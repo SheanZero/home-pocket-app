@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
-status: executing
+status: verifying
 stopped_at: Completed 45-04-PLAN.md
-last_updated: "2026-06-17T06:25:20.345Z"
+last_updated: "2026-06-17T06:33:23.816Z"
 last_activity: 2026-06-17
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 17
-  completed_plans: 16
-  percent: 40
+  completed_plans: 17
+  percent: 60
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 Phase: 45 (presentation-shell-rebuild) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-17
 
 ### Quick Tasks Completed
@@ -157,7 +157,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T06:25:16.382Z
+Last session: 2026-06-17T06:33:06.276Z
 Stopped at: Completed 45-04-PLAN.md
 Resume file: None
 
@@ -182,6 +182,7 @@ Resume file: None
 | Phase 45 P03 | 3min | 2 tasks | 1 files |
 | Phase 45 P04 | 7min | 2 tasks | 1 files |
 | Phase 45 P05 | 18min | 1 tasks | 1 files |
+| Phase 45 P07 | 11min | 2 tasks | 1 files |
 
 ## Decisions
 
@@ -212,6 +213,7 @@ Resume file: None
 - [Phase 45]: 45-03: dailyVsJoyRefreshTargets is group-aware (family snapshot only behind if(ctx.isGroupMode)) though the spec is always-visible — preserves today's _refresh:314 group-mode invalidation (D-A1); distinct from the family PerCategory provider
 - [Phase 45]: 45-03: FamilyInsightDataCard shadowBooks is a Plan-04 shell-injected display prop (null placeholder in registry build) — registry imports zero home/* providers (D-B3 file-wide gate)
 - [Phase ?]: [45-04]: analytics_screen rewritten to a 176-LOC thin shell — build maps analyticsCardRegistry.where(isVisible) into a byte-faithful Column, _refresh derives the union from registry.expand(refreshTargets).toSet()+shellRefreshTargets (no hand-listed providers, no home/* invalidate); FamilyInsightDataCard shadowBooks injected via 'built is FamilyInsightDataCard' (reorder-safe); 7 inline _*Card classes deleted; ctor preserved
+- [Phase ?]: Phase 45 A1/D-B3 Option A confirmed TRUE: dropping the direct shadowBooksProvider invalidate preserves group-mode family refresh via transitive familyHappinessProvider re-read (45-07)
 
 ## Operator Next Steps
 
