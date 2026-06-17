@@ -157,6 +157,7 @@ class _JoyCalendarBodyState extends State<_JoyCalendarBody> {
               : _InlineDayPanel(
                   key: const ValueKey('joy_calendar_inline_panel'),
                   bookId: widget.bookId,
+                  anchor: widget.anchor,
                   day: _selectedDay!,
                   joyMetricVariant: widget.joyMetricVariant,
                 ),
@@ -174,11 +175,18 @@ class _InlineDayPanel extends ConsumerWidget {
   const _InlineDayPanel({
     super.key,
     required this.bookId,
+    required this.anchor,
     required this.day,
     required this.joyMetricVariant,
   });
 
   final String bookId;
+
+  /// MONTH-anchored key of the heatmap-count provider this panel listens to
+  /// (D-12). Used only to mirror the pull-to-refresh invalidation onto the
+  /// day-keyed list provider — see the `ref.listen` in [build].
+  final DateTime anchor;
+
   final DateTime day;
   final JoyMetricVariant joyMetricVariant;
 
@@ -187,6 +195,30 @@ class _InlineDayPanel extends ConsumerWidget {
     final palette = context.palette;
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+
+    // WR-04 (46-REVIEW option (a) / D-05 "失效重算"): pull-to-refresh invalidates
+    // `perDayJoyCountsProvider` (it is in `joyCalendarRefreshTargets`), but the
+    // expanded day's inline list reads the day-keyed `joyDayTransactionsProvider`,
+    // whose `day` key is LOCAL `_JoyCalendarBody` state — unknown at registry
+    // build, so the registry union cannot key it. We mirror the refresh from the
+    // panel: when the month-anchored counts provider is recomputed, invalidate
+    // THIS day's list provider so the inline rows re-fetch alongside the heatmap
+    // count (no stale/deleted rows). GUARD-01: `joyDayTransactionsProvider` is an
+    // analytics provider — no home-feature provider enters the union.
+    ref.listen(
+      perDayJoyCountsProvider(
+        bookId: bookId,
+        anchor: anchor,
+        joyMetricVariant: joyMetricVariant,
+      ),
+      (_, _) => ref.invalidate(
+        joyDayTransactionsProvider(
+          bookId: bookId,
+          day: day,
+          joyMetricVariant: joyMetricVariant,
+        ),
+      ),
+    );
 
     final dayTxnsAsync = ref.watch(
       joyDayTransactionsProvider(
