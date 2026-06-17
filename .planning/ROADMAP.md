@@ -161,7 +161,7 @@
 
 **Wave 3** *(blocked on 46-02 joy providers)*
 
-- [ ] 46-05-PLAN.md — 悦己花在哪 stacked bar (R-1 custom) + 小确幸日历 heatmap (R-2 custom) cards, ambient + tap interactions + count-up header (D-C1/D-C2/D-D2)
+- [x] 46-05-PLAN.md — 悦己花在哪 stacked bar (R-1 custom) + 小确幸日历 heatmap (R-2 custom) cards, ambient + tap interactions + count-up header (D-C1/D-C2/D-D2)
 
 **Wave 4** *(integration — blocked on all card plans)*
 
@@ -212,4 +212,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | P43-45 done; Phase 46 5/7 (46-01/02/03/04/06) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | P43-45 done; Phase 46 6/7 (46-01/02/03/04/05/06) | In progress | - |

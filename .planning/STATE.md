@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 46-04-PLAN.md
-last_updated: "2026-06-17T10:18:00.000Z"
-last_activity: 2026-06-17 -- Completed 46-04-PLAN.md (within-month spend-trend LineChart widget + WithinMonthTrendCard + withinMonthTrendRefreshTargets; D-E1 structural single-vs-dual guard)
+stopped_at: Completed 46-05-PLAN.md
+last_updated: "2026-06-17T10:20:00.000Z"
+last_activity: 2026-06-17 -- Completed 46-05-PLAN.md (悦己花在哪 R-1 custom Row+Flexible stacked bar + count-up header; 小确幸日历 R-2 custom GridView heatmap + inline day expand; both GATE-04 zero fl_chart; joyDayTransactions provider)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 14
-  completed_plans: 12
-  percent: 43
+  completed_plans: 13
+  percent: 46
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 46 (cards) — EXECUTING
-Plan: 46-04 done (Wave 2 spend-trend card); 46-01/02/03/04/06 complete
+Plan: 46-05 done (Wave 3 two custom joy cards); 46-01/02/03/04/05/06 complete; 46-07 remaining (registry re-order)
 Status: Executing
-Last activity: 2026-06-17 -- Completed 46-04-PLAN.md (within-month spend-trend LineChart widget + WithinMonthTrendCard + withinMonthTrendRefreshTargets; D-E1 structural single-vs-dual guard)
+Last activity: 2026-06-17 -- Completed 46-05-PLAN.md (悦己花在哪 R-1 custom Row+Flexible stacked bar + count-up header; 小确幸日历 R-2 custom GridView heatmap + inline day expand; both GATE-04 zero fl_chart; joyDayTransactions provider; full suite 2963/2963)
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T10:18:00.000Z
-Stopped at: Completed 46-04-PLAN.md
+Last session: 2026-06-17T10:20:00.000Z
+Stopped at: Completed 46-05-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -188,6 +188,7 @@ Resume file: None
 | Phase 46 P46-06 | ~50min | 3 tasks | 14 files |
 | Phase 46 P46-02 | ~5min | 2 tasks | 8 files |
 | Phase 46 P46-04 | ~18min | 2 tasks | 8 files |
+| Phase 46 P46-05 | ~30min | 2 tasks | 10 files |
 
 ## Decisions
 
@@ -234,6 +235,9 @@ Resume file: None
 - [Phase 46]: [46-04] D-E1 cross-period guard is STRUCTURAL not runtime: the 悦己 pill tab passes `previousMonth=null` and the model has no `previousMonthJoy` field, so a joy 上月 line is unrepresentable (Pitfall 2). Spend tabs (总支出/日常) pass the previous-month list → dual line + spend-only 本月/上月 legend gated behind non-empty previous.
 - [Phase 46]: [46-04] Pill tabs are local `_TrendBody` StatefulWidget state (no StateProvider) — tab switch changes only the rendered series, never re-watches the trendAnchor-keyed provider (D-12 rebuild-storm guard). `withinMonthTrendRefreshTargets(ctx)` exported (categoryDonut shape) but card NOT registered — 46-07 owns the registry.
 - [Phase 46]: [46-04] Added 4 new l10n keys across en/ja/zh (analyticsCardTitle/CaptionWithinMonthTrend + analyticsTrendSeriesThisMonth/LastMonth); tab labels reuse existing analyticsKpiTotalLabel/daily/joy. Phase 47 ARB-parity/anti-toxicity note: `analyticsTrendSeriesLastMonth` is the spend-side-only ADR-012 §4 exception, never reachable from the joy tab.
+- [Phase 46]: [46-05] Both round-5 B joy cards #3/#4 built as CUSTOM non-fl_chart widgets (GATE-04 verified: zero fl_chart import in all 4 new files). 悦己花在哪 = `Row` of `Flexible(flex: amount)` segments (R-1) + single-column legend + local tap-highlight (D-C2 no drill) + 悦己 header `TweenAnimationBuilder` count-up (D-D2 anchor #2). 小确幸日历 = 7-col `GridView` (R-2), cell depth = continuous `Color.lerp(joyLight, joy, count/maxCount)` ambient (ADR-016 §5, explicitly NOT a streak), tap-day → INLINE `AnimatedSize` expand (D-C1, no sheet/route). Cards NOT registered (46-07 owns registry); refreshTargets exported in donut shape.
+- [Phase 46]: [46-05] Calendar inline-expand data path = NEW `joyDayTransactionsProvider` (day-scoped `findByBookIds(ledgerType: joy)` over the tapped day's whole-day window, D-12 normalized, auto-dispose, zero home/*) — chosen over widening the count model so `perDayJoyCounts` stays count-only (D-C1); passes only active book + tapped day to findByBookIds (T-46-05-01). Inline list reuses `ListTransactionTile(readOnly: true)` (D-B3, no new variant). Joy-spend segment hues lerp WITHIN the joy family (joy→joyLight), not the donut's daily-green→joy cross-ledger ramp.
+- [Phase 46]: [46-05] Added 7 new l10n keys across en/ja/zh (analyticsCardTitle/CaptionJoySpend, analyticsJoySpendHeaderLabel, analyticsJoySpendEmpty, analyticsCardTitle/CaptionJoyCalendar, analyticsJoyCalendarDayEmpty) — anti-toxicity clean (celebrate-past descriptive). Phase 47 should fold them into the anti_toxicity sweep. Full suite 2963/2963 green; analyze 0.
 
 ## Operator Next Steps
 
