@@ -398,14 +398,14 @@ flutter test --coverage   # ≥80% (project rule)
 | A3 | WR-04 fix uses 46-REVIEW option (a) (panel self-invalidates its day-keyed provider on refresh), since D-05 mandates actual invalidation/recompute, not the documented-gap option (b). | Pattern 5 | LOW — if option (a) proves awkward, the planner may need a `checkpoint:human-verify` on the exact invalidation wiring, but D-05's intent is unambiguous (失效重算). |
 | A4 | Light + dark golden coverage per card (D-06 "× light/dark") follows the existing `per_category_breakdown_card_golden_test.dart` convention of `ThemeData.light()`/`ThemeData.dark()`; the app's real palette is ADR-019 via `context.palette`, but the existing golden harness uses base ThemeData. Planner should decide whether to wrap goldens in the real app theme for palette fidelity. | Pattern 2 | MEDIUM — if goldens use bare `ThemeData.dark()` they won't capture ADR-019 palette regressions; consider wrapping in the production theme (`AppTheme`) for the analytics goldens to make them meaningful. Flag for planner. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Golden theme fidelity (ADR-019 palette)**
+1. **Golden theme fidelity (ADR-019 palette)** — RESOLVED: see UI-SPEC §Theme Fidelity (wrap production `AppTheme.light/.dark`); enforced in plan 47-05 (acceptance asserts bare `ThemeData` == 0).
    - What we know: existing card goldens use `ThemeData.light()/dark()`; the app resolves colors via `context.palette` (ADR-019 `AppPalette`).
    - What's unclear: whether new analytics goldens should wrap in the production `AppTheme` to capture palette regressions (the cards read `context.palette`).
    - Recommendation: wrap the new analytics goldens in the real app theme so the goldens actually exercise `AppPalette.light/.dark` — otherwise the goldens validate layout but not the v1.6 palette. (See A4.) Planner to confirm with how `home_hero_card_golden_test.dart` wraps theme.
 
-2. **Exact "Other" slice color/sort (D-03 discretion)**
+2. **Exact "Other" slice color/sort (D-03 discretion)** — RESOLVED: see UI-SPEC §WR-02 Other slice (neutral swatch, sort-last, non-tappable, true-total center); carried into plan 47-01 Task 2.
    - What we know: D-03 leaves "Other" slice color/sort to existing donut palette + ADR-019.
    - What's unclear: whether "Other" sorts last (after the 10 L1 rows) and uses a muted/neutral swatch.
    - Recommendation: place "Other" last, use a neutral grey-ish swatch distinct from the daily→joy lerp gradient; non-tappable (no L1 to drill). Confirm against `category_spend_donut_chart.dart`'s existing Other handling.
