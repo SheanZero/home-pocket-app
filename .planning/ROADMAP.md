@@ -211,7 +211,7 @@
 
 **Wave 3** (golden authoring — after WR fixes + ARB clean + anti-toxicity gate)
 
-- [ ] 47-05-PLAN.md — 8 macOS golden test files (5 cards + family_insight + drill screen + full-page scroll-smoke) wrapping production AppTheme; ≈30+ baselines incl. Other-slice/inline-expand/group/empty states; count-up settled (GUARD-04)
+- [x] 47-05-PLAN.md — 8 macOS golden test files (5 cards + family_insight + drill screen + full-page scroll-smoke) wrapping production AppTheme; ≈30+ baselines incl. Other-slice/inline-expand/group/empty states; count-up settled (GUARD-04)
 
 **Wave 4** (full-suite gate + on-device UAT — blocking)
 
