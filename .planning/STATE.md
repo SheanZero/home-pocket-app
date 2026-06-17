@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 46-01-PLAN.md
-last_updated: "2026-06-17T09:23:20.313Z"
+stopped_at: Completed 46-03-PLAN.md
+last_updated: "2026-06-17T09:28:11.711Z"
 last_activity: 2026-06-17 -- Phase 46 execution started
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 50
+  total_plans: 14
+  completed_plans: 9
+  percent: 33
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 46 (cards) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-06-17 -- Phase 46 execution started
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T09:23:20.309Z
-Stopped at: Completed 46-01-PLAN.md
+Last session: 2026-06-17T09:28:11.707Z
+Stopped at: Completed 46-03-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -184,6 +184,7 @@ Resume file: None
 | Phase 45 P05 | 18min | 1 tasks | 1 files |
 | Phase 45 P07 | 11min | 2 tasks | 1 files |
 | Phase 46 P46-01 | 40min | 2 tasks | 20 files |
+| Phase 46 P46-03 | 7min | 2 tasks | 2 files |
 
 ## Decisions
 
@@ -217,6 +218,8 @@ Resume file: None
 - [Phase ?]: Phase 45 A1/D-B3 Option A confirmed TRUE: dropping the direct shadowBooksProvider invalidate preserves group-mode family refresh via transitive familyHappinessProvider re-read (45-07)
 - [Phase ?]: [46-01]: within-month per-day-cumulative trend = pure Dart transform over findByBookIds (2-month window); no new DAO/migration, schema v21. Joy modelled current-month-only via a model with NO previousMonthJoy field (joy cross-period unrepresentable — D-E1).
 - [Phase ?]: [46-01] DEVIATION: 6-month TotalSixMonth registry spec + Time section header removed in 46-01 (not deferred to 46-07) because total_six_month_card/monthly_spend_trend_bar_chart hard-import deleted data symbols — data-only deletion cannot compile, must_have needs zero dangling refs (Pitfall 4). Registry now 9 specs; round-5 B card + re-order remain for 46-07.
+- [Phase 46]: [46-03] JOY-03/JOY-04 marked Descoped (superseded by GATE-03 round-5 B) in REQUIREMENTS.md; ROADMAP.md gained a Phase 46 SC section listing the round-5 B 5-card lineup (D-A1/D-A2). Requirement IDs satisfied by ledger correction, not by code.
+- [Phase 46]: [46-03] DEVIATION: ROADMAP.md had no existing Phase 46 Success-Criteria block (plan's :240-254/:249 line refs stale — file is 200 lines). Added a full Phase 46 section mirroring Phase 43/47 to carry SC #3 round-5 B lineup (Rule 3, faithful-to-intent).
 
 ## Operator Next Steps
 
