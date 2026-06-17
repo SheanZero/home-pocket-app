@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
-status: verifying
+status: executing
 stopped_at: Phase 45 UI-SPEC approved
-last_updated: "2026-06-17T05:40:51.059Z"
-last_activity: 2026-06-17 -- Phase 45 planning complete
+last_updated: "2026-06-17T05:55:02.811Z"
+last_activity: 2026-06-17 -- Phase 45 execution started
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 17
+  completed_plans: 11
   percent: 40
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 45 — 展示外壳重建 (presentation shell rebuild)
+**Current focus:** Phase 45 — presentation-shell-rebuild
 
 ## Current Position
 
-Phase: 45
-Plan: Not started
-Status: Ready to discuss/plan (Phase 45 — presentation shell rebuild; Phase 44 complete & verified)
-Last activity: 2026-06-17 -- Phase 45 planning complete
+Phase: 45 (presentation-shell-rebuild) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-06-17 -- Phase 45 execution started
 
 ### Quick Tasks Completed
 
@@ -157,7 +157,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T04:02:50.863Z
+Last session: 2026-06-17T05:54:30.365Z
 Stopped at: Phase 45 UI-SPEC approved
 Resume file: .planning/phases/45-presentation-shell-rebuild/45-UI-SPEC.md
 
@@ -176,6 +176,7 @@ Resume file: .planning/phases/45-presentation-shell-rebuild/45-UI-SPEC.md
 | Phase 44 P01 | 12min | 1 tasks | 3 files |
 | Phase 44 P02 | 12min | 2 tasks | 6 files |
 | Phase 44 P03 | 9min | 3 tasks | 8 files |
+| Phase 45 P01 | 22min | 3 tasks | 6 files |
 
 ## Decisions
 
@@ -197,6 +198,8 @@ Resume file: .planning/phases/45-presentation-shell-rebuild/45-UI-SPEC.md
 - [Phase 44]: [44-02]: in-loop getLedgerTotals chosen over a new getMonthlyLedgerTotals repo method (planner discretion per D-08/RESEARCH Flag C — both migration-free; in-loop adds zero repo surface). Zero-default daily/joy extraction copied from get_monthly_report_use_case.dart (Pitfall 1 — getLedgerTotals omits zero-spend ledger rows). No joy cross-period delta (D-09); schema stays v21 (D-13).
 - [Phase ?]: 44-03: Category drill-down subtotal/count sourced from Plan 01 l1RollupFromTransactions (D-11 single source — drill header cannot drift from donut slice)
 - [Phase ?]: 44-03: drill path reuses findByBookIds + Dart-side l1AncestorOf filter — zero new DAO/index/migration, schema stays v21 (D-04/D-05/D-06/D-13)
+- [Phase 45]: 45-01: AnalyticsCardContext stub lives in analytics_card_registry.dart (Plan 03 fills the AnalyticsCardSpec registry list around it; no per-card duplication of the context class)
+- [Phase 45]: 45-01: single-source <card>RefreshTargets(ctx) returns List<ProviderBase<Object?>> (ProviderBase from flutter_riverpod/misc.dart); multi-error-branch cards (KpiHero, SatisfactionHistogram) keep typed ref.watch byte-faithful and retry via targets[n] from the locally-built _ctx() list (D-B2 without losing static typing)
 
 ## Operator Next Steps
 

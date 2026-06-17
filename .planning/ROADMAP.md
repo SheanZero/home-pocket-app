@@ -211,7 +211,7 @@
 
 **Wave 1** (parallel — no file overlap)
 
-- [ ] 45-01-PLAN.md — 抽共享卡壳 `AnalyticsDataCard` + 4 张卡（KpiHero/TotalSixMonth/CategoryDonut/SatisfactionHistogram）到 `widgets/cards/`，各带单源 `*RefreshTargets`（D-A1/D-B2/D-B5）
+- [x] 45-01-PLAN.md — 抽共享卡壳 `AnalyticsDataCard` + 4 张卡（KpiHero/TotalSixMonth/CategoryDonut/SatisfactionHistogram）到 `widgets/cards/`，各带单源 `*RefreshTargets`（D-A1/D-B2/D-B5）
 - [ ] 45-02-PLAN.md — 抽 3 张 Stories 卡（LargestExpense/BestJoy/FamilyInsightData）；FamilyInsight 丢弃 `shadowBooksProvider` 直接失效（D-B3 Option A）
 - [ ] 45-06-PLAN.md — ADR-012 append-only `## Update` 补正：支出侧 本月vs上月 为 §4 记录在案例外（D-D1，doc-only）
 
