@@ -16,9 +16,10 @@ import '../../shared/constants/sort_config.dart';
 /// amounts.
 ///
 /// Single source (D-11): the rollup routes through the SAME `l1AncestorOf` rule
-/// the donut uses (via the locked `l1RollupFromTransactions` helper), so a joy
-/// segment can never drift from the donut slice math. There is NO second rollup
-/// loop here.
+/// the donut uses, so a joy segment can never drift from the donut slice math.
+/// Amounts are accumulated in a SINGLE pass over the expense transactions —
+/// each transaction is keyed by its `l1AncestorOf` L1 ancestor and added into a
+/// per-L1 accumulator (no per-L1 re-rollup loop).
 ///
 /// Reuse-first: ONE `findByBookIds(ledgerType: LedgerType.joy)` window fetch
 /// through the existing primitive — no new DAO, no migration (schema stays v21).
@@ -73,24 +74,20 @@ class GetJoyCategoryAmountsUseCase {
     }
 
     // 4. Roll up per L1 through the SAME l1AncestorOf rule the donut uses
-    //    (D-11). l1RollupFromTransactions is the single source — never a second
-    //    rollup loop. First collect the distinct L1 ids present, then ask the
-    //    locked helper for each L1's amount over the expense-only joy set.
-    final l1Ids = <String>{};
+    //    (D-11), in a SINGLE pass over the expense set: key each transaction by
+    //    its L1 ancestor and accumulate its amount. No per-L1 re-rollup loop.
+    final amountByL1 = <String, int>{};
     for (final tx in expenseTxns) {
-      final l1 = l1AncestorOf(tx.categoryId, categoryMap) ?? tx.categoryId;
-      l1Ids.add(l1);
+      final l1Id = l1AncestorOf(tx.categoryId, categoryMap) ?? tx.categoryId;
+      amountByL1[l1Id] = (amountByL1[l1Id] ?? 0) + tx.amount;
     }
 
     final buckets = <JoyCategoryAmount>[];
-    for (final l1Id in l1Ids) {
-      final rollup = l1RollupFromTransactions(expenseTxns, categoryMap, l1Id);
-      if (rollup.amount > 0) {
-        buckets.add(
-          JoyCategoryAmount(categoryId: l1Id, amount: rollup.amount),
-        );
+    amountByL1.forEach((l1Id, amount) {
+      if (amount > 0) {
+        buckets.add(JoyCategoryAmount(categoryId: l1Id, amount: amount));
       }
-    }
+    });
 
     // 5. Sort amount-descending (largest -> smallest, D-C2 segment order).
     buckets.sort((a, b) => b.amount.compareTo(a.amount));
