@@ -27,8 +27,8 @@ import '../providers/state_time_window.dart';
 /// Header = subtotal + count + 日均 (per-window-day average): three NEUTRAL
 /// descriptive values (D-B2, ADR-012-safe). No target/goal/ranking/cross-period
 /// copy. The list is READ-ONLY (D-B3): [ListTransactionTile] in `readOnly`
-/// mode — no swipe-delete (no [Dismissible]) and no tap-to-edit. Mutations stay
-/// on the List/entry tab.
+/// mode — no swipe-to-delete wrapper and no tap-to-edit. Mutations stay on the
+/// List/entry tab.
 class CategoryDrillDownScreen extends ConsumerWidget {
   const CategoryDrillDownScreen({
     super.key,
@@ -135,8 +135,8 @@ class _DrillBody extends StatelessWidget {
 
   /// Builds a READ-ONLY [ListTransactionTile] (D-B3): the pre-formatting mirrors
   /// `list_screen.dart`'s tile contract, but `readOnly: true` suppresses the
-  /// Dismissible + tap-to-edit entirely (no-op callbacks satisfy the required
-  /// params but are never wired).
+  /// swipe-to-delete wrapper + tap-to-edit entirely (no-op callbacks satisfy the
+  /// required params but are never wired).
   Widget _readOnlyTile(BuildContext context, Transaction transaction) {
     final ledgerType = transaction.ledgerType;
 

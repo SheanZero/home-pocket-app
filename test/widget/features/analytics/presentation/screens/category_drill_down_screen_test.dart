@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/analytics/domain/models/category_drill_down.dart';
@@ -43,10 +42,7 @@ CategoryDrillDown _drill({List<Transaction>? txns}) => CategoryDrillDown(
   avgPerDay: 64,
 );
 
-Widget _subject({
-  AsyncValue<CategoryDrillDown>? override,
-  Object? error,
-}) {
+Widget _subject({Object? error}) {
   return createLocalizedWidget(
     const CategoryDrillDownScreen(
       bookId: _bookId,
