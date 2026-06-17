@@ -32,111 +32,93 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
         children: [
           SizedBox(
             height: 200,
-            child: Stack(
-              children: [
-                BarChart(
-                  BarChartData(
-                    minY: 0,
-                    maxY: chartMaxY,
-                    alignment: BarChartAlignment.spaceAround,
-                    gridData: const FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                    ),
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 1,
-                          getTitlesWidget: (value, meta) {
-                            final score = value.toInt();
-                            if (score < 1 || score > 10) {
-                              return const SizedBox.shrink();
-                            }
-                            return Text(
-                              '$score',
-                              style: AppTextStyles.caption.copyWith(
-                                color: context.palette.textSecondary,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    barGroups: [
-                      for (final bucket in normalized)
-                        BarChartGroupData(
-                          x: bucket.score,
-                          barRods: [
-                            BarChartRodData(
-                              toY: bucket.count == 0
-                                  ? 1
-                                  : bucket.count.toDouble(),
-                              color: _colorForScore(bucket.score, palette),
-                              width: 14,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(4),
-                                topRight: Radius.circular(4),
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
-                    barTouchData: BarTouchData(
-                      touchTooltipData: BarTouchTooltipData(
-                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          final score = group.x;
-                          final count = normalized[score - 1].count;
-                          return BarTooltipItem(
-                            '$score/10\n$count',
-                            AppTextStyles.caption.copyWith(
-                              color: palette.card,
-                            ),
-                          );
-                        },
-                      ),
+            // REDES-02: fl_chart 1.2.0 renders the "5" annotation natively via
+            // BarChartRodData.label (below). The previous Stack + Align +
+            // DecoratedBox overlay is deleted — no manual annotation widget.
+            child: BarChart(
+              BarChartData(
+                minY: 0,
+                maxY: chartMaxY,
+                alignment: BarChartAlignment.spaceAround,
+                gridData: const FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        final score = value.toInt();
+                        if (score < 1 || score > 10) {
+                          return const SizedBox.shrink();
+                        }
+                        return Text(
+                          '$score',
+                          style: AppTextStyles.caption.copyWith(
+                            color: context.palette.textSecondary,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
-                Align(
-                  alignment: const Alignment(-0.12, -1),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.palette.card,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: palette.joy.withValues(alpha: 0.32),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      child: Text(
-                        l10n.analyticsHistogramBarFiveAnnotation,
-                        key: const ValueKey(
-                          'analytics_histogram_bar_5_annotation',
+                barGroups: [
+                  for (final bucket in normalized)
+                    BarChartGroupData(
+                      x: bucket.score,
+                      barRods: [
+                        BarChartRodData(
+                          toY: bucket.count == 0 ? 1 : bucket.count.toDouble(),
+                          color: _colorForScore(bucket.score, palette),
+                          width: 14,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(4),
+                            topRight: Radius.circular(4),
+                          ),
+                          // REDES-02: native per-rod label replacing the deleted
+                          // Stack/Align/DecoratedBox "5" annotation hack. Only
+                          // the median bucket (score 5) carries the descriptive
+                          // 中央値・含未評価 annotation.
+                          label: bucket.score == 5
+                              ? BarChartRodLabel(
+                                  show: true,
+                                  text: l10n.analyticsHistogramBarFiveAnnotation,
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: palette.joy,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  offset: const Offset(0, -4),
+                                )
+                              : const BarChartRodLabel(show: false),
                         ),
-                        style: AppTextStyles.caption.copyWith(
-                          color: palette.joy,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      ],
                     ),
+                ],
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final score = group.x;
+                      final count = normalized[score - 1].count;
+                      return BarTooltipItem(
+                        '$score/10\n$count',
+                        AppTextStyles.caption.copyWith(color: palette.card),
+                      );
+                    },
                   ),
                 ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 6),
