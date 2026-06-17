@@ -197,7 +197,26 @@
   3. 新/改 analytics 表面的 golden 在 **macOS** 上从零撰写并重基线，diff 归因清晰（无图表库变更混入 diff）；全量 `flutter test` 套件作为逐波门禁通过（含 `home_screen_isolation_test.dart` + 两个反毒性扫描 + 架构/CJK 扫描）（GUARD-04）
   4. 重设计后的统计页通过真机视觉 UAT（GUARD-05）
 
-**Plans**: TBD
+**Plans**: 6 plans in 4 waves
+
+**Wave 1** (parallel — no file overlap; WR fixes before UAT, D-01)
+
+- [ ] 47-01-PLAN.md — WR-01 delete dead `currencyCode` plumbing + WR-02 donut true-total reconciliation (neutral "Other" rollup slice) + WR-04 calendar inline-list refresh consistency (registry/cards/drill/test)
+- [ ] 47-02-PLAN.md — WR-03 `GetJoyCategoryAmountsUseCase` single-pass accumulate + honest docstring (independent use-case file)
+
+**Wave 2** (parallel — ARB-edit lane isolated from the test-author lane)
+
+- [ ] 47-03-PLAN.md — delete 3 orphan section-header ARB keys symmetric ×3 + `flutter gen-l10n` + `git add -f lib/generated/` (GUARD-03)
+- [ ] 47-04-PLAN.md — `anti_toxicity_phase47_test.dart` sweep: 5 round-5 B cards × ja/zh/en × all states (incl. WR-02 Other + calendar inline-expand), locked forbidden lists reused verbatim (GUARD-02 wording + GUARD-03)
+
+**Wave 3** (golden authoring — after WR fixes + ARB clean + anti-toxicity gate)
+
+- [ ] 47-05-PLAN.md — 8 macOS golden test files (5 cards + family_insight + drill screen + full-page scroll-smoke) wrapping production AppTheme; ≈30+ baselines incl. Other-slice/inline-expand/group/empty states; count-up settled (GUARD-04)
+
+**Wave 4** (full-suite gate + on-device UAT — blocking)
+
+- [ ] 47-06-PLAN.md — FULL `flutter test` per-wave gate (isolation + 3 anti-toxicity + architecture/CJK/density/logging-privacy) + analyze 0 + coverage ≥80%, then blocking on-device D-10 visual UAT (real iOS, locale=ja; D-12 no defer path) (GUARD-04, GUARD-05)
+
 **UI hint**: yes
 
 ## Milestone Progress
@@ -212,4 +231,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | P43-45 done; Phase 46 7/7 (COMPLETE) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | P43-46 done; Phase 47 planned (6 plans, 4 waves) | In progress | - |
