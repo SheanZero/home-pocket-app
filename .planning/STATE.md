@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 46-05-PLAN.md
-last_updated: "2026-06-17T10:20:00.000Z"
-last_activity: 2026-06-17 -- Completed 46-05-PLAN.md (悦己花在哪 R-1 custom Row+Flexible stacked bar + count-up header; 小确幸日历 R-2 custom GridView heatmap + inline day expand; both GATE-04 zero fl_chart; joyDayTransactions provider)
+stopped_at: Completed 46-07-PLAN.md (Phase 46 COMPLETE)
+last_updated: "2026-06-17T11:00:00.000Z"
+last_activity: 2026-06-17 -- Completed 46-07-PLAN.md (round-5 B flat 5-card registry integration LIVE: within_month_trend → category_donut → joy_spend → joy_calendar → satisfaction_histogram + family_insight group-only; dead cards + section headers deleted; registry/screen/anti-toxicity tests updated; full suite 2971/2971). Phase 46 complete (7/7).
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 14
-  completed_plans: 13
-  percent: 46
+  completed_plans: 14
+  percent: 50
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 ## Current Position
 
-Phase: 46 (cards) — EXECUTING
-Plan: 46-05 done (Wave 3 two custom joy cards); 46-01/02/03/04/05/06 complete; 46-07 remaining (registry re-order)
-Status: Executing
-Last activity: 2026-06-17 -- Completed 46-05-PLAN.md (悦己花在哪 R-1 custom Row+Flexible stacked bar + count-up header; 小确幸日历 R-2 custom GridView heatmap + inline day expand; both GATE-04 zero fl_chart; joyDayTransactions provider; full suite 2963/2963)
+Phase: 46 (cards) — COMPLETE (7/7 plans)
+Plan: 46-07 done (Wave 4 integration — round-5 B registry re-order LIVE); 46-01..46-07 all complete
+Status: Phase 46 complete; ready for Phase 47 (VALIDATION)
+Last activity: 2026-06-17 -- Completed 46-07-PLAN.md (round-5 B flat 5-card lineup wired through analyticsCardRegistry; dead Variant-δ cards + section headers deleted, zero dangling refs; registry/screen/anti-toxicity tests in lockstep; full suite 2971/2971; analyze 0)
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T10:20:00.000Z
-Stopped at: Completed 46-05-PLAN.md
+Last session: 2026-06-17T11:00:00.000Z
+Stopped at: Completed 46-07-PLAN.md (Phase 46 COMPLETE — 7/7 plans)
 Resume file: None
 
 ## Performance Metrics
@@ -189,6 +189,7 @@ Resume file: None
 | Phase 46 P46-02 | ~5min | 2 tasks | 8 files |
 | Phase 46 P46-04 | ~18min | 2 tasks | 8 files |
 | Phase 46 P46-05 | ~30min | 2 tasks | 10 files |
+| Phase 46 P46-07 | ~35min | 3 tasks | 10 files |
 
 ## Decisions
 
@@ -238,6 +239,10 @@ Resume file: None
 - [Phase 46]: [46-05] Both round-5 B joy cards #3/#4 built as CUSTOM non-fl_chart widgets (GATE-04 verified: zero fl_chart import in all 4 new files). 悦己花在哪 = `Row` of `Flexible(flex: amount)` segments (R-1) + single-column legend + local tap-highlight (D-C2 no drill) + 悦己 header `TweenAnimationBuilder` count-up (D-D2 anchor #2). 小确幸日历 = 7-col `GridView` (R-2), cell depth = continuous `Color.lerp(joyLight, joy, count/maxCount)` ambient (ADR-016 §5, explicitly NOT a streak), tap-day → INLINE `AnimatedSize` expand (D-C1, no sheet/route). Cards NOT registered (46-07 owns registry); refreshTargets exported in donut shape.
 - [Phase 46]: [46-05] Calendar inline-expand data path = NEW `joyDayTransactionsProvider` (day-scoped `findByBookIds(ledgerType: joy)` over the tapped day's whole-day window, D-12 normalized, auto-dispose, zero home/*) — chosen over widening the count model so `perDayJoyCounts` stays count-only (D-C1); passes only active book + tapped day to findByBookIds (T-46-05-01). Inline list reuses `ListTransactionTile(readOnly: true)` (D-B3, no new variant). Joy-spend segment hues lerp WITHIN the joy family (joy→joyLight), not the donut's daily-green→joy cross-ledger ramp.
 - [Phase 46]: [46-05] Added 7 new l10n keys across en/ja/zh (analyticsCardTitle/CaptionJoySpend, analyticsJoySpendHeaderLabel, analyticsJoySpendEmpty, analyticsCardTitle/CaptionJoyCalendar, analyticsJoyCalendarDayEmpty) — anti-toxicity clean (celebrate-past descriptive). Phase 47 should fold them into the anti_toxicity sweep. Full suite 2963/2963 green; analyze 0.
+- [Phase 46]: [46-07] analyticsCardRegistry IS the round-5 B flat 5-card lineup (within_month_trend → category_donut → joy_spend → joy_calendar → satisfaction_histogram) + family_insight group-only conditional (D-F1/D-F2). The sectionHeaderKey field + the shell's section-header interleave + _sectionLabel were removed (flat Column of cards). Group mode now adds EXACTLY FamilyHappinessProvider to the _refresh union (only group-only spec).
+- [Phase 46]: [46-07] Deleted best_joy_card/kpi_hero_card/largest_expense_card/analytics_screen_section_header (D-A3; total_six_month_card + monthly_spend_trend_bar_chart already gone in 46-01). De-registered daily_vs_joy_card + per_category_breakdown_card (widget FILES retained, keep own tests; their refreshTargets fns removed from the registry). bestJoyMomentProvider/largestMonthlyExpenseProvider providers RETAINED — bestJoyMomentProvider is a HomeHero consumer, not dead-card-unique.
+- [Phase 46]: [46-07] Section-header ARB keys (analyticsGroupHeaderTime/Distribution/Stories) now orphaned (zero source consumers) — DEFERRED to Phase 47 ARB sweep (removal needs gen-l10n + force-add of gitignored generated files). JOY-01/JOY-02/REDES-03/GUARD-02 flipped to Complete now the round-5 B lineup is user-visible. Full suite 2971/2971 green; analyze 0.
+- [Phase 46]: [46-07] The STATE.md 46-01 sequencing blocker was ALREADY RESOLVED by 46-01 (it deleted the trend presentation consumers alongside the data layer); 46-07 verified absence + completed the integration. Marked resolved.
 
 ## Operator Next Steps
 
@@ -245,4 +250,4 @@ Resume file: None
 
 ### Blockers
 
-- 46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07. Those files hard-import the deleted symbols, so a data-only deletion cannot compile, yet must_have requires zero dangling references. Decision needed on deletion scope.
+- ~~46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07.~~ **RESOLVED (46-01 + 46-07):** 46-01 resolved it at the time by ALSO deleting total_six_month_card.dart + monthly_spend_trend_bar_chart.dart + the Time section header + their registry specs (registry → 9 specs) so the data-only deletion compiled. 46-07 then verified those two files were already absent (no re-delete) and completed the round-5 B integration: re-ordered the registry to the flat 5-card lineup, deleted the remaining 4 dead files (best_joy_card, kpi_hero_card, largest_expense_card, analytics_screen_section_header), and updated the registry/screen/anti-toxicity tests in lockstep. Zero dangling references; full suite 2971/2971 green. No active blockers.

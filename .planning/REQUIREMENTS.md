@@ -41,8 +41,8 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 
 > All four committed. Concrete visual form is decided in the GATE phase under ADR-012; here we commit *which* surfaces ship.
 
-- [ ] **JOY-01**: "值得" affirmation block — surface 已花悦己 + `Σ joy_contribution` as a *celebration of investing in yourself* (framing-only over ADR-016 data; **ambient presentation — must NOT become a progress/target ring; HomeHero owns the only target ring, ADR-016 §3**)
-- [ ] **JOY-02**: "值不值" satisfaction-reflection surface — reuse the satisfaction histogram + per-category joy (min-N=3), framed as proud/content, never "beat last month" / ranking
+- [x] **JOY-01**: "值得" affirmation block — surface 已花悦己 + `Σ joy_contribution` as a *celebration of investing in yourself* (framing-only over ADR-016 data; **ambient presentation — must NOT become a progress/target ring; HomeHero owns the only target ring, ADR-016 §3**)
+- [x] **JOY-02**: "值不值" satisfaction-reflection surface — reuse the satisfaction histogram + per-category joy (min-N=3), framed as proud/content, never "beat last month" / ranking
 - [~] **JOY-03**: ~~Memory/story surface — elevate the existing "best joy moment" story card (pure surfacing of existing data)~~ — **Descoped (superseded by GATE-03 round-5 B).** round-5 B (the user-approved single source of truth, D-A1) is exactly 5 cards and deliberately omits the 记忆故事 (best-joy story) card; the final selected mock grep-confirms 0 hits for 记忆故事. The joy emotional surface is instead re-carried ambiently by the round-5 B design (JOY-01 已花悦己 amount → 悦己 tab + 悦己花在哪 header; 分类悦己 → 悦己花在哪 stacked bar; 满足度 → satisfaction histogram). No story card is built anywhere in Phase 46; this requirement ID is satisfied **by this descope correction, not by code** (D-A2).
 - [~] **JOY-04**: ~~Kakeibo Q4 reflection prompt — an open-ended, affirming "how could spending make you happier next time" prompt; **if it persists user-authored text, a new ADR is required** (encryption/privacy implications) — decided in GATE-04~~ — **Descoped (superseded by GATE-03 round-5 B).** round-5 B is exactly 5 cards and deliberately omits the kakeibo Q4 reflection prompt; the final selected mock grep-confirms 0 hits for kakeibo. GATE-04 already ruled JOY-04 text-persistence NO-GO (static read-only → no persisted text → no encryption/ADR; v1.8 stays no-Drift). A future milestone may revisit JOY-04 — persisting user-authored text would require a new ADR + non-Drift storage (per Phase 43 D-07). No prompt card is built in Phase 46; this requirement ID is satisfied **by this descope correction, not by code** (D-A1/D-A2).
 
@@ -50,12 +50,12 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 
 - [x] **REDES-01**: Full IA + visual redesign of `AnalyticsScreen` — thin shell + a `widgets/cards/` card system (fixed layout), with a data-driven `_refresh()` that preserves HomeHero isolation by construction
 - [x] **REDES-02**: Chart polish — adopt fl_chart 1.2.0 native per-rod `label` (delete the histogram `Stack` hack) + optional donut `cornerRadius`; **no chart-library upgrade/swap (keep `^1.2.0`)**
-- [ ] **REDES-03**: Warm/affirming motion via built-in Flutter animations (`TweenAnimationBuilder` count-up, `AnimatedSwitcher`, glow), ADR-012-safe (ambient, not achievement-reward)
+- [x] **REDES-03**: Warm/affirming motion via built-in Flutter animations (`TweenAnimationBuilder` count-up, `AnimatedSwitcher`, glow), ADR-012-safe (ambient, not achievement-reward)
 
 ### Quality & Guardrails (质量与约束守护)
 
 - [x] **GUARD-01**: HomeHero isolation preserved — `home_screen_isolation_test.dart` stays green; analytics reads/invalidates no `home/*` provider
-- [ ] **GUARD-02**: Anti-gamification — every new card joins the `anti_toxicity_*_test` forbidden-substring sweep (ja/zh/en × all states); `FamilyHappiness` stays aggregate-only (no per-member fields); single-Joy-expression preserved (`grep density|joyPerYen lib/` == 0)
+- [x] **GUARD-02**: Anti-gamification — every new card joins the `anti_toxicity_*_test` forbidden-substring sweep (ja/zh/en × all states); `FamilyHappiness` stays aggregate-only (no per-member fields); single-Joy-expression preserved (`grep density|joyPerYen lib/` == 0)
 - [ ] **GUARD-03**: i18n — ARB parity across ja/zh/en for all new copy; `flutter gen-l10n` clean; 生存/灵魂 grep-ban green (ADR-017)
 - [ ] **GUARD-04**: macOS golden re-baseline for new/changed analytics surfaces (chart goldens do not exist today — authored from scratch on macOS, isolated from any library change); full `flutter test` suite as the per-wave gate
 - [ ] **GUARD-05**: On-device visual UAT of the redesigned page
@@ -112,15 +112,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OVW-02 | Phase 46 | Complete |
 | TREND-01 | Phase 44 | Complete |
 | DRILL-01 | Phase 44 | Complete |
-| JOY-01 | Phase 46 | Pending |
-| JOY-02 | Phase 46 | Pending |
+| JOY-01 | Phase 46 | Complete |
+| JOY-02 | Phase 46 | Complete |
 | JOY-03 | Phase 46 | Descoped (Phase 46 — superseded by GATE-03) |
 | JOY-04 | Phase 46 | Descoped (Phase 46 — superseded by GATE-03) |
 | REDES-01 | Phase 45 | Complete |
 | REDES-02 | Phase 46 | Complete |
-| REDES-03 | Phase 46 | Pending |
+| REDES-03 | Phase 46 | Complete |
 | GUARD-01 | Phase 45 | Complete |
-| GUARD-02 | Phase 46 | Pending |
+| GUARD-02 | Phase 46 | Complete |
 | GUARD-03 | Phase 47 | Pending |
 | GUARD-04 | Phase 47 | Pending |
 | GUARD-05 | Phase 47 | Pending |
