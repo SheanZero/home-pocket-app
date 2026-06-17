@@ -136,6 +136,74 @@ void main() {
     expect(find.textContaining('30,000'), findsWidgets);
   });
 
+  testWidgets('WR-02: no Other row when <=10 L1 categories have spend', (
+    tester,
+  ) async {
+    await _pump(tester, _subject());
+    expect(find.byKey(const ValueKey('donut_legend_row_other')), findsNothing);
+  });
+
+  testWidgets('WR-02: appends a non-tappable Other rollup row when >10 L1 '
+      'categories have spend, reconciling to the true total', (tester) async {
+    // 12 L1 categories each 1000 → donut keeps top 10 (10000), Other = 2000.
+    final manyMap = <String, Category>{
+      for (var i = 0; i < 12; i++) 'cat_$i': _cat('cat_$i', level: 1),
+    };
+    final manyBreakdowns = [
+      for (var i = 0; i < 12; i++) _bd('cat_$i', 'Cat $i', 1000, 0),
+    ];
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        CategoryDonutCard(
+          bookId: _bookId,
+          startDate: _start,
+          endDate: _end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('en'),
+          ),
+          monthlyReportProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith(
+            // True total 12000 = full 12-category spend; donutTotal = 10000.
+            (_) async => _report(manyBreakdowns).copyWith(totalExpenses: 12000),
+          ),
+          analyticsCategoriesMapProvider.overrideWith((_) async => manyMap),
+        ],
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // The Other row exists and is labelled "Other" (en).
+    final otherRow = find.byKey(const ValueKey('donut_legend_row_other'));
+    expect(otherRow, findsOneWidget);
+    expect(
+      find.descendant(of: otherRow, matching: find.text('Other')),
+      findsOneWidget,
+    );
+
+    // It is NON-tappable: tapping must NOT push a drill screen.
+    await tester.tap(otherRow);
+    await tester.pumpAndSettle();
+    expect(find.byType(CategoryDrillDownScreen), findsNothing);
+
+    // Center stays the TRUE total (¥12,000), not the truncated donutTotal.
+    expect(find.textContaining('12,000'), findsWidgets);
+
+    // Other amount = total - donutTotal = 2000.
+    expect(
+      find.descendant(of: otherRow, matching: find.textContaining('2,000')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('rolls up L2 into its L1 parent (single source, D-11)', (
     tester,
   ) async {
