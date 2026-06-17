@@ -156,7 +156,7 @@
 
 **Wave 2** *(46-02 blocked on 46-01 shared providers; 46-04 blocked on 46-01 trend provider — no mutual overlap)*
 
-- [ ] 46-02-PLAN.md — joy data paths: per-L1 joy AMOUNT (悦己花在哪) + per-day joy COUNT (小确幸日历), reuse-first over findByBookIds(joy) (D-C1/D-C2)
+- [x] 46-02-PLAN.md — joy data paths: per-L1 joy AMOUNT (悦己花在哪) + per-day joy COUNT (小确幸日历), reuse-first over findByBookIds(joy) (D-C1/D-C2)
 - [ ] 46-04-PLAN.md — within-month cumulative LineChart widget + within_month_trend_card (pill tabs 总/日常/悦己; joy single-line zero cross-period) (D-E1)
 
 **Wave 3** *(blocked on 46-02 joy providers)*

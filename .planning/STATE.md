@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 46-06-PLAN.md
-last_updated: "2026-06-17T10:20:00.000Z"
-last_activity: 2026-06-17 -- Completed 46-06-PLAN.md (donut hero + histogram native label + read-only drill)
+stopped_at: Completed 46-02-PLAN.md
+last_updated: "2026-06-17T09:54:00.000Z"
+last_activity: 2026-06-17 -- Completed 46-02-PLAN.md (per-L1 joy AMOUNT + per-day joy COUNT data paths; zero DAO/migration)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 14
-  completed_plans: 10
-  percent: 36
+  completed_plans: 11
+  percent: 39
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 46 (cards) — EXECUTING
-Plan: 6 of 7 complete (46-06 done)
+Plan: 46-02 done (Wave 2 joy data paths); 46-01/03/06 + 46-02 complete
 Status: Executing
-Last activity: 2026-06-17 -- Completed 46-06-PLAN.md (donut hero + histogram native label + read-only drill)
+Last activity: 2026-06-17 -- Completed 46-02-PLAN.md (per-L1 joy AMOUNT + per-day joy COUNT data paths; zero DAO/migration)
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T10:20:00.000Z
-Stopped at: Completed 46-06-PLAN.md
+Last session: 2026-06-17T09:54:00.000Z
+Stopped at: Completed 46-02-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -186,6 +186,7 @@ Resume file: None
 | Phase 46 P46-01 | 40min | 2 tasks | 20 files |
 | Phase 46 P46-03 | 7min | 2 tasks | 2 files |
 | Phase 46 P46-06 | ~50min | 3 tasks | 14 files |
+| Phase 46 P46-02 | ~5min | 2 tasks | 8 files |
 
 ## Decisions
 
@@ -225,6 +226,9 @@ Resume file: None
 - [Phase 46]: [46-06] Read-only drill = ListTransactionTile + new readOnly flag (reuse over a new tile variant); readOnly:true renders the shared _buildRow directly (no Dismissible, no tap, no chevron). List tab byte-identical (readOnly defaults false). Drill list kept time-desc (provider order, D-B2 discretion), showDate:true.
 - [Phase 46]: [46-06] Donut legend categoryMap = new auto-dispose analyticsCategoriesMapProvider over categoryRepository.findAll() (no new DAO); empty-map fallback while loading. Legend = 10 L1 rows via rollupCategoryBreakdownsToL1 (D-11); ROW tap → Navigator.push CategoryDrillDownScreen (D-B1, not slice); center total TweenAnimationBuilder<int> count-up ~480ms (D-D2). cornerRadius:4.
 - [Phase 46]: [46-06] DEVIATION (Rule 1): analytics_screen_test asserted the deleted CategorySpendDonutChart child; updated to find.byType(CategoryDonutCard) since the rebuilt card no longer renders the old chart widget. Full suite 2928/2928 green; analyze 0.
+- [Phase 46]: [46-02] Two JOY-side data paths built as pure Dart transforms over findByBookIds(ledgerType: joy) — zero new DAO, zero migration, schema stays v21. JoyCategoryAmount (per-L1 joy AMOUNT, D-C2) rolls up through the SAME l1AncestorOf/l1RollupFromTransactions the donut uses (D-11 single source → joy segments are a strict subset of donut L1). PerDayJoyCount (per-day joy COUNT, D-C1) = Dart group-by-local-day count (笔数, not sum — Pitfall 3), chosen over a SQL ledger+COUNT DAO variant (no DAO surface, does not cross DRILL-01 scope lock — RESEARCH Flag 2). Both models are domain-pure plain immutable value classes (not Freezed).
+- [Phase 46]: [46-02] joyCategoryAmounts (DateBoundaries window-normalized key) + perDayJoyCounts (month-anchored key) wired as @riverpod auto-dispose families alongside 46-01's trend provider (added-to, not clobbered); zero home/* (GUARD-01). 11/11 plan unit tests green; analyze 0; registry + home-isolation structural locks stay green.
+- [Phase 46]: [46-02] DEVIATION (Rule 3): reworded doc-comment references to the bare token `getDailyTotals` (kept the rationale) so the plan's literal Pitfall-3 grep guard returns zero matches; the use case never called it.
 
 ## Operator Next Steps
 
