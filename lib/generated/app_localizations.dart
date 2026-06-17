@@ -2855,24 +2855,6 @@ abstract class S {
     int totalCount,
   );
 
-  /// No description provided for @analyticsGroupHeaderTime.
-  ///
-  /// In en, this message translates to:
-  /// **'━ Time ━'**
-  String get analyticsGroupHeaderTime;
-
-  /// No description provided for @analyticsGroupHeaderDistribution.
-  ///
-  /// In en, this message translates to:
-  /// **'━ Distribution ━'**
-  String get analyticsGroupHeaderDistribution;
-
-  /// No description provided for @analyticsGroupHeaderStories.
-  ///
-  /// In en, this message translates to:
-  /// **'━ Stories ━'**
-  String get analyticsGroupHeaderStories;
-
   /// No description provided for @analyticsCardTitleTotalSixMonth.
   ///
   /// In en, this message translates to:

@@ -1524,15 +1524,6 @@ class SEn extends S {
   }
 
   @override
-  String get analyticsGroupHeaderTime => '━ Time ━';
-
-  @override
-  String get analyticsGroupHeaderDistribution => '━ Distribution ━';
-
-  @override
-  String get analyticsGroupHeaderStories => '━ Stories ━';
-
-  @override
   String get analyticsCardTitleTotalSixMonth => 'Total · 6-month trend';
 
   @override

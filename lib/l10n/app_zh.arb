@@ -1952,9 +1952,6 @@
       }
     }
   },
-  "analyticsGroupHeaderTime": "━ 时间 / Time ━",
-  "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",
-  "analyticsGroupHeaderStories": "━ 故事 / Stories ━",
   "analyticsCardTitleTotalSixMonth": "总 · 6 个月支出推移",
   "analyticsCardCaptionTotalSixMonth": "BarChart · 当月高亮",
   "analyticsCardTitleCategoryDonut": "总 · 类别支出分布",

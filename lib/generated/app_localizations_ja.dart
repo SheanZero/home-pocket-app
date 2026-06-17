@@ -1500,15 +1500,6 @@ class SJa extends S {
   }
 
   @override
-  String get analyticsGroupHeaderTime => '━ 時間 / Time ━';
-
-  @override
-  String get analyticsGroupHeaderDistribution => '━ 分布 / Distribution ━';
-
-  @override
-  String get analyticsGroupHeaderStories => '━ 物語 / Stories ━';
-
-  @override
   String get analyticsCardTitleTotalSixMonth => '総 · 6 か月支出推移';
 
   @override

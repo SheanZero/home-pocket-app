@@ -1952,9 +1952,6 @@
       }
     }
   },
-  "analyticsGroupHeaderTime": "━ Time ━",
-  "analyticsGroupHeaderDistribution": "━ Distribution ━",
-  "analyticsGroupHeaderStories": "━ Stories ━",
   "analyticsCardTitleTotalSixMonth": "Total · 6-month trend",
   "analyticsCardCaptionTotalSixMonth": "BarChart · current month highlighted",
   "analyticsCardTitleCategoryDonut": "Total · Category breakdown",

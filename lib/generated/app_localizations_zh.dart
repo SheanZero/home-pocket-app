@@ -1494,15 +1494,6 @@ class SZh extends S {
   }
 
   @override
-  String get analyticsGroupHeaderTime => '━ 时间 / Time ━';
-
-  @override
-  String get analyticsGroupHeaderDistribution => '━ 分布 / Distribution ━';
-
-  @override
-  String get analyticsGroupHeaderStories => '━ 故事 / Stories ━';
-
-  @override
   String get analyticsCardTitleTotalSixMonth => '总 · 6 个月支出推移';
 
   @override

@@ -1952,9 +1952,6 @@
       }
     }
   },
-  "analyticsGroupHeaderTime": "━ 時間 / Time ━",
-  "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",
-  "analyticsGroupHeaderStories": "━ 物語 / Stories ━",
   "analyticsCardTitleTotalSixMonth": "総 · 6 か月支出推移",
   "analyticsCardCaptionTotalSixMonth": "BarChart · 当月 highlighted",
   "analyticsCardTitleCategoryDonut": "総 · 類別支出分布",
