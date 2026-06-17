@@ -1,10 +1,11 @@
 ---
 phase: 47
 slug: i18n-macos-golden-uat
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-17
+reviewed_at: 2026-06-17
 ---
 
 # Phase 47 — UI Design Contract
@@ -192,11 +193,11 @@ No third-party UI registries. No `npx shadcn` surface. Registry vetting gate **N
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS — WR-02 "Other" neutral + GATE-04 reuse; orphan-key delete; rest settled upstream
-- [ ] Dimension 2 Visuals: PASS — golden matrix locks the visual states; no new layout
-- [ ] Dimension 3 Color: PASS — ADR-019 locked; WR-02 neutral swatch within palette, palette-resolved
-- [ ] Dimension 4 Typography: PASS — N/A settled (`AppTextStyles`); WR-02 reuses existing styles
-- [ ] Dimension 5 Spacing: PASS — N/A settled (Phase 46 card system)
-- [ ] Dimension 6 Registry Safety: PASS — N/A (Flutter, no shadcn/third-party registry)
+- [x] Dimension 1 Copywriting: PASS — WR-02 "Other" neutral + GATE-04 reuse; orphan-key delete; rest settled upstream
+- [x] Dimension 2 Visuals: PASS — golden matrix locks the visual states; no new layout
+- [x] Dimension 3 Color: PASS — ADR-019 locked; WR-02 neutral swatch within palette, palette-resolved
+- [x] Dimension 4 Typography: PASS — N/A settled (`AppTextStyles`); WR-02 reuses existing styles
+- [x] Dimension 5 Spacing: PASS — N/A settled (Phase 46 card system)
+- [x] Dimension 6 Registry Safety: PASS — N/A (Flutter, no shadcn/third-party registry)
 
-**Approval:** pending
+**Approval:** approved 2026-06-17
