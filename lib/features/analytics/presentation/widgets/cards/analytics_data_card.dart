@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 /// Phase 45: promoted verbatim from the private `_AnalyticsDataCard` inline in
 /// `analytics_screen.dart` (D-A1 byte-faithful move — only the class name lost
 /// its leading underscore and the constructor gained `super.key`). Consumed by
-/// `TotalSixMonthCard`, `CategoryDonutCard`, and `SatisfactionHistogramCard`.
+/// `CategoryDonutCard` and `SatisfactionHistogramCard` (the `TotalSixMonthCard`
+/// consumer was removed with the 6-month trend stack in 46-01, D-E2).
 ///
 /// The 14px padding and 12px/4px internal gaps are preserved 8-pt-grid
 /// exceptions (UI-SPEC Spacing) — do NOT "normalise" them.
