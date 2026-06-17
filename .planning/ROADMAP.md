@@ -146,111 +146,27 @@
   3. 经充分讨论后，用户明确选定恰好一套方向；关卡出口 = 用户批准，且仓库中无新增 Dart/生产代码（GATE-03）
   4. 针对选定方向产出：新 ADR 的 go/no-go 决定（如 JOY-04 需持久化用户自撰反思文本，则加密/隐私含义触发新 ADR）、锁定供反毒性扫描使用的情感词表、以及每个图表 affordance 对当前 fl_chart 1.2.0 API 的逐项校验结果（GATE-04）
 
-**Plans**: 7 plans in 3 wavesPlans:
-**Wave 1**
-
-- [x] 43-01-PLAN.md — Wave 1: GATE-01 现状深研图 + 共享示例数据 + mock 阵容 README（mock 前置基座）
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 43-02-PLAN.md — Wave 2: M1 实用主导 mock（light+dark+ADR-012 自审）
-- [x] 43-03-PLAN.md — Wave 2: M2 均衡 mock（light+dark+ADR-012 自审）
-- [x] 43-04-PLAN.md — Wave 2: M3 极简实用派 mock（低悦己强度，light+dark+自审）
-- [x] 43-05-PLAN.md — Wave 2: M4 温暖反思派 mock（中强度 + kakeibo Q4 静态提示，light+dark+自审）
-- [x] 43-06-PLAN.md — Wave 2: M5 故事画报派 mock（高强度，light+dark+自审）
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 43-07-PLAN.md — Wave 3: GATE-03 选定一案（round-5 B，M2 衍生）→ GATE-04 三决策文档（ADR no-go + 支出跨期 amendment / 词表 / fl_chart 校验）
-
-**Cross-cutting constraints:**
-
-- Dark mock uses ADR-019 桜餅×若葉 warm palette hex
-- git diff shows zero .dart/pubspec/lib/test changes (GATE-03)
-- Both HTML files self-contained: inline <style>, no external CDN font/JS/CSS
-- Mocks draw expense overview only — never 结余率/收入/savings-rate
-
-**UI hint**: yes
-
-### Phase 44: 数据与用例补全 (Data / Use-Case Additions — reuse-first)
-
-**Goal**: 仅补齐选定方向真正需要的展示层之下的数据/用例。复用优先：总览（`GetMonthlyReportUseCase`）与趋势（`GetExpenseTrendUseCase`）零新增数据工作；分类下钻至多新增一条只读路径。**不引入预算表、不做 Drift 迁移、不触收入/结余率（总览仅支出侧）。**
-**Depends on**: Phase 43 (selected direction defines exactly which data is needed)
-**Requirements**: OVW-01, TREND-01, DRILL-01
-**Success Criteria** (what must be TRUE):
-
-  1. 支出总览所需数据（总支出 + 日常/悦己拆分 + Top 分类）确认为对 `monthlyReportProvider` 的纯展示变换，零新增用例/DAO/迁移（OVW-01）
-  2. 6 个月滚动支出趋势数据经 `GetExpenseTrendUseCase` 暴露，作为中性滚动上下文（TREND-01）
-  3. 若选定方向含下钻，存在至多一条新只读路径（`CategoryDrillDown` Freezed 模型 + `GetCategoryDrillDownUseCase` + `AnalyticsDao.getCategoryTransactions`，或复用 v1.4 `GetListTransactionsUseCase` 过滤路径），TDD 覆盖，并完成 `(book_id, category_id, timestamp)` 索引核查（DRILL-01）
-  4. 所有新 provider 的 family key 经 `DateBoundaries`/`TimeWindow` 规范化后再进入 key tuple（避免 microsecond-exact provider rebuild storm）；Drift schema 保持 v21 不变
-
-**Plans**: 3 plans in 2 waves
-
-**Wave 1** (parallel — no file overlap)
-
-- [x] 44-01-PLAN.md — 共享 L1-rollup 纯 helper + 单测（OVW-01 唯一新代码；下钻小结复用同源）
-- [x] 44-02-PLAN.md — `MonthlyTrend` +dailyTotal/+joyTotal + `GetExpenseTrendUseCase` per-ledger 扩展（TREND-01；零迁移、无 joy 跨期 delta）
-
-**Wave 2** *(blocked on 44-01 — drill 小结复用其 rollup helper)*
-
-- [x] 44-03-PLAN.md — TDD-first 分类下钻：`CategoryDrillDown` + `GetCategoryDrillDownUseCase`（走 `findByBookIds` + Dart 侧 L1 过滤）+ auto-dispose drill family（DRILL-01；无新 DAO/索引/迁移）
-
-### Phase 45: 展示外壳重建 (Presentation Shell Rebuild)
-
-**Goal**: 在填充卡片之前先确立卡片契约——把 739 行的 `analytics_screen.dart` 单体重建为瘦外壳（AppBar + `TimeWindowChip` + `JoyMetricVariantChip` + 滚动容器 + 卡片列表驱动），并把手写的 108 行 `_refresh()` 改为由卡片注册表派生的数据驱动失效，使 HomeHero 隔离由构造保证。**纯结构重构、行为保持（D-A1）：golden 保绿、隔离测试同断言过、diff = 机械抽取。**
-**Depends on**: Phase 44
-**Requirements**: REDES-01, GUARD-01
-**Success Criteria** (what must be TRUE):
-
-  1. `analytics_screen.dart` 成为瘦外壳；卡片拆分进 `presentation/widgets/cards/`，每卡 < 400 LOC，且每卡是一个 `ConsumerWidget`、watch 自己唯一的 provider family、本地 `.when(data/loading/error)`（REDES-01）
-  2. `_refresh()` 数据驱动——失效集合由 analytics 卡片注册表派生，结构上不可能包含任何 `home/*` provider（REDES-01）
-  3. `home_screen_isolation_test.dart` 保持 green；analytics 不读取也不失效任何 `home/*` provider，不新增任何 Home 与 Analytics 共享的 provider（GUARD-01）
-  4. analytics 卡片 provider 保持 auto-dispose（离开 tab 释放、重入重算）；不向任何 home widget「共享」时间窗 provider
-
 **Plans**: 7 plans in 4 waves
 
 **Wave 1** (parallel — no file overlap)
 
-- [x] 45-01-PLAN.md — 抽共享卡壳 `AnalyticsDataCard` + 4 张卡（KpiHero/TotalSixMonth/CategoryDonut/SatisfactionHistogram）到 `widgets/cards/`，各带单源 `*RefreshTargets`（D-A1/D-B2/D-B5）
-- [x] 45-02-PLAN.md — 抽 3 张 Stories 卡（LargestExpense/BestJoy/FamilyInsightData）；FamilyInsight 丢弃 `shadowBooksProvider` 直接失效（D-B3 Option A）
-- [x] 45-06-PLAN.md — ADR-012 append-only `## Update` 补正：支出侧 本月vs上月 为 §4 记录在案例外（D-D1，doc-only）
+- [ ] 46-01-PLAN.md — within-month per-day-cumulative trend data path + DELETE 6-month MonthlyTrend/BarChart stack (D-E1/D-E2/D-A3)
+- [ ] 46-03-PLAN.md — docs: mark JOY-03/JOY-04 Descoped (superseded by GATE-03) + rewrite Phase 46 SC #3 to round-5 B 5-card lineup (D-A2)
+- [ ] 46-06-PLAN.md — REDES-02 histogram native label (delete Stack hack) + donut hero rebuild (10 L1 legend rows → drill push + count-up) + read-only CategoryDrillDownScreen (D-B1/B2/B3, DRILL-01 UI)
 
-**Wave 2** *(blocked on 45-01 + 45-02)*
+**Wave 2** *(46-02 blocked on 46-01 shared providers; 46-04 blocked on 46-01 trend provider — no mutual overlap)*
 
-- [x] 45-03-PLAN.md — 建 typed 注册表 `analytics_card_registry.dart`（AnalyticsCardContext/Spec + 有序 `analyticsCardRegistry` + `shellRefreshTargets`），渲染顺序与 refresh 并集单一来源；DailyVsJoy spec group-aware（含 `dailyVsJoySnapshotFamilyProvider` 仅 group）（D-B1/D-B2/D-B4）
+- [ ] 46-02-PLAN.md — joy data paths: per-L1 joy AMOUNT (悦己花在哪) + per-day joy COUNT (小确幸日历), reuse-first over findByBookIds(joy) (D-C1/D-C2)
+- [ ] 46-04-PLAN.md — within-month cumulative LineChart widget + within_month_trend_card (pill tabs 总/日常/悦己; joy single-line zero cross-period) (D-E1)
 
-**Wave 3** *(parallel — both blocked on 45-03, no file overlap)*
+**Wave 3** *(blocked on 46-02 joy providers)*
 
-- [x] 45-04-PLAN.md — 瘦身 `analytics_screen.dart`：删 7 张内联卡 + `_AnalyticsDataCard`，build 映射注册表（1:1 树）、`_refresh()` 由注册表派生（D-A1/D-B1/D-B3）
-- [x] 45-05-PLAN.md — D-B3 注册表并集单测（⊆ analytics、0 个 `home/*`）+ 渲染顺序/可见性 + `dailyVsJoySnapshotFamily` group-presence + 每卡结构/键单源（Nyquist Wave-0：注册表一就绪即验，与 04 并行）（GUARD-01）
+- [ ] 46-05-PLAN.md — 悦己花在哪 stacked bar (R-1 custom) + 小确幸日历 heatmap (R-2 custom) cards, ambient + tap interactions + count-up header (D-C1/D-C2/D-D2)
 
-**Wave 4** *(blocked on 45-04 + 45-05)*
+**Wave 4** *(integration — blocked on all card plans)*
 
-- [x] 45-07-PLAN.md — A1 group-mode 刷新回归（familyHappiness 透传 re-read）+ solo 不触 family + 既有 screen test 不改断言 + 全量门禁（golden 零重基线）（GUARD-01）
+- [ ] 46-07-PLAN.md — re-order registry to round-5 B flat 5-card lineup + delete dead cards + remove section headers + update registry/screen/anti-toxicity tests + full-suite gate (D-F1/D-F2, GUARD-01/02)
 
-**Cross-cutting constraints:**
-
-- 纯结构、行为保持：所有可见变化（round-5 B IA 重排/卡片增删/图表打磨/动效）压到 Phase 46，golden 重基线压到 Phase 47
-- 每卡 = `ConsumerWidget` watch 唯一 provider family + 本地 `.when`；single-source `refreshTargets` == error-retry == 注册表并集（卡就是契约）
-- 注册表/各 `cards/*` 仅 import analytics providers（home/* 隔离的物理来源）；D-B3 单测背书
-- 下钻宿主（D-C1/D-C2）Phase 45 零预留，全部留 Phase 46
-
-**UI hint**: yes (但本阶段零视觉变化——见 45-UI-SPEC.md preserve-as-is 合约)
-
-### Phase 46: 卡片体系 (Cards)
-
-**Goal**: 在外壳契约就绪后，逐卡构建/迁移设计批准的卡片——实用半边（支出总览、趋势、分类下钻入口）与悦己情感半边（值得 / 值不值 / 记忆故事 / kakeibo Q4 反思），全部复用既有 chart widget 并采用 fl_chart 1.2.0 原生能力；情感呈现「庆祝为自己投资」而非「打分」，每张新卡满足反游戏化。
-**Depends on**: Phase 45
-**Requirements**: OVW-02, JOY-01, JOY-02, JOY-03, JOY-04, REDES-02, REDES-03, GUARD-02
-**Success Criteria** (what must be TRUE):
-
-  1. 支出总览卡呈现当前时间窗的中性总览，**无跨期 delta、无评判式措辞**（`MonthlyReport.previousMonthComparison` 保持不被 analytics 页面 surface）（OVW-02）
-  2. 「值得」肯定卡呈现 已花悦己 + `Σ joy_contribution` 作为 *为自己投资* 的庆祝；为 ambient 呈现，**绝不成为 progress/target ring**（HomeHero 独占唯一 target ring，ADR-016 §3）（JOY-01）
-  3. 「值不值」满足反思卡复用满足度直方图 + 分类悦己（min-N=3），框定为自豪/满足，绝无「超过上月」/排名；「记忆故事」卡抬升既有 best-joy moment；kakeibo Q4 反思 prompt 按 Phase 43 决定的形态落地（若持久化用户自撰文本则按已批准的新 ADR 加密落地）（JOY-02, JOY-03, JOY-04）
-  4. 图表采用 fl_chart 1.2.0 原生 per-rod `label`（删除直方图 `Stack` hack）+ 可选 donut `cornerRadius`，**不升级/不更换图表库（保持 `^1.2.0`）**；温暖肯定的动效用 Flutter 内建动画（`TweenAnimationBuilder` count-up / `AnimatedSwitcher` / glow），ADR-012-safe（REDES-02, REDES-03）
-  5. `FamilyHappiness` 保持 aggregate-only（无 per-member 字段，无排行）；单一悦己表达保持（`grep density|joyPerYen lib/` == 0）；每张新卡都准备好接入反毒性禁词扫描（GUARD-02）
-
-**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT
