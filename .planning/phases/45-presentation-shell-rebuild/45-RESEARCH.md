@@ -327,17 +327,17 @@ Not applicable — no library-version migration. The relevant "state of the art"
 | A2 | `DailyVsJoyCard` (471 LOC) and `PerCategoryBreakdownCard` (260 LOC) need NOT be split to satisfy "<400 LOC per card" because they are pre-existing leaf widgets, not the newly-extracted card wrappers, and D-A1 forbids behavior change | Standard Stack / Structure | If the planner/checker reads SC-1 "<400 LOC per card" as applying to `DailyVsJoyCard`, they may attempt an out-of-scope split. The <400 target applies to the **newly extracted `cards/` wrappers** (all <100 LOC). Confirm interpretation with the planner. |
 | A3 | The D-B3 "union ⊆ analytics providers" assertion can be written without instantiating widgets, by iterating `registry.expand((s)=>s.refreshTargets(ctx))` with a synthetic ctx | Validation Architecture | If specs require widget context to compute targets, the test needs a `ProviderContainer.test()` pump. The recommended spec shape (closures over a plain ctx) avoids this. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Where does `earliestTransactionMonth` invalidation live in the registry model?**
    - What we know: it's a shell-level read feeding `TimeWindowChip`, not a card.
-   - What's unclear: whether to model the chip as a pseudo-spec or append a `shellRefreshTargets`.
-   - Recommendation: append a tiny `shellRefreshTargets(ctx) => [earliestTransactionMonth(bookId: ctx.bookId)]` to the union; it's an analytics provider so D-B3 passes.
+   - **RESOLVED:** append a tiny `shellRefreshTargets(ctx) => [earliestTransactionMonth(bookId: ctx.bookId)]` to the union; it's an analytics provider so D-B3 passes. Adopted in Plan 45-03 Task 1 (`shellRefreshTargets`).
 
 2. **D-B3 assertion strength re `shadowBooksProvider` (home/*).**
    - What we know: today's `_refresh` invalidates it (a `home/*` provider).
-   - What's unclear: whether to drop it (Option A) or scope the assertion (Option B).
-   - Recommendation: Option A (drop direct invalidate, rely on transitive re-read), gated by a group-mode refresh test (Assumption A1).
+   - **RESOLVED:** Option A — drop the direct invalidate, rely on transitive re-read via `familyHappinessProvider`'s internal `watch(shadowBooksProvider.future)`. Adopted in Plan 45-02 Task 2 (`familyInsightRefreshTargets` excludes shadowBooksProvider) and gated by the group-mode refresh test (Assumption A1) in Plan 45-07.
+
+> **Post-planning addendum (Blocker-1, found in plan review):** A third resolution — the single `DailyVsJoyCard` watches BOTH `dailyVsJoySnapshotProvider` (always) and `dailyVsJoySnapshotFamilyProvider` (when group, daily_vs_joy_card.dart:50-61), and today's `_refresh:314` invalidates the family snapshot under group mode. **RESOLVED:** the DailyVsJoy registry spec's `dailyVsJoyRefreshTargets(ctx)` is GROUP-AWARE — `[dailyVsJoySnapshotProvider(...), if (ctx.isGroupMode) dailyVsJoySnapshotFamilyProvider(...)]` — so the group-mode union stays byte-equivalent to today's invalidate set (minus the dropped shadowBooksProvider). Adopted in Plan 45-03 spec #4; asserted (∈ group ∧ ∉ solo) in Plan 45-05.
 
 ## Environment Availability
 

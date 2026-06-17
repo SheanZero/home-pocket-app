@@ -207,7 +207,7 @@
   3. `home_screen_isolation_test.dart` 保持 green；analytics 不读取也不失效任何 `home/*` provider，不新增任何 Home 与 Analytics 共享的 provider（GUARD-01）
   4. analytics 卡片 provider 保持 auto-dispose（离开 tab 释放、重入重算）；不向任何 home widget「共享」时间窗 provider
 
-**Plans**: 6 plans in 4 waves
+**Plans**: 7 plans in 4 waves
 
 **Wave 1** (parallel — no file overlap)
 
@@ -217,15 +217,16 @@
 
 **Wave 2** *(blocked on 45-01 + 45-02)*
 
-- [ ] 45-03-PLAN.md — 建 typed 注册表 `analytics_card_registry.dart`（AnalyticsCardContext/Spec + 有序 `analyticsCardRegistry` + `shellRefreshTargets`），渲染顺序与 refresh 并集单一来源（D-B1/D-B2/D-B4）
+- [ ] 45-03-PLAN.md — 建 typed 注册表 `analytics_card_registry.dart`（AnalyticsCardContext/Spec + 有序 `analyticsCardRegistry` + `shellRefreshTargets`），渲染顺序与 refresh 并集单一来源；DailyVsJoy spec group-aware（含 `dailyVsJoySnapshotFamilyProvider` 仅 group）（D-B1/D-B2/D-B4）
 
-**Wave 3** *(blocked on 45-03)*
+**Wave 3** *(parallel — both blocked on 45-03, no file overlap)*
 
 - [ ] 45-04-PLAN.md — 瘦身 `analytics_screen.dart`：删 7 张内联卡 + `_AnalyticsDataCard`，build 映射注册表（1:1 树）、`_refresh()` 由注册表派生（D-A1/D-B1/D-B3）
+- [ ] 45-05-PLAN.md — D-B3 注册表并集单测（⊆ analytics、0 个 `home/*`）+ 渲染顺序/可见性 + `dailyVsJoySnapshotFamily` group-presence + 每卡结构/键单源（Nyquist Wave-0：注册表一就绪即验，与 04 并行）（GUARD-01）
 
-**Wave 4** *(blocked on 45-04)*
+**Wave 4** *(blocked on 45-04 + 45-05)*
 
-- [ ] 45-05-PLAN.md — D-B3 注册表并集单测（⊆ analytics、0 个 `home/*`）+ 渲染顺序/可见性 + 每卡结构 + A1 group-mode 刷新回归 + 全量门禁（GUARD-01）
+- [ ] 45-07-PLAN.md — A1 group-mode 刷新回归（familyHappiness 透传 re-read）+ solo 不触 family + 既有 screen test 不改断言 + 全量门禁（golden 零重基线）（GUARD-01）
 
 **Cross-cutting constraints:**
 
@@ -279,4 +280,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | 10 plans (P43-44 done; P45 planned 0/6) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | 10 plans (P43-44 done; P45 planned 0/7) | In progress | - |

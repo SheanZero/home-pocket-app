@@ -2,8 +2,8 @@
 phase: 45
 slug: presentation-shell-rebuild
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-17
 ---
 
@@ -94,4 +94,4 @@ created: 2026-06-17
 - [ ] Feedback latency acceptable (quick subset per commit)
 - [ ] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** plan-bound — the D-B3 union+structure test is Plan 45-05 (Wave 3, lands with the registry); the A1 group-mode pump test + full-suite gate is Plan 45-07 (Wave 4). All REDES-01/GUARD-01 behaviors have an `<automated>` verify or a Wave-3/4 test dependency. No 3 consecutive implementation tasks lack automated structural verify (the registry invariant is asserted in Wave 3, parallel with the shell rewrite).
