@@ -46,6 +46,7 @@ class ListTransactionTile extends ConsumerWidget {
     this.satisfactionValue,
     this.showDate = false,
     this.foreignAnnotation,
+    this.readOnly = false,
   });
 
   final TaggedTransaction taggedTx;
@@ -91,9 +92,26 @@ class ListTransactionTile extends ConsumerWidget {
   /// amount block byte-identically to before (CURR-04 regression protection).
   final String? foreignAnnotation;
 
+  /// D-B3 (Phase 46): when true the tile renders READ-ONLY — no [Dismissible]
+  /// swipe-to-delete wrapper and the [onTap] is suppressed. Used by the
+  /// analytics category drill-down (a descriptive "where the money went" list;
+  /// mutations stay on the List/entry tab). Defaults to false so the List tab
+  /// behaviour is byte-identical (ROW-01/ROW-02 unchanged).
+  final bool readOnly;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
+
+    if (readOnly) {
+      // No Dismissible, no tap-to-edit — pure descriptive row (D-B3). The
+      // trailing chevron affordance is dropped since there is nothing to open.
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: _buildRow(context, palette, showChevron: false),
+      );
+    }
+
     return Dismissible(
       key: ValueKey(taggedTx.transaction.id),
       direction: DismissDirection.endToStart,
@@ -125,153 +143,156 @@ class ListTransactionTile extends ConsumerWidget {
         behavior: HitTestBehavior.opaque,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
+          child: _buildRow(context, palette, showChevron: true),
+        ),
+      ),
+    );
+  }
+
+  /// Shared row content used by both the swipe-enabled (List tab) and the
+  /// read-only (analytics drill-down, D-B3) variants. [showChevron] gates the
+  /// trailing tap affordance — false when the row is non-interactive.
+  Widget _buildRow(
+    BuildContext context,
+    AppPalette palette, {
+    required bool showChevron,
+  }) {
+    return Row(
+      children: [
+        // Leading: enlarged, vertically-centered L1 category icon
+        Icon(l1Icon, size: 28, color: categoryColor),
+        const SizedBox(width: 12),
+        // Left info column (title + ledger badge aligned to title)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Leading: enlarged, vertically-centered L1 category icon
-              Icon(l1Icon, size: 28, color: categoryColor),
-              const SizedBox(width: 12),
-              // Left info column (title + ledger badge aligned to title)
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Primary: L2 category name + optional joy emoji
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            showDate
-                                ? '${DateFormatter.formatShortMonthDay(taggedTx.transaction.timestamp, locale)} $category'
-                                : category,
-                            style: AppTextStyles.bodyMedium,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        if (satisfactionValue != null) ...[
-                          const SizedBox(width: 6),
-                          SatisfactionFaceIcon(
-                            value: satisfactionValue!,
-                            size: 14,
-                            color: palette.joy,
-                          ),
-                        ],
-                      ],
+              // Primary: L2 category name + optional joy emoji
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      showDate
+                          ? '${DateFormatter.formatShortMonthDay(taggedTx.transaction.timestamp, locale)} $category'
+                          : category,
+                      style: AppTextStyles.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    const SizedBox(height: 3),
-                    // Secondary: ledger badge (background pill) + optional merchant
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: tagBgColor,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          child: Text(
-                            tagText,
-                            style: AppTextStyles.micro.copyWith(
-                              color: tagTextColor,
-                            ),
-                            maxLines: 1,
-                          ),
-                        ),
-                        if (merchant != null) ...[
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              merchant!,
-                              style: AppTextStyles.micro.copyWith(
-                                color: palette.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
+                  ),
+                  if (satisfactionValue != null) ...[
+                    const SizedBox(width: 6),
+                    SatisfactionFaceIcon(
+                      value: satisfactionValue!,
+                      size: 14,
+                      color: palette.joy,
                     ),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(width: 8),
-              // Member attribution chip — second trailing element, only for shadow-book rows (D-01/SC#3)
-              // taggedTx.memberTag is null for own-book rows; no isOwn branch needed
-              if (taggedTx.memberTag case final tag?) ...[
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 72),
-                  child: Container(
+              const SizedBox(height: 3),
+              // Secondary: ledger badge (background pill) + optional merchant
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
                     decoration: BoxDecoration(
-                      color: palette.sharedLight,
-                      borderRadius: BorderRadius.circular(3),
+                      color: tagBgColor,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,
                       vertical: 1,
                     ),
                     child: Text(
-                      '${tag.emoji} ${tag.name}',
-                      style: AppTextStyles.micro.copyWith(
-                        color: palette.sharedText,
-                      ),
+                      tagText,
+                      style: AppTextStyles.micro.copyWith(color: tagTextColor),
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              // Amount — amountSmall with tabular figures (SC#1)
-              // Uses palette.textPrimary (general text, not ledger-coloured amount context)
-              //
-              // DISP-02: foreign rows show a small secondary original-currency
-              // annotation (labelMedium / textSecondary) under the JPY amount.
-              // JPY/domestic rows render the bare Text unchanged (CURR-04 —
-              // byte-identical golden, no Column wrapper introduced).
-              if (foreignAnnotation == null)
-                Text(
-                  formattedAmount,
-                  style: AppTextStyles.amountSmall.copyWith(
-                    color: palette.textPrimary,
-                  ),
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      formattedAmount,
-                      style: AppTextStyles.amountSmall.copyWith(
-                        color: palette.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      foreignAnnotation!,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: palette.textSecondary,
+                  if (merchant != null) ...[
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        merchant!,
+                        style: AppTextStyles.micro.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
-                ),
-              // 260603-nr1 #4: static tap affordance after the amount. Coexists
-              // with the Dismissible swipe (it does not intercept the gesture).
-              const SizedBox(width: 6),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: palette.textSecondary,
+                ],
               ),
             ],
           ),
         ),
-      ),
+        const SizedBox(width: 8),
+        // Member attribution chip — second trailing element, only for shadow-book rows (D-01/SC#3)
+        // taggedTx.memberTag is null for own-book rows; no isOwn branch needed
+        if (taggedTx.memberTag case final tag?) ...[
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 72),
+            child: Container(
+              decoration: BoxDecoration(
+                color: palette.sharedLight,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              child: Text(
+                '${tag.emoji} ${tag.name}',
+                style: AppTextStyles.micro.copyWith(color: palette.sharedText),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+        // Amount — amountSmall with tabular figures (SC#1)
+        // Uses palette.textPrimary (general text, not ledger-coloured amount context)
+        //
+        // DISP-02: foreign rows show a small secondary original-currency
+        // annotation (labelMedium / textSecondary) under the JPY amount.
+        // JPY/domestic rows render the bare Text unchanged (CURR-04 —
+        // byte-identical golden, no Column wrapper introduced).
+        if (foreignAnnotation == null)
+          Text(
+            formattedAmount,
+            style: AppTextStyles.amountSmall.copyWith(
+              color: palette.textPrimary,
+            ),
+          )
+        else
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                formattedAmount,
+                style: AppTextStyles.amountSmall.copyWith(
+                  color: palette.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                foreignAnnotation!,
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        // 260603-nr1 #4: static tap affordance after the amount. Coexists
+        // with the Dismissible swipe (it does not intercept the gesture).
+        // Suppressed in read-only mode (nothing to open — D-B3).
+        if (showChevron) ...[
+          const SizedBox(width: 6),
+          Icon(Icons.chevron_right, size: 18, color: palette.textSecondary),
+        ],
+      ],
     );
   }
 }

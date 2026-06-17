@@ -1960,6 +1960,30 @@
   "analyticsCardTitleCategoryDonut": "総 · 類別支出分布",
   "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + その他",
   "analyticsCategoryDonutOther": "その他",
+  "analyticsDonutCenterLabel": "今月の支出",
+  "@analyticsDonutCenterLabel": {
+    "description": "Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)"
+  },
+  "analyticsDrillSubtotalLabel": "小計",
+  "@analyticsDrillSubtotalLabel": {
+    "description": "Category drill-down header: subtotal of the selected category for the window (neutral descriptive, ADR-012-safe)"
+  },
+  "analyticsDrillCountLabel": "件数",
+  "@analyticsDrillCountLabel": {
+    "description": "Category drill-down header: number of transactions"
+  },
+  "analyticsDrillAvgPerDayLabel": "日均",
+  "@analyticsDrillAvgPerDayLabel": {
+    "description": "Category drill-down header: descriptive average spend per window-day (never a target/goal)"
+  },
+  "analyticsDrillEmpty": "この期間の記録はありません",
+  "@analyticsDrillEmpty": {
+    "description": "Category drill-down empty state when no transactions in the window"
+  },
+  "analyticsDrillLoadError": "読み込みに失敗しました",
+  "@analyticsDrillLoadError": {
+    "description": "Category drill-down error state message"
+  },
   "analyticsCardTitleSatisfactionHistogram": "悦己 · 満足度の分布 1–10",
   "analyticsCardCaptionHistogram": "Histogram · cool→warm · bar 5 三語注記",
   "analyticsHistogramBarFiveAnnotation": "中央値・含未評価",

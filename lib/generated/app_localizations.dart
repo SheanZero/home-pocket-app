@@ -2903,6 +2903,42 @@ abstract class S {
   /// **'Other'**
   String get analyticsCategoryDonutOther;
 
+  /// Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get analyticsDonutCenterLabel;
+
+  /// Category drill-down header: subtotal of the selected category for the window (neutral descriptive, ADR-012-safe)
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get analyticsDrillSubtotalLabel;
+
+  /// Category drill-down header: number of transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get analyticsDrillCountLabel;
+
+  /// Category drill-down header: descriptive average spend per window-day (never a target/goal)
+  ///
+  /// In en, this message translates to:
+  /// **'Per day'**
+  String get analyticsDrillAvgPerDayLabel;
+
+  /// Category drill-down empty state when no transactions in the window
+  ///
+  /// In en, this message translates to:
+  /// **'No records for this period'**
+  String get analyticsDrillEmpty;
+
+  /// Category drill-down error state message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load'**
+  String get analyticsDrillLoadError;
+
   /// No description provided for @analyticsCardTitleSatisfactionHistogram.
   ///
   /// In en, this message translates to:

@@ -1518,6 +1518,24 @@ class SZh extends S {
   String get analyticsCategoryDonutOther => '其他';
 
   @override
+  String get analyticsDonutCenterLabel => '本月支出';
+
+  @override
+  String get analyticsDrillSubtotalLabel => '小计';
+
+  @override
+  String get analyticsDrillCountLabel => '笔数';
+
+  @override
+  String get analyticsDrillAvgPerDayLabel => '日均';
+
+  @override
+  String get analyticsDrillEmpty => '此期间没有记录';
+
+  @override
+  String get analyticsDrillLoadError => '加载失败';
+
+  @override
   String get analyticsCardTitleSatisfactionHistogram => '悦己 · 满足度分布 1–10';
 
   @override

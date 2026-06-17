@@ -1960,6 +1960,30 @@
   "analyticsCardTitleCategoryDonut": "Total · Category breakdown",
   "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + Other",
   "analyticsCategoryDonutOther": "Other",
+  "analyticsDonutCenterLabel": "This month",
+  "@analyticsDonutCenterLabel": {
+    "description": "Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)"
+  },
+  "analyticsDrillSubtotalLabel": "Subtotal",
+  "@analyticsDrillSubtotalLabel": {
+    "description": "Category drill-down header: subtotal of the selected category for the window (neutral descriptive, ADR-012-safe)"
+  },
+  "analyticsDrillCountLabel": "Count",
+  "@analyticsDrillCountLabel": {
+    "description": "Category drill-down header: number of transactions"
+  },
+  "analyticsDrillAvgPerDayLabel": "Per day",
+  "@analyticsDrillAvgPerDayLabel": {
+    "description": "Category drill-down header: descriptive average spend per window-day (never a target/goal)"
+  },
+  "analyticsDrillEmpty": "No records for this period",
+  "@analyticsDrillEmpty": {
+    "description": "Category drill-down empty state when no transactions in the window"
+  },
+  "analyticsDrillLoadError": "Failed to load",
+  "@analyticsDrillLoadError": {
+    "description": "Category drill-down error state message"
+  },
   "analyticsCardTitleSatisfactionHistogram": "Joy · Satisfaction distribution 1–10",
   "analyticsCardCaptionHistogram": "Histogram · cool→warm · 5-bar trilingual annotation",
   "analyticsHistogramBarFiveAnnotation": "Median + unrated",

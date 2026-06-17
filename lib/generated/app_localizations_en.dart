@@ -1550,6 +1550,24 @@ class SEn extends S {
   String get analyticsCategoryDonutOther => 'Other';
 
   @override
+  String get analyticsDonutCenterLabel => 'This month';
+
+  @override
+  String get analyticsDrillSubtotalLabel => 'Subtotal';
+
+  @override
+  String get analyticsDrillCountLabel => 'Count';
+
+  @override
+  String get analyticsDrillAvgPerDayLabel => 'Per day';
+
+  @override
+  String get analyticsDrillEmpty => 'No records for this period';
+
+  @override
+  String get analyticsDrillLoadError => 'Failed to load';
+
+  @override
   String get analyticsCardTitleSatisfactionHistogram =>
       'Joy · Satisfaction distribution 1–10';
 

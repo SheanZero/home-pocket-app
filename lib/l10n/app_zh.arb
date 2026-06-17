@@ -1960,6 +1960,30 @@
   "analyticsCardTitleCategoryDonut": "总 · 类别支出分布",
   "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + 其他",
   "analyticsCategoryDonutOther": "其他",
+  "analyticsDonutCenterLabel": "本月支出",
+  "@analyticsDonutCenterLabel": {
+    "description": "Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)"
+  },
+  "analyticsDrillSubtotalLabel": "小计",
+  "@analyticsDrillSubtotalLabel": {
+    "description": "Category drill-down header: subtotal of the selected category for the window (neutral descriptive, ADR-012-safe)"
+  },
+  "analyticsDrillCountLabel": "笔数",
+  "@analyticsDrillCountLabel": {
+    "description": "Category drill-down header: number of transactions"
+  },
+  "analyticsDrillAvgPerDayLabel": "日均",
+  "@analyticsDrillAvgPerDayLabel": {
+    "description": "Category drill-down header: descriptive average spend per window-day (never a target/goal)"
+  },
+  "analyticsDrillEmpty": "此期间没有记录",
+  "@analyticsDrillEmpty": {
+    "description": "Category drill-down empty state when no transactions in the window"
+  },
+  "analyticsDrillLoadError": "加载失败",
+  "@analyticsDrillLoadError": {
+    "description": "Category drill-down error state message"
+  },
   "analyticsCardTitleSatisfactionHistogram": "悦己 · 满足度分布 1–10",
   "analyticsCardCaptionHistogram": "Histogram · cool→warm · 5 bar 三语注释",
   "analyticsHistogramBarFiveAnnotation": "中位数·含未评分",

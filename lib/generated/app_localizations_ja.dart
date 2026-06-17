@@ -1525,6 +1525,24 @@ class SJa extends S {
   String get analyticsCategoryDonutOther => 'その他';
 
   @override
+  String get analyticsDonutCenterLabel => '今月の支出';
+
+  @override
+  String get analyticsDrillSubtotalLabel => '小計';
+
+  @override
+  String get analyticsDrillCountLabel => '件数';
+
+  @override
+  String get analyticsDrillAvgPerDayLabel => '日均';
+
+  @override
+  String get analyticsDrillEmpty => 'この期間の記録はありません';
+
+  @override
+  String get analyticsDrillLoadError => '読み込みに失敗しました';
+
+  @override
   String get analyticsCardTitleSatisfactionHistogram => '悦己 · 満足度の分布 1–10';
 
   @override
