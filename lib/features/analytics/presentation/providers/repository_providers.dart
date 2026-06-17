@@ -6,7 +6,9 @@ import '../../../../application/analytics/get_budget_progress_use_case.dart';
 import '../../../../application/analytics/get_category_drill_down_use_case.dart';
 import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
+import '../../../../application/analytics/get_joy_category_amounts_use_case.dart';
 import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
+import '../../../../application/analytics/get_per_day_joy_counts_use_case.dart';
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
 import '../../../../application/analytics/get_per_category_joy_breakdown_across_books_use_case.dart';
@@ -77,6 +79,32 @@ GetCategoryDrillDownUseCase getCategoryDrillDownUseCase(Ref ref) {
   return GetCategoryDrillDownUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
+  );
+}
+
+/// JOY-02 / D-C2: GetJoyCategoryAmountsUseCase provider.
+///
+/// Injects the transaction + category repositories (NOT analyticsRepository):
+/// the joy-amount rollup reuses `findByBookIds(ledgerType: joy)` directly with a
+/// Dart-side L1 filter through the locked `l1RollupFromTransactions` (D-11).
+@riverpod
+GetJoyCategoryAmountsUseCase getJoyCategoryAmountsUseCase(Ref ref) {
+  return GetJoyCategoryAmountsUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
+    categoryRepository: ref.watch(categoryRepositoryProvider),
+  );
+}
+
+/// JOY-01 / D-C1: GetPerDayJoyCountsUseCase provider.
+///
+/// Injects the transaction repository directly: per-day joy COUNT reuses
+/// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
+/// NOT the unfiltered daily-totals SQL aggregate (Pitfall 3). No new DAO, no
+/// migration.
+@riverpod
+GetPerDayJoyCountsUseCase getPerDayJoyCountsUseCase(Ref ref) {
+  return GetPerDayJoyCountsUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
   );
 }
 

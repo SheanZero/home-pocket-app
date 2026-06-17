@@ -797,3 +797,356 @@ final class SatisfactionDistributionFamily extends $Family
   @override
   String toString() => r'satisfactionDistributionProvider';
 }
+
+/// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
+///
+/// Returns one [JoyCategoryAmount] per L1 (largest→smallest) — a strict subset of
+/// the donut's L1 amounts (single-source L1 rollup via l1AncestorOf, D-11).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+@ProviderFor(joyCategoryAmounts)
+final joyCategoryAmountsProvider = JoyCategoryAmountsFamily._();
+
+/// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
+///
+/// Returns one [JoyCategoryAmount] per L1 (largest→smallest) — a strict subset of
+/// the donut's L1 amounts (single-source L1 rollup via l1AncestorOf, D-11).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+final class JoyCategoryAmountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<JoyCategoryAmount>>,
+          List<JoyCategoryAmount>,
+          FutureOr<List<JoyCategoryAmount>>
+        >
+    with
+        $FutureModifier<List<JoyCategoryAmount>>,
+        $FutureProvider<List<JoyCategoryAmount>> {
+  /// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
+  ///
+  /// Returns one [JoyCategoryAmount] per L1 (largest→smallest) — a strict subset of
+  /// the donut's L1 amounts (single-source L1 rollup via l1AncestorOf, D-11).
+  ///
+  /// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+  /// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+  /// they reach the use case — never accept microsecond-exact instants into the
+  /// family key (rebuild-storm guard).
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01).
+  JoyCategoryAmountsProvider._({
+    required JoyCategoryAmountsFamily super.from,
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'joyCategoryAmountsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$joyCategoryAmountsHash();
+
+  @override
+  String toString() {
+    return r'joyCategoryAmountsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<JoyCategoryAmount>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<JoyCategoryAmount>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return joyCategoryAmounts(
+      ref,
+      bookId: argument.bookId,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is JoyCategoryAmountsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$joyCategoryAmountsHash() =>
+    r'dc30b88219c12ccfc15da8d6ee6567547a20286b';
+
+/// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
+///
+/// Returns one [JoyCategoryAmount] per L1 (largest→smallest) — a strict subset of
+/// the donut's L1 amounts (single-source L1 rollup via l1AncestorOf, D-11).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+final class JoyCategoryAmountsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<JoyCategoryAmount>>,
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
+        > {
+  JoyCategoryAmountsFamily._()
+    : super(
+        retry: null,
+        name: r'joyCategoryAmountsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
+  ///
+  /// Returns one [JoyCategoryAmount] per L1 (largest→smallest) — a strict subset of
+  /// the donut's L1 amounts (single-source L1 rollup via l1AncestorOf, D-11).
+  ///
+  /// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+  /// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+  /// they reach the use case — never accept microsecond-exact instants into the
+  /// family key (rebuild-storm guard).
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01).
+
+  JoyCategoryAmountsProvider call({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  }) => JoyCategoryAmountsProvider._(
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'joyCategoryAmountsProvider';
+}
+
+/// JOY-01 / D-C1: per-day joy COUNT (笔数) for the active month — the 小确幸
+/// calendar heatmap depth.
+///
+/// Returns one [PerDayJoyCount] per day that has joy spend (count, NOT sum —
+/// Pitfall 3) within the month derived from [anchor].
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)). The provider
+/// re-anchors to month precision and derives the month's whole-day window, so a
+/// microsecond-exact key never explodes the family cache.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+@ProviderFor(perDayJoyCounts)
+final perDayJoyCountsProvider = PerDayJoyCountsFamily._();
+
+/// JOY-01 / D-C1: per-day joy COUNT (笔数) for the active month — the 小确幸
+/// calendar heatmap depth.
+///
+/// Returns one [PerDayJoyCount] per day that has joy spend (count, NOT sum —
+/// Pitfall 3) within the month derived from [anchor].
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)). The provider
+/// re-anchors to month precision and derives the month's whole-day window, so a
+/// microsecond-exact key never explodes the family cache.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+final class PerDayJoyCountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<PerDayJoyCount>>,
+          List<PerDayJoyCount>,
+          FutureOr<List<PerDayJoyCount>>
+        >
+    with
+        $FutureModifier<List<PerDayJoyCount>>,
+        $FutureProvider<List<PerDayJoyCount>> {
+  /// JOY-01 / D-C1: per-day joy COUNT (笔数) for the active month — the 小确幸
+  /// calendar heatmap depth.
+  ///
+  /// Returns one [PerDayJoyCount] per day that has joy spend (count, NOT sum —
+  /// Pitfall 3) within the month derived from [anchor].
+  ///
+  /// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)). The provider
+  /// re-anchors to month precision and derives the month's whole-day window, so a
+  /// microsecond-exact key never explodes the family cache.
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01).
+  PerDayJoyCountsProvider._({
+    required PerDayJoyCountsFamily super.from,
+    required ({
+      String bookId,
+      DateTime anchor,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'perDayJoyCountsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$perDayJoyCountsHash();
+
+  @override
+  String toString() {
+    return r'perDayJoyCountsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<PerDayJoyCount>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<PerDayJoyCount>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime anchor,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return perDayJoyCounts(
+      ref,
+      bookId: argument.bookId,
+      anchor: argument.anchor,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PerDayJoyCountsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$perDayJoyCountsHash() => r'f50e5b3ec0656ef871186628217fcb795a9b1d33';
+
+/// JOY-01 / D-C1: per-day joy COUNT (笔数) for the active month — the 小确幸
+/// calendar heatmap depth.
+///
+/// Returns one [PerDayJoyCount] per day that has joy spend (count, NOT sum —
+/// Pitfall 3) within the month derived from [anchor].
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)). The provider
+/// re-anchors to month precision and derives the month's whole-day window, so a
+/// microsecond-exact key never explodes the family cache.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+final class PerDayJoyCountsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<PerDayJoyCount>>,
+          ({String bookId, DateTime anchor, JoyMetricVariant joyMetricVariant})
+        > {
+  PerDayJoyCountsFamily._()
+    : super(
+        retry: null,
+        name: r'perDayJoyCountsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// JOY-01 / D-C1: per-day joy COUNT (笔数) for the active month — the 小确幸
+  /// calendar heatmap depth.
+  ///
+  /// Returns one [PerDayJoyCount] per day that has joy spend (count, NOT sum —
+  /// Pitfall 3) within the month derived from [anchor].
+  ///
+  /// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)). The provider
+  /// re-anchors to month precision and derives the month's whole-day window, so a
+  /// microsecond-exact key never explodes the family cache.
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01).
+
+  PerDayJoyCountsProvider call({
+    required String bookId,
+    required DateTime anchor,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  }) => PerDayJoyCountsProvider._(
+    argument: (
+      bookId: bookId,
+      anchor: anchor,
+      joyMetricVariant: joyMetricVariant,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'perDayJoyCountsProvider';
+}

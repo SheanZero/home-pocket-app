@@ -300,6 +300,137 @@ final class GetCategoryDrillDownUseCaseProvider
 String _$getCategoryDrillDownUseCaseHash() =>
     r'5e6e6178adc8f95a2ddafe0a1ab1ca2a1c348365';
 
+/// JOY-02 / D-C2: GetJoyCategoryAmountsUseCase provider.
+///
+/// Injects the transaction + category repositories (NOT analyticsRepository):
+/// the joy-amount rollup reuses `findByBookIds(ledgerType: joy)` directly with a
+/// Dart-side L1 filter through the locked `l1RollupFromTransactions` (D-11).
+
+@ProviderFor(getJoyCategoryAmountsUseCase)
+final getJoyCategoryAmountsUseCaseProvider =
+    GetJoyCategoryAmountsUseCaseProvider._();
+
+/// JOY-02 / D-C2: GetJoyCategoryAmountsUseCase provider.
+///
+/// Injects the transaction + category repositories (NOT analyticsRepository):
+/// the joy-amount rollup reuses `findByBookIds(ledgerType: joy)` directly with a
+/// Dart-side L1 filter through the locked `l1RollupFromTransactions` (D-11).
+
+final class GetJoyCategoryAmountsUseCaseProvider
+    extends
+        $FunctionalProvider<
+          GetJoyCategoryAmountsUseCase,
+          GetJoyCategoryAmountsUseCase,
+          GetJoyCategoryAmountsUseCase
+        >
+    with $Provider<GetJoyCategoryAmountsUseCase> {
+  /// JOY-02 / D-C2: GetJoyCategoryAmountsUseCase provider.
+  ///
+  /// Injects the transaction + category repositories (NOT analyticsRepository):
+  /// the joy-amount rollup reuses `findByBookIds(ledgerType: joy)` directly with a
+  /// Dart-side L1 filter through the locked `l1RollupFromTransactions` (D-11).
+  GetJoyCategoryAmountsUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getJoyCategoryAmountsUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getJoyCategoryAmountsUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetJoyCategoryAmountsUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetJoyCategoryAmountsUseCase create(Ref ref) {
+    return getJoyCategoryAmountsUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetJoyCategoryAmountsUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetJoyCategoryAmountsUseCase>(value),
+    );
+  }
+}
+
+String _$getJoyCategoryAmountsUseCaseHash() =>
+    r'4712f1c44d3966a716df41ac7da3dffe8211e104';
+
+/// JOY-01 / D-C1: GetPerDayJoyCountsUseCase provider.
+///
+/// Injects the transaction repository directly: per-day joy COUNT reuses
+/// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
+/// NOT the unfiltered `getDailyTotals` (Pitfall 3). No new DAO, no migration.
+
+@ProviderFor(getPerDayJoyCountsUseCase)
+final getPerDayJoyCountsUseCaseProvider = GetPerDayJoyCountsUseCaseProvider._();
+
+/// JOY-01 / D-C1: GetPerDayJoyCountsUseCase provider.
+///
+/// Injects the transaction repository directly: per-day joy COUNT reuses
+/// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
+/// NOT the unfiltered `getDailyTotals` (Pitfall 3). No new DAO, no migration.
+
+final class GetPerDayJoyCountsUseCaseProvider
+    extends
+        $FunctionalProvider<
+          GetPerDayJoyCountsUseCase,
+          GetPerDayJoyCountsUseCase,
+          GetPerDayJoyCountsUseCase
+        >
+    with $Provider<GetPerDayJoyCountsUseCase> {
+  /// JOY-01 / D-C1: GetPerDayJoyCountsUseCase provider.
+  ///
+  /// Injects the transaction repository directly: per-day joy COUNT reuses
+  /// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
+  /// NOT the unfiltered `getDailyTotals` (Pitfall 3). No new DAO, no migration.
+  GetPerDayJoyCountsUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getPerDayJoyCountsUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getPerDayJoyCountsUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetPerDayJoyCountsUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetPerDayJoyCountsUseCase create(Ref ref) {
+    return getPerDayJoyCountsUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetPerDayJoyCountsUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetPerDayJoyCountsUseCase>(value),
+    );
+  }
+}
+
+String _$getPerDayJoyCountsUseCaseHash() =>
+    r'44b10010225efeb773093026f2752178835d3707';
+
 /// HAPPY-01..04: GetHappinessReportUseCase provider.
 
 @ProviderFor(getHappinessReportUseCase)
