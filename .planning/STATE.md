@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 47-04-PLAN.md
-last_updated: "2026-06-17T15:29:56.170Z"
+stopped_at: 47-06-PLAN.md Task 2 — BLOCKED at on-device D-10 UAT (human-verify)
+last_updated: "2026-06-17T15:40:00.000Z"
 last_activity: 2026-06-17
 progress:
   total_phases: 3
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 Phase: 47 (i18n-macos-golden-uat) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: 47-06 Task 1 GREEN (full suite 3057/3057, analyze 0, cleaned coverage 80.48%); Task 2 BLOCKED at on-device D-10 UAT (human-verify, blocking — no defer path)
 Last activity: 2026-06-17
 
 ### Quick Tasks Completed
@@ -157,9 +157,9 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T15:29:50.037Z
-Stopped at: Completed 47-04-PLAN.md
-Resume file: None
+Last session: 2026-06-17T15:40:00.000Z
+Stopped at: 47-06-PLAN.md Task 2 — awaiting human on-device D-10 UAT (locale=ja, physical iOS)
+Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UAT.md
 
 ## Performance Metrics
 
