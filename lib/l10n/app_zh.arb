@@ -1975,6 +1975,34 @@
   "@analyticsTrendSeriesLastMonth": {
     "description": "Within-month trend dashed reference-line series label (spend side only; never the joy tab)"
   },
+  "analyticsCardTitleJoySpend": "悦己 · 花在哪",
+  "@analyticsCardTitleJoySpend": {
+    "description": "悦己花在哪 stacked-bar card title (Phase 46 round-5 B, R-1 custom Row)"
+  },
+  "analyticsCardCaptionJoySpend": "你的悦己花销去向",
+  "@analyticsCardCaptionJoySpend": {
+    "description": "悦己花在哪 stacked-bar card caption (descriptive, celebrate-past, ADR-012-safe)"
+  },
+  "analyticsJoySpendHeaderLabel": "悦己花销",
+  "@analyticsJoySpendHeaderLabel": {
+    "description": "悦己花在哪 header label above the count-up joy total (D-D2 anchor #2)"
+  },
+  "analyticsJoySpendEmpty": "这个时间段还没有悦己花销",
+  "@analyticsJoySpendEmpty": {
+    "description": "悦己花在哪 empty-state copy when there is no joy spend (neutral, no judgment)"
+  },
+  "analyticsCardTitleJoyCalendar": "小确幸 · 日历",
+  "@analyticsCardTitleJoyCalendar": {
+    "description": "小确幸日历 heatmap card title (Phase 46 round-5 B, R-2 custom GridView)"
+  },
+  "analyticsCardCaptionJoyCalendar": "悦己日子的纹理",
+  "@analyticsCardCaptionJoyCalendar": {
+    "description": "小确幸日历 heatmap card caption (ambient, celebrate-past, ADR-012-safe; depth = count not streak)"
+  },
+  "analyticsJoyCalendarDayEmpty": "这一天还没有小确幸记录",
+  "@analyticsJoyCalendarDayEmpty": {
+    "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
+  },
   "analyticsCategoryDonutOther": "其他",
   "analyticsDonutCenterLabel": "本月支出",
   "@analyticsDonutCenterLabel": {

@@ -1,8 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../shared/utils/date_boundaries.dart';
+import '../../../../shared/constants/sort_config.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/entry_source.dart';
+import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../domain/models/analytics_aggregate.dart';
 import '../../domain/models/category_drill_down.dart';
@@ -233,4 +235,54 @@ Future<List<PerDayJoyCount>> perDayJoyCounts(
     endDate: monthEnd,
     entrySourceFilter: entrySourceFilter,
   );
+}
+
+/// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
+/// heatmap's INLINE day expansion.
+///
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
+/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
+/// demand rather than widening the count model. Returns EXPENSE joy rows only,
+/// time-descending, with the optional manualOnly entry-source filter applied —
+/// the same gate the count path uses (Pitfall: findByBookIds has no
+/// income/expense or entry-source SQL param).
+///
+/// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
+/// here) so two callers with differing sub-day precision share one cache key.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
+/// never logs tx contents (T-46-05-02).
+@riverpod
+Future<List<Transaction>> joyDayTransactions(
+  Ref ref, {
+  required String bookId,
+  required DateTime day,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+}) async {
+  final repository = ref.watch(transactionRepositoryProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero
+  // providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
+  // D-12 defensive normalization: collapse to the tapped day's whole-day bounds.
+  final dayRange = DateBoundaries.dayRange(day);
+  final txns = await repository.findByBookIds(
+    [bookId],
+    ledgerType: LedgerType.joy,
+    categoryId: null,
+    startDate: dayRange.start,
+    endDate: dayRange.end,
+    sortField: SortField.timestamp,
+    sortDirection: SortDirection.desc,
+  );
+  return txns
+      .where(
+        (tx) =>
+            tx.type == TransactionType.expense &&
+            (entrySourceFilter == null || tx.entrySource == entrySourceFilter),
+      )
+      .toList();
 }

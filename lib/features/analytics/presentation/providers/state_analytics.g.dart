@@ -1150,3 +1150,192 @@ final class PerDayJoyCountsFamily extends $Family
   @override
   String toString() => r'perDayJoyCountsProvider';
 }
+
+/// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
+/// heatmap's INLINE day expansion.
+///
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
+/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
+/// demand rather than widening the count model. Returns EXPENSE joy rows only,
+/// time-descending, with the optional manualOnly entry-source filter applied —
+/// the same gate the count path uses (Pitfall: findByBookIds has no
+/// income/expense or entry-source SQL param).
+///
+/// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
+/// here) so two callers with differing sub-day precision share one cache key.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
+/// never logs tx contents (T-46-05-02).
+
+@ProviderFor(joyDayTransactions)
+final joyDayTransactionsProvider = JoyDayTransactionsFamily._();
+
+/// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
+/// heatmap's INLINE day expansion.
+///
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
+/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
+/// demand rather than widening the count model. Returns EXPENSE joy rows only,
+/// time-descending, with the optional manualOnly entry-source filter applied —
+/// the same gate the count path uses (Pitfall: findByBookIds has no
+/// income/expense or entry-source SQL param).
+///
+/// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
+/// here) so two callers with differing sub-day precision share one cache key.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
+/// never logs tx contents (T-46-05-02).
+
+final class JoyDayTransactionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Transaction>>,
+          List<Transaction>,
+          FutureOr<List<Transaction>>
+        >
+    with
+        $FutureModifier<List<Transaction>>,
+        $FutureProvider<List<Transaction>> {
+  /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
+  /// heatmap's INLINE day expansion.
+  ///
+  /// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
+  /// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+  /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
+  /// demand rather than widening the count model. Returns EXPENSE joy rows only,
+  /// time-descending, with the optional manualOnly entry-source filter applied —
+  /// the same gate the count path uses (Pitfall: findByBookIds has no
+  /// income/expense or entry-source SQL param).
+  ///
+  /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
+  /// here) so two callers with differing sub-day precision share one cache key.
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
+  /// never logs tx contents (T-46-05-02).
+  JoyDayTransactionsProvider._({
+    required JoyDayTransactionsFamily super.from,
+    required ({String bookId, DateTime day, JoyMetricVariant joyMetricVariant})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'joyDayTransactionsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$joyDayTransactionsHash();
+
+  @override
+  String toString() {
+    return r'joyDayTransactionsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Transaction>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Transaction>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime day,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return joyDayTransactions(
+      ref,
+      bookId: argument.bookId,
+      day: argument.day,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is JoyDayTransactionsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$joyDayTransactionsHash() =>
+    r'ffcbe22225e80be82783df2b9ff83f804848df25';
+
+/// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
+/// heatmap's INLINE day expansion.
+///
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
+/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
+/// demand rather than widening the count model. Returns EXPENSE joy rows only,
+/// time-descending, with the optional manualOnly entry-source filter applied —
+/// the same gate the count path uses (Pitfall: findByBookIds has no
+/// income/expense or entry-source SQL param).
+///
+/// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
+/// here) so two callers with differing sub-day precision share one cache key.
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
+/// never logs tx contents (T-46-05-02).
+
+final class JoyDayTransactionsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<Transaction>>,
+          ({String bookId, DateTime day, JoyMetricVariant joyMetricVariant})
+        > {
+  JoyDayTransactionsFamily._()
+    : super(
+        retry: null,
+        name: r'joyDayTransactionsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
+  /// heatmap's INLINE day expansion.
+  ///
+  /// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
+  /// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+  /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
+  /// demand rather than widening the count model. Returns EXPENSE joy rows only,
+  /// time-descending, with the optional manualOnly entry-source filter applied —
+  /// the same gate the count path uses (Pitfall: findByBookIds has no
+  /// income/expense or entry-source SQL param).
+  ///
+  /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
+  /// here) so two callers with differing sub-day precision share one cache key.
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
+  /// never logs tx contents (T-46-05-02).
+
+  JoyDayTransactionsProvider call({
+    required String bookId,
+    required DateTime day,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  }) => JoyDayTransactionsProvider._(
+    argument: (bookId: bookId, day: day, joyMetricVariant: joyMetricVariant),
+    from: this,
+  );
+
+  @override
+  String toString() => r'joyDayTransactionsProvider';
+}

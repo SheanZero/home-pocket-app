@@ -370,7 +370,8 @@ String _$getJoyCategoryAmountsUseCaseHash() =>
 ///
 /// Injects the transaction repository directly: per-day joy COUNT reuses
 /// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
-/// NOT the unfiltered `getDailyTotals` (Pitfall 3). No new DAO, no migration.
+/// NOT the unfiltered daily-totals SQL aggregate (Pitfall 3). No new DAO, no
+/// migration.
 
 @ProviderFor(getPerDayJoyCountsUseCase)
 final getPerDayJoyCountsUseCaseProvider = GetPerDayJoyCountsUseCaseProvider._();
@@ -379,7 +380,8 @@ final getPerDayJoyCountsUseCaseProvider = GetPerDayJoyCountsUseCaseProvider._();
 ///
 /// Injects the transaction repository directly: per-day joy COUNT reuses
 /// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
-/// NOT the unfiltered `getDailyTotals` (Pitfall 3). No new DAO, no migration.
+/// NOT the unfiltered daily-totals SQL aggregate (Pitfall 3). No new DAO, no
+/// migration.
 
 final class GetPerDayJoyCountsUseCaseProvider
     extends
@@ -393,7 +395,8 @@ final class GetPerDayJoyCountsUseCaseProvider
   ///
   /// Injects the transaction repository directly: per-day joy COUNT reuses
   /// `findByBookIds(ledgerType: joy)` with a Dart-side group-by-local-day count —
-  /// NOT the unfiltered `getDailyTotals` (Pitfall 3). No new DAO, no migration.
+  /// NOT the unfiltered daily-totals SQL aggregate (Pitfall 3). No new DAO, no
+  /// migration.
   GetPerDayJoyCountsUseCaseProvider._()
     : super(
         from: null,

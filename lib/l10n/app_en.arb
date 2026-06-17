@@ -1975,6 +1975,34 @@
   "@analyticsTrendSeriesLastMonth": {
     "description": "Within-month trend dashed reference-line series label (spend side only; never the joy tab)"
   },
+  "analyticsCardTitleJoySpend": "Joy · Where it went",
+  "@analyticsCardTitleJoySpend": {
+    "description": "悦己花在哪 stacked-bar card title (Phase 46 round-5 B, R-1 custom Row)"
+  },
+  "analyticsCardCaptionJoySpend": "How your joy spending breaks down",
+  "@analyticsCardCaptionJoySpend": {
+    "description": "悦己花在哪 stacked-bar card caption (descriptive, celebrate-past, ADR-012-safe)"
+  },
+  "analyticsJoySpendHeaderLabel": "Joy spend",
+  "@analyticsJoySpendHeaderLabel": {
+    "description": "悦己花在哪 header label above the count-up joy total (D-D2 anchor #2)"
+  },
+  "analyticsJoySpendEmpty": "No joy spending in this window yet",
+  "@analyticsJoySpendEmpty": {
+    "description": "悦己花在哪 empty-state copy when there is no joy spend (neutral, no judgment)"
+  },
+  "analyticsCardTitleJoyCalendar": "Little joys · Calendar",
+  "@analyticsCardTitleJoyCalendar": {
+    "description": "小确幸日历 heatmap card title (Phase 46 round-5 B, R-2 custom GridView)"
+  },
+  "analyticsCardCaptionJoyCalendar": "The texture of your joyful days",
+  "@analyticsCardCaptionJoyCalendar": {
+    "description": "小确幸日历 heatmap card caption (ambient, celebrate-past, ADR-012-safe; depth = count not streak)"
+  },
+  "analyticsJoyCalendarDayEmpty": "No little joys recorded this day",
+  "@analyticsJoyCalendarDayEmpty": {
+    "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
+  },
   "analyticsCategoryDonutOther": "Other",
   "analyticsDonutCenterLabel": "This month",
   "@analyticsDonutCenterLabel": {
