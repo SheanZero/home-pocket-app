@@ -4,13 +4,13 @@ milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
 stopped_at: Phase 47 UI-SPEC approved
-last_updated: "2026-06-17T14:27:16.741Z"
-last_activity: 2026-06-17 -- Phase 47 planning complete
+last_updated: "2026-06-17T14:56:33.758Z"
+last_activity: 2026-06-17 -- Phase 47 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 20
+  completed_plans: 15
   percent: 67
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 46 — cards
+**Current focus:** Phase 47 — i18n-macos-golden-uat
 
 ## Current Position
 
-Phase: 47
-Plan: Not started
+Phase: 47 (i18n-macos-golden-uat) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-06-17 -- Phase 47 planning complete
+Last activity: 2026-06-17 -- Phase 47 execution started
 
 ### Quick Tasks Completed
 
@@ -157,7 +157,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T13:40:21.689Z
+Last session: 2026-06-17T14:56:06.508Z
 Stopped at: Phase 47 UI-SPEC approved
 Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UI-SPEC.md
 
@@ -190,6 +190,7 @@ Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UI-SPEC.md
 | Phase 46 P46-04 | ~18min | 2 tasks | 8 files |
 | Phase 46 P46-05 | ~30min | 2 tasks | 10 files |
 | Phase 46 P46-07 | ~35min | 3 tasks | 10 files |
+| Phase 47 P01 | 10min | 3 tasks | 9 files |
 
 ## Decisions
 

@@ -201,7 +201,7 @@
 
 **Wave 1** (parallel — no file overlap; WR fixes before UAT, D-01)
 
-- [ ] 47-01-PLAN.md — WR-01 delete dead `currencyCode` plumbing + WR-02 donut true-total reconciliation (neutral "Other" rollup slice) + WR-04 calendar inline-list refresh consistency (registry/cards/drill/test)
+- [x] 47-01-PLAN.md — WR-01 delete dead `currencyCode` plumbing + WR-02 donut true-total reconciliation (neutral "Other" rollup slice) + WR-04 calendar inline-list refresh consistency (registry/cards/drill/test)
 - [ ] 47-02-PLAN.md — WR-03 `GetJoyCategoryAmountsUseCase` single-pass accumulate + honest docstring (independent use-case file)
 
 **Wave 2** (parallel — ARB-edit lane isolated from the test-author lane)
