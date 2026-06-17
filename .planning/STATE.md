@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Phase 46 context gathered
-last_updated: "2026-06-17T09:01:48.947Z"
+stopped_at: Completed 46-01-PLAN.md
+last_updated: "2026-06-17T09:23:20.313Z"
 last_activity: 2026-06-17 -- Phase 46 execution started
 progress:
   total_phases: 2
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 46 (cards) — EXECUTING
-Plan: 1 of 7
-Status: Executing Phase 46
+Plan: 2 of 7
+Status: Ready to execute
 Last activity: 2026-06-17 -- Phase 46 execution started
 
 ### Quick Tasks Completed
@@ -157,9 +157,9 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T08:14:32.303Z
-Stopped at: Phase 46 context gathered
-Resume file: .planning/phases/46-cards/46-CONTEXT.md
+Last session: 2026-06-17T09:23:20.309Z
+Stopped at: Completed 46-01-PLAN.md
+Resume file: None
 
 ## Performance Metrics
 
@@ -183,6 +183,7 @@ Resume file: .planning/phases/46-cards/46-CONTEXT.md
 | Phase 45 P04 | 7min | 2 tasks | 1 files |
 | Phase 45 P05 | 18min | 1 tasks | 1 files |
 | Phase 45 P07 | 11min | 2 tasks | 1 files |
+| Phase 46 P46-01 | 40min | 2 tasks | 20 files |
 
 ## Decisions
 
@@ -214,7 +215,13 @@ Resume file: .planning/phases/46-cards/46-CONTEXT.md
 - [Phase 45]: 45-03: FamilyInsightDataCard shadowBooks is a Plan-04 shell-injected display prop (null placeholder in registry build) — registry imports zero home/* providers (D-B3 file-wide gate)
 - [Phase ?]: [45-04]: analytics_screen rewritten to a 176-LOC thin shell — build maps analyticsCardRegistry.where(isVisible) into a byte-faithful Column, _refresh derives the union from registry.expand(refreshTargets).toSet()+shellRefreshTargets (no hand-listed providers, no home/* invalidate); FamilyInsightDataCard shadowBooks injected via 'built is FamilyInsightDataCard' (reorder-safe); 7 inline _*Card classes deleted; ctor preserved
 - [Phase ?]: Phase 45 A1/D-B3 Option A confirmed TRUE: dropping the direct shadowBooksProvider invalidate preserves group-mode family refresh via transitive familyHappinessProvider re-read (45-07)
+- [Phase ?]: [46-01]: within-month per-day-cumulative trend = pure Dart transform over findByBookIds (2-month window); no new DAO/migration, schema v21. Joy modelled current-month-only via a model with NO previousMonthJoy field (joy cross-period unrepresentable — D-E1).
+- [Phase ?]: [46-01] DEVIATION: 6-month TotalSixMonth registry spec + Time section header removed in 46-01 (not deferred to 46-07) because total_six_month_card/monthly_spend_trend_bar_chart hard-import deleted data symbols — data-only deletion cannot compile, must_have needs zero dangling refs (Pitfall 4). Registry now 9 specs; round-5 B card + re-order remain for 46-07.
 
 ## Operator Next Steps
 
 - Review/approve the v1.8 roadmap, then run `/gsd-plan-phase 43` to begin the HTML 设计探索关卡 (Design Gate).
+
+### Blockers
+
+- 46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07. Those files hard-import the deleted symbols, so a data-only deletion cannot compile, yet must_have requires zero dangling references. Decision needed on deletion scope.

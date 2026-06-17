@@ -150,7 +150,7 @@
 
 **Wave 1** (parallel — no file overlap)
 
-- [ ] 46-01-PLAN.md — within-month per-day-cumulative trend data path + DELETE 6-month MonthlyTrend/BarChart stack (D-E1/D-E2/D-A3)
+- [x] 46-01-PLAN.md — within-month per-day-cumulative trend data path + DELETE 6-month MonthlyTrend/BarChart stack (D-E1/D-E2/D-A3)
 - [ ] 46-03-PLAN.md — docs: mark JOY-03/JOY-04 Descoped (superseded by GATE-03) + rewrite Phase 46 SC #3 to round-5 B 5-card lineup (D-A2)
 - [ ] 46-06-PLAN.md — REDES-02 histogram native label (delete Stack hack) + donut hero rebuild (10 L1 legend rows → drill push + count-up) + read-only CategoryDrillDownScreen (D-B1/B2/B3, DRILL-01 UI)
 

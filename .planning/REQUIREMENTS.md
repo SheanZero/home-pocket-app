@@ -27,7 +27,7 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 > Reframed from "收支总览/结余率" because the app has **no income-entry path** today (the only transaction writer hardcodes `TransactionType.expense`), so `totalIncome` is always 0 and a savings rate would be meaningless. Real savings-rate is deferred to a future milestone once income capture lands.
 
 - [x] **OVW-01**: The statistics page presents a first-class expense-overview surface for the active time window — total spend + 日常/悦己 split + top categories — reusing `GetMonthlyReportUseCase` (zero new data work)
-- [ ] **OVW-02**: The overview obeys ADR-012 — neutral current-window presentation, no cross-period delta and no judgmental framing
+- [x] **OVW-02**: The overview obeys ADR-012 — neutral current-window presentation, no cross-period delta and no judgmental framing
 
 ### Spending Trend (支出趋势)
 
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GATE-03 | Phase 43 | Complete |
 | GATE-04 | Phase 43 | Complete |
 | OVW-01 | Phase 44 | Complete |
-| OVW-02 | Phase 46 | Pending |
+| OVW-02 | Phase 46 | Complete |
 | TREND-01 | Phase 44 | Complete |
 | DRILL-01 | Phase 44 | Complete |
 | JOY-01 | Phase 46 | Pending |
