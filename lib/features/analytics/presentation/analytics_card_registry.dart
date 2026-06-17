@@ -18,7 +18,6 @@ import 'widgets/cards/family_insight_data_card.dart';
 import 'widgets/cards/kpi_hero_card.dart';
 import 'widgets/cards/largest_expense_card.dart';
 import 'widgets/cards/satisfaction_histogram_card.dart';
-import 'widgets/cards/total_six_month_card.dart';
 import 'widgets/daily_vs_joy_card.dart';
 import 'widgets/per_category_breakdown_card.dart';
 
@@ -232,18 +231,12 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     ),
     refreshTargets: kpiHeroRefreshTargets,
   ),
-  // 2. Time group — 6-month total expense trend.
-  AnalyticsCardSpec(
-    sectionHeaderKey: 'analyticsGroupHeaderTime',
-    build: (ctx) => TotalSixMonthCard(
-      bookId: ctx.bookId,
-      anchor: ctx.trendAnchor,
-      locale: ctx.locale,
-      joyMetricVariant: ctx.joyMetricVariant,
-    ),
-    refreshTargets: totalSixMonthRefreshTargets,
-  ),
-  // 3. Distribution group — category-spend donut.
+  // 2. Distribution group — category-spend donut.
+  //    NOTE (46-01 deviation): the 6-month TotalSixMonth trend spec was removed
+  //    here because its data layer (expenseTrendProvider / GetExpenseTrendUseCase
+  //    / ExpenseTrendData) is deleted in this plan (D-E2). The round-5 B
+  //    within-month LineChart card + the registry re-order are added by wave-3
+  //    plan 46-07; this leaves the spec list otherwise byte-identical.
   AnalyticsCardSpec(
     sectionHeaderKey: 'analyticsGroupHeaderDistribution',
     build: (ctx) => CategoryDonutCard(

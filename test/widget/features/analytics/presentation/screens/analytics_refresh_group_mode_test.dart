@@ -33,7 +33,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
-import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
@@ -64,7 +63,6 @@ class _MockFamilyHappinessUseCase extends Mock
 const _bookId = 'book_001';
 final _windowStart = DateTime(2026, 5);
 final _windowEnd = DateTime(2026, 5, 31, 23, 59, 59);
-final _trendAnchor = DateTime(2026, 5);
 
 class _TestSelectedTimeWindow extends SelectedTimeWindow {
   _TestSelectedTimeWindow();
@@ -104,10 +102,6 @@ Widget _buildSubject({
         startDate: _windowStart,
         endDate: _windowEnd,
       ).overrideWith((_) async => _monthlyReport),
-      expenseTrendProvider(
-        bookId: _bookId,
-        anchor: _trendAnchor,
-      ).overrideWith((_) async => _expenseTrend),
       happinessReportProvider(
         bookId: _bookId,
         startDate: _windowStart,
@@ -335,27 +329,6 @@ const _monthlyReport = MonthlyReport(
     ),
   ],
   dailyExpenses: [],
-);
-
-const _expenseTrend = ExpenseTrendData(
-  months: [
-    MonthlyTrend(
-      year: 2026,
-      month: 3,
-      totalExpenses: 132000,
-      totalIncome: 300000,
-      dailyTotal: 100000,
-      joyTotal: 32000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 4,
-      totalExpenses: 142800,
-      totalIncome: 300000,
-      dailyTotal: 110000,
-      joyTotal: 32800,
-    ),
-  ],
 );
 
 final _largestExpense = LargestMonthlyExpense(

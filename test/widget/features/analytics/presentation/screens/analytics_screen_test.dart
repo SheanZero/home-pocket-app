@@ -6,7 +6,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
-import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
@@ -29,7 +28,6 @@ import 'package:home_pocket/features/analytics/presentation/widgets/category_spe
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/kpi_mini_hero_strip.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/largest_expense_story_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/monthly_spend_trend_bar_chart.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/time_window_chip.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -44,7 +42,6 @@ import '../../../../../helpers/test_localizations.dart';
 const _bookId = 'book_001';
 final _windowStart = DateTime(2026, 5);
 final _windowEnd = DateTime(2026, 5, 31, 23, 59, 59);
-final _trendAnchor = DateTime(2026, 5);
 
 class _TestSelectedTimeWindow extends SelectedTimeWindow {
   _TestSelectedTimeWindow();
@@ -79,10 +76,6 @@ Widget _buildSubject({
         startDate: _windowStart,
         endDate: _windowEnd,
       ).overrideWith((_) async => _monthlyReport),
-      expenseTrendProvider(
-        bookId: _bookId,
-        anchor: _trendAnchor,
-      ).overrideWith((_) async => _expenseTrend),
       happinessReportProvider(
         bookId: _bookId,
         startDate: _windowStart,
@@ -167,8 +160,11 @@ void main() {
 
         expect(find.byType(TimeWindowChip), findsOneWidget);
         expect(find.byType(KpiMiniHeroStrip), findsOneWidget);
-        expect(find.byType(AnalyticsScreenSectionHeader), findsNWidgets(3));
-        expect(find.byType(MonthlySpendTrendBarChart), findsOneWidget);
+        // 46-01: the 6-month TotalSixMonth trend spec + its
+        // 'analyticsGroupHeaderTime' section header were removed (D-E2), so 2
+        // section headers remain (Distribution, Stories). The within-month
+        // trend card + the registry re-order land in wave-3 46-07.
+        expect(find.byType(AnalyticsScreenSectionHeader), findsNWidgets(2));
         expect(find.byType(CategorySpendDonutChart), findsOneWidget);
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
         expect(find.byType(LargestExpenseStoryCard), findsOneWidget);
@@ -176,7 +172,7 @@ void main() {
       },
     );
 
-    testWidgets('per-card error isolation keeps six-month trend visible', (
+    testWidgets('per-card error isolation keeps the donut visible', (
       tester,
     ) async {
       await _pump(
@@ -184,7 +180,9 @@ void main() {
         _buildSubject(distributionError: StateError('distribution failed')),
       );
 
-      expect(find.byType(MonthlySpendTrendBarChart), findsOneWidget);
+      // The satisfaction-distribution card surfaces its error in isolation
+      // while sibling cards (e.g. the donut) stay rendered.
+      expect(find.byType(CategorySpendDonutChart), findsOneWidget);
       expect(find.byType(AnalyticsCardErrorState), findsOneWidget);
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
     });
@@ -313,59 +311,6 @@ const _monthlyReport = MonthlyReport(
     ),
   ],
   dailyExpenses: [],
-);
-
-const _expenseTrend = ExpenseTrendData(
-  months: [
-    MonthlyTrend(
-      year: 2025,
-      month: 11,
-      totalExpenses: 95000,
-      totalIncome: 280000,
-      dailyTotal: 65000,
-      joyTotal: 30000,
-    ),
-    MonthlyTrend(
-      year: 2025,
-      month: 12,
-      totalExpenses: 105000,
-      totalIncome: 280000,
-      dailyTotal: 75000,
-      joyTotal: 30000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 1,
-      totalExpenses: 110000,
-      totalIncome: 290000,
-      dailyTotal: 80000,
-      joyTotal: 30000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 2,
-      totalExpenses: 118000,
-      totalIncome: 290000,
-      dailyTotal: 88000,
-      joyTotal: 30000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 3,
-      totalExpenses: 132000,
-      totalIncome: 300000,
-      dailyTotal: 100000,
-      joyTotal: 32000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 4,
-      totalExpenses: 142800,
-      totalIncome: 300000,
-      dailyTotal: 110000,
-      joyTotal: 32800,
-    ),
-  ],
 );
 
 final _largestExpense = LargestMonthlyExpense(

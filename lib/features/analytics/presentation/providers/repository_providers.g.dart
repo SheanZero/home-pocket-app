@@ -160,58 +160,79 @@ final class GetBudgetProgressUseCaseProvider
 String _$getBudgetProgressUseCaseHash() =>
     r'dec07f59ecb73ca73f6ee2b53912485c78ed23e1';
 
-/// GetExpenseTrendUseCase provider.
+/// OVW-02 / D-E1: GetWithinMonthCumulativeUseCase provider.
+///
+/// Injects the transaction repository directly (NOT analyticsRepository): the
+/// within-month trend reuses `findByBookIds` over a 2-month window with a
+/// Dart-side per-day per-ledger cumulative transform. Replaces the deleted
+/// 6-month `getExpenseTrendUseCase` (D-E2 — the 6-month MonthlyTrend/BarChart
+/// stack is removed; round-5 B needs per-day cumulative, not per-month totals).
 
-@ProviderFor(getExpenseTrendUseCase)
-final getExpenseTrendUseCaseProvider = GetExpenseTrendUseCaseProvider._();
+@ProviderFor(getWithinMonthCumulativeUseCase)
+final getWithinMonthCumulativeUseCaseProvider =
+    GetWithinMonthCumulativeUseCaseProvider._();
 
-/// GetExpenseTrendUseCase provider.
+/// OVW-02 / D-E1: GetWithinMonthCumulativeUseCase provider.
+///
+/// Injects the transaction repository directly (NOT analyticsRepository): the
+/// within-month trend reuses `findByBookIds` over a 2-month window with a
+/// Dart-side per-day per-ledger cumulative transform. Replaces the deleted
+/// 6-month `getExpenseTrendUseCase` (D-E2 — the 6-month MonthlyTrend/BarChart
+/// stack is removed; round-5 B needs per-day cumulative, not per-month totals).
 
-final class GetExpenseTrendUseCaseProvider
+final class GetWithinMonthCumulativeUseCaseProvider
     extends
         $FunctionalProvider<
-          GetExpenseTrendUseCase,
-          GetExpenseTrendUseCase,
-          GetExpenseTrendUseCase
+          GetWithinMonthCumulativeUseCase,
+          GetWithinMonthCumulativeUseCase,
+          GetWithinMonthCumulativeUseCase
         >
-    with $Provider<GetExpenseTrendUseCase> {
-  /// GetExpenseTrendUseCase provider.
-  GetExpenseTrendUseCaseProvider._()
+    with $Provider<GetWithinMonthCumulativeUseCase> {
+  /// OVW-02 / D-E1: GetWithinMonthCumulativeUseCase provider.
+  ///
+  /// Injects the transaction repository directly (NOT analyticsRepository): the
+  /// within-month trend reuses `findByBookIds` over a 2-month window with a
+  /// Dart-side per-day per-ledger cumulative transform. Replaces the deleted
+  /// 6-month `getExpenseTrendUseCase` (D-E2 — the 6-month MonthlyTrend/BarChart
+  /// stack is removed; round-5 B needs per-day cumulative, not per-month totals).
+  GetWithinMonthCumulativeUseCaseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'getExpenseTrendUseCaseProvider',
+        name: r'getWithinMonthCumulativeUseCaseProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$getExpenseTrendUseCaseHash();
+  String debugGetCreateSourceHash() => _$getWithinMonthCumulativeUseCaseHash();
 
   @$internal
   @override
-  $ProviderElement<GetExpenseTrendUseCase> $createElement(
+  $ProviderElement<GetWithinMonthCumulativeUseCase> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  GetExpenseTrendUseCase create(Ref ref) {
-    return getExpenseTrendUseCase(ref);
+  GetWithinMonthCumulativeUseCase create(Ref ref) {
+    return getWithinMonthCumulativeUseCase(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GetExpenseTrendUseCase value) {
+  Override overrideWithValue(GetWithinMonthCumulativeUseCase value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<GetExpenseTrendUseCase>(value),
+      providerOverride: $SyncValueProvider<GetWithinMonthCumulativeUseCase>(
+        value,
+      ),
     );
   }
 }
 
-String _$getExpenseTrendUseCaseHash() =>
-    r'dfd62efcd364189bcdaa5d2b36b4dad57edb476d';
+String _$getWithinMonthCumulativeUseCaseHash() =>
+    r'f61e23cec92cc866d489113451a12798501af67d';
 
 /// DRILL-01 / D-01..D-06, D-11: GetCategoryDrillDownUseCase provider.
 ///

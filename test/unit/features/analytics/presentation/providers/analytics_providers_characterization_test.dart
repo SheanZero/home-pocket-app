@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/analytics/get_budget_progress_use_case.dart';
-import 'package:home_pocket/application/analytics/get_expense_trend_use_case.dart';
 import 'package:home_pocket/application/analytics/get_monthly_report_use_case.dart';
+import 'package:home_pocket/application/analytics/get_within_month_cumulative_use_case.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -14,19 +15,25 @@ class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
+
 void main() {
   late _MockAnalyticsRepository mockAnalyticsRepo;
   late _MockCategoryRepository mockCategoryRepo;
+  late _MockTransactionRepository mockTransactionRepo;
   late ProviderContainer container;
 
   setUp(() {
     mockAnalyticsRepo = _MockAnalyticsRepository();
     mockCategoryRepo = _MockCategoryRepository();
+    mockTransactionRepo = _MockTransactionRepository();
 
     container = ProviderContainer(
       overrides: [
         analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+        transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
       ],
     );
   });
@@ -48,10 +55,14 @@ void main() {
         expect(uc, isA<GetBudgetProgressUseCase>());
       });
 
-      test('getExpenseTrendUseCaseProvider constructs without error', () {
-        final uc = container.read(getExpenseTrendUseCaseProvider);
-        expect(uc, isA<GetExpenseTrendUseCase>());
-      });
+      test(
+        'getWithinMonthCumulativeUseCaseProvider constructs without error '
+        '(replaces deleted getExpenseTrendUseCaseProvider — D-E2)',
+        () {
+          final uc = container.read(getWithinMonthCumulativeUseCaseProvider);
+          expect(uc, isA<GetWithinMonthCumulativeUseCase>());
+        },
+      );
     },
   );
 }

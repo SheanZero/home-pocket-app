@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../application/analytics/get_best_joy_moment_use_case.dart';
 import '../../../../application/analytics/get_budget_progress_use_case.dart';
 import '../../../../application/analytics/get_category_drill_down_use_case.dart';
-import '../../../../application/analytics/get_expense_trend_use_case.dart';
 import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
 import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
@@ -13,6 +12,7 @@ import '../../../../application/analytics/get_monthly_report_use_case.dart';
 import '../../../../application/analytics/get_per_category_joy_breakdown_across_books_use_case.dart';
 import '../../../../application/analytics/get_per_category_joy_breakdown_use_case.dart';
 import '../../../../application/analytics/get_satisfaction_distribution_use_case.dart';
+import '../../../../application/analytics/get_within_month_cumulative_use_case.dart';
 import '../../../../application/analytics/get_daily_vs_joy_snapshot_across_books_use_case.dart';
 import '../../../../application/analytics/get_daily_vs_joy_snapshot_use_case.dart';
 import '../../../../application/analytics/repository_providers.dart'
@@ -53,11 +53,17 @@ GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
   return GetBudgetProgressUseCase();
 }
 
-/// GetExpenseTrendUseCase provider.
+/// OVW-02 / D-E1: GetWithinMonthCumulativeUseCase provider.
+///
+/// Injects the transaction repository directly (NOT analyticsRepository): the
+/// within-month trend reuses `findByBookIds` over a 2-month window with a
+/// Dart-side per-day per-ledger cumulative transform. Replaces the deleted
+/// 6-month `getExpenseTrendUseCase` (D-E2 — the 6-month MonthlyTrend/BarChart
+/// stack is removed; round-5 B needs per-day cumulative, not per-month totals).
 @riverpod
-GetExpenseTrendUseCase getExpenseTrendUseCase(Ref ref) {
-  return GetExpenseTrendUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+GetWithinMonthCumulativeUseCase getWithinMonthCumulativeUseCase(Ref ref) {
+  return GetWithinMonthCumulativeUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
   );
 }
 

@@ -13,7 +13,6 @@ import 'package:home_pocket/features/analytics/presentation/widgets/cards/catego
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/kpi_hero_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/largest_expense_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/satisfaction_histogram_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/total_six_month_card.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 
 /// Phase 45 Plan 05 — D-B3 / GUARD-01 structural-invariant test.
@@ -45,7 +44,6 @@ import 'package:home_pocket/features/home/presentation/providers/state_shadow_bo
 /// provider type (`ShadowBooksProvider`/`ShadowAggregateProvider`) appears here.
 const Set<String> _analyticsProviderTypeWhitelist = <String>{
   'MonthlyReportProvider',
-  'ExpenseTrendProvider',
   'SatisfactionDistributionProvider',
   'EarliestTransactionMonthProvider',
   'HappinessReportProvider',
@@ -101,12 +99,14 @@ void main() {
             'pass falsely (T-45-10).',
       );
       // The registry is a `final List` whose iteration order is its declaration
-      // order. Reproduce analytics_screen.dart:94–206 1:1 → 10 specs.
+      // order. 46-01 removed the TotalSixMonth trend spec (its data layer is
+      // deleted, D-E2) → 9 specs (was 10). The round-5 B card additions + the
+      // registry re-order land in wave-3 46-07.
       expect(
         analyticsCardRegistry.length,
-        10,
-        reason: 'D-B1: 10 specs in stable render order (8 always-visible + 2 '
-            'group-only).',
+        9,
+        reason: 'D-B1: 9 specs in stable render order (7 always-visible + 2 '
+            'group-only) after the 46-01 TotalSixMonth removal.',
       );
     });
 
@@ -176,14 +176,15 @@ void main() {
           );
         }
       }
-      // Group makes all 10 specs visible.
+      // Group makes all 9 specs visible (was 10 before the 46-01 TotalSixMonth
+      // removal).
       expect(
         analyticsCardRegistry.where((s) => s.isVisible(groupCtx)).length,
-        10,
+        9,
       );
       expect(
         analyticsCardRegistry.where((s) => s.isVisible(soloCtx)).length,
-        8,
+        7,
       );
     });
 
@@ -276,18 +277,10 @@ void main() {
         ]),
       );
 
-      // TotalSixMonth: keyed on trendAnchor (NOT start/end) — the regression
-      // RESEARCH flagged as the most drift-prone key.
-      expect(
-        totalSixMonthRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          expenseTrendProvider(
-            bookId: ctx.bookId,
-            anchor: ctx.trendAnchor,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
+      // (TotalSixMonth trend-anchor key assertion removed in 46-01 — the
+      // expenseTrend provider + TotalSixMonthCard are deleted with the 6-month
+      // stack, D-E2. The within-month trend card + its key assertion land in
+      // wave-3 46-07.)
 
       // CategoryDonut: monthlyReport (same key tuple as KPI — deduped by Set).
       expect(

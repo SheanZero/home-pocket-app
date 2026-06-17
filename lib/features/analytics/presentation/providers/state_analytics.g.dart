@@ -132,24 +132,71 @@ final class MonthlyReportFamily extends $Family
   String toString() => r'monthlyReportProvider';
 }
 
-/// 6-month expense trend.
+/// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
+///
+/// Drives round-5 B's spend-trend LineChart: per-ledger (total/daily/joy)
+/// running cumulative within the current month, plus a previous-month reference
+/// line for the spend side (total/daily). The joy side is current-month-only —
+/// there is no previous-month joy series (D-E1, ADR-012 zero joy cross-period).
+/// Replaces the deleted 6-month `expenseTrend` provider (D-E2).
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)), NOT raw
+/// instants — the use case derives the 2-month window from the month, so a
+/// microsecond-exact key would explode the family cache. The shell normalizes
+/// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
+/// here; this provider defends the contract by re-anchoring to month precision.
+///
+/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01).
 
-@ProviderFor(expenseTrend)
-final expenseTrendProvider = ExpenseTrendFamily._();
+@ProviderFor(withinMonthCumulativeTrend)
+final withinMonthCumulativeTrendProvider = WithinMonthCumulativeTrendFamily._();
 
-/// 6-month expense trend.
+/// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
+///
+/// Drives round-5 B's spend-trend LineChart: per-ledger (total/daily/joy)
+/// running cumulative within the current month, plus a previous-month reference
+/// line for the spend side (total/daily). The joy side is current-month-only —
+/// there is no previous-month joy series (D-E1, ADR-012 zero joy cross-period).
+/// Replaces the deleted 6-month `expenseTrend` provider (D-E2).
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)), NOT raw
+/// instants — the use case derives the 2-month window from the month, so a
+/// microsecond-exact key would explode the family cache. The shell normalizes
+/// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
+/// here; this provider defends the contract by re-anchoring to month precision.
+///
+/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01).
 
-final class ExpenseTrendProvider
+final class WithinMonthCumulativeTrendProvider
     extends
         $FunctionalProvider<
-          AsyncValue<ExpenseTrendData>,
-          ExpenseTrendData,
-          FutureOr<ExpenseTrendData>
+          AsyncValue<WithinMonthCumulativeTrend>,
+          WithinMonthCumulativeTrend,
+          FutureOr<WithinMonthCumulativeTrend>
         >
-    with $FutureModifier<ExpenseTrendData>, $FutureProvider<ExpenseTrendData> {
-  /// 6-month expense trend.
-  ExpenseTrendProvider._({
-    required ExpenseTrendFamily super.from,
+    with
+        $FutureModifier<WithinMonthCumulativeTrend>,
+        $FutureProvider<WithinMonthCumulativeTrend> {
+  /// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
+  ///
+  /// Drives round-5 B's spend-trend LineChart: per-ledger (total/daily/joy)
+  /// running cumulative within the current month, plus a previous-month reference
+  /// line for the spend side (total/daily). The joy side is current-month-only —
+  /// there is no previous-month joy series (D-E1, ADR-012 zero joy cross-period).
+  /// Replaces the deleted 6-month `expenseTrend` provider (D-E2).
+  ///
+  /// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)), NOT raw
+  /// instants — the use case derives the 2-month window from the month, so a
+  /// microsecond-exact key would explode the family cache. The shell normalizes
+  /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
+  /// here; this provider defends the contract by re-anchoring to month precision.
+  ///
+  /// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
+  /// invalidates ZERO `home/*` providers (GUARD-01).
+  WithinMonthCumulativeTrendProvider._({
+    required WithinMonthCumulativeTrendFamily super.from,
     required ({
       String bookId,
       DateTime anchor,
@@ -158,30 +205,30 @@ final class ExpenseTrendProvider
     super.argument,
   }) : super(
          retry: null,
-         name: r'expenseTrendProvider',
+         name: r'withinMonthCumulativeTrendProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$expenseTrendHash();
+  String debugGetCreateSourceHash() => _$withinMonthCumulativeTrendHash();
 
   @override
   String toString() {
-    return r'expenseTrendProvider'
+    return r'withinMonthCumulativeTrendProvider'
         ''
         '$argument';
   }
 
   @$internal
   @override
-  $FutureProviderElement<ExpenseTrendData> $createElement(
+  $FutureProviderElement<WithinMonthCumulativeTrend> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<ExpenseTrendData> create(Ref ref) {
+  FutureOr<WithinMonthCumulativeTrend> create(Ref ref) {
     final argument =
         this.argument
             as ({
@@ -189,7 +236,7 @@ final class ExpenseTrendProvider
               DateTime anchor,
               JoyMetricVariant joyMetricVariant,
             });
-    return expenseTrend(
+    return withinMonthCumulativeTrend(
       ref,
       bookId: argument.bookId,
       anchor: argument.anchor,
@@ -199,7 +246,8 @@ final class ExpenseTrendProvider
 
   @override
   bool operator ==(Object other) {
-    return other is ExpenseTrendProvider && other.argument == argument;
+    return other is WithinMonthCumulativeTrendProvider &&
+        other.argument == argument;
   }
 
   @override
@@ -208,32 +256,63 @@ final class ExpenseTrendProvider
   }
 }
 
-String _$expenseTrendHash() => r'0ff13a49235e35493e4f9c8ec5a2ffa8daeade0c';
+String _$withinMonthCumulativeTrendHash() =>
+    r'b68e6a3b6bf6837d1320771d4446fc00ff16532b';
 
-/// 6-month expense trend.
+/// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
+///
+/// Drives round-5 B's spend-trend LineChart: per-ledger (total/daily/joy)
+/// running cumulative within the current month, plus a previous-month reference
+/// line for the spend side (total/daily). The joy side is current-month-only —
+/// there is no previous-month joy series (D-E1, ADR-012 zero joy cross-period).
+/// Replaces the deleted 6-month `expenseTrend` provider (D-E2).
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)), NOT raw
+/// instants — the use case derives the 2-month window from the month, so a
+/// microsecond-exact key would explode the family cache. The shell normalizes
+/// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
+/// here; this provider defends the contract by re-anchoring to month precision.
+///
+/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01).
 
-final class ExpenseTrendFamily extends $Family
+final class WithinMonthCumulativeTrendFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<ExpenseTrendData>,
+          FutureOr<WithinMonthCumulativeTrend>,
           ({String bookId, DateTime anchor, JoyMetricVariant joyMetricVariant})
         > {
-  ExpenseTrendFamily._()
+  WithinMonthCumulativeTrendFamily._()
     : super(
         retry: null,
-        name: r'expenseTrendProvider',
+        name: r'withinMonthCumulativeTrendProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  /// 6-month expense trend.
+  /// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
+  ///
+  /// Drives round-5 B's spend-trend LineChart: per-ledger (total/daily/joy)
+  /// running cumulative within the current month, plus a previous-month reference
+  /// line for the spend side (total/daily). The joy side is current-month-only —
+  /// there is no previous-month joy series (D-E1, ADR-012 zero joy cross-period).
+  /// Replaces the deleted 6-month `expenseTrend` provider (D-E2).
+  ///
+  /// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)), NOT raw
+  /// instants — the use case derives the 2-month window from the month, so a
+  /// microsecond-exact key would explode the family cache. The shell normalizes
+  /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
+  /// here; this provider defends the contract by re-anchoring to month precision.
+  ///
+  /// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
+  /// invalidates ZERO `home/*` providers (GUARD-01).
 
-  ExpenseTrendProvider call({
+  WithinMonthCumulativeTrendProvider call({
     required String bookId,
     required DateTime anchor,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
-  }) => ExpenseTrendProvider._(
+  }) => WithinMonthCumulativeTrendProvider._(
     argument: (
       bookId: bookId,
       anchor: anchor,
@@ -243,7 +322,7 @@ final class ExpenseTrendFamily extends $Family
   );
 
   @override
-  String toString() => r'expenseTrendProvider';
+  String toString() => r'withinMonthCumulativeTrendProvider';
 }
 
 /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
@@ -259,8 +338,8 @@ final class ExpenseTrendFamily extends $Family
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
+/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
 /// home_screen_isolation_test.dart).
 
 @ProviderFor(categoryDrillDown)
@@ -279,8 +358,8 @@ final categoryDrillDownProvider = CategoryDrillDownFamily._();
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
+/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
 /// home_screen_isolation_test.dart).
 
 final class CategoryDrillDownProvider
@@ -306,8 +385,8 @@ final class CategoryDrillDownProvider
   /// the contract by re-normalizing the bounds via [DateBoundaries] before they
   /// reach the use case — never accept microsecond-exact instants into the key.
   ///
-  /// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
-  /// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+  /// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
+  /// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
   /// home_screen_isolation_test.dart).
   CategoryDrillDownProvider._({
     required CategoryDrillDownFamily super.from,
@@ -387,8 +466,8 @@ String _$categoryDrillDownHash() => r'780cecb1ce06f8c4efa63f96cf90d7c633d833a1';
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
+/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
 /// home_screen_isolation_test.dart).
 
 final class CategoryDrillDownFamily extends $Family
@@ -424,8 +503,8 @@ final class CategoryDrillDownFamily extends $Family
   /// the contract by re-normalizing the bounds via [DateBoundaries] before they
   /// reach the use case — never accept microsecond-exact instants into the key.
   ///
-  /// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
-  /// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+  /// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
+  /// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
   /// home_screen_isolation_test.dart).
 
   CategoryDrillDownProvider call({

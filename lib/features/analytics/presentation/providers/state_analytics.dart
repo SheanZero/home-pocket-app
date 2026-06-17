@@ -4,8 +4,8 @@ import '../../../../shared/utils/date_boundaries.dart';
 import '../../../accounting/domain/models/entry_source.dart';
 import '../../domain/models/analytics_aggregate.dart';
 import '../../domain/models/category_drill_down.dart';
-import '../../domain/models/expense_trend.dart';
 import '../../domain/models/monthly_report.dart';
+import '../../domain/models/within_month_cumulative_trend.dart';
 import 'repository_providers.dart';
 import 'state_joy_metric_variant.dart';
 
@@ -33,22 +33,40 @@ Future<MonthlyReport> monthlyReport(
   );
 }
 
-/// 6-month expense trend.
+/// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
+///
+/// Drives round-5 B's spend-trend LineChart: per-ledger (total/daily/joy)
+/// running cumulative within the current month, plus a previous-month reference
+/// line for the spend side (total/daily). The joy side is current-month-only —
+/// there is no previous-month joy series (D-E1, ADR-012 zero joy cross-period).
+/// Replaces the deleted 6-month `expenseTrend` provider (D-E2).
+///
+/// D-12: keyed on a MONTH-anchored [anchor] (DateTime(year, month)), NOT raw
+/// instants — the use case derives the 2-month window from the month, so a
+/// microsecond-exact key would explode the family cache. The shell normalizes
+/// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
+/// here; this provider defends the contract by re-anchoring to month precision.
+///
+/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01).
 @riverpod
-Future<ExpenseTrendData> expenseTrend(
+Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
   Ref ref, {
   required String bookId,
   required DateTime anchor,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
-  final useCase = ref.watch(getExpenseTrendUseCaseProvider);
+  final useCase = ref.watch(getWithinMonthCumulativeUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
       : null;
+  // D-12 defensive normalization: collapse to month precision so two callers
+  // with differing sub-day/day precision share one cache key.
+  final monthAnchor = DateTime(anchor.year, anchor.month);
   return useCase.execute(
-    bookId: bookId,
-    anchor: anchor,
+    bookIds: [bookId],
+    monthAnchor: monthAnchor,
     entrySourceFilter: entrySourceFilter,
   );
 }

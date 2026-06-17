@@ -9,7 +9,6 @@ import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
-import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
@@ -51,51 +50,6 @@ final _largestExpense = LargestMonthlyExpense(
   timestamp: DateTime.utc(2026, 5, 10),
 );
 
-const _expenseTrend = ExpenseTrendData(
-  months: [
-    MonthlyTrend(
-      year: 2026,
-      month: 1,
-      totalExpenses: 110000,
-      totalIncome: 290000,
-      dailyTotal: 80000,
-      joyTotal: 30000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 2,
-      totalExpenses: 118000,
-      totalIncome: 290000,
-      dailyTotal: 88000,
-      joyTotal: 30000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 3,
-      totalExpenses: 132000,
-      totalIncome: 300000,
-      dailyTotal: 100000,
-      joyTotal: 32000,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 4,
-      totalExpenses: 142800,
-      totalIncome: 300000,
-      dailyTotal: 110000,
-      joyTotal: 32800,
-    ),
-    MonthlyTrend(
-      year: 2026,
-      month: 5,
-      totalExpenses: 150000,
-      totalIncome: 300000,
-      dailyTotal: 115000,
-      joyTotal: 35000,
-    ),
-  ],
-);
-
 class _TestSelectedTimeWindow extends SelectedTimeWindow {
   _TestSelectedTimeWindow();
 
@@ -120,7 +74,6 @@ void main() {
   Widget buildSubject(TimeWindow window) {
     _TestSelectedTimeWindow.fixedWindow = window;
     final range = window.range;
-    final trendAnchor = DateTime(range.end.year, range.end.month);
 
     return createLocalizedWidget(
       const AnalyticsScreen(bookId: _bookId),
@@ -138,10 +91,6 @@ void main() {
           startDate: range.start,
           endDate: range.end,
         ).overrideWith((_) async => fixtureMonthlyReportRich()),
-        expenseTrendProvider(
-          bookId: _bookId,
-          anchor: trendAnchor,
-        ).overrideWith((_) async => _expenseTrend),
         happinessReportProvider(
           bookId: _bookId,
           startDate: range.start,
