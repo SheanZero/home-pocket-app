@@ -1,38 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 
-import '../../../../features/accounting/presentation/providers/repository_providers.dart'
-    as accounting_providers;
-import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/home/presentation/providers/state_shadow_books.dart';
-import '../../../../features/settings/presentation/providers/state_locale.dart'
-    as locale_providers;
 import '../../../../generated/app_localizations.dart';
-import '../../domain/models/time_window.dart';
+import '../analytics_card_registry.dart';
 import '../providers/state_analytics.dart';
-import '../providers/state_happiness.dart';
-import '../providers/state_joy_metric_variant.dart';
-import '../providers/state_ledger_snapshot.dart';
-import '../providers/state_time_window.dart';
-import '../widgets/analytics_card_error_state.dart';
 import '../widgets/analytics_screen_section_header.dart';
-import '../widgets/best_joy_story_strip.dart';
-import '../widgets/category_spend_donut_chart.dart';
-import '../widgets/family_insight_card.dart';
-import '../widgets/kpi_mini_hero_strip.dart';
-import '../widgets/largest_expense_story_card.dart';
-import '../widgets/monthly_spend_trend_bar_chart.dart';
-import '../widgets/per_category_breakdown_card.dart';
-import '../widgets/satisfaction_distribution_histogram.dart';
-import '../widgets/daily_vs_joy_card.dart';
+import '../widgets/cards/family_insight_data_card.dart';
 import '../widgets/joy_metric_variant_chip.dart';
 import '../widgets/time_window_chip.dart';
 
 /// Phase 11 Variant delta unified analytics dashboard.
 ///
-/// Structure: AppBar + TimeWindowChip, KPI mini-hero, then the Time,
-/// Distribution, and Stories themed groups. Each data card owns its own
-/// AsyncValue.when branch so one failing provider does not blank the screen.
+/// Phase 45 (D-A1 / REDES-01): a THIN SHELL. The body is built by mapping
+/// [analyticsCardRegistry] (the single source of render order AND the
+/// `_refresh` invalidation union — D-B1) into the [Column] children,
+/// interleaving the section headers + spacers 1:1 with the previous
+/// hand-written tree. The 7 inline `_*Card` widgets + the shared
+/// `_AnalyticsDataCard` now live under `widgets/cards/`. `_refresh` is derived
+/// from the registry (no hand-listed providers) so HomeHero isolation is
+/// guaranteed by construction (GUARD-01): the registry imports zero `home/*`
+/// providers.
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key, required this.bookId});
 
@@ -41,699 +30,147 @@ class AnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    final window = ref.watch(selectedTimeWindowProvider);
-    final range = window.range;
-    final startDate = range.start;
-    final endDate = range.end;
-    final trendAnchor = DateTime(endDate.year, endDate.month);
-    final locale =
-        ref.watch(locale_providers.currentLocaleProvider).value ??
-        Localizations.localeOf(context);
 
-    final bookAsync = ref.watch(
-      accounting_providers.bookByIdProvider(bookId: bookId),
-    );
-    final currencyCode = bookAsync.value?.currency ?? 'JPY';
+    // ONE canonical context drives BOTH the card map and `_refresh` so build
+    // and invalidation keys cannot drift (D-A1 / D-B2).
+    final ctx = buildAnalyticsCardContext(context, ref, bookId: bookId);
+
+    // AppBar-only read: the TimeWindowChip surfaces the earliest data month.
     final earliestMonthAsync = ref.watch(
       earliestTransactionMonthProvider(bookId: bookId),
     );
-    final joyMetricVariant = ref.watch(selectedJoyMetricVariantProvider);
 
-    final isGroupMode = ref.watch(isGroupModeProvider);
-    final shadowBooksAsync = isGroupMode
+    // Display-only home-feature read (NOT an invalidation target — never in the
+    // `_refresh` union, D-B3). Resolved here and injected into the one
+    // FamilyInsightDataCard the registry leaves with a null placeholder.
+    final shadowBooksAsync = ctx.isGroupMode
         ? ref
               .watch(shadowBooksProvider)
-              .whenData<List<ShadowBookInfo>?>((value) => value)
-        : const AsyncData<List<ShadowBookInfo>?>(null);
+              .whenData<List<Object>?>((value) => value)
+        : const AsyncValue<List<Object>?>.data(null);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.analyticsTitle),
         actions: [
           TimeWindowChip(
-            locale: locale,
+            locale: ctx.locale,
             earliestData: earliestMonthAsync.value,
           ),
-          JoyMetricVariantChip(locale: locale),
+          JoyMetricVariantChip(locale: ctx.locale),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async => _refresh(
-          ref,
-          startDate: startDate,
-          endDate: endDate,
-          trendAnchor: trendAnchor,
-          currencyCode: currencyCode,
-          isGroupMode: isGroupMode,
-        ),
+        onRefresh: () async => _refresh(ref, ctx),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _KpiHero(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                currencyCode: currencyCode,
-                locale: locale,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              const SizedBox(height: 32),
-              AnalyticsScreenSectionHeader(
-                label: l10n.analyticsGroupHeaderTime,
-              ),
-              const SizedBox(height: 8),
-              _TotalSixMonthCard(
-                bookId: bookId,
-                anchor: trendAnchor,
-                locale: locale,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              const SizedBox(height: 32),
-              AnalyticsScreenSectionHeader(
-                label: l10n.analyticsGroupHeaderDistribution,
-              ),
-              const SizedBox(height: 8),
-              _CategoryDonutCard(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              const SizedBox(height: 8),
-              // D-13: STATSUI-V2-01 Soul-vs-Survival card between donut and
-              // satisfaction histogram in the Distribution section.
-              DailyVsJoyCard(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                currencyCode: currencyCode,
-                locale: locale,
-                isGroupMode: isGroupMode,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              const SizedBox(height: 8),
-              _SatisfactionHistogramOrFallback(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                currencyCode: currencyCode,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              const SizedBox(height: 8),
-              // D-13: HAPPY-V2-01 per-category breakdown card after the
-              // satisfaction histogram. Solo mode renders one card; group mode
-              // renders You first.
-              PerCategoryBreakdownCard(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                locale: locale,
-                scope: isGroupMode
-                    ? PerCategoryScope.you
-                    : PerCategoryScope.solo,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              if (isGroupMode) ...[
-                const SizedBox(height: 8),
-                // D-17: group-mode adds a second stacked PerCategoryBreakdownCard
-                // for the family-aggregate scope. PerCategoryScope.family reads
-                // perCategoryJoyBreakdownFamilyProvider (no bookId arg).
-                PerCategoryBreakdownCard(
-                  bookId: bookId,
-                  startDate: startDate,
-                  endDate: endDate,
-                  locale: locale,
-                  scope: PerCategoryScope.family,
-                  joyMetricVariant: joyMetricVariant,
-                ),
-              ],
-              const SizedBox(height: 32),
-              AnalyticsScreenSectionHeader(
-                label: l10n.analyticsGroupHeaderStories,
-              ),
-              const SizedBox(height: 8),
-              _LargestExpenseCard(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                currencyCode: currencyCode,
-                locale: locale,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              const SizedBox(height: 8),
-              _BestJoyCard(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                currencyCode: currencyCode,
-                locale: locale,
-                joyMetricVariant: joyMetricVariant,
-              ),
-              if (isGroupMode) ...[
-                const SizedBox(height: 8),
-                _FamilyCard(
-                  startDate: startDate,
-                  endDate: endDate,
-                  isGroupMode: isGroupMode,
-                  shadowBooksAsync: shadowBooksAsync,
-                  locale: locale,
-                  joyMetricVariant: joyMetricVariant,
-                ),
-              ],
-              const SizedBox(height: 64),
-            ],
+            children: _buildCardChildren(l10n, ctx, shadowBooksAsync),
           ),
         ),
       ),
     );
   }
 
-  void _refresh(
-    WidgetRef ref, {
-    required DateTime startDate,
-    required DateTime endDate,
-    required DateTime trendAnchor,
-    required String currencyCode,
-    required bool isGroupMode,
-  }) {
-    // D-12: _refresh MUST NOT invalidate any home/* provider (verified by widget test home_screen_isolation_test.dart in Plan 06).
-    // D-18 (Phase 17): fold current joyMetricVariant into invalidations so the
-    // variant-aware family entries are refreshed. Riverpod 3 auto-invalidates
-    // on key-tuple change for toggle changes themselves; this _refresh only
-    // runs on pull-to-refresh.
-    final variant = ref.read(selectedJoyMetricVariantProvider);
-    ref.invalidate(
-      monthlyReportProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: variant,
-      ),
-    );
-    ref.invalidate(
-      expenseTrendProvider(
-        bookId: bookId,
-        anchor: trendAnchor,
-        joyMetricVariant: variant,
-      ),
-    );
-    ref.invalidate(earliestTransactionMonthProvider(bookId: bookId));
-    ref.invalidate(
-      happinessReportProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        currencyCode: currencyCode,
-        joyMetricVariant: variant,
-      ),
-    );
-    ref.invalidate(
-      satisfactionDistributionProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: variant,
-      ),
-    );
-    ref.invalidate(
-      bestJoyMomentProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: variant,
-      ),
-    );
-    ref.invalidate(
-      largestMonthlyExpenseProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: variant,
-      ),
-    );
-    // Phase 16 — HAPPY-V2-01 + STATSUI-V2-01. Same (bookId, startDate, endDate)
-    // keys as the build context so HomeHero's month-anchored provider instances
-    // remain untouched (D-12).
-    ref.invalidate(
-      perCategoryJoyBreakdownProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: variant,
-      ),
-    );
-    ref.invalidate(
-      dailyVsJoySnapshotProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: variant,
-      ),
-    );
-    if (isGroupMode) {
-      ref.invalidate(
-        familyHappinessProvider(
-          startDate: startDate,
-          endDate: endDate,
-          joyMetricVariant: variant,
-        ),
-      );
-      ref.invalidate(shadowBooksProvider);
-      // Phase 16 — D-17 / D-18 family-aggregate variants. Drop bookId because
-      // these providers derive ids from shadowBooksProvider.
-      ref.invalidate(
-        perCategoryJoyBreakdownFamilyProvider(
-          startDate: startDate,
-          endDate: endDate,
-          joyMetricVariant: variant,
-        ),
-      );
-      ref.invalidate(
-        dailyVsJoySnapshotFamilyProvider(
-          startDate: startDate,
-          endDate: endDate,
-          joyMetricVariant: variant,
-        ),
-      );
-    }
-  }
-}
+  /// Maps [analyticsCardRegistry] into the [Column] children 1:1 with the
+  /// previous hand-written tree (D-A1): for each visible spec, a
+  /// [sectionHeaderKey] opens a section with `SizedBox(32)` + section header +
+  /// `SizedBox(8)`; otherwise an inter-card `SizedBox(8)` precedes it (the very
+  /// first card — the KPI hero — has no leading spacer). A trailing
+  /// `SizedBox(64)` closes the list.
+  List<Widget> _buildCardChildren(
+    S l10n,
+    AnalyticsCardContext ctx,
+    AsyncValue<List<Object>?> shadowBooksAsync,
+  ) {
+    final children = <Widget>[];
+    var isFirst = true;
 
-class _KpiHero extends ConsumerWidget {
-  const _KpiHero({
-    required this.bookId,
-    required this.startDate,
-    required this.endDate,
-    required this.currencyCode,
-    required this.locale,
-    required this.joyMetricVariant,
-  });
+    for (final spec in analyticsCardRegistry) {
+      if (!spec.isVisible(ctx)) continue;
 
-  final String bookId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String currencyCode;
-  final Locale locale;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final monthlyAsync = ref.watch(
-      monthlyReportProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    final happinessAsync = ref.watch(
-      happinessReportProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        currencyCode: currencyCode,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-
-    return monthlyAsync.when(
-      data: (monthly) => happinessAsync.when(
-        data: (happiness) => SizedBox(
-          height: 120,
-          child: KpiMiniHeroStrip(
-            monthlyReport: monthly,
-            happinessReport: happiness,
-            currencyCode: currencyCode,
-            locale: locale,
-          ),
-        ),
-        loading: () => const SizedBox(height: 120),
-        error: (_, _) => AnalyticsCardErrorState(
-          onRetry: () => ref.invalidate(
-            happinessReportProvider(
-              bookId: bookId,
-              startDate: startDate,
-              endDate: endDate,
-              currencyCode: currencyCode,
-              joyMetricVariant: joyMetricVariant,
-            ),
-          ),
-        ),
-      ),
-      loading: () => const SizedBox(height: 120),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          monthlyReportProvider(
-            bookId: bookId,
-            startDate: startDate,
-            endDate: endDate,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TotalSixMonthCard extends ConsumerWidget {
-  const _TotalSixMonthCard({
-    required this.bookId,
-    required this.anchor,
-    required this.locale,
-    required this.joyMetricVariant,
-  });
-
-  final String bookId;
-  final DateTime anchor;
-  final Locale locale;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final trendAsync = ref.watch(
-      expenseTrendProvider(
-        bookId: bookId,
-        anchor: anchor,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    return trendAsync.when(
-      data: (trend) => _AnalyticsDataCard(
-        title: S.of(context).analyticsCardTitleTotalSixMonth,
-        caption: S.of(context).analyticsCardCaptionTotalSixMonth,
-        child: MonthlySpendTrendBarChart(
-          trendData: trend,
-          selectedYear: anchor.year,
-          selectedMonth: anchor.month,
-          locale: locale,
-        ),
-      ),
-      loading: () => const SizedBox(height: 260),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          expenseTrendProvider(
-            bookId: bookId,
-            anchor: anchor,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryDonutCard extends ConsumerWidget {
-  const _CategoryDonutCard({
-    required this.bookId,
-    required this.startDate,
-    required this.endDate,
-    required this.joyMetricVariant,
-  });
-
-  final String bookId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final monthlyAsync = ref.watch(
-      monthlyReportProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    return monthlyAsync.when(
-      data: (monthly) => _AnalyticsDataCard(
-        title: S.of(context).analyticsCardTitleCategoryDonut,
-        caption: S.of(context).analyticsCardCaptionCategoryDonut,
-        child: CategorySpendDonutChart(breakdowns: monthly.categoryBreakdowns),
-      ),
-      loading: () => const SizedBox(height: 280),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          monthlyReportProvider(
-            bookId: bookId,
-            startDate: startDate,
-            endDate: endDate,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SatisfactionHistogramOrFallback extends ConsumerWidget {
-  const _SatisfactionHistogramOrFallback({
-    required this.bookId,
-    required this.startDate,
-    required this.endDate,
-    required this.currencyCode,
-    required this.joyMetricVariant,
-  });
-
-  final String bookId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String currencyCode;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final happinessAsync = ref.watch(
-      happinessReportProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        currencyCode: currencyCode,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    final distributionAsync = ref.watch(
-      satisfactionDistributionProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-
-    return happinessAsync.when(
-      data: (report) {
-        if (report.totalJoyTx < 5) {
-          return const SizedBox.shrink();
-        }
-        return distributionAsync.when(
-          data: (buckets) => _AnalyticsDataCard(
-            title: S.of(context).analyticsCardTitleSatisfactionHistogram,
-            caption: S.of(context).analyticsCardCaptionHistogram,
-            child: SatisfactionDistributionHistogram(buckets: buckets),
-          ),
-          loading: () => const SizedBox(height: 260),
-          error: (_, _) => AnalyticsCardErrorState(
-            onRetry: () => ref.invalidate(
-              satisfactionDistributionProvider(
-                bookId: bookId,
-                startDate: startDate,
-                endDate: endDate,
-                joyMetricVariant: joyMetricVariant,
-              ),
-            ),
+      if (spec.sectionHeaderKey != null) {
+        // A new themed section: 32px gap, header, 8px gap. The first card never
+        // gets a leading section gap before its header in the legacy tree — but
+        // the first card (KPI hero) has no sectionHeaderKey, so the first
+        // header always follows the KPI hero (preceded by SizedBox(32)).
+        children.add(const SizedBox(height: 32));
+        children.add(
+          AnalyticsScreenSectionHeader(
+            label: _sectionLabel(l10n, spec.sectionHeaderKey!),
           ),
         );
-      },
-      loading: () => const SizedBox(height: 260),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          happinessReportProvider(
-            bookId: bookId,
-            startDate: startDate,
-            endDate: endDate,
-            currencyCode: currencyCode,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
+        children.add(const SizedBox(height: 8));
+      } else if (!isFirst) {
+        // An inter-card gap (the legacy tree uses 8px between sibling cards).
+        children.add(const SizedBox(height: 8));
+      }
+
+      children.add(_buildCard(spec, ctx, shadowBooksAsync));
+      isFirst = false;
+    }
+
+    children.add(const SizedBox(height: 64));
+    return children;
   }
-}
 
-class _LargestExpenseCard extends ConsumerWidget {
-  const _LargestExpenseCard({
-    required this.bookId,
-    required this.startDate,
-    required this.endDate,
-    required this.currencyCode,
-    required this.locale,
-    required this.joyMetricVariant,
-  });
-
-  final String bookId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String currencyCode;
-  final Locale locale;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final largestAsync = ref.watch(
-      largestMonthlyExpenseProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    return largestAsync.when(
-      data: (expense) => LargestExpenseStoryCard(
-        expense: expense,
-        currencyCode: currencyCode,
-        locale: locale,
-      ),
-      loading: () => const SizedBox(height: 110),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          largestMonthlyExpenseProvider(
-            bookId: bookId,
-            startDate: startDate,
-            endDate: endDate,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
+  /// Builds a card from its spec. The FamilyInsightDataCard's display-only
+  /// `shadowBooksAsync` is a shell-injected prop (the registry passes a null
+  /// placeholder so it imports zero `home/*` providers — D-B3); the shell
+  /// rebuilds that one card with the real shell-resolved value.
+  Widget _buildCard(
+    AnalyticsCardSpec spec,
+    AnalyticsCardContext ctx,
+    AsyncValue<List<Object>?> shadowBooksAsync,
+  ) {
+    final built = spec.build(ctx);
+    if (built is FamilyInsightDataCard) {
+      return FamilyInsightDataCard(
+        startDate: ctx.startDate,
+        endDate: ctx.endDate,
+        isGroupMode: ctx.isGroupMode,
+        shadowBooksAsync: shadowBooksAsync,
+        locale: ctx.locale,
+        joyMetricVariant: ctx.joyMetricVariant,
+      );
+    }
+    return built;
   }
-}
 
-class _BestJoyCard extends ConsumerWidget {
-  const _BestJoyCard({
-    required this.bookId,
-    required this.startDate,
-    required this.endDate,
-    required this.currencyCode,
-    required this.locale,
-    required this.joyMetricVariant,
-  });
-
-  final String bookId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String currencyCode;
-  final Locale locale;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final joyAsync = ref.watch(
-      bestJoyMomentProvider(
-        bookId: bookId,
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    return joyAsync.when(
-      data: (joy) => BestJoyStoryStrip(
-        bestJoy: joy,
-        currencyCode: currencyCode,
-        locale: locale,
-      ),
-      loading: () => const SizedBox(height: 120),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          bestJoyMomentProvider(
-            bookId: bookId,
-            startDate: startDate,
-            endDate: endDate,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
+  String _sectionLabel(S l10n, String key) {
+    switch (key) {
+      case 'analyticsGroupHeaderTime':
+        return l10n.analyticsGroupHeaderTime;
+      case 'analyticsGroupHeaderDistribution':
+        return l10n.analyticsGroupHeaderDistribution;
+      case 'analyticsGroupHeaderStories':
+        return l10n.analyticsGroupHeaderStories;
+      default:
+        return key;
+    }
   }
-}
 
-class _FamilyCard extends ConsumerWidget {
-  const _FamilyCard({
-    required this.startDate,
-    required this.endDate,
-    required this.isGroupMode,
-    required this.shadowBooksAsync,
-    required this.locale,
-    required this.joyMetricVariant,
-  });
-
-  final DateTime startDate;
-  final DateTime endDate;
-  final bool isGroupMode;
-  final AsyncValue<List<ShadowBookInfo>?> shadowBooksAsync;
-  final Locale locale;
-  final JoyMetricVariant joyMetricVariant;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final familyAsync = ref.watch(
-      familyHappinessProvider(
-        startDate: startDate,
-        endDate: endDate,
-        joyMetricVariant: joyMetricVariant,
-      ),
-    );
-    return familyAsync.when(
-      data: (family) => FamilyInsightCard(
-        family: family,
-        isGroupMode: isGroupMode,
-        shadowBooks: shadowBooksAsync.value,
-        locale: locale,
-      ),
-      loading: () => const SizedBox(height: 110),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          familyHappinessProvider(
-            startDate: startDate,
-            endDate: endDate,
-            joyMetricVariant: joyMetricVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AnalyticsDataCard extends StatelessWidget {
-  const _AnalyticsDataCard({
-    required this.title,
-    required this.caption,
-    required this.child,
-  });
-
-  final String title;
-  final String caption;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(caption, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
-      ),
-    );
+  /// Pull-to-refresh invalidation, derived ENTIRELY from the registry + the one
+  /// shell-level target (D-B2/D-B4). The union is registry-derived and
+  /// structurally analytics-only — it can NEVER contain a `home/*` provider
+  /// because the registry imports none (D-B3; verified by the Plan-05 union
+  /// test + home_screen_isolation_test). No provider is hand-listed here.
+  ///
+  /// `where(isVisible)` filters BEFORE `expand(refreshTargets)` so solo mode
+  /// never invalidates family providers (D-B4). `.toSet()` dedupes the
+  /// monthlyReport/happinessReport instances shared across cards.
+  void _refresh(WidgetRef ref, AnalyticsCardContext ctx) {
+    final targets = analyticsCardRegistry
+        .where((spec) => spec.isVisible(ctx))
+        .expand((spec) => spec.refreshTargets(ctx))
+        .toSet();
+    for (final ProviderBase<Object?> p in targets) {
+      ref.invalidate(p);
+    }
+    for (final ProviderBase<Object?> p in shellRefreshTargets(ctx)) {
+      ref.invalidate(p);
+    }
   }
 }
