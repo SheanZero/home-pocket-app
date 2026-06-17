@@ -31,7 +31,7 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 
 ### Spending Trend (支出趋势)
 
-- [ ] **TREND-01**: Spending trend over time is presented (reusing `GetExpenseTrendUseCase`, 6-month rolling), as neutral rolling context only — no "more/less than last month" judgment framing (ADR-012 #4)
+- [x] **TREND-01**: Spending trend over time is presented (reusing `GetExpenseTrendUseCase`, 6-month rolling), as neutral rolling context only — no "more/less than last month" judgment framing (ADR-012 #4)
 
 ### Category Drill-down (分类下钻)
 
@@ -110,7 +110,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GATE-04 | Phase 43 | Complete |
 | OVW-01 | Phase 44 | Complete |
 | OVW-02 | Phase 46 | Pending |
-| TREND-01 | Phase 44 | Pending |
+| TREND-01 | Phase 44 | Complete |
 | DRILL-01 | Phase 44 | Complete |
 | JOY-01 | Phase 46 | Pending |
 | JOY-02 | Phase 46 | Pending |

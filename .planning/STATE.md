@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: "Completed 44-02-PLAN.md (TREND-01) — MonthlyTrend +dailyTotal/+joyTotal + GetExpenseTrendUseCase per-ledger fill, zero-default for zero-spend ledgers, no joy delta, schema v21. Next: 44-03 (DRILL-01, Wave 2)."
-last_updated: "2026-06-16T14:30:05.502Z"
-last_activity: 2026-06-16 -- Phase 44 Plan 02 executed (TREND-01)
+stopped_at: "Completed Phase 44 (data-use-case-additions-reuse-first) — 3/3 plans verified (OVW-01/TREND-01/DRILL-01), schema v21, no migration. Code-review BLOCKER CR-01 (drill income/transfer leak vs expense-only donut) fixed; 2 pre-existing main failures (COLOR-01 nav literals, voice golden) + 1 date-rollover flake (Phase-41 exchange-rate D-03 TZ guard) also fixed. Suite 2914 green. Next: Phase 45 (presentation shell rebuild)."
+last_updated: "2026-06-17T00:42:46.510Z"
+last_activity: 2026-06-17
 progress:
   total_phases: 5
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 44 — data-use-case-additions-reuse-first
+**Current focus:** Phase 45 — 展示外壳重建 (presentation shell rebuild)
 
 ## Current Position
 
-Phase: 44 (data-use-case-additions-reuse-first) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute (Plan 03 — DRILL-01; Wave 2, depends on 44-01)
-Last activity: 2026-06-16 -- Phase 44 Plan 02 executed (TREND-01)
+Phase: 45
+Plan: Not started
+Status: Ready to discuss/plan (Phase 45 — presentation shell rebuild; Phase 44 complete & verified)
+Last activity: 2026-06-17
 
 ### Quick Tasks Completed
 
