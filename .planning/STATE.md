@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 45-06-PLAN.md
-last_updated: "2026-06-17T06:12:47.311Z"
-last_activity: 2026-06-17 -- Phase 45 execution started
+stopped_at: Completed 45-04-PLAN.md
+last_updated: "2026-06-17T06:18:39.185Z"
+last_activity: 2026-06-17
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
   percent: 40
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 45 (presentation-shell-rebuild) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
-Last activity: 2026-06-17 -- Phase 45 execution started
+Last activity: 2026-06-17
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T06:11:57.736Z
-Stopped at: Completed 45-06-PLAN.md
+Last session: 2026-06-17T06:18:26.830Z
+Stopped at: Completed 45-04-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -180,6 +180,7 @@ Resume file: None
 | Phase 45 P02 | 14min | 2 tasks | 3 files |
 | Phase 45 P06 | 5 min | 1 tasks | 1 files |
 | Phase 45 P03 | 3min | 2 tasks | 1 files |
+| Phase 45 P04 | 7min | 2 tasks | 1 files |
 
 ## Decisions
 
@@ -209,6 +210,7 @@ Resume file: None
 - [Phase 45]: 45-03: analyticsCardRegistry is a spec-list (List<AnalyticsCardSpec>) — single source for render order (declaration==render, D-B1) AND _refresh union; cards stay dumb ConsumerWidgets
 - [Phase 45]: 45-03: dailyVsJoyRefreshTargets is group-aware (family snapshot only behind if(ctx.isGroupMode)) though the spec is always-visible — preserves today's _refresh:314 group-mode invalidation (D-A1); distinct from the family PerCategory provider
 - [Phase 45]: 45-03: FamilyInsightDataCard shadowBooks is a Plan-04 shell-injected display prop (null placeholder in registry build) — registry imports zero home/* providers (D-B3 file-wide gate)
+- [Phase ?]: [45-04]: analytics_screen rewritten to a 176-LOC thin shell — build maps analyticsCardRegistry.where(isVisible) into a byte-faithful Column, _refresh derives the union from registry.expand(refreshTargets).toSet()+shellRefreshTargets (no hand-listed providers, no home/* invalidate); FamilyInsightDataCard shadowBooks injected via 'built is FamilyInsightDataCard' (reorder-safe); 7 inline _*Card classes deleted; ctor preserved
 
 ## Operator Next Steps
 

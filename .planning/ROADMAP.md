@@ -221,7 +221,7 @@
 
 **Wave 3** *(parallel — both blocked on 45-03, no file overlap)*
 
-- [ ] 45-04-PLAN.md — 瘦身 `analytics_screen.dart`：删 7 张内联卡 + `_AnalyticsDataCard`，build 映射注册表（1:1 树）、`_refresh()` 由注册表派生（D-A1/D-B1/D-B3）
+- [x] 45-04-PLAN.md — 瘦身 `analytics_screen.dart`：删 7 张内联卡 + `_AnalyticsDataCard`，build 映射注册表（1:1 树）、`_refresh()` 由注册表派生（D-A1/D-B1/D-B3）
 - [ ] 45-05-PLAN.md — D-B3 注册表并集单测（⊆ analytics、0 个 `home/*`）+ 渲染顺序/可见性 + `dailyVsJoySnapshotFamily` group-presence + 每卡结构/键单源（Nyquist Wave-0：注册表一就绪即验，与 04 并行）（GUARD-01）
 
 **Wave 4** *(blocked on 45-04 + 45-05)*
