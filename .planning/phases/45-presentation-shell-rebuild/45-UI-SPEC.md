@@ -1,10 +1,11 @@
 ---
 phase: 45
 slug: presentation-shell-rebuild
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-17
+reviewed_at: 2026-06-17
 ---
 
 # Phase 45 — UI Design Contract
@@ -157,4 +158,4 @@ Accent reserved for: active `TimeWindowChip` / `JoyMetricVariantChip` selection 
 - [ ] Dimension 5 Spacing: PASS — current spacers/padding (incl. 12px / 14px exceptions) preserved verbatim
 - [ ] Dimension 6 Registry Safety: PASS — N/A (Flutter; no external UI registry)
 
-**Approval:** pending
+**Approval:** approved 2026-06-17
