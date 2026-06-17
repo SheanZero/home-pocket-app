@@ -1522,6 +1522,18 @@ class SJa extends S {
       'Donut/PieChart · top-N + その他';
 
   @override
+  String get analyticsCardTitleWithinMonthTrend => '支出の推移';
+
+  @override
+  String get analyticsCardCaptionWithinMonthTrend => '今月の日ごとの累計支出';
+
+  @override
+  String get analyticsTrendSeriesThisMonth => '今月';
+
+  @override
+  String get analyticsTrendSeriesLastMonth => '先月';
+
+  @override
   String get analyticsCategoryDonutOther => 'その他';
 
   @override

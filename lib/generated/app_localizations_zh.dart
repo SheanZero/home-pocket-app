@@ -1515,6 +1515,18 @@ class SZh extends S {
   String get analyticsCardCaptionCategoryDonut => 'Donut/PieChart · top-N + 其他';
 
   @override
+  String get analyticsCardTitleWithinMonthTrend => '支出趋势';
+
+  @override
+  String get analyticsCardCaptionWithinMonthTrend => '本月按天累计支出';
+
+  @override
+  String get analyticsTrendSeriesThisMonth => '本月';
+
+  @override
+  String get analyticsTrendSeriesLastMonth => '上月';
+
+  @override
   String get analyticsCategoryDonutOther => '其他';
 
   @override

@@ -1959,6 +1959,22 @@
   "analyticsCardCaptionTotalSixMonth": "BarChart · 当月高亮",
   "analyticsCardTitleCategoryDonut": "总 · 类别支出分布",
   "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + 其他",
+  "analyticsCardTitleWithinMonthTrend": "支出趋势",
+  "@analyticsCardTitleWithinMonthTrend": {
+    "description": "Within-month per-day cumulative spend trend card title (Phase 46 round-5 B)"
+  },
+  "analyticsCardCaptionWithinMonthTrend": "本月按天累计支出",
+  "@analyticsCardCaptionWithinMonthTrend": {
+    "description": "Within-month spend trend card caption (Phase 46 round-5 B)"
+  },
+  "analyticsTrendSeriesThisMonth": "本月",
+  "@analyticsTrendSeriesThisMonth": {
+    "description": "Within-month trend solid-line series label (current month)"
+  },
+  "analyticsTrendSeriesLastMonth": "上月",
+  "@analyticsTrendSeriesLastMonth": {
+    "description": "Within-month trend dashed reference-line series label (spend side only; never the joy tab)"
+  },
   "analyticsCategoryDonutOther": "其他",
   "analyticsDonutCenterLabel": "本月支出",
   "@analyticsDonutCenterLabel": {

@@ -1547,6 +1547,19 @@ class SEn extends S {
       'Donut/PieChart · top-N + Other';
 
   @override
+  String get analyticsCardTitleWithinMonthTrend => 'Spending trend';
+
+  @override
+  String get analyticsCardCaptionWithinMonthTrend =>
+      'Cumulative spend by day this month';
+
+  @override
+  String get analyticsTrendSeriesThisMonth => 'This month';
+
+  @override
+  String get analyticsTrendSeriesLastMonth => 'Last month';
+
+  @override
   String get analyticsCategoryDonutOther => 'Other';
 
   @override

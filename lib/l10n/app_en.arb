@@ -1959,6 +1959,22 @@
   "analyticsCardCaptionTotalSixMonth": "BarChart · current month highlighted",
   "analyticsCardTitleCategoryDonut": "Total · Category breakdown",
   "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + Other",
+  "analyticsCardTitleWithinMonthTrend": "Spending trend",
+  "@analyticsCardTitleWithinMonthTrend": {
+    "description": "Within-month per-day cumulative spend trend card title (Phase 46 round-5 B)"
+  },
+  "analyticsCardCaptionWithinMonthTrend": "Cumulative spend by day this month",
+  "@analyticsCardCaptionWithinMonthTrend": {
+    "description": "Within-month spend trend card caption (Phase 46 round-5 B)"
+  },
+  "analyticsTrendSeriesThisMonth": "This month",
+  "@analyticsTrendSeriesThisMonth": {
+    "description": "Within-month trend solid-line series label (current month)"
+  },
+  "analyticsTrendSeriesLastMonth": "Last month",
+  "@analyticsTrendSeriesLastMonth": {
+    "description": "Within-month trend dashed reference-line series label (spend side only; never the joy tab)"
+  },
   "analyticsCategoryDonutOther": "Other",
   "analyticsDonutCenterLabel": "This month",
   "@analyticsDonutCenterLabel": {

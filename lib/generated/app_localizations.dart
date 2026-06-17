@@ -2897,6 +2897,30 @@ abstract class S {
   /// **'Donut/PieChart · top-N + Other'**
   String get analyticsCardCaptionCategoryDonut;
 
+  /// Within-month per-day cumulative spend trend card title (Phase 46 round-5 B)
+  ///
+  /// In en, this message translates to:
+  /// **'Spending trend'**
+  String get analyticsCardTitleWithinMonthTrend;
+
+  /// Within-month spend trend card caption (Phase 46 round-5 B)
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative spend by day this month'**
+  String get analyticsCardCaptionWithinMonthTrend;
+
+  /// Within-month trend solid-line series label (current month)
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get analyticsTrendSeriesThisMonth;
+
+  /// Within-month trend dashed reference-line series label (spend side only; never the joy tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get analyticsTrendSeriesLastMonth;
+
   /// No description provided for @analyticsCategoryDonutOther.
   ///
   /// In en, this message translates to:
