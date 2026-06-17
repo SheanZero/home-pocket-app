@@ -4,13 +4,13 @@ milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
 stopped_at: Completed 45-06-PLAN.md
-last_updated: "2026-06-17T06:04:33.653Z"
+last_updated: "2026-06-17T06:12:47.311Z"
 last_activity: 2026-06-17 -- Phase 45 execution started
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 17
-  completed_plans: 13
+  completed_plans: 14
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 45 (presentation-shell-rebuild) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-06-17 -- Phase 45 execution started
 
@@ -157,7 +157,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T06:04:33.649Z
+Last session: 2026-06-17T06:11:57.736Z
 Stopped at: Completed 45-06-PLAN.md
 Resume file: None
 
@@ -179,6 +179,7 @@ Resume file: None
 | Phase 45 P01 | 22min | 3 tasks | 6 files |
 | Phase 45 P02 | 14min | 2 tasks | 3 files |
 | Phase 45 P06 | 5 min | 1 tasks | 1 files |
+| Phase 45 P03 | 3min | 2 tasks | 1 files |
 
 ## Decisions
 
@@ -205,6 +206,9 @@ Resume file: None
 - [Phase ?]: 45-02: familyInsightRefreshTargets drops the direct shadow-books invalidate (D-B3 Option A); familyHappinessProvider re-reads it transitively, keeping the registry union home-free
 - [Phase ?]: 45-02: FamilyInsightDataCard shadowBooksAsync prop widened to AsyncValue<List<Object>?> so the cards/ layer imports zero home-feature providers (ShadowBookInfo lives only in state_shadow_books); display behavior byte-identical (T-45-03 mitigation)
 - [Phase ?]: Phase 45-06: D-D1 discharged — ADR-012 gains an append-only ## Update recording the expense-side 本月vs上月 §4 carve-out (GATE-04 + STATE.md §4); joy-side cross-period stays ABSOLUTELY forbidden; decision body / §🚫 list / 状态 header byte-unchanged (arch.md append-only)
+- [Phase 45]: 45-03: analyticsCardRegistry is a spec-list (List<AnalyticsCardSpec>) — single source for render order (declaration==render, D-B1) AND _refresh union; cards stay dumb ConsumerWidgets
+- [Phase 45]: 45-03: dailyVsJoyRefreshTargets is group-aware (family snapshot only behind if(ctx.isGroupMode)) though the spec is always-visible — preserves today's _refresh:314 group-mode invalidation (D-A1); distinct from the family PerCategory provider
+- [Phase 45]: 45-03: FamilyInsightDataCard shadowBooks is a Plan-04 shell-injected display prop (null placeholder in registry build) — registry imports zero home/* providers (D-B3 file-wide gate)
 
 ## Operator Next Steps
 

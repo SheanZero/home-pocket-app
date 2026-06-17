@@ -217,7 +217,7 @@
 
 **Wave 2** *(blocked on 45-01 + 45-02)*
 
-- [ ] 45-03-PLAN.md — 建 typed 注册表 `analytics_card_registry.dart`（AnalyticsCardContext/Spec + 有序 `analyticsCardRegistry` + `shellRefreshTargets`），渲染顺序与 refresh 并集单一来源；DailyVsJoy spec group-aware（含 `dailyVsJoySnapshotFamilyProvider` 仅 group）（D-B1/D-B2/D-B4）
+- [x] 45-03-PLAN.md — 建 typed 注册表 `analytics_card_registry.dart`（AnalyticsCardContext/Spec + 有序 `analyticsCardRegistry` + `shellRefreshTargets`），渲染顺序与 refresh 并集单一来源；DailyVsJoy spec group-aware（含 `dailyVsJoySnapshotFamilyProvider` 仅 group）（D-B1/D-B2/D-B4）
 
 **Wave 3** *(parallel — both blocked on 45-03, no file overlap)*
 
