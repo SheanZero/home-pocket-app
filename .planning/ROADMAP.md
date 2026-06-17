@@ -157,7 +157,7 @@
 **Wave 2** *(46-02 blocked on 46-01 shared providers; 46-04 blocked on 46-01 trend provider — no mutual overlap)*
 
 - [x] 46-02-PLAN.md — joy data paths: per-L1 joy AMOUNT (悦己花在哪) + per-day joy COUNT (小确幸日历), reuse-first over findByBookIds(joy) (D-C1/D-C2)
-- [ ] 46-04-PLAN.md — within-month cumulative LineChart widget + within_month_trend_card (pill tabs 总/日常/悦己; joy single-line zero cross-period) (D-E1)
+- [x] 46-04-PLAN.md — within-month cumulative LineChart widget + within_month_trend_card (pill tabs 总/日常/悦己; joy single-line zero cross-period) (D-E1)
 
 **Wave 3** *(blocked on 46-02 joy providers)*
 
@@ -212,4 +212,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | 10 plans (P43-44 done; P45 planned 0/7) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | P43-45 done; Phase 46 5/7 (46-01/02/03/04/06) | In progress | - |

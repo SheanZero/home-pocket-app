@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 46-02-PLAN.md
-last_updated: "2026-06-17T09:54:00.000Z"
-last_activity: 2026-06-17 -- Completed 46-02-PLAN.md (per-L1 joy AMOUNT + per-day joy COUNT data paths; zero DAO/migration)
+stopped_at: Completed 46-04-PLAN.md
+last_updated: "2026-06-17T10:18:00.000Z"
+last_activity: 2026-06-17 -- Completed 46-04-PLAN.md (within-month spend-trend LineChart widget + WithinMonthTrendCard + withinMonthTrendRefreshTargets; D-E1 structural single-vs-dual guard)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 14
-  completed_plans: 11
-  percent: 39
+  completed_plans: 12
+  percent: 43
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 46 (cards) — EXECUTING
-Plan: 46-02 done (Wave 2 joy data paths); 46-01/03/06 + 46-02 complete
+Plan: 46-04 done (Wave 2 spend-trend card); 46-01/02/03/04/06 complete
 Status: Executing
-Last activity: 2026-06-17 -- Completed 46-02-PLAN.md (per-L1 joy AMOUNT + per-day joy COUNT data paths; zero DAO/migration)
+Last activity: 2026-06-17 -- Completed 46-04-PLAN.md (within-month spend-trend LineChart widget + WithinMonthTrendCard + withinMonthTrendRefreshTargets; D-E1 structural single-vs-dual guard)
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T09:54:00.000Z
-Stopped at: Completed 46-02-PLAN.md
+Last session: 2026-06-17T10:18:00.000Z
+Stopped at: Completed 46-04-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -187,6 +187,7 @@ Resume file: None
 | Phase 46 P46-03 | 7min | 2 tasks | 2 files |
 | Phase 46 P46-06 | ~50min | 3 tasks | 14 files |
 | Phase 46 P46-02 | ~5min | 2 tasks | 8 files |
+| Phase 46 P46-04 | ~18min | 2 tasks | 8 files |
 
 ## Decisions
 
@@ -229,6 +230,10 @@ Resume file: None
 - [Phase 46]: [46-02] Two JOY-side data paths built as pure Dart transforms over findByBookIds(ledgerType: joy) — zero new DAO, zero migration, schema stays v21. JoyCategoryAmount (per-L1 joy AMOUNT, D-C2) rolls up through the SAME l1AncestorOf/l1RollupFromTransactions the donut uses (D-11 single source → joy segments are a strict subset of donut L1). PerDayJoyCount (per-day joy COUNT, D-C1) = Dart group-by-local-day count (笔数, not sum — Pitfall 3), chosen over a SQL ledger+COUNT DAO variant (no DAO surface, does not cross DRILL-01 scope lock — RESEARCH Flag 2). Both models are domain-pure plain immutable value classes (not Freezed).
 - [Phase 46]: [46-02] joyCategoryAmounts (DateBoundaries window-normalized key) + perDayJoyCounts (month-anchored key) wired as @riverpod auto-dispose families alongside 46-01's trend provider (added-to, not clobbered); zero home/* (GUARD-01). 11/11 plan unit tests green; analyze 0; registry + home-isolation structural locks stay green.
 - [Phase 46]: [46-02] DEVIATION (Rule 3): reworded doc-comment references to the bare token `getDailyTotals` (kept the rationale) so the plan's literal Pitfall-3 grep guard returns zero matches; the use case never called it.
+- [Phase 46]: [46-04] First `LineChart` in `lib/`: `WithinMonthCumulativeLineChart` mirrors the donut fl_chart wiring (SizedBox(height:) + hidden grid/axes/touch). 本月 solid `isStrokeCapRound` + optional 上月 `dashArray [4,4]`; series color passed in by the card (`seriesColor`) so the chart stays palette-agnostic/tab-driven; 上月 ref = `Color.lerp(seriesColor, palette.card, 0.55)`.
+- [Phase 46]: [46-04] D-E1 cross-period guard is STRUCTURAL not runtime: the 悦己 pill tab passes `previousMonth=null` and the model has no `previousMonthJoy` field, so a joy 上月 line is unrepresentable (Pitfall 2). Spend tabs (总支出/日常) pass the previous-month list → dual line + spend-only 本月/上月 legend gated behind non-empty previous.
+- [Phase 46]: [46-04] Pill tabs are local `_TrendBody` StatefulWidget state (no StateProvider) — tab switch changes only the rendered series, never re-watches the trendAnchor-keyed provider (D-12 rebuild-storm guard). `withinMonthTrendRefreshTargets(ctx)` exported (categoryDonut shape) but card NOT registered — 46-07 owns the registry.
+- [Phase 46]: [46-04] Added 4 new l10n keys across en/ja/zh (analyticsCardTitle/CaptionWithinMonthTrend + analyticsTrendSeriesThisMonth/LastMonth); tab labels reuse existing analyticsKpiTotalLabel/daily/joy. Phase 47 ARB-parity/anti-toxicity note: `analyticsTrendSeriesLastMonth` is the spend-side-only ADR-012 §4 exception, never reachable from the joy tab.
 
 ## Operator Next Steps
 
