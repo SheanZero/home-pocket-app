@@ -169,6 +169,22 @@
 
 **UI hint**: yes
 
+### Phase 46: 卡片体系 (Cards)
+
+**Goal**: 在 Phase 45 瘦外壳 + 卡片注册表契约就绪后，逐卡构建/迁移已批准的 **round-5 B** 设计（GATE-03 选定方向），全程反游戏化（ADR-012）。这是 v1.8「45 立机制 → 46 填内容 → 47 验视觉」的填充阶段。
+**Depends on**: Phase 45
+**Requirements**: OVW-02, JOY-01, JOY-02, REDES-02, REDES-03, GUARD-02 （JOY-03 / JOY-04 **Descoped — superseded by GATE-03 round-5 B**，见 REQUIREMENTS.md）
+**Success Criteria** (what must be TRUE):
+
+  1. 支出总览面（OVW-02）严守 ADR-012：当前窗口中性呈现，无跨期 delta、无评判措辞（复用 `GetMonthlyReportUseCase`，零新数据）
+  2. 悦己情感面以 round-5 B 既定形态承载 JOY-01/JOY-02——「已花悦己」金额由悦己 tab + 悦己花在哪 header 描述性承载（ambient，**analytics 不画 target ring；HomeHero 独占唯一 target ring，ADR-016 §3/§4**，D-A4），满足度由直方图（分布 + 中位）呈现，分类悦己由悦己花在哪堆叠条呈现——celebrate-past，绝不目标/排名/跨期
+  3. **卡片阵容忠于 round-5 B 实际 5 张卡（D-A1/D-A2，扁平叙事流，无分区头）：** ①支出趋势（top，pill tabs 总支出/日常/悦己；当月内按天累计 LineChart，支出侧本月+上月双线、悦己侧本月单线零跨期）→ ②支出分类圆环 hero donut（中心「本月支出」，10 个 L1 金额降序图例，整行 tap 下钻）→ ③悦己花在哪 横向堆叠分段条（R-1 自定义 Row+Flexible，悦己金额在 L1 严格子集间构成）→ ④小确幸日历热力（R-2 自定义 GridView，色深 = 当天悦己笔数，tap 某天 inline 展开）→ ⑤悦己满足度分布直方图（频次分布 + 中位）；其后追加 **group-mode 条件卡 `family_insight`**（`isVisible(ctx)`，GUARD-02 聚合面存续，D-F1）。悦己侧全为描述性「庆祝过去」（已花悦己金额 + 去向 + 满足度 + 日历纹理），ADR-012-safe，绝不排名/目标/跨期。**记忆故事（JOY-03）+ kakeibo Q4 反思（JOY-04）随 round-5 B drop，零加回——Descoped (superseded by GATE-03 round-5 B)，由 REQUIREMENTS.md 台账补正承载，不另建卡（D-A1/D-A2）**
+  4. 图表 polish（REDES-02）：采用 fl_chart 1.2.0 原生 per-rod `label`（删除直方图 `Stack` hack）+ 可选 donut `cornerRadius`；**不升级/不换图表库（保持 `^1.2.0`）**
+  5. 暖色入场动效（REDES-03）经 Flutter 内建实现（`TweenAnimationBuilder` count-up 落点仅 donut 中心总额 + 悦己花在哪 header 总额，`AnimatedSwitcher`），ADR-012-safe（ambient value-affirming，非 achievement-reward；克制微动，无循环/glow 脉冲/庆祝爆发，D-D1/D-D2）
+
+**Plans**: 7 plans in 4 waves (see Wave 1–4 listing under the v1.8 Phases block above)
+**UI hint**: yes
+
 ### Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT
 
 **Goal**: 验证已完成的重设计页面——补齐三语文案与 parity、把每张新卡纳入反毒性禁词扫描、在 macOS 上从零撰写/重基线图表 golden（今天图表无 golden 覆盖），以全量 `flutter test`（含隔离/反毒性/架构/CJK/density grep）作为逐波里程碑门禁，并完成真机视觉 UAT。
