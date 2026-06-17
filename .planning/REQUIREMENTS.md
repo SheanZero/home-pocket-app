@@ -43,8 +43,8 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 
 - [ ] **JOY-01**: "值得" affirmation block — surface 已花悦己 + `Σ joy_contribution` as a *celebration of investing in yourself* (framing-only over ADR-016 data; **ambient presentation — must NOT become a progress/target ring; HomeHero owns the only target ring, ADR-016 §3**)
 - [ ] **JOY-02**: "值不值" satisfaction-reflection surface — reuse the satisfaction histogram + per-category joy (min-N=3), framed as proud/content, never "beat last month" / ranking
-- [ ] **JOY-03**: Memory/story surface — elevate the existing "best joy moment" story card (pure surfacing of existing data)
-- [ ] **JOY-04**: Kakeibo Q4 reflection prompt — an open-ended, affirming "how could spending make you happier next time" prompt; **if it persists user-authored text, a new ADR is required** (encryption/privacy implications) — decided in GATE-04
+- [~] **JOY-03**: ~~Memory/story surface — elevate the existing "best joy moment" story card (pure surfacing of existing data)~~ — **Descoped (superseded by GATE-03 round-5 B).** round-5 B (the user-approved single source of truth, D-A1) is exactly 5 cards and deliberately omits the 记忆故事 (best-joy story) card; the final selected mock grep-confirms 0 hits for 记忆故事. The joy emotional surface is instead re-carried ambiently by the round-5 B design (JOY-01 已花悦己 amount → 悦己 tab + 悦己花在哪 header; 分类悦己 → 悦己花在哪 stacked bar; 满足度 → satisfaction histogram). No story card is built anywhere in Phase 46; this requirement ID is satisfied **by this descope correction, not by code** (D-A2).
+- [~] **JOY-04**: ~~Kakeibo Q4 reflection prompt — an open-ended, affirming "how could spending make you happier next time" prompt; **if it persists user-authored text, a new ADR is required** (encryption/privacy implications) — decided in GATE-04~~ — **Descoped (superseded by GATE-03 round-5 B).** round-5 B is exactly 5 cards and deliberately omits the kakeibo Q4 reflection prompt; the final selected mock grep-confirms 0 hits for kakeibo. GATE-04 already ruled JOY-04 text-persistence NO-GO (static read-only → no persisted text → no encryption/ADR; v1.8 stays no-Drift). A future milestone may revisit JOY-04 — persisting user-authored text would require a new ADR + non-Drift storage (per Phase 43 D-07). No prompt card is built in Phase 46; this requirement ID is satisfied **by this descope correction, not by code** (D-A1/D-A2).
 
 ### Redesign — IA + Visual (信息架构与视觉重构)
 
@@ -114,8 +114,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRILL-01 | Phase 44 | Complete |
 | JOY-01 | Phase 46 | Pending |
 | JOY-02 | Phase 46 | Pending |
-| JOY-03 | Phase 46 | Pending |
-| JOY-04 | Phase 46 | Pending |
+| JOY-03 | Phase 46 | Descoped (Phase 46 — superseded by GATE-03) |
+| JOY-04 | Phase 46 | Descoped (Phase 46 — superseded by GATE-03) |
 | REDES-01 | Phase 45 | Complete |
 | REDES-02 | Phase 46 | Pending |
 | REDES-03 | Phase 46 | Pending |
