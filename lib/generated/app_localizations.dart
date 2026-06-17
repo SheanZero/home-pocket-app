@@ -2921,6 +2921,48 @@ abstract class S {
   /// **'Last month'**
   String get analyticsTrendSeriesLastMonth;
 
+  /// 悦己花在哪 stacked-bar card title (Phase 46 round-5 B, R-1 custom Row)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Where it went'**
+  String get analyticsCardTitleJoySpend;
+
+  /// 悦己花在哪 stacked-bar card caption (descriptive, celebrate-past, ADR-012-safe)
+  ///
+  /// In en, this message translates to:
+  /// **'How your joy spending breaks down'**
+  String get analyticsCardCaptionJoySpend;
+
+  /// 悦己花在哪 header label above the count-up joy total (D-D2 anchor #2)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy spend'**
+  String get analyticsJoySpendHeaderLabel;
+
+  /// 悦己花在哪 empty-state copy when there is no joy spend (neutral, no judgment)
+  ///
+  /// In en, this message translates to:
+  /// **'No joy spending in this window yet'**
+  String get analyticsJoySpendEmpty;
+
+  /// 小确幸日历 heatmap card title (Phase 46 round-5 B, R-2 custom GridView)
+  ///
+  /// In en, this message translates to:
+  /// **'Little joys · Calendar'**
+  String get analyticsCardTitleJoyCalendar;
+
+  /// 小确幸日历 heatmap card caption (ambient, celebrate-past, ADR-012-safe; depth = count not streak)
+  ///
+  /// In en, this message translates to:
+  /// **'The texture of your joyful days'**
+  String get analyticsCardCaptionJoyCalendar;
+
+  /// 小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)
+  ///
+  /// In en, this message translates to:
+  /// **'No little joys recorded this day'**
+  String get analyticsJoyCalendarDayEmpty;
+
   /// No description provided for @analyticsCategoryDonutOther.
   ///
   /// In en, this message translates to:

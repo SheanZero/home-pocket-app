@@ -1534,6 +1534,27 @@ class SJa extends S {
   String get analyticsTrendSeriesLastMonth => '先月';
 
   @override
+  String get analyticsCardTitleJoySpend => '悦己 · どこへ使った';
+
+  @override
+  String get analyticsCardCaptionJoySpend => 'あなたの悦己支出の内訳';
+
+  @override
+  String get analyticsJoySpendHeaderLabel => '悦己支出';
+
+  @override
+  String get analyticsJoySpendEmpty => 'この期間の悦己支出はまだありません';
+
+  @override
+  String get analyticsCardTitleJoyCalendar => '小确幸 · カレンダー';
+
+  @override
+  String get analyticsCardCaptionJoyCalendar => '悦己の日々の手ざわり';
+
+  @override
+  String get analyticsJoyCalendarDayEmpty => 'この日の小确幸の記録はありません';
+
+  @override
   String get analyticsCategoryDonutOther => 'その他';
 
   @override

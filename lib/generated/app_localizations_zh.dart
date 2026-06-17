@@ -1527,6 +1527,27 @@ class SZh extends S {
   String get analyticsTrendSeriesLastMonth => '上月';
 
   @override
+  String get analyticsCardTitleJoySpend => '悦己 · 花在哪';
+
+  @override
+  String get analyticsCardCaptionJoySpend => '你的悦己花销去向';
+
+  @override
+  String get analyticsJoySpendHeaderLabel => '悦己花销';
+
+  @override
+  String get analyticsJoySpendEmpty => '这个时间段还没有悦己花销';
+
+  @override
+  String get analyticsCardTitleJoyCalendar => '小确幸 · 日历';
+
+  @override
+  String get analyticsCardCaptionJoyCalendar => '悦己日子的纹理';
+
+  @override
+  String get analyticsJoyCalendarDayEmpty => '这一天还没有小确幸记录';
+
+  @override
   String get analyticsCategoryDonutOther => '其他';
 
   @override

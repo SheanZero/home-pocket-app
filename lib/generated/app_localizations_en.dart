@@ -1560,6 +1560,29 @@ class SEn extends S {
   String get analyticsTrendSeriesLastMonth => 'Last month';
 
   @override
+  String get analyticsCardTitleJoySpend => 'Joy · Where it went';
+
+  @override
+  String get analyticsCardCaptionJoySpend =>
+      'How your joy spending breaks down';
+
+  @override
+  String get analyticsJoySpendHeaderLabel => 'Joy spend';
+
+  @override
+  String get analyticsJoySpendEmpty => 'No joy spending in this window yet';
+
+  @override
+  String get analyticsCardTitleJoyCalendar => 'Little joys · Calendar';
+
+  @override
+  String get analyticsCardCaptionJoyCalendar =>
+      'The texture of your joyful days';
+
+  @override
+  String get analyticsJoyCalendarDayEmpty => 'No little joys recorded this day';
+
+  @override
   String get analyticsCategoryDonutOther => 'Other';
 
   @override
