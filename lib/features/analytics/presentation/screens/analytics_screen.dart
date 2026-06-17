@@ -6,22 +6,20 @@ import '../../../../features/home/presentation/providers/state_shadow_books.dart
 import '../../../../generated/app_localizations.dart';
 import '../analytics_card_registry.dart';
 import '../providers/state_analytics.dart';
-import '../widgets/analytics_screen_section_header.dart';
 import '../widgets/cards/family_insight_data_card.dart';
 import '../widgets/joy_metric_variant_chip.dart';
 import '../widgets/time_window_chip.dart';
 
-/// Phase 11 Variant delta unified analytics dashboard.
+/// Round-5 B analytics dashboard (Phase 46, D-F2).
 ///
-/// Phase 45 (D-A1 / REDES-01): a THIN SHELL. The body is built by mapping
+/// A THIN SHELL (Phase 45 D-A1 / REDES-01). The body is built by mapping
 /// [analyticsCardRegistry] (the single source of render order AND the
-/// `_refresh` invalidation union — D-B1) into the [Column] children,
-/// interleaving the section headers + spacers 1:1 with the previous
-/// hand-written tree. The 7 inline `_*Card` widgets + the shared
-/// `_AnalyticsDataCard` now live under `widgets/cards/`. `_refresh` is derived
-/// from the registry (no hand-listed providers) so HomeHero isolation is
-/// guaranteed by construction (GUARD-01): the registry imports zero `home/*`
-/// providers.
+/// `_refresh` invalidation union — D-B1) into a FLAT [Column] of cards with
+/// inter-card spacers only — NO section headers (the round-5 B lineup is a flat
+/// 5-card narrative flow; the Variant-δ section headers were deleted, D-F2).
+/// `_refresh` is derived from the registry (no hand-listed providers) so HomeHero
+/// isolation is guaranteed by construction (GUARD-01): the registry imports zero
+/// `home/*` providers.
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key, required this.bookId});
 
@@ -67,21 +65,18 @@ class AnalyticsScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _buildCardChildren(l10n, ctx, shadowBooksAsync),
+            children: _buildCardChildren(ctx, shadowBooksAsync),
           ),
         ),
       ),
     );
   }
 
-  /// Maps [analyticsCardRegistry] into the [Column] children 1:1 with the
-  /// previous hand-written tree (D-A1): for each visible spec, a
-  /// [sectionHeaderKey] opens a section with `SizedBox(32)` + section header +
-  /// `SizedBox(8)`; otherwise an inter-card `SizedBox(8)` precedes it (the very
-  /// first card — the KPI hero — has no leading spacer). A trailing
-  /// `SizedBox(64)` closes the list.
+  /// Maps [analyticsCardRegistry] into a FLAT [Column] of cards (D-F2): for each
+  /// visible spec, an inter-card `SizedBox(8)` precedes it (the first card has
+  /// no leading spacer). A trailing `SizedBox(64)` closes the list. No section
+  /// headers — the round-5 B lineup is a flat narrative flow.
   List<Widget> _buildCardChildren(
-    S l10n,
     AnalyticsCardContext ctx,
     AsyncValue<List<Object>?> shadowBooksAsync,
   ) {
@@ -91,20 +86,7 @@ class AnalyticsScreen extends ConsumerWidget {
     for (final spec in analyticsCardRegistry) {
       if (!spec.isVisible(ctx)) continue;
 
-      if (spec.sectionHeaderKey != null) {
-        // A new themed section: 32px gap, header, 8px gap. The first card never
-        // gets a leading section gap before its header in the legacy tree — but
-        // the first card (KPI hero) has no sectionHeaderKey, so the first
-        // header always follows the KPI hero (preceded by SizedBox(32)).
-        children.add(const SizedBox(height: 32));
-        children.add(
-          AnalyticsScreenSectionHeader(
-            label: _sectionLabel(l10n, spec.sectionHeaderKey!),
-          ),
-        );
-        children.add(const SizedBox(height: 8));
-      } else if (!isFirst) {
-        // An inter-card gap (the legacy tree uses 8px between sibling cards).
+      if (!isFirst) {
         children.add(const SizedBox(height: 8));
       }
 
@@ -137,19 +119,6 @@ class AnalyticsScreen extends ConsumerWidget {
       );
     }
     return built;
-  }
-
-  String _sectionLabel(S l10n, String key) {
-    switch (key) {
-      case 'analyticsGroupHeaderTime':
-        return l10n.analyticsGroupHeaderTime;
-      case 'analyticsGroupHeaderDistribution':
-        return l10n.analyticsGroupHeaderDistribution;
-      case 'analyticsGroupHeaderStories':
-        return l10n.analyticsGroupHeaderStories;
-      default:
-        return key;
-    }
   }
 
   /// Pull-to-refresh invalidation, derived ENTIRELY from the registry + the one

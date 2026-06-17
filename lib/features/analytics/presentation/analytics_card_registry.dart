@@ -10,16 +10,13 @@ import '../../../features/settings/presentation/providers/state_locale.dart'
 import '../domain/models/time_window.dart';
 import 'providers/state_analytics.dart';
 import 'providers/state_joy_metric_variant.dart';
-import 'providers/state_ledger_snapshot.dart';
 import 'providers/state_time_window.dart';
-import 'widgets/cards/best_joy_card.dart';
 import 'widgets/cards/category_donut_card.dart';
 import 'widgets/cards/family_insight_data_card.dart';
-import 'widgets/cards/kpi_hero_card.dart';
-import 'widgets/cards/largest_expense_card.dart';
+import 'widgets/cards/joy_calendar_card.dart';
+import 'widgets/cards/joy_spend_card.dart';
 import 'widgets/cards/satisfaction_histogram_card.dart';
-import 'widgets/daily_vs_joy_card.dart';
-import 'widgets/per_category_breakdown_card.dart';
+import 'widgets/cards/within_month_trend_card.dart';
 
 /// Snapshot of everything an analytics card needs to (a) be built, (b) decide
 /// its visibility, and (c) compute its refresh targets — all derived from the
@@ -71,15 +68,17 @@ class AnalyticsCardContext {
 /// - [refreshTargets] delegates to the per-card `<card>RefreshTargets(ctx)`
 ///   function from Plans 01/02 (no second list — D-B2).
 /// - [isVisible] gates conditional cards (D-B4); defaults to always-true.
-/// - [sectionHeaderKey] lets Plan 04's shell interleave the section headers
-///   1:1 with today's render order.
+///
+/// Round-5 B (Phase 46, D-F2): the lineup is a FLAT 5-card narrative flow with
+/// NO section headers — the per-spec header-key field + the shell's
+/// section-header interleave were removed when the round-5 B order landed
+/// (`analytics_screen_section_header` deleted).
 @immutable
 class AnalyticsCardSpec {
   const AnalyticsCardSpec({
     required this.build,
     required this.refreshTargets,
     this.isVisible = _always,
-    this.sectionHeaderKey,
   });
 
   /// Builds the card widget from the shared [AnalyticsCardContext].
@@ -91,14 +90,9 @@ class AnalyticsCardSpec {
   final List<ProviderBase<Object?>> Function(AnalyticsCardContext ctx)
   refreshTargets;
 
-  /// Visibility predicate (D-B4). Only the two family specs override this with
-  /// `(ctx) => ctx.isGroupMode`; all others are always-visible.
+  /// Visibility predicate (D-B4). Only the `FamilyInsightDataCard` spec overrides
+  /// this with `(ctx) => ctx.isGroupMode`; all others are always-visible.
   final bool Function(AnalyticsCardContext ctx) isVisible;
-
-  /// Optional section-header key (one of the three `analyticsGroupHeader*`
-  /// l10n keys) the shell renders ABOVE this card. `null` = no header (the
-  /// KPI hero sits above all section headers).
-  final String? sectionHeaderKey;
 
   static bool _always(AnalyticsCardContext _) => true;
 }
@@ -149,96 +143,41 @@ List<ProviderBase<Object?>> shellRefreshTargets(AnalyticsCardContext ctx) => [
   earliestTransactionMonthProvider(bookId: ctx.bookId),
 ];
 
-/// Single-source, GROUP-AWARE refresh targets for [DailyVsJoyCard] (D-B2 /
-/// D-A1).
-///
-/// The single `DailyVsJoyCard` watches `dailyVsJoySnapshotProvider`
-/// unconditionally AND `dailyVsJoySnapshotFamilyProvider` ONLY when
-/// `isGroupMode` (daily_vs_joy_card.dart:50-69). To preserve today's
-/// pull-to-refresh behavior (analytics_screen.dart:314 invalidates the family
-/// snapshot under group mode), this collection mirrors that conditional watch:
-/// the family snapshot is included ONLY behind `if (ctx.isGroupMode)`.
-///
-/// The DailyVsJoy spec itself stays ALWAYS-VISIBLE (the card always renders);
-/// only the family snapshot invalidation is gated. The family
-/// `PerCategoryBreakdownCard` covers a DIFFERENT provider
-/// (`perCategoryJoyBreakdownFamilyProvider`) — omitting the family snapshot
-/// here would be a behavior-preservation defect goldens cannot catch.
-List<ProviderBase<Object?>> dailyVsJoyRefreshTargets(
-  AnalyticsCardContext ctx,
-) => [
-  dailyVsJoySnapshotProvider(
-    bookId: ctx.bookId,
-    startDate: ctx.startDate,
-    endDate: ctx.endDate,
-    joyMetricVariant: ctx.joyMetricVariant,
-  ),
-  if (ctx.isGroupMode)
-    dailyVsJoySnapshotFamilyProvider(
-      startDate: ctx.startDate,
-      endDate: ctx.endDate,
-      joyMetricVariant: ctx.joyMetricVariant,
-    ),
-];
-
-/// Single-source refresh targets for the solo/you-scope [PerCategoryBreakdownCard]
-/// (D-B2). The card watches `perCategoryJoyBreakdownProvider` for both the
-/// `solo` and `you` scopes (only the `family` scope reads the family provider).
-List<ProviderBase<Object?>> perCategorySoloRefreshTargets(
-  AnalyticsCardContext ctx,
-) => [
-  perCategoryJoyBreakdownProvider(
-    bookId: ctx.bookId,
-    startDate: ctx.startDate,
-    endDate: ctx.endDate,
-    joyMetricVariant: ctx.joyMetricVariant,
-  ),
-];
-
-/// Single-source refresh targets for the family-scope [PerCategoryBreakdownCard]
-/// (D-B2). Reads `perCategoryJoyBreakdownFamilyProvider` (no `bookId` — the
-/// provider derives book ids from shadow books internally). This spec is
-/// `isVisible: (ctx) => ctx.isGroupMode` (D-B4), so the family provider only
-/// ever enters the union in group mode.
-List<ProviderBase<Object?>> perCategoryFamilyRefreshTargets(
-  AnalyticsCardContext ctx,
-) => [
-  perCategoryJoyBreakdownFamilyProvider(
-    startDate: ctx.startDate,
-    endDate: ctx.endDate,
-    joyMetricVariant: ctx.joyMetricVariant,
-  ),
-];
-
 /// The ordered card registry — the SINGLE SOURCE OF TRUTH for both the shell's
 /// render order (declaration order == render order, D-B1) and the `_refresh`
 /// invalidation union (`registry.where(isVisible).expand(refreshTargets)`).
 ///
-/// Order reproduces analytics_screen.dart:94–206 1:1, including the two
-/// group-only specs (2nd `PerCategoryBreakdownCard(scope: family)` +
-/// `FamilyInsightDataCard`), both gated by `isVisible: (ctx) => ctx.isGroupMode`
-/// (D-B4). No drill/route artifact is added (D-C1/D-C2 deferred to Phase 46).
+/// Round-5 B flat lineup (Phase 46, D-F2) — a 5-card narrative flow with NO
+/// section headers:
+///   1. within_month_trend (支出趋势)
+///   2. category_donut (支出分类圆环 hero, rebuilt 46-06)
+///   3. joy_spend (悦己花在哪 R-1 stacked bar)
+///   4. joy_calendar (小确幸日历 R-2 heatmap)
+///   5. satisfaction_histogram (悦己满足度分布, rebuilt 46-06)
+///   6. [family_insight] — GROUP-ONLY conditional card (D-F1), appended after
+///      the 5 always-visible cards, gated by `isVisible: (ctx) => ctx.isGroupMode`.
+///
+/// The Variant-δ Time/Distribution/Stories section headers + the dead cards
+/// (kpi_hero, total_six_month, daily_vs_joy/per_category de-registered,
+/// largest_expense, best_joy) were removed in Phase 46 (D-A3/D-F2). The
+/// `daily_vs_joy_card`/`per_category_breakdown_card` widget files are RETAINED
+/// (they keep their own tests) but no longer appear in this lineup.
 final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
-  // 1. KPI mini-hero — sits ABOVE all section headers (no sectionHeaderKey).
+  // 1. 支出趋势 — within-month per-day-cumulative spend LineChart (round-5 B
+  //    card #1, D-E1). Spend tabs draw 本月 solid + 上月 dashed; the 悦己 tab is a
+  //    structurally-single 本月 line (zero cross-period).
   AnalyticsCardSpec(
-    build: (ctx) => KpiHeroCard(
+    build: (ctx) => WithinMonthTrendCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
       endDate: ctx.endDate,
-      currencyCode: ctx.currencyCode,
-      locale: ctx.locale,
       joyMetricVariant: ctx.joyMetricVariant,
     ),
-    refreshTargets: kpiHeroRefreshTargets,
+    refreshTargets: withinMonthTrendRefreshTargets,
   ),
-  // 2. Distribution group — category-spend donut.
-  //    NOTE (46-01 deviation): the 6-month TotalSixMonth trend spec was removed
-  //    here because its data layer (expenseTrendProvider / GetExpenseTrendUseCase
-  //    / ExpenseTrendData) is deleted in this plan (D-E2). The round-5 B
-  //    within-month LineChart card + the registry re-order are added by wave-3
-  //    plan 46-07; this leaves the spec list otherwise byte-identical.
+  // 2. 支出分类圆环 hero — donut with 10 tappable L1-rollup legend rows → drill
+  //    (round-5 B card #2, rebuilt 46-06).
   AnalyticsCardSpec(
-    sectionHeaderKey: 'analyticsGroupHeaderDistribution',
     build: (ctx) => CategoryDonutCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
@@ -247,21 +186,29 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     ),
     refreshTargets: categoryDonutRefreshTargets,
   ),
-  // 4. Distribution — Daily-vs-Joy ledger snapshot. ALWAYS visible; its
-  //    refreshTargets are GROUP-AWARE (family snapshot only under group mode).
+  // 3. 悦己花在哪 — custom Row+Flexible stacked bar (R-1, round-5 B card #3, D-C2).
   AnalyticsCardSpec(
-    build: (ctx) => DailyVsJoyCard(
+    build: (ctx) => JoySpendCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
       endDate: ctx.endDate,
-      currencyCode: ctx.currencyCode,
-      locale: ctx.locale,
-      isGroupMode: ctx.isGroupMode,
       joyMetricVariant: ctx.joyMetricVariant,
     ),
-    refreshTargets: dailyVsJoyRefreshTargets,
+    refreshTargets: joySpendRefreshTargets,
   ),
-  // 5. Distribution — satisfaction histogram (async self-hide is in-card, D-B5).
+  // 4. 小确幸日历 — custom GridView heatmap with inline day expand (R-2, round-5 B
+  //    card #4, D-C1).
+  AnalyticsCardSpec(
+    build: (ctx) => JoyCalendarCard(
+      bookId: ctx.bookId,
+      startDate: ctx.startDate,
+      endDate: ctx.endDate,
+      joyMetricVariant: ctx.joyMetricVariant,
+    ),
+    refreshTargets: joyCalendarRefreshTargets,
+  ),
+  // 5. 悦己满足度分布 — histogram (round-5 B card #5; native fl_chart rod label,
+  //    rebuilt 46-06). Async self-hide is in-card (D-B5).
   AnalyticsCardSpec(
     build: (ctx) => SatisfactionHistogramCard(
       bookId: ctx.bookId,
@@ -272,60 +219,10 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     ),
     refreshTargets: satisfactionHistogramRefreshTargets,
   ),
-  // 6. Distribution — per-category breakdown (you in group mode, solo otherwise).
-  AnalyticsCardSpec(
-    build: (ctx) => PerCategoryBreakdownCard(
-      bookId: ctx.bookId,
-      startDate: ctx.startDate,
-      endDate: ctx.endDate,
-      locale: ctx.locale,
-      scope: ctx.isGroupMode ? PerCategoryScope.you : PerCategoryScope.solo,
-      joyMetricVariant: ctx.joyMetricVariant,
-    ),
-    refreshTargets: perCategorySoloRefreshTargets,
-  ),
-  // 7. Distribution — 2nd per-category breakdown (family scope). GROUP-ONLY (D-B4).
-  AnalyticsCardSpec(
-    build: (ctx) => PerCategoryBreakdownCard(
-      bookId: ctx.bookId,
-      startDate: ctx.startDate,
-      endDate: ctx.endDate,
-      locale: ctx.locale,
-      scope: PerCategoryScope.family,
-      joyMetricVariant: ctx.joyMetricVariant,
-    ),
-    refreshTargets: perCategoryFamilyRefreshTargets,
-    isVisible: (ctx) => ctx.isGroupMode,
-  ),
-  // 8. Stories group — largest single expense.
-  AnalyticsCardSpec(
-    sectionHeaderKey: 'analyticsGroupHeaderStories',
-    build: (ctx) => LargestExpenseCard(
-      bookId: ctx.bookId,
-      startDate: ctx.startDate,
-      endDate: ctx.endDate,
-      currencyCode: ctx.currencyCode,
-      locale: ctx.locale,
-      joyMetricVariant: ctx.joyMetricVariant,
-    ),
-    refreshTargets: largestExpenseRefreshTargets,
-  ),
-  // 9. Stories — best joy moment.
-  AnalyticsCardSpec(
-    build: (ctx) => BestJoyCard(
-      bookId: ctx.bookId,
-      startDate: ctx.startDate,
-      endDate: ctx.endDate,
-      currencyCode: ctx.currencyCode,
-      locale: ctx.locale,
-      joyMetricVariant: ctx.joyMetricVariant,
-    ),
-    refreshTargets: bestJoyRefreshTargets,
-  ),
-  // 10. Stories — family-aggregate insight. GROUP-ONLY (D-B4).
+  // 6. Family-aggregate insight. GROUP-ONLY (D-F1/D-B4).
   //     The card's `shadowBooksAsync` is a DISPLAY-ONLY home-feature read; the
   //     registry must not import the home provider (D-B3 file-wide gate), so
-  //     this build passes a null placeholder and Plan 04's shell injects the
+  //     this build passes a null placeholder and the shell injects the
   //     real shell-resolved `shadowBooksAsync` when it constructs this card
   //     (the shell already imports the home provider for display; reading it for
   //     display is NOT an invalidation target and never enters the union).

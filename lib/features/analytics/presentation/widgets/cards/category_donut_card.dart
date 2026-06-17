@@ -95,8 +95,8 @@ class CategoryDonutCard extends ConsumerWidget {
   );
 }
 
-/// Single-source refresh targets for [CategoryDonutCard] (D-B2). SAME key tuple
-/// as [KpiHeroCard]'s monthlyReport — the shell union dedupes via `.toSet()`.
+/// Single-source refresh targets for [CategoryDonutCard] (D-B2). Watches the
+/// `monthlyReportProvider` keyed on book/start/end/variant.
 List<ProviderBase<Object?>> categoryDonutRefreshTargets(
   AnalyticsCardContext ctx,
 ) => [
