@@ -197,7 +197,7 @@
 
 ### Phase 45: 展示外壳重建 (Presentation Shell Rebuild)
 
-**Goal**: 在填充卡片之前先确立卡片契约——把 592 行的 `analytics_screen.dart` 单体重建为瘦外壳（AppBar + `TimeWindowChip` + `JoyMetricVariantChip` + 滚动容器 + 卡片列表驱动），并把手写的 100 行 `_refresh()` 改为由卡片注册表派生的数据驱动失效，使 HomeHero 隔离由构造保证。
+**Goal**: 在填充卡片之前先确立卡片契约——把 739 行的 `analytics_screen.dart` 单体重建为瘦外壳（AppBar + `TimeWindowChip` + `JoyMetricVariantChip` + 滚动容器 + 卡片列表驱动），并把手写的 108 行 `_refresh()` 改为由卡片注册表派生的数据驱动失效，使 HomeHero 隔离由构造保证。**纯结构重构、行为保持（D-A1）：golden 保绿、隔离测试同断言过、diff = 机械抽取。**
 **Depends on**: Phase 44
 **Requirements**: REDES-01, GUARD-01
 **Success Criteria** (what must be TRUE):
@@ -207,8 +207,34 @@
   3. `home_screen_isolation_test.dart` 保持 green；analytics 不读取也不失效任何 `home/*` provider，不新增任何 Home 与 Analytics 共享的 provider（GUARD-01）
   4. analytics 卡片 provider 保持 auto-dispose（离开 tab 释放、重入重算）；不向任何 home widget「共享」时间窗 provider
 
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 6 plans in 4 waves
+
+**Wave 1** (parallel — no file overlap)
+
+- [ ] 45-01-PLAN.md — 抽共享卡壳 `AnalyticsDataCard` + 4 张卡（KpiHero/TotalSixMonth/CategoryDonut/SatisfactionHistogram）到 `widgets/cards/`，各带单源 `*RefreshTargets`（D-A1/D-B2/D-B5）
+- [ ] 45-02-PLAN.md — 抽 3 张 Stories 卡（LargestExpense/BestJoy/FamilyInsightData）；FamilyInsight 丢弃 `shadowBooksProvider` 直接失效（D-B3 Option A）
+- [ ] 45-06-PLAN.md — ADR-012 append-only `## Update` 补正：支出侧 本月vs上月 为 §4 记录在案例外（D-D1，doc-only）
+
+**Wave 2** *(blocked on 45-01 + 45-02)*
+
+- [ ] 45-03-PLAN.md — 建 typed 注册表 `analytics_card_registry.dart`（AnalyticsCardContext/Spec + 有序 `analyticsCardRegistry` + `shellRefreshTargets`），渲染顺序与 refresh 并集单一来源（D-B1/D-B2/D-B4）
+
+**Wave 3** *(blocked on 45-03)*
+
+- [ ] 45-04-PLAN.md — 瘦身 `analytics_screen.dart`：删 7 张内联卡 + `_AnalyticsDataCard`，build 映射注册表（1:1 树）、`_refresh()` 由注册表派生（D-A1/D-B1/D-B3）
+
+**Wave 4** *(blocked on 45-04)*
+
+- [ ] 45-05-PLAN.md — D-B3 注册表并集单测（⊆ analytics、0 个 `home/*`）+ 渲染顺序/可见性 + 每卡结构 + A1 group-mode 刷新回归 + 全量门禁（GUARD-01）
+
+**Cross-cutting constraints:**
+
+- 纯结构、行为保持：所有可见变化（round-5 B IA 重排/卡片增删/图表打磨/动效）压到 Phase 46，golden 重基线压到 Phase 47
+- 每卡 = `ConsumerWidget` watch 唯一 provider family + 本地 `.when`；single-source `refreshTargets` == error-retry == 注册表并集（卡就是契约）
+- 注册表/各 `cards/*` 仅 import analytics providers（home/* 隔离的物理来源）；D-B3 单测背书
+- 下钻宿主（D-C1/D-C2）Phase 45 零预留，全部留 Phase 46
+
+**UI hint**: yes (但本阶段零视觉变化——见 45-UI-SPEC.md preserve-as-is 合约)
 
 ### Phase 46: 卡片体系 (Cards)
 
@@ -253,4 +279,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | 6/7 (Phase 43) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | 10 plans (P43-44 done; P45 planned 0/6) | In progress | - |
