@@ -42,8 +42,8 @@ created: 2026-06-17
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 46-01·T1 | 01 | 1 | OVW-02 | T-46-01-01/02 | book-set never widened; no tx logging | unit | `flutter test test/unit/application/analytics/get_within_month_cumulative_use_case_test.dart` | ❌ W0 | ⬜ pending |
 | 46-01·T2 | 01 | 1 | OVW-02 | T-46-01-03 | bound params | unit | `flutter test test/unit/application/analytics/ test/unit/features/analytics/` | ✅ update | ⬜ pending |
-| 46-02·T1 | 02 | 1 | JOY-01/02 | T-46-02-01/02 | book-set faithful; aggregate-only | unit | `flutter test test/unit/application/analytics/get_joy_category_amounts_use_case_test.dart` | ❌ W0 | ⬜ pending |
-| 46-02·T2 | 02 | 1 | JOY-01/02 | T-46-02-01/02 | book-set faithful; count not per-member | unit | `flutter test test/unit/application/analytics/get_per_day_joy_counts_use_case_test.dart` | ❌ W0 | ⬜ pending |
+| 46-02·T1 | 02 | 2 | JOY-01/02 | T-46-02-01/02 | book-set faithful; aggregate-only | unit | `flutter test test/unit/application/analytics/get_joy_category_amounts_use_case_test.dart` | ❌ W0 | ⬜ pending |
+| 46-02·T2 | 02 | 2 | JOY-01/02 | T-46-02-01/02 | book-set faithful; count not per-member | unit | `flutter test test/unit/application/analytics/get_per_day_joy_counts_use_case_test.dart` | ❌ W0 | ⬜ pending |
 | 46-03·T1 | 03 | 1 | JOY-03 | T-46-03-01 | docs-only | n/a (grep) | `grep -c "Descoped" .planning/REQUIREMENTS.md` | ✅ | ⬜ pending |
 | 46-03·T2 | 03 | 1 | JOY-04 | T-46-03-01 | docs-only | n/a (grep) | `grep -n "round-5 B" .planning/ROADMAP.md` | ✅ | ⬜ pending |
 | 46-06·T1 | 06 | 1 | REDES-02 | T-46-06-SC | no new deps | widget | `flutter test test/widget/features/analytics/presentation/widgets/satisfaction_distribution_histogram_test.dart` | ✅ update | ⬜ pending |
@@ -51,11 +51,11 @@ created: 2026-06-17
 | 46-06·T3 | 06 | 1 | OVW-02 | T-46-06-01 | single-source rollup; row-tap only | widget | `flutter test test/widget/features/analytics/presentation/widgets/cards/category_donut_card_test.dart` | ❌ W0 | ⬜ pending |
 | 46-04·T1 | 04 | 2 | OVW-02 | T-46-04-02 | joy line structurally single (no 上月) | widget | `flutter test test/widget/features/analytics/presentation/widgets/within_month_cumulative_line_chart_test.dart` | ❌ W0 | ⬜ pending |
 | 46-04·T2 | 04 | 2 | OVW-02/REDES-03 | T-46-04-01/02 | no per-member series; joy tab zero cross-period | widget | `flutter test test/widget/features/analytics/presentation/widgets/cards/within_month_trend_card_test.dart` | ❌ W0 | ⬜ pending |
-| 46-05·T1 | 05 | 2 | JOY-01/02/REDES-03 | T-46-05-02/03 | ambient only; no target/streak/cross-period | widget | `flutter test test/widget/features/analytics/presentation/widgets/cards/joy_spend_card_test.dart` | ❌ W0 | ⬜ pending |
-| 46-05·T2 | 05 | 2 | JOY-01/02/REDES-03 | T-46-05-01/02/03 | day read book-set faithful; ambient f(count) | widget | `flutter test test/widget/features/analytics/presentation/widgets/cards/joy_calendar_card_test.dart` | ❌ W0 | ⬜ pending |
-| 46-07·T1 | 07 | 3 | OVW-02/JOY-01/02/REDES-02 | T-46-07-01/02 | union ⊆ analytics, zero home/* | (build) | `flutter analyze lib/features/analytics/` | ✅ | ⬜ pending |
-| 46-07·T2 | 07 | 3 | GUARD-02 | T-46-07-03 | anti-toxicity subjects scan-ready | widget | `flutter test test/widget/features/analytics/` | ✅ update | ⬜ pending |
-| 46-07·T3 | 07 | 3 | GUARD-02 | T-46-07-01 | isolation + grep-ban + single-joy-expr | full | `flutter test` | ✅ | ⬜ pending |
+| 46-05·T1 | 05 | 3 | JOY-01/02/REDES-03 | T-46-05-02/03 | ambient only; no target/streak/cross-period | widget | `flutter test test/widget/features/analytics/presentation/widgets/cards/joy_spend_card_test.dart` | ❌ W0 | ⬜ pending |
+| 46-05·T2 | 05 | 3 | JOY-01/02/REDES-03 | T-46-05-01/02/03 | day read book-set faithful; ambient f(count) | widget | `flutter test test/widget/features/analytics/presentation/widgets/cards/joy_calendar_card_test.dart` | ❌ W0 | ⬜ pending |
+| 46-07·T1 | 07 | 4 | OVW-02/JOY-01/02/REDES-02 | T-46-07-01/02 | union ⊆ analytics, zero home/* | (build) | `flutter analyze lib/features/analytics/` | ✅ | ⬜ pending |
+| 46-07·T2 | 07 | 4 | GUARD-02 | T-46-07-03 | anti-toxicity subjects scan-ready | widget | `flutter test test/widget/features/analytics/` | ✅ update | ⬜ pending |
+| 46-07·T3 | 07 | 4 | GUARD-02 | T-46-07-01 | isolation + grep-ban + single-joy-expr | full | `flutter test` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
