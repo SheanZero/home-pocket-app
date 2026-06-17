@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Phase 47 UI-SPEC approved
-last_updated: "2026-06-17T14:56:33.758Z"
-last_activity: 2026-06-17 -- Phase 47 execution started
+stopped_at: Completed 47-02-PLAN.md
+last_updated: "2026-06-17T14:59:32.746Z"
+last_activity: 2026-06-17
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 15
+  completed_plans: 16
   percent: 67
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 47 (i18n-macos-golden-uat) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
-Last activity: 2026-06-17 -- Phase 47 execution started
+Last activity: 2026-06-17
 
 ### Quick Tasks Completed
 
@@ -157,9 +157,9 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T14:56:06.508Z
-Stopped at: Phase 47 UI-SPEC approved
-Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UI-SPEC.md
+Last session: 2026-06-17T14:59:32.740Z
+Stopped at: Completed 47-02-PLAN.md
+Resume file: None
 
 ## Performance Metrics
 
@@ -191,6 +191,7 @@ Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UI-SPEC.md
 | Phase 46 P46-05 | ~30min | 2 tasks | 10 files |
 | Phase 46 P46-07 | ~35min | 3 tasks | 10 files |
 | Phase 47 P01 | 10min | 3 tasks | 9 files |
+| Phase 47 P02 | 4min | 1 tasks | 1 files |
 
 ## Decisions
 
@@ -244,6 +245,7 @@ Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UI-SPEC.md
 - [Phase 46]: [46-07] Deleted best_joy_card/kpi_hero_card/largest_expense_card/analytics_screen_section_header (D-A3; total_six_month_card + monthly_spend_trend_bar_chart already gone in 46-01). De-registered daily_vs_joy_card + per_category_breakdown_card (widget FILES retained, keep own tests; their refreshTargets fns removed from the registry). bestJoyMomentProvider/largestMonthlyExpenseProvider providers RETAINED — bestJoyMomentProvider is a HomeHero consumer, not dead-card-unique.
 - [Phase 46]: [46-07] Section-header ARB keys (analyticsGroupHeaderTime/Distribution/Stories) now orphaned (zero source consumers) — DEFERRED to Phase 47 ARB sweep (removal needs gen-l10n + force-add of gitignored generated files). JOY-01/JOY-02/REDES-03/GUARD-02 flipped to Complete now the round-5 B lineup is user-visible. Full suite 2971/2971 green; analyze 0.
 - [Phase 46]: [46-07] The STATE.md 46-01 sequencing blocker was ALREADY RESOLVED by 46-01 (it deleted the trend presentation consumers alongside the data layer); 46-07 verified absence + completed the integration. Marked resolved.
+- [Phase ?]: [Phase 47]: [47-02]: GetJoyCategoryAmountsUseCase refactored to a single-pass <String,int> accumulate keyed by l1AncestorOf (replaces the O(n·k) distinct-L1-set + per-L1 l1RollupFromTransactions loop); false 'There is NO second rollup loop here' docstring removed; D-11 single source intact; per-L1 amounts byte-identical (existing 6 unit tests green, unchanged); no findByBookIds widening; analyze 0 (WR-03/D-04, GUARD-04)
 
 ## Operator Next Steps
 
