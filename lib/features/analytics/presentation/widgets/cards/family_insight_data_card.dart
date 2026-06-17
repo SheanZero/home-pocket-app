@@ -70,15 +70,13 @@ class FamilyInsightDataCard extends ConsumerWidget {
     );
   }
 
-  /// Minimal [AnalyticsCardContext] for this card's single target. `bookId`,
-  /// `currencyCode` and `trendAnchor` are unused by
-  /// `familyInsightRefreshTargets`.
+  /// Minimal [AnalyticsCardContext] for this card's single target. `bookId` and
+  /// `trendAnchor` are unused by `familyInsightRefreshTargets`.
   AnalyticsCardContext _ctx() => AnalyticsCardContext(
     bookId: '',
     startDate: startDate,
     endDate: endDate,
     trendAnchor: DateTime(endDate.year, endDate.month),
-    currencyCode: 'JPY',
     joyMetricVariant: joyMetricVariant,
     isGroupMode: isGroupMode,
     locale: locale,

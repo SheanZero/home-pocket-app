@@ -31,14 +31,12 @@ class SatisfactionHistogramCard extends ConsumerWidget {
     required this.bookId,
     required this.startDate,
     required this.endDate,
-    required this.currencyCode,
     required this.joyMetricVariant,
   });
 
   final String bookId;
   final DateTime startDate;
   final DateTime endDate;
-  final String currencyCode;
   final JoyMetricVariant joyMetricVariant;
 
   @override
@@ -52,7 +50,9 @@ class SatisfactionHistogramCard extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
-        currencyCode: currencyCode,
+        // JPY-only is a v1 data-layer truth (WR-01 / D-02); happinessReportProvider
+        // still requires a currency key, so feed it the literal — not a dropped field.
+        currencyCode: 'JPY',
         joyMetricVariant: joyMetricVariant,
       ),
     );
@@ -96,7 +96,6 @@ class SatisfactionHistogramCard extends ConsumerWidget {
     startDate: startDate,
     endDate: endDate,
     trendAnchor: DateTime(endDate.year, endDate.month),
-    currencyCode: currencyCode,
     joyMetricVariant: joyMetricVariant,
     isGroupMode: false,
     locale: const Locale('ja'),
@@ -113,7 +112,9 @@ List<ProviderBase<Object?>> satisfactionHistogramRefreshTargets(
     bookId: ctx.bookId,
     startDate: ctx.startDate,
     endDate: ctx.endDate,
-    currencyCode: ctx.currencyCode,
+    // JPY-only literal (WR-01 / D-02) — happinessReportProvider keeps its required
+    // currency key; only the AnalyticsCardContext.currencyCode plumbing was removed.
+    currencyCode: 'JPY',
     joyMetricVariant: ctx.joyMetricVariant,
   ),
   satisfactionDistributionProvider(

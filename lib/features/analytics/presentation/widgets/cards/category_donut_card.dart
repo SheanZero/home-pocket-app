@@ -88,7 +88,6 @@ class CategoryDonutCard extends ConsumerWidget {
     startDate: startDate,
     endDate: endDate,
     trendAnchor: DateTime(endDate.year, endDate.month),
-    currencyCode: 'JPY',
     joyMetricVariant: joyMetricVariant,
     isGroupMode: false,
     locale: const Locale('ja'),

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 
-import '../../../features/accounting/presentation/providers/repository_providers.dart'
-    as accounting_providers;
 import '../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
@@ -36,7 +34,6 @@ class AnalyticsCardContext {
     required this.startDate,
     required this.endDate,
     required this.trendAnchor,
-    required this.currencyCode,
     required this.joyMetricVariant,
     required this.isGroupMode,
     required this.locale,
@@ -49,9 +46,6 @@ class AnalyticsCardContext {
   /// `DateTime(endDate.year, endDate.month)` — the month-anchored key the
   /// 6-month expense-trend provider is keyed on (NOT start/end).
   final DateTime trendAnchor;
-
-  /// `bookByIdProvider.value?.currency ?? 'JPY'`.
-  final String currencyCode;
 
   final JoyMetricVariant joyMetricVariant;
   final bool isGroupMode;
@@ -111,12 +105,6 @@ AnalyticsCardContext buildAnalyticsCardContext(
   final startDate = range.start;
   final endDate = range.end;
   final trendAnchor = DateTime(endDate.year, endDate.month);
-  final currencyCode =
-      ref
-          .watch(accounting_providers.bookByIdProvider(bookId: bookId))
-          .value
-          ?.currency ??
-      'JPY';
   final joyMetricVariant = ref.watch(selectedJoyMetricVariantProvider);
   final isGroupMode = ref.watch(isGroupModeProvider);
   final locale =
@@ -128,7 +116,6 @@ AnalyticsCardContext buildAnalyticsCardContext(
     startDate: startDate,
     endDate: endDate,
     trendAnchor: trendAnchor,
-    currencyCode: currencyCode,
     joyMetricVariant: joyMetricVariant,
     isGroupMode: isGroupMode,
     locale: locale,
@@ -214,7 +201,6 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
       bookId: ctx.bookId,
       startDate: ctx.startDate,
       endDate: ctx.endDate,
-      currencyCode: ctx.currencyCode,
       joyMetricVariant: ctx.joyMetricVariant,
     ),
     refreshTargets: satisfactionHistogramRefreshTargets,

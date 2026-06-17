@@ -72,7 +72,6 @@ AnalyticsCardContext _ctx({required bool isGroupMode}) {
     startDate: startDate,
     endDate: endDate,
     trendAnchor: DateTime(endDate.year, endDate.month),
-    currencyCode: 'JPY',
     joyMetricVariant: JoyMetricVariant.all,
     isGroupMode: isGroupMode,
     locale: const Locale('ja'),
@@ -282,7 +281,9 @@ void main() {
             bookId: ctx.bookId,
             startDate: ctx.startDate,
             endDate: ctx.endDate,
-            currencyCode: ctx.currencyCode,
+            // Matches the card's literal 'JPY' (WR-01 / D-02) — currencyCode was
+            // removed from AnalyticsCardContext, kept as a provider key literal.
+            currencyCode: 'JPY',
             joyMetricVariant: ctx.joyMetricVariant,
           ),
           satisfactionDistributionProvider(
