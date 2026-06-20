@@ -365,4 +365,63 @@ void main() {
       expect(current.above, isNot(previous.above));
     },
   );
+
+  testWidgets(
+    'Part1② (260620-v2m, 参考图 #6): the 本月 endpoint label is FORCE-anchored '
+    'ABOVE the marker even when 本月 < 上月 (no comparison-driven flip); the 上月 '
+    'reference still takes the OPPOSITE side',
+    (tester) async {
+      // 本月 (400) < 上月 (500) at the comparison day. Under the OLD comparison
+      // rule the 本月 label would drop BELOW; Part1② pins it ABOVE the endpoint
+      // marker, so the 上月 reference goes below (opposite).
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [100, 250, 400]),
+            previousMonth: _series(const [120, 300, 500]),
+            seriesColor: AppPalette.light.daily,
+            anchor: _anchor,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final labels = tester
+          .widgetList<WithinMonthEndpointAnnotation>(_endpointLabels())
+          .toList();
+      final current = labels.firstWhere((l) => l.isCurrent);
+      final previous = labels.firstWhere((l) => !l.isCurrent);
+      // 本月 ALWAYS above (Part1②); 上月 opposite.
+      expect(current.above, isTrue, reason: '本月 force-above regardless of <');
+      expect(previous.above, isFalse);
+    },
+  );
+
+  testWidgets(
+    'Part1①③ (260620-v2m): 本月 line is a softened CURVE with below-line '
+    'gradient fill; 上月 reference is also curved with no fill',
+    (tester) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [100, 300, 600]),
+            previousMonth: _series(const [120, 250, 500]),
+            seriesColor: AppPalette.light.daily,
+            anchor: _anchor,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final bars = _bars(tester);
+      // 本月: curved + below-line gradient area visible.
+      expect(bars[0].isCurved, isTrue);
+      expect(bars[0].preventCurveOverShooting, isTrue);
+      expect(bars[0].belowBarData.show, isTrue);
+      expect(bars[0].belowBarData.gradient, isNotNull);
+      // 上月: curved too (visual consistency), but no fill.
+      expect(bars[1].isCurved, isTrue);
+      expect(bars[1].belowBarData.show, isFalse);
+    },
+  );
 }

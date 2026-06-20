@@ -135,13 +135,12 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
     );
 
     // Comparison day = the current line's endpoint day (the use case made this
-    // = today/month-end). No clock read here (D-5).
+    // = today/month-end). No clock read here (D-5). The 本月 label is now
+    // force-anchored above its endpoint (Part1②), so the 本月/上月 comparison no
+    // longer drives the 本月 side; [labelAbove] is retained as a pure helper and
+    // still unit-tested (Test 12) for the documented comparison semantic.
     final comparisonDay = lastPoint.day;
     final prevPoint = _hasReference ? _prevAtComparison(comparisonDay) : null;
-    final currentAbove = labelAbove(
-      currentEndAmount: lastPoint.cumulativeAmount,
-      prevAtComparisonAmount: prevPoint?.cumulativeAmount ?? 0,
-    );
 
     return SizedBox(
       height: height,
@@ -158,30 +157,38 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
           final overlays = <Widget>[];
 
-          // 本月 endpoint label — anchored at the line's last point, nudged
-          // up/down by the comparison rule (D-3).
+          // Part1② (参考图 #6「应在标注终点 marker 的正上方」): the 本月 label is
+          // FORCE-anchored directly ABOVE the endpoint marker (horizontally
+          // centered on `px(lastPoint.day)`), regardless of the 本月/上月
+          // comparison. `_positionedLabel` still falls back to BELOW only when
+          // the above position would clip the top edge (端点贴顶). The 上月 label
+          // keeps the opposite-position comparison rule (D-4) so the two labels
+          // don't collide.
+          const currentLabelAbove = true;
           overlays.add(
             _positionedLabel(
               context: context,
               constraints: constraints,
               x: px(lastPoint.day),
               y: py(lastPoint.cumulativeAmount),
-              above: currentAbove,
+              above: currentLabelAbove,
               child: WithinMonthEndpointAnnotation(
                 date: DateTime(anchor.year, anchor.month, lastPoint.day),
                 amount: lastPoint.cumulativeAmount,
                 locale: locale,
                 color: seriesColor,
                 isCurrent: true,
-                above: currentAbove,
+                above: currentLabelAbove,
               ),
             ),
           );
 
           // 上月 endpoint label (spend side only) — anchored at its
-          // comparison-day point, placed OPPOSITE to the 本月 label (D-4).
+          // comparison-day point, placed OPPOSITE to the (now force-above) 本月
+          // label (D-4) so it never overlaps. Since 本月 is pinned ABOVE, the
+          // 上月 reference is pinned BELOW.
           if (prevPoint != null) {
-            final prevAbove = !currentAbove;
+            const prevAbove = !currentLabelAbove;
             overlays.add(
               _positionedLabel(
                 context: context,
@@ -276,13 +283,17 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                   borderData: FlBorderData(show: false),
                   lineTouchData: const LineTouchData(enabled: false),
                   lineBarsData: [
-                    // 本月 — solid, stroke-cap round, endpoint dot at the last
-                    // spot only (no start dot — D-2).
+                    // 本月 — softened CURVE (Part1①: 角度不要太锐化), stroke-cap
+                    // round, endpoint dot at the last spot only (no start dot —
+                    // D-2). `preventCurveOverShooting` keeps the smoothed curve
+                    // from dipping below the 0 baseline / overshooting points.
                     LineChartBarData(
                       spots: _spots(currentMonth),
                       color: seriesColor,
                       barWidth: 2.5,
-                      isCurved: false,
+                      isCurved: true,
+                      curveSmoothness: 0.22,
+                      preventCurveOverShooting: true,
                       isStrokeCapRound: true,
                       dotData: FlDotData(
                         show: true,
@@ -295,16 +306,34 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                           strokeColor: palette.card,
                         ),
                       ),
-                      belowBarData: BarAreaData(show: false),
+                      // Part1③ (参考图 #8): below-line gradient shadow — series
+                      // colour → transparent (top→bottom). Colour is driven by
+                      // the passed `seriesColor` (ADR-019 palette, D1) — never a
+                      // hardcoded hex. Only the 本月 line fills (上月 stays
+                      // unfilled below) to avoid a muddy double fill.
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            seriesColor.withValues(alpha: 0.18),
+                            seriesColor.withValues(alpha: 0.0),
+                          ],
+                        ),
+                      ),
                     ),
                     // 上月 — dashed muted-GRAY reference, ONLY on the spend side
-                    // (never joy, D-E1).
+                    // (never joy, D-E1). Same softened curve so both lines read
+                    // visually consistent; no below-line fill.
                     if (_hasReference)
                       LineChartBarData(
                         spots: _spots(previousMonth!),
                         color: palette.textTertiary,
                         barWidth: 2,
-                        isCurved: false,
+                        isCurved: true,
+                        curveSmoothness: 0.22,
+                        preventCurveOverShooting: true,
                         dashArray: const [4, 4],
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
