@@ -132,7 +132,7 @@
 - [x] **Phase 44: 数据与用例补全 (Data / Use-Case Additions — reuse-first)** — 复用优先确认现状 reuse 图；按选定方向至多新增一条只读「分类下钻」路径（无预算、无 Drift 迁移）；窗口边界经 `DateBoundaries`/`TimeWindow` 规范化 (completed 2026-06-16)
 - [x] **Phase 45: 展示外壳重建 (Presentation Shell Rebuild)** — 瘦身 `analytics_screen.dart` 外壳 + 数据驱动 `_refresh()` + `widgets/cards/` 卡片体系；HomeHero 隔离由结构保证（不读/不失效任何 `home/*` provider） (completed 2026-06-17)
 - [x] **Phase 46: 卡片体系 (Cards)** (7/7 plans) — 总览 / 趋势 / 分类下钻 / 悦己×4，复用既有 chart widget + fl_chart 1.2.0 原生 label（删除直方图 Stack hack）；情感化呈现「已花悦己」满足感，全程反游戏化 — round-5 B flat 5-card lineup LIVE 2026-06-17
-- [ ] **Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT** — 三语 ARB parity；每张新卡加入 `anti_toxicity_*_test` 禁词扫描；macOS golden 从零撰写/重基线；全量 `flutter test` 作为逐波门禁；真机视觉 UAT
+- [x] **Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT** — 三语 ARB parity；每张新卡加入 `anti_toxicity_*_test` 禁词扫描；macOS golden 从零撰写/重基线；全量 `flutter test` 作为逐波门禁；真机视觉 UAT (completed 2026-06-20)
 
 ### Phase 43: HTML 设计探索关卡 (Design Gate — NO production code)
 
@@ -215,7 +215,7 @@
 
 **Wave 4** (full-suite gate + on-device UAT — blocking)
 
-- [ ] 47-06-PLAN.md — FULL `flutter test` per-wave gate (isolation + 3 anti-toxicity + architecture/CJK/density/logging-privacy) + analyze 0 + coverage ≥80%, then blocking on-device D-10 visual UAT (real iOS, locale=ja; D-12 no defer path) (GUARD-04, GUARD-05)
+- [x] 47-06-PLAN.md — FULL `flutter test` per-wave gate (isolation + 3 anti-toxicity + architecture/CJK/density/logging-privacy) + analyze 0 + coverage ≥80%, then blocking on-device D-10 visual UAT (real iOS, locale=ja; D-12 no defer path) (GUARD-04, GUARD-05)
 
 **UI hint**: yes
 
@@ -231,4 +231,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | P43-46 done; Phase 47 planned (6 plans, 4 waves) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | P43-47 all plans done (Phase 47: 6/6); milestone closeout pending orchestrator verify | In progress | - |

@@ -58,7 +58,7 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 - [x] **GUARD-02**: Anti-gamification — every new card joins the `anti_toxicity_*_test` forbidden-substring sweep (ja/zh/en × all states); `FamilyHappiness` stays aggregate-only (no per-member fields); single-Joy-expression preserved (`grep density|joyPerYen lib/` == 0)
 - [x] **GUARD-03**: i18n — ARB parity across ja/zh/en for all new copy; `flutter gen-l10n` clean; 生存/灵魂 grep-ban green (ADR-017)
 - [x] **GUARD-04**: macOS golden re-baseline for new/changed analytics surfaces (chart goldens do not exist today — authored from scratch on macOS, isolated from any library change); full `flutter test` suite as the per-wave gate
-- [ ] **GUARD-05**: On-device visual UAT of the redesigned page
+- [x] **GUARD-05**: On-device visual UAT of the redesigned page
 
 ---
 
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GUARD-02 | Phase 46 | Complete |
 | GUARD-03 | Phase 47 | Complete |
 | GUARD-04 | Phase 47 | Complete |
-| GUARD-05 | Phase 47 | Pending |
+| GUARD-05 | Phase 47 | Complete |
 
 ---
 *Defined 2026-06-15 — v1.8 统计页面重设计. 20 requirements across 7 categories. Phase numbering continues from v1.7's Phase 42 (starts at Phase 43). Research basis: `.planning/research/SUMMARY.md` (+ STACK/FEATURES/ARCHITECTURE/PITFALLS).*

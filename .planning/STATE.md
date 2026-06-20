@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
-status: executing
-stopped_at: 47-06-PLAN.md Task 2 — BLOCKED at on-device D-10 UAT (human-verify)
-last_updated: "2026-06-17T15:40:00.000Z"
-last_activity: 2026-06-17
+status: verifying
+stopped_at: 47-06-PLAN.md complete — full-suite gate green + on-device D-10 UAT all 10 PASS (user-approved 2026-06-20); Phase 47 ready for verification (orchestrator owns phase closeout)
+last_updated: "2026-06-20T05:01:37.306Z"
+last_activity: 2026-06-20
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 20
-  completed_plans: 19
-  percent: 67
+  completed_plans: 20
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 ## Current Position
 
-Phase: 47 (i18n-macos-golden-uat) — EXECUTING
-Plan: 6 of 6
-Status: 47-06 Task 1 GREEN (full suite 3057/3057, analyze 0, cleaned coverage 80.48%); Task 2 BLOCKED at on-device D-10 UAT (human-verify, blocking — no defer path)
-Last activity: 2026-06-17
+Phase: 47 (i18n-macos-golden-uat) — ALL PLANS COMPLETE (ready for verification)
+Plan: 6 of 6 — COMPLETE
+Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
+Last activity: 2026-06-20
 
 ### Quick Tasks Completed
 
@@ -157,9 +157,9 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T15:40:00.000Z
-Stopped at: 47-06-PLAN.md Task 2 — awaiting human on-device D-10 UAT (locale=ja, physical iOS)
-Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UAT.md
+Last session: 2026-06-20T05:01:26.828Z
+Stopped at: 47-06-PLAN.md complete — full-suite gate green + on-device D-10 UAT all 10 PASS (user-approved 2026-06-20); Phase 47 all 6 plans done, ready for verification
+Resume file: None
 
 ## Performance Metrics
 
@@ -195,6 +195,7 @@ Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UAT.md
 | Phase 47 P03 | 6min | 1 tasks | 7 files |
 | Phase 47 P04 | 8min | 1 tasks | 1 files |
 | Phase 47 P05 | 11min | 3 tasks | 56 files |
+| Phase 47 P06 | 25min | 2 tasks | 4 files |
 
 ## Decisions
 
@@ -252,6 +253,7 @@ Resume file: .planning/phases/47-i18n-macos-golden-uat/47-UAT.md
 - [Phase 47]: [47-03]: Deleted 3 orphan section-header ARB keys (analyticsGroupHeaderTime/Distribution/Stories) symmetrically across en/ja/zh + regenerated lib/generated/ via gen-l10n + git add -f (Phase-46 gitignored-yet-tracked gotcha); analyticsCategoryDonutOther retained for 47-01 WR-02; parity green, analyze 0 (GUARD-03/D-15)
 - [Phase 47]: [47-04]: Authored anti_toxicity_phase47_test.dart (D-14) — 36-case sweep over the 5 round-5 B cards × en/ja/zh × {value/empty/other/inline-expand/self-hide}; forbidden en/ja/zh lists copied VERBATIM from anti_toxicity_phase16 (D-13, never relaxed); WR-02 >10-L1 donut Other state exercised so analyticsCategoryDonutOther sweeps clean (D-03); per-state overrides LOCAL+complete + added _expectRenderedText/donut_legend_row_other/inline_panel coverage guards so a failed override can't trivialize the sweep (Pitfall 1); 36/36 green, analyze 0 (GUARD-02/GUARD-03). NOTE: gsd-tools CLI unavailable in this exec env — STATE.md/ROADMAP.md updated by hand.
 - [Phase ?]: [47-05] Authored 8 golden tests + 48 macOS PNG baselines for round-5 B analytics (GUARD-04 closed); all wrap PRODUCTION AppTheme so context.palette resolves real ADR-019 — bare ThemeData validates layout but NOT palette. Scoped --update-goldens to the 8 new files (clean diff attribution). Off-macOS reduces to baseline-existence via flutter_test_config.
+- [Phase ?]: [Phase 47]: 47-06: full flutter test gate 3057/3057 + analyze 0 + cleaned coverage 80.48% (GUARD-04); on-device D-10 visual UAT all 10 items PASS on physical iOS locale=ja, user-approved 2026-06-20 (GUARD-05, D-12 no defer path). Plan 6/6 — Phase 47 ready_for_verification.
 
 ## Operator Next Steps
 
