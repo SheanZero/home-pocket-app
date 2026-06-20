@@ -65,6 +65,9 @@ class JoyCalendarCard extends ConsumerWidget {
       data: (counts) => AnalyticsDataCard(
         title: S.of(context).analyticsCardTitleJoyCalendar,
         caption: S.of(context).analyticsCardCaptionJoyCalendar,
+        // round-5 r5 §2a: drop the in-card title/caption — the section header
+        // already labels it (same handling as the donut + trend cards).
+        showHeader: false,
         child: _JoyCalendarBody(
           bookId: bookId,
           anchor: ctx.trendAnchor,

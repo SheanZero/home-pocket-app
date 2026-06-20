@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/analytics_category_palette.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 
 /// 小确幸日历 — a CUSTOM month heatmap grid (R-2, GATE-04).
 ///
-/// NOT fl_chart: a 7-column [GridView] month grid. Each day cell's color depth is
-/// a CONTINUOUS `f(per-day joy COUNT)` ambient mapping (`Color.lerp(base, joy, t)`
-/// — the same idiom as `satisfaction_distribution_histogram.dart`'s
-/// `_colorForScore`), explicitly NOT a streak / consecutive-days indicator
-/// (ADR-016 §5). Days with 0 joy render the base/empty color.
+/// NOT fl_chart: a 7-column [GridView] month grid. Each day cell's color is a
+/// DISCRETE `f(per-day joy COUNT)` heat bucket (`AnalyticsCategoryPalette.heat`,
+/// round-5 r5 §2d — 0→heat0, 1→heat1, 2→heat2, ≥3→heat3), explicitly NOT a streak
+/// / consecutive-days indicator (ADR-016 §5). Days with 0 joy render heat0.
 ///
-/// The grid leads with the correct weekday offset for day 1 (blank leading cells)
-/// and renders exactly the anchored month's day count. Tapping a day cell fires
+/// The grid leads with a Monday-first weekday header row and the correct weekday
+/// offset for day 1 (transparent leading cells), then renders exactly the anchored
+/// month's day count, with a discrete-heat legend + cal-cap below. Tapping a day
+/// cell fires
 /// [onDayTap]; the parent holds the [selectedDay] and renders the inline panel
 /// (D-C1 — the card grows in place, NOT a sheet/route).
 class JoyCalendarHeatmap extends StatelessWidget {
@@ -40,6 +42,7 @@ class JoyCalendarHeatmap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final l10n = S.of(context);
 
     final year = anchor.year;
     final month = anchor.month;
@@ -49,18 +52,23 @@ class JoyCalendarHeatmap extends StatelessWidget {
     // (Sun); render a Monday-first grid → offset = weekday - 1.
     final firstWeekday = DateTime(year, month, 1).weekday;
     final leadingBlanks = firstWeekday - 1;
-    final maxCount = countByDay.values.isEmpty
-        ? 0
-        : countByDay.values.reduce((a, b) => a > b ? a : b);
+
+    // §2f: 本月有悦己的天数 = days with count > 0.
+    final joyDays = countByDay.values.where((c) => c > 0).length;
 
     final cells = <Widget>[
-      for (var i = 0; i < leadingBlanks; i++) const SizedBox.shrink(),
+      // §2c: leading slots are TRANSPARENT placeholders (NOT SizedBox.shrink,
+      // which collapses and breaks the Monday-first column alignment). Keep them
+      // keyless — a shared ValueKey across multiple GridView children collides in
+      // the sliver child-element list and asserts.
+      for (var i = 0; i < leadingBlanks; i++) const SizedBox.expand(),
       for (var day = 1; day <= daysInMonth; day++)
         _DayCell(
           key: ValueKey('joy_day_$day'),
           day: day,
           count: countByDay[day] ?? 0,
-          color: _depthColor(countByDay[day] ?? 0, maxCount, palette),
+          // §2d: discrete heat0..heat3 by count (NOT a continuous lerp).
+          color: AnalyticsCategoryPalette.heatForCount(countByDay[day] ?? 0),
           selected:
               selectedDay != null &&
               selectedDay!.year == year &&
@@ -74,30 +82,58 @@ class JoyCalendarHeatmap extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // §2b: Monday-first weekday header row (mock `.wd`).
+        Row(
+          children: [
+            for (final label in <String>[
+              l10n.analyticsCalWeekdayMon,
+              l10n.analyticsCalWeekdayTue,
+              l10n.analyticsCalWeekdayWed,
+              l10n.analyticsCalWeekdayThu,
+              l10n.analyticsCalWeekdayFri,
+              l10n.analyticsCalWeekdaySat,
+              l10n.analyticsCalWeekdaySun,
+            ])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: palette.textTertiary,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
         GridView.count(
           crossAxisCount: 7,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          // Slightly wider-than-tall cells keep the 6-row month grid compact so
-          // the card stays a reasonable height (lives in the analytics scroll).
-          childAspectRatio: 1.3,
-          mainAxisSpacing: 4,
-          crossAxisSpacing: 4,
+          // §2c: square cells, gap 6.
+          childAspectRatio: 1,
+          mainAxisSpacing: 6,
+          crossAxisSpacing: 6,
           children: cells,
         ),
         const SizedBox(height: 14),
         _CalLegend(palette: palette),
+        // §2f: cal-cap below the legend (was previously in the deleted caption).
+        const SizedBox(height: 10),
+        Text(
+          l10n.analyticsCalCap(joyDays),
+          style: AppTextStyles.caption.copyWith(
+            fontSize: 11,
+            height: 1.55,
+            color: palette.textTertiary,
+          ),
+        ),
       ],
     );
-  }
-
-  /// Continuous ambient depth: 0 joy → base; more joy → toward the joy hue.
-  /// NOT a streak (the depth is a per-day count function, not consecutive-days).
-  Color _depthColor(int count, int maxCount, AppPalette palette) {
-    if (count <= 0) return palette.backgroundMuted;
-    if (maxCount <= 0) return palette.backgroundMuted;
-    final t = count / maxCount;
-    return Color.lerp(palette.joyLight, palette.joy, t)!;
   }
 }
 
@@ -123,23 +159,36 @@ class _DayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // §2d day-number colour: 0→tertiary; 1 (heat1)→joyText; ≥2 (heat2/heat3)→white.
+    final Color dayNumberColor = count <= 0
+        ? palette.textTertiary
+        : count == 1
+        ? palette.joyText
+        : Colors.white;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           border: selected
               ? Border.all(color: palette.joyText, width: 2)
               : null,
         ),
-        child: Center(
-          child: Text(
-            '$day',
-            style: AppTextStyles.caption.copyWith(
-              color: count > 0 ? palette.joyText : palette.textSecondary,
-              fontWeight: count > 0 ? FontWeight.w600 : FontWeight.w400,
+        // §2d: day number top-right (NOT centered).
+        child: Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 3, right: 4),
+            child: Text(
+              '$day',
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w700,
+                color: dayNumberColor,
+              ),
             ),
           ),
         ),
@@ -149,10 +198,9 @@ class _DayCell extends StatelessWidget {
 }
 
 /// The 淡 [4 swatches] 浓 + neutral-note heat legend below the calendar (round-5
-/// r5 mock `.cal-legend`). The 4 swatches lerp `backgroundMuted`→`joy` at fixed
-/// stops — illustrative of the continuous cell depth (the mock's discrete heat0–3
-/// have no palette token; exact hex not required, ADR-012-safe). The note says
-/// depth = per-day joy COUNT (not a streak).
+/// r5 mock `.cal-legend`). The 4 swatches are the DISCRETE
+/// `AnalyticsCategoryPalette.heat[0..3]` ramp (§2e), matching the day-cell heat
+/// buckets exactly. The note says depth = per-day joy COUNT (not a streak).
 class _CalLegend extends StatelessWidget {
   const _CalLegend({required this.palette});
 
@@ -161,10 +209,8 @@ class _CalLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final swatches = <Color>[
-      for (final t in const [0.0, 0.34, 0.67, 1.0])
-        Color.lerp(palette.backgroundMuted, palette.joy, t)!,
-    ];
+    // §2e: discrete heat0..heat3 swatches (NOT a lerp).
+    const swatches = AnalyticsCategoryPalette.heat;
 
     return Row(
       children: [
