@@ -2882,5 +2882,67 @@
   "@rateChangedUndo": {
     "description": "Undo action on the rate-changed toast — restores the old rate (Phase 42-09, ADR-022 D-03)"
   },
+  "analyticsDonutHeroCap": "Where your money went this month",
+  "@analyticsDonutHeroCap": {
+    "description": "Category donut hero-top caption (round5 r5 mock .hero-cap) — neutral framing of where money went"
+  },
+  "analyticsDonutHeroTag": "{count} entries · month {month}",
+  "@analyticsDonutHeroTag": {
+    "description": "Category donut hero-top pill (round5 r5 mock .hero-tag) — total expense entry count + month",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsDonutCenterCount": "{count} entries",
+  "@analyticsDonutCenterCount": {
+    "description": "Category donut center third line (round5 r5 mock .ctr .n) — total expense entry count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCalCap": "{days} days this month held a small joy · just which days",
+  "@analyticsCalCap": {
+    "description": "Joy calendar bottom caption (round5 r5 mock .cal-cap) — number of days that held a small joy, ADR-012 neutral (no streak/compare)",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCalWeekdayMon": "M",
+  "@analyticsCalWeekdayMon": {
+    "description": "Joy calendar weekday header — Monday (Monday-first grid)"
+  },
+  "analyticsCalWeekdayTue": "T",
+  "@analyticsCalWeekdayTue": {
+    "description": "Joy calendar weekday header — Tuesday"
+  },
+  "analyticsCalWeekdayWed": "W",
+  "@analyticsCalWeekdayWed": {
+    "description": "Joy calendar weekday header — Wednesday"
+  },
+  "analyticsCalWeekdayThu": "T",
+  "@analyticsCalWeekdayThu": {
+    "description": "Joy calendar weekday header — Thursday"
+  },
+  "analyticsCalWeekdayFri": "F",
+  "@analyticsCalWeekdayFri": {
+    "description": "Joy calendar weekday header — Friday"
+  },
+  "analyticsCalWeekdaySat": "S",
+  "@analyticsCalWeekdaySat": {
+    "description": "Joy calendar weekday header — Saturday"
+  },
+  "analyticsCalWeekdaySun": "S",
+  "@analyticsCalWeekdaySun": {
+    "description": "Joy calendar weekday header — Sunday"
+  },
   "@@locale": "en"
 }

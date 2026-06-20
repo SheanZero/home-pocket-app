@@ -2882,5 +2882,67 @@
   "@rateChangedUndo": {
     "description": "Undo action on the rate-changed toast — restores the old rate (Phase 42-09, ADR-022 D-03)"
   },
+  "analyticsDonutHeroCap": "今月、お金はどこへ",
+  "@analyticsDonutHeroCap": {
+    "description": "Category donut hero-top caption (round5 r5 mock .hero-cap) — neutral framing of where money went"
+  },
+  "analyticsDonutHeroTag": "{count}件 · {month}月",
+  "@analyticsDonutHeroTag": {
+    "description": "Category donut hero-top pill (round5 r5 mock .hero-tag) — total expense entry count + month",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsDonutCenterCount": "{count}件",
+  "@analyticsDonutCenterCount": {
+    "description": "Category donut center third line (round5 r5 mock .ctr .n) — total expense entry count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCalCap": "今月は {days} 日、自分のための小さな幸せ · 「あった日」を見るだけ",
+  "@analyticsCalCap": {
+    "description": "Joy calendar bottom caption (round5 r5 mock .cal-cap) — number of days that held a small joy, ADR-012 neutral (no streak/compare)",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCalWeekdayMon": "月",
+  "@analyticsCalWeekdayMon": {
+    "description": "Joy calendar weekday header — Monday (Monday-first grid)"
+  },
+  "analyticsCalWeekdayTue": "火",
+  "@analyticsCalWeekdayTue": {
+    "description": "Joy calendar weekday header — Tuesday"
+  },
+  "analyticsCalWeekdayWed": "水",
+  "@analyticsCalWeekdayWed": {
+    "description": "Joy calendar weekday header — Wednesday"
+  },
+  "analyticsCalWeekdayThu": "木",
+  "@analyticsCalWeekdayThu": {
+    "description": "Joy calendar weekday header — Thursday"
+  },
+  "analyticsCalWeekdayFri": "金",
+  "@analyticsCalWeekdayFri": {
+    "description": "Joy calendar weekday header — Friday"
+  },
+  "analyticsCalWeekdaySat": "土",
+  "@analyticsCalWeekdaySat": {
+    "description": "Joy calendar weekday header — Saturday"
+  },
+  "analyticsCalWeekdaySun": "日",
+  "@analyticsCalWeekdaySun": {
+    "description": "Joy calendar weekday header — Sunday"
+  },
   "@@locale": "ja"
 }

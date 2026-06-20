@@ -2273,4 +2273,43 @@ class SEn extends S {
 
   @override
   String get rateChangedUndo => 'Undo';
+
+  @override
+  String get analyticsDonutHeroCap => 'Where your money went this month';
+
+  @override
+  String analyticsDonutHeroTag(int count, int month) {
+    return '$count entries · month $month';
+  }
+
+  @override
+  String analyticsDonutCenterCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String analyticsCalCap(int days) {
+    return '$days days this month held a small joy · just which days';
+  }
+
+  @override
+  String get analyticsCalWeekdayMon => 'M';
+
+  @override
+  String get analyticsCalWeekdayTue => 'T';
+
+  @override
+  String get analyticsCalWeekdayWed => 'W';
+
+  @override
+  String get analyticsCalWeekdayThu => 'T';
+
+  @override
+  String get analyticsCalWeekdayFri => 'F';
+
+  @override
+  String get analyticsCalWeekdaySat => 'S';
+
+  @override
+  String get analyticsCalWeekdaySun => 'S';
 }

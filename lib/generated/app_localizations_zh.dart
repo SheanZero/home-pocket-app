@@ -2224,4 +2224,43 @@ class SZh extends S {
 
   @override
   String get rateChangedUndo => '撤销';
+
+  @override
+  String get analyticsDonutHeroCap => '这个月，钱花在哪';
+
+  @override
+  String analyticsDonutHeroTag(int count, int month) {
+    return '$count 笔 · $month 月';
+  }
+
+  @override
+  String analyticsDonutCenterCount(int count) {
+    return '$count 笔';
+  }
+
+  @override
+  String analyticsCalCap(int days) {
+    return '这个月有 $days 天，为自己留下了一点小确幸 · 只看「哪些天发生过」';
+  }
+
+  @override
+  String get analyticsCalWeekdayMon => '一';
+
+  @override
+  String get analyticsCalWeekdayTue => '二';
+
+  @override
+  String get analyticsCalWeekdayWed => '三';
+
+  @override
+  String get analyticsCalWeekdayThu => '四';
+
+  @override
+  String get analyticsCalWeekdayFri => '五';
+
+  @override
+  String get analyticsCalWeekdaySat => '六';
+
+  @override
+  String get analyticsCalWeekdaySun => '日';
 }

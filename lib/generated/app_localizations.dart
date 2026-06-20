@@ -4200,6 +4200,72 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Undo'**
   String get rateChangedUndo;
+
+  /// Category donut hero-top caption (round5 r5 mock .hero-cap) — neutral framing of where money went
+  ///
+  /// In en, this message translates to:
+  /// **'Where your money went this month'**
+  String get analyticsDonutHeroCap;
+
+  /// Category donut hero-top pill (round5 r5 mock .hero-tag) — total expense entry count + month
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries · month {month}'**
+  String analyticsDonutHeroTag(int count, int month);
+
+  /// Category donut center third line (round5 r5 mock .ctr .n) — total expense entry count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String analyticsDonutCenterCount(int count);
+
+  /// Joy calendar bottom caption (round5 r5 mock .cal-cap) — number of days that held a small joy, ADR-012 neutral (no streak/compare)
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days this month held a small joy · just which days'**
+  String analyticsCalCap(int days);
+
+  /// Joy calendar weekday header — Monday (Monday-first grid)
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get analyticsCalWeekdayMon;
+
+  /// Joy calendar weekday header — Tuesday
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get analyticsCalWeekdayTue;
+
+  /// Joy calendar weekday header — Wednesday
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get analyticsCalWeekdayWed;
+
+  /// Joy calendar weekday header — Thursday
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get analyticsCalWeekdayThu;
+
+  /// Joy calendar weekday header — Friday
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get analyticsCalWeekdayFri;
+
+  /// Joy calendar weekday header — Saturday
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get analyticsCalWeekdaySat;
+
+  /// Joy calendar weekday header — Sunday
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get analyticsCalWeekdaySun;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

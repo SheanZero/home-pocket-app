@@ -2232,4 +2232,43 @@ class SJa extends S {
 
   @override
   String get rateChangedUndo => '元に戻す';
+
+  @override
+  String get analyticsDonutHeroCap => '今月、お金はどこへ';
+
+  @override
+  String analyticsDonutHeroTag(int count, int month) {
+    return '$count件 · $month月';
+  }
+
+  @override
+  String analyticsDonutCenterCount(int count) {
+    return '$count件';
+  }
+
+  @override
+  String analyticsCalCap(int days) {
+    return '今月は $days 日、自分のための小さな幸せ · 「あった日」を見るだけ';
+  }
+
+  @override
+  String get analyticsCalWeekdayMon => '月';
+
+  @override
+  String get analyticsCalWeekdayTue => '火';
+
+  @override
+  String get analyticsCalWeekdayWed => '水';
+
+  @override
+  String get analyticsCalWeekdayThu => '木';
+
+  @override
+  String get analyticsCalWeekdayFri => '金';
+
+  @override
+  String get analyticsCalWeekdaySat => '土';
+
+  @override
+  String get analyticsCalWeekdaySun => '日';
 }
