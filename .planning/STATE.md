@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 Phase: 47
 Plan: Not started
 Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
-Last activity: 2026-06-20 - quick 260620-lfp R3 悦己抽屉修复（用户反馈"悦己部分没按mock"）：根因=joybar 段用 Flexible(loose)+无尺寸 DecoratedBox→压成 0 宽→整条不可见（golden 锁了坏渲染）；改 Expanded(tight) 修复可见。并对齐 mock：条 height32/radius9/奶白底+樱粉边/段间 2px 奶白分隔/大段(≥12%)内嵌白色%标；去掉嵌套抽屉里重复的「悦己花销 ¥…」总额（JoySpendDrawerBody 加 showTotalHeader，嵌套传 false；独立 JoySpendCard 仍 true 保测试）；joybar 图例 dot 圆角方块/金额 joyText/分隔线。analyze 0、full test 3072/3072、7 golden 重基线（commits b296d3b5/53b65787）。R2：分类环 hero + 日历卡像素对齐（53928fbc/774c2133/9640001f）
+Last activity: 2026-06-20 - quick 260620-lfp R4 悦己满足度直方图重建（用户反馈"这个卡片没有实现"）：弃 fl_chart 改自定义 flex 柱——10 柱共基线、每非零柱顶上计数标(joyText/10/w700)、count==0→3px 灰残桩、统一粉竖直渐变(joy→#E7A6B6)、顶5底2圆角、max-width22、数据派生中位桶 2px 描边(不硬编码7)、分数标、footer+中位 pill、暖文案 caption；去卡内标题 showHeader:false；新增 analyticsHistogramJoyCaption(ja/zh/en)+histoBarBottom token。analyze 0、full test 3072/3072、7 golden 重基线（commits fe234195/2cee111a）。[本会话 mock 保真链：R2 环hero+日历 / R3 joybar 可见性 / R4 直方图]
 
 ### Quick Tasks Completed
 
