@@ -65,7 +65,12 @@ class WithinMonthTrendCard extends ConsumerWidget {
     );
 
     return trendAsync.when(
+      // round-5 r5 / D2: the「支出趋势」section header above this card already
+      // labels it and the mock card body carries no separate title (pills sit at
+      // the top), so suppress the card's own header to avoid a double title. The
+      // frozen _TrendBody / chart internals (D3) are untouched.
       data: (trend) => AnalyticsDataCard(
+        showHeader: false,
         title: S.of(context).analyticsCardTitleWithinMonthTrend,
         caption: S.of(context).analyticsCardCaptionWithinMonthTrend,
         child: _TrendBody(trend: trend, anchor: ctx.trendAnchor),

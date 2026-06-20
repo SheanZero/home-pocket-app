@@ -16,11 +16,19 @@ class AnalyticsDataCard extends StatelessWidget {
     required this.title,
     required this.caption,
     required this.child,
+    this.showHeader = true,
   });
 
   final String title;
   final String caption;
   final Widget child;
+
+  /// When `false`, the card's own [title]/[caption] header row is suppressed —
+  /// used by the within-month trend card (round-5 r5 / D2), whose section header
+  /// 「支出趋势」already labels it and whose mock body has no separate card title
+  /// (pills sit at the top). All other cards keep `showHeader: true` (the section
+  /// header is the section label; the card title is light, accepted redundancy).
+  final bool showHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +38,12 @@ class AnalyticsDataCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(caption, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 12),
+            if (showHeader) ...[
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text(caption, style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 12),
+            ],
             child,
           ],
         ),

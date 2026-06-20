@@ -6,20 +6,22 @@ import '../../../../features/home/presentation/providers/state_shadow_books.dart
 import '../../../../generated/app_localizations.dart';
 import '../analytics_card_registry.dart';
 import '../providers/state_analytics.dart';
+import '../widgets/analytics_section_header.dart';
 import '../widgets/cards/family_insight_data_card.dart';
 import '../widgets/joy_metric_variant_chip.dart';
 import '../widgets/time_window_chip.dart';
 
-/// Round-5 B analytics dashboard (Phase 46, D-F2).
+/// Round-5 r5 analytics dashboard (260620-lfp / D2).
 ///
 /// A THIN SHELL (Phase 45 D-A1 / REDES-01). The body is built by mapping
 /// [analyticsCardRegistry] (the single source of render order AND the
-/// `_refresh` invalidation union — D-B1) into a FLAT [Column] of cards with
-/// inter-card spacers only — NO section headers (the round-5 B lineup is a flat
-/// 5-card narrative flow; the Variant-δ section headers were deleted, D-F2).
-/// `_refresh` is derived from the registry (no hand-listed providers) so HomeHero
-/// isolation is guaranteed by construction (GUARD-01): the registry imports zero
-/// `home/*` providers.
+/// `_refresh` invalidation union — D-B1) into a SECTIONED [Column]: each spec
+/// carrying a provider-free `sectionHeader` descriptor renders an
+/// [AnalyticsSectionHeader] before its card (round-5 r5 reverses Phase-46 D-F2's
+/// flat no-header lineup). `_refresh` is derived from the registry (no
+/// hand-listed providers, and headers carry none) so HomeHero isolation is
+/// guaranteed by construction (GUARD-01): the registry imports zero `home/*`
+/// providers.
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key, required this.bookId});
 
@@ -65,18 +67,24 @@ class AnalyticsScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _buildCardChildren(ctx, shadowBooksAsync),
+            children: _buildCardChildren(l10n, ctx, shadowBooksAsync),
           ),
         ),
       ),
     );
   }
 
-  /// Maps [analyticsCardRegistry] into a FLAT [Column] of cards (D-F2): for each
-  /// visible spec, an inter-card `SizedBox(8)` precedes it (the first card has
-  /// no leading spacer). A trailing `SizedBox(64)` closes the list. No section
-  /// headers — the round-5 B lineup is a flat narrative flow.
+  /// Maps [analyticsCardRegistry] into a SECTIONED [Column] (round-5 r5 / D2 —
+  /// reverses Phase-46 D-F2's flat no-header lineup). For each visible spec:
+  ///   - if it carries a `sectionHeader` descriptor, an [AnalyticsSectionHeader]
+  ///     is rendered first (with a leading `SizedBox(26)` except before the very
+  ///     first widget, matching the mock `.sect-h` `margin:26px 4px 10px`), then
+  ///     a `SizedBox(10)` gap, then the card.
+  ///   - otherwise (the family card) a plain inter-card `SizedBox(8)` precedes it.
+  /// A trailing `SizedBox(64)` closes the list. Section headers carry NO
+  /// providers, so `_refresh` is untouched (GUARD-01).
   List<Widget> _buildCardChildren(
+    S l10n,
     AnalyticsCardContext ctx,
     AsyncValue<List<Object>?> shadowBooksAsync,
   ) {
@@ -86,7 +94,20 @@ class AnalyticsScreen extends ConsumerWidget {
     for (final spec in analyticsCardRegistry) {
       if (!spec.isVisible(ctx)) continue;
 
-      if (!isFirst) {
+      final header = spec.sectionHeader;
+      if (header != null) {
+        if (!isFirst) {
+          children.add(const SizedBox(height: 26));
+        }
+        children.add(
+          AnalyticsSectionHeader(
+            title: header.title(l10n),
+            tag: header.tag(l10n),
+            tone: header.tone,
+          ),
+        );
+        children.add(const SizedBox(height: 10));
+      } else if (!isFirst) {
         children.add(const SizedBox(height: 8));
       }
 
