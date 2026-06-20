@@ -23,6 +23,15 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
       (maxValue, item) => item.count > maxValue ? item.count : maxValue,
     );
     final chartMaxY = maxCount > 0 ? maxCount * 1.25 : 1.0;
+    // Pitfall-7 / D4: the median pill is DERIVED from buckets (weighted median —
+    // the score whose cumulative count first crosses 50% of total), NEVER the
+    // mock's literal「7」. `null` when there is no data (no pill / outline).
+    final medianScore = _weightedMedian(normalized, total);
+    final medianBorderColor = Color.lerp(
+      palette.joy,
+      palette.joyLight,
+      0.55,
+    )!;
 
     return Semantics(
       container: true,
@@ -87,6 +96,11 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                             topLeft: Radius.circular(4),
                             topRight: Radius.circular(4),
                           ),
+                          // round-5 r5 mock `.b.med` — outline the data-derived
+                          // median bucket (descriptive, not a target).
+                          borderSide: bucket.score == medianScore
+                              ? BorderSide(color: medianBorderColor, width: 2)
+                              : BorderSide.none,
                           // REDES-02: native per-rod label replacing the deleted
                           // Stack/Align/DecoratedBox "5" annotation hack. Only
                           // the median bucket (score 5) carries the descriptive
@@ -121,7 +135,41 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 14),
+          // round-5 r5 mock `.histo-foot`: left = data-derived count footer,
+          // right = data-derived median pill (Pitfall-7 / D4). Both come from
+          // `buckets` (no new provider) — descriptive, ADR-012-safe.
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.analyticsHistogramCountFooter(total),
+                  style: AppTextStyles.caption.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ),
+              if (medianScore != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: palette.joyLight,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Text(
+                    l10n.analyticsHistogramMedianPill(medianScore),
+                    style: AppTextStyles.caption.copyWith(
+                      color: palette.joyText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 9),
           Text(
             l10n.analyticsHistogramColorCaption,
             style: AppTextStyles.caption.copyWith(
@@ -131,6 +179,20 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Weighted median of the 1–10 satisfaction buckets: the score whose CUMULATIVE
+  /// count first reaches/crosses 50% of [total]. Returns `null` when there is no
+  /// data. Descriptive (Pitfall-7 / D4) — never a target.
+  int? _weightedMedian(List<SatisfactionScoreBucket> normalized, int total) {
+    if (total <= 0) return null;
+    final half = total / 2;
+    var cumulative = 0;
+    for (final bucket in normalized) {
+      cumulative += bucket.count;
+      if (cumulative >= half) return bucket.score;
+    }
+    return normalized.isNotEmpty ? normalized.last.score : null;
   }
 
   List<SatisfactionScoreBucket> _normalize() {

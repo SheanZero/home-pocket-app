@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 
 /// 小确幸日历 — a CUSTOM month heatmap grid (R-2, GATE-04).
 ///
@@ -70,16 +71,23 @@ class JoyCalendarHeatmap extends StatelessWidget {
         ),
     ];
 
-    return GridView.count(
-      crossAxisCount: 7,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      // Slightly wider-than-tall cells keep the 6-row month grid compact so the
-      // card stays a reasonable height (it lives inside the analytics scroll).
-      childAspectRatio: 1.3,
-      mainAxisSpacing: 4,
-      crossAxisSpacing: 4,
-      children: cells,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GridView.count(
+          crossAxisCount: 7,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          // Slightly wider-than-tall cells keep the 6-row month grid compact so
+          // the card stays a reasonable height (lives in the analytics scroll).
+          childAspectRatio: 1.3,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          children: cells,
+        ),
+        const SizedBox(height: 14),
+        _CalLegend(palette: palette),
+      ],
     );
   }
 
@@ -136,6 +144,63 @@ class _DayCell extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The 淡 [4 swatches] 浓 + neutral-note heat legend below the calendar (round-5
+/// r5 mock `.cal-legend`). The 4 swatches lerp `backgroundMuted`→`joy` at fixed
+/// stops — illustrative of the continuous cell depth (the mock's discrete heat0–3
+/// have no palette token; exact hex not required, ADR-012-safe). The note says
+/// depth = per-day joy COUNT (not a streak).
+class _CalLegend extends StatelessWidget {
+  const _CalLegend({required this.palette});
+
+  final AppPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final swatches = <Color>[
+      for (final t in const [0.0, 0.34, 0.67, 1.0])
+        Color.lerp(palette.backgroundMuted, palette.joy, t)!,
+    ];
+
+    return Row(
+      children: [
+        Text(
+          l10n.analyticsCalLegendLow,
+          style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
+        ),
+        const SizedBox(width: 7),
+        for (final color in swatches)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Container(
+              width: 13,
+              height: 13,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        const SizedBox(width: 7),
+        Text(
+          l10n.analyticsCalLegendHigh,
+          style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            l10n.analyticsCalLegendNote,
+            textAlign: TextAlign.end,
+            style: AppTextStyles.caption.copyWith(color: palette.textTertiary),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
