@@ -2000,6 +2000,90 @@
   "@analyticsJoyCalendarDayEmpty": {
     "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
   },
+  "analyticsSectionTrend": "Spending trend",
+  "@analyticsSectionTrend": {
+    "description": "Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)"
+  },
+  "analyticsSectionCategory": "Category spending",
+  "@analyticsSectionCategory": {
+    "description": "Section header above the category-spend donut hero card (round-5 r5 mock, 实用 section)"
+  },
+  "analyticsSectionJoyCalendar": "Little joys calendar",
+  "@analyticsSectionJoyCalendar": {
+    "description": "Section header above the 小确幸日历 heatmap card (round-5 r5 mock, 悦己 section)"
+  },
+  "analyticsSectionSatisfaction": "Joy satisfaction",
+  "@analyticsSectionSatisfaction": {
+    "description": "Section header above the satisfaction-distribution histogram card (round-5 r5 mock, 悦己 section)"
+  },
+  "analyticsSectionTagPractical": "Practical",
+  "@analyticsSectionTagPractical": {
+    "description": "Section-header tag chip for the practical (实用) spend sections"
+  },
+  "analyticsSectionTagJoy": "Joy",
+  "@analyticsSectionTagJoy": {
+    "description": "Section-header tag chip for the joy (悦己) sections"
+  },
+  "analyticsJoyDrawerConnector": "Zoom into your joy spending",
+  "@analyticsJoyDrawerConnector": {
+    "description": "Connector chip linking the category donut to the nested joy-spend drawer (neutral, just shows where joy spend went)"
+  },
+  "analyticsJoyDrawerTitle": "Where your joy {amount} went",
+  "@analyticsJoyDrawerTitle": {
+    "description": "Joy drawer title with the data-derived joy total (neutral, no ranking/target)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsJoyDrawerCount": "{count} categories",
+  "@analyticsJoyDrawerCount": {
+    "description": "Joy drawer category-count badge (descriptive count of joy categories)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsJoyDrawerSubtitle": "Just where it went, no ranking",
+  "@analyticsJoyDrawerSubtitle": {
+    "description": "Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)"
+  },
+  "analyticsJoyDrawerCaption": "Percentages are each item's share of joy itself · no target, no comparison with the past",
+  "@analyticsJoyDrawerCaption": {
+    "description": "Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)"
+  },
+  "analyticsCalLegendLow": "Light",
+  "@analyticsCalLegendLow": {
+    "description": "Calendar heat legend low-end label (lighter = fewer joy entries that day)"
+  },
+  "analyticsCalLegendHigh": "Deep",
+  "@analyticsCalLegendHigh": {
+    "description": "Calendar heat legend high-end label (deeper = more joy entries that day)"
+  },
+  "analyticsCalLegendNote": "The deeper the color, the more joy entries that day",
+  "@analyticsCalLegendNote": {
+    "description": "Calendar heat legend note — depth = per-day joy count, not a streak (ADR-012)"
+  },
+  "analyticsHistogramMedianPill": "Median satisfaction {value}",
+  "@analyticsHistogramMedianPill": {
+    "description": "Histogram median pill — data-derived weighted median satisfaction (descriptive, not a target)",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHistogramCountFooter": "Satisfaction of {count} joy expenses",
+  "@analyticsHistogramCountFooter": {
+    "description": "Histogram footer — count of joy expenses whose satisfaction is plotted (data-derived)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsCategoryDonutOther": "Other",
   "analyticsDonutCenterLabel": "This month",
   "@analyticsDonutCenterLabel": {

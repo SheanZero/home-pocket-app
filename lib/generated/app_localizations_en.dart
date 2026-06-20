@@ -1574,6 +1574,64 @@ class SEn extends S {
   String get analyticsJoyCalendarDayEmpty => 'No little joys recorded this day';
 
   @override
+  String get analyticsSectionTrend => 'Spending trend';
+
+  @override
+  String get analyticsSectionCategory => 'Category spending';
+
+  @override
+  String get analyticsSectionJoyCalendar => 'Little joys calendar';
+
+  @override
+  String get analyticsSectionSatisfaction => 'Joy satisfaction';
+
+  @override
+  String get analyticsSectionTagPractical => 'Practical';
+
+  @override
+  String get analyticsSectionTagJoy => 'Joy';
+
+  @override
+  String get analyticsJoyDrawerConnector => 'Zoom into your joy spending';
+
+  @override
+  String analyticsJoyDrawerTitle(String amount) {
+    return 'Where your joy $amount went';
+  }
+
+  @override
+  String analyticsJoyDrawerCount(int count) {
+    return '$count categories';
+  }
+
+  @override
+  String get analyticsJoyDrawerSubtitle => 'Just where it went, no ranking';
+
+  @override
+  String get analyticsJoyDrawerCaption =>
+      'Percentages are each item\'s share of joy itself · no target, no comparison with the past';
+
+  @override
+  String get analyticsCalLegendLow => 'Light';
+
+  @override
+  String get analyticsCalLegendHigh => 'Deep';
+
+  @override
+  String get analyticsCalLegendNote =>
+      'The deeper the color, the more joy entries that day';
+
+  @override
+  String analyticsHistogramMedianPill(int value) {
+    return 'Median satisfaction $value';
+  }
+
+  @override
+  String analyticsHistogramCountFooter(int count) {
+    return 'Satisfaction of $count joy expenses';
+  }
+
+  @override
   String get analyticsCategoryDonutOther => 'Other';
 
   @override

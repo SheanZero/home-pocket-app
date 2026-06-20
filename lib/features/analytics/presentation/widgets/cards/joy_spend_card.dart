@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/misc.dart';
 import '../../../../../application/accounting/category_localization_service.dart';
 import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/theme/app_text_styles.dart';
+import '../../../../../core/theme/joy_warm_palette.dart';
 import '../../../../../generated/app_localizations.dart';
 import '../../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../settings/presentation/providers/state_locale.dart';
@@ -137,7 +138,9 @@ class _JoySpendBody extends ConsumerWidget {
           percent: total > 0
               ? (entry.value.amount / total * 100).round()
               : 0,
-          color: _segmentColor(entry.key, amounts.length, palette),
+          // D5: the joybar uses the mock's 7-color warm palette (j1–j7), wrapping
+          // deterministically past 7 categories — NOT a single joy-family lerp.
+          color: JoyWarmPalette.colorAt(entry.key),
         ),
     ];
 
@@ -164,16 +167,5 @@ class _JoySpendBody extends ConsumerWidget {
         JoySpendStackedBar(segments: segments),
       ],
     );
-  }
-
-  /// Distinct warm sakura-anchored hue per segment (avoids the daily-green /
-  /// shared-blue families — README data-correction). Lerps within the joy
-  /// family so every segment reads as 悦己 spend.
-  Color _segmentColor(int index, int count, AppPalette palette) {
-    if (count <= 1) return palette.joy;
-    final t = index / (count - 1);
-    // Lerp from the deep joy hue toward the lighter joy tint — a warm,
-    // single-family ramp (not a green/blue cross-ledger gradient).
-    return Color.lerp(palette.joy, palette.joyLight, t)!;
   }
 }

@@ -1539,6 +1539,62 @@ class SZh extends S {
   String get analyticsJoyCalendarDayEmpty => '这一天还没有小确幸记录';
 
   @override
+  String get analyticsSectionTrend => '支出趋势';
+
+  @override
+  String get analyticsSectionCategory => '分类支出';
+
+  @override
+  String get analyticsSectionJoyCalendar => '小确幸日历';
+
+  @override
+  String get analyticsSectionSatisfaction => '悦己满足度分布';
+
+  @override
+  String get analyticsSectionTagPractical => '实用';
+
+  @override
+  String get analyticsSectionTagJoy => '悦己';
+
+  @override
+  String get analyticsJoyDrawerConnector => '把悦己这一块放大看看';
+
+  @override
+  String analyticsJoyDrawerTitle(String amount) {
+    return '悦己 $amount 花在哪几类开心事';
+  }
+
+  @override
+  String analyticsJoyDrawerCount(int count) {
+    return '$count 类';
+  }
+
+  @override
+  String get analyticsJoyDrawerSubtitle => '仅呈现去向，不分高下';
+
+  @override
+  String get analyticsJoyDrawerCaption => '百分比是各项占悦己自身的比例 · 不设目标、不与过往相比';
+
+  @override
+  String get analyticsCalLegendLow => '淡';
+
+  @override
+  String get analyticsCalLegendHigh => '浓';
+
+  @override
+  String get analyticsCalLegendNote => '颜色越浓 = 那天的悦己笔数越多';
+
+  @override
+  String analyticsHistogramMedianPill(int value) {
+    return '中位满足度 $value';
+  }
+
+  @override
+  String analyticsHistogramCountFooter(int count) {
+    return '$count 笔悦己支出的满足度';
+  }
+
+  @override
   String get analyticsCategoryDonutOther => '其他';
 
   @override

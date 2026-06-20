@@ -1546,6 +1546,62 @@ class SJa extends S {
   String get analyticsJoyCalendarDayEmpty => 'この日の小确幸の記録はありません';
 
   @override
+  String get analyticsSectionTrend => '支出の推移';
+
+  @override
+  String get analyticsSectionCategory => 'カテゴリ支出';
+
+  @override
+  String get analyticsSectionJoyCalendar => '小さな幸せカレンダー';
+
+  @override
+  String get analyticsSectionSatisfaction => '悦びの満足度';
+
+  @override
+  String get analyticsSectionTagPractical => '実用';
+
+  @override
+  String get analyticsSectionTagJoy => '悦び';
+
+  @override
+  String get analyticsJoyDrawerConnector => '悦びの内訳を見る';
+
+  @override
+  String analyticsJoyDrawerTitle(String amount) {
+    return '悦び $amount は、どんな嬉しいことに';
+  }
+
+  @override
+  String analyticsJoyDrawerCount(int count) {
+    return '$count カテゴリ';
+  }
+
+  @override
+  String get analyticsJoyDrawerSubtitle => '使い道だけ、優劣なし';
+
+  @override
+  String get analyticsJoyDrawerCaption => '割合は悦び自身の中での比率です · 目標も過去との比較もありません';
+
+  @override
+  String get analyticsCalLegendLow => '淡';
+
+  @override
+  String get analyticsCalLegendHigh => '濃';
+
+  @override
+  String get analyticsCalLegendNote => '色が濃いほど、その日の悦びの記録が多いという意味です';
+
+  @override
+  String analyticsHistogramMedianPill(int value) {
+    return '中央の満足度 $value';
+  }
+
+  @override
+  String analyticsHistogramCountFooter(int count) {
+    return '悦び支出 $count 件の満足度';
+  }
+
+  @override
   String get analyticsCategoryDonutOther => 'その他';
 
   @override

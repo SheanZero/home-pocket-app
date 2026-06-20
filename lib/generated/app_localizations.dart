@@ -2945,6 +2945,102 @@ abstract class S {
   /// **'No little joys recorded this day'**
   String get analyticsJoyCalendarDayEmpty;
 
+  /// Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)
+  ///
+  /// In en, this message translates to:
+  /// **'Spending trend'**
+  String get analyticsSectionTrend;
+
+  /// Section header above the category-spend donut hero card (round-5 r5 mock, 实用 section)
+  ///
+  /// In en, this message translates to:
+  /// **'Category spending'**
+  String get analyticsSectionCategory;
+
+  /// Section header above the 小确幸日历 heatmap card (round-5 r5 mock, 悦己 section)
+  ///
+  /// In en, this message translates to:
+  /// **'Little joys calendar'**
+  String get analyticsSectionJoyCalendar;
+
+  /// Section header above the satisfaction-distribution histogram card (round-5 r5 mock, 悦己 section)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy satisfaction'**
+  String get analyticsSectionSatisfaction;
+
+  /// Section-header tag chip for the practical (实用) spend sections
+  ///
+  /// In en, this message translates to:
+  /// **'Practical'**
+  String get analyticsSectionTagPractical;
+
+  /// Section-header tag chip for the joy (悦己) sections
+  ///
+  /// In en, this message translates to:
+  /// **'Joy'**
+  String get analyticsSectionTagJoy;
+
+  /// Connector chip linking the category donut to the nested joy-spend drawer (neutral, just shows where joy spend went)
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom into your joy spending'**
+  String get analyticsJoyDrawerConnector;
+
+  /// Joy drawer title with the data-derived joy total (neutral, no ranking/target)
+  ///
+  /// In en, this message translates to:
+  /// **'Where your joy {amount} went'**
+  String analyticsJoyDrawerTitle(String amount);
+
+  /// Joy drawer category-count badge (descriptive count of joy categories)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} categories'**
+  String analyticsJoyDrawerCount(int count);
+
+  /// Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)
+  ///
+  /// In en, this message translates to:
+  /// **'Just where it went, no ranking'**
+  String get analyticsJoyDrawerSubtitle;
+
+  /// Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)
+  ///
+  /// In en, this message translates to:
+  /// **'Percentages are each item\'s share of joy itself · no target, no comparison with the past'**
+  String get analyticsJoyDrawerCaption;
+
+  /// Calendar heat legend low-end label (lighter = fewer joy entries that day)
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get analyticsCalLegendLow;
+
+  /// Calendar heat legend high-end label (deeper = more joy entries that day)
+  ///
+  /// In en, this message translates to:
+  /// **'Deep'**
+  String get analyticsCalLegendHigh;
+
+  /// Calendar heat legend note — depth = per-day joy count, not a streak (ADR-012)
+  ///
+  /// In en, this message translates to:
+  /// **'The deeper the color, the more joy entries that day'**
+  String get analyticsCalLegendNote;
+
+  /// Histogram median pill — data-derived weighted median satisfaction (descriptive, not a target)
+  ///
+  /// In en, this message translates to:
+  /// **'Median satisfaction {value}'**
+  String analyticsHistogramMedianPill(int value);
+
+  /// Histogram footer — count of joy expenses whose satisfaction is plotted (data-derived)
+  ///
+  /// In en, this message translates to:
+  /// **'Satisfaction of {count} joy expenses'**
+  String analyticsHistogramCountFooter(int count);
+
   /// No description provided for @analyticsCategoryDonutOther.
   ///
   /// In en, this message translates to:

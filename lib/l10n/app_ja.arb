@@ -2000,6 +2000,90 @@
   "@analyticsJoyCalendarDayEmpty": {
     "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
   },
+  "analyticsSectionTrend": "支出の推移",
+  "@analyticsSectionTrend": {
+    "description": "Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)"
+  },
+  "analyticsSectionCategory": "カテゴリ支出",
+  "@analyticsSectionCategory": {
+    "description": "Section header above the category-spend donut hero card (round-5 r5 mock, 实用 section)"
+  },
+  "analyticsSectionJoyCalendar": "小さな幸せカレンダー",
+  "@analyticsSectionJoyCalendar": {
+    "description": "Section header above the 小确幸日历 heatmap card (round-5 r5 mock, 悦己 section)"
+  },
+  "analyticsSectionSatisfaction": "悦びの満足度",
+  "@analyticsSectionSatisfaction": {
+    "description": "Section header above the satisfaction-distribution histogram card (round-5 r5 mock, 悦己 section)"
+  },
+  "analyticsSectionTagPractical": "実用",
+  "@analyticsSectionTagPractical": {
+    "description": "Section-header tag chip for the practical (实用) spend sections"
+  },
+  "analyticsSectionTagJoy": "悦び",
+  "@analyticsSectionTagJoy": {
+    "description": "Section-header tag chip for the joy (悦己) sections"
+  },
+  "analyticsJoyDrawerConnector": "悦びの内訳を見る",
+  "@analyticsJoyDrawerConnector": {
+    "description": "Connector chip linking the category donut to the nested joy-spend drawer (neutral, just shows where joy spend went)"
+  },
+  "analyticsJoyDrawerTitle": "悦び {amount} は、どんな嬉しいことに",
+  "@analyticsJoyDrawerTitle": {
+    "description": "Joy drawer title with the data-derived joy total (neutral, no ranking/target)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsJoyDrawerCount": "{count} カテゴリ",
+  "@analyticsJoyDrawerCount": {
+    "description": "Joy drawer category-count badge (descriptive count of joy categories)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsJoyDrawerSubtitle": "使い道だけ、優劣なし",
+  "@analyticsJoyDrawerSubtitle": {
+    "description": "Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)"
+  },
+  "analyticsJoyDrawerCaption": "割合は悦び自身の中での比率です · 目標も過去との比較もありません",
+  "@analyticsJoyDrawerCaption": {
+    "description": "Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)"
+  },
+  "analyticsCalLegendLow": "淡",
+  "@analyticsCalLegendLow": {
+    "description": "Calendar heat legend low-end label (lighter = fewer joy entries that day)"
+  },
+  "analyticsCalLegendHigh": "濃",
+  "@analyticsCalLegendHigh": {
+    "description": "Calendar heat legend high-end label (deeper = more joy entries that day)"
+  },
+  "analyticsCalLegendNote": "色が濃いほど、その日の悦びの記録が多いという意味です",
+  "@analyticsCalLegendNote": {
+    "description": "Calendar heat legend note — depth = per-day joy count, not a streak (ADR-012)"
+  },
+  "analyticsHistogramMedianPill": "中央の満足度 {value}",
+  "@analyticsHistogramMedianPill": {
+    "description": "Histogram median pill — data-derived weighted median satisfaction (descriptive, not a target)",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHistogramCountFooter": "悦び支出 {count} 件の満足度",
+  "@analyticsHistogramCountFooter": {
+    "description": "Histogram footer — count of joy expenses whose satisfaction is plotted (data-derived)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsCategoryDonutOther": "その他",
   "analyticsDonutCenterLabel": "今月の支出",
   "@analyticsDonutCenterLabel": {
