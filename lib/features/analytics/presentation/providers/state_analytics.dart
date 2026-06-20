@@ -9,6 +9,7 @@ import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../domain/models/analytics_aggregate.dart';
 import '../../domain/models/category_drill_down.dart';
 import '../../domain/models/joy_category_amount.dart';
+import '../../domain/models/member_spend_breakdown.dart';
 import '../../domain/models/monthly_report.dart';
 import '../../domain/models/per_day_joy_count.dart';
 import '../../domain/models/within_month_cumulative_trend.dart';
@@ -78,6 +79,44 @@ Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
     bookIds: [bookId],
     monthAnchor: monthAnchor,
     now: DateTime.now(),
+    entrySourceFilter: entrySourceFilter,
+  );
+}
+
+/// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
+/// donut's 成员 dimension over the active window.
+///
+/// Returns one [MemberSpendBreakdown] per device (largest→smallest amount).
+/// Single-device degrades to one bucket (UI handles graceful degradation).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+@riverpod
+Future<List<MemberSpendBreakdown>> memberSpendBreakdown(
+  Ref ref, {
+  required String bookId,
+  required DateTime startDate,
+  required DateTime endDate,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+}) async {
+  final useCase = ref.watch(getMemberSpendBreakdownUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
+  // D-12 defensive normalization: collapse the window to whole-day closed bounds
+  // so two callers with differing sub-day precision share one cache key.
+  final start = DateBoundaries.dayRange(startDate).start;
+  final end = DateBoundaries.dayRange(endDate).end;
+  return useCase.execute(
+    bookIds: [bookId],
+    startDate: start,
+    endDate: end,
     entrySourceFilter: entrySourceFilter,
   );
 }

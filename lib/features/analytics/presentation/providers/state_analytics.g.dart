@@ -257,7 +257,7 @@ final class WithinMonthCumulativeTrendProvider
 }
 
 String _$withinMonthCumulativeTrendHash() =>
-    r'b68e6a3b6bf6837d1320771d4446fc00ff16532b';
+    r'd52098662e8ca6bb02bccb64b2db7f4c45e90a6e';
 
 /// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
 ///
@@ -323,6 +323,193 @@ final class WithinMonthCumulativeTrendFamily extends $Family
 
   @override
   String toString() => r'withinMonthCumulativeTrendProvider';
+}
+
+/// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
+/// donut's 成员 dimension over the active window.
+///
+/// Returns one [MemberSpendBreakdown] per device (largest→smallest amount).
+/// Single-device degrades to one bucket (UI handles graceful degradation).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+@ProviderFor(memberSpendBreakdown)
+final memberSpendBreakdownProvider = MemberSpendBreakdownFamily._();
+
+/// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
+/// donut's 成员 dimension over the active window.
+///
+/// Returns one [MemberSpendBreakdown] per device (largest→smallest amount).
+/// Single-device degrades to one bucket (UI handles graceful degradation).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+final class MemberSpendBreakdownProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<MemberSpendBreakdown>>,
+          List<MemberSpendBreakdown>,
+          FutureOr<List<MemberSpendBreakdown>>
+        >
+    with
+        $FutureModifier<List<MemberSpendBreakdown>>,
+        $FutureProvider<List<MemberSpendBreakdown>> {
+  /// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
+  /// donut's 成员 dimension over the active window.
+  ///
+  /// Returns one [MemberSpendBreakdown] per device (largest→smallest amount).
+  /// Single-device degrades to one bucket (UI handles graceful degradation).
+  ///
+  /// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+  /// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+  /// they reach the use case — never accept microsecond-exact instants into the
+  /// family key (rebuild-storm guard).
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01).
+  MemberSpendBreakdownProvider._({
+    required MemberSpendBreakdownFamily super.from,
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'memberSpendBreakdownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$memberSpendBreakdownHash();
+
+  @override
+  String toString() {
+    return r'memberSpendBreakdownProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<MemberSpendBreakdown>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<MemberSpendBreakdown>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return memberSpendBreakdown(
+      ref,
+      bookId: argument.bookId,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MemberSpendBreakdownProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$memberSpendBreakdownHash() =>
+    r'0c3e688a398122cb08484c1f5c2115711fadd04e';
+
+/// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
+/// donut's 成员 dimension over the active window.
+///
+/// Returns one [MemberSpendBreakdown] per device (largest→smallest amount).
+/// Single-device degrades to one bucket (UI handles graceful degradation).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+/// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+/// they reach the use case — never accept microsecond-exact instants into the
+/// family key (rebuild-storm guard).
+///
+/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+/// `home/*` providers (GUARD-01).
+
+final class MemberSpendBreakdownFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<MemberSpendBreakdown>>,
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
+        > {
+  MemberSpendBreakdownFamily._()
+    : super(
+        retry: null,
+        name: r'memberSpendBreakdownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
+  /// donut's 成员 dimension over the active window.
+  ///
+  /// Returns one [MemberSpendBreakdown] per device (largest→smallest amount).
+  /// Single-device degrades to one bucket (UI handles graceful degradation).
+  ///
+  /// D-12: callers MUST pass window-normalized [startDate]/[endDate]. This provider
+  /// defends the contract by re-normalizing the bounds via [DateBoundaries] before
+  /// they reach the use case — never accept microsecond-exact instants into the
+  /// family key (rebuild-storm guard).
+  ///
+  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
+  /// `home/*` providers (GUARD-01).
+
+  MemberSpendBreakdownProvider call({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  }) => MemberSpendBreakdownProvider._(
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'memberSpendBreakdownProvider';
 }
 
 /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category

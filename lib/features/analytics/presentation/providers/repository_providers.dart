@@ -8,6 +8,7 @@ import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
 import '../../../../application/analytics/get_joy_category_amounts_use_case.dart';
 import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
+import '../../../../application/analytics/get_member_spend_breakdown_use_case.dart';
 import '../../../../application/analytics/get_per_day_joy_counts_use_case.dart';
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
@@ -104,6 +105,18 @@ GetJoyCategoryAmountsUseCase getJoyCategoryAmountsUseCase(Ref ref) {
 @riverpod
 GetPerDayJoyCountsUseCase getPerDayJoyCountsUseCase(Ref ref) {
   return GetPerDayJoyCountsUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
+  );
+}
+
+/// STATSUI-DONUT-MEMBER / D2: GetMemberSpendBreakdownUseCase provider.
+///
+/// Injects the transaction repository directly: per-member spend reuses
+/// `findByBookIds` (both ledgers) with a Dart-side expense + group-by-deviceId
+/// aggregate. No new DAO, no migration (schema stays v21).
+@riverpod
+GetMemberSpendBreakdownUseCase getMemberSpendBreakdownUseCase(Ref ref) {
+  return GetMemberSpendBreakdownUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
   );
 }

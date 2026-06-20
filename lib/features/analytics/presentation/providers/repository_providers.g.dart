@@ -434,6 +434,74 @@ final class GetPerDayJoyCountsUseCaseProvider
 String _$getPerDayJoyCountsUseCaseHash() =>
     r'44b10010225efeb773093026f2752178835d3707';
 
+/// STATSUI-DONUT-MEMBER / D2: GetMemberSpendBreakdownUseCase provider.
+///
+/// Injects the transaction repository directly: per-member spend reuses
+/// `findByBookIds` (both ledgers) with a Dart-side expense + group-by-deviceId
+/// aggregate. No new DAO, no migration (schema stays v21).
+
+@ProviderFor(getMemberSpendBreakdownUseCase)
+final getMemberSpendBreakdownUseCaseProvider =
+    GetMemberSpendBreakdownUseCaseProvider._();
+
+/// STATSUI-DONUT-MEMBER / D2: GetMemberSpendBreakdownUseCase provider.
+///
+/// Injects the transaction repository directly: per-member spend reuses
+/// `findByBookIds` (both ledgers) with a Dart-side expense + group-by-deviceId
+/// aggregate. No new DAO, no migration (schema stays v21).
+
+final class GetMemberSpendBreakdownUseCaseProvider
+    extends
+        $FunctionalProvider<
+          GetMemberSpendBreakdownUseCase,
+          GetMemberSpendBreakdownUseCase,
+          GetMemberSpendBreakdownUseCase
+        >
+    with $Provider<GetMemberSpendBreakdownUseCase> {
+  /// STATSUI-DONUT-MEMBER / D2: GetMemberSpendBreakdownUseCase provider.
+  ///
+  /// Injects the transaction repository directly: per-member spend reuses
+  /// `findByBookIds` (both ledgers) with a Dart-side expense + group-by-deviceId
+  /// aggregate. No new DAO, no migration (schema stays v21).
+  GetMemberSpendBreakdownUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getMemberSpendBreakdownUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getMemberSpendBreakdownUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetMemberSpendBreakdownUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetMemberSpendBreakdownUseCase create(Ref ref) {
+    return getMemberSpendBreakdownUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetMemberSpendBreakdownUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetMemberSpendBreakdownUseCase>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$getMemberSpendBreakdownUseCaseHash() =>
+    r'f696a91b3474f4d04529ffa402d46235f3e511fb';
+
 /// HAPPY-01..04: GetHappinessReportUseCase provider.
 
 @ProviderFor(getHappinessReportUseCase)
