@@ -30,31 +30,41 @@ class DonutDimensionMemberControls extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 分类 / 成员 segmented toggle.
-          Wrap(
-            spacing: 8,
-            children: [
-              _DimPill(
-                key: const ValueKey('donut_dim_category'),
-                label: l10n.analyticsDonutDimensionCategory,
-                selected: view.dimension == DonutDimension.category,
-                onTap: () => ref
-                    .read(donutDimensionStateProvider.notifier)
-                    .setDimension(DonutDimension.category),
-              ),
-              _DimPill(
-                key: const ValueKey('donut_dim_member'),
-                label: l10n.analyticsDonutDimensionMember,
-                selected: view.dimension == DonutDimension.member,
-                onTap: () => ref
-                    .read(donutDimensionStateProvider.notifier)
-                    .setDimension(DonutDimension.member),
-              ),
-            ],
+          Flexible(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                _DimPill(
+                  key: const ValueKey('donut_dim_category'),
+                  label: l10n.analyticsDonutDimensionCategory,
+                  selected: view.dimension == DonutDimension.category,
+                  onTap: () => ref
+                      .read(donutDimensionStateProvider.notifier)
+                      .setDimension(DonutDimension.category),
+                ),
+                _DimPill(
+                  key: const ValueKey('donut_dim_member'),
+                  label: l10n.analyticsDonutDimensionMember,
+                  selected: view.dimension == DonutDimension.member,
+                  onTap: () => ref
+                      .read(donutDimensionStateProvider.notifier)
+                      .setDimension(DonutDimension.member),
+                ),
+              ],
+            ),
           ),
-          // Member filter trigger.
-          _MemberFilterTrigger(
-            label: _filterLabel(l10n, members, view.memberFilterDeviceId),
-            onTap: () => _showMemberSheet(context, ref, l10n, members),
+          const SizedBox(width: 8),
+          // Member filter trigger — constrained so a long localized member name
+          // never overflows the controls row (ellipsized).
+          Flexible(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 150),
+              child: _MemberFilterTrigger(
+                label: _filterLabel(l10n, members, view.memberFilterDeviceId),
+                onTap: () => _showMemberSheet(context, ref, l10n, members),
+              ),
+            ),
           ),
         ],
       ),

@@ -8,9 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_theme.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
+import 'package:home_pocket/features/analytics/domain/models/member_spend_breakdown.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_donut_dimension.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -147,6 +151,102 @@ Widget _wrap({
   );
 }
 
+/// Fixed-state notifier so the golden renders the 成员 dimension deterministically.
+class _MemberDimensionState extends DonutDimensionState {
+  @override
+  DonutDimensionView build() => const DonutDimensionView(
+    dimension: DonutDimension.member,
+    memberFilterDeviceId: null,
+  );
+}
+
+GroupMember _member(String deviceId, String name, String emoji) => GroupMember(
+  deviceId: deviceId,
+  publicKey: 'pk_$deviceId',
+  deviceName: name,
+  role: 'member',
+  status: 'active',
+  displayName: name,
+  avatarEmoji: emoji,
+);
+
+final _membersMulti = [
+  _member('dev-a', 'Aoi', '🌸'),
+  _member('dev-b', 'Ren', '🍵'),
+  _member('dev-c', 'Mio', '🌿'),
+];
+
+final _membersSolo = [_member('dev-a', 'Aoi', '🌸')];
+
+final _memberBreakdownMulti = [
+  const MemberSpendBreakdown(deviceId: 'dev-a', amount: 70000, transactionCount: 8),
+  const MemberSpendBreakdown(deviceId: 'dev-b', amount: 38000, transactionCount: 5),
+  const MemberSpendBreakdown(deviceId: 'dev-c', amount: 12000, transactionCount: 2),
+];
+
+final _memberBreakdownSolo = [
+  const MemberSpendBreakdown(deviceId: 'dev-a', amount: 84000, transactionCount: 11),
+];
+
+Widget _wrapMember({
+  required Locale locale,
+  required List<GroupMember> members,
+  required List<MemberSpendBreakdown> breakdown,
+  ThemeMode themeMode = ThemeMode.light,
+}) {
+  return ProviderScope(
+    overrides: [
+      locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
+      monthlyReportProvider(
+        bookId: _bookId,
+        startDate: _startDate,
+        endDate: _endDate,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => _reportFour()),
+      analyticsCategoriesMapProvider
+          .overrideWith((_) async => _categoryMapFour),
+      donutDimensionStateProvider.overrideWith(_MemberDimensionState.new),
+      activeGroupMembersProvider.overrideWith((_) => Stream.value(members)),
+      memberSpendBreakdownProvider(
+        bookId: _bookId,
+        startDate: _startDate,
+        endDate: _endDate,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => breakdown),
+    ],
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      locale: locale,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.supportedLocales,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: 360,
+            height: 620,
+            child: SingleChildScrollView(
+              child: CategoryDonutCard(
+                bookId: _bookId,
+                startDate: _startDate,
+                endDate: _endDate,
+                joyMetricVariant: JoyMetricVariant.all,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
   group('CategoryDonutCard golden', () {
     for (final locale in const [Locale('ja'), Locale('zh'), Locale('en')]) {
@@ -229,6 +329,56 @@ void main() {
       await expectLater(
         find.byType(CategoryDonutCard),
         matchesGoldenFile('goldens/category_donut_card_empty_light_ja.png'),
+      );
+    });
+
+    // 260620-v2m / D2: 成员 dimension — multi-member ring (on-ring % per member)
+    // + member legend rows (emoji + name + ¥ + %).
+    testWidgets('member dimension multi — light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrapMember(
+          locale: const Locale('ja'),
+          members: _membersMulti,
+          breakdown: _memberBreakdownMulti,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CategoryDonutCard),
+        matchesGoldenFile('goldens/category_donut_card_member_multi_light_ja.png'),
+      );
+    });
+
+    testWidgets('member dimension multi — dark en', (tester) async {
+      await tester.pumpWidget(
+        _wrapMember(
+          locale: const Locale('en'),
+          members: _membersMulti,
+          breakdown: _memberBreakdownMulti,
+          themeMode: ThemeMode.dark,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CategoryDonutCard),
+        matchesGoldenFile('goldens/category_donut_card_member_multi_dark_en.png'),
+      );
+    });
+
+    // 260620-v2m / D2: single-device graceful degradation — ONE member slice
+    // (100%), filter still usable.
+    testWidgets('member dimension single-device — light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrapMember(
+          locale: const Locale('ja'),
+          members: _membersSolo,
+          breakdown: _memberBreakdownSolo,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CategoryDonutCard),
+        matchesGoldenFile('goldens/category_donut_card_member_solo_light_ja.png'),
       );
     });
   });
