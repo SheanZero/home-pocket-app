@@ -9,7 +9,8 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_happ
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart'
+    show joySpendRefreshTargets;
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/satisfaction_histogram_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
@@ -104,14 +105,16 @@ void main() {
             'pass falsely (T-45-10).',
       );
       // The registry is a `final List` whose iteration order is its declaration
-      // order. Round-5 B (Phase 46 D-F2): 6 specs total — 5 always-visible
-      // (within_month_trend, category_donut, joy_spend, joy_calendar,
-      // satisfaction_histogram) + 1 group-only (family_insight).
+      // order. Round-5 r5 (260620-lfp D2): 5 specs total — 4 always-visible
+      // (within_month_trend, category_donut[+joy drawer], joy_calendar,
+      // satisfaction_histogram) + 1 group-only (family_insight). JoySpendCard is
+      // de-registered (its joybar moved into category_donut).
       expect(
         analyticsCardRegistry.length,
-        6,
-        reason: 'D-B1/D-F2: 6 specs in stable round-5 B render order (5 '
-            'always-visible + 1 group-only family insight).',
+        5,
+        reason: 'D-B1/D2: 5 specs in stable round-5 r5 render order (4 '
+            'always-visible + 1 group-only family insight); JoySpendCard '
+            'de-registered (joybar nested in the donut card).',
       );
     });
 
@@ -137,6 +140,25 @@ void main() {
         reason: 'D-B3 Option A: shadowBooksProvider (home/*) is dropped from '
             'the union — FamilyInsightDataCard reads it display-only via a '
             'shell-injected prop, never as an invalidation target.',
+      );
+
+      // D2 / Pitfall-3: after JoySpendCard de-registration, the folded
+      // joyCategoryAmountsProvider (now carried by categoryDonutRefreshTargets)
+      // MUST still be in the SOLO union so pull-to-refresh invalidates the nested
+      // joy drawer.
+      expect(
+        union.contains(
+          joyCategoryAmountsProvider(
+            bookId: soloCtx.bookId,
+            startDate: soloCtx.startDate,
+            endDate: soloCtx.endDate,
+            joyMetricVariant: soloCtx.joyMetricVariant,
+          ),
+        ),
+        isTrue,
+        reason: 'D2 / Pitfall-3: the joy drawer refresh target must survive '
+            'JoySpendCard de-registration by being folded into the donut '
+            "card's targets.",
       );
     });
 
@@ -182,14 +204,14 @@ void main() {
           );
         }
       }
-      // Group makes all 6 specs visible; solo makes the 5 round-5 B cards.
+      // Group makes all 5 specs visible; solo makes the 4 round-5 r5 cards.
       expect(
         analyticsCardRegistry.where((s) => s.isVisible(groupCtx)).length,
-        6,
+        5,
       );
       expect(
         analyticsCardRegistry.where((s) => s.isVisible(soloCtx)).length,
-        5,
+        4,
       );
     });
 
@@ -235,7 +257,9 @@ void main() {
         ],
       );
 
-      // CategoryDonut: monthlyReport keyed on book/start/end/variant.
+      // CategoryDonut: monthlyReport + the FOLDED joyCategoryAmounts (D2 /
+      // Pitfall-3 — the nested joy drawer's refresh target now lives here so
+      // pull-to-refresh still invalidates it after JoySpendCard de-registration).
       expect(
         categoryDonutRefreshTargets(ctx),
         <ProviderBase<Object?>>[
@@ -245,10 +269,18 @@ void main() {
             endDate: ctx.endDate,
             joyMetricVariant: ctx.joyMetricVariant,
           ),
+          joyCategoryAmountsProvider(
+            bookId: ctx.bookId,
+            startDate: ctx.startDate,
+            endDate: ctx.endDate,
+            joyMetricVariant: ctx.joyMetricVariant,
+          ),
         ],
       );
 
-      // JoySpend: joyCategoryAmounts keyed on book/start/end/variant.
+      // The de-registered JoySpendCard's single-source function is retained (its
+      // wrapper + tests still consume it) and returns its joyCategoryAmounts
+      // target — the SAME provider instance now folded into the donut's targets.
       expect(
         joySpendRefreshTargets(ctx),
         <ProviderBase<Object?>>[

@@ -1580,7 +1580,8 @@ class SJa extends S {
   String get analyticsJoyDrawerSubtitle => '使い道だけ、優劣なし';
 
   @override
-  String get analyticsJoyDrawerCaption => '割合は悦び自身の中での比率です · 目標も過去との比較もありません';
+  String get analyticsJoyDrawerCaption =>
+      '割合は悦び自身の中での比率です · 目標もなく、過去と引き比べることもありません';
 
   @override
   String get analyticsCalLegendLow => '淡';

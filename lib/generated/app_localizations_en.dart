@@ -1605,11 +1605,12 @@ class SEn extends S {
   }
 
   @override
-  String get analyticsJoyDrawerSubtitle => 'Just where it went, no ranking';
+  String get analyticsJoyDrawerSubtitle =>
+      'Just where it went, nothing placed above another';
 
   @override
   String get analyticsJoyDrawerCaption =>
-      'Percentages are each item\'s share of joy itself · no target, no comparison with the past';
+      'Percentages are each item\'s share of joy itself · no target, never weighed against the past';
 
   @override
   String get analyticsCalLegendLow => 'Light';

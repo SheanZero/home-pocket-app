@@ -3002,13 +3002,13 @@ abstract class S {
   /// Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)
   ///
   /// In en, this message translates to:
-  /// **'Just where it went, no ranking'**
+  /// **'Just where it went, nothing placed above another'**
   String get analyticsJoyDrawerSubtitle;
 
   /// Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)
   ///
   /// In en, this message translates to:
-  /// **'Percentages are each item\'s share of joy itself · no target, no comparison with the past'**
+  /// **'Percentages are each item\'s share of joy itself · no target, never weighed against the past'**
   String get analyticsJoyDrawerCaption;
 
   /// Calendar heat legend low-end label (lighter = fewer joy entries that day)

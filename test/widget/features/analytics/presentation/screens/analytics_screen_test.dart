@@ -25,11 +25,13 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_ledg
 import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/analytics_section_header.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_drawer.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/time_window_chip.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -170,19 +172,36 @@ Future<void> _resetProviderScope(WidgetTester tester) async {
 void main() {
   group('AnalyticsScreen round-5 B lineup', () {
     testWidgets(
-      'renders the flat round-5 B 5-card lineup with NO section headers',
+      'renders the round-5 r5 sectioned lineup with 4 section headers + nested '
+      'joybar (JoySpendCard de-registered)',
       (tester) async {
         await _pump(tester, _buildSubject());
 
         expect(find.byType(TimeWindowChip), findsOneWidget);
-        // D-F2: the round-5 B lineup is a FLAT narrative flow — the Variant-δ
-        // Time/Distribution/Stories section headers were deleted (the
-        // AnalyticsScreenSectionHeader widget no longer exists).
+        // round-5 r5 (D2) reverses Phase-46 D-F2: the 4 section headers
+        // (支出趋势·实用 / 分类支出·实用 / 小确幸日历·悦己 / 悦己满足度分布·悦己) are back.
+        expect(
+          find.byType(AnalyticsSectionHeader, skipOffstage: false),
+          findsNWidgets(4),
+        );
         expect(find.byType(WithinMonthTrendCard), findsOneWidget);
         expect(find.byType(CategoryDonutCard), findsOneWidget);
-        expect(find.byType(JoySpendCard), findsOneWidget);
         expect(find.byType(JoyCalendarCard), findsOneWidget);
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
+
+        // D2: JoySpendCard is no longer a top-level sibling card — its joybar is
+        // nested inside CategoryDonutCard (the JoySpendDrawer lives in the donut
+        // subtree). The empty-joy fixture renders the drawer's neutral empty copy
+        // (no JoySpendStackedBar), so assert the drawer widget itself.
+        expect(find.byType(JoySpendCard), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(CategoryDonutCard),
+            matching: find.byType(JoySpendDrawer),
+            skipOffstage: false,
+          ),
+          findsOneWidget,
+        );
       },
     );
 
@@ -217,8 +236,9 @@ void main() {
 
       // D-C1/D-C2: the joy cards have local-only tap interactions (segment
       // highlight / calendar day expand) — none push a route. With empty data
-      // they render their neutral states without throwing.
-      await tester.ensureVisible(find.byType(JoySpendCard));
+      // they render their neutral states without throwing. The joybar now lives
+      // INSIDE the donut card (D2), so ensure the donut + calendar are visible.
+      await tester.ensureVisible(find.byType(CategoryDonutCard));
       await tester.ensureVisible(find.byType(JoyCalendarCard));
       expect(tester.takeException(), isNull);
     });

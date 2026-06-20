@@ -2050,7 +2050,7 @@
   "@analyticsJoyDrawerSubtitle": {
     "description": "Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)"
   },
-  "analyticsJoyDrawerCaption": "割合は悦び自身の中での比率です · 目標も過去との比較もありません",
+  "analyticsJoyDrawerCaption": "割合は悦び自身の中での比率です · 目標もなく、過去と引き比べることもありません",
   "@analyticsJoyDrawerCaption": {
     "description": "Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)"
   },

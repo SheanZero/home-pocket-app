@@ -2046,11 +2046,11 @@
       }
     }
   },
-  "analyticsJoyDrawerSubtitle": "Just where it went, no ranking",
+  "analyticsJoyDrawerSubtitle": "Just where it went, nothing placed above another",
   "@analyticsJoyDrawerSubtitle": {
     "description": "Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)"
   },
-  "analyticsJoyDrawerCaption": "Percentages are each item's share of joy itself · no target, no comparison with the past",
+  "analyticsJoyDrawerCaption": "Percentages are each item's share of joy itself · no target, never weighed against the past",
   "@analyticsJoyDrawerCaption": {
     "description": "Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)"
   },

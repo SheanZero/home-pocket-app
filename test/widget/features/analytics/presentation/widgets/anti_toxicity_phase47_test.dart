@@ -363,6 +363,14 @@ List<Override> _donutValueOverrides(Locale locale) => [
     ),
   ),
   analyticsCategoriesMapProvider.overrideWith((_) async => _donutValueMap),
+  // D2: the donut now nests the 悦己 joybar drawer, which watches
+  // joyCategoryAmountsProvider — override it so the drawer copy is swept.
+  joyCategoryAmountsProvider(
+    bookId: _bookId,
+    startDate: _startDate,
+    endDate: _endDate,
+    joyMetricVariant: _variant,
+  ).overrideWith((_) async => _joyAmountsValue()),
 ];
 
 List<Override> _donutEmptyOverrides(Locale locale) => [
@@ -378,6 +386,12 @@ List<Override> _donutEmptyOverrides(Locale locale) => [
   analyticsCategoriesMapProvider.overrideWith(
     (_) async => const <String, Category>{},
   ),
+  joyCategoryAmountsProvider(
+    bookId: _bookId,
+    startDate: _startDate,
+    endDate: _endDate,
+    joyMetricVariant: _variant,
+  ).overrideWith((_) async => const <JoyCategoryAmount>[]),
 ];
 
 // WR-02 / D-03: >10 L1 categories → the neutral "Other" long-tail row renders.
@@ -397,6 +411,12 @@ List<Override> _donutOtherOverrides(Locale locale) => [
     ),
   ),
   analyticsCategoriesMapProvider.overrideWith((_) async => _donutOtherMap),
+  joyCategoryAmountsProvider(
+    bookId: _bookId,
+    startDate: _startDate,
+    endDate: _endDate,
+    joyMetricVariant: _variant,
+  ).overrideWith((_) async => _joyAmountsValue()),
 ];
 
 List<Override> _joySpendValueOverrides(Locale locale) => [
