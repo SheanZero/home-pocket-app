@@ -7,7 +7,8 @@ import 'package:home_pocket/features/analytics/presentation/widgets/within_month
 import '../../../../../helpers/test_localizations.dart';
 
 /// Anchor month used for annotation date labels (the chart builds
-/// `DateTime(anchor.year, anchor.month, point.day)` for the 本月 endpoints).
+/// `DateTime(anchor.year, anchor.month, point.day)` for the 本月 endpoint, and
+/// derives the whole-month X extent `daysInMonth(anchor)`). May 2026 = 31 days.
 final _anchor = DateTime(2026, 5);
 
 List<CumulativePoint> _series(List<int> cumulative) => [
@@ -22,6 +23,9 @@ LineChart _chart(WidgetTester tester) =>
 /// Pull the single [LineChart] from the tree and read its bar data.
 List<LineChartBarData> _bars(WidgetTester tester) =>
     _chart(tester).data.lineBarsData;
+
+/// Count the endpoint annotation widgets rendered in the overlay.
+Finder _endpointLabels() => find.byType(WithinMonthEndpointAnnotation);
 
 void main() {
   testWidgets(
@@ -196,7 +200,8 @@ void main() {
   });
 
   testWidgets(
-    'Test 9: 本月 series shows endpoint dots only at the first + last spots',
+    'Test 9: 本月 series shows an endpoint dot at the last spot only (no start '
+    'dot — D-2)',
     (tester) async {
       final current = _series(const [100, 300, 600, 900]);
       await tester.pumpWidget(
@@ -216,10 +221,128 @@ void main() {
 
       final spots = bar.spots;
       final check = bar.dotData.checkToShowDot;
-      // First + last show; an interior spot does not.
-      expect(check(spots.first, bar), isTrue);
+      // Last shows; the first (start) spot and interior spots do not (D-2).
       expect(check(spots.last, bar), isTrue);
+      expect(check(spots.first, bar), isFalse);
       expect(check(spots[1], bar), isFalse);
+    },
+  );
+
+  // ---- Round-2 corrections (kll) ----
+
+  testWidgets(
+    'Test 10 (whole-month X extent, D-1): maxX == daysInMonth(anchor) even when '
+    'the current series ends before month end; minX stays 1',
+    (tester) async {
+      // Series ends at day 3 but anchor is May 2026 (31 days).
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [100, 300, 600]),
+            previousMonth: null,
+            seriesColor: AppPalette.light.daily,
+            anchor: _anchor,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_chart(tester).data.maxX, 31);
+      expect(_chart(tester).data.minX, 1);
+    },
+  );
+
+  testWidgets(
+    'Test 11 (one endpoint label per drawn line, D-2/D-4): joy mode = 1 label; '
+    'spend mode = 2 labels (本月 + 上月)',
+    (tester) async {
+      // Joy mode — single endpoint label, no 上月 label.
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [50, 90, 140]),
+            previousMonth: null,
+            seriesColor: AppPalette.light.joy,
+            anchor: _anchor,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(_endpointLabels(), findsOneWidget);
+
+      // Spend mode — two endpoint labels (本月 + 上月).
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [100, 300, 600]),
+            previousMonth: _series(const [120, 250, 500]),
+            seriesColor: AppPalette.light.daily,
+            anchor: _anchor,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(_endpointLabels(), findsNWidgets(2));
+    },
+  );
+
+  test(
+    'Test 12 (above/below comparison, D-3): 本月 label is ABOVE when current '
+    '>= prev, BELOW when current < prev',
+    () {
+      // 本月 >= 上月 ⇒ above.
+      expect(
+        WithinMonthCumulativeLineChart.labelAbove(
+          currentEndAmount: 600,
+          prevAtComparisonAmount: 500,
+        ),
+        isTrue,
+      );
+      expect(
+        WithinMonthCumulativeLineChart.labelAbove(
+          currentEndAmount: 500,
+          prevAtComparisonAmount: 500,
+        ),
+        isTrue,
+      );
+      // 本月 < 上月 ⇒ below.
+      expect(
+        WithinMonthCumulativeLineChart.labelAbove(
+          currentEndAmount: 400,
+          prevAtComparisonAmount: 500,
+        ),
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets(
+    'Test 13 (opposite placement, D-4): the 上月 label sits at the OPPOSITE '
+    'position from the 本月 label',
+    (tester) async {
+      // 本月 (600) > 上月 (500) at the comparison day ⇒ 本月 above, 上月 below.
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [100, 300, 600]),
+            previousMonth: _series(const [120, 250, 500]),
+            seriesColor: AppPalette.light.daily,
+            anchor: _anchor,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final labels = tester
+          .widgetList<WithinMonthEndpointAnnotation>(_endpointLabels())
+          .toList();
+      expect(labels.length, 2);
+      final current = labels.firstWhere((l) => l.isCurrent);
+      final previous = labels.firstWhere((l) => !l.isCurrent);
+      // Current above ⇒ previous below (opposite).
+      expect(current.above, isTrue);
+      expect(previous.above, isFalse);
+      expect(current.above, isNot(previous.above));
     },
   );
 }

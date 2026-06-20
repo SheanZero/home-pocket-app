@@ -11,10 +11,17 @@ import '../../domain/models/within_month_cumulative_trend.dart';
 ///
 /// Renders ONE or TWO [LineChartBarData] series over a fl_chart 1.2.0
 /// [LineChart] with a left amount axis + horizontal gridlines (from 0), bottom
-/// localized day markers, a muted-gray dashed 上月 reference (spend side only),
-/// and 本月 start/current endpoint annotations. Colors come from
-/// `context.palette` (ADR-019) — never hardcoded hex; labels come from
-/// `NumberFormatter` / `DateFormatter` (i18n) — never bare literals.
+/// localized day markers spanning the WHOLE displayed month (D-1), a muted-gray
+/// dashed 上月 reference (spend side only), and a SINGLE data-anchored endpoint
+/// label per drawn line (D-2/D-3/D-4). Colors come from `context.palette`
+/// (ADR-019) — never hardcoded hex; labels come from `NumberFormatter` /
+/// `DateFormatter` (i18n) — never bare literals.
+///
+/// CLOCKLESS (D-5): the chart reads NO wall clock. The use case injects
+/// "today"/the carry-forward right edge into the series it receives, so the
+/// chart renders deterministically from its inputs (golden stability). The
+/// comparison day is simply `currentMonth.last.day` (the use case made that the
+/// comparison day).
 ///
 /// CROSS-PERIOD GUARD (D-E1, Pitfall 2 — the highest-risk ADR-012 line): the
 /// [previousMonth] reference series is OPTIONAL and only ever drawn when a
@@ -47,15 +54,53 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
   /// `palette.joy` for the joy tab). The 上月 reference is a muted neutral gray.
   final Color seriesColor;
 
-  /// The current-month anchor (`DateTime(year, month)`). Endpoint annotation
-  /// dates are built as `DateTime(anchor.year, anchor.month, point.day)` —
-  /// [CumulativePoint.day] carries no month/year by itself.
+  /// The current-month anchor (`DateTime(year, month)`). The whole-month X
+  /// extent is `daysInMonth(anchor)` (D-1); endpoint annotation dates are built
+  /// as `DateTime(anchor.year, anchor.month, point.day)` — [CumulativePoint.day]
+  /// carries no month/year by itself.
   final DateTime anchor;
 
   final double height;
 
+  /// Plot-area insets used to map a (day, amount) spot to a pixel position for
+  /// data-anchored endpoint labels (CONTEXT key_facts). These mirror the axis
+  /// `reservedSize` values below.
+  static const double _leftReserved = 44;
+  static const double _bottomReserved = 22;
+  static const double _topPad = 12;
+
+  /// Vertical nudge (px) applied to an endpoint label above/below its point.
+  static const double _labelNudge = 28;
+
   bool get _hasReference =>
       previousMonth != null && previousMonth!.isNotEmpty;
+
+  /// The above/below decision (D-3): the 本月 label sits ABOVE its point when
+  /// 本月 ≥ 上月 at the comparison day, BELOW otherwise. The 上月 label uses the
+  /// OPPOSITE (negation, D-4). Pure + visible-for-testing.
+  static bool labelAbove({
+    required int currentEndAmount,
+    required int prevAtComparisonAmount,
+  }) =>
+      currentEndAmount >= prevAtComparisonAmount;
+
+  /// Days in the displayed month, derived from [anchor] (D-1).
+  int get _daysInMonth => DateTime(anchor.year, anchor.month + 1, 0).day;
+
+  /// The previous-month point with the latest `day <= comparisonDay` — 上月 now
+  /// spans the whole month, so `.last` is month-end, NOT the comparison day
+  /// (CONTEXT key_facts). Returns null when there is no such point.
+  CumulativePoint? _prevAtComparison(int comparisonDay) {
+    CumulativePoint? found;
+    for (final p in previousMonth!) {
+      if (p.day <= comparisonDay) {
+        found = p;
+      } else {
+        break;
+      }
+    }
+    return found;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,176 +111,236 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
     final palette = context.palette;
     final locale = Localizations.localeOf(context);
-    final maxDay = _maxDay();
+    final daysInMonth = _daysInMonth;
     final maxY = _maxY();
     final yStep = _niceYStep(maxY);
     // Round the axis ceiling up to a whole number of steps so the top gridline
     // and the top tick coincide (no clipped top label).
     final axisMaxY = (maxY / yStep).ceil() * yStep;
 
-    final firstPoint = currentMonth.first;
+    const minX = 1.0;
+    final maxX = daysInMonth.toDouble();
+
     final lastPoint = currentMonth.last;
-    final firstSpot = FlSpot(
-      firstPoint.day.toDouble(),
-      firstPoint.cumulativeAmount.toDouble(),
-    );
     final lastSpot = FlSpot(
       lastPoint.day.toDouble(),
       lastPoint.cumulativeAmount.toDouble(),
     );
 
+    // Comparison day = the current line's endpoint day (the use case made this
+    // = today/month-end). No clock read here (D-5).
+    final comparisonDay = lastPoint.day;
+    final prevPoint = _hasReference ? _prevAtComparison(comparisonDay) : null;
+    final currentAbove = labelAbove(
+      currentEndAmount: lastPoint.cumulativeAmount,
+      prevAtComparisonAmount: prevPoint?.cumulativeAmount ?? 0,
+    );
+
     return SizedBox(
       height: height,
-      child: Stack(
-        children: [
-          LineChart(
-            LineChartData(
-              minX: 1,
-              maxX: maxDay.toDouble(),
-              minY: 0,
-              maxY: axisMaxY,
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                horizontalInterval: yStep,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: palette.backgroundDivider,
-                  strokeWidth: 1,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final plotW = constraints.maxWidth - _leftReserved;
+          final plotH = constraints.maxHeight - _bottomReserved - _topPad;
+
+          double px(num day) =>
+              _leftReserved + (day - minX) / (maxX - minX) * plotW;
+          double py(num amount) =>
+              _topPad +
+              (1 - (amount - 0) / (axisMaxY - 0)) * plotH;
+
+          final overlays = <Widget>[];
+
+          // 本月 endpoint label — anchored at the line's last point, nudged
+          // up/down by the comparison rule (D-3).
+          overlays.add(
+            _positionedLabel(
+              context: context,
+              constraints: constraints,
+              x: px(lastPoint.day),
+              y: py(lastPoint.cumulativeAmount),
+              above: currentAbove,
+              child: WithinMonthEndpointAnnotation(
+                date: DateTime(anchor.year, anchor.month, lastPoint.day),
+                amount: lastPoint.cumulativeAmount,
+                locale: locale,
+                color: seriesColor,
+                isCurrent: true,
+                above: currentAbove,
+              ),
+            ),
+          );
+
+          // 上月 endpoint label (spend side only) — anchored at its
+          // comparison-day point, placed OPPOSITE to the 本月 label (D-4).
+          if (prevPoint != null) {
+            final prevAbove = !currentAbove;
+            overlays.add(
+              _positionedLabel(
+                context: context,
+                constraints: constraints,
+                x: px(prevPoint.day),
+                y: py(prevPoint.cumulativeAmount),
+                above: prevAbove,
+                child: WithinMonthEndpointAnnotation(
+                  // 上月 date is the PREVIOUS month at the comparison day.
+                  date: DateTime(
+                    anchor.year,
+                    anchor.month - 1,
+                    prevPoint.day,
+                  ),
+                  amount: prevPoint.cumulativeAmount,
+                  locale: locale,
+                  color: palette.textTertiary,
+                  isCurrent: false,
+                  above: prevAbove,
                 ),
               ),
-              titlesData: FlTitlesData(
-                show: true,
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 44,
-                    interval: yStep,
-                    getTitlesWidget: (value, meta) => SideTitleWidget(
-                      meta: meta,
-                      child: Text(
-                        NumberFormatter.formatCompact(value, locale),
-                        style: AppTextStyles.legendLabel.copyWith(
-                          color: palette.textSecondary,
+            );
+          }
+
+          return Stack(
+            children: [
+              LineChart(
+                LineChartData(
+                  minX: minX,
+                  maxX: maxX,
+                  minY: 0,
+                  maxY: axisMaxY,
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: yStep,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: palette.backgroundDivider,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: _leftReserved,
+                        interval: yStep,
+                        getTitlesWidget: (value, meta) => SideTitleWidget(
+                          meta: meta,
+                          child: Text(
+                            NumberFormatter.formatCompact(value, locale),
+                            style: AppTextStyles.legendLabel.copyWith(
+                              color: palette.textSecondary,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 22,
-                    interval: 7,
-                    getTitlesWidget: (value, meta) {
-                      final day = value.round();
-                      // Skip the auto-emitted edge label past maxX to avoid
-                      // clutter; show only sparse ~weekly markers.
-                      if (day < 1 || day > maxDay) {
-                        return const SizedBox.shrink();
-                      }
-                      return SideTitleWidget(
-                        meta: meta,
-                        child: Text(
-                          DateFormatter.formatDayOfMonthAxis(day, locale),
-                          style: AppTextStyles.legendLabel.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              borderData: FlBorderData(show: false),
-              lineTouchData: const LineTouchData(enabled: false),
-              lineBarsData: [
-                // 本月 — solid, stroke-cap round, endpoint dots (always present).
-                LineChartBarData(
-                  spots: _spots(currentMonth),
-                  color: seriesColor,
-                  barWidth: 2.5,
-                  isCurved: false,
-                  isStrokeCapRound: true,
-                  dotData: FlDotData(
-                    show: true,
-                    checkToShowDot: (spot, bar) =>
-                        spot == firstSpot || spot == lastSpot,
-                    getDotPainter: (spot, pct, bar, idx) => FlDotCirclePainter(
-                      radius: 3,
-                      color: seriesColor,
-                      strokeWidth: 1.5,
-                      strokeColor: palette.card,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: _bottomReserved,
+                        interval: 7,
+                        getTitlesWidget: (value, meta) {
+                          final day = value.round();
+                          // Show only sparse ~weekly markers across the whole
+                          // month; skip any auto-emitted label past the month.
+                          if (day < 1 || day > daysInMonth) {
+                            return const SizedBox.shrink();
+                          }
+                          return SideTitleWidget(
+                            meta: meta,
+                            child: Text(
+                              DateFormatter.formatDayOfMonthAxis(day, locale),
+                              style: AppTextStyles.legendLabel.copyWith(
+                                color: palette.textSecondary,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  belowBarData: BarAreaData(show: false),
+                  borderData: FlBorderData(show: false),
+                  lineTouchData: const LineTouchData(enabled: false),
+                  lineBarsData: [
+                    // 本月 — solid, stroke-cap round, endpoint dot at the last
+                    // spot only (no start dot — D-2).
+                    LineChartBarData(
+                      spots: _spots(currentMonth),
+                      color: seriesColor,
+                      barWidth: 2.5,
+                      isCurved: false,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        checkToShowDot: (spot, bar) => spot == lastSpot,
+                        getDotPainter: (spot, pct, bar, idx) =>
+                            FlDotCirclePainter(
+                          radius: 3,
+                          color: seriesColor,
+                          strokeWidth: 1.5,
+                          strokeColor: palette.card,
+                        ),
+                      ),
+                      belowBarData: BarAreaData(show: false),
+                    ),
+                    // 上月 — dashed muted-GRAY reference, ONLY on the spend side
+                    // (never joy, D-E1).
+                    if (_hasReference)
+                      LineChartBarData(
+                        spots: _spots(previousMonth!),
+                        color: palette.textTertiary,
+                        barWidth: 2,
+                        isCurved: false,
+                        dashArray: const [4, 4],
+                        dotData: const FlDotData(show: false),
+                        belowBarData: BarAreaData(show: false),
+                      ),
+                  ],
                 ),
-                // 上月 — dashed muted-GRAY reference, ONLY on the spend side
-                // (never joy, D-E1).
-                if (_hasReference)
-                  LineChartBarData(
-                    spots: _spots(previousMonth!),
-                    color: palette.textTertiary,
-                    barWidth: 2,
-                    isCurved: false,
-                    dashArray: const [4, 4],
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(show: false),
-                  ),
-              ],
-            ),
-          ),
-          // 本月 start + current endpoint annotations (date + amount). Only the
-          // 本月 line is annotated (not 上月, not every point) — Feature 4.
-          Positioned(
-            left: 48,
-            top: 4,
-            child: _EndpointAnnotation(
-              point: firstPoint,
-              anchor: anchor,
-              locale: locale,
-              color: seriesColor,
-              alignEnd: false,
-            ),
-          ),
-          Positioned(
-            right: 4,
-            bottom: 26,
-            child: _EndpointAnnotation(
-              point: lastPoint,
-              anchor: anchor,
-              locale: locale,
-              color: seriesColor,
-              alignEnd: true,
-            ),
-          ),
-        ],
+              ),
+              ...overlays,
+            ],
+          );
+        },
       ),
     );
+  }
+
+  /// Positions an endpoint label near a plot pixel, nudged above/below, clamped
+  /// so it never overflows the card. The label is roughly [_labelW] × [_labelH].
+  static const double _labelW = 86;
+  static const double _labelH = 34;
+
+  Widget _positionedLabel({
+    required BuildContext context,
+    required BoxConstraints constraints,
+    required double x,
+    required double y,
+    required bool above,
+    required Widget child,
+  }) {
+    // Center the label horizontally on the point, biased to stay on-card.
+    var left = x - _labelW / 2;
+    var top = above ? y - _labelNudge - _labelH : y + _labelNudge;
+
+    final maxLeft = constraints.maxWidth - _labelW;
+    final maxTop = constraints.maxHeight - _labelH;
+    left = left.clamp(0.0, maxLeft < 0 ? 0.0 : maxLeft);
+    top = top.clamp(0.0, maxTop < 0 ? 0.0 : maxTop);
+
+    return Positioned(left: left, top: top, child: child);
   }
 
   List<FlSpot> _spots(List<CumulativePoint> points) => [
     for (final p in points)
       FlSpot(p.day.toDouble(), p.cumulativeAmount.toDouble()),
   ];
-
-  int _maxDay() {
-    var maxDay = 1;
-    for (final p in currentMonth) {
-      if (p.day > maxDay) maxDay = p.day;
-    }
-    if (_hasReference) {
-      for (final p in previousMonth!) {
-        if (p.day > maxDay) maxDay = p.day;
-      }
-    }
-    return maxDay;
-  }
 
   double _maxY() {
     var maxAmount = 0;
@@ -307,34 +412,40 @@ extension on double {
   }
 }
 
-/// A small date + amount label rendered at a 本月 endpoint (Feature 4).
-class _EndpointAnnotation extends StatelessWidget {
-  const _EndpointAnnotation({
-    required this.point,
-    required this.anchor,
+/// A small date + amount label rendered at a line's endpoint (D-2/D-3/D-4).
+///
+/// Visible-for-testing: [isCurrent] distinguishes the 本月 (true) from the 上月
+/// (false) label; [above] records the placement so tests can assert the
+/// opposite-position rule without pixel math.
+class WithinMonthEndpointAnnotation extends StatelessWidget {
+  const WithinMonthEndpointAnnotation({
+    super.key,
+    required this.date,
+    required this.amount,
     required this.locale,
     required this.color,
-    required this.alignEnd,
+    required this.isCurrent,
+    required this.above,
   });
 
-  final CumulativePoint point;
-  final DateTime anchor;
+  final DateTime date;
+  final int amount;
   final Locale locale;
   final Color color;
-  final bool alignEnd;
+
+  /// True for the 本月 label, false for the 上月 reference label.
+  final bool isCurrent;
+
+  /// True when this label is placed ABOVE its point (else below). Records the
+  /// comparison/opposite decision for tests.
+  final bool above;
 
   @override
   Widget build(BuildContext context) {
-    final date = DateTime(anchor.year, anchor.month, point.day);
     final dateLabel = DateFormatter.formatShortMonthDay(date, locale);
-    final amountLabel = NumberFormatter.formatCurrency(
-      point.cumulativeAmount,
-      'JPY',
-      locale,
-    );
+    final amountLabel = NumberFormatter.formatCurrency(amount, 'JPY', locale);
     return Column(
-      crossAxisAlignment:
-          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
