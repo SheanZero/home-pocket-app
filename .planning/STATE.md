@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 Phase: 47
 Plan: Not started
 Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
-Last activity: 2026-06-20 - Completed quick task 260620-lfp: 统计页按 round5 r5-drawer-joybar mock 整页重建（4 节标题回归逆转 D-F2 + 悦己堆叠条内嵌分类环抽屉 + joy-warm j1–j7 调色板 + AnalyticsSectionHeader 组件 + 直方图中位数据派生；趋势图冻结守 D3）；--full：plan-check PASSED + verify 9/9 must-have、analyze 0、full test 3072/3072、34 golden 重基线
+Last activity: 2026-06-20 - quick 260620-lfp R2 像素对齐 mock（用户反馈"差距太大"）：分类支出卡（去卡内标题 showHeader:false + hero-top「这个月钱花在哪」+「N笔·M月」pill + 环按分类离散配色 joy樱粉/survival绿蓝 弃 daily→joy 渐变 + 中心 3 行加「N笔」+ 图例圆角方块 dot/行分隔线/去 chevron）+ 小确幸日历卡（星期表头一二三四五六日 + 正方格 gap6 + 右上角日号 + 离散 heat0–3 + 底部「这个月有N天」说明）；新增 lib/core/theme/analytics_category_palette.dart + 11 ARB key（含 DonutHero 提取守 REDES-01）；analyze 0、full test 3072/3072、17 golden 重基线（commits 53928fbc/774c2133/9640001f）
 
 ### Quick Tasks Completed
 
