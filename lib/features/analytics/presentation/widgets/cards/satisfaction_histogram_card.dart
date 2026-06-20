@@ -11,7 +11,7 @@ import '../analytics_card_error_state.dart';
 import '../satisfaction_distribution_histogram.dart';
 import 'analytics_data_card.dart';
 
-/// Satisfaction-distribution histogram card with an async self-hide.
+/// Satisfaction-distribution histogram card. ALWAYS renders.
 ///
 /// Phase 45: promoted verbatim from the private
 /// `_SatisfactionHistogramOrFallback` inline in `analytics_screen.dart` (D-A1
@@ -19,12 +19,14 @@ import 'analytics_data_card.dart';
 /// error-retry invalidations now draw their provider from the single-source
 /// `satisfactionHistogramRefreshTargets` list instead of literals).
 ///
-/// D-B5: the `report.totalJoyTx < 5 → SizedBox.shrink()` self-hide stays INSIDE
-/// the `happinessAsync.when` data branch — it depends on FETCHED data, not on
-/// the [AnalyticsCardContext], so it is NOT a registry visibility predicate. The
-/// registry sets this card's `isVisible` to always-true (Plan 03), and
-/// `satisfactionHistogramRefreshTargets` always returns BOTH providers
-/// regardless of the self-hide.
+/// round-5 r5b: the former `report.totalJoyTx < 5 → SizedBox.shrink()` self-hide
+/// (D-B5) is REMOVED. It left an orphaned section header (「悦己满足度分布」renders
+/// unconditionally in the shell) when joy tx < 5. The card now renders the
+/// histogram for ALL data; the empty case (0 rated joy tx) is the
+/// `SatisfactionDistributionHistogram` empty state (10 zero-stub bars +「0 笔」).
+/// `happinessReportProvider` is still watched (loading/error gating only — its
+/// value is discarded), and `satisfactionHistogramRefreshTargets` still returns
+/// BOTH providers.
 class SatisfactionHistogramCard extends ConsumerWidget {
   const SatisfactionHistogramCard({
     super.key,
@@ -65,27 +67,29 @@ class SatisfactionHistogramCard extends ConsumerWidget {
       ),
     );
 
+    // round-5 r5b / D-B5 REVERSED: the `totalJoyTx < 5` self-hide is GONE — the
+    // card ALWAYS renders the histogram. The empty-data case (0 rated joy tx) is
+    // handled by SatisfactionDistributionHistogram itself (10 zero-stub bars +
+    // 「0 笔」footer). The happinessAsync.when wrapper is kept ONLY to gate on the
+    // happiness fetch's loading/error states; its value is intentionally
+    // discarded (`_`). Both providers stay watched so the refresh union
+    // (satisfactionHistogramRefreshTargets) is unchanged.
     return happinessAsync.when(
-      data: (report) {
-        if (report.totalJoyTx < 5) {
-          return const SizedBox.shrink();
-        }
-        return distributionAsync.when(
-          // round-5 r5 / §3: the card title is suppressed — the section header
-          // 「悦己满足度分布」already labels it and the mock body has no in-card
-          // title. title/caption stay set (still required) but are not rendered.
-          data: (buckets) => AnalyticsDataCard(
-            showHeader: false,
-            title: S.of(context).analyticsCardTitleSatisfactionHistogram,
-            caption: S.of(context).analyticsCardCaptionHistogram,
-            child: SatisfactionDistributionHistogram(buckets: buckets),
-          ),
-          loading: () => const SizedBox(height: 260),
-          error: (_, _) => AnalyticsCardErrorState(
-            onRetry: () => ref.invalidate(targets[1]),
-          ),
-        );
-      },
+      data: (_) => distributionAsync.when(
+        // round-5 r5 / §3: the card title is suppressed — the section header
+        // 「悦己满足度分布」already labels it and the mock body has no in-card
+        // title. title/caption stay set (still required) but are not rendered.
+        data: (buckets) => AnalyticsDataCard(
+          showHeader: false,
+          title: S.of(context).analyticsCardTitleSatisfactionHistogram,
+          caption: S.of(context).analyticsCardCaptionHistogram,
+          child: SatisfactionDistributionHistogram(buckets: buckets),
+        ),
+        loading: () => const SizedBox(height: 260),
+        error: (_, _) => AnalyticsCardErrorState(
+          onRetry: () => ref.invalidate(targets[1]),
+        ),
+      ),
       loading: () => const SizedBox(height: 260),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(targets[0]),
@@ -108,7 +112,8 @@ class SatisfactionHistogramCard extends ConsumerWidget {
 
 /// Single-source refresh targets for [SatisfactionHistogramCard] (D-B2). ALWAYS
 /// returns both `happinessReportProvider` and `satisfactionDistributionProvider`
-/// regardless of the in-card `totalJoyTx < 5` self-hide (D-B5).
+/// (the card watches both; the former now only gates loading/error after the
+/// round-5 r5b self-hide removal).
 List<ProviderBase<Object?>> satisfactionHistogramRefreshTargets(
   AnalyticsCardContext ctx,
 ) => [

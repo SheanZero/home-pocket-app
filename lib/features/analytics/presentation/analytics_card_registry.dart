@@ -219,8 +219,8 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
       tone: SectionTone.joy,
     ),
   ),
-  // 4. 悦己满足度分布 (悦己) — histogram (native fl_chart rod label). Async
-  //    self-hide is in-card (D-B5).
+  // 4. 悦己满足度分布 (悦己) — histogram. round-5 r5b: the former in-card
+  //    `totalJoyTx < 5` self-hide (D-B5) is REMOVED; the card always renders.
   AnalyticsCardSpec(
     build: (ctx) => SatisfactionHistogramCard(
       bookId: ctx.bookId,
