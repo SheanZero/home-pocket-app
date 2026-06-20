@@ -220,14 +220,21 @@ void main() {
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
     });
 
-    testWidgets('thin-sample happiness hides histogram slot', (tester) async {
-      await _pump(
-        tester,
-        _buildSubject(happinessReport: fixtureHappinessReportThin()),
-      );
+    testWidgets(
+      'thin-sample happiness still renders the histogram (no self-hide)',
+      (tester) async {
+        // round-5 r5b: the former `totalJoyTx < 5` self-hide is REMOVED — it left
+        // an orphaned 「悦己满足度分布」section header (the header renders
+        // unconditionally in the shell). The card now ALWAYS renders the
+        // histogram, so a thin-sample report no longer collapses the slot.
+        await _pump(
+          tester,
+          _buildSubject(happinessReport: fixtureHappinessReportThin()),
+        );
 
-      expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
-    });
+        expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
+      },
+    );
 
     testWidgets('joy cards render without throwing on the empty-data path', (
       tester,

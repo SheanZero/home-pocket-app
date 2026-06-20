@@ -236,7 +236,7 @@ Transaction _tx(String id, DateTime ts) => Transaction(
 
 MetricResult<T> _m<T>(T data, int n) => Value(data, n);
 
-// A `totalJoyTx >= 5` happiness report so the histogram card does NOT self-hide.
+// A `totalJoyTx >= 5` happiness report (the histogram card's value state).
 HappinessReport _happinessVisible() => HappinessReport(
   year: 2026,
   month: 5,
@@ -495,8 +495,8 @@ List<Override> _histogramEmptyOverrides(Locale locale) => [
     joyMetricVariant: _variant,
   ).overrideWith(
     (_) async =>
-        // totalJoyTx < 5 → the card self-hides (SizedBox.shrink); still a valid
-        // user-visible state to sweep (it renders nothing forbidden).
+        // totalJoyTx < 5 + empty distribution → round-5 r5b: no longer self-hides;
+        // the card renders the histogram empty state (still swept).
         _happinessVisible().copyWith(totalJoyTx: 0),
   ),
   satisfactionDistributionProvider(
@@ -533,8 +533,7 @@ void _sweepForbiddenSubstrings({
 
 /// Asserts the card actually rendered SOME visible non-empty text, so a
 /// silently-failed override (e.g. the card stuck in loading/error) cannot mask
-/// the sweep into a trivial pass (RESEARCH Pitfall 1). Skipped for self-hidden
-/// states (the histogram <5 self-hide renders nothing by design).
+/// the sweep into a trivial pass (RESEARCH Pitfall 1).
 void _expectRenderedText() {
   final textWidgets = find.byWidgetPredicate(
     (w) => w is Text && (w.data?.trim().isNotEmpty ?? false),
@@ -799,7 +798,10 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // SatisfactionHistogramCard — 3 locales × {value (totalJoyTx>=5), self_hide}.
+  // SatisfactionHistogramCard — 3 locales × {value (totalJoyTx>=5), empty}.
+  // round-5 r5b: the former `totalJoyTx < 5` self-hide is REMOVED — the empty
+  // state now ALWAYS renders the histogram empty body, so it is swept like any
+  // other rendered state (and asserts visible text).
   // -------------------------------------------------------------------------
   group('D-14 / SatisfactionHistogramCard / forbidden substring sweep', () {
     for (final locale in locales) {
@@ -822,10 +824,11 @@ void main() {
         );
       });
 
-      // totalJoyTx < 5 → the card self-hides (renders nothing). Still swept to
-      // confirm the hidden state never leaks a forbidden substring.
+      // totalJoyTx < 5, empty distribution → round-5 r5b: the card now renders
+      // the histogram empty state (10 zero-stub bars +「0 笔」footer) rather than
+      // self-hiding. Swept like the value state, with the rendered-text guard.
       testWidgets(
-          'SatisfactionHistogramCard / ${locale.languageCode} / self_hide',
+          'SatisfactionHistogramCard / ${locale.languageCode} / empty',
           (tester) async {
         await tester.pumpWidget(
           createLocalizedWidget(
@@ -836,10 +839,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        _expectRenderedText();
         _sweepForbiddenSubstrings(
           locale: locale,
           card: 'SatisfactionHistogramCard',
-          state: 'self_hide',
+          state: 'empty',
         );
       });
     }

@@ -22,10 +22,12 @@ import '../helpers/happiness_test_fixtures.dart';
 /// Plan 47-05).
 ///
 /// Coverage (GUARD-04 / 47-UI-SPEC §Golden Visual-Contract Matrix):
-/// - ja/zh/en × light/dark (6 value-state masters). The value state needs
-///   `totalJoyTx >= 5` so the in-card self-hide (D-B5) does NOT collapse it.
+/// - ja/zh/en × light/dark (6 value-state masters).
 /// - + empty/thin-sample state (1 master): a thin happiness report
-///   (`totalJoyTx < 5`) → the card self-hides to `SizedBox.shrink()`.
+///   (`totalJoyTx < 5`) with an empty distribution. round-5 r5b: the former
+///   `totalJoyTx < 5` self-hide is REMOVED, so the card now renders the
+///   `SatisfactionDistributionHistogram` empty state (10 zero-stub bars +
+///   「0 笔」footer, median pill absent) instead of `SizedBox.shrink()`.
 ///
 /// Wraps the PRODUCTION [AppTheme] so `context.palette` resolves the real
 /// ADR-019 palette.
@@ -136,8 +138,9 @@ void main() {
       });
     }
 
-    // Thin-sample (totalJoyTx < 5) → in-card self-hide to SizedBox.shrink.
-    testWidgets('empty self-hide — light ja', (tester) async {
+    // Thin-sample (totalJoyTx < 5, empty distribution) → round-5 r5b: the card
+    // now ALWAYS renders the histogram empty state (no more self-hide).
+    testWidgets('empty data — light ja', (tester) async {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('ja'),
