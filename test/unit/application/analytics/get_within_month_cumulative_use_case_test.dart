@@ -81,8 +81,9 @@ int? _cumAt(List<CumulativePoint> points, int day) {
 
 /// The carried-forward cumulative on/before [day] (the value a line chart would
 /// draw at [day]): the cumulative of the latest point at or before [day], or 0
-/// if no spend has occurred yet. Series are sparse (only spend days are
-/// emitted), so a no-spend day inherits the prior cumulative — never resets.
+/// if no spend has occurred yet. Series are sparse (only spend days + the
+/// carry-forward edges are emitted), so a no-spend day inherits the prior
+/// cumulative — never resets.
 int _cumOnOrBefore(List<CumulativePoint> points, int day) {
   int running = 0;
   for (final p in points) {
@@ -96,8 +97,12 @@ int _cumOnOrBefore(List<CumulativePoint> points, int day) {
 }
 
 void main() {
-  // June 2026 is the current month; May 2026 is the previous month.
+  // June 2026 is the displayed month; May 2026 is the previous month.
   final monthAnchor = DateTime(2026, 6, 1);
+  // A "live current month" now: the 20th of June, the displayed month.
+  final nowLive = DateTime(2026, 6, 20, 14);
+  // A "past month" now: well after June (the displayed month is complete).
+  final nowAfter = DateTime(2026, 8, 5, 9);
 
   group('GetWithinMonthCumulativeUseCase', () {
     test(
@@ -116,6 +121,7 @@ void main() {
         final result = await useCase.execute(
           bookIds: ['book1'],
           monthAnchor: monthAnchor,
+          now: nowLive,
         );
 
         final total = result.currentMonthTotal;
@@ -164,11 +170,13 @@ void main() {
         final result = await useCase.execute(
           bookIds: ['book1'],
           monthAnchor: monthAnchor,
+          now: nowLive,
         );
 
         // total == daily + joy at every point in total. Series are sparse
-        // (only spend days emitted), so use the carried-forward cumulative for
-        // the per-ledger lookup — a no-spend day keeps the prior cumulative.
+        // (only spend days + carry-forward edges emitted), so use the
+        // carried-forward cumulative for the per-ledger lookup — a no-spend day
+        // keeps the prior cumulative.
         for (final p in result.currentMonthTotal) {
           final daily = _cumOnOrBefore(result.currentMonthDaily, p.day);
           final joy = _cumOnOrBefore(result.currentMonthJoy, p.day);
@@ -225,6 +233,7 @@ void main() {
         final result = await useCase.execute(
           bookIds: ['book1'],
           monthAnchor: monthAnchor,
+          now: nowLive,
         );
 
         // Spend (total/daily) previous-month series are populated.
@@ -235,7 +244,8 @@ void main() {
 
         // Current-month joy is populated.
         expect(result.currentMonthJoy, isNotEmpty);
-        expect(_cumAt(result.currentMonthJoy, 4), 2000);
+        // Joy day-1 prepend (carry-forward left edge) is 0; day 4 carries 2000.
+        expect(_cumOnOrBefore(result.currentMonthJoy, 4), 2000);
 
         // CROSS-PERIOD GUARD: there is NO previous-month joy series at all
         // (the model has no previousMonthJoy field — this is the type-level
@@ -273,10 +283,11 @@ void main() {
         final result = await useCase.execute(
           bookIds: ['book1'],
           monthAnchor: monthAnchor,
+          now: nowLive,
         );
 
-        // Only the 10000 expense contributes.
-        expect(_cumAt(result.currentMonthTotal, 2), 10000);
+        // Only the 10000 expense contributes (carried forward to day 2+).
+        expect(_cumOnOrBefore(result.currentMonthTotal, 2), 10000);
       },
     );
 
@@ -289,8 +300,11 @@ void main() {
       final result = await useCase.execute(
         bookIds: ['book1'],
         monthAnchor: monthAnchor,
+        now: nowLive,
       );
 
+      // A month with NO spend stays empty — do NOT synthesize a flat 0-line so
+      // the empty-state placeholder still renders.
       expect(result.currentMonthTotal, isEmpty);
       expect(result.currentMonthDaily, isEmpty);
       expect(result.currentMonthJoy, isEmpty);
@@ -312,6 +326,7 @@ void main() {
         await useCase.execute(
           bookIds: ['book1', 'book2'],
           monthAnchor: monthAnchor,
+          now: nowLive,
         );
 
         expect(repo.lastBookIds, ['book1', 'book2']);
@@ -337,10 +352,186 @@ void main() {
         final result = await useCase.execute(
           bookIds: ['book1'],
           monthAnchor: monthAnchor,
+          now: nowLive,
           entrySourceFilter: EntrySource.manual,
         );
 
         expect(result.currentMonthTotal, isNotEmpty);
+      },
+    );
+
+    // ---- Round-2 carry-forward + now-injection contract (kll) ----
+
+    test(
+      'Test 7 (carry-forward left edge): the current-month series is PREPENDED '
+      'with a day-1 cumulative-0 point when the first spend day > 1 (D-5)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'a', amount: 12000, timestamp: DateTime(2026, 6, 5, 9)),
+        ]);
+        final useCase = GetWithinMonthCumulativeUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          monthAnchor: monthAnchor,
+          now: nowLive,
+        );
+
+        // Left edge: day 1, cumulative 0 (carry-forward from month start).
+        expect(result.currentMonthTotal.first.day, 1);
+        expect(result.currentMonthTotal.first.cumulativeAmount, 0);
+        // The actual spend on day 5 is still present.
+        expect(_cumAt(result.currentMonthTotal, 5), 12000);
+      },
+    );
+
+    test(
+      'Test 8 (live current month): the current-month series is EXTENDED to '
+      'now.day carrying forward the running cumulative even on a no-spend now '
+      'day (D-5)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'a', amount: 8000, timestamp: DateTime(2026, 6, 5, 9)),
+          // Last spend on day 12 — well before now.day (20).
+          _tx(id: 'b', amount: 4000, timestamp: DateTime(2026, 6, 12, 9)),
+        ]);
+        final useCase = GetWithinMonthCumulativeUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          monthAnchor: monthAnchor,
+          now: nowLive, // 2026-06-20
+        );
+
+        // Right edge: extends to now.day (20), carrying the final running total.
+        expect(result.currentMonthTotal.last.day, 20);
+        expect(result.currentMonthTotal.last.cumulativeAmount, 12000);
+      },
+    );
+
+    test(
+      'Test 9 (past month): when now is AFTER the displayed month, the '
+      'current-month series extends to the month LAST day, not now.day (D-5)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'a', amount: 8000, timestamp: DateTime(2026, 6, 5, 9)),
+        ]);
+        final useCase = GetWithinMonthCumulativeUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          monthAnchor: monthAnchor,
+          now: nowAfter, // 2026-08-05, well after June
+        );
+
+        // June has 30 days — the complete-month series extends to day 30.
+        expect(result.currentMonthTotal.last.day, 30);
+        expect(result.currentMonthTotal.last.cumulativeAmount, 8000);
+      },
+    );
+
+    test(
+      'Test 10 (previous month full span): the 上月 series spans the WHOLE '
+      'previous month — day 1 (cumulative 0) .. last day of prev month (D-5)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(
+            id: 'm1',
+            amount: 7000,
+            timestamp: DateTime(2026, 5, 10, 9),
+            ledgerType: LedgerType.daily,
+          ),
+          _tx(
+            id: 'c1',
+            amount: 9000,
+            timestamp: DateTime(2026, 6, 4, 9),
+            ledgerType: LedgerType.daily,
+          ),
+        ]);
+        final useCase = GetWithinMonthCumulativeUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          monthAnchor: monthAnchor,
+          now: nowLive,
+        );
+
+        // 上月 (May) spans day 1 .. 31.
+        expect(result.previousMonthTotal.first.day, 1);
+        expect(result.previousMonthTotal.first.cumulativeAmount, 0);
+        expect(result.previousMonthTotal.last.day, 31);
+        expect(result.previousMonthTotal.last.cumulativeAmount, 7000);
+
+        // Same full-month span for previousMonthDaily.
+        expect(result.previousMonthDaily.first.day, 1);
+        expect(result.previousMonthDaily.last.day, 31);
+        expect(result.previousMonthDaily.last.cumulativeAmount, 7000);
+      },
+    );
+
+    test(
+      'Test 11 (joy spans the chart): the joy current-month series ALSO gets a '
+      'day-1 prepend + extension to the comparison day; still NO previous joy',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(
+            id: 'j1',
+            amount: 5000,
+            timestamp: DateTime(2026, 6, 8, 9),
+            ledgerType: LedgerType.joy,
+          ),
+        ]);
+        final useCase = GetWithinMonthCumulativeUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          monthAnchor: monthAnchor,
+          now: nowLive,
+        );
+
+        expect(result.currentMonthJoy.first.day, 1);
+        expect(result.currentMonthJoy.first.cumulativeAmount, 0);
+        expect(result.currentMonthJoy.last.day, 20);
+        expect(result.currentMonthJoy.last.cumulativeAmount, 5000);
+        // No previous-month joy is representable (model has no field) — the
+        // spend previous series carry zero joy contribution.
+        expect(result.previousMonthTotal, isEmpty);
+      },
+    );
+
+    test(
+      'Test 12 (day-1 spend): when spend exists ON day 1, the first point is '
+      'the day-1 cumulative (no duplicate day-1 prepend)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'a', amount: 3000, timestamp: DateTime(2026, 6, 1, 9)),
+          _tx(id: 'b', amount: 2000, timestamp: DateTime(2026, 6, 7, 9)),
+        ]);
+        final useCase = GetWithinMonthCumulativeUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          monthAnchor: monthAnchor,
+          now: nowLive,
+        );
+
+        // Exactly one day-1 point with the day-1 cumulative (3000).
+        final dayOnePoints =
+            result.currentMonthTotal.where((p) => p.day == 1).toList();
+        expect(dayOnePoints.length, 1);
+        expect(dayOnePoints.first.cumulativeAmount, 3000);
       },
     );
   });

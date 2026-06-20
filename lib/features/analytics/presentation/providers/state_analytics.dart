@@ -70,9 +70,14 @@ Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
   // D-12 defensive normalization: collapse to month precision so two callers
   // with differing sub-day/day precision share one cache key.
   final monthAnchor = DateTime(anchor.year, anchor.month);
+  // The provider is the ONLY production caller that injects the real clock
+  // (D-5): "today" / the carry-forward right edge lives in the use case, never
+  // in the chart widget (golden determinism). Use-case tests pass an explicit
+  // `now`.
   return useCase.execute(
     bookIds: [bookId],
     monthAnchor: monthAnchor,
+    now: DateTime.now(),
     entrySourceFilter: entrySourceFilter,
   );
 }

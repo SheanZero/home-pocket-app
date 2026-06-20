@@ -30,6 +30,7 @@ class GetWithinMonthCumulativeUseCase {
   Future<WithinMonthCumulativeTrend> execute({
     required List<String> bookIds,
     required DateTime monthAnchor,
+    required DateTime now,
     EntrySource? entrySourceFilter,
   }) async {
     // 2-month window: first day of the previous month .. last day of the
@@ -64,22 +65,42 @@ class GetWithinMonthCumulativeUseCase {
 
     final previousMonth = DateTime(currentYear, currentMonth - 1, 1);
 
+    // Comparison day = the right edge each series is carried-forward to (D-5):
+    //  - current month: `now.day` when `now` falls inside the displayed month
+    //    (live current month), else the month's last day (a past, complete
+    //    month). Clamp `now.day` to the month length defensively.
+    //  - previous month: ALWAYS its last day (the previous month is always
+    //    complete relative to the displayed month).
+    final currentMonthDays = _daysInMonth(currentYear, currentMonth);
+    final isLiveCurrentMonth =
+        now.year == currentYear && now.month == currentMonth;
+    final currentComparisonDay = isLiveCurrentMonth
+        ? (now.day > currentMonthDays ? currentMonthDays : now.day)
+        : currentMonthDays;
+    final previousComparisonDay = _daysInMonth(
+      previousMonth.year,
+      previousMonth.month,
+    );
+
     // Current-month series: total + daily + joy.
     final currentMonthTotal = _cumulative(
       expense,
       year: currentYear,
       month: currentMonth,
+      comparisonDay: currentComparisonDay,
     );
     final currentMonthDaily = _cumulative(
       expense,
       year: currentYear,
       month: currentMonth,
+      comparisonDay: currentComparisonDay,
       ledgerType: LedgerType.daily,
     );
     final currentMonthJoy = _cumulative(
       expense,
       year: currentYear,
       month: currentMonth,
+      comparisonDay: currentComparisonDay,
       ledgerType: LedgerType.joy,
     );
 
@@ -88,11 +109,13 @@ class GetWithinMonthCumulativeUseCase {
       expense,
       year: previousMonth.year,
       month: previousMonth.month,
+      comparisonDay: previousComparisonDay,
     );
     final previousMonthDaily = _cumulative(
       expense,
       year: previousMonth.year,
       month: previousMonth.month,
+      comparisonDay: previousComparisonDay,
       ledgerType: LedgerType.daily,
     );
 
@@ -106,15 +129,31 @@ class GetWithinMonthCumulativeUseCase {
   }
 
   /// Builds the per-day running-cumulative points for one calendar [month]
-  /// (optionally restricted to a single [ledgerType]). The cumulative is scoped
-  /// to the month — it starts at the month's first spend day and never carries
-  /// across the month boundary. Days with no spend are omitted; the running
-  /// total persists to the next spend day (a no-spend day keeps the prior
-  /// cumulative — no reset).
+  /// (optionally restricted to a single [ledgerType]), CARRY-FORWARDED across
+  /// the whole displayed span (D-5). The cumulative is scoped to the month — it
+  /// never carries across the month boundary. Days with no spend are omitted
+  /// (sparse series); the running total persists to the next spend day (a
+  /// no-spend day keeps the prior cumulative — no reset).
+  ///
+  /// Carry-forward (D-5): the returned series spans day 1 .. [comparisonDay]:
+  ///  - PREPEND a `(day: 1, cumulativeAmount: 0)` left edge when the first
+  ///    spend day > 1, so the line starts at the chart's left edge (cumulative
+  ///    is 0 until the first spend). If spend exists ON day 1, no duplicate is
+  ///    added — the existing day-1 cumulative is the left edge.
+  ///  - APPEND a `(day: comparisonDay, cumulativeAmount: finalRunning)` right
+  ///    edge when the last spend day < [comparisonDay], carrying forward the
+  ///    final running total to the comparison day even on no-spend days. The
+  ///    caller passes the comparison day: today (live current month) / month
+  ///    end (a past month) for the current month, and the previous month's last
+  ///    day for the previous month.
+  ///
+  /// A month with NO spend returns `const []` — it is NOT synthesized into a
+  /// flat 0-line, so the empty-state placeholder still renders.
   List<CumulativePoint> _cumulative(
     List<Transaction> expense, {
     required int year,
     required int month,
+    required int comparisonDay,
     LedgerType? ledgerType,
   }) {
     // Sum per day-of-month within this calendar month (and optional ledger).
@@ -136,11 +175,30 @@ class GetWithinMonthCumulativeUseCase {
 
     final days = perDay.keys.toList()..sort();
     final points = <CumulativePoint>[];
+
+    // Left-edge carry-forward: a day-1 cumulative-0 point when the first spend
+    // day is after day 1.
+    if (days.first > 1) {
+      points.add(const CumulativePoint(day: 1, cumulativeAmount: 0));
+    }
+
     int running = 0;
     for (final day in days) {
       running += perDay[day]!;
       points.add(CumulativePoint(day: day, cumulativeAmount: running));
     }
+
+    // Right-edge carry-forward: extend to the comparison day with the final
+    // running total when the last spend predates the comparison day.
+    if (days.last < comparisonDay) {
+      points.add(
+        CumulativePoint(day: comparisonDay, cumulativeAmount: running),
+      );
+    }
+
     return points;
   }
+
+  /// Days in calendar [month] of [year]: `DateTime(year, month + 1, 0).day`.
+  int _daysInMonth(int year, int month) => DateTime(year, month + 1, 0).day;
 }
