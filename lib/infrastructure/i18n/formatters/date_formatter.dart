@@ -51,6 +51,22 @@ class DateFormatter {
     }
   }
 
+  /// Day-of-month axis tick label (ja/zh `7日`, en plain `7`).
+  ///
+  /// Used by within-month chart X-axis markers. The `日` glyph is a CJK date
+  /// affix (same family as the 年/月/日 patterns above), kept here in the
+  /// whitelisted formatter rather than leaked into a UI widget literal.
+  static String formatDayOfMonthAxis(int day, Locale locale) {
+    switch (locale.languageCode) {
+      case 'ja':
+      case 'zh':
+        return '$day日';
+      case 'en':
+      default:
+        return '$day';
+    }
+  }
+
   /// Short localized weekday label (ja 月, zh 周一, en Mon) — matches the labels
   /// table_calendar renders in its days-of-week row.
   static String formatShortWeekday(DateTime date, Locale locale) {

@@ -68,7 +68,7 @@ class WithinMonthTrendCard extends ConsumerWidget {
       data: (trend) => AnalyticsDataCard(
         title: S.of(context).analyticsCardTitleWithinMonthTrend,
         caption: S.of(context).analyticsCardCaptionWithinMonthTrend,
-        child: _TrendBody(trend: trend),
+        child: _TrendBody(trend: trend, anchor: ctx.trendAnchor),
       ),
       loading: () => const SizedBox(height: 280),
       error: (_, _) => AnalyticsCardErrorState(
@@ -109,9 +109,12 @@ List<ProviderBase<Object?>> withinMonthTrendRefreshTargets(
 /// here so a tab switch never re-watches the provider (D-12 — only the rendered
 /// series changes).
 class _TrendBody extends StatefulWidget {
-  const _TrendBody({required this.trend});
+  const _TrendBody({required this.trend, required this.anchor});
 
   final WithinMonthCumulativeTrend trend;
+
+  /// Current-month anchor, threaded to the chart for endpoint annotation dates.
+  final DateTime anchor;
 
   @override
   State<_TrendBody> createState() => _TrendBodyState();
@@ -161,6 +164,7 @@ class _TrendBodyState extends State<_TrendBody> {
           currentMonth: current,
           previousMonth: previous,
           seriesColor: color,
+          anchor: widget.anchor,
         ),
         const SizedBox(height: 8),
         // 上月 reference legend only on the spend side (never the joy tab).
@@ -176,8 +180,9 @@ class _TrendBodyState extends State<_TrendBody> {
                 ),
               ),
               const SizedBox(width: 16),
+              // Matches the chart's 上月 line color exactly (muted gray).
               _LegendSwatch(
-                color: Color.lerp(color, palette.card, 0.55)!,
+                color: palette.textTertiary,
                 dashed: true,
               ),
               const SizedBox(width: 6),
