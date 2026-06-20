@@ -1629,6 +1629,10 @@ class SZh extends S {
   String get analyticsHistogramColorCaption => '色彩仅为 ordinal 视觉区分';
 
   @override
+  String get analyticsHistogramJoyCaption =>
+      '大多落在中高位——为自己花的钱，多数让你感到值得，偶有几笔不那么满意，也都是真实的体验。';
+
+  @override
   String get analyticsCardTitleLargestExpense => '总 · 最大支出';
 
   @override

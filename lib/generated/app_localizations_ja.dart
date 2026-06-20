@@ -1637,6 +1637,10 @@ class SJa extends S {
   String get analyticsHistogramColorCaption => '色は ordinal 表現です';
 
   @override
+  String get analyticsHistogramJoyCaption =>
+      '多くは中〜高め —— 自分のために使ったお金は、たいてい「よかった」と思える。たまに今ひとつでも、それも本当の体験。';
+
+  @override
   String get analyticsCardTitleLargestExpense => '総 · 最大支出';
 
   @override

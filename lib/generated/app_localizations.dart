@@ -3107,6 +3107,12 @@ abstract class S {
   /// **'Colors are ordinal only'**
   String get analyticsHistogramColorCaption;
 
+  /// Warm descriptive caption beneath the joy satisfaction histogram (round-5 r5 mock .histo-cap; descriptive only, no ranking/target/streak/cross-period)
+  ///
+  /// In en, this message translates to:
+  /// **'Mostly mid-to-high — money you spend on yourself usually feels worth it; the occasional miss is a real experience too.'**
+  String get analyticsHistogramJoyCaption;
+
   /// No description provided for @analyticsCardTitleLargestExpense.
   ///
   /// In en, this message translates to:

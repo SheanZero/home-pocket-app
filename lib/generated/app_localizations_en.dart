@@ -1668,6 +1668,10 @@ class SEn extends S {
   String get analyticsHistogramColorCaption => 'Colors are ordinal only';
 
   @override
+  String get analyticsHistogramJoyCaption =>
+      'Mostly mid-to-high — money you spend on yourself usually feels worth it; the occasional miss is a real experience too.';
+
+  @override
   String get analyticsCardTitleLargestExpense => 'Total · Largest expense';
 
   @override

@@ -13,6 +13,9 @@ abstract final class AnalyticsCategoryPalette {
   /// 悦己(soul)系分类环色 —— 樱粉，账本暗示。
   static const Color joy = Color(0xFFD98CA0);
 
+  /// 满足度柱渐变底色（mock `.bar` 渐变 var(--joy)→#E7A6B6）。顶色用运行时 palette.joy。
+  static const Color histoBarBottom = Color(0xFFE7A6B6);
+
   /// 长尾「其他」/未知分类 —— 中性藕灰。
   static const Color other = Color(0xFFC4B6AD);
 

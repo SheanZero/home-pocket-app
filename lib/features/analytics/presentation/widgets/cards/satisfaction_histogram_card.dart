@@ -71,7 +71,11 @@ class SatisfactionHistogramCard extends ConsumerWidget {
           return const SizedBox.shrink();
         }
         return distributionAsync.when(
+          // round-5 r5 / §3: the card title is suppressed — the section header
+          // 「悦己满足度分布」already labels it and the mock body has no in-card
+          // title. title/caption stay set (still required) but are not rendered.
           data: (buckets) => AnalyticsDataCard(
+            showHeader: false,
             title: S.of(context).analyticsCardTitleSatisfactionHistogram,
             caption: S.of(context).analyticsCardCaptionHistogram,
             child: SatisfactionDistributionHistogram(buckets: buckets),

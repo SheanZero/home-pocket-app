@@ -2116,6 +2116,10 @@
     "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
   },
   "analyticsHistogramColorCaption": "Colors are ordinal only",
+  "analyticsHistogramJoyCaption": "Mostly mid-to-high — money you spend on yourself usually feels worth it; the occasional miss is a real experience too.",
+  "@analyticsHistogramJoyCaption": {
+    "description": "Warm descriptive caption beneath the joy satisfaction histogram (round-5 r5 mock .histo-cap; descriptive only, no ranking/target/streak/cross-period)"
+  },
   "analyticsCardTitleLargestExpense": "Total · Largest expense",
   "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
   "@analyticsCardLargestExpenseBody": {

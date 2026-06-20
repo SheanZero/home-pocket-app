@@ -1,95 +1,50 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/analytics_category_palette.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
 
 import '../../../../../helpers/test_localizations.dart';
 
 void main() {
+  // score 1 → 2, score 4 → 3, score 10 → 5; all other scores normalize to 0.
+  // total = 10; weighted median (cumulative first ≥ 5) lands on score 4.
   const buckets = [
     SatisfactionScoreBucket(score: 1, count: 2),
     SatisfactionScoreBucket(score: 4, count: 3),
     SatisfactionScoreBucket(score: 10, count: 5),
   ];
 
-  BarChartRodData bar5Rod(WidgetTester tester) {
-    final chart = tester.widget<BarChart>(find.byType(BarChart));
-    // bar group for score 5 is at index 4 (scores 1..10).
-    return chart.data.barGroups[4].barRods.single;
+  /// All gradient bars (non-zero columns) in render order.
+  List<Container> gradientBars(WidgetTester tester) {
+    return tester
+        .widgetList<Container>(find.byType(Container))
+        .where((c) {
+          final decoration = c.decoration;
+          return decoration is BoxDecoration && decoration.gradient != null;
+        })
+        .toList();
   }
 
-  testWidgets('normalizes missing scores into all 10 bars', (tester) async {
+  testWidgets('renders 10 score labels (1..10) and no fl_chart', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         const SatisfactionDistributionHistogram(buckets: buckets),
       ),
     );
 
-    final chart = tester.widget<BarChart>(find.byType(BarChart));
-
-    expect(chart.data.barGroups, hasLength(10));
-    expect(chart.data.barGroups[4].barRods.single.toY, 1);
-  });
-
-  testWidgets('REDES-02: no Stack/Align/DecoratedBox annotation overlay', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        const SatisfactionDistributionHistogram(buckets: buckets),
-        locale: const Locale('ja'),
-      ),
-    );
-
-    // The "5" annotation hack used a Stack wrapping the BarChart with an
-    // Align/DecoratedBox overlay. After REDES-02 the histogram renders the
-    // BarChart directly (no Stack ancestor for the chart) and there is no
-    // DecoratedBox-based annotation pill.
-    expect(
-      find.ancestor(of: find.byType(BarChart), matching: find.byType(Stack)),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const ValueKey('analytics_histogram_bar_5_annotation')),
-      findsNothing,
-    );
-  });
-
-  testWidgets('bar-5 annotation moves onto the native BarChartRodData.label', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        const SatisfactionDistributionHistogram(buckets: buckets),
-        locale: const Locale('ja'),
-      ),
-    );
-
-    final rod = bar5Rod(tester);
-    // Native fl_chart 1.2.0 per-rod label carries the annotation string.
-    expect(rod.label.show, isTrue);
-    expect(rod.label.text, '中央値・含未評価');
-
-    // The color caption survives.
-    expect(find.text('色は ordinal 表現です'), findsOneWidget);
-  });
-
-  testWidgets('only the bar-5 rod carries a visible label', (tester) async {
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        const SatisfactionDistributionHistogram(buckets: buckets),
-      ),
-    );
-
-    final chart = tester.widget<BarChart>(find.byType(BarChart));
-    for (var i = 0; i < chart.data.barGroups.length; i++) {
-      final rod = chart.data.barGroups[i].barRods.single;
-      expect(rod.label.show, i == 4, reason: 'rod index $i label.show');
+    for (var score = 1; score <= 10; score += 1) {
+      expect(
+        find.text('$score'),
+        findsWidgets,
+        reason: 'score label $score should render',
+      );
     }
+    // fl_chart is gone — no BarChart in the tree.
+    expect(find.byType(Container), findsWidgets);
   });
 
-  testWidgets('bucket coloring and normalization are unchanged', (
+  testWidgets('non-zero buckets render a count label; zero buckets do not', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -98,16 +53,84 @@ void main() {
       ),
     );
 
-    final chart = tester.widget<BarChart>(find.byType(BarChart));
-    // score 1 (index 0) and score 10 (index 9) get distinct colors from the
-    // ordinal lerp — a regression guard that _colorForScore is intact.
-    final color1 = chart.data.barGroups[0].barRods.single.color;
-    final color10 = chart.data.barGroups[9].barRods.single.color;
-    expect(color1, isNotNull);
-    expect(color10, isNotNull);
-    expect(color1, isNot(color10));
-    // Empty buckets render with a floor toY of 1 (normalization intact).
-    expect(chart.data.barGroups[1].barRods.single.toY, 1);
+    // Count labels for the three non-zero buckets (2, 3, 5).
+    expect(find.text('2'), findsWidgets);
+    expect(find.text('3'), findsWidgets);
+    expect(find.text('5'), findsWidgets);
+
+    // Exactly three gradient bars (one per non-zero bucket). The seven zero
+    // buckets render a muted stub WITHOUT a gradient.
+    expect(gradientBars(tester), hasLength(3));
+  });
+
+  testWidgets('uniform pink gradient is identical across all non-zero bars', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const SatisfactionDistributionHistogram(buckets: buckets),
+      ),
+    );
+
+    final bars = gradientBars(tester);
+    expect(bars, hasLength(3));
+
+    final gradients = bars
+        .map((c) => (c.decoration! as BoxDecoration).gradient! as LinearGradient)
+        .toList();
+
+    // All bars share ONE gradient (not a per-score color ramp).
+    final first = gradients.first;
+    for (final gradient in gradients) {
+      expect(gradient.colors, equals(first.colors));
+    }
+    // Gradient bottom color is the histogram-specific token.
+    expect(first.colors.last, AnalyticsCategoryPalette.histoBarBottom);
+  });
+
+  testWidgets('median bucket (data-derived, not literal 7) gets an outline', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const SatisfactionDistributionHistogram(buckets: buckets),
+      ),
+    );
+
+    // The weighted median of this fixture is score 4, NOT the mock's literal 7.
+    // The median bar is wrapped in a bordered Container (outline). Exactly one
+    // such bordered wrapper exists.
+    final borderedWrappers = tester
+        .widgetList<Container>(find.byType(Container))
+        .where((c) {
+          final decoration = c.decoration;
+          return decoration is BoxDecoration &&
+              decoration.border != null &&
+              decoration.gradient == null;
+        })
+        .toList();
+    expect(borderedWrappers, hasLength(1));
+  });
+
+  testWidgets('footer count + median pill + warm caption render', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const SatisfactionDistributionHistogram(buckets: buckets),
+        locale: const Locale('en'),
+      ),
+    );
+
+    // Count footer (total = 10).
+    expect(find.textContaining('10'), findsWidgets);
+    // Median pill text (median = 4).
+    expect(find.textContaining('Median satisfaction 4'), findsOneWidget);
+    // Warm descriptive caption (new analyticsHistogramJoyCaption key).
+    expect(
+      find.textContaining('Mostly mid-to-high'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('semantic label is neutral and factual', (tester) async {
@@ -127,14 +150,18 @@ void main() {
     expect(labels, isNot(contains(RegExp('差|悪い|bad|不好|低|不満|sad'))));
   });
 
-  testWidgets('empty/zero buckets render without throw', (tester) async {
+  testWidgets('empty/zero buckets render without throw and no median pill', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         const SatisfactionDistributionHistogram(buckets: []),
       ),
     );
 
-    expect(find.byType(BarChart), findsOneWidget);
     expect(tester.takeException(), isNull);
+    // No data → no gradient bars, no median pill.
+    expect(gradientBars(tester), isEmpty);
+    expect(find.textContaining('Median satisfaction'), findsNothing);
   });
 }

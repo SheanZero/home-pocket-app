@@ -1,16 +1,37 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/analytics_category_palette.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/analytics_aggregate.dart';
 
 /// STATSUI-02: 1-10 joy fullness distribution histogram.
+///
+/// round-5 r5 (`.histo` / `.histo .b` / `.bar` / `.cnt` / `.x` / `.b.med`):
+/// custom flex bars replacing fl_chart for pixel control. 10 bars (scores 1–10)
+/// grow from a shared baseline, height ∝ count. Each non-zero bar carries a count
+/// label above it; count==0 renders a 3px [AppPalette.backgroundMuted] stub with
+/// NO label. Every bar uses ONE uniform pink vertical gradient
+/// (`palette.joy` → [AnalyticsCategoryPalette.histoBarBottom]) — NOT a per-score
+/// ramp. The data-derived weighted-median bucket gets a 2px outline (descriptive,
+/// not a target; the mock's literal「7」is NEVER hardcoded).
 class SatisfactionDistributionHistogram extends StatelessWidget {
   const SatisfactionDistributionHistogram({super.key, required this.buckets});
 
   final List<SatisfactionScoreBucket> buckets;
+
+  /// Chart plot height (count labels + bars).
+  static const double _chartHeight = 140;
+
+  /// Tallest a non-zero bar can grow (leaves headroom above for the count label).
+  static const double _maxBarHeight = 110;
+
+  /// Fixed height reserved for the count-label row above each bar so all bar tops
+  /// share one baseline (placeholder height for count==0 columns).
+  static const double _countLabelHeight = 14;
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +43,11 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
       0,
       (maxValue, item) => item.count > maxValue ? item.count : maxValue,
     );
-    final chartMaxY = maxCount > 0 ? maxCount * 1.25 : 1.0;
-    // Pitfall-7 / D4: the median pill is DERIVED from buckets (weighted median —
-    // the score whose cumulative count first crosses 50% of total), NEVER the
-    // mock's literal「7」. `null` when there is no data (no pill / outline).
+    // Pitfall-7 / D4: the median pill/outline are DERIVED from buckets (weighted
+    // median — the score whose cumulative count first crosses 50% of total),
+    // NEVER the mock's literal「7」. `null` when there is no data.
     final medianScore = _weightedMedian(normalized, total);
-    final medianBorderColor = Color.lerp(
-      palette.joy,
-      palette.joyLight,
-      0.55,
-    )!;
+    final medianBorderColor = Color.lerp(palette.joy, palette.joyLight, 0.55)!;
 
     return Semantics(
       container: true,
@@ -40,105 +56,46 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 200,
-            // REDES-02: fl_chart 1.2.0 renders the "5" annotation natively via
-            // BarChartRodData.label (below). The previous Stack + Align +
-            // DecoratedBox overlay is deleted — no manual annotation widget.
-            child: BarChart(
-              BarChartData(
-                minY: 0,
-                maxY: chartMaxY,
-                alignment: BarChartAlignment.spaceAround,
-                gridData: const FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                ),
-                borderData: FlBorderData(show: false),
-                titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        final score = value.toInt();
-                        if (score < 1 || score > 10) {
-                          return const SizedBox.shrink();
-                        }
-                        return Text(
-                          '$score',
-                          style: AppTextStyles.caption.copyWith(
-                            color: context.palette.textSecondary,
-                          ),
-                        );
-                      },
+            height: _chartHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (final bucket in normalized)
+                  Expanded(
+                    child: _BarColumn(
+                      score: bucket.score,
+                      count: bucket.count,
+                      maxCount: maxCount,
+                      isMedian: bucket.score == medianScore,
+                      palette: palette,
+                      medianBorderColor: medianBorderColor,
                     ),
                   ),
-                ),
-                barGroups: [
-                  for (final bucket in normalized)
-                    BarChartGroupData(
-                      x: bucket.score,
-                      barRods: [
-                        BarChartRodData(
-                          toY: bucket.count == 0 ? 1 : bucket.count.toDouble(),
-                          color: _colorForScore(bucket.score, palette),
-                          width: 14,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(4),
-                            topRight: Radius.circular(4),
-                          ),
-                          // round-5 r5 mock `.b.med` — outline the data-derived
-                          // median bucket (descriptive, not a target).
-                          borderSide: bucket.score == medianScore
-                              ? BorderSide(color: medianBorderColor, width: 2)
-                              : BorderSide.none,
-                          // REDES-02: native per-rod label replacing the deleted
-                          // Stack/Align/DecoratedBox "5" annotation hack. Only
-                          // the median bucket (score 5) carries the descriptive
-                          // 中央値・含未評価 annotation.
-                          label: bucket.score == 5
-                              ? BarChartRodLabel(
-                                  show: true,
-                                  text: l10n.analyticsHistogramBarFiveAnnotation,
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: palette.joy,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  offset: const Offset(0, -4),
-                                )
-                              : const BarChartRodLabel(show: false),
-                        ),
-                      ],
-                    ),
-                ],
-                barTouchData: BarTouchData(
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final score = group.x;
-                      final count = normalized[score - 1].count;
-                      return BarTooltipItem(
-                        '$score/10\n$count',
-                        AppTextStyles.caption.copyWith(color: palette.card),
-                      );
-                    },
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
+          const SizedBox(height: 6),
+          // Score labels (`.x`), one per column, aligned with the bars above.
+          Row(
+            children: [
+              for (final bucket in normalized)
+                Expanded(
+                  child: Text(
+                    '${bucket.score}',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 14),
-          // round-5 r5 mock `.histo-foot`: left = data-derived count footer,
-          // right = data-derived median pill (Pitfall-7 / D4). Both come from
-          // `buckets` (no new provider) — descriptive, ADR-012-safe.
+          // round-5 r5 `.histo-foot`: left = data-derived count footer, right =
+          // data-derived median pill (Pitfall-7 / D4). Both come from `buckets`
+          // (no new provider) — descriptive, ADR-012-safe.
           Row(
             children: [
               Expanded(
@@ -170,10 +127,13 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 9),
+          // round-5 r5 `.histo-cap`: warm descriptive caption (new key, §3).
           Text(
-            l10n.analyticsHistogramColorCaption,
+            l10n.analyticsHistogramJoyCaption,
             style: AppTextStyles.caption.copyWith(
-              color: context.palette.textSecondary,
+              fontSize: 11,
+              height: 1.55,
+              color: palette.textTertiary,
             ),
           ),
         ],
@@ -203,17 +163,6 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
     ];
   }
 
-  Color _colorForScore(int score, AppPalette palette) {
-    if (score <= 5) {
-      return Color.lerp(palette.daily, palette.joy, (score - 1) / 4)!;
-    }
-    return Color.lerp(
-      palette.joy,
-      palette.accentPrimary,
-      (score - 5) / 5,
-    )!;
-  }
-
   String _semanticLabel(List<SatisfactionScoreBucket> normalized, int total) {
     return normalized
         .map(
@@ -221,5 +170,106 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
               'score ${bucket.score} of 10, ${bucket.count} entries of $total',
         )
         .join('. ');
+  }
+}
+
+/// One score column: count label (or placeholder) above a single flex bar.
+class _BarColumn extends StatelessWidget {
+  const _BarColumn({
+    required this.score,
+    required this.count,
+    required this.maxCount,
+    required this.isMedian,
+    required this.palette,
+    required this.medianBorderColor,
+  });
+
+  final int score;
+  final int count;
+  final int maxCount;
+  final bool isMedian;
+  final AppPalette palette;
+  final Color medianBorderColor;
+
+  static const BorderRadius _barRadius = BorderRadius.only(
+    topLeft: Radius.circular(5),
+    topRight: Radius.circular(5),
+    bottomLeft: Radius.circular(2),
+    bottomRight: Radius.circular(2),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final hasCount = count > 0;
+    final double barHeight;
+    if (!hasCount) {
+      barHeight = 3;
+    } else {
+      final ratio = maxCount > 0 ? count / maxCount : 0.0;
+      barHeight = math.max(
+        8,
+        ratio * SatisfactionDistributionHistogram._maxBarHeight,
+      );
+    }
+
+    final bar = Container(
+      height: barHeight,
+      decoration: BoxDecoration(
+        color: hasCount ? null : palette.backgroundMuted,
+        gradient: hasCount
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [palette.joy, AnalyticsCategoryPalette.histoBarBottom],
+              )
+            : null,
+        borderRadius: _barRadius,
+      ),
+    );
+
+    // round-5 r5 `.b.med .bar{outline}` — outline the data-derived median bucket.
+    final outlinedBar = isMedian
+        ? Container(
+            padding: const EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              border: Border.all(color: medianBorderColor, width: 2),
+              borderRadius: _barRadius,
+            ),
+            child: bar,
+          )
+        : bar;
+
+    return Padding(
+      // max-width 22 per bar (mock `.bar{max-width:22px}`); the Expanded column is
+      // wider on small screens, so cap the bar and center it.
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Count label above the bar (count==0 → fixed-height placeholder so all
+          // bar tops share one baseline).
+          SizedBox(
+            height: SatisfactionDistributionHistogram._countLabelHeight,
+            child: hasCount
+                ? Center(
+                    child: Text(
+                      '$count',
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: palette.joyText,
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(height: 2),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 22),
+            child: SizedBox(width: double.infinity, child: outlinedBar),
+          ),
+        ],
+      ),
+    );
   }
 }

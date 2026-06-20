@@ -2116,6 +2116,10 @@
     "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
   },
   "analyticsHistogramColorCaption": "色は ordinal 表現です",
+  "analyticsHistogramJoyCaption": "多くは中〜高め —— 自分のために使ったお金は、たいてい「よかった」と思える。たまに今ひとつでも、それも本当の体験。",
+  "@analyticsHistogramJoyCaption": {
+    "description": "Warm descriptive caption beneath the joy satisfaction histogram (round-5 r5 mock .histo-cap; descriptive only, no ranking/target/streak/cross-period)"
+  },
   "analyticsCardTitleLargestExpense": "総 · 最大支出",
   "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
   "@analyticsCardLargestExpenseBody": {
