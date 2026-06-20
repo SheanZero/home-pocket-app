@@ -54,12 +54,15 @@ class _FixedTimeWindow extends SelectedTimeWindow {
 CumulativePoint _p(int day, int amount) =>
     CumulativePoint(day: day, cumulativeAmount: amount);
 
+// Round-2 (kll) use-case OUTPUT shape: current series carry-forward day 1 (0)
+// .. day 31 (May month-end); previous (April, 30 days) series day 1 (0) .. 30.
+// 本月 (98000) > 上月-at-day-30 (90000) at the comparison day ⇒ ABOVE branch.
 WithinMonthCumulativeTrend _trend() => WithinMonthCumulativeTrend(
-  currentMonthTotal: [_p(1, 3000), _p(15, 48000), _p(31, 98000)],
-  currentMonthDaily: [_p(1, 2000), _p(15, 34000), _p(31, 70000)],
-  currentMonthJoy: [_p(1, 1000), _p(15, 14000), _p(31, 28000)],
-  previousMonthTotal: [_p(1, 2500), _p(15, 44000), _p(31, 90000)],
-  previousMonthDaily: [_p(1, 1800), _p(15, 31000), _p(31, 66000)],
+  currentMonthTotal: [_p(1, 0), _p(15, 48000), _p(31, 98000)],
+  currentMonthDaily: [_p(1, 0), _p(15, 34000), _p(31, 70000)],
+  currentMonthJoy: [_p(1, 0), _p(15, 14000), _p(31, 28000)],
+  previousMonthTotal: [_p(1, 0), _p(15, 44000), _p(30, 90000)],
+  previousMonthDaily: [_p(1, 0), _p(15, 31000), _p(30, 66000)],
 );
 
 Category _cat(String id) => Category(

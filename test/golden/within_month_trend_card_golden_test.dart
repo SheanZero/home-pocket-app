@@ -31,14 +31,20 @@ final _anchor = DateTime(2026, 5);
 CumulativePoint _p(int day, int amount) =>
     CumulativePoint(day: day, cumulativeAmount: amount);
 
-/// Deterministic within-month cumulative trend (43-01 sample-data shape):
-/// a rising total line, the daily subset, and the joy current-month line.
+/// Deterministic within-month cumulative trend in the round-2 (kll) use-case
+/// OUTPUT shape so the masters show the corrected look:
+///  - every current-month series carry-forwards day 1 (cumulative 0) .. day 31
+///    (May is a COMPLETE past month, so the right edge is month-end).
+///  - every previous-month (April, 30 days) series spans day 1 (0) .. day 30.
+///  - at the comparison day (31) 本月 (98000) > 上月-at-day-30 (90000) on the
+///    total tab, exercising the ABOVE branch (本月 above / 上月 below, D-3/D-4)
+///    so both endpoint labels are visible without collision.
 WithinMonthCumulativeTrend _fixtureRich() => WithinMonthCumulativeTrend(
-  currentMonthTotal: [_p(1, 3000), _p(10, 24000), _p(20, 61000), _p(31, 98000)],
-  currentMonthDaily: [_p(1, 2000), _p(10, 18000), _p(20, 44000), _p(31, 70000)],
-  currentMonthJoy: [_p(1, 1000), _p(10, 6000), _p(20, 17000), _p(31, 28000)],
-  previousMonthTotal: [_p(1, 2500), _p(10, 21000), _p(20, 55000), _p(31, 90000)],
-  previousMonthDaily: [_p(1, 1800), _p(10, 16000), _p(20, 40000), _p(31, 66000)],
+  currentMonthTotal: [_p(1, 0), _p(10, 24000), _p(20, 61000), _p(31, 98000)],
+  currentMonthDaily: [_p(1, 0), _p(10, 18000), _p(20, 44000), _p(31, 70000)],
+  currentMonthJoy: [_p(1, 0), _p(10, 6000), _p(20, 17000), _p(31, 28000)],
+  previousMonthTotal: [_p(1, 0), _p(10, 21000), _p(20, 55000), _p(30, 90000)],
+  previousMonthDaily: [_p(1, 0), _p(10, 16000), _p(20, 40000), _p(30, 66000)],
 );
 
 const _fixtureEmpty = WithinMonthCumulativeTrend(
