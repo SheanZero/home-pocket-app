@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 Phase: 47
 Plan: Not started
 Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
-Last activity: 2026-06-20 - quick 260620-lfp R4 悦己满足度直方图重建（用户反馈"这个卡片没有实现"）：弃 fl_chart 改自定义 flex 柱——10 柱共基线、每非零柱顶上计数标(joyText/10/w700)、count==0→3px 灰残桩、统一粉竖直渐变(joy→#E7A6B6)、顶5底2圆角、max-width22、数据派生中位桶 2px 描边(不硬编码7)、分数标、footer+中位 pill、暖文案 caption；去卡内标题 showHeader:false；新增 analyticsHistogramJoyCaption(ja/zh/en)+histoBarBottom token。analyze 0、full test 3072/3072、7 golden 重基线（commits fe234195/2cee111a）。[本会话 mock 保真链：R2 环hero+日历 / R3 joybar 可见性 / R4 直方图]
+Last activity: 2026-06-20 - quick 260620-lfp R5 直方图卡自隐反转（用户反馈"悦己满足度分布没显示"；用户选"总是显示"）：根因=卡 totalJoyTx<5 自隐(D-B5)→空渲染，但 section header 无条件渲染→孤立标题；用户测试数据 joy 笔数<5。移除 <5 自隐（保留双 provider watch，刷新并集不变）→卡总是渲染，空数据走直方图内建空态(10 零桩+「0笔」)，孤立标题随之消除。翻转 analytics_screen_test/anti_toxicity self_hide→empty/golden 断言；analyze 0、full test 3072/3072、1 golden 重基线（commits d07d5314/0c11a936）。[本会话 mock 保真链：R2 环hero+日历 / R3 joybar 可见 / R4 直方图重建 / R5 直方图自隐反转]
 
 ### Quick Tasks Completed
 
