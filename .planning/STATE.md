@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 Phase: 47
 Plan: Not started
 Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
-Last activity: 2026-06-20 - quick 260620-lfp R2 像素对齐 mock（用户反馈"差距太大"）：分类支出卡（去卡内标题 showHeader:false + hero-top「这个月钱花在哪」+「N笔·M月」pill + 环按分类离散配色 joy樱粉/survival绿蓝 弃 daily→joy 渐变 + 中心 3 行加「N笔」+ 图例圆角方块 dot/行分隔线/去 chevron）+ 小确幸日历卡（星期表头一二三四五六日 + 正方格 gap6 + 右上角日号 + 离散 heat0–3 + 底部「这个月有N天」说明）；新增 lib/core/theme/analytics_category_palette.dart + 11 ARB key（含 DonutHero 提取守 REDES-01）；analyze 0、full test 3072/3072、17 golden 重基线（commits 53928fbc/774c2133/9640001f）
+Last activity: 2026-06-20 - quick 260620-lfp R3 悦己抽屉修复（用户反馈"悦己部分没按mock"）：根因=joybar 段用 Flexible(loose)+无尺寸 DecoratedBox→压成 0 宽→整条不可见（golden 锁了坏渲染）；改 Expanded(tight) 修复可见。并对齐 mock：条 height32/radius9/奶白底+樱粉边/段间 2px 奶白分隔/大段(≥12%)内嵌白色%标；去掉嵌套抽屉里重复的「悦己花销 ¥…」总额（JoySpendDrawerBody 加 showTotalHeader，嵌套传 false；独立 JoySpendCard 仍 true 保测试）；joybar 图例 dot 圆角方块/金额 joyText/分隔线。analyze 0、full test 3072/3072、7 golden 重基线（commits b296d3b5/53b65787）。R2：分类环 hero + 日历卡像素对齐（53928fbc/774c2133/9640001f）
 
 ### Quick Tasks Completed
 
