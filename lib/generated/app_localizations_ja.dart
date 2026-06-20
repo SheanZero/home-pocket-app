@@ -1606,6 +1606,18 @@ class SJa extends S {
   String get analyticsCategoryDonutOther => 'その他';
 
   @override
+  String get analyticsDonutDimensionCategory => 'カテゴリ';
+
+  @override
+  String get analyticsDonutDimensionMember => 'メンバー';
+
+  @override
+  String get analyticsDonutMemberFilterAll => '全メンバー';
+
+  @override
+  String get analyticsDonutMemberFilterLabel => 'メンバー';
+
+  @override
   String get analyticsDonutCenterLabel => '今月の支出';
 
   @override

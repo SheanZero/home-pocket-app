@@ -28,4 +28,16 @@ abstract final class AnalyticsCategoryPalette {
 
   static Color heatForCount(int count) =>
       count <= 0 ? heat[0] : count == 1 ? heat[1] : count == 2 ? heat[2] : heat[3];
+
+  /// 成员环色阶（260620-v2m / D1）—— ADR-019 协调色：若叶绿/钢蓝/柚绿/浅蓝 + 琥珀衍生，
+  /// 避开 error 红，把樱粉留给悦己语义。按 deviceId 稳定哈希映射，保证同一成员跨刷新颜色稳定。
+  /// 深色经 context.palette 不受影响（与 donut 分类色阶同策略——固定环色，非语义色）。
+  static const List<Color> memberSequence = [
+    Color(0xFF6FA36F), Color(0xFF5B8AC4), Color(0xFF86C79A),
+    Color(0xFF86A9D6), Color(0xFFC8841A), Color(0xFF9FBF8A),
+  ];
+
+  /// 同一 deviceId 跨刷新映射到稳定的环色（D1）。用 deviceId 的稳定哈希取模色阶长度。
+  static Color memberColorFor(String deviceId) =>
+      memberSequence[deviceId.hashCode.abs() % memberSequence.length];
 }

@@ -2085,6 +2085,22 @@
     }
   },
   "analyticsCategoryDonutOther": "其他",
+  "analyticsDonutDimensionCategory": "分类",
+  "@analyticsDonutDimensionCategory": {
+    "description": "Donut dimension toggle: split by category (260620-v2m)"
+  },
+  "analyticsDonutDimensionMember": "成员",
+  "@analyticsDonutDimensionMember": {
+    "description": "Donut dimension toggle: split by member/device (260620-v2m)"
+  },
+  "analyticsDonutMemberFilterAll": "所有成员",
+  "@analyticsDonutMemberFilterAll": {
+    "description": "Donut member-filter option: show all members (default) (260620-v2m)"
+  },
+  "analyticsDonutMemberFilterLabel": "成员",
+  "@analyticsDonutMemberFilterLabel": {
+    "description": "Donut member-filter trigger title (260620-v2m)"
+  },
   "analyticsDonutCenterLabel": "本月支出",
   "@analyticsDonutCenterLabel": {
     "description": "Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)"

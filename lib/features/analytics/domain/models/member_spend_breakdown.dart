@@ -1,3 +1,24 @@
+import 'monthly_report.dart';
+
+/// Category breakdown restricted to ONE member's transactions + that member's
+/// window total / entry count (260620-v2m / D2) — fed to `DonutHero` when the
+/// donut is in 分类 dimension AND a member filter is active.
+///
+/// Plain immutable value holder; the [breakdowns] rows carry only
+/// categoryId/amount/transactionCount meaningfully (name/icon/color/percentage
+/// are placeholders re-derived by the hero).
+class MemberFilteredCategoryBreakdown {
+  const MemberFilteredCategoryBreakdown({
+    required this.breakdowns,
+    required this.total,
+    required this.entryCount,
+  });
+
+  final List<CategoryBreakdown> breakdowns;
+  final int total;
+  final int entryCount;
+}
+
 /// One per-MEMBER expense aggregate bucket — the slice weight for the donut's
 /// 成员 (member) dimension (260620-v2m / D2).
 ///

@@ -2085,6 +2085,22 @@
     }
   },
   "analyticsCategoryDonutOther": "その他",
+  "analyticsDonutDimensionCategory": "カテゴリ",
+  "@analyticsDonutDimensionCategory": {
+    "description": "Donut dimension toggle: split by category (260620-v2m)"
+  },
+  "analyticsDonutDimensionMember": "メンバー",
+  "@analyticsDonutDimensionMember": {
+    "description": "Donut dimension toggle: split by member/device (260620-v2m)"
+  },
+  "analyticsDonutMemberFilterAll": "全メンバー",
+  "@analyticsDonutMemberFilterAll": {
+    "description": "Donut member-filter option: show all members (default) (260620-v2m)"
+  },
+  "analyticsDonutMemberFilterLabel": "メンバー",
+  "@analyticsDonutMemberFilterLabel": {
+    "description": "Donut member-filter trigger title (260620-v2m)"
+  },
   "analyticsDonutCenterLabel": "今月の支出",
   "@analyticsDonutCenterLabel": {
     "description": "Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)"

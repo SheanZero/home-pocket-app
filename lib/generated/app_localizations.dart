@@ -3047,6 +3047,30 @@ abstract class S {
   /// **'Other'**
   String get analyticsCategoryDonutOther;
 
+  /// Donut dimension toggle: split by category (260620-v2m)
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get analyticsDonutDimensionCategory;
+
+  /// Donut dimension toggle: split by member/device (260620-v2m)
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get analyticsDonutDimensionMember;
+
+  /// Donut member-filter option: show all members (default) (260620-v2m)
+  ///
+  /// In en, this message translates to:
+  /// **'All members'**
+  String get analyticsDonutMemberFilterAll;
+
+  /// Donut member-filter trigger title (260620-v2m)
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get analyticsDonutMemberFilterLabel;
+
   /// Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)
   ///
   /// In en, this message translates to:

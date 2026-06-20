@@ -1636,6 +1636,18 @@ class SEn extends S {
   String get analyticsCategoryDonutOther => 'Other';
 
   @override
+  String get analyticsDonutDimensionCategory => 'Category';
+
+  @override
+  String get analyticsDonutDimensionMember => 'Member';
+
+  @override
+  String get analyticsDonutMemberFilterAll => 'All members';
+
+  @override
+  String get analyticsDonutMemberFilterLabel => 'Member';
+
+  @override
   String get analyticsDonutCenterLabel => 'This month';
 
   @override

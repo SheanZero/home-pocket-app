@@ -1598,6 +1598,18 @@ class SZh extends S {
   String get analyticsCategoryDonutOther => '其他';
 
   @override
+  String get analyticsDonutDimensionCategory => '分类';
+
+  @override
+  String get analyticsDonutDimensionMember => '成员';
+
+  @override
+  String get analyticsDonutMemberFilterAll => '所有成员';
+
+  @override
+  String get analyticsDonutMemberFilterLabel => '成员';
+
+  @override
   String get analyticsDonutCenterLabel => '本月支出';
 
   @override

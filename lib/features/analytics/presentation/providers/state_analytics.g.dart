@@ -325,6 +325,211 @@ final class WithinMonthCumulativeTrendFamily extends $Family
   String toString() => r'withinMonthCumulativeTrendProvider';
 }
 
+/// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
+/// (deviceId) expense transactions over the active window — the donut's 分类
+/// dimension WHEN a member filter is active (genuinely-functional global
+/// narrowing: pick a member, see their category split).
+///
+/// Returns a [MemberFilteredCategoryBreakdown] carrying minimal
+/// [CategoryBreakdown] rows (categoryId/amount/transactionCount — name/icon/color/
+/// percentage are placeholders; `DonutHero` re-resolves the localized name from
+/// the id and re-computes percentages off the true total) plus the member's
+/// total + entry count for the center figure.
+///
+/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
+/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+///
+/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+
+@ProviderFor(memberFilteredCategoryBreakdown)
+final memberFilteredCategoryBreakdownProvider =
+    MemberFilteredCategoryBreakdownFamily._();
+
+/// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
+/// (deviceId) expense transactions over the active window — the donut's 分类
+/// dimension WHEN a member filter is active (genuinely-functional global
+/// narrowing: pick a member, see their category split).
+///
+/// Returns a [MemberFilteredCategoryBreakdown] carrying minimal
+/// [CategoryBreakdown] rows (categoryId/amount/transactionCount — name/icon/color/
+/// percentage are placeholders; `DonutHero` re-resolves the localized name from
+/// the id and re-computes percentages off the true total) plus the member's
+/// total + entry count for the center figure.
+///
+/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
+/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+///
+/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+
+final class MemberFilteredCategoryBreakdownProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MemberFilteredCategoryBreakdown>,
+          MemberFilteredCategoryBreakdown,
+          FutureOr<MemberFilteredCategoryBreakdown>
+        >
+    with
+        $FutureModifier<MemberFilteredCategoryBreakdown>,
+        $FutureProvider<MemberFilteredCategoryBreakdown> {
+  /// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
+  /// (deviceId) expense transactions over the active window — the donut's 分类
+  /// dimension WHEN a member filter is active (genuinely-functional global
+  /// narrowing: pick a member, see their category split).
+  ///
+  /// Returns a [MemberFilteredCategoryBreakdown] carrying minimal
+  /// [CategoryBreakdown] rows (categoryId/amount/transactionCount — name/icon/color/
+  /// percentage are placeholders; `DonutHero` re-resolves the localized name from
+  /// the id and re-computes percentages off the true total) plus the member's
+  /// total + entry count for the center figure.
+  ///
+  /// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
+  /// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+  ///
+  /// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+  MemberFilteredCategoryBreakdownProvider._({
+    required MemberFilteredCategoryBreakdownFamily super.from,
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      String deviceId,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'memberFilteredCategoryBreakdownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$memberFilteredCategoryBreakdownHash();
+
+  @override
+  String toString() {
+    return r'memberFilteredCategoryBreakdownProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<MemberFilteredCategoryBreakdown> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MemberFilteredCategoryBreakdown> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              String deviceId,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return memberFilteredCategoryBreakdown(
+      ref,
+      bookId: argument.bookId,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+      deviceId: argument.deviceId,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MemberFilteredCategoryBreakdownProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$memberFilteredCategoryBreakdownHash() =>
+    r'c7f1012c4f2f7c8039dbb349e9ec12d8d41f41f2';
+
+/// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
+/// (deviceId) expense transactions over the active window — the donut's 分类
+/// dimension WHEN a member filter is active (genuinely-functional global
+/// narrowing: pick a member, see their category split).
+///
+/// Returns a [MemberFilteredCategoryBreakdown] carrying minimal
+/// [CategoryBreakdown] rows (categoryId/amount/transactionCount — name/icon/color/
+/// percentage are placeholders; `DonutHero` re-resolves the localized name from
+/// the id and re-computes percentages off the true total) plus the member's
+/// total + entry count for the center figure.
+///
+/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
+/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+///
+/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+
+final class MemberFilteredCategoryBreakdownFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<MemberFilteredCategoryBreakdown>,
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            String deviceId,
+            JoyMetricVariant joyMetricVariant,
+          })
+        > {
+  MemberFilteredCategoryBreakdownFamily._()
+    : super(
+        retry: null,
+        name: r'memberFilteredCategoryBreakdownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
+  /// (deviceId) expense transactions over the active window — the donut's 分类
+  /// dimension WHEN a member filter is active (genuinely-functional global
+  /// narrowing: pick a member, see their category split).
+  ///
+  /// Returns a [MemberFilteredCategoryBreakdown] carrying minimal
+  /// [CategoryBreakdown] rows (categoryId/amount/transactionCount — name/icon/color/
+  /// percentage are placeholders; `DonutHero` re-resolves the localized name from
+  /// the id and re-computes percentages off the true total) plus the member's
+  /// total + entry count for the center figure.
+  ///
+  /// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
+  /// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+  ///
+  /// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+
+  MemberFilteredCategoryBreakdownProvider call({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String deviceId,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  }) => MemberFilteredCategoryBreakdownProvider._(
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      deviceId: deviceId,
+      joyMetricVariant: joyMetricVariant,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'memberFilteredCategoryBreakdownProvider';
+}
+
 /// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
 /// donut's 成员 dimension over the active window.
 ///

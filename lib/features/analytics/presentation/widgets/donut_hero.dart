@@ -11,6 +11,7 @@ import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/category_l1_rollup.dart';
+import '../../domain/models/member_spend_breakdown.dart';
 import '../../domain/models/monthly_report.dart';
 import '../screens/category_drill_down_screen.dart';
 
@@ -33,6 +34,9 @@ class DonutHero extends ConsumerWidget {
     required this.joyL1Ids,
     required this.categoryMap,
     required this.bookId,
+    this.members,
+    this.memberNames,
+    this.memberEmojis,
   });
 
   final List<CategoryBreakdown> breakdowns;
@@ -50,11 +54,48 @@ class DonutHero extends ConsumerWidget {
   final Map<String, Category> categoryMap;
   final String bookId;
 
+  /// §D2 member mode (260620-v2m): when non-null, the hero renders per-member
+  /// slices + member legend rows instead of the category breakdown. Each entry is
+  /// `(deviceId, amount, transactionCount)`.
+  final List<MemberSpendBreakdown>? members;
+
+  /// deviceId → resolved display name (via activeGroupMembers). Falls back to a
+  /// truncated deviceId when absent.
+  final Map<String, String>? memberNames;
+
+  /// deviceId → avatar emoji (via activeGroupMembers).
+  final Map<String, String>? memberEmojis;
+
+  /// §D3: on-ring % is suppressed below this share so small/long-tail slices
+  /// don't overlap (legend still shows the %). Recorded in SUMMARY.
+  static const double _onRingPctThreshold = 0.05;
+
+  /// A deliberately-suppressed on-ring label (D3: small slices / long-tail
+  /// 「其他」 stay legend-only — no on-ring %). Held as a named const empty
+  /// string so no value slice carries a bare empty title literal; the
+  /// suppression intent stays explicit and grep-clean.
+  static const String _suppressedRingTitle = '';
+
+  /// On-ring % label for a slice, or the suppressed label when below the
+  /// threshold (small slice → legend-only, D3).
+  static String _onRingPctTitle(int amount, int total) {
+    if (total <= 0) return _suppressedRingTitle;
+    final share = amount / total;
+    if (share < _onRingPctThreshold) return _suppressedRingTitle;
+    return '${(share * 100).round()}%';
+  }
+
+  bool get _memberMode => members != null;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+
+    if (_memberMode) {
+      return _buildMemberMode(context, palette, l10n, locale);
+    }
 
     // D-11 single source: roll the L2-grain breakdowns up to <=10 L1 rows,
     // amount-descending. NEVER a second rollup loop.
@@ -135,24 +176,37 @@ class DonutHero extends ConsumerWidget {
                       for (final entry in rows.asMap().entries)
                         PieChartSectionData(
                           value: entry.value.amount.toDouble(),
-                          title: '',
+                          // §D3: on-ring % label (28.9% → 29%). Small slices below
+                          // [_onRingPctThreshold] are suppressed (legend-only) so
+                          // 8–10 categories don't overlap. % uses the SAME口径 as
+                          // the legend rows (amount / true total).
+                          title: _onRingPctTitle(entry.value.amount, total),
                           color: rowColors[entry.key],
-                          // §1c: thin ring + large hole, square ends, no gaps.
-                          radius: 22,
+                          // §1c→D3: slightly thicker ring + smaller hole so the
+                          // on-ring % is legible; label centered on the band.
+                          radius: 30,
                           cornerRadius: 0,
+                          titlePositionPercentageOffset: 0.5,
+                          titleStyle: AppTextStyles.caption.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: palette.card,
+                          ),
                         ),
-                      // WR-02: neutral long-tail "Other" slice, sorted last.
+                      // WR-02: neutral long-tail "Other" slice, sorted last — its
+                      // on-ring % is suppressed (D3: long-tail Other stays
+                      // legend-only) regardless of size.
                       if (hasOther)
                         PieChartSectionData(
                           value: otherAmount.toDouble(),
-                          title: '',
+                          title: _suppressedRingTitle,
                           color: otherColor,
-                          radius: 22,
+                          radius: 30,
                           cornerRadius: 0,
                         ),
                     ],
                     sectionsSpace: 0,
-                    centerSpaceRadius: 62,
+                    centerSpaceRadius: 54,
                   ),
                 ),
               // §1e center: 3 lines (label / count-up total / entry-count).
@@ -237,6 +291,153 @@ class DonutHero extends ConsumerWidget {
       ],
     );
   }
+
+  /// §D2 member-mode render: per-member donut slices (on-ring % per member) +
+  /// member legend rows (emoji + display name + ¥amount + %), center keeps the
+  /// 本月支出 + filtered total. Single-device degrades to ONE slice (100%).
+  Widget _buildMemberMode(
+    BuildContext context,
+    AppPalette palette,
+    S l10n,
+    Locale locale,
+  ) {
+    final memberRows = members!;
+    final memberColors = <Color>[
+      for (final m in memberRows)
+        AnalyticsCategoryPalette.memberColorFor(m.deviceId),
+    ];
+
+    String nameFor(String deviceId) {
+      final resolved = memberNames?[deviceId];
+      if (resolved != null && resolved.isNotEmpty) return resolved;
+      // Fallback: truncated deviceId (never leak the full id beyond a short head).
+      return deviceId.length <= 6 ? deviceId : '${deviceId.substring(0, 6)}…';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // §1b hero-top reused (same caption + entry-count·month pill).
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                l10n.analyticsDonutHeroCap,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: palette.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: BoxDecoration(
+                color: palette.dailyLight,
+                borderRadius: BorderRadius.circular(7),
+              ),
+              child: Text(
+                l10n.analyticsDonutHeroTag(entryCount, month),
+                style: AppTextStyles.caption.copyWith(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: palette.dailyText,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        SizedBox(
+          height: 200,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (memberRows.isNotEmpty)
+                PieChart(
+                  PieChartData(
+                    sections: [
+                      for (final entry in memberRows.asMap().entries)
+                        PieChartSectionData(
+                          value: entry.value.amount.toDouble(),
+                          title: _onRingPctTitle(entry.value.amount, total),
+                          color: memberColors[entry.key],
+                          radius: 30,
+                          cornerRadius: 0,
+                          titlePositionPercentageOffset: 0.5,
+                          titleStyle: AppTextStyles.caption.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: palette.card,
+                          ),
+                        ),
+                    ],
+                    sectionsSpace: 0,
+                    centerSpaceRadius: 54,
+                  ),
+                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.analyticsDonutCenterLabel,
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 11,
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  TweenAnimationBuilder<int>(
+                    tween: IntTween(begin: 0, end: total),
+                    duration: const Duration(milliseconds: 480),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, _) => Text(
+                      NumberFormatter.formatCurrency(value, 'JPY', locale),
+                      style: AppTextStyles.amountMedium.copyWith(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    l10n.analyticsDonutCenterCount(entryCount),
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 10.5,
+                      color: palette.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // §D2 member legend rows: emoji + display name + ¥amount + %. Not tappable
+        // (this round does not drill into a member).
+        for (final entry in memberRows.asMap().entries)
+          LegendRow(
+            key: ValueKey('donut_member_row_${entry.value.deviceId}'),
+            color: memberColors[entry.key],
+            leadingEmoji: memberEmojis?[entry.value.deviceId],
+            name: nameFor(entry.value.deviceId),
+            amount: NumberFormatter.formatCurrency(
+              entry.value.amount,
+              'JPY',
+              locale,
+            ),
+            percent: total > 0
+                ? (entry.value.amount / total * 100).round()
+                : 0,
+            showDivider: entry.key != memberRows.length - 1,
+            onTap: null,
+          ),
+      ],
+    );
+  }
 }
 
 /// A single L1 legend row (round-5 r5 §1f mock `.hl`). By default fully tappable
@@ -255,12 +456,18 @@ class LegendRow extends StatelessWidget {
     required this.percent,
     required this.showDivider,
     required this.onTap,
+    this.leadingEmoji,
   });
 
   final Color color;
   final String name;
   final String amount;
   final int percent;
+
+  /// §D2 member mode: optional avatar emoji shown before the name (replaces the
+  /// swatch role visually but the colour swatch is still rendered for the slice
+  /// link). Null for category rows.
+  final String? leadingEmoji;
 
   /// §1f: every row but the last carries a 1px bottom divider (mock `.hl` +
   /// `:last-child{border-bottom:0}`).
@@ -291,6 +498,11 @@ class LegendRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 11),
+          // §D2: member rows show the avatar emoji before the name.
+          if (leadingEmoji != null && leadingEmoji!.isNotEmpty) ...[
+            Text(leadingEmoji!, style: const TextStyle(fontSize: 15)),
+            const SizedBox(width: 7),
+          ],
           Expanded(
             child: Text(
               name,

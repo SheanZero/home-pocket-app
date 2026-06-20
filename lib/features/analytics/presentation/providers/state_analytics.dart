@@ -83,6 +83,84 @@ Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
   );
 }
 
+/// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
+/// (deviceId) expense transactions over the active window — the donut's 分类
+/// dimension WHEN a member filter is active (genuinely-functional global
+/// narrowing: pick a member, see their category split).
+///
+/// Returns a [MemberFilteredCategoryBreakdown] carrying minimal
+/// [CategoryBreakdown] rows (categoryId/amount/transactionCount — name/icon/color/
+/// percentage are placeholders; `DonutHero` re-resolves the localized name from
+/// the id and re-computes percentages off the true total) plus the member's
+/// total + entry count for the center figure.
+///
+/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
+/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+///
+/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+@riverpod
+Future<MemberFilteredCategoryBreakdown> memberFilteredCategoryBreakdown(
+  Ref ref, {
+  required String bookId,
+  required DateTime startDate,
+  required DateTime endDate,
+  required String deviceId,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+}) async {
+  final repository = ref.watch(transactionRepositoryProvider);
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
+  final start = DateBoundaries.dayRange(startDate).start;
+  final end = DateBoundaries.dayRange(endDate).end;
+  final txns = await repository.findByBookIds(
+    [bookId],
+    ledgerType: null,
+    categoryId: null,
+    startDate: start,
+    endDate: end,
+    sortField: SortField.timestamp,
+    sortDirection: SortDirection.desc,
+  );
+  // Expense rows recorded by the chosen member only.
+  final memberTxns = txns.where(
+    (tx) =>
+        tx.type == TransactionType.expense &&
+        tx.deviceId == deviceId &&
+        (entrySourceFilter == null || tx.entrySource == entrySourceFilter),
+  );
+  // Aggregate by leaf categoryId (DonutHero rolls these up to L1 itself).
+  final amountByCat = <String, int>{};
+  final countByCat = <String, int>{};
+  var total = 0;
+  var entryCount = 0;
+  for (final tx in memberTxns) {
+    amountByCat[tx.categoryId] = (amountByCat[tx.categoryId] ?? 0) + tx.amount;
+    countByCat[tx.categoryId] = (countByCat[tx.categoryId] ?? 0) + 1;
+    total += tx.amount;
+    entryCount += 1;
+  }
+  final breakdowns = <CategoryBreakdown>[];
+  amountByCat.forEach((catId, amount) {
+    breakdowns.add(
+      CategoryBreakdown(
+        categoryId: catId,
+        categoryName: catId,
+        icon: '',
+        color: '',
+        amount: amount,
+        percentage: total > 0 ? amount / total * 100 : 0,
+        transactionCount: countByCat[catId] ?? 0,
+      ),
+    );
+  });
+  return MemberFilteredCategoryBreakdown(
+    breakdowns: breakdowns,
+    total: total,
+    entryCount: entryCount,
+  );
+}
+
 /// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
 /// donut's 成员 dimension over the active window.
 ///

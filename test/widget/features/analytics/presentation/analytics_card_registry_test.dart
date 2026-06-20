@@ -49,6 +49,9 @@ const Set<String> _analyticsProviderTypeWhitelist = <String>{
   'JoyCategoryAmountsProvider',
   'PerDayJoyCountsProvider',
   'SatisfactionDistributionProvider',
+  // 260620-v2m / D2: donut 成员 dimension family — analytics state_* family,
+  // GUARD-01 compliant (zero home/*); folded into categoryDonutRefreshTargets.
+  'MemberSpendBreakdownProvider',
   'HappinessReportProvider',
   'EarliestTransactionMonthProvider',
   'FamilyHappinessProvider',
@@ -259,7 +262,8 @@ void main() {
 
       // CategoryDonut: monthlyReport + the FOLDED joyCategoryAmounts (D2 /
       // Pitfall-3 — the nested joy drawer's refresh target now lives here so
-      // pull-to-refresh still invalidates it after JoySpendCard de-registration).
+      // pull-to-refresh still invalidates it after JoySpendCard de-registration)
+      // + the 260620-v2m memberSpendBreakdown (donut 成员 dimension data).
       expect(
         categoryDonutRefreshTargets(ctx),
         <ProviderBase<Object?>>[
@@ -270,6 +274,12 @@ void main() {
             joyMetricVariant: ctx.joyMetricVariant,
           ),
           joyCategoryAmountsProvider(
+            bookId: ctx.bookId,
+            startDate: ctx.startDate,
+            endDate: ctx.endDate,
+            joyMetricVariant: ctx.joyMetricVariant,
+          ),
+          memberSpendBreakdownProvider(
             bookId: ctx.bookId,
             startDate: ctx.startDate,
             endDate: ctx.endDate,
