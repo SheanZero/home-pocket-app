@@ -39,7 +39,7 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
     required this.seriesColor,
     required this.anchor,
     this.previousMonth,
-    this.height = 244,
+    this.height = 200,
   });
 
   /// Current-month running-cumulative points (1..n). Required, drawn as a SOLID
@@ -70,7 +70,7 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
   static const double _topPad = 12;
 
   /// Vertical nudge (px) applied to an endpoint label above/below its point.
-  static const double _labelNudge = 28;
+  static const double _labelNudge = 14;
 
   bool get _hasReference =>
       previousMonth != null && previousMonth!.isNotEmpty;
@@ -86,6 +86,13 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
   /// Days in the displayed month, derived from [anchor] (D-1).
   int get _daysInMonth => DateTime(anchor.year, anchor.month + 1, 0).day;
+
+  /// Which day-of-month bottom-axis labels to render: 6 / 12 / 18 / 24 —
+  /// multiples of 6, excluding fl_chart's auto min/max edge labels AND the
+  /// near-month-end mark so the right edge never crowds (no 28日/30日). Pure +
+  /// visible-for-testing.
+  static bool showDayAxisLabel(int day, int daysInMonth) =>
+      day >= 6 && day % 6 == 0 && day <= daysInMonth - 6;
 
   /// The previous-month point with the latest `day <= comparisonDay` — 上月 now
   /// spans the whole month, so `.last` is month-end, NOT the comparison day
@@ -244,12 +251,13 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: _bottomReserved,
-                        interval: 7,
+                        interval: 6,
                         getTitlesWidget: (value, meta) {
                           final day = value.round();
-                          // Show only sparse ~weekly markers across the whole
-                          // month; skip any auto-emitted label past the month.
-                          if (day < 1 || day > daysInMonth) {
+                          // Sparse markers at 6/12/18/24; drop fl_chart's auto
+                          // min/max edge labels and the near-month-end mark so
+                          // the right edge never crowds (no 28日/30日).
+                          if (!showDayAxisLabel(day, daysInMonth)) {
                             return const SizedBox.shrink();
                           }
                           return SideTitleWidget(
@@ -314,8 +322,8 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
   /// Positions an endpoint label near a plot pixel, nudged above/below, clamped
   /// so it never overflows the card. The label is roughly [_labelW] × [_labelH].
-  static const double _labelW = 86;
-  static const double _labelH = 34;
+  static const double _labelW = 80;
+  static const double _labelH = 30;
 
   Widget _positionedLabel({
     required BuildContext context,
@@ -325,12 +333,24 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
     required bool above,
     required Widget child,
   }) {
-    // Center the label horizontally on the point, biased to stay on-card.
-    var left = x - _labelW / 2;
-    var top = above ? y - _labelNudge - _labelH : y + _labelNudge;
-
     final maxLeft = constraints.maxWidth - _labelW;
     final maxTop = constraints.maxHeight - _labelH;
+
+    double topFor(bool a) => a ? y - _labelNudge - _labelH : y + _labelNudge;
+
+    // Prefer the comparison side (D-3/D-4), but FLIP to the other side when the
+    // preferred side would overflow the card — otherwise a near-top/near-bottom
+    // endpoint clamps onto the line (round-3 fix: "数字写到点上了"). The child's
+    // `above` flag still records the comparison decision for tests.
+    var top = topFor(above);
+    if (above && top < 0) {
+      top = topFor(false);
+    } else if (!above && top > maxTop) {
+      top = topFor(true);
+    }
+
+    // Center the label horizontally on the point, biased to stay on-card.
+    var left = x - _labelW / 2;
     left = left.clamp(0.0, maxLeft < 0 ? 0.0 : maxLeft);
     top = top.clamp(0.0, maxTop < 0 ? 0.0 : maxTop);
 
@@ -457,7 +477,7 @@ class WithinMonthEndpointAnnotation extends StatelessWidget {
         Text(
           amountLabel,
           style: AppTextStyles.amountSmall.copyWith(
-            fontSize: 12,
+            fontSize: 10,
             color: color,
           ),
         ),

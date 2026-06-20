@@ -316,6 +316,26 @@ void main() {
     },
   );
 
+  test(
+    'Test 13b (round-3 X-axis markers): bottom-axis labels render only at '
+    '6/12/18/24 — multiples of 6, dropping edges and the near-month-end mark '
+    '(no 28日/30日)',
+    () {
+      // 30-day month (June): 6/12/18/24 show; 30 dropped; edges/non-multiples no.
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(6, 30), isTrue);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(12, 30), isTrue);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(18, 30), isTrue);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(24, 30), isTrue);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(30, 30), isFalse);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(28, 30), isFalse);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(1, 30), isFalse);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(7, 30), isFalse);
+      // 31-day month: 24 still shows, 30 dropped.
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(24, 31), isTrue);
+      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(30, 31), isFalse);
+    },
+  );
+
   testWidgets(
     'Test 13 (opposite placement, D-4): the 上月 label sits at the OPPOSITE '
     'position from the 本月 label',
