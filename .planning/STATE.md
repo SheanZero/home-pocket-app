@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 Phase: 47
 Plan: Not started
 Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
-Last activity: 2026-06-20
+Last activity: 2026-06-20 - Completed quick task 260620-jx2: 支出趋势图表增加坐标轴/网格/上月对比线/起止点标注
 
 ### Quick Tasks Completed
 
@@ -45,6 +45,7 @@ Last activity: 2026-06-20
 | 260614-dx1 | 外币金额为整数时编辑/显示不再出现 .00（编辑页+键盘 formatMinorAsMajor；列表注释 formatCurrency trimWholeFraction；保留真实小数 12.50 与 JPY 整数路径） | 2026-06-14 | 3423d53e | [260614-dx1-fx-no-trailing-zeros](./quick/260614-dx1-fx-no-trailing-zeros/) |
 | 260614-goh | 语音外币切换：①识别口语词（人民币/美金+全货币 zh/ja/en，大小写不敏感，regexAlternation longest-first）②修复头部药丸不切换（AmountDisplay 未传 currency→硬编码 JPY；新增 _displayCurrency，汇率成功才切外币、RateUnavailable 保持 JPY）（+32 用例） | 2026-06-14 | 117aecd5,d2b9df8e | [260614-goh-voice-currency-switch](./quick/260614-goh-voice-currency-switch/) |
 | 260614-iww | 隐藏 OCR 记账入口（新增 kOcrEntryEnabled=false 编译期 flag，InputModeTabs 隐藏扫描页签 + navigateToEntryMode 短路；OCR 基础设施/屏幕零改动，翻转 flag 即恢复）+ 添加账目 FAB 点击=保存即 pop 返回 + 友好提示，长按=连续记账模式（停留清空表单 + 「继续记账」提示 + 退出键/退出提示）；ja/zh/en 三语温暖文案 | 2026-06-14 | 10236350,9c9b6068,45ed4332 | [260614-iww-ocr](./quick/260614-iww-ocr/) |
+| 260620-jx2 | 支出趋势图表增加坐标轴/网格/上月对比线/起止点标注（统计页 within-month 累计趋势图：Y轴金额刻度+横向网格线从0起、X轴本地化日期刻度、清晰灰色虚线上月对比线+图例、本月起点/当前点 日期+金额标注；三 tab 通用，悦己仍单线守 ADR-012/D-E1；零新 ARB key；9 golden 重基线，full test 3061/3061，analyze 0） | 2026-06-20 | ec4d43e2,c005e531 | [260620-jx2-trend-chart-axes](./quick/260620-jx2-trend-chart-axes/) |
 
 ## Last Milestone Snapshot (v1.7)
 
