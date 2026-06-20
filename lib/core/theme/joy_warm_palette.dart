@@ -44,6 +44,9 @@ class JoyWarmPalette {
   /// j7 藕灰玫.
   static const Color j7 = Color(0xFFC7A7AE);
 
+  /// 段间 2px 分隔 / 条底色（mock --cream）。
+  static const Color cream = Color(0xFFFFFAF6);
+
   /// The ordered j1..j7 segment colors (largest→smallest joy category).
   static const List<Color> segments = <Color>[j1, j2, j3, j4, j5, j6, j7];
 

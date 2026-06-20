@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/joy_warm_palette.dart';
 
 /// One pre-resolved segment for the 悦己花在哪 horizontal stacked bar.
 ///
@@ -71,19 +72,29 @@ class JoySpendStackedBarState extends State<JoySpendStackedBar> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final segments = widget.segments;
+    // Pink bar border — same lerp the drawer uses for its border (mock .joybar
+    // border:1px solid var(--joyBorder)).
+    final barBorder = Color.lerp(palette.joy, palette.joyLight, 0.55)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // The custom stacked bar — Row of Flexible(flex: amount) (R-1).
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            height: 28,
+        // The custom stacked bar — Row of Expanded(flex: amount). Expanded (TIGHT
+        // fit) is the fix: Flexible was loose, so the zero-intrinsic-width segments
+        // collapsed to 0 and the whole bar was invisible (root cause).
+        Container(
+          height: 32,
+          decoration: BoxDecoration(
+            color: JoyWarmPalette.cream,
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: barBorder),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
             child: Row(
               children: [
                 for (final entry in segments.asMap().entries)
-                  Flexible(
+                  Expanded(
                     key: ValueKey('joy_spend_segment_${entry.key}'),
                     flex: entry.value.amount,
                     child: GestureDetector(
@@ -91,6 +102,8 @@ class JoySpendStackedBarState extends State<JoySpendStackedBar> {
                       onTap: () => _onSegmentTap(entry.key),
                       child: _Segment(
                         color: entry.value.color,
+                        percent: entry.value.percent,
+                        isLast: entry.key == segments.length - 1,
                         selected: selectedIndex == entry.key,
                         dimmed:
                             selectedIndex != null &&
@@ -102,13 +115,14 @@ class JoySpendStackedBarState extends State<JoySpendStackedBar> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 13),
         // Single-column legend (donut dot+label idiom).
         for (final entry in segments.asMap().entries)
           _LegendRow(
             key: ValueKey('joy_spend_legend_${entry.key}'),
             segment: entry.value,
             selected: selectedIndex == entry.key,
+            isLast: entry.key == segments.length - 1,
             palette: palette,
             onTap: () => _onSegmentTap(entry.key),
           ),
@@ -123,23 +137,58 @@ class JoySpendStackedBarState extends State<JoySpendStackedBar> {
 class _Segment extends StatelessWidget {
   const _Segment({
     required this.color,
+    required this.percent,
+    required this.isLast,
     required this.selected,
     required this.dimmed,
   });
 
   final Color color;
+  final int percent;
+  final bool isLast;
   final bool selected;
   final bool dimmed;
 
   @override
   Widget build(BuildContext context) {
+    // 2px cream right divider on every segment except the last (mock
+    // .seg{border-right:2px solid var(--cream)} / :last-child{border-right:0}).
+    Border? border;
+    if (selected) {
+      border = Border.all(color: Colors.white.withValues(alpha: 0.9), width: 2);
+    } else if (!isLast) {
+      border = const Border(
+        right: BorderSide(color: JoyWarmPalette.cream, width: 2),
+      );
+    }
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: dimmed ? color.withValues(alpha: 0.45) : color,
-        border: selected
-            ? Border.all(color: Colors.white.withValues(alpha: 0.9), width: 2)
-            : null,
+        border: border,
       ),
+      // Inline % label only on wide-enough segments (rounded percent >= 12),
+      // matching the mock (.inpct shown on 25/22/19/13, hidden on 9/7/4).
+      child: percent >= 12
+          ? Center(
+              child: Text(
+                '$percent%',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: 0.02,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(0, 1),
+                      blurRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
@@ -151,12 +200,14 @@ class _LegendRow extends StatelessWidget {
     super.key,
     required this.segment,
     required this.selected,
+    required this.isLast,
     required this.palette,
     required this.onTap,
   });
 
   final JoySpendSegment segment;
   final bool selected;
+  final bool isLast;
   final AppPalette palette;
   final VoidCallback onTap;
 
@@ -164,16 +215,26 @@ class _LegendRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Container(
+        // 1px divider under every row except the last (mock
+        // .jl{border-bottom} + :last-child{border-bottom:0}). padding 垂直 7.
+        decoration: isLast
+            ? null
+            : BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: palette.borderDivider),
+                ),
+              ),
+        padding: const EdgeInsets.symmetric(vertical: 7),
         child: Row(
           children: [
+            // Rounded-square 11×11 dot (mock .jl .dot, matches the ring legend).
             Container(
-              width: 10,
-              height: 10,
+              width: 11,
+              height: 11,
               decoration: BoxDecoration(
                 color: segment.color,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(4),
               ),
             ),
             const SizedBox(width: 8),
@@ -181,8 +242,9 @@ class _LegendRow extends StatelessWidget {
               child: Text(
                 segment.label,
                 style: AppTextStyles.caption.copyWith(
-                  color: selected ? palette.textPrimary : palette.textSecondary,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 12.5,
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.w600,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -192,18 +254,21 @@ class _LegendRow extends StatelessWidget {
             Text(
               segment.formattedAmount,
               style: AppTextStyles.amountSmall.copyWith(
-                color: selected ? palette.joyText : palette.textPrimary,
-                fontWeight: selected ? FontWeight.w700 : null,
+                fontSize: 12,
+                color: palette.joyText,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 8),
             SizedBox(
-              width: 40,
+              width: 46,
               child: Text(
                 '${segment.percent}%',
                 textAlign: TextAlign.end,
                 style: AppTextStyles.caption.copyWith(
-                  color: palette.textSecondary,
+                  fontSize: 10.5,
+                  color: palette.textTertiary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),

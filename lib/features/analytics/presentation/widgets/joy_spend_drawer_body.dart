@@ -23,9 +23,19 @@ import 'joy_spend_stacked_bar.dart';
 /// Ambient celebrate-past: amounts only — zero target/streak/ranking/cross-period
 /// (ADR-012). Empty amounts → a neutral empty copy (no throw).
 class JoySpendDrawerBody extends ConsumerWidget {
-  const JoySpendDrawerBody({super.key, required this.amounts});
+  const JoySpendDrawerBody({
+    super.key,
+    required this.amounts,
+    this.showTotalHeader = true,
+  });
 
   final List<JoyCategoryAmount> amounts;
+
+  /// Whether to render the「悦己花销」label + count-up total above the joybar.
+  /// The nested [JoySpendDrawer] passes `false` (drawer-top already shows the
+  /// ¥ total — the count-up here would be a duplicate). The standalone
+  /// `JoySpendCard` wrapper keeps the default `true`.
+  final bool showTotalHeader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -73,23 +83,27 @@ class JoySpendDrawerBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // D-D2 anchor #2: count-up the 悦己 header total.
-        Text(
-          l10n.analyticsJoySpendHeaderLabel,
-          style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
-        ),
-        const SizedBox(height: 2),
-        TweenAnimationBuilder<int>(
-          key: const ValueKey('joy_spend_total_countup'),
-          tween: IntTween(begin: 0, end: total),
-          duration: const Duration(milliseconds: 480),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, _) => Text(
-            NumberFormatter.formatCurrency(value, 'JPY', locale),
-            style: AppTextStyles.amountLarge.copyWith(color: palette.joyText),
+        // D-D2 anchor #2: count-up the 悦己 header total. Skipped inside the
+        // nested drawer (showTotalHeader == false) where drawer-top already
+        // shows the ¥ total — rendering it here would duplicate it.
+        if (showTotalHeader) ...[
+          Text(
+            l10n.analyticsJoySpendHeaderLabel,
+            style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 2),
+          TweenAnimationBuilder<int>(
+            key: const ValueKey('joy_spend_total_countup'),
+            tween: IntTween(begin: 0, end: total),
+            duration: const Duration(milliseconds: 480),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) => Text(
+              NumberFormatter.formatCurrency(value, 'JPY', locale),
+              style: AppTextStyles.amountLarge.copyWith(color: palette.joyText),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         JoySpendStackedBar(segments: segments),
       ],
     );

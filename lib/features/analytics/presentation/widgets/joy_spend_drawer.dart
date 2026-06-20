@@ -125,7 +125,10 @@ class JoySpendDrawer extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 13),
-                    JoySpendDrawerBody(amounts: amounts),
+                    JoySpendDrawerBody(
+                      amounts: amounts,
+                      showTotalHeader: false,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       l10n.analyticsJoyDrawerCaption,
