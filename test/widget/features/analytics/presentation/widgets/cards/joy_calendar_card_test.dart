@@ -80,7 +80,11 @@ Widget _subject({
         joyMetricVariant: JoyMetricVariant.all,
       ).overrideWith(
         (_) async =>
-            dayTxns ?? [_tx('t1', DateTime(2026, 5, 12, 10)), _tx('t2', DateTime(2026, 5, 12, 14))],
+            dayTxns ??
+            [
+              _tx('t1', DateTime(2026, 5, 12, 10)),
+              _tx('t2', DateTime(2026, 5, 12, 14)),
+            ],
       ),
       joyDayTransactionsProvider(
         bookId: _bookId,
@@ -130,15 +134,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // No inline panel before tapping.
-      expect(find.byKey(const ValueKey('joy_calendar_inline_panel')),
-          findsNothing);
+      expect(
+        find.byKey(const ValueKey('joy_calendar_inline_panel')),
+        findsNothing,
+      );
 
       await tester.tap(find.byKey(const ValueKey('joy_day_12')));
       await tester.pumpAndSettle();
 
       // Inline panel appears in place (no Navigator route, no bottom sheet).
-      expect(find.byKey(const ValueKey('joy_calendar_inline_panel')),
-          findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('joy_calendar_inline_panel')),
+        findsOneWidget,
+      );
       // No bottom sheet / route was used — the panel grew in place (D-C1).
       expect(find.byType(BottomSheet), findsNothing);
 
@@ -149,38 +157,36 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Test 3: tap a 0-joy day → neutral inline empty copy, no throw',
-    (tester) async {
-      await tester.pumpWidget(_subject());
-      await tester.pumpAndSettle();
+  testWidgets('Test 3: tap a 0-joy day → neutral inline empty copy, no throw', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_subject());
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('joy_day_4')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('joy_day_4')));
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('joy_calendar_day_empty')),
-          findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(
+      find.byKey(const ValueKey('joy_calendar_day_empty')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 
-  testWidgets(
-    'Test 4: ADR-016 §5 ambient — no streak/target/ranking copy '
-    '(GUARD-02 readiness)',
-    (tester) async {
-      await tester.pumpWidget(_subject());
-      await tester.pumpAndSettle();
+  testWidgets('Test 4: ADR-016 §5 ambient — no streak/target/ranking copy '
+      '(GUARD-02 readiness)', (tester) async {
+    await tester.pumpWidget(_subject());
+    await tester.pumpAndSettle();
 
-      final forbidden = ['排名', '连续', '目标', '超支', '达成', 'streak', 'rank'];
-      for (final token in forbidden) {
-        expect(
-          find.textContaining(token, findRichText: true),
-          findsNothing,
-          reason: 'forbidden token "$token" must not appear',
-        );
-      }
-    },
-  );
+    final forbidden = ['排名', '连续', '目标', '超支', '达成', 'streak', 'rank'];
+    for (final token in forbidden) {
+      expect(
+        find.textContaining(token, findRichText: true),
+        findsNothing,
+        reason: 'forbidden token "$token" must not appear',
+      );
+    }
+  });
 
   testWidgets('Test 5: empty month → grid renders all-empty, no throw', (
     tester,
@@ -209,4 +215,94 @@ void main() {
     expect(find.byType(AnalyticsCardErrorState), findsOneWidget);
     expect(find.byType(TextButton), findsOneWidget);
   });
+
+  group('default-select-today', () {
+    testWidgets(
+      'A: anchor == current month → today auto-selected + inline panel '
+      'auto-expanded (deterministic, y/m/d only)',
+      (tester) async {
+        await tester.pumpWidget(_currentMonthSubject());
+        await tester.pumpAndSettle();
+
+        // The inline panel is open without any tap (today auto-selected).
+        expect(
+          find.byKey(const ValueKey('joy_calendar_inline_panel')),
+          findsOneWidget,
+        );
+
+        final heatmap = tester.widget<JoyCalendarHeatmap>(
+          find.byType(JoyCalendarHeatmap),
+        );
+        final selected = heatmap.selectedDay;
+        expect(selected, isNotNull);
+        // Compare only y/m/d — _defaultSelectedDay reads its own DateTime.now(),
+        // so a millisecond clock race against the test's now is possible.
+        final now = DateTime.now();
+        expect(selected!.year, now.year);
+        expect(selected.month, now.month);
+        expect(selected.day, now.day);
+      },
+    );
+
+    testWidgets('B: anchor == a past month (May 2026) → nothing auto-selected '
+        '(no ring, no inline panel)', (tester) async {
+      await tester.pumpWidget(_subject());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('joy_calendar_inline_panel')),
+        findsNothing,
+      );
+
+      final heatmap = tester.widget<JoyCalendarHeatmap>(
+        find.byType(JoyCalendarHeatmap),
+      );
+      expect(heatmap.selectedDay, isNull);
+    });
+  });
+}
+
+/// Builds the card with `endDate` in the CURRENT month so the card-derived
+/// anchor (`DateTime(endDate.year, endDate.month)`) equals the current month,
+/// driving `_defaultSelectedDay()` to auto-select today. Overrides are keyed on
+/// the current month / today (pure y/m/d) to match the production code path.
+Widget _currentMonthSubject() {
+  final now = DateTime.now();
+  final monthAnchor = DateTime(now.year, now.month);
+  final today = DateTime(now.year, now.month, now.day);
+  // A day in the current month, safely on or before today, used as endDate so
+  // anchor resolves to the current month regardless of run date.
+  final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+  return createLocalizedWidget(
+    SingleChildScrollView(
+      child: JoyCalendarCard(
+        bookId: _bookId,
+        startDate: monthAnchor,
+        endDate: endDate,
+        joyMetricVariant: JoyMetricVariant.all,
+      ),
+    ),
+    locale: const Locale('zh'),
+    overrides: [
+      locale_providers.currentLocaleProvider.overrideWith(
+        (_) async => const Locale('zh'),
+      ),
+      perDayJoyCountsProvider(
+        bookId: _bookId,
+        anchor: monthAnchor,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => [PerDayJoyCount(date: today, count: 2)]),
+      joyDayTransactionsProvider(
+        bookId: _bookId,
+        day: today,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith(
+        (_) async => [
+          _tx('today1', DateTime(now.year, now.month, now.day, 10)),
+          _tx('today2', DateTime(now.year, now.month, now.day, 14)),
+        ],
+      ),
+    ],
+  );
 }
