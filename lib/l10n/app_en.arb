@@ -1769,26 +1769,6 @@
   "@analyticsTimeWindowChipTooltip": {
     "description": "Analytics screen time-window selector chip tooltip"
   },
-  "analyticsJoyMetricVariantChipLabel": "Entries",
-  "@analyticsJoyMetricVariantChipLabel": {
-    "description": "AppBar chip label for manual-vs-all entries audit toggle (Phase 17)"
-  },
-  "analyticsJoyMetricVariantSheetTitle": "Joy metric variant",
-  "@analyticsJoyMetricVariantSheetTitle": {
-    "description": "Bottom sheet title for the entries-source filter"
-  },
-  "analyticsJoyMetricVariantOptionAll": "All entries",
-  "@analyticsJoyMetricVariantOptionAll": {
-    "description": "Option label: include voice and manual entries"
-  },
-  "analyticsJoyMetricVariantOptionManualOnly": "Manual entries only",
-  "@analyticsJoyMetricVariantOptionManualOnly": {
-    "description": "Option label: exclude voice-estimated entries for audit mode"
-  },
-  "analyticsJoyMetricVariantManualOnlyExplain": "Manual entries only · excludes voice-estimated entries",
-  "@analyticsJoyMetricVariantManualOnlyExplain": {
-    "description": "One-line explanation appended to the manualOnly option; descriptive copy, not judgmental"
-  },
   "analyticsTimeWindowChipLabelWeek": "Week of {monday}",
   "@analyticsTimeWindowChipLabelWeek": {
     "description": "Analytics screen time-window selector week chip label",
@@ -2016,19 +1996,7 @@
   "@analyticsSectionSatisfaction": {
     "description": "Section header above the satisfaction-distribution histogram card (round-5 r5 mock, 悦己 section)"
   },
-  "analyticsSectionTagPractical": "Practical",
-  "@analyticsSectionTagPractical": {
-    "description": "Section-header tag chip for the practical (实用) spend sections"
-  },
-  "analyticsSectionTagJoy": "Joy",
-  "@analyticsSectionTagJoy": {
-    "description": "Section-header tag chip for the joy (悦己) sections"
-  },
-  "analyticsJoyDrawerConnector": "Zoom into your joy spending",
-  "@analyticsJoyDrawerConnector": {
-    "description": "Connector chip linking the category donut to the nested joy-spend drawer (neutral, just shows where joy spend went)"
-  },
-  "analyticsJoyDrawerTitle": "Where your joy {amount} went",
+  "analyticsJoyDrawerTitle": "Joy {amount}",
   "@analyticsJoyDrawerTitle": {
     "description": "Joy drawer title with the data-derived joy total (neutral, no ranking/target)",
     "placeholders": {
@@ -2045,14 +2013,6 @@
         "type": "int"
       }
     }
-  },
-  "analyticsJoyDrawerSubtitle": "Just where it went, nothing placed above another",
-  "@analyticsJoyDrawerSubtitle": {
-    "description": "Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)"
-  },
-  "analyticsJoyDrawerCaption": "Percentages are each item's share of joy itself · no target, never weighed against the past",
-  "@analyticsJoyDrawerCaption": {
-    "description": "Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)"
   },
   "analyticsCalLegendLow": "Light",
   "@analyticsCalLegendLow": {
@@ -2136,10 +2096,6 @@
     "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
   },
   "analyticsHistogramColorCaption": "Colors are ordinal only",
-  "analyticsHistogramJoyCaption": "Mostly mid-to-high — money you spend on yourself usually feels worth it; the occasional miss is a real experience too.",
-  "@analyticsHistogramJoyCaption": {
-    "description": "Warm descriptive caption beneath the joy satisfaction histogram (round-5 r5 mock .histo-cap; descriptive only, no ranking/target/streak/cross-period)"
-  },
   "analyticsCardTitleLargestExpense": "Total · Largest expense",
   "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
   "@analyticsCardLargestExpenseBody": {
@@ -2620,12 +2576,20 @@
   "shoppingSelectionCount": "{count}",
   "@shoppingSelectionCount": {
     "description": "Selected item count shown in the batch selection header (Phase 38)",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shoppingBatchSelectingCount": "{count} selected",
   "@shoppingBatchSelectingCount": {
     "description": "Selected item count label in the batch action bar (Phase 38)",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shoppingFormAddTitle": "Add item",
   "@shoppingFormAddTitle": {
@@ -2823,23 +2787,33 @@
   "@conversionPreviewRateRow": {
     "description": "Preview rate sub-row: currency code, JPY-per-unit rate, rate date (Phase 42-07 D-03)",
     "placeholders": {
-      "code": { "type": "String" },
-      "rate": { "type": "String" },
-      "date": { "type": "String" }
+      "code": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
     }
   },
   "conversionStalenessCached": "Using cached rate from {date}",
   "@conversionStalenessCached": {
     "description": "Staleness label for a cached fallback rate (Phase 42-07 D-05)",
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "conversionStalenessWeekend": "{date} (most recent business day)",
   "@conversionStalenessWeekend": {
     "description": "Staleness label for a weekend/holiday business-day proxy rate (Phase 42-07 D-05)",
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "conversionRateRequired": "Rate unavailable — please enter a rate manually",
@@ -2898,8 +2872,12 @@
   "@rateChangedToast": {
     "description": "Non-blocking toast when a date change auto-recalculates JPY by >1% (Phase 42-09, ADR-022 D-03)",
     "placeholders": {
-      "oldJpy": { "type": "String" },
-      "newJpy": { "type": "String" }
+      "oldJpy": {
+        "type": "String"
+      },
+      "newJpy": {
+        "type": "String"
+      }
     }
   },
   "rateChangedUndo": "Undo",
@@ -2927,15 +2905,6 @@
     "description": "Category donut center third line (round5 r5 mock .ctr .n) — total expense entry count",
     "placeholders": {
       "count": {
-        "type": "int"
-      }
-    }
-  },
-  "analyticsCalCap": "{days} days this month held a small joy · just which days",
-  "@analyticsCalCap": {
-    "description": "Joy calendar bottom caption (round5 r5 mock .cal-cap) — number of days that held a small joy, ADR-012 neutral (no streak/compare)",
-    "placeholders": {
-      "days": {
         "type": "int"
       }
     }

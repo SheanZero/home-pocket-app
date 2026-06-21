@@ -1382,21 +1382,6 @@ class SJa extends S {
   String get analyticsTimeWindowChipTooltip => '期間を選ぶ';
 
   @override
-  String get analyticsJoyMetricVariantChipLabel => 'エントリ';
-
-  @override
-  String get analyticsJoyMetricVariantSheetTitle => 'Joy 指標バリアント';
-
-  @override
-  String get analyticsJoyMetricVariantOptionAll => 'すべてのエントリ';
-
-  @override
-  String get analyticsJoyMetricVariantOptionManualOnly => '手動入力のみ';
-
-  @override
-  String get analyticsJoyMetricVariantManualOnlyExplain => '手動入力のみ · 音声推定を除外';
-
-  @override
   String analyticsTimeWindowChipLabelWeek(String monday) {
     return '$mondayの週';
   }
@@ -1558,30 +1543,14 @@ class SJa extends S {
   String get analyticsSectionSatisfaction => '悦びの満足度';
 
   @override
-  String get analyticsSectionTagPractical => '実用';
-
-  @override
-  String get analyticsSectionTagJoy => '悦び';
-
-  @override
-  String get analyticsJoyDrawerConnector => '悦びの内訳を見る';
-
-  @override
   String analyticsJoyDrawerTitle(String amount) {
-    return '悦び $amount は、どんな嬉しいことに';
+    return '悦び $amount';
   }
 
   @override
   String analyticsJoyDrawerCount(int count) {
     return '$count カテゴリ';
   }
-
-  @override
-  String get analyticsJoyDrawerSubtitle => '使い道だけ、優劣なし';
-
-  @override
-  String get analyticsJoyDrawerCaption =>
-      '割合は悦び自身の中での比率です · 目標もなく、過去と引き比べることもありません';
 
   @override
   String get analyticsCalLegendLow => '淡';
@@ -1650,10 +1619,6 @@ class SJa extends S {
 
   @override
   String get analyticsHistogramColorCaption => '色は ordinal 表現です';
-
-  @override
-  String get analyticsHistogramJoyCaption =>
-      '多くは中〜高め —— 自分のために使ったお金は、たいてい「よかった」と思える。たまに今ひとつでも、それも本当の体験。';
 
   @override
   String get analyticsCardTitleLargestExpense => '総 · 最大支出';
@@ -2263,11 +2228,6 @@ class SJa extends S {
   @override
   String analyticsDonutCenterCount(int count) {
     return '$count件';
-  }
-
-  @override
-  String analyticsCalCap(int days) {
-    return '今月は $days 日、自分のための小さな幸せ · 「あった日」を見るだけ';
   }
 
   @override

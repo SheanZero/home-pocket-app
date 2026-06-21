@@ -1769,26 +1769,6 @@
   "@analyticsTimeWindowChipTooltip": {
     "description": "Analytics screen time-window selector chip tooltip"
   },
-  "analyticsJoyMetricVariantChipLabel": "エントリ",
-  "@analyticsJoyMetricVariantChipLabel": {
-    "description": "AppBar chip label for manual-vs-all entries audit toggle (Phase 17)"
-  },
-  "analyticsJoyMetricVariantSheetTitle": "Joy 指標バリアント",
-  "@analyticsJoyMetricVariantSheetTitle": {
-    "description": "Bottom sheet title for the entries-source filter"
-  },
-  "analyticsJoyMetricVariantOptionAll": "すべてのエントリ",
-  "@analyticsJoyMetricVariantOptionAll": {
-    "description": "Option label: include voice and manual entries"
-  },
-  "analyticsJoyMetricVariantOptionManualOnly": "手動入力のみ",
-  "@analyticsJoyMetricVariantOptionManualOnly": {
-    "description": "Option label: exclude voice-estimated entries for audit mode"
-  },
-  "analyticsJoyMetricVariantManualOnlyExplain": "手動入力のみ · 音声推定を除外",
-  "@analyticsJoyMetricVariantManualOnlyExplain": {
-    "description": "One-line explanation appended to the manualOnly option; descriptive copy, not judgmental"
-  },
   "analyticsTimeWindowChipLabelWeek": "{monday}の週",
   "@analyticsTimeWindowChipLabelWeek": {
     "description": "Analytics screen time-window selector week chip label",
@@ -2016,19 +1996,7 @@
   "@analyticsSectionSatisfaction": {
     "description": "Section header above the satisfaction-distribution histogram card (round-5 r5 mock, 悦己 section)"
   },
-  "analyticsSectionTagPractical": "実用",
-  "@analyticsSectionTagPractical": {
-    "description": "Section-header tag chip for the practical (实用) spend sections"
-  },
-  "analyticsSectionTagJoy": "悦び",
-  "@analyticsSectionTagJoy": {
-    "description": "Section-header tag chip for the joy (悦己) sections"
-  },
-  "analyticsJoyDrawerConnector": "悦びの内訳を見る",
-  "@analyticsJoyDrawerConnector": {
-    "description": "Connector chip linking the category donut to the nested joy-spend drawer (neutral, just shows where joy spend went)"
-  },
-  "analyticsJoyDrawerTitle": "悦び {amount} は、どんな嬉しいことに",
+  "analyticsJoyDrawerTitle": "悦び {amount}",
   "@analyticsJoyDrawerTitle": {
     "description": "Joy drawer title with the data-derived joy total (neutral, no ranking/target)",
     "placeholders": {
@@ -2045,14 +2013,6 @@
         "type": "int"
       }
     }
-  },
-  "analyticsJoyDrawerSubtitle": "使い道だけ、優劣なし",
-  "@analyticsJoyDrawerSubtitle": {
-    "description": "Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)"
-  },
-  "analyticsJoyDrawerCaption": "割合は悦び自身の中での比率です · 目標もなく、過去と引き比べることもありません",
-  "@analyticsJoyDrawerCaption": {
-    "description": "Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)"
   },
   "analyticsCalLegendLow": "淡",
   "@analyticsCalLegendLow": {
@@ -2136,10 +2096,6 @@
     "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
   },
   "analyticsHistogramColorCaption": "色は ordinal 表現です",
-  "analyticsHistogramJoyCaption": "多くは中〜高め —— 自分のために使ったお金は、たいてい「よかった」と思える。たまに今ひとつでも、それも本当の体験。",
-  "@analyticsHistogramJoyCaption": {
-    "description": "Warm descriptive caption beneath the joy satisfaction histogram (round-5 r5 mock .histo-cap; descriptive only, no ranking/target/streak/cross-period)"
-  },
   "analyticsCardTitleLargestExpense": "総 · 最大支出",
   "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
   "@analyticsCardLargestExpenseBody": {
@@ -2620,12 +2576,20 @@
   "shoppingSelectionCount": "{count}件",
   "@shoppingSelectionCount": {
     "description": "Selected item count shown in the batch selection header (Phase 38)",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shoppingBatchSelectingCount": "{count}件選択中",
   "@shoppingBatchSelectingCount": {
     "description": "Selected item count label in the batch action bar (Phase 38)",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shoppingFormAddTitle": "アイテムを追加",
   "@shoppingFormAddTitle": {
@@ -2823,23 +2787,33 @@
   "@conversionPreviewRateRow": {
     "description": "Preview rate sub-row: currency code, JPY-per-unit rate, rate date (Phase 42-07 D-03)",
     "placeholders": {
-      "code": { "type": "String" },
-      "rate": { "type": "String" },
-      "date": { "type": "String" }
+      "code": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
     }
   },
   "conversionStalenessCached": "{date} のレート（キャッシュ）を使用",
   "@conversionStalenessCached": {
     "description": "Staleness label for a cached fallback rate (Phase 42-07 D-05)",
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "conversionStalenessWeekend": "{date}（直近の営業日）のレート",
   "@conversionStalenessWeekend": {
     "description": "Staleness label for a weekend/holiday business-day proxy rate (Phase 42-07 D-05)",
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "conversionRateRequired": "レートが取得できません。手動でレートを入力してください",
@@ -2898,8 +2872,12 @@
   "@rateChangedToast": {
     "description": "Non-blocking toast when a date change auto-recalculates JPY by >1% (Phase 42-09, ADR-022 D-03)",
     "placeholders": {
-      "oldJpy": { "type": "String" },
-      "newJpy": { "type": "String" }
+      "oldJpy": {
+        "type": "String"
+      },
+      "newJpy": {
+        "type": "String"
+      }
     }
   },
   "rateChangedUndo": "元に戻す",
@@ -2927,15 +2905,6 @@
     "description": "Category donut center third line (round5 r5 mock .ctr .n) — total expense entry count",
     "placeholders": {
       "count": {
-        "type": "int"
-      }
-    }
-  },
-  "analyticsCalCap": "今月は {days} 日、自分のための小さな幸せ · 「あった日」を見るだけ",
-  "@analyticsCalCap": {
-    "description": "Joy calendar bottom caption (round5 r5 mock .cal-cap) — number of days that held a small joy, ADR-012 neutral (no streak/compare)",
-    "placeholders": {
-      "days": {
         "type": "int"
       }
     }

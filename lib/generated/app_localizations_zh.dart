@@ -1377,21 +1377,6 @@ class SZh extends S {
   String get analyticsTimeWindowChipTooltip => '选择时间范围';
 
   @override
-  String get analyticsJoyMetricVariantChipLabel => '条目';
-
-  @override
-  String get analyticsJoyMetricVariantSheetTitle => 'Joy 指标变体';
-
-  @override
-  String get analyticsJoyMetricVariantOptionAll => '全部条目';
-
-  @override
-  String get analyticsJoyMetricVariantOptionManualOnly => '仅手动输入';
-
-  @override
-  String get analyticsJoyMetricVariantManualOnlyExplain => '仅手动输入 · 不含语音估算条目';
-
-  @override
   String analyticsTimeWindowChipLabelWeek(String monday) {
     return '$monday的一周';
   }
@@ -1551,29 +1536,14 @@ class SZh extends S {
   String get analyticsSectionSatisfaction => '悦己满足度分布';
 
   @override
-  String get analyticsSectionTagPractical => '实用';
-
-  @override
-  String get analyticsSectionTagJoy => '悦己';
-
-  @override
-  String get analyticsJoyDrawerConnector => '把悦己这一块放大看看';
-
-  @override
   String analyticsJoyDrawerTitle(String amount) {
-    return '悦己 $amount 花在哪几类开心事';
+    return '悦己 $amount';
   }
 
   @override
   String analyticsJoyDrawerCount(int count) {
     return '$count 类';
   }
-
-  @override
-  String get analyticsJoyDrawerSubtitle => '仅呈现去向，不分高下';
-
-  @override
-  String get analyticsJoyDrawerCaption => '百分比是各项占悦己自身的比例 · 不设目标、不与过往相比';
 
   @override
   String get analyticsCalLegendLow => '淡';
@@ -1642,10 +1612,6 @@ class SZh extends S {
 
   @override
   String get analyticsHistogramColorCaption => '色彩仅为 ordinal 视觉区分';
-
-  @override
-  String get analyticsHistogramJoyCaption =>
-      '大多落在中高位——为自己花的钱，多数让你感到值得，偶有几笔不那么满意，也都是真实的体验。';
 
   @override
   String get analyticsCardTitleLargestExpense => '总 · 最大支出';
@@ -2255,11 +2221,6 @@ class SZh extends S {
   @override
   String analyticsDonutCenterCount(int count) {
     return '$count 笔';
-  }
-
-  @override
-  String analyticsCalCap(int days) {
-    return '这个月有 $days 天，为自己留下了一点小确幸 · 只看「哪些天发生过」';
   }
 
   @override

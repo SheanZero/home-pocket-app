@@ -1401,22 +1401,6 @@ class SEn extends S {
   String get analyticsTimeWindowChipTooltip => 'Pick a time window';
 
   @override
-  String get analyticsJoyMetricVariantChipLabel => 'Entries';
-
-  @override
-  String get analyticsJoyMetricVariantSheetTitle => 'Joy metric variant';
-
-  @override
-  String get analyticsJoyMetricVariantOptionAll => 'All entries';
-
-  @override
-  String get analyticsJoyMetricVariantOptionManualOnly => 'Manual entries only';
-
-  @override
-  String get analyticsJoyMetricVariantManualOnlyExplain =>
-      'Manual entries only · excludes voice-estimated entries';
-
-  @override
   String analyticsTimeWindowChipLabelWeek(String monday) {
     return 'Week of $monday';
   }
@@ -1586,31 +1570,14 @@ class SEn extends S {
   String get analyticsSectionSatisfaction => 'Joy satisfaction';
 
   @override
-  String get analyticsSectionTagPractical => 'Practical';
-
-  @override
-  String get analyticsSectionTagJoy => 'Joy';
-
-  @override
-  String get analyticsJoyDrawerConnector => 'Zoom into your joy spending';
-
-  @override
   String analyticsJoyDrawerTitle(String amount) {
-    return 'Where your joy $amount went';
+    return 'Joy $amount';
   }
 
   @override
   String analyticsJoyDrawerCount(int count) {
     return '$count categories';
   }
-
-  @override
-  String get analyticsJoyDrawerSubtitle =>
-      'Just where it went, nothing placed above another';
-
-  @override
-  String get analyticsJoyDrawerCaption =>
-      'Percentages are each item\'s share of joy itself · no target, never weighed against the past';
 
   @override
   String get analyticsCalLegendLow => 'Light';
@@ -1681,10 +1648,6 @@ class SEn extends S {
 
   @override
   String get analyticsHistogramColorCaption => 'Colors are ordinal only';
-
-  @override
-  String get analyticsHistogramJoyCaption =>
-      'Mostly mid-to-high — money you spend on yourself usually feels worth it; the occasional miss is a real experience too.';
 
   @override
   String get analyticsCardTitleLargestExpense => 'Total · Largest expense';
@@ -2304,11 +2267,6 @@ class SEn extends S {
   @override
   String analyticsDonutCenterCount(int count) {
     return '$count entries';
-  }
-
-  @override
-  String analyticsCalCap(int days) {
-    return '$days days this month held a small joy · just which days';
   }
 
   @override

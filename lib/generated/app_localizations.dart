@@ -2667,36 +2667,6 @@ abstract class S {
   /// **'Pick a time window'**
   String get analyticsTimeWindowChipTooltip;
 
-  /// AppBar chip label for manual-vs-all entries audit toggle (Phase 17)
-  ///
-  /// In en, this message translates to:
-  /// **'Entries'**
-  String get analyticsJoyMetricVariantChipLabel;
-
-  /// Bottom sheet title for the entries-source filter
-  ///
-  /// In en, this message translates to:
-  /// **'Joy metric variant'**
-  String get analyticsJoyMetricVariantSheetTitle;
-
-  /// Option label: include voice and manual entries
-  ///
-  /// In en, this message translates to:
-  /// **'All entries'**
-  String get analyticsJoyMetricVariantOptionAll;
-
-  /// Option label: exclude voice-estimated entries for audit mode
-  ///
-  /// In en, this message translates to:
-  /// **'Manual entries only'**
-  String get analyticsJoyMetricVariantOptionManualOnly;
-
-  /// One-line explanation appended to the manualOnly option; descriptive copy, not judgmental
-  ///
-  /// In en, this message translates to:
-  /// **'Manual entries only · excludes voice-estimated entries'**
-  String get analyticsJoyMetricVariantManualOnlyExplain;
-
   /// Analytics screen time-window selector week chip label
   ///
   /// In en, this message translates to:
@@ -2969,28 +2939,10 @@ abstract class S {
   /// **'Joy satisfaction'**
   String get analyticsSectionSatisfaction;
 
-  /// Section-header tag chip for the practical (实用) spend sections
-  ///
-  /// In en, this message translates to:
-  /// **'Practical'**
-  String get analyticsSectionTagPractical;
-
-  /// Section-header tag chip for the joy (悦己) sections
-  ///
-  /// In en, this message translates to:
-  /// **'Joy'**
-  String get analyticsSectionTagJoy;
-
-  /// Connector chip linking the category donut to the nested joy-spend drawer (neutral, just shows where joy spend went)
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom into your joy spending'**
-  String get analyticsJoyDrawerConnector;
-
   /// Joy drawer title with the data-derived joy total (neutral, no ranking/target)
   ///
   /// In en, this message translates to:
-  /// **'Where your joy {amount} went'**
+  /// **'Joy {amount}'**
   String analyticsJoyDrawerTitle(String amount);
 
   /// Joy drawer category-count badge (descriptive count of joy categories)
@@ -2998,18 +2950,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{count} categories'**
   String analyticsJoyDrawerCount(int count);
-
-  /// Joy drawer subtitle — neutral framing, only shows where it went, no ranking (ADR-012)
-  ///
-  /// In en, this message translates to:
-  /// **'Just where it went, nothing placed above another'**
-  String get analyticsJoyDrawerSubtitle;
-
-  /// Joy drawer footnote — percentages are share-of-self, no target, no cross-period comparison (ADR-012)
-  ///
-  /// In en, this message translates to:
-  /// **'Percentages are each item\'s share of joy itself · no target, never weighed against the past'**
-  String get analyticsJoyDrawerCaption;
 
   /// Calendar heat legend low-end label (lighter = fewer joy entries that day)
   ///
@@ -3136,12 +3076,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Colors are ordinal only'**
   String get analyticsHistogramColorCaption;
-
-  /// Warm descriptive caption beneath the joy satisfaction histogram (round-5 r5 mock .histo-cap; descriptive only, no ranking/target/streak/cross-period)
-  ///
-  /// In en, this message translates to:
-  /// **'Mostly mid-to-high — money you spend on yourself usually feels worth it; the occasional miss is a real experience too.'**
-  String get analyticsHistogramJoyCaption;
 
   /// No description provided for @analyticsCardTitleLargestExpense.
   ///
@@ -4254,12 +4188,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{count} entries'**
   String analyticsDonutCenterCount(int count);
-
-  /// Joy calendar bottom caption (round5 r5 mock .cal-cap) — number of days that held a small joy, ADR-012 neutral (no streak/compare)
-  ///
-  /// In en, this message translates to:
-  /// **'{days} days this month held a small joy · just which days'**
-  String analyticsCalCap(int days);
 
   /// Joy calendar weekday header — Monday (Monday-first grid)
   ///
