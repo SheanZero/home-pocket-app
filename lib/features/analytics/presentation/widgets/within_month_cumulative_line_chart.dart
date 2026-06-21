@@ -123,7 +123,15 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
     final yStep = _niceYStep(maxY);
     // Round the axis ceiling up to a whole number of steps so the top gridline
     // and the top tick coincide (no clipped top label).
-    final axisMaxY = (maxY / yStep).ceil() * yStep;
+    var axisMaxY = (maxY / yStep).ceil() * yStep;
+    // Headroom guarantee (Part1② / 参考图 #6): the 本月 endpoint label is FORCE-
+    // anchored ABOVE its marker. When the data max lands in the top ~20% of the
+    // axis there is no room above the point, so the label would clip the top and
+    // flip below (the exact 「数字位置不对」 bug). Add one more gridline step so
+    // the endpoint always clears the top edge with its label above it.
+    if (_dataMax() > axisMaxY * 0.8) {
+      axisMaxY += yStep;
+    }
 
     const minX = 1.0;
     final maxX = daysInMonth.toDouble();
@@ -351,7 +359,10 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
   /// Positions an endpoint label near a plot pixel, nudged above/below, clamped
   /// so it never overflows the card. The label is roughly [_labelW] × [_labelH].
-  static const double _labelW = 80;
+  // Wide enough that a 2-line endpoint label (date + ¥amount, incl. 7-digit
+  // JPY) fits the fixed-width box without wrapping; used for both centering and
+  // the on-card clamp.
+  static const double _labelW = 92;
   static const double _labelH = 30;
 
   Widget _positionedLabel({
@@ -367,23 +378,28 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
     double topFor(bool a) => a ? y - _labelNudge - _labelH : y + _labelNudge;
 
-    // Prefer the comparison side (D-3/D-4), but FLIP to the other side when the
-    // preferred side would overflow the card — otherwise a near-top/near-bottom
-    // endpoint clamps onto the line (round-3 fix: "数字写到点上了"). The child's
-    // `above` flag still records the comparison decision for tests.
+    // The 本月 label (above==true) is FORCE-anchored ABOVE its marker (Part1②,
+    // 参考图 #6). The axis now carries a headroom guarantee (see `axisMaxY`) so
+    // the above position clears the top edge; in the rare residual case where it
+    // still would clip, PIN it to the top edge (top:0) and keep it above the
+    // point — never flip below. The 上月 reference (above==false) still flips UP
+    // only when a below position would overflow the bottom edge.
     var top = topFor(above);
     if (above && top < 0) {
-      top = topFor(false);
+      top = 0;
     } else if (!above && top > maxTop) {
       top = topFor(true);
     }
 
-    // Center the label horizontally on the point, biased to stay on-card.
+    // Horizontally center the label exactly ON the point: a fixed [_labelW]-wide
+    // box whose Column centers its text, so the centering no longer depends on
+    // the text's intrinsic width (fixes the left-bias when the content was
+    // narrower than _labelW). Clamp the box so it stays on-card near the edges.
     var left = x - _labelW / 2;
     left = left.clamp(0.0, maxLeft < 0 ? 0.0 : maxLeft);
     top = top.clamp(0.0, maxTop < 0 ? 0.0 : maxTop);
 
-    return Positioned(left: left, top: top, child: child);
+    return Positioned(left: left, top: top, width: _labelW, child: child);
   }
 
   List<FlSpot> _spots(List<CumulativePoint> points) => [
@@ -391,7 +407,9 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
       FlSpot(p.day.toDouble(), p.cumulativeAmount.toDouble()),
   ];
 
-  double _maxY() {
+  /// Raw maximum cumulative amount across 本月 (and 上月 when present), with NO
+  /// headroom inflation. Drives the endpoint-label top-clearance check.
+  int _dataMax() {
     var maxAmount = 0;
     for (final p in currentMonth) {
       if (p.cumulativeAmount > maxAmount) maxAmount = p.cumulativeAmount;
@@ -401,6 +419,11 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
         if (p.cumulativeAmount > maxAmount) maxAmount = p.cumulativeAmount;
       }
     }
+    return maxAmount;
+  }
+
+  double _maxY() {
+    final maxAmount = _dataMax();
     // A little headroom so the line never clips the top edge.
     return maxAmount == 0 ? 1 : maxAmount * 1.1;
   }
