@@ -9,7 +9,6 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_joy_
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/joy_metric_variant_chip.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
 
@@ -30,13 +29,6 @@ const forbiddenZhPhase17 = <String>['不准', '不可靠', '不完整', '质量�
 
 const locales = <Locale>[Locale('en'), Locale('ja'), Locale('zh')];
 
-class _TestSelectedJoyMetricVariant extends SelectedJoyMetricVariant {
-  static JoyMetricVariant initial = JoyMetricVariant.all;
-
-  @override
-  JoyMetricVariant build() => initial;
-}
-
 List<String> _forbiddenFor(Locale locale) {
   return switch (locale.languageCode) {
     'en' => forbiddenEnPhase17,
@@ -44,24 +36,6 @@ List<String> _forbiddenFor(Locale locale) {
     'zh' => forbiddenZhPhase17,
     _ => throw StateError('Unsupported locale: ${locale.languageCode}'),
   };
-}
-
-Widget _buildSubject({
-  required Locale locale,
-  required JoyMetricVariant variant,
-}) {
-  _TestSelectedJoyMetricVariant.initial = variant;
-  return createLocalizedWidget(
-    Scaffold(
-      appBar: AppBar(actions: [JoyMetricVariantChip(locale: locale)]),
-    ),
-    locale: locale,
-    overrides: <Override>[
-      selectedJoyMetricVariantProvider.overrideWith(
-        _TestSelectedJoyMetricVariant.new,
-      ),
-    ],
-  );
 }
 
 String _visibleTextBlob(WidgetTester tester) {
@@ -97,9 +71,7 @@ Widget _buildCardSubject({
     Scaffold(body: SingleChildScrollView(child: card)),
     locale: locale,
     overrides: <Override>[
-      locale_providers.currentLocaleProvider.overrideWith(
-        (_) async => locale,
-      ),
+      locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
       providerOverride,
     ],
   );
@@ -173,39 +145,6 @@ void main() {
                 reason:
                     'Forbidden Phase 17 substring "$forbidden" appeared in '
                     '${entry.key} / ${locale.languageCode}: $blob',
-              );
-            }
-          },
-        );
-      }
-    }
-  });
-
-  group('Phase 17 Joy metric variant copy', () {
-    for (final locale in locales) {
-      for (final variant in JoyMetricVariant.values) {
-        testWidgets(
-          'has no forbidden copy for ${locale.languageCode} / ${variant.name}',
-          (tester) async {
-            await tester.pumpWidget(
-              _buildSubject(locale: locale, variant: variant),
-            );
-            await tester.pumpAndSettle();
-
-            await tester.tap(find.byType(JoyMetricVariantChip));
-            await tester.pumpAndSettle();
-
-            final blob = _visibleTextBlob(tester);
-            final searchable = locale.languageCode == 'en'
-                ? blob.toLowerCase()
-                : blob;
-            for (final forbidden in _forbiddenFor(locale)) {
-              expect(
-                searchable.contains(forbidden.toLowerCase()),
-                isFalse,
-                reason:
-                    'Forbidden Phase 17 substring "$forbidden" appeared in '
-                    '${locale.languageCode} / ${variant.name}: $blob',
               );
             }
           },

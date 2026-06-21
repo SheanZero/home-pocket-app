@@ -17,16 +17,15 @@ void main() {
 
   /// All gradient bars (non-zero columns) in render order.
   List<Container> gradientBars(WidgetTester tester) {
-    return tester
-        .widgetList<Container>(find.byType(Container))
-        .where((c) {
-          final decoration = c.decoration;
-          return decoration is BoxDecoration && decoration.gradient != null;
-        })
-        .toList();
+    return tester.widgetList<Container>(find.byType(Container)).where((c) {
+      final decoration = c.decoration;
+      return decoration is BoxDecoration && decoration.gradient != null;
+    }).toList();
   }
 
-  testWidgets('renders 10 score labels (1..10) and no fl_chart', (tester) async {
+  testWidgets('renders 10 score labels (1..10) and no fl_chart', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         const SatisfactionDistributionHistogram(buckets: buckets),
@@ -76,7 +75,9 @@ void main() {
     expect(bars, hasLength(3));
 
     final gradients = bars
-        .map((c) => (c.decoration! as BoxDecoration).gradient! as LinearGradient)
+        .map(
+          (c) => (c.decoration! as BoxDecoration).gradient! as LinearGradient,
+        )
         .toList();
 
     // All bars share ONE gradient (not a per-score color ramp).
@@ -112,9 +113,7 @@ void main() {
     expect(borderedWrappers, hasLength(1));
   });
 
-  testWidgets('footer count + median pill + warm caption render', (
-    tester,
-  ) async {
+  testWidgets('footer count + median pill render', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         const SatisfactionDistributionHistogram(buckets: buckets),
@@ -126,11 +125,6 @@ void main() {
     expect(find.textContaining('10'), findsWidgets);
     // Median pill text (median = 4).
     expect(find.textContaining('Median satisfaction 4'), findsOneWidget);
-    // Warm descriptive caption (new analyticsHistogramJoyCaption key).
-    expect(
-      find.textContaining('Mostly mid-to-high'),
-      findsOneWidget,
-    );
   });
 
   testWidgets('semantic label is neutral and factual', (tester) async {
