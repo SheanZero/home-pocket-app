@@ -111,7 +111,9 @@ class CategoryDonutCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          controls,
+          // 260621-son Bug 3: the 分类/成员 toggle + filter row is no longer a
+          // card-level child here — it is injected into DonutHero (between the
+          // donut and the legend) via `controls:` so it renders BELOW the donut.
           hero,
           // round-5 r5 §2b (D2): the 悦己 joybar is nested INSIDE the donut hero
           // behind a connector chip + pink drawer (no longer a top-level card).
@@ -162,6 +164,7 @@ class CategoryDonutCard extends ConsumerWidget {
               members: filtered,
               memberNames: memberNames,
               memberEmojis: memberEmojis,
+              controls: controls,
             ),
           );
         },
@@ -200,6 +203,7 @@ class CategoryDonutCard extends ConsumerWidget {
             joyL1Ids: joyL1Ids,
             categoryMap: categoryMapAsync.value ?? const {},
             bookId: bookId,
+            controls: controls,
           ),
         ),
         loading: () => const SizedBox(height: 280),
@@ -235,6 +239,7 @@ class CategoryDonutCard extends ConsumerWidget {
           // fall back to an empty map (the donut + center total still render).
           categoryMap: categoryMapAsync.value ?? const {},
           bookId: bookId,
+          controls: controls,
         ),
       ),
       loading: () => const SizedBox(height: 280),

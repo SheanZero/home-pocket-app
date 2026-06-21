@@ -37,10 +37,17 @@ class DonutHero extends ConsumerWidget {
     this.members,
     this.memberNames,
     this.memberEmojis,
+    this.controls,
   });
 
   final List<CategoryBreakdown> breakdowns;
   final int total;
+
+  /// 260621-son Bug 3: the 分类/成员 toggle + member-filter row, rendered between
+  /// the donut Stack and the legend rows (both category and member mode). Null =
+  /// not shown. Injected by `CategoryDonutCard` so the card-level Column no
+  /// longer owns it (it used to sit above the hero).
+  final Widget? controls;
 
   /// Total expense entry count for the window (hero-top pill + center 3rd line).
   final int entryCount;
@@ -265,6 +272,8 @@ class DonutHero extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
+        // 260621-son Bug 3: 分类/成员 toggle + filter row between donut & legend.
+        ?controls,
         // §1f: L1-rollup legend ROWS — each fully tappable → drill push (D-B1).
         // The last row owns no bottom divider (mock `.hl:last-child`).
         for (final entry in rows.asMap().entries)
@@ -446,6 +455,8 @@ class DonutHero extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
+        // 260621-son Bug 3: 分类/成员 toggle + filter row between donut & legend.
+        ?controls,
         // §D2 member legend rows: emoji + display name + ¥amount + %. Not tappable
         // (this round does not drill into a member).
         for (final entry in memberRows.asMap().entries)
