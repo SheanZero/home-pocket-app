@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/analytics/domain/models/member_spend_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_donut_dimension.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/category_drill_down_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
+import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
+import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
 
@@ -237,6 +243,132 @@ void main() {
     expect(
       find.byKey(const ValueKey('donut_legend_row_cat_food_lunch')),
       findsNothing,
+    );
+  });
+
+  // ── 260621-son Bug 1: self member name uses the profile displayName ──────────
+  testWidgets('Bug 1: member dimension shows the profile displayName for the '
+      'self record (not a truncated deviceId)', (tester) async {
+    const selfId = '95fayo_long_device_id';
+    final profile = UserProfile(
+      id: 'p1',
+      displayName: 'Shean',
+      avatarEmoji: '🦊',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+
+    await _pump(
+      tester,
+      createLocalizedWidget(
+        CategoryDonutCard(
+          bookId: _bookId,
+          startDate: _start,
+          endDate: _end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('en'),
+          ),
+          monthlyReportProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith((_) async => _report(_breakdowns)),
+          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          userProfileProvider.overrideWith((_) async => profile),
+          currentDeviceIdProvider.overrideWith((_) async => selfId),
+          activeGroupMembersProvider.overrideWith(
+            (_) => Stream.value(const <GroupMember>[]),
+          ),
+          memberSpendBreakdownProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith(
+            (_) async => const [
+              MemberSpendBreakdown(
+                deviceId: selfId,
+                amount: 30000,
+                transactionCount: 3,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // Switch to the member dimension.
+    await tester.tap(find.byKey(const ValueKey('donut_dim_member')));
+    await tester.pumpAndSettle();
+
+    // The self legend row shows "Shean", never the truncated deviceId.
+    final selfRow = find.byKey(ValueKey('donut_member_row_$selfId'));
+    expect(selfRow, findsOneWidget);
+    expect(
+      find.descendant(of: selfRow, matching: find.text('Shean')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('95fayo'), findsNothing);
+  });
+
+  // ── 260621-son Bug 2: filter sheet lists 自己 even without a group ───────────
+  testWidgets('Bug 2: with no group joined, the member filter sheet lists '
+      'All members + the self profile name', (tester) async {
+    const selfId = 'self_device_id';
+    final profile = UserProfile(
+      id: 'p1',
+      displayName: 'Shean',
+      avatarEmoji: '🦊',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+
+    await _pump(
+      tester,
+      createLocalizedWidget(
+        CategoryDonutCard(
+          bookId: _bookId,
+          startDate: _start,
+          endDate: _end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('en'),
+          ),
+          monthlyReportProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith((_) async => _report(_breakdowns)),
+          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          userProfileProvider.overrideWith((_) async => profile),
+          currentDeviceIdProvider.overrideWith((_) async => selfId),
+          // No group joined → activeGroupMembers is empty.
+          activeGroupMembersProvider.overrideWith(
+            (_) => Stream.value(const <GroupMember>[]),
+          ),
+        ],
+      ),
+    );
+
+    // Open the member filter sheet.
+    await tester.tap(find.byKey(const ValueKey('donut_member_filter_trigger')));
+    await tester.pumpAndSettle();
+
+    // The sheet (ListTile options) offers both「All members」and「Shean」(self).
+    // "All members" also appears on the closed trigger, so scope to ListTiles.
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.text('All members')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.text('Shean')),
+      findsOneWidget,
     );
   });
 }

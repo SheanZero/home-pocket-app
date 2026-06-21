@@ -2,7 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_donut_dimension.dart';
 
+import '../../../../helpers/test_provider_scope.dart';
+
 void main() {
+  group('currentDeviceIdProvider (260621-son)', () {
+    test('returns the overridden self deviceId', () async {
+      final container = ProviderContainer.test(
+        overrides: [
+          currentDeviceIdProvider.overrideWith((_) async => 'dev-self'),
+        ],
+      );
+
+      final value = await waitForFirstValue<String?>(
+        container,
+        currentDeviceIdProvider,
+      );
+      expect(value.value, 'dev-self');
+    });
+  });
+
   group('DonutDimensionState', () {
     test('Test 1: initial = (category, memberFilterDeviceId: null)', () {
       final container = ProviderContainer.test();

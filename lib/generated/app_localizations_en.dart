@@ -1648,6 +1648,9 @@ class SEn extends S {
   String get analyticsDonutMemberFilterLabel => 'Member';
 
   @override
+  String get analyticsDonutMemberFilterSelf => 'Me';
+
+  @override
   String get analyticsDonutCenterLabel => 'This month';
 
   @override

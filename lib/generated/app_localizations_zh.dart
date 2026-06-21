@@ -1610,6 +1610,9 @@ class SZh extends S {
   String get analyticsDonutMemberFilterLabel => '成员';
 
   @override
+  String get analyticsDonutMemberFilterSelf => '自己';
+
+  @override
   String get analyticsDonutCenterLabel => '本月支出';
 
   @override

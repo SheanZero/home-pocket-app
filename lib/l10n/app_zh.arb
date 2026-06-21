@@ -2101,6 +2101,10 @@
   "@analyticsDonutMemberFilterLabel": {
     "description": "Donut member-filter trigger title (260620-v2m)"
   },
+  "analyticsDonutMemberFilterSelf": "自己",
+  "@analyticsDonutMemberFilterSelf": {
+    "description": "Donut member-filter option label for the current user (self) when no profile name is set (260621-son Bug 2)"
+  },
   "analyticsDonutCenterLabel": "本月支出",
   "@analyticsDonutCenterLabel": {
     "description": "Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)"

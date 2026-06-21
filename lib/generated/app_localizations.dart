@@ -3071,6 +3071,12 @@ abstract class S {
   /// **'Member'**
   String get analyticsDonutMemberFilterLabel;
 
+  /// Donut member-filter option label for the current user (self) when no profile name is set (260621-son Bug 2)
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get analyticsDonutMemberFilterSelf;
+
   /// Donut hero center label above the count-up total spend figure (Phase 46 round-5 B)
   ///
   /// In en, this message translates to:

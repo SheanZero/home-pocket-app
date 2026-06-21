@@ -1618,6 +1618,9 @@ class SJa extends S {
   String get analyticsDonutMemberFilterLabel => 'メンバー';
 
   @override
+  String get analyticsDonutMemberFilterSelf => '自分';
+
+  @override
   String get analyticsDonutCenterLabel => '今月の支出';
 
   @override

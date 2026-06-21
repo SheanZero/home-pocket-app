@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../family_sync/domain/models/group_member.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
+import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../providers/state_donut_dimension.dart';
 
 /// §D2 (260620-v2m): the 分类 / 成员 dimension toggle + member-filter dropdown
@@ -23,6 +24,16 @@ class DonutDimensionMemberControls extends ConsumerWidget {
     final view = ref.watch(donutDimensionStateProvider);
     final members =
         ref.watch(activeGroupMembersProvider).value ?? const <GroupMember>[];
+    // 260621-son Bug 2: even with no group joined, the filter must list 「自己」.
+    final profile = ref.watch(userProfileProvider).value;
+    final selfDeviceId = ref.watch(currentDeviceIdProvider).value;
+    final effectiveMembers = _withSelf(
+      members,
+      selfDeviceId,
+      profile?.displayName ?? '',
+      profile?.avatarEmoji ?? '',
+      l10n,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -61,14 +72,48 @@ class DonutDimensionMemberControls extends ConsumerWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 150),
               child: _MemberFilterTrigger(
-                label: _filterLabel(l10n, members, view.memberFilterDeviceId),
-                onTap: () => _showMemberSheet(context, ref, l10n, members),
+                key: const ValueKey('donut_member_filter_trigger'),
+                label: _filterLabel(
+                  l10n,
+                  effectiveMembers,
+                  view.memberFilterDeviceId,
+                ),
+                onTap: () =>
+                    _showMemberSheet(context, ref, l10n, effectiveMembers),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// 260621-son Bug 2: returns [members] with a synthesized self entry
+  /// prepended when the self deviceId is not already among the group members.
+  /// The self entry carries the profile name (or the localized「自己」label when
+  /// the profile name is empty), deduped by deviceId. Single-device / no-group
+  /// degrades to exactly `[self]` here.
+  static List<GroupMember> _withSelf(
+    List<GroupMember> members,
+    String? selfDeviceId,
+    String selfDisplayName,
+    String selfAvatarEmoji,
+    S l10n,
+  ) {
+    if (selfDeviceId == null) return members;
+    if (members.any((m) => m.deviceId == selfDeviceId)) return members;
+    final selfMember = GroupMember(
+      deviceId: selfDeviceId,
+      publicKey: '',
+      deviceName: '',
+      role: '',
+      status: '',
+      displayName: selfDisplayName.isNotEmpty
+          ? selfDisplayName
+          : l10n.analyticsDonutMemberFilterSelf,
+      avatarEmoji: selfAvatarEmoji,
+    );
+    return [selfMember, ...members];
   }
 
   static String _filterLabel(
@@ -188,7 +233,11 @@ class _DimPill extends StatelessWidget {
 }
 
 class _MemberFilterTrigger extends StatelessWidget {
-  const _MemberFilterTrigger({required this.label, required this.onTap});
+  const _MemberFilterTrigger({
+    super.key,
+    required this.label,
+    required this.onTap,
+  });
 
   final String label;
   final VoidCallback onTap;

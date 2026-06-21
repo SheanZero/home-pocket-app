@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/misc.dart';
 import '../../../../../generated/app_localizations.dart';
 import '../../../../family_sync/domain/models/group_member.dart';
 import '../../../../family_sync/presentation/providers/state_sync.dart';
+import '../../../../profile/presentation/providers/state_user_profile.dart';
 import '../../analytics_card_registry.dart';
 import '../../providers/state_analytics.dart';
 import '../../providers/state_donut_dimension.dart';
@@ -75,6 +76,10 @@ class CategoryDonutCard extends ConsumerWidget {
     final donutView = ref.watch(donutDimensionStateProvider);
     final members =
         ref.watch(activeGroupMembersProvider).value ?? const <GroupMember>[];
+    // 260621-son Bug 1: self name single source = userProfileProvider (watched,
+    // not snapshotted) so renaming in 设置 invalidates and re-renders here.
+    final profile = ref.watch(userProfileProvider).value;
+    final selfDeviceId = ref.watch(currentDeviceIdProvider).value;
     final memberNames = <String, String>{
       for (final m in members)
         m.deviceId: m.displayName.isNotEmpty
@@ -84,6 +89,16 @@ class CategoryDonutCard extends ConsumerWidget {
     final memberEmojis = <String, String>{
       for (final m in members) m.deviceId: m.avatarEmoji,
     };
+    // 260621-son Bug 1: override the self record with the profile name/avatar so
+    // 「自己」 shows "Shean" (设置 → 编辑个人资料), never a truncated deviceId.
+    if (selfDeviceId != null && profile != null) {
+      if (profile.displayName.isNotEmpty) {
+        memberNames[selfDeviceId] = profile.displayName;
+      }
+      if (profile.avatarEmoji.isNotEmpty) {
+        memberEmojis[selfDeviceId] = profile.avatarEmoji;
+      }
+    }
 
     final controls = const DonutDimensionMemberControls();
 

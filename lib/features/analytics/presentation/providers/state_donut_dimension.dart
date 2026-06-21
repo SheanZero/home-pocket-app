@@ -1,6 +1,20 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../family_sync/presentation/providers/repository_providers.dart';
+
 part 'state_donut_dimension.g.dart';
+
+/// The current device's id — the「自己」key for the 成员 dimension (260621-son
+/// Bug 1/2). Wraps `keyManager.getDeviceId()` (the same source the transaction
+/// writer assigns to `transactions.deviceId`), so the self record in the member
+/// breakdown can be matched and labelled with the user's profile name.
+///
+/// Plain auto-dispose `@riverpod`, consistent with the other analytics state in
+/// this file; tests override it with a fixed deviceId.
+@riverpod
+Future<String?> currentDeviceId(Ref ref) {
+  return ref.watch(keyManagerProvider).getDeviceId();
+}
 
 /// The donut's split dimension (260620-v2m / D2).
 ///
