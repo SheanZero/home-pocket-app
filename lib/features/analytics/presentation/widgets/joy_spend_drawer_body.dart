@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/joy_warm_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/joy_category_amount.dart';
 import 'joy_spend_stacked_bar.dart';
@@ -77,6 +78,8 @@ class JoySpendDrawerBody extends ConsumerWidget {
           // D5: the joybar uses the mock's 7-color warm palette (j1–j7), wrapping
           // deterministically past 7 categories — NOT a single joy-family lerp.
           color: JoyWarmPalette.colorAt(entry.key),
+          // TI1-ICON-01: L1 icon via the shared helper (categoryId is already L1).
+          icon: parentCategoryIconFromId(entry.value.categoryId),
         ),
     ];
 

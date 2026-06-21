@@ -17,6 +17,7 @@ class JoySpendSegment {
     required this.formattedAmount,
     required this.percent,
     required this.color,
+    required this.icon,
   });
 
   /// Localized L1 category name (resolved by the card).
@@ -33,6 +34,11 @@ class JoySpendSegment {
 
   /// Distinct warm sakura-anchored segment hue (resolved by the card).
   final Color color;
+
+  /// TI1-ICON-01: L1 (top-level) category icon, resolved by the card via the
+  /// shared `parentCategoryIconFromId` helper. Rendered before the legend-row
+  /// label; the colored bar segment itself carries no icon.
+  final IconData icon;
 }
 
 /// 悦己花在哪 — a CUSTOM horizontal stacked segmented bar (R-1, GATE-04).
@@ -238,6 +244,10 @@ class _LegendRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
+            // TI1-ICON-01: L1 category icon before the name (悦己 warm joyText
+            // hue, matching the row's amount color).
+            Icon(segment.icon, size: 13, color: palette.joyText),
+            const SizedBox(width: 7),
             Expanded(
               child: Text(
                 segment.label,
