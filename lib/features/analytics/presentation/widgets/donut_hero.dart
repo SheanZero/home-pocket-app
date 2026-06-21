@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../accounting/domain/models/category.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/category_l1_rollup.dart';
 import '../../domain/models/member_spend_breakdown.dart';
@@ -205,6 +206,23 @@ class DonutHero extends ConsumerWidget {
                             fontWeight: FontWeight.w700,
                             color: palette.card,
                           ),
+                          // TI1-ICON-01: L1 category icon overlaid above the
+                          // on-ring %, but ONLY when the % is shown (same露出 rule
+                          // as the title — suppressed small slices get no badge so
+                          // the band doesn't crowd). badge sits slightly inward of
+                          // the title (offset < 0.5) → lands above the % text.
+                          badgeWidget:
+                              _onRingPctTitle(entry.value.amount, total) ==
+                                  _suppressedRingTitle
+                              ? null
+                              : Icon(
+                                  parentCategoryIconFromId(
+                                    entry.value.categoryId,
+                                  ),
+                                  size: 11,
+                                  color: palette.card,
+                                ),
+                          badgePositionPercentageOffset: 0.35,
                         ),
                       // WR-02: neutral long-tail "Other" slice, sorted last — its
                       // on-ring % is suppressed (D3: long-tail Other stays
@@ -280,6 +298,8 @@ class DonutHero extends ConsumerWidget {
           LegendRow(
             key: ValueKey('donut_legend_row_${entry.value.categoryId}'),
             color: rowColors[entry.key],
+            // TI1-ICON-01: L1 (top-level) category icon before the name.
+            leadingIcon: parentCategoryIconFromId(entry.value.categoryId),
             name: CategoryLocalizationService.resolveFromId(
               entry.value.categoryId,
               locale,
@@ -498,6 +518,7 @@ class LegendRow extends StatelessWidget {
     required this.showDivider,
     required this.onTap,
     this.leadingEmoji,
+    this.leadingIcon,
   });
 
   final Color color;
@@ -509,6 +530,11 @@ class LegendRow extends StatelessWidget {
   /// swatch role visually but the colour swatch is still rendered for the slice
   /// link). Null for category rows.
   final String? leadingEmoji;
+
+  /// TI1-ICON-01: optional L1 (top-level) category icon shown before the name
+  /// for category-dimension rows. Null for member rows and the long-tail
+  /// 「其他」 row (no single L1 ancestor).
+  final IconData? leadingIcon;
 
   /// §1f: every row but the last carries a 1px bottom divider (mock `.hl` +
   /// `:last-child{border-bottom:0}`).
@@ -542,6 +568,12 @@ class LegendRow extends StatelessWidget {
           // §D2: member rows show the avatar emoji before the name.
           if (leadingEmoji != null && leadingEmoji!.isNotEmpty) ...[
             Text(leadingEmoji!, style: const TextStyle(fontSize: 15)),
+            const SizedBox(width: 7),
+          ],
+          // TI1-ICON-01: category-dimension rows show the L1 category icon
+          // before the name.
+          if (leadingIcon != null) ...[
+            Icon(leadingIcon, size: 14, color: palette.textSecondary),
             const SizedBox(width: 7),
           ],
           Expanded(
