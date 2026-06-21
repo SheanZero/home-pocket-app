@@ -8,7 +8,6 @@ import '../analytics_card_registry.dart';
 import '../providers/state_analytics.dart';
 import '../widgets/analytics_section_header.dart';
 import '../widgets/cards/family_insight_data_card.dart';
-import '../widgets/joy_metric_variant_chip.dart';
 import '../widgets/time_window_chip.dart';
 
 /// Round-5 r5 analytics dashboard (260620-lfp / D2).
@@ -57,7 +56,6 @@ class AnalyticsScreen extends ConsumerWidget {
             locale: ctx.locale,
             earliestData: earliestMonthAsync.value,
           ),
-          JoyMetricVariantChip(locale: ctx.locale),
         ],
       ),
       body: RefreshIndicator(
