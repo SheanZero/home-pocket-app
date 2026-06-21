@@ -100,7 +100,6 @@ class AnalyticsScreen extends ConsumerWidget {
         children.add(
           AnalyticsSectionHeader(
             title: header.title(l10n),
-            tag: header.tag(l10n),
             tone: header.tone,
           ),
         );

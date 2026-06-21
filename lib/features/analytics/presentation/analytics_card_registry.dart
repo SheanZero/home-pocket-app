@@ -69,12 +69,11 @@ class AnalyticsCardContext {
 /// section-header interleave were removed when the round-5 B order landed
 /// (`analytics_screen_section_header` deleted).
 /// Provider-FREE section-header descriptor attached to an [AnalyticsCardSpec]
-/// (round-5 r5 / D2). [title] and [tag] are resolver closures over the generated
-/// [S] localizations (so the registry carries zero literal CJK and zero
-/// providers); [tone] picks practical (green) vs joy (sakura) tinting.
+/// (round-5 r5 / D2). [title] is a resolver closure over the generated [S]
+/// localizations (so the registry carries zero literal CJK and zero providers);
+/// [tone] picks practical (green) vs joy (sakura) tinting.
 typedef AnalyticsSectionHeaderSpec = ({
   String Function(S l10n) title,
-  String Function(S l10n) tag,
   SectionTone tone,
 });
 
@@ -183,7 +182,6 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     refreshTargets: withinMonthTrendRefreshTargets,
     sectionHeader: (
       title: (l10n) => l10n.analyticsSectionTrend,
-      tag: (l10n) => l10n.analyticsSectionTagPractical,
       tone: SectionTone.practical,
     ),
   ),
@@ -199,7 +197,6 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     refreshTargets: categoryDonutRefreshTargets,
     sectionHeader: (
       title: (l10n) => l10n.analyticsSectionCategory,
-      tag: (l10n) => l10n.analyticsSectionTagPractical,
       tone: SectionTone.practical,
     ),
   ),
@@ -215,7 +212,6 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     refreshTargets: joyCalendarRefreshTargets,
     sectionHeader: (
       title: (l10n) => l10n.analyticsSectionJoyCalendar,
-      tag: (l10n) => l10n.analyticsSectionTagJoy,
       tone: SectionTone.joy,
     ),
   ),
@@ -231,7 +227,6 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
     refreshTargets: satisfactionHistogramRefreshTargets,
     sectionHeader: (
       title: (l10n) => l10n.analyticsSectionSatisfaction,
-      tag: (l10n) => l10n.analyticsSectionTagJoy,
       tone: SectionTone.joy,
     ),
   ),
