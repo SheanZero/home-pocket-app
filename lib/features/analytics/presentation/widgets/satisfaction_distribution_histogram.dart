@@ -126,16 +126,6 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 9),
-          // round-5 r5 `.histo-cap`: warm descriptive caption (new key, §3).
-          Text(
-            l10n.analyticsHistogramJoyCaption,
-            style: AppTextStyles.caption.copyWith(
-              fontSize: 11,
-              height: 1.55,
-              color: palette.textTertiary,
-            ),
-          ),
         ],
       ),
     );

@@ -53,9 +53,6 @@ class JoyCalendarHeatmap extends StatelessWidget {
     final firstWeekday = DateTime(year, month, 1).weekday;
     final leadingBlanks = firstWeekday - 1;
 
-    // §2f: 本月有悦己的天数 = days with count > 0.
-    final joyDays = countByDay.values.where((c) => c > 0).length;
-
     final cells = <Widget>[
       // §2c: leading slots are TRANSPARENT placeholders (NOT SizedBox.shrink,
       // which collapses and breaks the Monday-first column alignment). Keep them
@@ -122,16 +119,6 @@ class JoyCalendarHeatmap extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         _CalLegend(palette: palette),
-        // §2f: cal-cap below the legend (was previously in the deleted caption).
-        const SizedBox(height: 10),
-        Text(
-          l10n.analyticsCalCap(joyDays),
-          style: AppTextStyles.caption.copyWith(
-            fontSize: 11,
-            height: 1.55,
-            color: palette.textTertiary,
-          ),
-        ),
       ],
     );
   }
