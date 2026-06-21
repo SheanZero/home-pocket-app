@@ -13,10 +13,9 @@ import 'joy_spend_drawer_body.dart';
 
 /// The nested 悦己 joybar drawer (round-5 r5 mock §2b, D2). Lives INSIDE
 /// `CategoryDonutCard`'s hero. Watches [joyCategoryAmountsProvider] with the SAME
-/// key tuple the de-registered `JoySpendCard` used, and renders a connector chip
-/// («▾ 把悦己这一块放大看看») followed by a pink-bordered drawer: drawer-top
-/// (data-derived ¥ total + category count) + subtitle + the shared
-/// [JoySpendDrawerBody] (count-up header + joybar + legend) + neutral caption.
+/// key tuple the de-registered `JoySpendCard` used, and renders a pink-bordered
+/// drawer: drawer-top (data-derived ¥ total + category count) + the shared
+/// [JoySpendDrawerBody] (count-up header + joybar + legend).
 ///
 /// The drawer's own error branch invalidates `joyCategoryAmountsProvider` (the
 /// donut's error branch owns the monthlyReport target — the two are folded into
@@ -68,15 +67,6 @@ class JoySpendDrawer extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Connector: dashed stem + pink chip.
-              _JoyConnector(
-                label: l10n.analyticsJoyDrawerConnector,
-                stemColor: drawerBorderColor,
-                chipBg: palette.joyLight,
-                chipBorder: drawerBorderColor,
-                chipText: palette.joyText,
-              ),
-              const SizedBox(height: 10),
               // The pink-bordered drawer card.
               Container(
                 decoration: BoxDecoration(
@@ -117,26 +107,10 @@ class JoySpendDrawer extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.analyticsJoyDrawerSubtitle,
-                      style: AppTextStyles.caption.copyWith(
-                        color: palette.textTertiary,
-                      ),
-                    ),
                     const SizedBox(height: 13),
                     JoySpendDrawerBody(
                       amounts: amounts,
                       showTotalHeader: false,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      l10n.analyticsJoyDrawerCaption,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.caption.copyWith(
-                        color: palette.textTertiary,
-                        height: 1.55,
-                      ),
                     ),
                   ],
                 ),
@@ -159,66 +133,6 @@ class JoySpendDrawer extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// The connector between the donut hero and the joy drawer: a centered dashed
-/// vertical stem + a pink pill chip with a ▾ arrow (round-5 r5 mock `.joy-connector`).
-class _JoyConnector extends StatelessWidget {
-  const _JoyConnector({
-    required this.label,
-    required this.stemColor,
-    required this.chipBg,
-    required this.chipBorder,
-    required this.chipText,
-  });
-
-  final String label;
-  final Color stemColor;
-  final Color chipBg;
-  final Color chipBorder;
-  final Color chipText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Dashed 2px stem (three short dashes).
-        for (var i = 0; i < 3; i++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: SizedBox(
-              width: 2,
-              height: 4,
-              child: DecoratedBox(decoration: BoxDecoration(color: stemColor)),
-            ),
-          ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 3),
-          decoration: BoxDecoration(
-            color: chipBg,
-            border: Border.all(color: chipBorder),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.keyboard_arrow_down, size: 14, color: chipText),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w700,
-                  color: chipText,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
