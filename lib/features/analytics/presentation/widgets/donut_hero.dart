@@ -76,6 +76,12 @@ class DonutHero extends ConsumerWidget {
   /// suppression intent stays explicit and grep-clean.
   static const String _suppressedRingTitle = '';
 
+  /// Max width (px) for the donut center total. The hole is
+  /// `centerSpaceRadius: 54` → ~108px inner ø; this keeps the count-up amount
+  /// inside the ring with margin. Paired with `FittedBox.scaleDown` so large
+  /// (7+ digit JPY) totals shrink to fit instead of overflowing the donut.
+  static const double _centerTotalMaxWidth = 96;
+
   /// On-ring % label for a slice, or the suppressed label when below the
   /// threshold (small slice → legend-only, D3).
   static String _onRingPctTitle(int amount, int total) {
@@ -220,16 +226,28 @@ class DonutHero extends ConsumerWidget {
                       color: palette.textSecondary,
                     ),
                   ),
+                  // Center total: smaller base size + auto-shrink so large
+                  // amounts (7+ digit JPY like ¥2,041,856) never overflow the
+                  // donut hole. FittedBox.scaleDown only shrinks past the base
+                  // size — short amounts keep the full 24px.
                   TweenAnimationBuilder<int>(
                     tween: IntTween(begin: 0, end: total),
                     duration: const Duration(milliseconds: 480),
                     curve: Curves.easeOutCubic,
-                    builder: (context, value, _) => Text(
-                      NumberFormatter.formatCurrency(value, 'JPY', locale),
-                      style: AppTextStyles.amountMedium.copyWith(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: palette.textPrimary,
+                    builder: (context, value, _) => SizedBox(
+                      width: _centerTotalMaxWidth,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: Text(
+                          NumberFormatter.formatCurrency(value, 'JPY', locale),
+                          maxLines: 1,
+                          style: AppTextStyles.amountMedium.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: palette.textPrimary,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -389,16 +407,28 @@ class DonutHero extends ConsumerWidget {
                       color: palette.textSecondary,
                     ),
                   ),
+                  // Center total: smaller base size + auto-shrink so large
+                  // amounts (7+ digit JPY like ¥2,041,856) never overflow the
+                  // donut hole. FittedBox.scaleDown only shrinks past the base
+                  // size — short amounts keep the full 24px.
                   TweenAnimationBuilder<int>(
                     tween: IntTween(begin: 0, end: total),
                     duration: const Duration(milliseconds: 480),
                     curve: Curves.easeOutCubic,
-                    builder: (context, value, _) => Text(
-                      NumberFormatter.formatCurrency(value, 'JPY', locale),
-                      style: AppTextStyles.amountMedium.copyWith(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: palette.textPrimary,
+                    builder: (context, value, _) => SizedBox(
+                      width: _centerTotalMaxWidth,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: Text(
+                          NumberFormatter.formatCurrency(value, 'JPY', locale),
+                          maxLines: 1,
+                          style: AppTextStyles.amountMedium.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: palette.textPrimary,
+                          ),
+                        ),
                       ),
                     ),
                   ),
