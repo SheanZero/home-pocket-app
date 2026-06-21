@@ -234,19 +234,9 @@ class _LegendRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 7),
         child: Row(
           children: [
-            // Rounded-square 11×11 dot (mock .jl .dot, matches the ring legend).
-            Container(
-              width: 11,
-              height: 11,
-              decoration: BoxDecoration(
-                color: segment.color,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // TI1-ICON-01: L1 category icon before the name (悦己 warm joyText
-            // hue, matching the row's amount color).
-            Icon(segment.icon, size: 13, color: palette.joyText),
+            // TI1-ICON-01: the swatch dot is dropped — the L1 category icon
+            // itself now carries the segment colour (replacing the .jl .dot).
+            Icon(segment.icon, size: 13, color: segment.color),
             const SizedBox(width: 7),
             Expanded(
               child: Text(

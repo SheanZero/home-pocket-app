@@ -573,25 +573,30 @@ class LegendRow extends StatelessWidget {
           : null,
       child: Row(
         children: [
-          // §1f: rounded-square swatch (NOT a circle), colour = arc colour.
-          Container(
-            width: 11,
-            height: 11,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(4),
+          // §1f: rounded-square swatch (colour = arc colour). Dropped for
+          // category-icon rows (TI1-ICON-01) — the L1 icon itself now carries
+          // the arc colour. Member rows (emoji) and the long-tail 「其他」 row
+          // (no L1 icon) keep the swatch.
+          if (leadingIcon == null) ...[
+            Container(
+              width: 11,
+              height: 11,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
-          ),
-          const SizedBox(width: 11),
+            const SizedBox(width: 11),
+          ],
           // §D2: member rows show the avatar emoji before the name.
           if (leadingEmoji != null && leadingEmoji!.isNotEmpty) ...[
             Text(leadingEmoji!, style: const TextStyle(fontSize: 15)),
             const SizedBox(width: 7),
           ],
           // TI1-ICON-01: category-dimension rows show the L1 category icon
-          // before the name.
+          // — coloured with the arc colour, replacing the swatch — before name.
           if (leadingIcon != null) ...[
-            Icon(leadingIcon, size: 14, color: palette.textSecondary),
+            Icon(leadingIcon, size: 14, color: color),
             const SizedBox(width: 7),
           ],
           Expanded(
