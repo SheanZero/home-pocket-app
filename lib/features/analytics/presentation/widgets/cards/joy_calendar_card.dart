@@ -131,6 +131,30 @@ class _JoyCalendarBody extends StatefulWidget {
 class _JoyCalendarBodyState extends State<_JoyCalendarBody> {
   DateTime? _selectedDay;
 
+  /// 默认选中「今天」——仅当今天落在 anchor 当月内时返回（其它月份返回 null）。
+  DateTime? _defaultSelectedDay() {
+    final now = DateTime.now();
+    if (now.year == widget.anchor.year && now.month == widget.anchor.month) {
+      return DateTime(now.year, now.month, now.day);
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _defaultSelectedDay();
+  }
+
+  @override
+  void didUpdateWidget(covariant _JoyCalendarBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.anchor.year != widget.anchor.year ||
+        oldWidget.anchor.month != widget.anchor.month) {
+      setState(() => _selectedDay = _defaultSelectedDay());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final countByDay = <int, int>{
