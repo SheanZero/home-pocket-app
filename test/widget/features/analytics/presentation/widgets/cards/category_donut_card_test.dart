@@ -70,11 +70,19 @@ final _breakdowns = [
 
 Widget _subject({List<CategoryBreakdown>? breakdowns}) {
   return createLocalizedWidget(
-    CategoryDonutCard(
-      bookId: _bookId,
-      startDate: _start,
-      endDate: _end,
-      joyMetricVariant: JoyMetricVariant.all,
+    // The bare card can exceed the 800x600 test viewport (taller donut + legend
+    // rows); on the real screen it lives in a scroll view, so wrap it here to
+    // avoid a fixed-window layout overflow (same pattern as the >10-category
+    // test below).
+    Scaffold(
+      body: SingleChildScrollView(
+        child: CategoryDonutCard(
+          bookId: _bookId,
+          startDate: _start,
+          endDate: _end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ),
+      ),
     ),
     locale: const Locale('en'),
     overrides: [
@@ -261,11 +269,15 @@ void main() {
     await _pump(
       tester,
       createLocalizedWidget(
-        CategoryDonutCard(
-          bookId: _bookId,
-          startDate: _start,
-          endDate: _end,
-          joyMetricVariant: JoyMetricVariant.all,
+        Scaffold(
+          body: SingleChildScrollView(
+            child: CategoryDonutCard(
+              bookId: _bookId,
+              startDate: _start,
+              endDate: _end,
+              joyMetricVariant: JoyMetricVariant.all,
+            ),
+          ),
         ),
         locale: const Locale('en'),
         overrides: [
@@ -329,11 +341,15 @@ void main() {
     await _pump(
       tester,
       createLocalizedWidget(
-        CategoryDonutCard(
-          bookId: _bookId,
-          startDate: _start,
-          endDate: _end,
-          joyMetricVariant: JoyMetricVariant.all,
+        Scaffold(
+          body: SingleChildScrollView(
+            child: CategoryDonutCard(
+              bookId: _bookId,
+              startDate: _start,
+              endDate: _end,
+              joyMetricVariant: JoyMetricVariant.all,
+            ),
+          ),
         ),
         locale: const Locale('en'),
         overrides: [

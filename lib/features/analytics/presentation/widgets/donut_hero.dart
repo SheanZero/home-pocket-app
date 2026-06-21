@@ -85,10 +85,11 @@ class DonutHero extends ConsumerWidget {
   static const String _suppressedRingTitle = '';
 
   /// Max width (px) for the donut center total. The hole is
-  /// `centerSpaceRadius: 54` → ~108px inner ø; this keeps the count-up amount
-  /// inside the ring with margin. Paired with `FittedBox.scaleDown` so large
-  /// (7+ digit JPY) totals shrink to fit instead of overflowing the donut.
-  static const double _centerTotalMaxWidth = 96;
+  /// `centerSpaceRadius: 59.4` → ~119px inner ø (260621-ti1: inner ø ×1.1);
+  /// this keeps the count-up amount inside the ring with margin. Paired with
+  /// `FittedBox.scaleDown` so large (7+ digit JPY) totals shrink to fit instead
+  /// of overflowing the donut.
+  static const double _centerTotalMaxWidth = 106;
 
   /// On-ring % label for a slice, or the suppressed label when below the
   /// threshold (small slice → legend-only, D3).
@@ -179,7 +180,9 @@ class DonutHero extends ConsumerWidget {
         ),
         const SizedBox(height: 18),
         SizedBox(
-          height: 200,
+          // 260621-ti1: donut outer ø ×1.2 (radius 41.4 + centerSpace 59.4 →
+          // ~201.6px) — box grown from 200 so the larger ring isn't clipped.
+          height: 234,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -198,7 +201,7 @@ class DonutHero extends ConsumerWidget {
                           color: rowColors[entry.key],
                           // §1c→D3: slightly thicker ring + smaller hole so the
                           // on-ring % is legible; label centered on the band.
-                          radius: 30,
+                          radius: 41.4,
                           cornerRadius: 0,
                           titlePositionPercentageOffset: 0.5,
                           titleStyle: AppTextStyles.caption.copyWith(
@@ -232,12 +235,12 @@ class DonutHero extends ConsumerWidget {
                           value: otherAmount.toDouble(),
                           title: _suppressedRingTitle,
                           color: otherColor,
-                          radius: 30,
+                          radius: 41.4,
                           cornerRadius: 0,
                         ),
                     ],
                     sectionsSpace: 0,
-                    centerSpaceRadius: 54,
+                    centerSpaceRadius: 59.4,
                   ),
                 ),
               // §1e center: 3 lines (label / count-up total / entry-count).
@@ -399,7 +402,9 @@ class DonutHero extends ConsumerWidget {
         ),
         const SizedBox(height: 18),
         SizedBox(
-          height: 200,
+          // 260621-ti1: donut outer ø ×1.2 (radius 41.4 + centerSpace 59.4 →
+          // ~201.6px) — box grown from 200 so the larger ring isn't clipped.
+          height: 234,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -412,7 +417,7 @@ class DonutHero extends ConsumerWidget {
                           value: entry.value.amount.toDouble(),
                           title: _onRingPctTitle(entry.value.amount, total),
                           color: memberColors[entry.key],
-                          radius: 30,
+                          radius: 41.4,
                           cornerRadius: 0,
                           titlePositionPercentageOffset: 0.5,
                           titleStyle: AppTextStyles.caption.copyWith(
@@ -423,7 +428,7 @@ class DonutHero extends ConsumerWidget {
                         ),
                     ],
                     sectionsSpace: 0,
-                    centerSpaceRadius: 54,
+                    centerSpaceRadius: 59.4,
                   ),
                 ),
               Column(
