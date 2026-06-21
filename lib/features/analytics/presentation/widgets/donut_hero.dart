@@ -193,39 +193,52 @@ class DonutHero extends ConsumerWidget {
                       for (final entry in rows.asMap().entries)
                         PieChartSectionData(
                           value: entry.value.amount.toDouble(),
-                          // §D3: on-ring % label (28.9% → 29%). Small slices below
-                          // [_onRingPctThreshold] are suppressed (legend-only) so
-                          // 8–10 categories don't overlap. % uses the SAME口径 as
-                          // the legend rows (amount / true total).
-                          title: _onRingPctTitle(entry.value.amount, total),
+                          // §D3 + TI1-ICON-01: the on-ring % and its L1 icon are
+                          // rendered TOGETHER as one centered Column badge (icon
+                          // ABOVE the %, centre-line aligned). The built-in title
+                          // is suppressed so the icon never overlaps the digits
+                          // (fl_chart positions title/badge radially, which is not
+                          // "vertically above" off the 6/12-o'clock axis). Small
+                          // slices below [_onRingPctThreshold] stay legend-only
+                          // (badge null). % 口径 = amount / true total.
+                          title: _suppressedRingTitle,
+                          showTitle: false,
                           color: rowColors[entry.key],
-                          // §1c→D3: slightly thicker ring + smaller hole so the
-                          // on-ring % is legible; label centered on the band.
+                          // §1c→D3: thicker ring so the on-ring badge is legible.
                           radius: 41.4,
                           cornerRadius: 0,
-                          titlePositionPercentageOffset: 0.5,
-                          titleStyle: AppTextStyles.caption.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: palette.card,
-                          ),
-                          // TI1-ICON-01: L1 category icon overlaid above the
-                          // on-ring %, but ONLY when the % is shown (same露出 rule
-                          // as the title — suppressed small slices get no badge so
-                          // the band doesn't crowd). badge sits slightly inward of
-                          // the title (offset < 0.5) → lands above the % text.
                           badgeWidget:
                               _onRingPctTitle(entry.value.amount, total) ==
                                   _suppressedRingTitle
                               ? null
-                              : Icon(
-                                  parentCategoryIconFromId(
-                                    entry.value.categoryId,
-                                  ),
-                                  size: 11,
-                                  color: palette.card,
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      parentCategoryIconFromId(
+                                        entry.value.categoryId,
+                                      ),
+                                      size: 11,
+                                      color: palette.card,
+                                    ),
+                                    const SizedBox(height: 1),
+                                    Text(
+                                      _onRingPctTitle(
+                                        entry.value.amount,
+                                        total,
+                                      ),
+                                      style: AppTextStyles.caption.copyWith(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: palette.card,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                          badgePositionPercentageOffset: 0.35,
+                          // Badge centred in the band middle; the Column stacks
+                          // icon-over-% itself, so no radial-offset trickery.
+                          badgePositionPercentageOffset: 0.5,
                         ),
                       // WR-02: neutral long-tail "Other" slice, sorted last — its
                       // on-ring % is suppressed (D3: long-tail Other stays
