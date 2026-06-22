@@ -10,7 +10,7 @@
 - ✅ **v1.5 文案与配色统一** — Phases 31-35 (shipped 2026-06-02) — see [archive](milestones/v1.5-ROADMAP.md)
 - ✅ **v1.6 购物清单** — Phases 36-39 (shipped 2026-06-12) — see [archive](milestones/v1.6-ROADMAP.md)
 - ✅ **v1.7 多币种支持** — Phases 40-42 (shipped 2026-06-14) — see [archive](milestones/v1.7-ROADMAP.md)
-- ⏳ **v1.8 统计页面重设计（实用化 × 悦己情感化）** — Phases 43-47 (in progress) — 设计探索关卡先行
+- ⏳ **v1.8 统计页面重设计（实用化 × 悦己情感化）** — Phases 43-48 (in progress) — 设计探索关卡先行 + 收尾技术债
 
 ## Phases
 
@@ -122,17 +122,18 @@
 
 </details>
 
-## v1.8 统计页面重设计（实用化 × 悦己情感化） — ACTIVE (Phases 43-47)
+## v1.8 统计页面重设计（实用化 × 悦己情感化） — ACTIVE (Phases 43-48)
 
 **Milestone Goal:** 把统计页面从「指标罗列」全面重设计为「更实用（支出总览 / 支出趋势 / 分类下钻）+ 凸显悦己、让用户为自己花钱而感到开心」的体验——在 ADR-012 反游戏化恒久约束内。开发前先用一个硬性「HTML 设计探索关卡」深入调研现状、产出多套 HTML 方向并充分讨论选定一案；**未获批前不进入开发**。这是一次**展示层重建**（数据已存在，最大化复用 5 层架构），不是绿地开发。
 
-**Phase numbering:** Continues from v1.7's Phase 42 → v1.8 = Phases 43-47.
+**Phase numbering:** Continues from v1.7's Phase 42 → v1.8 = Phases 43-48 (Phase 48 appended 2026-06-22 for post-audit tech-debt cleanup).
 
 - [x] **Phase 43: HTML 设计探索关卡 (Design Gate — NO production code)** — 现状深研图 + ≥3 套 HTML 方向（各带 ADR-012 自审表）+ 讨论选定一案 + 新 ADR go/no-go + 词表锁定 + fl_chart 1.2.0 affordance 校验；关卡出口 = 用户批准 (completed 2026-06-16)
 - [x] **Phase 44: 数据与用例补全 (Data / Use-Case Additions — reuse-first)** — 复用优先确认现状 reuse 图；按选定方向至多新增一条只读「分类下钻」路径（无预算、无 Drift 迁移）；窗口边界经 `DateBoundaries`/`TimeWindow` 规范化 (completed 2026-06-16)
 - [x] **Phase 45: 展示外壳重建 (Presentation Shell Rebuild)** — 瘦身 `analytics_screen.dart` 外壳 + 数据驱动 `_refresh()` + `widgets/cards/` 卡片体系；HomeHero 隔离由结构保证（不读/不失效任何 `home/*` provider） (completed 2026-06-17)
 - [x] **Phase 46: 卡片体系 (Cards)** (7/7 plans) — 总览 / 趋势 / 分类下钻 / 悦己×4，复用既有 chart widget + fl_chart 1.2.0 原生 label（删除直方图 Stack hack）；情感化呈现「已花悦己」满足感，全程反游戏化 — round-5 B flat 5-card lineup LIVE 2026-06-17
 - [x] **Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT** — 三语 ARB parity；每张新卡加入 `anti_toxicity_*_test` 禁词扫描；macOS golden 从零撰写/重基线；全量 `flutter test` 作为逐波门禁；真机视觉 UAT (completed 2026-06-20)
+- [ ] **Phase 48: v1.8 收尾技术债 (Tech-Debt Cleanup)** — 修 TD-1 成员筛选 donut 下拉刷新 staleness（把 donut 成员筛选穿过 `AnalyticsCardContext` 进 `categoryDonutRefreshTargets` + registry-test 白名单 + 完整性断言）+ TD-2 清除已移除 `getExpenseTrendUseCase`/`MonthlyTrend` 残留 dartdoc（regen `.g.dart`）+ 字符化测试描述
 
 ### Phase 43: HTML 设计探索关卡 (Design Gate — NO production code)
 
@@ -219,6 +220,18 @@
 
 **UI hint**: yes
 
+### Phase 48: Address v1.8 tech debt: member-filter donut refresh + stale trend comments
+
+**Goal:** 清除 v1.8 里程碑审计记录的两项代码级技术债（`v1.8-MILESTONE-AUDIT.md` Tech Debt §1/§2），不引入任何新功能/新卡/新 provider/schema 迁移：**TD-1** — 把 donut 成员筛选 (`donutDimensionStateProvider.memberFilterDeviceId`) 穿过 `AnalyticsCardContext` → `buildAnalyticsCardContext` → `categoryDonutRefreshTargets`，使成员筛选状态下的 pull-to-refresh 真正失效 `memberFilteredCategoryBreakdownProvider`（今天服务陈旧缓存数据），并把该家族加入 registry-test 白名单 + 新增「并集 ⊇ 卡片活动监听」完整性断言防回归；**TD-2** — 清除 `repository_providers.dart` 残留 dartdoc 对已移除的 `getExpenseTrendUseCase`/`MonthlyTrend` 符号的命名（build_runner regen `.g.dart` 三处镜像）+ 更新一处字符化测试描述串。验收：`grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` 返回 0。
+**Requirements**: none mapped (REQUIREMENTS.md has no REQ-IDs for Phase 48; decision coverage tracked via CONTEXT.md D-01..D-04)
+**Depends on:** Phase 47
+**Plans:** 2 plans in 1 wave
+
+**Wave 1** (parallel — disjoint file sets; 48-01 TD-1 code/test, 48-02 TD-2 doc-hygiene)
+
+- [ ] 48-01-PLAN.md — TD-1: thread donut member filter through `AnalyticsCardContext` → `categoryDonutRefreshTargets` (D-01) + registry-test whitelist `MemberFilteredCategoryBreakdownProvider` (D-02) + completeness regression assertion (D-03)
+- [ ] 48-02-PLAN.md — TD-2: scrub removed-symbol dartdoc in `repository_providers.dart` + regen `.g.dart` (D-04) + update characterization test description; `grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` = 0
+
 ## Milestone Progress
 
 | Milestone | Phases | Plans Complete | Status | Shipped |
@@ -231,4 +244,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | P43-47 all plans done (Phase 47: 6/6); milestone closeout pending orchestrator verify | In progress | - |
+| v1.8 统计页面重设计 | 43-48 | P43-47 all plans done (Phase 47: 6/6); Phase 48: 2 plans planned (0/2 done) | In progress | - |
