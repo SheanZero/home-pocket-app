@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/currency/rate_result.dart';
+import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -21,12 +22,16 @@ import '../widgets/amount_input_controller.dart';
 import '../widgets/conversion_preview_panel.dart';
 import '../widgets/currency_linked_edit_fields.dart';
 import '../widgets/currency_selector_sheet.dart';
-import '../widgets/entry_mode_switcher.dart';
-import '../widgets/input_mode_tabs.dart';
+import '../widgets/hold_to_talk_bar.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
 import '../widgets/transaction_details_form.dart';
+import '../widgets/voice_listening_overlay.dart';
+import 'manual_one_step_foreign_card.dart';
+import 'voice_locale_readiness_mixin.dart';
+import 'voice_ptt_session_mixin.dart';
+import 'voice_recognition_event_handler_mixin.dart';
 
 /// WR-01: returns true when a foreign rate-fetch's captured inputs no longer
 /// match the screen's current inputs — i.e. the user changed the currency,
@@ -81,6 +86,7 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
     this.voiceKeyword,
     this.entrySource = EntrySource.manual,
     this.continuousMode = false,
+    this.speechService,
   });
 
   final String bookId;
@@ -98,12 +104,21 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
   /// previous page (single-tap entry).
   final bool continuousMode;
 
+  /// 260622-nhs: injectable speech use case for the single-page PTT bar (tests
+  /// pass a fake; production builds it from the provider via the mixin).
+  final StartSpeechRecognitionUseCase? speechService;
+
   @override
   ConsumerState<ManualOneStepScreen> createState() =>
       _ManualOneStepScreenState();
 }
 
-class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
+class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
+    with
+        WidgetsBindingObserver,
+        VoiceRecognitionEventHandlerMixin,
+        VoiceLocaleReadinessMixin,
+        VoicePttSessionMixin {
   final _formKey = GlobalKey<TransactionDetailsFormState>();
 
   late final FocusNode _merchantFocus;
@@ -113,6 +128,55 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   bool _amountFocused = true;
   bool _isTextFieldFocused = false;
   bool _isSubmitting = false;
+
+  /// 260622-nhs (D-2 / T-nhs-03): the synchronous voice-locale mirror, and the
+  /// provenance flag flipped true after a PTT batch-fill so the saved row stamps
+  /// `EntrySource.voice`. Reset to false whenever the amount is cleared.
+  String _voiceLocaleId = 'zh-CN';
+  bool _lastFillWasVoice = false;
+
+  // ── VoicePttSessionMixin contract ─────────────────────────────────────────
+
+  @override
+  TransactionDetailsFormState? get pttFormState => _formKey.currentState;
+  @override
+  StartSpeechRecognitionUseCase? get pttInjectedSpeechService =>
+      widget.speechService;
+  @override
+  String get pttVoiceLocaleId => _voiceLocaleId;
+  @override
+  void onPttSessionChanged(VoidCallback apply) {
+    if (mounted) setState(apply);
+  }
+
+  @override
+  void onPttCommitted() {
+    if (!mounted) return;
+    // A PTT fill happened — the session mixin already pushed amount / category /
+    // merchant / date / satisfaction (+ foreign triple) into _formKey's state.
+    // Mirror the booked JPY amount into AmountDisplay's string + the keypad
+    // controller so an edit continues from the fill, and flip provenance to
+    // voice so the saved row stamps EntrySource.voice (T-nhs-03). Keep the
+    // keypad on the JPY native path: the form already carries the real foreign
+    // triple for the save, so the headline shows the booked JPY figure (mirrors
+    // the legacy voice screen, D-4) without re-driving _syncAmountToForm.
+    setState(() {
+      _lastFillWasVoice = true;
+      final filled = pttLastFilledAmount;
+      if (filled > 0) {
+        while (_controller.text.isNotEmpty) {
+          _controller.onDelete();
+        }
+        for (final ch in filled.toString().split('')) {
+          _controller.onDigit(ch);
+        }
+        _amount = _controller.text;
+      }
+    });
+  }
+
+  @override
+  void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
 
   // Phase 42 (CURR-01/04/05): host owns the currency-aware decimal input.
   // [_controller] replaces the old inline 4-decimal cap in _onDigit/_onDot;
@@ -164,6 +228,13 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     _merchantFocus = FocusNode()..addListener(_handleFocusChange);
     _noteFocus = FocusNode()..addListener(_handleFocusChange);
 
+    // 260622-nhs: single-page push-to-talk. Observe app lifecycle so a paused
+    // app cancels any in-progress recording (T-nhs-02), and init the speech
+    // service + locale-readiness gate via the shared mixin.
+    WidgetsBinding.instance.addObserver(this);
+    initPttSpeechService();
+    initLocaleReadiness();
+
     // Initialize amount string from widget param. The initial amount is a JPY
     // integer (foreign pre-fill is not a v1.7 entry path) — seed both the raw
     // string and the controller so digit edits continue from it.
@@ -194,9 +265,26 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
 
   @override
   void dispose() {
+    disposePttSession();
+    WidgetsBinding.instance.removeObserver(this);
     _merchantFocus.dispose();
     _noteFocus.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // T-nhs-02: app-pause must cancel an in-progress recording.
+    if (state == AppLifecycleState.paused && pttIsRecording) {
+      cancelPttSessionAndDiscard();
+    }
+  }
+
+  // ── 260622-nhs: single-page push-to-talk hold lifecycle ───────────────────
+
+  void _onPttHoldStart() {
+    if (!pttServiceInitialized || !isLocaleReady || pttIsRecording) return;
+    onPttHoldStart();
   }
 
   // ── Category init (ported verbatim from transaction_entry_screen.dart:52-82, D-24) ──
@@ -308,6 +396,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     while (_controller.text.isNotEmpty) {
       _controller.onDelete();
     }
+    // 260622-nhs: clearing the amount drops voice provenance — a row the user
+    // re-enters by keypad after a clear is `manual`, not `voice` (T-nhs-03).
+    _lastFillWasVoice = false;
     _syncAmountToForm();
   }
 
@@ -618,7 +709,10 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       _amount = '';
       _selectedDate = DateTime.now();
       _manualForeignRate = null;
+      // 260622-nhs: a fresh continuous-entry slate starts as manual provenance.
+      _lastFillWasVoice = false;
     });
+    resetPttSessionState();
     final formState = _formKey.currentState;
     formState?.updateAmount(0);
     formState?.updateCurrencyTriple(
@@ -705,13 +799,10 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                   ),
                 ),
 
-              // D-04: mode switcher at top
-              EntryModeSwitcher(
-                selectedMode: InputMode.manual,
-                bookId: widget.bookId,
-                continuousMode: widget.continuousMode,
-              ),
-
+              // 260622-nhs (D-3): the 手工/语音 mode Tab (EntryModeSwitcher) is
+              // gone — manual keypad is the only resident state; voice is the
+              // push-to-talk bar below the keypad. No mode switching, no page
+              // replacement.
               const SizedBox(height: 8),
 
               // Amount display — tap to activate SmartKeyboard (D-10)
@@ -753,7 +844,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: palette.borderDefault),
                           ),
-                          child: _AddScreenForeignCard(
+                          child: AddScreenForeignCard(
                             currency: _currency,
                             date: _selectedDate,
                             originalMinorUnits: _originalMinorUnits,
@@ -775,7 +866,13 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                           initialMerchant: widget.initialMerchant,
                           initialSatisfaction: widget.initialSatisfaction,
                           voiceKeyword: widget.voiceKeyword,
-                          entrySource: widget.entrySource,
+                          // 260622-nhs (T-nhs-03): a PTT-filled row stamps voice
+                          // provenance; a pure keypad row keeps widget.entrySource
+                          // (manual). submit() reads entrySource from this live
+                          // config, so the flag survives the single-page merge.
+                          entrySource: _lastFillWasVoice
+                              ? EntrySource.voice
+                              : widget.entrySource,
                         ),
                         // P19-W3: per-host FocusNodes so _handleFocusChange fires.
                         merchantFocusNode: _merchantFocus,
@@ -815,8 +912,27 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                   onCurrencyTap: _onCurrencyTap,
                 ),
               ),
+
+              // 260622-nhs (D-1): full-width 「按住说话」 push-to-talk bar below the
+              // keypad. Hidden together with the keypad when a TextField is
+              // focused (so it doesn't sit over the soft keyboard). Hold → start
+              // a session + raise the listening overlay; release → fill the form
+              // and stay on this page (D-2 fill-and-stay, no auto-save).
+              if (_showSmartKeypad)
+                HoldToTalkBar(
+                  onHoldStart: _onPttHoldStart,
+                  onHoldEnd: onPttHoldEnd,
+                  onHoldCancel: onPttHoldCancel,
+                ),
             ],
           ),
+
+          // 260622-nhs: listening overlay while holding the talk bar.
+          if (pttIsRecording)
+            VoiceListeningOverlay(
+              transcript: pttTranscript,
+              soundLevel: pttSoundLevel,
+            ),
 
           // D-11/D-13: floating KeyboardToolbar rides on top of soft keyboard.
           // Only visible when a TextField is focused.
@@ -833,142 +949,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-/// Quick 260613-ufn (D-1): thin Consumer wrapper that mounts the unified
-/// [CurrencyLinkedEditFields] card on the ADD screen, fed by the keyed
-/// [conversionRateProvider]. It reuses the SAME card and the SAME single
-/// staleness-derivation site as the edit host — the two screens are now visually
-/// and interactively identical (no large ≈¥ preview block).
-///
-/// Date auto-refetch (D-4): because the provider is keyed on (currency, date,
-/// amount), the host bumping `_selectedDate` re-resolves the rate and re-seeds
-/// the card's 汇率 / 日元 / 汇率日期 / staleness. A user hand-edit of the 汇率 row
-/// flips manual override via [onRateEdited] (the host persists the edited rate).
-class _AddScreenForeignCard extends ConsumerWidget {
-  const _AddScreenForeignCard({
-    required this.currency,
-    required this.date,
-    required this.originalMinorUnits,
-    required this.manualRateOverride,
-    required this.onRateEdited,
-    required this.onSignal,
-  });
-
-  final String currency;
-  final DateTime date;
-  final int originalMinorUnits;
-
-  /// Active manual-override rate (null when the auto-resolved rate is in use).
-  /// When set it seeds the card so the user's edit survives provider re-reads.
-  final String? manualRateOverride;
-
-  /// Fired when the user hand-edits the 汇率 row (manual override).
-  final ValueChanged<CurrencyLinkedEditValue> onRateEdited;
-
-  /// ADR-022 RateSignal sink (D-02/D-03), forwarded via ref.listen only.
-  final void Function(RateSignal signal) onSignal;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = S.of(context);
-    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
-
-    final args = ConversionPreviewArgs(
-      currency: currency,
-      date: date,
-    );
-
-    // RateSignal side-effects (D-02 dialog / D-03 toast) belong in ref.listen,
-    // NEVER ref.watch (Riverpod 3 — CLAUDE.md side-effect rule).
-    ref.listen<AsyncValue<RateResultWithSignal>>(
-      conversionRateProvider(args),
-      (previous, next) {
-        final signal = next.value?.signal;
-        if (signal != null) onSignal(signal);
-      },
-    );
-
-    final rateAsync = ref.watch(conversionRateProvider(args));
-
-    return rateAsync.when(
-      loading: () => const SizedBox(
-        height: kAddScreenForeignCardLoadingHeight,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
-      error: (_, _) => _RateRequiredRow(l10n: l10n, palette: context.palette),
-      data: (withSignal) {
-        final result = withSignal.result;
-        final resolvedRate = rateStringOf(result);
-        // RateUnavailable (P41 D-08): prompt for a manual rate; the host's
-        // _pushForeignTriple already withholds the triple so save is gated.
-        if (resolvedRate == null && manualRateOverride == null) {
-          return _RateRequiredRow(l10n: l10n, palette: context.palette);
-        }
-        // A user-edited (manual) rate wins over the auto-resolved one as the
-        // seed, so the edit survives provider re-reads.
-        final seedRate = manualRateOverride ?? resolvedRate!;
-        final actualRateDate = rateEffectiveDateOf(result, date);
-        final stalenessNote = manualRateOverride != null
-            ? null // manual override supersedes the auto-rate staleness
-            : stalenessNoteFor(
-                result: result,
-                requestedDate: date,
-                l10n: l10n,
-                locale: locale,
-              );
-
-        return CurrencyLinkedEditFields(
-          // Re-seed the card when the resolved/override rate changes (date
-          // re-resolve or currency switch) — a stable key preserves in-card
-          // edits within the same seed.
-          key: ValueKey('add-foreign-card-$currency-$seedRate'),
-          originalCurrency: currency,
-          originalAmount: originalMinorUnits,
-          appliedRate: seedRate,
-          manualOverride: manualRateOverride != null,
-          rateDate: date,
-          actualRateDate: actualRateDate,
-          stalenessNote: stalenessNote,
-          onChanged: onRateEdited,
-        );
-      },
-    );
-  }
-}
-
-/// Fixed loading height so the add-screen card area does not jump while the
-/// keyed rate provider resolves.
-const double kAddScreenForeignCardLoadingHeight = 56;
-
-/// Mandatory-manual-rate prompt row (P41 D-08 / RateUnavailable) for the add
-/// screen. Error color — save is gated on a present rate by the host.
-class _RateRequiredRow extends StatelessWidget {
-  const _RateRequiredRow({required this.l10n, required this.palette});
-
-  final S l10n;
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          l10n.conversionRateRequired,
-          style: AppTextStyles.labelMedium.copyWith(color: palette.error),
-        ),
       ),
     );
   }

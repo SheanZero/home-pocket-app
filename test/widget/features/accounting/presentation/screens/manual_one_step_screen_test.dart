@@ -13,11 +13,22 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
         categoryRepositoryProvider,
         createTransactionUseCaseProvider,
         categoryServiceProvider;
+import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
+import 'package:home_pocket/application/voice/start_speech_recognition_use_case.dart';
+import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
+    show merchantCategoryLearningServiceProvider, parseVoiceInputUseCaseProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/entry_mode_switcher.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/hold_to_talk_bar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_toolbar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/voice_listening_overlay.dart';
+import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart'
+    show voiceLocaleIdProvider;
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
@@ -95,6 +106,9 @@ class MockCreateTransactionUseCase extends Mock
 
 class MockCategoryService extends Mock implements CategoryService {}
 
+class _MockMerchantCategoryLearningService extends Mock
+    implements MerchantCategoryLearningService {}
+
 class FakeCreateTransactionParams extends Fake
     implements CreateTransactionParams {}
 
@@ -123,6 +137,65 @@ final _l2Category = Category(
 );
 
 final _fakeCategories = [_l1Category, _l2Category];
+
+// ── 260622-nhs PTT fakes ───────────────────────────────────────────────────
+
+class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
+  void Function(SpeechRecognitionResult result)? onResult;
+  String? startedLocaleId;
+  var stopped = false;
+  var canceled = false;
+
+  @override
+  Future<bool> initialize({
+    void Function(String status)? onStatus,
+    void Function(String errorMsg, bool permanent)? onError,
+  }) async => true;
+
+  @override
+  bool get isAvailable => true;
+
+  @override
+  bool get isListening => startedLocaleId != null && !stopped;
+
+  @override
+  Future<void> startListening({
+    required void Function(SpeechRecognitionResult result) onResult,
+    required void Function(double normalizedLevel) onSoundLevel,
+    required String localeId,
+    Duration listenFor = const Duration(seconds: 30),
+    Duration pauseFor = const Duration(seconds: 3),
+  }) async {
+    this.onResult = onResult;
+    startedLocaleId = localeId;
+    stopped = false;
+  }
+
+  @override
+  Future<void> stop() async => stopped = true;
+
+  @override
+  Future<void> cancel() async => canceled = true;
+
+  void emitFinal(String words) => onResult!(
+    SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], true),
+  );
+}
+
+class _FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
+  _FakeParseVoiceInputUseCase(this.results);
+  final Map<String, VoiceParseResult> results;
+  final inputs = <String>[];
+
+  @override
+  Future<Result<VoiceParseResult>> execute(
+    String recognizedText, {
+    String? localeId,
+  }) async {
+    inputs.add(recognizedText);
+    return Result.success(results[recognizedText]);
+  }
+}
 
 final _successTransaction = Transaction(
   id: 'tx_001',
@@ -169,6 +242,7 @@ Widget _pumpScreen({
 void main() {
   late MockCreateTransactionUseCase mockCreateUseCase;
   late MockCategoryService mockCategoryService;
+  late _MockMerchantCategoryLearningService _mockLearningService;
 
   setUpAll(() {
     registerFallbackValue(FakeCreateTransactionParams());
@@ -177,9 +251,16 @@ void main() {
   setUp(() {
     mockCreateUseCase = MockCreateTransactionUseCase();
     mockCategoryService = MockCategoryService();
+    _mockLearningService = _MockMerchantCategoryLearningService();
     when(
       () => mockCategoryService.resolveLedgerType(any()),
     ).thenAnswer((_) async => LedgerType.daily);
+    when(
+      () => _mockLearningService.recordSelection(
+        merchantRaw: any(named: 'merchantRaw'),
+        selectedCategoryId: any(named: 'selectedCategoryId'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   // ── SC-1: single screen, no Next button, all six field surfaces ─────────────
@@ -206,7 +287,10 @@ void main() {
 
     // All six field surfaces visible
     expect(find.byType(AmountDisplay), findsOneWidget);
-    expect(find.byType(EntryModeSwitcher), findsOneWidget);
+    // 260622-nhs (D-3): the 手工/语音 mode Tab is gone — single-page entry.
+    expect(find.byType(EntryModeSwitcher), findsNothing);
+    // 260622-nhs (D-1): the full-width push-to-talk bar sits below the keypad.
+    expect(find.byType(HoldToTalkBar), findsOneWidget);
     expect(find.byKey(const ValueKey('category-chip')), findsOneWidget);
     expect(find.byKey(const ValueKey('date-chip')), findsOneWidget);
     expect(find.byKey(const ValueKey('merchant-textfield')), findsOneWidget);
@@ -991,6 +1075,211 @@ void main() {
       2,
       reason:
           'WR-01: _isSubmitting must reset after persistError so a second save is not deadlocked',
+    );
+  });
+
+  // ── 260622-nhs: single-page push-to-talk (D-1/D-2/D-3, T-nhs-03) ───────────
+
+  group('260622-nhs single-page PTT', () {
+    final micBarFinder = find.byKey(const ValueKey('hold-to-talk-bar'));
+
+    Widget pumpPtt({
+      required _CapturingSpeechService speech,
+      required _FakeParseVoiceInputUseCase parse,
+      EntrySource entrySource = EntrySource.manual,
+    }) {
+      return createLocalizedWidget(
+        ManualOneStepScreen(
+          bookId: 'book-1',
+          initialCategory: _l2Category,
+          initialParentCategory: _l1Category,
+          entrySource: entrySource,
+          speechService: speech,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            FakeCategoryRepository(_fakeCategories),
+          ),
+          createTransactionUseCaseProvider.overrideWithValue(mockCreateUseCase),
+          categoryServiceProvider.overrideWithValue(mockCategoryService),
+          parseVoiceInputUseCaseProvider.overrideWithValue(parse),
+          voiceLocaleIdProvider.overrideWith((ref) async => 'ja-JP'),
+          merchantCategoryLearningServiceProvider.overrideWithValue(
+            _mockLearningService,
+          ),
+        ],
+      );
+    }
+
+    void tall(WidgetTester tester) {
+      tester.view.physicalSize = const Size(390, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+    }
+
+    testWidgets('HoldToTalkBar renders below the SmartKeyboard', (tester) async {
+      tall(tester);
+      await tester.pumpWidget(
+        pumpPtt(
+          speech: _CapturingSpeechService(),
+          parse: _FakeParseVoiceInputUseCase(const {}),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HoldToTalkBar), findsOneWidget);
+      // The bar sits BELOW the keypad: its top edge is greater than the
+      // SmartKeyboard's top edge.
+      final barTop = tester.getTopLeft(micBarFinder).dy;
+      final keypadTop = tester.getTopLeft(find.byType(SmartKeyboard)).dy;
+      expect(barTop, greaterThan(keypadTop),
+          reason: 'push-to-talk bar must sit below the SmartKeyboard');
+    });
+
+    testWidgets(
+      'hold → overlay shown; release → overlay gone, form filled, stays on page',
+      (tester) async {
+        tall(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase({
+          '1千8百4十元 星巴克': VoiceParseResult(
+            rawText: '1千8百4十元 星巴克',
+            amount: 1840,
+            parsedDate: DateTime(2026, 4, 27),
+            merchantName: '星巴克',
+            categoryMatch: const CategoryMatchResult(
+              categoryId: 'convenience',
+              confidence: 0.91,
+              source: MatchSource.keyword,
+            ),
+            ledgerType: LedgerType.daily,
+          ),
+        });
+
+        await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        // Hold the bar → listening overlay rises.
+        final gesture =
+            await tester.startGesture(tester.getCenter(micBarFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+        expect(find.byType(VoiceListeningOverlay), findsOneWidget,
+            reason: 'holding the bar must raise the listening overlay');
+
+        speech.emitFinal('1千8百4十元 星巴克');
+        await tester.pump();
+        await tester.binding.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 350)),
+        );
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Overlay gone, form filled, screen still present (no auto-save / pop).
+        expect(find.byType(VoiceListeningOverlay), findsNothing);
+        expect(parse.inputs, contains('1千8百4十元 星巴克'));
+        expect(find.text('星巴克'), findsOneWidget,
+            reason: 'merchant must be filled into the same form');
+        expect(find.byKey(const ValueKey('manual-one-step-screen')),
+            findsOneWidget,
+            reason: 'D-2: the screen stays on the manual page (no auto-save)');
+        verifyNever(() => mockCreateUseCase.execute(any()));
+      },
+    );
+
+    testWidgets(
+      'T-nhs-03: a PTT-filled save stamps EntrySource.voice; keypad-only stays manual',
+      (tester) async {
+        tall(tester);
+        when(() => mockCreateUseCase.execute(any()))
+            .thenAnswer((_) async => Result.success(_successTransaction));
+
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase({
+          'ラテ 1千': VoiceParseResult(
+            rawText: 'ラテ 1千',
+            amount: 1000,
+            parsedDate: DateTime(2026, 4, 27),
+            merchantName: 'スタバ',
+            categoryMatch: const CategoryMatchResult(
+              categoryId: 'convenience',
+              confidence: 0.91,
+              source: MatchSource.keyword,
+            ),
+            ledgerType: LedgerType.daily,
+          ),
+        });
+
+        await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        final gesture =
+            await tester.startGesture(tester.getCenter(micBarFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+        speech.emitFinal('ラテ 1千');
+        await tester.pump();
+        await tester.binding.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 350)),
+        );
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Save via the SmartKeyboard Record key.
+        final recordFinder = find.descendant(
+          of: find.byType(SmartKeyboard),
+          matching: find.text('Record'),
+        );
+        await tester.tap(recordFinder);
+        await tester.pumpAndSettle();
+
+        final captured =
+            verify(() => mockCreateUseCase.execute(captureAny())).captured;
+        expect(captured.length, 1);
+        expect((captured.first as CreateTransactionParams).entrySource,
+            EntrySource.voice,
+            reason: 'T-nhs-03: a PTT-filled row carries voice provenance');
+      },
+    );
+
+    testWidgets(
+      'T-nhs-03: keypad-only save stays EntrySource.manual (no PTT fill)',
+      (tester) async {
+        tall(tester);
+        when(() => mockCreateUseCase.execute(any()))
+            .thenAnswer((_) async => Result.success(_successTransaction));
+
+        await tester.pumpWidget(
+          pumpPtt(
+            speech: _CapturingSpeechService(),
+            parse: _FakeParseVoiceInputUseCase(const {}),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final digit1 = find.descendant(
+          of: find.byType(SmartKeyboard),
+          matching: find.text('1'),
+        );
+        await tester.tap(digit1);
+        await tester.pump();
+        await tester.tap(
+          find.descendant(
+            of: find.byType(SmartKeyboard),
+            matching: find.text('Record'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final captured =
+            verify(() => mockCreateUseCase.execute(captureAny())).captured;
+        expect(captured.length, 1);
+        expect((captured.first as CreateTransactionParams).entrySource,
+            EntrySource.manual,
+            reason: 'a pure keypad row keeps manual provenance');
+      },
     );
   });
 }
