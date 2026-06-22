@@ -47,57 +47,36 @@ void main() {
       expect(find.byIcon(Icons.mic_none), findsOneWidget);
       expect(find.byIcon(Icons.mic), findsNothing);
       // R7: the bottom reset button is removed — no reset icon while listening.
-      expect(find.byIcon(Icons.restore), findsNothing,
-          reason: 'R7: no reset affordance while listening');
-      // R7: the standalone reset button key no longer exists.
-      expect(find.byKey(const ValueKey('voice-panel-reset')), findsNothing,
-          reason: 'R7: the bottom reset button is deleted');
-    },
-  );
-
-  testWidgets(
-    'R3: it is an INLINE panel — no full-screen scrim overlay',
-    (tester) async {
-      await tester.pumpWidget(
-        createLocalizedWidget(
-          Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                VoiceRecordPanel(
-                  transcript: 'x',
-                  soundLevel: 0.1,
-                  onExit: () {},
-                  onReset: () {},
-                ),
-              ],
-            ),
-          ),
-          locale: const Locale('zh'),
-        ),
+      expect(
+        find.byIcon(Icons.restore),
+        findsNothing,
+        reason: 'R7: no reset affordance while listening',
       );
-      await tester.pump();
-
-      // No Positioned.fill scrim: the panel does not paint a full-screen dim.
-      expect(find.byType(Positioned), findsNothing,
-          reason: 'R3: the inline panel must not use a Positioned scrim/overlay');
+      // R7: the standalone reset button key no longer exists.
+      expect(
+        find.byKey(const ValueKey('voice-panel-reset')),
+        findsNothing,
+        reason: 'R7: the bottom reset button is deleted',
+      );
     },
   );
 
-  testWidgets('listening: tapping the central grey square fires onExit (passive)',
-      (tester) async {
-    var exits = 0;
-    var resets = 0;
-
+  testWidgets('R3: it is an INLINE panel — no full-screen scrim overlay', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
-          body: VoiceRecordPanel(
-            transcript: 'x',
-            soundLevel: 0.1,
-            status: PttListenStatus.listening,
-            onExit: () => exits++,
-            onReset: () => resets++,
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              VoiceRecordPanel(
+                transcript: 'x',
+                soundLevel: 0.1,
+                onExit: () {},
+                onReset: () {},
+              ),
+            ],
           ),
         ),
         locale: const Locale('zh'),
@@ -105,13 +84,48 @@ void main() {
     );
     await tester.pump();
 
-    // The grey square is passive: a tap on it bubbles to the panel exit.
-    await tester.tap(find.byIcon(Icons.mic_none));
-    await tester.pump();
-
-    expect(resets, 0, reason: 'R7: the grey listening square must NOT reset');
-    expect(exits, 1, reason: 'R7: the passive square forwards the tap to exit');
+    // No Positioned.fill scrim: the panel does not paint a full-screen dim.
+    expect(
+      find.byType(Positioned),
+      findsNothing,
+      reason: 'R3: the inline panel must not use a Positioned scrim/overlay',
+    );
   });
+
+  testWidgets(
+    'listening: tapping the central grey square fires onExit (passive)',
+    (tester) async {
+      var exits = 0;
+      var resets = 0;
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: VoiceRecordPanel(
+              transcript: 'x',
+              soundLevel: 0.1,
+              status: PttListenStatus.listening,
+              onExit: () => exits++,
+              onReset: () => resets++,
+            ),
+          ),
+          locale: const Locale('zh'),
+        ),
+      );
+      await tester.pump();
+
+      // The grey square is passive: a tap on it bubbles to the panel exit.
+      await tester.tap(find.byIcon(Icons.mic_none));
+      await tester.pump();
+
+      expect(resets, 0, reason: 'R7: the grey listening square must NOT reset');
+      expect(
+        exits,
+        1,
+        reason: 'R7: the passive square forwards the tap to exit',
+      );
+    },
+  );
 
   testWidgets(
     'stopped: tapping the central red square fires onReset and NOT onExit',
@@ -136,10 +150,16 @@ void main() {
       await tester.pump();
 
       // The red square shows the reset icon and is tappable.
-      expect(find.byIcon(Icons.restore), findsOneWidget,
-          reason: 'R7: stopped state shows the reset icon on the red square');
-      expect(find.byIcon(Icons.mic_none), findsNothing,
-          reason: 'R7: the mic glyph is replaced by reset when stopped');
+      expect(
+        find.byIcon(Icons.restore),
+        findsOneWidget,
+        reason: 'R7: stopped state shows the reset icon on the red square',
+      );
+      expect(
+        find.byIcon(Icons.mic_none),
+        findsNothing,
+        reason: 'R7: the mic glyph is replaced by reset when stopped',
+      );
 
       await tester.tap(find.byKey(const ValueKey('voice-square-reset')));
       await tester.pump();
@@ -151,8 +171,9 @@ void main() {
 
   // ── R4 BUG C: live status drives the title ────────────────────────────────
 
-  testWidgets('R4 BUG C: status listening shows the listening title',
-      (tester) async {
+  testWidgets('R4 BUG C: status listening shows the listening title', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
@@ -175,8 +196,9 @@ void main() {
     expect(find.text(l10n.voiceStatusStopped), findsNothing);
   });
 
-  testWidgets('R4 BUG C: status processing shows the parsing title',
-      (tester) async {
+  testWidgets('R4 BUG C: status processing shows the parsing title', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
@@ -201,8 +223,9 @@ void main() {
     expect(find.byIcon(Icons.restore), findsNothing);
   });
 
-  testWidgets('R4 BUG C: status stopped shows the stopped title',
-      (tester) async {
+  testWidgets('R4 BUG C: status stopped shows the stopped title', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
@@ -247,8 +270,11 @@ void main() {
 
       final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
       // The stopped-state hint tells the user that tapping the red square records again.
-      expect(find.text(l10n.voiceTapResetToRerecord), findsOneWidget,
-          reason: 'stopped state must surface the tap-reset hint');
+      expect(
+        find.text(l10n.voiceTapResetToRerecord),
+        findsOneWidget,
+        reason: 'stopped state must surface the tap-reset hint',
+      );
       // The tap-exit hint remains available.
       expect(find.text(l10n.voiceTapToExit), findsOneWidget);
     },
@@ -289,8 +315,11 @@ void main() {
       // R7 equal-height requirement: the panel must not change height between
       // listening and stopped (no jump on transition). The reserved placeholder
       // for the tap-reset hint guarantees this.
-      expect(listeningSize.height, stoppedSize.height,
-          reason: 'R7: listening and stopped panels must be equal height');
+      expect(
+        listeningSize.height,
+        stoppedSize.height,
+        reason: 'R7: listening and stopped panels must be equal height',
+      );
 
       // While listening, the reset-hint TEXT is not visible (only stopped shows it)…
       final l10n = l10nHolder.first;
@@ -313,8 +342,134 @@ void main() {
       // maintainState keeps the Text in the tree (for layout) but invisible.
       // The reserved placeholder line keeps the height identical — asserted above.
       // The hint text node still exists in the tree (maintainState: true).
-      expect(find.text(l10n.voiceTapResetToRerecord), findsOneWidget,
-          reason: 'R7: the hint line is maintained (reserved) while listening');
+      expect(
+        find.text(l10n.voiceTapResetToRerecord),
+        findsOneWidget,
+        reason: 'R7: the hint line is maintained (reserved) while listening',
+      );
+    },
+  );
+
+  // ── 260622-nhs R8: central square vertically CENTERED + taller panel ───────
+
+  Future<void> pumpPanel(WidgetTester tester, PttListenStatus status) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() async => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              width: 390,
+              child: VoiceRecordPanel(
+                transcript: '今天吃饭用了 888 日元',
+                soundLevel: 0.4,
+                status: status,
+                onExit: () {},
+                onReset: () {},
+              ),
+            ),
+          ),
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+    await tester.pump();
+  }
+
+  testWidgets(
+    'R8: the panel uses two Expanded zones flanking the central square '
+    '(square sits between them, at the vertical center)',
+    (tester) async {
+      await pumpPanel(tester, PttListenStatus.listening);
+
+      // Two equal-flex Expanded zones (top: status/transcript/wave,
+      // bottom: hints) sit on either side of the square → the square lands at
+      // the panel's vertical center.
+      final expanders = find.descendant(
+        of: find.byType(VoiceRecordPanel),
+        matching: find.byType(Expanded),
+      );
+      expect(
+        expanders,
+        findsNWidgets(2),
+        reason: 'R8: top + bottom Expanded(flex:1) zones flank the square',
+      );
+
+      // The square (grey mic while listening) must NOT be inside either
+      // Expanded — it is a sibling between them.
+      final squareInExpanded = find.descendant(
+        of: find.byType(Expanded),
+        matching: find.byIcon(Icons.mic_none),
+      );
+      expect(
+        squareInExpanded,
+        findsNothing,
+        reason:
+            'R8: the central square is a sibling between the two zones, '
+            'not nested inside a flex zone',
+      );
+    },
+  );
+
+  testWidgets('R8: the central square is vertically centered within the panel '
+      '(square center ≈ panel center)', (tester) async {
+    await pumpPanel(tester, PttListenStatus.listening);
+
+    final panelRect = tester.getRect(find.byType(VoiceRecordPanel));
+    final squareRect = tester.getRect(find.byIcon(Icons.mic_none));
+
+    final panelCenterY = panelRect.center.dy;
+    final squareCenterY = squareRect.center.dy;
+
+    // Design tolerance: the mock measured the square center within ~3px of the
+    // panel midpoint. Allow a small slack for padding asymmetry.
+    expect(
+      (squareCenterY - panelCenterY).abs(),
+      lessThanOrEqualTo(6.0),
+      reason: 'R8: the square must be vertically centered in the panel',
+    );
+  });
+
+  testWidgets(
+    'R8: the panel is taller than the pre-R8 height (~356dp, up from ~287)',
+    (tester) async {
+      await pumpPanel(tester, PttListenStatus.listening);
+      final height = tester.getSize(find.byType(VoiceRecordPanel)).height;
+
+      // Pre-R8 the panel was ~287dp. R8 grows it to ~356dp for breathing room.
+      expect(
+        height,
+        greaterThanOrEqualTo(340.0),
+        reason: 'R8: the panel must be taller (~356dp) than before (~287dp)',
+      );
+    },
+  );
+
+  testWidgets(
+    'R8: both states keep equal height at the taller size (no jump)',
+    (tester) async {
+      await pumpPanel(tester, PttListenStatus.listening);
+      final listeningHeight = tester
+          .getSize(find.byType(VoiceRecordPanel))
+          .height;
+
+      await pumpPanel(tester, PttListenStatus.stopped);
+      final stoppedHeight = tester
+          .getSize(find.byType(VoiceRecordPanel))
+          .height;
+
+      expect(
+        listeningHeight,
+        stoppedHeight,
+        reason: 'R8: listening and stopped panels stay equal height',
+      );
+      expect(
+        listeningHeight,
+        greaterThanOrEqualTo(340.0),
+        reason: 'R8: both states are at the taller ~356dp size',
+      );
     },
   );
 }

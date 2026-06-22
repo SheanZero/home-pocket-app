@@ -33,6 +33,15 @@ import 'voice_waveform.dart';
 /// transcript → 16-bar [VoiceWaveform] → dual-state square → 「点击重置重新录入」
 /// hint (reserved while listening) → 「轻点空白处退出」 hint.
 ///
+/// 260622-nhs R8 (layout only): the dual-state square is the panel's CORE, so
+/// it is the vertical centerpiece. The panel is a fixed taller 356dp [SizedBox]
+/// whose [Column] has two EQUAL-FLEX (1:1) [Expanded] zones flanking the
+/// square — TOP (status/transcript/waveform) and BOTTOM (the two hints), each
+/// centered within its half. The square sits between them at the panel's exact
+/// vertical center. Both states stay equal height (fixed height + the
+/// maintained bottom placeholder) — no jump on transition. No interaction,
+/// session, parse, or status logic changed.
+///
 /// All text via [S]; all colors via [AppPalette] (zero raw hex). Stateless —
 /// the host passes the live [transcript] / [soundLevel] and the [onExit] /
 /// [onReset] handlers from the session mixin.
@@ -74,17 +83,17 @@ class VoiceRecordPanel extends StatelessWidget {
     // 260622-nhs R4 (BUG C): title + pulse-dot colour reflect the live status.
     final (statusTitle, statusColor) = switch (status) {
       PttListenStatus.listening => (
-          l10n.listeningTitle,
-          palette.recordingGradientStart,
-        ),
+        l10n.listeningTitle,
+        palette.recordingGradientStart,
+      ),
       PttListenStatus.processing => (
-          l10n.voiceStatusProcessing,
-          palette.warning,
-        ),
+        l10n.voiceStatusProcessing,
+        palette.warning,
+      ),
       PttListenStatus.stopped => (
-          l10n.voiceStatusStopped,
-          palette.textTertiary,
-        ),
+        l10n.voiceStatusStopped,
+        palette.textTertiary,
+      ),
     };
 
     // 260622-nhs R6 (BUG 1): in the one-shot model the recognizer stops after a
@@ -105,102 +114,128 @@ class VoiceRecordPanel extends StatelessWidget {
         // form above keeps its same visible footprint (no reflow/jump).
         decoration: BoxDecoration(
           color: palette.card,
-          border: Border(
-            top: BorderSide(color: palette.borderDefault),
-          ),
+          border: Border(top: BorderSide(color: palette.borderDefault)),
         ),
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Status title with a pulsing status-coloured dot (BUG C).
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Stopped: a static dot (no pulse) — the recognizer is idle.
-                _PulsingDot(color: statusColor, pulsing: !isStopped),
-                const SizedBox(width: 6),
-                Text(
-                  statusTitle,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        // 260622-nhs R8: the central square is the panel's CORE → make it the
+        // vertical centerpiece. A fixed taller height (356dp, up from the prior
+        // ~287/296) with two EQUAL-FLEX (1:1) [Expanded] zones flanking the
+        // square places the square at the panel's exact vertical center; the
+        // top group (status/transcript/wave) and bottom group (hints) are each
+        // centered within their half. Both states stay equal height (same fixed
+        // height + the maintained bottom placeholder) — no jump on transition.
+        child: SizedBox(
+          height: 356,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // TOP zone — status row + transcript + waveform, centered in the
+              // upper half.
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Status title with a pulsing status-coloured dot (BUG C).
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Stopped: a static dot (no pulse) — recognizer is idle.
+                        _PulsingDot(color: statusColor, pulsing: !isStopped),
+                        const SizedBox(width: 6),
+                        Text(
+                          statusTitle,
+                          style: AppTextStyles.labelMedium.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
 
-            // Live transcript.
-            SizedBox(
-              key: const ValueKey('voice-panel-transcript'),
-              height: 24,
-              child: Center(
-                child: Text(
-                  transcript,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: palette.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+                    // Live transcript.
+                    SizedBox(
+                      key: const ValueKey('voice-panel-transcript'),
+                      height: 24,
+                      child: Center(
+                        child: Text(
+                          transcript,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: palette.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
 
-            VoiceWaveform(
-              soundLevel: soundLevel,
-              isActive: true,
-              color: palette.daily,
-            ),
-            const SizedBox(height: 12),
-
-            // 260622-nhs R7: dual-state central square (~74dp, radius ~22).
-            //  - listening/processing → grey ([backgroundMuted]) + line mic
-            //    ([Icons.mic_none], [textTertiary]); PASSIVE (no onTap, so a tap
-            //    bubbles to the panel's exit handler).
-            //  - stopped → red (recording-gradient) + reset icon
-            //    ([Icons.restore], white); TAPPABLE → [onReset] (re-record). Its
-            //    tap must NOT bubble to the exit handler.
-            _CentralSquare(
-              isStopped: isStopped,
-              palette: palette,
-              onReset: onReset,
-            ),
-            const SizedBox(height: 8),
-
-            // 260622-nhs R7: the stopped-only 「点击重置重新录入」 hint keeps a
-            // RESERVED placeholder while listening (maintainSize) so the panel
-            // height — and the 「轻点空白处退出」 below — is identical in both
-            // states (no jump on transition).
-            Visibility(
-              visible: isStopped,
-              maintainSize: true,
-              maintainAnimation: true,
-              maintainState: true,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  l10n.voiceTapResetToRerecord,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: palette.textSecondary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                    VoiceWaveform(
+                      soundLevel: soundLevel,
+                      isActive: true,
+                      color: palette.daily,
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            // Tap-to-exit hint — always present, aligned in both states.
-            Text(
-              l10n.voiceTapToExit,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: palette.textTertiary,
-                fontWeight: FontWeight.w600,
+              // 260622-nhs R7: dual-state central square (~74dp, radius ~22) —
+              // a sibling BETWEEN the two flex zones, so it lands at the panel's
+              // vertical center.
+              //  - listening/processing → grey ([backgroundMuted]) + line mic
+              //    ([Icons.mic_none], [textTertiary]); PASSIVE (no onTap, so a
+              //    tap bubbles to the panel's exit handler).
+              //  - stopped → red (recording-gradient) + reset icon
+              //    ([Icons.restore], white); TAPPABLE → [onReset] (re-record).
+              //    Its tap must NOT bubble to the exit handler.
+              _CentralSquare(
+                isStopped: isStopped,
+                palette: palette,
+                onReset: onReset,
               ),
-            ),
-          ],
+
+              // BOTTOM zone — the two hints, centered in the lower half.
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 260622-nhs R7: the stopped-only 「点击重置重新录入」 hint
+                    // keeps a RESERVED placeholder while listening (maintainSize)
+                    // so the panel reads identically in both states (no jump).
+                    Visibility(
+                      visible: isStopped,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          l10n.voiceTapResetToRerecord,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: palette.textSecondary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Tap-to-exit hint — always present, aligned in both states.
+                    Text(
+                      l10n.voiceTapToExit,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: palette.textTertiary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
