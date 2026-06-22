@@ -6,15 +6,15 @@ scope: ui-layout-only
 status: complete
 branch: main
 worktree: false
-commit: db828168
+commit: db828168 (R1), 83175136 (R2)
 gate:
   analyze: 0
-  test: 3137 passed / 0 failed
-  goldens: 10 re-baselined (6 smart_keyboard matrix + 4 dot-gating), macOS
-  palette_only: true (no raw hex; joyLight/joyText/daily/FAB tokens + withValues)
+  test: 3138 passed / 0 failed
+  goldens: 10 re-baselined ×2 (R1 40dp, R2 44dp); 6 smart_keyboard matrix + 4 dot-gating, macOS
+  palette_only: true (no raw hex; card/borderDefault/FAB-gradient/actionShadow tokens)
   arb: none (reused l10n.voiceRecordBar)
   codegen: none (no @riverpod/@freezed/Drift/ARB change)
-human_verify: pending  # 真机确认椭圆/底排观感
+human_verify: pending  # 真机确认白色一体/椭圆/底排观感
 design_gate: HTML mock approved (mocks/numpad-voicekey-midpoint.html · 方案 M, width 200dp)
 ---
 
@@ -68,8 +68,35 @@ design_gate: HTML mock approved (mocks/numpad-voicekey-midpoint.html · 方案 M
   子树、不含键盘 → 未变、未重基线。`VoiceRecordBar` 无 golden 覆盖（仅 widget 断言）。
 - palette-only：无新裸 hex；胶囊边/影用 `palette.joyText.withValues(alpha:)`。
 
+## R2 — 白色一体 + 44dp + 配色字体对齐「记录」键（commit 83175136）
+
+用户 R2 反馈：「语音记录按键的整体背景色应该是白色，整体和数字键盘是一体的，
+按键高度和最下排按键高度都改成44dp，同时配色以及字体改成和记录按键一致」。
+
+### ① 白色一体（一体的）
+- `VoiceRecordBar` 外层 `Container` 由透明（悬浮 cream）→ `palette.card` 白底，
+  并接管整个键盘组合的**顶部边框**（`Border(top: borderDefault)`）。
+- `SmartKeyboard` 新增 `showTopBorder`（默认 true，向后兼容 edit/ocr/amount-sheet
+  等独立调用）；`manual_one_step_screen` 传 `showTopBorder: false` → 键盘不再画自己的
+  顶边 → 语音键白条 + 键盘白卡 = **一整片白色无内部分隔线**。
+
+### ② 高度都改 44dp
+- 语音胶囊 40→**44dp**；动作（底）排由 `max(40, kh×0.77)` → **固定 44dp**
+  （`_actionRowHeight = 44`，HIG 44pt 触达；仍 < 数字键 ≥48dp）。
+
+### ③ 配色 + 字体 = 「记录」键
+- 胶囊填充由 `joyLight` 纯色 → **FAB 樱粉渐变**（`fabGradientStart→End`）+ `actionShadow`
+  阴影 + 全圆角（`borderRadius: height/2`），即 `_GradientKey`(「记录」键) 的同款配色。
+- 文案 `语音记录` 由 `labelMedium`/`joyText` → **`titleMedium` 16 w700 白色**（与「记录」键一致）；
+  mic 图标白色；用 loose `Flexible(maxLines:1, ellipsis)` 兜底，长本地化串不溢出 200dp。
+
+### R2 gate
+- analyze 0、`flutter test` 全量 **3138 / 0**；10 SmartKeyboard golden 二次重基线（底排 40→44）。
+- 新增/更新测试：`showTopBorder` 开关；语音键断言 200×44 + 白条+顶边 + 渐变胶囊 + 16/w700 白字。
+- 视觉自检：临时拼装截图确认白色一体、樱粉渐变胶囊居中不顶边、底排矮一截且与「记录」键同色（截图后即删）。
+
 ## On-device verification (human · pending)
-1. **语音键椭圆** — 记账录入页键盘顶部出现居中樱粉椭圆胶囊「🎙 语音记录」，
-   左右明显留白、不贴边；点胶囊升起语音面板，点胶囊外的留白区不触发。
-2. **底排更矮** — 最下一排（删除 / ¥JPY / 保存）明显比数字键矮一截（~40dp），
-   保存键樱粉渐变仍清晰可点。
+1. **白色一体** — 语音键白条与下方键盘连成一整片白色、无中间分隔线，组合顶部一条边线。
+2. **椭圆胶囊 = 记录键配色/字体** — 居中樱粉渐变胶囊「🎙 语音记录」（白图标白字），
+   左右明显留白、不贴边；与右下「记录」保存键同色同字。点胶囊升起语音面板，点留白区不触发。
+3. **44dp** — 语音胶囊与最下一排（删除 / ¥JPY / 记录）等高 44dp，均比数字键矮一截。
