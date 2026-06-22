@@ -1665,18 +1665,6 @@ abstract class S {
   /// **'Stopped'**
   String get voiceStatusStopped;
 
-  /// Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get voiceResetRestore;
-
-  /// Listening modal reset button subtitle: restore the transaction content
-  ///
-  /// In en, this message translates to:
-  /// **'· Restore entry'**
-  String get voiceResetRestoreSub;
-
   /// Voice panel stopped-state hint: tap the reset button to record again
   ///
   /// In en, this message translates to:

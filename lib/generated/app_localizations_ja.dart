@@ -832,12 +832,6 @@ class SJa extends S {
   String get voiceStatusStopped => '聞き取り停止';
 
   @override
-  String get voiceResetRestore => 'リセット';
-
-  @override
-  String get voiceResetRestoreSub => '· 入力を元に戻す';
-
-  @override
   String get voiceTapResetToRerecord => 'リセットして録音し直す';
 
   @override

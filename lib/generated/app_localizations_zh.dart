@@ -830,12 +830,6 @@ class SZh extends S {
   String get voiceStatusStopped => '停止聆听';
 
   @override
-  String get voiceResetRestore => '重置';
-
-  @override
-  String get voiceResetRestoreSub => '· 恢复账目';
-
-  @override
   String get voiceTapResetToRerecord => '点击重置重新录入';
 
   @override

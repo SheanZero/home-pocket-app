@@ -840,12 +840,6 @@ class SEn extends S {
   String get voiceStatusStopped => 'Stopped';
 
   @override
-  String get voiceResetRestore => 'Reset';
-
-  @override
-  String get voiceResetRestoreSub => '· Restore entry';
-
-  @override
   String get voiceTapResetToRerecord => 'Tap Reset to record again';
 
   @override

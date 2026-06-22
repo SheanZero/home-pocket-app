@@ -1090,14 +1090,6 @@
   "@voiceStatusStopped": {
     "description": "Voice panel status: the recognizer stopped (not listening)"
   },
-  "voiceResetRestore": "Reset",
-  "@voiceResetRestore": {
-    "description": "Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot"
-  },
-  "voiceResetRestoreSub": "· Restore entry",
-  "@voiceResetRestoreSub": {
-    "description": "Listening modal reset button subtitle: restore the transaction content"
-  },
   "voiceTapResetToRerecord": "Tap Reset to record again",
   "@voiceTapResetToRerecord": {
     "description": "Voice panel stopped-state hint: tap the reset button to record again"
