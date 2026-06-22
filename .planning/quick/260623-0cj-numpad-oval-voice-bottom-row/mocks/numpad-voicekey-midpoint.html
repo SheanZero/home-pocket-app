@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语音键椭圆 — A / 中间值M / B 对比</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F1ECE7; --divider:#EAE1DC; --border:#E6DCDA;
+    --textPrimary:#20352B; --textSecondary:#6B8178; --textTertiary:#9AA39C;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --fabA:#E3A0B6; --fabB:#D27E97; --actionShadow:rgba(210,126,151,.32);
+    --kh:52px; --ah:40px; --gap:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1280px;margin:0 auto 26px;}
+  .page-head h1{font-size:23px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.85;color:#5a5048;max-width:980px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--joy);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.9;color:#5a5048;max-width:980px;}
+  .page-head .prob b{color:#a53d5e;} .page-head .prob .g{color:#2e6b3a;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start;max-width:1280px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px;width:374px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;color:#fff;flex-shrink:0;display:inline-flex;
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .col.a > .cap .n{background:#b6aaa0;} .col.m > .cap .n{background:var(--joy);} .col.b > .cap .n{background:#b6aaa0;}
+  .col.m{position:relative;}
+  .col.m .phone{outline:3px solid var(--joy);outline-offset:3px;}
+  .pick{position:absolute;top:34px;right:18px;background:var(--joy);color:#fff;font-size:10.5px;font-weight:800;
+    padding:3px 9px;border-radius:8px;letter-spacing:.4px;z-index:2;box-shadow:0 2px 6px rgba(165,61,94,.3);}
+
+  .phone{width:374px;background:var(--bg);border-radius:42px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;border:1px solid #ddd3cc;position:relative;}
+  .sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;
+    font-size:14px;font-weight:700;color:var(--textPrimary);position:relative;background:var(--card);}
+  .sb .island{position:absolute;left:50%;top:9px;translate:-50% 0;width:96px;height:26px;border-radius:16px;background:#0a0a0a;}
+  .sb .r{font-size:12px;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:13px 18px 9px;display:flex;align-items:center;gap:10px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:13px;font-weight:700;padding:6px 11px;border-radius:9px;}
+  .amount .val{flex:1;text-align:right;font-size:42px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;line-height:1;}
+  .amount .clr{color:var(--textTertiary);font-size:18px;width:30px;height:30px;border-radius:50%;background:var(--muted);
+    display:flex;align-items:center;justify-content:center;}
+
+  .form{padding:2px 16px 8px;display:flex;flex-direction:column;gap:10px;}
+  .cardbox{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .frow{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+  .frow + .frow{border-top:1px solid var(--divider);}
+  .frow .ic{font-size:15px;width:18px;text-align:center;color:var(--textSecondary);}
+  .frow .lbl{font-size:14px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .usecard{display:flex;align-items:center;padding:11px 14px;}
+  .usecard .ul{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .ledger{display:flex;gap:9px;margin-left:auto;}
+  .lchip{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);
+    background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+
+  .keypad{background:var(--card);border-top:1px solid var(--border);padding:12px 12px 18px;
+    display:flex;flex-direction:column;gap:var(--gap);}
+
+  /* voice key capsules — all centered, vary only WIDTH */
+  .vpill{align-self:center;height:40px;border-radius:20px;background:var(--joyLight);border:1px solid #F0D6DE;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 4px;
+    box-shadow:0 2px 7px rgba(165,61,94,.10);}
+  .vpill.a{padding:0 22px;}              /* hug content ≈ 150dp */
+  .vpill.m{width:228px;}                 /* MIDDLE ≈ 228dp, centered */
+  .vpill.b{align-self:stretch;margin:2px 20px 4px;}  /* inset 20dp ≈ 310dp */
+  .vpill .mi{width:18px;height:18px;color:var(--joyText);}
+  .vpill .tx{font-size:13.5px;font-weight:700;color:var(--joyText);}
+  .wlabel{align-self:center;font-size:10.5px;font-weight:700;color:#b08; color:var(--joyText);opacity:.75;margin:-1px 0 3px;}
+
+  .krow{display:flex;gap:var(--gap);}
+  .key{flex:1;height:var(--kh);border-radius:12px;background:var(--muted);display:flex;align-items:center;
+    justify-content:center;font-size:20px;font-weight:500;color:var(--textPrimary);font-variant-numeric:tabular-nums;}
+  .key.dim{color:var(--textTertiary);font-size:16px;font-weight:600;}
+  .arow .key{height:var(--ah);}
+  .key.back{font-size:21px;color:var(--textSecondary);}
+  .key.curk{flex-direction:column;gap:0;}
+  .key.curk .sym{font-size:18px;font-weight:700;color:var(--daily);line-height:1.05;}
+  .key.curk .code{font-size:11px;font-weight:600;color:var(--daily);opacity:.9;}
+  .key.save{background:linear-gradient(to bottom,var(--fabA),var(--fabB));color:#fff;font-size:16px;font-weight:700;
+    border-radius:14px;box-shadow:0 4px 14px var(--actionShadow);}
+
+  .note{width:374px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;font-size:12.5px;color:#5a5048;line-height:1.75;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;}
+  .note .badge.grey{background:#eef1f0;color:#5a6b63;border:1px solid #d8e0db;}
+  .note .badge.pink{background:#fbeaef;color:#a53d5e;border:1px solid #f3cdd8;}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .k{display:inline-block;min-width:46px;color:#8a7f76;font-weight:700;}
+  .legend{max-width:1280px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;border:1px solid #e3dad2;
+    border-radius:10px;padding:14px 17px;line-height:1.9;}
+  .legend b{color:#2c2a26;} .legend code{background:#f3ece6;border:1px solid #e6dbd2;border-radius:5px;padding:1px 5px;font-size:11.5px;color:#7a4a58;}
+  .legend .p{color:#a53d5e;font-weight:700;}
+  .iconsvg{display:none;}
+</style>
+</head>
+<body>
+
+<svg class="iconsvg"><defs>
+  <g id="mic"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></g>
+</defs></svg>
+
+<div class="page-head">
+  <h1>语音键椭圆 · A / <span style="color:#a53d5e">中间值 M</span> / B 宽度对比</h1>
+  <p>三者都是<b>居中椭圆胶囊、不顶边、悬浮在键盘顶部</b>，唯一区别是<b>宽度</b>：
+  A 贴合文字（最窄）→ <span class="g" style="color:#a53d5e;font-weight:700">M 取 A、B 中间（≈228dp，居中、左右各留约 60dp）</span>→ B 内缩 20dp（最宽）。
+  底排高度（40dp，−23%）三者一致，数字键不变。</p>
+  <div class="prob"><b>中间值 M：</b>比 A 更易点、更有按钮分量；比 B 更收敛、留白更舒展，不会像「一整条」。建议作为最终样式。</div>
+</div>
+
+<div class="grid">
+
+  <!-- A -->
+  <div class="col a">
+    <div class="cap"><span class="n">A</span>贴合文字（最窄）</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="keypad">
+        <div class="vpill a"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg><span class="tx">语音记录</span></div>
+        <div class="wlabel">≈ 150dp</div>
+        <div class="krow"><span class="key">1</span><span class="key">2</span><span class="key">3</span></div>
+        <div class="krow"><span class="key">4</span><span class="key">5</span><span class="key">6</span></div>
+        <div class="krow"><span class="key">7</span><span class="key">8</span><span class="key">9</span></div>
+        <div class="krow"><span class="key dim">00</span><span class="key">0</span><span class="key dim">.</span></div>
+        <div class="krow arow"><span class="key back">⌫</span><span class="key curk"><span class="sym">¥</span><span class="code">JPY</span></span><span class="key save">保存</span></div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge grey">A · 最窄</span>
+      <h4>仅包住「🎙 语音记录」</h4>
+      <div style="margin:5px 0"><span class="k">观感</span>最轻，色块最小，留白最多</div>
+      <div style="margin:5px 0"><span class="k">缺点</span>点击命中区偏小</div>
+    </div>
+  </div>
+
+  <!-- M (middle) -->
+  <div class="col m">
+    <div class="pick">★ 中间值 M</div>
+    <div class="cap"><span class="n">M</span>居中 · A/B 中间（≈228dp）</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="keypad">
+        <div class="vpill m"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg><span class="tx">语音记录</span></div>
+        <div class="wlabel">≈ 228dp · 左右各留约 60dp</div>
+        <div class="krow"><span class="key">1</span><span class="key">2</span><span class="key">3</span></div>
+        <div class="krow"><span class="key">4</span><span class="key">5</span><span class="key">6</span></div>
+        <div class="krow"><span class="key">7</span><span class="key">8</span><span class="key">9</span></div>
+        <div class="krow"><span class="key dim">00</span><span class="key">0</span><span class="key dim">.</span></div>
+        <div class="krow arow"><span class="key back">⌫</span><span class="key curk"><span class="sym">¥</span><span class="code">JPY</span></span><span class="key save">保存</span></div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge pink">M · 中间值（推荐）</span>
+      <h4>居中宽胶囊 — 比 A 宽、比 B 窄</h4>
+      <div style="margin:5px 0"><span class="k">宽度</span>≈228dp，约键盘宽的 2/3，水平居中</div>
+      <div style="margin:5px 0"><span class="k">观感</span>有按钮分量、命中区舒适，又保留悬浮留白</div>
+      <div style="margin:5px 0"><span class="k">实现</span>固定/最大宽 + 居中（非 stretch），Stadium 全圆角</div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="col b">
+    <div class="cap"><span class="n">B</span>内缩 20dp（最宽）</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="keypad">
+        <div class="vpill b"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg><span class="tx">语音记录</span></div>
+        <div class="wlabel">≈ 310dp · 左右各留 20dp</div>
+        <div class="krow"><span class="key">1</span><span class="key">2</span><span class="key">3</span></div>
+        <div class="krow"><span class="key">4</span><span class="key">5</span><span class="key">6</span></div>
+        <div class="krow"><span class="key">7</span><span class="key">8</span><span class="key">9</span></div>
+        <div class="krow"><span class="key dim">00</span><span class="key">0</span><span class="key dim">.</span></div>
+        <div class="krow arow"><span class="key back">⌫</span><span class="key curk"><span class="sym">¥</span><span class="code">JPY</span></span><span class="key save">保存</span></div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge grey">B · 最宽</span>
+      <h4>接近满宽（内缩 20dp）</h4>
+      <div style="margin:5px 0"><span class="k">观感</span>最显眼、命中区最大</div>
+      <div style="margin:5px 0"><span class="k">缺点</span>仍有「一整条」感，留白少</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>本轮只比语音键宽度。</b>三版都是<span class="p">居中椭圆胶囊（Stadium 全圆角）· 不顶边 · joyLight 底 / joyText 字</span>，
+  区别仅在宽度：A≈150 / <span class="p">M≈228（A、B 中间）</span> / B≈310 dp。底排 40dp（−23%）与数字键尺寸三版一致、本轮不动。
+  <br><b>实现（<code>VoiceRecordBar</code> · hold_to_talk_bar.dart）：</b>M = 在键盘卡片顶部放一个<b>居中</b>的胶囊，
+  给定宽度（如 <code>ConstrainedBox(maxWidth: 228)</code> 或 <code>FractionallySizedBox(widthFactor≈0.65)</code>）+ <code>StadiumBorder</code>，
+  去掉原满宽 <code>joyLight</code> 背景条与 <code>border-bottom</code>，上下留 6–8dp 边距。确认 M 后即进入 Flutter 实改。
+</div>
+
+</body>
+</html>

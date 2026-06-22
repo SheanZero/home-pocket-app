@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字小键盘重设计 — 语音键椭圆化 + 底排降高</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F1ECE7; --divider:#EAE1DC; --border:#E6DCDA;
+    --textPrimary:#20352B; --textSecondary:#6B8178; --textTertiary:#9AA39C;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --fabA:#E3A0B6; --fabB:#D27E97; --actionShadow:rgba(210,126,151,.32);
+    /* key heights — digit rows tall, bottom(action) row shortened */
+    --kh:52px;    /* digit / extra row height */
+    --ah:40px;    /* action(bottom) row height  → −23% */
+    --gap:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1280px;margin:0 auto 26px;}
+  .page-head h1{font-size:23px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.85;color:#5a5048;max-width:980px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--joy);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.9;color:#5a5048;max-width:980px;}
+  .page-head .prob b{color:#a53d5e;}
+  .page-head .prob .g{color:#2e6b3a;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start;max-width:1280px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px;width:374px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;color:#fff;flex-shrink:0;display:inline-flex;
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .col.cur > .cap .n{background:#b6aaa0;} .col.a > .cap .n{background:var(--daily);} .col.b > .cap .n{background:var(--joy);}
+
+  .phone{width:374px;background:var(--bg);border-radius:42px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;border:1px solid #ddd3cc;position:relative;}
+  .sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;
+    font-size:14px;font-weight:700;color:var(--textPrimary);position:relative;background:var(--card);}
+  .sb .island{position:absolute;left:50%;top:9px;translate:-50% 0;width:96px;height:26px;border-radius:16px;background:#0a0a0a;}
+  .sb .r{font-size:12px;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:13px 18px 9px;display:flex;align-items:center;gap:10px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:13px;font-weight:700;padding:6px 11px;border-radius:9px;}
+  .amount .val{flex:1;text-align:right;font-size:42px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;line-height:1;}
+  .amount .clr{color:var(--textTertiary);font-size:18px;width:30px;height:30px;border-radius:50%;background:var(--muted);
+    display:flex;align-items:center;justify-content:center;}
+
+  .form{padding:2px 16px 8px;display:flex;flex-direction:column;gap:10px;}
+  .cardbox{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .frow{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+  .frow + .frow{border-top:1px solid var(--divider);}
+  .frow .ic{font-size:15px;width:18px;text-align:center;color:var(--textSecondary);}
+  .frow .lbl{font-size:14px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .frow .v.ph{color:var(--textTertiary);font-weight:500;}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .usecard{display:flex;align-items:center;padding:11px 14px;}
+  .usecard .ul{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .ledger{display:flex;gap:9px;margin-left:auto;}
+  .lchip{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);
+    background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+
+  /* ============ KEYPAD ============ */
+  .keypad{background:var(--card);border-top:1px solid var(--border);padding:12px 12px 18px;
+    display:flex;flex-direction:column;gap:var(--gap);}
+
+  /* voice key — current: full-width flush strip */
+  .vstrip{height:38px;margin:-12px -12px 12px;background:var(--joyLight);
+    border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:8px;}
+  .vstrip .mi{width:18px;height:18px;color:var(--joyText);}
+  .vstrip .tx{font-size:13.5px;font-weight:700;color:var(--joyText);}
+
+  /* voice key — option A: centered compact capsule (hugs content, not touching edges) */
+  .vpill-c{align-self:center;height:38px;padding:0 22px;border-radius:19px;background:var(--joyLight);
+    border:1px solid #F0D6DE;display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 4px;
+    box-shadow:0 2px 7px rgba(165,61,94,.10);}
+  .vpill-c .mi{width:18px;height:18px;color:var(--joyText);}
+  .vpill-c .tx{font-size:13.5px;font-weight:700;color:var(--joyText);}
+
+  /* voice key — option B: wide inset capsule (side margins, fully rounded ends) */
+  .vpill-w{height:40px;margin:2px 20px 6px;border-radius:20px;background:var(--joyLight);border:1px solid #F0D6DE;
+    display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 7px rgba(165,61,94,.10);}
+  .vpill-w .mi{width:18px;height:18px;color:var(--joyText);}
+  .vpill-w .tx{font-size:13.5px;font-weight:700;color:var(--joyText);}
+
+  /* rows */
+  .krow{display:flex;gap:var(--gap);}
+  .key{flex:1;height:var(--kh);border-radius:12px;background:var(--muted);display:flex;align-items:center;
+    justify-content:center;font-size:20px;font-weight:500;color:var(--textPrimary);font-variant-numeric:tabular-nums;}
+  .key.dim{color:var(--textTertiary);font-size:16px;font-weight:600;}
+
+  /* action(bottom) row — shorter height */
+  .arow .key{height:var(--ah);}
+  .arow.tall .key{height:var(--kh);}            /* current = same height as digits */
+  .key.back{font-size:21px;color:var(--textSecondary);}
+  .key.curk{flex-direction:column;gap:0;background:var(--muted);}
+  .key.curk .sym{font-size:18px;font-weight:700;color:var(--daily);line-height:1.05;}
+  .key.curk .code{font-size:11px;font-weight:600;color:var(--daily);opacity:.9;}
+  .key.save{background:linear-gradient(to bottom,var(--fabA),var(--fabB));color:#fff;font-size:16px;font-weight:700;
+    border-radius:14px;box-shadow:0 4px 14px var(--actionShadow);}
+
+  /* height ruler badge on the action row */
+  .kphold{position:relative;}
+  .hbadge{position:absolute;right:-7px;top:50%;translate:0 -50%;background:#fff;border:1px solid #e3cdd5;color:#a53d5e;
+    font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+
+  .note{width:374px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;font-size:12.5px;color:#5a5048;line-height:1.75;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;}
+  .note .badge.grey{background:#eef1f0;color:#5a6b63;border:1px solid #d8e0db;}
+  .note .badge.green{background:#eaf5ec;color:#2e6b3a;border:1px solid #cfe6d4;}
+  .note .badge.pink{background:#fbeaef;color:#a53d5e;border:1px solid #f3cdd8;}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .k{display:inline-block;min-width:46px;color:#8a7f76;font-weight:700;}
+  .legend{max-width:1280px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;border:1px solid #e3dad2;
+    border-radius:10px;padding:14px 17px;line-height:1.9;}
+  .legend b{color:#2c2a26;} .legend code{background:#f3ece6;border:1px solid #e6dbd2;border-radius:5px;padding:1px 5px;font-size:11.5px;color:#7a4a58;}
+  .legend .g{color:#2e6b3a;font-weight:700;} .legend .p{color:#a53d5e;font-weight:700;}
+  .iconsvg{display:none;}
+</style>
+</head>
+<body>
+
+<svg class="iconsvg"><defs>
+  <g id="mic"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></g>
+</defs></svg>
+
+<div class="page-head">
+  <h1>数字小键盘重设计 · 语音键椭圆化 + 底排降高</h1>
+  <p>两处改动：① <b>语音录入键</b>——现在是「顶满左右边」的整条色带，改成<b>不顶边的椭圆胶囊</b>；
+  ② <span class="g">最下面一排（删除 / ¥货币 / 保存）</span>——把高度<b>调低一些</b>，让键盘更紧凑。
+  其余数字键（1–9 / 00 0 .）布局、配色、间距全部不变。</p>
+  <div class="prob">
+    <b>现状问题：</b>语音键是 <code style="background:#fbeaef;border:1px solid #f3cdd8;border-radius:4px;padding:1px 5px">VoiceRecordBar</code>
+    一条 38dp 满宽色带（贴着键盘左右边 + 一条下边线），略显笨重；底排动作键与数字键<b>等高</b>，整体偏高。
+    <br><b>目标：</b>语音键<span class="p">→ 椭圆胶囊、留出边距、悬浮在键盘顶部</span>；底排<span class="g">→ 比数字键矮约 1/4（52→40dp）</span>。
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== 现状 ===================== -->
+  <div class="col cur">
+    <div class="cap"><span class="n">0</span>现状 · 满宽色带 + 等高底排</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="keypad">
+        <div class="vstrip"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg><span class="tx">语音记录</span></div>
+        <div class="krow"><span class="key">1</span><span class="key">2</span><span class="key">3</span></div>
+        <div class="krow"><span class="key">4</span><span class="key">5</span><span class="key">6</span></div>
+        <div class="krow"><span class="key">7</span><span class="key">8</span><span class="key">9</span></div>
+        <div class="krow"><span class="key dim">00</span><span class="key">0</span><span class="key dim">.</span></div>
+        <div class="krow arow tall">
+          <span class="key back">⌫</span>
+          <span class="key curk"><span class="sym">¥</span><span class="code">JPY</span></span>
+          <span class="key save">保存</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge grey">现状</span>
+      <h4>语音键 = 满宽色带（顶边）· 底排与数字键等高</h4>
+      <div style="margin:5px 0"><span class="k">语音键</span>38dp 满宽，贴左右边 + 下边线，色块感重</div>
+      <div style="margin:5px 0"><span class="k">底排高</span>52dp（= 数字键高）</div>
+      <div style="margin:5px 0"><span class="k">键盘高</span>语音带 38 + 5 排 ×52 + 间距</div>
+    </div>
+  </div>
+
+  <!-- ===================== 方案 A ===================== -->
+  <div class="col a">
+    <div class="cap"><span class="n">A</span>居中小胶囊 + 底排降高</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="keypad">
+        <div class="vpill-c"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg><span class="tx">语音记录</span></div>
+        <div class="krow"><span class="key">1</span><span class="key">2</span><span class="key">3</span></div>
+        <div class="krow"><span class="key">4</span><span class="key">5</span><span class="key">6</span></div>
+        <div class="krow"><span class="key">7</span><span class="key">8</span><span class="key">9</span></div>
+        <div class="krow"><span class="key dim">00</span><span class="key">0</span><span class="key dim">.</span></div>
+        <div class="krow arow kphold">
+          <span class="key back">⌫</span>
+          <span class="key curk"><span class="sym">¥</span><span class="code">JPY</span></span>
+          <span class="key save">保存</span>
+          <span class="hbadge">40dp · −23%</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge green">方案 A</span>
+      <h4>语音键 = 居中小胶囊（贴合文字宽度）</h4>
+      <div style="margin:5px 0"><span class="k">语音键</span>椭圆胶囊，宽度只包住「🎙 语音记录」，<b>水平居中</b>、上下留白、不顶边</div>
+      <div style="margin:5px 0"><span class="k">观感</span>最轻盈，色块最小，像一颗悬浮按钮</div>
+      <div style="margin:5px 0"><span class="k">底排高</span><b>40dp</b>（数字键仍 52dp，底排 −23%）</div>
+    </div>
+  </div>
+
+  <!-- ===================== 方案 B ===================== -->
+  <div class="col b">
+    <div class="cap"><span class="n">B</span>内缩宽胶囊 + 底排降高</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="keypad">
+        <div class="vpill-w"><svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg><span class="tx">语音记录</span></div>
+        <div class="krow"><span class="key">1</span><span class="key">2</span><span class="key">3</span></div>
+        <div class="krow"><span class="key">4</span><span class="key">5</span><span class="key">6</span></div>
+        <div class="krow"><span class="key">7</span><span class="key">8</span><span class="key">9</span></div>
+        <div class="krow"><span class="key dim">00</span><span class="key">0</span><span class="key dim">.</span></div>
+        <div class="krow arow kphold">
+          <span class="key back">⌫</span>
+          <span class="key curk"><span class="sym">¥</span><span class="code">JPY</span></span>
+          <span class="key save">保存</span>
+          <span class="hbadge">40dp · −23%</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge pink">方案 B</span>
+      <h4>语音键 = 内缩宽胶囊（两端全圆角）</h4>
+      <div style="margin:5px 0"><span class="k">语音键</span>椭圆胶囊，<b>左右各留 20dp 边距</b>，两端全圆角；比 A 更显眼、更易点</div>
+      <div style="margin:5px 0"><span class="k">观感</span>保留「整条」的存在感，但不再顶边、四角变圆端</div>
+      <div style="margin:5px 0"><span class="k">底排高</span><b>40dp</b>（同 A，数字键 52dp 不变）</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>改动范围：</b>只动键盘区，数字键 1–9 / 00 / 0 / . 的尺寸·配色·间距<b>完全不变</b>。
+  <br><b>① 语音键（<code>VoiceRecordBar</code> · hold_to_talk_bar.dart）：</b>
+  由「38dp 满宽色带 + 下边线」改为<span class="p">椭圆胶囊</span> —— 去掉满宽 <code>joyLight</code> 背景条与 <code>border-bottom</code>，
+  改为悬浮在键盘卡片顶部的胶囊（<code>borderRadius: StadiumBorder</code> 或 <code>height/2</code>），加左右/上下边距使其「不顶边」。
+  <span class="g">A</span>=宽度贴合文字、居中；<span class="g">B</span>=左右各内缩 20dp 的宽胶囊。配色沿用 <code>joyLight</code> 底 / <code>joyText</code> 字（樱粉系）。
+  <br><b>② 底排降高（<code>SmartKeyboard._buildActionRow</code> · smart_keyboard.dart）：</b>
+  新增独立 <code>bottomRowHeight ≈ keyHeight × 0.77</code>（52→<span class="g">40dp</span>），传给 <code>_ActionKey</code> / <code>_CurrencyKey</code> / <code>_GradientKey</code>；
+  数字行仍用原 <code>keyHeight</code>（≥48dp 下限不动）。降幅可调：−15%≈44dp / −23%≈40dp / −30%≈36dp，当前样稿取 <b>−23%（40dp）</b>。
+  <br><b>配色对齐</b> <code>app_palette.dart</code>：joyLight #FBEAEF / joyText #A53D5E / daily #5FAE72 / 保存键 FAB 樱粉渐变 #E3A0B6→#D27E97 / 数字键底 backgroundMuted。
+</div>
+
+</body>
+</html>
