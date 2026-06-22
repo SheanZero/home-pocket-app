@@ -14,7 +14,7 @@ gate:
   goldens: no re-baseline needed (no golden directly captures VoiceRecordPanel; the only *voice* golden — voice_input_screen_mic_button_idle.png — is unaffected)
   palette_only: true (no new raw hex)
   manual_one_step_screen_loc: 1020 (untouched by R8 — not in diff)
-human_verify: pending
+human_verify: verified  # 用户真机验收通过 2026-06-23（approved，覆盖 R1–R8 累计最终态）
 ---
 
 # 260622-nhs · FIX R8 — Voice panel: center the square, taller panel
