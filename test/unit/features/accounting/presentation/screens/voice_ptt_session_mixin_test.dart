@@ -88,6 +88,10 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   void emitFinal(String words) => onResult!(
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], true),
   );
+
+  /// Simulate the platform recognizer self-terminating (30s/3s timeout) so the
+  /// continuous tap-session must re-arm to keep listening.
+  void emitTerminalStatus() => onStatus!('done');
 }
 
 class FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
@@ -413,6 +417,121 @@ void main() {
       expect(host.pttDisplayCurrency, 'USD',
           reason: 'a resolved foreign rate pushes the triple and switches '
               'the display currency to USD');
+    },
+  );
+
+  // ── R2 tap-modal / continuous auto-fill ──────────────────────────────────
+
+  testWidgets(
+    'R2: tap-session auto-fills the form on each speech-final (no exit needed)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '1千8百4十元 星巴克': VoiceParseResult(
+          rawText: '1千8百4十元 星巴克',
+          amount: 1840,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: '星巴克',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.91,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(host.pttIsRecording, isTrue);
+
+      // A speech-final result AUTO-fills the form — no exit / release needed.
+      speech.emitFinal('1千8百4十元 星巴克');
+      await tester.pumpAndSettle();
+
+      expect(parse.inputs, contains('1千8百4十元 星巴克'));
+      expect(host.committed, isTrue,
+          reason: 'an auto-fill fires onPttCommitted');
+      expect(host.pttIsRecording, isTrue,
+          reason: 'the session keeps listening after an auto-fill');
+      expect(find.text('星巴克'), findsOneWidget);
+      expect(find.textContaining('Cafe'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'R2: a terminal recognizer status re-arms listening while the session is open',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.startedLocaleId = null; // simulate the platform stopping
+
+      speech.emitTerminalStatus();
+      await tester.pumpAndSettle();
+
+      expect(host.pttIsRecording, isTrue,
+          reason: 're-arm must keep the session open, not end it');
+      expect(speech.startedLocaleId, isNotNull,
+          reason: 'startListening was called again to keep listening');
+    },
+  );
+
+  testWidgets(
+    'R2: exitPttTapSession stops the recognizer and ends the session',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        'ラテ 1千': VoiceParseResult(
+          rawText: 'ラテ 1千',
+          amount: 1000,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: 'スタバ',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.emitFinal('ラテ 1千');
+      await tester.pumpAndSettle();
+
+      await host.exitPttTapSession();
+      await tester.pumpAndSettle();
+
+      expect(speech.stopped, isTrue);
+      expect(host.pttIsRecording, isFalse,
+          reason: 'exit ends the session');
+      // Filled content is retained (D-2 fill-and-stay).
+      expect(find.text('スタバ'), findsOneWidget);
     },
   );
 }

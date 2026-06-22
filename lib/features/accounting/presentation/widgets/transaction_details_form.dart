@@ -327,6 +327,38 @@ class TransactionDetailsFormState
     });
   }
 
+  // ── 260622-nhs R2: read-only snapshot accessors ───────────────────────────
+  //
+  // The single-page voice-record modal (D-2 reset-restore) snapshots the form
+  // BEFORE auto-filling so the 「重置·恢复账目」 button can roll the form back to
+  // the pre-speech state. These getters expose the mutable fields the imperative
+  // `update*` setters write, so the host can capture and re-apply them without
+  // the form leaking its internal controllers.
+
+  /// Current JPY amount (the figure `submit()` persists).
+  int get currentAmount => _amount;
+
+  /// Current selected category / parent (null until resolved).
+  Category? get currentCategory => _category;
+  Category? get currentParentCategory => _parentCategory;
+
+  /// Current transaction date.
+  DateTime get currentDate => _date;
+
+  /// Current merchant text.
+  String get currentMerchant => _storeController.text;
+
+  /// Current note text.
+  String get currentNote => _memoController.text;
+
+  /// Current joy-ledger satisfaction value.
+  int get currentSatisfaction => _joyFullness;
+
+  /// Current foreign-currency triple (all null on a JPY-native row).
+  String? get currentOriginalCurrency => _originalCurrency;
+  int? get currentOriginalAmount => _originalAmount;
+  String? get currentAppliedRate => _appliedRate;
+
   /// Phase 42-09 (DISP-03 / ADR-022 D-01) — imperative host sync for the
   /// foreign currency code. Mirrors [updateAmount]'s idempotency short-circuit
   /// (host-owns, form-syncs). Setting a non-JPY code marks the row foreign so

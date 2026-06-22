@@ -96,6 +96,12 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   DateTime? _pressStart;
 
+  /// 260622-nhs R2: true while a tap-toggled continuous listening session (the
+  /// auto-fill modal on the manual screen) is open. In this mode there is no
+  /// hold/`pressStart`; the recognizer is re-armed on self-termination and each
+  /// speech-final result auto-fills the form live. The legacy hold path leaves
+  /// this false so its behavior is byte-unchanged.
+  bool _continuousActive = false;
   final List<double> _soundLevels = [];
   final List<DateTime> _timestamps = [];
   DateTime? _startTime;
@@ -129,6 +135,10 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   /// Latest parse result (drives the voice-correction learning keyword hook).
   VoiceParseResult? get pttParseResult => _parseResult;
+
+  /// 260622-nhs R2: true while the tap-toggled continuous auto-fill session is
+  /// open (the manual-screen modal). False during the legacy hold path.
+  bool get pttContinuousActive => _continuousActive;
 
   // ── VoiceRecognitionEventHandlerMixin abstract contract ────────────────────
 
@@ -173,6 +183,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   /// Tear down the session. Call from the host's dispose (before super.dispose).
   void disposePttSession() {
+    _continuousActive = false;
     _parseDebounce?.cancel();
     _amountMerger?.dispose();
     _amountMerger = null;
@@ -235,6 +246,15 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     });
 
     final text = _finalText.isNotEmpty ? _finalText : _partialText;
+    await _fillFormFromText(text);
+  }
+
+  /// 260622-nhs R2: parse [text] and batch-fill the embedded form (amount /
+  /// category / merchant / date / satisfaction / foreign triple). Extracted
+  /// VERBATIM from the prior `stopPttSessionAndCommit` body so BOTH the legacy
+  /// hold-release commit AND the new continuous auto-fill (each speech-final)
+  /// share one fill path — no parse/merger/foreign/satisfaction fork.
+  Future<void> _fillFormFromText(String text) async {
     if (text.isEmpty) return;
 
     final parseUseCase = ref.read(parseVoiceInputUseCaseProvider);
@@ -297,6 +317,63 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     onPttCommitted();
   }
 
+  // ── 260622-nhs R2: tap-toggled continuous auto-fill session ────────────────
+
+  /// Start a tap-toggled continuous listening session (manual-screen modal):
+  /// reset buffers, begin recognition, and keep listening (re-armed via
+  /// [onStatus]) so every speech-final result auto-fills the form. There is NO
+  /// hold/`pressStart`; the host exits via [exitPttTapSession] (a tap on the
+  /// modal/scrim) or rolls back via the host's snapshot restore.
+  Future<void> startPttTapSession() async {
+    _continuousActive = true;
+    _pressStart = null;
+    await startPttSession();
+  }
+
+  /// Exit the tap session: stop the recognizer, flush the merger, fill the form
+  /// one last time from the latest transcript (D-2 fill-and-stay), and end the
+  /// session. Filled content is RETAINED — no discard, no auto-save.
+  Future<void> exitPttTapSession() async {
+    _continuousActive = false;
+    _amountMerger?.stop();
+    await pttSpeechService.stop();
+    if (!mounted) return;
+    onPttSessionChanged(() {
+      _isRecording = false;
+      _soundLevel = 0.0;
+    });
+    final text = _finalText.isNotEmpty ? _finalText : _partialText;
+    await _fillFormFromText(text);
+  }
+
+  /// Re-arm a fresh `startListening` so the continuous session keeps listening
+  /// after the platform recognizer self-terminates (30s listenFor / 3s pauseFor
+  /// timeout). Preserves the same merger so chunk-merging spans re-arms.
+  Future<void> _reArmPttListening() async {
+    if (!_continuousActive || !mounted) return;
+    await pttSpeechService.startListening(
+      onResult: _onResult,
+      onSoundLevel: _onSoundLevel,
+      localeId: pttVoiceLocaleId,
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
+    );
+  }
+
+  @override
+  void onStatus(String status) {
+    // In the continuous tap session a terminal status is NOT a commit/end
+    // signal — it's a recognizer timeout. Re-arm to keep listening rather than
+    // letting the base handler tear the session down.
+    if (_continuousActive &&
+        (status == 'done' || status == 'notListening') &&
+        _isRecording) {
+      unawaited(_reArmPttListening());
+      return;
+    }
+    super.onStatus(status);
+  }
+
   // ── Foreign triple (ported verbatim from _pushVoiceForeignTriple) ───────────
 
   Future<bool> pushVoiceForeignTriple({
@@ -346,6 +423,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   // ── Cancel/discard (ported verbatim from _cancelRecordingAndDiscard) ────────
 
   Future<void> cancelPttSessionAndDiscard() async {
+    _continuousActive = false;
     _amountMerger?.dispose();
     _amountMerger = null;
     await pttSpeechService.cancel();
@@ -398,7 +476,16 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _parseDebounce?.cancel();
       if (text.isNotEmpty) {
         _amountMerger?.feedChunk(text, isFinal: true);
-        _parseFinalResult(text);
+        // R2: in the continuous tap session, parse for satisfaction THEN
+        // auto-fill the form live (no exit/release needed). The legacy hold
+        // path only refreshes _parseResult here; the fill happens on release.
+        if (_continuousActive) {
+          _parseFinalResult(text).then((_) {
+            if (mounted && _continuousActive) _fillFormFromText(text);
+          });
+        } else {
+          _parseFinalResult(text);
+        }
       }
     }
   }
