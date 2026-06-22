@@ -60,9 +60,10 @@ GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
 ///
 /// Injects the transaction repository directly (NOT analyticsRepository): the
 /// within-month trend reuses `findByBookIds` over a 2-month window with a
-/// Dart-side per-day per-ledger cumulative transform. Replaces the deleted
-/// 6-month `getExpenseTrendUseCase` (D-E2 — the 6-month MonthlyTrend/BarChart
-/// stack is removed; round-5 B needs per-day cumulative, not per-month totals).
+/// Dart-side per-day per-ledger cumulative transform. The prior 6-month
+/// per-month-totals trend was retired in Phase 46 (D-E2) in favour of this
+/// per-day cumulative path (round-5 B needs per-day cumulative, not per-month
+/// totals).
 @riverpod
 GetWithinMonthCumulativeUseCase getWithinMonthCumulativeUseCase(Ref ref) {
   return GetWithinMonthCumulativeUseCase(
