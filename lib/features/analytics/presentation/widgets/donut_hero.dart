@@ -255,6 +255,17 @@ class DonutHero extends ConsumerWidget {
                     sectionsSpace: 0,
                     centerSpaceRadius: 59.4,
                   ),
+                  // 260622-d5i fix: disable fl_chart's implicit slice-morph
+                  // animation. `RenderPieChart.badgeWidgetPaint` indexes the
+                  // animation-LERPED `data.sections` by badge-child position;
+                  // when the section count changes, the first post-change frame
+                  // evaluates the tween at the OLD (shorter) data while the badge
+                  // children are already the NEW (longer) list →
+                  // `data.sections[counter]` throws RangeError. Zero duration
+                  // keeps `data == target` every frame so the child/section
+                  // counts can never desync. The center count-up (a separate
+                  // TweenAnimationBuilder) is unaffected.
+                  duration: Duration.zero,
                 ),
               // §1e center: 3 lines (label / count-up total / entry-count).
               Column(
@@ -443,6 +454,12 @@ class DonutHero extends ConsumerWidget {
                     sectionsSpace: 0,
                     centerSpaceRadius: 59.4,
                   ),
+                  // 260622-d5i fix: see the category-mode PieChart above —
+                  // zero-duration keeps `data == target` so fl_chart's
+                  // badgeWidgetPaint can never index a stale shorter sections
+                  // list (RangeError). Member mode uses on-ring titles rather
+                  // than badge widgets, but the same lerp/desync guard applies.
+                  duration: Duration.zero,
                 ),
               Column(
                 mainAxisSize: MainAxisSize.min,
