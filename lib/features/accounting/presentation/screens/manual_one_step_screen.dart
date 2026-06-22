@@ -327,13 +327,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
         _lastFillWasVoice = snapshot.lastFillWasVoice;
       });
     }
-    // Clear the session's transcript/merger/parse buffers, then GUARANTEE the
-    // recognizer is still listening. 260622-nhs R3 (BUG 2): resetPttSessionState
-    // only clears buffers — if the recognizer had already self-terminated
-    // (pauseFor/done) the user would otherwise be left in a dead session after a
-    // reset. restartPttListening is idempotent (no-op while already listening).
-    resetPttSessionState();
-    restartPttListening();
+    // 260622-nhs R4 (BUG A + BUG B): a reset must CANCEL the recognizer (to
+    // clear its accumulated in-window buffer — the R3 buffer-only clear left the
+    // iOS recognizer's prior transcript alive, so the next partial re-surfaced
+    // the old text) and start a FRESH serialized listening session (the cancel→
+    // start is guarded so onStatus can't double-start into a freeze).
+    resetPttSessionAndRestart();
   }
 
   // ── Category init (ported verbatim from transaction_entry_screen.dart:52-82, D-24) ──
@@ -958,6 +957,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                     ? VoiceRecordPanel(
                         transcript: pttTranscript,
                         soundLevel: pttSoundLevel,
+                        // 260622-nhs R4 (BUG C): live recognizer status drives
+                        // the panel title + pulse-dot colour.
+                        status: pttListenStatus,
                         onExit: _onVoiceModalExit,
                         onReset: _onVoiceReset,
                       )

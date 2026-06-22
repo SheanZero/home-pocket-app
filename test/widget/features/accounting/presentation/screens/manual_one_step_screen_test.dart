@@ -1336,8 +1336,13 @@ void main() {
             reason: '重置 restores the pre-speech (empty) merchant');
         expect(find.byType(VoiceRecordPanel), findsOneWidget,
             reason: '重置 keeps the panel shown / keeps listening');
-        expect(speech.canceled, isFalse,
-            reason: '重置 must not cancel the recognizer');
+        // 260622-nhs R4 (BUG A): 重置 now CANCELS the recognizer (to clear its
+        // accumulated in-window buffer so the old transcript can't re-surface)
+        // and starts a FRESH listening session — the corrected reset semantics.
+        expect(speech.canceled, isTrue,
+            reason: '重置 cancels the recognizer to clear its buffer (BUG A)');
+        expect(speech.isListening, isTrue,
+            reason: '重置 re-arms a fresh listening session');
       },
     );
   });
