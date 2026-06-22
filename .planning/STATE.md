@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
-status: verifying
-stopped_at: 47-06-PLAN.md complete — full-suite gate green + on-device D-10 UAT all 10 PASS (user-approved 2026-06-20); Phase 47 all 6 plans done, ready for verification
-last_updated: "2026-06-22T05:39:29.816Z"
-last_activity: "2026-06-22 - quick 260622-d5i 统计页「分类支出/カテゴリ支出」donut 卡片内嵌悦己抽屉(`JoySpendDrawer`)去边框 + 分割线分离 + 随成员维度&筛选联动（先出 HTML 设计稿经用户确认再开发）。①视觉(D1)：删樱粉描边 `Container`(`Border.all`/radius18/盒内边距)→插入 1px `borderDivider` 分割线与「整体」(donut+类别图例)分离，保留「♡悦び」chip(`joyLight`/`joyText`)+¥总额+计数行。②成员筛选联动(D2)：悦己改读 `donutDimensionStateProvider`，category 维度经 `joyCategoryAmounts(deviceId:)` 复用整体同款 `tx.deviceId==deviceId` 过滤收窄。③维度切换(D3，用户选「切成员维度悦己也按成员拆」)：member 维度经新 `joyMemberAmounts` provider(复用 `GetMemberSpendBreakdownUseCase` 传 `ledgerType: LedgerType.joy`)in-widget 按 `memberFilterDeviceId` 收窄，成员段 label=成员名/emoji + `Icons.person_outline` + JoyWarmPalette 色。数据层 `GetJoyCategoryAmountsUseCase`(+`deviceId`)、`GetMemberSpendBreakdownUseCase`(+`ledgerType`)各加 1 可选参数(null 路径字节不变，单测+golden 双证)；零新 DAO/migration(复用 `findByBookIds`，schema 不动)、GUARD-01 无 home/*、全文经 `S.of(context)`、零裸 hex；新 ARB `analyticsJoyDrawerMemberCount`×3+gen-l10n；`joyMemberAmounts` 折入 `categoryDonutRefreshTargets`。analyze 0、受影响 unit/widget/golden+anti_toxicity 独立复跑 82/82(执行器报全 analytics widget+golden 421/421)、4 golden macOS 重基线(scroll-smoke+3 member-dim 变体)。commits 0f8ddff4/968e1e5f/20cdc950/fa9b97f1/d163abbc。 跟进修复(设备端 UAT 触发)：统计页 donut 圆环 `PieChart` 在扇区数变化时崩溃 `RangeError (length): Only valid value is 0: 1`（根因=fl_chart `RenderPieChart.badgeWidgetPaint` 按徽章子节点位置索引**动画 LERP 后**的 `data.sections`；圆环扇区给 ≥5% 切片配 on-ring 徽章[ti1]，扇区数增长时首帧 tween 评估到旧短数据而徽章子节点已是新长列表→越界；非 d5i 引入、ti1/v2m 徽章工作的既有脆弱点，d5i 设备 UAT 暴露）。修复=两处 PieChart(分类+成员维度)关闭隐式扇区 morph 动画 `duration: Duration.zero`，使 `data` 恒等于 target、子节点/扇区数永不失配；中心金额 count-up(独立 TweenAnimationBuilder)不受影响、settled golden 字节不变→**0 重基线**；新增决定论回归 widget 测试(`donut_hero_section_count_regression_test`，扇区数 1→4 增长跨动画窗逐帧断言零异常，修复前 RED 复现同一 RangeError、修复后 GREEN)。analyze 0、analytics widget+golden 422/422。commit d5f9412f。"
+status: executing
+stopped_at: 48-01-PLAN.md complete — TD-1 member-filter donut refresh wired (D-01/D-02/D-03); analyze 0, registry test 9/9; awaiting 48-02 (TD-2 doc scrub)
+last_updated: "2026-06-22T05:48:17.000Z"
+last_activity: 2026-06-22 -- 48-01 complete (TD-1 donut refresh wiring)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 20
+  total_plans: 22
   completed_plans: 20
   percent: 75
 ---
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 47 — i18n-macos-golden-uat
+**Current focus:** Phase 48 — address-v1-8-tech-debt-member-filter-donut-refresh-stale-tre
 
 ## Current Position
 
-Phase: 47
-Plan: Not started
-Status: 47-06 complete — full suite 3057/3057, analyze 0, cleaned coverage 80.48% (GUARD-04); on-device D-10 UAT all 10 items PASS, user-approved 2026-06-20 (GUARD-05). Phase verify/closeout owned by orchestrator.
-Last activity: 2026-06-22 - quick 260622-d5i 统计页「分类支出/カテゴリ支出」donut 卡片内嵌悦己抽屉(`JoySpendDrawer`)去边框 + 分割线分离 + 随成员维度&筛选联动（先出 HTML 设计稿经用户确认再开发）。①视觉(D1)：删樱粉描边 `Container`(`Border.all`/radius18/盒内边距)→插入 1px `borderDivider` 分割线与「整体」(donut+类别图例)分离，保留「♡悦び」chip(`joyLight`/`joyText`)+¥总额+计数行。②成员筛选联动(D2)：悦己改读 `donutDimensionStateProvider`，category 维度经 `joyCategoryAmounts(deviceId:)` 复用整体同款 `tx.deviceId==deviceId` 过滤收窄。③维度切换(D3，用户选「切成员维度悦己也按成员拆」)：member 维度经新 `joyMemberAmounts` provider(复用 `GetMemberSpendBreakdownUseCase` 传 `ledgerType: LedgerType.joy`)in-widget 按 `memberFilterDeviceId` 收窄，成员段 label=成员名/emoji + `Icons.person_outline` + JoyWarmPalette 色。数据层 `GetJoyCategoryAmountsUseCase`(+`deviceId`)、`GetMemberSpendBreakdownUseCase`(+`ledgerType`)各加 1 可选参数(null 路径字节不变，单测+golden 双证)；零新 DAO/migration(复用 `findByBookIds`，schema 不动)、GUARD-01 无 home/*、全文经 `S.of(context)`、零裸 hex；新 ARB `analyticsJoyDrawerMemberCount`×3+gen-l10n；`joyMemberAmounts` 折入 `categoryDonutRefreshTargets`。analyze 0、受影响 unit/widget/golden+anti_toxicity 独立复跑 82/82(执行器报全 analytics widget+golden 421/421)、4 golden macOS 重基线(scroll-smoke+3 member-dim 变体)。commits 0f8ddff4/968e1e5f/20cdc950/fa9b97f1/d163abbc。 跟进修复(设备端 UAT 触发)：统计页 donut 圆环 `PieChart` 在扇区数变化时崩溃 `RangeError (length): Only valid value is 0: 1`（根因=fl_chart `RenderPieChart.badgeWidgetPaint` 按徽章子节点位置索引**动画 LERP 后**的 `data.sections`；圆环扇区给 ≥5% 切片配 on-ring 徽章[ti1]，扇区数增长时首帧 tween 评估到旧短数据而徽章子节点已是新长列表→越界；非 d5i 引入、ti1/v2m 徽章工作的既有脆弱点，d5i 设备 UAT 暴露）。修复=两处 PieChart(分类+成员维度)关闭隐式扇区 morph 动画 `duration: Duration.zero`，使 `data` 恒等于 target、子节点/扇区数永不失配；中心金额 count-up(独立 TweenAnimationBuilder)不受影响、settled golden 字节不变→**0 重基线**；新增决定论回归 widget 测试(`donut_hero_section_count_regression_test`，扇区数 1→4 增长跨动画窗逐帧断言零异常，修复前 RED 复现同一 RangeError、修复后 GREEN)。analyze 0、analytics widget+golden 422/422。commit d5f9412f。
+Phase: 48 (address-v1-8-tech-debt-member-filter-donut-refresh-stale-tre) — EXECUTING
+Plan: 2 of 2
+Status: Executing Phase 48 (48-01 done; 48-02 TD-2 doc scrub pending)
+Last activity: 2026-06-22 -- 48-01 complete (TD-1 donut refresh wiring)
 Prior: 2026-06-22 - quick 260622-0ly 打开统计页查看当前月时，小确幸日历默认选中「今天」（高亮今天格子 + 自动展开今天的小确幸明细面板，今天无记录则显示空状态文案）；仅当前月生效，翻到其它月份不自动选中（翻回当前月重新选中今天），同月内 pull-to-refresh 保留用户手动点击的那天，手动点击行为不变。改动 `_JoyCalendarBodyState` 新增 `initState`/`didUpdateWidget`/`_defaultSelectedDay()`（"今天"仅当落在 anchor 当月内才选中；单一状态 `_selectedDay` 同时驱动 ring 高亮+内联展开）；零 provider/ARB/数据层改动、不跑 build_runner/gen-l10n。决定论：现存 golden/测试窗口全钉死 May 2026，今天永不落入→默认选中恒 null→**0 golden 重基线**、视觉与改前字节一致；新增决定论 widget 测试（当前月→自动选中+展开 / 过去月→不选中，只比 y/m/d 规避时钟竞态）。analyze 0、full test 3083/3083、仅 2 文件改动。commits 3eabc907/1811a22f。
 Prior: quick 260621-uus 统计页删除截图红框圈出的编辑性元素（纯展示层、零数据流改动）：AppBar 删「全部条目 ▼」entry-filter chip（删孤立 widget+测试，保留 `selectedJoyMetricVariantProvider` 默认 all）、四个分区标题删「实用/悦己」tag chip（保留左侧彩色竖条+标题）、悦己 drawer 去 connector(dashed dots+「把悦己这一块放大看看」)+副标题「仅呈现去向不分高下」+caption「百分比是各项占悦己自身…」且标题缩短为「悦己 {amount}」（保留金额/笔数/bar 主体）、删小确幸日历 footer「这个月有X天…」+悦己满足度分布 footer「大多落在中高位…」（保留 median pill）；3 ARB 对称删 12 个 0-ref key+gen-l10n、删 `_JoyConnector` 类/孤立测试 helper（无 dead code）。analyze 0、full test 3081/3081、15 golden（scroll-smoke/joy_calendar/satisfaction_histogram）macOS 重基线（category_donut/joy_spend 验证无变化未重基线）。commits 15ebc181/730b5bb3/412a8e9d/4c8b6c20/27224cba/547a359d/5b8c1bd9。
 Prior: quick 260621-ti1 统计页「分类支出」donut 卡片：类目 icon + 圆环放大 + 列表去色块（设备端 UAT 已通过✓）。①分类详细列表行 / 悦己「钱花在哪」legend 行类目名前加「上一级(L1顶层)」类目 icon、圆环显示了%的扇区加 icon，全经共享 `parentCategoryIconFromId`（categoryId 已是 L1 rollup id；零新 icon 映射/ARB/数据层/依赖；成员维度保持头像 emoji 不改）。②圆环放大：section radius 30→41.4、centerSpaceRadius 54→59.4（外径×1.2/内径×1.1），容器 `SizedBox` height 200→234、center `_centerTotalMaxWidth` 96→106；widget test `category_donut_card_test.dart` 将 bare card 包进 `SingleChildScrollView`（生产本就在滚动视图内）避免放大后 800×600 测试窗 26px 溢出。③圆环 icon 改为 % 正上方、中线对齐：原 `badgeWidget`(offset0.35)+内置 `title`(% offset0.5) 沿半径分置→非6/12点钟扇区横向重叠(`88🍴%`)；改为抑制内置 title（`showTitle:false`）、icon+% 合成单个居中 `Column` badge（icon 在上、% 在下、offset0.5 居环带中部）。④分类/悦己列表行去掉色块、icon 取色块颜色：`donut_hero` `LegendRow` 有 icon 的分类行不画 11×11 色块、icon 颜色→该行 arc `color`；`joy_spend_stacked_bar` `_LegendRow` 去 `.jl .dot`、icon 颜色→`segment.color`；成员行(emoji)与「其他」行(无 icon)保留色块。质量门：analyze 0、full test 3091/3091、多轮受影响 golden（category_donut/joy_spend/scroll-smoke）macOS 重基线（commits 0903114b/a2925f42/0064693f/5ae71263/87a313b1/6c9794d3）。
@@ -209,6 +209,7 @@ Resume file: None
 | Phase 47 P04 | 8min | 1 tasks | 1 files |
 | Phase 47 P05 | 11min | 3 tasks | 56 files |
 | Phase 47 P06 | 25min | 2 tasks | 4 files |
+| Phase 48 P01 | 4min | 3 tasks | 3 files |
 
 ## Decisions
 
@@ -267,6 +268,9 @@ Resume file: None
 - [Phase 47]: [47-04]: Authored anti_toxicity_phase47_test.dart (D-14) — 36-case sweep over the 5 round-5 B cards × en/ja/zh × {value/empty/other/inline-expand/self-hide}; forbidden en/ja/zh lists copied VERBATIM from anti_toxicity_phase16 (D-13, never relaxed); WR-02 >10-L1 donut Other state exercised so analyticsCategoryDonutOther sweeps clean (D-03); per-state overrides LOCAL+complete + added _expectRenderedText/donut_legend_row_other/inline_panel coverage guards so a failed override can't trivialize the sweep (Pitfall 1); 36/36 green, analyze 0 (GUARD-02/GUARD-03). NOTE: gsd-tools CLI unavailable in this exec env — STATE.md/ROADMAP.md updated by hand.
 - [Phase ?]: [47-05] Authored 8 golden tests + 48 macOS PNG baselines for round-5 B analytics (GUARD-04 closed); all wrap PRODUCTION AppTheme so context.palette resolves real ADR-019 — bare ThemeData validates layout but NOT palette. Scoped --update-goldens to the 8 new files (clean diff attribution). Off-macOS reduces to baseline-existence via flutter_test_config.
 - [Phase ?]: [Phase 47]: 47-06: full flutter test gate 3057/3057 + analyze 0 + cleaned coverage 80.48% (GUARD-04); on-device D-10 visual UAT all 10 items PASS on physical iOS locale=ja, user-approved 2026-06-20 (GUARD-05, D-12 no defer path). Plan 6/6 — Phase 47 ready_for_verification.
+- [Phase 48]: [48-01] TD-1 fixed (D-01): nullable AnalyticsCardContext.memberFilterDeviceId threaded from donutDimensionStateProvider (analytics state_*, GUARD-01 intact); categoryDonutRefreshTargets appends memberFilteredCategoryBreakdownProvider via collection-if ONLY when a member filter is active (unfiltered 4-target union byte-stable). Member-filtered pull-to-refresh now invalidates the displayed filtered breakdown (no stale cached data). CategoryDonutCard._ctx() threads the live donutView filter.
+- [Phase 48]: [48-01] D-02: 'MemberFilteredCategoryBreakdownProvider' whitelisted in _analyticsProviderTypeWhitelist (verbatim generated type) so union ⊆ analytics isolation still passes. D-03: added (f) completeness guard (union ⊇ active card-watch — the direction the suite never checked, which let TD-1 in) + negative control (no filter → filtered family absent, unfiltered union byte-stable) + mutual-consistency whitelist loop. Registry test 9/9 green, analyze 0, 0 golden re-baseline (refresh-wiring only).
+- [Phase 48]: [48-01] DEVIATION (Rule 1): reworded categoryDonutRefreshTargets dartdoc to drop the literal `home/*` substring — the Task-1 comment tripped the pre-existing REDES-01 `source.contains('home/')` per-card guard (folded into bf0122a2). NOTE: gsd-tools CLI unavailable in this exec env — STATE.md/ROADMAP.md updated by hand (consistent with the Phase 47 47-04 note).
 
 ## Operator Next Steps
 

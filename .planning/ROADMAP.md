@@ -229,7 +229,7 @@
 
 **Wave 1** (parallel — disjoint file sets; 48-01 TD-1 code/test, 48-02 TD-2 doc-hygiene)
 
-- [ ] 48-01-PLAN.md — TD-1: thread donut member filter through `AnalyticsCardContext` → `categoryDonutRefreshTargets` (D-01) + registry-test whitelist `MemberFilteredCategoryBreakdownProvider` (D-02) + completeness regression assertion (D-03)
+- [x] 48-01-PLAN.md — TD-1: thread donut member filter through `AnalyticsCardContext` → `categoryDonutRefreshTargets` (D-01) + registry-test whitelist `MemberFilteredCategoryBreakdownProvider` (D-02) + completeness regression assertion (D-03) — DONE (3/3 tasks; analyze 0, registry test 9/9, 0 golden)
 - [ ] 48-02-PLAN.md — TD-2: scrub removed-symbol dartdoc in `repository_providers.dart` + regen `.g.dart` (D-04) + update characterization test description; `grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` = 0
 
 ## Milestone Progress
@@ -244,4 +244,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-48 | P43-47 all plans done (Phase 47: 6/6); Phase 48: 2 plans planned (0/2 done) | In progress | - |
+| v1.8 统计页面重设计 | 43-48 | P43-47 all plans done (Phase 47: 6/6); Phase 48: 2 plans planned (1/2 done — 48-01 ✓) | In progress | - |
