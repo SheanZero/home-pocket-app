@@ -21,7 +21,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     show merchantCategoryLearningServiceProvider, parseVoiceInputUseCaseProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/entry_mode_switcher.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/hold_to_talk_bar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_toolbar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
@@ -287,8 +286,9 @@ void main() {
 
     // All six field surfaces visible
     expect(find.byType(AmountDisplay), findsOneWidget);
-    // 260622-nhs (D-3): the 手工/语音 mode Tab is gone — single-page entry.
-    expect(find.byType(EntryModeSwitcher), findsNothing);
+    // 260622-nhs (D-3): the 手工/语音 mode Tab is gone — single-page entry. The
+    // EntryModeSwitcher widget was deleted entirely; its absence is proven by
+    // the presence of the resident keypad + push-to-talk bar instead.
     // 260622-nhs (D-1): the full-width push-to-talk bar sits below the keypad.
     expect(find.byType(HoldToTalkBar), findsOneWidget);
     expect(find.byKey(const ValueKey('category-chip')), findsOneWidget);

@@ -694,15 +694,6 @@ class SJa extends S {
   String get addTransaction => '取引を追加';
 
   @override
-  String get manualInput => '手動';
-
-  @override
-  String get ocrScan => 'OCR';
-
-  @override
-  String get voiceInput => '音声';
-
-  @override
   String get selectCategory => '分類を選択';
 
   @override

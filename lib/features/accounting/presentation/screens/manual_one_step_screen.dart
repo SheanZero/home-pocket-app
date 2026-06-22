@@ -59,9 +59,9 @@ bool foreignPushIsStale({
 /// Single-screen manual transaction entry replacing the legacy two-screen flow
 /// (manual entry hub → confirmation screen).
 ///
-/// Layout (top-to-bottom per D-03):
-///   AppBar → EntryModeSwitcher → AmountDisplay → scrollable details form
-///   → AnimatedSlide(SmartKeyboard)
+/// Layout (top-to-bottom — 260622-nhs single-page push-to-talk):
+///   AppBar → AmountDisplay → scrollable details form
+///   → AnimatedSlide(SmartKeyboard) → HoldToTalkBar
 ///
 /// Focus state machine (D-05/D-10/D-13):
 ///   - SmartKeyboard is visible when `_amountFocused && !_isTextFieldFocused`
@@ -799,10 +799,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                   ),
                 ),
 
-              // 260622-nhs (D-3): the 手工/语音 mode Tab (EntryModeSwitcher) is
-              // gone — manual keypad is the only resident state; voice is the
-              // push-to-talk bar below the keypad. No mode switching, no page
-              // replacement.
+              // 260622-nhs (D-3): the 手工/语音 mode Tab is gone — manual keypad is
+              // the only resident state; voice is the push-to-talk bar below the
+              // keypad. No mode switching, no page replacement.
               const SizedBox(height: 8),
 
               // Amount display — tap to activate SmartKeyboard (D-10)
@@ -825,8 +824,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Quick 260613-wuv (WUV-01): the foreign conversion card
-                      // now scrolls WITH the form (only AmountDisplay +
-                      // EntryModeSwitcher stay pinned) and is wrapped in the same
+                      // now scrolls WITH the form (only the AmountDisplay stays
+                      // pinned) and is wrapped in the same
                       // card chrome the EDIT screen uses (_formCard: palette.card
                       // / radius 14 / palette.borderDefault). The unified
                       // CurrencyLinkedEditFields renders 汇率 (editable) / 日元

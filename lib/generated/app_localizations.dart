@@ -1389,24 +1389,6 @@ abstract class S {
   /// **'Add Transaction'**
   String get addTransaction;
 
-  /// Manual input mode tab label
-  ///
-  /// In en, this message translates to:
-  /// **'Manual'**
-  String get manualInput;
-
-  /// Future OCR/MOD-005 stub
-  ///
-  /// In en, this message translates to:
-  /// **'OCR'**
-  String get ocrScan;
-
-  /// Voice input mode tab label
-  ///
-  /// In en, this message translates to:
-  /// **'Voice'**
-  String get voiceInput;
-
   /// Category selection screen title
   ///
   /// In en, this message translates to:

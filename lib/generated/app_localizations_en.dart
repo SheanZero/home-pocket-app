@@ -701,15 +701,6 @@ class SEn extends S {
   String get addTransaction => 'Add Transaction';
 
   @override
-  String get manualInput => 'Manual';
-
-  @override
-  String get ocrScan => 'OCR';
-
-  @override
-  String get voiceInput => 'Voice';
-
-  @override
   String get selectCategory => 'Select Category';
 
   @override

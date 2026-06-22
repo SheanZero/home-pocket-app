@@ -4,8 +4,6 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/ocr_parse_draft.dart';
-import '../widgets/entry_mode_switcher.dart';
-import '../widgets/input_mode_tabs.dart';
 import 'ocr_review_screen.dart';
 
 /// Stub OCR scanner screen with dark camera-style UI.
@@ -55,11 +53,9 @@ class OcrScannerScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 8),
-
-            // Input mode tabs (OCR active)
-            EntryModeSwitcher(selectedMode: InputMode.ocr, bookId: bookId),
-
+            // 260622-nhs (D-3): the manual/voice mode Tab is gone. OCR stays
+            // hidden behind kOcrEntryEnabled; this header no longer renders a
+            // switcher to the removed tabs.
             const SizedBox(height: 24),
 
             // Camera viewfinder area

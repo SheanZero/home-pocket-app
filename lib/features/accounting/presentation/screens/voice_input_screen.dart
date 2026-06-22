@@ -18,8 +18,6 @@ import '../../domain/models/entry_source.dart';
 import '../../domain/models/transaction_details_form_config.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/amount_edit_bottom_sheet.dart';
-import '../widgets/entry_mode_switcher.dart';
-import '../widgets/input_mode_tabs.dart';
 import '../widgets/transaction_details_form.dart';
 import '../../../../shared/widgets/soft_toast.dart';
 import '../widgets/voice_waveform.dart';
@@ -271,15 +269,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
         children: [
           const SizedBox(height: 8),
 
-          // Input mode tabs (Voice active)
-          EntryModeSwitcher(
-            selectedMode: InputMode.voice,
-            bookId: widget.bookId,
-            continuousMode: widget.continuousMode,
-          ),
-
-          const SizedBox(height: 8),
-
+          // 260622-nhs (D-3): the 手工/语音 mode Tab is gone. This screen is
+          // retained but no longer routed — the single-page push-to-talk bar on
+          // ManualOneStepScreen is the only voice entry now.
           GestureDetector(
             onTap: () async {
               await AmountEditBottomSheet.show(

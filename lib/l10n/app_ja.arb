@@ -906,18 +906,6 @@
   "@addTransaction": {
     "description": "Transaction entry screen title"
   },
-  "manualInput": "手動",
-  "@manualInput": {
-    "description": "Manual input mode tab label"
-  },
-  "ocrScan": "OCR",
-  "@ocrScan": {
-    "description": "Future OCR/MOD-005 stub"
-  },
-  "voiceInput": "音声",
-  "@voiceInput": {
-    "description": "Voice input mode tab label"
-  },
   "selectCategory": "分類を選択",
   "@selectCategory": {
     "description": "Category selection screen title"

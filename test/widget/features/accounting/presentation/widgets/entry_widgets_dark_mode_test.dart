@@ -6,7 +6,6 @@ import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_edit_bottom_sheet.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/input_mode_tabs.dart';
 import 'package:home_pocket/shared/widgets/ledger_type_selector.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -80,25 +79,8 @@ void main() {
     expect(find.byKey(const ValueKey('amount_currency_badge')), findsOneWidget);
   });
 
-  testWidgets('input mode tabs use dark background', (tester) async {
-    await tester.pumpWidget(
-      buildDark(
-        InputModeTabs(
-          selected: InputMode.voice,
-          onChanged: (_) {},
-          manualLabel: '手動',
-          ocrLabel: 'OCR',
-          voiceLabel: '音声',
-        ),
-      ),
-    );
-
-    final container = tester.widget<Container>(
-      find.byKey(const ValueKey('input_mode_tabs_root')),
-    );
-    final decoration = container.decoration! as BoxDecoration;
-    expect(decoration.color, AppPalette.dark.backgroundMuted);
-  });
+  // 260622-nhs: the InputModeTabs dark-mode case was removed — the 手工/语音
+  // mode Tab widget was deleted (single-page push-to-talk entry, D-3).
 
   testWidgets('ledger type selector uses dark inactive surface', (
     tester,
