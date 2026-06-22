@@ -1070,17 +1070,25 @@
   "@recording": {
     "description": "Voice recording-state caption"
   },
-  "holdToTalkBar": "Hold to talk",
-  "@holdToTalkBar": {
-    "description": "Push-to-talk bar label below the keypad on the entry screen"
+  "voiceRecordBar": "Voice entry",
+  "@voiceRecordBar": {
+    "description": "Tap voice-record bar label above the keypad on the entry screen"
   },
   "listeningTitle": "Listening…",
   "@listeningTitle": {
-    "description": "Listening overlay title shown while the user holds the talk bar"
+    "description": "Listening modal title shown while the auto-fill session is open"
   },
-  "releaseToFill": "Release to fill the form",
-  "@releaseToFill": {
-    "description": "Listening overlay hint: release to auto-fill the form"
+  "voiceTapToExit": "Tap anywhere to exit",
+  "@voiceTapToExit": {
+    "description": "Listening modal hint: tap anywhere to exit and keep the filled content"
+  },
+  "voiceResetRestore": "Reset",
+  "@voiceResetRestore": {
+    "description": "Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot"
+  },
+  "voiceResetRestoreSub": "· Restore entry",
+  "@voiceResetRestoreSub": {
+    "description": "Listening modal reset button subtitle: restore the transaction content"
   },
   "todayDate": "Today",
   "@todayDate": {

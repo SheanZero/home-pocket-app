@@ -1070,17 +1070,25 @@
   "@recording": {
     "description": "Voice recording-state caption"
   },
-  "holdToTalkBar": "押して話す",
-  "@holdToTalkBar": {
-    "description": "Push-to-talk bar label below the keypad on the entry screen"
+  "voiceRecordBar": "音声で記録",
+  "@voiceRecordBar": {
+    "description": "Tap voice-record bar label above the keypad on the entry screen"
   },
   "listeningTitle": "聞き取り中…",
   "@listeningTitle": {
-    "description": "Listening overlay title shown while the user holds the talk bar"
+    "description": "Listening modal title shown while the auto-fill session is open"
   },
-  "releaseToFill": "離すとフォームに自動入力",
-  "@releaseToFill": {
-    "description": "Listening overlay hint: release to auto-fill the form"
+  "voiceTapToExit": "空白をタップで終了",
+  "@voiceTapToExit": {
+    "description": "Listening modal hint: tap anywhere to exit and keep the filled content"
+  },
+  "voiceResetRestore": "リセット",
+  "@voiceResetRestore": {
+    "description": "Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot"
+  },
+  "voiceResetRestoreSub": "· 入力を元に戻す",
+  "@voiceResetRestoreSub": {
+    "description": "Listening modal reset button subtitle: restore the transaction content"
   },
   "todayDate": "今日",
   "@todayDate": {

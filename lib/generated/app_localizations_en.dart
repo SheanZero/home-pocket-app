@@ -825,13 +825,19 @@ class SEn extends S {
   String get recording => 'Recording…';
 
   @override
-  String get holdToTalkBar => 'Hold to talk';
+  String get voiceRecordBar => 'Voice entry';
 
   @override
   String get listeningTitle => 'Listening…';
 
   @override
-  String get releaseToFill => 'Release to fill the form';
+  String get voiceTapToExit => 'Tap anywhere to exit';
+
+  @override
+  String get voiceResetRestore => 'Reset';
+
+  @override
+  String get voiceResetRestoreSub => '· Restore entry';
 
   @override
   String get todayDate => 'Today';

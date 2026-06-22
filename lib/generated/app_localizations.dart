@@ -1635,23 +1635,35 @@ abstract class S {
   /// **'Recording…'**
   String get recording;
 
-  /// Push-to-talk bar label below the keypad on the entry screen
+  /// Tap voice-record bar label above the keypad on the entry screen
   ///
   /// In en, this message translates to:
-  /// **'Hold to talk'**
-  String get holdToTalkBar;
+  /// **'Voice entry'**
+  String get voiceRecordBar;
 
-  /// Listening overlay title shown while the user holds the talk bar
+  /// Listening modal title shown while the auto-fill session is open
   ///
   /// In en, this message translates to:
   /// **'Listening…'**
   String get listeningTitle;
 
-  /// Listening overlay hint: release to auto-fill the form
+  /// Listening modal hint: tap anywhere to exit and keep the filled content
   ///
   /// In en, this message translates to:
-  /// **'Release to fill the form'**
-  String get releaseToFill;
+  /// **'Tap anywhere to exit'**
+  String get voiceTapToExit;
+
+  /// Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get voiceResetRestore;
+
+  /// Listening modal reset button subtitle: restore the transaction content
+  ///
+  /// In en, this message translates to:
+  /// **'· Restore entry'**
+  String get voiceResetRestoreSub;
 
   /// Today date chip label
   ///

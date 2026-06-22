@@ -29,6 +29,7 @@ import '../widgets/smart_keyboard.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_listening_overlay.dart';
 import 'manual_one_step_foreign_card.dart';
+import 'manual_one_step_snapshot.dart';
 import 'voice_locale_readiness_mixin.dart';
 import 'voice_ptt_session_mixin.dart';
 import 'voice_recognition_event_handler_mixin.dart';
@@ -134,6 +135,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// `EntrySource.voice`. Reset to false whenever the amount is cleared.
   String _voiceLocaleId = 'zh-CN';
   bool _lastFillWasVoice = false;
+
+  /// 260622-nhs R2 (D-2 reset-restore): the pre-speech form snapshot taken when
+  /// the user taps 「语音记录」. Null when no voice session is open. The modal's
+  /// 「重置·恢复账目」 button rolls the form back to this snapshot.
+  ManualEntrySnapshot? _voiceSnapshot;
 
   // ── VoicePttSessionMixin contract ─────────────────────────────────────────
 
@@ -280,11 +286,49 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     }
   }
 
-  // ── 260622-nhs: single-page push-to-talk hold lifecycle ───────────────────
+  // ── 260622-nhs R2: tap-modal voice-record lifecycle ───────────────────────
 
-  void _onPttHoldStart() {
+  /// Tap 「语音记录」: snapshot the form (D-2 reset-restore), then start a
+  /// continuous auto-fill listening session and raise the modal.
+  void _onVoiceRecordTap() {
     if (!pttServiceInitialized || !isLocaleReady || pttIsRecording) return;
-    onPttHoldStart();
+    final form = _formKey.currentState;
+    if (form != null) {
+      _voiceSnapshot = ManualEntrySnapshot.capture(
+        amountText: _amount,
+        currency: _currency,
+        manualForeignRate: _manualForeignRate,
+        lastFillWasVoice: _lastFillWasVoice,
+        form: form,
+      );
+    }
+    startPttTapSession();
+  }
+
+  /// Tap the modal/scrim: stop listening + final fill + close, keep content.
+  void _onVoiceModalExit() {
+    exitPttTapSession();
+    _voiceSnapshot = null;
+  }
+
+  /// 「重置·恢复账目」: restore the form to the pre-speech snapshot, clear the
+  /// transcript/merger/parse buffers, and KEEP listening (the user can re-speak).
+  void _onVoiceReset() {
+    final snapshot = _voiceSnapshot;
+    final form = _formKey.currentState;
+    if (snapshot != null && form != null) {
+      snapshot.restoreForm(form);
+      setState(() {
+        _currency = snapshot.currency;
+        _amount = snapshot.restoreHostAmount(_controller);
+        _manualForeignRate = snapshot.manualForeignRate;
+        // Revert provenance: if the snapshot was a pure-manual slate, drop the
+        // voice flag so a later keypad save stays manual (T-nhs-03).
+        _lastFillWasVoice = snapshot.lastFillWasVoice;
+      });
+    }
+    // Clear the session's transcript/merger/parse buffers but keep listening.
+    resetPttSessionState();
   }
 
   // ── Category init (ported verbatim from transaction_entry_screen.dart:52-82, D-24) ──
@@ -889,48 +933,57 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                 ),
               ),
 
-              // D-05: SmartKeyboard slides off-screen when a TextField is focused.
+              // D-05: SmartKeyboard slides off-screen when a TextField is
+              // focused. 260622-nhs R2: the 「语音记录」 bar now sits ABOVE the
+              // keypad (R1 placed it below = the iOS up-swipe gesture zone), and
+              // the keypad+bar bottom region is wrapped in a bottom SafeArea so
+              // they clear the home indicator.
               AnimatedSlide(
                 offset: Offset(0, _showSmartKeypad ? 0 : 1),
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeInOut,
-                child: SmartKeyboard(
-                  onDigit: _onDigit,
-                  onDoubleZero: _onDoubleZero,
-                  // D-06: gate the dot key on the active currency's minor unit.
-                  // 0-decimal currencies (JPY/KRW) pass null → disabled blank
-                  // tile; the JPY path keeps onDot:null exactly as before.
-                  onDot: _controller.decimals > 0 ? _onDot : null,
-                  onDelete: _onDelete,
-                  // P19-W1: route through _trySave for category-null guard.
-                  onNext: _trySave,
-                  actionLabel: l10n.record,
-                  currencyLabel: _currency,
-                  currencySymbol: currencySymbol,
-                  // CURR-01: open the currency selector sheet.
-                  onCurrencyTap: _onCurrencyTap,
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
+                      // auto-fill listening modal. Above the keypad; hidden with
+                      // the keypad when a TextField is focused.
+                      if (_showSmartKeypad)
+                        VoiceRecordBar(onTap: _onVoiceRecordTap),
+                      SmartKeyboard(
+                        onDigit: _onDigit,
+                        onDoubleZero: _onDoubleZero,
+                        // D-06: gate the dot key on the active currency's minor
+                        // unit. 0-decimal currencies (JPY/KRW) pass null →
+                        // disabled blank tile; JPY keeps onDot:null as before.
+                        onDot: _controller.decimals > 0 ? _onDot : null,
+                        onDelete: _onDelete,
+                        // P19-W1: route through _trySave for category-null guard.
+                        onNext: _trySave,
+                        actionLabel: l10n.record,
+                        currencyLabel: _currency,
+                        currencySymbol: currencySymbol,
+                        // CURR-01: open the currency selector sheet.
+                        onCurrencyTap: _onCurrencyTap,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-
-              // 260622-nhs (D-1): full-width 「按住说话」 push-to-talk bar below the
-              // keypad. Hidden together with the keypad when a TextField is
-              // focused (so it doesn't sit over the soft keyboard). Hold → start
-              // a session + raise the listening overlay; release → fill the form
-              // and stay on this page (D-2 fill-and-stay, no auto-save).
-              if (_showSmartKeypad)
-                HoldToTalkBar(
-                  onHoldStart: _onPttHoldStart,
-                  onHoldEnd: onPttHoldEnd,
-                  onHoldCancel: onPttHoldCancel,
-                ),
             ],
           ),
 
-          // 260622-nhs: listening overlay while holding the talk bar.
+          // 260622-nhs R2: auto-fill listening modal. Tap the modal/scrim =
+          // exit (keep filled content, stay on page); 「重置」 = restore the
+          // pre-speech snapshot + keep listening.
           if (pttIsRecording)
-            VoiceListeningOverlay(
+            VoiceListeningModal(
               transcript: pttTranscript,
               soundLevel: pttSoundLevel,
+              onExit: _onVoiceModalExit,
+              onReset: _onVoiceReset,
             ),
 
           // D-11/D-13: floating KeyboardToolbar rides on top of soft keyboard.

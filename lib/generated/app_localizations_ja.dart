@@ -817,13 +817,19 @@ class SJa extends S {
   String get recording => '録音中…';
 
   @override
-  String get holdToTalkBar => '押して話す';
+  String get voiceRecordBar => '音声で記録';
 
   @override
   String get listeningTitle => '聞き取り中…';
 
   @override
-  String get releaseToFill => '離すとフォームに自動入力';
+  String get voiceTapToExit => '空白をタップで終了';
+
+  @override
+  String get voiceResetRestore => 'リセット';
+
+  @override
+  String get voiceResetRestoreSub => '· 入力を元に戻す';
 
   @override
   String get todayDate => '今日';

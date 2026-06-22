@@ -1070,17 +1070,25 @@
   "@recording": {
     "description": "Voice recording-state caption"
   },
-  "holdToTalkBar": "按住说话",
-  "@holdToTalkBar": {
-    "description": "Push-to-talk bar label below the keypad on the entry screen"
+  "voiceRecordBar": "语音记录",
+  "@voiceRecordBar": {
+    "description": "Tap voice-record bar label above the keypad on the entry screen"
   },
   "listeningTitle": "正在聆听…",
   "@listeningTitle": {
-    "description": "Listening overlay title shown while the user holds the talk bar"
+    "description": "Listening modal title shown while the auto-fill session is open"
   },
-  "releaseToFill": "松开后自动填入表单",
-  "@releaseToFill": {
-    "description": "Listening overlay hint: release to auto-fill the form"
+  "voiceTapToExit": "轻点空白处退出",
+  "@voiceTapToExit": {
+    "description": "Listening modal hint: tap anywhere to exit and keep the filled content"
+  },
+  "voiceResetRestore": "重置",
+  "@voiceResetRestore": {
+    "description": "Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot"
+  },
+  "voiceResetRestoreSub": "· 恢复账目",
+  "@voiceResetRestoreSub": {
+    "description": "Listening modal reset button subtitle: restore the transaction content"
   },
   "todayDate": "今天",
   "@todayDate": {
