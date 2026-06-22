@@ -939,42 +939,41 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
               ),
 
               // D-05: SmartKeyboard slides off-screen when a TextField is
-              // focused. 260622-nhs R2: the 「语音记录」 bar now sits ABOVE the
-              // keypad (R1 placed it below = the iOS up-swipe gesture zone), and
-              // the keypad+bar bottom region is wrapped in a bottom SafeArea so
-              // they clear the home indicator.
+              // focused. 260622-nhs R2: the 「语音记录」 strip sits ABOVE the keypad.
+              //
+              // R3 (BUG 1): the R2 bottom SafeArea doubled the keypad's own 24dp
+              // bottom padding (≈ +34dp on notched devices). The SmartKeyboard's
+              // built-in 24dp bottom padding already clears the home indicator,
+              // so the SafeArea wrapper is gone — restoring the pre-R1 spacing.
               AnimatedSlide(
                 offset: Offset(0, _showSmartKeypad ? 0 : 1),
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeInOut,
-                child: SafeArea(
-                  top: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
-                      // auto-fill listening modal. Above the keypad; hidden with
-                      // the keypad when a TextField is focused.
-                      if (_showSmartKeypad)
-                        VoiceRecordBar(onTap: _onVoiceRecordTap),
-                      SmartKeyboard(
-                        onDigit: _onDigit,
-                        onDoubleZero: _onDoubleZero,
-                        // D-06: gate the dot key on the active currency's minor
-                        // unit. 0-decimal currencies (JPY/KRW) pass null →
-                        // disabled blank tile; JPY keeps onDot:null as before.
-                        onDot: _controller.decimals > 0 ? _onDot : null,
-                        onDelete: _onDelete,
-                        // P19-W1: route through _trySave for category-null guard.
-                        onNext: _trySave,
-                        actionLabel: l10n.record,
-                        currencyLabel: _currency,
-                        currencySymbol: currencySymbol,
-                        // CURR-01: open the currency selector sheet.
-                        onCurrencyTap: _onCurrencyTap,
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
+                    // auto-fill listening modal. Above the keypad; hidden with
+                    // the keypad when a TextField is focused.
+                    if (_showSmartKeypad)
+                      VoiceRecordBar(onTap: _onVoiceRecordTap),
+                    SmartKeyboard(
+                      onDigit: _onDigit,
+                      onDoubleZero: _onDoubleZero,
+                      // D-06: gate the dot key on the active currency's minor
+                      // unit. 0-decimal currencies (JPY/KRW) pass null →
+                      // disabled blank tile; JPY keeps onDot:null as before.
+                      onDot: _controller.decimals > 0 ? _onDot : null,
+                      onDelete: _onDelete,
+                      // P19-W1: route through _trySave for category-null guard.
+                      onNext: _trySave,
+                      actionLabel: l10n.record,
+                      currencyLabel: _currency,
+                      currencySymbol: currencySymbol,
+                      // CURR-01: open the currency selector sheet.
+                      onCurrencyTap: _onCurrencyTap,
+                    ),
+                  ],
                 ),
               ),
             ],
