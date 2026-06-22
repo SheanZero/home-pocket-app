@@ -225,7 +225,7 @@
 **Goal:** 清除 v1.8 里程碑审计记录的两项代码级技术债（`v1.8-MILESTONE-AUDIT.md` Tech Debt §1/§2），不引入任何新功能/新卡/新 provider/schema 迁移：**TD-1** — 把 donut 成员筛选 (`donutDimensionStateProvider.memberFilterDeviceId`) 穿过 `AnalyticsCardContext` → `buildAnalyticsCardContext` → `categoryDonutRefreshTargets`，使成员筛选状态下的 pull-to-refresh 真正失效 `memberFilteredCategoryBreakdownProvider`（今天服务陈旧缓存数据），并把该家族加入 registry-test 白名单 + 新增「并集 ⊇ 卡片活动监听」完整性断言防回归；**TD-2** — 清除 `repository_providers.dart` 残留 dartdoc 对已移除的 `getExpenseTrendUseCase`/`MonthlyTrend` 符号的命名（build_runner regen `.g.dart` 三处镜像）+ 更新一处字符化测试描述串。验收：`grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` 返回 0。
 **Requirements**: none mapped (REQUIREMENTS.md has no REQ-IDs for Phase 48; decision coverage tracked via CONTEXT.md D-01..D-04)
 **Depends on:** Phase 47
-**Plans:** 2 plans in 1 wave
+**Plans:** 2/2 plans complete
 
 **Wave 1** (parallel — disjoint file sets; 48-01 TD-1 code/test, 48-02 TD-2 doc-hygiene)
 
