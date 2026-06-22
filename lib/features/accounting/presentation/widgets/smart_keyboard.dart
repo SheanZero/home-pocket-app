@@ -65,6 +65,13 @@ class SmartKeyboard extends StatelessWidget {
     final rawKeyHeight = available / 5;
     final keyHeight = math.max(48.0, rawKeyHeight); // §Pitfall 1 NON-NEGOTIABLE
 
+    // 260623-0cj: the action (bottom) row is intentionally shorter than the
+    // digit rows — ~23% lower, matching the approved mock (52→40 dp). Kept
+    // proportional to keyHeight so the ratio holds across devices, with a 40 dp
+    // floor (the user-approved height; never below it on small/standard phones).
+    final bottomRowHeight =
+        math.max(_actionRowMinHeight, keyHeight * _actionRowHeightFactor);
+
     return Container(
       key: const ValueKey('smart_keyboard_root'),
       decoration: BoxDecoration(
@@ -87,11 +94,17 @@ class SmartKeyboard extends StatelessWidget {
           const SizedBox(height: 12),
           _buildExtraRow(context, keyHeight, palette),
           const SizedBox(height: 12),
-          _buildActionRow(context, palette, keyHeight),
+          _buildActionRow(context, palette, bottomRowHeight),
         ],
       ),
     );
   }
+
+  /// 260623-0cj: the action (bottom) row height = keyHeight * this factor,
+  /// floored at [_actionRowMinHeight]. ~0.77 reproduces the approved 52→40 dp
+  /// (−23%) mock while staying proportional on larger screens.
+  static const double _actionRowHeightFactor = 0.77;
+  static const double _actionRowMinHeight = 40.0;
 
   Widget _buildDigitRow(
     BuildContext context,
@@ -176,11 +189,14 @@ class SmartKeyboard extends StatelessWidget {
     );
   }
 
-  /// Action Row: backspace, currency label, Save — all equal width (D-08)
+  /// Action Row: backspace, currency label, Save — all equal width (D-08).
+  /// 260623-0cj: [rowHeight] is the shortened bottom-row height (keyHeight ×
+  /// 0.77, floored at 40 dp) — all three cells share it so they stay equal
+  /// height to each other (D-08) while sitting lower than the digit rows.
   Widget _buildActionRow(
     BuildContext context,
     AppPalette palette,
-    double keyHeight,
+    double rowHeight,
   ) {
     return Row(
       children: [
@@ -191,7 +207,7 @@ class SmartKeyboard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 3),
             child: _ActionKey(
               color: palette.backgroundMuted,
-              height: keyHeight, // D-08: same responsive height as digit keys
+              height: rowHeight, // 260623-0cj: shortened bottom-row height
               onTap: onDelete,
               child: Icon(
                 Icons.backspace_outlined,
@@ -210,7 +226,7 @@ class SmartKeyboard extends StatelessWidget {
               symbol: currencySymbol,
               label: currencyLabel,
               palette: palette,
-              height: keyHeight, // D-08: same responsive height as digit keys
+              height: rowHeight, // 260623-0cj: shortened bottom-row height
               onTap: onCurrencyTap,
             ),
           ),
@@ -224,7 +240,7 @@ class SmartKeyboard extends StatelessWidget {
               label: actionLabel,
               onTap: onNext,
               palette: palette,
-              height: keyHeight, // D-08: same responsive height as digit keys
+              height: rowHeight, // 260623-0cj: shortened bottom-row height
             ),
           ),
         ),

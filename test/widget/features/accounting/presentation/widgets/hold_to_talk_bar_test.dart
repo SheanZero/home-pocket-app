@@ -28,14 +28,17 @@ void main() {
   });
 
   testWidgets(
-      'R3 BUG 1: slim bar (<=40dp) with no outer margin so it integrates '
-      'into the keypad top', (tester) async {
+      '260623-0cj: voice key is a centered ~200dp capsule, inset from BOTH '
+      'edges (不顶边), with a Stadium (pill) shape', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
           body: Align(
-            alignment: Alignment.topLeft,
-            child: VoiceRecordBar(onTap: () {}),
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: 390,
+              child: VoiceRecordBar(onTap: () {}),
+            ),
           ),
         ),
         locale: const Locale('zh'),
@@ -43,17 +46,36 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final container = tester.widget<Container>(
-      find.descendant(
-        of: find.byKey(const ValueKey('voice-record-bar')),
-        matching: find.byType(Container),
-      ),
+    final barRect =
+        tester.getRect(find.byKey(const ValueKey('voice-record-bar')));
+    final pillRect =
+        tester.getRect(find.byKey(const ValueKey('voice-record-pill')));
+
+    // Width ≈ 200 dp — the approved A/B midpoint width.
+    expect(pillRect.width, closeTo(200.0, 0.5),
+        reason: '260623-0cj: the voice capsule is 200 dp wide');
+
+    // Inset from BOTH edges (不顶边) and horizontally centered.
+    final leftInset = pillRect.left - barRect.left;
+    final rightInset = barRect.right - pillRect.right;
+    expect(leftInset, greaterThan(20.0),
+        reason: '不顶边: the capsule must not touch the left edge');
+    expect(rightInset, greaterThan(20.0),
+        reason: '不顶边: the capsule must not touch the right edge');
+    expect((leftInset - rightInset).abs(), lessThan(1.0),
+        reason: 'the capsule is horizontally centered');
+
+    // Pill (Stadium) shape — fully rounded ends, not a rectangular strip.
+    final material = tester.widget<Material>(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('voice-record-pill')),
+            matching: find.byType(Material),
+          )
+          .first,
     );
-    expect(container.constraints?.maxHeight ?? double.infinity, lessThanOrEqualTo(40.0),
-        reason: 'R3: the bar must be a slim top strip (<=40dp), not a 52dp card');
-    // R3: no outer margin — it sits flush against the keypad below it.
-    expect(container.margin, anyOf(isNull, EdgeInsets.zero),
-        reason: 'R3: no gap/margin between the bar and the keypad');
+    expect(material.shape, isA<StadiumBorder>(),
+        reason: '椭圆: the voice key is a Stadium-shaped capsule');
   });
 
   testWidgets('fires onTap on a single tap', (tester) async {

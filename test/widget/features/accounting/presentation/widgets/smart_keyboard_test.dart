@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
@@ -6,14 +8,17 @@ import '../../../../../helpers/test_localizations.dart';
 
 void main() {
   group('SmartKeyboard — responsive height (SC-2 / KEYPAD-01)', () {
-    // TEST 1: 48 dp floor on all three target device surfaces
+    // TEST 1: 48 dp floor on the DIGIT + extra rows, on all three surfaces.
+    // 260623-0cj: the floor is scoped to the digit/extra keys — the action
+    // (bottom) row is intentionally shorter and is covered by its own test.
+    const digitLabels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '00', '.'];
     for (final surfaceSize in const [
       Size(375, 667), // iPhone SE
       Size(390, 844), // iPhone 14
       Size(428, 926), // iPhone Pro Max
     ]) {
       testWidgets(
-        'every key height >= 48 dp on '
+        'every DIGIT key height >= 48 dp on '
         '${surfaceSize.width.toInt()}x${surfaceSize.height.toInt()}',
         (tester) async {
           tester.view.physicalSize = surfaceSize;
@@ -43,25 +48,89 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Assert every InkWell (digit + action keys) meets 48 dp height floor
-          final inkWells = find.descendant(
-            of: find.byKey(const ValueKey('smart_keyboard_root')),
-            matching: find.byType(InkWell),
-          );
-          expect(inkWells, findsWidgets);
-          for (final element in inkWells.evaluate()) {
-            final box = element.renderObject as RenderBox;
+          // Each digit/extra key's InkWell meets the 48 dp touch-target floor.
+          for (final label in digitLabels) {
+            final ink = find
+                .ancestor(
+                  of: find.text(label),
+                  matching: find.byType(InkWell),
+                )
+                .first;
             expect(
-              box.size.height,
+              tester.getSize(ink).height,
               greaterThanOrEqualTo(48.0),
               reason:
-                  'Key height ${box.size.height} is below 48 dp floor on '
+                  'Digit "$label" below 48 dp floor on '
                   '${surfaceSize.width.toInt()}x${surfaceSize.height.toInt()}',
             );
           }
         },
       );
     }
+
+    // TEST 1b (260623-0cj): the action(bottom) row is shorter than the digit
+    // rows — height = max(40, keyHeight * 0.77).
+    testWidgets(
+      '260623-0cj: action(bottom) row is shorter than the digit keys',
+      (tester) async {
+        const surface = Size(390, 844);
+        tester.view.physicalSize = surface;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          createLocalizedWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                size: surface,
+                padding: EdgeInsets.only(bottom: 34),
+              ),
+              child: Scaffold(
+                body: SmartKeyboard(
+                  onDigit: (_) {},
+                  onDelete: () {},
+                  onNext: () {},
+                  onDoubleZero: () {},
+                  onDot: () {},
+                  actionLabel: 'Save',
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final digitH = tester
+            .getSize(
+              find
+                  .ancestor(of: find.text('1'), matching: find.byType(InkWell))
+                  .first,
+            )
+            .height;
+        final saveH = tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text('Save'),
+                    matching: find.byType(InkWell),
+                  )
+                  .first,
+            )
+            .height;
+
+        expect(
+          saveH,
+          lessThan(digitH),
+          reason: '260623-0cj: the bottom row must be shorter than digit rows',
+        );
+        expect(
+          saveH,
+          closeTo(math.max(40.0, digitH * 0.77), 0.6),
+          reason: '260623-0cj: action row height = max(40, keyHeight * 0.77)',
+        );
+      },
+    );
 
     // TEST 2 (P19-B3 spacing): column gap = 6 dp TOTAL (3 dp per side)
     testWidgets(
