@@ -58,6 +58,7 @@ Transaction _tx({
   LedgerType ledgerType = LedgerType.daily,
   TransactionType type = TransactionType.expense,
   EntrySource entrySource = EntrySource.manual,
+  String categoryId = 'cat_x',
 }) {
   return Transaction(
     id: id,
@@ -65,7 +66,7 @@ Transaction _tx({
     deviceId: deviceId,
     amount: amount,
     type: type,
-    categoryId: 'cat_x',
+    categoryId: categoryId,
     ledgerType: ledgerType,
     timestamp: timestamp,
     currentHash: 'hash_$id',
@@ -204,6 +205,64 @@ void main() {
 
       expect(result, isEmpty);
     });
+
+    test(
+      'Test 7 (260622-d5i / D3): default ledgerType forwards null '
+      '(cross-ledger, byte-unchanged)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'd1', amount: 10000, deviceId: 'dev-a',
+              timestamp: DateTime(2026, 5, 10), ledgerType: LedgerType.daily),
+          _tx(id: 'j1', amount: 5000, deviceId: 'dev-a',
+              timestamp: DateTime(2026, 5, 11), ledgerType: LedgerType.joy),
+        ]);
+        final useCase = GetMemberSpendBreakdownUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
+
+        // Cross-ledger: both daily and joy spend counted.
+        expect(repo.lastLedgerType, isNull);
+        expect(result.single.deviceId, 'dev-a');
+        expect(result.single.amount, 15000);
+        expect(result.single.transactionCount, 2);
+      },
+    );
+
+    test(
+      'Test 8 (260622-d5i / D3): ledgerType: joy forwarded to findByBookIds; '
+      'a daily-only member yields no joy bucket',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          // dev-joy has joy spend; dev-daily has only daily spend.
+          _tx(id: 'j1', amount: 8000, deviceId: 'dev-joy',
+              timestamp: DateTime(2026, 5, 10), ledgerType: LedgerType.joy),
+          _tx(id: 'd1', amount: 99999, deviceId: 'dev-daily',
+              timestamp: DateTime(2026, 5, 11), ledgerType: LedgerType.daily),
+        ]);
+        final useCase = GetMemberSpendBreakdownUseCase(
+          transactionRepository: repo,
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+          ledgerType: LedgerType.joy,
+        );
+
+        // Fetch must request the joy ledger.
+        expect(repo.lastLedgerType, LedgerType.joy);
+        // Only the joy-spending member yields a bucket.
+        expect(result.map((e) => e.deviceId).toList(), ['dev-joy']);
+        expect(result.single.amount, 8000);
+      },
+    );
 
     test(
       'Test 6: amount==0 groups not produced; bookIds NOT widened',

@@ -36,11 +36,16 @@ class GetJoyCategoryAmountsUseCase {
   final TransactionRepository _txRepo;
   final CategoryRepository _categoryRepo;
 
+  /// [deviceId] (260622-d5i / D2): optional per-member narrowing. When non-null,
+  /// only transactions whose `tx.deviceId == deviceId` contribute — the SAME
+  /// rule `memberFilteredCategoryBreakdown` uses. `null` (default) = all members,
+  /// byte-identical to the pre-d5i behaviour.
   Future<List<JoyCategoryAmount>> execute({
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
+    String? deviceId,
   }) async {
     // 1. Joy-ledger window fetch via the existing primitive (Pitfall 5). Pass
     //    only the caller's active books (T-46-02-01).
@@ -62,7 +67,10 @@ class GetJoyCategoryAmountsUseCase {
           (tx) =>
               tx.type == TransactionType.expense &&
               (entrySourceFilter == null ||
-                  tx.entrySource == entrySourceFilter),
+                  tx.entrySource == entrySourceFilter) &&
+              // 260622-d5i / D2: optional per-member narrowing (same rule as
+              // memberFilteredCategoryBreakdown). null = all members.
+              (deviceId == null || tx.deviceId == deviceId),
         )
         .toList();
 

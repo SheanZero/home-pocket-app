@@ -11,8 +11,11 @@ import '../../shared/constants/sort_config.dart';
 /// device `transactions.deviceId` (no payer field). This use case groups expense
 /// rows BY deviceId; single-device / not-in-group degrades to a single bucket.
 ///
-/// Cross-ledger (D2): `ledgerType: null` — the member dimension shows TOTAL spend
-/// per member across BOTH the daily and joy ledgers (not a single-ledger view).
+/// Cross-ledger (D2): `ledgerType` defaults to `null` — the member dimension
+/// shows TOTAL spend per member across BOTH the daily and joy ledgers (not a
+/// single-ledger view). A joy-by-member caller (260622-d5i / D3) passes
+/// `ledgerType: LedgerType.joy` so only joy-ledger expense rows aggregate per
+/// member; null is byte-identical to the pre-d5i cross-ledger behaviour.
 ///
 /// Reuse-first: ONE `findByBookIds` window fetch through the existing primitive —
 /// no new DAO, no migration (schema stays v21). The book set passed to
@@ -31,13 +34,15 @@ class GetMemberSpendBreakdownUseCase {
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
+    LedgerType? ledgerType,
   }) async {
-    // 1. Window fetch via the existing primitive. `ledgerType: null` = both
-    //    ledgers (member spend is a cross-ledger total). Pass only the caller's
+    // 1. Window fetch via the existing primitive. `ledgerType` defaults to null
+    //    = both ledgers (member spend is a cross-ledger total); a joy-by-member
+    //    caller (260622-d5i / D3) passes LedgerType.joy. Pass only the caller's
     //    active books (T-v2m-02).
     final txns = await _txRepo.findByBookIds(
       bookIds,
-      ledgerType: null,
+      ledgerType: ledgerType,
       categoryId: null,
       startDate: startDate,
       endDate: endDate,

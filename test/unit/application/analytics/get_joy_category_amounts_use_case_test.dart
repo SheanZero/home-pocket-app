@@ -90,11 +90,12 @@ Transaction _tx({
   required DateTime timestamp,
   LedgerType ledgerType = LedgerType.joy,
   TransactionType type = TransactionType.expense,
+  String deviceId = 'dev1',
 }) {
   return Transaction(
     id: id,
     bookId: 'book1',
-    deviceId: 'dev1',
+    deviceId: deviceId,
     amount: amount,
     type: type,
     categoryId: categoryId,
@@ -295,6 +296,58 @@ void main() {
 
       expect(result, isEmpty);
     });
+
+    test(
+      'deviceId filter (260622-d5i / D2): only the chosen device contributes; '
+      'deviceId == null is byte-unchanged (all devices)',
+      () async {
+        // dev-a: 30000 (l1_hobby) ; dev-b: 80000 (l1_travel).
+        final rows = [
+          _tx(
+            id: 'a1',
+            amount: 30000,
+            categoryId: 'l1_hobby',
+            timestamp: DateTime(2026, 5, 10),
+            deviceId: 'dev-a',
+          ),
+          _tx(
+            id: 'b1',
+            amount: 80000,
+            categoryId: 'l1_travel',
+            timestamp: DateTime(2026, 5, 12),
+            deviceId: 'dev-b',
+          ),
+        ];
+        final repo = _RecordingTransactionRepository(rows);
+        final useCase = GetJoyCategoryAmountsUseCase(
+          transactionRepository: repo,
+          categoryRepository: _FakeCategoryRepository(categories),
+        );
+
+        // Filtered to dev-a: only l1_hobby = 30000.
+        final filtered = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+          deviceId: 'dev-a',
+        );
+        expect(filtered.map((e) => e.categoryId).toList(), ['l1_hobby']);
+        expect(filtered.single.amount, 30000);
+
+        // Null deviceId: unchanged — both devices contribute.
+        final unfiltered = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
+        expect(unfiltered.map((e) => e.categoryId).toList(), [
+          'l1_travel',
+          'l1_hobby',
+        ]);
+        expect(unfiltered.first.amount, 80000);
+        expect(unfiltered[1].amount, 30000);
+      },
+    );
 
     test(
       'security: findByBookIds called with exactly the caller bookIds '
