@@ -360,6 +360,27 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     );
   }
 
+  /// 260622-nhs R3 (BUG 2): idempotently GUARANTEE the continuous session is
+  /// listening. The host calls this after a 「重置·恢复账目」 — `resetPttSessionState`
+  /// only clears the transcript/merger/parse buffers and does NOT re-arm, so if
+  /// the recognizer had already self-terminated (pauseFor/done) and no re-arm
+  /// cycle was in flight, the form would silently stop receiving voice. This
+  /// starts a fresh `startListening` ONLY when the session is still active
+  /// (`_continuousActive && _isRecording`) AND the recognizer is not already
+  /// listening — so calling it while live is a safe no-op (no double-start), and
+  /// calling it after exit does nothing.
+  Future<void> restartPttListening() async {
+    if (!_continuousActive || !_isRecording || !mounted) return;
+    if (pttSpeechService.isListening) return;
+    await pttSpeechService.startListening(
+      onResult: _onResult,
+      onSoundLevel: _onSoundLevel,
+      localeId: pttVoiceLocaleId,
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
+    );
+  }
+
   @override
   void onStatus(String status) {
     // In the continuous tap session a terminal status is NOT a commit/end

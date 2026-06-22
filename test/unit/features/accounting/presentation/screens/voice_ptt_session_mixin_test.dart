@@ -48,6 +48,7 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   String? startedLocaleId;
   var stopped = false;
   var canceled = false;
+  var startCount = 0;
 
   @override
   Future<bool> initialize({
@@ -77,6 +78,7 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     this.onSoundLevel = onSoundLevel;
     startedLocaleId = localeId;
     stopped = false;
+    startCount++;
   }
 
   @override
@@ -490,6 +492,99 @@ void main() {
           reason: 're-arm must keep the session open, not end it');
       expect(speech.startedLocaleId, isNotNull,
           reason: 'startListening was called again to keep listening');
+    },
+  );
+
+  testWidgets(
+    'R3: restartPttListening re-arms after the recognizer self-terminated '
+    '(reset keeps listening)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(host.pttIsRecording, isTrue);
+
+      // Simulate the platform recognizer having self-terminated WITHOUT a
+      // re-arm yet (e.g. between cycles): it is no longer listening.
+      speech.stopped = true;
+      speech.startedLocaleId = null;
+      expect(speech.isListening, isFalse);
+
+      // R3 BUG 2: a reset must GUARANTEE listening resumes — restartPttListening
+      // is idempotent and re-arms only because the session is still active and
+      // the recognizer is not currently listening.
+      await host.restartPttListening();
+      await tester.pumpAndSettle();
+
+      expect(host.pttIsRecording, isTrue,
+          reason: 'the session stays active after restart');
+      expect(speech.isListening, isTrue,
+          reason: 'restartPttListening re-armed startListening');
+    },
+  );
+
+  testWidgets(
+    'R3: restartPttListening is idempotent — no double-start while listening',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(speech.isListening, isTrue);
+
+      // Already listening — a restart must be a no-op (idempotent guard).
+      speech.startCount = 0;
+      await host.restartPttListening();
+      await tester.pumpAndSettle();
+
+      expect(speech.startCount, 0,
+          reason: 'restart must not re-call startListening while listening');
+    },
+  );
+
+  testWidgets(
+    'R3: restartPttListening does nothing once the session ended',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      await host.exitPttTapSession();
+      await tester.pumpAndSettle();
+      expect(host.pttIsRecording, isFalse);
+
+      speech.startCount = 0;
+      await host.restartPttListening();
+      await tester.pumpAndSettle();
+
+      expect(speech.startCount, 0,
+          reason: 'a closed session must not be re-armed');
+      expect(host.pttIsRecording, isFalse);
     },
   );
 

@@ -327,8 +327,13 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
         _lastFillWasVoice = snapshot.lastFillWasVoice;
       });
     }
-    // Clear the session's transcript/merger/parse buffers but keep listening.
+    // Clear the session's transcript/merger/parse buffers, then GUARANTEE the
+    // recognizer is still listening. 260622-nhs R3 (BUG 2): resetPttSessionState
+    // only clears buffers — if the recognizer had already self-terminated
+    // (pauseFor/done) the user would otherwise be left in a dead session after a
+    // reset. restartPttListening is idempotent (no-op while already listening).
     resetPttSessionState();
+    restartPttListening();
   }
 
   // ── Category init (ported verbatim from transaction_entry_screen.dart:52-82, D-24) ──
