@@ -46,8 +46,6 @@ class CategoryDonutCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final targets = categoryDonutRefreshTargets(_ctx());
-
     final monthlyAsync = ref.watch(
       monthlyReportProvider(
         bookId: bookId,
@@ -74,6 +72,12 @@ class CategoryDonutCard extends ConsumerWidget {
 
     // §D2 (260620-v2m): donut dimension + global member filter.
     final donutView = ref.watch(donutDimensionStateProvider);
+    // TD-1 / D-01: build the refresh targets from the LIVE member filter so the
+    // self-derived error-retry target list (and the registry union via _ctx)
+    // appends memberFilteredCategoryBreakdownProvider when a filter is active.
+    final targets = categoryDonutRefreshTargets(
+      _ctx(donutView.memberFilterDeviceId),
+    );
     final members =
         ref.watch(activeGroupMembersProvider).value ?? const <GroupMember>[];
     // 260621-son Bug 1: self name single source = userProfileProvider (watched,
@@ -255,17 +259,22 @@ class CategoryDonutCard extends ConsumerWidget {
     );
   }
 
-  /// Minimal [AnalyticsCardContext] for this card's single target. `trendAnchor`
-  /// is derived from `endDate`; `isGroupMode` is unused by the targets.
-  AnalyticsCardContext _ctx() => AnalyticsCardContext(
-    bookId: bookId,
-    startDate: startDate,
-    endDate: endDate,
-    trendAnchor: DateTime(endDate.year, endDate.month),
-    joyMetricVariant: joyMetricVariant,
-    isGroupMode: false,
-    locale: const Locale('ja'),
-  );
+  /// Minimal [AnalyticsCardContext] for this card's targets. `trendAnchor` is
+  /// derived from `endDate`; `isGroupMode` is unused by the targets.
+  /// TD-1 / D-01: [memberFilterDeviceId] (the LIVE `donutView` filter) is
+  /// threaded in so `categoryDonutRefreshTargets` appends the filtered breakdown
+  /// target when a member filter is active.
+  AnalyticsCardContext _ctx(String? memberFilterDeviceId) =>
+      AnalyticsCardContext(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+        trendAnchor: DateTime(endDate.year, endDate.month),
+        joyMetricVariant: joyMetricVariant,
+        isGroupMode: false,
+        locale: const Locale('ja'),
+        memberFilterDeviceId: memberFilterDeviceId,
+      );
 }
 
 /// Single-source refresh targets for [CategoryDonutCard] (D-B2). Returns BOTH
@@ -280,6 +289,14 @@ class CategoryDonutCard extends ConsumerWidget {
 /// invalidates `targets.first`); `[1]` is the drawer's (the `_JoyDrawer` error
 /// branch invalidates `joyCategoryAmountsProvider` itself). Both are analytics
 /// providers — the registry stays home-free.
+///
+/// TD-1 / D-01: when a member filter is active (`ctx.memberFilterDeviceId !=
+/// null`), the donut watches `memberFilteredCategoryBreakdownProvider(deviceId:)`
+/// (NOT `monthlyReportProvider`), so that filtered breakdown family is APPENDED
+/// last to the union — otherwise pull-to-refresh would serve the stale cached
+/// filtered data. The unfiltered union (no member filter) is byte-identical to
+/// the prior four-target order. The filtered family is analytics `state_*`
+/// (zero `home/*`) so GUARD-01 still holds.
 List<ProviderBase<Object?>> categoryDonutRefreshTargets(
   AnalyticsCardContext ctx,
 ) => [
@@ -312,6 +329,17 @@ List<ProviderBase<Object?>> categoryDonutRefreshTargets(
     endDate: ctx.endDate,
     joyMetricVariant: ctx.joyMetricVariant,
   ),
+  // TD-1 / D-01: the member-filtered category breakdown the donut watches when
+  // a member filter is active — appended ONLY when one is set so the unfiltered
+  // union stays byte-stable. Keyed identically to the card's watch (line ~192).
+  if (ctx.memberFilterDeviceId != null)
+    memberFilteredCategoryBreakdownProvider(
+      bookId: ctx.bookId,
+      startDate: ctx.startDate,
+      endDate: ctx.endDate,
+      deviceId: ctx.memberFilterDeviceId!,
+      joyMetricVariant: ctx.joyMetricVariant,
+    ),
 ];
 
 

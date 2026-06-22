@@ -8,6 +8,7 @@ import '../../../features/settings/presentation/providers/state_locale.dart'
 import '../../../generated/app_localizations.dart';
 import '../domain/models/time_window.dart';
 import 'providers/state_analytics.dart';
+import 'providers/state_donut_dimension.dart';
 import 'providers/state_joy_metric_variant.dart';
 import 'providers/state_time_window.dart';
 import 'widgets/analytics_section_header.dart';
@@ -38,6 +39,7 @@ class AnalyticsCardContext {
     required this.joyMetricVariant,
     required this.isGroupMode,
     required this.locale,
+    this.memberFilterDeviceId,
   });
 
   final String bookId;
@@ -51,6 +53,16 @@ class AnalyticsCardContext {
   final JoyMetricVariant joyMetricVariant;
   final bool isGroupMode;
   final Locale locale;
+
+  /// TD-1 / D-01: the donut's active member filter (`null` = no filter), read
+  /// from `donutDimensionStateProvider`. When non-null, `category_donut_card`
+  /// watches `memberFilteredCategoryBreakdownProvider(deviceId:)` instead of
+  /// `monthlyReportProvider`, so `categoryDonutRefreshTargets` must append that
+  /// filtered family to the refresh union (else pull-to-refresh serves stale
+  /// cached data). `donutDimensionStateProvider` is an analytics `state_*`
+  /// provider, so reading it in the registry keeps GUARD-01 intact (zero
+  /// `home/*`).
+  final String? memberFilterDeviceId;
 }
 
 /// A single analytics card entry in the [analyticsCardRegistry] — the typed
@@ -129,6 +141,10 @@ AnalyticsCardContext buildAnalyticsCardContext(
   final locale =
       ref.watch(locale_providers.currentLocaleProvider).value ??
       Localizations.localeOf(context);
+  // TD-1 / D-01: thread the donut's active member filter into the context.
+  // `donutDimensionStateProvider` is an analytics `state_*` provider, so this
+  // read keeps GUARD-01 intact (the registry imports zero `home/*`).
+  final donutView = ref.watch(donutDimensionStateProvider);
 
   return AnalyticsCardContext(
     bookId: bookId,
@@ -138,6 +154,7 @@ AnalyticsCardContext buildAnalyticsCardContext(
     joyMetricVariant: joyMetricVariant,
     isGroupMode: isGroupMode,
     locale: locale,
+    memberFilterDeviceId: donutView.memberFilterDeviceId,
   );
 }
 
