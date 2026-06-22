@@ -290,13 +290,19 @@ class CategoryDonutCard extends ConsumerWidget {
 /// branch invalidates `joyCategoryAmountsProvider` itself). Both are analytics
 /// providers — the registry stays home-free.
 ///
-/// TD-1 / D-01: when a member filter is active (`ctx.memberFilterDeviceId !=
-/// null`), the donut watches `memberFilteredCategoryBreakdownProvider(deviceId:)`
-/// (NOT `monthlyReportProvider`), so that filtered breakdown family is APPENDED
-/// last to the union — otherwise pull-to-refresh would serve the stale cached
-/// filtered data. The unfiltered union (no member filter) is byte-identical to
-/// the prior four-target order. The filtered family is an analytics `state_*`
-/// provider (no home-feature provider) so GUARD-01 still holds.
+/// TD-1 / D-01: `memberFilteredCategoryBreakdownProvider(deviceId:)` is APPENDED
+/// last to the union whenever a member filter is active (`ctx.memberFilterDeviceId
+/// != null`), regardless of the active `DonutDimension`. In the CATEGORY dimension
+/// the donut actually watches this exact filtered family (NOT `monthlyReportProvider`),
+/// so the append is required — otherwise pull-to-refresh would serve the stale cached
+/// filtered data. In the MEMBER dimension the donut instead watches
+/// `memberSpendBreakdownProvider`, so the same append is a harmless
+/// over-invalidation (a no-op — the filtered family is uncached there). Either way
+/// the `union ⊇ watched` invariant holds; `AnalyticsCardContext` carries no
+/// `dimension` field to gate the append more narrowly, so the broader-but-safe
+/// condition is intentional. The unfiltered union (no member filter) is
+/// byte-identical to the prior four-target order. The filtered family is an
+/// analytics `state_*` provider (no home-feature provider) so GUARD-01 still holds.
 List<ProviderBase<Object?>> categoryDonutRefreshTargets(
   AnalyticsCardContext ctx,
 ) => [
@@ -329,9 +335,11 @@ List<ProviderBase<Object?>> categoryDonutRefreshTargets(
     endDate: ctx.endDate,
     joyMetricVariant: ctx.joyMetricVariant,
   ),
-  // TD-1 / D-01: the member-filtered category breakdown the donut watches when
-  // a member filter is active — appended ONLY when one is set so the unfiltered
-  // union stays byte-stable. Keyed identically to the card's watch (line ~192).
+  // TD-1 / D-01: the member-filtered category breakdown the donut watches in the
+  // CATEGORY dimension when a member filter is active (a harmless no-op
+  // over-invalidation in the MEMBER dimension — see dartdoc above). Appended ONLY
+  // when a filter is set so the unfiltered union stays byte-stable. Keyed
+  // identically to the card's category-dimension watch (line ~192).
   if (ctx.memberFilterDeviceId != null)
     memberFilteredCategoryBreakdownProvider(
       bookId: ctx.bookId,
