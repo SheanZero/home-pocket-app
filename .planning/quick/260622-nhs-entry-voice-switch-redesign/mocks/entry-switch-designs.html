@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记账录入 — 手工/语音切换 · 5 种方案</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F5F1ED; --divider:#E6DCDA; --border:#E6DCDA;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#999999;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --primary:#6FA36F; --primaryLight:#EEF6EC; --primaryBorder:#CFE6CF;
+    --fabStart:#E09DB4; --fabEnd:#D98CA0; --fabShadow:rgba(217,140,160,.32);
+    --recStart:#E5484D; --recEnd:#C93040;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1180px;margin:0 auto 30px;}
+  .page-head h1{font-size:24px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.8;color:#5a5048;max-width:920px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--recStart);
+    border-radius:10px;padding:12px 16px;margin-top:14px;font-size:13px;line-height:1.75;color:#6a5f56;max-width:920px;}
+  .page-head .prob b{color:#b03a3f;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:30px;justify-content:center;align-items:flex-start;max-width:1240px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:12px;width:340px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .col.before > .cap .n{background:var(--recStart);}
+
+  /* ===== phone frame ===== */
+  .phone{width:340px;height:760px;background:var(--bg);border-radius:38px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;
+    border:1px solid #ddd3cc;position:relative;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 14px;
+    border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  /* header switcher (current + designs that keep header) */
+  .sw-top{margin:8px 14px 2px;height:36px;background:var(--muted);border-radius:11px;
+    display:flex;padding:4px;gap:4px;}
+  .sw-top .seg{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border-radius:8px;
+    font-size:13px;font-weight:600;color:var(--textSecondary);cursor:pointer;}
+  .sw-top .seg.on{background:var(--card);color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.10);}
+
+  .amount{margin:12px 16px 4px;display:flex;align-items:center;gap:10px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:12px;font-weight:700;
+    padding:6px 10px;border-radius:9px;white-space:nowrap;}
+  .amount .val{flex:1;text-align:right;font-size:42px;font-weight:700;color:var(--dailyText);
+    font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1;}
+  .amount .clr{color:var(--textTertiary);font-size:22px;width:24px;text-align:center;}
+
+  .form{padding:8px 16px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:9px;}
+  .frow{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:12px 13px;}
+  .frow .ic{font-size:15px;width:18px;text-align:center;}
+  .frow .lbl{font-size:13px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:13px;font-weight:600;color:var(--textPrimary);}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .ledger{display:flex;gap:9px;}
+  .lchip{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;
+    border-radius:11px;border:1.5px solid var(--border);background:var(--muted);
+    font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+  .lchip.joy.on{background:var(--joyLight);border-color:var(--joy);color:var(--joyText);}
+
+  /* ===== bottom zones ===== */
+  .bottom{flex-shrink:0;}
+  .pad{background:var(--card);border-top:1px solid var(--divider);padding:9px 11px 13px;}
+  .pad .g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .key{height:46px;border-radius:11px;background:var(--muted);display:flex;align-items:center;
+    justify-content:center;font-size:21px;font-weight:600;color:var(--textPrimary);cursor:pointer;}
+  .act{display:flex;gap:8px;margin-top:8px;}
+  .act .sm{width:46px;height:46px;border-radius:11px;background:var(--muted);display:flex;
+    align-items:center;justify-content:center;font-size:17px;color:var(--textSecondary);cursor:pointer;}
+  .save{flex:1;height:46px;border-radius:12px;color:#fff;font-size:15px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 4px 12px var(--fabShadow);}
+
+  .voice{background:var(--card);border-top:1px solid var(--divider);padding:16px 16px 18px;
+    display:flex;flex-direction:column;align-items:center;gap:11px;}
+  .voice .tx{font-size:13px;color:var(--textTertiary);height:18px;}
+  .wave{display:flex;align-items:flex-end;gap:3px;height:42px;}
+  .wave i{width:3px;border-radius:2px;background:var(--daily);opacity:.85;}
+  .mic{width:66px;height:66px;border-radius:50%;color:#fff;font-size:27px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 6px 16px var(--fabShadow);}
+  .mic.rec{background:linear-gradient(to bottom,var(--recStart),var(--recEnd));border-radius:20px;}
+  .voice .cap{font-size:12px;color:var(--textSecondary);font-weight:600;}
+  .voice .back{font-size:12px;color:var(--primary);font-weight:600;cursor:pointer;}
+
+  /* mode toggling via class on .phone */
+  .phone .zone-voice{display:none;}
+  .phone.is-voice .zone-pad{display:none;}
+  .phone.is-voice .zone-voice{display:flex;}
+
+  /* highlight ring for the NEW switch affordance */
+  .hl{position:relative;outline:2.5px dashed var(--primary);outline-offset:3px;border-radius:13px;}
+  .hl.pink{outline-color:var(--joy);}
+  .tag-n{position:absolute;top:-12px;left:-10px;z-index:5;width:24px;height:24px;border-radius:50%;
+    background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .tag-n.pink{background:var(--joy);}
+  .tag-n.red{background:var(--recStart);}
+
+  /* ===== Design A : bottom segmented ===== */
+  .sw-bottom{margin:0;padding:9px 11px 0;background:var(--card);border-top:1px solid var(--divider);}
+  .sw-bottom .row{height:40px;background:var(--muted);border-radius:11px;display:flex;padding:4px;gap:4px;}
+  .sw-bottom .seg{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;
+    font-size:13.5px;font-weight:700;color:var(--textSecondary);cursor:pointer;}
+  .sw-bottom .seg.on{background:var(--card);color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.10);}
+  .pad.attached{border-top:none;padding-top:9px;}
+  .voice.attached{border-top:none;}
+
+  /* ===== Design C : composer bar ===== */
+  .composer{background:var(--card);border-top:1px solid var(--divider);padding:11px 13px;
+    display:flex;align-items:center;gap:11px;}
+  .composer .field{flex:1;height:48px;border-radius:24px;background:var(--muted);border:1px solid var(--border);
+    display:flex;align-items:center;padding:0 16px;gap:8px;cursor:pointer;}
+  .composer .field .ph{font-size:15px;color:var(--textTertiary);}
+  .composer .field .amt{font-size:18px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;}
+  .composer .mic-c{width:48px;height:48px;border-radius:50%;flex-shrink:0;color:#fff;font-size:21px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 4px 12px var(--fabShadow);}
+  .phone .c-pad,.phone .c-voice{display:none;}
+  .phone.show-pad .c-pad{display:block;}
+  .phone.show-voice .c-voice{display:flex;}
+
+  /* ===== Design D : swipe indicator ===== */
+  .swipe-hint{position:absolute;top:108px;left:0;right:0;display:flex;justify-content:space-between;
+    padding:0 6px;pointer-events:none;z-index:3;}
+  .swipe-hint span{font-size:26px;color:rgba(111,163,111,.45);}
+  .dind{padding:10px 11px 0;background:var(--card);border-top:1px solid var(--divider);
+    display:flex;align-items:center;justify-content:center;gap:14px;}
+  .dind .pill{display:flex;align-items:center;gap:10px;background:var(--muted);border-radius:20px;
+    padding:7px 16px;cursor:pointer;}
+  .dind .pseg{font-size:13px;font-weight:700;color:var(--textTertiary);}
+  .dind .pseg.on{color:var(--primary);}
+  .dind .dots{display:flex;gap:6px;align-items:center;}
+  .dind .dot{width:7px;height:7px;border-radius:50%;background:var(--border);}
+  .dind .dot.on{background:var(--primary);width:18px;border-radius:4px;}
+
+  /* ===== Design E : floating mic + voice sheet ===== */
+  .fab-mic{position:absolute;right:18px;bottom:96px;width:60px;height:60px;border-radius:50%;z-index:6;
+    color:#fff;font-size:25px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--fabStart),var(--fabEnd));box-shadow:0 8px 20px var(--fabShadow);}
+  .fab-mic .ping{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--joy);opacity:.5;}
+  .sheet-scrim{position:absolute;inset:0;background:rgba(20,18,16,.32);z-index:8;display:none;}
+  .phone.show-sheet .sheet-scrim{display:block;}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:9;background:var(--card);
+    border-radius:22px 22px 0 0;padding:10px 18px 26px;transform:translateY(100%);transition:transform .28s ease;
+    display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 -10px 30px rgba(0,0,0,.16);}
+  .phone.show-sheet .sheet{transform:translateY(0);}
+  .sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--border);margin-bottom:4px;}
+  .sheet .title{font-size:14px;font-weight:700;color:var(--textPrimary);}
+
+  /* annotation note under each phone */
+  .note{width:340px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;
+    font-size:12.5px;color:#5a5048;line-height:1.7;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;
+    background:var(--primaryLight);color:var(--dailyText);border:1px solid var(--primaryBorder);}
+  .note .badge.bold{background:var(--joyLight);color:var(--joyText);border-color:#eccdd6;}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .line{margin:5px 0;}
+  .note .line b{color:#2c2a26;}
+  .note .k{display:inline-block;min-width:46px;color:#8a7f76;font-weight:700;}
+  .note ul{margin:7px 0 0 2px;list-style:none;}
+  .note li{padding-left:18px;position:relative;margin:3px 0;}
+  .note li.pro::before{content:"＋";position:absolute;left:0;color:var(--daily);font-weight:700;}
+  .note li.con::before{content:"－";position:absolute;left:0;color:#c98a6a;font-weight:700;}
+  .hint{font-size:12px;color:#8a7f76;text-align:center;margin-top:-4px;}
+  .legend{max-width:1180px;margin:22px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;
+    border:1px solid #e3dad2;border-radius:10px;padding:12px 16px;line-height:1.8;}
+  .legend b{color:#2c2a26;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>记账录入界面 — 手工 / 语音 快速切换 · 5 种方案</h1>
+  <p>当前「手工 / 语音」切换器放在 <b>顶部头部</b>（AppBar 下方的分段 Tab）。但用户记账时手指停在 <b>底部</b>
+  的数字键盘或麦克风区域，每次切换都要把手伸到屏幕最上方再回来 —— 动线长、打断输入节奏。
+  下面 5 个方案把切换入口移到拇指可达的底部，或彻底重构「模式」概念。每个手机可点击交互演示。</p>
+  <div class="prob"><b>现状动线：</b>录入金额（底部） → 手指上移到头部 → 点小 Tab → 整页替换（0ms）→ 表单重置。
+  顶部 Tab 命中区小、距离远，是这次要解决的核心痛点。</div>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== BEFORE / 现状 ===================== -->
+  <div class="col before">
+    <div class="cap"><span class="n">0</span>现状 — 头部 Tab 切换</div>
+    <div class="phone" id="p0">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="sw-top hl pink" style="outline-color:var(--recStart)">
+        <span class="tag-n red">0</span>
+        <span class="seg on">⌨ 手工</span><span class="seg">🎤 语音</span>
+      </div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger">
+          <span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="pad">
+          <div class="g">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+          </div>
+          <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="hint">↑ 切换器在顶部（红圈），离底部手指很远</div>
+  </div>
+
+  <!-- ===================== A : 底部分段切换器 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">A</span>底部分段切换器</div>
+    <div class="phone" id="pA">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="bottom">
+        <div class="sw-bottom hl"><span class="tag-n">A</span>
+          <div class="row">
+            <span class="seg on" data-m="manual" onclick="setMode('pA','manual')">⌨ 手工</span>
+            <span class="seg" data-m="voice" onclick="setMode('pA','voice')">🎤 语音</span>
+          </div>
+        </div>
+        <div class="pad attached zone-pad">
+          <div class="g">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+          </div>
+          <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+        </div>
+        <div class="voice attached zone-voice">
+          <div class="tx">咖啡 五百八 …</div>
+          <div class="wave" data-wave></div>
+          <div class="mic">🎤</div>
+          <div class="cap">按住说话</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">最稳妥 · 改动最小</span>
+      <h4>把现有分段 Tab 从头部移到键盘正上方</h4>
+      <div class="line"><span class="k">交互</span>点一下「语音」，键盘区原地变成麦克风卡片；再点「手工」变回键盘。</div>
+      <div class="line"><span class="k">动线</span><b>1 次点击 · 全程在拇指区</b>，手指无需离开底部。</div>
+      <ul>
+        <li class="pro">沿用熟悉的分段控件，零学习成本</li>
+        <li class="pro">两种模式地位对等，切换可逆直观</li>
+        <li class="con">键盘上方多占约 40dp 竖向空间</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== B : 键盘内麦克风键 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">B</span>键盘麦克风键 · 按住说话</div>
+    <div class="phone" id="pB">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="bottom">
+        <div class="pad zone-pad">
+          <div class="g">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+          </div>
+          <div class="act">
+            <div class="sm">⌫</div>
+            <div class="sm hl pink" style="background:var(--joyLight);color:var(--joyText);font-size:19px"
+                 onclick="setMode('pB','voice')"><span class="tag-n pink">B</span>🎤</div>
+            <div class="save">✓ 保存</div>
+          </div>
+        </div>
+        <div class="voice zone-voice">
+          <div class="back" onclick="setMode('pB','manual')">‹ 返回键盘</div>
+          <div class="tx">拿铁 五百八十 …</div>
+          <div class="wave" data-wave></div>
+          <div class="mic rec">🎤</div>
+          <div class="cap">松开完成 · 录音中…</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">手工为主 · 语音随手可用</span>
+      <h4>键盘动作行内嵌一颗麦克风键</h4>
+      <div class="line"><span class="k">交互</span>键盘常驻；<b>按住</b>麦克风键即说即录，松手自动填表回到键盘。点一下则展开语音面板。</div>
+      <div class="line"><span class="k">动线</span><b>0 跳转</b> · 麦克风就在键盘里，本就在拇指下。</div>
+      <ul>
+        <li class="pro">最快：说一句不离开键盘，适合「偶尔语音」</li>
+        <li class="pro">复用现有 hold-to-record 逻辑，工程量小</li>
+        <li class="con">语音降级为「副功能」，需提示引导首次发现</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== C : 统一底部输入条 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">C</span>统一底部输入条 · 无模式</div>
+    <div class="phone show-pad" id="pC">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v" style="color:var(--textTertiary);font-weight:500">未填</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="bottom">
+        <!-- collapsible keypad -->
+        <div class="pad c-pad" style="padding-bottom:8px">
+          <div class="g">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key">00</div><div class="key">0</div><div class="key">⌫</div>
+          </div>
+        </div>
+        <div class="voice c-voice" style="padding:12px 16px 8px">
+          <div class="tx">咖啡 五百八 …</div>
+          <div class="wave" data-wave></div>
+          <div class="cap" style="color:var(--joyText)">松开完成</div>
+        </div>
+        <!-- always-on composer -->
+        <div class="composer hl"><span class="tag-n">C</span>
+          <div class="field" onclick="composerMode('pC','pad')">
+            <span class="amt">¥ 1,280</span>
+          </div>
+          <div class="mic-c" onclick="composerMode('pC','voice')">🎤</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge bold">最彻底 · 取消「模式」概念</span>
+      <h4>聊天式输入条：键盘与麦克风始终并列</h4>
+      <div class="line"><span class="k">交互</span>点金额条 → 升起键盘；按住麦克风 → 即说即录。<b>两种输入永远各一键可达</b>，没有「当前模式」。</div>
+      <div class="line"><span class="k">动线</span><b>0 切换</b> · 用哪个碰哪个，互不遮挡。</div>
+      <ul>
+        <li class="pro">最现代，彻底消灭「切换」这件事</li>
+        <li class="pro">表单露出更多（键盘可收起）</li>
+        <li class="con">改动最大；键盘改为「升起式」，需重排底部</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== D : 横滑切换 + 指示 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">D</span>横滑切换 · 底部指示点</div>
+    <div class="phone" id="pD">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="swipe-hint zone-pad"><span>‹</span><span>›</span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="bottom">
+        <div class="dind hl"><span class="tag-n">D</span>
+          <div class="pill" onclick="toggleMode('pD')">
+            <span class="pseg on" data-m="manual">⌨ 手工</span>
+            <span class="dots"><i class="dot on"></i><i class="dot"></i></span>
+            <span class="pseg" data-m="voice">🎤 语音</span>
+          </div>
+        </div>
+        <div class="pad zone-pad" style="border-top:none">
+          <div class="g">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+          </div>
+          <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+        </div>
+        <div class="voice zone-voice" style="border-top:none">
+          <div class="tx">咖啡 五百八 …</div>
+          <div class="wave" data-wave></div>
+          <div class="mic">🎤</div>
+          <div class="cap">按住说话</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">手势优先 · 老用户最快</span>
+      <h4>左右滑动输入区翻页 + 底部页码指示</h4>
+      <div class="line"><span class="k">交互</span>在输入区左右滑动切换手工/语音；底部指示点同步。点指示条也能切（手势兜底）。</div>
+      <div class="line"><span class="k">动线</span><b>一个滑动手势</b> · 不用精确命中小目标。</div>
+      <ul>
+        <li class="pro">熟手极快，符合「翻页」心智模型</li>
+        <li class="pro">指示点常驻，状态一目了然</li>
+        <li class="con">手势可发现性差；可能与表单滚动冲突</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== E : 浮动麦克风唤起语音浮层 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">E</span>浮动麦克风 · 语音浮层</div>
+    <div class="phone" id="pE">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="bottom">
+        <div class="pad">
+          <div class="g">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+          </div>
+          <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+        </div>
+      </div>
+      <!-- floating mic -->
+      <div class="fab-mic hl pink" onclick="openSheet('pE')"><span class="ping"></span><span class="tag-n pink">E</span>🎤</div>
+      <!-- voice sheet overlay -->
+      <div class="sheet-scrim" onclick="closeSheet('pE')"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="title">语音记账</div>
+        <div class="tx" style="color:var(--textTertiary);font-size:13px">咖啡 五百八 …</div>
+        <div class="wave" data-wave></div>
+        <div class="mic">🎤</div>
+        <div class="cap" style="font-size:12px;color:var(--textSecondary);font-weight:600">按住说话，松手填入表单</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge bold">手工为画布 · 语音作加速器</span>
+      <h4>常驻浮动麦克风，唤起语音浮层（不离开手工）</h4>
+      <div class="line"><span class="k">交互</span>点右下角樱粉麦克风 → 升起语音浮层（带遮罩），说完松手回填同一张表单并收起。手工页从不被替换。</div>
+      <div class="line"><span class="k">动线</span><b>1 次点击 · 拇指角</b>，语音是临时工具不是独立页。</div>
+      <ul>
+        <li class="pro">手工体验完全不被打断，语音随取随用</li>
+        <li class="pro">浮层可复用现有 voice_input 卡片</li>
+        <li class="con">FAB 漂浮易遮挡内容；屏上又多一个浮动元素</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>调色板（ADR-019 桜餅×若葉，已对齐真实 app_palette.dart）：</b>
+  主色/激活 Tab 若叶绿 <code>#6FA36F</code> ·
+  日常 <code>#5FAE72</code>/字 <code>#2E6B3A</code> ·
+  悦己 樱粉 <code>#D98CA0</code>/字 <code>#A53D5E</code> ·
+  保存键/麦克风(待机) 樱粉渐变 <code>#E09DB4→#D98CA0</code> ·
+  录音中 红 <code>#E5484D→#C93040</code> ·
+  背景暖米白 <code>#FBF7F4</code>。
+  <br><b>说明：</b>均为亮色稿（暗色 token 已存在，落地零成本）。手机可点击：A 底部分段、B 麦克风键、C 输入条、D 指示条、E 浮动麦克风。
+</div>
+
+<script>
+  // build waveforms
+  document.querySelectorAll('[data-wave]').forEach(w=>{
+    const hs=[10,18,26,34,40,34,28,22,30,38,42,36,28,20,14,9];
+    w.innerHTML = hs.map(h=>`<i style="height:${h}px"></i>`).join('');
+  });
+  // A & generic two-mode swap
+  function setMode(id,m){
+    const p=document.getElementById(id);
+    p.classList.toggle('is-voice', m==='voice');
+    p.querySelectorAll('.sw-bottom .seg, .sw-top .seg').forEach(s=>{
+      if(s.dataset.m) s.classList.toggle('on', s.dataset.m===m);
+    });
+  }
+  // D toggle (pill + dots)
+  function toggleMode(id){
+    const p=document.getElementById(id);
+    const voice=!p.classList.contains('is-voice');
+    p.classList.toggle('is-voice',voice);
+    p.querySelectorAll('.pseg').forEach(s=>s.classList.toggle('on', (s.dataset.m==='voice')===voice));
+    const dots=p.querySelectorAll('.dot');
+    dots[0].classList.toggle('on',!voice); dots[1].classList.toggle('on',voice);
+  }
+  // C composer
+  function composerMode(id,m){
+    const p=document.getElementById(id);
+    p.classList.toggle('show-pad', m==='pad');
+    p.classList.toggle('show-voice', m==='voice');
+  }
+  // E sheet
+  function openSheet(id){document.getElementById(id).classList.add('show-sheet');}
+  function closeSheet(id){document.getElementById(id).classList.remove('show-sheet');}
+</script>
+</body>
+</html>

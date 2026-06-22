@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记账录入 — 按住说话（不切换模式）· 5 种位置方案</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F5F1ED; --divider:#E6DCDA; --border:#E6DCDA;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#999999;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --primary:#6FA36F; --primaryLight:#EEF6EC; --primaryBorder:#CFE6CF;
+    --fabStart:#E09DB4; --fabEnd:#D98CA0; --fabShadow:rgba(217,140,160,.32);
+    --recStart:#E5484D; --recEnd:#C93040;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1180px;margin:0 auto 28px;}
+  .page-head h1{font-size:24px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.8;color:#5a5048;max-width:940px;}
+  .page-head .key-idea{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--primary);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.8;color:#5a5048;max-width:940px;}
+  .page-head .key-idea b{color:var(--dailyText);}
+  .page-head .try{display:inline-block;margin-top:10px;font-size:12.5px;color:#fff;background:var(--joy);
+    padding:5px 13px;border-radius:8px;font-weight:600;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:30px;justify-content:center;align-items:flex-start;max-width:1240px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:12px;width:340px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+
+  /* ===== phone frame ===== */
+  .phone{width:340px;height:760px;background:var(--bg);border-radius:38px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;
+    border:1px solid #ddd3cc;position:relative;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 14px;
+    border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:12px 16px 4px;display:flex;align-items:center;gap:10px;position:relative;border-radius:12px;padding:4px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:12px;font-weight:700;
+    padding:6px 10px;border-radius:9px;white-space:nowrap;}
+  .amount .val{flex:1;text-align:right;font-size:42px;font-weight:700;color:var(--dailyText);
+    font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1;}
+  .amount .clr{color:var(--textTertiary);font-size:22px;width:24px;text-align:center;}
+  .amount .mic-hint{position:absolute;left:8px;bottom:-13px;font-size:10px;color:var(--joyText);
+    background:var(--joyLight);padding:1px 7px;border-radius:6px;font-weight:600;}
+
+  .form{padding:10px 16px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:9px;position:relative;}
+  .frow{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:12px 13px;}
+  .frow .ic{font-size:15px;width:18px;text-align:center;}
+  .frow .lbl{font-size:13px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:13px;font-weight:600;color:var(--textPrimary);}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .ledger{display:flex;gap:9px;}
+  .lchip{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;
+    border-radius:11px;border:1.5px solid var(--border);background:var(--muted);
+    font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+  .lchip.joy.on{background:var(--joyLight);border-color:var(--joy);color:var(--joyText);}
+
+  /* whole-screen hint chip (V5) */
+  .screen-hint{position:absolute;left:50%;top:46%;translate:-50% 0;
+    font-size:12px;color:var(--joyText);background:var(--joyLight);border:1px dashed var(--joy);
+    padding:6px 14px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+
+  /* ===== keypad (always present = natural input) ===== */
+  .pad{background:var(--card);border-top:1px solid var(--divider);padding:9px 11px 13px;flex-shrink:0;}
+  .pad.tight{padding-bottom:8px;}
+  .pad .g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .key{height:44px;border-radius:11px;background:var(--muted);display:flex;align-items:center;
+    justify-content:center;font-size:20px;font-weight:600;color:var(--textPrimary);}
+  .act{display:flex;gap:8px;margin-top:8px;}
+  .act .sm{width:44px;height:44px;border-radius:11px;background:var(--muted);display:flex;
+    align-items:center;justify-content:center;font-size:17px;color:var(--textSecondary);}
+  .save{flex:1;height:44px;border-radius:12px;color:#fff;font-size:15px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 4px 12px var(--fabShadow);}
+  /* V1: save with dual-action sublabel */
+  .save.dual{flex-direction:column;gap:1px;height:48px;}
+  .save.dual .sub{font-size:10px;font-weight:600;opacity:.92;display:flex;align-items:center;gap:3px;}
+
+  /* V2: dedicated hold-to-talk bar */
+  .ptt-bar{flex-shrink:0;height:48px;margin:0;display:flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(to bottom,#FCEFF3,#F8E2E9);border-top:1px solid #EFD6DE;
+    color:var(--joyText);font-size:14px;font-weight:700;}
+  .ptt-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--joy);}
+
+  /* V4: momentary mic FAB */
+  .fab-hold{position:absolute;left:262px;bottom:350px;width:62px;height:62px;border-radius:50%;z-index:6;
+    color:#fff;font-size:25px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+    background:linear-gradient(135deg,var(--fabStart),var(--fabEnd));box-shadow:0 8px 20px var(--fabShadow);}
+  .fab-hold .fl{font-size:8.5px;font-weight:700;margin-top:-2px;}
+
+  /* ===== PTT overlay (appears WHILE holding) ===== */
+  .scrim{position:absolute;inset:0;background:rgba(20,18,16,.30);z-index:8;opacity:0;pointer-events:none;transition:opacity .18s;}
+  .phone.talking .scrim{opacity:1;}
+  .ptt{position:absolute;left:0;right:0;bottom:0;z-index:9;background:var(--card);
+    border-radius:22px 22px 0 0;padding:14px 18px 26px;display:flex;flex-direction:column;align-items:center;gap:11px;
+    box-shadow:0 -10px 30px rgba(0,0,0,.18);transform:translateY(101%);transition:transform .2s ease;}
+  .phone.talking .ptt{transform:translateY(0);}
+  .ptt .grab{width:40px;height:5px;border-radius:3px;background:var(--border);}
+  .ptt .listening{font-size:13px;font-weight:700;color:var(--recStart);display:flex;align-items:center;gap:6px;}
+  .ptt .listening .rd{width:9px;height:9px;border-radius:50%;background:var(--recStart);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .ptt .tx{font-size:15px;color:var(--textPrimary);font-weight:600;min-height:20px;}
+  .wave{display:flex;align-items:flex-end;gap:3px;height:44px;}
+  .wave i{width:3px;border-radius:2px;background:var(--daily);opacity:.9;animation:bounce 1s infinite ease-in-out;}
+  @keyframes bounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .ptt .mic{width:68px;height:68px;border-radius:20px;color:#fff;font-size:28px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to bottom,var(--recStart),var(--recEnd));box-shadow:0 6px 18px rgba(201,48,64,.32);}
+  .ptt .rel{font-size:12px;color:var(--textSecondary);font-weight:600;}
+
+  /* highlight ring on the hold target */
+  .hl{position:relative;outline:2.5px dashed var(--joy);outline-offset:3px;border-radius:13px;}
+  .tag-n{position:absolute;top:-12px;left:-10px;z-index:7;width:24px;height:24px;border-radius:50%;
+    background:var(--joy);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .holdable{cursor:pointer;}
+
+  /* annotation note */
+  .note{width:340px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;
+    font-size:12.5px;color:#5a5048;line-height:1.7;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;
+    background:var(--joyLight);color:var(--joyText);border:1px solid #eccdd6;}
+  .note .badge.green{background:var(--primaryLight);color:var(--dailyText);border-color:var(--primaryBorder);}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .line{margin:5px 0;}
+  .note .line b{color:#2c2a26;}
+  .note .k{display:inline-block;min-width:46px;color:#8a7f76;font-weight:700;vertical-align:top;}
+  .note ul{margin:7px 0 0 2px;list-style:none;}
+  .note li{padding-left:18px;position:relative;margin:3px 0;}
+  .note li.pro::before{content:"＋";position:absolute;left:0;color:var(--daily);font-weight:700;}
+  .note li.con::before{content:"－";position:absolute;left:0;color:#c98a6a;font-weight:700;}
+  .hint{font-size:12px;color:#8a7f76;text-align:center;}
+  .legend{max-width:1180px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;
+    border:1px solid #e3dad2;border-radius:10px;padding:13px 16px;line-height:1.85;}
+  .legend b{color:#2c2a26;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>记账录入 — 「按住说话」不切换模式 · 5 种位置方案</h1>
+  <p>单页面、无「手工/语音」切换。<b>自然手工输入是唯一常驻状态</b>（数字键盘始终在）。
+  语音只是一个<b>动量动作（push-to-talk）</b>：按住某处 → 说话 → 松手 → 解析结果填进同一张表单 → 回到手工继续微调保存。
+  没有任何模式 Tab，没有整页替换。下面 5 个方案只在「按住的位置」上不同。</p>
+  <div class="key-idea">
+    <b>统一交互（5 个方案共用）：</b>
+    ① 默认 = 手工键盘录入；② <b>按住</b>目标 → 升起语音浮层（实时转写 + 波形 + 录音红麦克风「松开完成」）；
+    ③ <b>松开</b> → 金额/分类/商家/日期自动填入表单，浮层收起，回到手工。语音从不"接管"页面。
+    <div class="try">👆 在每个手机上「按住」高亮目标不放 → 看到浮层；松手 → 收起</div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== V1 : 长按保存键 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">1</span>长按保存键说话</div>
+    <div class="phone" id="v1">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+        </div>
+        <div class="act">
+          <div class="sm">⌫</div><div class="sm">¥</div>
+          <div class="save dual hl holdable" data-hold="v1"><span class="tag-n">1</span>
+            <span>✓ 保存</span><span class="sub">🎤 长按说话</span>
+          </div>
+        </div>
+      </div>
+      <div class="scrim"></div>
+      <div class="ptt">
+        <div class="grab"></div>
+        <div class="listening"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 一千二百八</div>
+        <div class="wave" data-wave></div>
+        <div class="mic">🎤</div>
+        <div class="rel">松开 → 自动填入并保存</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge green">最省空间 · 复用主按钮</span>
+      <h4>主按钮双动作：点=保存，长按=说话</h4>
+      <div class="line"><span class="k">动线</span>拇指本就停在保存键上，<b>长按即说</b>，松手填表（可设松手即存）。</div>
+      <ul>
+        <li class="pro">零新增控件，底部最干净</li>
+        <li class="pro">拇指自然落点，单手极顺</li>
+        <li class="con">点/长按同一键，需防误触（长按阈值 + 触觉反馈）</li>
+        <li class="con">语音入口隐性，靠 sublabel 提示发现</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== V2 : 底部按住说话长条 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">2</span>底部「按住说话」长条</div>
+    <div class="phone" id="v2">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="pad tight">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+      </div>
+      <div class="ptt-bar hl holdable" data-hold="v2"><span class="tag-n">2</span>
+        <span class="dot"></span>🎤 按住说话
+      </div>
+      <div class="scrim"></div>
+      <div class="ptt">
+        <div class="grab"></div>
+        <div class="listening"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 一千二百八</div>
+        <div class="wave" data-wave></div>
+        <div class="mic">🎤</div>
+        <div class="rel">松开 → 自动填入表单</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">最易发现 · 零歧义</span>
+      <h4>键盘下方常驻一条全宽「按住说话」</h4>
+      <div class="line"><span class="k">动线</span>屏幕最底、全宽大目标，<b>按住整条</b>即说，松手填表。键盘照常在上方可用。</div>
+      <ul>
+        <li class="pro">命中区最大，最好发现、最不会误触</li>
+        <li class="pro">"手工在上、说话在下"心智清晰</li>
+        <li class="con">多占约 48dp 竖向空间</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== V3 : 长按金额区 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">3</span>长按金额区说话</div>
+    <div class="phone" id="v3">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount hl holdable" data-hold="v3"><span class="tag-n">3</span>
+        <span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span>
+        <span class="mic-hint">🎤 长按说话</span>
+      </div>
+      <div class="form" style="padding-top:18px">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="ptt">
+        <div class="grab"></div>
+        <div class="listening"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 一千二百八</div>
+        <div class="wave" data-wave></div>
+        <div class="mic">🎤</div>
+        <div class="rel">松开 → 金额与明细自动填入</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">语义最贴 · 视觉焦点</span>
+      <h4>长按大金额数字即说话</h4>
+      <div class="line"><span class="k">动线</span>金额是录入焦点；<b>长按金额条</b>说"拿铁一千二百八"，松手填金额+明细。点金额仍可手工编辑。</div>
+      <ul>
+        <li class="pro">语义直觉：对着金额说出金额</li>
+        <li class="pro">不新增底部控件，键盘区不动</li>
+        <li class="con">金额区在中上部，单手拇指略远</li>
+        <li class="con">长按与"点击编辑"需区分阈值</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== V4 : 长按浮动麦克风 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">4</span>长按浮动麦克风（动量）</div>
+    <div class="phone" id="v4">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+      </div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+      </div>
+      <div class="fab-hold hl holdable" data-hold="v4"><span class="tag-n">4</span>🎤<span class="fl">按住</span></div>
+      <div class="scrim"></div>
+      <div class="ptt">
+        <div class="grab"></div>
+        <div class="listening"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 一千二百八</div>
+        <div class="wave" data-wave></div>
+        <div class="mic">🎤</div>
+        <div class="rel">松开 → 自动填入表单</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">悬浮随手 · 不占布局</span>
+      <h4>角落悬浮麦克风，纯按住动量</h4>
+      <div class="line"><span class="k">动线</span>右侧悬浮麦克风<b>只按住不点击</b>：按住说话、松手收起。不抢键盘空间。</div>
+      <ul>
+        <li class="pro">不改动键盘/表单布局，叠加即可</li>
+        <li class="pro">位置可贴右侧中部，拇指够得到</li>
+        <li class="con">悬浮元素可能遮挡表单内容</li>
+        <li class="con">"按住"非"点击"，需微标签 + 首次引导</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== V5 : 长按任意处 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">5</span>长按屏幕任意处说话</div>
+    <div class="phone" id="v5">
+      <div class="bar"><span class="x">×</span><span class="t">记账</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span><span class="clr">×</span></div>
+      <div class="form hl holdable" data-hold="v5" style="outline-offset:-2px">
+        <span class="tag-n" style="top:6px;left:6px">5</span>
+        <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">餐饮</span><span class="chev">›</span></div>
+        <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">今天</span><span class="chev">›</span></div>
+        <div class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></div>
+        <div class="screen-hint">🎤 长按任意处说话</div>
+      </div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key">.</div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥</div><div class="save">✓ 保存</div></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="ptt">
+        <div class="grab"></div>
+        <div class="listening"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 一千二百八</div>
+        <div class="wave" data-wave></div>
+        <div class="mic">🎤</div>
+        <div class="rel">松开 → 自动填入表单</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">最少控件 · 手势驱动</span>
+      <h4>长按表单空白区任意处即说话</h4>
+      <div class="line"><span class="k">动线</span>不依赖任何专用按钮；<b>长按内容区</b>（非键盘/非可点行）即说，松手填表。触点冒出涟漪+麦克风。</div>
+      <ul>
+        <li class="pro">界面最干净，零新增控件</li>
+        <li class="pro">"随处可说"自由度最高</li>
+        <li class="con">可发现性最差，必须首次引导 + 常驻提示</li>
+        <li class="con">易与滚动/点击冲突，长按阈值要调好</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>调色板（ADR-019 桜餅×若葉，已对齐 app_palette.dart）：</b>
+  日常绿 <code>#5FAE72</code>/字 <code>#2E6B3A</code> · 悦己/语音提示樱粉 <code>#D98CA0</code>/字 <code>#A53D5E</code> ·
+  保存键樱粉渐变 <code>#E09DB4→#D98CA0</code> · 录音浮层红 <code>#E5484D→#C93040</code> · 背景暖米白 <code>#FBF7F4</code>。
+  <br><b>共性：</b>都不切换模式、都单页、都「按住说话松手回手工」，复用现有 <code>voice_input</code> 的转写/波形/解析逻辑 与 hold-to-record 机制。
+  差异只在按住位置：① 保存键 ② 底部长条 ③ 金额区 ④ 悬浮麦克风 ⑤ 屏幕任意处。
+  <br><b>提示：</b>亮色稿；暗色 token 已存在。按住高亮目标演示「聆听」浮层。
+</div>
+
+<script>
+  document.querySelectorAll('[data-wave]').forEach(w=>{
+    const hs=[12,20,30,40,34,24,32,42,36,26,18,28,38,30,20,12];
+    w.innerHTML = hs.map((h,i)=>`<i style="height:${h}px;animation-delay:${i*0.06}s"></i>`).join('');
+  });
+  function bind(el){
+    const id=el.dataset.hold;
+    const p=document.getElementById(id);
+    const start=e=>{e.preventDefault();p.classList.add('talking');};
+    const end=()=>p.classList.remove('talking');
+    el.addEventListener('mousedown',start);
+    el.addEventListener('touchstart',start,{passive:false});
+    window.addEventListener('mouseup',end);
+    el.addEventListener('touchend',end);
+    el.addEventListener('touchcancel',end);
+  }
+  document.querySelectorAll('[data-hold]').forEach(bind);
+</script>
+</body>
+</html>
