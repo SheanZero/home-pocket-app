@@ -241,7 +241,7 @@ Widget _pumpScreen({
 void main() {
   late MockCreateTransactionUseCase mockCreateUseCase;
   late MockCategoryService mockCategoryService;
-  late _MockMerchantCategoryLearningService _mockLearningService;
+  late _MockMerchantCategoryLearningService mockLearningService;
 
   setUpAll(() {
     registerFallbackValue(FakeCreateTransactionParams());
@@ -250,12 +250,12 @@ void main() {
   setUp(() {
     mockCreateUseCase = MockCreateTransactionUseCase();
     mockCategoryService = MockCategoryService();
-    _mockLearningService = _MockMerchantCategoryLearningService();
+    mockLearningService = _MockMerchantCategoryLearningService();
     when(
       () => mockCategoryService.resolveLedgerType(any()),
     ).thenAnswer((_) async => LedgerType.daily);
     when(
-      () => _mockLearningService.recordSelection(
+      () => mockLearningService.recordSelection(
         merchantRaw: any(named: 'merchantRaw'),
         selectedCategoryId: any(named: 'selectedCategoryId'),
       ),
@@ -1106,7 +1106,7 @@ void main() {
           parseVoiceInputUseCaseProvider.overrideWithValue(parse),
           voiceLocaleIdProvider.overrideWith((ref) async => 'ja-JP'),
           merchantCategoryLearningServiceProvider.overrideWithValue(
-            _mockLearningService,
+            mockLearningService,
           ),
         ],
       );
