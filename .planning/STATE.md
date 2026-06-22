@@ -4,14 +4,14 @@ milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: verifying
 stopped_at: 47-06-PLAN.md complete — full-suite gate green + on-device D-10 UAT all 10 PASS (user-approved 2026-06-20); Phase 47 all 6 plans done, ready for verification
-last_updated: "2026-06-20T05:13:06.191Z"
-last_activity: 2026-06-20
+last_updated: "2026-06-22T05:39:29.816Z"
+last_activity: "2026-06-22 - quick 260622-d5i 统计页「分类支出/カテゴリ支出」donut 卡片内嵌悦己抽屉(`JoySpendDrawer`)去边框 + 分割线分离 + 随成员维度&筛选联动（先出 HTML 设计稿经用户确认再开发）。①视觉(D1)：删樱粉描边 `Container`(`Border.all`/radius18/盒内边距)→插入 1px `borderDivider` 分割线与「整体」(donut+类别图例)分离，保留「♡悦び」chip(`joyLight`/`joyText`)+¥总额+计数行。②成员筛选联动(D2)：悦己改读 `donutDimensionStateProvider`，category 维度经 `joyCategoryAmounts(deviceId:)` 复用整体同款 `tx.deviceId==deviceId` 过滤收窄。③维度切换(D3，用户选「切成员维度悦己也按成员拆」)：member 维度经新 `joyMemberAmounts` provider(复用 `GetMemberSpendBreakdownUseCase` 传 `ledgerType: LedgerType.joy`)in-widget 按 `memberFilterDeviceId` 收窄，成员段 label=成员名/emoji + `Icons.person_outline` + JoyWarmPalette 色。数据层 `GetJoyCategoryAmountsUseCase`(+`deviceId`)、`GetMemberSpendBreakdownUseCase`(+`ledgerType`)各加 1 可选参数(null 路径字节不变，单测+golden 双证)；零新 DAO/migration(复用 `findByBookIds`，schema 不动)、GUARD-01 无 home/*、全文经 `S.of(context)`、零裸 hex；新 ARB `analyticsJoyDrawerMemberCount`×3+gen-l10n；`joyMemberAmounts` 折入 `categoryDonutRefreshTargets`。analyze 0、受影响 unit/widget/golden+anti_toxicity 独立复跑 82/82(执行器报全 analytics widget+golden 421/421)、4 golden macOS 重基线(scroll-smoke+3 member-dim 变体)。commits 0f8ddff4/968e1e5f/20cdc950/fa9b97f1/d163abbc。 跟进修复(设备端 UAT 触发)：统计页 donut 圆环 `PieChart` 在扇区数变化时崩溃 `RangeError (length): Only valid value is 0: 1`（根因=fl_chart `RenderPieChart.badgeWidgetPaint` 按徽章子节点位置索引**动画 LERP 后**的 `data.sections`；圆环扇区给 ≥5% 切片配 on-ring 徽章[ti1]，扇区数增长时首帧 tween 评估到旧短数据而徽章子节点已是新长列表→越界；非 d5i 引入、ti1/v2m 徽章工作的既有脆弱点，d5i 设备 UAT 暴露）。修复=两处 PieChart(分类+成员维度)关闭隐式扇区 morph 动画 `duration: Duration.zero`，使 `data` 恒等于 target、子节点/扇区数永不失配；中心金额 count-up(独立 TweenAnimationBuilder)不受影响、settled golden 字节不变→**0 重基线**；新增决定论回归 widget 测试(`donut_hero_section_count_regression_test`，扇区数 1→4 增长跨动画窗逐帧断言零异常，修复前 RED 复现同一 RangeError、修复后 GREEN)。analyze 0、analytics widget+golden 422/422。commit d5f9412f。"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
   total_plans: 20
   completed_plans: 20
-  percent: 100
+  percent: 75
 ---
 
 # Project State
@@ -82,6 +82,7 @@ Prior: quick 260621-ti1 统计页「分类支出」donut 卡片：类目 icon + 
 
 - v1.8 roadmap first written 2026-06-15 as 5 phases (43-47) following the research design-gate-first decomposition. Phase numbering continues from v1.7's Phase 42 (no reset).
 - Phase 43 is a **standalone hard DESIGN GATE — NO production code** (user requirement "未获批前不进入开发"). Build phases (44-47) start only after the gate closes on user approval. The v1.6 (7→4) and v1.7 (6→3) consolidation precedents were considered; the build half (44-47) is kept at 4 phases because each carries a distinct, sequentially-dependent contract (data → shell → cards → validation) and the milestone is a full screen rebuild under tight ADR-012 invariants.
+- Phase 48 added 2026-06-22: Address v1.8 tech debt — member-filter donut refresh + stale trend comments. Integer phase appended to v1.8 (range 43→48) to clear the two code-grade items from `v1.8-MILESTONE-AUDIT.md`: (1) `memberFilteredCategoryBreakdownProvider` watched by `category_donut_card.dart` but absent from `categoryDonutRefreshTargets` (member-filtered pull-to-refresh serves stale cached data); (2) stale dartdoc for the removed `GetExpenseTrendUseCase`/`MonthlyTrend` in `repository_providers.dart` (+`.g.dart`) and one characterization test. Doc-grade audit items (47 nyquist, SUMMARY frontmatter drift) left out of scope.
 
 ### v1.8 Roadmap Constraints (locked by research + PROJECT.md — every build phase carries these)
 
