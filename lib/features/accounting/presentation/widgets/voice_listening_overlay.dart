@@ -13,15 +13,25 @@ import 'voice_waveform.dart';
 /// user speaks.
 ///
 /// Tap the panel's blank area = EXIT (stop + dismiss, keep the already-filled
-/// content, stay on the page — D-2 no auto-save). The ONLY button is
-/// 「重置·恢复账目」 which clears the transcript and restores the form to the
-/// pre-speech snapshot; its tap does NOT bubble to the exit handler.
+/// content, stay on the page — D-2 no auto-save).
+///
+/// 260622-nhs R7: the central square is a DUAL-STATE button driven by [status]
+/// (the bottom 「重置·恢复账目」 button is GONE):
+///   - listening/processing → grey square + line mic ([Icons.mic_none]); PASSIVE
+///     (no onTap — a tap on it bubbles to the panel's exit handler).
+///   - stopped → red (recording-gradient) square + reset icon ([Icons.restore],
+///     white); TAPPABLE → [onReset] (restore the pre-speech snapshot + re-record).
+/// The tap does NOT bubble to the exit handler when stopped.
+///
+/// Both states are EQUAL HEIGHT: the stopped-only 「点击重置重新录入」 hint keeps a
+/// reserved (invisible, maintained) placeholder while listening so 「轻点空白处
+/// 退出」 aligns at the same vertical position in both states (no jump on
+/// transition).
 ///
 /// Replaces R2's `VoiceListeningModal` (a Positioned.fill scrim + rounded
-/// bottom-sheet). Content top→bottom: 「正在聆听…」 (pulsing recording-red dot) →
-/// live transcript → 16-bar [VoiceWaveform] → recording-red rounded mic
-/// (line-style [Icons.mic_none], white) → 「轻点空白处退出」 hint (directly below
-/// the mic) → single line-style reset button.
+/// bottom-sheet). Content top→bottom: status title (pulsing status dot) → live
+/// transcript → 16-bar [VoiceWaveform] → dual-state square → 「点击重置重新录入」
+/// hint (reserved while listening) → 「轻点空白处退出」 hint.
 ///
 /// All text via [S]; all colors via [AppPalette] (zero raw hex). Stateless —
 /// the host passes the live [transcript] / [soundLevel] and the [onExit] /
@@ -51,7 +61,9 @@ class VoiceRecordPanel extends StatelessWidget {
   /// Tap-on-blank-area exit: stop listening + dismiss, keep the filled content.
   final VoidCallback onExit;
 
-  /// Reset button: clear the transcript and restore the pre-speech snapshot.
+  /// 260622-nhs R7: triggered by tapping the RED central square in the stopped
+  /// state — clears the transcript, restores the pre-speech snapshot, and
+  /// re-arms a fresh listening session. Passive while listening (no trigger).
   final VoidCallback onReset;
 
   @override
@@ -145,59 +157,42 @@ class VoiceRecordPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Rounded mic (line-style glyph). Recording-red gradient while
-            // listening/processing; a flat muted fill when stopped (R6 BUG 1).
-            Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: isStopped ? palette.backgroundMuted : null,
-                gradient: isStopped
-                    ? null
-                    : LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          palette.recordingGradientStart,
-                          palette.recordingGradientEnd,
-                        ],
-                      ),
-                border: isStopped
-                    ? Border.all(color: palette.borderDefault)
-                    : null,
-                boxShadow: isStopped
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: palette.actionShadow,
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-              ),
-              child: Icon(
-                Icons.mic_none,
-                color: isStopped ? palette.textTertiary : Colors.white,
-                size: 34,
-              ),
+            // 260622-nhs R7: dual-state central square (~74dp, radius ~22).
+            //  - listening/processing → grey ([backgroundMuted]) + line mic
+            //    ([Icons.mic_none], [textTertiary]); PASSIVE (no onTap, so a tap
+            //    bubbles to the panel's exit handler).
+            //  - stopped → red (recording-gradient) + reset icon
+            //    ([Icons.restore], white); TAPPABLE → [onReset] (re-record). Its
+            //    tap must NOT bubble to the exit handler.
+            _CentralSquare(
+              isStopped: isStopped,
+              palette: palette,
+              onReset: onReset,
             ),
             const SizedBox(height: 8),
 
-            // 260622-nhs R6 (BUG 1): when stopped, a tap-reset hint tells the
-            // user that tapping 重置 records again (the one-shot session ended).
-            if (isStopped) ...[
-              Text(
-                l10n.voiceTapResetToRerecord,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: palette.textSecondary,
-                  fontWeight: FontWeight.w700,
+            // 260622-nhs R7: the stopped-only 「点击重置重新录入」 hint keeps a
+            // RESERVED placeholder while listening (maintainSize) so the panel
+            // height — and the 「轻点空白处退出」 below — is identical in both
+            // states (no jump on transition).
+            Visibility(
+              visible: isStopped,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  l10n.voiceTapResetToRerecord,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: palette.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
-            ],
+            ),
 
-            // Tap-to-exit hint directly below the mic.
+            // Tap-to-exit hint — always present, aligned in both states.
             Text(
               l10n.voiceTapToExit,
               style: AppTextStyles.bodySmall.copyWith(
@@ -205,53 +200,76 @@ class VoiceRecordPanel extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
-
-            // Single reset button — restores the pre-speech snapshot. Its tap
-            // must NOT bubble to the panel's exit handler.
-            GestureDetector(
-              key: const ValueKey('voice-panel-reset'),
-              behavior: HitTestBehavior.opaque,
-              onTap: onReset,
-              child: Container(
-                height: 46,
-                padding: const EdgeInsets.symmetric(horizontal: 26),
-                decoration: BoxDecoration(
-                  color: palette.backgroundMuted,
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: palette.borderDefault),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.restore,
-                      size: 18,
-                      color: palette.textSecondary,
-                    ),
-                    const SizedBox(width: 7),
-                    Text(
-                      l10n.voiceResetRestore,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: palette.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      l10n.voiceResetRestoreSub,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: palette.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 260622-nhs R7: the dual-state central square. Stateless visual: grey/mic when
+/// listening (passive — taps bubble up to the panel exit) and red/reset when
+/// stopped (a tappable [GestureDetector] wired to [onReset] whose tap does NOT
+/// bubble to the panel exit handler).
+class _CentralSquare extends StatelessWidget {
+  const _CentralSquare({
+    required this.isStopped,
+    required this.palette,
+    required this.onReset,
+  });
+
+  final bool isStopped;
+  final AppPalette palette;
+  final VoidCallback onReset;
+
+  @override
+  Widget build(BuildContext context) {
+    final square = Container(
+      width: 74,
+      height: 74,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        // Stopped → red recording gradient; listening → flat grey (muted).
+        color: isStopped ? null : palette.backgroundMuted,
+        gradient: isStopped
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  palette.recordingGradientStart,
+                  palette.recordingGradientEnd,
+                ],
+              )
+            : null,
+        border: isStopped ? null : Border.all(color: palette.borderDefault),
+        boxShadow: isStopped
+            ? [
+                BoxShadow(
+                  color: palette.actionShadow,
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
+      ),
+      child: Icon(
+        // Stopped → reset (re-record) icon; listening → passive line mic.
+        isStopped ? Icons.restore : Icons.mic_none,
+        color: isStopped ? Colors.white : palette.textTertiary,
+        size: 32,
+      ),
+    );
+
+    // Listening/processing: passive — no GestureDetector, so a tap on the grey
+    // square falls through to the panel's exit handler.
+    if (!isStopped) return square;
+
+    // Stopped: tappable red square → onReset; must NOT bubble to exit.
+    return GestureDetector(
+      key: const ValueKey('voice-square-reset'),
+      behavior: HitTestBehavior.opaque,
+      onTap: onReset,
+      child: square,
     );
   }
 }

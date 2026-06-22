@@ -1302,7 +1302,7 @@ void main() {
     );
 
     testWidgets(
-      'R2: 重置 restores the pre-speech form and keeps listening',
+      'R7: tapping the red reset square restores the pre-speech form and re-arms',
       (tester) async {
         tall(tester);
         final speech = _CapturingSpeechService();
@@ -1333,10 +1333,16 @@ void main() {
         await tester.pump();
         expect(find.text('星巴克'), findsOneWidget);
 
-        // Tap 「重置」 → the form rolls back to the empty pre-speech snapshot
-        // (merchant 星巴克 gone) and the panel STAYS shown (keeps listening).
-        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
-        await tester.tap(find.text(panelL10n.voiceResetRestore));
+        // R7: the recognizer self-terminates (one-shot) → stopped state, the
+        // central square turns red + tappable. There is no bottom reset button.
+        speech.startedLocaleId = null;
+        speech.emitStatus('done');
+        await tester.pump();
+        await tester.pump();
+
+        // Tap the RED reset square → the form rolls back to the empty pre-speech
+        // snapshot (merchant 星巴克 gone) and the panel STAYS shown.
+        await tester.tap(find.byKey(const ValueKey('voice-square-reset')));
         await tester.pump();
         await tester.pump();
 
@@ -1455,8 +1461,9 @@ void main() {
             S.of(tester.element(find.byType(VoiceRecordPanel)));
         expect(find.text(stoppedL10n.voiceStatusStopped), findsOneWidget);
 
-        // Tap 重置 → fresh listening session, panel stays open, status listening.
-        await tester.tap(find.text(stoppedL10n.voiceResetRestore));
+        // Tap the red reset square → fresh listening session, panel stays open,
+        // status returns to listening. (R7: no bottom reset button.)
+        await tester.tap(find.byKey(const ValueKey('voice-square-reset')));
         await tester.pump();
         await tester.pump();
 
