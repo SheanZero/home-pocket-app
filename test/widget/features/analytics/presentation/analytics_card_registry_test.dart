@@ -56,6 +56,9 @@ const Set<String> _analyticsProviderTypeWhitelist = <String>{
   // GUARD-01 compliant (zero home/*); folded into categoryDonutRefreshTargets so
   // pull-to-refresh covers the drawer's 成员 dimension joy path.
   'JoyMemberAmountsProvider',
+  // TD-1 / D-02: member-filtered donut breakdown family — analytics state_*
+  // (zero home/*), legally enters the union when a member filter is active.
+  'MemberFilteredCategoryBreakdownProvider',
   'HappinessReportProvider',
   'EarliestTransactionMonthProvider',
   'FamilyHappinessProvider',
