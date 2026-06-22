@@ -295,8 +295,8 @@ class CategoryDonutCard extends ConsumerWidget {
 /// (NOT `monthlyReportProvider`), so that filtered breakdown family is APPENDED
 /// last to the union — otherwise pull-to-refresh would serve the stale cached
 /// filtered data. The unfiltered union (no member filter) is byte-identical to
-/// the prior four-target order. The filtered family is analytics `state_*`
-/// (zero `home/*`) so GUARD-01 still holds.
+/// the prior four-target order. The filtered family is an analytics `state_*`
+/// provider (no home-feature provider) so GUARD-01 still holds.
 List<ProviderBase<Object?>> categoryDonutRefreshTargets(
   AnalyticsCardContext ctx,
 ) => [

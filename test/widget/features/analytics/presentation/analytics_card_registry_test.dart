@@ -75,7 +75,14 @@ const Set<String> _analyticsProviderTypeWhitelist = <String>{
 
 /// Builds a synthetic [AnalyticsCardContext] with fixed dates/variant/currency.
 /// No widget context is needed — the spec closures are pure over the ctx.
-AnalyticsCardContext _ctx({required bool isGroupMode}) {
+///
+/// TD-1 / D-03: [memberFilterDeviceId] (default null = no filter) lets the
+/// completeness test build a member-filtered context to assert the filtered
+/// breakdown family enters the refresh union.
+AnalyticsCardContext _ctx({
+  required bool isGroupMode,
+  String? memberFilterDeviceId,
+}) {
   final startDate = DateTime(2026, 1, 1);
   final endDate = DateTime(2026, 1, 31);
   return AnalyticsCardContext(
@@ -86,6 +93,7 @@ AnalyticsCardContext _ctx({required bool isGroupMode}) {
     joyMetricVariant: JoyMetricVariant.all,
     isGroupMode: isGroupMode,
     locale: const Locale('ja'),
+    memberFilterDeviceId: memberFilterDeviceId,
   );
 }
 
@@ -359,6 +367,66 @@ void main() {
           earliestTransactionMonthProvider(bookId: ctx.bookId),
         ],
       );
+    });
+
+    test('(f) completeness: active member filter puts '
+        'memberFilteredCategoryBreakdownProvider in the refresh union '
+        '(D-03 / TD-1 regression guard)', () {
+      // Completeness direction (union ⊇ active card-watch) the suite never
+      // checked: the existing (a)/(c2) assertions prove union ⊆ analytics
+      // whitelist (ISOLATION), but never that everything the donut WATCHES when
+      // a member filter is active is actually invalidated by pull-to-refresh.
+      // That gap let TD-1 in (the filtered breakdown was watched but absent from
+      // categoryDonutRefreshTargets → stale cached filtered data on refresh).
+      const fixtureDeviceId = 'device-fixture';
+      final filteredCtx = _ctx(
+        isGroupMode: false,
+        memberFilterDeviceId: fixtureDeviceId,
+      );
+
+      // The donut watches this EXACT key when a member filter is active
+      // (category_donut_card.dart ~line 192). The union must contain it so a
+      // pull-to-refresh re-fetches the filtered breakdown (D-01).
+      expect(
+        _union(filteredCtx).contains(
+          memberFilteredCategoryBreakdownProvider(
+            bookId: filteredCtx.bookId,
+            startDate: filteredCtx.startDate,
+            endDate: filteredCtx.endDate,
+            deviceId: fixtureDeviceId,
+            joyMetricVariant: filteredCtx.joyMetricVariant,
+          ),
+        ),
+        isTrue,
+        reason: 'D-03 / TD-1: with a member filter active, the breakdown the '
+            'donut watches must be in the registry-derived refresh union — '
+            'otherwise pull-to-refresh serves stale cached filtered data.',
+      );
+
+      // Negative control: with NO filter the filtered family is NOT in the
+      // union (keeps the unfiltered union byte-stable — D-01).
+      expect(
+        _union(soloCtx).any(
+          (p) =>
+              p.runtimeType.toString() ==
+              'MemberFilteredCategoryBreakdownProvider',
+        ),
+        isFalse,
+        reason: 'D-01: the filtered breakdown target only appears when a member '
+            'filter is active; the unfiltered union stays byte-stable.',
+      );
+
+      // Mutual consistency (D-02 + D-03): the filtered union still passes the
+      // isolation whitelist loop — the completeness target is also legal.
+      for (final provider in _union(filteredCtx)) {
+        final typeName = provider.runtimeType.toString();
+        expect(
+          _analyticsProviderTypeWhitelist.contains(typeName),
+          isTrue,
+          reason: 'D-02/D-03: the member-filtered union must still be ⊆ '
+              'analytics families; "$typeName" is not in the whitelist.',
+        );
+      }
     });
   });
 
