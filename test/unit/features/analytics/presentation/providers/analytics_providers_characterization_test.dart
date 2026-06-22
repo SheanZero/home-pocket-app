@@ -57,7 +57,7 @@ void main() {
 
       test(
         'getWithinMonthCumulativeUseCaseProvider constructs without error '
-        '(replaces deleted getExpenseTrendUseCaseProvider — D-E2)',
+        '(within-month cumulative trend path, D-E1)',
         () {
           final uc = container.read(getWithinMonthCumulativeUseCaseProvider);
           expect(uc, isA<GetWithinMonthCumulativeUseCase>());
