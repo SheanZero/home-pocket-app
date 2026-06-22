@@ -28,8 +28,9 @@ void main() {
   });
 
   testWidgets(
-      '260623-0cj: voice key is a centered ~200dp capsule, inset from BOTH '
-      'edges (不顶边), with a Stadium (pill) shape', (tester) async {
+      '260623-0cj R2: voice key is a centered 200×44 capsule, inset from BOTH '
+      'edges (不顶边), gradient + font matching the 「记录」 button, on a white '
+      'strip unified with the keypad', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
@@ -51,9 +52,11 @@ void main() {
     final pillRect =
         tester.getRect(find.byKey(const ValueKey('voice-record-pill')));
 
-    // Width ≈ 200 dp — the approved A/B midpoint width.
+    // Size: 200 dp wide (approved midpoint), 44 dp tall (R2).
     expect(pillRect.width, closeTo(200.0, 0.5),
         reason: '260623-0cj: the voice capsule is 200 dp wide');
+    expect(pillRect.height, closeTo(44.0, 0.5),
+        reason: '260623-0cj R2: the voice capsule is 44 dp tall');
 
     // Inset from BOTH edges (不顶边) and horizontally centered.
     final leftInset = pillRect.left - barRect.left;
@@ -65,17 +68,37 @@ void main() {
     expect((leftInset - rightInset).abs(), lessThan(1.0),
         reason: 'the capsule is horizontally centered');
 
-    // Pill (Stadium) shape — fully rounded ends, not a rectangular strip.
-    final material = tester.widget<Material>(
+    // White strip unified with the keypad (一体): the bar paints a card-colored
+    // background with a top border.
+    final barDeco = tester
+        .widget<Container>(find.byKey(const ValueKey('voice-record-bar')))
+        .decoration! as BoxDecoration;
+    expect(barDeco.color, isNotNull,
+        reason: '一体: the voice strip has a solid (white card) background');
+    expect(barDeco.border, isNotNull,
+        reason: '一体: the strip carries the assembly top border');
+
+    // Color scheme matches the 「记录」 button: a gradient-filled capsule.
+    final ink = tester.widget<Ink>(
       find
           .ancestor(
             of: find.byKey(const ValueKey('voice-record-pill')),
-            matching: find.byType(Material),
+            matching: find.byType(Ink),
           )
           .first,
     );
-    expect(material.shape, isA<StadiumBorder>(),
-        reason: '椭圆: the voice key is a Stadium-shaped capsule');
+    final pillDeco = ink.decoration! as BoxDecoration;
+    expect(pillDeco.gradient, isNotNull,
+        reason: '配色: the voice key uses the FAB gradient like 「记录」');
+    expect(pillDeco.borderRadius, BorderRadius.circular(22.0),
+        reason: '椭圆: fully rounded (stadium) capsule, radius = height/2');
+
+    // Font matches the 「记录」 button: white, w700, 16 dp.
+    final l10n = S.of(tester.element(find.byType(VoiceRecordBar)));
+    final label = tester.widget<Text>(find.text(l10n.voiceRecordBar));
+    expect(label.style?.color, Colors.white, reason: '字体: white like 「记录」');
+    expect(label.style?.fontWeight, FontWeight.w700);
+    expect(label.style?.fontSize, 16.0);
   });
 
   testWidgets('fires onTap on a single tap', (tester) async {

@@ -992,6 +992,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                             currencySymbol: currencySymbol,
                             // CURR-01: open the currency selector sheet.
                             onCurrencyTap: _onCurrencyTap,
+                            // 260623-0cj R2: the white VoiceRecordBar above
+                            // carries the assembly's top border, so the keypad
+                            // omits its own → voice key + keypad read as ONE
+                            // unified white surface (一体).
+                            showTopBorder: false,
                           ),
                         ],
                       ),

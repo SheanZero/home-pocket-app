@@ -7,10 +7,13 @@ import '../../../../generated/app_localizations.dart';
 /// Quick task 260622-nhs / 260623-0cj: the 「语音记录」 voice-record key that sits
 /// ABOVE the SmartKeyboard on the single-page entry screen.
 ///
-/// 260623-0cj: redesigned from a flush full-width strip into a centered,
-/// edge-inset **capsule** (椭圆/Stadium) that floats on the screen background
-/// above the keypad card — it no longer touches the left/right edges. The
-/// capsule is the tap target (the surrounding inset area is not); a single
+/// 260623-0cj R2: the strip background is white ([AppPalette.card]) and carries
+/// the keypad assembly's top border, so the voice key + keypad read as ONE
+/// unified surface (一体) — the keypad below drops its own top border
+/// (`SmartKeyboard(showTopBorder: false)`). The key itself is a centered,
+/// edge-inset 200×44 **capsule** styled exactly like the 「记录」 (Record/Save)
+/// button: the FAB sakura-pink gradient, white icon + white [titleMedium] label,
+/// and the same action shadow. The capsule is the only tap target; a single
 /// [onTap] raises the inline voice panel (no press-and-hold).
 ///
 /// Stateless about recording — the host owns the session state. The mic is a
@@ -21,9 +24,11 @@ class VoiceRecordBar extends StatelessWidget {
 
   final VoidCallback onTap;
 
-  /// 260623-0cj: approved A/B midpoint width for the voice capsule.
+  /// 260623-0cj: approved A/B midpoint width; R2 height = 44 dp (HIG touch
+  /// target, equal to the keypad's bottom row).
   static const double _pillWidth = 200.0;
-  static const double _pillHeight = 40.0;
+  static const double _pillHeight = 44.0;
+  static const double _pillRadius = _pillHeight / 2; // full capsule (stadium)
 
   @override
   Widget build(BuildContext context) {
@@ -32,37 +37,64 @@ class VoiceRecordBar extends StatelessWidget {
 
     return Container(
       key: const ValueKey('voice-record-bar'),
-      // Vertical breathing room so the capsule floats clear of the form above
-      // and the keypad card below (不顶边).
+      // White, unified with the keypad below (一体); carries the assembly's top
+      // border (the keypad omits its own via showTopBorder: false).
+      decoration: BoxDecoration(
+        color: palette.card,
+        border: Border(top: BorderSide(color: palette.borderDefault)),
+      ),
       padding: const EdgeInsets.symmetric(vertical: 8),
       alignment: Alignment.center,
       child: Material(
-        color: palette.joyLight,
-        elevation: 1,
-        shadowColor: palette.joyText.withValues(alpha: 0.25),
-        shape: StadiumBorder(
-          side: BorderSide(color: palette.joyText.withValues(alpha: 0.18)),
-        ),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(_pillRadius),
         child: InkWell(
-          customBorder: const StadiumBorder(),
+          borderRadius: BorderRadius.circular(_pillRadius),
           onTap: onTap,
-          child: SizedBox(
-            key: const ValueKey('voice-record-pill'),
-            width: _pillWidth,
-            height: _pillHeight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.mic_none, size: 18, color: palette.joyText),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.voiceRecordBar,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: palette.joyText,
-                    fontWeight: FontWeight.w700,
-                  ),
+          child: Ink(
+            decoration: BoxDecoration(
+              // Same color scheme as the 「记录」 button (_GradientKey).
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [palette.fabGradientStart, palette.fabGradientEnd],
+              ),
+              borderRadius: BorderRadius.circular(_pillRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: palette.actionShadow,
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
                 ),
               ],
+            ),
+            child: SizedBox(
+              key: const ValueKey('voice-record-pill'),
+              width: _pillWidth,
+              height: _pillHeight,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.mic_none, size: 18, color: Colors.white),
+                  const SizedBox(width: 8),
+                  // Loose Flexible: keeps the icon+label centered as a group at
+                  // its natural width, but never overflows the fixed 200 dp
+                  // capsule on a very long localization.
+                  Flexible(
+                    child: Text(
+                      l10n.voiceRecordBar,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // Same font as the 「记录」 button (_GradientKey).
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

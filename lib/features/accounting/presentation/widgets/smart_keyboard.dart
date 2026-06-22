@@ -29,6 +29,7 @@ class SmartKeyboard extends StatelessWidget {
     this.currencyLabel = 'JPY',
     this.currencySymbol = '¥',
     this.onCurrencyTap,
+    this.showTopBorder = true,
   });
 
   final ValueChanged<String> onDigit;
@@ -36,6 +37,13 @@ class SmartKeyboard extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback? onDoubleZero;
   final VoidCallback? onDot;
+
+  /// 260623-0cj R2: when false, the keypad omits its own top border. Used by the
+  /// single-page entry screen where the white [VoiceRecordBar] above already
+  /// carries the assembly's top border, so the voice key + keypad read as ONE
+  /// unified white surface (一体). Defaults to true so standalone callers
+  /// (edit / ocr-review / amount sheet) keep their top edge.
+  final bool showTopBorder;
 
   /// CURR-01: tap handler for the currency key. When non-null the currency cell
   /// becomes a tappable Material+InkWell that opens the currency selector
@@ -65,22 +73,17 @@ class SmartKeyboard extends StatelessWidget {
     final rawKeyHeight = available / 5;
     final keyHeight = math.max(48.0, rawKeyHeight); // §Pitfall 1 NON-NEGOTIABLE
 
-    // 260623-0cj: the action (bottom) row is intentionally shorter than the
-    // digit rows — ~23% lower, matching the approved mock (52→40 dp). Kept
-    // proportional to keyHeight so the ratio holds across devices, with a 40 dp
-    // floor (the user-approved height; never below it on small/standard phones).
-    final bottomRowHeight =
-        math.max(_actionRowMinHeight, keyHeight * _actionRowHeightFactor);
-
     return Container(
       key: const ValueKey('smart_keyboard_root'),
       decoration: BoxDecoration(
         color: palette.card,
-        border: Border(
-          top: BorderSide(
-            color: palette.borderDefault,
-          ),
-        ),
+        border: showTopBorder
+            ? Border(
+                top: BorderSide(
+                  color: palette.borderDefault,
+                ),
+              )
+            : null,
       ),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       child: Column(
@@ -94,17 +97,16 @@ class SmartKeyboard extends StatelessWidget {
           const SizedBox(height: 12),
           _buildExtraRow(context, keyHeight, palette),
           const SizedBox(height: 12),
-          _buildActionRow(context, palette, bottomRowHeight),
+          _buildActionRow(context, palette, _actionRowHeight),
         ],
       ),
     );
   }
 
-  /// 260623-0cj: the action (bottom) row height = keyHeight * this factor,
-  /// floored at [_actionRowMinHeight]. ~0.77 reproduces the approved 52→40 dp
-  /// (−23%) mock while staying proportional on larger screens.
-  static const double _actionRowHeightFactor = 0.77;
-  static const double _actionRowMinHeight = 40.0;
+  /// 260623-0cj R2: the action (bottom) row is a fixed 44 dp — shorter than the
+  /// digit rows (keyHeight ≥ 48 dp) and equal to the voice key's 44 dp height
+  /// (HIG 44 pt touch target). User-directed: 「按键高度和最下排按键高度都改成44dp」.
+  static const double _actionRowHeight = 44.0;
 
   Widget _buildDigitRow(
     BuildContext context,

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
@@ -68,10 +66,10 @@ void main() {
       );
     }
 
-    // TEST 1b (260623-0cj): the action(bottom) row is shorter than the digit
-    // rows — height = max(40, keyHeight * 0.77).
+    // TEST 1b (260623-0cj R2): the action(bottom) row is a fixed 44 dp —
+    // shorter than the digit rows, equal to the voice key height.
     testWidgets(
-      '260623-0cj: action(bottom) row is shorter than the digit keys',
+      '260623-0cj: action(bottom) row is a fixed 44 dp, shorter than digit keys',
       (tester) async {
         const surface = Size(390, 844);
         tester.view.physicalSize = surface;
@@ -126,11 +124,60 @@ void main() {
         );
         expect(
           saveH,
-          closeTo(math.max(40.0, digitH * 0.77), 0.6),
-          reason: '260623-0cj: action row height = max(40, keyHeight * 0.77)',
+          closeTo(44.0, 0.6),
+          reason: '260623-0cj R2: action row height is a fixed 44 dp',
         );
       },
     );
+
+    // TEST 1c (260623-0cj R2): showTopBorder toggles the keypad's own top
+    // border (the single-page entry screen hands the border to VoiceRecordBar).
+    testWidgets('260623-0cj R2: showTopBorder controls the keypad top border',
+        (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      BoxDecoration decoOf(WidgetTester t) => t
+          .widget<Container>(find.byKey(const ValueKey('smart_keyboard_root')))
+          .decoration! as BoxDecoration;
+
+      // Default keeps the top border (standalone callers unaffected).
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: SmartKeyboard(
+              onDigit: (_) {},
+              onDelete: () {},
+              onNext: () {},
+              actionLabel: 'Save',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(decoOf(tester).border, isNotNull,
+          reason: 'default showTopBorder:true keeps the top border');
+
+      // Explicit false drops it (一体 with the white voice bar above).
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: SmartKeyboard(
+              onDigit: (_) {},
+              onDelete: () {},
+              onNext: () {},
+              actionLabel: 'Save',
+              showTopBorder: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(decoOf(tester).border, isNull,
+          reason: 'showTopBorder:false removes the keypad top border');
+    });
 
     // TEST 2 (P19-B3 spacing): column gap = 6 dp TOTAL (3 dp per side)
     testWidgets(
