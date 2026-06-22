@@ -70,13 +70,18 @@ void main() {
 
     // White strip unified with the keypad (一体): the bar paints a card-colored
     // background with a top border.
-    final barDeco = tester
-        .widget<Container>(find.byKey(const ValueKey('voice-record-bar')))
-        .decoration! as BoxDecoration;
+    final bar = tester
+        .widget<Container>(find.byKey(const ValueKey('voice-record-bar')));
+    final barDeco = bar.decoration! as BoxDecoration;
     expect(barDeco.color, isNotNull,
         reason: '一体: the voice strip has a solid (white card) background');
     expect(barDeco.border, isNotNull,
         reason: '一体: the strip carries the assembly top border');
+
+    // R3 spacing: 12 dp above the pill (matches the 12 dp digit inter-row gap);
+    // 0 below — the keypad's own 12 dp top padding supplies the 12 dp below.
+    expect(bar.padding, const EdgeInsets.only(top: 12),
+        reason: 'R3: even 12 dp above/below the voice key, like a keypad row');
 
     // Color scheme matches the 「记录」 button: a gradient-filled capsule.
     final ink = tester.widget<Ink>(

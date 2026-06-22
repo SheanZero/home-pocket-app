@@ -43,7 +43,11 @@ class VoiceRecordBar extends StatelessWidget {
         color: palette.card,
         border: Border(top: BorderSide(color: palette.borderDefault)),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      // 260623-0cj R3: 12 dp above the pill (matches the 12 dp digit inter-row
+      // gap); 0 below because the keypad's own 12 dp top padding supplies the
+      // 12 dp gap to row 1 — so the pill sits 12 dp from the top edge AND 12 dp
+      // from the digits, evenly, like another keypad row.
+      padding: const EdgeInsets.only(top: 12),
       alignment: Alignment.center,
       child: Material(
         color: Colors.transparent,
