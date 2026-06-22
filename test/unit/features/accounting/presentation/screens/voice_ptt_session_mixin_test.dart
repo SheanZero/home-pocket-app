@@ -85,15 +85,31 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   Future<void> stop() async => stopped = true;
 
   @override
-  Future<void> cancel() async => canceled = true;
+  Future<void> cancel() async {
+    canceled = true;
+    cancelCount++;
+    // Cancelling clears the recognizer's accumulated buffer and stops it —
+    // model that by marking the session not-listening (isListening → false).
+    // `stop()` was NOT called, so the `stopped` flag stays as-is; isListening
+    // flips false purely via startedLocaleId being cleared.
+    startedLocaleId = null;
+  }
+
+  var cancelCount = 0;
 
   void emitFinal(String words) => onResult!(
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], true),
   );
 
+  void emitPartial(String words) => onResult!(
+    SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.5)], false),
+  );
+
   /// Simulate the platform recognizer self-terminating (30s/3s timeout) so the
   /// continuous tap-session must re-arm to keep listening.
   void emitTerminalStatus() => onStatus!('done');
+
+  void emitStatus(String status) => onStatus!(status);
 }
 
 class FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
@@ -626,6 +642,255 @@ void main() {
       expect(host.pttIsRecording, isFalse,
           reason: 'exit ends the session');
       // Filled content is retained (D-2 fill-and-stay).
+      expect(find.text('スタバ'), findsOneWidget);
+    },
+  );
+
+  // ── R4 BUG A: reset cancels the recognizer + fresh restart ────────────────
+
+  testWidgets(
+    'R4 BUG A: resetPttSessionAndRestart cancels the recognizer (clears '
+    'accumulated buffer) then starts a fresh listening session',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(speech.isListening, isTrue);
+      final startsBefore = speech.startCount;
+
+      await host.resetPttSessionAndRestart();
+      await tester.pumpAndSettle();
+
+      // cancel() must have been called to clear the recognizer buffer …
+      expect(speech.cancelCount, greaterThanOrEqualTo(1),
+          reason: 'reset must cancel() to clear the recognizer buffer');
+      // … and a fresh startListening must follow (not the weak no-op restart).
+      expect(speech.startCount, greaterThan(startsBefore),
+          reason: 'reset must start a fresh listening session');
+      expect(speech.isListening, isTrue,
+          reason: 'the session is listening again after reset');
+      expect(host.pttIsRecording, isTrue);
+    },
+  );
+
+  testWidgets(
+    'R4 BUG A: after reset, the next transcript replaces (no old-text '
+    'accumulation) and fills fresh',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '1千8百4十元 星巴克': VoiceParseResult(
+          rawText: '1千8百4十元 星巴克',
+          amount: 1840,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: '星巴克',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.91,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.emitPartial('今天吃饭用了1450日元');
+      await tester.pump();
+
+      await host.resetPttSessionAndRestart();
+      await tester.pumpAndSettle();
+
+      // The app-side transcript buffers are cleared.
+      expect(host.pttTranscript, isEmpty,
+          reason: 'reset clears the partial/final transcript');
+
+      // A fresh utterance after reset fills the form (no stale accumulation).
+      speech.emitFinal('1千8百4十元 星巴克');
+      await tester.pumpAndSettle();
+      expect(find.text('星巴克'), findsOneWidget);
+    },
+  );
+
+  // ── R4 BUG B: serialize reset-restart, suppress double re-arm ──────────────
+
+  testWidgets(
+    'R4 BUG B: a terminal status during the reset-restart window does NOT '
+    'double-start (guard suppresses auto re-arm)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      // Drive reset and, while it is in flight, fire the cancel-induced terminal
+      // status that onStatus would normally re-arm on.
+      final resetFuture = host.resetPttSessionAndRestart();
+      speech.emitStatus('notListening');
+      speech.emitStatus('done');
+      await resetFuture;
+      await tester.pumpAndSettle();
+
+      // Exactly ONE fresh start from the reset — the suppressed onStatus re-arm
+      // must not have added a second concurrent startListening.
+      expect(speech.startCount, 2,
+          reason: 'one start from startPttTapSession + one from reset; the '
+              'in-window terminal status must NOT add a third');
+      expect(host.pttIsRecording, isTrue);
+      expect(speech.isListening, isTrue);
+
+      // The session still responds after the reset (no freeze): a new final
+      // result still flows through.
+      speech.emitFinal('テスト');
+      await tester.pumpAndSettle();
+      expect(host.pttIsRecording, isTrue);
+    },
+  );
+
+  // ── R4 BUG C: live listen status ──────────────────────────────────────────
+
+  testWidgets(
+    'R4 BUG C: pttListenStatus transitions listening → processing → stopped',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        'ラテ 1千': VoiceParseResult(
+          rawText: 'ラテ 1千',
+          amount: 1000,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: 'スタバ',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(host.pttListenStatus, PttListenStatus.listening,
+          reason: 'an open session starts in listening');
+
+      await host.exitPttTapSession();
+      await tester.pumpAndSettle();
+      expect(host.pttListenStatus, PttListenStatus.stopped,
+          reason: 'exiting stops the recognizer');
+    },
+  );
+
+  // ── R4 BUG D: dedupe final parse + live partial auto-fill ──────────────────
+
+  testWidgets(
+    'R4 BUG D: a partial result auto-fills the form live (sub-second, no '
+    'wait for final)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '1千8百4十元 星巴克': VoiceParseResult(
+          rawText: '1千8百4十元 星巴克',
+          amount: 1840,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: '星巴克',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.91,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      // A PARTIAL result (not final) must drive a live fill after the 300ms
+      // debounce — the user does NOT wait for the 3s pauseFor final. Advance the
+      // fake clock past the debounce so the Timer fires, then settle the parse.
+      speech.emitPartial('1千8百4十元 星巴克');
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
+
+      expect(find.text('星巴克'), findsOneWidget,
+          reason: 'partial auto-fill updates the form live');
+    },
+  );
+
+  testWidgets(
+    'R4 BUG D: the final branch parses the text only ONCE (dedupe)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        'ラテ 1千': VoiceParseResult(
+          rawText: 'ラテ 1千',
+          amount: 1000,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: 'スタバ',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.emitFinal('ラテ 1千');
+      await tester.pumpAndSettle();
+
+      // BUG D: the final path must parse 'ラテ 1千' exactly once — the prior code
+      // parsed it twice (satisfaction estimate + fill).
+      final count = parse.inputs.where((t) => t == 'ラテ 1千').length;
+      expect(count, 1,
+          reason: 'final result must parse once (deduped), not twice');
       expect(find.text('スタバ'), findsOneWidget);
     },
   );

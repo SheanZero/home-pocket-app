@@ -47,6 +47,17 @@ import '../widgets/transaction_details_form.dart';
 import 'voice_input_screen_helpers.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
+/// 260622-nhs R4 (BUG C): the live recognizer-driven session status surfaced to
+/// the inline [VoiceRecordPanel] so its title + pulse-dot reflect reality
+/// instead of a hardcoded 「正在聆听…」.
+///
+/// - [listening]  — the recognizer is actively listening (red 「正在聆听…」).
+/// - [processing] — a result arrived and a parse / form-fill is in flight
+///   (amber 「正在解析…」).
+/// - [stopped]    — the recognizer self-terminated and was not re-armed, or the
+///   session ended / a restart failed (grey 「停止聆听」).
+enum PttListenStatus { listening, processing, stopped }
+
 /// Reusable hold-to-record session: speech lifecycle + transcript + chunk merger
 /// + parse + batch-fill + foreign triple + satisfaction, host-agnostic.
 ///
@@ -102,6 +113,23 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// speech-final result auto-fills the form live. The legacy hold path leaves
   /// this false so its behavior is byte-unchanged.
   bool _continuousActive = false;
+
+  /// 260622-nhs R4 (BUG B): true while [resetPttSessionAndRestart] is serializing
+  /// a `cancel() → startListening()` sequence. While set, [onStatus] must NOT
+  /// auto-re-arm — the cancel emits `notListening`/`done`, and re-arming there
+  /// would race the reset's own `startListening` into a double-start (the
+  /// speech_to_text plugin then hangs / goes silent: the post-reset 「假死」).
+  bool _restarting = false;
+
+  /// 260622-nhs R4 (BUG C): true while a final/partial parse + form-fill is in
+  /// flight, so the status surfaces 「正在解析…」 (processing). Live-driven, set
+  /// around the parse/fill calls and cleared when they settle.
+  bool _parsing = false;
+
+  /// 260622-nhs R4 (BUG C): live recognizer status mirror. Driven by
+  /// [onStatus] (listening ↔ stopped) and the [_parsing] flag (processing).
+  PttListenStatus _listenStatus = PttListenStatus.stopped;
+
   final List<double> _soundLevels = [];
   final List<DateTime> _timestamps = [];
   DateTime? _startTime;
@@ -139,6 +167,14 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// 260622-nhs R2: true while the tap-toggled continuous auto-fill session is
   /// open (the manual-screen modal). False during the legacy hold path.
   bool get pttContinuousActive => _continuousActive;
+
+  /// 260622-nhs R4 (BUG C): live recognizer-driven status for the panel title +
+  /// pulse-dot. `processing` while a parse/fill is in flight overrides
+  /// `listening` so the user sees 「正在解析…」 the instant a result lands.
+  PttListenStatus get pttListenStatus =>
+      _parsing && _listenStatus != PttListenStatus.stopped
+          ? PttListenStatus.processing
+          : _listenStatus;
 
   // ── VoiceRecognitionEventHandlerMixin abstract contract ────────────────────
 
@@ -202,6 +238,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _soundLevel = 0.0;
       _parseResult = null;
       _mergedAmount = null;
+      _listenStatus = PttListenStatus.listening;
     });
     _soundLevels.clear();
     _timestamps.clear();
@@ -209,19 +246,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     _partialResultCount = 0;
     _lastWordCount = 0;
 
-    _amountMerger?.dispose();
-    final speechService = ref.read(appSpeechRecognitionServiceProvider);
-    final parser = localeId.startsWith('ja')
-        ? ref.read(japaneseNumeralStateMachineProvider)
-        : ref.read(chineseNumeralStateMachineProvider);
-    _amountMerger = VoiceChunkMerger(
-      parser: parser,
-      speechService: speechService,
-      onAmountResolved: (amount) {
-        if (!mounted) return;
-        onPttSessionChanged(() => _mergedAmount = amount);
-      },
-    );
+    _rebuildAmountMerger();
 
     await pttSpeechService.startListening(
       onResult: _onResult,
@@ -243,6 +268,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     onPttSessionChanged(() {
       _isRecording = false;
       _soundLevel = 0.0;
+      _listenStatus = PttListenStatus.stopped;
     });
 
     final text = _finalText.isNotEmpty ? _finalText : _partialText;
@@ -254,17 +280,38 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// VERBATIM from the prior `stopPttSessionAndCommit` body so BOTH the legacy
   /// hold-release commit AND the new continuous auto-fill (each speech-final)
   /// share one fill path — no parse/merger/foreign/satisfaction fork.
-  Future<void> _fillFormFromText(String text) async {
-    if (text.isEmpty) return;
+  /// 260622-nhs R4 (BUG D): accepts an optional already-parsed [data] so the
+  /// final/partial paths parse ONCE and reuse the result here (the prior code
+  /// parsed `text` again inside this method — a redundant second parse). When
+  /// [data] is null this still parses [text] itself (legacy hold-release path).
+  Future<void> _fillFormFromText(String text, {VoiceParseResult? data}) async {
+    if (text.isEmpty && data == null) return;
 
-    final parseUseCase = ref.read(parseVoiceInputUseCaseProvider);
-    final parseResult = await parseUseCase.execute(
-      text,
-      localeId: pttVoiceLocaleId,
-    );
-    if (!mounted || !parseResult.isSuccess) return;
-    final data = parseResult.data;
-    if (data == null) return;
+    onPttSessionChanged(() => _parsing = true);
+    try {
+      await _fillFormFromTextInner(text, preParsed: data);
+    } finally {
+      if (mounted) onPttSessionChanged(() => _parsing = false);
+    }
+  }
+
+  Future<void> _fillFormFromTextInner(
+    String text, {
+    VoiceParseResult? preParsed,
+  }) async {
+    var resolved = preParsed;
+    if (resolved == null) {
+      if (text.isEmpty) return;
+      final parseUseCase = ref.read(parseVoiceInputUseCaseProvider);
+      final parseResult = await parseUseCase.execute(
+        text,
+        localeId: pttVoiceLocaleId,
+      );
+      if (!mounted || !parseResult.isSuccess) return;
+      resolved = parseResult.data;
+    }
+    if (resolved == null) return;
+    final data = resolved;
 
     Category? category;
     Category? parent;
@@ -341,6 +388,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     onPttSessionChanged(() {
       _isRecording = false;
       _soundLevel = 0.0;
+      _listenStatus = PttListenStatus.stopped;
     });
     final text = _finalText.isNotEmpty ? _finalText : _partialText;
     await _fillFormFromText(text);
@@ -381,16 +429,104 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     );
   }
 
+  /// 260622-nhs R4 (BUG A + BUG B): the 「重置·恢复账目」 reset. Unlike the weak
+  /// R3 `resetPttSessionState() + restartPttListening()` pair (which left the
+  /// iOS recognizer's ACCUMULATED in-window buffer alive, so the next partial
+  /// re-surfaced the old transcript), this:
+  ///   1. CANCELS the recognizer — `cancel()` discards its accumulated buffer
+  ///      (the real fix for the "old text comes back" bug).
+  ///   2. Clears the app-side transcript / parse / merged-amount buffers and
+  ///      REBUILDS the chunk merger so the amount re-accumulates from the
+  ///      startSession baseline.
+  ///   3. Starts a FRESH `startListening` so the user can immediately re-speak.
+  ///
+  /// BUG B serialization: `_restarting` is held across the whole cancel→start
+  /// window so [onStatus] does NOT auto-re-arm on the cancel's
+  /// notListening/done — that would race a second concurrent startListening and
+  /// hang the plugin (post-reset 「假死」). The `await cancel()` completes before
+  /// the fresh `await startListening()`, and the guard is cleared in `finally`.
+  Future<void> resetPttSessionAndRestart() async {
+    if (!_continuousActive || !mounted) return;
+    _restarting = true;
+    _parseDebounce?.cancel();
+    try {
+      // 1. Cancel the recognizer to clear its accumulated buffer.
+      await pttSpeechService.cancel();
+      if (!mounted) return;
+
+      // 2. Clear app-side buffers + rebuild the merger from the baseline.
+      onPttSessionChanged(() {
+        _displayCurrency = 'JPY';
+        _partialText = '';
+        _finalText = '';
+        _parseResult = null;
+        _mergedAmount = null;
+        _soundLevel = 0.0;
+        _lastFilledAmount = 0;
+        _parsing = false;
+        _listenStatus = PttListenStatus.listening;
+      });
+      _rebuildAmountMerger();
+
+      // 3. Fresh listening session so the user can re-speak immediately.
+      await pttSpeechService.startListening(
+        onResult: _onResult,
+        onSoundLevel: _onSoundLevel,
+        localeId: pttVoiceLocaleId,
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+      );
+      if (mounted) {
+        onPttSessionChanged(() {
+          _isRecording = true;
+          _listenStatus = PttListenStatus.listening;
+        });
+      }
+    } finally {
+      _restarting = false;
+    }
+  }
+
+  /// Rebuild the chunk merger (used by [resetPttSessionAndRestart]) so a reset
+  /// re-accumulates the amount from a clean baseline. Mirrors the merger setup
+  /// in [startPttSession] (same parser selection + onAmountResolved hook).
+  void _rebuildAmountMerger() {
+    _amountMerger?.dispose();
+    final speechService = ref.read(appSpeechRecognitionServiceProvider);
+    final parser = pttVoiceLocaleId.startsWith('ja')
+        ? ref.read(japaneseNumeralStateMachineProvider)
+        : ref.read(chineseNumeralStateMachineProvider);
+    _amountMerger = VoiceChunkMerger(
+      parser: parser,
+      speechService: speechService,
+      onAmountResolved: (amount) {
+        if (!mounted) return;
+        onPttSessionChanged(() => _mergedAmount = amount);
+      },
+    );
+  }
+
   @override
   void onStatus(String status) {
+    final terminal = status == 'done' || status == 'notListening';
+    // 260622-nhs R4 (BUG B): while a reset is serializing cancel→start, the
+    // cancel emits notListening/done. Auto-re-arming here would race the reset's
+    // own startListening into a double-start that hangs the plugin (post-reset
+    // 「假死」). The reset owns the restart — suppress the auto re-arm entirely.
+    if (_restarting && terminal) {
+      return;
+    }
     // In the continuous tap session a terminal status is NOT a commit/end
     // signal — it's a recognizer timeout. Re-arm to keep listening rather than
     // letting the base handler tear the session down.
-    if (_continuousActive &&
-        (status == 'done' || status == 'notListening') &&
-        _isRecording) {
+    if (_continuousActive && terminal && _isRecording) {
       unawaited(_reArmPttListening());
       return;
+    }
+    // 260622-nhs R4 (BUG C): a terminal status outside the continuous re-arm
+    // path means the recognizer stopped — surface it.
+    if (terminal && !_isRecording) {
+      onPttSessionChanged(() => _listenStatus = PttListenStatus.stopped);
     }
     super.onStatus(status);
   }
@@ -452,6 +588,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     onPttSessionChanged(() {
       _isRecording = false;
       _soundLevel = 0.0;
+      _listenStatus = PttListenStatus.stopped;
     });
     _pressStart = null;
   }
@@ -497,12 +634,16 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _parseDebounce?.cancel();
       if (text.isNotEmpty) {
         _amountMerger?.feedChunk(text, isFinal: true);
-        // R2: in the continuous tap session, parse for satisfaction THEN
-        // auto-fill the form live (no exit/release needed). The legacy hold
-        // path only refreshes _parseResult here; the fill happens on release.
+        // R2/R4: in the continuous tap session, parse ONCE (with satisfaction)
+        // and reuse that single result to auto-fill the form live (BUG D dedupe
+        // — the prior code parsed `text` here AND again inside _fillFormFromText).
+        // The legacy hold path only refreshes _parseResult here; the fill happens
+        // on release (still one parse, via the release commit).
         if (_continuousActive) {
-          _parseFinalResult(text).then((_) {
-            if (mounted && _continuousActive) _fillFormFromText(text);
+          _parseFinalResult(text).then((parsed) {
+            if (mounted && _continuousActive) {
+              _fillFormFromText(text, data: parsed);
+            }
           });
         } else {
           _parseFinalResult(text);
@@ -511,23 +652,37 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     }
   }
 
+  /// 260622-nhs R4 (BUG D): the debounced PARTIAL parse now ALSO drives a live
+  /// form-fill (continuous session only) so the user sees the entry update as
+  /// they speak — sub-second, not after the 3s pauseFor final. Idempotent: the
+  /// fill is overwritten by the final fill and revertible by reset (the snapshot
+  /// baseline is unchanged). Parses ONCE and reuses the result for both the
+  /// `_parseResult` mirror and the fill.
   Future<void> _parseVoiceInput(String text) async {
     if (!mounted) return;
     final useCase = ref.read(parseVoiceInputUseCaseProvider);
     final result = await useCase.execute(text, localeId: pttVoiceLocaleId);
-    if (mounted && result.isSuccess) {
-      onPttSessionChanged(() => _parseResult = result.data);
+    if (!mounted || !result.isSuccess) return;
+    final data = result.data;
+    onPttSessionChanged(() => _parseResult = data);
+    if (_continuousActive && data != null) {
+      await _fillFormFromText(text, data: data);
     }
   }
 
-  Future<void> _parseFinalResult(String text) async {
-    if (!mounted) return;
+  /// 260622-nhs R4 (BUG D): now RETURNS the resolved parse result so the caller
+  /// can reuse it for the form-fill instead of parsing the same text a second
+  /// time. Still mirrors `_parseResult` (drives the learning keyword hook /
+  /// satisfaction read) as before.
+  Future<VoiceParseResult?> _parseFinalResult(String text) async {
+    if (!mounted) return null;
     final useCase = ref.read(parseVoiceInputUseCaseProvider);
     final result = await useCase.execute(text, localeId: pttVoiceLocaleId);
 
-    if (!mounted || !result.isSuccess) return;
+    if (!mounted || !result.isSuccess) return null;
 
-    var parseResult = result.data!;
+    var parseResult = result.data;
+    if (parseResult == null) return null;
 
     if (parseResult.ledgerType == LedgerType.joy) {
       final features = buildVoiceAudioFeatures(
@@ -546,6 +701,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     }
 
     onPttSessionChanged(() => _parseResult = parseResult);
+    return parseResult;
   }
 
   // ── Hold-gesture lifecycle (ported from _onLongPress* + misfire 300ms) ──────
