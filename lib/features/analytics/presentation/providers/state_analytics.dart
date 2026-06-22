@@ -199,6 +199,40 @@ Future<List<MemberSpendBreakdown>> memberSpendBreakdown(
   );
 }
 
+/// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
+/// joy-ledger only, a strict subset of [memberSpendBreakdown].
+///
+/// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
+/// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
+/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
+/// rows aggregate per member (a daily-only member yields no bucket).
+@riverpod
+Future<List<MemberSpendBreakdown>> joyMemberAmounts(
+  Ref ref, {
+  required String bookId,
+  required DateTime startDate,
+  required DateTime endDate,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+}) async {
+  final useCase = ref.watch(getMemberSpendBreakdownUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
+  // D-12 defensive normalization: collapse the window to whole-day closed bounds
+  // so two callers with differing sub-day precision share one cache key.
+  final start = DateBoundaries.dayRange(startDate).start;
+  final end = DateBoundaries.dayRange(endDate).end;
+  return useCase.execute(
+    bookIds: [bookId],
+    startDate: start,
+    endDate: end,
+    entrySourceFilter: entrySourceFilter,
+    ledgerType: LedgerType.joy,
+  );
+}
+
 /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
 /// over the active analytics window.
 ///
@@ -298,6 +332,10 @@ Future<List<SatisfactionScoreBucket>> satisfactionDistribution(
 ///
 /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
 /// `home/*` providers (GUARD-01).
+/// [deviceId] (260622-d5i / D2): optional per-member narrowing, added to the
+/// family key. `null` (default) reproduces the pre-d5i cache key/value, so
+/// existing watchers that omit it stay byte-identical; a non-null value applies
+/// the same `tx.deviceId == deviceId` rule the overall donut's member filter uses.
 @riverpod
 Future<List<JoyCategoryAmount>> joyCategoryAmounts(
   Ref ref, {
@@ -305,6 +343,7 @@ Future<List<JoyCategoryAmount>> joyCategoryAmounts(
   required DateTime startDate,
   required DateTime endDate,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  String? deviceId,
 }) async {
   final useCase = ref.watch(getJoyCategoryAmountsUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -320,6 +359,7 @@ Future<List<JoyCategoryAmount>> joyCategoryAmounts(
     startDate: start,
     endDate: end,
     entrySourceFilter: entrySourceFilter,
+    deviceId: deviceId,
   );
 }
 

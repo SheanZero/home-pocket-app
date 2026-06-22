@@ -717,6 +717,167 @@ final class MemberSpendBreakdownFamily extends $Family
   String toString() => r'memberSpendBreakdownProvider';
 }
 
+/// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
+/// joy-ledger only, a strict subset of [memberSpendBreakdown].
+///
+/// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
+/// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
+/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
+/// rows aggregate per member (a daily-only member yields no bucket).
+
+@ProviderFor(joyMemberAmounts)
+final joyMemberAmountsProvider = JoyMemberAmountsFamily._();
+
+/// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
+/// joy-ledger only, a strict subset of [memberSpendBreakdown].
+///
+/// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
+/// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
+/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
+/// rows aggregate per member (a daily-only member yields no bucket).
+
+final class JoyMemberAmountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<MemberSpendBreakdown>>,
+          List<MemberSpendBreakdown>,
+          FutureOr<List<MemberSpendBreakdown>>
+        >
+    with
+        $FutureModifier<List<MemberSpendBreakdown>>,
+        $FutureProvider<List<MemberSpendBreakdown>> {
+  /// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
+  /// joy-ledger only, a strict subset of [memberSpendBreakdown].
+  ///
+  /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
+  /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
+  /// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+  /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
+  /// rows aggregate per member (a daily-only member yields no bucket).
+  JoyMemberAmountsProvider._({
+    required JoyMemberAmountsFamily super.from,
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'joyMemberAmountsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$joyMemberAmountsHash();
+
+  @override
+  String toString() {
+    return r'joyMemberAmountsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<MemberSpendBreakdown>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<MemberSpendBreakdown>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return joyMemberAmounts(
+      ref,
+      bookId: argument.bookId,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is JoyMemberAmountsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$joyMemberAmountsHash() => r'8963406648a89ac6c0e920c419a96d8a47ebfb42';
+
+/// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
+/// joy-ledger only, a strict subset of [memberSpendBreakdown].
+///
+/// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
+/// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
+/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
+/// rows aggregate per member (a daily-only member yields no bucket).
+
+final class JoyMemberAmountsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<MemberSpendBreakdown>>,
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
+        > {
+  JoyMemberAmountsFamily._()
+    : super(
+        retry: null,
+        name: r'joyMemberAmountsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
+  /// joy-ledger only, a strict subset of [memberSpendBreakdown].
+  ///
+  /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
+  /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
+  /// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+  /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
+  /// rows aggregate per member (a daily-only member yields no bucket).
+
+  JoyMemberAmountsProvider call({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  }) => JoyMemberAmountsProvider._(
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'joyMemberAmountsProvider';
+}
+
 /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
 /// over the active analytics window.
 ///
@@ -1202,6 +1363,10 @@ final class SatisfactionDistributionFamily extends $Family
 ///
 /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
 /// `home/*` providers (GUARD-01).
+/// [deviceId] (260622-d5i / D2): optional per-member narrowing, added to the
+/// family key. `null` (default) reproduces the pre-d5i cache key/value, so
+/// existing watchers that omit it stay byte-identical; a non-null value applies
+/// the same `tx.deviceId == deviceId` rule the overall donut's member filter uses.
 
 @ProviderFor(joyCategoryAmounts)
 final joyCategoryAmountsProvider = JoyCategoryAmountsFamily._();
@@ -1218,6 +1383,10 @@ final joyCategoryAmountsProvider = JoyCategoryAmountsFamily._();
 ///
 /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
 /// `home/*` providers (GUARD-01).
+/// [deviceId] (260622-d5i / D2): optional per-member narrowing, added to the
+/// family key. `null` (default) reproduces the pre-d5i cache key/value, so
+/// existing watchers that omit it stay byte-identical; a non-null value applies
+/// the same `tx.deviceId == deviceId` rule the overall donut's member filter uses.
 
 final class JoyCategoryAmountsProvider
     extends
@@ -1241,6 +1410,10 @@ final class JoyCategoryAmountsProvider
   ///
   /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
   /// `home/*` providers (GUARD-01).
+  /// [deviceId] (260622-d5i / D2): optional per-member narrowing, added to the
+  /// family key. `null` (default) reproduces the pre-d5i cache key/value, so
+  /// existing watchers that omit it stay byte-identical; a non-null value applies
+  /// the same `tx.deviceId == deviceId` rule the overall donut's member filter uses.
   JoyCategoryAmountsProvider._({
     required JoyCategoryAmountsFamily super.from,
     required ({
@@ -1248,6 +1421,7 @@ final class JoyCategoryAmountsProvider
       DateTime startDate,
       DateTime endDate,
       JoyMetricVariant joyMetricVariant,
+      String? deviceId,
     })
     super.argument,
   }) : super(
@@ -1283,6 +1457,7 @@ final class JoyCategoryAmountsProvider
               DateTime startDate,
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
+              String? deviceId,
             });
     return joyCategoryAmounts(
       ref,
@@ -1290,6 +1465,7 @@ final class JoyCategoryAmountsProvider
       startDate: argument.startDate,
       endDate: argument.endDate,
       joyMetricVariant: argument.joyMetricVariant,
+      deviceId: argument.deviceId,
     );
   }
 
@@ -1305,7 +1481,7 @@ final class JoyCategoryAmountsProvider
 }
 
 String _$joyCategoryAmountsHash() =>
-    r'dc30b88219c12ccfc15da8d6ee6567547a20286b';
+    r'd903912b757675355851eba50bf78554a1e324e3';
 
 /// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
 ///
@@ -1319,6 +1495,10 @@ String _$joyCategoryAmountsHash() =>
 ///
 /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
 /// `home/*` providers (GUARD-01).
+/// [deviceId] (260622-d5i / D2): optional per-member narrowing, added to the
+/// family key. `null` (default) reproduces the pre-d5i cache key/value, so
+/// existing watchers that omit it stay byte-identical; a non-null value applies
+/// the same `tx.deviceId == deviceId` rule the overall donut's member filter uses.
 
 final class JoyCategoryAmountsFamily extends $Family
     with
@@ -1329,6 +1509,7 @@ final class JoyCategoryAmountsFamily extends $Family
             DateTime startDate,
             DateTime endDate,
             JoyMetricVariant joyMetricVariant,
+            String? deviceId,
           })
         > {
   JoyCategoryAmountsFamily._()
@@ -1352,18 +1533,24 @@ final class JoyCategoryAmountsFamily extends $Family
   ///
   /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
   /// `home/*` providers (GUARD-01).
+  /// [deviceId] (260622-d5i / D2): optional per-member narrowing, added to the
+  /// family key. `null` (default) reproduces the pre-d5i cache key/value, so
+  /// existing watchers that omit it stay byte-identical; a non-null value applies
+  /// the same `tx.deviceId == deviceId` rule the overall donut's member filter uses.
 
   JoyCategoryAmountsProvider call({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+    String? deviceId,
   }) => JoyCategoryAmountsProvider._(
     argument: (
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
       joyMetricVariant: joyMetricVariant,
+      deviceId: deviceId,
     ),
     from: this,
   );
