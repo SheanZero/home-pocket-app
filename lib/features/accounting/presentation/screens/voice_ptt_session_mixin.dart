@@ -44,6 +44,7 @@ import '../../domain/models/transaction.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/transaction_details_form.dart';
+import '../widgets/voice_error_toast.dart';
 import 'voice_input_screen_helpers.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
@@ -504,6 +505,100 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         onPttSessionChanged(() => _mergedAmount = amount);
       },
     );
+  }
+
+  /// 260622-nhs R5 (BUG 1): silence-class recognizer errors that are NORMAL in
+  /// hands-free continuous mode — the user simply paused/stopped speaking and
+  /// the recognizer timed out with nothing to transcribe. iOS reports
+  /// `error_no_match` as `permanent: true`, so the base handler would flip
+  /// `isInitialized=false` (locking the 「语音记录」 bar) and toast 「未识别到语音内容」.
+  /// In the continuous session these are swallowed and the recognizer is
+  /// re-armed instead. Everything else (permission/audio/client/network) is
+  /// fatal and tears the session down.
+  static const Set<String> _transientSilenceErrors = {
+    'error_no_match',
+    'error_speech_timeout',
+  };
+
+  @override
+  void onError(String errorMsg, bool permanent) {
+    if (!mounted) return;
+
+    // Legacy hold path: keep the base behavior byte-unchanged (toast + flip
+    // isInitialized on permanent) so voice_input_screen tests stay green.
+    if (!_continuousActive) {
+      super.onError(errorMsg, permanent);
+      return;
+    }
+
+    // ── Continuous tap session ───────────────────────────────────────────────
+    if (_transientSilenceErrors.contains(errorMsg)) {
+      // 260622-nhs R5 (BUG 1): normal silence. Do NOT toast, do NOT flip
+      // isInitialized, do NOT tear down. Keep recording + a sensible listening
+      // status (BUG 2), and re-arm listening via the serialized restart so a
+      // double-start can't race the recognizer.
+      onPttSessionChanged(() {
+        _isRecording = true;
+        _soundLevel = 0.0;
+        _listenStatus = PttListenStatus.listening;
+      });
+      unawaited(_reArmAfterTransientError());
+      return;
+    }
+
+    // 260622-nhs R5 (BUG 1): fatal error — clean teardown (BUG 2: status →
+    // stopped), surface the toast, AND recover the bar so the next tap works
+    // without an app restart (re-initialize if the platform flipped
+    // isInitialized=false on a permanent error).
+    onPttSessionChanged(() {
+      _continuousActive = false;
+      _isRecording = false;
+      _restarting = false;
+      _soundLevel = 0.0;
+      _listenStatus = PttListenStatus.stopped;
+    });
+    showVoiceRecognitionErrorToast(context, errorMsg);
+    unawaited(_recoverBarAfterFatalError());
+  }
+
+  /// 260622-nhs R5 (BUG 1): re-arm listening after a swallowed transient error.
+  /// Serialized through `_restarting` so the recognizer's own
+  /// notListening/done (and any concurrent re-arm) can't race a double-start
+  /// that hangs the plugin (the same 「假死」 hazard the reset guards against).
+  Future<void> _reArmAfterTransientError() async {
+    if (_restarting || !_continuousActive || !mounted) return;
+    _restarting = true;
+    try {
+      await pttSpeechService.startListening(
+        onResult: _onResult,
+        onSoundLevel: _onSoundLevel,
+        localeId: pttVoiceLocaleId,
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+      );
+      if (mounted && _continuousActive) {
+        onPttSessionChanged(() {
+          _isRecording = true;
+          _listenStatus = PttListenStatus.listening;
+        });
+      }
+    } finally {
+      _restarting = false;
+    }
+  }
+
+  /// 260622-nhs R5 (BUG 1): after a fatal error the platform may have flipped
+  /// `isInitialized=false` (iOS reports permanent), which would lock the bar's
+  /// tap guard. Re-initialize the speech service so the next 「语音记录」 tap can
+  /// re-enter, and re-enable the bar (`_pttServiceInitialized=true`).
+  Future<void> _recoverBarAfterFatalError() async {
+    if (!mounted) return;
+    final available = await pttSpeechService.initialize(
+      onStatus: onStatus,
+      onError: onError,
+    );
+    if (!mounted) return;
+    onPttSessionChanged(() => _pttServiceInitialized = available);
   }
 
   @override
