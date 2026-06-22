@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: 48-01-PLAN.md complete — TD-1 member-filter donut refresh wired (D-01/D-02/D-03); analyze 0, registry test 9/9; awaiting 48-02 (TD-2 doc scrub)
-last_updated: "2026-06-22T05:48:17.000Z"
-last_activity: 2026-06-22 -- 48-01 complete (TD-1 donut refresh wiring)
+stopped_at: 48-02-PLAN.md complete — TD-2 stale-trend dartdoc scrubbed (D-04); grep getExpenseTrend|MonthlyTrend lib/ test/ = 0; .g.dart regenerated via build_runner (3 dartdoc mirror lines only); both Phase 48 plans done — ready for verification
+last_updated: "2026-06-22T06:10:00.000Z"
+last_activity: 2026-06-22 -- 48-02 complete (TD-2 stale-trend dartdoc scrub)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 22
-  completed_plans: 20
-  percent: 75
+  completed_plans: 22
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 ## Current Position
 
-Phase: 48 (address-v1-8-tech-debt-member-filter-donut-refresh-stale-tre) — EXECUTING
-Plan: 2 of 2
-Status: Executing Phase 48 (48-01 done; 48-02 TD-2 doc scrub pending)
-Last activity: 2026-06-22 -- 48-01 complete (TD-1 donut refresh wiring)
+Phase: 48 (address-v1-8-tech-debt-member-filter-donut-refresh-stale-tre) — ALL PLANS DONE (ready for verification)
+Plan: 2 of 2 (both complete)
+Status: Phase 48 complete (48-01 TD-1 donut refresh ✓; 48-02 TD-2 doc scrub ✓)
+Last activity: 2026-06-22 -- 48-02 complete (TD-2 stale-trend dartdoc scrub)
 Prior: 2026-06-22 - quick 260622-0ly 打开统计页查看当前月时，小确幸日历默认选中「今天」（高亮今天格子 + 自动展开今天的小确幸明细面板，今天无记录则显示空状态文案）；仅当前月生效，翻到其它月份不自动选中（翻回当前月重新选中今天），同月内 pull-to-refresh 保留用户手动点击的那天，手动点击行为不变。改动 `_JoyCalendarBodyState` 新增 `initState`/`didUpdateWidget`/`_defaultSelectedDay()`（"今天"仅当落在 anchor 当月内才选中；单一状态 `_selectedDay` 同时驱动 ring 高亮+内联展开）；零 provider/ARB/数据层改动、不跑 build_runner/gen-l10n。决定论：现存 golden/测试窗口全钉死 May 2026，今天永不落入→默认选中恒 null→**0 golden 重基线**、视觉与改前字节一致；新增决定论 widget 测试（当前月→自动选中+展开 / 过去月→不选中，只比 y/m/d 规避时钟竞态）。analyze 0、full test 3083/3083、仅 2 文件改动。commits 3eabc907/1811a22f。
 Prior: quick 260621-uus 统计页删除截图红框圈出的编辑性元素（纯展示层、零数据流改动）：AppBar 删「全部条目 ▼」entry-filter chip（删孤立 widget+测试，保留 `selectedJoyMetricVariantProvider` 默认 all）、四个分区标题删「实用/悦己」tag chip（保留左侧彩色竖条+标题）、悦己 drawer 去 connector(dashed dots+「把悦己这一块放大看看」)+副标题「仅呈现去向不分高下」+caption「百分比是各项占悦己自身…」且标题缩短为「悦己 {amount}」（保留金额/笔数/bar 主体）、删小确幸日历 footer「这个月有X天…」+悦己满足度分布 footer「大多落在中高位…」（保留 median pill）；3 ARB 对称删 12 个 0-ref key+gen-l10n、删 `_JoyConnector` 类/孤立测试 helper（无 dead code）。analyze 0、full test 3081/3081、15 golden（scroll-smoke/joy_calendar/satisfaction_histogram）macOS 重基线（category_donut/joy_spend 验证无变化未重基线）。commits 15ebc181/730b5bb3/412a8e9d/4c8b6c20/27224cba/547a359d/5b8c1bd9。
 Prior: quick 260621-ti1 统计页「分类支出」donut 卡片：类目 icon + 圆环放大 + 列表去色块（设备端 UAT 已通过✓）。①分类详细列表行 / 悦己「钱花在哪」legend 行类目名前加「上一级(L1顶层)」类目 icon、圆环显示了%的扇区加 icon，全经共享 `parentCategoryIconFromId`（categoryId 已是 L1 rollup id；零新 icon 映射/ARB/数据层/依赖；成员维度保持头像 emoji 不改）。②圆环放大：section radius 30→41.4、centerSpaceRadius 54→59.4（外径×1.2/内径×1.1），容器 `SizedBox` height 200→234、center `_centerTotalMaxWidth` 96→106；widget test `category_donut_card_test.dart` 将 bare card 包进 `SingleChildScrollView`（生产本就在滚动视图内）避免放大后 800×600 测试窗 26px 溢出。③圆环 icon 改为 % 正上方、中线对齐：原 `badgeWidget`(offset0.35)+内置 `title`(% offset0.5) 沿半径分置→非6/12点钟扇区横向重叠(`88🍴%`)；改为抑制内置 title（`showTitle:false`）、icon+% 合成单个居中 `Column` badge（icon 在上、% 在下、offset0.5 居环带中部）。④分类/悦己列表行去掉色块、icon 取色块颜色：`donut_hero` `LegendRow` 有 icon 的分类行不画 11×11 色块、icon 颜色→该行 arc `color`；`joy_spend_stacked_bar` `_LegendRow` 去 `.jl .dot`、icon 颜色→`segment.color`；成员行(emoji)与「其他」行(无 icon)保留色块。质量门：analyze 0、full test 3091/3091、多轮受影响 golden（category_donut/joy_spend/scroll-smoke）macOS 重基线（commits 0903114b/a2925f42/0064693f/5ae71263/87a313b1/6c9794d3）。
@@ -210,6 +210,7 @@ Resume file: None
 | Phase 47 P05 | 11min | 3 tasks | 56 files |
 | Phase 47 P06 | 25min | 2 tasks | 4 files |
 | Phase 48 P01 | 4min | 3 tasks | 3 files |
+| Phase 48 P02 | ~6min | 2 tasks | 3 files |
 
 ## Decisions
 
@@ -271,6 +272,7 @@ Resume file: None
 - [Phase 48]: [48-01] TD-1 fixed (D-01): nullable AnalyticsCardContext.memberFilterDeviceId threaded from donutDimensionStateProvider (analytics state_*, GUARD-01 intact); categoryDonutRefreshTargets appends memberFilteredCategoryBreakdownProvider via collection-if ONLY when a member filter is active (unfiltered 4-target union byte-stable). Member-filtered pull-to-refresh now invalidates the displayed filtered breakdown (no stale cached data). CategoryDonutCard._ctx() threads the live donutView filter.
 - [Phase 48]: [48-01] D-02: 'MemberFilteredCategoryBreakdownProvider' whitelisted in _analyticsProviderTypeWhitelist (verbatim generated type) so union ⊆ analytics isolation still passes. D-03: added (f) completeness guard (union ⊇ active card-watch — the direction the suite never checked, which let TD-1 in) + negative control (no filter → filtered family absent, unfiltered union byte-stable) + mutual-consistency whitelist loop. Registry test 9/9 green, analyze 0, 0 golden re-baseline (refresh-wiring only).
 - [Phase 48]: [48-01] DEVIATION (Rule 1): reworded categoryDonutRefreshTargets dartdoc to drop the literal `home/*` substring — the Task-1 comment tripped the pre-existing REDES-01 `source.contains('home/')` per-card guard (folded into bf0122a2). NOTE: gsd-tools CLI unavailable in this exec env — STATE.md/ROADMAP.md updated by hand (consistent with the Phase 47 47-04 note).
+- [Phase 48]: [48-02] TD-2 fixed (D-04): scrubbed the removed `getExpenseTrendUseCase` / `MonthlyTrend` symbol names from the `getWithinMonthCumulativeUseCase` dartdoc (source + 3 build_runner-regenerated `.g.dart` mirrors at ~168/180/196) and from the one characterization test description (now 'within-month cumulative trend path, D-E1'). Kept the accurate `findByBookIds`/NOT-analyticsRepository rationale. `grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` = 0; scoped analyze 0; char test 3/3; 0 golden re-baseline; .g.dart diff = ONLY the 3 dartdoc mirror blocks (no codegen drift), committed normally (not gitignored). gsd-tools CLI still unavailable — STATE.md/ROADMAP.md updated by hand.
 
 ## Operator Next Steps
 

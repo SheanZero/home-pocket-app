@@ -133,7 +133,7 @@
 - [x] **Phase 45: 展示外壳重建 (Presentation Shell Rebuild)** — 瘦身 `analytics_screen.dart` 外壳 + 数据驱动 `_refresh()` + `widgets/cards/` 卡片体系；HomeHero 隔离由结构保证（不读/不失效任何 `home/*` provider） (completed 2026-06-17)
 - [x] **Phase 46: 卡片体系 (Cards)** (7/7 plans) — 总览 / 趋势 / 分类下钻 / 悦己×4，复用既有 chart widget + fl_chart 1.2.0 原生 label（删除直方图 Stack hack）；情感化呈现「已花悦己」满足感，全程反游戏化 — round-5 B flat 5-card lineup LIVE 2026-06-17
 - [x] **Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT** — 三语 ARB parity；每张新卡加入 `anti_toxicity_*_test` 禁词扫描；macOS golden 从零撰写/重基线；全量 `flutter test` 作为逐波门禁；真机视觉 UAT (completed 2026-06-20)
-- [ ] **Phase 48: v1.8 收尾技术债 (Tech-Debt Cleanup)** — 修 TD-1 成员筛选 donut 下拉刷新 staleness（把 donut 成员筛选穿过 `AnalyticsCardContext` 进 `categoryDonutRefreshTargets` + registry-test 白名单 + 完整性断言）+ TD-2 清除已移除 `getExpenseTrendUseCase`/`MonthlyTrend` 残留 dartdoc（regen `.g.dart`）+ 字符化测试描述
+- [x] **Phase 48: v1.8 收尾技术债 (Tech-Debt Cleanup)** (2/2 plans) — 修 TD-1 成员筛选 donut 下拉刷新 staleness（把 donut 成员筛选穿过 `AnalyticsCardContext` 进 `categoryDonutRefreshTargets` + registry-test 白名单 + 完整性断言）+ TD-2 清除已移除 `getExpenseTrendUseCase`/`MonthlyTrend` 残留 dartdoc（regen `.g.dart`）+ 字符化测试描述
 
 ### Phase 43: HTML 设计探索关卡 (Design Gate — NO production code)
 
@@ -230,7 +230,7 @@
 **Wave 1** (parallel — disjoint file sets; 48-01 TD-1 code/test, 48-02 TD-2 doc-hygiene)
 
 - [x] 48-01-PLAN.md — TD-1: thread donut member filter through `AnalyticsCardContext` → `categoryDonutRefreshTargets` (D-01) + registry-test whitelist `MemberFilteredCategoryBreakdownProvider` (D-02) + completeness regression assertion (D-03) — DONE (3/3 tasks; analyze 0, registry test 9/9, 0 golden)
-- [ ] 48-02-PLAN.md — TD-2: scrub removed-symbol dartdoc in `repository_providers.dart` + regen `.g.dart` (D-04) + update characterization test description; `grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` = 0
+- [x] 48-02-PLAN.md — TD-2: scrub removed-symbol dartdoc in `repository_providers.dart` + regen `.g.dart` (D-04) + update characterization test description; `grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` = 0 — DONE (2/2 tasks; analyze 0, char test 3/3, 0 golden; .g.dart regenerated via build_runner, only 3 dartdoc mirror lines changed)
 
 ## Milestone Progress
 
@@ -244,4 +244,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-48 | P43-47 all plans done (Phase 47: 6/6); Phase 48: 2 plans planned (1/2 done — 48-01 ✓) | In progress | - |
+| v1.8 统计页面重设计 | 43-48 | P43-47 all plans done (Phase 47: 6/6); Phase 48: 2/2 done (48-01 ✓ 48-02 ✓) | In progress | - |
