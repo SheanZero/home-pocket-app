@@ -78,3 +78,18 @@
 Round 1 的 5 个文件保留为历史（`mocks/entry-switch-designs.html`）。
 
 待用户从 V1–V5 选定 → 开 PLAN.md → 开发。
+
+---
+
+## Round 3 — 真机迭代（2026-06-22）
+
+R1 实现 hold-to-talk 后真机发现底部长条**贴 iOS Home/上滑手势区**难按。经多轮设计 review，
+交互模型重做。设计稿迭代（全部 review 过）：
+- `mocks/entry-ptt-safezone-designs.html` — 4 个避手势区落点（用户选 **N1 长条移到键盘上方**）
+- `mocks/entry-ptt-textinput-state.html` — 文字输入态工具条「按住说话」（本次不做）
+- `mocks/entry-ptt-tap-modal.html` — 点击触发 + 弹窗（完成/重置/取消）
+- `mocks/entry-voice-auto-modal.html` — **终稿**：点击「语音记录」(线条 mic) → 自动填表弹窗 →
+  轻点空白处退出 → 唯一「重置·恢复账目」键（去完成/取消）
+
+**终版交互（→ `260622-nhs-PLAN-R2.md` 实现）：** 长条移键盘上方 + 补 SafeArea；hold→tap；文案「语音记录」+
+线条 mic；弹窗免持聆听、说一句自动填账目、轻点退出保留、重置还原说话前快照；无完成/取消；不自动保存（D-2）。

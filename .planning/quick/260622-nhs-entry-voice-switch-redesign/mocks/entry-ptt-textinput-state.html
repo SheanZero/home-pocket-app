@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记账录入 — 文字输入态的「按住说话」显示样式（基于 N1）</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F5F1ED; --divider:#E6DCDA; --border:#E6DCDA;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#999999;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --primary:#6FA36F; --primaryLight:#EEF6EC; --primaryBorder:#CFE6CF;
+    --fabStart:#E09DB4; --fabEnd:#D98CA0; --fabShadow:rgba(217,140,160,.32);
+    --recStart:#E5484D; --recEnd:#C93040;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1100px;margin:0 auto 26px;}
+  .page-head h1{font-size:23px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.8;color:#5a5048;max-width:920px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--primary);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.8;color:#5a5048;max-width:920px;}
+  .page-head .prob b{color:var(--dailyText);}
+  .page-head .try{display:inline-block;margin-top:10px;font-size:12.5px;color:#fff;background:var(--joy);
+    padding:5px 13px;border-radius:8px;font-weight:600;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:46px;justify-content:center;align-items:flex-start;max-width:1100px;margin:0 auto;position:relative;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:12px;width:370px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;text-align:center;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .arrow{align-self:center;margin-top:330px;font-size:30px;color:#b3a79c;}
+
+  .phone{width:370px;height:812px;background:var(--bg);border-radius:42px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;
+    border:1px solid #ddd3cc;position:relative;}
+  .sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;
+    font-size:14px;font-weight:700;color:var(--textPrimary);position:relative;background:var(--card);}
+  .sb .island{position:absolute;left:50%;top:9px;translate:-50% 0;width:96px;height:26px;border-radius:16px;background:#0a0a0a;}
+  .sb .r{font-size:12px;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 16px;
+    border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:14px 18px 8px;display:flex;align-items:center;gap:10px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:13px;font-weight:700;padding:6px 11px;border-radius:9px;}
+  .amount .val{flex:1;text-align:right;font-size:42px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;line-height:1;}
+
+  .form{padding:6px 16px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;}
+  .cardbox{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .frow{display:flex;align-items:center;gap:10px;padding:13px 14px;}
+  .frow + .frow{border-top:1px solid var(--divider);}
+  .frow .ic{font-size:15px;width:18px;text-align:center;color:var(--textSecondary);}
+  .frow .lbl{font-size:14px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .frow .v.ph{color:var(--textTertiary);font-weight:500;}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .usecard{display:flex;align-items:center;padding:12px 14px;}
+  .usecard .ul{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .ledger{display:flex;gap:9px;margin-left:auto;}
+  .lchip{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:20px;
+    border:1.5px solid var(--border);background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+  .lchip.joy.on{background:var(--joyLight);border-color:var(--joy);color:var(--joyText);}
+
+  /* note field (focused) */
+  .notecard{padding:12px 14px;}
+  .notecard .nh{font-size:13px;color:var(--textSecondary);display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+  .notebox{min-height:62px;border-radius:10px;border:1.5px solid var(--primary);background:#fff;padding:11px 12px;
+    font-size:15px;color:var(--textPrimary);box-shadow:0 0 0 3px rgba(111,163,111,.16);}
+  .notebox .cursor{display:inline-block;width:2px;height:17px;background:var(--primary);vertical-align:-3px;animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0}}
+  .focus-pill{font-size:10px;font-weight:700;color:#fff;background:var(--primary);padding:2px 8px;border-radius:7px;margin-left:auto;}
+
+  /* numeric keypad */
+  .pad{background:var(--card);border-top:1px solid var(--divider);padding:8px 11px 6px;flex-shrink:0;}
+  .pad .g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+  .key{height:46px;border-radius:11px;background:var(--muted);display:flex;align-items:center;justify-content:center;
+    font-size:21px;font-weight:600;color:var(--textPrimary);}
+  .key.blank{background:transparent;}
+  .act{display:flex;gap:7px;margin-top:7px;}
+  .act .sm{flex:1;height:46px;border-radius:11px;background:var(--muted);display:flex;align-items:center;justify-content:center;
+    font-size:16px;color:var(--textSecondary);gap:4px;}
+  .save{flex:1.1;height:46px;border-radius:12px;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 4px 12px var(--fabShadow);}
+  .ptt-bar{flex-shrink:0;height:50px;display:flex;align-items:center;justify-content:center;gap:9px;margin:0 16px 8px;border-radius:14px;
+    background:linear-gradient(to bottom,#FCEFF3,#F6DEE6);border:1.5px solid #EFD0DA;color:var(--joyText);font-size:15px;font-weight:700;}
+  .ptt-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--joy);}
+
+  /* ===== floating keyboard toolbar (TEXT state) ===== */
+  .kbtoolbar{flex-shrink:0;background:var(--card);border-top:1px solid var(--border);padding:7px 12px;
+    display:flex;align-items:center;gap:9px;height:58px;}
+  .kbtoolbar .done{height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+    display:flex;align-items:center;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .kbtoolbar .talk{flex:1;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:7px;
+    background:var(--joyLight);border:1.5px solid #EFD0DA;color:var(--joyText);font-size:14.5px;font-weight:700;}
+  .kbtoolbar .talk .dot{width:7px;height:7px;border-radius:50%;background:var(--joy);}
+  .kbtoolbar .rec{height:42px;padding:0 18px;border-radius:10px;color:#fff;font-size:15px;font-weight:700;
+    display:flex;align-items:center;background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 3px 10px var(--fabShadow);}
+
+  /* ===== iOS system keyboard ===== */
+  .ios-kb{flex-shrink:0;background:#D1D5DB;padding:8px 4px 4px;}
+  .ios-kb .krow{display:flex;justify-content:center;gap:5px;margin-bottom:9px;padding:0 3px;}
+  .ios-kb .kk{flex:1;height:40px;background:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center;
+    font-size:17px;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.28);}
+  .ios-kb .kk.wide{flex:1.5;background:#ABB2BC;font-size:13px;}
+  .ios-kb .kk.space{flex:5;}
+  .ios-kb .kk.gray{background:#ABB2BC;font-size:13px;}
+  .ios-kb .kk .micsys{color:#666;font-size:15px;}
+  .ios-kb .homebar{height:5px;width:135px;border-radius:3px;background:#7d8590;margin:6px auto 4px;}
+
+  /* highlight */
+  .hl{position:relative;outline:2.5px dashed var(--joy);outline-offset:3px;border-radius:13px;}
+  .tag-n{position:absolute;top:-12px;left:-10px;z-index:7;width:24px;height:24px;border-radius:50%;background:var(--joy);color:#fff;
+    font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .clr{position:absolute;z-index:7;font-size:10px;font-weight:700;color:#2e7d4f;background:#e6f4ea;border:1px solid #bfe3cc;
+    padding:2px 8px;border-radius:7px;white-space:nowrap;}
+  .holdable{cursor:pointer;}
+  .home-ind{position:absolute;left:50%;bottom:9px;translate:-50% 0;width:135px;height:5px;border-radius:3px;background:#111;z-index:5;}
+
+  /* listening overlay */
+  .scrim{position:absolute;inset:0;background:rgba(20,18,16,.30);z-index:8;opacity:0;pointer-events:none;transition:opacity .18s;}
+  .phone.talking .scrim{opacity:1;}
+  .ov{position:absolute;left:0;right:0;bottom:0;z-index:9;background:var(--card);border-radius:22px 22px 0 0;
+    padding:14px 18px 30px;display:flex;flex-direction:column;align-items:center;gap:11px;box-shadow:0 -10px 30px rgba(0,0,0,.18);
+    transform:translateY(101%);transition:transform .2s ease;}
+  .phone.talking .ov{transform:translateY(0);}
+  .ov .grab{width:40px;height:5px;border-radius:3px;background:var(--border);}
+  .ov .lis{font-size:13px;font-weight:700;color:var(--recStart);display:flex;align-items:center;gap:6px;}
+  .ov .lis .rd{width:9px;height:9px;border-radius:50%;background:var(--recStart);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .ov .tx{font-size:16px;color:var(--textPrimary);font-weight:600;}
+  .wave{display:flex;align-items:flex-end;gap:3px;height:42px;}
+  .wave i{width:3px;border-radius:2px;background:var(--daily);opacity:.9;animation:bounce 1s infinite ease-in-out;}
+  @keyframes bounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .ov .mic{width:66px;height:66px;border-radius:20px;color:#fff;font-size:27px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to bottom,var(--recStart),var(--recEnd));box-shadow:0 6px 18px rgba(201,48,64,.32);}
+  .ov .rel{font-size:12px;color:var(--textSecondary);font-weight:600;}
+
+  .note{width:370px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;font-size:12.5px;color:#5a5048;line-height:1.7;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;
+    background:var(--joyLight);color:var(--joyText);border:1px solid #eccdd6;}
+  .note .badge.green{background:var(--primaryLight);color:var(--dailyText);border-color:var(--primaryBorder);}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .line{margin:5px 0;}
+  .note .k{display:inline-block;min-width:56px;color:#8a7f76;font-weight:700;vertical-align:top;}
+  .note ul{margin:7px 0 0 2px;list-style:none;}
+  .note li{padding-left:18px;position:relative;margin:3px 0;}
+  .note li.pro::before{content:"＋";position:absolute;left:0;color:var(--daily);font-weight:700;}
+  .note li.con::before{content:"－";position:absolute;left:0;color:#c98a6a;font-weight:700;}
+  .legend{max-width:1100px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;border:1px solid #e3dad2;border-radius:10px;padding:13px 16px;line-height:1.85;}
+  .legend b{color:#2c2a26;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>文字输入态的「按住说话」显示样式（基于 N1）</h1>
+  <p>聚焦<b>商家 / 备注</b>等文本框时，自定义数字键盘滑走、iOS <b>系统键盘</b>升起 —— 此时 N1 的底部
+  「按住说话」长条会被系统键盘顶掉。本稿设计这一态的显示：把「按住说话」<b>搬进系统键盘上方那条浮动工具条</b>
+  （原本只有 [完成] [记录]），让语音在两种输入态下都「一按即说」、且工具条浮在键盘<b>之上</b>、天然避开 Home 手势区。</p>
+  <div class="prob"><b>一致性原则：</b>数字态 = 键盘上方全宽长条；文字态 = 系统键盘上方工具条里的「按住说话」段。
+  两态同一个会话逻辑（<code>VoicePttSessionMixin</code>）：按住→收起系统键盘+升聆听浮层→松手填同一张表单·停留。</div>
+  <span class="try">👆 在右机工具条「按住说话」上按住 → 升起聆听浮层；松手 → 收起</span>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== 数字键盘态 (N1 参照) ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">A</span>数字键盘态（N1 · 参照）</div>
+    <div class="phone" id="pa">
+      <div class="sb"><span>19:05</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 外出就餐</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v ph">输入店铺</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></span></div>
+      </div>
+      <div class="ptt-bar"><span class="dot"></span>🎤 按住说话</div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key blank"></div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥ JPY</div><div class="save">记录</div></div>
+      </div>
+      <div style="height:30px;flex-shrink:0;background:var(--card)"></div>
+      <div class="home-ind"></div>
+    </div>
+    <div class="note">
+      <span class="badge green">已确认（N1）</span>
+      <h4>金额聚焦 → 数字键盘 + 上方全宽「按住说话」长条</h4>
+      <div class="line"><span class="k">说明</span>长条在键盘上方、距底边远；这是 N1 的常态。点商家/备注文本框即切到右侧文字态。</div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- ===================== 文字输入态（本稿设计） ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">B</span>文字输入态（本稿设计）</div>
+    <div class="phone" id="pb">
+      <div class="sb"><span>19:05</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">1,280</span></div>
+      <div class="form" style="gap:10px">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v">星巴克</span></div>
+        </div>
+        <div class="cardbox notecard hl"><span class="tag-n">B</span>
+          <div class="nh">✏️ 备注 <span class="focus-pill">⌨ 输入中</span></div>
+          <div class="notebox">和同事的午餐<span class="cursor"></span></div>
+        </div>
+      </div>
+      <!-- floating toolbar above the system keyboard -->
+      <div class="kbtoolbar">
+        <div class="done">完成</div>
+        <div class="talk hl holdable" data-hold="pb" style="outline-offset:2px">
+          <span class="clr" style="top:-22px;left:50%;translate:-50% 0">↕ 浮在键盘上方 · 避开手势区 ✓</span>
+          <span class="dot"></span>🎤 按住说话</div>
+        <div class="rec">记录</div>
+      </div>
+      <!-- iOS system keyboard -->
+      <div class="ios-kb">
+        <div class="krow"><span class="kk">q</span><span class="kk">w</span><span class="kk">e</span><span class="kk">r</span><span class="kk">t</span><span class="kk">y</span><span class="kk">u</span><span class="kk">i</span><span class="kk">o</span><span class="kk">p</span></div>
+        <div class="krow" style="padding:0 18px"><span class="kk">a</span><span class="kk">s</span><span class="kk">d</span><span class="kk">f</span><span class="kk">g</span><span class="kk">h</span><span class="kk">j</span><span class="kk">k</span><span class="kk">l</span></div>
+        <div class="krow"><span class="kk gray">⇧</span><span class="kk">z</span><span class="kk">x</span><span class="kk">c</span><span class="kk">v</span><span class="kk">b</span><span class="kk">n</span><span class="kk">m</span><span class="kk gray">⌫</span></div>
+        <div class="krow"><span class="kk wide">123</span><span class="kk gray">🌐</span><span class="kk gray"><span class="micsys">🎙</span></span><span class="kk space">空格</span><span class="kk wide">换行</span></div>
+        <div class="homebar"></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="ov"><div class="grab"></div><div class="lis"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 一千二百八</div><div class="wave" data-wave></div><div class="mic">🎤</div>
+        <div class="rel">松开 → 自动填入表单</div></div>
+    </div>
+    <div class="note">
+      <span class="badge">本稿设计</span>
+      <h4>系统键盘上方工具条：完成 · <b>🎤 按住说话</b> · 记录</h4>
+      <div class="line"><span class="k">为何这样</span>文本框聚焦时系统键盘顶掉底部长条；把「按住说话」放进原 [完成][记录] 浮动工具条中段（樱粉浅底大段），保持语音一按即达。</div>
+      <div class="line"><span class="k">为何安全</span>工具条浮在<b>系统键盘之上</b>，离底边远，天然不碰 iOS 上滑手势区。</div>
+      <div class="line"><span class="k">交互</span>按住「按住说话」→ 收起系统键盘 + 升聆听浮层 → 松手把金额/分类/商家/日期填进同一张表单、回到当前页（不自动保存）。</div>
+      <ul>
+        <li class="pro">两种输入态都「一按即说」，体验一致</li>
+        <li class="pro">复用现有浮动工具条（仅在 [完成][记录] 间插入一段），改动小</li>
+        <li class="pro">浮在键盘上方，零手势冲突</li>
+        <li class="con">工具条变三段，[完成]/[记录] 略窄（仍达标命中区）</li>
+      </ul>
+      <div class="line" style="margin-top:9px;color:#8a7f76"><b>注：</b>系统键盘自带的 🎙 是 iOS 听写（逐字录入到文本框），与我们的「按住说话」（整句解析填表）不同，二者并存不冲突。</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>结论：</b>「按住说话」在两态各有落点 —— 数字态 = 键盘上方全宽长条（N1）；文字态 = 系统键盘上方浮动工具条的中段。
+  二者同一会话逻辑、同一聆听浮层、同样松手填表停留（D-2）；都避开 iOS 底部手势区。
+  <b>配色</b>对齐 app_palette.dart（樱粉 #D98CA0 / joyLight #FBEAEF / 记录键 #E09DB4→#D98CA0 / 录音红 #E5484D→#C93040）。
+  <br><b>实现提示：</b>给 <code>KeyboardToolbar</code> 在 [完成] 与 [记录] 之间加一个 hold-to-talk 段（按住起停，复用 PTT 会话）；
+  按住时先 unfocus 文本框收起系统键盘再升浮层。原 TapRegion 分组保留，避免按住时文本框过早失焦。
+  <br><b>提示：</b>亮色稿；右机工具条「按住说话」可按住演示。
+</div>
+
+<script>
+  document.querySelectorAll('[data-wave]').forEach(w=>{
+    const hs=[12,20,30,40,34,24,32,42,36,26,18,28,38,30,20,12];
+    w.innerHTML = hs.map((h,i)=>`<i style="height:${h}px;animation-delay:${i*0.06}s"></i>`).join('');
+  });
+  function bind(el){
+    const id=el.dataset.hold; const p=document.getElementById(id);
+    const start=e=>{e.preventDefault();p.classList.add('talking');};
+    const end=()=>p.classList.remove('talking');
+    el.addEventListener('mousedown',start);
+    el.addEventListener('touchstart',start,{passive:false});
+    window.addEventListener('mouseup',end);
+    el.addEventListener('touchend',end); el.addEventListener('touchcancel',end);
+  }
+  document.querySelectorAll('[data-hold]').forEach(bind);
+</script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记账录入 — 语音记录 · 自动填表 · 弹窗轻点退出 · 重置恢复</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F5F1ED; --divider:#E6DCDA; --border:#E6DCDA;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#999999;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --primary:#6FA36F; --primaryLight:#EEF6EC; --primaryBorder:#CFE6CF;
+    --fabStart:#E09DB4; --fabEnd:#D98CA0; --fabShadow:rgba(217,140,160,.32);
+    --recStart:#E5484D; --recEnd:#C93040;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1100px;margin:0 auto 26px;}
+  .page-head h1{font-size:23px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.8;color:#5a5048;max-width:930px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--primary);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.85;color:#5a5048;max-width:930px;}
+  .page-head .prob b{color:var(--dailyText);}
+  .page-head .flow{margin-bottom:6px;font-size:13px;color:#6a5f56;}
+  .page-head .flow code{background:var(--muted);padding:1px 7px;border-radius:6px;font-weight:600;color:var(--joyText);}
+  .page-head .try{display:inline-block;margin-top:10px;font-size:12.5px;color:#fff;background:var(--joy);padding:5px 13px;border-radius:8px;font-weight:600;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:46px;justify-content:center;align-items:flex-start;max-width:1100px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:12px;width:370px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;text-align:center;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .arrow{align-self:center;margin-top:340px;font-size:30px;color:#b3a79c;}
+
+  .phone{width:370px;height:812px;background:var(--bg);border-radius:42px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;border:1px solid #ddd3cc;position:relative;}
+  .sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;
+    font-size:14px;font-weight:700;color:var(--textPrimary);position:relative;background:var(--card);}
+  .sb .island{position:absolute;left:50%;top:9px;translate:-50% 0;width:96px;height:26px;border-radius:16px;background:#0a0a0a;}
+  .sb .r{font-size:12px;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:14px 18px 8px;display:flex;align-items:center;gap:10px;border-radius:12px;padding:4px;transition:background .3s;}
+  .amount.filled{background:rgba(95,174,114,.10);}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:13px;font-weight:700;padding:6px 11px;border-radius:9px;}
+  .amount .val{flex:1;text-align:right;font-size:42px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;line-height:1;}
+  .auto-tag{position:absolute;right:18px;top:64px;font-size:10px;font-weight:700;color:#2e7d4f;background:#e6f4ea;border:1px solid #bfe3cc;padding:2px 8px;border-radius:7px;z-index:3;}
+
+  .form{padding:6px 16px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;}
+  .cardbox{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .frow{display:flex;align-items:center;gap:10px;padding:13px 14px;}
+  .frow + .frow{border-top:1px solid var(--divider);}
+  .frow .ic{font-size:15px;width:18px;text-align:center;color:var(--textSecondary);}
+  .frow .lbl{font-size:14px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .frow .v.ph{color:var(--textTertiary);font-weight:500;}
+  .frow .v.just{color:var(--dailyText);}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .usecard{display:flex;align-items:center;padding:12px 14px;}
+  .usecard .ul{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .ledger{display:flex;gap:9px;margin-left:auto;}
+  .lchip{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:20px;
+    border:1.5px solid var(--border);background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+  .lchip.joy.on{background:var(--joyLight);border-color:var(--joy);color:var(--joyText);}
+
+  /* line-icon mic */
+  .mic-ico{width:21px;height:21px;color:currentColor;flex-shrink:0;}
+
+  /* TAP bar：语音记录 */
+  .talk-bar{flex-shrink:0;height:54px;display:flex;align-items:center;justify-content:center;gap:9px;margin:0 16px 8px;border-radius:14px;
+    background:linear-gradient(to bottom,#FCEFF3,#F4D9E2);border:1.5px solid #ECC9D5;color:var(--joyText);font-size:16px;font-weight:700;cursor:pointer;}
+
+  .pad{background:var(--card);border-top:1px solid var(--divider);padding:8px 11px 6px;flex-shrink:0;}
+  .pad .g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+  .key{height:46px;border-radius:11px;background:var(--muted);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:600;color:var(--textPrimary);}
+  .key.blank{background:transparent;}
+  .act{display:flex;gap:7px;margin-top:7px;}
+  .act .sm{flex:1;height:46px;border-radius:11px;background:var(--muted);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--textSecondary);gap:4px;}
+  .save{flex:1.1;height:46px;border-radius:12px;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));box-shadow:0 4px 12px var(--fabShadow);}
+  .safe{height:30px;flex-shrink:0;background:var(--card);}
+  .home-ind{position:absolute;left:50%;bottom:9px;translate:-50% 0;width:135px;height:5px;border-radius:3px;background:#111;z-index:5;}
+
+  .hl{position:relative;outline:2.5px dashed var(--joy);outline-offset:3px;border-radius:14px;}
+  .tag-n{position:absolute;top:-12px;left:-10px;z-index:7;width:24px;height:24px;border-radius:50%;background:var(--joy);color:#fff;
+    font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .badgewrap{position:absolute;z-index:7;font-size:10px;font-weight:700;color:#2e7d4f;background:#e6f4ea;border:1px solid #bfe3cc;padding:2px 8px;border-radius:7px;}
+
+  /* ===== listening modal (auto-fill, tap to exit, only reset) ===== */
+  .scrim{position:absolute;inset:0;background:rgba(20,18,16,.34);z-index:8;opacity:0;pointer-events:none;transition:opacity .18s;}
+  .modal{position:absolute;left:0;right:0;bottom:0;z-index:9;background:var(--card);border-radius:24px 24px 0 0;
+    padding:12px 18px 28px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 -10px 30px rgba(0,0,0,.18);
+    transform:translateY(101%);transition:transform .24s ease;cursor:pointer;}
+  .open .scrim{opacity:1;}
+  .open .modal{transform:translateY(0);}
+  .modal .grab{width:40px;height:5px;border-radius:3px;background:var(--border);}
+  .modal .exit-hint{font-size:12.5px;color:var(--textTertiary);font-weight:600;text-align:center;margin-top:-3px;}
+  .modal .lis{font-size:13px;font-weight:700;color:var(--recStart);display:flex;align-items:center;gap:6px;}
+  .modal .lis .rd{width:9px;height:9px;border-radius:50%;background:var(--recStart);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .modal .tx{font-size:20px;color:var(--textPrimary);font-weight:700;min-height:27px;text-align:center;}
+  .modal .tx .grow{color:var(--dailyText);}
+  .wave{display:flex;align-items:flex-end;gap:3px;height:46px;}
+  .wave i{width:3px;border-radius:2px;background:var(--daily);opacity:.9;animation:bounce 1s infinite ease-in-out;}
+  @keyframes bounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .modal .mic{width:76px;height:76px;border-radius:24px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to bottom,var(--recStart),var(--recEnd));box-shadow:0 6px 18px rgba(201,48,64,.32);color:#fff;}
+  .modal .mic .mic-ico{width:34px;height:34px;}
+  .reset-btn{margin-top:2px;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;padding:0 26px;border-radius:13px;
+    background:var(--muted);border:1.5px solid var(--border);color:var(--textPrimary);font-size:14.5px;font-weight:700;cursor:pointer;}
+  .reset-btn .ri{width:18px;height:18px;color:var(--textSecondary);}
+  .reset-btn .sub{font-size:11px;color:var(--textSecondary);font-weight:600;}
+
+  .note{width:370px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;font-size:12.5px;color:#5a5048;line-height:1.7;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;background:var(--joyLight);color:var(--joyText);border:1px solid #eccdd6;}
+  .note .badge.green{background:var(--primaryLight);color:var(--dailyText);border-color:var(--primaryBorder);}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .line{margin:5px 0;}
+  .note .k{display:inline-block;min-width:46px;color:#8a7f76;font-weight:700;vertical-align:top;}
+  .note ul{margin:7px 0 0 2px;list-style:none;}
+  .note li{padding-left:18px;position:relative;margin:3px 0;}
+  .note li.pro::before{content:"＋";position:absolute;left:0;color:var(--daily);font-weight:700;}
+  .note li.con::before{content:"－";position:absolute;left:0;color:#c98a6a;font-weight:700;}
+  .legend{max-width:1100px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;border:1px solid #e3dad2;border-radius:10px;padding:13px 16px;line-height:1.85;}
+  .legend b{color:#2c2a26;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>语音记录 · 自动填表 · 轻点弹窗退出 · 重置恢复</h1>
+  <p>底部长条改为<b>「语音记录」</b>（线条 mic 图标，点一下、免按住）。点开<b>聆听弹窗</b>后免持聆听：
+  <b>说完一句就自动更新账目内容</b>（实时填表，无需点完成）；<b>轻点弹窗任意处即退出</b>（内容已填好）；
+  弹窗只保留一个<b>「重置」键</b>——清空转写并<b>把账目内容也恢复</b>到说话前。无完成、无取消按钮。</p>
+  <div class="prob">
+    <div class="flow"><code>点「语音记录」</code> → <code>弹窗免持聆听</code> → <code>说一句→账目自动更新</code> → <code>轻点弹窗→退出</code> ／ <code>重置→清空转写 + 恢复账目</code></div>
+    <b>不变：</b>单页 · 无模式切换 · 填同一张表单 · 不自动保存（D-2，退出后你再点「记录」）；复用 <code>VoicePttSessionMixin</code> 的识别/解析/波形/外币 triple/满意度。
+  </div>
+  <span class="try">👆 左机点「语音记录」开弹窗 → 右机轻点弹窗退出 / 点「重置」恢复</span>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== 常态 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">1</span>常态 · 点「语音记录」</div>
+    <div class="phone" id="p1">
+      <div class="sb"><span>19:05</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">0</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 外出就餐</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v ph">输入店铺</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></span></div>
+      </div>
+      <div class="talk-bar hl" onclick="document.getElementById('p1').classList.add('open')">
+        <span class="tag-n">1</span><span class="badgewrap" style="top:-13px;right:-6px">点一下 · 非按住 ✓</span>
+        <svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></svg>
+        语音记录
+      </div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key blank"></div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥ JPY</div><div class="save">记录</div></div>
+      </div>
+      <div class="safe"></div>
+      <div class="home-ind"></div>
+      <!-- modal -->
+      <div class="scrim" onclick="document.getElementById('p1').classList.remove('open')"></div>
+      <div class="modal" onclick="document.getElementById('p1').classList.remove('open')">
+        <div class="grab"></div>
+        <div class="lis"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 <span class="grow">一千二百八</span></div>
+        <div class="wave" data-wave></div>
+        <div class="mic"><svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></svg></div>
+        <div class="exit-hint">轻点空白处退出</div>
+        <div class="reset-btn" onclick="event.stopPropagation()">
+          <svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          重置 <span class="sub">· 恢复账目</span></div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">常态</span>
+      <h4>键盘上方长条 →「语音记录」（线条 mic，点一下）</h4>
+      <div class="line"><span class="k">触发</span>点长条 → 升起聆听弹窗（右机）。点击非按住、非贴底，避开 iOS 上滑手势。</div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- ===================== 聆听弹窗 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">2</span>聆听弹窗 · 自动填表 · 仅重置</div>
+    <div class="phone open" id="p2">
+      <div class="sb"><span>19:05</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="auto-tag">↑ 账目已自动更新</div>
+      <div class="amount filled"><span class="cur">¥ JPY</span><span class="val">1,280</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v just">食费 › 外出就餐</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v just">星巴克</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip joy">✨ 悦己</span></span></div>
+      </div>
+      <div class="talk-bar">
+        <svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></svg>
+        语音记录</div>
+      <div class="pad">
+        <div class="g">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key">00</div><div class="key">0</div><div class="key blank"></div>
+        </div>
+        <div class="act"><div class="sm">⌫</div><div class="sm">¥ JPY</div><div class="save">记录</div></div>
+      </div>
+      <div class="safe"></div>
+      <div class="scrim" onclick="document.getElementById('p2').classList.remove('open')"></div>
+      <div class="modal hl" onclick="document.getElementById('p2').classList.remove('open')" style="outline-offset:-4px">
+        <span class="tag-n" style="top:6px;left:14px">2</span>
+        <div class="grab"></div>
+        <div class="lis"><span class="rd"></span>正在聆听…</div>
+        <div class="tx">拿铁 <span class="grow">一千二百八</span></div>
+        <div class="wave" data-wave></div>
+        <div class="mic"><svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></svg></div>
+        <div class="exit-hint">轻点空白处退出</div>
+        <div class="reset-btn hl" onclick="event.stopPropagation()" style="outline-offset:2px">
+          <span class="tag-n" style="top:-13px;left:auto;right:-10px">R</span>
+          <svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          重置 <span class="sub">· 恢复账目</span></div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge green">弹窗设计（本稿重点）</span>
+      <h4>免持聆听 · 自动填表 · 轻点退出 · 仅一个重置键</h4>
+      <div class="line"><span class="k">自动</span>说一句 → 金额/分类/商家/日期实时填进账目（上方金额已变 1,280、商家=星巴克）。无需点完成。</div>
+      <div class="line"><span class="k">退出</span>账目已填好后，<b>轻点弹窗任意处</b>即退出（带提示）。点遮罩同效。回到当前页停留。</div>
+      <div class="line"><span class="k">重置</span>唯一按钮「🔄 重置 · 恢复账目」：清空转写 <b>并把账目内容恢复</b>到说话前快照（听错了一键还原重说）。</div>
+      <ul>
+        <li class="pro">最少操作：说→自动填→轻点走，零确认按钮</li>
+        <li class="pro">重置能整体还原账目，容错强</li>
+        <li class="pro">线条 mic 图标更克制、统一</li>
+        <li class="con">需做「账目说话前快照」以支持重置还原</li>
+        <li class="con">轻点退出 vs 点重置 要分清（重置区拦截点击）</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>交互模型（终版）：</b>点「语音记录」→ 弹窗免持聆听 → 说一句自动更新账目 → 轻点弹窗退出（账目已填）；
+  唯一按钮「重置」= 清空转写 + 恢复账目到说话前快照。<b>无完成、无取消。</b>
+  <b>不变：</b>单页 · 无模式 · 填同一张表单 · 不自动保存（退出后你点「记录」存）。
+  <b>配色</b>对齐 app_palette.dart（樱粉 #D98CA0 / 录音红 #E5484D→#C93040 / joyLight #FBEAEF）；图标为线条描边。
+  <br><b>实现提示：</b>① 长条 onTap 开弹窗；② <code>VoicePttSessionMixin</code> 在 startSession 前<b>对表单取快照</b>（amount/category/merchant/date/satisfaction/foreign），
+  speech final 结果实时 batch-fill（自动更新账目）；③ 轻点弹窗 = 停止聆听并关闭（保留已填内容）；④ 重置 = 还原到快照 + 清空转写 + 继续聆听；
+  ⑤ 关闭时停止录音、释放识别资源；保留锁屏/超时取消。
+  <br><b>提示：</b>亮色稿；左机点长条开弹窗，右机轻点弹窗退出 / 点重置。
+</div>
+
+<script>
+  document.querySelectorAll('[data-wave]').forEach(w=>{
+    const hs=[12,20,30,40,34,24,32,42,36,26,18,28,38,30,20,12,22,34,28,16];
+    w.innerHTML = hs.map((h,i)=>`<i style="height:${h}px;animation-delay:${i*0.05}s"></i>`).join('');
+  });
+</script>
+</body>
+</html>
