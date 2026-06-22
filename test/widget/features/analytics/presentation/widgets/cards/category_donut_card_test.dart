@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/analytics/domain/models/joy_category_amount.dart';
 import 'package:home_pocket/features/analytics/domain/models/member_spend_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
@@ -8,6 +9,8 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_donu
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/category_drill_down_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_drawer.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_stacked_bar.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
@@ -384,6 +387,190 @@ void main() {
     );
     expect(
       find.descendant(of: find.byType(ListTile), matching: find.text('Shean')),
+      findsOneWidget,
+    );
+  });
+
+  // ── 260622-d5i / D1: borderless drawer + divider + ♡悦び chip + count + total ─
+  testWidgets('D1: category-dim joy drawer is borderless (no Border.all on the '
+      'drawer) and shows the ♡悦び chip + count + ¥total', (tester) async {
+    await _pump(
+      tester,
+      createLocalizedWidget(
+        Scaffold(
+          body: SingleChildScrollView(
+            child: CategoryDonutCard(
+              bookId: _bookId,
+              startDate: _start,
+              endDate: _end,
+              joyMetricVariant: JoyMetricVariant.all,
+            ),
+          ),
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('en'),
+          ),
+          monthlyReportProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith((_) async => _report(_breakdowns)),
+          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          // Category-dim drawer watches joyCategoryAmounts with deviceId: null.
+          joyCategoryAmountsProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith(
+            (_) async => const [
+              JoyCategoryAmount(categoryId: 'cat_hobbies', amount: 8000),
+              JoyCategoryAmount(categoryId: 'cat_food', amount: 2000),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    final drawer = find.byType(JoySpendDrawer);
+    expect(drawer, findsOneWidget);
+
+    // The ♡悦び chip uses the localized joy-spend header label (en "Joy spend").
+    expect(
+      find.descendant(of: drawer, matching: find.text('Joy spend')),
+      findsOneWidget,
+    );
+    // The chip carries a heart glyph (Icons.favorite_border).
+    expect(
+      find.descendant(of: drawer, matching: find.byIcon(Icons.favorite_border)),
+      findsOneWidget,
+    );
+    // Category count "2 categories" + ¥total 10,000 on the label row.
+    expect(
+      find.descendant(of: drawer, matching: find.textContaining('2 categories')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: drawer, matching: find.textContaining('10,000')),
+      findsWidgets,
+    );
+
+    // D1: a 1px divider (palette.borderDivider colored, height 1) separates the
+    // 悦己 part from the donut/legend above. The old pink-bordered outer drawer
+    // Container (rounded-18 BoxDecoration with a border) is gone — assert no
+    // drawer-level Container carries BOTH a border AND a >=18 border radius
+    // (that was the deleted pink box; the joybar's own thin bar border has a
+    // 9px radius and is part of the bar, not the drawer chrome).
+    final drawerContainers = tester.widgetList<Container>(
+      find.descendant(of: drawer, matching: find.byType(Container)),
+    );
+    final hasPinkBox = drawerContainers.any((c) {
+      final deco = c.decoration;
+      if (deco is! BoxDecoration || deco.border == null) return false;
+      final radius = deco.borderRadius;
+      return radius is BorderRadius && radius.topLeft.x >= 18;
+    });
+    expect(hasPinkBox, isFalse);
+
+    // The divider Container (height 1) is present in the drawer.
+    final hasDivider = drawerContainers.any(
+      (c) => c.constraints?.maxHeight == 1,
+    );
+    expect(hasDivider, isTrue);
+  });
+
+  // ── 260622-d5i / D3: member dimension splits 悦己 by member ───────────────────
+  testWidgets('D3: member dimension renders by-member joy segments via '
+      'JoySpendStackedBar with member-labeled segments', (tester) async {
+    const devA = 'dev-a';
+    const devB = 'dev-b';
+
+    await _pump(
+      tester,
+      createLocalizedWidget(
+        Scaffold(
+          body: SingleChildScrollView(
+            child: CategoryDonutCard(
+              bookId: _bookId,
+              startDate: _start,
+              endDate: _end,
+              joyMetricVariant: JoyMetricVariant.all,
+            ),
+          ),
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('en'),
+          ),
+          monthlyReportProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith((_) async => _report(_breakdowns)),
+          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          activeGroupMembersProvider.overrideWith(
+            (_) => Stream.value(const <GroupMember>[]),
+          ),
+          memberSpendBreakdownProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith(
+            (_) async => const [
+              MemberSpendBreakdown(
+                deviceId: devA,
+                amount: 30000,
+                transactionCount: 3,
+              ),
+              MemberSpendBreakdown(
+                deviceId: devB,
+                amount: 10000,
+                transactionCount: 1,
+              ),
+            ],
+          ),
+          // The nested 悦己 drawer's 成员 branch reads joyMemberAmounts.
+          joyMemberAmountsProvider(
+            bookId: _bookId,
+            startDate: _start,
+            endDate: _end,
+          ).overrideWith(
+            (_) async => const [
+              MemberSpendBreakdown(
+                deviceId: devA,
+                amount: 9000,
+                transactionCount: 2,
+              ),
+              MemberSpendBreakdown(
+                deviceId: devB,
+                amount: 3000,
+                transactionCount: 1,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // Switch to the member dimension.
+    await tester.tap(find.byKey(const ValueKey('donut_dim_member')));
+    await tester.pumpAndSettle();
+
+    final drawer = find.byType(JoySpendDrawer);
+    // The member-dim joy bar renders via JoySpendStackedBar with person icons.
+    expect(
+      find.descendant(of: drawer, matching: find.byType(JoySpendStackedBar)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: drawer, matching: find.byIcon(Icons.person_outline)),
+      findsWidgets,
+    );
+    // The member-mode count label ("2 members").
+    expect(
+      find.descendant(of: drawer, matching: find.textContaining('2 members')),
       findsOneWidget,
     );
   });

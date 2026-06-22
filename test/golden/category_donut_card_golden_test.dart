@@ -213,6 +213,24 @@ Widget _wrapMember({
         endDate: _endDate,
         joyMetricVariant: JoyMetricVariant.all,
       ).overrideWith((_) async => breakdown),
+      // 260622-d5i / D3: the nested 悦己 drawer's 成员 dimension reads the
+      // joy-by-member breakdown — override it so the by-member joy bar renders
+      // with data (a strict subset of the member spend, half here for contrast).
+      joyMemberAmountsProvider(
+        bookId: _bookId,
+        startDate: _startDate,
+        endDate: _endDate,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith(
+        (_) async => [
+          for (final m in breakdown)
+            MemberSpendBreakdown(
+              deviceId: m.deviceId,
+              amount: (m.amount / 2).round(),
+              transactionCount: m.transactionCount,
+            ),
+        ],
+      ),
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,

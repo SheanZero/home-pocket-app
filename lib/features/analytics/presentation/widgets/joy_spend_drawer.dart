@@ -110,15 +110,21 @@ class JoySpendDrawer extends ConsumerWidget {
                 children: [
                   _JoyChip(palette: palette, label: l10n.analyticsJoySpendHeaderLabel),
                   const SizedBox(width: 7),
-                  Text(
-                    countText,
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: palette.joyText,
+                  // Count takes the remaining space (left-aligned) so the ¥total
+                  // stays pinned to the row end; ellipsizes if cramped.
+                  Expanded(
+                    child: Text(
+                      countText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: palette.joyText,
+                      ),
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
                     NumberFormatter.formatCurrency(total, 'JPY', locale),
                     style: AppTextStyles.amountSmall.copyWith(
