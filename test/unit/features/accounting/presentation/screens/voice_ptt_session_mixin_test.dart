@@ -49,6 +49,7 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   var stopped = false;
   var canceled = false;
   var startCount = 0;
+  var initializeCount = 0;
 
   @override
   Future<bool> initialize({
@@ -57,6 +58,7 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   }) async {
     this.onStatus = onStatus;
     this.onError = onError;
+    initializeCount++;
     return true;
   }
 
@@ -110,6 +112,11 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   void emitTerminalStatus() => onStatus!('done');
 
   void emitStatus(String status) => onStatus!(status);
+
+  /// Simulate the platform recognizer reporting an error. On iOS a no-match
+  /// (silence) is reported `permanent: true`; that is the BUG 1 trigger.
+  void emitError(String errorMsg, {bool permanent = false}) =>
+      onError!(errorMsg, permanent);
 }
 
 class FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
@@ -892,6 +899,202 @@ void main() {
       expect(count, 1,
           reason: 'final result must parse once (deduped), not twice');
       expect(find.text('スタバ'), findsOneWidget);
+    },
+  );
+
+  // ── R5 BUG 1: continuous-session onError — swallow transient no-match ───────
+
+  testWidgets(
+    'R5 BUG 1: a transient no-match (iOS permanent:true) during a continuous '
+    'session does NOT toast and does NOT lock the bar',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(host.pttServiceInitialized, isTrue);
+
+      final startsBefore = speech.startCount;
+      // iOS reports error_no_match as permanent:true — the base handler would
+      // flip isInitialized=false (locking the bar) + toast. The continuous
+      // override must swallow it as normal silence.
+      speech.emitError('error_no_match', permanent: true);
+      await tester.pumpAndSettle();
+
+      // No toast surfaced.
+      expect(find.text('音声を認識できませんでした。もう一度お試しください'), findsNothing,
+          reason: 'a silence no-match must not toast in hands-free mode');
+      // Bar stays usable — the guard `pttServiceInitialized && !pttIsRecording`
+      // is what the tap path checks; isInitialized must NOT flip false.
+      expect(host.pttServiceInitialized, isTrue,
+          reason: 'transient error must not lock the bar');
+      // The session keeps listening (re-armed via the serialized restart).
+      expect(host.pttIsRecording, isTrue,
+          reason: 'a transient no-match keeps the continuous session listening');
+      expect(speech.startCount, greaterThan(startsBefore),
+          reason: 'the recognizer was re-armed to keep listening');
+    },
+  );
+
+  testWidgets(
+    'R5 BUG 1: a transient speech-timeout during a continuous session is '
+    'swallowed (no toast, no lock, keeps listening)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitError('error_speech_timeout', permanent: true);
+      await tester.pumpAndSettle();
+
+      expect(find.text('音声認識でエラーが発生しました'), findsNothing);
+      expect(host.pttServiceInitialized, isTrue);
+      expect(host.pttIsRecording, isTrue);
+    },
+  );
+
+  testWidgets(
+    'R5 BUG 1: a FATAL error during a continuous session tears down cleanly '
+    'AND recovers the bar (re-initializes so the next tap works)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      final initBefore = speech.initializeCount;
+
+      // A fatal (audio/permission/client/network) error.
+      speech.emitError('error_audio', permanent: true);
+      await tester.pumpAndSettle();
+
+      // Clean teardown.
+      expect(host.pttContinuousActive, isFalse,
+          reason: 'a fatal error ends the continuous session');
+      expect(host.pttIsRecording, isFalse,
+          reason: 'a fatal error stops recording');
+      expect(host.pttListenStatus, PttListenStatus.stopped,
+          reason: 'status reflects the stopped recognizer');
+      // The user IS told (fatal errors toast).
+      expect(find.text('マイクの音声を取得できませんでした'), findsOneWidget,
+          reason: 'a fatal error surfaces a toast');
+      // The bar recovers — guard passes for the next tap (re-initialized so the
+      // next 「语音记录」 tap works without an app restart).
+      expect(host.pttServiceInitialized, isTrue,
+          reason: 'the bar must be re-enabled after a fatal error');
+      expect(speech.initializeCount, greaterThan(initBefore),
+          reason: 'the service was re-initialized to recover the bar');
+      expect(host.pttCanStart, isTrue,
+          reason: 'a new tap can re-enter after a fatal error');
+    },
+  );
+
+  testWidgets(
+    'R5 BUG 1: the hold path (NOT continuous) keeps the legacy base onError '
+    'behavior — toast + isInitialized flip',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.onPttHoldStart(); // legacy hold path — _continuousActive stays false
+      await tester.pump();
+      expect(host.pttContinuousActive, isFalse);
+
+      speech.emitError('error_no_match', permanent: true);
+      await tester.pumpAndSettle();
+
+      // Legacy behavior preserved: base onError toasts + flips isInitialized.
+      expect(find.text('音声を認識できませんでした。もう一度お試しください'), findsOneWidget,
+          reason: 'the hold path keeps the legacy toast (super.onError)');
+      expect(host.pttServiceInitialized, isFalse,
+          reason: 'the hold path keeps the legacy permanent isInitialized flip');
+      expect(host.pttIsRecording, isFalse);
+    },
+  );
+
+  // ── R5 BUG 2: status synced to stopped on the error path ───────────────────
+
+  testWidgets(
+    'R5 BUG 2: pttListenStatus is stopped after a fatal error (never stuck '
+    'on listening)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(host.pttListenStatus, PttListenStatus.listening);
+
+      speech.emitError('error_client', permanent: true);
+      await tester.pumpAndSettle();
+
+      expect(host.pttListenStatus, PttListenStatus.stopped,
+          reason: 'the panel must not show 正在聆听 after the recognizer stopped');
+    },
+  );
+
+  testWidgets(
+    'R5 BUG 2: a transient no-match keeps the status sensible (listening) '
+    'while re-arming — never stuck',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitError('error_no_match', permanent: true);
+      await tester.pumpAndSettle();
+
+      // Still listening (re-armed) — sensible status, not stopped, not stuck.
+      expect(host.pttListenStatus, PttListenStatus.listening,
+          reason: 'a swallowed transient keeps the session in listening');
+      expect(host.pttIsRecording, isTrue);
     },
   );
 }
