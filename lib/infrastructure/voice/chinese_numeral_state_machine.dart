@@ -74,9 +74,32 @@ class ChineseNumeralStateMachine extends NumeralStateMachine {
   @override
   List<NumeralToken> normalize(String text) {
     final tokens = <NumeralToken>[];
+    // 260622-nhs R6 (BUG 2): buffer consecutive Arabic digits so a multi-digit
+    // run like "99999" or the "304" tail of 「2千304」 reads as ONE positional
+    // Digit(99999) / Digit(304) instead of the scanner overwriting digit on
+    // each rune and keeping only the last (the 「99999→9」 / 「2千304→2004」
+    // regression). A non-Arabic rune (unit, kanji digit, or any dropped char)
+    // flushes the run — so a stray kanji 一 (in 一共) separated from "99999" by
+    // text does NOT merge into it, and comma grouping (handled at the parser
+    // layer) is unaffected.
+    final arabicRun = StringBuffer();
+    void flushArabicRun() {
+      if (arabicRun.isEmpty) return;
+      tokens.add(Digit(int.parse(arabicRun.toString())));
+      arabicRun.clear();
+    }
+
     // Chinese kanji are all in the BMP; runes iteration is grapheme-safe here.
     for (final rune in text.runes) {
       final ch = String.fromCharCode(rune);
+      if (RegExp(r'^[0-9]$').hasMatch(ch)) {
+        // Step 4: arabic digit — accumulate the run; flush on the next
+        // non-Arabic rune. Mixed "2千" inputs still tokenize per D-07 because
+        // the 千 below flushes the leading "2" first.
+        arabicRun.write(ch);
+        continue;
+      }
+      flushArabicRun();
       // Step 1: explicit ZeroPlaceholder dispatch — MUST precede _kanjiDigits lookup
       if (ch == '零' || ch == '〇') {
         tokens.add(const ZeroPlaceholder());
@@ -86,9 +109,6 @@ class ChineseNumeralStateMachine extends NumeralStateMachine {
       } else if (_kanjiUnits.containsKey(ch)) {
         // Step 3: positional unit
         tokens.add(Unit(_kanjiUnits[ch]!));
-      } else if (RegExp(r'^[0-9]$').hasMatch(ch)) {
-        // Step 4: arabic digit fallback (handles mixed "2千" inputs per D-07)
-        tokens.add(Digit(int.parse(ch)));
       }
       // Step 5: everything else silently dropped — _skipPattern chars and
       // any random text that the speech recognizer may have emitted.
@@ -100,6 +120,7 @@ class ChineseNumeralStateMachine extends NumeralStateMachine {
       // longest-first scan over [VoiceCurrencySuffixes.all]; the use-case layer
       // then maps the token → ISO (bare 元 → CNY in zh locale per D-08 locked).
     }
+    flushArabicRun();
     return tokens;
   }
 }

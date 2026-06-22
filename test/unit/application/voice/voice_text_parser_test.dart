@@ -98,6 +98,50 @@ void main() {
     });
   });
 
+  // ── 260622-nhs R6 BUG 2: multi-digit Arabic amount must NOT collapse to the
+  //    last digit when a stray kanji-numeral (e.g. 一 in 一共) trips the hint. ──
+  group('260622-nhs R6 BUG 2: multi-digit Arabic amount', () {
+    late VoiceTextParser p;
+    setUp(() => p = VoiceTextParser());
+
+    test('zh: 今天买手机，一共用了99999日元 → 99999 (not 9)', () {
+      // 一 (in 一共) trips _numeralHintPattern → the zh state machine used to
+      // overwrite each bare Arabic digit and return 9. The scanner must now
+      // accumulate the adjacent run "99999" positionally.
+      expect(
+        p.extractAmount('今天买手机，一共用了99999日元', localeId: 'zh-CN'),
+        99999,
+      );
+    });
+
+    test('zh: comma-grouped 今天买手机，一共用了99,999日元 → 99999 (not 9)', () {
+      // The comma-grouped form must read the full 99,999 — the Arabic regex is
+      // authoritative for comma-grouped numbers even when 一 trips the hint.
+      expect(
+        p.extractAmount('今天买手机，一共用了99,999日元', localeId: 'zh-CN'),
+        99999,
+      );
+    });
+
+    test('zh: bare 99999日元 still → 99999 (no regression)', () {
+      expect(p.extractAmount('99999日元', localeId: 'zh-CN'), 99999);
+    });
+
+    test('zh: mixed 2千304元 → 2304 (adjacent run accumulates)', () {
+      // The trailing Arabic run after a kanji unit must accumulate as 304 so the
+      // full reading is 2千 + 304 = 2304 (was 2004 — last-digit-only bug).
+      expect(p.extractAmount('2千304元', localeId: 'zh-CN'), 2304);
+    });
+
+    test('ja: 携帯を買って99999円 → 99999', () {
+      expect(p.extractAmount('携帯を買って99999円', localeId: 'ja-JP'), 99999);
+    });
+
+    test('ja: comma-grouped 99,999円 → 99999', () {
+      expect(p.extractAmount('99,999円', localeId: 'ja-JP'), 99999);
+    });
+  });
+
   group('VoiceTextParser - Date extraction: relative keywords', () {
     test('extracts 昨日 (Japanese yesterday)', () {
       final result = parser.extractDate('昨日マクドナルドで680円');

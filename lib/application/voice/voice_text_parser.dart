@@ -42,7 +42,23 @@ class VoiceTextParser {
   ///    — the arabic regex would otherwise short-circuit on `304元`).
   /// 2. Otherwise, try the arabic regex (「680円」「¥1280」「1,280」).
   /// 3. As a last resort, fall through to the other path.
+  /// 260622-nhs R6 (BUG 2): a comma-grouped Arabic number (e.g. 「99,999」,
+  /// 「1,234,567」, full-width 「12，450」). The state-machine scanner drops the
+  /// comma and splits the run into two Digits — keeping only the trailing group
+  /// (99,999 → 999). The Arabic regex parses comma grouping correctly, so when a
+  /// comma-grouped number is present it is AUTHORITATIVE over the state machine.
+  static final _commaGroupedPattern = RegExp(r'\d[,，]\d');
+
   int? extractAmount(String text, {String? localeId}) {
+    // 260622-nhs R6 (BUG 2): a comma-grouped Arabic amount is unambiguous and
+    // the scanner cannot read it (it drops the comma and keeps only the last
+    // group). Prefer the Arabic regex when one is present, even if a stray kanji
+    // numeral (e.g. 一 in 一共) would otherwise trip the state-machine hint.
+    if (_commaGroupedPattern.hasMatch(text)) {
+      final fromArabic = _extractArabicAmount(text);
+      if (fromArabic != null) return fromArabic;
+    }
+
     final hasNumeralHint = _numeralHintPattern.hasMatch(text);
 
     // Mixed kanji+arabic strings (e.g. 「2千304元」) must NOT fall through to

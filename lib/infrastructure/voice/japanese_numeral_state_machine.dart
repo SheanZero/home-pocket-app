@@ -89,10 +89,33 @@ class JapaneseNumeralStateMachine extends NumeralStateMachine {
   @override
   List<NumeralToken> normalize(String text) {
     final tokens = <NumeralToken>[];
+    // 260622-nhs R6 (BUG 2): buffer consecutive Arabic digits into ONE
+    // multi-digit Digit so a run like "99999" reads positionally instead of the
+    // scanner overwriting digit on each rune and keeping only the last. Mirrors
+    // the zh machine. A dictionary hit, kanji digit/unit, or any non-Arabic char
+    // flushes the run, so a stray kanji numeral separated by text never merges
+    // into the Arabic amount.
+    final arabicRun = StringBuffer();
+    void flushArabicRun() {
+      if (arabicRun.isEmpty) return;
+      tokens.add(Digit(int.parse(arabicRun.toString())));
+      arabicRun.clear();
+    }
+
     var i = 0;
     while (i < text.length) {
       NumeralToken? matched;
       int? matchLen;
+
+      // Arabic-digit accumulation takes precedence over the dictionary so a bare
+      // digit run is never split by a single-char dictionary entry.
+      final ch0 = text[i];
+      if (RegExp(r'^[0-9]$').hasMatch(ch0)) {
+        arabicRun.write(ch0);
+        i += 1;
+        continue;
+      }
+      flushArabicRun();
 
       // Step 1: Greedy longest-match against dictionary
       for (final key in _sortedKeys) {
@@ -104,13 +127,10 @@ class JapaneseNumeralStateMachine extends NumeralStateMachine {
         }
       }
 
-      // Step 2: Character-level fallback — arabic / kanji digit / kanji unit / skip
+      // Step 2: Character-level fallback — kanji digit / kanji unit / skip
       if (matched == null) {
         final ch = text[i];
-        if (RegExp(r'^[0-9]$').hasMatch(ch)) {
-          matched = Digit(int.parse(ch));
-          matchLen = 1;
-        } else if (_kanjiDigits.containsKey(ch)) {
+        if (_kanjiDigits.containsKey(ch)) {
           matched = Digit(_kanjiDigits[ch]!);
           matchLen = 1;
         } else if (_kanjiUnits.containsKey(ch)) {
@@ -132,6 +152,7 @@ class JapaneseNumeralStateMachine extends NumeralStateMachine {
       }
       i += matchLen!;
     }
+    flushArabicRun();
     return tokens;
   }
 }
