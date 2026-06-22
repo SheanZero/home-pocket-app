@@ -24,7 +24,8 @@ import 'package:home_pocket/features/accounting/presentation/widgets/amount_disp
 import 'package:home_pocket/features/accounting/presentation/widgets/hold_to_talk_bar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_toolbar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/voice_listening_overlay.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/voice_listening_overlay.dart'
+    show VoiceRecordPanel;
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart'
     show voiceLocaleIdProvider;
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -1139,7 +1140,8 @@ void main() {
     });
 
     testWidgets(
-      'tap → modal shown; speak → auto-fill; tap-exit → modal gone, content kept, stays on page',
+      'R3: tap → panel replaces keypad in place; speak → auto-fill; tap-exit → '
+      'keypad back, content kept, stays on page',
       (tester) async {
         tall(tester);
         final speech = _CapturingSpeechService();
@@ -1161,14 +1163,18 @@ void main() {
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        // Tap the bar → the listening modal rises (免持聆听).
+        // Tap the bar → the inline panel REPLACES the keypad in place. No scrim,
+        // no overlay; the keypad is gone while the panel shows.
         await tester.tap(micBarFinder);
         await tester.pump();
         await tester.pump();
-        expect(find.byType(VoiceListeningModal), findsOneWidget,
-            reason: 'tapping the bar must raise the auto-fill listening modal');
+        expect(find.byType(VoiceRecordPanel), findsOneWidget,
+            reason: 'tapping the bar swaps the inline voice panel in');
+        expect(find.byType(SmartKeyboard), findsNothing,
+            reason: 'R3: the panel replaces the keypad in the same footprint');
 
-        // A speech-final result AUTO-fills the form (no release needed).
+        // A speech-final result AUTO-fills the form (no release needed). The
+        // form above stays visible (no scrim dimming it).
         speech.emitFinal('1千8百4十元 星巴克');
         await tester.pump();
         await tester.pump();
@@ -1176,13 +1182,16 @@ void main() {
         expect(find.text('星巴克'), findsOneWidget,
             reason: 'auto-fill writes the merchant into the same form');
 
-        // Tap the modal body (the listening title) to exit — content kept.
-        final modalL10n = S.of(tester.element(find.byType(VoiceListeningModal)));
-        await tester.tap(find.text(modalL10n.listeningTitle));
+        // Tap the panel body (the listening title) to exit — content kept.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.listeningTitle));
+        await tester.pump();
         await tester.pump();
 
-        expect(find.byType(VoiceListeningModal), findsNothing,
-            reason: 'tap-exit closes the modal');
+        expect(find.byType(VoiceRecordPanel), findsNothing,
+            reason: 'tap-exit dismisses the panel');
+        expect(find.byType(SmartKeyboard), findsOneWidget,
+            reason: 'the keypad returns after exit');
         expect(find.text('星巴克'), findsOneWidget,
             reason: 'filled content is kept after exit');
         expect(find.byKey(const ValueKey('manual-one-step-screen')),
@@ -1224,9 +1233,9 @@ void main() {
         speech.emitFinal('ラテ 1千');
         await tester.pump();
         await tester.pump();
-        // Exit the modal (tap the listening title) — content kept.
-        final modalL10n = S.of(tester.element(find.byType(VoiceListeningModal)));
-        await tester.tap(find.text(modalL10n.listeningTitle));
+        // Exit the panel (tap the listening title) — content kept.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.listeningTitle));
         await tester.pumpAndSettle();
 
         // Save via the SmartKeyboard Record key.
@@ -1317,16 +1326,16 @@ void main() {
         expect(find.text('星巴克'), findsOneWidget);
 
         // Tap 「重置」 → the form rolls back to the empty pre-speech snapshot
-        // (merchant 星巴克 gone) and the modal STAYS open (keeps listening).
-        final modalL10n = S.of(tester.element(find.byType(VoiceListeningModal)));
-        await tester.tap(find.text(modalL10n.voiceResetRestore));
+        // (merchant 星巴克 gone) and the panel STAYS shown (keeps listening).
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.voiceResetRestore));
         await tester.pump();
         await tester.pump();
 
         expect(find.text('星巴克'), findsNothing,
             reason: '重置 restores the pre-speech (empty) merchant');
-        expect(find.byType(VoiceListeningModal), findsOneWidget,
-            reason: '重置 keeps the modal open / keeps listening');
+        expect(find.byType(VoiceRecordPanel), findsOneWidget,
+            reason: '重置 keeps the panel shown / keeps listening');
         expect(speech.canceled, isFalse,
             reason: '重置 must not cancel the recognizer');
       },

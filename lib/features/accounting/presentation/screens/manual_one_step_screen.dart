@@ -27,7 +27,7 @@ import '../../../../shared/widgets/feedback_toast.dart';
 import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
 import '../widgets/transaction_details_form.dart';
-import '../widgets/voice_listening_overlay.dart';
+import '../widgets/voice_listening_overlay.dart' show VoiceRecordPanel;
 import 'manual_one_step_foreign_card.dart';
 import 'manual_one_step_snapshot.dart';
 import 'voice_locale_readiness_mixin.dart';
@@ -939,7 +939,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
               ),
 
               // D-05: SmartKeyboard slides off-screen when a TextField is
-              // focused. 260622-nhs R2: the 「语音记录」 strip sits ABOVE the keypad.
+              // focused. 260622-nhs R3 (BUG 3): the bottom slot swaps IN PLACE —
+              // while recording (`pttIsRecording`) the inline VoiceRecordPanel
+              // occupies the keypad's footprint (no scrim, no overlay; the form
+              // above stays fully visible and keeps auto-filling). Otherwise it
+              // shows the slim 「语音记录」 strip + SmartKeyboard. The swap keeps the
+              // form above stable — no reflow/jump.
               //
               // R3 (BUG 1): the R2 bottom SafeArea doubled the keypad's own 24dp
               // bottom padding (≈ +34dp on notched devices). The SmartKeyboard's
@@ -949,46 +954,42 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                 offset: Offset(0, _showSmartKeypad ? 0 : 1),
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeInOut,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
-                    // auto-fill listening modal. Above the keypad; hidden with
-                    // the keypad when a TextField is focused.
-                    if (_showSmartKeypad)
-                      VoiceRecordBar(onTap: _onVoiceRecordTap),
-                    SmartKeyboard(
-                      onDigit: _onDigit,
-                      onDoubleZero: _onDoubleZero,
-                      // D-06: gate the dot key on the active currency's minor
-                      // unit. 0-decimal currencies (JPY/KRW) pass null →
-                      // disabled blank tile; JPY keeps onDot:null as before.
-                      onDot: _controller.decimals > 0 ? _onDot : null,
-                      onDelete: _onDelete,
-                      // P19-W1: route through _trySave for category-null guard.
-                      onNext: _trySave,
-                      actionLabel: l10n.record,
-                      currencyLabel: _currency,
-                      currencySymbol: currencySymbol,
-                      // CURR-01: open the currency selector sheet.
-                      onCurrencyTap: _onCurrencyTap,
-                    ),
-                  ],
-                ),
+                child: pttIsRecording
+                    ? VoiceRecordPanel(
+                        transcript: pttTranscript,
+                        soundLevel: pttSoundLevel,
+                        onExit: _onVoiceModalExit,
+                        onReset: _onVoiceReset,
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
+                          // inline auto-fill panel. Above the keypad; hidden with
+                          // the keypad when a TextField is focused.
+                          if (_showSmartKeypad)
+                            VoiceRecordBar(onTap: _onVoiceRecordTap),
+                          SmartKeyboard(
+                            onDigit: _onDigit,
+                            onDoubleZero: _onDoubleZero,
+                            // D-06: gate the dot key on the active currency's
+                            // minor unit. 0-decimal currencies (JPY/KRW) pass
+                            // null → disabled blank tile; JPY keeps onDot:null.
+                            onDot: _controller.decimals > 0 ? _onDot : null,
+                            onDelete: _onDelete,
+                            // P19-W1: route through _trySave for category guard.
+                            onNext: _trySave,
+                            actionLabel: l10n.record,
+                            currencyLabel: _currency,
+                            currencySymbol: currencySymbol,
+                            // CURR-01: open the currency selector sheet.
+                            onCurrencyTap: _onCurrencyTap,
+                          ),
+                        ],
+                      ),
               ),
             ],
           ),
-
-          // 260622-nhs R2: auto-fill listening modal. Tap the modal/scrim =
-          // exit (keep filled content, stay on page); 「重置」 = restore the
-          // pre-speech snapshot + keep listening.
-          if (pttIsRecording)
-            VoiceListeningModal(
-              transcript: pttTranscript,
-              soundLevel: pttSoundLevel,
-              onExit: _onVoiceModalExit,
-              onReset: _onVoiceReset,
-            ),
 
           // D-11/D-13: floating KeyboardToolbar rides on top of soft keyboard.
           // Only visible when a TextField is focused.
