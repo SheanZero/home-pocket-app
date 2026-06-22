@@ -1653,6 +1653,24 @@ abstract class S {
   /// **'Recording…'**
   String get recording;
 
+  /// Push-to-talk bar label below the keypad on the entry screen
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to talk'**
+  String get holdToTalkBar;
+
+  /// Listening overlay title shown while the user holds the talk bar
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get listeningTitle;
+
+  /// Listening overlay hint: release to auto-fill the form
+  ///
+  /// In en, this message translates to:
+  /// **'Release to fill the form'**
+  String get releaseToFill;
+
   /// Today date chip label
   ///
   /// In en, this message translates to:

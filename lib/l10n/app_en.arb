@@ -1082,6 +1082,18 @@
   "@recording": {
     "description": "Voice recording-state caption"
   },
+  "holdToTalkBar": "Hold to talk",
+  "@holdToTalkBar": {
+    "description": "Push-to-talk bar label below the keypad on the entry screen"
+  },
+  "listeningTitle": "Listening…",
+  "@listeningTitle": {
+    "description": "Listening overlay title shown while the user holds the talk bar"
+  },
+  "releaseToFill": "Release to fill the form",
+  "@releaseToFill": {
+    "description": "Listening overlay hint: release to auto-fill the form"
+  },
   "todayDate": "Today",
   "@todayDate": {
     "description": "Today date chip label"

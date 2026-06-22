@@ -1082,6 +1082,18 @@
   "@recording": {
     "description": "Voice recording-state caption"
   },
+  "holdToTalkBar": "按住说话",
+  "@holdToTalkBar": {
+    "description": "Push-to-talk bar label below the keypad on the entry screen"
+  },
+  "listeningTitle": "正在聆听…",
+  "@listeningTitle": {
+    "description": "Listening overlay title shown while the user holds the talk bar"
+  },
+  "releaseToFill": "松开后自动填入表单",
+  "@releaseToFill": {
+    "description": "Listening overlay hint: release to auto-fill the form"
+  },
   "todayDate": "今天",
   "@todayDate": {
     "description": "Today date chip label"

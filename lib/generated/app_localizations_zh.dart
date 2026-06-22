@@ -824,6 +824,15 @@ class SZh extends S {
   String get recording => '录音中…';
 
   @override
+  String get holdToTalkBar => '按住说话';
+
+  @override
+  String get listeningTitle => '正在聆听…';
+
+  @override
+  String get releaseToFill => '松开后自动填入表单';
+
+  @override
   String get todayDate => '今天';
 
   @override
