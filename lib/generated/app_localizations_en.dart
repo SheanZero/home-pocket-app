@@ -1580,6 +1580,11 @@ class SEn extends S {
   }
 
   @override
+  String analyticsJoyDrawerMemberCount(int count) {
+    return '$count members';
+  }
+
+  @override
   String get analyticsCalLegendLow => 'Light';
 
   @override

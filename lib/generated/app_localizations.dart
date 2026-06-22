@@ -2951,6 +2951,12 @@ abstract class S {
   /// **'{count} categories'**
   String analyticsJoyDrawerCount(int count);
 
+  /// Joy drawer member-count badge (descriptive count of members in the 成员 dimension)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String analyticsJoyDrawerMemberCount(int count);
+
   /// Calendar heat legend low-end label (lighter = fewer joy entries that day)
   ///
   /// In en, this message translates to:

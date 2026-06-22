@@ -1546,6 +1546,11 @@ class SZh extends S {
   }
 
   @override
+  String analyticsJoyDrawerMemberCount(int count) {
+    return '$count 名成员';
+  }
+
+  @override
   String get analyticsCalLegendLow => '淡';
 
   @override

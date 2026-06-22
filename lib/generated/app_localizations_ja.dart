@@ -1553,6 +1553,11 @@ class SJa extends S {
   }
 
   @override
+  String analyticsJoyDrawerMemberCount(int count) {
+    return '$count メンバー';
+  }
+
+  @override
   String get analyticsCalLegendLow => '淡';
 
   @override

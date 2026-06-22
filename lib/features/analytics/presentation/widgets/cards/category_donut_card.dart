@@ -115,13 +115,17 @@ class CategoryDonutCard extends ConsumerWidget {
           // card-level child here — it is injected into DonutHero (between the
           // donut and the legend) via `controls:` so it renders BELOW the donut.
           hero,
-          // round-5 r5 §2b (D2): the 悦己 joybar is nested INSIDE the donut hero
-          // behind a connector chip + pink drawer (no longer a top-level card).
+          // round-5 r5 §2b (D2) → 260622-d5i (D1/D2/D3): the 悦己 joybar is nested
+          // INSIDE the donut hero, borderless + divider-separated, dimension-aware
+          // and member-filtered. The drawer reads the same donutView the card does.
           JoySpendDrawer(
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
             joyMetricVariant: joyMetricVariant,
+            donutView: donutView,
+            memberNames: memberNames,
+            memberEmojis: memberEmojis,
           ),
         ],
       ),
@@ -294,6 +298,15 @@ List<ProviderBase<Object?>> categoryDonutRefreshTargets(
   // §D2 (260620-v2m): member dimension data — fold into the pull-to-refresh
   // union so the 成员 split refreshes alongside the category path.
   memberSpendBreakdownProvider(
+    bookId: ctx.bookId,
+    startDate: ctx.startDate,
+    endDate: ctx.endDate,
+    joyMetricVariant: ctx.joyMetricVariant,
+  ),
+  // 260622-d5i / D3: the 悦己 by-member joy split (UNFILTERED key — book/start/
+  // end/variant, no deviceId concept here) so pull-to-refresh covers the
+  // member-dim joy path too.
+  joyMemberAmountsProvider(
     bookId: ctx.bookId,
     startDate: ctx.startDate,
     endDate: ctx.endDate,

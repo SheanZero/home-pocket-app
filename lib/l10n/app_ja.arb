@@ -2014,6 +2014,15 @@
       }
     }
   },
+  "analyticsJoyDrawerMemberCount": "{count} メンバー",
+  "@analyticsJoyDrawerMemberCount": {
+    "description": "Joy drawer member-count badge (descriptive count of members in the 成员 dimension)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsCalLegendLow": "淡",
   "@analyticsCalLegendLow": {
     "description": "Calendar heat legend low-end label (lighter = fewer joy entries that day)"
