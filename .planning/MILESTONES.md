@@ -1,5 +1,37 @@
 # Milestones — Home Pocket
 
+## v1.8 统计页面重设计（实用化 × 悦己情感化） (Shipped: 2026-06-22)
+
+**Shipped:** 2026-06-22
+**Phases:** 43-48 (6 phases, 32 plans) — design gate (43) + reuse-first build (44-46) + verification (47) + post-audit tech-debt cleanup (48)
+**Duration:** 2026-06-15 → 2026-06-22 (git range `v1.7..HEAD` = 255 commits, 428 files, +55,226 / −17,507 LOC — includes post-v1.7 doc churn and the 06-15→06-22 analytics rebuild)
+**Tag:** `v1.8` · schema stays **v21** (no migration) · fl_chart stays **^1.2.0** (no bump)
+**Audit Status at Close:** `tech_debt` — milestone goal achieved (18/18 active requirements satisfied, 2 deliberately descoped at the GATE, 5/5 phases verified passed, 9/9 cross-phase integration flows wired, E2E data→shell→card→i18n complete). Both **code-grade** debt items the audit flagged (member-filter donut pull-to-refresh staleness + stale TREND-01 dartdoc) were closed inline by **Phase 48**; residual is documentation-grade only (Phase 47 draft-Nyquist, SUMMARY frontmatter drift), mirroring the accepted v1.2–v1.7 close precedent. Suite **3090/3090** green, `flutter analyze` 0, coverage 80.48%. See `.planning/milestones/v1.8-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** acknowledged via the pre-close artifact audit — 35 items (34 quick-task metadata-drift/voice-backlog stubs + 1 false-positive UAT flag on Phase 47, which is actually `passed`/0-pending) + Phase 47 draft-Nyquist + SUMMARY frontmatter drift; see `.planning/STATE.md` Deferred Items §v1.8.
+
+### Delivered
+
+The statistics/analytics page was fully overhauled — more practical and emotionally surfacing 悦己 self-spending so users feel good about spending on themselves — under the permanent ADR-012 anti-gamification contract, via a design-gate-first decomposition. **Phase 43** was a hard HTML design gate with no production code: a deep-research map of the current implementation, five HTML directions (M1–M5) each carrying an ADR-012 self-audit, four discussion rounds, and user selection of **round-5 B** (M2-derived), plus GATE-04 decisions (JOY-04 text-persistence NO-GO; an ADR-012 §4 expense-side cross-period carve-out; a locked calm-warm emotional wordlist; an fl_chart 1.2.0 per-chart affordance table). The build (Phases 44–46) was reuse-first: a domain-pure L1-category rollup helper (single source for both the donut transform and the drill subtotal), a within-month per-day cumulative trend, and one read-only category drill path — all over the existing `findByBookIds` primitive with zero new DAO/index/Drift migration (schema stays v21). `analytics_screen.dart` was rebuilt from a 739-LOC monolith into a registry-driven thin shell (176 LOC) + a `widgets/cards/` system with a single-source `_refresh()` union; HomeHero isolation (GUARD-01) holds by construction and by test. The live screen is the **round-5 B flat 5-card lineup**: within-month spend trend (pill tabs; 本月+上月 dual lines on spend, a structurally-single 本月 line on joy — zero cross-period) → category donut hero (count-up center 本月支出, 10 L1 amount-desc legend rows, full-row tap → read-only drill) → 悦己花在哪 custom stacked bar (zero fl_chart) → 小确幸 calendar heatmap (zero fl_chart) → satisfaction histogram (native fl_chart 1.2.0 `BarChartRodData.label`, Stack hack deleted), plus a group-mode `family_insight` conditional card. **Phase 47** validated it: trilingual ARB parity, a 36-case anti-toxicity sweep across all 5 cards × ja/zh/en × states, 48 macOS golden baselines authored from scratch, full suite green, and a 10/10 on-device visual UAT (locale=ja, user-approved). **Phase 48** cleared the two post-audit code-grade tech-debt items. Joy is surfaced entirely descriptively (celebrate-past: already-spent joy amount + 去向 + 满足度 distribution + calendar texture) — never ranking, target, streak, or cross-period.
+
+### Key Accomplishments
+
+1. **Design gate, zero production code (Phase 43)** — a deep-research map of the current `lib/features/analytics/` implementation, five HTML directions (M1–M5) spanning the 实用↔悦己 intensity axis each with an ADR-012 self-audit table, and four discussion rounds → user-selected **round-5 B** (M2-derived). GATE-04 locked the four go/no-go decisions: JOY-04 text-persistence **NO-GO** (no new ADR, stays no-Drift), an ADR-012 §4 **expense-side cross-period carve-out** (joy-side cross-period prohibition stays absolute), the **calm-warm emotional wordlist** (target/目标 scoped analytics-only; HomeHero keeps the only target ring), and an **fl_chart 1.2.0 per-chart affordance table**. Gate-exit no-Dart condition verified EMPTY.
+2. **Reuse-first data layer (Phase 44)** — a domain-pure **L1-category rollup helper** (`l1AncestorOf` + `L1CategoryRollup`, the single source for both the OVW-01 donut transform and the DRILL-01 subtotal — donut can never drift from drill), a **within-month per-day cumulative trend** (replacing the deleted 6-month `MonthlyTrend`/BarChart stack), and **one read-only category drill path** — all over the existing `findByBookIds` primitive. Zero new DAO/index/Drift migration; schema stays v21.
+3. **Thin shell + card registry (Phase 45)** — `analytics_screen.dart` rebuilt from a 739-LOC monolith into a **176-LOC registry-driven thin shell** + a `widgets/cards/` system, each card exposing a single-source `<card>RefreshTargets(ctx)`; the `_refresh()` union (108→12 LOC) is derived from the registry (union ⊆ analytics, zero `home/*`). **HomeHero isolation (GUARD-01) guaranteed by construction** + structural-invariant test + green `home_screen_isolation_test`; behavior preserved byte-for-byte (2925/2925, zero golden re-baseline).
+4. **round-5 B 5-card lineup (Phase 46)** — within-month trend (dual spend / single joy, zero cross-period by construction) → category donut hero (count-up center, 10 L1 legend rows, full-row drill) → 悦己花在哪 custom Row+Flexible stacked bar → 小确幸 custom GridView calendar heatmap → satisfaction histogram (native fl_chart 1.2.0 `BarChartRodData.label`, Stack hack deleted) + group-mode `family_insight`; read-only `CategoryDrillDownScreen`. All descriptive celebrate-past; JOY-03/JOY-04 descoped per GATE-03.
+5. **Verification (Phase 47)** — trilingual ARB parity (orphan section-header keys deleted symmetrically), a 36-case anti-toxicity sweep (5 cards × ja/zh/en × all states), **48 macOS golden baselines authored from scratch** (closing the zero-golden gap on the new charts), full suite **3057/3057** + analyze 0 + coverage 80.48%, and a blocking **10/10 on-device visual UAT** (physical iOS, locale=ja, user-approved).
+6. **Post-audit tech-debt cleanup (Phase 48)** — TD-1: the member-filter donut pull-to-refresh staleness fixed by threading `donutDimensionStateProvider`'s filter through `AnalyticsCardContext` → `categoryDonutRefreshTargets` (+ a "union ⊇ card watches" completeness regression assertion); TD-2: stale `GetExpenseTrendUseCase`/`MonthlyTrend` dartdoc scrubbed from `repository_providers.dart` (+ regenerated `.g.dart`), `grep` = 0. Suite **3090/3090**, zero golden re-baseline.
+
+### Stats
+
+- **Commits since v1.7 tag:** 255 (`v1.7..HEAD`)
+- **Files changed:** 428 (+55,226 / −17,507 LOC) — includes post-v1.7 doc churn alongside the analytics rebuild
+- **Suite:** 3090/3090 green · `flutter analyze` 0 · coverage 80.48%
+- **Schema:** v21 (no migration) · **fl_chart:** ^1.2.0 (no bump)
+- **Tag:** `v1.8`
+
+---
+
 Historical record of shipped versions. Each entry links to its full archive in `.planning/milestones/`.
 
 ---

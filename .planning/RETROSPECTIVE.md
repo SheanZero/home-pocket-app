@@ -341,6 +341,49 @@
 
 ---
 
+## Milestone: v1.8 — 统计页面重设计（实用化 × 悦己情感化） (Analytics Redesign)
+
+**Shipped:** 2026-06-22
+**Phases:** 6 (43-48) | **Plans:** 32 | **Sessions:** multi-session GSD execution incl. a hard design gate + post-audit cleanup phase
+
+### What Was Built
+- A full statistics-page overhaul under the permanent ADR-012 anti-gamification contract, decomposed design-gate-first: **Phase 43** was a hard HTML design gate with no production code (deep-research map + 5 HTML directions each ADR-012-self-audited + 4 discussion rounds → user-selected round-5 B; GATE-04 locked JOY-04 NO-GO, an ADR-012 §4 expense-side cross-period carve-out, the calm-warm wordlist, and an fl_chart 1.2.0 affordance table).
+- Reuse-first data layer (Phases 44–46): a domain-pure L1-category rollup helper (single source for the donut transform AND the drill subtotal), a within-month per-day cumulative trend (replacing the deleted 6-month stack), and one read-only category drill — all over the existing `findByBookIds` primitive, zero new DAO/index/Drift migration (schema stays v21).
+- `analytics_screen.dart` rebuilt from a 739-LOC monolith into a 176-LOC registry-driven thin shell + a `widgets/cards/` system whose registry is the single source of both render order and the `_refresh()` invalidation union; HomeHero isolation (GUARD-01) guaranteed by construction + structural test.
+- The round-5 B flat 5-card lineup (within-month trend / category-donut-hero-with-drill / 悦己花在哪 custom stacked bar / 小确幸 custom calendar heatmap / satisfaction histogram with native fl_chart 1.2.0 label) + a group-mode `family_insight` card; joy surfaced entirely descriptively (celebrate-past, never ranking/target/streak/cross-period).
+- Verification (Phase 47): trilingual ARB parity, a 36-case anti-toxicity sweep, 48 macOS chart golden baselines authored from scratch, full-suite per-wave gate, and a 10/10 on-device UAT. Phase 48 (appended post-audit) cleared the two code-grade tech-debt items.
+
+### What Worked
+- **Design-gate-first** was the decisive structural move — running five HTML directions with ADR-012 self-audit tables *before any Dart* resolved the "凸显悦己 vs anti-gamification" tension up front, and the gate's GATE-04 go/no-go decisions prevented downstream ADR/scope churn (JOY-04 NO-GO kept v1.8 no-Drift; the §4 carve-out was decided once and amended cleanly in Phase 45).
+- **round-5 B as the single source of truth (D-A1)** + an explicit descope-at-gate (JOY-03/04 recorded in the REQUIREMENTS ledger) meant the goal-backward verifier never demanded a card the approved design deliberately omitted.
+- **Registry-as-single-source** of both render order and the refresh union collapsed `_refresh()` from 108→12 LOC and made HomeHero isolation a structural property (zero `home/*` import, asserted by test) rather than a convention.
+- **Reuse-first** kept the whole milestone a pure presentation-layer rebuild: zero schema migration, zero new dependencies, fl_chart unchanged — so the 48 new goldens were attributable to the redesign alone.
+- Wave-0 behavior-preservation proof in Phase 45 (full suite 2925/2925, zero golden re-baseline) gave high confidence that the 739→176 LOC shell rewrite changed nothing user-visible.
+
+### What Was Inefficient
+- The milestone-close CLI **undercounted** (reported 4 phases / 22 plans vs the real 6 / 32) because its roadmap parser skips phases lacking a `### Phase N` detail block, and it **again** emitted one garbage accomplishment from a malformed `one_liner` (3rd recurrence after v1.7) — the MILESTONES.md entry and stats had to be hand-corrected against disk.
+- A **post-audit quick-task (260622-d5i)** reintroduced the member-filter donut pull-to-refresh staleness *after* Phase 47 closed, so the milestone audit flagged a "post-milestone" code-grade item — forcing a whole appended **Phase 48** to fix it (TD-1) plus stale-dartdoc hygiene (TD-2).
+- Worktree base-drift (#683) forced degraded-sequential execution on the main tree across Phases 46–48 instead of parallel worktree waves.
+- Each build phase (46/47/48) carried ~4 WR advisories forward to backlog rather than closing them in-phase.
+
+### Patterns Established
+- **Design-gate-first phase** (hard, no-production-code, gate-exit = user approval) for any goal that sits one decision from a permanent constraint — produce multiple directions each with a constraint self-audit, then select exactly one.
+- **Descope-at-gate**, recorded in the REQUIREMENTS traceability ledger (status `~`), so a requirement omitted by the approved design is satisfied by the descope correction, not by code.
+- **Registry as the single source of render order AND the `_refresh` union** — one structure drives layout, refresh, and the isolation invariant.
+- **Completeness assertion for isolation invariants** — the registry test now asserts both union ⊆ allowed (no leakage) AND union ⊇ what-cards-watch (no staleness), after TD-1 showed the second half was missing.
+
+### Key Lessons
+- An isolation invariant has two halves — leakage (union ⊆ allowed) AND staleness (union ⊇ what-cards-actually-watch); checking only the first let a watched member-filtered provider serve stale data on pull-to-refresh (TD-1).
+- The milestone-close extractor cannot be trusted for counts or accomplishments — verify phase/plan counts against `ls .planning/phases/*/` and hand-curate the entry (now 3×-recurring with the empty/garbage `one_liner` problem).
+- Freeze feature quick-tasks once the close audit starts — a post-audit quick-task reintroduced debt the audit had already cleared, turning a clean close into an appended phase.
+- Design-gate-first is cheap insurance for boundary-risky UX — one no-code phase prevented the more expensive failure of building an anti-gamification-violating surface and unwinding it later.
+
+### Cost Observations
+- Model profile: `balanced`; multi-session GSD execution with a hard design-gate phase (HTML/docs only) + a post-audit cleanup phase.
+- Notable: git range `v1.7..HEAD` = 255 commits / 428 files / +55,226 / −17,507 LOC (includes post-v1.7 doc churn); **0 schema migrations, 0 new pub dependencies, no fl_chart bump** — the leanest dependency footprint of any feature milestone; the design gate committed only `.planning/` HTML + Markdown.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -355,6 +398,7 @@
 | v1.5 | multi-session, 2 days | 5 | First pure consistency/refactor milestone since v1.0. Dependency-ordered workstreams (terminology→palette→tokens→goldens) eliminated rename churn; ThemeExtension single-source consolidation; migration contract test as Wave-0 RED. Milestone audit caught two gate-evading vocabulary leaks (W1 a11y string literals, W2 capital-case identifiers) → dedicated Phase-35 closure + re-audit. |
 | v1.6 | multi-session, ~2 days + quick-task hardening | 4 | User-directed 7→4 phase consolidation; Wave-0 TDD scaffolds in all phases; reactive-stream delivery as a stated success criterion (v1.4 GAP-2 lesson applied structurally); executed-proof integration check at audit caught a phantom-comment safety net (W1) and receiver wire-trust (W2) → closed inline via quick task 260612-daz (audit→quick-task→re-verify loop at quick-task granularity). |
 | v1.7 | multi-session, ~2 days + long quick-task tail | 3 | User-directed 6→3 phase consolidation; three blocking ADRs before migration code; first external network dependency introduced with structural privacy/offline invariants (single `convertToJpy()` site, never-block-save, no user data in URLs); Wave-0 RED scaffolds as executable acceptance specs; heavy 06-13/14 quick-task UX-polish tail signals Phase-42 plans under-specified edit/display. |
+| v1.8 | multi-session, ~1 week incl. design gate | 6 (43-48) | First **design-gate-first** milestone — a hard no-production-code HTML exploration phase (43) gated the build; reuse-first build (0 schema migration, 0 new deps, no fl_chart bump); registry as single source of render order AND refresh union (HomeHero isolation structural); descope-at-gate (JOY-03/04 in the requirements ledger); a post-audit quick-task reintroduced debt → appended Phase 48 to clear it inline. |
 
 ### Cumulative Quality
 
@@ -368,6 +412,7 @@
 | v1.5 | 2281/2281 tests pass (full suite, golden incl.); 77 golden masters re-baselined to teal (34 dark) with diff-attribution; `flutter analyze` 4 pre-existing infos (0 regressions); v18 migration contract test + CR-01 regression test green | 79.0% filtered coverage (≥70% gate) | 0 new pub dependencies |
 | v1.6 | 2588/2588 tests pass at close (full suite incl. goldens); 54 new shopping golden baselines (user-approved); `flutter analyze` 0 issues; v20 migration contract test (raw-sqlite3 + real-Drift index assertion) green; 32/32 cross-phase integration tests executed at audit | 77.3% on shopping modules (≥70% gate); global not recomputed | 0 new pub dependencies |
 | v1.7 | 2786/2786 tests pass at close (full suite incl. goldens); voice currency corpus ≥5 cases/currency/locale; CNY symbol goldens re-baselined; `flutter analyze` 0 issues; v21 migration + null-safe sync round-trip + partial-triple invariant tests green; 6/6 cross-phase integration seams verified at audit; Phase 42 4/4 device UAT passed | not recomputed at milestone close | 1 new pub dependency (`connectivity_plus ^7.1.1`, iOS-build-green) |
+| v1.8 | 3090/3090 tests pass at close (full suite incl. goldens); 48 macOS chart golden baselines authored from scratch (zero-golden gap closed); 36-case anti-toxicity sweep (5 cards × ja/zh/en × states); `flutter analyze` 0 issues; 9/9 cross-phase integration flows + 10/10 on-device UAT verified at audit | 80.48% cleaned-lcov (≥70% gate) | 0 new pub dependencies; 0 schema migration (stays v21); fl_chart stays ^1.2.0 (no bump) |
 
 ### Top Lessons
 
@@ -401,3 +446,7 @@
 28. **(v1.7)** Decide hash/integrity scope via ADR *before* a schema migration adds fields — retrofitting fields into an integrity hash invalidates every existing chain (ADR-021 excluded them by design).
 29. **(v1.7)** "N linked editable fields" requirements are a circular-update trap — reframe as two-input/one-derived early (ADR-022 D-01 voided the original "bidirectional" DISP-04 wording before it became code).
 30. **(v1.7)** A heavy post-phase quick-task UX-polish tail (12+ tasks over 2 days) is a signal the UI phase's plans under-specified interaction/display detail — fold more of that into the phase plan or a dedicated polish wave.
+31. **(v1.8)** Design-gate-first (a hard, no-production-code phase) is the right tool when a goal sits one decision from a permanent constraint — five HTML directions + ADR-012 self-audits + user selection resolved "凸显悦己 vs anti-gamification" before any Dart, and GATE-04's go/no-go decisions (JOY-04 NO-GO, expense-side §4 carve-out) prevented downstream ADR/scope churn.
+32. **(v1.8)** An isolation invariant has two halves — union ⊆ allowed (no leakage) AND union ⊇ what-cards-actually-watch (no staleness); the registry test checked only the first, so a member-filtered provider the card watched but the refresh union omitted served stale data on pull-to-refresh (TD-1). Assert both directions.
+33. **(v1.8)** The milestone-close CLI silently undercounts (4 phases/22 plans vs the real 6/32 when phases lack a `### Phase N` detail block) and still emits garbage accomplishments from malformed `one_liner` frontmatter (3rd recurrence) — verify close-stats against `ls .planning/phases/*/` and hand-curate; don't trust the extractor.
+34. **(v1.8)** A post-audit quick-task can reintroduce debt the audit just cleared (260622-d5i added the member-filter staleness after Phase 47 closed) — freeze feature quick-tasks once the close audit starts, or expect an appended cleanup phase.

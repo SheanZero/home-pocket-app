@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.8
-milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
-status: completed
-stopped_at: 47-06-PLAN.md complete — full-suite gate green + on-device D-10 UAT all 10 PASS (user-approved 2026-06-20); Phase 47 all 6 plans done, ready for verification
-last_updated: "2026-06-22T06:05:15.916Z"
-last_activity: 2026-06-22
+milestone_name: 统计页面重设计（实用化 × 悦己情感化） — SHIPPED 2026-06-22
+status: Awaiting next milestone
+stopped_at: Milestone v1.8 complete and archived (2026-06-22) — 6 phases (43-48), 32 plans, tag v1.8; all requirements satisfied/descoped, audit tech_debt accepted
+last_updated: "2026-06-22T07:31:03.904Z"
+last_activity: 2026-06-22 — Milestone v1.8 completed and archived
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 6
+  completed_phases: 6
+  total_plans: 32
+  completed_plans: 32
   percent: 100
 ---
 
@@ -18,20 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
+See: .planning/PROJECT.md (updated 2026-06-22 after v1.8 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 48 — address-v1-8-tech-debt-member-filter-donut-refresh-stale-tre
+**Current focus:** Planning next milestone (v1.8 统计页面重设计 shipped 2026-06-22) — run `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 48
-Plan: Not started
-Status: Phase 48 complete (48-01 TD-1 donut refresh ✓; 48-02 TD-2 doc scrub ✓)
-Last activity: 2026-06-22
-Prior: 2026-06-22 - quick 260622-0ly 打开统计页查看当前月时，小确幸日历默认选中「今天」（高亮今天格子 + 自动展开今天的小确幸明细面板，今天无记录则显示空状态文案）；仅当前月生效，翻到其它月份不自动选中（翻回当前月重新选中今天），同月内 pull-to-refresh 保留用户手动点击的那天，手动点击行为不变。改动 `_JoyCalendarBodyState` 新增 `initState`/`didUpdateWidget`/`_defaultSelectedDay()`（"今天"仅当落在 anchor 当月内才选中；单一状态 `_selectedDay` 同时驱动 ring 高亮+内联展开）；零 provider/ARB/数据层改动、不跑 build_runner/gen-l10n。决定论：现存 golden/测试窗口全钉死 May 2026，今天永不落入→默认选中恒 null→**0 golden 重基线**、视觉与改前字节一致；新增决定论 widget 测试（当前月→自动选中+展开 / 过去月→不选中，只比 y/m/d 规避时钟竞态）。analyze 0、full test 3083/3083、仅 2 文件改动。commits 3eabc907/1811a22f。
-Prior: quick 260621-uus 统计页删除截图红框圈出的编辑性元素（纯展示层、零数据流改动）：AppBar 删「全部条目 ▼」entry-filter chip（删孤立 widget+测试，保留 `selectedJoyMetricVariantProvider` 默认 all）、四个分区标题删「实用/悦己」tag chip（保留左侧彩色竖条+标题）、悦己 drawer 去 connector(dashed dots+「把悦己这一块放大看看」)+副标题「仅呈现去向不分高下」+caption「百分比是各项占悦己自身…」且标题缩短为「悦己 {amount}」（保留金额/笔数/bar 主体）、删小确幸日历 footer「这个月有X天…」+悦己满足度分布 footer「大多落在中高位…」（保留 median pill）；3 ARB 对称删 12 个 0-ref key+gen-l10n、删 `_JoyConnector` 类/孤立测试 helper（无 dead code）。analyze 0、full test 3081/3081、15 golden（scroll-smoke/joy_calendar/satisfaction_histogram）macOS 重基线（category_donut/joy_spend 验证无变化未重基线）。commits 15ebc181/730b5bb3/412a8e9d/4c8b6c20/27224cba/547a359d/5b8c1bd9。
-Prior: quick 260621-ti1 统计页「分类支出」donut 卡片：类目 icon + 圆环放大 + 列表去色块（设备端 UAT 已通过✓）。①分类详细列表行 / 悦己「钱花在哪」legend 行类目名前加「上一级(L1顶层)」类目 icon、圆环显示了%的扇区加 icon，全经共享 `parentCategoryIconFromId`（categoryId 已是 L1 rollup id；零新 icon 映射/ARB/数据层/依赖；成员维度保持头像 emoji 不改）。②圆环放大：section radius 30→41.4、centerSpaceRadius 54→59.4（外径×1.2/内径×1.1），容器 `SizedBox` height 200→234、center `_centerTotalMaxWidth` 96→106；widget test `category_donut_card_test.dart` 将 bare card 包进 `SingleChildScrollView`（生产本就在滚动视图内）避免放大后 800×600 测试窗 26px 溢出。③圆环 icon 改为 % 正上方、中线对齐：原 `badgeWidget`(offset0.35)+内置 `title`(% offset0.5) 沿半径分置→非6/12点钟扇区横向重叠(`88🍴%`)；改为抑制内置 title（`showTitle:false`）、icon+% 合成单个居中 `Column` badge（icon 在上、% 在下、offset0.5 居环带中部）。④分类/悦己列表行去掉色块、icon 取色块颜色：`donut_hero` `LegendRow` 有 icon 的分类行不画 11×11 色块、icon 颜色→该行 arc `color`；`joy_spend_stacked_bar` `_LegendRow` 去 `.jl .dot`、icon 颜色→`segment.color`；成员行(emoji)与「其他」行(无 icon)保留色块。质量门：analyze 0、full test 3091/3091、多轮受影响 golden（category_donut/joy_spend/scroll-smoke）macOS 重基线（commits 0903114b/a2925f42/0064693f/5ae71263/87a313b1/6c9794d3）。
+Phase: Milestone v1.8 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-22 — Milestone v1.8 completed and archived
 
 ### Quick Tasks Completed
 
@@ -121,6 +118,18 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 - **MOD-005 OCR slot:** OCR ledger entry hidden behind reversible `kOcrEntryEnabled` flag (260614-iww); flip when MOD-005 writer lands
 
 ## Deferred Items
+
+### Items acknowledged and deferred at v1.8 milestone close on 2026-06-22
+
+Acknowledged via the pre-close artifact audit (35 items) — all benign, matching the accepted v1.2–v1.7 close pattern:
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| nyquist_gap | Phase 47 `47-VALIDATION.md` draft + `nyquist_compliant: false` (Phases 43–46 compliant). Documentation-grade; underlying suite 3090/3090 green. Mirrors accepted v1.2–v1.7 pattern. To clear: `/gsd-validate-phase 47` | accept (documentation-grade) | v1.8 close |
+| uat_flag | Phase 47 `47-UAT.md` flagged by `audit-open` as a UAT gap, but status is `passed` with **0 pending scenarios** (on-device D-10, 10/10 PASS, user-approved 2026-06-20) — false-positive flag, actually complete | resolved (flag stale) | v1.8 close |
+| metadata_drift | `audit-open` reports 34 quick tasks as incomplete/unknown (SUMMARY.md lack `status: complete` frontmatter). All recorded in the Quick Tasks Completed table. Same cosmetic pattern as v1.5 (17) / v1.6 (38) / v1.7 (33) | cosmetic, no functional gap | v1.8 close |
+| summary_frontmatter_drift | GATE-01 (in 43-01) + TREND-01 (in 44-02) satisfied + verified in their phase VERIFICATION.md but not auto-extracted into SUMMARY `requirements_completed` frontmatter. Cosmetic metadata drift, no functional gap | cosmetic, no functional gap | v1.8 close |
+| voice_backlog | 260526-k92/l0o/n7b/pg6 voice-tab/active-learning follow-ups — genuinely incomplete; carried as the v1.3 VOICE-POLISH-V2 backlog (re-affirmed from v1.7 close) | defer to VOICE-POLISH-V2 | v1.8 close |
 
 ### Items acknowledged and deferred at v1.7 milestone close on 2026-06-14
 
@@ -276,7 +285,7 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Review/approve the v1.8 roadmap, then run `/gsd-plan-phase 43` to begin the HTML 设计探索关卡 (Design Gate).
+- Start the next milestone with /gsd-new-milestone
 
 ### Blockers
 
