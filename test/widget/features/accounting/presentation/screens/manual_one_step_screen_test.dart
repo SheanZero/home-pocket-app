@@ -289,8 +289,8 @@ void main() {
     // 260622-nhs (D-3): the 手工/语音 mode Tab is gone — single-page entry. The
     // EntryModeSwitcher widget was deleted entirely; its absence is proven by
     // the presence of the resident keypad + push-to-talk bar instead.
-    // 260622-nhs (D-1): the full-width push-to-talk bar sits below the keypad.
-    expect(find.byType(HoldToTalkBar), findsOneWidget);
+    // 260622-nhs R2: the full-width 「语音记录」 bar sits ABOVE the keypad.
+    expect(find.byType(VoiceRecordBar), findsOneWidget);
     expect(find.byKey(const ValueKey('category-chip')), findsOneWidget);
     expect(find.byKey(const ValueKey('date-chip')), findsOneWidget);
     expect(find.byKey(const ValueKey('merchant-textfield')), findsOneWidget);
@@ -1081,7 +1081,7 @@ void main() {
   // ── 260622-nhs: single-page push-to-talk (D-1/D-2/D-3, T-nhs-03) ───────────
 
   group('260622-nhs single-page PTT', () {
-    final micBarFinder = find.byKey(const ValueKey('hold-to-talk-bar'));
+    final micBarFinder = find.byKey(const ValueKey('voice-record-bar'));
 
     Widget pumpPtt({
       required _CapturingSpeechService speech,
@@ -1119,7 +1119,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
     }
 
-    testWidgets('HoldToTalkBar renders below the SmartKeyboard', (tester) async {
+    testWidgets('VoiceRecordBar renders ABOVE the SmartKeyboard', (tester) async {
       tall(tester);
       await tester.pumpWidget(
         pumpPtt(
@@ -1129,17 +1129,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(HoldToTalkBar), findsOneWidget);
-      // The bar sits BELOW the keypad: its top edge is greater than the
-      // SmartKeyboard's top edge.
+      expect(find.byType(VoiceRecordBar), findsOneWidget);
+      // R2: the bar sits ABOVE the keypad (R1 placed it below = iOS gesture
+      // zone): its top edge is LESS than the SmartKeyboard's top edge.
       final barTop = tester.getTopLeft(micBarFinder).dy;
       final keypadTop = tester.getTopLeft(find.byType(SmartKeyboard)).dy;
-      expect(barTop, greaterThan(keypadTop),
-          reason: 'push-to-talk bar must sit below the SmartKeyboard');
+      expect(barTop, lessThan(keypadTop),
+          reason: 'R2: voice-record bar must sit above the SmartKeyboard');
     });
 
     testWidgets(
-      'hold → overlay shown; release → overlay gone, form filled, stays on page',
+      'tap → modal shown; speak → auto-fill; tap-exit → modal gone, content kept, stays on page',
       (tester) async {
         tall(tester);
         final speech = _CapturingSpeechService();
@@ -1161,27 +1161,30 @@ void main() {
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        // Hold the bar → listening overlay rises.
-        final gesture =
-            await tester.startGesture(tester.getCenter(micBarFinder));
-        await tester.pump(const Duration(milliseconds: 1));
+        // Tap the bar → the listening modal rises (免持聆听).
+        await tester.tap(micBarFinder);
         await tester.pump();
-        expect(find.byType(VoiceListeningOverlay), findsOneWidget,
-            reason: 'holding the bar must raise the listening overlay');
+        await tester.pump();
+        expect(find.byType(VoiceListeningModal), findsOneWidget,
+            reason: 'tapping the bar must raise the auto-fill listening modal');
 
+        // A speech-final result AUTO-fills the form (no release needed).
         speech.emitFinal('1千8百4十元 星巴克');
         await tester.pump();
-        await tester.binding.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 350)),
-        );
-        await gesture.up();
-        await tester.pumpAndSettle();
-
-        // Overlay gone, form filled, screen still present (no auto-save / pop).
-        expect(find.byType(VoiceListeningOverlay), findsNothing);
+        await tester.pump();
         expect(parse.inputs, contains('1千8百4十元 星巴克'));
         expect(find.text('星巴克'), findsOneWidget,
-            reason: 'merchant must be filled into the same form');
+            reason: 'auto-fill writes the merchant into the same form');
+
+        // Tap the modal body (the listening title) to exit — content kept.
+        final modalL10n = S.of(tester.element(find.byType(VoiceListeningModal)));
+        await tester.tap(find.text(modalL10n.listeningTitle));
+        await tester.pump();
+
+        expect(find.byType(VoiceListeningModal), findsNothing,
+            reason: 'tap-exit closes the modal');
+        expect(find.text('星巴克'), findsOneWidget,
+            reason: 'filled content is kept after exit');
         expect(find.byKey(const ValueKey('manual-one-step-screen')),
             findsOneWidget,
             reason: 'D-2: the screen stays on the manual page (no auto-save)');
@@ -1215,16 +1218,15 @@ void main() {
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        final gesture =
-            await tester.startGesture(tester.getCenter(micBarFinder));
-        await tester.pump(const Duration(milliseconds: 1));
+        await tester.tap(micBarFinder);
+        await tester.pump();
         await tester.pump();
         speech.emitFinal('ラテ 1千');
         await tester.pump();
-        await tester.binding.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 350)),
-        );
-        await gesture.up();
+        await tester.pump();
+        // Exit the modal (tap the listening title) — content kept.
+        final modalL10n = S.of(tester.element(find.byType(VoiceListeningModal)));
+        await tester.tap(find.text(modalL10n.listeningTitle));
         await tester.pumpAndSettle();
 
         // Save via the SmartKeyboard Record key.
@@ -1279,6 +1281,54 @@ void main() {
         expect((captured.first as CreateTransactionParams).entrySource,
             EntrySource.manual,
             reason: 'a pure keypad row keeps manual provenance');
+      },
+    );
+
+    testWidgets(
+      'R2: 重置 restores the pre-speech form and keeps listening',
+      (tester) async {
+        tall(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase({
+          '1千8百4十元 星巴克': VoiceParseResult(
+            rawText: '1千8百4十元 星巴克',
+            amount: 1840,
+            parsedDate: DateTime(2026, 4, 27),
+            merchantName: '星巴克',
+            categoryMatch: const CategoryMatchResult(
+              categoryId: 'convenience',
+              confidence: 0.91,
+              source: MatchSource.keyword,
+            ),
+            ledgerType: LedgerType.daily,
+          ),
+        });
+
+        await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        // Tap → modal; speak → auto-fill merchant 星巴克.
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        speech.emitFinal('1千8百4十元 星巴克');
+        await tester.pump();
+        await tester.pump();
+        expect(find.text('星巴克'), findsOneWidget);
+
+        // Tap 「重置」 → the form rolls back to the empty pre-speech snapshot
+        // (merchant 星巴克 gone) and the modal STAYS open (keeps listening).
+        final modalL10n = S.of(tester.element(find.byType(VoiceListeningModal)));
+        await tester.tap(find.text(modalL10n.voiceResetRestore));
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.text('星巴克'), findsNothing,
+            reason: '重置 restores the pre-speech (empty) merchant');
+        expect(find.byType(VoiceListeningModal), findsOneWidget,
+            reason: '重置 keeps the modal open / keeps listening');
+        expect(speech.canceled, isFalse,
+            reason: '重置 must not cancel the recognizer');
       },
     );
   });
