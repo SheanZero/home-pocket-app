@@ -75,6 +75,12 @@ class VoiceRecordPanel extends StatelessWidget {
         ),
     };
 
+    // 260622-nhs R6 (BUG 1): in the one-shot model the recognizer stops after a
+    // single listen. When stopped the mic drops to a non-recording (grey, no
+    // pulse) look and a 「点击重置重新录入」 hint tells the user to tap 重置 to
+    // record again. listening/processing keep the recording-red pulsing mic.
+    final isStopped = status == PttListenStatus.stopped;
+
     // Inline panel occupying the keypad footprint. Tap the blank area to exit;
     // the reset button (below) has its own non-bubbling onTap.
     return GestureDetector(
@@ -99,7 +105,8 @@ class VoiceRecordPanel extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PulsingDot(color: statusColor),
+                // Stopped: a static dot (no pulse) — the recognizer is idle.
+                _PulsingDot(color: statusColor, pulsing: !isStopped),
                 const SizedBox(width: 6),
                 Text(
                   statusTitle,
@@ -138,35 +145,57 @@ class VoiceRecordPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Recording-red rounded mic (line-style glyph).
+            // Rounded mic (line-style glyph). Recording-red gradient while
+            // listening/processing; a flat muted fill when stopped (R6 BUG 1).
             Container(
               width: 76,
               height: 76,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    palette.recordingGradientStart,
-                    palette.recordingGradientEnd,
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: palette.actionShadow,
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+                color: isStopped ? palette.backgroundMuted : null,
+                gradient: isStopped
+                    ? null
+                    : LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          palette.recordingGradientStart,
+                          palette.recordingGradientEnd,
+                        ],
+                      ),
+                border: isStopped
+                    ? Border.all(color: palette.borderDefault)
+                    : null,
+                boxShadow: isStopped
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: palette.actionShadow,
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.mic_none,
-                color: Colors.white,
+                color: isStopped ? palette.textTertiary : Colors.white,
                 size: 34,
               ),
             ),
             const SizedBox(height: 8),
+
+            // 260622-nhs R6 (BUG 1): when stopped, a tap-reset hint tells the
+            // user that tapping 重置 records again (the one-shot session ended).
+            if (isStopped) ...[
+              Text(
+                l10n.voiceTapResetToRerecord,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: palette.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
 
             // Tap-to-exit hint directly below the mic.
             Text(
@@ -228,10 +257,12 @@ class VoiceRecordPanel extends StatelessWidget {
 }
 
 /// Recording-red dot that pulses opacity 1.0 → 0.3 → 1.0 (mock `@keyframes
-/// pulse`).
+/// pulse`). 260622-nhs R6 (BUG 1): when [pulsing] is false (stopped state) the
+/// dot is static so the panel reads as idle, not actively listening.
 class _PulsingDot extends StatefulWidget {
-  const _PulsingDot({required this.color});
+  const _PulsingDot({required this.color, this.pulsing = true});
   final Color color;
+  final bool pulsing;
 
   @override
   State<_PulsingDot> createState() => _PulsingDotState();
@@ -242,7 +273,24 @@ class _PulsingDotState extends State<_PulsingDot>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 1),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.pulsing) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(_PulsingDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.pulsing && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!widget.pulsing && _controller.isAnimating) {
+      _controller.stop();
+      _controller.value = 1.0;
+    }
+  }
 
   @override
   void dispose() {

@@ -846,6 +846,9 @@ class SEn extends S {
   String get voiceResetRestoreSub => '· Restore entry';
 
   @override
+  String get voiceTapResetToRerecord => 'Tap Reset to record again';
+
+  @override
   String get todayDate => 'Today';
 
   @override

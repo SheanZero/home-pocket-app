@@ -199,4 +199,60 @@ void main() {
     expect(find.text(l10n.voiceStatusStopped), findsOneWidget);
     expect(find.text(l10n.listeningTitle), findsNothing);
   });
+
+  // ── 260622-nhs R6 BUG 1: stopped-state tap-reset hint ─────────────────────
+
+  testWidgets(
+    'R6: status stopped shows the 点击重置重新录入 tap-reset hint below the mic',
+    (tester) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: VoiceRecordPanel(
+              transcript: 'x',
+              soundLevel: 0.1,
+              status: PttListenStatus.stopped,
+              onExit: () {},
+              onReset: () {},
+            ),
+          ),
+          locale: const Locale('zh'),
+        ),
+      );
+      await tester.pump();
+
+      final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+      // The new stopped-state hint tells the user to tap 重置 to record again.
+      expect(find.text(l10n.voiceTapResetToRerecord), findsOneWidget,
+          reason: 'stopped state must surface the tap-reset hint');
+      // The 重置 button and the tap-exit hint remain available.
+      expect(find.text(l10n.voiceResetRestore), findsOneWidget);
+      expect(find.text(l10n.voiceTapToExit), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'R6: while listening the tap-reset hint is NOT shown',
+    (tester) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: VoiceRecordPanel(
+              transcript: 'x',
+              soundLevel: 0.1,
+              status: PttListenStatus.listening,
+              onExit: () {},
+              onReset: () {},
+            ),
+          ),
+          locale: const Locale('zh'),
+        ),
+      );
+      await tester.pump();
+
+      final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+      expect(find.text(l10n.voiceTapResetToRerecord), findsNothing,
+          reason: 'the tap-reset hint is a stopped-state affordance only');
+    },
+  );
 }

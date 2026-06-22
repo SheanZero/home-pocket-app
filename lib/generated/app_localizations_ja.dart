@@ -838,6 +838,9 @@ class SJa extends S {
   String get voiceResetRestoreSub => '· 入力を元に戻す';
 
   @override
+  String get voiceTapResetToRerecord => 'リセットして録音し直す';
+
+  @override
   String get todayDate => '今日';
 
   @override

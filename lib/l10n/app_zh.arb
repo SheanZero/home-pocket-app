@@ -1098,6 +1098,10 @@
   "@voiceResetRestoreSub": {
     "description": "Listening modal reset button subtitle: restore the transaction content"
   },
+  "voiceTapResetToRerecord": "点击重置重新录入",
+  "@voiceTapResetToRerecord": {
+    "description": "Voice panel stopped-state hint: tap the reset button to record again"
+  },
   "todayDate": "今天",
   "@todayDate": {
     "description": "Today date chip label"

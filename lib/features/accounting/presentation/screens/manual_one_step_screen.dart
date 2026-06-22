@@ -141,6 +141,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// 「重置·恢复账目」 button rolls the form back to this snapshot.
   ManualEntrySnapshot? _voiceSnapshot;
 
+  /// 260622-nhs R6 (BUG 1): true while the inline voice panel is open. Panel
+  /// visibility is gated on THIS, NOT `pttIsRecording` — the one-shot recognizer
+  /// stops after a single listen, but the panel must STAY (showing 「停止聆听」 +
+  /// the tap-reset hint) until the user taps the blank area to exit.
+  bool _voiceModalOpen = false;
+
   // ── VoicePttSessionMixin contract ─────────────────────────────────────────
 
   @override
@@ -291,7 +297,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// Tap 「语音记录」: snapshot the form (D-2 reset-restore), then start a
   /// continuous auto-fill listening session and raise the modal.
   void _onVoiceRecordTap() {
-    if (!pttServiceInitialized || !isLocaleReady || pttIsRecording) return;
+    if (!pttServiceInitialized || !isLocaleReady || _voiceModalOpen) return;
     final form = _formKey.currentState;
     if (form != null) {
       _voiceSnapshot = ManualEntrySnapshot.capture(
@@ -302,12 +308,16 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
         form: form,
       );
     }
+    // 260622-nhs R6 (BUG 1): open the modal (panel visibility) independent of
+    // the recognizer lifecycle, then start the one-shot listening session.
+    setState(() => _voiceModalOpen = true);
     startPttTapSession();
   }
 
   /// Tap the modal/scrim: stop listening + final fill + close, keep content.
   void _onVoiceModalExit() {
     exitPttTapSession();
+    setState(() => _voiceModalOpen = false);
     _voiceSnapshot = null;
   }
 
@@ -938,22 +948,18 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
               ),
 
               // D-05: SmartKeyboard slides off-screen when a TextField is
-              // focused. 260622-nhs R3 (BUG 3): the bottom slot swaps IN PLACE —
-              // while recording (`pttIsRecording`) the inline VoiceRecordPanel
-              // occupies the keypad's footprint (no scrim, no overlay; the form
-              // above stays fully visible and keeps auto-filling). Otherwise it
-              // shows the slim 「语音记录」 strip + SmartKeyboard. The swap keeps the
-              // form above stable — no reflow/jump.
-              //
-              // R3 (BUG 1): the R2 bottom SafeArea doubled the keypad's own 24dp
-              // bottom padding (≈ +34dp on notched devices). The SmartKeyboard's
-              // built-in 24dp bottom padding already clears the home indicator,
-              // so the SafeArea wrapper is gone — restoring the pre-R1 spacing.
+              // focused. 260622-nhs R3/R6: the bottom slot swaps IN PLACE — while
+              // the voice modal is open (`_voiceModalOpen`, R6 BUG 1: gated on
+              // this NOT `pttIsRecording`, so the one-shot recognizer stopping
+              // does NOT snap the keypad back) the inline VoiceRecordPanel
+              // occupies the keypad's footprint; otherwise the 「语音记录」 strip +
+              // SmartKeyboard. The SmartKeyboard's built-in 24dp bottom padding
+              // clears the home indicator (no SafeArea wrapper).
               AnimatedSlide(
                 offset: Offset(0, _showSmartKeypad ? 0 : 1),
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeInOut,
-                child: pttIsRecording
+                child: _voiceModalOpen
                     ? VoiceRecordPanel(
                         transcript: pttTranscript,
                         soundLevel: pttSoundLevel,

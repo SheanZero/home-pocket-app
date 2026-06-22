@@ -836,6 +836,9 @@ class SZh extends S {
   String get voiceResetRestoreSub => '· 恢复账目';
 
   @override
+  String get voiceTapResetToRerecord => '点击重置重新录入';
+
+  @override
   String get todayDate => '今天';
 
   @override

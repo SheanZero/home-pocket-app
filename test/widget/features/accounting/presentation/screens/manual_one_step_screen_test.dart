@@ -142,6 +142,7 @@ final _fakeCategories = [_l1Category, _l2Category];
 
 class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
   void Function(SpeechRecognitionResult result)? onResult;
+  void Function(String status)? onStatus;
   String? startedLocaleId;
   var stopped = false;
   var canceled = false;
@@ -150,7 +151,10 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
   Future<bool> initialize({
     void Function(String status)? onStatus,
     void Function(String errorMsg, bool permanent)? onError,
-  }) async => true;
+  }) async {
+    this.onStatus = onStatus;
+    return true;
+  }
 
   @override
   bool get isAvailable => true;
@@ -180,6 +184,10 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
   void emitFinal(String words) => onResult!(
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], true),
   );
+
+  /// 260622-nhs R6: drive a recognizer status (e.g. 'done'/'notListening') so a
+  /// one-shot session can self-terminate in the widget test.
+  void emitStatus(String status) => onStatus!(status);
 }
 
 class _FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
@@ -1343,6 +1351,124 @@ void main() {
             reason: '重置 cancels the recognizer to clear its buffer (BUG A)');
         expect(speech.isListening, isTrue,
             reason: '重置 re-arms a fresh listening session');
+      },
+    );
+
+    // ── 260622-nhs R6 BUG 1: panel visibility decoupled from isRecording ──────
+
+    testWidgets(
+      'R6: when the recognizer self-terminates the panel STAYS (shows 停止聆听 + '
+      'tap-reset hint), keypad does NOT return',
+      (tester) async {
+        tall(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {});
+
+        await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        // Tap the bar → panel opens, recognizer listening.
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        expect(find.byType(VoiceRecordPanel), findsOneWidget);
+        expect(find.byType(SmartKeyboard), findsNothing);
+
+        // The recognizer self-terminates (one-shot end): isRecording → false.
+        // The OLD code gated the panel on pttIsRecording, so the panel would
+        // vanish + the keypad return. R6 gates on _voiceModalOpen → panel stays.
+        speech.startedLocaleId = null;
+        speech.emitStatus('done');
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(VoiceRecordPanel), findsOneWidget,
+            reason: 'R6: the panel stays open after the recognizer stops');
+        expect(find.byType(SmartKeyboard), findsNothing,
+            reason: 'R6: the keypad must NOT return while the modal is open');
+
+        // The stopped status + tap-reset hint are shown.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        expect(find.text(panelL10n.voiceStatusStopped), findsOneWidget,
+            reason: 'the panel shows 停止聆听 after the recognizer stops');
+        expect(find.text(panelL10n.voiceTapResetToRerecord), findsOneWidget,
+            reason: 'the tap-reset hint tells the user to tap 重置');
+      },
+    );
+
+    testWidgets(
+      'R6: after the recognizer stops, tapping the panel body exits and the '
+      'keypad returns',
+      (tester) async {
+        tall(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {});
+
+        await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+
+        // Recognizer self-terminates → panel stays (stopped).
+        speech.startedLocaleId = null;
+        speech.emitStatus('done');
+        await tester.pump();
+        await tester.pump();
+        expect(find.byType(VoiceRecordPanel), findsOneWidget);
+
+        // Tap the panel body (stopped title) to exit → keypad back.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.voiceStatusStopped));
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(VoiceRecordPanel), findsNothing,
+            reason: 'tap-exit closes the modal even from the stopped state');
+        expect(find.byType(SmartKeyboard), findsOneWidget,
+            reason: 'the keypad returns after exit');
+      },
+    );
+
+    testWidgets(
+      'R6: 重置 from the stopped state re-opens a fresh listening session '
+      '(panel stays open, status → listening)',
+      (tester) async {
+        tall(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {});
+
+        await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+
+        // Recognizer stops → stopped state, panel stays.
+        speech.startedLocaleId = null;
+        speech.emitStatus('done');
+        await tester.pump();
+        await tester.pump();
+        final stoppedL10n =
+            S.of(tester.element(find.byType(VoiceRecordPanel)));
+        expect(find.text(stoppedL10n.voiceStatusStopped), findsOneWidget);
+
+        // Tap 重置 → fresh listening session, panel stays open, status listening.
+        await tester.tap(find.text(stoppedL10n.voiceResetRestore));
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(VoiceRecordPanel), findsOneWidget,
+            reason: '重置 keeps the panel open');
+        expect(speech.canceled, isTrue,
+            reason: '重置 cancels the recognizer to clear its buffer');
+        expect(speech.isListening, isTrue,
+            reason: '重置 starts a fresh listening session');
+        final liveL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        expect(find.text(liveL10n.listeningTitle), findsOneWidget,
+            reason: 'status returns to listening after 重置');
       },
     );
   });

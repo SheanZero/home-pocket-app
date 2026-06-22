@@ -1677,6 +1677,12 @@ abstract class S {
   /// **'· Restore entry'**
   String get voiceResetRestoreSub;
 
+  /// Voice panel stopped-state hint: tap the reset button to record again
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Reset to record again'**
+  String get voiceTapResetToRerecord;
+
   /// Today date chip label
   ///
   /// In en, this message translates to:
