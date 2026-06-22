@@ -6,7 +6,7 @@ scope: ui-layout-only
 status: complete
 branch: main
 worktree: false
-commit: db828168 (R1), 83175136 (R2)
+commit: db828168 (R1), 83175136 (R2), 10d8d056 (R3)
 gate:
   analyze: 0
   test: 3138 passed / 0 failed
@@ -94,6 +94,19 @@ design_gate: HTML mock approved (mocks/numpad-voicekey-midpoint.html · 方案 M
 - analyze 0、`flutter test` 全量 **3138 / 0**；10 SmartKeyboard golden 二次重基线（底排 40→44）。
 - 新增/更新测试：`showTopBorder` 开关；语音键断言 200×44 + 白条+顶边 + 渐变胶囊 + 16/w700 白字。
 - 视觉自检：临时拼装截图确认白色一体、樱粉渐变胶囊居中不顶边、底排矮一截且与「记录」键同色（截图后即删）。
+
+## R3 — 语音键上下留白对齐 12dp 行距（commit 10d8d056）
+
+用户 R3 反馈：「语音按键的下方和数字键留白过大，需要保持和数字键之间的距离一致，
+上方留白距离也是相同处理」。
+
+- 现状：胶囊下方留白 ≈20dp（语音条 `vertical:8` 的 8 + 键盘自身 `top:12` 的 12），
+  比数字行间距 12dp 大。
+- 改动：语音条 `padding` 由 `symmetric(vertical: 8)` → **`only(top: 12)`**。
+  胶囊上方 = 语音条 top 12dp；胶囊下方 = 语音条 bottom 0 + 键盘 top padding 12dp =
+  12dp。→ **胶囊像一行键盘行一样，上下各 12dp，与数字行间距完全一致**。
+- 仅 `hold_to_talk_bar.dart` 一处；test 断言 `bar.padding == EdgeInsets.only(top: 12)`。
+- analyze 0、full test 3138/3138、**0 golden**（语音条无 golden 覆盖；SmartKeyboard golden 不含语音条）。
 
 ## On-device verification (human · pending)
 1. **白色一体** — 语音键白条与下方键盘连成一整片白色、无中间分隔线，组合顶部一条边线。
