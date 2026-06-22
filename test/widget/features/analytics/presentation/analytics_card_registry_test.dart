@@ -52,6 +52,10 @@ const Set<String> _analyticsProviderTypeWhitelist = <String>{
   // 260620-v2m / D2: donut 成员 dimension family — analytics state_* family,
   // GUARD-01 compliant (zero home/*); folded into categoryDonutRefreshTargets.
   'MemberSpendBreakdownProvider',
+  // 260622-d5i / D3: 悦己 by-member joy split family — analytics state_* family,
+  // GUARD-01 compliant (zero home/*); folded into categoryDonutRefreshTargets so
+  // pull-to-refresh covers the drawer's 成员 dimension joy path.
+  'JoyMemberAmountsProvider',
   'HappinessReportProvider',
   'EarliestTransactionMonthProvider',
   'FamilyHappinessProvider',
@@ -280,6 +284,14 @@ void main() {
             joyMetricVariant: ctx.joyMetricVariant,
           ),
           memberSpendBreakdownProvider(
+            bookId: ctx.bookId,
+            startDate: ctx.startDate,
+            endDate: ctx.endDate,
+            joyMetricVariant: ctx.joyMetricVariant,
+          ),
+          // 260622-d5i / D3: the drawer's 成员-dimension joy split, folded in so
+          // pull-to-refresh covers the by-member joy path (unfiltered key).
+          joyMemberAmountsProvider(
             bookId: ctx.bookId,
             startDate: ctx.startDate,
             endDate: ctx.endDate,
