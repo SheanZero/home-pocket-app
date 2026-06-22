@@ -395,41 +395,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     await _fillFormFromText(text);
   }
 
-  /// Re-arm a fresh `startListening` so the continuous session keeps listening
-  /// after the platform recognizer self-terminates (30s listenFor / 3s pauseFor
-  /// timeout). Preserves the same merger so chunk-merging spans re-arms.
-  Future<void> _reArmPttListening() async {
-    if (!_continuousActive || !mounted) return;
-    await pttSpeechService.startListening(
-      onResult: _onResult,
-      onSoundLevel: _onSoundLevel,
-      localeId: pttVoiceLocaleId,
-      listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds: 3),
-    );
-  }
-
-  /// 260622-nhs R3 (BUG 2): idempotently GUARANTEE the continuous session is
-  /// listening. The host calls this after a 「重置·恢复账目」 — `resetPttSessionState`
-  /// only clears the transcript/merger/parse buffers and does NOT re-arm, so if
-  /// the recognizer had already self-terminated (pauseFor/done) and no re-arm
-  /// cycle was in flight, the form would silently stop receiving voice. This
-  /// starts a fresh `startListening` ONLY when the session is still active
-  /// (`_continuousActive && _isRecording`) AND the recognizer is not already
-  /// listening — so calling it while live is a safe no-op (no double-start), and
-  /// calling it after exit does nothing.
-  Future<void> restartPttListening() async {
-    if (!_continuousActive || !_isRecording || !mounted) return;
-    if (pttSpeechService.isListening) return;
-    await pttSpeechService.startListening(
-      onResult: _onResult,
-      onSoundLevel: _onSoundLevel,
-      localeId: pttVoiceLocaleId,
-      listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds: 3),
-    );
-  }
-
   /// 260622-nhs R4 (BUG A + BUG B): the 「重置·恢复账目」 reset. Unlike the weak
   /// R3 `resetPttSessionState() + restartPttListening()` pair (which left the
   /// iOS recognizer's ACCUMULATED in-window buffer alive, so the next partial
@@ -533,16 +498,18 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
     // ── Continuous tap session ───────────────────────────────────────────────
     if (_transientSilenceErrors.contains(errorMsg)) {
-      // 260622-nhs R5 (BUG 1): normal silence. Do NOT toast, do NOT flip
-      // isInitialized, do NOT tear down. Keep recording + a sensible listening
-      // status (BUG 2), and re-arm listening via the serialized restart so a
-      // double-start can't race the recognizer.
+      // 260622-nhs R6 (BUG 1): normal silence (the user paused/stopped). Keep
+      // R5's swallow — do NOT toast, do NOT flip isInitialized, do NOT tear the
+      // session down or lock the bar. But unlike R5 (which re-armed via an
+      // unreliable iOS restart that left the mic dead + status stuck on
+      // listening), the ONE-SHOT model STOPS cleanly: status → stopped so the
+      // panel shows 「停止聆听」 + the tap-reset hint, and the user taps 重置 to
+      // record again. No re-arm.
       onPttSessionChanged(() {
-        _isRecording = true;
+        _isRecording = false;
         _soundLevel = 0.0;
-        _listenStatus = PttListenStatus.listening;
+        _listenStatus = PttListenStatus.stopped;
       });
-      unawaited(_reArmAfterTransientError());
       return;
     }
 
@@ -559,32 +526,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     });
     showVoiceRecognitionErrorToast(context, errorMsg);
     unawaited(_recoverBarAfterFatalError());
-  }
-
-  /// 260622-nhs R5 (BUG 1): re-arm listening after a swallowed transient error.
-  /// Serialized through `_restarting` so the recognizer's own
-  /// notListening/done (and any concurrent re-arm) can't race a double-start
-  /// that hangs the plugin (the same 「假死」 hazard the reset guards against).
-  Future<void> _reArmAfterTransientError() async {
-    if (_restarting || !_continuousActive || !mounted) return;
-    _restarting = true;
-    try {
-      await pttSpeechService.startListening(
-        onResult: _onResult,
-        onSoundLevel: _onSoundLevel,
-        localeId: pttVoiceLocaleId,
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
-      );
-      if (mounted && _continuousActive) {
-        onPttSessionChanged(() {
-          _isRecording = true;
-          _listenStatus = PttListenStatus.listening;
-        });
-      }
-    } finally {
-      _restarting = false;
-    }
   }
 
   /// 260622-nhs R5 (BUG 1): after a fatal error the platform may have flipped
@@ -605,21 +546,30 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   void onStatus(String status) {
     final terminal = status == 'done' || status == 'notListening';
     // 260622-nhs R4 (BUG B): while a reset is serializing cancel→start, the
-    // cancel emits notListening/done. Auto-re-arming here would race the reset's
-    // own startListening into a double-start that hangs the plugin (post-reset
-    // 「假死」). The reset owns the restart — suppress the auto re-arm entirely.
+    // cancel emits notListening/done. Acting on it here would race the reset's
+    // own startListening — the reset owns the restart, so suppress entirely.
     if (_restarting && terminal) {
       return;
     }
-    // In the continuous tap session a terminal status is NOT a commit/end
-    // signal — it's a recognizer timeout. Re-arm to keep listening rather than
-    // letting the base handler tear the session down.
+    // 260622-nhs R6 (BUG 1): ONE-SHOT model. The iOS continuous re-arm was
+    // unreliable — re-calling startListening on a terminal status often left the
+    // mic dead while the status optimistically stayed 「正在聆听」. Instead, when
+    // the recognizer naturally terminates in the continuous tap session, STOP
+    // cleanly (status → stopped, isRecording → false) and DO NOT re-arm. The
+    // panel then shows 「停止聆听」 + the tap-reset hint; the user taps 重置 to
+    // record again (resetPttSessionAndRestart). pauseFor:3s already tolerates
+    // in-sentence pauses, so a single listen spans a normal utterance.
     if (_continuousActive && terminal && _isRecording) {
-      unawaited(_reArmPttListening());
+      onPttSessionChanged(() {
+        _isRecording = false;
+        _soundLevel = 0.0;
+        _listenStatus = PttListenStatus.stopped;
+      });
+      super.onStatus(status);
       return;
     }
-    // 260622-nhs R4 (BUG C): a terminal status outside the continuous re-arm
-    // path means the recognizer stopped — surface it.
+    // 260622-nhs R4 (BUG C): a terminal status outside the continuous path means
+    // the recognizer stopped — surface it.
     if (terminal && !_isRecording) {
       onPttSessionChanged(() => _listenStatus = PttListenStatus.stopped);
     }

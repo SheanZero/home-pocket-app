@@ -492,7 +492,7 @@ void main() {
   );
 
   testWidgets(
-    'R2: a terminal recognizer status re-arms listening while the session is open',
+    'R6: a terminal recognizer status STOPS the one-shot session (no re-arm)',
     (tester) async {
       useTallSurface(tester);
       final speech = CapturingSpeechService();
@@ -506,110 +506,26 @@ void main() {
       final host = hostOf(tester);
       host.startPttTapSession();
       await tester.pump();
+      final startsBefore = speech.startCount;
       speech.startedLocaleId = null; // simulate the platform stopping
 
       speech.emitTerminalStatus();
       await tester.pumpAndSettle();
 
-      expect(host.pttIsRecording, isTrue,
-          reason: 're-arm must keep the session open, not end it');
-      expect(speech.startedLocaleId, isNotNull,
-          reason: 'startListening was called again to keep listening');
+      // R6: the iOS continuous re-arm was unreliable (mic died but status stuck
+      // on listening). The one-shot model stops cleanly instead of re-arming.
+      expect(host.pttIsRecording, isFalse,
+          reason: 'a terminal status ends the one-shot recording');
+      expect(host.pttListenStatus, PttListenStatus.stopped,
+          reason: 'status reflects the stopped recognizer');
+      expect(speech.startCount, startsBefore,
+          reason: 'no auto re-arm — the recognizer is NOT restarted');
     },
   );
 
-  testWidgets(
-    'R3: restartPttListening re-arms after the recognizer self-terminated '
-    '(reset keeps listening)',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase(const {});
-
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse),
-      );
-      await tester.pumpAndSettle();
-
-      final host = hostOf(tester);
-      host.startPttTapSession();
-      await tester.pump();
-      expect(host.pttIsRecording, isTrue);
-
-      // Simulate the platform recognizer having self-terminated WITHOUT a
-      // re-arm yet (e.g. between cycles): it is no longer listening.
-      speech.stopped = true;
-      speech.startedLocaleId = null;
-      expect(speech.isListening, isFalse);
-
-      // R3 BUG 2: a reset must GUARANTEE listening resumes — restartPttListening
-      // is idempotent and re-arms only because the session is still active and
-      // the recognizer is not currently listening.
-      await host.restartPttListening();
-      await tester.pumpAndSettle();
-
-      expect(host.pttIsRecording, isTrue,
-          reason: 'the session stays active after restart');
-      expect(speech.isListening, isTrue,
-          reason: 'restartPttListening re-armed startListening');
-    },
-  );
-
-  testWidgets(
-    'R3: restartPttListening is idempotent — no double-start while listening',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase(const {});
-
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse),
-      );
-      await tester.pumpAndSettle();
-
-      final host = hostOf(tester);
-      host.startPttTapSession();
-      await tester.pump();
-      expect(speech.isListening, isTrue);
-
-      // Already listening — a restart must be a no-op (idempotent guard).
-      speech.startCount = 0;
-      await host.restartPttListening();
-      await tester.pumpAndSettle();
-
-      expect(speech.startCount, 0,
-          reason: 'restart must not re-call startListening while listening');
-    },
-  );
-
-  testWidgets(
-    'R3: restartPttListening does nothing once the session ended',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase(const {});
-
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse),
-      );
-      await tester.pumpAndSettle();
-
-      final host = hostOf(tester);
-      host.startPttTapSession();
-      await tester.pump();
-      await host.exitPttTapSession();
-      await tester.pumpAndSettle();
-      expect(host.pttIsRecording, isFalse);
-
-      speech.startCount = 0;
-      await host.restartPttListening();
-      await tester.pumpAndSettle();
-
-      expect(speech.startCount, 0,
-          reason: 'a closed session must not be re-armed');
-      expect(host.pttIsRecording, isFalse);
-    },
-  );
+  // 260622-nhs R6: the R3 `restartPttListening` re-arm API was removed with the
+  // one-shot model (the host now re-records via resetPttSessionAndRestart — a
+  // full cancel→fresh-start — not an idempotent re-arm). Its 3 tests are gone.
 
   testWidgets(
     'R2: exitPttTapSession stops the recognizer and ends the session',
@@ -905,8 +821,8 @@ void main() {
   // ── R5 BUG 1: continuous-session onError — swallow transient no-match ───────
 
   testWidgets(
-    'R5 BUG 1: a transient no-match (iOS permanent:true) during a continuous '
-    'session does NOT toast and does NOT lock the bar',
+    'R6 BUG 1: a transient no-match (iOS permanent:true) STOPS the one-shot '
+    'session — no toast, no bar lock, no re-arm',
     (tester) async {
       useTallSurface(tester);
       final speech = CapturingSpeechService();
@@ -925,28 +841,32 @@ void main() {
       final startsBefore = speech.startCount;
       // iOS reports error_no_match as permanent:true — the base handler would
       // flip isInitialized=false (locking the bar) + toast. The continuous
-      // override must swallow it as normal silence.
+      // override must STILL swallow the toast (R5), but R6 stops cleanly rather
+      // than re-arming (the unreliable iOS re-arm left the mic dead + status
+      // stuck on listening).
       speech.emitError('error_no_match', permanent: true);
       await tester.pumpAndSettle();
 
-      // No toast surfaced.
+      // No toast surfaced (R5 swallow preserved).
       expect(find.text('音声を認識できませんでした。もう一度お試しください'), findsNothing,
           reason: 'a silence no-match must not toast in hands-free mode');
-      // Bar stays usable — the guard `pttServiceInitialized && !pttIsRecording`
-      // is what the tap path checks; isInitialized must NOT flip false.
+      // Bar stays usable — isInitialized must NOT flip false.
       expect(host.pttServiceInitialized, isTrue,
           reason: 'transient error must not lock the bar');
-      // The session keeps listening (re-armed via the serialized restart).
-      expect(host.pttIsRecording, isTrue,
-          reason: 'a transient no-match keeps the continuous session listening');
-      expect(speech.startCount, greaterThan(startsBefore),
-          reason: 'the recognizer was re-armed to keep listening');
+      // R6: the one-shot session STOPS (no re-arm); the user taps 重置 to record
+      // again. status → stopped surfaces the 「停止聆听」 + tap-reset hint.
+      expect(host.pttIsRecording, isFalse,
+          reason: 'a transient no-match stops the one-shot session');
+      expect(host.pttListenStatus, PttListenStatus.stopped,
+          reason: 'status → stopped so the panel shows 停止聆听 + tap-reset hint');
+      expect(speech.startCount, startsBefore,
+          reason: 'no auto re-arm — the recognizer is NOT restarted');
     },
   );
 
   testWidgets(
-    'R5 BUG 1: a transient speech-timeout during a continuous session is '
-    'swallowed (no toast, no lock, keeps listening)',
+    'R6 BUG 1: a transient speech-timeout STOPS the one-shot session '
+    '(no toast, no lock, no re-arm)',
     (tester) async {
       useTallSurface(tester);
       final speech = CapturingSpeechService();
@@ -960,13 +880,18 @@ void main() {
       final host = hostOf(tester);
       host.startPttTapSession();
       await tester.pump();
+      final startsBefore = speech.startCount;
 
       speech.emitError('error_speech_timeout', permanent: true);
       await tester.pumpAndSettle();
 
       expect(find.text('音声認識でエラーが発生しました'), findsNothing);
       expect(host.pttServiceInitialized, isTrue);
-      expect(host.pttIsRecording, isTrue);
+      expect(host.pttIsRecording, isFalse,
+          reason: 'a transient timeout stops the one-shot session');
+      expect(host.pttListenStatus, PttListenStatus.stopped);
+      expect(speech.startCount, startsBefore,
+          reason: 'no auto re-arm on a transient timeout');
     },
   );
 
@@ -1072,8 +997,7 @@ void main() {
   );
 
   testWidgets(
-    'R5 BUG 2: a transient no-match keeps the status sensible (listening) '
-    'while re-arming — never stuck',
+    'R6 BUG 2: a transient no-match goes to stopped (never stuck on listening)',
     (tester) async {
       useTallSurface(tester);
       final speech = CapturingSpeechService();
@@ -1091,10 +1015,42 @@ void main() {
       speech.emitError('error_no_match', permanent: true);
       await tester.pumpAndSettle();
 
-      // Still listening (re-armed) — sensible status, not stopped, not stuck.
-      expect(host.pttListenStatus, PttListenStatus.listening,
-          reason: 'a swallowed transient keeps the session in listening');
-      expect(host.pttIsRecording, isTrue);
+      // R6: the one-shot model goes to stopped — the panel shows 「停止聆听」 and
+      // the tap-reset hint, NEVER the stuck-on-listening dead-mic state.
+      expect(host.pttListenStatus, PttListenStatus.stopped,
+          reason: 'a swallowed transient stops cleanly (no stuck listening)');
+      expect(host.pttIsRecording, isFalse);
+    },
+  );
+
+  // ── R6: one-shot listen — exactly ONE startListening per session ───────────
+
+  testWidgets(
+    'R6: a session issues exactly ONE startListening (no infinite re-arm loop)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(speech.startCount, 1,
+          reason: 'one-shot: a single startListening opens the session');
+
+      // The recognizer self-terminates (timeout) — the old model re-armed here.
+      speech.startedLocaleId = null;
+      speech.emitTerminalStatus();
+      await tester.pumpAndSettle();
+
+      expect(speech.startCount, 1,
+          reason: 'no re-arm — still exactly one startListening after terminal');
+      expect(host.pttIsRecording, isFalse);
     },
   );
 }
