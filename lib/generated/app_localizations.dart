@@ -1653,6 +1653,18 @@ abstract class S {
   /// **'Tap anywhere to exit'**
   String get voiceTapToExit;
 
+  /// Voice panel status: a parse / form-fill is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Parsing…'**
+  String get voiceStatusProcessing;
+
+  /// Voice panel status: the recognizer stopped (not listening)
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped'**
+  String get voiceStatusStopped;
+
   /// Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot
   ///
   /// In en, this message translates to:

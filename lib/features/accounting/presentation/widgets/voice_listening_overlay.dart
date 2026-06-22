@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../screens/voice_ptt_session_mixin.dart' show PttListenStatus;
 import 'voice_waveform.dart';
 
 /// Quick task 260622-nhs R3 (BUG 3): inline auto-fill voice panel that REPLACES
@@ -32,6 +33,7 @@ class VoiceRecordPanel extends StatelessWidget {
     required this.soundLevel,
     required this.onExit,
     required this.onReset,
+    this.status = PttListenStatus.listening,
   });
 
   /// Live transcript (partial-or-final) rendered under the listening title.
@@ -39,6 +41,12 @@ class VoiceRecordPanel extends StatelessWidget {
 
   /// Normalized 0.0–1.0 sound level driving the waveform bars.
   final double soundLevel;
+
+  /// 260622-nhs R4 (BUG C): the live recognizer status driving the panel title
+  /// + pulse-dot colour (listening → red 「正在聆听…」, processing → amber
+  /// 「正在解析…」, stopped → grey 「停止聆听」). Defaults to listening so callers
+  /// that don't yet thread status see the prior behaviour.
+  final PttListenStatus status;
 
   /// Tap-on-blank-area exit: stop listening + dismiss, keep the filled content.
   final VoidCallback onExit;
@@ -50,6 +58,22 @@ class VoiceRecordPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final l10n = S.of(context);
+
+    // 260622-nhs R4 (BUG C): title + pulse-dot colour reflect the live status.
+    final (statusTitle, statusColor) = switch (status) {
+      PttListenStatus.listening => (
+          l10n.listeningTitle,
+          palette.recordingGradientStart,
+        ),
+      PttListenStatus.processing => (
+          l10n.voiceStatusProcessing,
+          palette.warning,
+        ),
+      PttListenStatus.stopped => (
+          l10n.voiceStatusStopped,
+          palette.textTertiary,
+        ),
+    };
 
     // Inline panel occupying the keypad footprint. Tap the blank area to exit;
     // the reset button (below) has its own non-bubbling onTap.
@@ -71,16 +95,16 @@ class VoiceRecordPanel extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Listening title with a pulsing recording-red dot.
+            // Status title with a pulsing status-coloured dot (BUG C).
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PulsingDot(color: palette.recordingGradientStart),
+                _PulsingDot(color: statusColor),
                 const SizedBox(width: 6),
                 Text(
-                  l10n.listeningTitle,
+                  statusTitle,
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: palette.recordingGradientStart,
+                    color: statusColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

@@ -826,6 +826,12 @@ class SJa extends S {
   String get voiceTapToExit => '空白をタップで終了';
 
   @override
+  String get voiceStatusProcessing => '解析中…';
+
+  @override
+  String get voiceStatusStopped => '聞き取り停止';
+
+  @override
   String get voiceResetRestore => 'リセット';
 
   @override

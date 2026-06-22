@@ -834,6 +834,12 @@ class SEn extends S {
   String get voiceTapToExit => 'Tap anywhere to exit';
 
   @override
+  String get voiceStatusProcessing => 'Parsing…';
+
+  @override
+  String get voiceStatusStopped => 'Stopped';
+
+  @override
   String get voiceResetRestore => 'Reset';
 
   @override

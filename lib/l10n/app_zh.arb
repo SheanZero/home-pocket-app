@@ -1082,6 +1082,14 @@
   "@voiceTapToExit": {
     "description": "Listening modal hint: tap anywhere to exit and keep the filled content"
   },
+  "voiceStatusProcessing": "正在解析…",
+  "@voiceStatusProcessing": {
+    "description": "Voice panel status: a parse / form-fill is in progress"
+  },
+  "voiceStatusStopped": "停止聆听",
+  "@voiceStatusStopped": {
+    "description": "Voice panel status: the recognizer stopped (not listening)"
+  },
   "voiceResetRestore": "重置",
   "@voiceResetRestore": {
     "description": "Listening modal reset button: clear transcript and restore the form to the pre-speech snapshot"

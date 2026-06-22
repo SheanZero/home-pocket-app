@@ -3,6 +3,7 @@
 // chrome. Tap the panel's blank area = exit; the reset button does NOT bubble).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/voice_ptt_session_mixin.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/voice_listening_overlay.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/voice_waveform.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -125,5 +126,77 @@ void main() {
 
     expect(resets, 1, reason: 'reset button restores the form');
     expect(exits, 0, reason: 'reset tap must NOT bubble to the exit handler');
+  });
+
+  // ── R4 BUG C: live status drives the title ────────────────────────────────
+
+  testWidgets('R4 BUG C: status listening shows the listening title',
+      (tester) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(
+          body: VoiceRecordPanel(
+            transcript: 'x',
+            soundLevel: 0.1,
+            status: PttListenStatus.listening,
+            onExit: () {},
+            onReset: () {},
+          ),
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+    await tester.pump();
+
+    final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+    expect(find.text(l10n.listeningTitle), findsOneWidget);
+    expect(find.text(l10n.voiceStatusProcessing), findsNothing);
+    expect(find.text(l10n.voiceStatusStopped), findsNothing);
+  });
+
+  testWidgets('R4 BUG C: status processing shows the parsing title',
+      (tester) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(
+          body: VoiceRecordPanel(
+            transcript: 'x',
+            soundLevel: 0.1,
+            status: PttListenStatus.processing,
+            onExit: () {},
+            onReset: () {},
+          ),
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+    await tester.pump();
+
+    final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+    expect(find.text(l10n.voiceStatusProcessing), findsOneWidget);
+    expect(find.text(l10n.listeningTitle), findsNothing);
+  });
+
+  testWidgets('R4 BUG C: status stopped shows the stopped title',
+      (tester) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(
+          body: VoiceRecordPanel(
+            transcript: 'x',
+            soundLevel: 0.1,
+            status: PttListenStatus.stopped,
+            onExit: () {},
+            onReset: () {},
+          ),
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+    await tester.pump();
+
+    final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+    expect(find.text(l10n.voiceStatusStopped), findsOneWidget);
+    expect(find.text(l10n.listeningTitle), findsNothing);
   });
 }

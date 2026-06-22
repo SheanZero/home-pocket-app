@@ -824,6 +824,12 @@ class SZh extends S {
   String get voiceTapToExit => '轻点空白处退出';
 
   @override
+  String get voiceStatusProcessing => '正在解析…';
+
+  @override
+  String get voiceStatusStopped => '停止聆听';
+
+  @override
   String get voiceResetRestore => '重置';
 
   @override
