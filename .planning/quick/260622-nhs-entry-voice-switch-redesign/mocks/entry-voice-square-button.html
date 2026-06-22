@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语音面板 — 中央方块双状态按钮（删除底部重置键）</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F5F1ED; --divider:#E6DCDA; --border:#E6DCDA;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#999999;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --recStart:#E5484D; --recEnd:#C93040;
+    --squareGrey:#EAEDEC; --squareGreyIcon:#9AA8A0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1000px;margin:0 auto 26px;}
+  .page-head h1{font-size:23px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.8;color:#5a5048;max-width:880px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--recStart);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.85;color:#5a5048;max-width:880px;}
+  .page-head .prob b{color:#b03a3f;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:42px;justify-content:center;align-items:flex-start;max-width:1000px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px;width:374px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;color:#fff;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .col.rec > .cap .n{background:var(--squareGreyIcon);} .col.stop > .cap .n{background:var(--recStart);}
+
+  .phone{width:374px;height:812px;background:var(--bg);border-radius:42px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;border:1px solid #ddd3cc;position:relative;}
+  .sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;
+    font-size:14px;font-weight:700;color:var(--textPrimary);position:relative;background:var(--card);}
+  .sb .island{position:absolute;left:50%;top:9px;translate:-50% 0;width:96px;height:26px;border-radius:16px;background:#0a0a0a;}
+  .sb .r{font-size:12px;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:14px 18px 8px;display:flex;align-items:center;gap:10px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:13px;font-weight:700;padding:6px 11px;border-radius:9px;}
+  .amount .val{flex:1;text-align:right;font-size:44px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;line-height:1;}
+  .amount .clr{color:var(--textTertiary);font-size:18px;width:30px;height:30px;border-radius:50%;background:var(--muted);display:flex;align-items:center;justify-content:center;}
+
+  .form{padding:6px 16px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;}
+  .cardbox{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .frow{display:flex;align-items:center;gap:10px;padding:13px 14px;}
+  .frow + .frow{border-top:1px solid var(--divider);}
+  .frow .ic{font-size:15px;width:18px;text-align:center;color:var(--textSecondary);}
+  .frow .lbl{font-size:14px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .frow .v.ph{color:var(--textTertiary);font-weight:500;}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .usecard{display:flex;align-items:center;padding:12px 14px;}
+  .usecard .ul{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .ledger{display:flex;gap:9px;margin-left:auto;}
+  .lchip{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+
+  /* ===== panel (current layout kept) ===== */
+  .panel{flex-shrink:0;background:var(--card);border-top:1px solid var(--divider);padding:16px 20px 26px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .status{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;}
+  .status .dot{width:9px;height:9px;border-radius:50%;}
+  .status.listening{color:var(--recStart);} .status.listening .dot{background:var(--recStart);animation:pulse 1s infinite;}
+  .status.stopped{color:var(--squareGreyIcon);} .status.stopped .dot{background:var(--squareGreyIcon);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .transcript{text-align:center;font-size:18px;font-weight:700;color:var(--textPrimary);}
+  .transcript.muted{color:var(--textSecondary);}
+  .wave{display:flex;align-items:flex-end;gap:3px;height:30px;}
+  .wave i{width:3px;border-radius:2px;background:var(--daily);opacity:.85;}
+  .wave.live i{animation:bounce 1s infinite ease-in-out;}
+  @keyframes bounce{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
+  .wave.idle i{opacity:.3;}
+
+  /* central square — DUAL STATE */
+  .square{width:74px;height:74px;border-radius:22px;display:flex;align-items:center;justify-content:center;}
+  .square .ico{width:32px;height:32px;}
+  /* recording → grey, mic icon, passive */
+  .square.rec{background:var(--squareGrey);color:var(--squareGreyIcon);}
+  /* stopped → red, reset icon, tappable action */
+  .square.stop{background:linear-gradient(to bottom,var(--recStart),var(--recEnd));color:#fff;
+    box-shadow:0 6px 18px rgba(201,48,64,.32);cursor:pointer;}
+  .square.stop:active{transform:scale(.96);}
+
+  .hint{text-align:center;font-size:12.5px;color:var(--textTertiary);font-weight:600;}
+  .hint.action{color:var(--recStart);}
+
+  .note{width:374px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;font-size:12.5px;color:#5a5048;line-height:1.7;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;}
+  .note .badge.grey{background:#eef1f0;color:#5a6b63;border:1px solid #d8e0db;}
+  .note .badge.red{background:#fdecec;color:#b03a3f;border:1px solid #f3cccc;}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note .k{display:inline-block;min-width:42px;color:#8a7f76;font-weight:700;}
+  .legend{max-width:1000px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;border:1px solid #e3dad2;border-radius:10px;padding:13px 16px;line-height:1.85;}
+  .legend b{color:#2c2a26;}
+  .micSvg{display:none;}
+</style>
+</head>
+<body>
+
+<svg class="micSvg"><defs>
+  <g id="mic"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></g>
+  <g id="reset"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></g>
+</defs></svg>
+
+<div class="page-head">
+  <h1>语音面板 · 中央方块双状态按钮（删除底部重置键）</h1>
+  <p>保持现在的面板布局，只改按键逻辑：<b>删掉底部「重置·恢复账目」按钮</b>，把功能并进中央方块 ——
+  <b>录音中 = 灰色方块 + 麦克风图标</b>（被动指示，不可点）；<b>停止时 = 红色方块 + 重置图标</b>（可点 = 重新录入）。提示文案不变。</p>
+  <div class="prob"><b>方块双状态:</b>录音中灰（你在说，方块是状态指示）→ 识别器停止后变红 + 重置图标（醒目，提示你点它重新录）。
+  「点击重置重新录入」「轻点空白处退出」保持不变。</div>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== 录音中 ===================== -->
+  <div class="col rec">
+    <div class="cap"><span class="n">1</span>录音中 · 灰方块（麦克风）</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v ph">输入店铺</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="panel">
+        <div class="status listening"><span class="dot"></span>正在聆听…</div>
+        <div class="transcript">今天吃饭用了 888 日元</div>
+        <div class="wave live" data-wave></div>
+        <div class="square rec"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg></div>
+        <div class="hint action" style="visibility:hidden">点击重置重新录入</div>
+        <div class="hint">轻点空白处退出</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge grey">录音中</span>
+      <h4>中央方块 = 灰色 + 麦克风图标（被动）</h4>
+      <div style="margin:5px 0"><span class="k">状态</span>● 正在聆听（红点脉冲）+ 波形动</div>
+      <div style="margin:5px 0"><span class="k">方块</span>灰底灰麦克风 —— 仅状态指示，不可点</div>
+      <div style="margin:5px 0"><span class="k">退出</span>轻点空白处（无底部重置键）</div>
+    </div>
+  </div>
+
+  <!-- ===================== 停止 ===================== -->
+  <div class="col stop">
+    <div class="cap"><span class="n">2</span>停止聆听 · 红方块（重置）</div>
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v ph">输入店铺</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <div class="panel">
+        <div class="status stopped"><span class="dot"></span>停止聆听</div>
+        <div class="transcript muted">今天吃饭用了 888 日元</div>
+        <div class="wave idle" data-wave></div>
+        <div class="square stop"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><use href="#reset"/></svg></div>
+        <div class="hint action">点击重置重新录入</div>
+        <div class="hint">轻点空白处退出</div>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge red">停止聆听</span>
+      <h4>中央方块 = 红色 + 重置图标（可点 = 重新录入）</h4>
+      <div style="margin:5px 0"><span class="k">状态</span>○ 停止聆听（灰点）+ 波形转静</div>
+      <div style="margin:5px 0"><span class="k">方块</span>红底白重置图标 —— <b>点它重新录入</b>（取代被删的底部重置键）</div>
+      <div style="margin:5px 0"><span class="k">提示</span>「点击重置重新录入」+「轻点空白处退出」不变</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>改动:</b>① 删除底部「重置·恢复账目」按钮；② 中央方块双状态 —— 录音中<b>灰 + 麦克风</b>（被动指示），
+  停止后<b>红 + 重置图标</b>（点击 = 重新录入，即原重置逻辑）；③ 其余布局/状态/提示<b>保持现在的设计不变</b>。
+  <b>配色</b>对齐 app_palette.dart（录音红 #E5484D→#C93040 / 停止灰 #9AA8A0 / 方块灰底 #EAEDEC / 日常绿 #5FAE72）。
+  <br>实现：`VoiceRecordPanel` 去掉 reset 按钮，中央 mic 方块按 `pttListenStatus` 切换底色+图标（listening→灰mic / stopped→红 reset 可点 onReset）；删 `voiceResetRestore(Sub)` 文案引用。
+</div>
+
+<script>
+  document.querySelectorAll('[data-wave]').forEach(w=>{
+    const hs=[8,14,20,26,22,16,22,28,24,18,12,18,24,20,14,9,15,22,18,11];
+    w.innerHTML = hs.map((h,i)=>`<i style="height:${h}px;animation-delay:${i*0.05}s"></i>`).join('');
+  });
+</script>
+</body>
+</html>

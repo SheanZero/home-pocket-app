@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语音面板布局重设计 — 聆听态/停止态 · 重置去「恢复账目」</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F5F1ED; --divider:#E6DCDA; --border:#E6DCDA;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#999999;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --primary:#6FA36F; --primaryLight:#EEF6EC; --primaryBorder:#CFE6CF;
+    --fabStart:#E09DB4; --fabEnd:#D98CA0; --fabShadow:rgba(217,140,160,.32);
+    --recStart:#E5484D; --recEnd:#C93040;
+    --stopGrey:#9AA8A0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;
+    font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:32px 20px 80px;color:#3a3833;}
+  .page-head{max-width:1180px;margin:0 auto 26px;}
+  .page-head h1{font-size:23px;color:#2c2a26;margin-bottom:10px;}
+  .page-head p{font-size:14px;line-height:1.8;color:#5a5048;max-width:940px;}
+  .page-head .prob{background:#fff;border:1px solid #e3dad2;border-left:4px solid var(--primary);
+    border-radius:10px;padding:13px 16px;margin-top:14px;font-size:13.5px;line-height:1.8;color:#5a5048;max-width:940px;}
+  .page-head .prob b{color:var(--dailyText);}
+
+  .grid{display:flex;flex-wrap:wrap;gap:34px;justify-content:center;align-items:flex-start;max-width:1240px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px;width:374px;}
+  .col > .cap{font-size:15px;font-weight:700;color:#2c2a26;display:flex;align-items:center;gap:8px;text-align:center;}
+  .col > .cap .n{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+
+  .phone{width:374px;height:812px;background:var(--bg);border-radius:42px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;border:1px solid #ddd3cc;position:relative;}
+  .sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;
+    font-size:14px;font-weight:700;color:var(--textPrimary);position:relative;background:var(--card);}
+  .sb .island{position:absolute;left:50%;top:9px;translate:-50% 0;width:96px;height:26px;border-radius:16px;background:#0a0a0a;}
+  .sb .r{font-size:12px;}
+  .bar{height:50px;background:var(--card);display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .bar .x{font-size:22px;color:var(--textSecondary);width:42px;}
+  .bar .t{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--textPrimary);}
+  .bar .sp{width:42px;}
+
+  .amount{margin:14px 18px 8px;display:flex;align-items:center;gap:10px;}
+  .cur{background:var(--dailyLight);color:var(--dailyText);font-size:13px;font-weight:700;padding:6px 11px;border-radius:9px;}
+  .amount .val{flex:1;text-align:right;font-size:44px;font-weight:700;color:var(--dailyText);font-variant-numeric:tabular-nums;line-height:1;}
+  .amount .clr{color:var(--textTertiary);font-size:20px;width:30px;height:30px;border-radius:50%;background:var(--muted);display:flex;align-items:center;justify-content:center;}
+
+  .form{padding:6px 16px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;}
+  .cardbox{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .frow{display:flex;align-items:center;gap:10px;padding:13px 14px;}
+  .frow + .frow{border-top:1px solid var(--divider);}
+  .frow .ic{font-size:15px;width:18px;text-align:center;color:var(--textSecondary);}
+  .frow .lbl{font-size:14px;color:var(--textSecondary);}
+  .frow .v{margin-left:auto;font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .frow .v.ph{color:var(--textTertiary);font-weight:500;}
+  .frow .chev{color:var(--textTertiary);font-size:16px;margin-left:2px;}
+  .usecard{display:flex;align-items:center;padding:12px 14px;}
+  .usecard .ul{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .ledger{display:flex;gap:9px;margin-left:auto;}
+  .lchip{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:20px;
+    border:1.5px solid var(--border);background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);}
+  .lchip.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+
+  .mic-ico{width:22px;height:22px;color:currentColor;}
+
+  /* ===== panel base (replaces keypad in place) ===== */
+  .panel{flex-shrink:0;background:var(--card);border-top:1px solid var(--divider);padding:16px 20px 26px;}
+  .vsep{height:1px;background:var(--divider);margin:14px 0;}
+
+  /* waveform */
+  .wave{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:30px;}
+  .wave i{width:3px;border-radius:2px;background:var(--daily);opacity:.85;}
+  .wave.live i{animation:bounce 1s infinite ease-in-out;}
+  @keyframes bounce{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
+
+  /* status line */
+  .status{display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;}
+  .status .dot{width:9px;height:9px;border-radius:50%;}
+  .status.listening{color:var(--recStart);} .status.listening .dot{background:var(--recStart);animation:pulse 1s infinite;}
+  .status.stopped{color:var(--stopGrey);} .status.stopped .dot{background:var(--stopGrey);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .transcript{text-align:center;font-size:18px;font-weight:700;color:var(--textPrimary);line-height:1.4;}
+  .transcript.muted{color:var(--textSecondary);}
+
+  /* mic blob */
+  .mic{width:64px;height:64px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#fff;margin:0 auto;}
+  .mic .mic-ico{width:30px;height:30px;}
+  .mic.rec{background:linear-gradient(to bottom,var(--recStart),var(--recEnd));box-shadow:0 6px 16px rgba(201,48,64,.30);}
+  .mic.stop{background:var(--muted);color:var(--stopGrey);box-shadow:none;}
+
+  .hint{text-align:center;font-size:12.5px;color:var(--textTertiary);font-weight:600;}
+  .hint.action{color:var(--joyText);}
+
+  /* reset button (NO 恢复账目) */
+  .reset{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 22px;border-radius:12px;
+    background:var(--muted);border:1.5px solid var(--border);color:var(--textPrimary);font-size:14.5px;font-weight:700;}
+  .reset .ri{width:17px;height:17px;color:var(--textSecondary);}
+
+  /* action row (variant A) */
+  .actrow{display:flex;align-items:center;justify-content:space-between;}
+  .actrow .exit{font-size:12.5px;color:var(--textTertiary);font-weight:600;}
+
+  /* mini panel (companion state) */
+  .mini{width:374px;background:var(--card);border:1px solid var(--e3dad2,#e3dad2);border-radius:16px;padding:16px 20px 18px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);}
+  .mini .mh{font-size:12px;font-weight:700;color:#8a7f76;margin-bottom:12px;text-align:center;}
+
+  .note{width:374px;background:#fff;border:1px solid #e3dad2;border-radius:13px;padding:14px 16px;font-size:12.5px;color:#5a5048;line-height:1.7;}
+  .note .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:7px;margin-bottom:9px;background:var(--primaryLight);color:var(--dailyText);border:1px solid var(--primaryBorder);}
+  .note h4{font-size:13.5px;color:#2c2a26;margin:0 0 7px;}
+  .note ul{margin:6px 0 0 2px;list-style:none;}
+  .note li{padding-left:18px;position:relative;margin:3px 0;}
+  .note li.pro::before{content:"＋";position:absolute;left:0;color:var(--daily);font-weight:700;}
+  .note li.con::before{content:"－";position:absolute;left:0;color:#c98a6a;font-weight:700;}
+  .legend{max-width:1180px;margin:24px auto 0;font-size:12.5px;color:#6a5f56;background:#fff;border:1px solid #e3dad2;border-radius:10px;padding:13px 16px;line-height:1.85;}
+  .legend b{color:#2c2a26;}
+  .micSvg{display:none;}
+</style>
+</head>
+<body>
+
+<svg class="micSvg"><defs>
+  <g id="mic"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></g>
+</defs></svg>
+
+<div class="page-head">
+  <h1>语音面板布局重设计 · 聆听态 / 停止态</h1>
+  <p>功能已稳定。本稿重排聆听面板布局，并把重置按键文字从「重置 · 恢复账目」<b>简化为「重置」</b>。
+  面板就地替换键盘、不灰背景（不变）。给出 2 个布局变体，每个都画出<b>聆听态</b>（录音中）与<b>停止态</b>（识别器结束）。</p>
+  <div class="prob"><b>共性:</b>状态实时（● 正在聆听 红 / ○ 停止聆听 灰）；停止态麦克风转灰、不脉冲，提示「点击重置重新录入」；
+  「轻点空白处退出」常驻；重置键去掉「· 恢复账目」。</div>
+</div>
+
+<div class="grid">
+
+  <!-- ===================== 变体 A：底部操作行 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">A</span>底部操作行（推荐）</div>
+    <!-- full phone: STOPPED -->
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v ph">输入店铺</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <!-- STOPPED panel -->
+      <div class="panel">
+        <div class="status stopped"><span class="dot"></span>停止聆听</div>
+        <div style="height:12px"></div>
+        <div class="transcript muted">今天吃饭用了 888 日元</div>
+        <div style="height:16px"></div>
+        <div class="mic stop"><svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg></div>
+        <div style="height:9px"></div>
+        <div class="hint action">点击重置重新录入</div>
+        <div class="vsep"></div>
+        <div class="actrow">
+          <span class="reset"><svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>重置</span>
+          <span class="exit">轻点空白处退出</span>
+        </div>
+      </div>
+    </div>
+    <!-- mini: LISTENING -->
+    <div class="mini">
+      <div class="mh">聆听态（录音中）</div>
+      <div class="status listening"><span class="dot"></span>正在聆听…</div>
+      <div style="height:12px"></div>
+      <div class="wave live" data-wave></div>
+      <div style="height:12px"></div>
+      <div class="transcript">今天吃饭用了 888 日元</div>
+      <div style="height:14px"></div>
+      <div class="mic rec"><svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#mic"/></svg></div>
+      <div class="vsep"></div>
+      <div class="actrow">
+        <span class="reset"><svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>重置</span>
+        <span class="exit">轻点空白处退出</span>
+      </div>
+    </div>
+    <div class="note">
+      <span class="badge">推荐 · 操作集中</span>
+      <h4>状态→转写→麦克风→底部操作行</h4>
+      <ul>
+        <li class="pro">重置 + 退出收进一行，竖向更紧凑、层级清晰</li>
+        <li class="pro">重置只剩「重置」，麦克风停止转灰，状态一眼可辨</li>
+        <li class="pro">聆听/停止结构一致，仅波形与颜色变化</li>
+        <li class="con">底部分隔线 + 操作行略增结构</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== 变体 B：极简卡片 ===================== -->
+  <div class="col">
+    <div class="cap"><span class="n">B</span>极简 · 转写为主</div>
+    <!-- full phone: STOPPED -->
+    <div class="phone">
+      <div class="sb"><span>23:14</span><span class="island"></span><span class="r">🔋100</span></div>
+      <div class="bar"><span class="x">×</span><span class="t">添加账目</span><span class="sp"></span></div>
+      <div class="amount"><span class="cur">¥ JPY</span><span class="val">888</span><span class="clr">×</span></div>
+      <div class="form">
+        <div class="cardbox">
+          <div class="frow"><span class="ic">🍽</span><span class="lbl">分类</span><span class="v">食费 › 其他食费</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">📅</span><span class="lbl">日期</span><span class="v">2026年06月22日</span><span class="chev">›</span></div>
+          <div class="frow"><span class="ic">🏪</span><span class="lbl">商家</span><span class="v ph">输入店铺</span></div>
+        </div>
+        <div class="cardbox usecard"><span class="ul">用途</span>
+          <span class="ledger"><span class="lchip daily on">🛡 日常</span><span class="lchip">✨ 悦己</span></span></div>
+      </div>
+      <!-- STOPPED panel (minimal) -->
+      <div class="panel" style="padding-top:20px">
+        <div class="status stopped" style="margin-bottom:14px"><span class="dot"></span>停止聆听 · 点击重置重新录入</div>
+        <div style="background:var(--muted);border-radius:14px;padding:16px 18px;text-align:center;">
+          <div class="transcript">今天吃饭用了 888 日元</div>
+        </div>
+        <div style="height:18px"></div>
+        <div style="text-align:center"><span class="reset" style="padding:0 30px;height:46px;background:var(--joyLight);border-color:#eccdd6;color:var(--joyText)">
+          <svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--joyText)"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>重置</span></div>
+        <div style="height:14px"></div>
+        <div class="hint">轻点空白处退出</div>
+      </div>
+    </div>
+    <!-- mini: LISTENING -->
+    <div class="mini">
+      <div class="mh">聆听态（录音中）</div>
+      <div class="status listening" style="margin-bottom:14px"><span class="dot"></span>正在聆听…&nbsp;&nbsp;</div>
+      <div style="background:var(--dailyLight);border-radius:14px;padding:14px 18px;text-align:center;">
+        <div class="transcript">今天吃饭用了 888 日元</div>
+        <div style="height:10px"></div>
+        <div class="wave live" data-wave></div>
+      </div>
+      <div style="height:16px"></div>
+      <div style="text-align:center"><span class="reset" style="padding:0 30px;height:46px;background:var(--joyLight);border-color:#eccdd6;color:var(--joyText)">
+        <svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--joyText)"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>重置</span></div>
+      <div style="height:12px"></div>
+      <div class="hint">轻点空白处退出</div>
+    </div>
+    <div class="note">
+      <span class="badge">最简 · 转写为主</span>
+      <h4>转写放进柔色卡片，去掉大麦克风</h4>
+      <ul>
+        <li class="pro">最干净，转写是主角，重置一个樱粉胶囊居中</li>
+        <li class="pro">状态与提示并一行，竖向最省</li>
+        <li class="con">无大麦克风，录音中的视觉存在感弱</li>
+        <li class="con">波形塞进卡片，动效空间小</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>两变体共性:</b>面板就地替换键盘、不灰背景；状态实时（红 正在聆听 / 灰 停止聆听）；停止态麦克风转灰不脉冲；
+  停止态提示「点击重置重新录入」；「轻点空白处退出」常驻；重置键<b>去「· 恢复账目」只留「重置」</b>。
+  <b>配色</b>对齐 app_palette.dart（录音红 #E5484D / 停止灰 #9AA8A0 / 樱粉 #D98CA0 / 日常绿 #5FAE72）。
+  <br>选定后我改 `VoiceRecordPanel` 布局 + 去掉 `voiceResetRestoreSub`「· 恢复账目」文案。
+</div>
+
+<script>
+  document.querySelectorAll('[data-wave]').forEach(w=>{
+    const hs=[8,14,20,26,22,16,22,28,24,18,12,18,24,20,14,9,15,22,18,11];
+    w.innerHTML = hs.map((h,i)=>`<i style="height:${h}px;animation-delay:${i*0.05}s"></i>`).join('');
+  });
+</script>
+</body>
+</html>
