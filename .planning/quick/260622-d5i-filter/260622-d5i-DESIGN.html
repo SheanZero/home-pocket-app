@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>统计页 · 分类支出卡片 · 悦己部分 去边框→分割线 设计稿 (260622-d5i)</title>
+<style>
+  :root{
+    /* ADR-019 桜餅×若葉 — light tokens (lib/core/theme/app_palette.dart) */
+    --bg:#FBF7F4; --card:#FFFFFF;
+    --textPrimary:#20352B; --textSecondary:#71877A;
+    --borderDefault:#E6DDD8; --borderDivider:#EAE1DC;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --shared:#5B8AC4;
+    /* JoyWarmPalette j1..j7 (lib/core/theme/joy_warm_palette.dart) */
+    --j1:#D98CA0; --j2:#E2A23B; --j3:#E0664B; --j4:#9B5DA6; --j5:#EBB87A; --j6:#B08363; --j7:#C7A7AE;
+    /* current drawer border = Color.lerp(joy,joyLight,0.55) ≈ */
+    --drawerBorder:#E7B9C6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;background:#EEE7E1;color:var(--textPrimary);padding:28px 18px 60px;}
+  h1{font-size:19px;font-weight:800;margin-bottom:4px;}
+  .sub{font-size:13px;color:#6b6258;margin-bottom:22px;line-height:1.6;}
+  .row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;}
+  .col{display:flex;flex-direction:column;align-items:center;}
+  .col .tag{font-size:12.5px;font-weight:800;margin-bottom:10px;padding:3px 12px;border-radius:20px;letter-spacing:.3px;}
+  .tag-before{background:#F4E3E8;color:#9a4c63;}
+  .tag-after{background:#E4F1E6;color:#2E6B3A;}
+  .tag-filter{background:#E7EEF7;color:#3a5d86;}
+
+  /* phone frame */
+  .phone{width:340px;background:var(--bg);border-radius:30px;padding:14px 12px;border:1px solid #ddd3cc;box-shadow:0 8px 26px rgba(60,40,30,.12);}
+  .secHeader{font-size:15px;font-weight:800;color:var(--textPrimary);padding:6px 4px 12px;}
+
+  .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(60,40,30,.05);}
+
+  /* donut */
+  .donutWrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 2px;}
+  .donut{width:148px;height:148px;border-radius:50%;
+    background:conic-gradient(
+      var(--daily) 0 28%, var(--shared) 28% 46%, #86C79A 46% 60%,
+      #9FBF8A 60% 70%, #86A9D6 70% 78%,
+      var(--j1) 78% 86%, var(--j2) 86% 92%, var(--j3) 92% 96%, #C4B6AD 96% 100%);
+    display:flex;align-items:center;justify-content:center;position:relative;}
+  .donut::after{content:"";position:absolute;width:96px;height:96px;border-radius:50%;background:var(--card);}
+  .donutCenter{position:relative;z-index:1;text-align:center;}
+  .donutCenter .lbl{font-size:10.5px;color:var(--textSecondary);}
+  .donutCenter .amt{font-size:20px;font-weight:800;color:var(--textPrimary);font-variant-numeric:tabular-nums;}
+  .donutCenter .cnt{font-size:10px;color:var(--textSecondary);}
+
+  /* controls: 分类/成员 toggle + member filter */
+  .controls{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 8px;}
+  .seg{display:flex;gap:8px;}
+  .pill{font-size:12px;padding:5px 14px;border-radius:16px;border:1px solid var(--daily);}
+  .pill.on{background:var(--daily);color:#fff;font-weight:700;}
+  .pill.off{background:var(--card);color:var(--textSecondary);}
+  .filterTrigger{font-size:12px;padding:5px 12px;border-radius:16px;border:1px solid var(--borderDefault);background:var(--card);color:var(--textPrimary);display:flex;gap:5px;align-items:center;max-width:150px;}
+  .filterTrigger.active{border-color:var(--shared);color:#3a5d86;background:#F3F7FC;}
+  .filterTrigger .car{font-size:8px;color:var(--textSecondary);}
+
+  /* legend rows */
+  .legend{margin-top:6px;}
+  .legRow{display:flex;align-items:center;gap:9px;padding:6px 2px;font-size:12.5px;}
+  .legRow .dot{width:9px;height:9px;border-radius:2px;flex:0 0 auto;}
+  .legRow .name{flex:1;color:var(--textPrimary);}
+  .legRow .val{color:var(--textSecondary);font-variant-numeric:tabular-nums;}
+
+  /* ===== JOY SECTION — BEFORE: pink-bordered drawer ===== */
+  .joyBefore{margin-top:12px;border:1px solid var(--drawerBorder);border-radius:18px;padding:16px 16px 15px;background:var(--card);}
+  .joyTop{display:flex;justify-content:space-between;align-items:flex-start;}
+  .joyTop .t{font-size:12.5px;font-weight:700;color:var(--joyText);}
+  .joyTop .c{font-size:12px;font-weight:800;color:var(--joyText);}
+  .joybar{display:flex;height:22px;border-radius:7px;overflow:hidden;margin:13px 0 12px;}
+  .joybar span{display:block;height:100%;}
+  .joyLeg{display:flex;flex-direction:column;gap:7px;}
+  .joyLegRow{display:flex;align-items:center;gap:8px;font-size:12px;}
+  .joyLegRow .d{width:9px;height:9px;border-radius:2px;flex:0 0 auto;}
+  .joyLegRow .n{flex:1;color:var(--textPrimary);}
+  .joyLegRow .v{color:var(--textSecondary);font-variant-numeric:tabular-nums;}
+  .joyLegRow .p{color:var(--joyText);font-weight:700;width:34px;text-align:right;}
+
+  /* ===== JOY SECTION — AFTER: divider-separated, borderless ===== */
+  .joyDivider{height:1px;background:var(--borderDivider);margin:16px 0 14px;}
+  .joyAfter{padding:0 2px;}            /* no border, flush within card padding */
+  .joyLabelRow{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+  .joyChip{display:inline-flex;align-items:center;gap:5px;background:var(--joyLight);color:var(--joyText);font-size:11.5px;font-weight:800;padding:2px 10px;border-radius:12px;}
+  .joyChip .heart{font-size:11px;}
+  .joyTotal{margin-left:auto;font-size:12px;font-weight:800;color:var(--joyText);font-variant-numeric:tabular-nums;}
+  .joyCount{font-size:11.5px;color:var(--joyText);font-weight:700;}
+
+  .note{max-width:760px;margin-top:30px;background:#fff;border:1px solid var(--borderDefault);border-radius:12px;padding:18px 20px;font-size:13.5px;line-height:1.75;}
+  .note h2{font-size:15px;margin-bottom:8px;color:var(--textPrimary);}
+  .note h3{font-size:13.5px;margin:14px 0 4px;color:var(--joyText);}
+  .note code{background:#f3ece8;padding:1px 5px;border-radius:4px;font-size:12px;}
+  .note ul{margin:4px 0 4px 18px;}
+  .note .q{background:#FFF7E8;border:1px solid #E9D8A8;border-radius:8px;padding:10px 12px;margin-top:8px;}
+  .legendKey{font-size:12px;color:#6b6258;margin:8px 0 18px;}
+</style>
+</head>
+<body>
+  <h1>统计页 · 「カテゴリ支出 / 分类支出」卡片 — 悦己部分：去边框 → 分割线分离</h1>
+  <p class="sub">
+    Quick 260622-d5i &nbsp;·&nbsp; 目标组件：<code style="font-size:12px">CategoryDonutCard</code> 内嵌的 <code style="font-size:12px">JoySpendDrawer</code>（当前唯一带「边框」的悦己元素）<br>
+    左 = <b>现状 Before</b>（樱粉描边盒子）&nbsp;|&nbsp; 中 = <b>提案 After</b>（去边框，分割线分离）&nbsp;|&nbsp; 右 = <b>After + 成员筛选</b>（联动演示）
+  </p>
+
+  <div class="row">
+
+    <!-- ============ BEFORE ============ -->
+    <div class="col">
+      <div class="tag tag-before">现状 BEFORE</div>
+      <div class="phone">
+        <div class="secHeader">カテゴリ支出</div>
+        <div class="card">
+          <div class="donutWrap">
+            <div class="donut"><div class="donutCenter">
+              <div class="lbl">本月支出</div><div class="amt">¥86,400</div><div class="cnt">128件</div>
+            </div></div>
+          </div>
+          <div class="controls">
+            <div class="seg"><div class="pill on">カテゴリ</div><div class="pill off">メンバー</div></div>
+            <div class="filterTrigger">全メンバー <span class="car">▼</span></div>
+          </div>
+          <div class="legend">
+            <div class="legRow"><span class="dot" style="background:var(--daily)"></span><span class="name">食費</span><span class="val">¥24,200 · 28%</span></div>
+            <div class="legRow"><span class="dot" style="background:var(--shared)"></span><span class="name">住居</span><span class="val">¥15,600 · 18%</span></div>
+            <div class="legRow"><span class="dot" style="background:#86C79A"></span><span class="name">交通</span><span class="val">¥12,100 · 14%</span></div>
+          </div>
+
+          <!-- 悦己: pink-bordered drawer -->
+          <div class="joyBefore">
+            <div class="joyTop"><span class="t">悦び ¥12,800</span><span class="c">4 カテゴリ</span></div>
+            <div class="joybar">
+              <span style="width:42%;background:var(--j1)"></span>
+              <span style="width:27%;background:var(--j2)"></span>
+              <span style="width:19%;background:var(--j3)"></span>
+              <span style="width:12%;background:var(--j4)"></span>
+            </div>
+            <div class="joyLeg">
+              <div class="joyLegRow"><span class="d" style="background:var(--j1)"></span><span class="n">趣味</span><span class="v">¥5,400</span><span class="p">42%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j2)"></span><span class="n">教育</span><span class="v">¥3,500</span><span class="p">27%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j3)"></span><span class="n">外食</span><span class="v">¥2,400</span><span class="p">19%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j4)"></span><span class="n">娯楽</span><span class="v">¥1,500</span><span class="p">12%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ AFTER ============ -->
+    <div class="col">
+      <div class="tag tag-after">提案 AFTER</div>
+      <div class="phone">
+        <div class="secHeader">カテゴリ支出</div>
+        <div class="card">
+          <div class="donutWrap">
+            <div class="donut"><div class="donutCenter">
+              <div class="lbl">本月支出</div><div class="amt">¥86,400</div><div class="cnt">128件</div>
+            </div></div>
+          </div>
+          <div class="controls">
+            <div class="seg"><div class="pill on">カテゴリ</div><div class="pill off">メンバー</div></div>
+            <div class="filterTrigger">全メンバー <span class="car">▼</span></div>
+          </div>
+          <div class="legend">
+            <div class="legRow"><span class="dot" style="background:var(--daily)"></span><span class="name">食費</span><span class="val">¥24,200 · 28%</span></div>
+            <div class="legRow"><span class="dot" style="background:var(--shared)"></span><span class="name">住居</span><span class="val">¥15,600 · 18%</span></div>
+            <div class="legRow"><span class="dot" style="background:#86C79A"></span><span class="name">交通</span><span class="val">¥12,100 · 14%</span></div>
+          </div>
+
+          <!-- divider separates 整体 from 悦己 -->
+          <div class="joyDivider"></div>
+
+          <!-- 悦己: borderless, label chip keeps joy identity -->
+          <div class="joyAfter">
+            <div class="joyLabelRow">
+              <span class="joyChip"><span class="heart">♡</span>悦び</span>
+              <span class="joyCount">4 カテゴリ</span>
+              <span class="joyTotal">¥12,800</span>
+            </div>
+            <div class="joybar">
+              <span style="width:42%;background:var(--j1)"></span>
+              <span style="width:27%;background:var(--j2)"></span>
+              <span style="width:19%;background:var(--j3)"></span>
+              <span style="width:12%;background:var(--j4)"></span>
+            </div>
+            <div class="joyLeg" style="margin-top:12px">
+              <div class="joyLegRow"><span class="d" style="background:var(--j1)"></span><span class="n">趣味</span><span class="v">¥5,400</span><span class="p">42%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j2)"></span><span class="n">教育</span><span class="v">¥3,500</span><span class="p">27%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j3)"></span><span class="n">外食</span><span class="v">¥2,400</span><span class="p">19%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j4)"></span><span class="n">娯楽</span><span class="v">¥1,500</span><span class="p">12%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ AFTER + MEMBER FILTER ============ -->
+    <div class="col">
+      <div class="tag tag-filter">AFTER · 成员筛选=Shean</div>
+      <div class="phone">
+        <div class="secHeader">カテゴリ支出</div>
+        <div class="card">
+          <div class="donutWrap">
+            <div class="donut" style="background:conic-gradient(var(--daily) 0 40%, var(--shared) 40% 62%, #86C79A 62% 74%, var(--j1) 74% 88%, var(--j2) 88% 96%, #C4B6AD 96% 100%)">
+              <div class="donutCenter">
+              <div class="lbl">本月支出</div><div class="amt">¥31,200</div><div class="cnt">47件</div>
+            </div></div>
+          </div>
+          <div class="controls">
+            <div class="seg"><div class="pill on">カテゴリ</div><div class="pill off">メンバー</div></div>
+            <div class="filterTrigger active">🦊 Shean <span class="car">▼</span></div>
+          </div>
+          <div class="legend">
+            <div class="legRow"><span class="dot" style="background:var(--daily)"></span><span class="name">食費</span><span class="val">¥9,800 · 40%</span></div>
+            <div class="legRow"><span class="dot" style="background:var(--shared)"></span><span class="name">住居</span><span class="val">¥5,400 · 22%</span></div>
+            <div class="legRow"><span class="dot" style="background:#86C79A"></span><span class="name">交通</span><span class="val">¥3,000 · 12%</span></div>
+          </div>
+
+          <div class="joyDivider"></div>
+
+          <!-- 悦己 now narrowed to Shean — fewer categories, smaller total -->
+          <div class="joyAfter">
+            <div class="joyLabelRow">
+              <span class="joyChip"><span class="heart">♡</span>悦び</span>
+              <span class="joyCount">2 カテゴリ</span>
+              <span class="joyTotal">¥4,900</span>
+            </div>
+            <div class="joybar">
+              <span style="width:63%;background:var(--j1)"></span>
+              <span style="width:37%;background:var(--j2)"></span>
+            </div>
+            <div class="joyLeg" style="margin-top:12px">
+              <div class="joyLegRow"><span class="d" style="background:var(--j1)"></span><span class="n">趣味</span><span class="v">¥3,100</span><span class="p">63%</span></div>
+              <div class="joyLegRow"><span class="d" style="background:var(--j2)"></span><span class="n">教育</span><span class="v">¥1,800</span><span class="p">37%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <h2>这份设计稿改了什么</h2>
+    <p class="legendKey">两处改动：① 视觉（去边框 + 分割线）；② 行为（悦己跟随成员筛选联动）。</p>
+
+    <h3>① 视觉：去掉樱粉边框，用分割线和「整体」分离</h3>
+    <ul>
+      <li>移除 <code>JoySpendDrawer</code> 外层 <code>Container</code> 的 <code>Border.all(drawerBorderColor)</code>（樱粉描边）、圆角与内边距盒子。</li>
+      <li>在「整体」（donut + 类别图例）与「悦己」之间插入一条 1px 分割线 <code>palette.borderDivider (#EAE1DC)</code>，上下留白 ~16/14px。</li>
+      <li>悦己内容直接贴合卡片内边距渲染（无独立盒子）。保留一个小的 <span class="joyChip" style="vertical-align:middle"><span class="heart">♡</span>悦び</span> 标签（<code>joyLight/joyText</code>）让悦己身份依然清晰——条形图本身已用 j1–j7 暖色，不会和上面的绿/蓝类别混淆。</li>
+      <li>¥总额与「N カテゴリ」计数保留（移到标签行右侧），文案/数据完全不变。</li>
+    </ul>
+
+    <h3>② 行为：悦己内容随「成员筛选」联动（与整体分类明细逻辑一致）</h3>
+    <ul>
+      <li>现状：悦己 drawer 只看 <code>joyCategoryAmountsProvider(book,start,end,variant)</code> —— <b>不读</b>成员筛选，整体 donut 收窄到某成员时，悦己仍显示全员，数据对不上。</li>
+      <li>提案：让 <code>JoySpendDrawer</code> 读取 <code>donutDimensionStateProvider</code> 的 <code>memberFilterDeviceId</code>，把它作为 <code>deviceId</code> 传入 joy 数据查询，<b>复用整体「成员筛选」用的同一 <code>tx.deviceId == deviceId</code> 过滤规则</b>（与 <code>memberFilteredCategoryBreakdown</code> 完全一致）。</li>
+      <li>数据层只需给 <code>GetJoyCategoryAmountsUseCase</code> / <code>joyCategoryAmountsProvider</code> 加一个可选 <code>deviceId</code> 参数（null=全员，保持现状）。无新建 DAO、无 schema 迁移。</li>
+      <li>效果：选某成员 → donut、类别图例、悦己条形图<b>同步收窄到该成员</b>（右图：Shean 只剩 趣味/教育 两类，¥4,900）。</li>
+    </ul>
+
+    <div class="q">
+      <b>一个需要你拍板的点（分类/成员 维度切换时悦己怎么显示）：</b><br>
+      悦己部分本质是「按<u>类别</u>看悦己花在哪」。当顶部维度切到「メンバー（成员）」时，整体 donut 改为<u>按成员</u>拆分。建议：悦己部分<b>始终按类别展示</b>，只跟随「成员筛选」收窄（不随维度切换改变分组）——因为不存在「悦己按成员拆」这种视图，且这与整体的类别明细收窄逻辑一致。<br>
+      如果你希望切到「成员」维度时悦己也按成员拆（需要新做一个「按成员的悦己金额」视图），告诉我，会是更大一点的改动。
+    </div>
+  </div>
+</body>
+</html>
