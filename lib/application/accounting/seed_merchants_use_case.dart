@@ -7,8 +7,10 @@ import 'ledger_hint_deriver.dart';
 
 /// Seeds the curated Japan merchant spine ([DefaultMerchants.all]) if none exist.
 ///
-/// Mirrors [SeedCategoriesUseCase]: a `findAll()`-empty count guard, then a
-/// single-transaction batch insert (D-05). Each [DefaultMerchant] expands into:
+/// Mirrors [SeedCategoriesUseCase]: a cheap `hasAny()` existence guard (avoids
+/// materializing the merchant object graph just to check emptiness — WR-03),
+/// then a single-transaction batch insert (D-05). Each [DefaultMerchant] expands
+/// into:
 ///
 ///  - one merchants row, with `ledgerHint` DERIVED from `categoryId` via
 ///    [deriveLedgerHint] (single source of truth — D-09, never hand-authored);
@@ -32,8 +34,10 @@ class SeedMerchantsUseCase {
   final MerchantRepository _merchantRepo;
 
   Future<Result<void>> execute() async {
-    final existing = await _merchantRepo.findAll();
-    if (existing.isNotEmpty) {
+    // Cheap existence probe (SELECT EXISTS) — avoids materializing the full
+    // ~400-merchant object graph on every post-seed launch just to learn the
+    // count is non-zero (WR-03). findAll() stays for real readers (Phase 50+).
+    if (await _merchantRepo.hasAny()) {
       return Result.success(null);
     }
 

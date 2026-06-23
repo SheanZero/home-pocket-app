@@ -51,6 +51,12 @@ void main() {
       expect(await dao.findAllMatchKeyRows(), isEmpty);
     });
 
+    test('hasAny is false on a fresh DB, true after a seed', () async {
+      expect(await dao.hasAny(), isFalse);
+      await dao.insertSeed([merchant('mer_seven_eleven')], const []);
+      expect(await dao.hasAny(), isTrue);
+    });
+
     test('insertSeed inserts merchant + match-key rows in one transaction',
         () async {
       await dao.insertSeed(

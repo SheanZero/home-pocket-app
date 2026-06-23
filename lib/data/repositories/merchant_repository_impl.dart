@@ -29,6 +29,9 @@ class MerchantRepositoryImpl implements MerchantRepository {
   }
 
   @override
+  Future<bool> hasAny() => _dao.hasAny();
+
+  @override
   Future<Merchant?> findById(String id) async {
     final row = await _dao.findById(id);
     if (row == null) return null;

@@ -7,9 +7,13 @@ import '../models/merchant.dart';
 /// count guard and [insertBatch] for the one-transaction idempotent insert.
 abstract class MerchantRepository {
   /// Return all merchants (each with its expanded surface forms).
-  ///
-  /// Drives the seed count-guard: a non-empty result means seeding is skipped.
   Future<List<Merchant>> findAll();
+
+  /// Cheap existence probe (`SELECT EXISTS`) — true if any merchant row exists.
+  ///
+  /// Drives the seed count-guard without materializing the merchant object
+  /// graph: a true result means seeding is skipped.
+  Future<bool> hasAny();
 
   /// Return the merchant with [id], or null if not found.
   Future<Merchant?> findById(String id);

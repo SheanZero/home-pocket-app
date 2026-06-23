@@ -17,10 +17,20 @@ class MerchantDao {
   final AppDatabase _db;
 
   /// Return all merchant rows, unfiltered.
-  ///
-  /// Drives the seed count-guard (empty → seed runs).
   Future<List<MerchantRow>> findAllMerchantRows() async {
     return _db.select(_db.merchants).get();
+  }
+
+  /// Cheap existence probe for the seed count-guard.
+  ///
+  /// `SELECT EXISTS(SELECT 1 FROM merchants)` — returns as soon as one row is
+  /// found, never materializing the merchant object graph. Use this (not
+  /// `findAll()`) when only emptiness matters (D-05 seed guard, hot path).
+  Future<bool> hasAny() async {
+    final row = await _db
+        .customSelect('SELECT EXISTS(SELECT 1 FROM merchants) AS has_any')
+        .getSingle();
+    return row.read<int>('has_any') == 1;
   }
 
   /// Return all match-key rows, unfiltered.
