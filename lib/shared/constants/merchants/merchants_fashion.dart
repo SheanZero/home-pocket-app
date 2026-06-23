@@ -1,0 +1,370 @@
+import '../default_merchants.dart';
+
+/// 服饰 (apparel) → `cat_clothing_clothes`.
+/// 靴 (shoes) → `cat_clothing_shoes`.
+/// 化粧品 (cosmetics) → `cat_clothing_cosmetics`.
+/// アクセサリー / 雑貨 → `cat_clothing_accessories`.
+/// 美容室 (hair salons) → `cat_clothing_hair`.
+///
+/// NOTE (D-08): `cat_clothing` L1 derives to `joy`, but `cat_clothing_clothes`,
+/// `cat_clothing_shoes`, `cat_clothing_underwear`, `cat_clothing_cleaning` carry
+/// L2 overrides to `daily`. Apparel merchants below therefore derive to `daily`
+/// (matches the verified ユニクロ seed-core fix). Accessories / cosmetics /
+/// hair have NO override → inherit `joy`.
+const List<DefaultMerchant> fashionMerchants = [
+  // ─── ファストファッション / 衣料品 → cat_clothing_clothes (daily) ───
+  DefaultMerchant(
+    id: 'mer_uniqlo',
+    nameJa: 'ユニクロ',
+    nameZh: '优衣库',
+    nameEn: 'UNIQLO',
+    aliases: ['Uniqlo', 'UNIQLO', 'uniqlo', 'ユニクロ'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_gu',
+    nameJa: 'ジーユー',
+    nameEn: 'GU',
+    aliases: ['GU', 'gu', 'ジーユー'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_shimamura',
+    nameJa: 'しまむら',
+    nameEn: 'Shimamura',
+    aliases: ['Shimamura', 'shimamura', 'ファッションセンターしまむら'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_gap',
+    nameJa: 'ギャップ',
+    nameEn: 'GAP',
+    aliases: ['GAP', 'gap'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_zara',
+    nameJa: 'ザラ',
+    nameEn: 'ZARA',
+    aliases: ['ZARA', 'zara'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_hm',
+    nameJa: 'エイチアンドエム',
+    nameEn: 'H&M',
+    aliases: ['H&M', 'h&m', 'hm', 'エイチエム'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_workman',
+    nameJa: 'ワークマン',
+    nameEn: 'Workman',
+    aliases: ['Workman', 'workman', 'ワークマンプラス'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_aoki',
+    nameJa: '洋服の青山',
+    nameEn: 'Aoyama',
+    aliases: ['青山', 'Aoyama', 'aoyama', 'ようふくのあおやま'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_aoki_suit',
+    nameJa: 'AOKI',
+    nameEn: 'AOKI',
+    aliases: ['AOKI', 'aoki'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_united_arrows',
+    nameJa: 'ユナイテッドアローズ',
+    nameEn: 'United Arrows',
+    aliases: ['UA', 'United Arrows', 'united arrows'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_beams',
+    nameJa: 'ビームス',
+    nameEn: 'BEAMS',
+    aliases: ['BEAMS', 'beams'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_ships',
+    nameJa: 'シップス',
+    nameEn: 'SHIPS',
+    aliases: ['SHIPS', 'ships'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_global_work',
+    nameJa: 'グローバルワーク',
+    nameEn: 'Global Work',
+    aliases: ['Global Work', 'global work', 'グローバルワーク'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_earth_music',
+    nameJa: 'アースミュージックアンドエコロジー',
+    nameEn: 'earth music&ecology',
+    aliases: ['アース', 'earth music', 'earth music&ecology'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_wego',
+    nameJa: 'ウィゴー',
+    nameEn: 'WEGO',
+    aliases: ['WEGO', 'wego'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_avail',
+    nameJa: 'アベイル',
+    nameEn: 'Avail',
+    aliases: ['Avail', 'avail'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_right_on',
+    nameJa: 'ライトオン',
+    nameEn: 'Right-on',
+    aliases: ['Right-on', 'right on', 'right-on'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  // ─── 靴 → cat_clothing_shoes (daily) ───
+  DefaultMerchant(
+    id: 'mer_abc_mart',
+    nameJa: 'ABCマート',
+    nameEn: 'ABC-MART',
+    aliases: ['ABC-MART', 'abc mart', 'abc-mart', 'エービーシーマート'],
+    categoryId: 'cat_clothing_shoes',
+  ),
+  DefaultMerchant(
+    id: 'mer_chiyoda',
+    nameJa: '東京靴流通センター',
+    nameEn: 'Chiyoda',
+    aliases: ['靴流通センター', 'Chiyoda', 'chiyoda'],
+    categoryId: 'cat_clothing_shoes',
+  ),
+  DefaultMerchant(
+    id: 'mer_asbee',
+    nameJa: 'アスビー',
+    nameEn: 'ASBee',
+    aliases: ['ASBee', 'asbee'],
+    categoryId: 'cat_clothing_shoes',
+  ),
+  // ─── アクセサリー / 雑貨 → cat_clothing_accessories (joy, inherited) ───
+  DefaultMerchant(
+    id: 'mer_4c',
+    nameJa: 'ヨンドシー',
+    nameEn: '4°C',
+    aliases: ['4C', '4°C', 'yondoshi'],
+    categoryId: 'cat_clothing_accessories',
+  ),
+  DefaultMerchant(
+    id: 'mer_swarovski',
+    nameJa: 'スワロフスキー',
+    nameEn: 'Swarovski',
+    aliases: ['Swarovski', 'swarovski'],
+    categoryId: 'cat_clothing_accessories',
+  ),
+  DefaultMerchant(
+    id: 'mer_agete',
+    nameJa: 'アガット',
+    nameEn: 'agete',
+    aliases: ['agete', 'アガット'],
+    categoryId: 'cat_clothing_accessories',
+  ),
+  DefaultMerchant(
+    id: 'mer_samantha_thavasa',
+    nameJa: 'サマンサタバサ',
+    nameEn: 'Samantha Thavasa',
+    aliases: ['サマンサ', 'Samantha Thavasa', 'samantha thavasa'],
+    categoryId: 'cat_clothing_bags',
+  ),
+  // ─── 化粧品 → cat_clothing_cosmetics (joy, inherited) ───
+  DefaultMerchant(
+    id: 'mer_at_cosme',
+    nameJa: 'アットコスメ',
+    nameEn: '@cosme',
+    aliases: ['@cosme', 'atcosme', 'アットコスメストア'],
+    categoryId: 'cat_clothing_cosmetics',
+  ),
+  DefaultMerchant(
+    id: 'mer_shiseido',
+    nameJa: '資生堂',
+    nameZh: '资生堂',
+    nameEn: 'Shiseido',
+    aliases: ['Shiseido', 'shiseido', 'しせいどう'],
+    categoryId: 'cat_clothing_cosmetics',
+  ),
+  DefaultMerchant(
+    id: 'mer_sephora',
+    nameJa: 'セフォラ',
+    nameEn: 'SEPHORA',
+    aliases: ['SEPHORA', 'sephora'],
+    categoryId: 'cat_clothing_cosmetics',
+  ),
+  // ─── 美容室 → cat_clothing_hair (joy, inherited) ───
+  DefaultMerchant(
+    id: 'mer_qb_house',
+    nameJa: 'QBハウス',
+    nameEn: 'QB HOUSE',
+    aliases: ['QB House', 'qb house', 'キュービーハウス'],
+    categoryId: 'cat_clothing_hair',
+  ),
+  DefaultMerchant(
+    id: 'mer_plage',
+    nameJa: 'プラージュ',
+    nameEn: 'Plage',
+    aliases: ['美容プラージュ', 'Plage', 'plage'],
+    categoryId: 'cat_clothing_hair',
+  ),
+  // ─── 追加: 衣料品 ───
+  DefaultMerchant(
+    id: 'mer_aoyama_flag',
+    nameJa: 'ザ・スーツカンパニー',
+    nameEn: 'The Suit Company',
+    aliases: ['スーツカンパニー', 'The Suit Company', 'the suit company'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_konaka',
+    nameJa: 'コナカ',
+    nameEn: 'Konaka',
+    aliases: ['Konaka', 'konaka', 'こなか'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_haruyama',
+    nameJa: 'はるやま',
+    nameEn: 'Haruyama',
+    aliases: ['Haruyama', 'haruyama'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_nano_universe',
+    nameJa: 'ナノユニバース',
+    nameEn: 'nano universe',
+    aliases: ['nano universe', 'ナノユニバース'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_journal_standard',
+    nameJa: 'ジャーナルスタンダード',
+    nameEn: 'JOURNAL STANDARD',
+    aliases: ['JOURNAL STANDARD', 'journal standard'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_urban_research',
+    nameJa: 'アーバンリサーチ',
+    nameEn: 'URBAN RESEARCH',
+    aliases: ['URBAN RESEARCH', 'urban research'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_tomorrowland',
+    nameJa: 'トゥモローランド',
+    nameEn: 'TOMORROWLAND',
+    aliases: ['TOMORROWLAND', 'tomorrowland'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_lowrys_farm',
+    nameJa: 'ローリーズファーム',
+    nameEn: 'LOWRYS FARM',
+    aliases: ['LOWRYS FARM', 'lowrys farm'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_niko_and',
+    nameJa: 'ニコアンド',
+    nameEn: 'niko and...',
+    aliases: ['niko and', 'ニコアンド'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_studio_clip',
+    nameJa: 'スタディオクリップ',
+    nameEn: 'studio CLIP',
+    aliases: ['studio CLIP', 'studio clip'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_coen',
+    nameJa: 'コーエン',
+    nameEn: 'coen',
+    aliases: ['coen', 'コーエン'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  DefaultMerchant(
+    id: 'mer_honeys',
+    nameJa: 'ハニーズ',
+    nameEn: 'Honeys',
+    aliases: ['Honeys', 'honeys', 'ハニーズ'],
+    categoryId: 'cat_clothing_clothes',
+  ),
+  // ─── 追加: 靴 ───
+  DefaultMerchant(
+    id: 'mer_washington',
+    nameJa: '銀座ワシントン',
+    nameEn: 'Washington',
+    aliases: ['ワシントン靴店', 'Washington', 'washington'],
+    categoryId: 'cat_clothing_shoes',
+  ),
+  // ─── 追加: 化粧品 / コスメ ───
+  DefaultMerchant(
+    id: 'mer_kose',
+    nameJa: 'コーセー',
+    nameEn: 'KOSE',
+    aliases: ['KOSE', 'kose', 'コーセー'],
+    categoryId: 'cat_clothing_cosmetics',
+  ),
+  DefaultMerchant(
+    id: 'mer_fancl',
+    nameJa: 'ファンケル',
+    nameEn: 'FANCL',
+    aliases: ['FANCL', 'fancl', 'ファンケル'],
+    categoryId: 'cat_clothing_cosmetics',
+  ),
+  DefaultMerchant(
+    id: 'mer_dhc',
+    nameJa: 'DHC',
+    nameEn: 'DHC',
+    aliases: ['DHC', 'dhc', 'ディーエイチシー'],
+    categoryId: 'cat_clothing_cosmetics',
+  ),
+  // ─── 追加: 美容室 / エステ ───
+  DefaultMerchant(
+    id: 'mer_taya',
+    nameJa: 'TAYA',
+    nameEn: 'TAYA',
+    aliases: ['TAYA', 'taya'],
+    categoryId: 'cat_clothing_hair',
+  ),
+  DefaultMerchant(
+    id: 'mer_tbc',
+    nameJa: 'TBC',
+    nameEn: 'TBC',
+    aliases: ['エステティックTBC', 'TBC', 'tbc'],
+    categoryId: 'cat_clothing_esthetic',
+  ),
+  // ─── 追加: クリーニング → cat_clothing_cleaning (daily override) ───
+  DefaultMerchant(
+    id: 'mer_hakuyosha',
+    nameJa: '白洋舎',
+    nameEn: 'Hakuyosha',
+    aliases: ['Hakuyosha', 'hakuyosha', 'はくようしゃ'],
+    categoryId: 'cat_clothing_cleaning',
+  ),
+  DefaultMerchant(
+    id: 'mer_pony_cleaning',
+    nameJa: 'ポニークリーニング',
+    nameEn: 'Pony Cleaning',
+    aliases: ['ポニー', 'Pony Cleaning', 'pony cleaning'],
+    categoryId: 'cat_clothing_cleaning',
+  ),
+];
