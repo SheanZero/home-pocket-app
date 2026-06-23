@@ -1,0 +1,145 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/shared/constants/default_categories.dart';
+import 'package:home_pocket/shared/constants/default_synonyms.dart';
+
+/// D-04 MACHINE SET-COMPLETENESS GATE (Phase 50 DECOUP-02, T-50-08).
+///
+/// The categoryId hard gate (`default_synonyms_categoryid_test.dart`) proves
+/// NO orphan id, but it passes just as happily on a 40-of-90 partial seed —
+/// every present row is legal, the missing rows simply do not exist to fail.
+/// A `grep cat_car_fuel` likewise passes on a partial seed. This gate closes
+/// THAT failure mode: it proves every SPEAKABLE L2 has at least one zh seed
+/// AND at least one ja seed, and NAMES every uncovered id so the authoring
+/// task knows exactly what to add.
+///
+/// ── speakable-L2 set ───────────────────────────────────────────────────
+/// speakableL2 = { every Category with level == 2 } MINUS a documented,
+/// code-literal exclusion set ([_isExcludedNonSpeakable]). D-04 does not
+/// require keyword coverage for pure `_other`/fallback buckets (the resolver's
+/// `_ensureL2` + L1->`_other` convention covers those) nor for admin/non-
+/// speakable id families (people rarely SAY these in a casual voice entry —
+/// they are statement/form line-items, not utterances):
+///   • `*_other`                  — pure fallback buckets
+///   • `cat_asset_*`              — investment vehicles (NISA/iDeCo/株/FX…)
+///   • `cat_insurance_*`          — insurance L1 family line-items
+///   • `*_insurance`             — insurance L2s under other L1s
+///                                  (cat_pet_insurance, cat_car_insurance,
+///                                   cat_housing_insurance, cat_tax_*_insurance)
+///   • `*_tax`                    — tax line-items (cat_car_tax,
+///                                  cat_housing_property_tax)
+///   • `cat_tax_*`                — taxes & social-security family
+///   • `cat_special_*`            — ceremonial / life-event special expenses
+/// Reviewable here in source so the human spot-check (Task 4) can challenge a
+/// borderline inclusion/exclusion.
+///
+/// ── zh vs ja classification ────────────────────────────────────────────
+/// [CategoryKeywordPreference] has NO lang/script field — only `keyword` +
+/// `categoryId`. So script is INFERRED from the keyword's codepoints:
+///   • a keyword containing any KANA (hiragana / katakana / half-width
+///     katakana) is a JA seed ([_isJa]).
+///   • a keyword with CJK Han ideographs and NO kana is a ZH seed ([_isZh]).
+///     (Han-only words are shared by zh & ja; we count them as ZH. A pure-ja
+///     coverage therefore needs at least one kana-bearing surface per L2 —
+///     the human spot-check can adjust a borderline Han-only ja word.)
+void main() {
+  // ── Codepoint helpers ──────────────────────────────────────────────────
+  bool _hasKana(String kw) {
+    for (final r in kw.runes) {
+      final hiragana = r >= 0x3040 && r <= 0x309F;
+      final katakana = r >= 0x30A0 && r <= 0x30FF;
+      final halfWidthKatakana = r >= 0xFF66 && r <= 0xFF9F;
+      if (hiragana || katakana || halfWidthKatakana) return true;
+    }
+    return false;
+  }
+
+  bool _hasHan(String kw) {
+    for (final r in kw.runes) {
+      // CJK Unified Ideographs (BMP) + common extension-A range.
+      final cjk = r >= 0x4E00 && r <= 0x9FFF;
+      final cjkExtA = r >= 0x3400 && r <= 0x4DBF;
+      if (cjk || cjkExtA) return true;
+    }
+    return false;
+  }
+
+  bool isJa(String kw) => _hasKana(kw);
+  bool isZh(String kw) => _hasHan(kw) && !_hasKana(kw);
+
+  // ── speakable-L2 exclusion predicate (documented above) ────────────────
+  bool isExcludedNonSpeakable(String id) {
+    if (id.endsWith('_other')) return true; // pure _other / fallback
+    if (id.startsWith('cat_asset_')) return true; // investment vehicles
+    if (id.startsWith('cat_insurance_')) return true; // insurance L1 family
+    if (id.endsWith('_insurance')) return true; // *_insurance L2s
+    if (id.endsWith('_tax')) return true; // *_tax line-items
+    if (id.startsWith('cat_tax_')) return true; // taxes & social security
+    if (id.startsWith('cat_special_')) return true; // ceremonial / life-event
+    return false;
+  }
+
+  final speakableL2 = DefaultCategories.all
+      .where((c) => c.level == 2)
+      .map((c) => c.id)
+      .where((id) => !isExcludedNonSpeakable(id))
+      .toSet();
+
+  group('DefaultVoiceSynonyms speakable-L2 coverage (D-04)', () {
+    test('speakableL2 set is non-empty (broken-exclusion-filter guard)', () {
+      expect(speakableL2, isNotEmpty);
+    });
+
+    test(
+      'every speakable L2 has >=1 zh direct seed AND >=1 ja direct seed',
+      () {
+        final offenders = <String>[];
+        for (final id in speakableL2) {
+          // DIRECT seeds only — an L1 seed covers only that L1's _other bucket
+          // via _ensureL2, never an arbitrary sibling L2. So set-completeness
+          // requires a seed whose categoryId == this exact L2 id.
+          final direct = DefaultVoiceSynonyms.all
+              .where((s) => s.categoryId == id)
+              .map((s) => s.keyword)
+              .toList();
+          final hasZh = direct.any(isZh);
+          final hasJa = direct.any(isJa);
+          if (!hasZh && !hasJa) {
+            offenders.add('$id (missing: both)');
+          } else if (!hasZh) {
+            offenders.add('$id (missing: zh)');
+          } else if (!hasJa) {
+            offenders.add('$id (missing: ja)');
+          }
+        }
+
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'These speakable L2 categories lack a zh and/or ja direct seed '
+              '(D-04 set-completeness gap):\n${offenders.join('\n')}',
+        );
+      },
+    );
+
+    test('coverage check iterates the FULL speakable set (no sampling)', () {
+      // Re-assert per-id (not just the aggregate offenders list) so the count
+      // of executed assertions equals |speakableL2| — a partial loop bug would
+      // shrink this and is caught by the non-empty guard above.
+      var checked = 0;
+      for (final id in speakableL2) {
+        final direct = DefaultVoiceSynonyms.all
+            .where((s) => s.categoryId == id)
+            .map((s) => s.keyword)
+            .toList();
+        expect(
+          direct.any(isZh) && direct.any(isJa),
+          isTrue,
+          reason: '$id lacks a zh+ja direct seed pair',
+        );
+        checked++;
+      }
+      expect(checked, equals(speakableL2.length));
+    });
+  });
+}
