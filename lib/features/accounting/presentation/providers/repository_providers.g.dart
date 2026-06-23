@@ -787,6 +787,71 @@ final class SeedVoiceSynonymsUseCaseProvider
 String _$seedVoiceSynonymsUseCaseHash() =>
     r'841f677819587fe04a615c7ce084a6f6f07c457a';
 
+/// Phase 49 D-05 — seeds the curated Japan merchant spine after categories.
+///
+/// Count-guarded idempotent seed (mirrors [seedCategoriesUseCaseProvider]).
+/// Wired as the third leaf of [SeedAllUseCase], NOT the AppInitializer
+/// `seedRunner` no-op (Pitfall #1).
+
+@ProviderFor(seedMerchantsUseCase)
+final seedMerchantsUseCaseProvider = SeedMerchantsUseCaseProvider._();
+
+/// Phase 49 D-05 — seeds the curated Japan merchant spine after categories.
+///
+/// Count-guarded idempotent seed (mirrors [seedCategoriesUseCaseProvider]).
+/// Wired as the third leaf of [SeedAllUseCase], NOT the AppInitializer
+/// `seedRunner` no-op (Pitfall #1).
+
+final class SeedMerchantsUseCaseProvider
+    extends
+        $FunctionalProvider<
+          SeedMerchantsUseCase,
+          SeedMerchantsUseCase,
+          SeedMerchantsUseCase
+        >
+    with $Provider<SeedMerchantsUseCase> {
+  /// Phase 49 D-05 — seeds the curated Japan merchant spine after categories.
+  ///
+  /// Count-guarded idempotent seed (mirrors [seedCategoriesUseCaseProvider]).
+  /// Wired as the third leaf of [SeedAllUseCase], NOT the AppInitializer
+  /// `seedRunner` no-op (Pitfall #1).
+  SeedMerchantsUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'seedMerchantsUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$seedMerchantsUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<SeedMerchantsUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SeedMerchantsUseCase create(Ref ref) {
+    return seedMerchantsUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SeedMerchantsUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SeedMerchantsUseCase>(value),
+    );
+  }
+}
+
+String _$seedMerchantsUseCaseHash() =>
+    r'a3ff015f974342a5501e1d79582cdfc7cb65da1d';
+
 @ProviderFor(categoryService)
 final categoryServiceProvider = CategoryServiceProvider._();
 

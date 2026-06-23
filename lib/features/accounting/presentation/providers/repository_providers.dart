@@ -11,6 +11,7 @@ import '../../../../application/accounting/merchant_category_learning_service.da
 import '../../../../application/accounting/repository_providers.dart'
     as app_accounting;
 import '../../../../application/accounting/seed_categories_use_case.dart';
+import '../../../../application/accounting/seed_merchants_use_case.dart';
 import '../../../../application/accounting/seed_voice_synonyms_use_case.dart';
 import '../../../../application/dual_ledger/repository_providers.dart';
 import '../../../../application/ml/repository_providers.dart' as app_ml;
@@ -192,6 +193,18 @@ SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
 SeedVoiceSynonymsUseCase seedVoiceSynonymsUseCase(Ref ref) {
   return SeedVoiceSynonymsUseCase(
     preferenceRepository: ref.watch(categoryKeywordPreferenceRepositoryProvider),
+  );
+}
+
+/// Phase 49 D-05 — seeds the curated Japan merchant spine after categories.
+///
+/// Count-guarded idempotent seed (mirrors [seedCategoriesUseCaseProvider]).
+/// Wired as the third leaf of [SeedAllUseCase], NOT the AppInitializer
+/// `seedRunner` no-op (Pitfall #1).
+@riverpod
+SeedMerchantsUseCase seedMerchantsUseCase(Ref ref) {
+  return SeedMerchantsUseCase(
+    merchantRepository: ref.watch(merchantRepositoryProvider),
   );
 }
 
