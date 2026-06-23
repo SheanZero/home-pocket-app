@@ -12,8 +12,8 @@
 - [ ] **MERCH-01**: 商家目录从 13 条硬编码 in-memory 列表迁移到新的 Drift `merchants` 表（schema v21→v22），字段含 `region`、多语店名变体、aliases、种子期计算的归一化 match-key、L2 `categoryId`、非权威 ledger 提示。
 - [ ] **MERCH-02**: ~400 家日本商家（覆盖每个日常类目的全国连锁头部——便利店/超市/牛丼·拉面/咖啡/ファミレス/药妆/百元店/家电/服饰/交通IC/加油/外卖/订阅——加东京·大阪重点商家），每条手工映射到 L2 类目，随表 seed 装载。
 - [ ] **MERCH-03**: 商家匹配使用锚定/归一化匹配（NFKC + 片↔平假名折叠 + 全角/小写、按字种最小长度），返回带分数的排序候选；不再用双向子串（`query.contains||contains(query)`），600-800 规模下无误命中爆炸。
-- [ ] **MERCH-04**: Seed 幂等（稳定 id + upsert/`INSERT OR IGNORE`、单事务批量）；表显式建索引（onCreate 与 onUpgrade 都 `CREATE INDEX IF NOT EXISTS`，`PRAGMA index_list` 可验证）；完整迁移阶梯在加密 executor 下验证。
-- [ ] **MERCH-05**: 商家 schema 按 600-800 上限设计、带 `region` 标签与多语店名，可被未来中国/其他地区扩展与 MOD-005 OCR 复用。
+- [x] **MERCH-04**: Seed 幂等（稳定 id + upsert/`INSERT OR IGNORE`、单事务批量）；表显式建索引（onCreate 与 onUpgrade 都 `CREATE INDEX IF NOT EXISTS`，`PRAGMA index_list` 可验证）；完整迁移阶梯在加密 executor 下验证。
+- [x] **MERCH-05**: 商家 schema 按 600-800 上限设计、带 `region` 标签与多语店名，可被未来中国/其他地区扩展与 MOD-005 OCR 复用。
 
 ### Decoupled Recognizers (DECOUP)
 
@@ -90,8 +90,8 @@
 | MERCH-01 | Phase 49 — Merchant Data Foundation | Pending |
 | MERCH-02 | Phase 49 — Merchant Data Foundation | Pending |
 | MERCH-03 | Phase 49 — Merchant Data Foundation | Pending |
-| MERCH-04 | Phase 49 — Merchant Data Foundation | Pending |
-| MERCH-05 | Phase 49 — Merchant Data Foundation | Pending |
+| MERCH-04 | Phase 49 — Merchant Data Foundation | Complete |
+| MERCH-05 | Phase 49 — Merchant Data Foundation | Complete |
 | DECOUP-01 | Phase 50 — Decoupled Recognizers | Pending |
 | DECOUP-02 | Phase 50 — Decoupled Recognizers | Pending |
 | DECOUP-03 | Phase 50 — Decoupled Recognizers | Pending |
@@ -109,6 +109,7 @@
 | VEN-02 | Phase 52 — Recognition UX + English Voice | Pending |
 
 **Coverage:**
+
 - v1 requirements: 20 total
 - Mapped to phases: 20 ✓
 - Unmapped: 0 ✓
