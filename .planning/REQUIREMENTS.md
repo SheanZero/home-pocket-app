@@ -19,7 +19,7 @@
 
 - [ ] **DECOUP-01**: `CategoryRecognizer` 与 `MerchantRecognizer` 为互不调用的独立引擎；移除 `VoiceCategoryResolver` 的「商家优先短路关键词」逻辑。
 - [ ] **DECOUP-02**: `CategoryRecognizer` 无条件运行，即使无商家也能从活动/物品关键词解析出 L2 类目——「加油用了400块」→ 燃料/交通 L2（Case B，category-only 路径）。
-- [ ] **DECOUP-03**: `MerchantRecognizer` 独立于关键词信号识别商家（及其弱默认类目 + ledger 提示）——单说「スタバ」仍解析为星巴克 → 咖啡。
+- [x] **DECOUP-03**: `MerchantRecognizer` 独立于关键词信号识别商家（及其弱默认类目 + ledger 提示）——单说「スタバ」仍解析为星巴克 → 咖啡。
 
 ### Cross-Validation / Reconciliation (XVAL)
 
@@ -94,7 +94,7 @@
 | MERCH-05 | Phase 49 — Merchant Data Foundation | Complete |
 | DECOUP-01 | Phase 50 — Decoupled Recognizers | Pending |
 | DECOUP-02 | Phase 50 — Decoupled Recognizers | Pending |
-| DECOUP-03 | Phase 50 — Decoupled Recognizers | Pending |
+| DECOUP-03 | Phase 50 — Decoupled Recognizers | Complete |
 | XVAL-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
 | XVAL-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
 | XVAL-03 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |

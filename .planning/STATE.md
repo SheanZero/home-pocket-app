@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
 current_phase: 50
-current_phase_name: Decoupled Recognizers
+current_phase_name: decoupled-recognizers
 status: executing
 stopped_at: Phase 50 planned (5 plans, ready to execute)
-last_updated: "2026-06-23T13:14:13.000Z"
+last_updated: "2026-06-23T14:43:36.956Z"
 last_activity: 2026-06-23
-last_activity_desc: Phase 50 planned — 5 plans across 3 waves, plan-checker PASSED
+last_activity_desc: Phase 50 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 11
-  completed_plans: 6
+  completed_plans: 7
   percent: 25
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 50 — Decoupled Recognizers
+**Current focus:** Phase 50 — decoupled-recognizers
 
 ## Current Position
 
-Phase: 50 — Decoupled Recognizers
-Plan: 5 plans across 3 waves (W1={01,02,04} · W2={03} · W3={05})
-Status: Ready to execute (plan-checker PASSED; research + pattern-map + validation contract complete) — run /gsd-execute-phase 50
-Last activity: 2026-06-23 — Phase 50 planned: 5 plans, 1 blocker + 2 warnings resolved in revision, re-verified PASSED
+Phase: 50 (decoupled-recognizers) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-06-23 — Phase 50 execution started
 
 ### Quick Tasks Completed
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-23T12:13:30.234Z
+Last session: 2026-06-23T14:43:31.229Z
 Stopped at: Phase 50 context gathered
 Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 
@@ -264,6 +264,7 @@ Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 | Phase 49 P03 | 12 | 3 tasks | 14 files |
 | Phase 49 P04 | 3 | 3 tasks | 9 files |
 | Phase 49 P05 | ~3 min | 3 tasks | 6 files |
+| Phase 50 P01 | 5m | 2 tasks | 7 files |
 
 ## Decisions
 
