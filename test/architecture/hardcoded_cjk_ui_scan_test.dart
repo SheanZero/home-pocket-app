@@ -30,6 +30,11 @@ const approvedWhitelist = {
   // not UI text. Centralized so VoiceTextParser and ParseVoiceInputUseCase
   // share one source of truth.
   'lib/shared/constants/voice_currency_suffixes.dart',
+  // Phase 49 — merchant name normalizer. The sole CJK literal ('・' 中黒) is
+  // the character stripped during match-key normalization, i.e. algorithm
+  // data, not UI text. (Merchant seed data files themselves are excluded by
+  // directory prefix in _shouldScan below.)
+  'lib/infrastructure/ml/merchant_name_normalizer.dart',
 };
 
 void main() {
@@ -75,6 +80,11 @@ bool _shouldScan(File file) {
   if (!path.endsWith('.dart')) return false;
   if (path.startsWith('lib/generated/')) return false;
   if (path.startsWith('lib/l10n/')) return false;
+  // Phase 49 — merchant seed data. Merchant proper-nouns are DATA (multi-locale
+  // seed rows), not UI text, per the v1.9 roadmap constraint ("merchant
+  // proper-nouns are DATA, category labels are ARB"). The directory grows toward
+  // a 600–800 merchant ceiling + regional tail (MERCH-V2), so exclude by prefix.
+  if (path.startsWith('lib/shared/constants/merchants/')) return false;
   if (path.endsWith('.g.dart')) return false;
   if (path.endsWith('.freezed.dart')) return false;
   if (approvedWhitelist.contains(path)) return false;
