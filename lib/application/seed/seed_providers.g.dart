@@ -61,4 +61,4 @@ final class SeedAllUseCaseProvider
   }
 }
 
-String _$seedAllUseCaseHash() => r'bcebc34cabacc512bba1ad28cf271cd6fb3a1445';
+String _$seedAllUseCaseHash() => r'2b82c286309cea3e0ee0e058d6824c39014c2137';

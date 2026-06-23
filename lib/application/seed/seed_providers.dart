@@ -14,5 +14,6 @@ SeedAllUseCase seedAllUseCase(Ref ref) {
   return SeedAllUseCase(
     seedCategories: ref.watch(seedCategoriesUseCaseProvider),
     seedVoiceSynonyms: ref.watch(seedVoiceSynonymsUseCaseProvider),
+    seedMerchants: ref.watch(seedMerchantsUseCaseProvider),
   );
 }
