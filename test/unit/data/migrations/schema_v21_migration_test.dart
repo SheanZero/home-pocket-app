@@ -3,11 +3,14 @@ import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 
 void main() {
-  test('AppDatabase schemaVersion is 21', () {
+  test('AppDatabase schemaVersion is at least 21', () {
     final db = AppDatabase.forTesting();
     addTearDown(db.close);
-    // RED: schemaVersion is currently 20 — this test fails until Wave 1 lands.
-    expect(db.schemaVersion, equals(21));
+    // This suite asserts the v21 multi-currency columns/indexes persist. The
+    // exact-version pin (==22) lives in merchant_v22_migration_test.dart; here we
+    // only require the schema to be at or beyond v21 so future additive bumps
+    // (e.g. Phase 49 v22 merchant tables) do not falsely fail this test.
+    expect(db.schemaVersion, greaterThanOrEqualTo(21));
   });
 
   test('exchange_rates table exists after fresh install', () async {

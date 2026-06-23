@@ -187,23 +187,23 @@ void main() {
     test('two rows may share a match_key (non-unique enforced)', () async {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      await db.customStatement(
-        "INSERT INTO merchants (id, name_ja, region, category_id, ledger_hint) "
-        "VALUES ('mer_a', 'A', 'JP', 'cat_food_other', 'daily')",
-      );
-      await db.customStatement(
-        "INSERT INTO merchants (id, name_ja, region, category_id, ledger_hint) "
-        "VALUES ('mer_b', 'B', 'JP', 'cat_food_other', 'daily')",
-      );
-      await db.customStatement(
-        "INSERT INTO merchant_match_keys (id, merchant_id, surface, match_key, kind) "
-        "VALUES ('mk_a', 'mer_a', 'X', 'shared', 'name')",
-      );
+      await db.customStatement('''
+        INSERT INTO merchants (id, name_ja, region, category_id, ledger_hint)
+        VALUES ('mer_a', 'A', 'JP', 'cat_food_other', 'daily')
+      ''');
+      await db.customStatement('''
+        INSERT INTO merchants (id, name_ja, region, category_id, ledger_hint)
+        VALUES ('mer_b', 'B', 'JP', 'cat_food_other', 'daily')
+      ''');
+      await db.customStatement('''
+        INSERT INTO merchant_match_keys (id, merchant_id, surface, match_key, kind)
+        VALUES ('mk_a', 'mer_a', 'X', 'shared', 'name')
+      ''');
       // Must NOT throw — match_key index is non-unique.
-      await db.customStatement(
-        "INSERT INTO merchant_match_keys (id, merchant_id, surface, match_key, kind) "
-        "VALUES ('mk_b', 'mer_b', 'X', 'shared', 'name')",
-      );
+      await db.customStatement('''
+        INSERT INTO merchant_match_keys (id, merchant_id, surface, match_key, kind)
+        VALUES ('mk_b', 'mer_b', 'X', 'shared', 'name')
+      ''');
       final rows = await db
           .customSelect(
             "SELECT COUNT(*) AS c FROM merchant_match_keys WHERE match_key = 'shared'",
@@ -215,10 +215,10 @@ void main() {
     test('region defaults to JP when omitted on insert', () async {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      await db.customStatement(
-        "INSERT INTO merchants (id, name_ja, category_id, ledger_hint) "
-        "VALUES ('mer_def', 'D', 'cat_food_other', 'daily')",
-      );
+      await db.customStatement('''
+        INSERT INTO merchants (id, name_ja, category_id, ledger_hint)
+        VALUES ('mer_def', 'D', 'cat_food_other', 'daily')
+      ''');
       final row = await db
           .customSelect(
             "SELECT region FROM merchants WHERE id = 'mer_def'",

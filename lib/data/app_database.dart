@@ -11,6 +11,8 @@ import 'tables/exchange_rates_table.dart';
 import 'tables/group_members_table.dart';
 import 'tables/groups_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
+import 'tables/merchant_match_keys_table.dart';
+import 'tables/merchants_table.dart';
 import 'tables/shopping_items_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
@@ -33,6 +35,8 @@ part 'app_database.g.dart';
     GroupMembers,
     Groups,
     MerchantCategoryPreferences,
+    MerchantMatchKeys,
+    Merchants,
     ShoppingItems,
     SyncQueue,
     Transactions,
@@ -46,7 +50,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration {
@@ -59,6 +63,9 @@ class AppDatabase extends _$AppDatabase {
         await _createShoppingItemIndexes();
         // exchange_rates indices are also decorative on the table — create explicitly.
         await _createExchangeRateIndexes();
+        // merchants + merchant_match_keys indices are decorative on the tables —
+        // create explicitly on fresh installs too (Phase 49, v22).
+        await _createMerchantIndexes();
       },
       onUpgrade: (migrator, from, to) async {
         if (from < 3) {
@@ -461,6 +468,16 @@ class AppDatabase extends _$AppDatabase {
             'ALTER TABLE transactions ADD COLUMN applied_rate TEXT',
           );
         }
+        if (from < 22) {
+          // Phase 49: merchant data foundation — create the merchants and
+          // merchant_match_keys tables (MERCH-04/05). createTable emits the
+          // table DDL; the customIndices getter is NOT consumed by Drift's
+          // migrator, so the indexes must be created explicitly via the shared
+          // merchant-index helper below (mirrors every other table here).
+          await migrator.createTable(merchants);
+          await migrator.createTable(merchantMatchKeys);
+          await _createMerchantIndexes();
+        }
       },
     );
   }
@@ -502,6 +519,34 @@ class AppDatabase extends _$AppDatabase {
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_exchange_rates_currency_date '
       'ON exchange_rates (currency, rate_date)',
+    );
+  }
+
+  /// Creates the merchant indexes declared on [Merchants.customIndices] and
+  /// [MerchantMatchKeys.customIndices].
+  ///
+  /// Drift's migrator does not consume the `customIndices` getter, so these must
+  /// be emitted by hand from both the onCreate (fresh install) and the from<22
+  /// onUpgrade paths. Kept in one place so the two paths cannot drift apart.
+  ///
+  /// NOTE: idx_merchant_match_keys_match_key is intentionally NON-UNIQUE — two
+  /// merchants may legally share a match_key (RESEARCH #6). Do not add UNIQUE.
+  Future<void> _createMerchantIndexes() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_merchant_match_keys_match_key '
+      'ON merchant_match_keys (match_key)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_merchant_match_keys_merchant '
+      'ON merchant_match_keys (merchant_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_merchants_region '
+      'ON merchants (region)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_merchants_category '
+      'ON merchants (category_id)',
     );
   }
 }
