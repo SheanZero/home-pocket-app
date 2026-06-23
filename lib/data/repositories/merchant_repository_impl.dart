@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 
 import '../../features/accounting/domain/models/merchant.dart';
+import '../../features/accounting/domain/models/merchant_match_entry.dart';
 import '../../features/accounting/domain/repositories/merchant_repository.dart';
 import '../app_database.dart';
 import '../daos/merchant_dao.dart';
@@ -81,6 +82,31 @@ class MerchantRepositoryImpl implements MerchantRepository {
     }
 
     await _dao.insertSeed(merchantCompanions, keyCompanions);
+  }
+
+  @override
+  Future<List<MerchantMatchEntry>> loadAllForMatching() {
+    // Mirror findAll(): read both tables inside ONE read transaction so the
+    // entries are point-in-time consistent — a concurrent re-seed cannot
+    // interleave between the two statements (WR-04). No new DAO query; reuses
+    // the existing findAllMerchantRows + findAllMatchKeyRows.
+    return _dao.readInTransaction(() async {
+      final rows = await _dao.findAllMerchantRows();
+      final keys = await _dao.findAllMatchKeyRows();
+      // Every match-key row has a parent merchant by FK, so the lookup is total.
+      final byId = {for (final r in rows) r.id: r};
+      return keys.map((k) {
+        final m = byId[k.merchantId]!;
+        return MerchantMatchEntry(
+          matchKey: k.matchKey,
+          surface: k.surface,
+          merchantId: m.id,
+          displayName: m.nameJa,
+          categoryId: m.categoryId,
+          ledgerHint: m.ledgerHint,
+        );
+      }).toList();
+    });
   }
 
   Merchant _toModel(MerchantRow row, List<MerchantMatchKeyRow> keys) {
