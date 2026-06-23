@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
 current_phase: 49
-status: planning
-stopped_at: Phase 49 context gathered
-last_updated: "2026-06-23T02:37:42.458Z"
+status: ready
+stopped_at: Phase 49 planned (6 plans, ready to execute)
+last_updated: "2026-06-23T04:27:06.000Z"
 last_activity: 2026-06-23
-last_activity_desc: v1.9 ROADMAP revised to 4 phases (49-52) per user-directed 6→4 merge (XVAL+LEDGER → Phase 51; RECUX+VEN → Phase 52), REQUIREMENTS.md traceability re-mapped (20/20 mapped, 0 orphans, 0 duplicates)
+last_activity_desc: Phase 49 (Merchant Data Foundation) planned — 6 plans across 4 waves; RESEARCH + Nyquist VALIDATION + PATTERNS produced, plan-checker VERIFICATION PASSED (0 blockers), requirements 5/5 + decisions 9/9 covered. Ready for /gsd-execute-phase 49.
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 6
   completed_plans: 0
   percent: 0
 ---
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22 after v1.8 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** v1.9 语音类目与商家识别系统重构 — ROADMAP revised to **4 phases (49-52)** per user-directed 6→4 merge. Awaiting approval, then `/gsd-plan-phase 49`.
+**Current focus:** v1.9 语音类目与商家识别系统重构 — Phase 49 (Merchant Data Foundation) planned: **6 plans across 4 waves**, plan-checker VERIFICATION PASSED. Next: `/gsd-execute-phase 49`.
 
 ## Current Position
 
-Phase: 49 — Merchant Data Foundation (not started)
-Plan: —
-Status: Roadmap revised (6→4 merge) — awaiting approval to begin planning
-Last activity: 2026-06-23 — v1.9 ROADMAP revised to 4 phases (49-52) per user-directed 6→4 merge (XVAL+LEDGER → Phase 51; RECUX+VEN → Phase 52), REQUIREMENTS.md traceability re-mapped (20/20 mapped, 0 orphans, 0 duplicates)
+Phase: 49 — Merchant Data Foundation (planned — ready to execute)
+Plan: 6 plans across 4 waves (W1: 49-01/02/03 ∥ · W2: 49-04 · W3: 49-05 · W4: 49-06 human-verify)
+Status: Planned — RESEARCH + Nyquist VALIDATION + PATTERNS produced; plan-checker VERIFICATION PASSED (0 blockers, 1 non-blocking WARNING: MERCH-03 scored-matching clause completes in Phase 50); requirements 5/5 + decisions 9/9 covered
+Last activity: 2026-06-23 — Phase 49 planned via /gsd-plan-phase (6 plans committed 08cf7b20)
 
 ### Quick Tasks Completed
 
@@ -217,9 +217,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-23T02:37:42.452Z
-Stopped at: Phase 49 context gathered
-Resume file: .planning/phases/49-merchant-data-foundation/49-CONTEXT.md
+Last session: 2026-06-23T04:27:06.000Z
+Stopped at: Phase 49 planned — 6 plans across 4 waves, plan-checker VERIFICATION PASSED
+Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merchant-data-foundation/)
 
 ## Performance Metrics
 
