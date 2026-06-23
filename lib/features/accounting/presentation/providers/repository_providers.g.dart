@@ -210,6 +210,68 @@ final class CategoryRepositoryProvider
 String _$categoryRepositoryHash() =>
     r'0efc054c1cb685a355e020bea93a3dbb90250e96';
 
+/// MerchantRepository provider.
+///
+/// Phase 49 wires the interface only — no consumer reads it yet (the
+/// recognizer cutover is Phase 50). The seed (Plan 05) is the first user.
+
+@ProviderFor(merchantRepository)
+final merchantRepositoryProvider = MerchantRepositoryProvider._();
+
+/// MerchantRepository provider.
+///
+/// Phase 49 wires the interface only — no consumer reads it yet (the
+/// recognizer cutover is Phase 50). The seed (Plan 05) is the first user.
+
+final class MerchantRepositoryProvider
+    extends
+        $FunctionalProvider<
+          MerchantRepository,
+          MerchantRepository,
+          MerchantRepository
+        >
+    with $Provider<MerchantRepository> {
+  /// MerchantRepository provider.
+  ///
+  /// Phase 49 wires the interface only — no consumer reads it yet (the
+  /// recognizer cutover is Phase 50). The seed (Plan 05) is the first user.
+  MerchantRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'merchantRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$merchantRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<MerchantRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  MerchantRepository create(Ref ref) {
+    return merchantRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MerchantRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MerchantRepository>(value),
+    );
+  }
+}
+
+String _$merchantRepositoryHash() =>
+    r'c5103262477f47f630b714c02af065e589e4145d';
+
 /// CategoryLedgerConfigRepository provider.
 
 @ProviderFor(categoryLedgerConfigRepository)

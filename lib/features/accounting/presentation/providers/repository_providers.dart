@@ -24,6 +24,7 @@ import '../../../../data/daos/category_dao.dart';
 import '../../../../data/daos/category_keyword_preference_dao.dart';
 import '../../../../data/daos/category_ledger_config_dao.dart';
 import '../../../../data/daos/merchant_category_preference_dao.dart';
+import '../../../../data/daos/merchant_dao.dart';
 import '../../../../data/daos/transaction_dao.dart';
 import '../../../../data/repositories/book_repository_impl.dart';
 import '../../../../data/repositories/category_keyword_preference_repository_impl.dart';
@@ -31,6 +32,7 @@ import '../../../../data/repositories/category_ledger_config_repository_impl.dar
 import '../../../../data/repositories/category_repository_impl.dart';
 import '../../../../data/repositories/device_identity_repository_impl.dart';
 import '../../../../data/repositories/merchant_category_preference_repository_impl.dart';
+import '../../../../data/repositories/merchant_repository_impl.dart';
 import '../../../../data/repositories/transaction_repository_impl.dart';
 import '../../domain/models/book.dart';
 import '../../domain/repositories/book_repository.dart';
@@ -39,6 +41,7 @@ import '../../domain/repositories/category_ledger_config_repository.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../../domain/repositories/device_identity_repository.dart';
 import '../../domain/repositories/merchant_category_preference_repository.dart';
+import '../../domain/repositories/merchant_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
 
@@ -72,6 +75,17 @@ CategoryRepository categoryRepository(Ref ref) {
   final database = ref.watch(app_accounting.appAppDatabaseProvider);
   final dao = CategoryDao(database);
   return CategoryRepositoryImpl(dao: dao);
+}
+
+/// MerchantRepository provider.
+///
+/// Phase 49 wires the interface only — no consumer reads it yet (the
+/// recognizer cutover is Phase 50). The seed (Plan 05) is the first user.
+@riverpod
+MerchantRepository merchantRepository(Ref ref) {
+  final database = ref.watch(app_accounting.appAppDatabaseProvider);
+  final dao = MerchantDao(database);
+  return MerchantRepositoryImpl(dao: dao);
 }
 
 /// CategoryLedgerConfigRepository provider.
