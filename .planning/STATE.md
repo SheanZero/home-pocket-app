@@ -6,14 +6,14 @@ current_phase: 49
 current_phase_name: merchant-data-foundation
 status: executing
 stopped_at: Phase 49 planned (6 plans, ready to execute)
-last_updated: "2026-06-23T05:40:45.830Z"
+last_updated: "2026-06-23T05:47:26.589Z"
 last_activity: 2026-06-23
 last_activity_desc: Phase 49 execution started
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-22 after v1.8 milestone)
 ## Current Position
 
 Phase: 49 (merchant-data-foundation) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-06-23 — Phase 49 execution started
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-23T05:40:40.317Z
+Last session: 2026-06-23T05:47:11.845Z
 Stopped at: Phase 49 planned — 6 plans across 4 waves, plan-checker VERIFICATION PASSED
 Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merchant-data-foundation/)
 
@@ -260,6 +260,7 @@ Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merc
 | Phase 48 P01 | 4min | 3 tasks | 3 files |
 | Phase 48 P02 | ~6min | 2 tasks | 3 files |
 | Phase 49 P01 | 6m | 3 tasks | 6 files |
+| Phase 49 P02 | 3min | 2 tasks | 2 files |
 
 ## Decisions
 
@@ -323,6 +324,7 @@ Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merc
 - [Phase 48]: [48-01] DEVIATION (Rule 1): reworded categoryDonutRefreshTargets dartdoc to drop the literal `home/*` substring — the Task-1 comment tripped the pre-existing REDES-01 `source.contains('home/')` per-card guard (folded into bf0122a2). NOTE: gsd-tools CLI unavailable in this exec env — STATE.md/ROADMAP.md updated by hand (consistent with the Phase 47 47-04 note).
 - [Phase 48]: [48-02] TD-2 fixed (D-04): scrubbed the removed `getExpenseTrendUseCase` / `MonthlyTrend` symbol names from the `getWithinMonthCumulativeUseCase` dartdoc (source + 3 build_runner-regenerated `.g.dart` mirrors at ~168/180/196) and from the one characterization test description (now 'within-month cumulative trend path, D-E1'). Kept the accurate `findByBookIds`/NOT-analyticsRepository rationale. `grep -rn "getExpenseTrend\|MonthlyTrend" lib/ test/` = 0; scoped analyze 0; char test 3/3; 0 golden re-baseline; .g.dart diff = ONLY the 3 dartdoc mirror blocks (no codegen drift), committed normally (not gitignored). gsd-tools CLI still unavailable — STATE.md/ROADMAP.md updated by hand.
 - [Phase ?]: Phase 49-01: merchant_match_keys.match_key index is NON-UNIQUE (cross-merchant collisions legal, RESEARCH #6); region default companion-layer JP; ledger_hint kept as stored non-authoritative hint (D-09); schema v21->v22 with explicit CREATE INDEX in onCreate AND from<22
+- [Phase ?]: Phase 49-02: normalizeMerchantKey is one shared hand-written kana normalizer (zero deps) reused unchanged for seed-time + Phase-50 query-time; all folds land in hiragana namespace; orphan combining marks dropped; ASCII hyphen kept, only 中黒/whitespace stripped
 
 ## Operator Next Steps
 
