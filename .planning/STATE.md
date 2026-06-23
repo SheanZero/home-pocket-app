@@ -5,14 +5,14 @@ milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证
 current_phase: 50
 current_phase_name: Decoupled Recognizers
 status: executing
-stopped_at: Phase 50 context gathered
-last_updated: "2026-06-23T12:13:30.243Z"
+stopped_at: Phase 50 planned (5 plans, ready to execute)
+last_updated: "2026-06-23T13:14:13.000Z"
 last_activity: 2026-06-23
-last_activity_desc: Phase 49 complete + verified, transitioned to Phase 50
+last_activity_desc: Phase 50 planned — 5 plans across 3 waves, plan-checker PASSED
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 6
+  total_plans: 11
   completed_plans: 6
   percent: 25
 ---
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 50 — Decoupled Recognizers
-Plan: Not started
-Status: Ready to plan (no CONTEXT/PLAN yet — run /gsd-discuss-phase 50 or /gsd-plan-phase 50)
-Last activity: 2026-06-23 — Phase 49 complete + verified, transitioned to Phase 50
+Plan: 5 plans across 3 waves (W1={01,02,04} · W2={03} · W3={05})
+Status: Ready to execute (plan-checker PASSED; research + pattern-map + validation contract complete) — run /gsd-execute-phase 50
+Last activity: 2026-06-23 — Phase 50 planned: 5 plans, 1 blocker + 2 warnings resolved in revision, re-verified PASSED
 
 ### Quick Tasks Completed
 
