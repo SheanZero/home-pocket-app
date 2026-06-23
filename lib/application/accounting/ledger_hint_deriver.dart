@@ -39,8 +39,12 @@ LedgerType deriveLedgerHint(String categoryId) {
     ),
   );
 
+  // Match resolveLedgerType's guard EXACTLY (category_service.dart:35): only an
+  // L2 inherits its parent's config. Keeping `level == 2` here makes parity
+  // structural, not a coincidence of the current data shape — a future L1 with a
+  // non-null parent, or an L3, can no longer silently diverge from the authority.
   final parentId = category.parentId;
-  if (parentId != null) {
+  if (category.level == 2 && parentId != null) {
     for (final config in configs) {
       if (config.categoryId == parentId) {
         return config.ledgerType;

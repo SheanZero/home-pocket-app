@@ -112,5 +112,47 @@ void main() {
       expect(deriveLedgerHint('cat_food_cafe'), LedgerType.daily);
       expect(deriveLedgerHint('cat_hobbies_subscription'), LedgerType.joy);
     });
+
+    test(
+        'parent inheritance is gated on level == 2 (structural parity with '
+        'resolveLedgerType, not data-shape coincidence)', () async {
+      // A synthetic category that has a parentId WITH a resolvable config but is
+      // NOT an L2 (e.g. an L1 mistakenly given a parent, or a future L3). The
+      // authority (resolveLedgerType) refuses to inherit because its guard is
+      // `level == 2 && parentId != null`. deriveLedgerHint MUST match: it should
+      // throw (no resolvable config) rather than silently inherit the parent's
+      // ledger. This locks WR-02 — without the level guard, deriveLedgerHint
+      // would return the parent's ledger and diverge from the authority.
+      final syntheticL1WithParent = Category(
+        id: 'cat_synthetic_l1_with_parent',
+        name: 'synthetic',
+        icon: 'x',
+        color: '#000000',
+        // parent has a direct config (cat_food -> daily) but this node is L1.
+        parentId: 'cat_food',
+        level: 1,
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      );
+
+      final byId = {
+        for (final c in DefaultCategories.all) c.id: c,
+        syntheticL1WithParent.id: syntheticL1WithParent,
+      };
+      final guardedService = CategoryService(
+        categoryRepository: _FakeCategoryRepository(byId),
+        ledgerConfigRepository: _FakeLedgerConfigRepository(configById),
+      );
+
+      // Authority does not inherit (level != 2) -> null.
+      expect(
+        await guardedService.resolveLedgerType(syntheticL1WithParent.id),
+        isNull,
+      );
+      // Deriver must agree by refusing to resolve (not inheriting the parent).
+      expect(
+        () => deriveLedgerHint(syntheticL1WithParent.id),
+        throwsStateError,
+      );
+    });
   });
 }
