@@ -1,10 +1,13 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.9
-milestone_name: 语音类目与商家识别系统重构
+milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
+current_phase: 49
 status: planning
-last_updated: "2026-06-23T00:41:40.061Z"
+stopped_at: Phase 49 context gathered
+last_updated: "2026-06-23T02:37:42.458Z"
 last_activity: 2026-06-23
+last_activity_desc: v1.9 ROADMAP revised to 4 phases (49-52) per user-directed 6→4 merge (XVAL+LEDGER → Phase 51; RECUX+VEN → Phase 52), REQUIREMENTS.md traceability re-mapped (20/20 mapped, 0 orphans, 0 duplicates)
 progress:
   total_phases: 4
   completed_phases: 0
@@ -214,9 +217,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-20T05:01:26.828Z
-Stopped at: 47-06-PLAN.md complete — full-suite gate green + on-device D-10 UAT all 10 PASS (user-approved 2026-06-20); Phase 47 all 6 plans done, ready for verification
-Resume file: None
+Last session: 2026-06-23T02:37:42.452Z
+Stopped at: Phase 49 context gathered
+Resume file: .planning/phases/49-merchant-data-foundation/49-CONTEXT.md
 
 ## Performance Metrics
 
