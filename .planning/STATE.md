@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-06-23T00:41:40.061Z"
 last_activity: 2026-06-23
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22 after v1.8 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Planning next milestone (v1.8 统计页面重设计 shipped 2026-06-22) — run `/gsd-new-milestone`
+**Current focus:** v1.9 语音类目与商家识别系统重构 — ROADMAP revised to **4 phases (49-52)** per user-directed 6→4 merge. Awaiting approval, then `/gsd-plan-phase 49`.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 49 — Merchant Data Foundation (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-23 — Milestone v1.9 started
+Status: Roadmap revised (6→4 merge) — awaiting approval to begin planning
+Last activity: 2026-06-23 — v1.9 ROADMAP revised to 4 phases (49-52) per user-directed 6→4 merge (XVAL+LEDGER → Phase 51; RECUX+VEN → Phase 52), REQUIREMENTS.md traceability re-mapped (20/20 mapped, 0 orphans, 0 duplicates)
 
 ### Quick Tasks Completed
 
@@ -78,9 +78,43 @@ Last activity: 2026-06-23 — Milestone v1.9 started
 
 ### Roadmap Evolution
 
+- v1.9 roadmap **first written** 2026-06-23 as 6 phases (49-54) following the research SUMMARY §"Implications for Roadmap" dependency-forced structure (data foundation → decoupled recognizers → reconciliation → ledger rework → recognition UX → English/coverage). Phase numbering **continues from v1.8's Phase 48 (NO reset)**. Granularity `fine`. All 20 v1 requirements mapped 1:1, 0 orphans, 0 duplicates.
+- v1.9 roadmap **revised 2026-06-23 to 4 phases (49-52)** per user-directed **6→4 merge** (review feedback). Two logic-pair merges, each because the merged concerns are **the same code surgery / shared surface**, not arbitrary compression:
+  - **Phase 51 = Cross-Validation + Daily/Joy Ledger Rework** (old Phase 51 XVAL + old Phase 52 LEDGER). Both delete the merchant short-circuit / ledger-from-merchant branch at `parse_voice_input_use_case.dart:106`; ledger purity depends on the single post-reconciliation `resolveLedgerType` site existing. Kept atomic — **wave-1 reconciler/XVAL** lands before **wave-2 LEDGER invariant** (preserves the original 51→52 dependency). 5 requirements (XVAL-01..03 + LEDGER-01..02); carries MORE plans/waves than a single-concern phase.
+  - **Phase 52 = Recognition UX + English Voice** (old Phase 53 RECUX + old Phase 54 VEN). Both touch `TransactionDetailsForm` and share the trilingual ARB-parity + anti-toxicity-sweep + golden-rebaseline close-out (the 6-phase version already ran it inline across 53-54). **Wave-1 RECUX surface** before/with **wave-2 VEN coverage** + inline parity/sweep/golden gate. 7 requirements (RECUX-01..05 + VEN-01..02); carries MORE plans/waves than a single-concern phase.
+  - Phases 49 (Merchant Data Foundation, MERCH-01..05) and 50 (Decoupled Recognizers, DECOUP-01..03) are **unchanged** from the 6-phase version. The Drift v21→v22 migration (Phase 49) and the two pure engines (Phase 50) each remain a standalone phase — they are NOT mergeable (a schema migration must precede every reader; both verdict shapes must exist before the reconciler can combine them). Still 20/20 mapped 1:1, 0 orphans, 0 duplicates (REQUIREMENTS.md traceability re-pointed to 49-52).
+
 - v1.8 roadmap first written 2026-06-15 as 5 phases (43-47) following the research design-gate-first decomposition. Phase numbering continues from v1.7's Phase 42 (no reset).
 - Phase 43 is a **standalone hard DESIGN GATE — NO production code** (user requirement "未获批前不进入开发"). Build phases (44-47) start only after the gate closes on user approval. The v1.6 (7→4) and v1.7 (6→3) consolidation precedents were considered; the build half (44-47) is kept at 4 phases because each carries a distinct, sequentially-dependent contract (data → shell → cards → validation) and the milestone is a full screen rebuild under tight ADR-012 invariants.
 - Phase 48 added 2026-06-22: Address v1.8 tech debt — member-filter donut refresh + stale trend comments. Integer phase appended to v1.8 (range 43→48) to clear the two code-grade items from `v1.8-MILESTONE-AUDIT.md`: (1) `memberFilteredCategoryBreakdownProvider` watched by `category_donut_card.dart` but absent from `categoryDonutRefreshTargets` (member-filtered pull-to-refresh serves stale cached data); (2) stale dartdoc for the removed `GetExpenseTrendUseCase`/`MonthlyTrend` in `repository_providers.dart` (+`.g.dart`) and one characterization test. Doc-grade audit items (47 nyquist, SUMMARY frontmatter drift) left out of scope.
+
+### v1.9 Roadmap Constraints (locked by research + PROJECT.md/CLAUDE.md — every phase carries these)
+
+- **Drift pins / schema:** drift stays **2.31.0** (NEVER ≥2.32.0 — drops SQLCipher easy-support); `sqlcipher_flutter_libs` 0.6.8; schema bump **v21→v22** (Phase 49 only); explicit `CREATE INDEX IF NOT EXISTS` in onCreate AND onUpgrade (`customIndices` is decorative — MEMORY.md gotcha); full migration ladder (v3→v22, v17→v22) tested against the encrypted SQLCipher executor, not just `NativeDatabase.memory()`.
+- **No new heavy deps:** decoupled engines / cross-validation / category-only are pure in-house Dart; merchant library is a curated Drift seed. No FTS5 (CJK tokenization broken + SQLCipher ships no CJK tokenizer + 400 rows too small), no Levenshtein/fuzzy lib (v1.3 deleted `FuzzyCategoryMatcher`), no TFLite/embeddings/cloud NLU. `kana_kit ^2.1.1` is the ONLY optional candidate (seed-time romaji normalization).
+- **Merchant scope:** ~400 entries committed for v1.9 (national-chain spine per everyday category); schema designed for 600-800 ceiling; regional/depachika tail deferred to MERCH-V2-01.
+- **ADR-012 anti-gamification (permanent):** no accuracy-%/streak/badge/leaderboard around recognition; confidence is qualitative 3-tier, never a number; low-confidence guesses confirmed/corrected, never auto-committed. New recognition UI joins the anti-toxicity sweep (Phase 52) with the COMPLETE banned-token list (incl. score/streak/accuracy/正确率/連続/ストリーク/達成 — v1.8 WR-02 flagged the list was incomplete).
+- **Thin-Feature Clean Architecture:** recognizers + use case in `lib/application/voice/recognition/`; `RecognitionReconciler` + verdict models + `MerchantRepository` interface in `domain/` (recommend `features/accounting/domain/` to avoid a one-service feature module — confirm at Phase 51 plan); merchants table/DAO/repo-impl in `lib/data/`. Domain never imports application/data/infrastructure.
+- **Ledger = pure function of final category:** drop the merchant `ledgerType` short-circuit (`parse_voice_input_use_case.dart:106`); ledger derives from `resolveLedgerType(finalCategoryId)` AFTER reconciliation. Invariant test `ledgerType == resolveLedgerType(finalCategoryId)` on every path.
+- **Learning-key identity contract:** `resolvedKeyword` write key == recognizer read key end-to-end (260526-pg6 orphan-key lesson); thread `CategoryVerdict.keyword` through `VoiceParseResult.resolvedKeyword` verbatim; corrections on conflict teach the KEYWORD table, never the merchant table.
+- **i18n:** merchant proper-nouns are DATA (Drift multi-locale columns), category labels are ARB; trilingual parity + `flutter gen-l10n` clean + `git add -f lib/generated/`; parity gate run INLINE within Phase 52 (RECUX+VEN close-out wave), not deferred to milestone close (v1.7/v1.8 lesson).
+- **Security:** never log raw transcript/amount/merchant (zero-knowledge); resolved merchant stays in the already-encrypted transaction field; merchant seed list is non-sensitive public data; learning-table sync stays under existing E2EE gates.
+
+### v1.9 Open Design Questions (resolve at phase plan time)
+
+- **Seed timing (Phase 49):** inside-migrator `rootBundle` read vs count-guarded post-open seed, given `AppInitializer` order KeyManager→Database→others. Count-guarded post-open is the safer default — decide early in Phase 49 planning.
+- **`RuleEngine`/`ClassificationService` deletion blast radius (Phase 51, wave-2 LEDGER):** grep for consumers (OCR MOD-005? tests?) before retiring; fold into `category_ledger_configs` seed instead of deleting if a consumer exists.
+- **Reconciler home (Phase 51):** `features/accounting/domain/services/` (recommended) vs a new `features/voice/` module — confirm at plan.
+- **Merchant `ledgerType` column (Phase 49):** keep as a stored non-authoritative hint (recommended, for a future merchant-specific-ledger affordance) vs drop entirely and always derive.
+- **en-US STT digit output (Phase 52, wave-2 VEN):** confirm on-device whether the target iOS/Android engine returns Arabic digits or words; the bounded ~30-line number-word fallback covers the word case either way (non-blocking).
+
+### v1.9 Pending Todos
+
+- Await user approval of the v1.9 roadmap, then run `/gsd-plan-phase 49` to begin Merchant Data Foundation.
+- **Codebase intel is stale:** `.planning/codebase/` is seven milestones old — consider `/gsd-map-codebase` (or at least re-read the voice/merchant/ledger files cited in ARCHITECTURE.md) before Phase 49/50 planning.
+- **Phase 49:** decide seed timing (above); author `japan_merchants.json` ~400 rows with seed-time normalized match-keys; `seed-categoryId-is-real-L2` integrity test; `PRAGMA index_list` test on fresh+upgraded DB; full migration-ladder test on the encrypted executor.
+- **Phase 51 (research flag — wave-1 XVAL):** write the none/weak/strong 3×3 truth table (band definitions, agreement granularity, confidence floors, hysteresis margin) as the `cross_validation_test.dart` spec BEFORE coding.
+- **Phase 52 (RECUX+VEN close-out wave):** run ARB parity + macOS golden re-baseline + anti-toxicity sweep INLINE (not at milestone close); if a new ADR is needed (e.g. a recognition-confidence affordance decision), check `ls docs/arch/03-adr/ADR-*.md` for the current max (currently ADR-022) and use the next sequential number.
 
 ### v1.8 Roadmap Constraints (locked by research + PROJECT.md — every build phase carries these)
 
@@ -110,7 +144,7 @@ Last activity: 2026-06-23 — Milestone v1.9 started
 
 ### Blockers / Concerns
 
-No active blockers for v1.8. Pre-existing carried debt (unchanged):
+No active blockers for v1.9. Pre-existing carried debt (unchanged):
 
 - **v1.5 a11y UAT:** Phase 35 W1 on-device screen-reader announcement of localized ledger-chip labels — human_needed
 - **v1.5 vocab residual:** `Book.survivalBalance`/`soulBalance` DB columns need future DB-migration phase before public release

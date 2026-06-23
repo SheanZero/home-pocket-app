@@ -83,24 +83,47 @@
 
 ## Traceability
 
-由 roadmap 创建时填充（gsd-roadmapper）。每条 v1 requirement 映射到恰好一个 phase。
-
-研究给出的依赖强制 phase 顺序（待 roadmapper 确认）：
+由 roadmap 创建时填充（gsd-roadmapper）。每条 v1 requirement 映射到恰好一个 phase。研究给出的依赖强制顺序经 roadmapper 确认后采纳，并按用户指示 **6→4 合并**：交叉验证 + 账本重做合并入 Phase 51（同一段代码手术——都删 `parse_voice_input_use_case.dart:106` 的商家短路），识别 UX + 英文语音合并入 Phase 52（同触 `TransactionDetailsForm` + 共享三语 ARB-parity/anti-toxicity/golden 收尾）。Phases 49/50 不变（**4 phases，49-52**）。
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MERCH-01..05 | Phase 49 (Merchant Data Foundation) | Pending |
-| DECOUP-01..03 | Phase 50 (Decoupled Recognizers) | Pending |
-| XVAL-01..03 | Phase 51 (Cross-Validation) | Pending |
-| LEDGER-01..02 | Phase 52 (Daily/Joy Ledger Rework) | Pending |
-| RECUX-01..05 | Phase 53 (Recognition UX + Learning) | Pending |
-| VEN-01..02 | Phase 54 (English Voice + Coverage) | Pending |
+| MERCH-01 | Phase 49 — Merchant Data Foundation | Pending |
+| MERCH-02 | Phase 49 — Merchant Data Foundation | Pending |
+| MERCH-03 | Phase 49 — Merchant Data Foundation | Pending |
+| MERCH-04 | Phase 49 — Merchant Data Foundation | Pending |
+| MERCH-05 | Phase 49 — Merchant Data Foundation | Pending |
+| DECOUP-01 | Phase 50 — Decoupled Recognizers | Pending |
+| DECOUP-02 | Phase 50 — Decoupled Recognizers | Pending |
+| DECOUP-03 | Phase 50 — Decoupled Recognizers | Pending |
+| XVAL-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| XVAL-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| XVAL-03 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| LEDGER-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| LEDGER-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| RECUX-01 | Phase 52 — Recognition UX + English Voice | Pending |
+| RECUX-02 | Phase 52 — Recognition UX + English Voice | Pending |
+| RECUX-03 | Phase 52 — Recognition UX + English Voice | Pending |
+| RECUX-04 | Phase 52 — Recognition UX + English Voice | Pending |
+| RECUX-05 | Phase 52 — Recognition UX + English Voice | Pending |
+| VEN-01 | Phase 52 — Recognition UX + English Voice | Pending |
+| VEN-02 | Phase 52 — Recognition UX + English Voice | Pending |
 
 **Coverage:**
 - v1 requirements: 20 total
-- Mapped to phases: 0 (roadmapper 填充)
-- Unmapped: 20 ⚠️ (until roadmap)
+- Mapped to phases: 20 ✓
+- Unmapped: 0 ✓
+- No requirement mapped to more than one phase (no duplicates) ✓
+
+**Per-phase counts:**
+
+| Phase | Requirements | Count |
+|-------|--------------|-------|
+| Phase 49 — Merchant Data Foundation | MERCH-01..05 | 5 |
+| Phase 50 — Decoupled Recognizers | DECOUP-01..03 | 3 |
+| Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | XVAL-01..03, LEDGER-01..02 | 5 |
+| Phase 52 — Recognition UX + English Voice | RECUX-01..05, VEN-01..02 | 7 |
+| **Total** | | **20** |
 
 ---
 *Requirements defined: 2026-06-23*
-*Last updated: 2026-06-23 after initial v1.9 definition*
+*Last updated: 2026-06-23 — roadmap revised (gsd-roadmapper): user-directed 6→4 merge (XVAL+LEDGER → Phase 51; RECUX+VEN → Phase 52); 20/20 v1 requirements mapped to Phases 49-52, 0 orphans, 0 duplicates*
