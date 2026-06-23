@@ -14,7 +14,7 @@ gate:
   palette_only: true (no raw hex; card/borderDefault/FAB-gradient/actionShadow tokens)
   arb: none (reused l10n.voiceRecordBar)
   codegen: none (no @riverpod/@freezed/Drift/ARB change)
-human_verify: pending  # 真机确认白色一体/椭圆/底排观感
+human_verify: verified  # 用户真机验收通过 2026-06-23（approved，覆盖 R1–R3 最终态）
 design_gate: HTML mock approved (mocks/numpad-voicekey-midpoint.html · 方案 M, width 200dp)
 ---
 
