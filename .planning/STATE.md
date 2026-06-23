@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.8
-milestone_name: 统计页面重设计（实用化 × 悦己情感化） — SHIPPED 2026-06-22
-status: Awaiting next milestone
-stopped_at: Milestone v1.8 complete and archived (2026-06-22) — 6 phases (43-48), 32 plans, tag v1.8; all requirements satisfied/descoped, audit tech_debt accepted
-last_updated: "2026-06-22T07:31:03.904Z"
-last_activity: 2026-06-22 — Milestone v1.8 completed and archived
+milestone: v1.9
+milestone_name: 语音类目与商家识别系统重构
+status: planning
+last_updated: "2026-06-23T00:41:40.061Z"
+last_activity: 2026-06-23
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 32
-  completed_plans: 32
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-22 after v1.8 milestone)
 
 ## Current Position
 
-Phase: Milestone v1.8 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-23 — Quick task 260623-0cj ✅ 完成并真机验收通过（approved）：数字小键盘重设计（先 HTML 稿经用户确认）：语音键 38dp 满宽贴边色带 → 居中 200dp 椭圆胶囊。**R2 按用户反馈**：语音键白底「一体」(键盘 `showTopBorder:false`，语音条接管顶边)、语音胶囊与底排都改 **44dp**、胶囊配色+字体对齐「记录」键(FAB 樱粉渐变+白 titleMedium16w700)。**R3**：语音键上下留白对齐 12dp 行距（语音条 `padding` `vertical:8`→`only(top:12)`，下方由键盘 top12 补齐）。analyze 0 / full test 3138/3138、10 SmartKeyboard golden ×2 重基线 + R3 零 golden。真机 UAT 待确认。遗留：manual_one_step_screen.dart 1020 LOC(>800) 待后续抽小
+Status: Defining requirements
+Last activity: 2026-06-23 — Milestone v1.9 started
 
 ### Quick Tasks Completed
 
