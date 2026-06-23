@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 
@@ -8,22 +11,19 @@ import 'package:home_pocket/data/app_database.dart';
 ///   (1) Fresh-install onCreate — `AppDatabase.forTesting()` opens at v22 and
 ///       both `merchants` + `merchant_match_keys` tables exist with the full
 ///       column set and the four explicit indexes (MERCH-04, MERCH-05).
-///   (2) v21→v22 onUpgrade — the `from < 22` migration step (replicated here as
-///       [_runV22MigrationSteps], the contract for what lands in `onUpgrade`)
-///       creates both tables and the same four indexes when applied to a DB that
-///       did NOT have them.
+///   (2) v21→v22 onUpgrade — the REAL `from < 22` block inside
+///       `AppDatabase.migration` is driven on the host VM (WR-01). We open a
+///       file-backed `NativeDatabase` at v22, simulate a pre-v22 DB by dropping
+///       what onCreate built and rewinding `user_version` to 21, close it, then
+///       reopen the SAME file as `AppDatabase` (schemaVersion 22). Drift's
+///       migrator sees 21 < 22 and runs the genuine production `from < 22`
+///       branch — `migrator.createTable` + `_createMerchantIndexes()`. This is
+///       the host-VM mirror of the encrypted ladder's STAGE A/B (minus the
+///       SQLCipher boundary, which is covered on-device in
+///       integration_test/merchant_migration_ladder_test.dart).
 ///
-/// Test approach (no drift_schemas/ snapshots; matches category_v14 idiom):
-///   - For onCreate: open a fresh AppDatabase.forTesting() and assert directly.
-///   - For onUpgrade: open a fresh DB, DROP the merchant tables/indexes that
-///     onCreate built (simulating a pre-v22 DB), then run [_runV22MigrationSteps]
-///     (mirror of the `from < 22` block) and assert the tables/indexes are
-///     re-created. This exercises the exact SQL/DDL the migrator runs.
-///
-/// These tests are intentionally RED until:
-///   - the merchants + merchant_match_keys tables are defined and registered,
-///   - schemaVersion is bumped to 22,
-///   - `_createMerchantIndexes()` is called from onCreate AND the from<22 block.
+/// No hand-written DDL mirror is used: if the real migrator's table/index set
+/// ever drifts, this test fails instead of staying falsely green (WR-01).
 
 const Set<String> _expectedIndexes = {
   'idx_merchants_region',
@@ -57,54 +57,6 @@ Future<bool> _tableExists(AppDatabase db, String table) async {
       )
       .get();
   return rows.isNotEmpty;
-}
-
-/// Run the v22 migration steps.
-///
-/// This is the contract for what must live inside `onUpgrade` when `from < 22`
-/// in AppDatabase. The DDL here must be kept in sync with `_createMerchantIndexes()`
-/// and the `migrator.createTable(...)` calls in the real migration.
-Future<void> _runV22MigrationSteps(AppDatabase db) async {
-  // Mirror migrator.createTable(merchants) / createTable(merchantMatchKeys).
-  await db.customStatement('''
-    CREATE TABLE IF NOT EXISTS merchants (
-      id TEXT NOT NULL,
-      name_ja TEXT NOT NULL,
-      name_zh TEXT,
-      name_en TEXT,
-      region TEXT NOT NULL DEFAULT 'JP',
-      category_id TEXT NOT NULL,
-      ledger_hint TEXT NOT NULL,
-      PRIMARY KEY (id)
-    )
-  ''');
-  await db.customStatement('''
-    CREATE TABLE IF NOT EXISTS merchant_match_keys (
-      id TEXT NOT NULL,
-      merchant_id TEXT NOT NULL REFERENCES merchants(id),
-      surface TEXT NOT NULL,
-      match_key TEXT NOT NULL,
-      kind TEXT NOT NULL,
-      PRIMARY KEY (id)
-    )
-  ''');
-  // Mirror _createMerchantIndexes().
-  await db.customStatement(
-    'CREATE INDEX IF NOT EXISTS idx_merchant_match_keys_match_key '
-    'ON merchant_match_keys (match_key)',
-  );
-  await db.customStatement(
-    'CREATE INDEX IF NOT EXISTS idx_merchant_match_keys_merchant '
-    'ON merchant_match_keys (merchant_id)',
-  );
-  await db.customStatement(
-    'CREATE INDEX IF NOT EXISTS idx_merchants_region '
-    'ON merchants (region)',
-  );
-  await db.customStatement(
-    'CREATE INDEX IF NOT EXISTS idx_merchants_category '
-    'ON merchants (category_id)',
-  );
 }
 
 void main() {
@@ -228,32 +180,80 @@ void main() {
     });
   });
 
-  group('merchant v22 — onUpgrade (v21→v22) contract', () {
-    test('migration step recreates both tables + four indexes', () async {
-      final db = AppDatabase.forTesting();
-      addTearDown(db.close);
+  group('merchant v22 — onUpgrade (v21→v22) drives the REAL migrator', () {
+    // File-backed so the DB persists across the close/reopen that is required to
+    // make Drift's migrator fire (an in-memory DB does not survive two executor
+    // instances — 49-PATTERNS reopen note). Mirrors the encrypted ladder STAGE
+    // A/B, minus the SQLCipher boundary.
+    late Directory tempDir;
+    late File dbFile;
 
-      // Simulate a pre-v22 DB: drop what onCreate built.
-      await db.customStatement('DROP TABLE IF EXISTS merchant_match_keys');
-      await db.customStatement('DROP TABLE IF EXISTS merchants');
-      expect(await _tableExists(db, 'merchants'), isFalse);
-      expect(await _tableExists(db, 'merchant_match_keys'), isFalse);
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('merchant_v22_migration');
+      dbFile = File('${tempDir.path}/app.sqlite');
+    });
 
-      // Run the from<22 migration contract.
-      await _runV22MigrationSteps(db);
+    tearDown(() async {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
 
-      expect(await _tableExists(db, 'merchants'), isTrue);
-      expect(await _tableExists(db, 'merchant_match_keys'), isTrue);
+    test(
+        'real from<22 onUpgrade block recreates both tables + four indexes',
+        () async {
+      // STAGE A — stamp the file at v21: open at v22 (onCreate builds
+      // everything), drop what onCreate built for merchants, and rewind
+      // user_version to 21 so the next open looks like a genuine pre-v22 DB.
+      final staged = AppDatabase(NativeDatabase(dbFile));
+      await staged.customStatement('DROP TABLE IF EXISTS merchant_match_keys');
+      await staged.customStatement('DROP TABLE IF EXISTS merchants');
+      await staged.customStatement('PRAGMA user_version = 21');
+      expect(await _tableExists(staged, 'merchants'), isFalse);
+      expect(await _tableExists(staged, 'merchant_match_keys'), isFalse);
+      await staged.close();
+
+      // STAGE B — reopen the SAME file as AppDatabase (schemaVersion 22). Drift
+      // sees user_version 21 < 22 and runs the production `from < 22` branch:
+      // migrator.createTable(merchants/merchantMatchKeys) + _createMerchantIndexes().
+      final upgraded = AppDatabase(NativeDatabase(dbFile));
+      addTearDown(upgraded.close);
+
+      // Force the migrator to run by issuing a query (lazy-open).
+      expect(await _tableExists(upgraded, 'merchants'), isTrue);
+      expect(await _tableExists(upgraded, 'merchant_match_keys'), isTrue);
+
+      // Columns come from the REAL Drift table definitions (no hand DDL).
+      final merchantCols = await _columnNames(upgraded, 'merchants');
+      expect(
+        merchantCols,
+        containsAll(<String>[
+          'id',
+          'name_ja',
+          'name_zh',
+          'name_en',
+          'region',
+          'category_id',
+          'ledger_hint',
+        ]),
+      );
+      final keyCols = await _columnNames(upgraded, 'merchant_match_keys');
+      expect(
+        keyCols,
+        containsAll(<String>['id', 'merchant_id', 'surface', 'match_key', 'kind']),
+      );
+
       final all = <String>{
-        ...await _indexNames(db, 'merchants'),
-        ...await _indexNames(db, 'merchant_match_keys'),
+        ...await _indexNames(upgraded, 'merchants'),
+        ...await _indexNames(upgraded, 'merchant_match_keys'),
       };
       expect(all, containsAll(_expectedIndexes));
 
       final merchantsIdx =
-          await db.customSelect('PRAGMA index_list(merchants)').get();
-      final matchKeysIdx =
-          await db.customSelect('PRAGMA index_list(merchant_match_keys)').get();
+          await upgraded.customSelect('PRAGMA index_list(merchants)').get();
+      final matchKeysIdx = await upgraded
+          .customSelect('PRAGMA index_list(merchant_match_keys)')
+          .get();
       expect(merchantsIdx, isNotEmpty);
       expect(matchKeysIdx, isNotEmpty);
     });
