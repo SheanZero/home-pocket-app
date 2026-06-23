@@ -6,15 +6,15 @@ current_phase: 49
 current_phase_name: merchant-data-foundation
 status: executing
 stopped_at: Phase 49 planned (6 plans, ready to execute)
-last_updated: "2026-06-23T06:19:46.479Z"
+last_updated: "2026-06-23T06:32:44.672Z"
 last_activity: 2026-06-23
 last_activity_desc: Phase 49 execution started
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 6
-  completed_plans: 5
-  percent: 0
+  completed_plans: 6
+  percent: 25
 ---
 
 # Project State
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-23T06:19:34.485Z
+Last session: 2026-06-23T06:32:14.821Z
 Stopped at: Phase 49 planned — 6 plans across 4 waves, plan-checker VERIFICATION PASSED
 Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merchant-data-foundation/)
 
@@ -332,6 +332,8 @@ Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merc
 - [Phase ?]: 49-04: MerchantDao is a plain class (not @DriftAccessor); insertSeed batches both tables in one transaction via companions, no raw SQL
 - [Phase ?]: 49-04: MerchantMatchKey row PK derived as merchantId__matchKey so re-seed is idempotent under INSERT OR IGNORE
 - [Phase ?]: Phase 49-05: merchant seed wired as third leaf in SeedAllUseCase (after categories), seedRunner no-op untouched; ledgerHint via deriveLedgerHint(categoryId).name
+- [Phase 49]: 49-06: encrypted migration ladder reuses createEncryptedExecutor unchanged via a fixed-key MasterKeyRepository test double (no second key path — V6); SQL-layer test isolation (executor documents-dir path not exposed for file unlink)
+- [Phase 49]: 49-06: SQLCipher-path coverage split — integration test proves fresh-v22 + v21→v22 (real v1.8-user upgrade); deep-history v3→v22/v17→v22 DDL assertions stay on host-VM ladder merchant_v22_migration_test.dart
 
 ## Operator Next Steps
 
@@ -340,3 +342,4 @@ Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merc
 ### Blockers
 
 - ~~46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07.~~ **RESOLVED (46-01 + 46-07):** 46-01 resolved it at the time by ALSO deleting total_six_month_card.dart + monthly_spend_trend_bar_chart.dart + the Time section header + their registry specs (registry → 9 specs) so the data-only deletion compiled. 46-07 then verified those two files were already absent (no re-delete) and completed the round-5 B integration: re-ordered the registry to the flat 5-card lineup, deleted the remaining 4 dead files (best_joy_card, kpi_hero_card, largest_expense_card, analytics_screen_section_header), and updated the registry/screen/anti-toxicity tests in lockstep. Zero dangling references; full suite 2971/2971 green. No active blockers.
+- **49-06 Task 3 (blocking human-verify):** run `flutter test integration_test/merchant_migration_ladder_test.dart` on a booted simulator/device; confirm `PRAGMA cipher_version` non-empty + fresh-v22/v21→v22 index+seed+categoryId∈L2 assertions + D-08 ~10-row merchant spot-check. Cannot run in headless orchestrator (no simulator).
