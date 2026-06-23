@@ -1,294 +1,112 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-05-21
+**Analysis Date:** 2026-06-23
 
 ## Naming Patterns
 
 **Files:**
-- Dart source: `snake_case.dart` (e.g., `hash_chain_service.dart`, `app_text_styles.dart`)
-- Generated files: `*.g.dart` (riverpod_generator / json_serializable), `*.freezed.dart` (freezed) — never hand-edit
-- State providers: `state_{domain}.dart` (e.g., `state_joy_metric_variant.dart`, `state_locale.dart`)
-- Repository wiring: exactly `repository_providers.dart` per feature presentation/providers/ directory
+- `snake_case.dart` for all Dart files (e.g., `create_transaction_use_case.dart`, `app_palette.dart`)
+- Generated companions: `*.g.dart` (riverpod/json/drift), `*.freezed.dart` (freezed) — never hand-edit
+- Tables: `{name}_table.dart` in `lib/data/tables/`; DAOs: `{name}_dao.dart` in `lib/data/daos/`
+- Use cases: `{verb}_{noun}_use_case.dart` (e.g., `delete_transaction_use_case.dart`)
+- Tests: `{subject}_test.dart`; characterization tests use `_characterization_test.dart` suffix
 
-**Classes:**
-- Freezed models: `PascalCase` with `abstract class Name with _$Name` (e.g., `class Book with _$Book`)
-- Riverpod notifiers: `PascalCase` ending in `Notifier` or descriptive noun (e.g., `LocaleNotifier`, `SelectedJoyMetricVariant`)
-- Use cases: `VerbNounUseCase` (e.g., `CreateTransactionUseCase`, `GetHappinessReportUseCase`)
-- Repositories: `NounRepository` (interface), `NounRepositoryImpl` (implementation)
-- DAOs: `NounDao` (e.g., `AnalyticsDao`)
-- Table definitions: `PascalCase` plural noun (e.g., `Transactions`) with `@DataClassName('RowType')` annotation
-- Infrastructure services: `NounService` (e.g., `KeyManager`, `FieldEncryptionService`, `HashChainService`)
-
-**Functions/Methods:**
-- `camelCase` for all Dart functions and methods
-- Use case entry points always named `execute()`
-- Riverpod generator functions: camelCase (e.g., `getMonthlyReportUseCase(Ref ref)`) — generator strips `Notifier` suffix automatically
+**Functions:**
+- `lowerCamelCase` for functions, methods, local variables
+- Riverpod 3 generator strips the `Notifier` suffix: `class LocaleNotifier` → `localeProvider` (NOT `localeNotifierProvider`)
 
 **Variables:**
-- `camelCase` for locals and fields
-- Private fields/helpers prefixed with `_` (e.g., `_MockAnalyticsRepository`, `_fontFamily`, `_ptvfBaseByCurrency`)
+- `lowerCamelCase` for instances/locals; `_leadingUnderscore` for private members
+- Drift index columns use Symbol syntax: `{#bookId}`
 
-**Providers (Riverpod generator convention):**
-- `@riverpod class LocaleNotifier` → generates `localeProvider` (NOT `localeNotifierProvider`)
-- `@riverpod FutureOr<X> currentLocale(Ref ref)` → generates `currentLocaleProvider`
-- KeepaliveProviders: `syncEngineProvider`, `transactionChangeTrackerProvider`, `appMerchantDatabaseProvider`, `activeGroupProvider`, `activeGroupMembersProvider`
+**Types:**
+- `PascalCase` for classes, enums, typedefs (e.g., `AppDatabase`, `AppRunner`)
+- Freezed models are immutable; mutate only via `copyWith`
 
-## Immutability (CRITICAL)
+## Code Style
 
-Always use `copyWith` on Freezed models — never mutate fields directly. Freezed enforces this on `@freezed` classes. Plain Dart classes (e.g., `MerchantCategoryPreference`) implement manual `copyWith`.
+**Formatting:**
+- `dart format .` — standard Dart formatter, 2-space indent
+- NOTE: repo is NOT format-clean across all of `test/`; never run `dart format` over the whole `test/` tree (golden baselines / placeholder-font widgets break). Format only files you touch.
 
-```dart
-// CORRECT
-state = state.copyWith(l1: updated, isDirty: true);
-
-// WRONG — mutation
-state.l1 = updated; // compile error on @freezed; manual class: silent bug
-```
-
-## File Organization
-
-- Typical source file: 200–400 lines. Hard cap: 800 lines.
-- Organize by feature/domain, not by type:
-  - `lib/features/{feature}/domain/` — only models/ and repositories/ (interfaces)
-  - `lib/features/{feature}/presentation/` — screens/, widgets/, providers/
-  - `lib/application/{domain}/` — Use Cases and business services (GLOBAL, not inside features)
-  - `lib/infrastructure/{capability}/` — technology wrappers (crypto, ml, sync, i18n, security)
-  - `lib/data/` — ALL tables, DAOs, repository implementations
-- Exceptions currently over 800 lines (known, tracked): `home_hero_card.dart` (921), `voice_input_screen.dart` (771), `analytics_dao.dart` (746), `transaction_confirm_screen.dart` (743), `analytics_screen.dart` (739)
-
-## Riverpod Provider Rules
-
-**Single-source-of-truth per feature:**
-
-Each feature has exactly one `repository_providers.dart` at `lib/features/{feature}/presentation/providers/repository_providers.dart`. All other provider files in that directory MUST be named `state_*.dart`. Repository/UseCase/Service providers live ONLY in `repository_providers.dart`. This is enforced by `test/architecture/provider_graph_hygiene_test.dart`.
-
-```dart
-// CORRECT — repository_providers.dart
-@riverpod
-GetMonthlyReportUseCase getMonthlyReportUseCase(Ref ref) {
-  return GetMonthlyReportUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
-  );
-}
-
-// WRONG — in state_analytics.dart
-@riverpod
-GetMonthlyReportUseCase getMonthlyReportUseCase(Ref ref) { ... } // HIGH-04 violation
-```
-
-**NEVER throw `UnimplementedError` in production providers** — enforced by `test/architecture/provider_graph_hygiene_test.dart` HIGH-06.
-
-**No duplicate provider names within `lib/features/`** — enforced by HIGH-04 global uniqueness test.
-
-## Riverpod 3 Import Rules
-
-Import from the correct entry point — wrong imports cause symbol-not-found compile errors:
-
-| Need | Import |
-|------|--------|
-| `Provider`, `FutureProvider`, `StreamProvider`, `Notifier`, `AsyncNotifier`, `AsyncValue`, `ProviderContainer`, `ConsumerWidget`, `WidgetRef`, `ProviderScope` | `package:flutter_riverpod/flutter_riverpod.dart` |
-| `StateNotifier`, `StateNotifierProvider`, `StateProvider` (legacy/discouraged) | `package:flutter_riverpod/legacy.dart` |
-| `Override`, `ProviderListenable`, `ProviderException`, `Family`, `Refreshable`, `ProviderBase` | `package:flutter_riverpod/misc.dart` |
-
-**Riverpod 3 API changes to remember:**
-- `AsyncValue.valueOrNull` was removed; use `.value` (now nullable)
-- Errors from providers are wrapped in `ProviderException`; `.exception` holds the inner error
-- Side-effect listeners → `ref.listen(...)` not `ref.watch(...)` (navigation, snackbars, etc.)
-- `currentLocaleProvider` name: generated from `class LocaleNotifier` → `localeProvider`; `currentLocale(Ref ref)` → `currentLocaleProvider`
-
-## Widget Parameter Pattern
-
-Use nullable constructor parameters with provider fallback — never hardcode defaults:
-
-```dart
-class MyWidget extends ConsumerWidget {
-  const MyWidget({super.key, this.bookId});
-  final String? bookId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
-    // ...
-  }
-}
-```
-
-## Amount Display Style
-
-Always use `AppTextStyles.amountLarge`, `amountMedium`, or `amountSmall` from `lib/core/theme/app_text_styles.dart` for monetary values. These embed `FontFeature.tabularFigures()` for numeric alignment. Never use generic text styles for amounts.
-
-```dart
-// CORRECT
-Text(formatted, style: AppTextStyles.amountLarge)
-
-// WRONG
-Text(formatted, style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700))
-```
-
-## Drift Table Conventions
-
-Use `TableIndex` with Symbol syntax. Naming: `idx_{table_abbrev}_{columns}`.
-
-```dart
-// CORRECT
-List<TableIndex> get customIndices => [
-  TableIndex(name: 'idx_tx_book_id', columns: {#bookId}),
-  TableIndex(name: 'idx_tx_book_timestamp', columns: {#bookId, #timestamp}),
-];
-
-// WRONG
-@override  // no @override
-List<Index> get customIndices => [  // Index → TableIndex
-  Index('idx', 'book_id'),          // no string syntax
-];
-```
-
-Custom constraints use `customConstraints` list with SQL string literals:
-```dart
-@override
-List<String> get customConstraints => [
-  'CHECK(soul_satisfaction BETWEEN 1 AND 10)',
-  "CHECK(entry_source IN ('manual', 'voice', 'ocr'))",
-];
-```
-
-## i18n Rules
-
-All UI text MUST go through `S.of(context)` (the generated `app_localizations` class). Never hardcode display strings.
-
-```dart
-// CORRECT
-final l10n = S.of(context);
-Text(l10n.appName)
-
-// WRONG
-Text('Home')  // triggers test/architecture/hardcoded_cjk_ui_scan_test.dart
-```
-
-**Formatters:**
-- Currency → `NumberFormatter.formatCurrency(amount, currencyCode, locale)` (`lib/infrastructure/i18n/formatters/number_formatter.dart`)
-- Dates → `DateFormatter.formatDate(date, locale)` (`lib/infrastructure/i18n/formatters/date_formatter.dart`)
-- Always pass locale from `currentLocaleProvider` → `ref.watch(currentLocaleProvider).value ?? const Locale('ja')`
-
-**Format rules:**
-- JPY: 0 decimal places (`¥1,235`)
-- USD / CNY / EUR / GBP: 2 decimal places
-- Date ja: `yyyy/MM/dd` | en: `MM/dd/yyyy` | zh: `yyyy年MM月dd日`
-- Compact numbers ja/zh: `123万` | en: `1.23M` (via `NumberFormatter.formatCompact`)
-
-**ARB maintenance:** Update all three ARB files (`lib/l10n/app_en.arb`, `app_ja.arb`, `app_zh.arb`) when adding keys; run `flutter gen-l10n` and verify 0 warnings before commit. Enforced by `test/architecture/arb_key_parity_test.dart`.
-
-## Crypto Rules
-
-All cryptographic operations MUST route through `lib/infrastructure/crypto/`:
-
-| Operation | Correct path |
-|-----------|-------------|
-| Key management | `lib/infrastructure/crypto/services/key_manager.dart` |
-| Field encryption | `lib/infrastructure/crypto/services/field_encryption_service.dart` |
-| Hash chain | `lib/infrastructure/crypto/services/hash_chain_service.dart` |
-| DB encryption executor | `lib/infrastructure/crypto/database/encrypted_database.dart` |
-
-**NEVER:**
-- Implement custom crypto primitives (use `package:cryptography` via KeyManager)
-- Access `flutter_secure_storage` directly outside `KeyManager`
-- Log sensitive data (enforced by `test/architecture/production_logging_privacy_test.dart`)
-
-Sensitive names forbidden in log calls: `body`, `token`, `signature`, `deviceId`, `groupId`, `inviteCode`, `transactionId`, `payload`, `encryptedPayload`, `publicKey`, `privateKey`. Logging must be guarded by `if (kDebugMode)`.
+**Linting:**
+- Base: `package:flutter_lints/flutter.yaml` (`flutter_lints: ^6.0.0`)
+- Plugins: `custom_lint` (with `import_guard_custom_lint`, `riverpod_lint`)
+- Enforced rules: `prefer_single_quotes`, `prefer_relative_imports`, `avoid_print`
+- Excluded from analysis: `**/*.g.dart`, `**/*.freezed.dart`, `build/**`
+- `invalid_annotation_target` set to `ignore` (freezed/json annotation noise)
+- **Zero analyzer warnings before commit** (CI-enforced via `audit.yml`). Fix root cause — do NOT suppress with `// ignore:`.
 
 ## Import Organization
 
-Enforced by `analysis_options.yaml` rules:
-1. `dart:` SDK imports
-2. `package:flutter/...` and `package:flutter_riverpod/...`
-3. Other `package:` imports
-4. Relative imports (`../`, `./`) — `prefer_relative_imports: true` lint rule
+**Order (observed):**
+1. `dart:*` core libraries
+2. `package:*` third-party (flutter, riverpod, drift)
+3. Relative project imports (`../../domain/models/...`) — `prefer_relative_imports` is enforced for intra-lib references
 
-All imports use single quotes (`prefer_single_quotes: true`). Generated files excluded from analyzer (`**/*.g.dart`, `**/*.freezed.dart`).
+**Riverpod 3 import split (critical — symbols won't resolve otherwise):**
+| Need | Import |
+|---|---|
+| `Provider`, `Notifier`, `AsyncValue`, `ConsumerWidget`, `WidgetRef`, `ProviderScope`, `ProviderContainer` | `package:flutter_riverpod/flutter_riverpod.dart` |
+| `StateNotifier`, `StateProvider`, `ChangeNotifierProvider` (legacy) | `package:flutter_riverpod/legacy.dart` |
+| `Override`, `ProviderListenable`, `ProviderException`, `Family` | `package:flutter_riverpod/misc.dart` |
 
-## Layer Dependency Rules (Thin Feature Pattern)
-
-Dependency flow: `Presentation → Application → Domain ← Data ← Infrastructure`
-
-**Features NEVER contain:** `application/`, `infrastructure/`, `data/tables/`, `data/daos/`.
-
-**Import guard** (enforced via `import_guard_custom_lint` + arch tests):
-- Domain models/repositories: deny `infrastructure/**`, `data/**`, `application/**`, `features/**/presentation/**`, `flutter/**`
-- Presentation: deny `infrastructure/**`, `data/daos/**`, `data/tables/**`
-
-Enforced by:
-- `test/architecture/domain_import_rules_test.dart`
-- `test/architecture/presentation_layer_rules_test.dart`
-- `dart run custom_lint --no-fatal-infos` in CI
-
-## EntrySource Pattern (Phase 17)
-
-```dart
-// lib/features/accounting/domain/models/entry_source.dart
-enum EntrySource { manual, voice, ocr }
-```
-
-- `entrySource` is a **required, no-default** field in `CreateTransactionParams` — every push site MUST declare it explicitly (D-06)
-- The 3 active push sites: `transaction_confirm_screen.dart` (manual), `voice_input_screen.dart` (voice), demo data (manual)
-- `EntrySource.ocr` is reserved for MOD-005 OCR — accepted by schema CHECK constraint but no production writer yet
-
-## Joy Formatter (Phase 13 rename)
-
-Use `formatJoyCumulative` from `lib/infrastructure/i18n/formatters/joy_cumulative_formatter.dart`.
-`formatJoyDensity` was deleted in Phase 13 — do NOT reference it anywhere.
+**Path Aliases:**
+- Use `as` prefixes to disambiguate same-named providers across layers (e.g., `import '.../ml/repository_providers.dart' as app_ml;`)
 
 ## Error Handling
 
+**Patterns:**
+- Explicit `try { } catch (e) { }` at boundaries (~73 try blocks in `lib/`)
+- Never silently swallow errors; provide user-friendly messages in UI-facing code
+- App init failures surface a dedicated fallback screen (`lib/core/initialization/init_failure_screen.dart`) rather than crashing
+- Riverpod 3: provider-thrown errors are wrapped in `ProviderException`; inner exception on `.exception`. Tests must use `throwsA(isA<ProviderException>().having((e) => e.exception, 'exception', isA<StateError>()))`
+
+## Logging
+
+**Framework:** `debugPrint` (Flutter) for diagnostics; dedicated `lib/infrastructure/security/audit_logger.dart` for audit events.
+
+**Patterns:**
+- Prefix logs with component tag: `debugPrint('[SyncOrchestrator] ...')`
+- `avoid_print` lint forbids raw `print()` — use `debugPrint`
+- NEVER log sensitive/crypto data (privacy enforced by `test/architecture/production_logging_privacy_test.dart`)
+
+## Comments
+
+**When to Comment:**
+- Default: no comments. Add a one-line WHY only when non-obvious.
+- File-header docstrings are common and valuable — they cite the spec/decision driving the file (e.g., `// STORE-02 specification:`, `// Per CRIT-05 D-15 ...`). Preserve this convention: link code to its planning decision.
+
+**DartDoc (`///`):**
+- Used on shared helpers and public test utilities to explain rationale and Riverpod-3 gotchas
+
+## Function Design
+
+**Size:** Small — functions <50 lines, files 200–400 typical, 800 max ("many small files > few large files").
+
+**Parameters:** Named parameters preferred, especially for widgets. Use nullable param + provider fallback, never hardcoded defaults:
 ```dart
-// Application layer use cases return Result<T> or throw typed exceptions
-// Presentation layer providers: catch and surface AsyncValue.error
-// UI: handle AsyncError state explicitly — never silently ignore
+final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
 ```
 
-Logging is conditional on `kDebugMode` — never use bare `print()` (`avoid_print: true` lint enforced).
+**Return Values:** Immutable returns; new objects via `copyWith`, never in-place mutation.
 
-## Code Quality Checklist
+## Module Design
 
-Before marking work complete:
-- [ ] `flutter analyze` → 0 issues (CI hard-fails on any warning)
-- [ ] `dart format .` applied
-- [ ] `flutter test --coverage` passes
-- [ ] `flutter pub run build_runner build --delete-conflicting-outputs` run after any `@riverpod`, `@freezed`, Drift table, or ARB change
-- [ ] No `// ignore:` suppressions — fix root cause (stale suppressions caught by `test/architecture/stale_suppressions_scan_test.dart`)
-- [ ] Functions < 50 lines, files < 800 lines
-- [ ] No deep nesting (> 4 levels)
-- [ ] All UI strings via `S.of(context)`
-- [ ] No hardcoded monetary values — use `AppTextStyles.amountLarge/amountMedium/amountSmall`
-- [ ] No `sqlite3_flutter_libs` in pubspec (AUDIT-09 blocks PR)
+**Layering (5-layer Clean Architecture):** `Presentation → Application → Domain ← Data ← Infrastructure`. Domain never imports Data (enforced by `import_guard` + `domain_import_rules_test.dart`).
 
-## Commit Message Format
+**Providers:**
+- ONE `repository_providers.dart` per feature (single source of truth) — never duplicate repository provider definitions (enforced by `provider_graph_hygiene_test.dart` + `riverpod_lint`)
+- Never throw `UnimplementedError` in providers
+- Side-effect listeners (navigation, snackbars) belong in `ref.listen`, NOT `ref.watch`
 
-```
-<type>: <description>
-```
+**i18n:**
+- All UI text via `S.of(context)` — never hardcode strings (enforced by `hardcoded_cjk_ui_scan_test.dart`)
+- Dates via `DateFormatter`, currency via `NumberFormatter`; pass locale from `currentLocaleProvider`
+- Update all 3 ARB files (ja/zh/en) then `flutter gen-l10n`
 
-Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
-
-Branches: `main` (stable), `feature/MOD-XXX-description`
-
-## Common Pitfalls (with enforcement status)
-
-| Pitfall | Enforcement |
-|---------|-------------|
-| Modifying `.g.dart` / `.freezed.dart` | Structural (AUDIT-10 CI) |
-| Domain importing Data/Infrastructure/Application | Structural (import_guard + arch test) |
-| Skipping build_runner after annotated changes | Structural (AUDIT-10 CI) |
-| Mutating `@freezed` objects | Structural (Freezed compiler) |
-| Using `sqlite3_flutter_libs` | Structural (import_guard deny + AUDIT-09 CI) |
-| Committing with analyzer warnings | Structural (flutter analyze CI step) |
-| Duplicate repository provider definitions | Structural (provider_graph_hygiene_test.dart) |
-| `UnimplementedError` in providers | Structural (provider_graph_hygiene_test.dart) |
-| Wrong Drift index syntax | Manual — no automated detection |
-| Hardcoding widget parameter defaults | Manual — no automated detection |
-| Modifying Podfile post_install without preserving `-lsqlite3` strip | Manual — iOS runtime verification only |
-| Skipping AppInitializer | Partially (provider_graph_hygiene_test catches UnimplementedError) |
-| Regenerating after merge/pull | Structural (AUDIT-10 CI) |
+**Colors:** Resolve via `context.palette` (`AppPalette`); no hardcoded color literals (enforced by `color_literal_scan_test.dart`).
 
 ---
 
-*Convention analysis: 2026-05-21*
+*Convention analysis: 2026-06-23*

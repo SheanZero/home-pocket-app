@@ -1,271 +1,205 @@
-<!-- refreshed: 2026-05-21 -->
+<!-- refreshed: 2026-06-23 -->
 # Architecture
 
-**Analysis Date:** 2026-05-21
+**Analysis Date:** 2026-06-23
 
 ## System Overview
 
 ```text
-┌────────────────────────────────────────────────────────────────────┐
-│                         Presentation Layer                         │
-│  lib/features/{f}/presentation/  (screens, widgets, providers)     │
-│                                                                    │
-│  home │ accounting │ analytics │ settings │ family_sync │ profile  │
-│  dual_ledger                                                       │
-└──────────┬─────────────────────────────────────────────────────────┘
-           │ ref.watch / ref.read (Riverpod)
-           ▼
-┌────────────────────────────────────────────────────────────────────┐
-│                        Application Layer                           │
-│  lib/application/{domain}/  (Use Cases + Services)                │
-│                                                                    │
-│  accounting │ analytics │ dual_ledger │ family_sync │ i18n         │
-│  ml │ profile │ settings │ voice                                   │
-└──────────┬─────────────────────────────────────────────────────────┘
-           │ depends on domain interfaces
-           ▼
-┌────────────────────────────────────────────────────────────────────┐
-│                          Domain Layer                              │
-│  lib/features/{f}/domain/  (models/ + repositories/ interfaces)   │
-│                                                                    │
-│  accounting/domain │ analytics/domain │ family_sync/domain         │
-│  settings/domain │ profile/domain                                  │
-└──────────┬─────────────────────────────────────────────────────────┘
-           ▲ (Data implements domain interfaces)
-┌──────────┴─────────────────────────────────────────────────────────┐
-│                           Data Layer                               │
-│  lib/data/  (app_database.dart, tables/, daos/, repositories/)     │
-│                                                                    │
-│  Drift + SQLCipher — schema v17 — 11 tables                        │
-└──────────┬─────────────────────────────────────────────────────────┘
-           ▲ (Infrastructure implements/drives Data)
-┌──────────┴─────────────────────────────────────────────────────────┐
-│                      Infrastructure Layer                          │
-│  lib/infrastructure/  (platform capabilities)                      │
-│                                                                    │
-│  crypto/ │ ml/ │ i18n/ │ sync/ │ security/ │ speech/ │ category/  │
-└────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                      Presentation Layer                      │
+├──────────────────┬──────────────────┬───────────────────────┤
+│  Feature screens │  Feature widgets │  Riverpod providers   │
+│ `lib/features/   │ `lib/features/   │ `lib/features/{f}/    │
+│  {f}/presentation│  {f}/presentation│  presentation/        │
+│  /screens`       │  /widgets`       │  providers`           │
+└────────┬─────────┴────────┬─────────┴──────────┬────────────┘
+         │                  │                     │
+         ▼                  ▼                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Application Layer                        │
+│  Use Cases + domain services (GLOBAL, not per-feature)      │
+│  `lib/application/{domain}/`                                 │
+└────────┬────────────────────────────────────────────────────┘
+         │ depends on interfaces
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       Domain Layer                           │
+│  Freezed models + repository interfaces                      │
+│  `lib/features/{f}/domain/{models,repositories}`             │
+└────────▲────────────────────────────────────────────────────┘
+         │ implemented by
+┌────────┴────────────────────────────────────────────────────┐
+│                        Data Layer                            │
+│  Drift tables, DAOs, repository implementations              │
+│  `lib/data/{tables,daos,repositories}` + `app_database.dart` │
+└────────┬────────────────────────────────────────────────────┘
+         │ uses
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                      │
+│  crypto/ ml/ sync/ security/ i18n/ speech/ exchange_rate/    │
+│  `lib/infrastructure/`                                       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Responsibilities
 
-| Component | Responsibility | Primary Files |
-|-----------|----------------|---------------|
-| `lib/main.dart` | Bootstrap, `HomePocketApp` widget, locale wiring | `lib/main.dart` |
-| `AppInitializer` | 3-stage init (KeyManager → Database → Seed) | `lib/core/initialization/app_initializer.dart` |
-| `AppDatabase` | Drift database root, schema v17, migration ladder | `lib/data/app_database.dart` |
-| `lib/core/theme/` | Material theme, `AppTextStyles`, `AppColors` | `lib/core/theme/app_theme.dart`, `app_text_styles.dart` |
-| `lib/data/tables/` | All 11 Drift table definitions | `lib/data/tables/` |
-| `lib/data/daos/` | All Drift DAOs (typed SQL queries) | `lib/data/daos/` |
-| `lib/data/repositories/` | All repository implementations (cross-feature) | `lib/data/repositories/` |
-| `lib/application/analytics/` | 12+ analytics use cases + Demo data service | `lib/application/analytics/` |
-| `lib/application/accounting/` | Transaction CRUD, category seed, book init | `lib/application/accounting/` |
-| `lib/application/dual_ledger/` | 3-layer classifier (Rule Engine → Merchant DB → ML) | `lib/application/dual_ledger/classification_service.dart`, `rule_engine.dart` |
-| `lib/application/family_sync/` | Sync use cases, `SyncEngine`, `SyncOrchestrator` | `lib/application/family_sync/sync_engine.dart` |
-| `lib/infrastructure/crypto/` | Encryption primitives — KeyManager, FieldEncryption, HashChain | `lib/infrastructure/crypto/services/` |
-| `lib/infrastructure/sync/` | WebSocket, APNS, relay API client, E2EE | `lib/infrastructure/sync/` |
-| `lib/infrastructure/i18n/` | DateFormatter, NumberFormatter, JoyCumulativeFormatter | `lib/infrastructure/i18n/formatters/` |
-| `lib/infrastructure/security/` | BiometricService, SecureStorageService, AuditLogger | `lib/infrastructure/security/` |
-| `lib/features/{f}/presentation/` | Screens, widgets, Riverpod providers (wiring only) | `lib/features/*/presentation/` |
-| `lib/features/{f}/domain/` | Domain models (Freezed) + repository interfaces | `lib/features/*/domain/` |
-| `lib/shared/` | Cross-feature utilities (Result type, constants, utils) | `lib/shared/` |
-| `lib/generated/` | ARB-generated `S` localizations class (do not edit) | `lib/generated/app_localizations.dart` |
+| Component | Responsibility | File |
+|-----------|----------------|------|
+| App entry / bootstrap | Load native libs, run AppInitializer, mount root widget | `lib/main.dart` |
+| AppInitializer | Staged init: master key → device key → database → seed | `lib/core/initialization/app_initializer.dart` |
+| AppDatabase | Drift database, all table registration, schema version | `lib/data/app_database.dart` |
+| Use Cases | Single-purpose business operations (CRUD, classification) | `lib/application/{domain}/*_use_case.dart` |
+| Domain services | Cross-cutting business logic (classification, learning) | `lib/application/{domain}/*_service.dart` |
+| Repository interfaces | Data-access contracts owned by domain | `lib/features/{f}/domain/repositories/` |
+| Repository impls | Drift-backed concrete data access | `lib/data/repositories/*_impl.dart` |
+| DAOs | Type-safe SQL queries per table | `lib/data/daos/` |
+| Crypto infrastructure | Key management, field encryption, hash chain, DB encryption | `lib/infrastructure/crypto/` |
+| Root shell | Tab navigation host (IndexedStack + bottom nav) | `lib/features/home/presentation/screens/main_shell_screen.dart` |
 
 ## Pattern Overview
 
-**Overall:** 5-Layer Clean Architecture ("Thin Feature" variant)
+**Overall:** Clean Architecture (5 layers) with the "Thin Feature" variant — the Application, Data, and Infrastructure layers are project-global, while `features/` hold only Domain + Presentation.
 
 **Key Characteristics:**
-- Features are deliberately thin: `lib/features/{f}/` contains ONLY `domain/` (models + repo interfaces) and `presentation/` (screens/widgets/providers). No Use Cases, DAOs, or infrastructure code inside features.
-- The Application layer is global at `lib/application/{domain}/`, not nested inside features.
-- The Data layer is global at `lib/data/` — all table definitions, DAOs, and repository implementations live there regardless of which feature owns the domain interface.
-- Dependency direction: Presentation → Application → Domain ← Data ← Infrastructure. Domain has zero outward dependencies.
-- State management is Riverpod with `@riverpod` codegen; generated `.g.dart` files must never be hand-edited.
+- Dependency rule: outer layers depend on inner; Domain depends on nothing
+- Repository pattern: interfaces in Domain, implementations in `lib/data/`
+- Use Case classes encapsulate each business operation; providers wire them in Presentation
+- Riverpod 3 (`@riverpod` codegen) for all dependency injection and state
+- Freezed for immutable models; Drift + SQLCipher for encrypted persistence
 
 ## Layers
 
-**Infrastructure Layer:**
-- Purpose: Raw platform/technology capabilities
-- Location: `lib/infrastructure/`
-- Contains: `crypto/` (KeyManager, FieldEncryptionService, HashChainService, encrypted DB executor), `ml/` (MerchantDatabase, TFLite classifier), `i18n/` (DateFormatter, NumberFormatter, JoyCumulativeFormatter), `sync/` (WebSocketService, APNSClient, RelayApiClient, E2EEService), `security/` (BiometricService, SecureStorageService, AuditLogger), `speech/` (SpeechRecognitionService), `category/` (CategoryLocaleService)
-- Depends on: External packages only
-- Used by: Application layer, Data layer (encrypted executor)
+**Presentation:**
+- Purpose: UI rendering, user interaction, provider wiring
+- Location: `lib/features/{feature}/presentation/`
+- Contains: `screens/`, `widgets/`, `providers/`
+- Depends on: Application (use cases), Domain (models)
+- Used by: Root shell / Flutter framework
 
-**Data Layer:**
-- Purpose: All persistence — Drift schema, DAOs, and repository implementations
-- Location: `lib/data/`
-- Contains: `app_database.dart` (Drift root, schema v17, 11 tables), `tables/` (AuditLogs, Books, Categories, CategoryKeywordPreferences, CategoryLedgerConfigs, GroupMembers, Groups, MerchantCategoryPreferences, SyncQueue, Transactions, UserProfiles), `daos/` (typed query objects), `repositories/` (all `*_repository_impl.dart` files)
-- Depends on: Infrastructure (crypto executor), Domain interfaces
-- Used by: Application layer via injected repository interfaces
-
-**Domain Layer:**
-- Purpose: Core business entities and repository contracts — intentionally isolated
-- Location: `lib/features/{f}/domain/`
-- Contains: `models/` (Freezed data classes) and `repositories/` (abstract interface classes)
-- Depends on: **Nothing** (no imports from Application, Data, or Infrastructure)
-- Used by: Application layer (implements interfaces), Presentation layer (reads models)
-
-**Application Layer:**
-- Purpose: Use Cases and orchestrating services
-- Location: `lib/application/{domain}/`
-- Contains per subdomain: Use Case classes (each a plain Dart class with an `execute()` method) + `repository_providers.dart` (Riverpod providers wiring repositories to use cases)
-- Subdomains: `accounting/`, `analytics/`, `dual_ledger/`, `family_sync/`, `i18n/`, `ml/`, `profile/`, `settings/`, `voice/`
+**Application:**
+- Purpose: business logic, orchestration of repositories + infrastructure
+- Location: `lib/application/{domain}/` (GLOBAL — never inside `features/`)
+- Contains: Use Case classes, domain services, repository provider wiring
 - Depends on: Domain interfaces, Infrastructure services
-- Used by: Presentation layer providers
+- Used by: Presentation providers
 
-**Presentation Layer:**
-- Purpose: Flutter UI + Riverpod provider wiring
-- Location: `lib/features/{f}/presentation/`
-- Contains: `screens/`, `widgets/`, `providers/` (Riverpod state files named `state_{domain}.dart` + one `repository_providers.dart` per feature)
-- Depends on: Application layer (via `ref.watch`), Domain models
-- Used by: Nothing (leaf layer)
+**Domain:**
+- Purpose: business entities and data-access contracts
+- Location: `lib/features/{feature}/domain/`
+- Contains: ONLY `models/` (Freezed) + `repositories/` (interfaces)
+- Depends on: nothing (independent)
+- Used by: Application, Data
+
+**Data:**
+- Purpose: persistence and concrete repositories
+- Location: `lib/data/`
+- Contains: `app_database.dart`, `tables/`, `daos/`, `repositories/`
+- Depends on: Domain interfaces, Infrastructure (crypto executor)
+- Used by: Application (via interfaces)
+
+**Infrastructure:**
+- Purpose: technology/platform capabilities
+- Location: `lib/infrastructure/`
+- Contains: `crypto/`, `ml/`, `sync/`, `security/`, `i18n/`, `speech/`, `voice/`, `category/`, `exchange_rate/`
+- Depends on: external packages, platform
+- Used by: Data, Application
 
 ## Data Flow
 
-### Primary Request Path (Transaction Entry)
+### Primary Request Path (create transaction)
 
-1. User taps "Add Transaction" → `TransactionEntryScreen` (`lib/features/accounting/presentation/screens/transaction_entry_screen.dart`)
-2. Screen calls `ref.read(createTransactionUseCaseProvider).execute(...)` — provider defined in `lib/features/accounting/presentation/providers/repository_providers.dart`
-3. `CreateTransactionUseCase` (`lib/application/accounting/create_transaction_use_case.dart`) delegates to `ITransactionRepository` + runs `ClassificationService` (`lib/application/dual_ledger/classification_service.dart`) for ledger assignment
-4. `ClassificationService` passes through Rule Engine → Merchant Database → ML Classifier (3-layer cascade)
-5. `TransactionRepositoryImpl` (`lib/data/repositories/transaction_repository_impl.dart`) writes via `TransactionDao` (`lib/data/daos/transaction_dao.dart`) to Drift/SQLCipher
-6. `SyncEngine` (`lib/application/family_sync/sync_engine.dart`) queues the change via `TransactionChangeTracker`
+1. Screen invokes use-case provider via `ref.read` (`lib/features/accounting/presentation/`)
+2. `CreateTransactionUseCase.execute()` validates input + verifies category (`lib/application/accounting/create_transaction_use_case.dart`)
+3. Classification service assigns ledger type; hash chain link computed (`lib/application/dual_ledger/classification_service.dart`, `lib/infrastructure/crypto/services/hash_chain_service.dart`)
+4. `TransactionRepository.create()` persists via DAO (`lib/data/repositories/transaction_repository_impl.dart` → `lib/data/daos/transaction_dao.dart`)
+5. Change tracker enqueues sync delta (`lib/application/family_sync/transaction_change_tracker.dart`)
 
-### App Initialization Flow
+### App Boot Path
 
-1. `main()` → `WidgetsFlutterBinding.ensureInitialized()` → `ensureNativeLibrary()` (`lib/main.dart`)
-2. `AppInitializer.initialize()` (`lib/core/initialization/app_initializer.dart`):
-   - **Stage 1:** `MasterKeyRepository.hasMasterKey()` / `initializeMasterKey()` → `KeyManager.generateDeviceKeyPair()` — returns `InitFailure(masterKey)` on error
-   - **Stage 2:** `createEncryptedExecutor(masterKeyRepo)` → `AppDatabase(executor)` — returns `InitFailure(database)` on error
-   - **Stage 3:** Final `ProviderContainer` with `appDatabaseProvider` override → seed runner
-3. `bootWithInitializerForTesting()` wraps result in `UncontrolledProviderScope` or renders `InitFailureApp`
-4. `HomePocketApp._initialize()`: seeds categories, ensures default book, initializes `SyncEngine`, wires push notifications, checks profile onboarding
-
-### Analytics Request Path
-
-1. `AnalyticsScreen` reads `selectedTimeWindowProvider` + `selectedJoyMetricVariantProvider` (session-scoped, no persistence)
-2. Passes `(startDate, endDate, joyMetricVariant)` as named parameters to each analytics provider (e.g., `monthlyReportProvider(bookId: ..., startDate: ..., endDate: ..., joyMetricVariant: ...)`)
-3. Providers delegate to Application layer Use Cases in `lib/application/analytics/`
-4. Use Cases query `IAnalyticsRepository` → `AnalyticsRepositoryImpl` (`lib/data/repositories/analytics_repository_impl.dart`) → `AnalyticsDao` (`lib/data/daos/analytics_dao.dart`)
-5. `JoyMetricVariant.manualOnly` maps to `entrySourceFilter: EntrySource.manual` at the provider/use-case boundary (D-15 pattern)
+1. `main()` ensures bindings + loads native SQLCipher library (`lib/main.dart`)
+2. `AppInitializer.initialize()` runs staged init (`lib/core/initialization/app_initializer.dart`)
+3. Master key + device key pair via keychain (`lib/infrastructure/crypto/`)
+4. Encrypted database created; `InitResult.success(container)` returned
+5. `HomePocketApp._initialize()` runs seeding, ensures default book, wires sync engine, then routes to onboarding or `MainShellScreen`
 
 **State Management:**
-- Session-scoped UI state: `@riverpod` codegen — auto-disposes unless `keepAlive: true`
-- Persistent app state: `appSettingsProvider`, `currentLocaleProvider` (backed by `SettingsRepositoryImpl`)
-- Navigation tab: `selectedTabIndexProvider` (`keepAlive: true`)
-- Analytics window: `selectedTimeWindowProvider` (session-scoped, resets on cold start)
-- Joy variant: `selectedJoyMetricVariantProvider` (session-scoped, resets on cold start — D-11)
+- Riverpod 3 `ProviderContainer` is created in AppInitializer and injected via `UncontrolledProviderScope`
+- Async state through `AsyncValue`; provider names strip the `Notifier` suffix
 
 ## Key Abstractions
 
-**Use Cases:**
-- Purpose: Single-responsibility business operations
-- Examples: `lib/application/accounting/create_transaction_use_case.dart`, `lib/application/analytics/get_happiness_report_use_case.dart`, `lib/application/family_sync/full_sync_use_case.dart`
-- Pattern: Plain Dart class, single `execute(...)` method, injected dependencies via constructor
+**Use Case:**
+- Purpose: one business operation with explicit params object
+- Examples: `lib/application/accounting/create_transaction_use_case.dart`, `get_transactions_use_case.dart`
+- Pattern: constructor-injected repositories; `execute()` returns `Result<T>`
 
-**Repository Interfaces:**
-- Purpose: Decouple Application from Data storage details
-- Examples: `lib/features/accounting/domain/repositories/transaction_repository.dart`, `lib/features/analytics/domain/repositories/` (via `lib/features/accounting/domain/repositories/`)
-- Pattern: Abstract class with typed return values (often `Result<T>` from `lib/shared/utils/result.dart`)
+**Repository:**
+- Purpose: storage-agnostic data access
+- Interface examples: `lib/features/accounting/domain/repositories/transaction_repository.dart`
+- Impl examples: `lib/data/repositories/transaction_repository_impl.dart`
 
-**Freezed Models:**
-- Purpose: Immutable domain data with `copyWith`
-- Examples: `lib/features/accounting/domain/models/transaction.dart`, `lib/features/analytics/domain/models/happiness_report.dart`
-- Pattern: `@freezed` annotation → `.freezed.dart` generated file → always use `copyWith`, never mutate
-
-**MetricResult<T>:**
-- Purpose: Discriminated union for analytics results (data present / empty / insufficient data)
-- Examples: `lib/features/analytics/domain/models/metric_result.dart` — subtypes `Data<T>`, `Empty`, used across all analytics providers
-- Pattern: Used instead of `T?` for analytics results that have meaningful empty-state semantics
-
-**AnalyticsScreen Providers (Phase 15+17):**
-- Purpose: Fan-out analytics queries keyed by `(startDate, endDate, joyMetricVariant)`
-- Location: `lib/features/analytics/presentation/providers/state_analytics.dart`, `state_happiness.dart`, `state_ledger_snapshot.dart`
-- Use Cases wired: `monthlyReport`, `expenseTrend`, `satisfactionDistribution`, `perCategorySoulBreakdown`, `perCategorySoulBreakdownFamily`, `soulVsSurvivalSnapshot`, `soulVsSurvivalSnapshotFamily`, `happinessReport`, `bestJoyMoment`, `monthlyJoyTargetRecommendation`, `largestMonthlyExpense`, `familyHappiness` (12 async providers total)
+**Result<T>:**
+- Purpose: explicit success/error envelope instead of throwing
+- Location: `lib/shared/utils/result.dart`
 
 ## Entry Points
 
-**App Entry:**
+**main():**
 - Location: `lib/main.dart`
-- Triggers: Flutter framework `main()` on app start
-- Responsibilities: native library init, `AppInitializer` orchestration, `UncontrolledProviderScope` mount
+- Triggers: app launch
+- Responsibilities: native lib load, bootstrap via AppInitializer, mount root or failure screen
 
-**Shell:**
+**MainShellScreen:**
 - Location: `lib/features/home/presentation/screens/main_shell_screen.dart`
-- Triggers: Rendered after successful initialization + profile check
-- Responsibilities: Bottom nav tab host (Home, Accounting, Analytics, Settings, Family)
-
-**Onboarding:**
-- Location: `lib/features/profile/presentation/screens/profile_onboarding_screen.dart`
-- Triggers: `getUserProfileUseCase.execute()` returns null after init
-- Responsibilities: First-launch profile creation
-
-## Joy Metric Semantics (ADR-016, ratified 2026-05-19)
-
-The **Joy** metric for analytics display is:
-
-```
-Σ joy_contribution = Σ (soul_satisfaction × (amount / base)^0.88)
-```
-
-This is a cumulative sum (not a density ratio). ADR-013's Joy/¥ density is **superseded** for HomeHero ring and analytics KPI display. The HomeHero ring visualizes single-month accumulation only (isolation invariant enforced by `test/widget/features/home/presentation/screens/home_screen_isolation_test.dart`). `JoyCumulativeFormatter` (`lib/infrastructure/i18n/formatters/joy_cumulative_formatter.dart`) handles display formatting.
-
-**HomeHero isolation invariant:** HomeHero providers (`state_home.dart`, `state_shadow_books.dart`, `state_today_transactions.dart`) do NOT read `selectedTimeWindowProvider` or `selectedJoyMetricVariantProvider`. They are always current-month, all-source. This is structural (D-15 / ADR-016 §3).
+- Triggers: successful init + completed profile onboarding
+- Responsibilities: hosts tabs via `IndexedStack`, bottom nav, central FAB add-entry
 
 ## Architectural Constraints
 
-- **Threading:** Flutter single-threaded UI; Drift uses an isolate-based background executor for database I/O
-- **Global state:** `AppDatabase` is singleton-per-run via `appDatabaseProvider`; `ProviderContainer` created once in `AppInitializer` and shared via `UncontrolledProviderScope`
-- **Circular imports:** Prevented by `import_guard.yaml` files at layer boundaries + `domain_import_rules_test.dart` (`test/architecture/domain_import_rules_test.dart`)
-- **Generated files:** `.g.dart` and `.freezed.dart` must never be hand-edited; run `flutter pub run build_runner build --delete-conflicting-outputs` after any annotation change
-- **Riverpod 3 import split:** `flutter_riverpod.dart` (primary), `flutter_riverpod/legacy.dart` (StateNotifier), `flutter_riverpod/misc.dart` (Override, ProviderBase) — see CLAUDE.md for full table
-- **Riverpod 3 upgrade blocked:** Riverpod 3 upgrade is tracked as FUTURE-TOOL-01 (blocked by `analyzer` conflict with `json_serializable`); codebase currently uses Riverpod 2.x with generator 4.x conventions
-- **DB encryption mandatory:** `sqlcipher_flutter_libs` only — `sqlite3_flutter_libs` is explicitly rejected by `import_guard` deny rule and AUDIT-09 CI guardrail
+- **Threading:** single-threaded Dart event loop; Drift runs queries on its own isolate executor
+- **Global state:** `ProviderContainer` from AppInitializer is the single DI root; `appDatabaseProvider` overridden with the encrypted instance
+- **Circular imports:** none enforced-against; import_guard + arch tests block Domain→Data violations
+- **Encryption non-negotiable:** all crypto MUST route through `lib/infrastructure/crypto/`; `sqlite3_flutter_libs` denied by `lib/import_guard.yaml`
+- **Navigation:** plain `Navigator`/`MaterialPageRoute` + `IndexedStack` shell (no GoRouter in code despite legacy doc references)
 
 ## Anti-Patterns
 
-### Use Cases inside Features
+### Application code inside a feature
 
-**What happens:** Placing business logic (Use Case classes) inside `lib/features/{f}/` instead of `lib/application/`
-**Why it's wrong:** Violates the Thin Feature rule; creates duplicated logic and breaks the single Application layer
-**Do this instead:** Create the Use Case in `lib/application/{domain}/your_use_case.dart`; wire its provider in `lib/features/{f}/presentation/providers/repository_providers.dart`
+**What happens:** placing use cases or services under `lib/features/{f}/application/`
+**Why it's wrong:** violates the Thin Feature rule; Application is global
+**Do this instead:** put business logic in `lib/application/{domain}/` (see existing `lib/application/accounting/`)
 
-### Repository Provider Duplication
+### Domain importing Data
 
-**What happens:** Defining the same repository provider in multiple provider files
-**Why it's wrong:** Creates divergent state — each definition gets its own instance; causes test flakiness and production bugs
-**Do this instead:** Define ONCE in `lib/features/{f}/presentation/providers/repository_providers.dart`; import from there everywhere else. Enforced by `test/architecture/provider_graph_hygiene_test.dart`
+**What happens:** a model or repository interface imports a Drift table or DAO
+**Why it's wrong:** breaks the dependency rule; Domain must stay independent
+**Do this instead:** depend only on interfaces; implement them in `lib/data/repositories/` (enforced by `domain_import_rules_test.dart` + import_guard custom_lint)
 
-### Bare `container.read(provider.future)` in Tests
+### Duplicate repository providers
 
-**What happens:** Calling `await container.read(asyncProvider.future)` without a subscription in auto-dispose provider tests
-**Why it's wrong:** Riverpod 3 disposes the orphan read before build settles; masks real values/errors with `Bad state: disposed during loading`
-**Do this instead:** Use `waitForFirstValue<T>(container, provider)` from `test/helpers/test_provider_scope.dart`
-
-### Domain Importing Data
-
-**What happens:** A file in `lib/features/{f}/domain/` imports from `lib/data/`
-**Why it's wrong:** Reverses the dependency direction; Domain must be the innermost layer with no outward imports
-**Do this instead:** Domain defines the interface; Data implements it. Enforced by `import_guard.yaml` + `test/architecture/domain_import_rules_test.dart`
+**What happens:** defining the same repository provider in more than one place
+**Why it's wrong:** breaks single-source-of-truth and provider graph hygiene
+**Do this instead:** one `repository_providers.dart` per feature (enforced by `provider_graph_hygiene_test.dart`)
 
 ## Error Handling
 
-**Strategy:** `Result<T>` wrapper for use-case return values; `InitResult` (Freezed union) for initialization; `MetricResult<T>` for analytics with meaningful empty states
+**Strategy:** `Result<T>` envelope for business operations; staged `InitResult` failure types for boot.
 
 **Patterns:**
-- Use cases return `Result<T>` (from `lib/shared/utils/result.dart`) — callers switch on `isSuccess`/`error`
-- Initialization uses `InitResult.success(container)` / `InitResult.failure(type, error, stackTrace)` — `lib/core/initialization/init_result.dart`
-- Analytics providers return `MetricResult<T>` subtypes (`Data<T>` / `Empty`) to differentiate "no data" from "query error"
-- Presentation layer catches `AsyncError` states via `AsyncValue.when(error: ...)` in widgets
+- Use Cases return `Result<T>` (`isSuccess`/`error`/`data`)
+- Boot failures classified by `InitFailureType` and rendered via `InitFailureApp`
+- Data-loss guard: never mint a new master key when an encrypted DB already exists
 
 ## Cross-Cutting Concerns
 
-**Logging:** `AuditLogger` (`lib/infrastructure/security/audit_logger.dart`) for security-relevant events; no `print()` or `debugPrint()` in production code (enforced by `test/architecture/production_logging_privacy_test.dart`)
-**Validation:** Time window validation in `lib/application/analytics/_time_window_validation.dart`; input validated at use-case boundary
-**Authentication:** Biometric lock via `BiometricService` (`lib/infrastructure/security/biometric_service.dart`); all DB access gated by SQLCipher key derived by `KeyManager`
-**i18n:** All UI text via `S.of(context)` (generated from ARB files at `lib/l10n/`); dates via `DateFormatter`; currency via `NumberFormatter` — no hardcoded CJK/Latin strings (enforced by `test/architecture/hardcoded_cjk_ui_scan_test.dart`)
-**CI Guardrails:** `import_guard` (custom_lint), `riverpod_lint`, `coverde` per-file ≥70%, `very_good_coverage@v2` ≥70% global, `build_runner` clean-diff check, ARB parity (487 keys × 3 locales at v1.2 close), `sqlite3_flutter_libs` rejection
+**Logging:** no `print`/`console`; sensitive data never logged (crypto rule)
+**Validation:** input validated inside Use Cases before persistence
+**Authentication:** biometric lock + secure storage via `lib/infrastructure/security/`
+**i18n:** all UI text through `S.of(context)`; formatting via `lib/infrastructure/i18n/formatters/`
 
 ---
 
-*Architecture analysis: 2026-05-21*
+*Architecture analysis: 2026-06-23*
