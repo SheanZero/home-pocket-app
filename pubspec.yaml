@@ -77,6 +77,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Flutter SDK package (no pub.dev fetch) — drives the on-device/simulator
+  # encrypted-executor migration ladder (integration_test/). SQLCipher natives
+  # only load on a real device/sim; host `flutter test` links plain libsqlite3.
+  integration_test:
+    sdk: flutter
   flutter_lints: ^6.0.0
 
   # Code Generation
