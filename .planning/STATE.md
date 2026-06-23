@@ -6,14 +6,14 @@ current_phase: 49
 current_phase_name: merchant-data-foundation
 status: executing
 stopped_at: Phase 49 planned (6 plans, ready to execute)
-last_updated: "2026-06-23T06:13:32.016Z"
+last_updated: "2026-06-23T06:19:46.479Z"
 last_activity: 2026-06-23
 last_activity_desc: Phase 49 execution started
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-22 after v1.8 milestone)
 ## Current Position
 
 Phase: 49 (merchant-data-foundation) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-06-23 — Phase 49 execution started
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-23T06:13:08.646Z
+Last session: 2026-06-23T06:19:34.485Z
 Stopped at: Phase 49 planned — 6 plans across 4 waves, plan-checker VERIFICATION PASSED
 Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merchant-data-foundation/)
 
@@ -263,6 +263,7 @@ Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merc
 | Phase 49 P02 | 3min | 2 tasks | 2 files |
 | Phase 49 P03 | 12 | 3 tasks | 14 files |
 | Phase 49 P04 | 3 | 3 tasks | 9 files |
+| Phase 49 P05 | ~3 min | 3 tasks | 6 files |
 
 ## Decisions
 
@@ -330,6 +331,7 @@ Resume file: next run `/gsd-execute-phase 49` (plans in .planning/phases/49-merc
 - [Phase ?]: Phase 49-03: DefaultMerchants seed (391 merchants) in 10 per-group files; ledger derived via deriveLedgerHint from DefaultCategories single source of truth; Amazon/ヤマダ電機/ユニクロ derive joy->daily (derived wins, D-08)
 - [Phase ?]: 49-04: MerchantDao is a plain class (not @DriftAccessor); insertSeed batches both tables in one transaction via companions, no raw SQL
 - [Phase ?]: 49-04: MerchantMatchKey row PK derived as merchantId__matchKey so re-seed is idempotent under INSERT OR IGNORE
+- [Phase ?]: Phase 49-05: merchant seed wired as third leaf in SeedAllUseCase (after categories), seedRunner no-op untouched; ledgerHint via deriveLedgerHint(categoryId).name
 
 ## Operator Next Steps
 
