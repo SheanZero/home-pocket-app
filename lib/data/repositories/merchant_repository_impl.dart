@@ -16,27 +16,37 @@ class MerchantRepositoryImpl implements MerchantRepository {
   final MerchantDao _dao;
 
   @override
-  Future<List<Merchant>> findAll() async {
-    final rows = await _dao.findAllMerchantRows();
-    final keys = await _dao.findAllMatchKeyRows();
-    final keysByMerchant = <String, List<MerchantMatchKeyRow>>{};
-    for (final k in keys) {
-      keysByMerchant.putIfAbsent(k.merchantId, () => []).add(k);
-    }
-    return rows
-        .map((r) => _toModel(r, keysByMerchant[r.id] ?? const []))
-        .toList();
+  Future<List<Merchant>> findAll() {
+    // Read the merchant rows and their match keys inside ONE read transaction so
+    // the returned aggregates are point-in-time consistent: a concurrent re-seed
+    // or future merchant edit cannot interleave between the two statements and
+    // yield a Merchant whose surfaces don't match its row (WR-04).
+    return _dao.readInTransaction(() async {
+      final rows = await _dao.findAllMerchantRows();
+      final keys = await _dao.findAllMatchKeyRows();
+      final keysByMerchant = <String, List<MerchantMatchKeyRow>>{};
+      for (final k in keys) {
+        keysByMerchant.putIfAbsent(k.merchantId, () => []).add(k);
+      }
+      return rows
+          .map((r) => _toModel(r, keysByMerchant[r.id] ?? const []))
+          .toList();
+    });
   }
 
   @override
   Future<bool> hasAny() => _dao.hasAny();
 
   @override
-  Future<Merchant?> findById(String id) async {
-    final row = await _dao.findById(id);
-    if (row == null) return null;
-    final keys = await _dao.findMatchKeysFor(id);
-    return _toModel(row, keys);
+  Future<Merchant?> findById(String id) {
+    // Single read transaction so the merchant row and its match keys are a
+    // consistent point-in-time aggregate (WR-04).
+    return _dao.readInTransaction(() async {
+      final row = await _dao.findById(id);
+      if (row == null) return null;
+      final keys = await _dao.findMatchKeysFor(id);
+      return _toModel(row, keys);
+    });
   }
 
   @override

@@ -16,6 +16,15 @@ class MerchantDao {
 
   final AppDatabase _db;
 
+  /// Run [action] inside a single database transaction.
+  ///
+  /// Used by the repository to read a merchant row and its match keys as a
+  /// point-in-time-consistent aggregate (WR-04) — no concurrent writer can
+  /// interleave between the two statements.
+  Future<T> readInTransaction<T>(Future<T> Function() action) {
+    return _db.transaction(action);
+  }
+
   /// Return all merchant rows, unfiltered.
   Future<List<MerchantRow>> findAllMerchantRows() async {
     return _db.select(_db.merchants).get();
