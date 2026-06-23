@@ -2,105 +2,94 @@
 
 **Analysis Date:** 2026-06-23
 
-This is a local-first, privacy-focused app. Most data stays on-device. External
-network calls are limited to: (1) a self-hosted relay for P2P family sync,
-(2) public exchange-rate APIs, and (3) Firebase Cloud Messaging for push.
-
 ## APIs & External Services
 
-**Family Sync Relay:**
-- Self-hosted relay server - Coordinates P2P family sync (E2EE payloads only).
-  - Client: `lib/infrastructure/sync/relay_api_client.dart`
-  - Default base URL: `https://sync.happypocket.app/api/v1` (`relay_api_client.dart` line 69)
-  - Transport: HTTPS (REST) + WebSocket
-  - Auth: **Ed25519 request signing** — `Authorization: Ed25519 {deviceId}:{timestamp}:{base64(signature)}` (`relay_api_client.dart` lines 24-44). Signed via `KeyManager.signData`.
-  - Key endpoint: `PUT /device/push-token` (register push token)
-
-**Exchange Rate APIs (3-source fallback chain):**
-- Client: `lib/infrastructure/exchange_rate/exchange_rate_api_client.dart`
-- Cache: `lib/infrastructure/exchange_rate/exchange_rate_cache_service.dart` (persisted to `exchange_rates` Drift table)
+**Exchange Rate (three-source fallback chain):**
+- Implemented in `lib/infrastructure/exchange_rate/exchange_rate_api_client.dart`
 - Source order (RATE-01):
-  1. Frankfurter - `https://api.frankfurter.dev/v1/{date}?from=JPY&to={C}` (primary, 1500ms timeout)
-  2. fawazahmed0 via jsDelivr - `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/...` (1500ms)
-  3. fawazahmed0 via Cloudflare - `https://{date}.currency-api.pages.dev/...` (1000ms)
-- No API key required. Privacy: URLs contain ONLY a date + ISO 4217 currency code — no identifiers, amounts, or ledger refs (SC-5 / T-41-05).
-- Throws `ExchangeRateApiException` only when all three sources fail.
+  1. Frankfurter — `https://api.frankfurter.dev/v1/{date}?from=JPY&to={C}`
+  2. fawazahmed0 jsDelivr — `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/...`
+  3. fawazahmed0 Cloudflare — `https://{date}.currency-api.pages.dev/v1/...`
+- SDK/Client: `http ^1.6.0`
+- Auth: None (public APIs)
+- Privacy: URLs contain ONLY a YYYY-MM-DD date and ISO 4217 currency code — no identifiers or monetary values. Full URL logged only under `kDebugMode`
+- Timeouts: 1500ms primary, 1000ms Cloudflare fallback
+
+**P2P Family Sync Relay:**
+- HTTP client: `lib/infrastructure/sync/relay_api_client.dart`
+- Default base URL: `https://sync.happypocket.app/api/v1`
+- Auth: Ed25519 request signing — `Authorization: Ed25519 <deviceId>:<timestamp>:<base64Signature>`; signed message `<method>:<path>:<timestamp>:<SHA256(body)>` (`RequestSigner` class)
+- WebSocket: `lib/infrastructure/sync/websocket_service.dart` — connects to `{baseUrl}/ws/group/{groupId}` via `web_socket_channel`
+- E2EE: payloads encrypted before transport (`lib/infrastructure/sync/e2ee_service.dart`)
 
 ## Data Storage
 
-**Database:**
-- Drift + SQLCipher (local, on-device, AES-256-CBC encrypted) — `lib/data/app_database.dart`, schema version **21**
-- Encryption key managed via `lib/infrastructure/crypto/` + `flutter_secure_storage`
-- Tables (`lib/data/tables/`): transactions, books, categories, groups, group_members, user_profiles, audit_logs, sync_queue, exchange_rates, shopping_items, category_ledger_configs, category_keyword_preferences, merchant_category_preferences
+**Databases:**
+- SQLCipher (encrypted SQLite, AES-256-CBC, 256k PBKDF2)
+  - Client: Drift `^2.25.0` (`lib/data/app_database.dart`, schema v21)
+  - Native libs: `sqlcipher_flutter_libs ^0.6.7`
+  - Encryption key sourced from `KeyManager` (never hardcoded)
 
 **File Storage:**
-- Local filesystem only via `path_provider`. Photos encrypted with AES-256-GCM (per security architecture). No cloud object storage.
+- Local filesystem only (`path_provider`) — photos encrypted with AES-256-GCM (4-layer encryption, file layer)
 
 **Caching:**
+- Exchange rates cached in `exchange_rates` Drift table (cache-first repository)
 - `shared_preferences` for lightweight settings
-- Exchange rates cached in the Drift `exchange_rates` table
 
 ## Authentication & Identity
 
-**No external auth provider.** Identity is device-local and key-based:
-- Ed25519 device key pair - `lib/infrastructure/crypto/` (`DeviceKeyPair`)
-- BIP39 recovery phrase + HKDF key derivation
-- Biometric lock - `local_auth ^3.0.1`
-- Family/group membership authenticated via Ed25519-signed relay requests (no username/password, no OAuth)
+**Local Auth:**
+- Biometric / device passcode via `local_auth ^3.0.1` (`lib/infrastructure/security/biometric_service.dart`)
+- Master key + Ed25519 device keypair stored in OS keychain via `flutter_secure_storage ^10.2.0` (`secure_storage_service.dart`)
+- BIP39 recovery phrase + HKDF key derivation (zero-knowledge, no remote auth provider)
+
+**Device Identity (sync):**
+- Ed25519 device keys (`pinenacl`) used to sign relay API requests (`KeyManager`)
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- None (no Sentry/Crashlytics detected). On-device audit logging via `audit_logs` table + `lib/infrastructure/security/audit_logger`.
+- None (no Sentry/Crashlytics). Privacy-focused; no third-party telemetry
 
 **Logs:**
-- `debugPrint` gated behind `kDebugMode`. `avoid_print` lint enforced. Sensitive data never logged (crypto rules).
+- Audit logging via `lib/infrastructure/security/audit_logger.dart`
+- Debug-only console logging (`kDebugMode`); `avoid_print` lint enforced
 
 ## CI/CD & Deployment
 
-**Hosting / Distribution:**
-- Mobile app (iOS App Store / Google Play). No backend hosted in this repo (relay server is external).
+**Hosting:**
+- Mobile app stores (iOS App Store / Google Play) — not detected in repo config
 
-**CI Pipeline (`.github/workflows/audit.yml`):**
-- Triggers: PR to `main` + push to `main`
-- Runner: `ubuntu-latest`, Flutter 3.44.0 stable via `subosito/flutter-action@v2`
-- Gates (blocking): `flutter analyze`, `import_guard`/`custom_lint`, per-file coverage ≥70% (`coverde 0.3.0+1`), `sqlite3_flutter_libs` reject guard, stale-generated-file check (AUDIT-10)
+**CI Pipeline:**
+- GitHub Actions (`audit.yml` referenced in CLAUDE.md): `flutter analyze`, stale-generated-file guardrails (AUDIT-09/10), full `flutter test`
 
-## Push / Messaging
+## Push Notifications
 
-**Firebase Cloud Messaging (FCM):**
-- `firebase_core ^4.1.1`, `firebase_messaging ^16.0.1`
-- Android config present: `android/app/google-services.json`
-- iOS config NOT present in repo: `ios/Runner/GoogleService-Info.plist` missing (must be supplied for iOS push builds)
-- Service: `lib/infrastructure/sync/push_notification_service.dart`
-- iOS APNs path: `lib/infrastructure/sync/apns_push_messaging_client.dart`
-- Local notifications: `flutter_local_notifications ^21.0.0`
-- iOS note: FirebaseMessaging declares `s.libraries = 'sqlite3'`; `ios/Podfile` `post_install` strips `-lsqlite3` so SQLCipher symbols win at runtime (do not remove)
-
-## On-Device ML
-
-- `lib/infrastructure/ml/merchant_database.dart` - 500+ merchant lookup (no network)
-- TFLite classifier planned but not yet wired — `lib/application/dual_ledger/classification_service.dart` has `// TODO: Implement TFLiteClassifier when model is available`. No `.tflite` asset or `google_mlkit` dependency currently present.
+**Provider:**
+- Firebase Cloud Messaging — `firebase_core ^4.1.1`, `firebase_messaging ^16.0.1`
+- Config: `android/app/google-services.json` (iOS `GoogleService-Info.plist` not committed)
+- Service: `lib/infrastructure/sync/push_notification_service.dart`, APNs client `apns_push_messaging_client.dart`
+- Local display: `flutter_local_notifications ^21.0.0`
 
 ## Environment Configuration
 
-**Required external config files:**
-- `android/app/google-services.json` (committed) - Android FCM
-- `ios/Runner/GoogleService-Info.plist` (MISSING) - needed for iOS FCM
-- No `.env` files; runtime secrets live in OS secure storage (keychain/keystore)
+**Required env vars:**
+- None — local-first architecture, no server-injected secrets
 
 **Secrets location:**
-- Device keys / DB key: `flutter_secure_storage` (iOS Keychain / Android Keystore) via `lib/infrastructure/crypto/services/key_manager.dart`
+- OS keychain/keystore via `flutter_secure_storage` (master key, device keypair)
+- Firebase config in committed `google-services.json` (Android)
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-- FCM push messages (handled by `push_notification_service.dart`)
-- WebSocket inbound sync events: `ws://.../ws/group/{groupId}` (`lib/infrastructure/sync/websocket_service.dart` line 123)
+- WebSocket relay events (`websocket_service.dart`) — group sync push events
+- FCM/APNs push messages (background message handling)
 
 **Outgoing:**
-- Signed REST calls to relay (`relay_api_client.dart`)
-- Outbound WebSocket sync frames to relay group channel
+- Signed POST requests to sync relay (`relay_api_client.dart`)
+- GET requests to exchange-rate sources (`exchange_rate_api_client.dart`)
 
 ---
 

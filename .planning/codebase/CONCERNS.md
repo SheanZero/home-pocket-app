@@ -2,142 +2,135 @@
 
 **Analysis Date:** 2026-06-23
 
-This codebase is in unusually good health for its size (~70k LOC under `lib/`): `flutter analyze` reports **0 issues**, there are **392 test files**, and `// ignore:` suppressions exist only in generated localization files. The concerns below are therefore mostly *deferred features* and *architectural fragility* rather than active rot. Concerns are ordered roughly by impact.
-
----
+This codebase is in good health overall: 398 test files against 426 source files, `avoid_print` enforced, zero-analyzer-warnings gate in CI, and most historical debt is tracked through GSD phases (CRIT-NN / WR-NN fix markers visible in code). The concerns below are the genuine remaining gaps, ordered by impact.
 
 ## Tech Debt
 
-**Dual-ledger classification is single-layer (2 of 3 layers stubbed):**
-- Issue: `ClassificationService` advertises a 3-layer pipeline (Rule Engine → Merchant DB → ML Classifier) but Layers 2 and 3 are no-ops. Everything that misses a category rule falls through to a hard-coded `LedgerType.daily` at `confidence: 0.5`.
-- Files: `lib/application/dual_ledger/classification_service.dart` (lines 32-44)
-- Impact: Classification accuracy is capped at whatever the rule engine alone can achieve. The dual-ledger feature — a headline product differentiator — silently degrades to "default to daily" for any uncovered category. The `confidence` value surfaced to callers is misleadingly precise for a fallback.
-- Fix approach: Wire `lib/infrastructure/ml/merchant_database.dart` (already exists and is used by the *voice* path) into Layer 2 here, then add the TFLite Layer 3. Note the voice flow (`voice_category_resolver.dart`, `parse_voice_input_use_case.dart`) already does merchant lookup — the transaction-create path has diverged from it.
+**Dual-ledger classification is a 2-of-3-layer stub:**
+- Issue: `ClassificationService.classify()` implements only Layer 1 (rule engine). Layer 2 (MerchantDatabase lookup) and Layer 3 (TFLite ML classifier) are `// TODO` no-ops. Any category not matched by a rule silently falls back to `LedgerType.daily` at `confidence: 0.5`.
+- Files: `lib/application/dual_ledger/classification_service.dart:33-36`
+- Impact: The "3-Layer Classification (Rule → Merchant → ML)" described in CLAUDE.md and MOD specs does not actually run end-to-end. The service is live — wired into `lib/application/accounting/create_transaction_use_case.dart` via `lib/application/dual_ledger/repository_providers.dart` — so real transactions get the daily-default classification. A standalone `MerchantDatabase` exists (`lib/infrastructure/ml/merchant_database.dart`, 181 lines) but is never called from the classifier.
+- Fix approach: Inject `MerchantDatabase` into `ClassificationService` and call it for Layer 2; defer Layer 3 (no TFLite dependency or model ships — see "Missing Critical Features"). Tighten the fallback confidence so downstream UI can flag low-confidence guesses.
 
-**TFLite ML classifier never built; no dependency, no model:**
-- Issue: `lib/infrastructure/ml/` contains only `merchant_database.dart`. There is no TFLite classifier, no `.tflite` model asset, and **no `tflite`/`mlkit`/`google_ml_kit` dependency in `pubspec.yaml`** despite CLAUDE.md and architecture docs describing an "85%+ TFLite classifier" and "ML/OCR (mlkit, tflite)".
-- Files: `lib/infrastructure/ml/` (directory), `pubspec.yaml`
-- Impact: Documentation/architecture claims diverge from reality. OCR receipt scanning (MOD-005) and ML classification are aspirational, not implemented.
-- Fix approach: Either implement and add deps, or downgrade the architecture docs (`ARCH-003`, CLAUDE.md "ML/OCR" claims) to match the shipped feature set so planners aren't misled.
+**TFLite / on-device ML is documented but absent:**
+- Issue: CLAUDE.md, MEMORY, and MOD docs describe a TFLite classifier (85%+ accuracy) and ML/OCR infrastructure. No `tflite`, `google_ml_kit`, or OCR package is in `pubspec.yaml`. `lib/infrastructure/ml/` contains only `merchant_database.dart` and `merchant_name_normalizer.dart`.
+- Files: `pubspec.yaml`, `lib/infrastructure/ml/`
+- Impact: Doc/code drift. Anyone planning OCR (MOD-005) or ML classification work will assume scaffolding exists that does not.
+- Fix approach: Treat ML/OCR as greenfield when those phases arrive; update MOD-005 status to reflect not-started.
 
-**Per-category budget tracking removed, use case is a hollow placeholder:**
-- Issue: `GetBudgetProgressUseCase.execute()` unconditionally returns `[]`. The `budgetAmount` field was removed from `Category` and no replacement Budget table exists.
-- Files: `lib/application/analytics/get_budget_progress_use_case.dart`
-- Impact: Any UI/analytics consuming budget progress shows empty state permanently. Tests against this use case validate nothing meaningful.
-- Fix approach: Introduce a dedicated `budgets` Drift table and re-implement, or remove the use case + its callers entirely until budgeting is scheduled.
+**OCR module is spec-only:**
+- Issue: `lib/application/ocr/` is referenced in CLAUDE.md architecture but no ML Kit / TextRecognizer dependency or implementation exists.
+- Files: `pubspec.yaml` (no OCR deps), CLAUDE.md architecture section
+- Impact: Receipt-scanning feature is unbuilt despite being listed in the layer map.
+- Fix approach: Scope as a future milestone; do not let plan-phase load INTEGRATIONS expecting an OCR SDK.
 
-**Transaction list pagination deferred:**
-- Issue: `transaction_dao.dart` returns all matching rows; pagination explicitly "deferred to v1.5".
-- Files: `lib/data/daos/transaction_dao.dart` (~line 243)
-- Impact: For heavy users (years of daily entries) the list query loads the full history into memory each render. Acceptable now; a scaling cliff later.
-- Fix approach: Add `LIMIT/OFFSET` (or keyset) pagination to the DAO and a lazy list in presentation.
+**Oversized files exceed the 800-line house limit:**
+- Issue: Four hand-written source files exceed the project's stated 800-line max (`.claude/rules/coding-style.md`).
+  - `lib/shared/constants/default_categories.dart` (1268) — data table, low risk but hard to diff
+  - `lib/features/accounting/presentation/widgets/transaction_details_form.dart` (1171)
+  - `lib/features/home/presentation/widgets/home_hero_card.dart` (1155)
+  - `lib/features/accounting/presentation/screens/manual_one_step_screen.dart` (1025)
+- Impact: The two form/screen widgets concentrate a lot of stateful UI logic, raising merge-conflict and regression risk (the parallel-executor ARB/stub collision gotcha in MEMORY is more likely in files this large).
+- Fix approach: Extract sub-widgets and validation helpers from the two accounting widgets. The constants file is acceptable as a generated-style data blob.
 
-**Disabled-but-retained celebration feature:**
-- Issue: Joy-save celebration animation gated behind `static const bool _kJoyCelebrationEnabled = false`. All scaffolding (overlay, completer machinery, `waitForCelebrationDismissed`) is kept live.
-- Files: `lib/features/accounting/presentation/widgets/transaction_details_form.dart` (lines 148-160), `joy_celebration_overlay.dart`
-- Impact: Dead-but-wired code in a 1171-line file (the largest hand-written file in the repo). The completer/future plumbing still executes around a no-op overlay, adding cognitive load to an already oversized widget.
-- Fix approach: Leave the flag (re-enable is intentional one-liner) but consider extracting the celebration machinery into its own widget so the form file shrinks.
+**Lingering migration TODO in theme:**
+- Issue: `app_text_styles.dart` carries a `// TODO: Remove after all screens are migrated to Wa-Modern`.
+- Files: `lib/core/theme/app_text_styles.dart:180`
+- Impact: Dead-ish style path kept alive for an unfinished migration.
+- Fix approach: Audit remaining non-migrated screens, then remove.
 
----
+## Known Bugs
 
-## Fragile Areas
-
-**iOS SQLCipher / `libsqlite3` linkage (runtime-fatal if broken):**
-- Files: `ios/Podfile` (`post_install`), `lib/infrastructure/crypto/database/encrypted_database.dart`
-- Why fragile: The Podfile `post_install` strips `-l"sqlite3"` from every Pod xcconfig. If removed (e.g. by a careless `pod` regeneration or merge), FirebaseMessaging pulls in the system `libsqlite3.tbd`, which wins `dlsym` over SQLCipher. `PRAGMA cipher_version` then returns empty and `encrypted_database.dart` throws `Bad state: SQLCipher not loaded`. The app fails to start with an unencrypted-or-dead database.
-- Safe modification: Never touch the Podfile `post_install` without a clean iOS rebuild and verifying `PRAGMA cipher_version` is non-empty. No automated lint guards this — relies on reviewer discipline and runtime check.
-- Test coverage: None at the native-linkage level; cannot be exercised in `flutter test`.
-
-**Pinned dependency trio (`file_picker` / `package_info_plus` / `share_plus`):**
-- Files: `pubspec.yaml`
-- Why fragile: These three are mutually constrained through a transitive `win32` version. Bumping any one in isolation breaks `flutter pub get` or the iOS native build (`file_picker 12.x` ships a broken iOS Swift module). `intl` is similarly pinned to exactly `0.20.2` by `flutter_localizations`.
-- Safe modification: Upgrade the trio together and verify `flutter build ios --debug --no-codesign`. Documented in CLAUDE.md but enforced only by build failure, not a lint.
-
-**Drift schema at v21 with 21 hand-written migration branches:**
-- Files: `lib/data/app_database.dart` (`schemaVersion => 21`, ~21 `from`/`if (from` branches)
-- Why fragile: Each migration is hand-emitted. `customIndices` is decorative — indices must be emitted by hand in *both* `onCreate` and `onUpgrade` (a known footgun, see project memory). Missing a CREATE INDEX in one of the two paths produces installs whose index state depends on install-vs-upgrade history.
-- Safe modification: When adding a table/index, mirror the DDL in both `onCreate` and `onUpgrade`, bump `schemaVersion`, and add a migration test. There is a `schemaVersion` mismatch risk vs CLAUDE.md which still documents "v20" — the code is already at v21.
-- Test coverage: Migration tests exist but coverage of every index across both paths is not guaranteed.
-
----
+No open functional bugs surfaced in this scan. Recent commits (`fix(49) WR-01/WR-04`) show the team closes review-found issues per phase. One carried cosmetic item from MEMORY: dark `list_transaction_tile` golden renders its internal date in `ja` regardless of locale (locale not threaded into `ListTransactionTile`) — pre-existing, test-fidelity only, non-blocking.
 
 ## Security Considerations
 
-**Swallowed exceptions on network/crypto sync paths:**
-- Risk: ~20 `catch (_)` blocks. Most in sync paths are *intentional* retry-or-fail logic (e.g. `sync_queue_manager.dart` increments retry count, `pull_sync_use_case.dart` returns `false` on group-key decryption failure). But a bare `catch (_)` around `decryptGroupKeyFromOwner` (`pull_sync_use_case.dart:204`) conflates "tampered/forged payload" with "transient error" — both just return `false`.
-- Files: `lib/application/family_sync/pull_sync_use_case.dart`, `lib/infrastructure/sync/sync_queue_manager.dart`, `lib/infrastructure/sync/e2ee_service.dart`, `lib/infrastructure/sync/websocket_service.dart`
-- Current mitigation: Failures degrade safely (entry not consumed, retry counter advances). No secret data is logged.
-- Recommendations: Distinguish authentication/integrity failures (potential attack) from transient I/O failures in the E2EE decrypt paths, and surface/audit-log the former via `audit_logger`. A silently-failing group-key decrypt could mask a man-in-the-middle relay attempting forged payloads.
+**Crypto discipline is strong — treat the boundary as the risk:**
+- Risk: The 4-layer encryption + key management is centralized in `lib/infrastructure/crypto/` and `lib/infrastructure/security/`, with `import_guard` denying `sqlite3_flutter_libs` and direct `flutter_secure_storage` access. The residual risk is a future contributor bypassing these wrappers.
+- Files: `lib/infrastructure/crypto/`, `lib/infrastructure/security/secure_storage_service.dart`
+- Current mitigation: custom_lint import_guard, AUDIT-09 CI guardrail, CLAUDE.md crypto rules.
+- Recommendations: Keep the deny rules; add any new crypto entry points to the guard list rather than relying on review.
 
-**Hard-coded sync relay endpoint:**
-- Risk: Relay base URL defaults to `https://sync.happypocket.app/api/v1` (derived `wss://`) in source.
-- Files: `lib/infrastructure/sync/relay_api_client.dart` (lines 52, 69, 75)
-- Current mitigation: TLS 1.3 + E2EE means the relay is untrusted-by-design, so a fixed URL is lower-risk than usual. The constructor appears to accept an override.
-- Recommendations: Confirm the override path is actually used in production config; ensure no environment can fall through to the hard-coded default unintentionally.
+**iOS SQLCipher symbol-collision fix is review-gated only:**
+- Risk: `ios/Podfile` `post_install` strips `-lsqlite3` so SQLCipher wins `dlsym` over the system lib. If a contributor regenerates the Podfile or removes the strip, `PRAGMA cipher_version` returns empty and the DB silently loses encryption (init-fail screen at best, plaintext-leaning failure mode at worst).
+- Files: `ios/Podfile` post_install, `lib/infrastructure/crypto/database/encrypted_database.dart`
+- Current mitigation: CLAUDE.md pitfall #7 + reviewer awareness. No lint.
+- Recommendations: Add a CI assertion (grep the rendered xcconfigs or check `PRAGMA cipher_version` in an integration smoke test) so this is structurally enforced, not manual.
 
----
+**Sync transport secret/endpoint handling unaudited here:**
+- Risk: `lib/infrastructure/sync/` ships a real `websocket_service.dart`, `relay_api_client.dart`, and `push_notification_service.dart` (Firebase). Relay endpoints and auth handling were not deeply inspected in this scan.
+- Files: `lib/infrastructure/sync/relay_api_client.dart`, `websocket_service.dart`
+- Current mitigation: Project claims TLS 1.3 + E2EE for transport.
+- Recommendations: Run a focused `gsd-secure-phase` over the family-sync transport before that milestone ships.
 
 ## Performance Bottlenecks
 
-**Unbounded transaction queries:**
-- Problem: List and analytics DAOs fetch full result sets (see "pagination deferred" above).
-- Files: `lib/data/daos/transaction_dao.dart`, `lib/data/daos/analytics_dao.dart` (746 lines — the largest DAO)
-- Cause: No `LIMIT`; entire history materialized per query.
-- Improvement path: Keyset pagination on list; pre-aggregated/cached monthly rollups for analytics rather than re-scanning all transactions on each report render.
+No measured bottlenecks found. Watch the large accounting widgets (`transaction_details_form.dart`, `manual_one_step_screen.dart`) for rebuild cost as more `ref.watch` providers accumulate; consider `select` narrowing if profiling shows churn.
 
-**Oversized presentation widgets:**
-- Problem: Several hand-written files exceed the project's own 800-line max from `.claude/rules/coding-style.md`:
-  - `transaction_details_form.dart` — 1171 lines
-  - `home_hero_card.dart` — 1155 lines
-  - `manual_one_step_screen.dart` — 1025 lines
-- Files: as listed, under `lib/features/`
-- Cause: Accreted UI logic + animation scaffolding (some disabled) in single widgets.
-- Improvement path: Extract sub-widgets and the celebration/animation machinery. These are not perf bottlenecks at runtime but are rebuild/maintenance hotspots and violate the repo's stated file-size budget.
+## Fragile Areas
 
----
+**Family sync subsystem (64 files) — youngest, most coupled:**
+- Files: `lib/application/family_sync/`, `lib/infrastructure/sync/`, `lib/features/family_sync/`
+- Why fragile: It is the largest cross-cutting subsystem (CRDT + WebSocket + relay + push + offline queue), and it carries the only concentration of `debugPrint` logging in the codebase (sync_engine, sync_orchestrator, pull/push/full sync use cases — ~40 of 51 total debugPrint calls). Heavy ad-hoc print logging usually marks code that was hard to get right.
+- Safe modification: Change one sync flow (push / pull / apply) at a time; run the full `flutter test` (not scoped) per the MEMORY gotcha about architecture tests being missed by scoped runs. ARB/stub collisions between same-wave executors also concentrate here.
+- Test coverage: `test/integration/sync/shopping_sync_round_trip_test.dart` has a `.skip(...)` branch — confirm what scenario is being skipped before relying on round-trip coverage.
 
-## Test Coverage Gaps
+**Drift onUpgrade migration chain (v1 → v22):**
+- Files: `lib/data/app_database.dart` (`schemaVersion => 22`, onUpgrade ~line 70+)
+- Why fragile: A long, mostly-unconditional `if (from < N)` ladder. The v4 step interacts with an unconditional `from < 18` RENAME COLUMN (noted inline), and `customIndices` is decorative (MEMORY gotcha) so indices must be emitted explicitly in both onCreate and onUpgrade.
+- Safe modification: Add new steps only as `if (from < 23)`; never reorder existing steps; test migration from each prior version (the WR-01 fix in Phase 49 added a real onUpgrade migrator drive in the host-VM v22 test — keep that pattern).
+- Test coverage: Migration tests exist; verify each `from < N` rung is exercised.
 
-**`profile` and `dual_ledger` features under-tested relative to peers:**
-- What's not tested: `profile` has only 5 tests, `dual_ledger` only 6, vs. accounting (55) / analytics (65) / list (44).
-- Files: `lib/features/profile/`, `lib/application/dual_ledger/`
-- Risk: `dual_ledger` is the product's core differentiator and its classification fallback logic (`classification_service.dart`) is exactly the kind of branch that needs regression coverage as Layers 2/3 get wired in. `profile` includes a `catch (_)` in `save_user_profile_use_case.dart` whose failure mode is untested.
-- Priority: Medium (dual_ledger), Low (profile).
+## Scaling Limits
 
-**Stub use cases validated by hollow tests:**
-- What's not tested meaningfully: `GetBudgetProgressUseCase` always returns `[]`, so any test of it asserts the placeholder, not behavior.
-- Files: `lib/application/analytics/get_budget_progress_use_case.dart`
-- Risk: Gives false coverage confidence; the real budgeting logic will be untested when introduced.
-- Priority: Low (until budgeting is scheduled).
-
-**Native iOS linkage / SQLCipher loading unverifiable in CI:**
-- What's not tested: The `-lsqlite3` strip and SQLCipher runtime load (most security-critical, runtime-fatal path).
-- Files: `ios/Podfile`, `lib/infrastructure/crypto/database/encrypted_database.dart`
-- Risk: A regression here is invisible to `flutter test` and `flutter analyze` and only surfaces on a real device/simulator boot.
-- Priority: High — consider a smoke test in iOS CI that boots the app and asserts `PRAGMA cipher_version` is non-empty.
-
----
+Not applicable for a local-first mobile app at this stage. The relay/sync server side (out of this repo) would be the scaling surface; not assessable here.
 
 ## Dependencies at Risk
 
-**`sqlcipher_flutter_libs` lacks Swift Package Manager support:**
-- Risk: `flutter analyze` emits a warning that `sqlcipher_flutter_libs` does not support SPM and "this will become an error in a future version of Flutter."
-- Impact: A future Flutter that hard-requires SPM could break the iOS build of the encryption layer entirely. The project is pinned to `^0.6.x` and intentionally has *not* migrated to `sqlite3` 3.x (`0.7.0+eol` is a do-nothing package).
-- Migration plan: Track upstream `sqlcipher_flutter_libs` SPM adoption; this is an external blocker the project cannot resolve alone. Monitor before each Flutter SDK upgrade.
+**Three-way win32-pinned trio is a known landmine:**
+- Risk: `file_picker ^11.0.2`, `package_info_plus ^9.0.1`, `share_plus ^12.0.2` are mutually pinned via a transitive `win32` constraint. Bumping any one in isolation breaks `flutter pub get` or the iOS native build.
+- Impact: Security patches to any of the three are blocked unless all three move together.
+- Migration plan: Upgrade as a set, then verify `flutter build ios --debug --no-codesign` (documented in CLAUDE.md). Schedule a deliberate trio-bump phase rather than ad-hoc.
 
-**`win32`-coupled trio and `intl 0.20.2` pin:** see "Fragile Areas". These are version-locks that constrain future upgrades.
+**intl hard-pinned at 0.20.2:**
+- Risk: Pinned by `flutter_localizations`; cannot float.
+- Impact: Low, but locks formatting behavior to one version.
+- Migration plan: Moves only with the Flutter SDK.
 
----
+**sqlcipher_flutter_libs pinned at ^0.6.x:**
+- Risk: `0.7.0+eol` is intentionally a no-op; project has not migrated to `sqlite3` 3.x.
+- Impact: A future forced migration to sqlite3 3.x is deferred debt.
+- Migration plan: Plan a dedicated DB-stack migration phase when 0.6.x is truly EOL.
 
 ## Missing Critical Features
 
-**OCR receipt scanning (MOD-005):**
-- Problem: Described in CLAUDE.md/architecture but no ML Kit dependency or OCR pipeline present in `lib/`.
-- Blocks: Receipt-scan entry flow; one of the four "Enhanced" modules.
+**ML classifier (Layer 3):** No TFLite dependency or model. Dual-ledger classification cannot reach its documented 85%+ accuracy path. Blocks the full MOD-003 dual-ledger value prop from being automatic.
 
-**ML transaction classifier (Layer 3 of dual ledger):** see Tech Debt — no model, no dependency.
+**OCR receipt scanning (MOD-005):** No ML Kit / OCR dependency. Receipt-scan feature unbuilt.
 
-**Per-category budgeting:** see Tech Debt — table removed, use case hollow.
+**Privacy policy navigation:** `// TODO: Navigate to privacy policy` stub in `lib/features/settings/presentation/widgets/about_section.dart:29` — a shipping app typically needs this wired for store review.
+
+**Home GroupBar real data:** `// TODO: Wire GroupBar with actual group data when available` at `lib/features/home/presentation/screens/home_screen.dart:241` — group bar renders without live data.
+
+## Test Coverage Gaps
+
+**Sync round-trip has a skipped branch:**
+- What's not tested: A `.skip(...)` scenario in `test/integration/sync/shopping_sync_round_trip_test.dart:87`.
+- Files: `test/integration/sync/shopping_sync_round_trip_test.dart`
+- Risk: A real round-trip path may be unverified; given how fragile family_sync is, this matters.
+- Priority: High
+
+**Classification fallback path:**
+- What's not tested: Whether the daily-default fallback (confidence 0.5) is intentional behavior or a placeholder — no test asserts the Layer-2/3 absence is acceptable.
+- Files: `lib/application/dual_ledger/classification_service.dart`
+- Risk: Silent mis-classification of joy-ledger spending as daily.
+- Priority: Medium
+
+**Removed-helpers home screen test gated on a plan:**
+- What's not tested: `test/widget/features/home/presentation/screens/home_screen_helpers_removed_test.dart` notes it stays `skip:`-gated until "Plan 10-08 lands."
+- Files: same
+- Risk: Low — intentional, but verify the plan actually landed.
+- Priority: Low
 
 ---
 
