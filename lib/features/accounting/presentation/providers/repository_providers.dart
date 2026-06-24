@@ -14,10 +14,10 @@ import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/accounting/seed_merchants_use_case.dart';
 import '../../../../application/accounting/seed_voice_synonyms_use_case.dart';
 import '../../../../application/dual_ledger/repository_providers.dart';
-import '../../../../application/ml/repository_providers.dart' as app_ml;
 import '../../../../application/voice/parse_voice_input_use_case.dart';
 import '../../../../application/voice/record_category_correction_use_case.dart';
-import '../../../../application/voice/voice_category_resolver.dart';
+import '../../../../application/voice/recognition/category_recognizer.dart';
+import '../../../../application/voice/recognition/merchant_recognizer.dart';
 import '../../../../application/voice/voice_satisfaction_estimator.dart';
 import '../../../../application/voice/voice_text_parser.dart';
 import '../../../../data/daos/book_dao.dart';
@@ -242,9 +242,10 @@ RecordCategoryCorrectionUseCase recordCategoryCorrectionUseCase(Ref ref) {
 }
 
 // ── Voice DI providers (folded from voice_providers.dart) ────────────────────
-// NOTE: merchantDatabaseProvider is now appMerchantDatabaseProvider from
-// lib/application/ml/repository_providers.dart (keepAlive via Plan 04-01).
-// Consumers reference app_ml.appMerchantDatabaseProvider directly.
+// Phase 50 (DECOUP-01): the old MerchantDatabase / VoiceCategoryResolver wiring
+// is retired. Two independent engines are now wired — CategoryRecognizer
+// (keyword-only) and MerchantRecognizer (anchored scorer over Phase-49's
+// merchant_match_keys) — and merged only inside ParseVoiceInputUseCase.
 
 /// VoiceTextParser — stateless NLP parser, auto-disposed when not in use.
 @riverpod
@@ -252,31 +253,48 @@ VoiceTextParser voiceTextParser(Ref ref) {
   return VoiceTextParser();
 }
 
-/// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+/// CategoryRecognizer — Phase 50 keyword-only engine (DECOUP-01/DECOUP-02).
 ///
-/// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
-/// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
-/// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
-/// (D-03 always-L2 contract).
+/// `VoiceCategoryResolver` minus its step-1 vendor lookup and its
+/// vendor-database dependency. Runs unconditionally; always returns an L2
+/// categoryId (D-03 always-L2 contract). Constructed from the three
+/// keyword-pipeline data sources only — no merchant database.
 @riverpod
-VoiceCategoryResolver voiceCategoryResolver(Ref ref) {
-  return VoiceCategoryResolver(
+CategoryRecognizer categoryRecognizer(Ref ref) {
+  return CategoryRecognizer(
     categoryRepository: ref.watch(categoryRepositoryProvider),
     preferenceRepository: ref.watch(
       categoryKeywordPreferenceRepositoryProvider,
     ),
     categoryService: ref.watch(categoryServiceProvider),
-    merchantDatabase: ref.watch(app_ml.appMerchantDatabaseProvider),
   );
 }
 
-/// ParseVoiceInputUseCase — wired to all voice application services.
+/// MerchantRecognizer — Phase 50 anchored scorer (DECOUP-03).
+///
+/// Recall-first ranker over Phase-49's `merchant_match_keys`. Takes only a
+/// [MerchantRepository]; never references the keyword/category recognizer
+/// (construction independence, DECOUP-01). `keepAlive` because it warms an
+/// in-memory cache of every match-key surface once per app session.
+@Riverpod(keepAlive: true)
+MerchantRecognizer merchantRecognizer(Ref ref) {
+  return MerchantRecognizer(
+    merchantRepository: ref.watch(merchantRepositoryProvider),
+  );
+}
+
+/// ParseVoiceInputUseCase — wired to both decoupled voice engines.
+///
+/// The orchestrator runs [CategoryRecognizer] and [MerchantRecognizer]
+/// independently and applies the thin keyword-priority merge with the 0.85
+/// auto-fill floor (D-02 / D-03). Ledger is derived from the final category
+/// via `resolveLedgerType` — never the merchant's ledger hint.
 @riverpod
 ParseVoiceInputUseCase parseVoiceInputUseCase(Ref ref) {
   return ParseVoiceInputUseCase(
     textParser: ref.watch(voiceTextParserProvider),
-    voiceCategoryResolver: ref.watch(voiceCategoryResolverProvider),
-    merchantDatabase: ref.watch(app_ml.appMerchantDatabaseProvider),
+    categoryRecognizer: ref.watch(categoryRecognizerProvider),
+    merchantRecognizer: ref.watch(merchantRecognizerProvider),
   );
 }
 

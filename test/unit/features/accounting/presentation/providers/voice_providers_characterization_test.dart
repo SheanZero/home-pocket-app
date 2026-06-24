@@ -1,16 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
-import 'package:home_pocket/application/ml/repository_providers.dart'
-    show appMerchantDatabaseProvider;
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
-import 'package:home_pocket/application/voice/voice_category_resolver.dart';
+import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
+import 'package:home_pocket/application/voice/recognition/merchant_recognizer.dart';
 import 'package:home_pocket/application/voice/voice_satisfaction_estimator.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/merchant_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
@@ -21,19 +20,26 @@ class _MockCategoryKeywordPreferenceRepository extends Mock
 
 class _MockCategoryService extends Mock implements CategoryService {}
 
+class _MockMerchantRepository extends Mock implements MerchantRepository {}
+
 void main() {
   late _MockCategoryRepository mockCategoryRepo;
   late _MockCategoryKeywordPreferenceRepository mockPreferenceRepo;
   late _MockCategoryService mockCategoryService;
+  late _MockMerchantRepository mockMerchantRepo;
   late ProviderContainer container;
 
   setUp(() {
     mockCategoryRepo = _MockCategoryRepository();
     mockPreferenceRepo = _MockCategoryKeywordPreferenceRepository();
     mockCategoryService = _MockCategoryService();
+    mockMerchantRepo = _MockMerchantRepository();
 
     when(() => mockCategoryRepo.findActive()).thenAnswer((_) async => []);
     when(() => mockCategoryRepo.findById(any())).thenAnswer((_) async => null);
+    when(
+      () => mockMerchantRepo.loadAllForMatching(),
+    ).thenAnswer((_) async => []);
 
     container = ProviderContainer(
       overrides: [
@@ -42,6 +48,7 @@ void main() {
           mockPreferenceRepo,
         ),
         categoryServiceProvider.overrideWithValue(mockCategoryService),
+        merchantRepositoryProvider.overrideWithValue(mockMerchantRepo),
       ],
     );
   });
@@ -52,24 +59,25 @@ void main() {
     'voice DI providers characterization tests (post-refactor: folded into repository_providers)',
     () {
       test(
-        'appMerchantDatabaseProvider constructs MerchantDatabase instance',
+        'merchantRecognizerProvider constructs MerchantRecognizer instance',
         () {
-          final db = container.read(appMerchantDatabaseProvider);
-          expect(db, isA<MerchantDatabase>());
+          final recognizer = container.read(merchantRecognizerProvider);
+          expect(recognizer, isA<MerchantRecognizer>());
         },
       );
 
       test(
-        'appMerchantDatabaseProvider is keepAlive — same instance across two reads',
+        'merchantRecognizerProvider is keepAlive — same instance across two reads',
         () {
-          // appMerchantDatabaseProvider is @Riverpod(keepAlive: true) in application/ml
-          final first = container.read(appMerchantDatabaseProvider);
-          final second = container.read(appMerchantDatabaseProvider);
+          // merchantRecognizerProvider is @Riverpod(keepAlive: true) — it warms
+          // an in-memory match-key cache once per app session.
+          final first = container.read(merchantRecognizerProvider);
+          final second = container.read(merchantRecognizerProvider);
           expect(
             identical(first, second),
             isTrue,
             reason:
-                'appMerchantDatabaseProvider must be keepAlive: true — same instance expected',
+                'merchantRecognizerProvider must be keepAlive: true — same instance expected',
           );
         },
       );
@@ -83,10 +91,10 @@ void main() {
       );
 
       test(
-        'voiceCategoryResolverProvider constructs VoiceCategoryResolver with injected deps',
+        'categoryRecognizerProvider constructs CategoryRecognizer with injected deps',
         () {
-          final resolver = container.read(voiceCategoryResolverProvider);
-          expect(resolver, isA<VoiceCategoryResolver>());
+          final recognizer = container.read(categoryRecognizerProvider);
+          expect(recognizer, isA<CategoryRecognizer>());
         },
       );
 

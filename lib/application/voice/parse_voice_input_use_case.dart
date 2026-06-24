@@ -1,31 +1,42 @@
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/voice_parse_result.dart';
-import '../../infrastructure/ml/merchant_database.dart';
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
 import '../../shared/utils/result.dart';
-import 'voice_category_resolver.dart';
+import 'recognition/category_recognizer.dart';
+import 'recognition/merchant_recognizer.dart';
 import 'voice_text_parser.dart';
+
+/// Auto-fill floor (D-03). When the keyword engine misses, the orchestrator
+/// auto-fills the category from the best merchant candidate ONLY when its raw
+/// score is at or above this floor (the exact / anchored-prefix tier). Below
+/// the floor the category stays null and the ranked candidates are surfaced
+/// for Phase-52 chips — never silently auto-filled. The floor lives in the
+/// ORCHESTRATOR, not the engine (the engine is recall-first / floor-agnostic).
+const double kMerchantAutoFillFloor = 0.85;
 
 /// Use case for parsing voice-recognized text into structured transaction data.
 ///
-/// Orchestrates: text parsing → merchant matching → category matching →
-/// ledger type resolution → [VoiceParseResult] construction.
+/// Phase 50 (DECOUP-01): orchestrates two INDEPENDENT engines that never call
+/// each other — [CategoryRecognizer] (keyword-only, runs unconditionally) and
+/// [MerchantRecognizer] (anchored scorer over the merchant match-key table) —
+/// and applies one thin keyword-priority merge with the 0.85 auto-fill floor
+/// (D-02 / D-03):
+///   - keyword hit  → keyword wins; ledger = resolveLedgerType(categoryId).
+///   - keyword null + best merchant candidate score >= 0.85 → auto-fill the
+///     category from the merchant's L2 (via normalizeToL2); ledger is STILL
+///     resolveLedgerType(finalCategoryId) — NEVER the merchant's ledger hint
+///     (LEDGER-01: the line-106 merchant-ledger short-circuit is deleted).
+///   - keyword null + below floor (or no candidate) → category stays null; the
+///     ranked candidates are still surfaced on the result.
 ///
-/// Merchant matching has higher priority than keyword category matching.
-/// Per Phase 21 PATTERNS.md §9 caveat, the merchant branch routes the
-/// derived categoryId through [VoiceCategoryResolver.normalizeToL2] so the
-/// always-L2 contract has no escape hatch — even if MerchantDatabase
-/// regresses and yields an L1 id, the resolver's `_ensureL2` re-maps it.
-///
-/// WR-05: merchant branch no longer re-runs [MerchantDatabase.findMerchant]
-/// through the resolver; it normalizes the already-derived categoryId
-/// directly, preserving the original match's confidence.
+/// Flow: text parsing (amount/currency/date/keyword) → two-engine resolution →
+/// thin merge → ledger derivation → [VoiceParseResult] construction.
 class ParseVoiceInputUseCase {
   final VoiceTextParser _textParser;
-  final VoiceCategoryResolver _voiceCategoryResolver;
-  final MerchantDatabase _merchantDatabase;
+  final CategoryRecognizer _categoryRecognizer;
+  final MerchantRecognizer _merchantRecognizer;
 
   /// Currency-token detectors (Phase 42, VOICE-CUR-01/02/03). Stateless — the
   /// `detectCurrencyToken` scan is locale-routed identically to the amount path.
@@ -36,11 +47,11 @@ class ParseVoiceInputUseCase {
 
   ParseVoiceInputUseCase({
     required VoiceTextParser textParser,
-    required VoiceCategoryResolver voiceCategoryResolver,
-    required MerchantDatabase merchantDatabase,
+    required CategoryRecognizer categoryRecognizer,
+    required MerchantRecognizer merchantRecognizer,
   }) : _textParser = textParser,
-       _voiceCategoryResolver = voiceCategoryResolver,
-       _merchantDatabase = merchantDatabase;
+       _categoryRecognizer = categoryRecognizer,
+       _merchantRecognizer = merchantRecognizer;
 
   /// Parses [recognizedText] into a [VoiceParseResult].
   ///
@@ -67,65 +78,76 @@ class ParseVoiceInputUseCase {
       // 2. Extract date
       final parsedDate = _textParser.extractDate(recognizedText);
 
-      // 3. Match merchant (higher priority than keyword category)
-      final merchantMatch = _textParser.extractAndMatchMerchant(
-        recognizedText,
-        _merchantDatabase,
-      );
-
-      // Quick task 260526-pg6 (Option F — Task 1): lift the resolver-bound
-      // keyword to the top so BOTH branches (merchant + keyword) populate the
-      // returned VoiceParseResult with the SAME canonical key the resolver
-      // uses internally. Form-side `recordCorrection` then writes that exact
-      // key — closing the silent-orphan bug where a divergent re-extractor
-      // wrote keys the resolver never looked up.
-      //
-      // We compute it unconditionally (cheap) so the merchant branch also
-      // surfaces a usable correction key when the user changes the
-      // merchant-derived category.
+      // Quick task 260526-pg6 (Option F — Task 1): compute the canonical
+      // keyword ONCE, at the top, so the returned VoiceParseResult carries the
+      // SAME string the CategoryRecognizer looks up internally. Form-side
+      // `recordCorrection` then writes that exact key — closing the
+      // silent-orphan bug where a divergent re-extractor wrote keys the
+      // recognizer never looked up. `_extractKeyword` is the single canonical
+      // key source (T-50-06).
       final keyword = _extractKeyword(recognizedText, localeId: localeId);
       final resolvedKeyword = keyword.isEmpty ? null : keyword;
 
-      // 4. Match category and resolve ledger type
-      CategoryMatchResult? categoryMatch;
-      LedgerType? ledgerType;
+      // 3. Run the two engines INDEPENDENTLY (DECOUP-01) — neither calls the
+      // other; the merge happens only here. The category engine runs
+      // unconditionally (DECOUP-02); the merchant engine is recall-first and
+      // surfaces every scored candidate (the orchestrator owns the floor).
+      final categoryMatch = await _categoryRecognizer.resolve(keyword);
+      final merchantCandidates = await _merchantRecognizer.recognize(
+        recognizedText,
+      );
 
-      if (merchantMatch != null) {
-        // WR-05: normalize the merchantMatch's categoryId directly via the
-        // resolver's public _ensureL2 wrapper. Avoids a second findMerchant
-        // pass and preserves the original match's confidence.
-        final normalizedId = await _voiceCategoryResolver.normalizeToL2(
-          merchantMatch.categoryId,
+      // 4. Thin keyword-priority merge (D-02) + 0.85 auto-fill floor (D-03).
+      CategoryMatchResult? finalCategory;
+      LedgerType? ledgerType;
+      if (categoryMatch != null) {
+        // Keyword wins (XVAL-02). Ledger is a pure function of the final
+        // category (LEDGER-01) — there is NO merchant-ledger short-circuit.
+        finalCategory = categoryMatch;
+        ledgerType = await _categoryRecognizer.resolveLedgerType(
+          categoryMatch.categoryId,
         );
-        categoryMatch = CategoryMatchResult(
-          categoryId: normalizedId ?? merchantMatch.categoryId,
-          confidence: merchantMatch.confidence,
-          source: MatchSource.merchant,
-        );
-        // merchant-specific ledgerType continues to win when present.
-        ledgerType = merchantMatch.ledgerType;
       } else {
-        // Keyword branch: pass the pre-computed keyword to the resolver.
-        categoryMatch = await _voiceCategoryResolver.resolve(keyword);
-        if (categoryMatch != null) {
-          ledgerType = await _voiceCategoryResolver.resolveLedgerType(
-            categoryMatch.categoryId,
+        // Keyword miss: auto-fill from the best merchant candidate ONLY at or
+        // above the floor. Below the floor finalCategory stays null and the
+        // ranked candidates are still surfaced for Phase-52 chips.
+        final best = merchantCandidates.isEmpty
+            ? null
+            : merchantCandidates.first;
+        if (best != null && best.score >= kMerchantAutoFillFloor) {
+          final l2 = await _categoryRecognizer.normalizeToL2(best.categoryId);
+          finalCategory = CategoryMatchResult(
+            categoryId: l2 ?? best.categoryId,
+            confidence: best.score,
+            source: MatchSource.merchant,
+          );
+          // Ledger derived from the final category — NEVER best.ledgerHint
+          // (Phase 49 D-09 non-authoritative; LEDGER-01).
+          ledgerType = await _categoryRecognizer.resolveLedgerType(
+            finalCategory.categoryId,
           );
         }
       }
+
+      // The best candidate's merchant primitives ride along on the result so
+      // the form can pre-fill the (already-encrypted) merchant field. These are
+      // descriptive only — the ledger never derives from merchantLedgerType.
+      final bestCandidate = merchantCandidates.isEmpty
+          ? null
+          : merchantCandidates.first;
 
       return Result.success(
         VoiceParseResult(
           rawText: recognizedText,
           amount: amount,
           parsedDate: parsedDate,
-          merchantName: merchantMatch?.merchantName,
-          merchantCategoryId: merchantMatch?.categoryId,
-          merchantLedgerType: merchantMatch?.ledgerType,
-          categoryMatch: categoryMatch,
+          merchantName: bestCandidate?.displayName,
+          merchantCategoryId: bestCandidate?.categoryId,
+          categoryMatch: finalCategory,
           ledgerType: ledgerType,
           resolvedKeyword: resolvedKeyword,
           detectedCurrency: detectedCurrency,
+          merchantCandidates: merchantCandidates,
         ),
       );
     } catch (e) {

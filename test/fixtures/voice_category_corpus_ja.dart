@@ -2,7 +2,9 @@
 ///
 /// ~30 cases covering 5 anchor categories (D-10):
 ///   1. Direct L2 synonym hit       (e.g. 朝ごはん -> cat_food_dining_out)
-///   2. Merchant DB -> L2 hit        (e.g. スタバ alias -> cat_food_cafe)
+///   2. Keyword L2 hit               (e.g. コーヒー -> cat_food_cafe) — Phase 50:
+///      merchant-alias resolution moved to MerchantRecognizer; this corpus is
+///      keyword-only now (CategoryRecognizer).
 ///   3. L1 -> ${l1Id}_other fallback (e.g. 食事 -> cat_food_other)
 ///   4. ID drift regression (cat_entertainment -> cat_hobbies)
 ///   5. ID drift regression (cat_medical -> cat_health)
@@ -48,10 +50,13 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusJa = [
     note: 'anchor: direct L2 synonym hit VOICE-04',
   ),
   (
+    // Phase 50: the keyword engine resolves the コーヒー keyword (the merchant
+    // alias スタバ is now MerchantRecognizer's job, covered by the orchestrator
+    // four-quadrant test). Same cat_food_cafe L2 assertion, via the keyword.
     input: 'スタバでコーヒー',
-    keyword: 'スタバ',
+    keyword: 'コーヒー',
     expectedCategoryId: 'cat_food_cafe',
-    note: 'anchor: merchant DB alias -> L2 hit VOICE-04',
+    note: 'anchor: keyword L2 hit VOICE-04',
   ),
   (
     input: '何か食べた',
@@ -216,31 +221,9 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusJa = [
     expectedCategoryId: 'cat_education_books',
     note: null,
   ),
-  // Merchant DB hits
-  (
-    input: 'スターバックスでコーヒー',
-    keyword: 'スターバックス',
-    expectedCategoryId: 'cat_food_cafe',
-    note: 'merchant exact-name',
-  ),
-  (
-    input: 'ニトリで家具',
-    keyword: 'ニトリ',
-    expectedCategoryId: 'cat_housing_furniture',
-    note: 'merchant exact-name',
-  ),
-  (
-    input: 'ユニクロで服',
-    keyword: 'ユニクロ',
-    expectedCategoryId: 'cat_clothing_clothes',
-    note: 'merchant (D-04 cat_shopping ID drift fixed)',
-  ),
-  (
-    input: 'Netflix月額',
-    keyword: 'Netflix',
-    expectedCategoryId: 'cat_hobbies_subscription',
-    note: 'merchant (D-04 cat_entertainment ID drift fixed)',
-  ),
+  // Phase 50: merchant-brand cases (スターバックス / ニトリ / ユニクロ / Netflix)
+  // moved to MerchantRecognizer — see merchant_recognizer_test.dart + the
+  // orchestrator four-quadrant test. This keyword corpus is keyword-only now.
 
   // ---------------------------------------------------------------------------
   // Quick task 260526-l0o (Issue 2) — extended transport synonyms + substring

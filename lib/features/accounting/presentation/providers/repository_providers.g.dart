@@ -1091,80 +1091,158 @@ final class VoiceTextParserProvider
 
 String _$voiceTextParserHash() => r'3493d74d0200f77486db448b8fc371a0fb3030fd';
 
-/// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+/// CategoryRecognizer — Phase 50 keyword-only engine (DECOUP-01/DECOUP-02).
 ///
-/// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
-/// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
-/// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
-/// (D-03 always-L2 contract).
+/// `VoiceCategoryResolver` minus its step-1 vendor lookup and its
+/// vendor-database dependency. Runs unconditionally; always returns an L2
+/// categoryId (D-03 always-L2 contract). Constructed from the three
+/// keyword-pipeline data sources only — no merchant database.
 
-@ProviderFor(voiceCategoryResolver)
-final voiceCategoryResolverProvider = VoiceCategoryResolverProvider._();
+@ProviderFor(categoryRecognizer)
+final categoryRecognizerProvider = CategoryRecognizerProvider._();
 
-/// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+/// CategoryRecognizer — Phase 50 keyword-only engine (DECOUP-01/DECOUP-02).
 ///
-/// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
-/// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
-/// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
-/// (D-03 always-L2 contract).
+/// `VoiceCategoryResolver` minus its step-1 vendor lookup and its
+/// vendor-database dependency. Runs unconditionally; always returns an L2
+/// categoryId (D-03 always-L2 contract). Constructed from the three
+/// keyword-pipeline data sources only — no merchant database.
 
-final class VoiceCategoryResolverProvider
+final class CategoryRecognizerProvider
     extends
         $FunctionalProvider<
-          VoiceCategoryResolver,
-          VoiceCategoryResolver,
-          VoiceCategoryResolver
+          CategoryRecognizer,
+          CategoryRecognizer,
+          CategoryRecognizer
         >
-    with $Provider<VoiceCategoryResolver> {
-  /// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+    with $Provider<CategoryRecognizer> {
+  /// CategoryRecognizer — Phase 50 keyword-only engine (DECOUP-01/DECOUP-02).
   ///
-  /// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
-  /// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
-  /// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
-  /// (D-03 always-L2 contract).
-  VoiceCategoryResolverProvider._()
+  /// `VoiceCategoryResolver` minus its step-1 vendor lookup and its
+  /// vendor-database dependency. Runs unconditionally; always returns an L2
+  /// categoryId (D-03 always-L2 contract). Constructed from the three
+  /// keyword-pipeline data sources only — no merchant database.
+  CategoryRecognizerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'voiceCategoryResolverProvider',
+        name: r'categoryRecognizerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$voiceCategoryResolverHash();
+  String debugGetCreateSourceHash() => _$categoryRecognizerHash();
 
   @$internal
   @override
-  $ProviderElement<VoiceCategoryResolver> $createElement(
+  $ProviderElement<CategoryRecognizer> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  VoiceCategoryResolver create(Ref ref) {
-    return voiceCategoryResolver(ref);
+  CategoryRecognizer create(Ref ref) {
+    return categoryRecognizer(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(VoiceCategoryResolver value) {
+  Override overrideWithValue(CategoryRecognizer value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<VoiceCategoryResolver>(value),
+      providerOverride: $SyncValueProvider<CategoryRecognizer>(value),
     );
   }
 }
 
-String _$voiceCategoryResolverHash() =>
-    r'b4c0da8814c96e49fd88f50bfbd6d3436a4a32e5';
+String _$categoryRecognizerHash() =>
+    r'0f40c85d8948aa871440620a39816eb4cf46db06';
 
-/// ParseVoiceInputUseCase — wired to all voice application services.
+/// MerchantRecognizer — Phase 50 anchored scorer (DECOUP-03).
+///
+/// Recall-first ranker over Phase-49's `merchant_match_keys`. Takes only a
+/// [MerchantRepository]; never references the keyword/category recognizer
+/// (construction independence, DECOUP-01). `keepAlive` because it warms an
+/// in-memory cache of every match-key surface once per app session.
+
+@ProviderFor(merchantRecognizer)
+final merchantRecognizerProvider = MerchantRecognizerProvider._();
+
+/// MerchantRecognizer — Phase 50 anchored scorer (DECOUP-03).
+///
+/// Recall-first ranker over Phase-49's `merchant_match_keys`. Takes only a
+/// [MerchantRepository]; never references the keyword/category recognizer
+/// (construction independence, DECOUP-01). `keepAlive` because it warms an
+/// in-memory cache of every match-key surface once per app session.
+
+final class MerchantRecognizerProvider
+    extends
+        $FunctionalProvider<
+          MerchantRecognizer,
+          MerchantRecognizer,
+          MerchantRecognizer
+        >
+    with $Provider<MerchantRecognizer> {
+  /// MerchantRecognizer — Phase 50 anchored scorer (DECOUP-03).
+  ///
+  /// Recall-first ranker over Phase-49's `merchant_match_keys`. Takes only a
+  /// [MerchantRepository]; never references the keyword/category recognizer
+  /// (construction independence, DECOUP-01). `keepAlive` because it warms an
+  /// in-memory cache of every match-key surface once per app session.
+  MerchantRecognizerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'merchantRecognizerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$merchantRecognizerHash();
+
+  @$internal
+  @override
+  $ProviderElement<MerchantRecognizer> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  MerchantRecognizer create(Ref ref) {
+    return merchantRecognizer(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MerchantRecognizer value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MerchantRecognizer>(value),
+    );
+  }
+}
+
+String _$merchantRecognizerHash() =>
+    r'c90c7072dfb13e69c23b99662f744e3a51e1fbee';
+
+/// ParseVoiceInputUseCase — wired to both decoupled voice engines.
+///
+/// The orchestrator runs [CategoryRecognizer] and [MerchantRecognizer]
+/// independently and applies the thin keyword-priority merge with the 0.85
+/// auto-fill floor (D-02 / D-03). Ledger is derived from the final category
+/// via `resolveLedgerType` — never the merchant's ledger hint.
 
 @ProviderFor(parseVoiceInputUseCase)
 final parseVoiceInputUseCaseProvider = ParseVoiceInputUseCaseProvider._();
 
-/// ParseVoiceInputUseCase — wired to all voice application services.
+/// ParseVoiceInputUseCase — wired to both decoupled voice engines.
+///
+/// The orchestrator runs [CategoryRecognizer] and [MerchantRecognizer]
+/// independently and applies the thin keyword-priority merge with the 0.85
+/// auto-fill floor (D-02 / D-03). Ledger is derived from the final category
+/// via `resolveLedgerType` — never the merchant's ledger hint.
 
 final class ParseVoiceInputUseCaseProvider
     extends
@@ -1174,7 +1252,12 @@ final class ParseVoiceInputUseCaseProvider
           ParseVoiceInputUseCase
         >
     with $Provider<ParseVoiceInputUseCase> {
-  /// ParseVoiceInputUseCase — wired to all voice application services.
+  /// ParseVoiceInputUseCase — wired to both decoupled voice engines.
+  ///
+  /// The orchestrator runs [CategoryRecognizer] and [MerchantRecognizer]
+  /// independently and applies the thin keyword-priority merge with the 0.85
+  /// auto-fill floor (D-02 / D-03). Ledger is derived from the final category
+  /// via `resolveLedgerType` — never the merchant's ledger hint.
   ParseVoiceInputUseCaseProvider._()
     : super(
         from: null,
@@ -1210,7 +1293,7 @@ final class ParseVoiceInputUseCaseProvider
 }
 
 String _$parseVoiceInputUseCaseHash() =>
-    r'89ff3e167c094bc3f2a11bdbc9830619a8d899dd';
+    r'15dacf0e6edc1b57902d91698d6b925a46e2f975';
 
 /// VoiceSatisfactionEstimator — pure stateless class.
 

@@ -1,4 +1,3 @@
-import '../../infrastructure/ml/merchant_database.dart';
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
@@ -499,70 +498,5 @@ class VoiceTextParser {
     }
 
     return null;
-  }
-
-  /// Extracts merchant names from text and matches against [merchantDB].
-  ///
-  /// Returns the best [MerchantMatch] found, or null if no merchant matched.
-  MerchantMatch? extractAndMatchMerchant(
-    String text,
-    MerchantDatabase merchantDB,
-  ) {
-    final words = _extractPotentialMerchantNames(text);
-
-    for (final word in words) {
-      final match = merchantDB.findMerchant(word);
-      if (match != null) return match;
-    }
-
-    return null;
-  }
-
-  /// Extracts candidate merchant name segments from text.
-  List<String> _extractPotentialMerchantNames(String text) {
-    final results = <String>[];
-
-    // Remove amounts and common verbs, leaving potential merchant name words.
-    // WR-07: currency suffix set comes from VoiceCurrencySuffixes so the list
-    // stays in sync with ParseVoiceInputUseCase._extractKeyword.
-    var cleaned = text
-        .replaceAll(RegExp(r'[¥￥]\s*\d[\d,.]*'), '')
-        .replaceAll(
-          RegExp(
-            r'\d[\d,.]*\s*(?:' +
-                VoiceCurrencySuffixes.regexAlternation +
-                r')',
-            // 260614-goh: case-insensitive so lowercase English currency
-            // tokens strip STT-capitalized words too.
-            caseSensitive: false,
-          ),
-          '',
-        )
-        .replaceAll(RegExp(r'[でにをがはのとへからまで]|した|って|ました|だった|です'), ' ')
-        .replaceAll(RegExp(r'[在了花买吃用去到]'), ' ')
-        .replaceAll(RegExp(r'\b(?:at|for|in|on|spent|paid|bought)\b'), ' ')
-        .trim();
-
-    // Split into candidate segments
-    final segments = cleaned
-        .split(RegExp(r'[\s,、。，]+'))
-        .where((s) => s.length >= 2 && s.length <= 20)
-        .toList();
-
-    // Prefer longer segments (more likely to be complete merchant names)
-    segments.sort((a, b) => b.length.compareTo(a.length));
-    results.addAll(segments);
-
-    // Also try raw substrings of varying lengths
-    for (var len = 10; len >= 2; len--) {
-      for (var i = 0; i <= text.length - len; i++) {
-        final sub = text.substring(i, i + len).trim();
-        if (sub.isNotEmpty && !results.contains(sub)) {
-          results.add(sub);
-        }
-      }
-    }
-
-    return results;
   }
 }

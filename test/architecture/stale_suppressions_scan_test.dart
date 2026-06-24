@@ -39,13 +39,13 @@ const approvedSuppressions = <String, String>{
       'print() accuracy summary line',
   'test/integration/voice/voice_category_corpus_zh_test.dart:164':
       'print() accuracy banner bottom',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:96':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:95':
       'printOnFailure() reporter for per-case soft failures',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:138':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:137':
       'print() accuracy banner top',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:140':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:139':
       'print() accuracy summary line',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:142':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:141':
       'print() accuracy banner bottom',
 };
 

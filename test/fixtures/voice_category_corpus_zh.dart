@@ -49,10 +49,15 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusZh = [
     note: 'anchor: direct L2 synonym hit VOICE-04',
   ),
   (
-    input: '星巴克咖啡',
-    keyword: 'starbucks',
-    expectedCategoryId: 'cat_food_cafe',
-    note: 'anchor: merchant DB alias -> L2 hit VOICE-04',
+    // Phase 50: merchant-alias resolution (星巴克 → cafe) moved to
+    // MerchantRecognizer (covered by the orchestrator four-quadrant test). This
+    // anchor now pins a strict keyword L2 hit through CategoryRecognizer. 咖啡
+    // is unavailable here (the zh learned-override setUp maps it to
+    // cat_hobbies_subscription), so we anchor on the unambiguous 地铁 seed.
+    input: '地铁 5元',
+    keyword: '地铁',
+    expectedCategoryId: 'cat_transport_train',
+    note: 'anchor: keyword L2 hit VOICE-04',
   ),
   (
     input: '吃饭 300元',
@@ -126,19 +131,9 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusZh = [
     expectedCategoryId: 'cat_food_other',
     note: 'L1 fallback via _ensureL2',
   ),
-  // Merchant DB hits (zh users referencing Japanese/English brands)
-  (
-    input: 'マクドナルド',
-    keyword: 'マクドナルド',
-    expectedCategoryId: 'cat_food_dining_out',
-    note: 'merchant exact-name match',
-  ),
-  (
-    input: '7-11 便利店',
-    keyword: '7-11',
-    expectedCategoryId: 'cat_food_groceries',
-    note: 'merchant alias zh user typed',
-  ),
+  // Phase 50: merchant-brand cases (マクドナルド / 7-11) moved to
+  // MerchantRecognizer — see merchant_recognizer_test.dart + the orchestrator
+  // four-quadrant test. This keyword corpus is keyword-only now.
   // Transport
   (
     input: '地铁 5元',
@@ -229,31 +224,8 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusZh = [
     expectedCategoryId: 'cat_education_books',
     note: null,
   ),
-  // Merchant DB hits (extra)
-  (
-    input: '麦当劳',
-    keyword: 'mcdonalds',
-    expectedCategoryId: 'cat_food_dining_out',
-    note: 'merchant alias (lowercase English) for zh user',
-  ),
-  (
-    input: 'Netflix 月费',
-    keyword: 'Netflix',
-    expectedCategoryId: 'cat_hobbies_subscription',
-    note: 'merchant exact-name (D-04 cat_entertainment ID drift fixed)',
-  ),
-  (
-    input: '优衣库',
-    keyword: 'Uniqlo',
-    expectedCategoryId: 'cat_clothing_clothes',
-    note: 'merchant alias (D-04 cat_shopping ID drift fixed)',
-  ),
-  (
-    input: '亚马逊',
-    keyword: 'amazon',
-    expectedCategoryId: 'cat_daily_other',
-    note: 'merchant alias (D-04 cat_shopping ID drift fixed)',
-  ),
+  // Phase 50: merchant-brand cases (麦当劳/mcdonalds, Netflix, Uniqlo, amazon)
+  // moved to MerchantRecognizer — keyword corpus is keyword-only now.
 
   // ---------------------------------------------------------------------------
   // Quick task 260526-l0o (Issue 2) — extended transport synonyms + substring

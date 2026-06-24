@@ -7,20 +7,19 @@
 /// word that may collide with contextual utterances.
 ///
 /// Resolver setup pattern follows voice_category_corpus_zh_test.dart (leaf
-/// providers, direct VoiceCategoryResolver construction). No fixture file
+/// providers, direct CategoryRecognizer construction). No fixture file
 /// needed — single inline test per RESEARCH Open Q4.
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/voice/voice_category_resolver.dart';
+import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 
 import '../../helpers/test_provider_scope.dart';
 
 void main() {
   late final container = createTestProviderScope();
-  late VoiceCategoryResolver resolver;
+  late CategoryRecognizer resolver;
 
   setUpAll(() async {
     // Seed categories first (synonyms reference these categoryIds).
@@ -28,12 +27,11 @@ void main() {
     // Seed default voice synonyms (DefaultVoiceSynonyms.all → hitCount=0).
     // 'other' seed row was added in Phase 23 D-15 / IN-06.
     await container.read(seedVoiceSynonymsUseCaseProvider).execute();
-    resolver = VoiceCategoryResolver(
+    resolver = CategoryRecognizer(
       categoryRepository: container.read(categoryRepositoryProvider),
       preferenceRepository:
           container.read(categoryKeywordPreferenceRepositoryProvider),
       categoryService: container.read(categoryServiceProvider),
-      merchantDatabase: MerchantDatabase(),
     );
   });
 

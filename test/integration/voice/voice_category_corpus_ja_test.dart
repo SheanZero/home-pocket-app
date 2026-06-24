@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/voice/voice_category_resolver.dart';
+import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 
 import '../../fixtures/voice_category_corpus_ja.dart';
 import '../../helpers/test_provider_scope.dart';
 
-/// Phase 21 D-10 corpus test (ja) for VoiceCategoryResolver.
+/// Phase 21 D-10 corpus test (ja) — Phase 50: now over CategoryRecognizer (the
+/// keyword-only engine, DECOUP-01).
 ///
 /// Anchor cases (5) get strict, individual `test()` blocks — hard failures.
 /// Statistical bucket aggregates non-anchor cases under a per-locale ≥95%
@@ -21,7 +21,7 @@ import '../../helpers/test_provider_scope.dart';
 /// up without any resolver-code change.
 void main() {
   late final container = createTestProviderScope();
-  late VoiceCategoryResolver resolver;
+  late CategoryRecognizer resolver;
   late CategoryKeywordPreferenceRepository prefRepo;
 
   var passCount = 0;
@@ -31,11 +31,10 @@ void main() {
     await container.read(seedCategoriesUseCaseProvider).execute();
     await container.read(seedVoiceSynonymsUseCaseProvider).execute();
     prefRepo = container.read(categoryKeywordPreferenceRepositoryProvider);
-    resolver = VoiceCategoryResolver(
+    resolver = CategoryRecognizer(
       categoryRepository: container.read(categoryRepositoryProvider),
       preferenceRepository: prefRepo,
       categoryService: container.read(categoryServiceProvider),
-      merchantDatabase: MerchantDatabase(),
     );
   });
 

@@ -1,10 +1,9 @@
 /// Currency suffix tokens recognized by the voice pipeline.
 ///
-/// Centralized in WR-07 because two functions in the voice path
-/// (`VoiceTextParser._extractPotentialMerchantNames` and
-/// `ParseVoiceInputUseCase._extractKeyword`) had drifted to slightly
-/// different sets — '5块钱' would have its amount stripped but '块'
-/// left behind as a corrupt keyword, depending on which function ran.
+/// Centralized in WR-07 because the voice path's keyword extractor
+/// (`ParseVoiceInputUseCase._extractKeyword`) and the amount-stripping
+/// pass had drifted to slightly different sets — '5块钱' would have its
+/// amount stripped but '块' left behind as a corrupt keyword.
 ///
 /// Keep this list narrow — every entry is a voice-recognized currency
 /// marker, not a generic Asian-language noun.

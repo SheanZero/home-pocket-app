@@ -27,11 +27,13 @@ const _features = [
 /// All 5 providers below MUST have @Riverpod(keepAlive: true) in lib/.
 /// Reconciliations per D-07.4 and Plan 04-05:
 ///   - activeGroupMembersProvider: renamed from groupMembers (Task 1)
-///   - appMerchantDatabaseProvider: app-prefixed per Plan 04-01 Task 2 Warning 7
+///   - merchantRecognizerProvider: Phase 50 replaced the retired
+///     appMerchantDatabaseProvider as the keepAlive merchant-data provider
+///     (warms an in-memory match-key cache once per app session).
 const _expectedKeepAliveProviders = [
   'syncEngineProvider',
   'transactionChangeTrackerProvider',
-  'appMerchantDatabaseProvider', // `app` prefix per Plan 04-01 Task 2 (Warning 7)
+  'merchantRecognizerProvider', // Phase 50: replaces appMerchantDatabaseProvider
   'activeGroupProvider',
   'activeGroupMembersProvider', // renamed from groupMembers (Task 1 reconciliation)
 ];

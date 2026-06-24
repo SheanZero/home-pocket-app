@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'merchant_candidate.dart';
 import 'transaction.dart';
 
 part 'voice_parse_result.freezed.dart';
@@ -7,8 +8,11 @@ part 'voice_parse_result.freezed.dart';
 /// Result of parsing a voice input into structured transaction data.
 ///
 /// Holds all extracted fields as primitives — no infrastructure types.
-/// [merchantName], [merchantCategoryId], [merchantLedgerType] store the
-/// results of merchant lookup without referencing MerchantMatch directly.
+/// [merchantName] / [merchantCategoryId] carry the best merchant candidate's
+/// descriptive primitives (for form pre-fill). [merchantLedgerType] is retained
+/// for backward compatibility but is no longer populated — the ledger is a pure
+/// function of the final category (LEDGER-01), never the merchant hint.
+/// [merchantCandidates] carries the full ranked list (recall-first).
 @freezed
 abstract class VoiceParseResult with _$VoiceParseResult {
   const factory VoiceParseResult({
@@ -43,6 +47,12 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     // this to trigger the normal rate-fetch flow; null skips it entirely
     // (Pitfall 1: JPY path must stay byte-identical).
     String? detectedCurrency,
+    // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
+    // the MerchantRecognizer produced for this utterance, recall-first (score
+    // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
+    // can offer below-floor candidates as manual picks. Empty when no merchant
+    // surface matched (or the utterance had no recognizable merchant token).
+    @Default(<MerchantCandidate>[]) List<MerchantCandidate> merchantCandidates,
     @Default(5) int estimatedSatisfaction,
   }) = _VoiceParseResult;
 }
@@ -59,7 +69,7 @@ abstract class CategoryMatchResult with _$CategoryMatchResult {
 
 /// How the category match was derived.
 enum MatchSource {
-  merchant, // matched via MerchantDatabase
+  merchant, // matched via MerchantRecognizer (auto-filled at the 0.85 floor)
   keyword, // matched via keyword map
   learning, // matched via user correction history
   fallback, // default fallback

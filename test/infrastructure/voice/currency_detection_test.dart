@@ -19,19 +19,17 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
-import 'package:home_pocket/application/voice/voice_category_resolver.dart';
+import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
+import 'package:home_pocket/application/voice/recognition/merchant_recognizer.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
+import 'package:home_pocket/features/accounting/domain/models/merchant_candidate.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
-import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockVoiceCategoryResolver extends Mock
-    implements VoiceCategoryResolver {}
+class _MockCategoryRecognizer extends Mock implements CategoryRecognizer {}
 
-class _MockMerchantDatabase extends Mock implements MerchantDatabase {}
-
-class _FakeMerchantDatabase extends Fake implements MerchantDatabase {}
+class _MockMerchantRecognizer extends Mock implements MerchantRecognizer {}
 
 /// One voice corpus expectation: input → (amount, detectedCurrency).
 class _CurrencyCase {
@@ -42,27 +40,25 @@ class _CurrencyCase {
 }
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(_FakeMerchantDatabase());
-  });
-
-  late _MockVoiceCategoryResolver mockResolver;
-  late _MockMerchantDatabase mockMerchantDatabase;
+  late _MockCategoryRecognizer mockCategoryRecognizer;
+  late _MockMerchantRecognizer mockMerchantRecognizer;
   late VoiceTextParser parser;
   late ParseVoiceInputUseCase useCase;
 
   setUp(() {
-    mockResolver = _MockVoiceCategoryResolver();
-    mockMerchantDatabase = _MockMerchantDatabase();
+    mockCategoryRecognizer = _MockCategoryRecognizer();
+    mockMerchantRecognizer = _MockMerchantRecognizer();
     parser = VoiceTextParser();
     useCase = ParseVoiceInputUseCase(
       textParser: parser,
-      voiceCategoryResolver: mockResolver,
-      merchantDatabase: mockMerchantDatabase,
+      categoryRecognizer: mockCategoryRecognizer,
+      merchantRecognizer: mockMerchantRecognizer,
     );
 
-    when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-    when(() => mockResolver.resolve(any())).thenAnswer(
+    when(
+      () => mockMerchantRecognizer.recognize(any()),
+    ).thenAnswer((_) async => const <MerchantCandidate>[]);
+    when(() => mockCategoryRecognizer.resolve(any())).thenAnswer(
       (_) async => const CategoryMatchResult(
         categoryId: 'cat_food_dining_out',
         confidence: 0.5,
@@ -70,7 +66,7 @@ void main() {
       ),
     );
     when(
-      () => mockResolver.resolveLedgerType(any()),
+      () => mockCategoryRecognizer.resolveLedgerType(any()),
     ).thenAnswer((_) async => LedgerType.daily);
   });
 

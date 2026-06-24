@@ -41,7 +41,13 @@ mixin _$VoiceParseResult {
   // conversion, preserving the pre-Phase-42 default. The shared form reads
   // this to trigger the normal rate-fetch flow; null skips it entirely
   // (Pitfall 1: JPY path must stay byte-identical).
-  String? get detectedCurrency;
+  String?
+  get detectedCurrency; // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
+  // the MerchantRecognizer produced for this utterance, recall-first (score
+  // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
+  // can offer below-floor candidates as manual picks. Empty when no merchant
+  // surface matched (or the utterance had no recognizable merchant token).
+  List<MerchantCandidate> get merchantCandidates;
   int get estimatedSatisfaction;
 
   /// Create a copy of VoiceParseResult
@@ -77,6 +83,10 @@ mixin _$VoiceParseResult {
                 other.resolvedKeyword == resolvedKeyword) &&
             (identical(other.detectedCurrency, detectedCurrency) ||
                 other.detectedCurrency == detectedCurrency) &&
+            const DeepCollectionEquality().equals(
+              other.merchantCandidates,
+              merchantCandidates,
+            ) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
                 other.estimatedSatisfaction == estimatedSatisfaction));
   }
@@ -94,12 +104,13 @@ mixin _$VoiceParseResult {
     ledgerType,
     resolvedKeyword,
     detectedCurrency,
+    const DeepCollectionEquality().hash(merchantCandidates),
     estimatedSatisfaction,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -121,6 +132,7 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
     LedgerType? ledgerType,
     String? resolvedKeyword,
     String? detectedCurrency,
+    List<MerchantCandidate> merchantCandidates,
     int estimatedSatisfaction,
   });
 
@@ -150,6 +162,7 @@ class _$VoiceParseResultCopyWithImpl<$Res>
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
     Object? detectedCurrency = freezed,
+    Object? merchantCandidates = null,
     Object? estimatedSatisfaction = null,
   }) {
     return _then(
@@ -194,6 +207,10 @@ class _$VoiceParseResultCopyWithImpl<$Res>
             ? _self.detectedCurrency
             : detectedCurrency // ignore: cast_nullable_to_non_nullable
                   as String?,
+        merchantCandidates: null == merchantCandidates
+            ? _self.merchantCandidates
+            : merchantCandidates // ignore: cast_nullable_to_non_nullable
+                  as List<MerchantCandidate>,
         estimatedSatisfaction: null == estimatedSatisfaction
             ? _self.estimatedSatisfaction
             : estimatedSatisfaction // ignore: cast_nullable_to_non_nullable
@@ -321,6 +338,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? ledgerType,
       String? resolvedKeyword,
       String? detectedCurrency,
+      List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
     )?
     $default, {
@@ -340,6 +358,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.ledgerType,
           _that.resolvedKeyword,
           _that.detectedCurrency,
+          _that.merchantCandidates,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -373,6 +392,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? ledgerType,
       String? resolvedKeyword,
       String? detectedCurrency,
+      List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
     )
     $default,
@@ -391,6 +411,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.ledgerType,
           _that.resolvedKeyword,
           _that.detectedCurrency,
+          _that.merchantCandidates,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -423,6 +444,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? ledgerType,
       String? resolvedKeyword,
       String? detectedCurrency,
+      List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
     )?
     $default,
@@ -441,6 +463,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.ledgerType,
           _that.resolvedKeyword,
           _that.detectedCurrency,
+          _that.merchantCandidates,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -463,8 +486,10 @@ class _VoiceParseResult implements VoiceParseResult {
     this.ledgerType,
     this.resolvedKeyword,
     this.detectedCurrency,
+    final List<MerchantCandidate> merchantCandidates =
+        const <MerchantCandidate>[],
     this.estimatedSatisfaction = 5,
-  });
+  }) : _merchantCandidates = merchantCandidates;
 
   @override
   final String rawText;
@@ -507,6 +532,26 @@ class _VoiceParseResult implements VoiceParseResult {
   // (Pitfall 1: JPY path must stay byte-identical).
   @override
   final String? detectedCurrency;
+  // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
+  // the MerchantRecognizer produced for this utterance, recall-first (score
+  // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
+  // can offer below-floor candidates as manual picks. Empty when no merchant
+  // surface matched (or the utterance had no recognizable merchant token).
+  final List<MerchantCandidate> _merchantCandidates;
+  // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
+  // the MerchantRecognizer produced for this utterance, recall-first (score
+  // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
+  // can offer below-floor candidates as manual picks. Empty when no merchant
+  // surface matched (or the utterance had no recognizable merchant token).
+  @override
+  @JsonKey()
+  List<MerchantCandidate> get merchantCandidates {
+    if (_merchantCandidates is EqualUnmodifiableListView)
+      return _merchantCandidates;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_merchantCandidates);
+  }
+
   @override
   @JsonKey()
   final int estimatedSatisfaction;
@@ -542,6 +587,10 @@ class _VoiceParseResult implements VoiceParseResult {
                 other.resolvedKeyword == resolvedKeyword) &&
             (identical(other.detectedCurrency, detectedCurrency) ||
                 other.detectedCurrency == detectedCurrency) &&
+            const DeepCollectionEquality().equals(
+              other._merchantCandidates,
+              _merchantCandidates,
+            ) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
                 other.estimatedSatisfaction == estimatedSatisfaction));
   }
@@ -559,12 +608,13 @@ class _VoiceParseResult implements VoiceParseResult {
     ledgerType,
     resolvedKeyword,
     detectedCurrency,
+    const DeepCollectionEquality().hash(_merchantCandidates),
     estimatedSatisfaction,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -588,6 +638,7 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
     LedgerType? ledgerType,
     String? resolvedKeyword,
     String? detectedCurrency,
+    List<MerchantCandidate> merchantCandidates,
     int estimatedSatisfaction,
   });
 
@@ -618,6 +669,7 @@ class __$VoiceParseResultCopyWithImpl<$Res>
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
     Object? detectedCurrency = freezed,
+    Object? merchantCandidates = null,
     Object? estimatedSatisfaction = null,
   }) {
     return _then(
@@ -662,6 +714,10 @@ class __$VoiceParseResultCopyWithImpl<$Res>
             ? _self.detectedCurrency
             : detectedCurrency // ignore: cast_nullable_to_non_nullable
                   as String?,
+        merchantCandidates: null == merchantCandidates
+            ? _self._merchantCandidates
+            : merchantCandidates // ignore: cast_nullable_to_non_nullable
+                  as List<MerchantCandidate>,
         estimatedSatisfaction: null == estimatedSatisfaction
             ? _self.estimatedSatisfaction
             : estimatedSatisfaction // ignore: cast_nullable_to_non_nullable
