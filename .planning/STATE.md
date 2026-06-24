@@ -5,15 +5,15 @@ milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证
 current_phase: 51
 current_phase_name: cross-validation-daily-joy-ledger-rework
 status: executing
-stopped_at: Phase 51 planned — 5 plans, ready to execute
+stopped_at: Phase 51 plan 05 complete — all 5 plans executed
 last_updated: "2026-06-24T06:39:40.202Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 51 execution started
+last_activity_desc: Phase 51 plan 05 (LEDGER-02 ledger rework) complete
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -29,9 +29,13 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 51 (cross-validation-daily-joy-ledger-rework) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-06-24 — Phase 51 execution started
+Plan: 5 of 5 — COMPLETE
+Status: All 5 plans executed; LEDGER-02 ledger rework done (D-18 user-approved 14-override set, D-19/D-20/D-21 invariant gates green)
+Last activity: 2026-06-24 — Phase 51 plan 05 (LEDGER-02) complete
+
+### Decisions
+
+- D-18 (2026-06-24): user approved ALL 5 candidate L2 ledger overrides at the blocking spot-check gate — `_defaultLedgerConfigs` now holds 14 overrides (food_drinks/health_fitness/health_massage→joy, clothing_hair/clothing_accessories→daily, plus the original 9). No schema change; ledger stays a pure function of the final category id.
 
 ### Quick Tasks Completed
 
