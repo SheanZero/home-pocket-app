@@ -1,5 +1,7 @@
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/voice/domain/models/recognition_outcome.dart';
 import '../../features/voice/domain/models/voice_parse_result.dart';
+import '../../features/voice/domain/services/recognition_reconciler.dart';
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
@@ -37,6 +39,10 @@ class ParseVoiceInputUseCase {
   final VoiceTextParser _textParser;
   final CategoryRecognizer _categoryRecognizer;
   final MerchantRecognizer _merchantRecognizer;
+
+  /// Pure cross-validation reconciler (XVAL-01). Stateless/const — formalizes
+  /// the keyword-priority merge into the explicit 3×3 truth table.
+  static const RecognitionReconciler _reconciler = RecognitionReconciler();
 
   /// Currency-token detectors (Phase 42, VOICE-CUR-01/02/03). Stateless — the
   /// `detectCurrencyToken` scan is locale-routed identically to the amount path.
@@ -105,44 +111,56 @@ class ParseVoiceInputUseCase {
         merchantQuery,
       );
 
-      // 4. Thin keyword-priority merge (D-02) + 0.85 auto-fill floor (D-03).
+      // 4. Cross-validation via the pure RecognitionReconciler (XVAL-01).
+      // The reconciler formalizes the keyword-priority merge into the explicit
+      // none/weak/strong 3×3 truth table, returning a ledger-free outcome
+      // (selectedCategoryId + band + ranked alternates + conflict flag). The
+      // ledger is derived HERE, AFTER reconciliation (LEDGER-01) — never inside
+      // the reconciler, never from the merchant's non-authoritative hint.
+      final outcome = _reconciler.reconcile(
+        categoryMatch,
+        merchantCandidates,
+        resolvedKeyword: resolvedKeyword,
+      );
+
       CategoryMatchResult? finalCategory;
       LedgerType? ledgerType;
       if (categoryMatch != null) {
-        // Keyword wins (XVAL-02). Ledger is a pure function of the final
-        // category (LEDGER-01) — there is NO merchant-ledger short-circuit.
+        // Keyword wins (XVAL-02). The reconciler selected the keyword's L2; the
+        // keyword verdict already carries an L2 id, so no normalizeToL2 here.
+        // Ledger is a pure function of the final category (LEDGER-01) — there
+        // is NO merchant-ledger short-circuit.
         finalCategory = categoryMatch;
         ledgerType = await _categoryRecognizer.resolveLedgerType(
-          categoryMatch.categoryId,
+          outcome.selectedCategoryId!,
         );
-      } else {
-        // Keyword miss: auto-fill from the best merchant candidate ONLY at or
-        // above the floor. Below the floor finalCategory stays null and the
-        // ranked candidates are still surfaced for Phase-52 chips.
-        final best = merchantCandidates.isEmpty
-            ? null
-            : merchantCandidates.first;
-        if (best != null && best.score >= kMerchantAutoFillFloor) {
-          final l2 = await _categoryRecognizer.normalizeToL2(best.categoryId);
-          // WR-04: only auto-fill when the merchant categoryId normalizes to a
-          // real L2. A null result means the id resolves to nothing or has no L2
-          // child — committing the un-normalized merchant categoryId would leak
-          // a non-L2 (possibly L1) id into the transaction and break the
-          // always-L2 contract resolveLedgerType assumes. Treat null as "no
-          // auto-fill": leave the category null and surface the candidate for a
-          // manual pick instead.
-          if (l2 != null) {
-            finalCategory = CategoryMatchResult(
-              categoryId: l2,
-              confidence: best.score,
-              source: MatchSource.merchant,
-            );
-            // Ledger derived from the final category — NEVER best.ledgerHint
-            // (Phase 49 D-09 non-authoritative; LEDGER-01).
-            ledgerType = await _categoryRecognizer.resolveLedgerType(
-              finalCategory.categoryId,
-            );
-          }
+      } else if (outcome.band == ConfidenceBand.medium) {
+        // Keyword missed but the best merchant sits at/above the auto-fill floor
+        // (the reconciler's medium band == merchant>=0.85). Below the floor the
+        // outcome carries a best-guess id at band=weak which we deliberately do
+        // NOT stamp as the form category — it is surfaced only via the ranked
+        // candidates for Phase-52 chips. Auto-fill ONLY at/above the floor.
+        final l2 = await _categoryRecognizer.normalizeToL2(
+          outcome.selectedCategoryId!,
+        );
+        // WR-04: only auto-fill when the merchant categoryId normalizes to a
+        // real L2. A null result means the id resolves to nothing or has no L2
+        // child — committing the un-normalized merchant categoryId would leak
+        // a non-L2 (possibly L1) id into the transaction and break the
+        // always-L2 contract resolveLedgerType assumes. Treat null as "no
+        // auto-fill": leave the category null and surface the candidate for a
+        // manual pick instead.
+        if (l2 != null) {
+          finalCategory = CategoryMatchResult(
+            categoryId: l2,
+            confidence: merchantCandidates.first.score,
+            source: MatchSource.merchant,
+          );
+          // Ledger derived from the final category — NEVER the merchant
+          // candidate's non-authoritative ledger hint (Phase 49 D-09; LEDGER-01).
+          ledgerType = await _categoryRecognizer.resolveLedgerType(
+            finalCategory.categoryId,
+          );
         }
       }
 
