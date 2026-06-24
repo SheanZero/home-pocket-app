@@ -4,15 +4,15 @@ milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
 current_phase: 52
 current_phase_name: Recognition UX + English Voice
-status: completed
-stopped_at: Phase 52 context gathered
-last_updated: "2026-06-24T09:24:37.406Z"
+status: planned
+stopped_at: Phase 52 planned — 6 plans, 4 waves (ready to execute)
+last_updated: "2026-06-24T10:11:12.000Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 51 complete, transitioned to Phase 52
+last_activity_desc: Phase 52 planned — 6 plans across 4 waves
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 16
+  total_plans: 22
   completed_plans: 16
   percent: 75
 ---
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 52 — Recognition UX + English Voice
-Plan: Not started
-Status: All 5 plans executed; LEDGER-02 ledger rework done (D-18 user-approved 14-override set, D-19/D-20/D-21 invariant gates green)
-Last activity: 2026-06-24 — Phase 51 complete, transitioned to Phase 52
+Plan: 6 plans planned (52-01..52-06), 4 waves — ready to execute
+Status: Planned & verified (plan-checker PASSED, 0 blockers); W1 52-01 (D-11 VPR thread + en casing) → W2 52-02/04/05 (band/chips render, en category seeds, en number-words+locale) → W3 52-03 (correction reflux) → W4 52-06 (anti-toxicity sweep + ARB parity + macOS golden close-out)
+Last activity: 2026-06-24 — Phase 52 planned (6 plans, 4 waves); ready to execute
 
 ### Decisions
 
@@ -222,9 +222,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T09:24:37.400Z
-Stopped at: Phase 52 context gathered
-Resume file: .planning/phases/52-recognition-ux-english-voice/52-CONTEXT.md
+Last session: 2026-06-24T10:11:12.000Z
+Stopped at: Phase 52 planned (6 plans, 4 waves) — ready to execute
+Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 
 ## Performance Metrics
 
