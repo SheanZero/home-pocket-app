@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
 current_phase: 52
-status: verifying
-stopped_at: Phase 52 planned (6 plans, 4 waves) — ready to execute
+status: complete
+stopped_at: Phase 52 complete & verified (7/7 must-haves, 5/5 criteria) — v1.9 all 4 phases done; ready for /gsd-complete-milestone
 last_updated: "2026-06-24T11:34:29.002Z"
 last_activity: 2026-06-24
 last_activity_desc: Phase 52 complete
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 ## Current Position
 
-Phase: 52
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-06-24 — Phase 52 complete
+Phase: 52 — recognition-ux-english-voice (COMPLETE, milestone's last phase)
+Plan: 6/6 complete (52-01..52-06), 4 waves
+Status: Phase complete & verified (7/7 must-haves, 5/5 success criteria, 0 warnings) — v1.9 milestone (49-52) all complete; ready for /gsd-complete-milestone
+Last activity: 2026-06-24 — Phase 52 executed (degraded-sequential on main, #683), verified, tracking finalized
 
 ### Decisions
 
