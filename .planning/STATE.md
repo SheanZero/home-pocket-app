@@ -6,15 +6,15 @@ current_phase: 50
 current_phase_name: decoupled-recognizers
 status: executing
 stopped_at: Phase 50 plan 50-03 complete (MerchantRecognizer + SC2/SC3 gates); plan 05 remains
-last_updated: "2026-06-24T01:30:59.214Z"
+last_updated: "2026-06-24T01:54:59.886Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 50 plan 50-03 executed (MerchantRecognizer anchored scorer)
+last_activity_desc: Phase 50 plan 50-03 executed (MerchantRecognizer + SC2/SC3 gates)
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 50
 ---
 
 # Project State
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T01:30:51.403Z
+Last session: 2026-06-24T01:54:41.695Z
 Stopped at: Phase 50 context gathered
 Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 
@@ -268,6 +268,7 @@ Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 | Phase 50 P04 | 2 | 2 tasks | 2 files |
 | Phase 50 P02 | ~25min | 4 tasks | 7 files |
 | Phase 50 P03 | ~1h | 2 tasks | 4 files |
+| Phase 50 P05 | 18 | 3 tasks | 26 files |
 
 ## Decisions
 
@@ -341,6 +342,7 @@ Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 - [Phase ?]: Phase 50-04: CategoryRecognizer = VoiceCategoryResolver minus step-1 + minus vendor-database dep; keyword-only and unconditional (DECOUP-01/02). Purely additive — old resolver/test/provider untouched (deleted in Plan 05/Wave 3) so Wave 1 stays green.
 - [Phase ?]: [Phase 50]: 50-02: keyword seed extended to FULL 138-L2 coverage (admin families cat_tax_*/cat_asset_*/cat_insurance_*/*_insurance/*_tax/cat_special_* + 19 *_other buckets INCLUDED per user scope decision + RESEARCH A4); coverage gate widened (no exclusion list); 515 zh+ja direct-seed rows; word refinements うーばー→ウーバー / 老婆零花→伴侣零花钱; split into synonyms/synonyms_*.dart (800-line rule), synonyms/ CJK-scan-excluded by prefix
 - [Phase ?]: Phase 50-03: prefix tier needs per-script min-length AND strict >50% rune-coverage guard (SC2).
+- [Phase ?]: Phase 50: voice pipeline cut to two decoupled engines (CategoryRecognizer + MerchantRecognizer); keyword-priority merge with 0.85 auto-fill floor; ledger = resolveLedgerType(finalCategory) (LEDGER-01); old MerchantDatabase/VoiceCategoryResolver path retired (D-05).
 
 ## Operator Next Steps
 
