@@ -43,7 +43,7 @@
 ### English Voice Parity (VEN)
 
 - [x] **VEN-01**: 英文语音从英文关键词识别类目、从英文别名/locale 名识别商家、识别英文货币词——达到与 zh/ja 的实用对齐（不做口述数字状态机）。
-- [ ] **VEN-02**: 英文 STT 数字金额正确解析；~30 行有界英文数字词兜底处理 "fifty"/"a hundred" 而不进 CJK 数字路径；`localeId` 端到端贯通。
+- [x] **VEN-02**: 英文 STT 数字金额正确解析；~30 行有界英文数字词兜底处理 "fifty"/"a hundred" 而不进 CJK 数字路径；`localeId` 端到端贯通。
 
 ## v2 Requirements
 
@@ -106,7 +106,7 @@
 | RECUX-04 | Phase 52 — Recognition UX + English Voice | Pending |
 | RECUX-05 | Phase 52 — Recognition UX + English Voice | Complete |
 | VEN-01 | Phase 52 — Recognition UX + English Voice | Complete |
-| VEN-02 | Phase 52 — Recognition UX + English Voice | Pending |
+| VEN-02 | Phase 52 — Recognition UX + English Voice | Complete |
 
 **Coverage:**
 
