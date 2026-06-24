@@ -4,6 +4,7 @@ import 'package:home_pocket/features/voice/domain/models/merchant_candidate.dart
 import 'package:home_pocket/features/accounting/domain/models/merchant_match_entry.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_repository.dart';
 import 'package:home_pocket/infrastructure/ml/merchant_name_normalizer.dart';
+import 'package:home_pocket/shared/constants/voice_currency_suffixes.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Phase 50 Plan 03 (DECOUP-03 / SC3): MerchantRecognizer is a pure-Dart anchored
@@ -237,6 +238,59 @@ void main() {
       final score = _bestScoreFor(cands, 'mer_starbucks');
       expect(score, isNotNull);
       expect(score! >= 0.85, isTrue);
+    });
+  });
+
+  // ── VEN-01 / Pitfall 5: English / romaji merchant recognition is ALREADY
+  // wired (nameEn locale-key + English alias surfaces feed the same anchored
+  // scorer; the normalizer lowercases Latin). These are VERIFICATION
+  // assertions — the recognizer is unchanged. ───────────────────────────────
+  group('VEN-01 English / romaji merchant recognition (verify, Pitfall 5)', () {
+    test('English/romaji query resolves the JA merchant via its nameEn surface',
+        () async {
+      // "Starbucks" is the seeded English (nameEn / romaji alias) surface for
+      // the スターバックス merchant. A lowercase or capitalized English
+      // utterance both resolve because normalizeMerchantKey lowercases Latin.
+      final r = _recognizer(_fixtureEntries());
+
+      final exact = await r.recognize('Starbucks');
+      expect(_bestScoreFor(exact, 'mer_starbucks'), 1.00,
+          reason: 'romaji/nameEn surface resolves the JA merchant');
+
+      // Case-insensitivity: lowercase + uppercase normalize to the same key.
+      expect(normalizeMerchantKey('starbucks'),
+          normalizeMerchantKey('STARBUCKS'));
+      final lower = await r.recognize('starbucks');
+      expect(_bestScoreFor(lower, 'mer_starbucks'), 1.00,
+          reason: 'Latin case folds in the shared normalizer');
+    });
+
+    test('English merchant query carries the JA merchant categoryId/ledgerHint',
+        () async {
+      final r = _recognizer(_fixtureEntries());
+      final cands = await r.recognize('Starbucks');
+      final star = cands.firstWhere((c) => c.merchantId == 'mer_starbucks');
+      expect(star.categoryId, 'cat_food_cafe');
+      expect(star.displayName, 'スターバックス');
+    });
+  });
+
+  // ── D-13: English currency words are ALREADY covered by VoiceCurrencySuffixes
+  // (quick task 260614-goh). VERIFY the reused path — do NOT fork a new one.
+  group('VEN-01 / D-13 English currency-word detection (reuse, no fork)', () {
+    test('English currency words map to their ISO via VoiceCurrencySuffixes',
+        () {
+      // dollar/dollars/USD-family resolve to USD; the en tokens are stored
+      // lowercase and the detection path is case-insensitive (260614-goh).
+      expect(VoiceCurrencySuffixes.tokenToIso['dollar'], 'USD');
+      expect(VoiceCurrencySuffixes.tokenToIso['dollars'], 'USD');
+      expect(VoiceCurrencySuffixes.tokenToIso['us dollar'], 'USD');
+      expect(VoiceCurrencySuffixes.tokenToIso['euro'], 'EUR');
+      expect(VoiceCurrencySuffixes.tokenToIso['pound'], 'GBP');
+      // English currency words are present in the canonical `all` token list
+      // (the single source the regex/extractor consume — no forked path).
+      expect(VoiceCurrencySuffixes.all, contains('dollar'));
+      expect(VoiceCurrencySuffixes.all, contains('yen'));
     });
   });
 

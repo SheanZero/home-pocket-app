@@ -7,6 +7,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/shared/constants/default_synonyms.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Phase 50 (DECOUP-01/DECOUP-02): CategoryRecognizer is keyword-only and runs
@@ -182,6 +183,153 @@ void main() {
       final learnedResult = await recognizer.resolve('learned');
       expect(learnedResult!.confidence, 1.0);
       expect(learnedResult.source, MatchSource.learning);
+    });
+  });
+
+  // ── VEN-01 / D-12: English category-keyword seeds resolve ────────────────
+  //
+  // Plan 52-04 Task 1 added lowercase en seeds for every zh/ja-covered L2. The
+  // recognizer's step-2 `findByKeyword` is an EXACT (case-sensitive) lookup, so
+  // the en seeds were authored lowercase to pair with the 52-01 en-residual
+  // lowercasing (`_extractKeyword` lowercases the en keyword BEFORE it reaches
+  // the recognizer — the write==read identity contract). These tests prove the
+  // recognizer resolves the correct L2 from a lowercase en keyword, and that a
+  // capitalized iOS-STT keyword resolves once it has been lowercased upstream.
+  group('VEN-01 English category seeds (D-12)', () {
+    test('lowercase en keyword resolves the correct L2 (coffee → cafe)',
+        () async {
+      when(() => mockPrefRepo.findByKeyword('coffee')).thenAnswer(
+        (_) async => [_pref('coffee', 'cat_food_cafe')],
+      );
+      when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
+        (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
+      );
+
+      final result = await recognizer.resolve('coffee');
+
+      expect(result, isNotNull);
+      expect(result!.categoryId, 'cat_food_cafe');
+      expect(result.source, MatchSource.keyword);
+    });
+
+    test('lowercase en keyword resolves the correct L2 (rent → housing rent)',
+        () async {
+      when(() => mockPrefRepo.findByKeyword('rent')).thenAnswer(
+        (_) async => [_pref('rent', 'cat_housing_rent')],
+      );
+      when(() => mockCategoryRepo.findById('cat_housing_rent')).thenAnswer(
+        (_) async => _makeCategory('cat_housing_rent', parentId: 'cat_housing'),
+      );
+
+      final result = await recognizer.resolve('rent');
+
+      expect(result, isNotNull);
+      expect(result!.categoryId, 'cat_housing_rent');
+    });
+
+    test(
+      'capitalized iOS-STT keyword resolves after upstream lowercasing '
+      '(Coffee → coffee → cafe)',
+      () async {
+        // The 52-01 _extractKeyword lowercases en residuals before the
+        // recognizer is called. We mirror that contract here: the lookup key
+        // the recognizer receives is already lowercase, so it matches the
+        // lowercase seed. A NON-lowercased "Coffee" would miss the
+        // case-sensitive findByKeyword — that is exactly why the seeds and the
+        // upstream extractor both go lowercase.
+        const sttKeyword = 'Coffee';
+        final lookupKey = sttKeyword.toLowerCase(); // = what _extractKeyword emits
+        when(() => mockPrefRepo.findByKeyword(lookupKey)).thenAnswer(
+          (_) async => [_pref('coffee', 'cat_food_cafe')],
+        );
+        // The case-sensitive seed lookup must NOT resolve the capitalized form.
+        when(() => mockPrefRepo.findByKeyword(sttKeyword))
+            .thenAnswer((_) async => []);
+        when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
+          (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
+        );
+
+        final resolved = await recognizer.resolve(lookupKey);
+        expect(resolved, isNotNull);
+        expect(resolved!.categoryId, 'cat_food_cafe');
+
+        // Proves the casing pairing matters: the raw capitalized key misses.
+        final rawMiss = await recognizer.resolve(sttKeyword);
+        expect(
+          rawMiss,
+          isNull,
+          reason:
+              'case-sensitive findByKeyword misses "Coffee"; the 52-01 '
+              'lowercasing is what makes capitalized STT input resolve',
+        );
+      },
+    );
+
+    test('en L1 keyword routes to its _other bucket (food → cat_food_other)',
+        () async {
+      when(() => mockPrefRepo.findByKeyword('food')).thenAnswer(
+        (_) async => [_pref('food', 'cat_food')],
+      );
+      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
+        (_) async => _makeCategory('cat_food', level: 1),
+      );
+      when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
+        (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
+      );
+
+      final result = await recognizer.resolve('food');
+
+      expect(result, isNotNull);
+      expect(result!.categoryId, 'cat_food_other');
+    });
+  });
+
+  // ── VEN-01 / D-12: the REAL seed data carries the en rows the mock tests
+  // above stub. This guards against the mock tests passing while Task 1's data
+  // is missing/typo'd — it reads DefaultVoiceSynonyms.all directly. ──────────
+  group('VEN-01 real seed data carries lowercase en keywords (D-12)', () {
+    CategoryKeywordPreference? findSeed(String keyword) {
+      for (final s in DefaultVoiceSynonyms.all) {
+        if (s.keyword == keyword) return s;
+      }
+      return null;
+    }
+
+    test('coffee → cat_food_cafe seed exists (lowercase)', () {
+      final s = findSeed('coffee');
+      expect(s, isNotNull, reason: 'en seed "coffee" must exist');
+      expect(s!.categoryId, 'cat_food_cafe');
+      expect(s.keyword, equals(s.keyword.toLowerCase()),
+          reason: 'en seeds MUST be authored lowercase (write==read contract)');
+    });
+
+    test('rent / taxi / gym / book sample en seeds map to their L2', () {
+      expect(findSeed('rent')?.categoryId, 'cat_housing_rent');
+      expect(findSeed('taxi')?.categoryId, 'cat_transport_taxi');
+      expect(findSeed('gym')?.categoryId, 'cat_health_fitness');
+      expect(findSeed('book')?.categoryId, 'cat_education_books');
+    });
+
+    test('every en common-word seed is fully lowercase', () {
+      // Proper-noun brand/product tokens predate VEN-01 and are intentionally
+      // cased as the brand spells itself (transit IC cards, broadcaster name).
+      // They are NOT the lowercase en COMMON-word seeds the write==read
+      // contract governs, so they are allow-listed out of this gate.
+      const properNounAllowlist = {'Suica', 'PASMO', 'NHK受信料'};
+
+      final caps = DefaultVoiceSynonyms.all
+          .where((s) {
+            final first = s.keyword.isEmpty ? '' : s.keyword[0];
+            // an ASCII-letter-leading keyword is an en seed
+            return first.toLowerCase() != first.toUpperCase();
+          })
+          .where((s) => !properNounAllowlist.contains(s.keyword))
+          .where((s) => s.keyword != s.keyword.toLowerCase())
+          .map((s) => s.keyword)
+          .toList();
+      expect(caps, isEmpty,
+          reason: 'Capitalized en common-word seeds break the 52-01 '
+              'case-sensitive findByKeyword pairing:\n${caps.join('\n')}');
     });
   });
 
