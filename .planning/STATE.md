@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
 current_phase: 51
-current_phase_name: Cross-Validation + Daily/Joy Ledger Rework
-status: completed
+current_phase_name: cross-validation-daily-joy-ledger-rework
+status: executing
 stopped_at: Phase 51 planned — 5 plans, ready to execute
-last_updated: "2026-06-24T05:50:43.000Z"
+last_updated: "2026-06-24T06:09:14.870Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 51 planned — 5 plans across 4 waves, ready to execute
+last_activity_desc: Phase 51 execution started
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 16
+  completed_plans: 12
   percent: 50
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 ## Current Position
 
-Phase: 51 — Cross-Validation + Daily/Joy Ledger Rework
-Plan: 5 plans across 4 waves (planned — ready to execute)
-Status: Phase 51 planned — Wave 1: 51-01 (voice/domain scaffold + type moves); Wave 2: 51-02 (3×3 reconciler, TDD) + 51-03 (resolve-on-final hysteresis); Wave 3: 51-04 (ledger re-route + dual_ledger retirement); Wave 4: 51-05 (L2-override seed audit + D-18 user spot-check checkpoint). Research + plan-checker PASSED (0 blockers/warnings).
-Last activity: 2026-06-24 — Phase 51 planned (research + 5 plans; plan-checker VERIFICATION PASSED)
+Phase: 51 (cross-validation-daily-joy-ledger-rework) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-06-24 — Phase 51 execution started
 
 ### Quick Tasks Completed
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T05:09:20.279Z
+Last session: 2026-06-24T06:08:47.738Z
 Stopped at: Phase 51 context gathered
 Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CONTEXT.md
 
@@ -269,6 +269,7 @@ Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CON
 | Phase 50 P02 | ~25min | 4 tasks | 7 files |
 | Phase 50 P03 | ~1h | 2 tasks | 4 files |
 | Phase 50 P05 | 18 | 3 tasks | 26 files |
+| Phase 51 P01 | 25 | 2 tasks | 19 files |
 
 ## Decisions
 
@@ -343,6 +344,7 @@ Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CON
 - [Phase ?]: [Phase 50]: 50-02: keyword seed extended to FULL 138-L2 coverage (admin families cat_tax_*/cat_asset_*/cat_insurance_*/*_insurance/*_tax/cat_special_* + 19 *_other buckets INCLUDED per user scope decision + RESEARCH A4); coverage gate widened (no exclusion list); 515 zh+ja direct-seed rows; word refinements うーばー→ウーバー / 老婆零花→伴侣零花钱; split into synonyms/synonyms_*.dart (800-line rule), synonyms/ CJK-scan-excluded by prefix
 - [Phase ?]: Phase 50-03: prefix tier needs per-script min-length AND strict >50% rune-coverage guard (SC2).
 - [Phase ?]: Phase 50: voice pipeline cut to two decoupled engines (CategoryRecognizer + MerchantRecognizer); keyword-priority merge with 0.85 auto-fill floor; ledger = resolveLedgerType(finalCategory) (LEDGER-01); old MerchantDatabase/VoiceCategoryResolver path retired (D-05).
+- [Phase ?]: Phase 51-01: extended domain_import_rules_test.dart models/ subdir check to accept isCrossFeatureDomainModel (mirrors repositories/ escape) so voice/domain is a guarded feature while voice_parse_result imports accounting LedgerType cross-feature
 
 ## Operator Next Steps
 
