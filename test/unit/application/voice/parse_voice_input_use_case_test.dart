@@ -7,6 +7,7 @@ import 'package:home_pocket/features/voice/domain/models/merchant_candidate.dart
 import 'package:home_pocket/features/accounting/domain/models/merchant_match_entry.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_repository.dart';
 import 'package:home_pocket/infrastructure/ml/merchant_name_normalizer.dart';
 import 'package:mocktail/mocktail.dart';
@@ -628,6 +629,166 @@ void main() {
       expect(result.isSuccess, isTrue, reason: result.error);
       expect(seen, equals('咖啡'));
       expect(result.data!.resolvedKeyword, equals('咖啡'));
+    });
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // D-11: the three RecognitionOutcome fields (band / alternates /
+  // keywordMerchantConflict) are now THREADED into VoiceParseResult — they were
+  // previously dropped at the VPR ctor. The reconciler is real here so the
+  // values come from genuine reconciliation, not a mock.
+  // ════════════════════════════════════════════════════════════════════════
+  group('D-11 — outcome band/alternates/conflict threaded into VPR', () {
+    test(
+      'keyword hit → band populated (strong), no null/empty/false drop',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer(
+          (_) async => const CategoryMatchResult(
+            categoryId: 'cat_shopping_daily',
+            confidence: 0.9,
+            source: MatchSource.learning, // user-validated → strong band
+          ),
+        );
+
+        final result = await useCase.execute('买杯子', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        // band is no longer dropped — a resolved outcome carries a real band.
+        expect(data.band, isNotNull);
+        expect(data.band, equals(ConfidenceBand.strong));
+      },
+    );
+
+    test(
+      'merchant✓keyword✓ conflict (XVAL-02) → keywordMerchantConflict true + '
+      'merchant category surfaced as an alternate',
+      () async {
+        // 「在星巴克买杯子」: keyword 购物 wins over a strong Starbucks→咖啡 merchant
+        // whose L2 differs → conflict flag true, merchant cafe demoted to chip.
+        when(() => mockCategory.resolve(any())).thenAnswer(
+          (_) async => const CategoryMatchResult(
+            categoryId: 'cat_shopping_daily',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+        );
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async => [
+            _candidate(
+              displayName: '星巴克',
+              score: 0.95,
+              categoryId: 'cat_food_cafe',
+            ),
+          ],
+        );
+
+        final result = await useCase.execute('在星巴克买杯子', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        // The 3 threaded fields equal their reconciler sources.
+        expect(
+          data.keywordMerchantConflict,
+          isTrue,
+          reason: 'keyword 购物 beat a strong Starbucks→咖啡 (XVAL-02)',
+        );
+        // The ranked alternates carry the demoted merchant cafe category.
+        expect(data.alternates, isNotEmpty);
+        expect(
+          data.alternates.any((a) => a.categoryId == 'cat_food_cafe'),
+          isTrue,
+          reason: 'the demoted merchant 咖啡 must surface as an alternate chip',
+        );
+      },
+    );
+
+    test(
+      'manual-style both-none parse → band weak, alternates empty, no conflict',
+      () async {
+        // No keyword, no merchant → reconciler returns the both-none cell.
+        final result = await useCase.execute('test', localeId: 'en-US');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        expect(data.band, equals(ConfidenceBand.weak));
+        expect(data.alternates, isEmpty);
+        expect(data.keywordMerchantConflict, isFalse);
+      },
+    );
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // VEN-01 / Pitfall 1: en residual is lowercased so lowercase en seeds match
+  // capitalized iOS STT keywords; zh/ja residual stays byte-identical; the
+  // resolvedKeyword write key == the recognizer read key (write==read, en).
+  // ════════════════════════════════════════════════════════════════════════
+  group('VEN-01 — en residual casing fix (write==read preserved)', () {
+    test(
+      'en-US capitalized "Coffee" → lowercase resolvedKeyword "coffee"',
+      () async {
+        String? recognizerSaw;
+        when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
+          recognizerSaw = inv.positionalArguments.first as String;
+          return null;
+        });
+
+        final result = await useCase.execute('Coffee', localeId: 'en-US');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        // The recognizer read a lowercase key (so it can hit a lowercase seed).
+        expect(recognizerSaw, equals('coffee'));
+        // The surfaced write key is lowercase too.
+        expect(result.data!.resolvedKeyword, equals('coffee'));
+        // write==read identity (260526-pg6) holds for en after the fix.
+        expect(result.data!.resolvedKeyword, equals(recognizerSaw));
+      },
+    );
+
+    test(
+      'en-US multi-word "Lunch Coffee" → fully lowercased residual',
+      () async {
+        String? recognizerSaw;
+        when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
+          recognizerSaw = inv.positionalArguments.first as String;
+          return null;
+        });
+
+        await useCase.execute('Lunch Coffee', localeId: 'en-US');
+
+        expect(recognizerSaw, isNotNull);
+        expect(recognizerSaw, equals(recognizerSaw!.toLowerCase()));
+        expect(recognizerSaw, contains('coffee'));
+      },
+    );
+
+    test('ja residual unchanged — capitalization NOT applied (byte-identical)',
+        () async {
+      String? recognizerSaw;
+      when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
+        recognizerSaw = inv.positionalArguments.first as String;
+        return null;
+      });
+
+      // Latin token embedded in a ja utterance must NOT be lowercased.
+      await useCase.execute('Cafe代', localeId: 'ja-JP');
+
+      expect(recognizerSaw, equals('Cafe代'),
+          reason: 'ja path must stay byte-identical (no en lowercasing)');
+    });
+
+    test('zh residual unchanged — capitalization NOT applied (byte-identical)',
+        () async {
+      String? recognizerSaw;
+      when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
+        recognizerSaw = inv.positionalArguments.first as String;
+        return null;
+      });
+
+      await useCase.execute('Cafe喝', localeId: 'zh-CN');
+
+      expect(recognizerSaw, equals('Cafe喝'),
+          reason: 'zh path must stay byte-identical (no en lowercasing)');
     });
   });
 }
