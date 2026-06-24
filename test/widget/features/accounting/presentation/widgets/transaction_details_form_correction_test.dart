@@ -31,6 +31,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_led
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/alternate_category_chips.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart'
     show ConfidenceBand;
@@ -252,9 +254,19 @@ void main() {
     TransactionDetailsFormConfig config, {
     required List<Override> overrides,
     required Key formKey,
+    // 52-UAT (test 2): the chip row is hidden in production. These deferred-
+    // correction cases exercise the retained chip-tap path, so they opt the
+    // chips back in; the dedicated "hidden by default" case below passes false.
+    bool showAlternateChips = true,
   }) {
     return createLocalizedWidget(
-      Scaffold(body: TransactionDetailsForm(key: formKey, config: config)),
+      Scaffold(
+        body: TransactionDetailsForm(
+          key: formKey,
+          config: config,
+          showAlternateChips: showAlternateChips,
+        ),
+      ),
       locale: const Locale('en'),
       overrides: overrides,
     );
@@ -653,6 +665,74 @@ void main() {
 
         expect(correctionSpy.calls, isEmpty,
             reason: 'reverting to the recognized original discards the stash');
+      },
+    );
+  });
+
+  group('Recognition surface visibility (52-UAT test 2)', () {
+    testWidgets(
+      'alternate chip row HIDDEN by default — only the confidence band renders',
+      (tester) async {
+        sizeView(tester);
+        final correctionSpy = _SpyRecordCategoryCorrectionUseCase();
+        final createUseCase = _MockCreateTransactionUseCase();
+        final merchantSpy = _SpyMerchantCategoryPreferenceRepository();
+        final formKey = GlobalKey<TransactionDetailsFormState>();
+
+        await tester.pumpWidget(
+          buildForm(
+            TransactionDetailsFormConfig.$new(
+              bookId: 'b1',
+              entrySource: EntrySource.voice,
+              initialCategory: _initialCat,
+              voiceKeyword: _kKeyword,
+            ),
+            overrides: _overrides(
+              correctionSpy: correctionSpy,
+              createUseCase: createUseCase,
+              merchantSpy: merchantSpy,
+              categories: [_initialCat, _altCat],
+            ),
+            formKey: formKey,
+            showAlternateChips: false, // production default
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Push a recognition outcome with an alternate — in the old behavior
+        // this rendered the chip row at resolve-on-final.
+        formKey.currentState!.updateRecognition(
+          ConfidenceBand.weak,
+          [
+            CategoryMatchResult(
+              categoryId: _altCat.id,
+              confidence: 0.4,
+              source: MatchSource.keyword,
+            ),
+          ],
+        );
+        await tester.pumpAndSettle();
+
+        // The qualitative band still renders (52-UAT test 1 passed)…
+        expect(
+          find.byType(ConfidenceBandIndicator),
+          findsOneWidget,
+          reason: 'the confidence band stays visible',
+        );
+        // …but the whole chip row is gone: no alternate chips and no exit chip.
+        expect(
+          find.byType(AlternateCategoryChips),
+          findsNothing,
+          reason: '52-UAT test 2: the alternate chip row is hidden in production',
+        );
+        expect(
+          find.byKey(ValueKey('alt-chip-${_altCat.id}')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('alt-chip-exit')),
+          findsNothing,
+        );
       },
     );
   });

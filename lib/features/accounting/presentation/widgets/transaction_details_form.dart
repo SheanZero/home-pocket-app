@@ -63,9 +63,24 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.onPickerDismissed,
     this.onForeignChanged,
     this.onDateChanged,
+    this.showAlternateChips = false,
   });
 
   final TransactionDetailsFormConfig config;
+
+  /// Phase 52 / 52-UAT (test 2): whether the alternate-category chip row (≤3
+  /// suggested alternates + the trailing "more" exit chip) renders under the
+  /// recognition band. HIDDEN by default at the user's request — after a voice
+  /// recognition only the qualitative confidence band shows. This is a
+  /// reversible scope-cut: the [AlternateCategoryChips] widget, the chip-tap
+  /// handler ([_selectAlternateCategory]) and their tests are all kept intact;
+  /// flip the default to `true` (or remove this flag) to restore the chips.
+  /// Category correction is unaffected — it still flows through the category-card
+  /// edit ([_editCategory] → full selector → [_applyCategorySelection]), so the
+  /// deferred-correction contract (D-05/06/07) still holds. Only the retained
+  /// chip-path widget tests construct the form with `showAlternateChips: true`.
+  @visibleForTesting
+  final bool showAlternateChips;
 
   /// Quick 260613-ufn (D-4): fired with the new transaction date whenever the
   /// form's internal date changes via the date picker. The ADD screen
@@ -1206,10 +1221,15 @@ class TransactionDetailsFormState
             ),
 
             // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): the recognition surface —
-            // a pure-visual confidence band + ≤3 alternate-category chips + exit
-            // chip. Gated on `_band != null`: manual/OCR entry has no band, so no
-            // affordance renders (D-10, correct-by-construction). Both clear the
-            // instant the user picks a category (D-09).
+            // a pure-visual confidence band (+ optionally ≤3 alternate-category
+            // chips + exit chip). Gated on `_band != null`: manual/OCR entry has
+            // no band, so no affordance renders (D-10, correct-by-construction).
+            // 52-UAT (test 2): the chip row is HIDDEN by default
+            // (`widget.showAlternateChips` is false in production) — only the
+            // band renders. The chip subtree is retained behind the flag for a
+            // reversible re-enable; correction still flows through the category
+            // card. Both surfaces clear the instant the user picks a category
+            // (D-09).
             if (_band != null) ...[
               const SizedBox(height: 12),
               Row(
@@ -1218,14 +1238,16 @@ class TransactionDetailsFormState
                     band: _band,
                     ledgerType: _ledgerType,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: AlternateCategoryChips(
-                      alternates: _alternates,
-                      selectedCategoryId: _category?.id,
-                      onSelect: _selectAlternateCategory,
+                  if (widget.showAlternateChips) ...[
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: AlternateCategoryChips(
+                        alternates: _alternates,
+                        selectedCategoryId: _category?.id,
+                        onSelect: _selectAlternateCategory,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ],
