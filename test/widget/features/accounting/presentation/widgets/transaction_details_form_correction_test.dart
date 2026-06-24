@@ -671,7 +671,7 @@ void main() {
 
   group('Recognition surface visibility (52-UAT test 2)', () {
     testWidgets(
-      'alternate chip row HIDDEN by default — only the confidence band renders',
+      'recognition surface HIDDEN by default — neither band nor chip row renders',
       (tester) async {
         sizeView(tester);
         final correctionSpy = _SpyRecordCategoryCorrectionUseCase();
@@ -713,13 +713,14 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // The qualitative band still renders (52-UAT test 1 passed)…
+        // The confidence band is now hidden in production too (52-UAT
+        // follow-up: the band pill was hidden at the user's request).
         expect(
           find.byType(ConfidenceBandIndicator),
-          findsOneWidget,
-          reason: 'the confidence band stays visible',
+          findsNothing,
+          reason: '52-UAT follow-up: the confidence band is hidden in production',
         );
-        // …but the whole chip row is gone: no alternate chips and no exit chip.
+        // …and the whole chip row is gone: no alternate chips and no exit chip.
         expect(
           find.byType(AlternateCategoryChips),
           findsNothing,

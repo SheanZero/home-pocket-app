@@ -64,6 +64,7 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.onForeignChanged,
     this.onDateChanged,
     this.showAlternateChips = false,
+    this.showConfidenceBand = false,
   });
 
   final TransactionDetailsFormConfig config;
@@ -81,6 +82,18 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
   /// chip-path widget tests construct the form with `showAlternateChips: true`.
   @visibleForTesting
   final bool showAlternateChips;
+
+  /// 52-UAT follow-up: whether the pure-visual recognition confidence band (the
+  /// small family-tinted pill under the info card) renders after a voice
+  /// recognition. HIDDEN by default at the user's request — with both this and
+  /// [showAlternateChips] off (the production default) the form shows NO
+  /// recognition affordance at all, and category correction flows solely through
+  /// the category card → full selector. Reversible scope-cut: the
+  /// [ConfidenceBandIndicator] widget and the [updateRecognition] plumbing are
+  /// kept intact; flip this default to `true` (or remove the flag) to restore
+  /// the band. Only the retained band-visibility widget test sets it true.
+  @visibleForTesting
+  final bool showConfidenceBand;
 
   /// Quick 260613-ufn (D-4): fired with the new transaction date whenever the
   /// form's internal date changes via the date picker. The ADD screen
@@ -1224,22 +1237,25 @@ class TransactionDetailsFormState
             // a pure-visual confidence band (+ optionally ≤3 alternate-category
             // chips + exit chip). Gated on `_band != null`: manual/OCR entry has
             // no band, so no affordance renders (D-10, correct-by-construction).
-            // 52-UAT (test 2): the chip row is HIDDEN by default
-            // (`widget.showAlternateChips` is false in production) — only the
-            // band renders. The chip subtree is retained behind the flag for a
-            // reversible re-enable; correction still flows through the category
-            // card. Both surfaces clear the instant the user picks a category
-            // (D-09).
-            if (_band != null) ...[
+            // 52-UAT (test 2) hid the chip row and a follow-up hid the band too:
+            // BOTH `widget.showAlternateChips` and `widget.showConfidenceBand`
+            // are false in production, so the whole surface renders nothing —
+            // category correction flows through the category card → full
+            // selector instead. Both subtrees are retained behind their flags
+            // for a reversible re-enable; both clear the instant the user picks a
+            // category (D-09).
+            if (_band != null &&
+                (widget.showConfidenceBand || widget.showAlternateChips)) ...[
               const SizedBox(height: 12),
               Row(
                 children: [
-                  ConfidenceBandIndicator(
-                    band: _band,
-                    ledgerType: _ledgerType,
-                  ),
+                  if (widget.showConfidenceBand)
+                    ConfidenceBandIndicator(
+                      band: _band,
+                      ledgerType: _ledgerType,
+                    ),
                   if (widget.showAlternateChips) ...[
-                    const SizedBox(width: 8),
+                    if (widget.showConfidenceBand) const SizedBox(width: 8),
                     Expanded(
                       child: AlternateCategoryChips(
                         alternates: _alternates,
