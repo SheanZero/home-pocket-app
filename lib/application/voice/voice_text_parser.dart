@@ -1,6 +1,7 @@
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
+import 'english_number_words.dart';
 
 /// NLP text parser for voice input.
 ///
@@ -48,7 +49,36 @@ class VoiceTextParser {
   /// comma-grouped number is present it is AUTHORITATIVE over the state machine.
   static final _commaGroupedPattern = RegExp(r'\d[,，]\d');
 
+  /// Money-context gate for the en number-word fallback (VEN-02 / D-14):
+  /// a recognized currency token (via [VoiceCurrencySuffixes]), a `$` symbol,
+  /// or a `dollar`/`dollars` word. Without this gate「five fifty」would be the
+  /// ambiguous 550-vs-5.50 case, so the X.50 idiom must never fire bare.
+  static final _enMoneyContextPattern = RegExp(r'\$|\bdollars?\b');
+
+  bool _hasEnMoneyContext(String text) {
+    if (_enMoneyContextPattern.hasMatch(text.toLowerCase())) return true;
+    final lower = text.toLowerCase();
+    return VoiceCurrencySuffixes.all.any(
+      (token) => lower.contains(token.toLowerCase()),
+    );
+  }
+
   int? extractAmount(String text, {String? localeId}) {
+    // VEN-02 / D-14: the en locale routes ENTIRELY around the CJK numeral state
+    // machines (isolation; guards the v1.8 WR-04 regression class). Arabic STT
+    // digits always win first; only on an Arabic miss, in money context, do we
+    // consult the bounded English number-word fallback. The en branch NEVER
+    // reaches _runStateMachine, so an English (or stray CJK) utterance under
+    // en-US can never leak into _jaMachine/_zhMachine.
+    if (localeId != null && localeId.startsWith('en')) {
+      final fromArabic = _extractArabicAmount(text);
+      if (fromArabic != null) return fromArabic;
+      if (_hasEnMoneyContext(text)) {
+        return parseEnglishNumberWords(text, moneyContext: true);
+      }
+      return null;
+    }
+
     // 260622-nhs R6 (BUG 2): a comma-grouped Arabic amount is unambiguous and
     // the scanner cannot read it (it drops the comma and keeps only the last
     // group). Prefer the Arabic regex when one is present, even if a stray kanji
