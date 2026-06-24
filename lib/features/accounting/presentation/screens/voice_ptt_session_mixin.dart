@@ -285,12 +285,28 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// final/partial paths parse ONCE and reuse the result here (the prior code
   /// parsed `text` again inside this method — a redundant second parse). When
   /// [data] is null this still parses [text] itself (legacy hold-release path).
-  Future<void> _fillFormFromText(String text, {VoiceParseResult? data}) async {
+  ///
+  /// XVAL-03 / D-01..D-03 (resolve-on-final hysteresis): [fillCategory] gates
+  /// ONLY the category write. The partial-driven fill passes `false` so partials
+  /// keep filling amount/text/merchant/date LIVE (sub-second feedback, 260622-nhs
+  /// R1-R8 unchanged) but hold the category guess until the first end-of-speech
+  /// final — eliminating category-chip flicker across partials. The final-result
+  /// fill keeps the default `true`, resolving the category exactly once. No new
+  /// timer is introduced (D-03): the single isFinal signal drives the one fill.
+  Future<void> _fillFormFromText(
+    String text, {
+    VoiceParseResult? data,
+    bool fillCategory = true,
+  }) async {
     if (text.isEmpty && data == null) return;
 
     onPttSessionChanged(() => _parsing = true);
     try {
-      await _fillFormFromTextInner(text, preParsed: data);
+      await _fillFormFromTextInner(
+        text,
+        preParsed: data,
+        fillCategory: fillCategory,
+      );
     } finally {
       if (mounted) onPttSessionChanged(() => _parsing = false);
     }
@@ -299,6 +315,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   Future<void> _fillFormFromTextInner(
     String text, {
     VoiceParseResult? preParsed,
+    bool fillCategory = true,
   }) async {
     var resolved = preParsed;
     if (resolved == null) {
@@ -314,15 +331,21 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     if (resolved == null) return;
     final data = resolved;
 
+    // XVAL-03 / D-01..D-03: the category guess is held until the first
+    // end-of-speech final. Partial-driven fills pass `fillCategory: false`, so
+    // we skip the repo lookup entirely (saves a read) AND never call
+    // state.updateCategory — the category chip resolves once, on the final.
     Category? category;
     Category? parent;
-    final categoryId =
-        data.categoryMatch?.categoryId ?? data.merchantCategoryId;
-    if (categoryId != null) {
-      final repo = ref.read(categoryRepositoryProvider);
-      category = await repo.findById(categoryId);
-      if (category?.parentId != null) {
-        parent = await repo.findById(category!.parentId!);
+    if (fillCategory) {
+      final categoryId =
+          data.categoryMatch?.categoryId ?? data.merchantCategoryId;
+      if (categoryId != null) {
+        final repo = ref.read(categoryRepositoryProvider);
+        category = await repo.findById(categoryId);
+        if (category?.parentId != null) {
+          parent = await repo.findById(category!.parentId!);
+        }
       }
     }
 
@@ -711,7 +734,9 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     final data = result.data;
     onPttSessionChanged(() => _parseResult = data);
     if (_continuousActive && data != null) {
-      await _fillFormFromText(text, data: data);
+      // XVAL-03 / D-01: partial fills amount/text/merchant/date LIVE but holds
+      // the category (fillCategory: false) until the first end-of-speech final.
+      await _fillFormFromText(text, data: data, fillCategory: false);
     }
   }
 
