@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
-current_phase: 50
-current_phase_name: decoupled-recognizers
-status: executing
-stopped_at: Phase 50 plan 50-03 complete (MerchantRecognizer + SC2/SC3 gates); plan 05 remains
-last_updated: "2026-06-24T01:54:59.886Z"
+current_phase: 51
+current_phase_name: Cross-Validation + Daily/Joy Ledger Rework
+status: completed
+stopped_at: Phase 50 context gathered
+last_updated: "2026-06-24T04:20:10.029Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 50 plan 50-03 executed (MerchantRecognizer + SC2/SC3 gates)
+last_activity_desc: Phase 50 complete, transitioned to Phase 51
 progress:
   total_phases: 4
   completed_phases: 2
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 ## Current Position
 
-Phase: 50 (decoupled-recognizers) — EXECUTING
-Plan: 5 of 5
+Phase: 51 — Cross-Validation + Daily/Joy Ledger Rework
+Plan: Not started
 Status: 50-03 complete (MerchantRecognizer anchored scorer); only 50-05 (orchestrator + retirement) remains
-Last activity: 2026-06-24 — Phase 50 plan 50-03 executed (MerchantRecognizer + SC2/SC3 gates)
+Last activity: 2026-06-24 — Phase 50 complete, transitioned to Phase 51
 
 ### Quick Tasks Completed
 
