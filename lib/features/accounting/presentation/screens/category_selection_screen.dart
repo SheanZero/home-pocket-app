@@ -40,6 +40,13 @@ class _CategorySelectionScreenState
   Map<String, List<Category>> _l2ByParent = {};
   bool _isLoading = true;
 
+  /// One-shot scroll target: the L1 group that contains the pre-selected
+  /// category. Set during [_loadCategories] and cleared after the first
+  /// post-frame scroll so manual scrolling is never forced back.
+  String? _pendingScrollL1Id;
+  final _selectedGroupKey = GlobalKey();
+  final _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -80,6 +87,9 @@ class _CategorySelectionScreenState
           l1.any((c) => c.id == widget.selectedCategoryId)) {
         _expandedL1Id = widget.selectedCategoryId;
       }
+      // Queue a one-shot scroll to the selected L1 group (null when the
+      // selected id is stale and resolves to no L1).
+      _pendingScrollL1Id = _expandedL1Id;
     }
 
     if (mounted) {
@@ -88,7 +98,55 @@ class _CategorySelectionScreenState
         _l2ByParent = l2Map;
         _isLoading = false;
       });
+      if (_pendingScrollL1Id != null) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _scrollToSelectedGroup(),
+        );
+      }
     }
+  }
+
+  /// Scrolls the read-mode list so the pre-selected L1 group aligns to the top
+  /// of the viewport. Runs once, then clears [_pendingScrollL1Id].
+  ///
+  /// Two phases because [ListView.builder] only builds near-viewport items: a
+  /// rough jump (estimated group extent) brings the target into the build
+  /// range, then [Scrollable.ensureVisible] refines to an exact, animated
+  /// top-aligned position. No-op for a stale id (target never resolves).
+  void _scrollToSelectedGroup() {
+    if (!mounted) return;
+    final id = _pendingScrollL1Id;
+    final index = id == null
+        ? -1
+        : _l1Categories.indexWhere((c) => c.id == id);
+    if (index < 0 || !_scrollController.hasClients) {
+      _pendingScrollL1Id = null;
+      return;
+    }
+
+    // Phase 1 — rough jump so the lazy list lays out the target group.
+    const estimatedGroupExtent = 72.0;
+    const listTopPadding = 12.0;
+    final position = _scrollController.position;
+    final estimate = (listTopPadding + index * estimatedGroupExtent).clamp(
+      0.0,
+      position.maxScrollExtent,
+    );
+    _scrollController.jumpTo(estimate);
+
+    // Phase 2 — refine to an exact top-aligned position once laid out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingScrollL1Id = null;
+      if (!mounted) return;
+      final ctx = _selectedGroupKey.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   List<Category> _getFilteredL1(Locale locale) {
@@ -314,11 +372,13 @@ class _CategorySelectionScreenState
     S l10n,
   ) {
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: filteredL1.length,
       itemBuilder: (context, index) {
         final l1 = filteredL1[index];
         return _CategoryGroup(
+          key: l1.id == _pendingScrollL1Id ? _selectedGroupKey : null,
           category: l1,
           children: _getFilteredL2(l1.id, locale),
           isExpanded: _expandedL1Id == l1.id,
@@ -414,6 +474,7 @@ class _CategorySelectionScreenState
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 }
@@ -496,6 +557,7 @@ class _L1ReorderTile extends StatelessWidget {
 
 class _CategoryGroup extends StatelessWidget {
   const _CategoryGroup({
+    super.key,
     required this.category,
     required this.children,
     required this.isExpanded,

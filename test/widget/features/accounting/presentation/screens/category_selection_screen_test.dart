@@ -282,4 +282,86 @@ void main() {
       expect(find.text('Select Category'), findsOneWidget);
     });
   });
+
+  group('auto-scroll to selected category', () {
+    // A list long enough that lower L1 groups start off-screen on the default
+    // 800x600 test surface. The pre-selected L2 ('leaf') lives under l1_14 —
+    // far enough down to require scrolling, with enough groups below it that
+    // it can be aligned to the top of the viewport.
+    final longList = <Category>[
+      for (var i = 0; i < 20; i++)
+        Category(
+          id: 'l1_$i',
+          name: 'L1-$i',
+          icon: 'restaurant',
+          color: '#6FA36F',
+          level: 1,
+          isSystem: true,
+          sortOrder: i,
+          createdAt: DateTime(2026, 4, 3),
+        ),
+      Category(
+        id: 'leaf',
+        name: 'Leaf-Child',
+        icon: 'restaurant',
+        color: '#6FA36F',
+        parentId: 'l1_14',
+        level: 2,
+        sortOrder: 1,
+        createdAt: DateTime(2026, 4, 3),
+      ),
+    ];
+
+    ScrollableState listScrollable(WidgetTester tester) {
+      return tester.state<ScrollableState>(
+        find.descendant(
+          of: find.byType(ListView),
+          matching: find.byType(Scrollable),
+        ),
+      );
+    }
+
+    testWidgets('scrolls the selected L1 group into view near the top', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(selectedCategoryId: 'leaf'),
+          locale: const Locale('en'),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(
+              FakeCategoryRepository(longList),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // List scrolled away from the top.
+      expect(listScrollable(tester).position.pixels, greaterThan(0.0));
+
+      // The selected L1 is built and sits near the top of the viewport.
+      expect(find.text('L1-14'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('L1-14')).dy, lessThan(400.0));
+    });
+
+    testWidgets('does not scroll when no category is pre-selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          locale: const Locale('en'),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(
+              FakeCategoryRepository(longList),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(listScrollable(tester).position.pixels, 0.0);
+    });
+  });
 }
