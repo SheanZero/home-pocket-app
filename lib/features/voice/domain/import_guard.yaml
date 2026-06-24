@@ -1,0 +1,18 @@
+# Domain layer — leafmost in the dependency graph (CRIT-04 territory).
+# Mirrors lib/features/accounting/domain/import_guard.yaml exactly:
+# import_guard_custom_lint evaluates each config in the chain independently
+# against its own allow whitelist, so the parent owns deny only; children own
+# the whitelist (see models/import_guard.yaml, services/import_guard.yaml).
+#
+# Phase 51 (D-11): new voice feature domain tree — recognition value objects
+# (MerchantCandidate, VoiceParseResult) and the incoming RecognitionReconciler
+# live here so recognition domain types are centralized in one feature.
+deny:
+  - package:home_pocket/data/**
+  - package:home_pocket/infrastructure/**
+  - package:home_pocket/application/**
+  - package:home_pocket/features/**/presentation/**
+  - package:flutter/**
+
+inherit: true
+# NOTE: no `allow:` block — see models/import_guard.yaml and services/import_guard.yaml

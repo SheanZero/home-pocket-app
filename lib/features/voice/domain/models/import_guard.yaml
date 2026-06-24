@@ -1,0 +1,15 @@
+# Per-subdirectory whitelist for voice domain/models/ (mirrors
+# lib/features/accounting/domain/models/import_guard.yaml). Inherits parent
+# feature-level deny rules.
+#
+# LedgerType enum is imported from accounting domain — same-layer cross-feature
+# domain→domain dependency (no layer violation), expressed as the relative path
+# matching the source `import '../../../accounting/domain/models/transaction.dart'`
+# (same pattern as features/list and features/shopping_list models).
+allow:
+  - dart:core
+  - package:freezed_annotation/**
+  - merchant_candidate.dart # intra-domain leaf for voice_parse_result + recognition_outcome
+  - ../../../accounting/domain/models/transaction.dart # LedgerType (cross-feature domain model, no layer violation)
+
+inherit: true

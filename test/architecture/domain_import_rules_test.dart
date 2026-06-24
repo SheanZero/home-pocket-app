@@ -25,6 +25,7 @@ void main() {
       'home',
       'profile',
       'settings',
+      'voice',
     ];
     const requiredDeny = [
       'package:home_pocket/data/**',
@@ -76,11 +77,19 @@ void main() {
                 entry.startsWith('package:meta');
             final isIntraDomainLeaf =
                 entry.endsWith('.dart') && !entry.contains('/');
+            // Cross-feature domain model (domain→domain across features, e.g.
+            // voice's voice_parse_result.dart referencing accounting's
+            // LedgerType enum). Still a pure domain dependency — no layer
+            // violation (mirrors the repositories/ escape below and the
+            // existing features/list + features/shopping_list models patterns).
+            final isCrossFeatureDomainModel =
+                entry.contains('/domain/models/') && entry.endsWith('.dart');
             expect(
-              isAnnotation || isIntraDomainLeaf,
+              isAnnotation || isIntraDomainLeaf || isCrossFeatureDomainModel,
               isTrue,
               reason:
-                  'Feature $feature models/: allow leaf "$entry" is neither annotation nor intra-domain leaf',
+                  'Feature $feature models/: allow leaf "$entry" is neither annotation, '
+                  'intra-domain leaf, nor cross-feature domain model',
             );
           }
           expect(yaml['inherit'], isTrue);

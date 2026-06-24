@@ -1,0 +1,15 @@
+# Per-subdirectory whitelist for voice domain/services/ (mirrors
+# lib/features/accounting/domain/repositories/import_guard.yaml shape).
+# Inherits parent feature-level deny rules.
+#
+# The Phase 51-02 RecognitionReconciler will live here and consume the
+# intra-domain model leaves (MerchantCandidate, VoiceParseResult,
+# RecognitionOutcome). Allow only annotation packages + ../models/*.dart leaves.
+allow:
+  - dart:core
+  - package:freezed_annotation/**
+  - ../models/merchant_candidate.dart
+  - ../models/voice_parse_result.dart
+  - ../models/recognition_outcome.dart
+
+inherit: true
