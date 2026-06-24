@@ -46,7 +46,7 @@ final List<CategoryKeywordPreference> _foodAndDaily = [
   seed('外卖', 'cat_food'), // L1 → cat_food_other
   seed('咖啡', 'cat_food_cafe'),
   seed('外出就餐', 'cat_food_dining_out'),
-  seed('外食', 'cat_food_dining_out'),
+  // 外食 (shared Han word) is seeded once in the ja section above (IN-01).
   seed('聚餐', 'cat_food_dining_out'),
   seed('餐厅', 'cat_food_dining_out'),
   seed('饭店', 'cat_food_dining_out'),
