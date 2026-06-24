@@ -2958,5 +2958,13 @@
   "@analyticsCalWeekdaySun": {
     "description": "Joy calendar weekday header — Sunday"
   },
+  "recognitionBandSuggestedCategory": "Suggested category",
+  "@recognitionBandSuggestedCategory": {
+    "description": "Screen-reader-only a11y label for the recognition confidence band; never painted (ADR-012 / D-03)"
+  },
+  "recognitionAlternatesMore": "More",
+  "@recognitionAlternatesMore": {
+    "description": "Exit chip label on the alternate-category chip row; opens the full category selector (D-04)"
+  },
   "@@locale": "en"
 }

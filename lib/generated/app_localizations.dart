@@ -4254,6 +4254,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'S'**
   String get analyticsCalWeekdaySun;
+
+  /// Screen-reader-only a11y label for the recognition confidence band; never painted (ADR-012 / D-03)
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested category'**
+  String get recognitionBandSuggestedCategory;
+
+  /// Exit chip label on the alternate-category chip row; opens the full category selector (D-04)
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get recognitionAlternatesMore;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -2257,4 +2257,10 @@ class SZh extends S {
 
   @override
   String get analyticsCalWeekdaySun => '日';
+
+  @override
+  String get recognitionBandSuggestedCategory => '推测类目';
+
+  @override
+  String get recognitionAlternatesMore => '其他';
 }

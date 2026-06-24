@@ -2303,4 +2303,10 @@ class SEn extends S {
 
   @override
   String get analyticsCalWeekdaySun => 'S';
+
+  @override
+  String get recognitionBandSuggestedCategory => 'Suggested category';
+
+  @override
+  String get recognitionAlternatesMore => 'More';
 }

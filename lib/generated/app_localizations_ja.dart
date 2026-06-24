@@ -2264,4 +2264,10 @@ class SJa extends S {
 
   @override
   String get analyticsCalWeekdaySun => '日';
+
+  @override
+  String get recognitionBandSuggestedCategory => '推定カテゴリ';
+
+  @override
+  String get recognitionAlternatesMore => 'もっと';
 }
