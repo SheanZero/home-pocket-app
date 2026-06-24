@@ -42,6 +42,16 @@ final List<CategoryKeywordPreference> _health = [
   seed('けんしん', 'cat_health_dock'), // ja — health checkup (hiragana)
   seed('其他医疗', 'cat_health_other'), // zh — other medical
   seed('その他医療', 'cat_health_other'), // ja — other medical (kana その他)
+  // ===== Health & Medical (en) — VEN-01 / D-12 lowercase seeds =====
+  seed('hospital', 'cat_health_hospital'), // en — hospital
+  seed('medicine', 'cat_health_medicine'), // en — medicine
+  seed('gym', 'cat_health_fitness'), // en — gym
+  seed('fitness', 'cat_health_fitness'), // en — fitness
+  seed('massage', 'cat_health_massage'), // en — massage
+  seed('dentist', 'cat_health_dental'), // en — dental visit
+  seed('supplements', 'cat_health_supplements'), // en — supplements
+  seed('health checkup', 'cat_health_dock'), // en — medical checkup
+  seed('other medical', 'cat_health_other'), // en — other medical
 ];
 
 final List<CategoryKeywordPreference> _education = [
@@ -85,6 +95,17 @@ final List<CategoryKeywordPreference> _education = [
   seed('こうざ', 'cat_education_seminar'), // ja — course / lecture (hiragana)
   seed('其他教育', 'cat_education_other'), // zh — other education
   seed('その他教育', 'cat_education_other'), // ja — other education (kana)
+  // ===== Education & Self-Improvement (en) — VEN-01 / D-12 seeds =====
+  seed('book', 'cat_education_books'), // en — book
+  seed('newspaper', 'cat_education_newspapers'), // en — newspaper
+  seed('class', 'cat_education_classes'), // en — classes / lessons
+  seed('textbook', 'cat_education_textbooks'), // en — textbook
+  seed('tuition', 'cat_education_tuition'), // en — tuition
+  seed('cram school', 'cat_education_cram_school'), // en — cram school
+  seed('entrance exam', 'cat_education_entrance_exam'), // en — entrance exam
+  seed('education insurance', 'cat_education_gakushi_hoken'), // en — education insurance
+  seed('seminar', 'cat_education_seminar'), // en — seminar
+  seed('other education', 'cat_education_other'), // en — other education
 ];
 
 final List<CategoryKeywordPreference> _hobbies = [
@@ -127,4 +148,17 @@ final List<CategoryKeywordPreference> _hobbies = [
   seed('おしかつ', 'cat_hobbies_oshikatsu'), // ja — oshikatsu (hiragana)
   seed('其他娱乐', 'cat_hobbies_other'), // zh — other hobbies
   seed('その他趣味', 'cat_hobbies_other'), // ja — other hobbies (kana)
+  // ===== Hobbies & Entertainment (en) — VEN-01 / D-12 seeds =====
+  seed('movie', 'cat_hobbies_movies'), // en — movie
+  seed('game', 'cat_hobbies_games'), // en — game
+  seed('hobby', 'cat_hobbies'), // en — L1 → cat_hobbies_other
+  seed('leisure', 'cat_hobbies_leisure'), // en — leisure
+  seed('event', 'cat_hobbies_events'), // en — event / concert
+  seed('concert', 'cat_hobbies_events'), // en — concert / live show
+  seed('manga', 'cat_hobbies_books'), // en — manga / comics
+  seed('travel', 'cat_hobbies_travel'), // en — travel
+  seed('music', 'cat_hobbies_music'), // en — music
+  seed('streaming', 'cat_hobbies_subscription'), // en — hobby/streaming subscription
+  seed('oshikatsu', 'cat_hobbies_oshikatsu'), // en — idol fandom spending
+  seed('other hobbies', 'cat_hobbies_other'), // en — other hobbies
 ];

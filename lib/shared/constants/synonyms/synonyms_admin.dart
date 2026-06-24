@@ -55,6 +55,19 @@ final List<CategoryKeywordPreference> _taxAndInsurance = [
   seed('しょとくほしょうほけん', 'cat_insurance_income'), // ja — income-protection insurance (hiragana reading)
   seed('其他保险', 'cat_insurance_other'), // zh — other insurance
   seed('その他保険', 'cat_insurance_other'), // ja — other insurance (kana その他)
+  // ===== Tax & social security / Insurance (en) — VEN-01 / D-12 seeds =====
+  seed('income tax', 'cat_tax_income'), // en — income tax
+  seed('pension', 'cat_tax_pension'), // en — pension contribution
+  seed('national health insurance', 'cat_tax_health_insurance'), // en — health insurance (national)
+  seed('hometown tax', 'cat_tax_furusato'), // en — furusato nozei
+  seed('consumption tax', 'cat_tax_consumption'), // en — consumption tax
+  seed('nursing insurance', 'cat_tax_nursing_insurance'), // en — long-term care insurance
+  seed('other taxes', 'cat_tax_other'), // en — other taxes
+  seed('life insurance', 'cat_insurance_life'), // en — life insurance
+  seed('medical insurance', 'cat_insurance_medical'), // en — medical insurance
+  seed('cancer insurance', 'cat_insurance_cancer'), // en — cancer insurance
+  seed('income protection', 'cat_insurance_income'), // en — income-protection insurance
+  seed('other insurance', 'cat_insurance_other'), // en — other insurance
 ];
 
 final List<CategoryKeywordPreference> _specialAndAsset = [
@@ -106,6 +119,23 @@ final List<CategoryKeywordPreference> _specialAndAsset = [
   seed('ふどうさん', 'cat_asset_realestate'), // ja — real estate (hiragana reading; 不動産 is Han)
   seed('其他资产', 'cat_asset_other'), // zh — other asset
   seed('その他資産', 'cat_asset_other'), // ja — other asset (kana その他)
+  // ===== Special life-events / Asset (en) — VEN-01 / D-12 seeds =====
+  seed('wedding', 'cat_special_wedding'), // en — wedding
+  seed('fertility treatment', 'cat_special_fertility'), // en — fertility treatment
+  seed('nursing care', 'cat_special_nursing'), // en — nursing care
+  seed('funeral', 'cat_special_funeral'), // en — funeral
+  seed('life event', 'cat_special_life_event'), // en — major life event
+  seed('new year', 'cat_special_newyear'), // en — new-year spending
+  seed('relocation', 'cat_special_movement'), // en — moving / relocation
+  seed('other special', 'cat_special_other'), // en — other special expense
+  seed('nisa', 'cat_asset_nisa'), // en — NISA tax-free investment
+  seed('ideco', 'cat_asset_ideco'), // en — iDeCo personal pension
+  seed('mutual fund', 'cat_asset_tsumitate'), // en — accumulation investing
+  seed('savings', 'cat_asset_savings'), // en — savings / deposit
+  seed('stocks', 'cat_asset_stock'), // en — stocks
+  seed('forex', 'cat_asset_fx'), // en — foreign exchange
+  seed('real estate', 'cat_asset_realestate'), // en — real-estate investment
+  seed('other asset', 'cat_asset_other'), // en — other asset
 ];
 
 final List<CategoryKeywordPreference> _allowanceAndOther = [
@@ -150,4 +180,13 @@ final List<CategoryKeywordPreference> _allowanceAndOther = [
   seed('その他', 'cat_other_expense'),
   seed('其他', 'cat_other_expense'),
   seed('other', 'cat_other_expense'),
+  // ===== Allowance / Other (en) — VEN-01 / D-12 lowercase seeds =====
+  seed('pocket money', 'cat_allowance_self'), // en — own pocket money
+  seed('spouse allowance', 'cat_allowance_spouse'), // en — spouse allowance
+  seed('kids allowance', 'cat_allowance_kids'), // en — kids allowance
+  seed('other allowance', 'cat_allowance_other'), // en — other allowance
+  seed('remittance', 'cat_other_remittance'), // en — remittance / transfer
+  seed('miscellaneous', 'cat_other_misc'), // en — miscellaneous
+  seed('unclassified', 'cat_other_unclassified'), // en — unclassified spending
+  seed('other misc', 'cat_other_other'), // en — other misc
 ];

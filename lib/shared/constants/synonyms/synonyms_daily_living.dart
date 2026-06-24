@@ -96,6 +96,33 @@ final List<CategoryKeywordPreference> _foodAndDaily = [
   seed('さぶすく', 'cat_daily_subscription'), // ja — subscription (hiragana)
   seed('其他日用', 'cat_daily_other'), // zh — other daily goods
   seed('その他日用品', 'cat_daily_other'), // ja — other daily goods (kana)
+  // ===== Food & Daily Necessities (en) — VEN-01 / D-12 lowercase seeds =====
+  // Authored lowercase: pairs with the 52-01 en-residual lowercasing so a
+  // capitalized iOS STT keyword ("Coffee") still matches via findByKeyword.
+  seed('breakfast', 'cat_food_dining_out'), // en — breakfast
+  seed('lunch', 'cat_food_dining_out'), // en — lunch
+  seed('dinner', 'cat_food_dining_out'), // en — dinner
+  seed('restaurant', 'cat_food_dining_out'), // en — eating out
+  seed('food', 'cat_food'), // en — L1 → cat_food_other
+  seed('coffee', 'cat_food_cafe'), // en — coffee
+  seed('cafe', 'cat_food_cafe'), // en — cafe
+  seed('groceries', 'cat_food_groceries'), // en — groceries
+  seed('supermarket', 'cat_food_groceries'), // en — supermarket
+  seed('delivery', 'cat_food_delivery'), // en — food delivery
+  seed('takeout', 'cat_food_delivery'), // en — takeout delivery
+  seed('drinks', 'cat_food_drinks'), // en — drinks
+  seed('alcohol', 'cat_food_drinks'), // en — alcohol
+  seed('other food', 'cat_food_other'), // en — other food/dining
+  seed('household goods', 'cat_daily_household'), // en — household goods
+  seed('soap', 'cat_daily_household'), // en — soap / daily goods
+  seed('baby supplies', 'cat_daily_children'), // en — baby supplies
+  seed('diapers', 'cat_daily_children'), // en — diapers
+  seed('cigarettes', 'cat_daily_tobacco'), // en — cigarettes
+  seed('tobacco', 'cat_daily_tobacco'), // en — tobacco
+  seed('drugstore', 'cat_daily_drugstore'), // en — drugstore
+  seed('pharmacy goods', 'cat_daily_drugstore'), // en — drugstore goods
+  seed('subscription', 'cat_daily_subscription'), // en — subscription
+  seed('other daily', 'cat_daily_other'), // en — other daily goods
 ];
 
 final List<CategoryKeywordPreference> _petAndTransport = [
@@ -158,6 +185,27 @@ final List<CategoryKeywordPreference> _petAndTransport = [
   seed('長途巴士', 'cat_transport_highway_bus'), // zh — long-distance coach
   seed('其他交通', 'cat_transport_other'), // zh — other transport
   seed('その他交通費', 'cat_transport_other'), // ja — other transport (kana)
+  // ===== Pet & Transport (en) — VEN-01 / D-12 lowercase seeds =====
+  seed('pet food', 'cat_pet_food'), // en — pet food
+  seed('cat food', 'cat_pet_food'), // en — cat food
+  seed('pet supplies', 'cat_pet_supplies'), // en — pet supplies
+  seed('cat litter', 'cat_pet_supplies'), // en — cat litter
+  seed('vet', 'cat_pet_medical'), // en — veterinarian
+  seed('animal hospital', 'cat_pet_medical'), // en — vet clinic
+  seed('pet grooming', 'cat_pet_grooming'), // en — pet grooming
+  seed('pet hotel', 'cat_pet_hotel'), // en — pet boarding
+  seed('pet insurance', 'cat_pet_insurance'), // en — pet insurance
+  seed('other pet', 'cat_pet_other'), // en — other pet expense
+  seed('train', 'cat_transport_train'), // en — train
+  seed('subway', 'cat_transport_train'), // en — subway / metro
+  seed('bus', 'cat_transport_bus'), // en — bus
+  seed('taxi', 'cat_transport_taxi'), // en — taxi
+  seed('transport', 'cat_transport'), // en — L1 → cat_transport_other
+  seed('bullet train', 'cat_transport_shinkansen'), // en — shinkansen
+  seed('flight', 'cat_transport_flights'), // en — flight
+  seed('plane ticket', 'cat_transport_flights'), // en — plane ticket
+  seed('highway bus', 'cat_transport_highway_bus'), // en — highway bus
+  seed('other transport', 'cat_transport_other'), // en — other transport
 ];
 
 final List<CategoryKeywordPreference> _clothingAndSocial = [
@@ -225,6 +273,28 @@ final List<CategoryKeywordPreference> _clothingAndSocial = [
   seed('かいひ', 'cat_social_fees'), // ja — membership fee (hiragana)
   seed('其他交际', 'cat_social_other'), // zh — other socializing
   seed('その他交際費', 'cat_social_other'), // ja — other socializing (kana)
+  // ===== Clothing & Beauty / Socializing (en) — VEN-01 / D-12 seeds =====
+  seed('clothes', 'cat_clothing'), // en — L1 → cat_clothing_other
+  seed('shoes', 'cat_clothing_shoes'), // en — shoes
+  seed('sneakers', 'cat_clothing_shoes'), // en — sneakers
+  seed('shirt', 'cat_clothing_clothes'), // en — clothes/garment
+  seed('accessories', 'cat_clothing_accessories'), // en — accessories
+  seed('jewelry', 'cat_clothing_accessories'), // en — jewelry
+  seed('underwear', 'cat_clothing_underwear'), // en — underwear
+  seed('haircut', 'cat_clothing_hair'), // en — haircut
+  seed('hair salon', 'cat_clothing_hair'), // en — hair salon
+  seed('cosmetics', 'cat_clothing_cosmetics'), // en — cosmetics
+  seed('makeup', 'cat_clothing_cosmetics'), // en — makeup
+  seed('esthetic', 'cat_clothing_esthetic'), // en — esthetic care
+  seed('dry cleaning', 'cat_clothing_cleaning'), // en — dry cleaning
+  seed('laundry', 'cat_clothing_cleaning'), // en — laundry
+  seed('bag', 'cat_clothing_bags'), // en — bag
+  seed('other clothing', 'cat_clothing_other'), // en — other clothing
+  seed('social drinks', 'cat_social_drinks'), // en — social drinking
+  seed('gift', 'cat_social_gifts'), // en — gift
+  seed('ceremonial gift', 'cat_social_ceremonial'), // en — ceremonial cash gift
+  seed('membership fee', 'cat_social_fees'), // en — membership/club fee
+  seed('other socializing', 'cat_social_other'), // en — other socializing
 ];
 
 final List<CategoryKeywordPreference> _housingUtilitiesCommunicationCar = [
@@ -344,4 +414,38 @@ final List<CategoryKeywordPreference> _housingUtilitiesCommunicationCar = [
   seed('じどうしゃぜい', 'cat_car_tax'), // ja — automobile tax (hiragana reading; 自動車税 is Han)
   seed('其他车辆', 'cat_car_other'), // zh — other car expense
   seed('その他車両', 'cat_car_other'), // ja — other car (kana その他)
+  // ===== Housing / Utilities / Communication / Car (en) — VEN-01 / D-12 =====
+  seed('rent', 'cat_housing_rent'), // en — rent
+  seed('water bill', 'cat_utilities_water'), // en — water bill
+  seed('electricity', 'cat_utilities_electricity'), // en — electricity bill
+  seed('gas bill', 'cat_utilities_gas'), // en — gas bill
+  seed('kerosene', 'cat_utilities_kerosene'), // en — kerosene
+  seed('other utilities', 'cat_utilities_other'), // en — other utilities
+  seed('mortgage', 'cat_housing_mortgage'), // en — mortgage
+  seed('management fee', 'cat_housing_management'), // en — property management fee
+  seed('furniture', 'cat_housing_furniture'), // en — furniture
+  seed('appliances', 'cat_housing_appliances'), // en — home appliances
+  seed('renovation', 'cat_housing_renovation'), // en — renovation
+  seed('moving cost', 'cat_housing_utilities_setup'), // en — moving setup cost
+  seed('home insurance', 'cat_housing_insurance'), // en — home insurance
+  seed('property tax', 'cat_housing_property_tax'), // en — property tax
+  seed('other housing', 'cat_housing_other'), // en — other housing
+  seed('mobile phone', 'cat_communication_mobile'), // en — mobile phone bill
+  seed('landline', 'cat_communication_landline'), // en — landline
+  seed('internet', 'cat_communication_internet'), // en — internet fee
+  seed('cable tv', 'cat_communication_broadcast'), // en — cable/satellite TV
+  seed('courier', 'cat_communication_delivery'), // en — courier / shipping
+  seed('nhk fee', 'cat_communication_nhk'), // en — NHK / broadcaster fee
+  seed('postage', 'cat_communication_postage'), // en — postage
+  seed('other communication', 'cat_communication_other'), // en — other comms
+  seed('fuel', 'cat_car_fuel'), // en — fuel / gasoline
+  seed('parking', 'cat_car_parking'), // en — parking
+  seed('toll', 'cat_car_toll'), // en — toll
+  seed('car loan', 'cat_car_loan'), // en — car loan
+  seed('car maintenance', 'cat_car_maintenance'), // en — car maintenance
+  seed('car share', 'cat_car_car_share'), // en — car share / rental
+  seed('driving school', 'cat_car_driving_school'), // en — driving school
+  seed('car insurance', 'cat_car_insurance'), // en — car insurance
+  seed('car tax', 'cat_car_tax'), // en — automobile tax
+  seed('other car', 'cat_car_other'), // en — other car expense
 ];

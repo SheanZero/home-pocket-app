@@ -41,12 +41,18 @@ export 'synonyms/synonyms_support.dart' show kVoiceSynonymSeedEpoch;
 /// routes to that L1's `_other` bucket via the resolver's `_ensureL2`, never
 /// to an arbitrary sibling L2 — so L1 catch-alls do NOT satisfy coverage.
 ///
-/// English (en) entries are deferred to v1.4+ — do NOT add `breakfast`,
-/// `lunch`, `coffee`, `food`, `clothes`, `shoes`, `book`, `hospital`,
-/// `medicine`, `rent`, `utilities`, `movie`, `game`, `train`, `bus`, `taxi`.
-/// REQUIREMENTS.md §Out of scope defers English voice input to v1.4+.
+/// English (en) seeds — ADDED per VEN-01 (Phase 52 D-12). Every L2 that
+/// carries a zh and/or ja DIRECT seed now ALSO carries ≥1 lowercase English
+/// keyword (e.g. `coffee`->`cat_food_cafe`, `rent`->`cat_housing_rent`). They
+/// are authored LOWERCASE on purpose: the 52-01 en-residual lowercasing fix
+/// (`_extractKeyword` in `parse_voice_input_use_case.dart`) lowercases the
+/// extracted en keyword, and `findByKeyword` is an exact (case-sensitive)
+/// lookup — so a capitalized iOS STT keyword ("Coffee") only matches a
+/// lowercase seed. This write==read identity contract MUST be preserved: do
+/// NOT add Capitalized en seed rows. (Earlier note deferred en to v1.4+; that
+/// deferral is reversed — English voice input is in scope as of v1.9 / VEN-01.)
 abstract final class DefaultVoiceSynonyms {
-  /// All built-in voice synonym seeds (zh + ja, no en).
+  /// All built-in voice synonym seeds (zh + ja + en).
   static List<CategoryKeywordPreference> get all => _all;
 
   static final List<CategoryKeywordPreference> _all = [
