@@ -197,12 +197,16 @@ class VoiceRecordPanel extends StatelessWidget {
                 onReset: onReset,
               ),
 
-              // BOTTOM zone — the two hints, centered in the lower half.
+              // BOTTOM zone — the two hints. Anchored to the TOP of the lower
+              // half (with a small gap) so the 「点击重置重新录入」 hint sits close
+              // to the reset square rather than floating at the lower-half center
+              // (user request: pull the caption nearer the reset button).
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    const SizedBox(height: 16),
                     // 260622-nhs R7: the stopped-only 「点击重置重新录入」 hint
                     // keeps a RESERVED placeholder while listening (maintainSize)
                     // so the panel reads identically in both states (no jump).
