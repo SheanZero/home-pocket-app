@@ -4,8 +4,11 @@ import 'package:home_pocket/application/voice/recognition/category_recognizer.da
 import 'package:home_pocket/application/voice/recognition/merchant_recognizer.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
 import 'package:home_pocket/features/accounting/domain/models/merchant_candidate.dart';
+import 'package:home_pocket/features/accounting/domain/models/merchant_match_entry.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/merchant_repository.dart';
+import 'package:home_pocket/infrastructure/ml/merchant_name_normalizer.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Phase 50 (DECOUP-01/02/03) — ParseVoiceInputUseCase runs two INDEPENDENT
@@ -24,6 +27,26 @@ class _MockCategoryRecognizer extends Mock implements CategoryRecognizer {}
 class _MockMerchantRecognizer extends Mock implements MerchantRecognizer {}
 
 class _MockVoiceTextParser extends Mock implements VoiceTextParser {}
+
+class _MockMerchantRepository extends Mock implements MerchantRepository {}
+
+/// Faithful match entry for the de-mocked (IN-04) end-to-end quadrant: matchKey
+/// derived with the production normalizer, exactly as the Phase-49 seed does.
+MerchantMatchEntry _matchEntry(
+  String surface, {
+  required String merchantId,
+  required String displayName,
+  required String categoryId,
+}) {
+  return MerchantMatchEntry(
+    matchKey: normalizeMerchantKey(surface),
+    surface: surface,
+    merchantId: merchantId,
+    displayName: displayName,
+    categoryId: categoryId,
+    ledgerHint: 'daily',
+  );
+}
 
 /// Builds a merchant candidate at a given score (default at/above floor).
 MerchantCandidate _candidate({
@@ -273,6 +296,41 @@ void main() {
       },
     );
 
+    // ── WR-04: a null normalizeToL2 result must NOT auto-fill the raw,
+    // possibly-non-L2 merchant categoryId — leave the category null and surface
+    // the candidate for a manual pick instead. ──
+    test(
+      'merchant✓keyword✗ but normalizeToL2 null → no auto-fill (WR-04)',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async =>
+              [_candidate(score: 0.95, categoryId: 'cat_food_l1_only')],
+        );
+        // The merchant categoryId does not normalize to an L2 (e.g. an L1 id
+        // with no resolvable child).
+        when(
+          () => mockCategory.normalizeToL2('cat_food_l1_only'),
+        ).thenAnswer((_) async => null);
+
+        final result = await useCase.execute('スタバ', localeId: 'ja-JP');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        // No auto-fill: the un-normalized id must never be stamped.
+        expect(
+          data.categoryMatch,
+          isNull,
+          reason: 'null normalizeToL2 → no auto-fill (WR-04)',
+        );
+        expect(data.ledgerType, isNull);
+        // resolveLedgerType is NOT consulted when there is no final category.
+        verifyNever(() => mockCategory.resolveLedgerType(any()));
+        // The candidate still surfaces for a manual pick (recall-first).
+        expect(data.merchantCandidates, isNotEmpty);
+      },
+    );
+
     test(
       'exactly-at-floor (0.85) candidate auto-fills (>= is inclusive)',
       () async {
@@ -414,6 +472,93 @@ void main() {
         reason: 'amount-only utterance → null resolvedKeyword (explicit guard)',
       );
     });
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // IN-04 / CR-01: REAL MerchantRecognizer end-to-end. The four-quadrant gate
+  // above mocks the recognizer (0.95 for any() input), so it cannot catch a
+  // scorer regression. This group wires the REAL MerchantRecognizer over a tiny
+  // in-memory seed through the REAL ParseVoiceInputUseCase, asserting compound
+  // "merchant-then-words" utterances auto-fill via the real anchored scorer —
+  // the structural reason CR-01 shipped green is closed here.
+  // ════════════════════════════════════════════════════════════════════════
+  group('IN-04 — real MerchantRecognizer over a tiny seed (CR-01 e2e)', () {
+    late ParseVoiceInputUseCase realMerchantUseCase;
+
+    setUp(() {
+      final repo = _MockMerchantRepository();
+      when(repo.loadAllForMatching).thenAnswer(
+        (_) async => <MerchantMatchEntry>[
+          _matchEntry(
+            'スターバックス',
+            merchantId: 'mer_starbucks',
+            displayName: 'スターバックス',
+            categoryId: 'cat_food_cafe',
+          ),
+          _matchEntry(
+            'スタバ',
+            merchantId: 'mer_starbucks',
+            displayName: 'スターバックス',
+            categoryId: 'cat_food_cafe',
+          ),
+          _matchEntry(
+            'マクドナルド',
+            merchantId: 'mer_mcdonalds',
+            displayName: 'マクドナルド',
+            categoryId: 'cat_food_dining_out',
+          ),
+          _matchEntry(
+            'マクド',
+            merchantId: 'mer_mcdonalds',
+            displayName: 'マクドナルド',
+            categoryId: 'cat_food_dining_out',
+          ),
+        ],
+      );
+      final realMerchant = MerchantRecognizer(merchantRepository: repo);
+      // Category recognizer stays mocked: it returns null so the merchant
+      // auto-fill branch is exercised; the L2/ledger steps pass through.
+      realMerchantUseCase = ParseVoiceInputUseCase(
+        textParser: parser,
+        categoryRecognizer: mockCategory,
+        merchantRecognizer: realMerchant,
+      );
+      when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+    });
+
+    for (final c in const <String, String>{
+      'スタバでコーヒー': 'cat_food_cafe',
+      'スタバで500円': 'cat_food_cafe',
+      'スタバに行った': 'cat_food_cafe',
+      'マクドでポテト食べた': 'cat_food_dining_out',
+      'マクドで昼': 'cat_food_dining_out',
+    }.entries) {
+      test(
+        'compound "${c.key}" auto-fills ${c.value} via the real scorer',
+        () async {
+          final result = await realMerchantUseCase.execute(
+            c.key,
+            localeId: 'ja-JP',
+          );
+
+          expect(result.isSuccess, isTrue, reason: result.error);
+          final data = result.data!;
+          expect(
+            data.merchantCandidates,
+            isNotEmpty,
+            reason: '"${c.key}" must surface a merchant candidate (CR-01)',
+          );
+          expect(
+            data.categoryMatch,
+            isNotNull,
+            reason: '"${c.key}" must auto-fill (>= 0.85 floor)',
+          );
+          expect(data.categoryMatch!.categoryId, equals(c.value));
+          expect(data.categoryMatch!.source, equals(MatchSource.merchant));
+          expect(data.categoryMatch!.confidence >= 0.85, isTrue);
+        },
+      );
+    }
   });
 
   // ─── localeId routing (preserved from the pre-Phase-50 test) ───

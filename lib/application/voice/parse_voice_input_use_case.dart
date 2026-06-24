@@ -93,8 +93,16 @@ class ParseVoiceInputUseCase {
       // unconditionally (DECOUP-02); the merchant engine is recall-first and
       // surfaces every scored candidate (the orchestrator owns the floor).
       final categoryMatch = await _categoryRecognizer.resolve(keyword);
+      // WR-03 / CR-01: feed the merchant engine the SAME amount/currency/date/
+      // particle-stripped surface the keyword engine uses — NOT the raw
+      // transcript. Scoring over the raw text pollutes the normalized query key
+      // with digits and unrelated runes (「スタバで500円」→ すたばで500円), which
+      // shrinks prefix coverage and silently drops the merchant. The stripped
+      // surface (「スタバでコーヒー」→ スタバコーヒー) lets the seeded alias match at
+      // the alias-at-start tier. rawText is retained for display only.
+      final merchantQuery = keyword.isEmpty ? recognizedText : keyword;
       final merchantCandidates = await _merchantRecognizer.recognize(
-        recognizedText,
+        merchantQuery,
       );
 
       // 4. Thin keyword-priority merge (D-02) + 0.85 auto-fill floor (D-03).
@@ -116,16 +124,25 @@ class ParseVoiceInputUseCase {
             : merchantCandidates.first;
         if (best != null && best.score >= kMerchantAutoFillFloor) {
           final l2 = await _categoryRecognizer.normalizeToL2(best.categoryId);
-          finalCategory = CategoryMatchResult(
-            categoryId: l2 ?? best.categoryId,
-            confidence: best.score,
-            source: MatchSource.merchant,
-          );
-          // Ledger derived from the final category — NEVER best.ledgerHint
-          // (Phase 49 D-09 non-authoritative; LEDGER-01).
-          ledgerType = await _categoryRecognizer.resolveLedgerType(
-            finalCategory.categoryId,
-          );
+          // WR-04: only auto-fill when the merchant categoryId normalizes to a
+          // real L2. A null result means the id resolves to nothing or has no L2
+          // child — committing the un-normalized merchant categoryId would leak
+          // a non-L2 (possibly L1) id into the transaction and break the
+          // always-L2 contract resolveLedgerType assumes. Treat null as "no
+          // auto-fill": leave the category null and surface the candidate for a
+          // manual pick instead.
+          if (l2 != null) {
+            finalCategory = CategoryMatchResult(
+              categoryId: l2,
+              confidence: best.score,
+              source: MatchSource.merchant,
+            );
+            // Ledger derived from the final category — NEVER best.ledgerHint
+            // (Phase 49 D-09 non-authoritative; LEDGER-01).
+            ledgerType = await _categoryRecognizer.resolveLedgerType(
+              finalCategory.categoryId,
+            );
+          }
         }
       }
 

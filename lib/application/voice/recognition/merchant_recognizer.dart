@@ -97,40 +97,57 @@ class MerchantRecognizer {
   /// no tier matches (so the caller skips the entry entirely).
   ///
   /// Tiers (anchored — there is no bidirectional `contains||contains`):
-  ///   - exact          `nq == mk`                              → 1.00
-  ///   - anchored prefix either is a prefix of the other, with
-  ///                    min-length on the SHORTER string        → 0.85
-  ///   - containment    `mk.contains(nq)`, min-length nq        → 0.60
-  ///   - reverse        `nq.contains(mk)`, min-length mk        → 0.55
+  ///   - exact            `nq == mk`                            → 1.00
+  ///   - alias-at-start   seeded alias [mk] is a prefix of the
+  ///                      (stripped) utterance [nq], min-length mk → 0.85
+  ///   - anchored prefix  query [nq] prefixes a longer brand [mk],
+  ///                      min-length nq AND > 50% coverage       → 0.85
+  ///   - containment      `mk.contains(nq)`, min-length nq       → 0.60
+  ///   - reverse          `nq.contains(mk)`, min-length mk       → 0.55
   ///
-  /// Every NON-exact tier is gated by [_passesScriptMinLength] on the SHORTER
-  /// (contained / prefixing) string — the source of false positives at scale.
-  /// Crucially the prefix tier is guarded too: a bare single kanji like 「米」
-  /// is a prefix of a long chain name (米屋本舗) but must NOT auto-fill (SC2).
+  /// CR-01 / WR-03: the two prefix directions are NOT symmetric and must be
+  /// scored separately (the pre-fix code collapsed both into one coverage-guarded
+  /// branch that `return null`ed on failure, silently dropping the dominant
+  /// "merchant-then-words" utterance):
   ///
-  /// The prefix tier carries an ADDITIONAL coverage guard: the shorter (prefix)
-  /// string must cover STRICTLY MORE than half the longer string's runes. A
-  /// generic word or place name that prefixes a longer brand surface
-  /// (「the」⊂「thebig」 3/6, 「大阪」⊂「大阪王将」 2/4, 「cafe」⊂「caferenoir」 4/10)
-  /// is a weak signal and must NOT auto-fill (SC2); a substantial prefix
-  /// (「まくどな」⊂「まくどなるど」 4/6) is a strong one. Only an EXACT key equality
-  /// (an explicitly seeded short alias, e.g. スタバ) bypasses both guards.
+  ///   • `nq.startsWith(mk)` — the seeded alias [mk] is a prefix of the longer
+  ///     (amount/particle-stripped) utterance [nq], e.g. すたば ⊂ すたばこーひー
+  ///     (「スタバでコーヒー」), まくど ⊂ まくどぽてと…. This is a STRONG signal: the
+  ///     user spoke the merchant name first. It resolves at the anchored tier
+  ///     gated ONLY by [_passesScriptMinLength] on the alias — NO coverage guard
+  ///     (the trailing words shrink coverage but carry no counter-evidence). A
+  ///     bare single-kanji / 2-kana alias is still rejected by the min-length
+  ///     floor, so 「米…」 cannot prefix-fill a 米-chain (SC2).
+  ///
+  ///   • `mk.startsWith(nq)` — the query [nq] is a prefix of a longer BRAND
+  ///     surface [mk], e.g. 大阪 ⊂ 大阪王将, the ⊂ thebig, cafe ⊂ caferenoir. A
+  ///     short generic prefix of a long brand is a WEAK signal and keeps the
+  ///     `> 50%` coverage guard so it does NOT auto-fill (SC2); a substantial
+  ///     prefix (まくどな ⊂ まくどなるど 4/6) still clears it.
+  ///
+  /// A failed guard in EITHER prefix branch falls THROUGH to the containment
+  /// tiers instead of returning null, so an embedded (non-prefix) match can
+  /// still surface recall-first (IN-03).
   double? _scoreOf(String nq, String mk) {
     if (nq == mk) return _scoreExact;
-    if (mk.startsWith(nq) || nq.startsWith(mk)) {
-      // The shorter string is the prefix; guard IT on script-min-length AND on
-      // coverage (>= half the longer string).
-      final shorterRunes = nq.runes.length <= mk.runes.length
-          ? nq.runes.length
-          : mk.runes.length;
-      final longerRunes = nq.runes.length >= mk.runes.length
-          ? nq.runes.length
-          : mk.runes.length;
-      final shorter = nq.length <= mk.length ? nq : mk;
-      if (!_passesScriptMinLength(shorter)) return null;
-      if (shorterRunes * 2 <= longerRunes) return null; // must cover > 50%
+
+    // Direction A — seeded alias [mk] anchored at the START of the utterance
+    // [nq]. Min-length on the alias keeps generic short fragments out (SC2);
+    // no coverage guard (the utterance is legitimately longer than the alias).
+    if (nq.startsWith(mk) && _passesScriptMinLength(mk)) {
       return _scoreAnchoredPrefix;
     }
+
+    // Direction B — query [nq] is a prefix of a longer BRAND [mk]. Keep the
+    // min-length + > 50% coverage guard so a short generic word does not
+    // auto-fill on a long brand surface (SC2).
+    if (mk.startsWith(nq) && _passesScriptMinLength(nq)) {
+      final nqRunes = nq.runes.length;
+      final mkRunes = mk.runes.length;
+      if (nqRunes * 2 > mkRunes) return _scoreAnchoredPrefix; // covers > 50%
+      // else: weak prefix — fall through to containment instead of dropping.
+    }
+
     if (mk.contains(nq) && _passesScriptMinLength(nq)) return _scoreContainment;
     if (nq.contains(mk) && _passesScriptMinLength(mk)) {
       return _scoreReverseContainment;
