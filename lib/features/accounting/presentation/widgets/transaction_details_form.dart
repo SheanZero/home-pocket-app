@@ -146,6 +146,19 @@ class TransactionDetailsFormState
       GlobalKey<CurrencyLinkedEditFieldsState>();
 
   String? _initialCategoryId;
+
+  // Phase 52 (RECUX-03 / D-05/D-06/D-07): the deferred category-correction
+  // stash. Set when the user changes the category away from the recognized
+  // original ([_initialCategoryId]) via EITHER a chip tap (52-02) OR the full
+  // selector; carries `resolvedKeyword` verbatim (write==read identity,
+  // 260526-pg6) plus the corrected categoryId. The KEYWORD-table write is
+  // DEFERRED to confirmed save and fires exactly once (D-05). Cleared with NO
+  // write when the category returns to the original, or on the host-driven
+  // reset / 连续记账 / back paths (via [updateCategory] / [discardPendingCorrection]).
+  // A null/empty keyword never produces a stash — and the merchant table is
+  // never touched on this path (D-07, D-16).
+  _PendingCategoryCorrection? _pendingCorrection;
+
   LedgerType _ledgerType = LedgerType.daily;
   int _joyFullness = 2;
   bool _isSubmitting = false;
@@ -460,6 +473,11 @@ class TransactionDetailsFormState
       _category = category;
       _parentCategory = parentCategory;
     });
+    // Phase 52 (RECUX-03 / D-05): a host-driven category push (voice batch-fill,
+    // snapshot-restore, continuous-entry re-seed) is a fresh slate, NOT an
+    // interactive user correction — discard any pending stash so an abandoned
+    // draft's correction never carries into the next entry.
+    _pendingCorrection = null;
     _resolveLedgerType(category.id);
   }
 
@@ -621,9 +639,16 @@ class TransactionDetailsFormState
 
     if (!mounted) return;
 
-    // Voice-correction gate (D-09): .new mode only, fires when category
-    // changed from the initial voice-matched one.
-    await widget.config.maybeWhen(
+    // Phase 52 (RECUX-03 / D-05/D-06/D-07): DEFER the correction write. Rather
+    // than writing the KEYWORD learning table here (the legacy immediate write),
+    // stash a pending correction and fire ONE write at confirmed save (D-05).
+    // Applies to BOTH this path's callers — the full selector ([_editCategory])
+    // AND an alternate-chip tap ([_selectAlternateCategory]) — so both count as
+    // corrections (D-06). The write key is `voiceKeyword` (== `resolvedKeyword`)
+    // verbatim (write==read, 260526-pg6); a null/empty keyword stashes NOTHING
+    // and the merchant table is NEVER touched (D-07, D-16). Selecting back to
+    // the recognized original clears the stash (no spurious correction).
+    widget.config.maybeWhen(
       $new:
           (
             nBookId,
@@ -635,21 +660,28 @@ class TransactionDetailsFormState
             nInitialDate,
             nEntrySource,
             voiceKeyword,
-          ) async {
-            if (voiceKeyword != null &&
-                voiceKeyword.isNotEmpty &&
-                result.id != _initialCategoryId) {
-              final correctionUseCase = ref.read(
-                recordCategoryCorrectionUseCaseProvider,
-              );
-              await correctionUseCase.execute(
+          ) {
+            if (result.id == _initialCategoryId) {
+              // Reverted to the recognized original — discard any pending stash.
+              _pendingCorrection = null;
+            } else if (voiceKeyword != null && voiceKeyword.isNotEmpty) {
+              _pendingCorrection = _PendingCategoryCorrection(
                 keyword: voiceKeyword,
                 correctedCategoryId: result.id,
               );
             }
+            // voiceKeyword null/empty: leave _pendingCorrection untouched
+            // (stays null) — D-07: no orphan-key write, ever.
           },
       orElse: () {},
     );
+  }
+
+  /// Phase 52 (RECUX-03 / D-05): discard the pending category correction with
+  /// NO write. Invoked by the host on the reset / 连续记账 (continuous-entry) /
+  /// back paths so an abandoned draft never pollutes the KEYWORD learning table.
+  void discardPendingCorrection() {
+    _pendingCorrection = null;
   }
 
   /// Phase 52 (RECUX-02): an alternate-category chip tap. Resolves the chosen
@@ -847,6 +879,29 @@ class TransactionDetailsFormState
                       merchantRaw: merchantRaw,
                       selectedCategoryId: _category!.id,
                     );
+              }
+
+              // Phase 52 (RECUX-03 / D-05/D-06/D-07): fire the DEFERRED category
+              // correction exactly once, only at confirmed save. The stash is
+              // present only when the user changed the category away from the
+              // recognized original via a chip tap OR the full selector (both
+              // count — D-06); it carries `resolvedKeyword` verbatim (write==read,
+              // 260526-pg6) and is null when the keyword was null/empty (D-07).
+              // Re-check the final category still differs from the recognized
+              // original (defense-in-depth — the host may have re-pushed the
+              // original after the stash was set). The write target is the
+              // KEYWORD table ONLY — the merchant table is never touched here.
+              final pending = _pendingCorrection;
+              if (pending != null &&
+                  pending.correctedCategoryId != _initialCategoryId &&
+                  _category!.id != _initialCategoryId) {
+                await ref
+                    .read(recordCategoryCorrectionUseCaseProvider)
+                    .execute(
+                      keyword: pending.keyword,
+                      correctedCategoryId: pending.correctedCategoryId,
+                    );
+                _pendingCorrection = null;
               }
 
               // D-15: celebration only for .new joy saves. .edit branch never
@@ -1271,4 +1326,24 @@ class TransactionDetailsFormState
       ],
     );
   }
+}
+
+/// Phase 52 (RECUX-03 / D-05/D-06/D-07): an immutable pending category
+/// correction stashed when the user changes the category away from the
+/// recognized-original one. The KEYWORD-table write is DEFERRED to confirmed
+/// save and fires exactly once. [keyword] is `resolvedKeyword` verbatim
+/// (write==read identity, 260526-pg6); it is guaranteed non-empty (an
+/// empty/null keyword never produces a stash, so save writes NOTHING — D-07).
+class _PendingCategoryCorrection {
+  const _PendingCategoryCorrection({
+    required this.keyword,
+    required this.correctedCategoryId,
+  });
+
+  /// `resolvedKeyword` verbatim — the learning write key (== recognizer read
+  /// key). Always non-empty by construction.
+  final String keyword;
+
+  /// The category id the user corrected to.
+  final String correctedCategoryId;
 }

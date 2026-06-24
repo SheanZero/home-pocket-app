@@ -328,6 +328,10 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     final form = _formKey.currentState;
     if (snapshot != null && form != null) {
       snapshot.restoreForm(form);
+      // Phase 52 (RECUX-03 / D-05): a 「重置·恢复账目」 reset abandons the
+      // current draft — discard any pending category correction with NO write
+      // (restoreForm clears it only when the snapshot had a category).
+      form.discardPendingCorrection();
       setState(() {
         _currency = snapshot.currency;
         _amount = snapshot.restoreHostAmount(_controller);
@@ -772,6 +776,10 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     });
     resetPttSessionState();
     final formState = _formKey.currentState;
+    // Phase 52 (RECUX-03 / D-05): 连续记账 (continuous-entry) starts a fresh
+    // slate after a successful save — discard any leftover pending correction
+    // with NO write so the next entry never inherits a stale correction.
+    formState?.discardPendingCorrection();
     formState?.updateAmount(0);
     formState?.updateCurrencyTriple(
       originalCurrency: null,
