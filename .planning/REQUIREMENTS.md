@@ -24,7 +24,7 @@
 ### Cross-Validation / Reconciliation (XVAL)
 
 - [x] **XVAL-01**: 纯领域 `RecognitionReconciler` 经显式 none/weak/strong 3×3 真值表合并两路裁决：一致 → 升置信度；关键词-商家冲突 → 关键词胜；无关键词 → 商家兜底；双弱 → 询问用户。
-- [ ] **XVAL-02**: Case A「在星巴克买了个杯子」解析为 购物（关键词意图），而非商家默认的咖啡。
+- [x] **XVAL-02**: Case A「在星巴克买了个杯子」解析为 购物（关键词意图），而非商家默认的咖啡。
 - [ ] **XVAL-03**: 识别在 STT 最终结果上裁定并加滞后（hysteresis），不随中间 partial 抖动。
 
 ### Daily/Joy Ledger Rework (LEDGER)
@@ -96,7 +96,7 @@
 | DECOUP-02 | Phase 50 — Decoupled Recognizers | Complete |
 | DECOUP-03 | Phase 50 — Decoupled Recognizers | Complete |
 | XVAL-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
-| XVAL-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| XVAL-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | XVAL-03 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
 | LEDGER-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
 | LEDGER-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |

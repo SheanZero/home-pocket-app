@@ -6,14 +6,14 @@ current_phase: 51
 current_phase_name: cross-validation-daily-joy-ledger-rework
 status: executing
 stopped_at: Phase 51 planned — 5 plans, ready to execute
-last_updated: "2026-06-24T06:09:14.870Z"
+last_updated: "2026-06-24T06:19:29.529Z"
 last_activity: 2026-06-24
 last_activity_desc: Phase 51 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 12
+  completed_plans: 13
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 51 (cross-validation-daily-joy-ledger-rework) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-24 — Phase 51 execution started
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T06:08:47.738Z
+Last session: 2026-06-24T06:19:11.425Z
 Stopped at: Phase 51 context gathered
 Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CONTEXT.md
 
@@ -270,6 +270,7 @@ Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CON
 | Phase 50 P03 | ~1h | 2 tasks | 4 files |
 | Phase 50 P05 | 18 | 3 tasks | 26 files |
 | Phase 51 P01 | 25 | 2 tasks | 19 files |
+| Phase 51 P02 | 6 | 3 tasks | 6 files |
 
 ## Decisions
 
@@ -345,6 +346,8 @@ Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CON
 - [Phase ?]: Phase 50-03: prefix tier needs per-script min-length AND strict >50% rune-coverage guard (SC2).
 - [Phase ?]: Phase 50: voice pipeline cut to two decoupled engines (CategoryRecognizer + MerchantRecognizer); keyword-priority merge with 0.85 auto-fill floor; ledger = resolveLedgerType(finalCategory) (LEDGER-01); old MerchantDatabase/VoiceCategoryResolver path retired (D-05).
 - [Phase ?]: Phase 51-01: extended domain_import_rules_test.dart models/ subdir check to accept isCrossFeatureDomainModel (mirrors repositories/ escape) so voice/domain is a guarded feature while voice_parse_result imports accounting LedgerType cross-feature
+- [Phase ?]: Reconciler emits best-guess at band=weak (D-05); use case gates form auto-fill on band==medium, preserving 0.85-floor/WR-04 (51-02)
+- [Phase ?]: RecognitionReconciler is pure/sync: D-06 boost compares L2 id strings directly (merchant ids are L2 seed ids), no DB/normalizeToL2 inside the reconciler (51-02)
 
 ## Operator Next Steps
 
