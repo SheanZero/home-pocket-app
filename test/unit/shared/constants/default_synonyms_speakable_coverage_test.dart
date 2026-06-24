@@ -5,32 +5,24 @@ import 'package:home_pocket/shared/constants/default_synonyms.dart';
 /// D-04 MACHINE SET-COMPLETENESS GATE (Phase 50 DECOUP-02, T-50-08).
 ///
 /// The categoryId hard gate (`default_synonyms_categoryid_test.dart`) proves
-/// NO orphan id, but it passes just as happily on a 40-of-90 partial seed —
-/// every present row is legal, the missing rows simply do not exist to fail.
+/// NO orphan id, but it passes just as happily on a partial seed — every
+/// present row is legal, the missing rows simply do not exist to fail.
 /// A `grep cat_car_fuel` likewise passes on a partial seed. This gate closes
-/// THAT failure mode: it proves every SPEAKABLE L2 has at least one zh seed
-/// AND at least one ja seed, and NAMES every uncovered id so the authoring
-/// task knows exactly what to add.
+/// THAT failure mode: it proves every L2 has at least one zh seed AND at least
+/// one ja seed, and NAMES every uncovered id so the authoring task knows
+/// exactly what to add.
 ///
-/// ── speakable-L2 set ───────────────────────────────────────────────────
-/// speakableL2 = { every Category with level == 2 } MINUS a documented,
-/// code-literal exclusion set ([_isExcludedNonSpeakable]). D-04 does not
-/// require keyword coverage for pure `_other`/fallback buckets (the resolver's
-/// `_ensureL2` + L1->`_other` convention covers those) nor for admin/non-
-/// speakable id families (people rarely SAY these in a casual voice entry —
-/// they are statement/form line-items, not utterances):
-///   • `*_other`                  — pure fallback buckets
-///   • `cat_asset_*`              — investment vehicles (NISA/iDeCo/株/FX…)
-///   • `cat_insurance_*`          — insurance L1 family line-items
-///   • `*_insurance`             — insurance L2s under other L1s
-///                                  (cat_pet_insurance, cat_car_insurance,
-///                                   cat_housing_insurance, cat_tax_*_insurance)
-///   • `*_tax`                    — tax line-items (cat_car_tax,
-///                                  cat_housing_property_tax)
-///   • `cat_tax_*`                — taxes & social-security family
-///   • `cat_special_*`            — ceremonial / life-event special expenses
-/// Reviewable here in source so the human spot-check (Task 4) can challenge a
-/// borderline inclusion/exclusion.
+/// ── target set: FULL L2 coverage ──────────────────────────────────────
+/// SCOPE (user decision, continuation of plan 50-02): the target set is now
+/// EVERY level-2 category — the previously-excluded admin families are
+/// INCLUDED per RESEARCH A4 ("err toward including admin buckets"). There is
+/// NO exclusion list any more: `targetL2 = { every Category with level == 2 }`.
+/// This deliberately covers the families that the earlier speakable-only scope
+/// dropped (`*_other` fallback buckets, `cat_asset_*`, `cat_insurance_*`,
+/// `*_insurance`, `*_tax`, `cat_tax_*`, `cat_special_*`). People do say some of
+/// these aloud ("汽车税", "房贷"), and the categoryId orphan gate guards typos
+/// regardless. The gate's PURPOSE is unchanged — prove every target L2 has
+/// ≥1 zh + ≥1 ja DIRECT seed — only the target set widened to all L2.
 ///
 /// ── zh vs ja classification ────────────────────────────────────────────
 /// [CategoryKeywordPreference] has NO lang/script field — only `keyword` +
@@ -66,31 +58,23 @@ void main() {
   bool isJa(String kw) => _hasKana(kw);
   bool isZh(String kw) => _hasHan(kw) && !_hasKana(kw);
 
-  // ── speakable-L2 exclusion predicate (documented above) ────────────────
-  bool isExcludedNonSpeakable(String id) {
-    if (id.endsWith('_other')) return true; // pure _other / fallback
-    if (id.startsWith('cat_asset_')) return true; // investment vehicles
-    if (id.startsWith('cat_insurance_')) return true; // insurance L1 family
-    if (id.endsWith('_insurance')) return true; // *_insurance L2s
-    if (id.endsWith('_tax')) return true; // *_tax line-items
-    if (id.startsWith('cat_tax_')) return true; // taxes & social security
-    if (id.startsWith('cat_special_')) return true; // ceremonial / life-event
-    return false;
-  }
-
+  // ── target set: FULL L2 coverage (no exclusion — see header) ───────────
+  // User scope decision (continuation of plan 50-02): every level-2 category
+  // is a coverage target, including the admin families the earlier scope
+  // excluded. The kept variable name `speakableL2` is retained to minimise
+  // churn; it now means "every L2", not a speakable subset.
   final speakableL2 = DefaultCategories.all
       .where((c) => c.level == 2)
       .map((c) => c.id)
-      .where((id) => !isExcludedNonSpeakable(id))
       .toSet();
 
-  group('DefaultVoiceSynonyms speakable-L2 coverage (D-04)', () {
-    test('speakableL2 set is non-empty (broken-exclusion-filter guard)', () {
+  group('DefaultVoiceSynonyms full-L2 coverage (D-04)', () {
+    test('targetL2 set is non-empty (broken-filter guard)', () {
       expect(speakableL2, isNotEmpty);
     });
 
     test(
-      'every speakable L2 has >=1 zh direct seed AND >=1 ja direct seed',
+      'every L2 has >=1 zh direct seed AND >=1 ja direct seed',
       () {
         final offenders = <String>[];
         for (final id in speakableL2) {
@@ -116,8 +100,8 @@ void main() {
           offenders,
           isEmpty,
           reason:
-              'These speakable L2 categories lack a zh and/or ja direct seed '
-              '(D-04 set-completeness gap):\n${offenders.join('\n')}',
+              'These L2 categories lack a zh and/or ja direct seed '
+              '(D-04 full-coverage gap):\n${offenders.join('\n')}',
         );
       },
     );

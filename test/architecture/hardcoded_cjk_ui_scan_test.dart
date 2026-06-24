@@ -85,6 +85,12 @@ bool _shouldScan(File file) {
   // proper-nouns are DATA, category labels are ARB"). The directory grows toward
   // a 600–800 merchant ceiling + regional tail (MERCH-V2), so exclude by prefix.
   if (path.startsWith('lib/shared/constants/merchants/')) return false;
+  // Phase 50 D-04 — voice synonym seed data, split from default_synonyms.dart
+  // into per-family group files. CJK keywords are seed data inserted into
+  // category_keyword_preferences (resolver matches against speech tokens),
+  // not UI text — same rationale as the whitelisted default_synonyms.dart.
+  // Excluded by prefix because the set grows per-L1-family (full L2 coverage).
+  if (path.startsWith('lib/shared/constants/synonyms/')) return false;
   if (path.endsWith('.g.dart')) return false;
   if (path.endsWith('.freezed.dart')) return false;
   if (approvedWhitelist.contains(path)) return false;
