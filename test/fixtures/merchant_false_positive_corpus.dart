@@ -42,7 +42,6 @@ const List<String> merchantFalsePositiveCorpus = <String>[
   '野菜', // vegetables
   'パン', // bread (kana, 2 runes)
   '牛乳', // milk
-
   // ── place names / wards (kanji, collide with location-named chains)
   '杉並区', // Suginami ward
   '渋谷', // Shibuya
@@ -51,7 +50,6 @@ const List<String> merchantFalsePositiveCorpus = <String>[
   '大阪', // Osaka
   '近所のお店', // "the shop nearby"
   '駅前', // "in front of the station"
-
   // ── comment / filler words (would naive-substring into many surfaces)
   'コーヒー', // generic coffee word (NOT a cafe brand)
   'カフェ', // generic cafe word
@@ -66,13 +64,12 @@ const List<String> merchantFalsePositiveCorpus = <String>[
   'いい感じ', // "feels good"
   'これ', // "this"
   'それ', // "that"
-
   // ── short fragments that are PROPER substrings of a chain surface
-  'モス', // 2-char prefix fragment of モスバーガー — guarded by min-length
+  // (NOTE: 「モス」 is intentionally NOT here — it is a real seeded MOS Burger
+  //  alias and legitimately resolves exact; it is not adversarial.)
   'マツ', // fragment of マツモトキヨシ-style chains
   'すき', // fragment / "like"
   'ばあく', // gibberish overlap
-
   // ── latin generic words (len >= 3 but not a brand)
   'cafe', // generic
   'shop', // generic

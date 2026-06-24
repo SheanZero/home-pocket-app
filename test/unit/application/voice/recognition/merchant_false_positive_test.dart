@@ -6,7 +6,7 @@ import 'package:home_pocket/infrastructure/ml/merchant_name_normalizer.dart';
 import 'package:home_pocket/shared/constants/default_merchants.dart';
 import 'package:mocktail/mocktail.dart';
 
-import '../../../../../fixtures/merchant_false_positive_corpus.dart';
+import '../../../../fixtures/merchant_false_positive_corpus.dart';
 
 // Phase 50 Plan 03 (SC2): the adversarial false-positive gate. Each of the ~40
 // corpus entries (お米 / 杉並区 / comment-words / chain-substring fragments) must

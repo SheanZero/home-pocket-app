@@ -141,11 +141,22 @@ void main() {
       expect(_bestScoreFor(cands, 'mer_starbucks'), 1.00);
     });
 
-    test('anchored prefix (モス ⊂ モスバーガー) scores 0.85', () async {
+    test('anchored prefix (まくどな ⊂ マクドナルド) scores 0.85', () async {
+      // まくどな (4 kana, passes the >= 3 kana guard) is a genuine prefix of
+      // まくどなるど but NOT an exact key — so it lands in the anchored-prefix
+      // tier, not the exact tier. There is no seeded まくどな alias.
+      final r = _recognizer(_fixtureEntries());
+      final cands = await r.recognize('まくどな');
+      expect(_bestScoreFor(cands, 'mer_mcdonalds'), 0.85);
+    });
+
+    test('short kana prefix below the guard does NOT prefix-fill', () async {
+      // モス -> もす is only 2 kana; it is a prefix of もすばーがー but must be
+      // guarded OUT (< 3 kana) so generic 2-char fragments never auto-fill.
       final r = _recognizer(_fixtureEntries());
       final cands = await r.recognize('モス');
-      // モス (まっ.. no) — まくど vs もす; only モスバーガー starts with もす.
-      expect(_bestScoreFor(cands, 'mer_mos_burger'), 0.85);
+      final score = _bestScoreFor(cands, 'mer_mos_burger');
+      expect(score == null || score < 0.85, isTrue);
     });
 
     test(
@@ -174,22 +185,25 @@ void main() {
       },
     );
 
-    test('below script-min-length on containment yields no candidate', () async {
-      // お米 normalizes to お米 (2 runes, kanji-containing → min 2, OK as kanji)
-      // — but 'パ' style 1-rune kana must be guarded out. Use a 2-rune kana
-      // fragment 'ばー' which is inside もすばーがー but below the 3-kana floor.
-      final entries = <MerchantMatchEntry>[
-        _entry(
-          'もすばーがー',
-          merchantId: 'mer_mos2',
-          displayName: 'モスバーガー',
-          categoryId: 'cat_food_dining_out',
-        ),
-      ];
-      final r = _recognizer(entries);
-      final cands = await r.recognize('ばー'); // 2 kana runes, contained
-      expect(cands.where((c) => c.merchantId == 'mer_mos2'), isEmpty);
-    });
+    test(
+      'below script-min-length on containment yields no candidate',
+      () async {
+        // お米 normalizes to お米 (2 runes, kanji-containing → min 2, OK as kanji)
+        // — but 'パ' style 1-rune kana must be guarded out. Use a 2-rune kana
+        // fragment 'ばー' which is inside もすばーがー but below the 3-kana floor.
+        final entries = <MerchantMatchEntry>[
+          _entry(
+            'もすばーがー',
+            merchantId: 'mer_mos2',
+            displayName: 'モスバーガー',
+            categoryId: 'cat_food_dining_out',
+          ),
+        ];
+        final r = _recognizer(entries);
+        final cands = await r.recognize('ばー'); // 2 kana runes, contained
+        expect(cands.where((c) => c.merchantId == 'mer_mos2'), isEmpty);
+      },
+    );
   });
 
   group('four real surface forms resolve at >= 0.85 (SC3)', () {
