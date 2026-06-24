@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
 current_phase: 52
-current_phase_name: Recognition UX + English Voice
-status: planned
+current_phase_name: recognition-ux-english-voice
+status: executing
 stopped_at: Phase 52 planned — 6 plans, 4 waves (ready to execute)
-last_updated: "2026-06-24T10:11:12.000Z"
+last_updated: "2026-06-24T10:32:51.762Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 52 planned — 6 plans across 4 waves
+last_activity_desc: Phase 52 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 22
-  completed_plans: 16
+  completed_plans: 17
   percent: 75
 ---
 
@@ -24,18 +24,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 51 — cross-validation-daily-joy-ledger-rework
+**Current focus:** Phase 52 — recognition-ux-english-voice
 
 ## Current Position
 
-Phase: 52 — Recognition UX + English Voice
-Plan: 6 plans planned (52-01..52-06), 4 waves — ready to execute
-Status: Planned & verified (plan-checker PASSED, 0 blockers); W1 52-01 (D-11 VPR thread + en casing) → W2 52-02/04/05 (band/chips render, en category seeds, en number-words+locale) → W3 52-03 (correction reflux) → W4 52-06 (anti-toxicity sweep + ARB parity + macOS golden close-out)
-Last activity: 2026-06-24 — Phase 52 planned (6 plans, 4 waves); ready to execute
+Phase: 52 (recognition-ux-english-voice) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-06-24 — Phase 52 execution started
 
 ### Decisions
 
 - D-18 (2026-06-24): user approved ALL 5 candidate L2 ledger overrides at the blocking spot-check gate — `_defaultLedgerConfigs` now holds 14 overrides (food_drinks/health_fitness/health_massage→joy, clothing_hair/clothing_accessories→daily, plus the original 9). No schema change; ledger stays a pure function of the final category id.
+- [Phase ?]: D-19 (2026-06-24): Phase 52-01 threaded the 3 Phase-51 RecognitionOutcome fields (band/alternates/keywordMerchantConflict) into VoiceParseResult (3 fields only, lowest blast radius; band nullable for D-10 manual-entry no-affordance) and lowercased the en-only keyword residual (gate on lower.startsWith('en'); zh/ja byte-identical; 260526-pg6 write==read preserved).
 
 ### Quick Tasks Completed
 
@@ -222,7 +223,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T10:11:12.000Z
+Last session: 2026-06-24T10:32:30.746Z
 Stopped at: Phase 52 planned (6 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 
@@ -277,6 +278,7 @@ Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 | Phase 51 P02 | 6 | 3 tasks | 6 files |
 | Phase 51 P03 | ~20min | 2 tasks | 2 files |
 | Phase 51 P04 | ~12min | 3 tasks | 11 files |
+| Phase 52 P01 | 2min | 3 tasks | 5 files |
 
 ## Decisions
 

@@ -34,15 +34,15 @@
 
 ### Recognition UX + Learning Loop (RECUX)
 
-- [ ] **RECUX-01**: 语音识别后，录入表单展示选定类目 + 3 档定性置信度带（绝不显示数字 %/分数），ADR-012-safe。
-- [ ] **RECUX-02**: 低置信度时，可点的备选 chips（备选类目 + 商家默认类目）让用户一键纠正。
+- [x] **RECUX-01**: 语音识别后，录入表单展示选定类目 + 3 档定性置信度带（绝不显示数字 %/分数），ADR-012-safe。
+- [x] **RECUX-02**: 低置信度时，可点的备选 chips（备选类目 + 商家默认类目）让用户一键纠正。
 - [ ] **RECUX-03**: 对关键词-商家冲突的内联纠错教 KEYWORD 表（`category_keyword_preferences`），绝不污染商家表；`resolvedKeyword` 写键 == 读键身份端到端成立（防 260526-pg6 orphan-key 回归）。
 - [ ] **RECUX-04**: 识别 UX 不引入任何游戏化（无准确率分数/连胜/徽章/排行）；扩展反毒性扫描覆盖新界面 × ja/zh/en。
 - [ ] **RECUX-05**: 商家名是数据（存于 Drift 多语列、不进 ARB），类目标签是 ARB；所有新增 UI 文案三语 ARB parity，`flutter gen-l10n` 干净（`git add -f lib/generated/`）。
 
 ### English Voice Parity (VEN)
 
-- [ ] **VEN-01**: 英文语音从英文关键词识别类目、从英文别名/locale 名识别商家、识别英文货币词——达到与 zh/ja 的实用对齐（不做口述数字状态机）。
+- [x] **VEN-01**: 英文语音从英文关键词识别类目、从英文别名/locale 名识别商家、识别英文货币词——达到与 zh/ja 的实用对齐（不做口述数字状态机）。
 - [ ] **VEN-02**: 英文 STT 数字金额正确解析；~30 行有界英文数字词兜底处理 "fifty"/"a hundred" 而不进 CJK 数字路径；`localeId` 端到端贯通。
 
 ## v2 Requirements
@@ -100,12 +100,12 @@
 | XVAL-03 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | LEDGER-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | LEDGER-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
-| RECUX-01 | Phase 52 — Recognition UX + English Voice | Pending |
-| RECUX-02 | Phase 52 — Recognition UX + English Voice | Pending |
+| RECUX-01 | Phase 52 — Recognition UX + English Voice | Complete |
+| RECUX-02 | Phase 52 — Recognition UX + English Voice | Complete |
 | RECUX-03 | Phase 52 — Recognition UX + English Voice | Pending |
 | RECUX-04 | Phase 52 — Recognition UX + English Voice | Pending |
 | RECUX-05 | Phase 52 — Recognition UX + English Voice | Pending |
-| VEN-01 | Phase 52 — Recognition UX + English Voice | Pending |
+| VEN-01 | Phase 52 — Recognition UX + English Voice | Complete |
 | VEN-02 | Phase 52 — Recognition UX + English Voice | Pending |
 
 **Coverage:**
