@@ -365,6 +365,15 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _lastFilledAmount = amount;
     }
     if (category != null) state.updateCategory(category, parent);
+    // Phase 52 (RECUX-01/02 / D-08): push the recognition surface (confidence
+    // band + ranked alternates) at resolve-on-final ONLY — the same single
+    // isFinal fill that resolves the category. Partial-driven fills pass
+    // `fillCategory: false` and never reach here, so the band/chips resolve
+    // exactly once (no flicker on partials). Null band on a manual/OCR VPR
+    // leaves the form's no-affordance state intact (D-10).
+    if (fillCategory) {
+      state.updateRecognition(data.band, data.alternates);
+    }
     if (data.merchantName != null && data.merchantName!.isNotEmpty) {
       state.updateMerchant(data.merchantName!);
     }

@@ -35,6 +35,11 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
+import '../widgets/alternate_category_chips.dart';
+import '../widgets/confidence_band_indicator.dart';
+import '../../../voice/domain/models/recognition_outcome.dart' show ConfidenceBand;
+import '../../../voice/domain/models/voice_parse_result.dart'
+    show CategoryMatchResult;
 import '../widgets/conversion_preview_panel.dart'
     show rateStringOf, rateEffectiveDateOf, stalenessNoteFor;
 import '../widgets/currency_linked_edit_fields.dart';
@@ -144,6 +149,14 @@ class TransactionDetailsFormState
   LedgerType _ledgerType = LedgerType.daily;
   int _joyFullness = 2;
   bool _isSubmitting = false;
+
+  // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): the recognition surface state.
+  // Pushed by the voice host at resolve-on-final via [updateRecognition] (D-08);
+  // null on manual/OCR entry → no band/chips affordance (D-10). Cleared the
+  // instant the user picks any category (chip or full selector) so the band
+  // stops marking a "guess" (D-09 → user-authoritative).
+  ConfidenceBand? _band;
+  List<CategoryMatchResult> _alternates = const <CategoryMatchResult>[];
 
   // Joy-save celebration temporarily disabled per user request (2026-06-03,
   // quick-260603-nr1 follow-up): "先不要了，后续再看如何添加".
@@ -450,6 +463,43 @@ class TransactionDetailsFormState
     _resolveLedgerType(category.id);
   }
 
+  /// Phase 52 (RECUX-01/02 / D-08): the voice host pushes the recognized
+  /// confidence band + ranked alternates at resolve-on-final — the SAME fill
+  /// point that calls [updateCategory]. This drives the pure-visual band +
+  /// alternate-category chips on the form. Null band → no affordance (D-10).
+  ///
+  /// Idempotency: short-circuits when band + alternate ids are unchanged so
+  /// repeated final-fills do not rebuild-storm.
+  void updateRecognition(
+    ConfidenceBand? band,
+    List<CategoryMatchResult> alternates,
+  ) {
+    if (!mounted) return;
+    final sameBand = band == _band;
+    final sameAlts =
+        alternates.length == _alternates.length &&
+        List.generate(
+          alternates.length,
+          (i) => alternates[i].categoryId == _alternates[i].categoryId,
+        ).every((e) => e);
+    if (sameBand && sameAlts) return;
+    setState(() {
+      _band = band;
+      _alternates = List<CategoryMatchResult>.unmodifiable(alternates);
+    });
+  }
+
+  /// D-09: the band clears the instant the user picks any category (chip tap or
+  /// full selector) — the recognition guess is no longer authoritative. Chips
+  /// collapse with it. No-op when the band is already cleared.
+  void _clearRecognitionBand() {
+    if (_band == null && _alternates.isEmpty) return;
+    setState(() {
+      _band = null;
+      _alternates = const <CategoryMatchResult>[];
+    });
+  }
+
   /// Phase 22 D-07 — host pushes voice-resolved merchant string via this
   /// method on batch fill. Assigning `.text` on the existing controller
   /// triggers a TextField rebuild without recreating the controller.
@@ -537,6 +587,17 @@ class TransactionDetailsFormState
       return;
     }
 
+    await _applyCategorySelection(result);
+
+    // Item 4: success path — fire after voice-correction tail.
+    _notifyPickerDismissed();
+  }
+
+  /// Shared user-selection write set used by BOTH the full-selector flow
+  /// ([_editCategory]) and an alternate-chip tap ([_selectAlternateCategory]).
+  /// Per D-09 the confidence band is cleared the moment the user picks any
+  /// category (the recognition guess is no longer authoritative).
+  Future<void> _applyCategorySelection(Category result) async {
     // Resolve parent for display path.
     Category? parent = resolveParentCategory(result, _categoryById);
     if (parent == null && result.parentId != null) {
@@ -551,6 +612,9 @@ class TransactionDetailsFormState
       _category = result;
       _parentCategory = parent;
     });
+
+    // D-09: user pick → clear the recognition band + collapse chips.
+    _clearRecognitionBand();
 
     // Resolve ledger type for .new mode after category change.
     await _resolveLedgerType(result.id);
@@ -586,9 +650,23 @@ class TransactionDetailsFormState
           },
       orElse: () {},
     );
+  }
 
-    // Item 4: success path — fire after voice-correction tail.
-    _notifyPickerDismissed();
+  /// Phase 52 (RECUX-02): an alternate-category chip tap. Resolves the chosen
+  /// category id to a [Category] then routes it through the same user-selection
+  /// write set as the full selector (instant swap + ledger re-derive + band
+  /// clear + correction record), per CONTEXT D-05/D-06/D-09.
+  Future<void> _selectAlternateCategory(String categoryId) async {
+    if (categoryId == _category?.id) {
+      // Same category re-tapped — still a user-authoritative confirmation: clear
+      // the band (D-09) without redoing the repo lookup / correction write.
+      _clearRecognitionBand();
+      return;
+    }
+    final cat = _categoryById[categoryId] ??
+        await ref.read(categoryRepositoryProvider).findById(categoryId);
+    if (!mounted || cat == null) return;
+    await _applyCategorySelection(cat);
   }
 
   Future<void> _editDate() async {
@@ -1071,6 +1149,31 @@ class TransactionDetailsFormState
               ],
               trailing: _buildMerchantRow(l10n),
             ),
+
+            // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): the recognition surface —
+            // a pure-visual confidence band + ≤3 alternate-category chips + exit
+            // chip. Gated on `_band != null`: manual/OCR entry has no band, so no
+            // affordance renders (D-10, correct-by-construction). Both clear the
+            // instant the user picks a category (D-09).
+            if (_band != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  ConfidenceBandIndicator(
+                    band: _band,
+                    ledgerType: _ledgerType,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: AlternateCategoryChips(
+                      alternates: _alternates,
+                      selectedCategoryId: _category?.id,
+                      onSelect: _selectAlternateCategory,
+                    ),
+                  ),
+                ],
+              ),
+            ],
 
             const SizedBox(height: 16),
 
