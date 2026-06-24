@@ -135,7 +135,15 @@ class CategoryRecognizer {
       if (l2 != null) {
         // Learned rows are user-validated — give them a slight confidence
         // boost over the seed-substring 0.80 baseline. Seeds stay at 0.80.
-        final isLearned = winner.hitCount > 0;
+        //
+        // WR-05: use the model's single source of truth (`isLearned`, hitCount
+        // >= 2) rather than re-deriving `hitCount > 0`. Both predicates agree on
+        // every row that can reach step 2.5 (seeds carry hitCount = 0 → false;
+        // promoted rows arrive via findLearnedRowsAtOrAbove(3) → true), but the
+        // local re-derivation was a DIFFERENT predicate than step 2's
+        // `best.isLearned`, so the two steps could classify the same row
+        // differently if the promotion threshold ever moved. One predicate now.
+        final isLearned = winner.isLearned;
         return CategoryMatchResult(
           categoryId: l2,
           confidence: isLearned
