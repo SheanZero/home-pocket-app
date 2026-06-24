@@ -35,7 +35,7 @@ import 'package:home_pocket/shared/constants/default_synonyms.dart';
 ///     the human spot-check can adjust a borderline Han-only ja word.)
 void main() {
   // ── Codepoint helpers ──────────────────────────────────────────────────
-  bool _hasKana(String kw) {
+  bool hasKana(String kw) {
     for (final r in kw.runes) {
       final hiragana = r >= 0x3040 && r <= 0x309F;
       final katakana = r >= 0x30A0 && r <= 0x30FF;
@@ -45,7 +45,7 @@ void main() {
     return false;
   }
 
-  bool _hasHan(String kw) {
+  bool hasHan(String kw) {
     for (final r in kw.runes) {
       // CJK Unified Ideographs (BMP) + common extension-A range.
       final cjk = r >= 0x4E00 && r <= 0x9FFF;
@@ -55,8 +55,8 @@ void main() {
     return false;
   }
 
-  bool isJa(String kw) => _hasKana(kw);
-  bool isZh(String kw) => _hasHan(kw) && !_hasKana(kw);
+  bool isJa(String kw) => hasKana(kw);
+  bool isZh(String kw) => hasHan(kw) && !hasKana(kw);
 
   // ── target set: FULL L2 coverage (no exclusion — see header) ───────────
   // User scope decision (continuation of plan 50-02): every level-2 category
