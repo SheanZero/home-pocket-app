@@ -36,7 +36,7 @@
 
 - [x] **RECUX-01**: 语音识别后，录入表单展示选定类目 + 3 档定性置信度带（绝不显示数字 %/分数），ADR-012-safe。
 - [x] **RECUX-02**: 低置信度时，可点的备选 chips（备选类目 + 商家默认类目）让用户一键纠正。
-- [ ] **RECUX-03**: 对关键词-商家冲突的内联纠错教 KEYWORD 表（`category_keyword_preferences`），绝不污染商家表；`resolvedKeyword` 写键 == 读键身份端到端成立（防 260526-pg6 orphan-key 回归）。
+- [x] **RECUX-03**: 对关键词-商家冲突的内联纠错教 KEYWORD 表（`category_keyword_preferences`），绝不污染商家表；`resolvedKeyword` 写键 == 读键身份端到端成立（防 260526-pg6 orphan-key 回归）。
 - [ ] **RECUX-04**: 识别 UX 不引入任何游戏化（无准确率分数/连胜/徽章/排行）；扩展反毒性扫描覆盖新界面 × ja/zh/en。
 - [x] **RECUX-05**: 商家名是数据（存于 Drift 多语列、不进 ARB），类目标签是 ARB；所有新增 UI 文案三语 ARB parity，`flutter gen-l10n` 干净（`git add -f lib/generated/`）。
 
@@ -102,7 +102,7 @@
 | LEDGER-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | RECUX-01 | Phase 52 — Recognition UX + English Voice | Complete |
 | RECUX-02 | Phase 52 — Recognition UX + English Voice | Complete |
-| RECUX-03 | Phase 52 — Recognition UX + English Voice | Pending |
+| RECUX-03 | Phase 52 — Recognition UX + English Voice | Complete |
 | RECUX-04 | Phase 52 — Recognition UX + English Voice | Pending |
 | RECUX-05 | Phase 52 — Recognition UX + English Voice | Complete |
 | VEN-01 | Phase 52 — Recognition UX + English Voice | Complete |

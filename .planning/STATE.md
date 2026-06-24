@@ -6,14 +6,14 @@ current_phase: 52
 current_phase_name: recognition-ux-english-voice
 status: executing
 stopped_at: Phase 52 planned — 6 plans, 4 waves (ready to execute)
-last_updated: "2026-06-24T11:02:30.889Z"
+last_updated: "2026-06-24T11:13:57.275Z"
 last_activity: 2026-06-24
 last_activity_desc: Phase 52 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 52 (recognition-ux-english-voice) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-06-24 — Phase 52 execution started
 
@@ -41,6 +41,8 @@ Last activity: 2026-06-24 — Phase 52 execution started
 - [Phase ?]: 52-04: English merchant + currency recognition VERIFIED not rebuilt (D-13 reuse); A6 nameEn coverage is 100% (391/391)
 - [Phase ?]: 52-05 / D-14: en locale routes ENTIRELY around _runStateMachine — Arabic STT digits win first, bounded en number-word fallback only on Arabic miss + money context ($/dollar word/VoiceCurrencySuffixes hit); isolation test proves no English→CJK numeral leak (guards v1.8 WR-04). 「X fifty」→X.50 in money ctx; bare→null. Clamped 0<amt<10M.
 - [Phase ?]: 52-05 / D-15: voice-locale decoupling VERIFIED not rebuilt — voiceLocaleIdFromLanguageCode('en')=='en-US' takes no app-UI-locale input (decoupled from currentLocaleProvider); en-US session routes amounts through the en path. No new derivation path added.
+- 52-03 / D-20 (2026-06-24): deferred category-correction — replaced the immediate `correctionUseCase.execute()` in `_applyCategorySelection` with a pending stash (`_PendingCategoryCorrection`: `resolvedKeyword` verbatim + `correctedCategoryId`); fired ONCE on the `.new` confirmed-save path, gated on non-empty keyword AND final category != recognized original. Chip-tap AND full-selector both flow through the shared `_applyCategorySelection` so both count (D-06). Write key stays `resolvedKeyword` verbatim (write==read, 260526-pg6); null/empty keyword writes nothing and the merchant table is never touched on this path (D-07/D-16).
+- 52-03 / D-21 (2026-06-24): host-driven `updateCategory` (voice batch-fill / snapshot-restore / continuous re-seed) clears the stash — a fresh-slate push is not an interactive correction; the host's 重置·恢复账目 and 连续记账 reset paths additionally call the new public `discardPendingCorrection()` for robustness against null-category snapshots. Reverting to the recognized-original category clears the stash (no spurious correction).
 
 ### Quick Tasks Completed
 
@@ -227,7 +229,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T11:02:30.882Z
+Last session: 2026-06-24T11:13:40.728Z
 Stopped at: Phase 52 planned (6 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 
@@ -286,6 +288,7 @@ Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 | Phase 52 P02 | 7min | 3 tasks | 13 files |
 | Phase 52 P04 | 12 | 2 tasks | 6 files |
 | Phase 52 P05 | 4 min | 3 tasks | 4 files |
+| Phase 52 P03 | 25min | 2 tasks | 3 files |
 
 ## Decisions
 
