@@ -5,10 +5,10 @@ milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证
 current_phase: 51
 current_phase_name: Cross-Validation + Daily/Joy Ledger Rework
 status: completed
-stopped_at: Phase 51 context gathered
-last_updated: "2026-06-24T05:09:20.286Z"
+stopped_at: Phase 51 planned — 5 plans, ready to execute
+last_updated: "2026-06-24T05:50:43.000Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 50 complete, transitioned to Phase 51
+last_activity_desc: Phase 51 planned — 5 plans across 4 waves, ready to execute
 progress:
   total_phases: 4
   completed_phases: 2
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 50 — decoupled-recognizers
+**Current focus:** Phase 51 — cross-validation-daily-joy-ledger-rework
 
 ## Current Position
 
 Phase: 51 — Cross-Validation + Daily/Joy Ledger Rework
-Plan: Not started
-Status: 50-03 complete (MerchantRecognizer anchored scorer); only 50-05 (orchestrator + retirement) remains
-Last activity: 2026-06-24 — Phase 50 complete, transitioned to Phase 51
+Plan: 5 plans across 4 waves (planned — ready to execute)
+Status: Phase 51 planned — Wave 1: 51-01 (voice/domain scaffold + type moves); Wave 2: 51-02 (3×3 reconciler, TDD) + 51-03 (resolve-on-final hysteresis); Wave 3: 51-04 (ledger re-route + dual_ledger retirement); Wave 4: 51-05 (L2-override seed audit + D-18 user spot-check checkpoint). Research + plan-checker PASSED (0 blockers/warnings).
+Last activity: 2026-06-24 — Phase 51 planned (research + 5 plans; plan-checker VERIFICATION PASSED)
 
 ### Quick Tasks Completed
 
