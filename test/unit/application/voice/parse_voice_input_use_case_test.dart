@@ -1,183 +1,100 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
-import 'package:home_pocket/application/voice/voice_category_resolver.dart';
+import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
+import 'package:home_pocket/application/voice/recognition/merchant_recognizer.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
+import 'package:home_pocket/features/accounting/domain/models/merchant_candidate.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
-import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Phase 21 D-09 — ParseVoiceInputUseCase consumes VoiceCategoryResolver.
-// PATTERNS.md §9 caveat — the merchant branch routes the derived categoryId
-// through resolver.normalizeToL2 (WR-05 — was resolve+findMerchant double-pass)
-// so the always-L2 contract has no escape hatch.
+// Phase 50 (DECOUP-01/02/03) — ParseVoiceInputUseCase runs two INDEPENDENT
+// engines and applies one thin keyword-priority merge with the 0.85 auto-fill
+// floor (D-02 / D-03). This is the PHASE ACCEPTANCE GATE: the four-quadrant
+// regression (merchant × keyword), the ledger invariant (ledger == a pure
+// function of the final category, LEDGER-01), and the learning-key identity
+// (resolvedKeyword == the canonical key the recognizer read, 260526-pg6).
+//
+// Both engines are mocked so each quadrant is exercised in isolation — the
+// real engines have their own unit + corpus coverage (category_recognizer_test,
+// merchant_recognizer_test, voice_category_corpus_{zh,ja,en}_test).
 
-class _MockVoiceCategoryResolver extends Mock
-    implements VoiceCategoryResolver {}
+class _MockCategoryRecognizer extends Mock implements CategoryRecognizer {}
 
-class _MockMerchantDatabase extends Mock implements MerchantDatabase {}
+class _MockMerchantRecognizer extends Mock implements MerchantRecognizer {}
 
 class _MockVoiceTextParser extends Mock implements VoiceTextParser {}
 
-class _FakeMerchantDatabase extends Fake implements MerchantDatabase {}
+/// Builds a merchant candidate at a given score (default at/above floor).
+MerchantCandidate _candidate({
+  String merchantId = 'm_starbucks',
+  String displayName = 'スターバックス',
+  double score = 0.95,
+  String categoryId = 'cat_food_cafe',
+  String ledgerHint = 'soul', // deliberately NON-daily to prove ledger never
+  // derives from the hint (LEDGER-01).
+}) {
+  return MerchantCandidate(
+    merchantId: merchantId,
+    displayName: displayName,
+    score: score,
+    categoryId: categoryId,
+    ledgerHint: ledgerHint,
+  );
+}
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(_FakeMerchantDatabase());
-  });
-
-  late _MockVoiceCategoryResolver mockResolver;
-  late _MockMerchantDatabase mockMerchantDatabase;
+  late _MockCategoryRecognizer mockCategory;
+  late _MockMerchantRecognizer mockMerchant;
   late VoiceTextParser parser;
   late ParseVoiceInputUseCase useCase;
 
   setUp(() {
-    mockResolver = _MockVoiceCategoryResolver();
-    mockMerchantDatabase = _MockMerchantDatabase();
+    mockCategory = _MockCategoryRecognizer();
+    mockMerchant = _MockMerchantRecognizer();
     parser = VoiceTextParser();
-
     useCase = ParseVoiceInputUseCase(
       textParser: parser,
-      voiceCategoryResolver: mockResolver,
-      merchantDatabase: mockMerchantDatabase,
+      categoryRecognizer: mockCategory,
+      merchantRecognizer: mockMerchant,
     );
+
+    // Sensible defaults — each test overrides only what it exercises.
+    when(
+      () => mockCategory.resolve(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => mockMerchant.recognize(any()),
+    ).thenAnswer((_) async => const <MerchantCandidate>[]);
+    when(
+      () => mockCategory.resolveLedgerType(any()),
+    ).thenAnswer((_) async => LedgerType.daily);
+    when(
+      () => mockCategory.normalizeToL2(any()),
+    ).thenAnswer((inv) async => inv.positionalArguments.first as String);
   });
 
-  group('ParseVoiceInputUseCase', () {
+  // ─── Pre-merge plumbing: both fields still flow (amount/raw/currency) ───
+  group('ParseVoiceInputUseCase — basic extraction still flows', () {
     test('parses amount correctly from text with 円', () async {
-      when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-      when(() => mockResolver.resolve(any())).thenAnswer(
+      when(() => mockCategory.resolve(any())).thenAnswer(
         (_) async => const CategoryMatchResult(
           categoryId: 'cat_food_dining_out',
           confidence: 0.9,
           source: MatchSource.keyword,
         ),
       );
-      when(
-        () => mockResolver.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.daily);
 
-      final result = await useCase.execute('昼ごはんに680円');
+      final result = await useCase.execute('昼ごはんに680円', localeId: 'ja-JP');
 
-      expect(result.isSuccess, isTrue);
+      expect(result.isSuccess, isTrue, reason: result.error);
       expect(result.data!.amount, equals(680));
       expect(result.data!.rawText, equals('昼ごはんに680円'));
     });
 
     test(
-      'merchant match routes through normalizeToL2 (PATTERNS.md §9 — always-L2; WR-05)',
+      'returns success with nulls when no engine produces a match',
       () async {
-        // Merchant lookup hits — the use case MUST call normalizeToL2 on the
-        // derived categoryId, NOT re-run resolve() against the canonical name.
-        final merchantMatch = MerchantMatch(
-          merchantName: 'マクドナルド',
-          categoryId: 'cat_food_dining_out',
-          confidence: 0.95,
-          ledgerType: LedgerType.daily,
-        );
-        when(
-          () => mockMerchantDatabase.findMerchant(any()),
-        ).thenReturn(merchantMatch);
-        when(
-          () => mockResolver.normalizeToL2('cat_food_dining_out'),
-        ).thenAnswer((_) async => 'cat_food_dining_out');
-
-        final result = await useCase.execute('マクドナルドで680円');
-
-        expect(result.isSuccess, isTrue);
-        expect(result.data!.merchantName, equals('マクドナルド'));
-        expect(
-          result.data!.categoryMatch!.source,
-          equals(MatchSource.merchant),
-        );
-        expect(
-          result.data!.categoryMatch!.categoryId,
-          equals('cat_food_dining_out'),
-        );
-        // Original confidence preserved (WR-05 — no longer overwritten by
-        // the resolver's hard-coded 0.90 for canonical-name re-match)
-        expect(result.data!.categoryMatch!.confidence, equals(0.95));
-        // merchant-specific ledgerType wins
-        expect(result.data!.ledgerType, equals(LedgerType.daily));
-        // resolve() MUST NOT be consulted on the merchant branch — only
-        // normalizeToL2 is.
-        verifyNever(() => mockResolver.resolve(any()));
-        verify(
-          () => mockResolver.normalizeToL2('cat_food_dining_out'),
-        ).called(1);
-      },
-    );
-
-    test(
-      'merchant branch defensive fallback: when normalizeToL2 returns null, '
-      'raw merchant categoryId is surfaced',
-      () async {
-        final merchantMatch = MerchantMatch(
-          merchantName: 'マクドナルド',
-          categoryId: 'cat_food_dining_out',
-          confidence: 0.95,
-          ledgerType: LedgerType.daily,
-        );
-        when(
-          () => mockMerchantDatabase.findMerchant(any()),
-        ).thenReturn(merchantMatch);
-        // normalizeToL2 miss — defensive branch kicks in.
-        when(
-          () => mockResolver.normalizeToL2(any()),
-        ).thenAnswer((_) async => null);
-
-        final result = await useCase.execute('マクドナルドで680円');
-
-        expect(result.isSuccess, isTrue);
-        expect(result.data!.categoryMatch, isNotNull);
-        expect(
-          result.data!.categoryMatch!.categoryId,
-          equals('cat_food_dining_out'),
-        );
-        expect(
-          result.data!.categoryMatch!.source,
-          equals(MatchSource.merchant),
-        );
-        // ledgerType still wins from merchantMatch
-        expect(result.data!.ledgerType, equals(LedgerType.daily));
-      },
-    );
-
-    test('falls back to resolver when no merchant found', () async {
-      when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-      when(() => mockResolver.resolve(any())).thenAnswer(
-        (_) async => const CategoryMatchResult(
-          categoryId: 'cat_transport_train',
-          confidence: 0.95,
-          source: MatchSource.keyword,
-        ),
-      );
-      when(
-        () => mockResolver.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.daily);
-
-      final result = await useCase.execute('電車代320円');
-
-      expect(result.isSuccess, isTrue);
-      expect(
-        result.data!.categoryMatch!.source,
-        equals(MatchSource.keyword),
-      );
-      expect(
-        result.data!.categoryMatch!.categoryId,
-        equals('cat_transport_train'),
-      );
-      expect(result.data!.ledgerType, equals(LedgerType.daily));
-    });
-
-    test(
-      'returns success with nulls when text has no recognizable content',
-      () async {
-        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-        when(
-          () => mockResolver.resolve(any()),
-        ).thenAnswer((_) async => null);
-
         final result = await useCase.execute('test');
 
         expect(result.isSuccess, isTrue);
@@ -188,169 +105,341 @@ void main() {
     );
   });
 
-  // ─── Quick task 260526-pg6 (Option F — Task 1): resolvedKeyword surface ───
-  //
-  // The use case must populate `VoiceParseResult.resolvedKeyword` with the
-  // SAME string the resolver internally received (post-strip). This closes
-  // the silent-orphan bug where form-side recordCorrection wrote keys that
-  // never matched the resolver's lookup key.
-  group('Quick task 260526-pg6 — resolvedKeyword surface', () {
+  // ════════════════════════════════════════════════════════════════════════
+  // FOUR-QUADRANT REGRESSION (merchant × keyword) — phase acceptance gate.
+  // ════════════════════════════════════════════════════════════════════════
+  group('Four-quadrant merge (D-02 keyword-priority + D-03 0.85 floor)', () {
+    // ── Quadrant 1: merchant✓ keyword✓ → KEYWORD WINS (XVAL-02) ──
+    // 「在星巴克买杯子」: Starbucks matches (merchant✓) AND 买杯子→购物 (keyword✓).
+    // The category MUST be the keyword's 购物 (shopping), NOT the merchant's
+    // 咖啡 default. resolveLedgerType is consulted on the keyword's categoryId.
     test(
-      'Test 1.A: keyword branch — resolvedKeyword equals the post-strip key '
-      'the resolver received (zh)',
+      'merchant✓keyword✓ "在星巴克买杯子" → 购物 (keyword wins, NOT 咖啡)',
       () async {
-        // Capture the keyword the resolver actually sees so the assertion
-        // pins the contract: resolvedKeyword == resolver-input keyword.
-        String? resolverSawKeyword;
-        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-        when(() => mockResolver.resolve(any())).thenAnswer((invocation) async {
-          resolverSawKeyword = invocation.positionalArguments.first as String;
-          return null;
-        });
-
-        // Input: "去外食12,450日元" with zh-CN locale.
-        // `_extractKeyword` strips `12,450日元` (amount + 日元 currency suffix
-        // via VoiceCurrencySuffixes.regexAlternation) and zh particles, but
-        // `去外食` contains no listed particles → stays intact.
-        final result = await useCase.execute(
-          '去外食12,450日元',
-          localeId: 'zh-CN',
-        );
-
-        expect(result.isSuccess, isTrue);
-        expect(resolverSawKeyword, equals('去外食'));
-        expect(result.data!.resolvedKeyword, equals('去外食'));
-        // Pin: resolvedKeyword is EXACTLY what the resolver saw.
-        expect(result.data!.resolvedKeyword, equals(resolverSawKeyword));
-      },
-    );
-
-    test(
-      'Test 1.B: merchant branch — resolvedKeyword populated even when '
-      'resolver.resolve never runs',
-      () async {
-        // Merchant DB hit short-circuits the resolver, but the use case still
-        // computes the post-strip keyword so the form has a usable key for
-        // future recordCorrection calls.
-        final merchantMatch = MerchantMatch(
-          merchantName: '星巴克',
-          categoryId: 'cat_food_cafe',
-          confidence: 0.92,
-          ledgerType: LedgerType.daily,
-        );
-        when(
-          () => mockMerchantDatabase.findMerchant(any()),
-        ).thenReturn(merchantMatch);
-        when(
-          () => mockResolver.normalizeToL2('cat_food_cafe'),
-        ).thenAnswer((_) async => 'cat_food_cafe');
-
-        final result = await useCase.execute(
-          '去星巴克500日元',
-          localeId: 'zh-CN',
-        );
-
-        expect(result.isSuccess, isTrue);
-        // Merchant branch took over but resolvedKeyword is still populated.
-        expect(result.data!.resolvedKeyword, isNotNull);
-        expect(result.data!.resolvedKeyword!.isNotEmpty, isTrue);
-        // resolver.resolve must NOT have been consulted (merchant short-circuit).
-        verifyNever(() => mockResolver.resolve(any()));
-      },
-    );
-
-    test(
-      'Test 1.C: amount-only utterance yields null resolvedKeyword',
-      () async {
-        // Input "500日元" strips amount+currency → empty keyword → use case
-        // surfaces null so consumers can guard on `!= null && isNotEmpty`.
-        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-        when(() => mockResolver.resolve(any())).thenAnswer((_) async => null);
-
-        final result = await useCase.execute('500日元', localeId: 'zh-CN');
-
-        expect(result.isSuccess, isTrue);
-        expect(
-          result.data!.resolvedKeyword,
-          isNull,
-          reason: 'amount-only utterance must yield null resolvedKeyword, '
-              'not empty-string — consumer null-guards are explicit',
-        );
-      },
-    );
-
-    test(
-      'Test 1.D: existing VoiceParseResult fields remain populated alongside '
-      'resolvedKeyword (additive, non-breaking)',
-      () async {
-        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-        when(() => mockResolver.resolve(any())).thenAnswer(
+        when(() => mockCategory.resolve(any())).thenAnswer(
           (_) async => const CategoryMatchResult(
-            categoryId: 'cat_food_dining_out',
+            categoryId: 'cat_shopping_daily',
             confidence: 0.9,
             source: MatchSource.keyword,
           ),
         );
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async => [_candidate(displayName: '星巴克')],
+        );
+        // The 购物 category resolves to the daily ledger.
         when(
-          () => mockResolver.resolveLedgerType(any()),
+          () => mockCategory.resolveLedgerType('cat_shopping_daily'),
         ).thenAnswer((_) async => LedgerType.daily);
 
-        final result = await useCase.execute(
-          '昼ごはんに680円',
-          localeId: 'ja-JP',
+        final result = await useCase.execute('在星巴克买杯子', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        // Keyword wins — category is 购物, source keyword, NOT merchant 咖啡.
+        expect(data.categoryMatch!.categoryId, equals('cat_shopping_daily'));
+        expect(data.categoryMatch!.source, equals(MatchSource.keyword));
+        expect(
+          data.categoryMatch!.categoryId,
+          isNot('cat_food_cafe'),
+          reason: 'keyword 购物 must win over the merchant 咖啡 default',
+        );
+        // Merchant primitives still surface (best candidate for form pre-fill).
+        expect(data.merchantName, equals('星巴克'));
+        expect(data.merchantCandidates, isNotEmpty);
+        // normalizeToL2 is NOT consulted on the keyword branch.
+        verifyNever(() => mockCategory.normalizeToL2(any()));
+      },
+    );
+
+    // ── Quadrant 2: merchant✓ keyword✗ → MERCHANT AUTO-FILL at >= 0.85 ──
+    // bare 「スタバ」: no keyword, Starbucks candidate at 0.95 (>= floor) →
+    // auto-fill 咖啡 via normalizeToL2. (SC3)
+    test(
+      'merchant✓keyword✗ bare スタバ → 咖啡 via the >= 0.85 auto-fill floor',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async => [_candidate(score: 0.95, categoryId: 'cat_food_cafe')],
+        );
+        when(
+          () => mockCategory.normalizeToL2('cat_food_cafe'),
+        ).thenAnswer((_) async => 'cat_food_cafe');
+        when(
+          () => mockCategory.resolveLedgerType('cat_food_cafe'),
+        ).thenAnswer((_) async => LedgerType.daily);
+
+        final result = await useCase.execute('スタバ', localeId: 'ja-JP');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        expect(data.categoryMatch, isNotNull);
+        expect(data.categoryMatch!.categoryId, equals('cat_food_cafe'));
+        expect(data.categoryMatch!.source, equals(MatchSource.merchant));
+        // Auto-fill confidence is the candidate's raw score.
+        expect(data.categoryMatch!.confidence, equals(0.95));
+      },
+    );
+
+    // Surface-form variants where the floor logic still applies. Each is a
+    // merchant✓keyword✗ case at-or-above the floor and must auto-fill.
+    for (final variant in const ['ｽﾀﾊﾞ', 'マクド', 'Starbucks']) {
+      test(
+        'merchant✓keyword✗ variant "$variant" auto-fills at the >= 0.85 floor',
+        () async {
+          when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+          when(() => mockMerchant.recognize(any())).thenAnswer(
+            (_) async =>
+                [_candidate(score: 0.85, categoryId: 'cat_food_cafe')],
+          );
+          when(
+            () => mockCategory.normalizeToL2('cat_food_cafe'),
+          ).thenAnswer((_) async => 'cat_food_cafe');
+          when(
+            () => mockCategory.resolveLedgerType('cat_food_cafe'),
+          ).thenAnswer((_) async => LedgerType.daily);
+
+          final result = await useCase.execute(variant, localeId: 'ja-JP');
+
+          expect(result.isSuccess, isTrue, reason: result.error);
+          expect(
+            result.data!.categoryMatch!.categoryId,
+            equals('cat_food_cafe'),
+          );
+          expect(
+            result.data!.categoryMatch!.source,
+            equals(MatchSource.merchant),
+          );
+        },
+      );
+    }
+
+    // ── Quadrant 3: merchant✗ keyword✓ → KEYWORD ONLY, no merchant fill ──
+    // 「加油用了400块」: no merchant, 加油→cat_car_fuel keyword (SC4 / DECOUP-02
+    // Case B). The category is the keyword's; no merchant primitives.
+    test(
+      'merchant✗keyword✓ "加油用了400块" → cat_car_fuel (no merchant auto-fill)',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer(
+          (_) async => const CategoryMatchResult(
+            categoryId: 'cat_car_fuel',
+            confidence: 0.85,
+            source: MatchSource.keyword,
+          ),
+        );
+        when(
+          () => mockMerchant.recognize(any()),
+        ).thenAnswer((_) async => const <MerchantCandidate>[]);
+        when(
+          () => mockCategory.resolveLedgerType('cat_car_fuel'),
+        ).thenAnswer((_) async => LedgerType.daily);
+
+        final result = await useCase.execute('加油用了400块', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        expect(data.categoryMatch!.categoryId, equals('cat_car_fuel'));
+        expect(data.categoryMatch!.source, equals(MatchSource.keyword));
+        // No merchant candidate — no merchant pre-fill.
+        expect(data.merchantName, isNull);
+        expect(data.merchantCandidates, isEmpty);
+        verifyNever(() => mockCategory.normalizeToL2(any()));
+      },
+    );
+
+    // ── Quadrant 4: merchant✗ keyword✗ → finalCategory null, no auto-fill ──
+    // Plus: a BELOW-floor candidate must NOT auto-fill, yet still surfaces on
+    // the result (recall-first for Phase-52 chips).
+    test(
+      'merchant✗keyword✗ → finalCategory null; candidates still surfaced',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+        // A weak (below-floor) candidate exists but must NOT auto-fill.
+        final weak = _candidate(score: 0.60, categoryId: 'cat_food_cafe');
+        when(
+          () => mockMerchant.recognize(any()),
+        ).thenAnswer((_) async => [weak]);
+
+        final result = await useCase.execute('なにか適当な発話', localeId: 'ja-JP');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        final data = result.data!;
+        // No auto-fill below the floor.
+        expect(data.categoryMatch, isNull, reason: 'below 0.85 → no auto-fill');
+        // But the ranked candidate is still surfaced.
+        expect(data.merchantCandidates, isNotEmpty);
+        expect(data.merchantCandidates.first.score, equals(0.60));
+        expect(data.ledgerType, isNull);
+        verifyNever(() => mockCategory.normalizeToL2(any()));
+      },
+    );
+
+    test(
+      'exactly-at-floor (0.85) candidate auto-fills (>= is inclusive)',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async => [_candidate(score: kMerchantAutoFillFloor)],
         );
 
-        expect(result.isSuccess, isTrue);
-        // All pre-existing fields still flow.
-        expect(result.data!.amount, equals(680));
-        expect(result.data!.rawText, equals('昼ごはんに680円'));
+        final result = await useCase.execute('スタバ', localeId: 'ja-JP');
+
+        expect(result.data!.categoryMatch, isNotNull);
         expect(
-          result.data!.categoryMatch!.categoryId,
-          equals('cat_food_dining_out'),
+          result.data!.categoryMatch!.source,
+          equals(MatchSource.merchant),
         );
-        expect(result.data!.ledgerType, equals(LedgerType.daily));
-        // NEW field also populated.
-        expect(result.data!.resolvedKeyword, isNotNull);
-        expect(result.data!.resolvedKeyword!.isNotEmpty, isTrue);
       },
     );
   });
 
-  group('ParseVoiceInputUseCase - localeId routing', () {
+  // ════════════════════════════════════════════════════════════════════════
+  // LEDGER INVARIANT (LEDGER-01) — ledger is a pure function of the final
+  // category, derived via resolveLedgerType; NEVER the merchant ledger hint.
+  // ════════════════════════════════════════════════════════════════════════
+  group('Ledger invariant — ledger == resolveLedgerType(finalCategoryId)', () {
+    test(
+      'keyword branch: ledger derived from the keyword category, NOT the hint',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer(
+          (_) async => const CategoryMatchResult(
+            categoryId: 'cat_shopping_daily',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+        );
+        // Merchant candidate carries a SOUL ledger hint — must be ignored.
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async => [_candidate(ledgerHint: 'soul')],
+        );
+        when(
+          () => mockCategory.resolveLedgerType('cat_shopping_daily'),
+        ).thenAnswer((_) async => LedgerType.daily);
+
+        final result = await useCase.execute('在星巴克买杯子', localeId: 'zh-CN');
+
+        // 购物 → daily ledger, NOT the candidate's soul hint.
+        expect(result.data!.ledgerType, equals(LedgerType.daily));
+        verify(
+          () => mockCategory.resolveLedgerType('cat_shopping_daily'),
+        ).called(1);
+      },
+    );
+
+    test(
+      'merchant auto-fill branch: ledger derived from the auto-filled L2, '
+      'NOT the candidate ledgerHint',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          // ledgerHint deliberately 'soul' — the final ledger must come from
+          // resolveLedgerType(cat_food_cafe), which we stub to daily.
+          (_) async => [
+            _candidate(
+              score: 0.95,
+              categoryId: 'cat_food_cafe',
+              ledgerHint: 'soul',
+            ),
+          ],
+        );
+        when(
+          () => mockCategory.normalizeToL2('cat_food_cafe'),
+        ).thenAnswer((_) async => 'cat_food_cafe');
+        when(
+          () => mockCategory.resolveLedgerType('cat_food_cafe'),
+        ).thenAnswer((_) async => LedgerType.daily);
+
+        final result = await useCase.execute('スタバ', localeId: 'ja-JP');
+
+        // Ledger is the resolved daily, NOT the 'soul' hint.
+        expect(result.data!.ledgerType, equals(LedgerType.daily));
+        verify(
+          () => mockCategory.resolveLedgerType('cat_food_cafe'),
+        ).called(1);
+      },
+    );
+  });
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LEARNING-KEY IDENTITY (260526-pg6) — resolvedKeyword on the result equals
+  // the exact canonical key the CategoryRecognizer.resolve() received.
+  // ════════════════════════════════════════════════════════════════════════
+  group('Learning-key identity (260526-pg6)', () {
+    test(
+      'resolvedKeyword equals the post-strip key the recognizer read (zh)',
+      () async {
+        String? recognizerSaw;
+        when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
+          recognizerSaw = inv.positionalArguments.first as String;
+          return null;
+        });
+
+        // 「去外食12,450日元」zh: amount + 日元 suffix stripped, 去外食 stays intact.
+        final result = await useCase.execute('去外食12,450日元', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        expect(recognizerSaw, equals('去外食'));
+        expect(result.data!.resolvedKeyword, equals('去外食'));
+        // Pin: the write-key IS the read-key (single canonical source).
+        expect(result.data!.resolvedKeyword, equals(recognizerSaw));
+      },
+    );
+
+    test(
+      'resolvedKeyword is populated even on the merchant auto-fill branch',
+      () async {
+        when(() => mockCategory.resolve(any())).thenAnswer((_) async => null);
+        when(() => mockMerchant.recognize(any())).thenAnswer(
+          (_) async => [_candidate(score: 0.95)],
+        );
+        when(
+          () => mockCategory.normalizeToL2(any()),
+        ).thenAnswer((inv) async => inv.positionalArguments.first as String);
+
+        final result = await useCase.execute('去星巴克喝咖啡', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue, reason: result.error);
+        // The post-strip keyword is still surfaced for a future correction.
+        expect(result.data!.resolvedKeyword, isNotNull);
+        expect(result.data!.resolvedKeyword!.isNotEmpty, isTrue);
+      },
+    );
+
+    test('amount-only utterance yields null resolvedKeyword', () async {
+      final result = await useCase.execute('500日元', localeId: 'zh-CN');
+
+      expect(result.isSuccess, isTrue);
+      expect(
+        result.data!.resolvedKeyword,
+        isNull,
+        reason: 'amount-only utterance → null resolvedKeyword (explicit guard)',
+      );
+    });
+  });
+
+  // ─── localeId routing (preserved from the pre-Phase-50 test) ───
+  group('localeId routing', () {
     late _MockVoiceTextParser mockTextParser;
-    late _MockVoiceCategoryResolver localMockResolver;
-    late _MockMerchantDatabase localMockDb;
     late ParseVoiceInputUseCase useCaseWithMockParser;
 
     setUp(() {
       mockTextParser = _MockVoiceTextParser();
-      localMockResolver = _MockVoiceCategoryResolver();
-      localMockDb = _MockMerchantDatabase();
       useCaseWithMockParser = ParseVoiceInputUseCase(
         textParser: mockTextParser,
-        voiceCategoryResolver: localMockResolver,
-        merchantDatabase: localMockDb,
+        categoryRecognizer: mockCategory,
+        merchantRecognizer: mockMerchant,
       );
+      when(
+        () => mockTextParser.extractAmount(
+          any(),
+          localeId: any(named: 'localeId'),
+        ),
+      ).thenReturn(2204);
+      when(() => mockTextParser.extractDate(any())).thenReturn(null);
     });
 
     test(
       'execute(text, localeId: x) forwards localeId to textParser.extractAmount',
       () async {
-        when(
-          () => mockTextParser.extractAmount(
-            any(),
-            localeId: any(named: 'localeId'),
-          ),
-        ).thenReturn(2204);
-        when(() => mockTextParser.extractDate(any())).thenReturn(null);
-        when(
-          () => mockTextParser.extractAndMatchMerchant(any(), any()),
-        ).thenReturn(null);
-        when(
-          () => localMockResolver.resolve(any()),
-        ).thenAnswer((_) async => null);
-        when(() => localMockDb.findMerchant(any())).thenReturn(null);
-
         await useCaseWithMockParser.execute('test text', localeId: 'ja-JP');
 
         verify(
@@ -360,18 +449,11 @@ void main() {
     );
   });
 
-  // ─── WR-04: standalone currency-suffix residue must not pollute keyword ───
+  // ─── WR-04 regression: currency-suffix residue must not pollute keyword ───
   group('WR-04 — currency-suffix residue stripped from category keyword', () {
-    setUp(() {
-      when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-      when(
-        () => mockResolver.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.daily);
-    });
-
-    test('"5块钱 拉面" → keyword 拉面 (no 块/钱 residue)', () async {
+    test('"5块钱拉面" → keyword 拉面 (no 块/钱 residue)', () async {
       String? seen;
-      when(() => mockResolver.resolve(any())).thenAnswer((inv) async {
+      when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
         seen = inv.positionalArguments.first as String?;
         return const CategoryMatchResult(
           categoryId: 'cat_food_dining_out',
@@ -386,9 +468,9 @@ void main() {
       expect(result.data!.resolvedKeyword, equals('拉面'));
     });
 
-    test('"50美元 咖啡" → keyword 咖啡 (no 美元 residue)', () async {
+    test('"50美元咖啡" → keyword 咖啡 (no 美元 residue)', () async {
       String? seen;
-      when(() => mockResolver.resolve(any())).thenAnswer((inv) async {
+      when(() => mockCategory.resolve(any())).thenAnswer((inv) async {
         seen = inv.positionalArguments.first as String?;
         return const CategoryMatchResult(
           categoryId: 'cat_food_dining_out',
@@ -401,27 +483,6 @@ void main() {
       expect(result.isSuccess, isTrue, reason: result.error);
       expect(seen, equals('咖啡'));
       expect(result.data!.resolvedKeyword, equals('咖啡'));
-    });
-
-    test('standalone foreign suffix residue stripped: 美元 not left in keyword',
-        () async {
-      // CJK numeral 五十 is NOT stripped (pre-existing keyword limitation,
-      // out of WR-04 scope) — but the standalone 美元 suffix MUST be removed by
-      // the WR-04 second pass, leaving no currency token in the keyword.
-      String? seen;
-      when(() => mockResolver.resolve(any())).thenAnswer((inv) async {
-        seen = inv.positionalArguments.first as String?;
-        return const CategoryMatchResult(
-          categoryId: 'cat_food_dining_out',
-          confidence: 0.5,
-          source: MatchSource.keyword,
-        );
-      });
-
-      final result = await useCase.execute('五十美元咖啡', localeId: 'zh-CN');
-      expect(result.isSuccess, isTrue, reason: result.error);
-      expect(seen, isNot(contains('美元')));
-      expect(seen, equals('五十咖啡'));
     });
   });
 }
