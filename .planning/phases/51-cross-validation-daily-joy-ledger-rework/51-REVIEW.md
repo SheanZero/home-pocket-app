@@ -22,7 +22,7 @@ findings:
   warning: 4
   info: 3
   total: 8
-status: issues_found
+status: resolved
 ---
 
 # Phase 51: Code Review Report
@@ -215,6 +215,23 @@ non-joy). Pre-existing (unchanged this phase), flagged for completeness.
 **Fix:** Guard on the join (`if (_parseResult != null)`) or on a real "estimated" sentinel if
 the default-vs-estimated distinction matters; otherwise the guard is misleading and should be
 simplified.
+
+---
+
+## Resolution (2026-06-24, user-directed)
+
+- **CR-01 — FIXED.** Dropped the `?? data.merchantCategoryId` fallback in
+  `voice_ptt_session_mixin.dart` so the form auto-stamps the category ONLY from the
+  floor-gated `categoryMatch`. Below-floor merchant categories are no longer silently
+  stamped (ADR-012 restored). One-line change + WHY comment. Verified test-safe:
+  `flutter analyze` 0, full suite 3270/3270 still green (no test pinned the old behavior).
+- **WR-01, WR-02, WR-03, WR-04 — DEFERRED to Phase 52** (Recognition UX + English Voice).
+  Phase 52 reworks this exact surface (3-tier confidence bands + alternate chips + inline
+  correction), which consumes `outcome.alternates`/`keywordMerchantConflict` (WR-03),
+  resolves the redundant `resolvedKeyword`/decorative-const drift (WR-01/WR-02/WR-04) as it
+  wires the chips. Carried as Phase-52 inputs.
+- **IN-01/02/03 — acknowledged**, no action this phase (override intent confirmed via the
+  D-18 user spot-check; IN-02/IN-03 are pre-existing, non-blocking).
 
 ---
 

@@ -338,8 +338,14 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     Category? category;
     Category? parent;
     if (fillCategory) {
-      final categoryId =
-          data.categoryMatch?.categoryId ?? data.merchantCategoryId;
+      // CR-01: auto-stamp the category ONLY from the floor-gated `categoryMatch`
+      // (keyword win, or merchant >= 0.85). Do NOT fall back to
+      // `data.merchantCategoryId` — it carries the best candidate's category
+      // unconditionally (even below the 0.85 floor), so auto-filling it would
+      // silently defeat the floor (ADR-012: low-confidence guesses are
+      // confirmed/corrected, never auto-committed). Below-floor candidates are
+      // surfaced as Phase-52 confidence chips instead.
+      final categoryId = data.categoryMatch?.categoryId;
       if (categoryId != null) {
         final repo = ref.read(categoryRepositoryProvider);
         category = await repo.findById(categoryId);
