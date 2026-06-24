@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
-import 'package:home_pocket/application/dual_ledger/classification_service.dart';
-import 'package:home_pocket/application/dual_ledger/rule_engine.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
@@ -15,6 +15,9 @@ import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.da
 import 'package:mocktail/mocktail.dart';
 
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
+
+class _MockCategoryLedgerConfigRepository extends Mock
+    implements CategoryLedgerConfigRepository {}
 
 class _MockDeviceIdentityRepository extends Mock
     implements DeviceIdentityRepository {}
@@ -27,6 +30,7 @@ void main() {
   late TransactionDao transactionDao;
   late CreateTransactionUseCase useCase;
   late _MockCategoryRepository categoryRepository;
+  late _MockCategoryLedgerConfigRepository ledgerConfigRepository;
   late _MockDeviceIdentityRepository deviceIdentityRepository;
   late _MockFieldEncryptionService encryptionService;
 
@@ -34,12 +38,18 @@ void main() {
     db = AppDatabase.forTesting();
     transactionDao = TransactionDao(db);
     categoryRepository = _MockCategoryRepository();
+    ledgerConfigRepository = _MockCategoryLedgerConfigRepository();
     deviceIdentityRepository = _MockDeviceIdentityRepository();
     encryptionService = _MockFieldEncryptionService();
 
     when(
       () => categoryRepository.findById(any()),
     ).thenAnswer((_) async => _category);
+    // Ledger is supplied explicitly (LedgerType.daily) on every create below,
+    // so resolveLedgerType is never hit; stub kept for construction safety.
+    when(
+      () => ledgerConfigRepository.findById(any()),
+    ).thenAnswer((_) async => null);
     when(
       () => deviceIdentityRepository.getDeviceId(),
     ).thenAnswer((_) async => 'device-local');
@@ -59,7 +69,10 @@ void main() {
       categoryRepository: categoryRepository,
       deviceIdentityRepository: deviceIdentityRepository,
       hashChainService: HashChainService(),
-      classificationService: ClassificationService(ruleEngine: RuleEngine()),
+      categoryService: CategoryService(
+        categoryRepository: categoryRepository,
+        ledgerConfigRepository: ledgerConfigRepository,
+      ),
     );
   });
 

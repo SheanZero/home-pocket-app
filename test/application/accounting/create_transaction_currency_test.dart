@@ -13,9 +13,8 @@
 //      docs/arch/03-adr/ADR-021_Hash_Chain_Scope.md.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
-import 'package:home_pocket/application/dual_ledger/classification_result.dart';
-import 'package:home_pocket/application/dual_ledger/classification_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -35,8 +34,7 @@ class _MockDeviceIdentityRepository extends Mock
 
 class _MockHashChainService extends Mock implements HashChainService {}
 
-class _MockClassificationService extends Mock
-    implements ClassificationService {}
+class _MockCategoryService extends Mock implements CategoryService {}
 
 class _FakeTransaction extends Fake implements Transaction {}
 
@@ -49,7 +47,7 @@ void main() {
   late _MockCategoryRepository mockCategoryRepo;
   late _MockDeviceIdentityRepository mockDeviceIdentityRepo;
   late _MockHashChainService mockHashChainService;
-  late _MockClassificationService mockClassificationService;
+  late _MockCategoryService mockCategoryService;
   late CreateTransactionUseCase useCase;
 
   final testCategory = Category(
@@ -68,33 +66,22 @@ void main() {
     mockCategoryRepo = _MockCategoryRepository();
     mockDeviceIdentityRepo = _MockDeviceIdentityRepository();
     mockHashChainService = _MockHashChainService();
-    mockClassificationService = _MockClassificationService();
+    mockCategoryService = _MockCategoryService();
 
     useCase = CreateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
       categoryRepository: mockCategoryRepo,
       deviceIdentityRepository: mockDeviceIdentityRepo,
       hashChainService: mockHashChainService,
-      classificationService: mockClassificationService,
+      categoryService: mockCategoryService,
     );
 
     when(
       () => mockDeviceIdentityRepo.getDeviceId(),
     ).thenAnswer((_) async => 'device_test_001');
     when(
-      () => mockClassificationService.classify(
-        categoryId: any(named: 'categoryId'),
-        merchant: any(named: 'merchant'),
-        note: any(named: 'note'),
-      ),
-    ).thenAnswer(
-      (_) async => const ClassificationResult(
-        ledgerType: LedgerType.daily,
-        confidence: 1.0,
-        method: ClassificationMethod.rule,
-        reason: 'Default stub',
-      ),
-    );
+      () => mockCategoryService.resolveLedgerType(any()),
+    ).thenAnswer((_) async => LedgerType.daily);
     when(
       () => mockCategoryRepo.findById('cat_food'),
     ).thenAnswer((_) async => testCategory);

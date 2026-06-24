@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
-import 'package:home_pocket/application/dual_ledger/classification_result.dart';
-import 'package:home_pocket/application/dual_ledger/classification_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
@@ -21,8 +20,7 @@ class _MockDeviceIdentityRepository extends Mock
 
 class _MockHashChainService extends Mock implements HashChainService {}
 
-class _MockClassificationService extends Mock
-    implements ClassificationService {}
+class _MockCategoryService extends Mock implements CategoryService {}
 
 class _FakeTransaction extends Fake implements Transaction {}
 
@@ -35,7 +33,7 @@ void main() {
   late _MockCategoryRepository mockCategoryRepo;
   late _MockDeviceIdentityRepository mockDeviceIdentityRepo;
   late _MockHashChainService mockHashChainService;
-  late _MockClassificationService mockClassificationService;
+  late _MockCategoryService mockCategoryService;
   late CreateTransactionUseCase useCase;
 
   setUp(() {
@@ -43,35 +41,24 @@ void main() {
     mockCategoryRepo = _MockCategoryRepository();
     mockDeviceIdentityRepo = _MockDeviceIdentityRepository();
     mockHashChainService = _MockHashChainService();
-    mockClassificationService = _MockClassificationService();
+    mockCategoryService = _MockCategoryService();
 
     useCase = CreateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
       categoryRepository: mockCategoryRepo,
       deviceIdentityRepository: mockDeviceIdentityRepo,
       hashChainService: mockHashChainService,
-      classificationService: mockClassificationService,
+      categoryService: mockCategoryService,
     );
 
     when(
       () => mockDeviceIdentityRepo.getDeviceId(),
     ).thenAnswer((_) async => 'device_test_001');
 
-    // Default classification stub: daily
+    // Default ledger derivation stub: daily (D-14 single source of truth).
     when(
-      () => mockClassificationService.classify(
-        categoryId: any(named: 'categoryId'),
-        merchant: any(named: 'merchant'),
-        note: any(named: 'note'),
-      ),
-    ).thenAnswer(
-      (_) async => const ClassificationResult(
-        ledgerType: LedgerType.daily,
-        confidence: 1.0,
-        method: ClassificationMethod.rule,
-        reason: 'Default stub',
-      ),
-    );
+      () => mockCategoryService.resolveLedgerType(any()),
+    ).thenAnswer((_) async => LedgerType.daily);
     when(
       () => mockTransactionRepo.getLatestHash(any()),
     ).thenAnswer((_) async => null);
@@ -244,36 +231,102 @@ void main() {
       verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
-    test('uses classification service to determine ledgerType', () async {
+    test(
+      'uses CategoryService.resolveLedgerType to determine ledgerType (joy)',
+      () async {
+        when(
+          () => mockCategoryService.resolveLedgerType('cat_entertainment'),
+        ).thenAnswer((_) async => LedgerType.joy);
+        when(() => mockCategoryRepo.findById('cat_entertainment')).thenAnswer(
+          (_) async => Category(
+            id: 'cat_entertainment',
+            name: 'Entertainment',
+            icon: 'movie',
+            color: '#9C27B0',
+            level: 1,
+            isSystem: true,
+            sortOrder: 4,
+            createdAt: DateTime(2026, 1, 1),
+          ),
+        );
+        when(
+          () => mockTransactionRepo.getLatestHash('book_001'),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockHashChainService.calculateTransactionHash(
+            transactionId: any(named: 'transactionId'),
+            amount: any(named: 'amount'),
+            timestamp: any(named: 'timestamp'),
+            previousHash: any(named: 'previousHash'),
+          ),
+        ).thenReturn('hash_joy');
+        when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+
+        final result = await useCase.execute(
+          CreateTransactionParams(
+            bookId: 'book_001',
+            amount: 2000,
+            type: TransactionType.expense,
+            categoryId: 'cat_entertainment',
+
+            entrySource: EntrySource.manual,
+          ),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.data!.ledgerType, LedgerType.joy);
+        verify(
+          () => mockCategoryService.resolveLedgerType('cat_entertainment'),
+        ).called(1);
+      },
+    );
+
+    test(
+      'D-16: resolveLedgerType returns null → ledger falls back to daily',
+      () async {
+        // The category exists but has no ledger config — the conservative
+        // fallback (D-16) MUST classify it as daily, never joy.
+        when(
+          () => mockCategoryService.resolveLedgerType('cat_food'),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => testCategory);
+        when(
+          () => mockTransactionRepo.getLatestHash('book_001'),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockHashChainService.calculateTransactionHash(
+            transactionId: any(named: 'transactionId'),
+            amount: any(named: 'amount'),
+            timestamp: any(named: 'timestamp'),
+            previousHash: any(named: 'previousHash'),
+          ),
+        ).thenReturn('hash_daily_fallback');
+        when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+
+        final result = await useCase.execute(
+          CreateTransactionParams(
+            bookId: 'book_001',
+            amount: 1200,
+            type: TransactionType.expense,
+            categoryId: 'cat_food',
+
+            entrySource: EntrySource.manual,
+          ),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.data!.ledgerType, LedgerType.daily);
+      },
+    );
+
+    test('user-supplied ledgerType overrides CategoryService derivation', () async {
+      // When params.ledgerType is non-null, the use case must NOT call
+      // resolveLedgerType — the form/user override wins.
       when(
-        () => mockClassificationService.classify(
-          categoryId: any(named: 'categoryId'),
-          merchant: any(named: 'merchant'),
-          note: any(named: 'note'),
-        ),
-      ).thenAnswer(
-        (_) async => const ClassificationResult(
-          ledgerType: LedgerType.joy,
-          confidence: 1.0,
-          method: ClassificationMethod.rule,
-          reason: 'Entertainment category',
-        ),
-      );
-      when(() => mockCategoryRepo.findById('cat_entertainment')).thenAnswer(
-        (_) async => Category(
-          id: 'cat_entertainment',
-          name: 'Entertainment',
-          icon: 'movie',
-          color: '#9C27B0',
-          level: 1,
-          isSystem: true,
-          sortOrder: 4,
-          createdAt: DateTime(2026, 1, 1),
-        ),
-      );
-      when(
-        () => mockTransactionRepo.getLatestHash('book_001'),
-      ).thenAnswer((_) async => null);
+        () => mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => testCategory);
       when(
         () => mockHashChainService.calculateTransactionHash(
           transactionId: any(named: 'transactionId'),
@@ -281,7 +334,7 @@ void main() {
           timestamp: any(named: 'timestamp'),
           previousHash: any(named: 'previousHash'),
         ),
-      ).thenReturn('hash_joy');
+      ).thenReturn('hash_override');
       when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute(
@@ -289,31 +342,21 @@ void main() {
           bookId: 'book_001',
           amount: 2000,
           type: TransactionType.expense,
-          categoryId: 'cat_entertainment',
-
+          categoryId: 'cat_food',
+          ledgerType: LedgerType.joy,
           entrySource: EntrySource.manual,
         ),
       );
 
       expect(result.isSuccess, isTrue);
       expect(result.data!.ledgerType, LedgerType.joy);
+      verifyNever(() => mockCategoryService.resolveLedgerType(any()));
     });
 
     test('uses default joy satisfaction 2 for joy transactions', () async {
       when(
-        () => mockClassificationService.classify(
-          categoryId: any(named: 'categoryId'),
-          merchant: any(named: 'merchant'),
-          note: any(named: 'note'),
-        ),
-      ).thenAnswer(
-        (_) async => const ClassificationResult(
-          ledgerType: LedgerType.joy,
-          confidence: 1.0,
-          method: ClassificationMethod.rule,
-          reason: 'Entertainment category',
-        ),
-      );
+        () => mockCategoryService.resolveLedgerType('cat_food'),
+      ).thenAnswer((_) async => LedgerType.joy);
       when(
         () => mockCategoryRepo.findById('cat_food'),
       ).thenAnswer((_) async => testCategory);
@@ -342,7 +385,7 @@ void main() {
       expect(result.data!.joyFullness, 2);
     });
 
-    test('passes merchant and note to classification service', () async {
+    test('derives ledger from the final category id (passes categoryId)', () async {
       when(
         () => mockCategoryRepo.findById('cat_food'),
       ).thenAnswer((_) async => testCategory);
@@ -373,11 +416,7 @@ void main() {
       );
 
       verify(
-        () => mockClassificationService.classify(
-          categoryId: 'cat_food',
-          merchant: 'Lawson',
-          note: 'Quick lunch',
-        ),
+        () => mockCategoryService.resolveLedgerType('cat_food'),
       ).called(1);
     });
   });

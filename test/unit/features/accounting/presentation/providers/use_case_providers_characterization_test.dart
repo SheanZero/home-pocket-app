@@ -9,8 +9,6 @@ import 'package:home_pocket/application/accounting/merchant_category_learning_se
 import 'package:home_pocket/application/accounting/repository_providers.dart'
     show appHashChainServiceProvider;
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
-import 'package:home_pocket/application/dual_ledger/classification_service.dart';
-import 'package:home_pocket/application/dual_ledger/repository_providers.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/application/voice/record_category_correction_use_case.dart';
@@ -48,9 +46,6 @@ class _MockCategoryKeywordPreferenceRepository extends Mock
 
 class _MockHashChainService extends Mock implements HashChainService {}
 
-class _MockClassificationService extends Mock
-    implements ClassificationService {}
-
 class _MockSyncEngine extends Mock implements SyncEngine {}
 
 class _MockTransactionChangeTracker extends Mock
@@ -65,7 +60,6 @@ void main() {
   late _MockMerchantCategoryPreferenceRepository mockMerchantPrefRepo;
   late _MockCategoryKeywordPreferenceRepository mockKeywordPrefRepo;
   late _MockHashChainService mockHashChainService;
-  late _MockClassificationService mockClassificationService;
   late _MockSyncEngine mockSyncEngine;
   late _MockTransactionChangeTracker mockChangeTracker;
   late ProviderContainer container;
@@ -79,7 +73,6 @@ void main() {
     mockMerchantPrefRepo = _MockMerchantCategoryPreferenceRepository();
     mockKeywordPrefRepo = _MockCategoryKeywordPreferenceRepository();
     mockHashChainService = _MockHashChainService();
-    mockClassificationService = _MockClassificationService();
     mockSyncEngine = _MockSyncEngine();
     mockChangeTracker = _MockTransactionChangeTracker();
 
@@ -101,9 +94,9 @@ void main() {
           mockKeywordPrefRepo,
         ),
         appHashChainServiceProvider.overrideWithValue(mockHashChainService),
-        classificationServiceProvider.overrideWithValue(
-          mockClassificationService,
-        ),
+        // categoryServiceProvider is NOT overridden — it constructs from the
+        // already-overridden categoryRepository + categoryLedgerConfig repos,
+        // exercising the real createTransactionUseCase wiring (D-14).
         syncEngineProvider.overrideWithValue(mockSyncEngine),
         transactionChangeTrackerProvider.overrideWithValue(mockChangeTracker),
       ],
