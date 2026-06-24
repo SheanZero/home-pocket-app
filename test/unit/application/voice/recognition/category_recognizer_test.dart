@@ -4,7 +4,7 @@ import 'package:home_pocket/application/voice/recognition/category_recognizer.da
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_keyword_preference.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:mocktail/mocktail.dart';

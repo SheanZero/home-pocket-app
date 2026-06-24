@@ -21,7 +21,7 @@ library;
 
 import '../../../features/accounting/domain/models/category_keyword_preference.dart';
 import '../../../features/accounting/domain/models/transaction.dart';
-import '../../../features/accounting/domain/models/voice_parse_result.dart';
+import '../../../features/voice/domain/models/voice_parse_result.dart';
 import '../../../features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import '../../../features/accounting/domain/repositories/category_repository.dart';
 import '../../../shared/constants/category_other_id_overrides.dart';

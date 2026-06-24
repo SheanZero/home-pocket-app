@@ -26,7 +26,7 @@ import 'package:home_pocket/features/accounting/domain/models/category_ledger_co
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_details_form_config.dart';
-import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';

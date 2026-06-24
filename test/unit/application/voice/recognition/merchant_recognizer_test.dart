@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/recognition/merchant_recognizer.dart';
-import 'package:home_pocket/features/accounting/domain/models/merchant_candidate.dart';
+import 'package:home_pocket/features/voice/domain/models/merchant_candidate.dart';
 import 'package:home_pocket/features/accounting/domain/models/merchant_match_entry.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_repository.dart';
 import 'package:home_pocket/infrastructure/ml/merchant_name_normalizer.dart';

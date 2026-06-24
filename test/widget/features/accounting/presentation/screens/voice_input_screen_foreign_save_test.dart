@@ -23,7 +23,7 @@ import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/merchant_category_preference.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';

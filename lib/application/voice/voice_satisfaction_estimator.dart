@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../../features/accounting/domain/models/voice_parse_result.dart';
+import '../../features/voice/domain/models/voice_parse_result.dart';
 
 /// Voice satisfaction estimator for Soul Ledger transactions.
 ///

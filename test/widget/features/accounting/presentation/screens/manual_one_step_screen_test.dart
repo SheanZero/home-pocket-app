@@ -15,7 +15,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
         categoryServiceProvider;
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
 import 'package:home_pocket/application/voice/start_speech_recognition_use_case.dart';
-import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show merchantCategoryLearningServiceProvider, parseVoiceInputUseCaseProvider;

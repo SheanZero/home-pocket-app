@@ -19,8 +19,7 @@ mixin _$VoiceParseResult {
   DateTime?
   get parsedDate; // Merchant fields stored as primitives (no MerchantMatch reference)
   String? get merchantName;
-  String? get merchantCategoryId;
-  LedgerType? get merchantLedgerType; // Category keyword match
+  String? get merchantCategoryId; // Category keyword match
   CategoryMatchResult?
   get categoryMatch; // Resolved ledger type (from merchant or category)
   LedgerType? get ledgerType; // Quick task 260526-pg6 (Option F — Task 1):
@@ -73,8 +72,6 @@ mixin _$VoiceParseResult {
                 other.merchantName == merchantName) &&
             (identical(other.merchantCategoryId, merchantCategoryId) ||
                 other.merchantCategoryId == merchantCategoryId) &&
-            (identical(other.merchantLedgerType, merchantLedgerType) ||
-                other.merchantLedgerType == merchantLedgerType) &&
             (identical(other.categoryMatch, categoryMatch) ||
                 other.categoryMatch == categoryMatch) &&
             (identical(other.ledgerType, ledgerType) ||
@@ -99,7 +96,6 @@ mixin _$VoiceParseResult {
     parsedDate,
     merchantName,
     merchantCategoryId,
-    merchantLedgerType,
     categoryMatch,
     ledgerType,
     resolvedKeyword,
@@ -110,7 +106,7 @@ mixin _$VoiceParseResult {
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -127,7 +123,6 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
     DateTime? parsedDate,
     String? merchantName,
     String? merchantCategoryId,
-    LedgerType? merchantLedgerType,
     CategoryMatchResult? categoryMatch,
     LedgerType? ledgerType,
     String? resolvedKeyword,
@@ -157,7 +152,6 @@ class _$VoiceParseResultCopyWithImpl<$Res>
     Object? parsedDate = freezed,
     Object? merchantName = freezed,
     Object? merchantCategoryId = freezed,
-    Object? merchantLedgerType = freezed,
     Object? categoryMatch = freezed,
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
@@ -187,10 +181,6 @@ class _$VoiceParseResultCopyWithImpl<$Res>
             ? _self.merchantCategoryId
             : merchantCategoryId // ignore: cast_nullable_to_non_nullable
                   as String?,
-        merchantLedgerType: freezed == merchantLedgerType
-            ? _self.merchantLedgerType
-            : merchantLedgerType // ignore: cast_nullable_to_non_nullable
-                  as LedgerType?,
         categoryMatch: freezed == categoryMatch
             ? _self.categoryMatch
             : categoryMatch // ignore: cast_nullable_to_non_nullable
@@ -333,7 +323,6 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       DateTime? parsedDate,
       String? merchantName,
       String? merchantCategoryId,
-      LedgerType? merchantLedgerType,
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
       String? resolvedKeyword,
@@ -353,7 +342,6 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.parsedDate,
           _that.merchantName,
           _that.merchantCategoryId,
-          _that.merchantLedgerType,
           _that.categoryMatch,
           _that.ledgerType,
           _that.resolvedKeyword,
@@ -387,7 +375,6 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       DateTime? parsedDate,
       String? merchantName,
       String? merchantCategoryId,
-      LedgerType? merchantLedgerType,
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
       String? resolvedKeyword,
@@ -406,7 +393,6 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.parsedDate,
           _that.merchantName,
           _that.merchantCategoryId,
-          _that.merchantLedgerType,
           _that.categoryMatch,
           _that.ledgerType,
           _that.resolvedKeyword,
@@ -439,7 +425,6 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       DateTime? parsedDate,
       String? merchantName,
       String? merchantCategoryId,
-      LedgerType? merchantLedgerType,
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
       String? resolvedKeyword,
@@ -458,7 +443,6 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.parsedDate,
           _that.merchantName,
           _that.merchantCategoryId,
-          _that.merchantLedgerType,
           _that.categoryMatch,
           _that.ledgerType,
           _that.resolvedKeyword,
@@ -481,7 +465,6 @@ class _VoiceParseResult implements VoiceParseResult {
     this.parsedDate,
     this.merchantName,
     this.merchantCategoryId,
-    this.merchantLedgerType,
     this.categoryMatch,
     this.ledgerType,
     this.resolvedKeyword,
@@ -503,8 +486,6 @@ class _VoiceParseResult implements VoiceParseResult {
   final String? merchantName;
   @override
   final String? merchantCategoryId;
-  @override
-  final LedgerType? merchantLedgerType;
   // Category keyword match
   @override
   final CategoryMatchResult? categoryMatch;
@@ -577,8 +558,6 @@ class _VoiceParseResult implements VoiceParseResult {
                 other.merchantName == merchantName) &&
             (identical(other.merchantCategoryId, merchantCategoryId) ||
                 other.merchantCategoryId == merchantCategoryId) &&
-            (identical(other.merchantLedgerType, merchantLedgerType) ||
-                other.merchantLedgerType == merchantLedgerType) &&
             (identical(other.categoryMatch, categoryMatch) ||
                 other.categoryMatch == categoryMatch) &&
             (identical(other.ledgerType, ledgerType) ||
@@ -603,7 +582,6 @@ class _VoiceParseResult implements VoiceParseResult {
     parsedDate,
     merchantName,
     merchantCategoryId,
-    merchantLedgerType,
     categoryMatch,
     ledgerType,
     resolvedKeyword,
@@ -614,7 +592,7 @@ class _VoiceParseResult implements VoiceParseResult {
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -633,7 +611,6 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
     DateTime? parsedDate,
     String? merchantName,
     String? merchantCategoryId,
-    LedgerType? merchantLedgerType,
     CategoryMatchResult? categoryMatch,
     LedgerType? ledgerType,
     String? resolvedKeyword,
@@ -664,7 +641,6 @@ class __$VoiceParseResultCopyWithImpl<$Res>
     Object? parsedDate = freezed,
     Object? merchantName = freezed,
     Object? merchantCategoryId = freezed,
-    Object? merchantLedgerType = freezed,
     Object? categoryMatch = freezed,
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
@@ -694,10 +670,6 @@ class __$VoiceParseResultCopyWithImpl<$Res>
             ? _self.merchantCategoryId
             : merchantCategoryId // ignore: cast_nullable_to_non_nullable
                   as String?,
-        merchantLedgerType: freezed == merchantLedgerType
-            ? _self.merchantLedgerType
-            : merchantLedgerType // ignore: cast_nullable_to_non_nullable
-                  as LedgerType?,
         categoryMatch: freezed == categoryMatch
             ? _self.categoryMatch
             : categoryMatch // ignore: cast_nullable_to_non_nullable

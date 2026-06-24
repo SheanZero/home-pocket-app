@@ -1,4 +1,4 @@
-import '../../../features/accounting/domain/models/merchant_candidate.dart';
+import '../../../features/voice/domain/models/merchant_candidate.dart';
 import '../../../features/accounting/domain/models/merchant_match_entry.dart';
 import '../../../features/accounting/domain/repositories/merchant_repository.dart';
 import '../../../infrastructure/ml/merchant_name_normalizer.dart';

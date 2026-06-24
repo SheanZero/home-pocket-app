@@ -41,7 +41,7 @@ import '../../../../shared/utils/currency_conversion.dart'
     show convertToJpy, subunitToUnitFor;
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
-import '../../domain/models/voice_parse_result.dart';
+import '../../../voice/domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_error_toast.dart';

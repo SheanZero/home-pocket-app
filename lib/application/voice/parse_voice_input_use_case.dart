@@ -1,5 +1,5 @@
 import '../../features/accounting/domain/models/transaction.dart';
-import '../../features/accounting/domain/models/voice_parse_result.dart';
+import '../../features/voice/domain/models/voice_parse_result.dart';
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
@@ -148,7 +148,7 @@ class ParseVoiceInputUseCase {
 
       // The best candidate's merchant primitives ride along on the result so
       // the form can pre-fill the (already-encrypted) merchant field. These are
-      // descriptive only — the ledger never derives from merchantLedgerType.
+      // descriptive only — the ledger never derives from the merchant hint.
       final bestCandidate = merchantCandidates.isEmpty
           ? null
           : merchantCandidates.first;

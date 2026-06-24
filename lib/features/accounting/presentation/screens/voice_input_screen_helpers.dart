@@ -7,7 +7,7 @@
 // versions and have no State or `this` dependency. They grew up inside the
 // State class for historical reasons; their inputs are now passed explicitly.
 
-import '../../domain/models/voice_parse_result.dart';
+import '../../../voice/domain/models/voice_parse_result.dart';
 
 /// Build a [VoiceAudioFeatures] snapshot from the raw audio-sampling buffers
 /// captured during a recording session. Mirrors the prior instance method

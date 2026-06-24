@@ -15,16 +15,16 @@
 //
 // See: .planning/phases/42-entry-ui-display-voice/42-CONTEXT.md (D-08),
 //      lib/shared/constants/voice_currency_suffixes.dart,
-//      lib/features/accounting/domain/models/voice_parse_result.dart.
+//      lib/features/voice/domain/models/voice_parse_result.dart.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
 import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
 import 'package:home_pocket/application/voice/recognition/merchant_recognizer.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
-import 'package:home_pocket/features/accounting/domain/models/merchant_candidate.dart';
+import 'package:home_pocket/features/voice/domain/models/merchant_candidate.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockCategoryRecognizer extends Mock implements CategoryRecognizer {}

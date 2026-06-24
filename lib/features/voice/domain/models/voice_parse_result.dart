@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'merchant_candidate.dart';
-import 'transaction.dart';
+import '../../../accounting/domain/models/transaction.dart';
 
 part 'voice_parse_result.freezed.dart';
 
@@ -9,9 +9,9 @@ part 'voice_parse_result.freezed.dart';
 ///
 /// Holds all extracted fields as primitives — no infrastructure types.
 /// [merchantName] / [merchantCategoryId] carry the best merchant candidate's
-/// descriptive primitives (for form pre-fill). [merchantLedgerType] is retained
-/// for backward compatibility but is no longer populated — the ledger is a pure
-/// function of the final category (LEDGER-01), never the merchant hint.
+/// descriptive primitives (for form pre-fill). The ledger is a pure function of
+/// the final category (LEDGER-01), never the merchant hint — so no
+/// merchant-derived ledger field is carried here (D-12).
 /// [merchantCandidates] carries the full ranked list (recall-first).
 @freezed
 abstract class VoiceParseResult with _$VoiceParseResult {
@@ -23,7 +23,6 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     // Merchant fields stored as primitives (no MerchantMatch reference)
     String? merchantName,
     String? merchantCategoryId,
-    LedgerType? merchantLedgerType,
     // Category keyword match
     CategoryMatchResult? categoryMatch,
     // Resolved ledger type (from merchant or category)
