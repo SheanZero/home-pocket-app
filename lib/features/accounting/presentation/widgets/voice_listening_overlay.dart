@@ -197,16 +197,17 @@ class VoiceRecordPanel extends StatelessWidget {
                 onReset: onReset,
               ),
 
-              // BOTTOM zone — the two hints. Anchored to the TOP of the lower
-              // half (with a small gap) so the 「点击重置重新录入」 hint sits close
-              // to the reset square rather than floating at the lower-half center
-              // (user request: pull the caption nearer the reset button).
+              // BOTTOM zone — the two hints, centered as a group in the lower
+              // half. The 「轻点空白处退出」 hint keeps its ORIGINAL centered
+              // position; only the 「点击重置重新录入」 caption is pulled UP toward
+              // the reset square via a layout-neutral Transform (it reserves its
+              // original box via maintainSize, so the exit hint below does NOT
+              // move — user request: lift only the reset caption).
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 16),
                     // 260622-nhs R7: the stopped-only 「点击重置重新录入」 hint
                     // keeps a RESERVED placeholder while listening (maintainSize)
                     // so the panel reads identically in both states (no jump).
@@ -215,13 +216,19 @@ class VoiceRecordPanel extends StatelessWidget {
                       maintainSize: true,
                       maintainAnimation: true,
                       maintainState: true,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          l10n.voiceTapResetToRerecord,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: palette.textSecondary,
-                            fontWeight: FontWeight.w700,
+                      // Paint-only upward shift toward the reset square; the
+                      // reserved layout box (and thus the exit hint below) is
+                      // unchanged. Tuned to the fixed 356dp / 74dp geometry.
+                      child: Transform.translate(
+                        offset: const Offset(0, -34),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            l10n.voiceTapResetToRerecord,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: palette.textSecondary,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
