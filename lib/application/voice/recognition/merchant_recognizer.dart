@@ -26,9 +26,18 @@ class MerchantRecognizer {
   final MerchantRepository _merchantRepository;
 
   /// Warm cache of every match-key surface (~391+ rows), loaded once via
-  /// [MerchantRepository.loadAllForMatching] and never invalidated — the seed is
-  /// immutable per app version (research A5, mirrors `_seedCache ??=`).
-  List<MerchantMatchEntry>? _cache;
+  /// [MerchantRepository.loadAllForMatching] — the seed is immutable per app
+  /// version (research A5, mirrors `_seedCache ??=`).
+  ///
+  /// WR-02: we cache the in-flight FUTURE (not the resolved value) so two
+  /// concurrent first-calls share ONE load instead of both issuing the
+  /// (transactional) DB read.
+  ///
+  /// WR-01: an EMPTY first load is NOT latched. If `recognize()` runs before
+  /// merchant seeding has completed (e.g. a seed retried after an init failure),
+  /// the cached future is cleared so a later call re-loads the now-populated
+  /// table — an empty seed never poisons the whole app session.
+  Future<List<MerchantMatchEntry>>? _cacheFuture;
 
   // ── Anchored scoring tiers (RESEARCH Pattern 1) ──
   static const double _scoreExact = 1.00;
@@ -54,7 +63,12 @@ class MerchantRecognizer {
     final nq = normalizeMerchantKey(query);
     if (nq.isEmpty) return const <MerchantCandidate>[];
 
-    final entries = _cache ??= await _merchantRepository.loadAllForMatching();
+    // WR-02: share one in-flight load across concurrent first-callers.
+    final entries = await (_cacheFuture ??=
+        _merchantRepository.loadAllForMatching());
+    // WR-01: do not latch an empty seed — clear the cached future so a later
+    // call re-loads once seeding has populated the table.
+    if (entries.isEmpty) _cacheFuture = null;
 
     // Best-scoring surface per merchant. We keep the winning entry so ranking
     // can break score ties by matchKey length deterministically.

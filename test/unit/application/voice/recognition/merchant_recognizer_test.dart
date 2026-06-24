@@ -292,4 +292,64 @@ void main() {
       }
     });
   });
+
+  group('cache hardening (WR-01 / WR-02)', () {
+    test(
+      'WR-01: an empty first load does NOT poison a later non-empty load',
+      () async {
+        final repo = _MockMerchantRepository();
+        var call = 0;
+        when(repo.loadAllForMatching).thenAnswer((_) async {
+          call++;
+          // First load returns empty (seeding not yet done); later loads are
+          // populated. The empty result must NOT latch.
+          return call == 1
+              ? const <MerchantMatchEntry>[]
+              : _fixtureEntries();
+        });
+        final r = MerchantRecognizer(merchantRepository: repo);
+
+        // First call hits the empty seed → no candidate.
+        expect(await r.recognize('スタバ'), isEmpty);
+        // Second call must re-load (cache not poisoned) and resolve.
+        final cands = await r.recognize('スタバ');
+        expect(_bestScoreFor(cands, 'mer_starbucks'), 1.00);
+        expect(call, greaterThanOrEqualTo(2), reason: 'empty load re-tried');
+      },
+    );
+
+    test('WR-01: a non-empty load IS cached (loaded once)', () async {
+      final repo = _MockMerchantRepository();
+      var call = 0;
+      when(repo.loadAllForMatching).thenAnswer((_) async {
+        call++;
+        return _fixtureEntries();
+      });
+      final r = MerchantRecognizer(merchantRepository: repo);
+
+      await r.recognize('スタバ');
+      await r.recognize('マクド');
+      await r.recognize('Starbucks');
+      expect(call, 1, reason: 'a populated seed is loaded exactly once');
+    });
+
+    test(
+      'WR-02: concurrent first-calls share ONE in-flight load',
+      () async {
+        final repo = _MockMerchantRepository();
+        var call = 0;
+        when(repo.loadAllForMatching).thenAnswer((_) async {
+          call++;
+          // Yield so both racing callers observe the null cache before either
+          // assigns — without the shared-future guard this double-loads.
+          await Future<void>.delayed(Duration.zero);
+          return _fixtureEntries();
+        });
+        final r = MerchantRecognizer(merchantRepository: repo);
+
+        await Future.wait([r.recognize('スタバ'), r.recognize('マクド')]);
+        expect(call, 1, reason: 'concurrent first-calls share one load (WR-02)');
+      },
+    );
+  });
 }
