@@ -10,6 +10,7 @@ allow:
   - dart:core
   - package:freezed_annotation/**
   - merchant_candidate.dart # intra-domain leaf for voice_parse_result + recognition_outcome
+  - voice_parse_result.dart # intra-domain leaf for recognition_outcome (CategoryMatchResult)
   - ../../../accounting/domain/models/transaction.dart # LedgerType (cross-feature domain model, no layer violation)
 
 inherit: true
