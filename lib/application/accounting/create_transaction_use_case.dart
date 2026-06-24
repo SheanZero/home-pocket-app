@@ -9,7 +9,7 @@ import '../../features/accounting/domain/repositories/transaction_repository.dar
 import '../../infrastructure/crypto/services/hash_chain_service.dart';
 import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
-import '../dual_ledger/classification_service.dart';
+import 'category_service.dart';
 import '../family_sync/sync_engine.dart';
 import '../family_sync/transaction_change_tracker.dart';
 
@@ -59,14 +59,14 @@ class CreateTransactionUseCase {
     required CategoryRepository categoryRepository,
     required DeviceIdentityRepository deviceIdentityRepository,
     required HashChainService hashChainService,
-    required ClassificationService classificationService,
+    required CategoryService categoryService,
     SyncEngine? syncEngine,
     TransactionChangeTracker? changeTracker,
   }) : _transactionRepo = transactionRepository,
        _categoryRepo = categoryRepository,
        _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
-       _classificationService = classificationService,
+       _categoryService = categoryService,
        _syncEngine = syncEngine,
        _changeTracker = changeTracker;
 
@@ -74,7 +74,7 @@ class CreateTransactionUseCase {
   final CategoryRepository _categoryRepo;
   final DeviceIdentityRepository _deviceIdentityRepo;
   final HashChainService _hashChainService;
-  final ClassificationService _classificationService;
+  final CategoryService _categoryService;
   final SyncEngine? _syncEngine;
   final TransactionChangeTracker? _changeTracker;
 
@@ -133,17 +133,18 @@ class CreateTransactionUseCase {
       return Result.error('deviceId is not available');
     }
 
-    // 4. Determine ledger type: user override > auto-classification
+    // 4. Determine ledger type: user override > category-config derivation.
+    // D-14: ledger derives from the authoritative category_ledger_configs
+    // (CategoryService.resolveLedgerType) — the single source of truth shared
+    // with the form's own derivation. D-16: an unknown / no-config category
+    // falls back to daily (conservative — never mis-stamps an expense as joy).
     final LedgerType resolvedLedgerType;
     if (params.ledgerType != null) {
       resolvedLedgerType = params.ledgerType!;
     } else {
-      final classification = await _classificationService.classify(
-        categoryId: params.categoryId,
-        merchant: params.merchant,
-        note: params.note,
-      );
-      resolvedLedgerType = classification.ledgerType;
+      resolvedLedgerType =
+          await _categoryService.resolveLedgerType(params.categoryId) ??
+          LedgerType.daily;
     }
 
     // 4.5 Resolve & validate joy fullness

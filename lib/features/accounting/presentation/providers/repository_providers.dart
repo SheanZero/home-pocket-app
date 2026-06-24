@@ -13,7 +13,6 @@ import '../../../../application/accounting/repository_providers.dart'
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/accounting/seed_merchants_use_case.dart';
 import '../../../../application/accounting/seed_voice_synonyms_use_case.dart';
-import '../../../../application/dual_ledger/repository_providers.dart';
 import '../../../../application/voice/parse_voice_input_use_case.dart';
 import '../../../../application/voice/record_category_correction_use_case.dart';
 import '../../../../application/voice/recognition/category_recognizer.dart';
@@ -149,7 +148,7 @@ CreateTransactionUseCase createTransactionUseCase(Ref ref) {
     categoryRepository: ref.watch(categoryRepositoryProvider),
     deviceIdentityRepository: ref.watch(deviceIdentityRepositoryProvider),
     hashChainService: ref.watch(app_accounting.appHashChainServiceProvider),
-    classificationService: ref.watch(classificationServiceProvider),
+    categoryService: ref.watch(categoryServiceProvider),
     syncEngine: ref.watch(syncEngineProvider),
     changeTracker: ref.watch(transactionChangeTrackerProvider),
   );
