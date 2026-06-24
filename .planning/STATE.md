@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
-current_phase: 51
-current_phase_name: cross-validation-daily-joy-ledger-rework
-status: executing
-stopped_at: Phase 51 plan 05 complete — all 5 plans executed
-last_updated: "2026-06-24T06:39:40.202Z"
+current_phase: 52
+current_phase_name: Recognition UX + English Voice
+status: completed
+stopped_at: Phase 51 context gathered
+last_updated: "2026-06-24T07:57:51.461Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 51 plan 05 (LEDGER-02 ledger rework) complete
+last_activity_desc: Phase 51 complete, transitioned to Phase 52
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 16
   completed_plans: 16
-  percent: 50
+  percent: 75
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 
 ## Current Position
 
-Phase: 51 (cross-validation-daily-joy-ledger-rework) — EXECUTING
-Plan: 5 of 5 — COMPLETE
+Phase: 52 — Recognition UX + English Voice
+Plan: Not started
 Status: All 5 plans executed; LEDGER-02 ledger rework done (D-18 user-approved 14-override set, D-19/D-20/D-21 invariant gates green)
-Last activity: 2026-06-24 — Phase 51 plan 05 (LEDGER-02) complete
+Last activity: 2026-06-24 — Phase 51 complete, transitioned to Phase 52
 
 ### Decisions
 
