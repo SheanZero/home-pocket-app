@@ -47,7 +47,24 @@ mixin _$VoiceParseResult {
   // can offer below-floor candidates as manual picks. Empty when no merchant
   // surface matched (or the utterance had no recognizable merchant token).
   List<MerchantCandidate> get merchantCandidates;
-  int get estimatedSatisfaction;
+  int
+  get estimatedSatisfaction; // Phase 52 (RECUX-01/02 / D-11): mirror of the three Phase-51
+  // RecognitionOutcome fields the use case already computes, threaded here so
+  // the form can render the confidence band + alternate-category chips. These
+  // are descriptive only — the ledger never derives from them.
+  //
+  // [band] is the qualitative confidence band (ADR-012: 3-tier, never a
+  // number). Null for a manual/OCR-constructed VPR (no outcome → D-10
+  // no-affordance correct-by-construction).
+  ConfidenceBand?
+  get band; // [alternates] is the outcome's ranked alternate categories for the
+  // Phase-52 chips (keyword's category first, then merchant-derived in rank
+  // order, de-duplicated by L2 id). Empty on manual/OCR entry.
+  List<CategoryMatchResult>
+  get alternates; // [keywordMerchantConflict] is true when the keyword verdict won over a
+  // strong (>=0.85) merchant whose L2 differs (XVAL-02 conflict). False on
+  // manual/OCR entry.
+  bool get keywordMerchantConflict;
 
   /// Create a copy of VoiceParseResult
   /// with the given fields replaced by the non-null parameter values.
@@ -85,7 +102,17 @@ mixin _$VoiceParseResult {
               merchantCandidates,
             ) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
-                other.estimatedSatisfaction == estimatedSatisfaction));
+                other.estimatedSatisfaction == estimatedSatisfaction) &&
+            (identical(other.band, band) || other.band == band) &&
+            const DeepCollectionEquality().equals(
+              other.alternates,
+              alternates,
+            ) &&
+            (identical(
+                  other.keywordMerchantConflict,
+                  keywordMerchantConflict,
+                ) ||
+                other.keywordMerchantConflict == keywordMerchantConflict));
   }
 
   @override
@@ -102,11 +129,14 @@ mixin _$VoiceParseResult {
     detectedCurrency,
     const DeepCollectionEquality().hash(merchantCandidates),
     estimatedSatisfaction,
+    band,
+    const DeepCollectionEquality().hash(alternates),
+    keywordMerchantConflict,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction, band: $band, alternates: $alternates, keywordMerchantConflict: $keywordMerchantConflict)';
   }
 }
 
@@ -129,6 +159,9 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
     String? detectedCurrency,
     List<MerchantCandidate> merchantCandidates,
     int estimatedSatisfaction,
+    ConfidenceBand? band,
+    List<CategoryMatchResult> alternates,
+    bool keywordMerchantConflict,
   });
 
   $CategoryMatchResultCopyWith<$Res>? get categoryMatch;
@@ -158,6 +191,9 @@ class _$VoiceParseResultCopyWithImpl<$Res>
     Object? detectedCurrency = freezed,
     Object? merchantCandidates = null,
     Object? estimatedSatisfaction = null,
+    Object? band = freezed,
+    Object? alternates = null,
+    Object? keywordMerchantConflict = null,
   }) {
     return _then(
       _self.copyWith(
@@ -205,6 +241,18 @@ class _$VoiceParseResultCopyWithImpl<$Res>
             ? _self.estimatedSatisfaction
             : estimatedSatisfaction // ignore: cast_nullable_to_non_nullable
                   as int,
+        band: freezed == band
+            ? _self.band
+            : band // ignore: cast_nullable_to_non_nullable
+                  as ConfidenceBand?,
+        alternates: null == alternates
+            ? _self.alternates
+            : alternates // ignore: cast_nullable_to_non_nullable
+                  as List<CategoryMatchResult>,
+        keywordMerchantConflict: null == keywordMerchantConflict
+            ? _self.keywordMerchantConflict
+            : keywordMerchantConflict // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -329,6 +377,9 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       String? detectedCurrency,
       List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
+      ConfidenceBand? band,
+      List<CategoryMatchResult> alternates,
+      bool keywordMerchantConflict,
     )?
     $default, {
     required TResult orElse(),
@@ -348,6 +399,9 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.detectedCurrency,
           _that.merchantCandidates,
           _that.estimatedSatisfaction,
+          _that.band,
+          _that.alternates,
+          _that.keywordMerchantConflict,
         );
       case _:
         return orElse();
@@ -381,6 +435,9 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       String? detectedCurrency,
       List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
+      ConfidenceBand? band,
+      List<CategoryMatchResult> alternates,
+      bool keywordMerchantConflict,
     )
     $default,
   ) {
@@ -399,6 +456,9 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.detectedCurrency,
           _that.merchantCandidates,
           _that.estimatedSatisfaction,
+          _that.band,
+          _that.alternates,
+          _that.keywordMerchantConflict,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -431,6 +491,9 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       String? detectedCurrency,
       List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
+      ConfidenceBand? band,
+      List<CategoryMatchResult> alternates,
+      bool keywordMerchantConflict,
     )?
     $default,
   ) {
@@ -449,6 +512,9 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.detectedCurrency,
           _that.merchantCandidates,
           _that.estimatedSatisfaction,
+          _that.band,
+          _that.alternates,
+          _that.keywordMerchantConflict,
         );
       case _:
         return null;
@@ -472,7 +538,11 @@ class _VoiceParseResult implements VoiceParseResult {
     final List<MerchantCandidate> merchantCandidates =
         const <MerchantCandidate>[],
     this.estimatedSatisfaction = 5,
-  }) : _merchantCandidates = merchantCandidates;
+    this.band,
+    final List<CategoryMatchResult> alternates = const <CategoryMatchResult>[],
+    this.keywordMerchantConflict = false,
+  }) : _merchantCandidates = merchantCandidates,
+       _alternates = alternates;
 
   @override
   final String rawText;
@@ -536,6 +606,37 @@ class _VoiceParseResult implements VoiceParseResult {
   @override
   @JsonKey()
   final int estimatedSatisfaction;
+  // Phase 52 (RECUX-01/02 / D-11): mirror of the three Phase-51
+  // RecognitionOutcome fields the use case already computes, threaded here so
+  // the form can render the confidence band + alternate-category chips. These
+  // are descriptive only — the ledger never derives from them.
+  //
+  // [band] is the qualitative confidence band (ADR-012: 3-tier, never a
+  // number). Null for a manual/OCR-constructed VPR (no outcome → D-10
+  // no-affordance correct-by-construction).
+  @override
+  final ConfidenceBand? band;
+  // [alternates] is the outcome's ranked alternate categories for the
+  // Phase-52 chips (keyword's category first, then merchant-derived in rank
+  // order, de-duplicated by L2 id). Empty on manual/OCR entry.
+  final List<CategoryMatchResult> _alternates;
+  // [alternates] is the outcome's ranked alternate categories for the
+  // Phase-52 chips (keyword's category first, then merchant-derived in rank
+  // order, de-duplicated by L2 id). Empty on manual/OCR entry.
+  @override
+  @JsonKey()
+  List<CategoryMatchResult> get alternates {
+    if (_alternates is EqualUnmodifiableListView) return _alternates;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_alternates);
+  }
+
+  // [keywordMerchantConflict] is true when the keyword verdict won over a
+  // strong (>=0.85) merchant whose L2 differs (XVAL-02 conflict). False on
+  // manual/OCR entry.
+  @override
+  @JsonKey()
+  final bool keywordMerchantConflict;
 
   /// Create a copy of VoiceParseResult
   /// with the given fields replaced by the non-null parameter values.
@@ -571,7 +672,17 @@ class _VoiceParseResult implements VoiceParseResult {
               _merchantCandidates,
             ) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
-                other.estimatedSatisfaction == estimatedSatisfaction));
+                other.estimatedSatisfaction == estimatedSatisfaction) &&
+            (identical(other.band, band) || other.band == band) &&
+            const DeepCollectionEquality().equals(
+              other._alternates,
+              _alternates,
+            ) &&
+            (identical(
+                  other.keywordMerchantConflict,
+                  keywordMerchantConflict,
+                ) ||
+                other.keywordMerchantConflict == keywordMerchantConflict));
   }
 
   @override
@@ -588,11 +699,14 @@ class _VoiceParseResult implements VoiceParseResult {
     detectedCurrency,
     const DeepCollectionEquality().hash(_merchantCandidates),
     estimatedSatisfaction,
+    band,
+    const DeepCollectionEquality().hash(_alternates),
+    keywordMerchantConflict,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction, band: $band, alternates: $alternates, keywordMerchantConflict: $keywordMerchantConflict)';
   }
 }
 
@@ -617,6 +731,9 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
     String? detectedCurrency,
     List<MerchantCandidate> merchantCandidates,
     int estimatedSatisfaction,
+    ConfidenceBand? band,
+    List<CategoryMatchResult> alternates,
+    bool keywordMerchantConflict,
   });
 
   @override
@@ -647,6 +764,9 @@ class __$VoiceParseResultCopyWithImpl<$Res>
     Object? detectedCurrency = freezed,
     Object? merchantCandidates = null,
     Object? estimatedSatisfaction = null,
+    Object? band = freezed,
+    Object? alternates = null,
+    Object? keywordMerchantConflict = null,
   }) {
     return _then(
       _VoiceParseResult(
@@ -694,6 +814,18 @@ class __$VoiceParseResultCopyWithImpl<$Res>
             ? _self.estimatedSatisfaction
             : estimatedSatisfaction // ignore: cast_nullable_to_non_nullable
                   as int,
+        band: freezed == band
+            ? _self.band
+            : band // ignore: cast_nullable_to_non_nullable
+                  as ConfidenceBand?,
+        alternates: null == alternates
+            ? _self._alternates
+            : alternates // ignore: cast_nullable_to_non_nullable
+                  as List<CategoryMatchResult>,
+        keywordMerchantConflict: null == keywordMerchantConflict
+            ? _self.keywordMerchantConflict
+            : keywordMerchantConflict // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }

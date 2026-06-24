@@ -540,7 +540,7 @@ final class CreateTransactionUseCaseProvider
 }
 
 String _$createTransactionUseCaseHash() =>
-    r'a3b1c6f6b92937972bd991e565193ae36551bbf6';
+    r'7b348e60ef0e21d753786ad4af39e9cf9b2b7442';
 
 @ProviderFor(updateTransactionUseCase)
 final updateTransactionUseCaseProvider = UpdateTransactionUseCaseProvider._();

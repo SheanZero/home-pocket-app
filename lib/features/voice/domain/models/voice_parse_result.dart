@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'merchant_candidate.dart';
+import 'recognition_outcome.dart';
 import '../../../accounting/domain/models/transaction.dart';
 
 part 'voice_parse_result.freezed.dart';
@@ -53,6 +54,23 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     // surface matched (or the utterance had no recognizable merchant token).
     @Default(<MerchantCandidate>[]) List<MerchantCandidate> merchantCandidates,
     @Default(5) int estimatedSatisfaction,
+    // Phase 52 (RECUX-01/02 / D-11): mirror of the three Phase-51
+    // RecognitionOutcome fields the use case already computes, threaded here so
+    // the form can render the confidence band + alternate-category chips. These
+    // are descriptive only — the ledger never derives from them.
+    //
+    // [band] is the qualitative confidence band (ADR-012: 3-tier, never a
+    // number). Null for a manual/OCR-constructed VPR (no outcome → D-10
+    // no-affordance correct-by-construction).
+    ConfidenceBand? band,
+    // [alternates] is the outcome's ranked alternate categories for the
+    // Phase-52 chips (keyword's category first, then merchant-derived in rank
+    // order, de-duplicated by L2 id). Empty on manual/OCR entry.
+    @Default(<CategoryMatchResult>[]) List<CategoryMatchResult> alternates,
+    // [keywordMerchantConflict] is true when the keyword verdict won over a
+    // strong (>=0.85) merchant whose L2 differs (XVAL-02 conflict). False on
+    // manual/OCR entry.
+    @Default(false) bool keywordMerchantConflict,
   }) = _VoiceParseResult;
 }
 
