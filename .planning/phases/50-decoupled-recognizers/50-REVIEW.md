@@ -33,7 +33,7 @@ findings:
   warning: 5
   info: 4
   total: 10
-status: issues_found
+status: resolved
 ---
 
 # Phase 50: Code Review Report
@@ -215,6 +215,39 @@ if (l2 != null) {
 
 ---
 
+## Fixes Applied (post-review)
+
+**Applied:** 2026-06-24 · **Status:** resolved · all whole-project `flutter analyze` = 0 issues, full `flutter test` = 3258 passed.
+
+Approved scope: BLOCKER (CR-01) + all warnings (WR-01…WR-05) + IN-01. IN-02 and IN-03 left as documented (IN-02 deferred — sync-format compat; IN-03 auto-covered by the CR-01 fix).
+
+| Finding | Resolution | Commit |
+|---|---|---|
+| **CR-01** (BLOCKER) | `MerchantRecognizer._scoreOf` now scores the two prefix directions separately. A seeded alias that is a prefix of the (stripped) utterance — `nq.startsWith(mk)`, the dominant 「スタバで…」 shape — resolves at the alias-at-start tier (0.85) gated only by script-min-length, **no** coverage guard. A short query prefixing a long brand — `mk.startsWith(nq)` — keeps the `>50%` coverage guard (SC2). A failed guard in either branch falls **through** to containment instead of `return null`. Real-recognizer evidence below. | `5778bf28` (RED test), `72b3f4f7` (GREEN) |
+| **WR-03** | Orchestrator feeds the recognizer the amount/currency/date/particle-**stripped** surface (the same `_extractKeyword` output the category engine uses), not the raw transcript. `rawText` retained for display only. | `72b3f4f7` |
+| **WR-04** | A null `normalizeToL2(best.categoryId)` result is now treated as "no auto-fill" — the un-normalized (possibly L1) merchant categoryId is never stamped; category stays null and the candidate surfaces for manual pick. New unit test pins it. | `72b3f4f7` |
+| **IN-04** | De-mocked the use-case acceptance gate: a new group drives the **real** `MerchantRecognizer` over a tiny seed end-to-end through the real `ParseVoiceInputUseCase` for all five headline compound utterances, so this class of false-negative cannot ship green again. Mocked merge-matrix tests retained. | `72b3f4f7` |
+| **WR-01** | Empty first load no longer latches — the cached future is cleared when the load is empty, so a later call re-loads once seeding has populated the table. | `cee36a44` |
+| **WR-02** | Cache the in-flight **Future** (not the resolved value) so concurrent first-calls share one (transactional) DB read. Both behaviors covered by new tests (empty-then-nonempty re-load; loaded-once; concurrent share-one). | `cee36a44` |
+| **WR-05** | Substring-fallback `isLearned` now uses the model's single source of truth `winner.isLearned` (hitCount >= 2) instead of the divergent `hitCount > 0`. | `5437de48` |
+| **IN-01** | Removed the duplicate `外食 → cat_food_dining_out` seed (kept the ja occurrence). Coverage + categoryId gates stay green. | `d15f3bf0` |
+
+**Real-recognizer evidence (CR-01 / SC3) — after fix, with the orchestrator strip applied:**
+
+```
+RAW="スタバ"               STRIP="スタバ"          -> mer_sb@1.00  ✅
+RAW="スタバでコーヒー"      STRIP="スタバコーヒー"    -> mer_sb@0.85  ✅ (was NONE ❌)
+RAW="スタバで500円"        STRIP="スタバ"          -> mer_sb@1.00  ✅ (was NONE ❌)
+RAW="スタバに行った"       STRIP="スタバ行った"     -> mer_sb@0.85  ✅ (was NONE ❌)
+RAW="マクドでポテト食べた"  STRIP="マクドポテト食べた" -> mer_mc@0.85  ✅ (was NONE ❌)
+RAW="マクドナルドで昼ごはん" STRIP="マクドナルド昼ごん" -> mer_mc@0.85  ✅
+```
+
+**SC2 hard constraint:** the full ~400-merchant adversarial corpus (`merchant_false_positive_test.dart`) re-run against the real recognizer stays entirely **below** the 0.85 floor — no false auto-fill introduced.
+
+---
+
 _Reviewed: 2026-06-24_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
+_Fixes applied: 2026-06-24 — see "Fixes Applied (post-review)" above._
