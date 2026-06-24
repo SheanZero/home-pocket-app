@@ -183,6 +183,12 @@ class ParseVoiceInputUseCase {
           resolvedKeyword: resolvedKeyword,
           detectedCurrency: detectedCurrency,
           merchantCandidates: merchantCandidates,
+          // Phase 52 (D-11): thread the three outcome fields the reconciler
+          // already computed but which were previously DROPPED at the VPR ctor.
+          // The form renders the band + alternate chips from these.
+          band: outcome.band,
+          alternates: outcome.alternates,
+          keywordMerchantConflict: outcome.keywordMerchantConflict,
         ),
       );
     } catch (e) {
@@ -290,6 +296,19 @@ class ParseVoiceInputUseCase {
       remaining = remaining.replaceAll(RegExp(r'[的了吗呢吧啊呀哦]'), '');
     }
 
-    return remaining.trim();
+    final trimmed = remaining.trim();
+
+    // VEN-01 / Pitfall 1: iOS/Android STT returns capitalized English words
+    // ("Coffee"), but the en category seeds are authored lowercase and
+    // `findByKeyword` is exact/case-sensitive. Lowercase the residual ONLY for
+    // en locales so lowercase seeds match the capitalized recognized keyword.
+    // The zh/ja residual stays byte-identical (gate on en only). The
+    // 260526-pg6 write==read contract holds because both the recognizer read
+    // key and the resolvedKeyword write key become lowercase for en.
+    if (lower.startsWith('en')) {
+      return trimmed.toLowerCase();
+    }
+
+    return trimmed;
   }
 }
