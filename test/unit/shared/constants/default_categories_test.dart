@@ -152,6 +152,9 @@ void main() {
           'cat_clothing_shoes',
           'cat_clothing_underwear',
           'cat_clothing_cleaning',
+          // D-18 user-approved expansion
+          'cat_clothing_hair',
+          'cat_clothing_accessories',
         };
         for (final id in overrides) {
           final c = configs.firstWhere(
@@ -189,6 +192,27 @@ void main() {
             orElse: () => throw StateError('Missing ledger override for $id'),
           );
           expect(c.ledgerType, LedgerType.joy);
+        }
+      });
+
+      test('D-18: food_drinks + health fitness/massage override to joy', () {
+        // User-approved (D-18) all-5 expansion: these enjoyment/self-investment
+        // L2s override their L1 (food→daily, health→daily) to joy.
+        final configs = DefaultCategories.defaultLedgerConfigs;
+        for (final id in [
+          'cat_food_drinks',
+          'cat_health_fitness',
+          'cat_health_massage',
+        ]) {
+          final c = configs.firstWhere(
+            (x) => x.categoryId == id,
+            orElse: () => throw StateError('Missing ledger override for $id'),
+          );
+          expect(
+            c.ledgerType,
+            LedgerType.joy,
+            reason: '$id should override its daily L1 parent to joy',
+          );
         }
       });
     });

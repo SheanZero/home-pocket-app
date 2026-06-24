@@ -1209,16 +1209,21 @@ abstract final class DefaultCategories {
     _config('cat_allowance', LedgerType.joy),
     _config('cat_asset', LedgerType.joy),
     _config('cat_other_expense', LedgerType.daily),
-    // L2 overrides
+    // L2 overrides (D-18: user-approved all-5 expansion — total 14)
     _config('cat_clothing_clothes', LedgerType.daily),
     _config('cat_clothing_shoes', LedgerType.daily),
     _config('cat_clothing_underwear', LedgerType.daily),
     _config('cat_clothing_cleaning', LedgerType.daily),
+    _config('cat_clothing_hair', LedgerType.daily),
+    _config('cat_clothing_accessories', LedgerType.daily),
     _config('cat_social_drinks', LedgerType.joy),
     _config('cat_social_gifts', LedgerType.joy),
     _config('cat_special_wedding', LedgerType.joy),
     _config('cat_special_movement', LedgerType.joy),
     _config('cat_special_newyear', LedgerType.joy),
+    _config('cat_food_drinks', LedgerType.joy),
+    _config('cat_health_fitness', LedgerType.joy),
+    _config('cat_health_massage', LedgerType.joy),
   ];
 
   // ─── Factory helpers ───
