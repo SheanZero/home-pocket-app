@@ -734,6 +734,71 @@ void main() {
     },
   );
 
+  // ── XVAL-03: resolve-on-final hysteresis (no category-chip flicker) ────────
+
+  testWidgets(
+    'resolve-on-final: category fills exactly once on the final result, never '
+    'from partials (XVAL-03)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      // Same category-bearing utterance carried by N partials then one final.
+      // The fake returns the SAME parse (amount/merchant/category) for both the
+      // partial-driven parse and the final parse, so the ONLY thing that gates
+      // the category chip is the resolve-on-final hysteresis (not a parse diff).
+      final result = VoiceParseResult(
+        rawText: '1千8百4十元 星巴克',
+        amount: 1840,
+        parsedDate: DateTime(2026, 4, 27),
+        merchantName: '星巴克',
+        categoryMatch: const CategoryMatchResult(
+          categoryId: 'cat_food_cafe',
+          confidence: 0.91,
+          source: MatchSource.keyword,
+        ),
+        ledgerType: LedgerType.daily,
+      );
+      final parse = FakeParseVoiceInputUseCase({'1千8百4十元 星巴克': result});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      // Feed 3 partials, each past the 300ms debounce so the partial-driven
+      // fill runs. Amount + merchant fill LIVE (sub-second feedback), but the
+      // category chip MUST stay unresolved across every partial (no flicker).
+      for (var i = 0; i < 3; i++) {
+        speech.emitPartial('1千8百4十元 星巴克');
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pumpAndSettle();
+      }
+
+      // Gate is category-scoped: amount + merchant DID fill from the partials.
+      expect(find.text('星巴克'), findsOneWidget,
+          reason: 'partials still fill merchant live (gate is category-only)');
+      expect(host.pttLastFilledAmount, 1840,
+          reason: 'partials still fill amount live (gate is category-only)');
+      // …but the category chip is held until the first end-of-speech final.
+      expect(find.textContaining('Cafe'), findsNothing,
+          reason: 'category is held across partials — no chip flicker (XVAL-03)');
+
+      // The first end-of-speech final resolves the category exactly once.
+      speech.emitFinal('1千8百4十元 星巴克');
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Cafe'), findsOneWidget,
+          reason: 'the final result resolves the category (resolve-on-final)');
+      // Amount/merchant remain filled (the final fill is a superset, not a reset).
+      expect(find.text('星巴克'), findsOneWidget);
+      expect(host.pttLastFilledAmount, 1840);
+    },
+  );
+
   // ── R4 BUG D: dedupe final parse + live partial auto-fill ──────────────────
 
   testWidgets(
