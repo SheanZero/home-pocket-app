@@ -6,14 +6,14 @@ current_phase: 52
 current_phase_name: recognition-ux-english-voice
 status: executing
 stopped_at: Phase 52 planned — 6 plans, 4 waves (ready to execute)
-last_updated: "2026-06-24T10:46:19.374Z"
+last_updated: "2026-06-24T10:55:53.172Z"
 last_activity: 2026-06-24
 last_activity_desc: Phase 52 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 22
-  completed_plans: 18
+  completed_plans: 19
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 52 (recognition-ux-english-voice) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-06-24 — Phase 52 execution started
 
@@ -37,6 +37,8 @@ Last activity: 2026-06-24 — Phase 52 execution started
 
 - D-18 (2026-06-24): user approved ALL 5 candidate L2 ledger overrides at the blocking spot-check gate — `_defaultLedgerConfigs` now holds 14 overrides (food_drinks/health_fitness/health_massage→joy, clothing_hair/clothing_accessories→daily, plus the original 9). No schema change; ledger stays a pure function of the final category id.
 - [Phase ?]: D-19 (2026-06-24): Phase 52-01 threaded the 3 Phase-51 RecognitionOutcome fields (band/alternates/keywordMerchantConflict) into VoiceParseResult (3 fields only, lowest blast radius; band nullable for D-10 manual-entry no-affordance) and lowercased the en-only keyword residual (gate on lower.startsWith('en'); zh/ja byte-identical; 260526-pg6 write==read preserved).
+- [Phase ?]: 52-04: en category seeds authored lowercase (write==read identity contract with 52-01 en-residual lowercasing)
+- [Phase ?]: 52-04: English merchant + currency recognition VERIFIED not rebuilt (D-13 reuse); A6 nameEn coverage is 100% (391/391)
 
 ### Quick Tasks Completed
 
@@ -223,7 +225,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T10:46:13.725Z
+Last session: 2026-06-24T10:55:21.635Z
 Stopped at: Phase 52 planned (6 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 
@@ -280,6 +282,7 @@ Resume file: .planning/phases/52-recognition-ux-english-voice/52-01-PLAN.md
 | Phase 51 P04 | ~12min | 3 tasks | 11 files |
 | Phase 52 P01 | 2min | 3 tasks | 5 files |
 | Phase 52 P02 | 7min | 3 tasks | 13 files |
+| Phase 52 P04 | 12 | 2 tasks | 6 files |
 
 ## Decisions
 
