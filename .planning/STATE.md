@@ -5,16 +5,16 @@ milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证
 current_phase: 50
 current_phase_name: decoupled-recognizers
 status: executing
-stopped_at: Phase 50 plan 50-02 complete (full-L2 keyword seed); plans 03/05 remain
-last_updated: "2026-06-24T01:17:42.371Z"
+stopped_at: Phase 50 plan 50-03 complete (MerchantRecognizer + SC2/SC3 gates); plan 05 remains
+last_updated: "2026-06-24T01:30:59.214Z"
 last_activity: 2026-06-24
-last_activity_desc: Phase 50 plan 50-02 executed (full-L2 keyword seed)
+last_activity_desc: Phase 50 plan 50-03 executed (MerchantRecognizer anchored scorer)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 50 (decoupled-recognizers) — EXECUTING
-Plan: 4 of 5
-Status: 50-02 complete (full-L2 keyword seed); 50-03 / 50-05 remain
-Last activity: 2026-06-24 — Phase 50 plan 50-02 executed (full-L2 keyword seed)
+Plan: 5 of 5
+Status: 50-03 complete (MerchantRecognizer anchored scorer); only 50-05 (orchestrator + retirement) remains
+Last activity: 2026-06-24 — Phase 50 plan 50-03 executed (MerchantRecognizer + SC2/SC3 gates)
 
 ### Quick Tasks Completed
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T01:17:22.781Z
+Last session: 2026-06-24T01:30:51.403Z
 Stopped at: Phase 50 context gathered
 Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 
@@ -267,6 +267,7 @@ Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 | Phase 50 P01 | 5m | 2 tasks | 7 files |
 | Phase 50 P04 | 2 | 2 tasks | 2 files |
 | Phase 50 P02 | ~25min | 4 tasks | 7 files |
+| Phase 50 P03 | ~1h | 2 tasks | 4 files |
 
 ## Decisions
 
@@ -339,6 +340,7 @@ Resume file: .planning/phases/50-decoupled-recognizers/50-CONTEXT.md
 - [Phase 49]: 49-06: SQLCipher-path coverage split — integration test proves fresh-v22 + v21→v22 (real v1.8-user upgrade); deep-history v3→v22/v17→v22 DDL assertions stay on host-VM ladder merchant_v22_migration_test.dart
 - [Phase ?]: Phase 50-04: CategoryRecognizer = VoiceCategoryResolver minus step-1 + minus vendor-database dep; keyword-only and unconditional (DECOUP-01/02). Purely additive — old resolver/test/provider untouched (deleted in Plan 05/Wave 3) so Wave 1 stays green.
 - [Phase ?]: [Phase 50]: 50-02: keyword seed extended to FULL 138-L2 coverage (admin families cat_tax_*/cat_asset_*/cat_insurance_*/*_insurance/*_tax/cat_special_* + 19 *_other buckets INCLUDED per user scope decision + RESEARCH A4); coverage gate widened (no exclusion list); 515 zh+ja direct-seed rows; word refinements うーばー→ウーバー / 老婆零花→伴侣零花钱; split into synonyms/synonyms_*.dart (800-line rule), synonyms/ CJK-scan-excluded by prefix
+- [Phase ?]: Phase 50-03: prefix tier needs per-script min-length AND strict >50% rune-coverage guard (SC2).
 
 ## Operator Next Steps
 
