@@ -29,8 +29,8 @@
 
 ### Daily/Joy Ledger Rework (LEDGER)
 
-- [ ] **LEDGER-01**: 语音条目的 日常/悦己 账本归属是最终交叉验证类目的纯函数（`resolveLedgerType(finalCategoryId)`）；删除商家 `ledgerType` 短路（`parse_voice_input_use_case.dart:106`）；每条路径有 `ledgerType == resolveLedgerType(finalCategoryId)` 不变量测试。
-- [ ] **LEDGER-02**: `category_ledger_configs` 重新 seed/扩展覆盖全部 19 L1 + 有意义的 L2；退役死的 `RuleEngine`/`ClassificationService` 桩（先 grep 确认无消费者，若有则折叠进 config 而非删除）。
+- [x] **LEDGER-01**: 语音条目的 日常/悦己 账本归属是最终交叉验证类目的纯函数（`resolveLedgerType(finalCategoryId)`）；删除商家 `ledgerType` 短路（`parse_voice_input_use_case.dart:106`）；每条路径有 `ledgerType == resolveLedgerType(finalCategoryId)` 不变量测试。
+- [x] **LEDGER-02**: `category_ledger_configs` 重新 seed/扩展覆盖全部 19 L1 + 有意义的 L2；退役死的 `RuleEngine`/`ClassificationService` 桩（先 grep 确认无消费者，若有则折叠进 config 而非删除）。
 
 ### Recognition UX + Learning Loop (RECUX)
 
@@ -98,8 +98,8 @@
 | XVAL-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | XVAL-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | XVAL-03 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
-| LEDGER-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
-| LEDGER-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Pending |
+| LEDGER-01 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
+| LEDGER-02 | Phase 51 — Cross-Validation + Daily/Joy Ledger Rework | Complete |
 | RECUX-01 | Phase 52 — Recognition UX + English Voice | Pending |
 | RECUX-02 | Phase 52 — Recognition UX + English Voice | Pending |
 | RECUX-03 | Phase 52 — Recognition UX + English Voice | Pending |

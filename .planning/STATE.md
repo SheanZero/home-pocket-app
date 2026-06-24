@@ -6,14 +6,14 @@ current_phase: 51
 current_phase_name: cross-validation-daily-joy-ledger-rework
 status: executing
 stopped_at: Phase 51 planned — 5 plans, ready to execute
-last_updated: "2026-06-24T06:26:16.983Z"
+last_updated: "2026-06-24T06:39:40.202Z"
 last_activity: 2026-06-24
 last_activity_desc: Phase 51 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-23 after Phase 49)
 ## Current Position
 
 Phase: 51 (cross-validation-daily-joy-ledger-rework) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-06-24 — Phase 51 execution started
 
@@ -218,7 +218,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-24T06:25:47.521Z
+Last session: 2026-06-24T06:39:40.197Z
 Stopped at: Phase 51 context gathered
 Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CONTEXT.md
 
@@ -272,6 +272,7 @@ Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CON
 | Phase 51 P01 | 25 | 2 tasks | 19 files |
 | Phase 51 P02 | 6 | 3 tasks | 6 files |
 | Phase 51 P03 | ~20min | 2 tasks | 2 files |
+| Phase 51 P04 | ~12min | 3 tasks | 11 files |
 
 ## Decisions
 
@@ -350,6 +351,8 @@ Resume file: .planning/phases/51-cross-validation-daily-joy-ledger-rework/51-CON
 - [Phase ?]: Reconciler emits best-guess at band=weak (D-05); use case gates form auto-fill on band==medium, preserving 0.85-floor/WR-04 (51-02)
 - [Phase ?]: RecognitionReconciler is pure/sync: D-06 boost compares L2 id strings directly (merchant ids are L2 seed ids), no DB/normalizeToL2 inside the reconciler (51-02)
 - [Phase ?]: 51-03: category fill gated to first end-of-speech final (resolve-on-final hysteresis, XVAL-03); partials still fill amount/text/merchant/date live; no new timer (D-03).
+- [Phase 51]: 51-04: CreateTransactionUseCase ledger derives from CategoryService.resolveLedgerType(categoryId) ?? daily (D-14/D-16) — single source = category_ledger_configs, never a merchant ledger hint.
+- [Phase 51]: 51-04: lib/application/dual_ledger/ retired (LEDGER-02, D-15) — second divergent hardcoded daily/joy map (RuleEngine, dead ids cat_entertainment/cat_shopping) deleted; ledger_hint_deriver + features/dual_ledger untouched.
 
 ## Operator Next Steps
 
