@@ -11,6 +11,7 @@ allow:
   - package:freezed_annotation/**
   - merchant_candidate.dart # intra-domain leaf for voice_parse_result + recognition_outcome
   - voice_parse_result.dart # intra-domain leaf for recognition_outcome (CategoryMatchResult)
+  - recognition_outcome.dart # intra-domain leaf for voice_parse_result (RecognitionOutcome)
   - ../../../accounting/domain/models/transaction.dart # LedgerType (cross-feature domain model, no layer violation)
 
 inherit: true

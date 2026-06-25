@@ -9,5 +9,7 @@ allow:
   - metric_result.dart                # sibling domain model (family_happiness.dart, happiness_report.dart)
   - shared_joy_insight.dart           # sibling domain model (family_happiness.dart)
   - best_joy_moment_row.dart          # sibling domain model (happiness_report.dart)
+  - monthly_report.dart               # sibling domain model (member_spend_breakdown.dart)
+  - ../../../accounting/domain/models/transaction.dart # Transaction (cross-feature domain model, no layer violation — category_drill_down.dart)
 
 inherit: true
