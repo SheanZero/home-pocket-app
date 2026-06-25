@@ -671,7 +671,7 @@ void main() {
 
   group('Recognition surface visibility (52-UAT test 2)', () {
     testWidgets(
-      'recognition surface HIDDEN by default — neither band nor chip row renders',
+      'recognition surface: confidence band renders by default, chip row stays hidden',
       (tester) async {
         sizeView(tester);
         final correctionSpy = _SpyRecordCategoryCorrectionUseCase();
@@ -699,8 +699,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Push a recognition outcome with an alternate — in the old behavior
-        // this rendered the chip row at resolve-on-final.
+        // Push a recognition outcome with an alternate at resolve-on-final.
         formKey.currentState!.updateRecognition(
           ConfidenceBand.weak,
           [
@@ -713,14 +712,15 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // The confidence band is now hidden in production too (52-UAT
-        // follow-up: the band pill was hidden at the user's request).
+        // The confidence band renders in production after a voice resolve-on-
+        // final (RECUX-01) — re-enabled by undoing the 52-UAT follow-up that had
+        // over-hidden it. Only the chip row stays hidden (test 2).
         expect(
           find.byType(ConfidenceBandIndicator),
-          findsNothing,
-          reason: '52-UAT follow-up: the confidence band is hidden in production',
+          findsOneWidget,
+          reason: 'RECUX-01: the confidence band renders in production',
         );
-        // …and the whole chip row is gone: no alternate chips and no exit chip.
+        // …but the whole chip row is gone: no alternate chips and no exit chip.
         expect(
           find.byType(AlternateCategoryChips),
           findsNothing,
