@@ -2,7 +2,9 @@
 phase: 260526-pg6
 plan: 01
 type: quick
-status: incomplete
+status: complete
+resolution: superseded-by-v1.9
+resolution_note: "Task 6 device checkpoint moot — VoiceCategoryResolver deleted in Phase 50. The resolvedKeyword write==read parity (orphan-key fix) this introduced was re-built as a v1.9 invariant in Phase 52 RECUX-03 ('防 260526-pg6 回归'), live in recognition_reconciler.dart / recognition_outcome.dart / parse_voice_input_use_case.dart with tests. Marked complete at v1.9 close (2026-06-25)."
 subsystem: voice
 tags: [voice, learning, active-learning, resolver, dao, freezed, cli-tool]
 wave: 1

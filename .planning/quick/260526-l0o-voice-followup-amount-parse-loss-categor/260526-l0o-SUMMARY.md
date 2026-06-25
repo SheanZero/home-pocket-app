@@ -2,8 +2,9 @@
 quick: 260526-l0o
 type: summary
 parent: 260526-k92
-status: incomplete
-status_reason: Task 6 awaiting human verification (checkpoint:human-verify)
+status: complete
+resolution: superseded-by-v1.9
+status_reason: "Task 6 device checkpoint moot — voice_category_resolver.dart (the substring-fallback this modified) was deleted in Phase 50 (D-05) and the amount parser rewritten (260622-nhs R6 + Phase 50/52). Comma-tolerant amount + transport keywords are covered by the v1.9 corpus. Marked complete at v1.9 close (2026-06-25)."
 commits:
   - dc5e37a  # Issue 1 — comma + 日元
   - 342d576  # Issue 2 — transport synonyms + substring fallback
