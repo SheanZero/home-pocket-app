@@ -384,6 +384,50 @@
 
 ---
 
+## Milestone: v1.9 — 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库） (Voice Category & Merchant Recognition)
+
+**Shipped:** 2026-06-25
+**Phases:** 4 (49-52) | **Plans:** 22 | **Sessions:** multi-session GSD execution (user-directed 6→4 phase merge)
+
+### What Was Built
+- A layered **decoupling + arbitration** of the voice ledger pipeline (not a rewrite): two mutually non-calling pure-Dart engines — `MerchantRecognizer` (anchored/normalized scored match, replacing bidirectional substring) + `CategoryRecognizer` (unconditional, keyword-only) — replacing the merchant-priority short-circuit embedded in the old text parser.
+- A pure-domain `RecognitionReconciler` arbitrating the two verdicts via an explicit none/weak/strong **3×3 truth table** (agreement boosts, keyword wins conflicts, merchant fallback, both-weak asks), written test-first as `cross_validation_test.dart`.
+- The daily/joy ledger reworked into a pure function `resolveLedgerType(finalCategoryId) ?? daily` at **one** post-reconciliation site — deleting the merchant ledger short-circuit and retiring the entire `lib/application/dual_ledger/` (RuleEngine/ClassificationService divergent map), with D-19/D-20/D-21 invariant gates.
+- The 13-entry hardcoded merchant list migrated to a persistent encrypted Drift `merchants` table (schema **v21→v22**, 391 JP merchants, region + multi-locale names + seed-time normalized match-key), idempotent seed, explicit CREATE INDEX in onCreate+onUpgrade, full migration ladder verified on the encrypted SQLCipher executor.
+- Recognition UX on `TransactionDetailsForm`: a purely-visual qualitative 3-tier confidence band + ≤3 alternate chips + KEYWORD-only inline correction (write==read parity, 防 260526-pg6); plus English voice parity (166 EN category seeds + bounded EN number-word fallback that never enters the CJK path + EN currency words + `localeId` e2e). Trilingual ARB parity + anti-toxicity sweep run inline before merge.
+
+### What Worked
+- **Decouple-then-arbitrate as a pure function** — making the reconciler a zero-I/O pure function of two verdicts turned the hardest logic (cross-validation) into a unit-testable 3×3 truth table authored test-first; the spec WAS the test.
+- **One ledger derivation site + invariant test** — collapsing two divergent hardcoded daily/joy maps into a single `resolveLedgerType` call with `ledgerType == resolveLedgerType(finalCategoryId)` asserted on every path structurally killed the ledger-desync risk the milestone existed to fix.
+- **Zero new heavy deps** — a hand-rolled `normalizeMerchantKey` (NFKC + kana-fold) serving both seed-time and query-time, plus rejecting FTS5/fuzzy/embeddings, kept a recognition milestone dependency-free (drift stays 2.31.0).
+- **Inline trilingual close-out gate** (anti-toxicity sweep + ARB parity + golden check run *inside* Phase 52, not deferred to milestone close) applied the v1.7/v1.8 lesson — the milestone arrived at close already i18n-clean.
+- **Resolving the carried voice backlog by supersession** — recognizing at close that k92/l0o/n7b/pg6 targeted code v1.9 had deleted, rather than re-rubber-stamping or re-implementing them, honestly cleared a six-milestone-old backlog.
+
+### What Was Inefficient
+- The milestone-close CLI **again** emitted garbage accomplishments (mixed `[Rule N - Bug]` deviation notes with real one-liners) and **mangled STATE.md** (set `current_phase: 9`, wrote a stale `stopped_at`) — 4th recurrence of the extractor/state-writer being untrustworthy; MILESTONES, the ROADMAP collapse, and STATE were hand-curated. (Counts were correct this time only because the ROADMAP carried `### Phase N` blocks.)
+- The recognition surface (confidence band + chips) was built, wired, and tested but **hidden in production** after a post-UAT scope-cut, surfacing at audit as the T-01 divergence — re-enabling the band was a conscious close-time decision rather than a planned state.
+- Worktree base-drift (#683) again forced degraded-sequential execution on the main tree (local main ~121 commits ahead of origin) instead of parallel worktree waves.
+- A long post-v1.8 single-page voice-entry quick-task series (260622-nhs R1–R8 + 260623-0cj) ran between v1.8 close and the v1.9 phases — heavy device-iteration churn folded into the v1.9 git range.
+
+### Patterns Established
+- **Decouple into mutually non-calling engines + a pure-function reconciler** — when two signals must cross-check, give each its own engine and arbitrate in a zero-I/O domain function that is a pure function of both verdicts (unit-testable as a truth table).
+- **Single derivation site + on-every-path invariant test** for any value that must stay consistent with another (ledger == f(category)).
+- **Resolve-by-supersession at close** — a carried backlog item whose target code a later milestone deleted is resolved (marked superseded with evidence), not perpetually re-deferred.
+- **Identity contract for learning loops** — write key == read key, threaded verbatim end-to-end and asserted, prevents the orphan-key class (260526-pg6 → Phase 52 invariant).
+
+### Key Lessons
+- A "decouple X from Y" milestone's real deliverable is the *arbitration* layer — the split is mechanical; the reconciler's truth table is where correctness lives, so write it as the test spec before coding.
+- A consistency invariant (ledger == f(category)) is only safe with exactly ONE derivation site AND a test asserting it on every path — two divergent hardcoded maps were the original bug.
+- Carried backlog must be re-examined against current code at every close, not auto-deferred — four items had been moot since their target pipeline was rebuilt, yet rode through six closes as "VOICE-POLISH-V2".
+- "Built, wired, tested, but flag-hidden in production" is a divergence the audit must surface — capability ≠ shipped; decide consciously at close whether to enable (T-01).
+- The close CLI is now a 4×-recurring liability (garbage accomplishments + STATE mangling) — treat its output as a draft to verify against disk, never the source of truth.
+
+### Cost Observations
+- Model profile: `balanced`; multi-session GSD execution; user-directed 6→4 phase merge.
+- Notable: git range `v1.8..HEAD` = 195 commits / 459 files / +46,943 / −9,819 LOC (includes the post-v1.8 single-page voice-entry redesign quick-task series); **schema v21→v22 (one migration), 0 new pub dependencies, drift unchanged at 2.31.0** — a recognition-system rebuild with zero new heavy deps.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -399,6 +443,7 @@
 | v1.6 | multi-session, ~2 days + quick-task hardening | 4 | User-directed 7→4 phase consolidation; Wave-0 TDD scaffolds in all phases; reactive-stream delivery as a stated success criterion (v1.4 GAP-2 lesson applied structurally); executed-proof integration check at audit caught a phantom-comment safety net (W1) and receiver wire-trust (W2) → closed inline via quick task 260612-daz (audit→quick-task→re-verify loop at quick-task granularity). |
 | v1.7 | multi-session, ~2 days + long quick-task tail | 3 | User-directed 6→3 phase consolidation; three blocking ADRs before migration code; first external network dependency introduced with structural privacy/offline invariants (single `convertToJpy()` site, never-block-save, no user data in URLs); Wave-0 RED scaffolds as executable acceptance specs; heavy 06-13/14 quick-task UX-polish tail signals Phase-42 plans under-specified edit/display. |
 | v1.8 | multi-session, ~1 week incl. design gate | 6 (43-48) | First **design-gate-first** milestone — a hard no-production-code HTML exploration phase (43) gated the build; reuse-first build (0 schema migration, 0 new deps, no fl_chart bump); registry as single source of render order AND refresh union (HomeHero isolation structural); descope-at-gate (JOY-03/04 in the requirements ledger); a post-audit quick-task reintroduced debt → appended Phase 48 to clear it inline. |
+| v1.9 | multi-session + long quick-task tail | 4 (49-52) | User-directed 6→4 phase merge (two logic-pairs = same code surgery / shared surface); **decouple-then-arbitrate** with a pure-function reconciler (3×3 truth table as the test spec); single ledger-derivation site + on-every-path invariant (retired `dual_ledger/`); zero new heavy deps for a recognition rebuild (drift stays 2.31.0); carried voice backlog resolved by **supersession** at close; T-01 (flag-hidden confidence band) caught by audit and re-enabled before ship. |
 
 ### Cumulative Quality
 
@@ -413,6 +458,7 @@
 | v1.6 | 2588/2588 tests pass at close (full suite incl. goldens); 54 new shopping golden baselines (user-approved); `flutter analyze` 0 issues; v20 migration contract test (raw-sqlite3 + real-Drift index assertion) green; 32/32 cross-phase integration tests executed at audit | 77.3% on shopping modules (≥70% gate); global not recomputed | 0 new pub dependencies |
 | v1.7 | 2786/2786 tests pass at close (full suite incl. goldens); voice currency corpus ≥5 cases/currency/locale; CNY symbol goldens re-baselined; `flutter analyze` 0 issues; v21 migration + null-safe sync round-trip + partial-triple invariant tests green; 6/6 cross-phase integration seams verified at audit; Phase 42 4/4 device UAT passed | not recomputed at milestone close | 1 new pub dependency (`connectivity_plus ^7.1.1`, iOS-build-green) |
 | v1.8 | 3090/3090 tests pass at close (full suite incl. goldens); 48 macOS chart golden baselines authored from scratch (zero-golden gap closed); 36-case anti-toxicity sweep (5 cards × ja/zh/en × states); `flutter analyze` 0 issues; 9/9 cross-phase integration flows + 10/10 on-device UAT verified at audit | 80.48% cleaned-lcov (≥70% gate) | 0 new pub dependencies; 0 schema migration (stays v21); fl_chart stays ^1.2.0 (no bump) |
+| v1.9 | 3352/3353 tests pass at close (full suite; 51 ran 3270/3270, 52 ran 3353 with the chips test); `merchant_false_positive` adversarial corpus + `cross_validation_test` 3×3 spec + ledger invariant (D-20) + en-never-CJK isolation tests green; `flutter analyze` 0 issues; v22 encrypted migration ladder (v3/v17/v21→v22 + fresh) verified; 5/5 cross-phase seams + 4/4 E2E flows verified at audit; Phase 49 MERCH-04 on-device verified | not recomputed at milestone close | 0 new pub dependencies; schema v21→v22 (Phase 49); drift stays 2.31.0 (no bump) |
 
 ### Top Lessons
 
@@ -450,3 +496,8 @@
 32. **(v1.8)** An isolation invariant has two halves — union ⊆ allowed (no leakage) AND union ⊇ what-cards-actually-watch (no staleness); the registry test checked only the first, so a member-filtered provider the card watched but the refresh union omitted served stale data on pull-to-refresh (TD-1). Assert both directions.
 33. **(v1.8)** The milestone-close CLI silently undercounts (4 phases/22 plans vs the real 6/32 when phases lack a `### Phase N` detail block) and still emits garbage accomplishments from malformed `one_liner` frontmatter (3rd recurrence) — verify close-stats against `ls .planning/phases/*/` and hand-curate; don't trust the extractor.
 34. **(v1.8)** A post-audit quick-task can reintroduce debt the audit just cleared (260622-d5i added the member-filter staleness after Phase 47 closed) — freeze feature quick-tasks once the close audit starts, or expect an appended cleanup phase.
+35. **(v1.9)** A "decouple X from Y" milestone's real deliverable is the *arbitration* layer, not the split — the engine separation is mechanical; write the reconciler's truth table as the test spec before coding (the 3×3 `cross_validation_test.dart`), because that is where correctness lives.
+36. **(v1.9)** A consistency invariant (ledger == f(category)) is only safe with exactly ONE derivation site AND a test asserting it on every path — the original bug was two divergent hardcoded daily/joy maps; retiring `dual_ledger/` and adding the D-20 invariant killed the class.
+37. **(v1.9)** Carried backlog must be re-examined against current code at each close — four voice items rode through six closes as "VOICE-POLISH-V2" while their target pipeline had already been deleted/rebuilt; **resolve-by-supersession** (mark complete + evidence) beats perpetual auto-deferral.
+38. **(v1.9)** "Built, wired, tested, but flag-hidden in production" is a real divergence (capability ≠ shipped) — the audit caught the hidden confidence band (T-01); decide consciously at close whether to enable, don't ship the divergence silently.
+39. **(v1.9)** The milestone-close CLI is now a 4×-recurring liability — this time it garbled accomplishments AND mangled STATE.md frontmatter (`current_phase: 9`, stale `stopped_at`); treat ALL its output (MILESTONES entry, STATE fields, counts) as a draft to verify against disk.
