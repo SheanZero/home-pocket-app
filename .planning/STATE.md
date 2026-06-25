@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 Phase: Milestone v1.9 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-06-25 — Milestone v1.9 completed and archived
+Last activity: 2026-06-25 — Completed quick task 260625-gwy: fix custom_lint import_guard CI failure
 
 ### Decisions
 
@@ -67,6 +67,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260624-fast-hint | 语音录入面板「点击重置重新录入」提示语贴近红色重置方块（截图红框：原本两条提示在下半区居中→与重置按键间距过大）。`VoiceRecordPanel` 底部 Expanded 的 Column `MainAxisAlignment.center`→`start` + 16dp 引导间距，提示组上移到重置方块正下方。布局不变式保留：仍为两个等 flex Expanded 夹中央方块（方块仍居面板垂直中心）、listening/stopped 两态等高（maintainSize 占位 + 常量间距与状态无关）。analyze 0、面板套件 13/13 绿。 | 2026-06-24 | 2c1d150a | — |
 | 260624-fast-hint2 | 修正上一步（fast-hint 把两条提示都上移了）：仅上移「点击重置重新录入」，「轻点空白处退出」恢复修改前位置。底部 Expanded 还原为 `MainAxisAlignment.center` 居中分组（退出提示位置=原样，由 maintainSize 占位保证），只对重置文案套 paint-only `Transform.translate(0,-34)` 视觉上提至重置方块下方（不影响布局→退出提示不动）。偏移 -34 钉死在固定 356dp/74dp 几何。布局不变式保留（两等 flex Expanded、方块居中、两态等高）。analyze 0、面板 13/13 + anti_toxicity + manual_one_step 套件绿。 | 2026-06-24 | 6b01f554 | — |
 | 260624-v84 | 进入「选择分类」页面时，若表单已带已选分类则自动滚动使其所属一级类目对齐视口顶部（已选 L1 既有的自动展开逻辑不变，L2 chip 随即可见）；无已选分类或 id 失效则停在顶部。`CategorySelectionScreen` 新增 `_pendingScrollL1Id`/`_selectedGroupKey`/`_scrollController`：`_loadCategories` 解析已选 L1 后注册 `addPostFrameCallback`；`_scrollToSelectedGroup` 两阶段——估算行高 `jumpTo` 让 `ListView.builder` 布出懒构建的目标 group，下一帧 `Scrollable.ensureVisible(alignment:0,250ms)` 精确动画对齐（弃用首选的 `cacheExtent:double.infinity`——被 viewport 布局断言拒绝、抛数千异常）；一次性，不干扰用户后续手动滚动。零 ARB/数据层/依赖改动。analyze 0、screen 套件 9/9（2 新增自动滚动 + 7 原有无回归）、related correction 套件绿；无 picker golden 主图无需重基线。 | 2026-06-24 | a50c8622 | [260624-v84-category-category](./quick/260624-v84-category-category/) |
+| 260625-gwy | 修复 CI `dart run custom_lint` 失败（run 28139595431，5 条 import_guard WARNING）。5 处均为合法的同层 domain→domain 模型导入，只是缺失于 per-directory `import_guard.yaml` 白名单（每个白名单继承 feature 级 deny，须显式 re-allow 兄弟/跨 feature domain 模型）。补 5 条白名单：accounting/domain/repositories（`../models/merchant.dart`、`../models/merchant_match_entry.dart`）、analytics/domain/models（`monthly_report.dart`、跨 feature `../../../accounting/domain/models/transaction.dart`）、voice/domain/models（`recognition_outcome.dart`）。零 `.dart` 源码改动（导入本身正确）。验证：custom_lint exit 0「No issues found!」、flutter analyze 0。inline 执行（5 行白名单低于 GSD subagent 委派阈值）。 | 2026-06-25 | 26cf4f79 | [260625-gwy-fix-custom-lint-import-guard-ci-failure-](./quick/260625-gwy-fix-custom-lint-import-guard-ci-failure-/) |
 
 ## Last Milestone Snapshot (v1.9)
 
