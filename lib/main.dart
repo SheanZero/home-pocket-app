@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/initialization/app_initializer.dart';
 import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
+import 'core/state/data_reset_signal.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_clamp.dart';
 import 'data/app_database.dart';
@@ -26,6 +27,8 @@ import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
+import 'shared/utils/invalidate_all_data_providers.dart';
+import 'shared/utils/result.dart';
 
 typedef AppRunner = void Function(Widget app);
 
@@ -106,17 +109,31 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     _initialize();
   }
 
+  /// Shared seed + ensure-default-book step. Returns the active book id on
+  /// success, or an error [Result] otherwise.
+  ///
+  /// `SeedAllUseCase` is count-guarded idempotent (Phase 23 D-14 — it owns the
+  /// ordering contract), so this is safe to run both at first boot AND after a
+  /// destructive data reset: it re-seeds wiped categories on the clear path and
+  /// no-ops on the import path (categories already restored). `ensureDefaultBook`
+  /// mints a fresh book after a wipe, or returns the imported `books.first`.
+  Future<Result<String>> _seedAndEnsureDefaultBook() async {
+    final seedAll = ref.read(seedAllUseCaseProvider);
+    await seedAll.execute();
+
+    final ensureBook = ref.read(ensureDefaultBookUseCaseProvider);
+    final bookResult = await ensureBook.execute();
+    if (bookResult.isSuccess && bookResult.data != null) {
+      return Result.success(bookResult.data!.id);
+    }
+    return Result.error(bookResult.error ?? 'Failed to initialize');
+  }
+
   Future<void> _initialize() async {
     try {
-      // Phase 23 D-14: SeedAllUseCase owns the ordering contract.
-      final seedAll = ref.read(seedAllUseCaseProvider);
-      await seedAll.execute();
+      final bookIdResult = await _seedAndEnsureDefaultBook();
 
-      // Ensure default book
-      final ensureBook = ref.read(ensureDefaultBookUseCaseProvider);
-      final bookResult = await ensureBook.execute();
-
-      if (bookResult.isSuccess && bookResult.data != null) {
+      if (bookIdResult.isSuccess && bookIdResult.data != null) {
         // Initialize SyncEngine (lifecycle observer + status stream)
         final syncEngine = ref.read(syncEngineProvider);
         syncEngine.initialize();
@@ -129,20 +146,55 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
             .execute();
 
         setState(() {
-          _bookId = bookResult.data!.id;
+          _bookId = bookIdResult.data!;
           _needsProfileOnboarding = existingProfile == null;
           _initialized = true;
         });
       } else {
-        setState(() => _error = bookResult.error ?? 'Failed to initialize');
+        setState(() => _error = bookIdResult.error ?? 'Failed to initialize');
       }
     } catch (e) {
       setState(() => _error = e.toString());
     }
   }
 
+  /// Re-bootstrap after a whole-app data reset (delete-all-data / import-backup),
+  /// fired via [dataResetSignalProvider]. Re-runs the shared seed+ensure-book
+  /// step to obtain the NEW active book id, invalidates every data-provider
+  /// family, and rebuilds the shell with the fresh bookId — all without an app
+  /// restart. The sync engine is intentionally NOT re-initialized (its lifecycle
+  /// observer is already registered from first boot).
+  Future<void> _reinitializeAfterDataReset() async {
+    if (!mounted) return;
+    // Show the existing spinner while the database is re-bootstrapped.
+    setState(() => _initialized = false);
+    try {
+      final bookIdResult = await _seedAndEnsureDefaultBook();
+      if (!mounted) return;
+
+      if (bookIdResult.isSuccess && bookIdResult.data != null) {
+        invalidateAllDataProviders(ref);
+        setState(() {
+          _bookId = bookIdResult.data!;
+          _initialized = true;
+        });
+      } else {
+        setState(() => _error = bookIdResult.error ?? 'Failed to initialize');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Re-bootstrap when a destructive Settings action (clear-all / import) fires
+    // the global reset signal. Side-effect → ref.listen, never ref.watch.
+    ref.listen(dataResetSignalProvider, (prev, next) {
+      _reinitializeAfterDataReset();
+    });
+
     final settingsAsync = ref.watch(appSettingsProvider);
     final themeMode =
         settingsAsync.whenOrNull(

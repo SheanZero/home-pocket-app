@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/state/data_reset_signal.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
@@ -124,6 +125,8 @@ class DataManagementSection extends ConsumerWidget {
     Navigator.pop(context); // Dismiss loading
 
     if (importResult.isSuccess) {
+      // Refresh Home / List / Analytics without an app restart (260627-v0w).
+      ref.read(dataResetSignalProvider.notifier).fire();
       if (context.mounted) {
         showSuccessFeedback(context, S.of(context).backupImportedSuccessfully);
       }
@@ -154,6 +157,8 @@ class DataManagementSection extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (result.isSuccess) {
+      // Refresh Home / List / Analytics without an app restart (260627-v0w).
+      ref.read(dataResetSignalProvider.notifier).fire();
       showSuccessFeedback(context, S.of(context).allDataDeleted);
     } else {
       showErrorFeedback(context, result.error ?? S.of(context).deleteFailed);
