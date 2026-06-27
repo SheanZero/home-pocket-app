@@ -1,178 +1,142 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-06-23
-
-This is a Flutter (Dart) app. ~409 test files live under `test/`, organized by layer and test type. Tests are first-class code held to the same standards as production.
+**Analysis Date:** 2026-06-27
 
 ## Test Framework
 
 **Runner:**
-- `flutter_test` (Flutter SDK) — host-side widget/unit/golden/architecture tests
-- `integration_test` (Flutter SDK) — on-device/simulator tests (e.g., SQLCipher encrypted-executor migration ladder; SQLCipher natives only load on a real device/sim, host `flutter test` links plain libsqlite3)
+- `flutter_test` (Flutter SDK) — 408 `*_test.dart` files
+- `integration_test` (Flutter SDK) — on-device/simulator suites under `test/integration/` (SQLCipher natives only load on real device/sim; host `flutter test` links plain libsqlite3)
 
-**Mocking:**
-- `mocktail: ^1.0.4` (no codegen, `extends Mock implements X`)
+**Supporting libraries (`pubspec.yaml` dev_dependencies):**
+- `mocktail: ^1.0.4` — mocking (no codegen)
+- `fake_async: ^1.3.3` — deterministic time control
+- `flutter_lints: ^6.0.0`, `custom_lint: ^0.8.1`, `riverpod_lint: ^3.1.0`, `import_guard_custom_lint: ^1.0.0`
 
-**Async helpers:**
-- `fake_async: ^1.3.3` for deterministic time-based tests
-
-**Run Commands:**
+**Run commands:**
 ```bash
-flutter test                       # Run all host tests
-flutter test --coverage            # With coverage (CI uses this)
-flutter test test/golden/          # Golden tests only
-flutter test --tags golden         # Tag-filtered (golden tests carry @Tags(['golden']))
-flutter test --plain-name "name"   # Single test by name
+flutter test                                   # Run all tests
+flutter test --coverage                        # With coverage (lcov.info)
+flutter test test/path/to/file_test.dart       # Single file
+flutter test --update-goldens test/golden/...  # Re-baseline goldens (macOS only)
+flutter test --tags golden                     # Golden-tagged tests only
 ```
-Run `flutter pub run build_runner build --delete-conflicting-outputs` before testing if annotated classes/tables/ARB changed.
 
 ## Test File Organization
 
-**Location:** Separate `test/` tree mirroring `lib/` layer structure:
+Tests live under `test/`, mirroring `lib/` layering and feature structure:
+
 ```
 test/
-├── unit/              # core, features, shared, application, infrastructure, data
-├── application/       # use-case tests (accounting, family_sync)
-├── data/repositories/ # repository tests
-├── infrastructure/    # crypto, security, voice, sync
-├── features/          # accounting, home, family_sync, analytics
-├── widget/            # widget tests (features, shared)
-├── golden/            # *_golden_test.dart + goldens/ (PNG baselines) + failures/
-├── integration/       # on-device flows (voice, sync, data, presentation)
-├── architecture/      # structural invariant tests (see below)
-├── core/              # initialization, theme
-├── helpers/           # shared test utilities
-├── fixtures/          # test data
-└── flutter_test_config.dart  # global bootstrap (golden platform gate)
+├── unit/            # Pure functions, providers, use cases (mirrors lib/ layers)
+│   ├── core/ features/ shared/ application/ infrastructure/ data/ helpers/
+├── widget/          # Widget pump tests (features/, shared/)
+├── golden/          # Golden image tests + goldens/ baselines + failures/
+├── integration/     # On-device suites (voice/, sync/, data/, presentation/)
+├── architecture/    # Invariant/guardrail tests (see below)
+├── features/        # Feature-scoped tests (accounting, home, family_sync, analytics)
+├── application/ infrastructure/ data/ core/   # Layer-scoped tests
+├── fixtures/        # Static test data
+├── helpers/         # Shared test utilities
+└── flutter_test_config.dart  # Global pre-test hook (golden comparator swap)
 ```
 
-**Naming:** `{source_name}_test.dart`; golden tests `{widget}_golden_test.dart`.
+**Naming:**
+- `{subject}_test.dart` — standard
+- `{subject}_golden_test.dart` — golden, tagged `@Tags(['golden'])`
+- `{subject}_characterization_test.dart` — characterization (lock-in existing behavior before refactor)
 
 ## Test Structure
 
-**Suite Organization** (mocktail + setUp pattern, from `test/application/accounting/create_transaction_currency_test.dart`):
 ```dart
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
-class _FakeTransaction extends Fake implements Transaction {}
+import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/shared/utils/currency_conversion.dart';
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(_FakeTransaction());  // mocktail needs fallbacks for any()
-  });
-
-  late _MockTransactionRepository mockTransactionRepo;
-  late CreateTransactionUseCase useCase;
-
-  setUp(() {
-    mockTransactionRepo = _MockTransactionRepository();
-    useCase = CreateTransactionUseCase(transactionRepository: mockTransactionRepo, ...);
-  });
-
-  group('CreateTransactionUseCase', () {
-    test('persists foreign-currency triple', () async { ... });
+  group('convertToJpy', () {
+    test('USD 50.00 at 149.30 → 7465', () {
+      expect(
+        convertToJpy(originalMinorUnits: 5000, appliedRate: '149.30', subunitToUnit: 100),
+        equals(7465),
+      );
+    });
   });
 }
 ```
 
-**Patterns:**
-- `setUpAll` for `registerFallbackValue` (mocktail `any()` matchers on custom types)
-- `setUp` to freshly construct mocks + system-under-test per test (isolation)
-- `group(...)` to cluster by behavior
-- `late` fields for SUT and mocks
-- TDD: many tests carry RED-scaffold headers (e.g., `// WAVE 0 RED SCAFFOLD`) and explicitly say "do NOT weaken these assertions to make them pass" — locked acceptance figures
+- `group()` per unit-under-test; descriptive `test()` names often encode the spec case (e.g. arrow notation `input → output`).
+- Header doc-comments cite the spec ID / decision (`D-NN`) and any rounding/edge-case rationale.
+
+## Riverpod 3 Testing (critical)
+
+Shared helpers in `test/helpers/test_provider_scope.dart`:
+
+- **`createTestProviderScope({AppDatabase? database, additionalOverrides})`** — builds a `ProviderContainer` that ALWAYS overrides `appDatabaseProvider` with an in-memory `AppDatabase.forTesting()`. Use it so DB-backed providers never touch real storage.
+- **`waitForFirstValue<T>(container, provider)`** — REQUIRED for async (Future/Stream) providers. Do NOT do bare `await container.read(provider.future)` on auto-dispose providers: Riverpod 3 disposes the orphan read before the build settles, masking values/errors with `Bad state: disposed during loading`. This helper holds a `container.listen(..., fireImmediately: true)` subscription via a `Completer` and resolves on the terminal `AsyncValue`.
+- Use `ProviderContainer.test()` (auto-disposes on teardown) instead of `ProviderContainer() + addTearDown(container.dispose)`.
+
+**Riverpod 3 gotchas in assertions:**
+- `AsyncValue.value` is nullable (the old throwing `.valueOrNull` → `.value`).
+- Provider-thrown errors are wrapped: assert `throwsA(isA<ProviderException>().having((e) => e.exception, 'exception', isA<StateError>()))`.
 
 ## Mocking
 
-**Framework:** mocktail (`extends Mock implements X`, prefix `_Mock`).
+**Framework:** `mocktail` (runtime mocks, no codegen).
 
-**Patterns:**
 ```dart
-class _MockHashChainService extends Mock implements HashChainService {}
-class _FakeTransaction extends Fake implements Transaction {}  // for registerFallbackValue
-
-when(() => mockRepo.save(any())).thenAnswer((_) async => Result.success(null));
-verify(() => mockRepo.save(any())).called(1);
+when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
+when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => 'device-1');
 ```
 
-**What to Mock:** repository interfaces, services (HashChainService, ClassificationService), device identity.
-
-**What NOT to Mock:** the database in integration paths — use real in-memory `AppDatabase.forTesting()` via `createTestProviderScope` instead.
-
-## Riverpod Test Helpers (`test/helpers/`)
-
-**`test_provider_scope.dart`:**
-- `createTestProviderScope({database, additionalOverrides})` — `ProviderContainer` always overriding `appDatabaseProvider` with in-memory `AppDatabase.forTesting()`
-- `waitForFirstValue<T>(container, provider)` — REQUIRED for async/auto-dispose providers. Bare `await container.read(provider.future)` errors with `Bad state: disposed during loading` in Riverpod 3; this helper holds a `container.listen(..., fireImmediately: true)` subscription via a `Completer`
-- Use `ProviderContainer.test()` in tests (auto-disposes on teardown) instead of manual `addTearDown(container.dispose)`
-
-**`test_localizations.dart`:**
-- `createLocalizedWidget(child, {locale, overrides})` — wraps in `ProviderScope` + `MaterialApp` with `S.delegate` + Global delegates for widget tests
+- Mock at repository / service interface boundaries; inject via Riverpod `overrideWithValue` / `additionalOverrides`.
+- `registerFallbackValue(...)` for custom argument-matcher types.
+- **What to mock:** repositories, crypto/key managers, platform services, anything I/O- or device-bound.
+- **What NOT to mock:** pure functions (`lib/shared/utils/`), Freezed models, formatters — test them directly. DB-backed code uses real in-memory `AppDatabase.forTesting()`, not mocks.
 
 ## Golden Tests
 
-**Location:** `test/golden/*_golden_test.dart`; PNG baselines in `test/golden/goldens/`; diffs in `test/golden/failures/`.
+- Tagged `@Tags(['golden'])`; baselines in `test/golden/goldens/`, diff failures dumped to `test/golden/failures/`.
+- **Baselines are macOS-rendered.** `test/flutter_test_config.dart` swaps in `BaselineExistenceGoldenComparator` (`test/helpers/ci_golden_comparator.dart`) when NOT on macOS — CI (ubuntu) only checks the baseline file *exists*, never pixel-matches (font anti-aliasing differs 0.05–5.9%). **Update goldens only on macOS.**
+- Pattern: wrap widget in a `MaterialApp` with fixed `locale`, full `S.delegate` + Global*Localizations delegates, fixed `SizedBox`, and a fixed `DateTime` (no `DateTime.now()`); typically 3 locales × theme.
 
-**Tagged:** every golden file starts with `@Tags(['golden'])` + `library;`.
+## Architecture / Guardrail Tests (`test/architecture/`)
 
-**Wrapper pattern:** fixed-size `SizedBox` inside `MaterialApp` (localization delegates + `themeMode`) so PNGs are stable across screen sizes. Assert with `matchesGoldenFile('goldens/name.png')`.
+These are invariant tests that fail the build on regressions — run as part of `flutter test`:
 
-**Platform gate (`test/flutter_test_config.dart`):** baselines are macOS-rendered. On non-macOS (CI ubuntu) `BaselineExistenceGoldenComparator` (from `test/helpers/ci_golden_comparator.dart`) only asserts the baseline file exists — keeping crash/widget coverage without pixel mismatch (font-AA diffs 0.05–5.9%). **Update/re-baseline goldens ONLY on macOS** (`flutter test --update-goldens`).
+| Test | Enforces |
+|------|----------|
+| `domain_import_rules_test.dart` | Domain layer import boundaries (mirrors import_guard) |
+| `provider_graph_hygiene_test.dart` | No duplicate repo providers, no `UnimplementedError` providers, keepAlive hard-list |
+| `hardcoded_cjk_ui_scan_test.dart` | No hardcoded CJK UI strings (with `approvedWhitelist` for lexicons/seed data) |
+| `arb_key_parity_test.dart` | ja/zh/en ARB key parity |
+| `color_literal_scan_test.dart` | No hardcoded color literals in widgets (use `context.palette`) |
+| `presentation_layer_rules_test.dart` | Presentation layer boundaries |
+| `production_logging_privacy_test.dart` | No sensitive-data logging |
+| `service_name_collision_test.dart` | No duplicate service class names across layers |
+| `stale_suppressions_scan_test.dart` | No leftover lint suppressions |
+| `low/medium_findings_closed_test.dart`, `audit_yml_invariants_test.dart` | Audit findings stay closed; CI config invariants |
 
-## Architecture Tests (`test/architecture/`)
-
-Structural invariants run as part of the normal suite — they enforce CLAUDE.md rules:
-- `domain_import_rules_test.dart` / `presentation_layer_rules_test.dart` — layer dependency direction
-- `provider_graph_hygiene_test.dart` — no duplicate repo providers, no `UnimplementedError`
-- `arb_key_parity_test.dart` — ja/zh/en ARB key parity
-- `hardcoded_cjk_ui_scan_test.dart` — no hardcoded CJK UI strings
-- `color_literal_scan_test.dart` — no hardcoded hex colors
-- `production_logging_privacy_test.dart` — no sensitive data in logs
-- `stale_suppressions_scan_test.dart` — no dead `// ignore:`
-- `service_name_collision_test.dart`, `category_other_l2_invariant_test.dart`, `audit_yml_invariants_test.dart`, `low/medium_findings_closed_test.dart`
-
-NOTE: scoped `flutter test path/` runs miss these — per-wave/post-merge gates must run the FULL `flutter test`.
+Run the FULL suite (`flutter test`) on per-wave merge gates — scoped test runs miss these architecture tests.
 
 ## Coverage
 
-**Target:** 80% project standard (CLAUDE.md / global rules).
-
-**CI gate (`.github/workflows/audit.yml`):** currently enforced at **70%** (Phase 8 amendment 2026-04-28; raise to 80 deferred to backlog `coverage-baseline-review`). Two gates:
-- `coverage_gate.dart --threshold 70` on cleanup-touched files (lcov with generated files stripped)
-- aggregate `min_coverage: 70`
-
-**Run locally:**
-```bash
-flutter test --coverage
-# generated files are stripped from coverage/lcov.info before the gate
-```
+- **Target: ≥80%** per project rules; **CI gate currently 70%** (lowered from 80% in the Phase 8 amendment 2026-04-28 post-cleanup; raise revisited after v1 feature work — backlog `coverage-baseline-review`).
+- CI (`.github/workflows/audit.yml`, `coverage` job, blocking):
+  1. `flutter test --coverage`
+  2. `coverde filter` strips `*.g.dart`, `*.freezed.dart`, `*.mocks.dart`, `lib/generated/` from `lcov.info` → `lcov_clean.info`
+  3. `scripts/coverage_gate.dart` — per-file gate (`--threshold 70`) with explicit `--deferred` rationale list
+  4. `VeryGoodOpenSource/very_good_coverage@v2` — `min_coverage: 70` on cleaned lcov
+- Tests are first-class code: same quality standards as production.
 
 ## Test Types
 
-**Unit:** use cases (`test/application/`), utilities, repositories, services — mocktail-isolated.
-**Widget:** `test/widget/` + `test/features/` via `createLocalizedWidget`.
-**Golden:** `test/golden/` — visual regression, macOS-baselined.
-**Integration:** `test/integration/` (host) + `integration_test/` (on-device, SQLCipher/migration).
-**Architecture:** `test/architecture/` — structural invariants.
-
-## Common Patterns
-
-**Async provider testing:**
-```dart
-final container = createTestProviderScope();
-addTearDown(container.dispose);  // or use ProviderContainer.test()
-final result = await waitForFirstValue(container, myAsyncProvider);
-expect(result.hasValue, isTrue);
-```
-
-**Error testing (Riverpod 3 ProviderException wrapping):**
-```dart
-expect(
-  () => container.read(p),
-  throwsA(isA<ProviderException>()
-      .having((e) => e.exception, 'exception', isA<StateError>())),
-);
-```
+- **Unit** (`test/unit/`): pure functions, use cases, providers (with in-memory DB).
+- **Widget** (`test/widget/`): `testWidgets` pumping minimal `MaterialApp`/`Builder` trees, asserting theme resolution / no-throw / structure rather than pixels.
+- **Golden** (`test/golden/`): visual regression, macOS-baselined.
+- **Integration** (`test/integration/`): device/sim suites for SQLCipher encrypted-executor, sync, voice.
+- **Architecture** (`test/architecture/`): build-failing invariant guards.
+- **Characterization** (`*_characterization_test.dart`): lock in existing behavior before refactors (mocktail-heavy).
 
 ---
 
-*Testing analysis: 2026-06-23*
+*Testing analysis: 2026-06-27*

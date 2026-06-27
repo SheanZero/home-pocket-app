@@ -1,129 +1,114 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-06-23
+**Analysis Date:** 2026-06-27
 
 ## Directory Layout
 
 ```
 lib/
-├── main.dart                  # App entry: native bootstrap, init, MaterialApp
-├── core/                      # config, init, theme (project-wide app shell)
-│   ├── constants/
-│   ├── initialization/        # app_initializer.dart, init_result.dart, init_failure_screen.dart
-│   └── theme/                 # app_palette.dart, app_theme.dart, app_text_styles.dart, *_palette.dart
-├── infrastructure/            # Technology/platform capability (NEVER in features/)
-│   ├── crypto/                # database/, models/, repositories/, services/ (key_manager, field_encryption, hash_chain)
-│   ├── ml/                    # ML/OCR (tflite, merchant classifier)
-│   ├── i18n/                  # formatters/ (date_formatter, number_formatter), models/
-│   ├── sync/                  # CRDT, bluetooth, nfc, wifi sync tech
-│   ├── security/              # biometric, secure_storage, audit_logger, models/
-│   ├── speech/  voice/        # speech recognition + voice parsing
-│   ├── category/  exchange_rate/
-│   └── import_guard.yaml      # layer-dependency lint config
-├── application/               # GLOBAL business logic (Use Cases + Services)
-│   ├── accounting/            # create/delete/get transaction use cases, category services
-│   ├── analytics/  currency/  dual_ledger/  family_sync/  i18n/  list/
-│   ├── ml/  profile/  seed/  settings/  shopping_list/  voice/
-├── data/                      # Shared CROSS-FEATURE data layer
-│   ├── app_database.dart      # Drift DB, schemaVersion => 22
-│   ├── tables/                # ALL Drift table definitions (15 tables)
-│   ├── daos/                  # ALL data access objects
-│   └── repositories/          # ALL repository implementations
-├── features/                  # Feature modules ("Thin Feature" — domain/ + presentation/ only)
-│   └── {feature}/
-│       ├── domain/            # models/ (Freezed) + repositories/ (interfaces)
-│       └── presentation/      # screens/, widgets/, providers/, utils/
-├── shared/                    # Cross-cutting reusable code
-│   ├── widgets/  utils/  constants/
-├── l10n/                      # ARB source files (ja, zh, en)
-└── generated/                 # Generated localizations (app_localizations.dart, class S)
+├── main.dart                 # Bootstrap + root widget (HomePocketApp)
+├── core/                     # config/init/theme cross-cutting (NOT feature code)
+│   ├── constants/            # feature_flags.dart
+│   ├── initialization/       # app_initializer.dart, init_result.dart, init_failure_screen.dart
+│   └── theme/                # app_palette, app_theme, app_text_styles, ring/joy palettes
+├── infrastructure/           # Technology/platform capability (Thin Feature: NEVER in features/)
+│   ├── crypto/               # key_manager, field_encryption, hash_chain, encrypted DB executor
+│   ├── ml/                   # merchant_name_normalizer.dart
+│   ├── category/             # category_locale_service.dart
+│   ├── exchange_rate/        # FX rate fetching
+│   ├── i18n/                 # date_formatter, number_formatter, locale settings
+│   ├── security/             # biometric_service, secure_storage, audit_logger
+│   ├── speech/               # speech_recognition_service.dart
+│   ├── voice/                # ja/zh/en numeral state machines + dictionaries
+│   └── sync/                 # crdt, bluetooth, nfc, wifi P2P
+├── application/              # GLOBAL business logic (Use Cases + services), per domain
+│   ├── accounting/  analytics/  currency/  family_sync/  i18n/
+│   ├── list/  profile/  seed/  settings/  shopping_list/
+│   └── voice/                # parse + recognition/ (merchant_recognizer, category_recognizer)
+├── data/                     # Shared cross-feature data layer
+│   ├── app_database.dart     # @DriftDatabase, schemaVersion 22, migrations
+│   ├── tables/               # ALL 15 Drift table definitions
+│   ├── daos/                 # ALL 14 DAOs
+│   └── repositories/         # ALL 15 repository implementations
+├── features/                 # Feature modules (Thin Feature: domain/ + presentation/ only)
+│   ├── accounting/  analytics/  currency/  dual_ledger/  family_sync/
+│   ├── home/  list/  profile/  settings/  shopping_list/  voice/
+├── shared/                   # widgets/, extensions/, utils/, constants/
+├── l10n/                     # ARB source (ja default, zh, en)
+├── generated/                # generated localizations (app_localizations.dart)
+└── import_guard.yaml         # project-wide deny rules (dart:mirrors, sqlite3_flutter_libs)
 ```
 
 ## Directory Purposes
 
-**`lib/core/`:**
-- Purpose: App-wide shell — initialization sequencing, theme, constants.
-- Key files: `initialization/app_initializer.dart`, `theme/app_palette.dart`, `theme/app_theme.dart`.
+**`lib/features/{feature}/`:**
+- `domain/`: ONLY `models/` (Freezed) and `repositories/` (interfaces). No data/app/infra code.
+- `presentation/`: `screens/`, `widgets/`, `providers/` (state + repository wiring).
+- Each layer dir carries an `import_guard.yaml` enforcing dependency direction.
 
-**`lib/infrastructure/`:**
-- Purpose: Technology/platform capability. Never holds business logic.
-- Contains: crypto, ml, sync, i18n, security, speech, voice, category, exchange_rate.
-
-**`lib/application/`:**
-- Purpose: GLOBAL use cases and services, organized by domain (one subdir per domain).
-- Contains: `*_use_case.dart`, `*_service.dart`, plus `repository_providers.dart` per domain.
+**`lib/application/{domain}/`:**
+- Use Case classes (`*_use_case.dart`) + cross-feature services. 61 use cases total.
+- Domains map loosely to features but live GLOBALLY here (not nested in features).
 
 **`lib/data/`:**
-- Purpose: Cross-feature persistence (Drift + SQLCipher).
-- Key files: `app_database.dart` (schema v22), `tables/`, `daos/`, `repositories/`.
-
-**`lib/features/{f}/`:**
-- Purpose: Feature module. domain/ (models + repo interfaces), presentation/ (UI + providers).
-- Features: accounting, analytics, currency, dual_ledger, family_sync, home, list, profile, settings, shopping_list.
+- Single home for all tables, DAOs, repo impls — cross-feature by design.
 
 ## Key File Locations
 
 **Entry Points:**
-- `lib/main.dart`: App bootstrap and MaterialApp.
-- `lib/features/home/presentation/screens/main_shell_screen.dart`: Tab shell + FAB.
+- `lib/main.dart`: bootstrap, `HomePocketApp`, shell/onboarding routing.
+- `lib/core/initialization/app_initializer.dart`: ordered init + data-loss guard.
+- `lib/features/home/presentation/screens/main_shell_screen.dart`: IndexedStack tab shell + FAB (Navigator/MaterialPageRoute, NO go_router).
 
 **Configuration:**
-- `pubspec.yaml`: deps (with pinned versions — see CLAUDE.md).
-- `l10n.yaml`: output class `S`, dir `lib/generated`.
-- `lib/infrastructure/import_guard.yaml` (+ per-layer `import_guard.yaml`): layer lint.
+- `lib/core/constants/feature_flags.dart`
+- `lib/data/app_database.dart` (`schemaVersion => 22`)
+- `l10n.yaml` (output class `S`, dir `lib/generated`)
 
 **Core Logic:**
-- `lib/application/{domain}/*_use_case.dart`: business operations.
-- `lib/data/app_database.dart`: DB schema + migrations.
+- Voice recognition: `lib/application/voice/recognition/{merchant,category}_recognizer.dart`
+- Reconciliation: `lib/features/voice/domain/services/recognition_reconciler.dart`
+- Merchant match data: `lib/data/tables/merchants_table.dart`, `merchant_match_keys_table.dart` (schema v22, Phase 49)
 
 **Testing:**
-- `test/` (mirrors `lib/`); helpers in `test/helpers/` (e.g. `test_provider_scope.dart`).
+- `test/` (arch tests, golden tests, helpers like `test/helpers/test_provider_scope.dart`)
 
 ## Naming Conventions
 
-**Files:**
-- snake_case: `create_transaction_use_case.dart`, `transaction_repository_impl.dart`.
-- Generated: `*.g.dart` (codegen), `*.freezed.dart` (Freezed) — never hand-edit.
-- Use cases end `_use_case.dart`; repo impls end `_repository_impl.dart`; DAOs end `_dao.dart`; tables end `_table.dart`.
-- Riverpod provider files prefixed `state_` (e.g. `state_home.dart`) or `repository_providers.dart`.
+**Files:** `snake_case.dart`. Use cases `*_use_case.dart`; repo impls `*_repository_impl.dart`; DAOs `*_dao.dart`; tables `*_table.dart`; Riverpod state `state_*.dart`; generated `*.g.dart` / `*.freezed.dart`.
 
-**Directories:**
-- snake_case, organized by domain/feature, then by layer concern (`domain/models`, `presentation/screens`).
+**Drift tables:** Table class PascalCase plural (`Merchants`, `Transactions`); indices `idx_{table}_{columns}` via `TableIndex(name:..., columns:{#col})`.
 
-**Drift indices:** `idx_{table}_{columns}`, `TableIndex` with `{#columnName}` Symbol syntax.
+**Riverpod providers:** `@riverpod`-generated; provider name strips `Notifier` suffix (`LocaleNotifier` → `localeProvider`).
+
+**Directories:** feature/domain-oriented, not type-oriented.
 
 ## Where to Add New Code
 
 **New Feature:**
-- Domain models/interfaces: `lib/features/{feature}/domain/`
-- UI + providers: `lib/features/{feature}/presentation/`
-- Use cases: `lib/application/{domain}/`
-- Tables/DAOs/repo impls: `lib/data/` (NEVER inside features/)
+- Domain interfaces + models: `lib/features/{feature}/domain/`
+- UI: `lib/features/{feature}/presentation/{screens,widgets,providers}/`
+- Use cases: `lib/application/{feature}/`
+- Persistence: `lib/data/tables/`, `lib/data/daos/`, `lib/data/repositories/`
 
-**New Table:**
-- Definition: `lib/data/tables/{name}_table.dart`
-- DAO: `lib/data/daos/{name}_dao.dart`
-- Register in `lib/data/app_database.dart`, bump `schemaVersion`, add migration + explicit `CREATE INDEX` in onCreate AND onUpgrade.
+**New Database Table:**
+- `lib/data/tables/{name}_table.dart`, register in `app_database.dart` `@DriftDatabase`, bump `schemaVersion`, add `onUpgrade` migration + explicit `CREATE INDEX`.
 
-**New Technology/Platform capability:**
-- `lib/infrastructure/{domain}/`
+**New Technology Wrapper:** `lib/infrastructure/{capability}/`.
 
-**Shared helper/widget:**
-- `lib/shared/utils/` or `lib/shared/widgets/`
+**Shared widget/util:** `lib/shared/{widgets,utils,extensions}/`.
 
-**New translation:**
-- Update ALL 3 ARB files in `lib/l10n/`, then `flutter gen-l10n`. Access via `S.of(context)`.
+**Placement rule (from CLAUDE.md):** Technology → infrastructure; business logic → application; data access → data; domain model/interface → features/domain; UI → features/presentation; unsure → default to `lib/`.
 
 ## Special Directories
 
 **`lib/generated/`:**
-- Purpose: Generated l10n (`app_localizations.dart`, class `S`).
-- Generated: Yes (`flutter gen-l10n`). Committed: Yes (gitignored-yet-tracked — use `git add -f`).
+- Purpose: generated localizations (`app_localizations.dart`).
+- Generated: Yes (`flutter gen-l10n`). Committed: Yes (gitignored-yet-tracked; force-add edits with `git add -f`).
 
 **`*.g.dart` / `*.freezed.dart`:**
-- Purpose: Riverpod / Drift / Freezed codegen output.
-- Generated: Yes (`build_runner`). Committed: Yes. Never hand-edit (AUDIT-10 catches stale files).
+- Generated by build_runner. Never hand-edit. Regenerate after editing `@riverpod`/`@freezed`/Drift tables/ARB and after merge/rebase/pull.
 
 ---
 
-*Structure analysis: 2026-06-23*
+*Structure analysis: 2026-06-27*
