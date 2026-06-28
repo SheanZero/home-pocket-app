@@ -1,31 +1,10 @@
 # Feature Research
 
-**Domain:** Voice expense-entry recognition (category + merchant decoupled, cross-validated) for a Japanese-market local-first kakeibo (家計簿) app
-**Researched:** 2026-06-23
-**Confidence:** MEDIUM-HIGH (chain coverage & spend dominance HIGH from store-count rankings; UX patterns MEDIUM — general AI-UX literature, no kakeibo-specific voice competitor; ADR-012 boundary HIGH — first-party constraint)
+**Domain:** Pre-launch capstone features for a free, local-first, privacy-first family accounting app — Japanese market (iOS 14+/Android 7+). Scope: (a) first-run onboarding with mandatory locale/currency/voice-language setup, (b) app-lock (Face ID + PIN), (c) in-Settings donation/sponsorship link, (d) in-Settings legal section.
+**Researched:** 2026-06-28
+**Confidence:** MEDIUM-HIGH (UX patterns HIGH/well-established; Apple-policy + Japan-legal specifics MEDIUM and flagged for legal review)
 
-> Scope note: This file covers ONLY the v1.9 redesign features (decoupled `CategoryRecognizer` + `MerchantRecognizer`, cross-validation, ~600-800 JP merchant DB, recognition UX, EN voice pragmatic path, daily/joy rule rework). It assumes the existing voice infra (`speech_to_text` v7, zh/ja number state machines, `VoiceTextParser` amount/date extraction, `category_keyword_preferences` / `merchant_category_preferences` learning tables, 19 L1 / 103 L2 taxonomy) is reused, not rebuilt.
-
----
-
-## 0. Anchor Mental Model (the two cases this milestone exists for)
-
-The whole redesign is judged against two utterances. Everything below serves these.
-
-**Case A — merchant+category cross-check (conflict → keyword wins):**
-> 「在星巴克买了个杯子」 ("bought a cup at Starbucks")
-> - Merchant engine: 星巴克/スタバ → `cat_food_cafe` (cafe), high merchant-confidence.
-> - Category engine (keyword-intent): 买…杯子 ("bought…a cup") → 购物 / `cat_daily_household` (a physical-good purchase), independent of merchant.
-> - **Cross-validation: keyword-intent has priority → result is shopping, NOT cafe.** Merchant is demoted to an alternative chip.
-> - Mental model the user expects: *"I told you what I bought; the place is secondary."*
-
-**Case B — merchant-less, category-only path:**
-> 「加油用了400块」 ("spent 400 on gas")
-> - Merchant engine: no merchant token → no hit.
-> - Category engine: 加油 ("refuel") activity keyword → `cat_car_fuel`. Amount 400 from existing parser.
-> - **Result must arrive WITHOUT any merchant hit.** This is the case the current merchant-first short-circuit (`VoiceCategoryResolver`) structurally cannot serve well, because it leads with merchant lookup.
-
-These two cases define the engine contract: **category recognition must stand alone, and when both fire, activity/object keywords outrank the merchant's default category.** The "agreement → boost confidence" path (e.g. 「在吉野家吃了牛丼」 — merchant=吉野家→dining, keyword=吃牛丼→dining) is the easy case and mostly serves the confidence display, not correctness.
+> Scope note: This file covers ONLY the four new v2.0 features. Existing infra (i18n `currentLocaleProvider`/ARB ja·zh·en, v1.7 JPY-first currency selector, zh/ja/en voice locale routing, `biometric_service`/`secure_storage`/Ed25519/BIP39) is treated as a dependency, not re-researched.
 
 ---
 
@@ -33,211 +12,196 @@ These two cases define the engine contract: **category recognition must stand al
 
 ### Table Stakes (Users Expect These)
 
+Missing these = the app feels broken, unsafe, or gets rejected from the App Store.
+
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Decoupled CategoryRecognizer + MerchantRecognizer** | Without it, Case A & B can't be served; it's the milestone's premise | MEDIUM | Refactor of 207-LOC `VoiceCategoryResolver`. Remove the merchant short-circuit. Two pure engines returning `(categoryId, confidence)` + `(merchantId, defaultCategoryId, confidence)` independently. Depends on: existing keyword/synonym dict + merchant DB. |
-| **Keyword-intent-priority cross-validation** | This IS the user-confirmed rule; agreement boosts, conflict → keyword wins | MEDIUM | A small deterministic resolver, NOT ML. Inputs: two `(id, confidence)` tuples. Output: chosen category + ranked alternatives + a final confidence. The conflict rule (keyword > merchant) is the hard-coded policy. |
-| **Category-only path (no merchant)** | 「加油用了400块」 / 「ガソリン400円」 / "spent 400 on gas" must work | LOW-MEDIUM | Falls out of decoupling — CategoryRecognizer simply runs without merchant input. Mostly free once decoupled. Needs activity/object-verb keyword coverage (加油/ガソリン/refuel→fuel; 吃饭/食事/lunch→dining; 打车/タクシー/taxi→taxi). |
-| **JP merchant DB covering everyday-spend categories** | 13 hardcoded entries is not a product; daily JP spend is chain-dominated | HIGH | The ~600-800 build. Must cover the konbini/super/牛丼/cafe/ファミレス/ドラッグストア/100円/家電/fashion/transit/gas/delivery/subscription spine (see §JP Coverage below). Migrate from in-memory list → Drift table with `region` + multi-language name variants. |
-| **Confidence display on the recognized result** | User must know when to trust vs. verify; finance demands transparency | LOW-MEDIUM | Per AI-UX literature: color-coded (green/amber/red) + the chosen category shown prominently. NOT a raw 0.0–1.0 number — a 3-tier band ("確実/たぶん/要確認" or just chip styling). |
-| **Alternative-candidate chips (category + merchant)** | When recognition is wrong, one-tap correction must be visible, not buried in a picker | MEDIUM | Show the demoted-but-plausible alternatives as tappable chips (e.g. Case A shows 咖啡/cafe as an alt). Reuses the ranked alternatives the resolver already produces. The merchant's category is a natural alt source. |
-| **Inline correction feeding the existing learning tables** | The whole point of `category_keyword_preferences` / `merchant_category_preferences` is closing the loop | LOW-MEDIUM | Tapping a correction must persist the FULL extracted keyword (the prior research flagged the current code only stores the matched substring — fix that). This is the cheapest compounding win. |
-| **EN voice pragmatic path** | EN STT already returns Arabic digits; trilingual parity expected | LOW-MEDIUM | No EN dictated-number state machine (explicitly out of scope). Add EN merchant aliases (Starbucks, McDonald's, Uniqlo…), EN category keywords (gas, lunch, taxi, groceries), EN currency words. Reuses the same two engines. |
-| **Daily/Joy ledger classification driven by the resolved category** | The ledger split is the app's core identity; it must follow the corrected category, not a stale merchant guess | MEDIUM | Rework the rule engine so 日常/悦己 is derived from the FINAL cross-validated category (+ `CategoryLedgerConfig` L1/L2 overrides already in `default_categories.dart`). Case A's 购物 → 日常; a 推し/oshikatsu hit → 悦己. |
+| **Onboarding: device-locale-aware language pre-selection** | The very first screen must already be in the user's language; a Japanese user must not face a Chinese/English form | LOW | Detect device locale → pre-select ja/zh/en in `currentLocaleProvider`. "Mandatory" should feel like *confirm a sensible default*, not *fill a blank form* |
+| **Onboarding: currency defaults to JPY** | Japanese-market app; JPY is the obvious default and already the v1.7 pinned currency | LOW | Reuse v1.7 selector logic; JPY pre-selected. Treat as confirm-not-configure |
+| **Onboarding: re-entrant / can't get stuck** | If the app is killed mid-onboarding it must resume cleanly, never lock the user out of their own app | MEDIUM | Persist a single `onboarding_completed` flag; gate runs after `AppInitializer`, before main shell. Until the flag is set, re-show onboarding on next launch |
+| **Onboarding: progress + back navigation** | Multi-step flows without progress/back feel like a trap | LOW | Step indicator + back button; final step is an explicit "始める/Start" |
+| **App-lock: biometric-first with knowledge-factor fallback** | Standard iOS pattern — try Face ID/Touch ID automatically, fall back to a code the user knows | MEDIUM | PIN is the base credential; biometric is a convenience layer on top. Never biometric-only (a failed/changed face would lock the user out forever) |
+| **App-lock: lock on cold launch when enabled** | A lock that doesn't trigger on a fresh launch is pointless | LOW | Gate the main shell behind the lock screen at boot when `appLockEnabled` |
+| **App-lock: re-lock on resume from background** | Users expect a privacy lock to re-engage when they return to the app | MEDIUM | Lock when returning from background past a grace threshold (see UX params). This is the behavior people mean by "app lock" |
+| **App-lock: failed-attempt feedback + escalating delay** | Silent failure or instant infinite retries feel broken/insecure | MEDIUM | Show remaining attempts; impose escalating cooldown after N failures. Do NOT wipe data by default (see anti-features) |
+| **App-lock: settings toggle** | Users must be able to turn the lock on/off and change PIN later | LOW | Settings switch; enabling requires setting a PIN first |
+| **Donation: single unobtrusive external link in Settings** | A free app may ask for support, but only quietly and only via an external browser per Apple policy | LOW | One row ("開発を支援" / "応援する") → `url_launcher` external browser. NOT IAP, NOT in-app webview |
+| **Legal: Privacy Policy reachable in-app** | App Store **requires** a privacy policy URL for every app (even local-only); users + reviewers expect to find it in Settings | LOW-MEDIUM | Needs a publicly hosted URL regardless (App Store Connect field). In-app: link out and/or render bundled localized copy |
+| **Legal: Terms of Use (利用規約)** | Standard Japanese-market expectation; defines the no-warranty/local-data relationship | LOW | Bundled localized screen or external link. If you supply none, Apple's standard EULA applies — but a Japanese 利用規約 is expected |
+| **Legal: OSS license attribution** | MIT/BSD/Apache/etc. legally require attribution; a Flutter app shipping without it is non-compliant | LOW | Flutter's built-in `showLicensePage()` auto-aggregates all deps incl. transitive — near-zero cost, do not hand-maintain |
+| **Legal: all of the above available in Japanese** | Japanese-market launch; ja is the default locale | LOW | Localize via ARB/bundled assets; license page is auto but its chrome should respect locale |
 
 ### Differentiators (Competitive Advantage)
 
+Aligned with the app's core value: privacy, local-first, calm/non-coercive, family-friendly.
+
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Conflict-aware resolution (keyword beats merchant)** | Most receipt/auto-classify apps (Zaim, MF ME) classify by *merchant only* — they'd book the Starbucks cup as cafe. Beating the merchant default is genuinely better | MEDIUM | This is the headline differentiator. Zaim/MF are merchant-keyed; they have no utterance to cross-check against. A voice app *does* — it hears intent. Lean into it. |
-| **Region-tagged, multi-variant merchant schema (future-proof)** | `region` field + multi-language store-name variants lets the DB later extend to CN/other markets and be reused by OCR (MOD-005) without re-architecting | MEDIUM | Schema design now, payoff later. PROJECT.md explicitly wants OCR-reusable schema. Variants matter for JP: katakana スタバ vs スターバックス, 漢字 vs かな, 半角/全角. |
-| **Confidence that drives behavior, not decoration** | "Easy to ignore when it works, actionable when it doesn't" — high-confidence auto-fills silently; low-confidence surfaces the chips proactively | MEDIUM | The AI-UX guides converge on: don't nag on high confidence. Only escalate the chips/"please confirm" affordance when the band is amber/red. Avoids correction fatigue. |
-| **Learning that generalizes the keyword, not the merchant** | Correcting 「在星巴克买了杯子」→shopping should teach "买杯子=shopping" (reusable everywhere), not "星巴克=shopping" (would wreck the next coffee entry) | MEDIUM | Subtle but important: the correction must write to `category_keyword_preferences` keyed on the activity/object phrase, NOT pollute `merchant_category_preferences`. Mis-routing corrections is a real footgun. |
+| **Onboarding: a genuine privacy/local-first intro (skippable)** | Most kakeibo apps push accounts/cloud; leading with "your data stays on this device, no account needed" is a real trust differentiator | LOW-MEDIUM | 2-4 calm intro slides; **skippable** (intro is skippable, *setup* is not). Reinforces the brand before the mandatory setup |
+| **Onboarding: voice-input language confirmed, defaulted to UI language** | The app's voice entry is a signature feature; surfacing the voice locale at setup primes the killer feature | LOW | Default voice locale = chosen UI language (zh-CN/ja-JP/en-US); offer to confirm/override. Depends on existing voice routing |
+| **App-lock: in-context, optional prompt during onboarding** | Offering the lock at first run (clearly skippable) drives adoption without nagging later | LOW-MEDIUM | "Skip" must be a first-class equal option, not a greyed-out afterthought. Enabling it = set PIN now, biometric opt-in |
+| **App-lock: forgot-PIN recovery via existing BIP39 phrase** | Turns a dead-end ("forgot PIN = locked out / wiped") into graceful recovery, leveraging infra already built | MEDIUM | Decision needed: does the recovery phrase reset the PIN? Strongly recommended so a forgotten PIN never bricks local data |
+| **Donation: warm, non-transactional framing (応援/支援)** | Japanese donation culture is reserved; "support the developer / cheer us on" lands better than "tip/投げ銭" | LOW | Copy choice, not engineering. One quiet line, no number suggestions, no guilt |
+| **Legal: offline, bundled, localized legal screens** | A privacy-first offline app rendering its policy *without a network call* is on-brand and reviewer-friendly | MEDIUM | Bundle localized markdown; still keep the hosted URL for App Store Connect. Slightly more work than pure links |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Any scoring/streak/badge/leaderboard around recognition accuracy** ("you classified 30 days in a row!", "95% recognition streak") | Gamification is the reflex engagement lever; "make corrections fun" | **Violates ADR-012 permanently.** Finance gamification is documented as harmful — fixation on streaks over financial health, celebratory cues distorting risk perception, shame on broken streaks. Recognition is a *utility*, not a game. | Silent correctness. The reward for a good correction is the right number, full stop. No counters, no celebration animation on a correct guess. |
-| **Confidence as a precise percentage ("87.3% sure")** | Looks rigorous; engineers love exposing the score | False precision; users can't act on 87 vs 84; invites distrust ("why was it 62% and still wrong?") | 3-tier band (high/med/low) via chip color/label only. |
-| **Auto-commit low-confidence guesses without review** | "Frictionless one-tap entry" | A wrong silent classification is worse than a prompt — it corrupts the ledger and the daily/joy split invisibly, and finance errors compound | Low confidence → surface chips/confirm before save. Bias toward precision on the uncertain tail (the prior research's open Q3 — answer: precision on low-confidence). |
-| **Cloud NLU / LLM API for recognition** | Would crush accuracy on novel phrasing | Violates zero-knowledge architecture; sends utterances off-device. Non-starter without per-user opt-in | On-device only. (Embedding-similarity is the future ceiling per prior research, but out of v1.9 scope — v1.9 stays dict+rules.) |
-| **Exhaustive merchant DB (every store in Japan)** | "Coverage = quality" | Curation cost grows linearly with the long tail; 10k+ entries bloat the asset and barely move accuracy past the top chains | Cover the chain spine (~600-800) that captures the bulk of *daily* spend; let learning + category-only path absorb the tail. |
-| **Punitive/judgmental copy on悦己 or any spend** ("you overspent again", "another impulse buy?") | Some budgeting apps shame to "motivate" | ADR-012 §forbids; the app's thesis is *celebrate* 悦己 spending. Shame around recognition would poison the whole tone | Neutral, descriptive language. Recognition UX never editorializes about the *amount* or the ledger. |
-| **Per-merchant rich profiles (logos, addresses, hours, maps)** | "Make merchants feel premium" | Scope explosion irrelevant to recognition; pulls toward a POI database, not a classifier | Store only what recognition/OCR needs: canonical id, name variants, default category, region. |
+| **In-app IAP "tip jar" / paid tiers** | "Monetize the free app" | Apple's stance on pure *developer* donations via IAP is murky and review-risky; 30% cut; contradicts the "entirely free" promise; adds StoreKit complexity | External-browser link to Buy Me a Coffee / Ko-fi / GitHub Sponsors / PayPal.me only |
+| **Gating any feature behind a donation** | "Incentivize donating" | Breaks the "entirely free, no forced payment" core promise; coercive; erodes trust | Donation is purely optional and grants nothing; never paywall |
+| **Donation nag dialogs / interstitials / badges** | "More visibility = more donations" | Dark pattern; the opposite of the app's calm/non-coercive identity (ADR-012 spirit); annoys Japanese users especially | One static Settings row. No popups, no counters, no "you haven't donated" reminders |
+| **Forced account / email capture at onboarding** | "Build a user list", "enable sync" | Directly contradicts local-first/no-account architecture; #1 onboarding drop-off cause; privacy red flag | No account. Onboarding collects only locale/currency/voice + optional lock |
+| **Unskippable intro carousel / forced tutorial** | "Make sure they see our features" | Feels like a hostage screen; users want to reach the app | Intro slides skippable; only the 3 setup choices are mandatory (and pre-filled) |
+| **Requesting mic/biometric/notification permissions up front during onboarding** | "Get permissions out of the way" | iOS best practice is in-context permission requests; pre-asking tanks grant rates and looks creepy | Request biometric only when the user opts into app-lock; request mic only on first voice use (already the case) |
+| **App-lock that wipes data after N failures (default-on)** | "Bank-grade security" | A family expense app silently destroying local data is catastrophic and surprising; no cloud backup to restore from | Escalating cooldown only. If offered at all, "erase after N fails" must be explicit opt-in, off by default, with the BIP39 caveat spelled out |
+| **Biometric-only app-lock (no PIN)** | "Face ID is enough" | Face/Touch changes, OS biometric lockout, or sensor failure = permanent lockout with no fallback | PIN is mandatory whenever lock is enabled; biometric layered on top |
+| **Storing the PIN in plaintext / reversible** | "Simplest to implement" | Trivial extraction defeats the whole privacy posture | Store a salted KDF hash (or derive a key) in `secure_storage`; never the raw PIN |
+| **Locking the whole app behind a blocking ToS-accept gate** | "Legal cover" | Heavy friction for a free local app; un-Japanese (利用規約 is browsable, not a wall) | Legal docs are *reachable* in Settings + linked at first run; no blocking modal |
+| **Per-currency home base other than JPY at onboarding** | "Be international" | Out of v1.7 scope (JPY is the stored base); adds confusion at first run | Onboarding currency = entry-currency default only; base stays JPY (carried v1.7 decision) |
 
 ---
 
-## Japanese Merchant DB Coverage (concrete, for the ~600-800 build)
+## Concrete UX Parameters (for the requirements writer — make these testable)
 
-**Key fact: daily JP spend is chain-dominated.** The top-3 konbini alone (7-Eleven / FamilyMart / Lawson) hold ~90% of the konbini market (~51,700 stores), and konbini are ~8% of all Japanese retail sales. Each everyday category is similarly concentrated in a handful of names. This means a few hundred well-chosen chains capture the overwhelming majority of *spoken everyday* expenses — the long tail is genuinely a tail.
+### (a) Onboarding flow
+- **Step order:** ① (optional) intro slides → ② UI language (pre-selected from device locale) → ③ currency (JPY pre-selected) → ④ voice-input language (defaults to chosen UI language) → ⑤ optional app-lock prompt → ⑥ "Start". Language MUST come first so steps 3-6 render in the chosen language.
+- **Skippable vs mandatory:** intro = skippable; steps ②③④ = mandatory but pre-filled (a single tap to confirm each, or a "use defaults" path); step ⑤ = skippable.
+- **Persistence:** one boolean `onboarding_completed` (recommend `secure_storage` or app prefs); gate evaluated after `AppInitializer`, before main `IndexedStack` shell. Re-entrant if killed before the flag is set.
+- **No account, no email, no upfront OS permission prompts.**
+- **Open decision to spell out:** whether changing UI language mid-onboarding rebuilds the flow live (recommended) and whether there's a single "skip all setup → use device defaults" express path.
 
-Coverage priority is by **frequency of everyday spend**, not store count alone. The spine below is the MUST-cover set; named chains are the anchors (store counts ~2025-2026).
+### (b) App-lock
+- **Credentials:** PIN mandatory when lock enabled; biometric optional add-on. Fallback ordering: on a locked screen, **attempt biometric automatically first**; on biometric fail/cancel/unavailable → **PIN entry**. PIN is also the explicit "use passcode" fallback button.
+- **PIN length:** recommend **6 digits** (matches iOS default, ~10⁶ space); 4-digit acceptable if simplicity preferred — pick one and fix it. Numeric.
+- **PIN storage:** salted KDF hash (e.g. PBKDF2/Argon2 via existing crypto infra) in `secure_storage`. Never plaintext, never reversible.
+- **Retry / lockout:** show remaining attempts; after **5** failed PIN attempts apply an **escalating cooldown** (e.g. 30s → 1m → 5m → 15m). **No data wipe** by default. Define exact thresholds as testable values.
+- **Re-lock timing:** **always lock on cold launch** (when enabled). On **resume from background**, lock if backgrounded longer than a **grace threshold** — recommend a small set: *immediately / 1 min / 5 min*, default **immediately or 1 min** for a privacy app. Define default + whether it's user-configurable.
+- **"Skip app-lock" meaning:** app-lock stays **OFF**; no PIN set; user can enable later in Settings. Enabling later = set PIN (mandatory) + optional biometric.
+- **Forgot-PIN:** decision required — recommend **BIP39 recovery phrase resets the PIN** so a forgotten PIN never bricks local data. Alternative (no recovery) must be stated as an explicit, scary trade-off.
+- **Scope clarification needed:** is the lock a **UI gate over the already-decrypted SQLCipher DB**, or tied to the DB key? Almost certainly a UI gate (DB is decrypted by `KeyManager` at boot). State this so the threat model is honest (UI gate ≠ at-rest protection; SQLCipher already provides that).
+- **Biometric change handling:** if enrolled biometrics change (iOS invalidates), fall back to PIN (don't silently trust). Reuse `biometric_service` semantics.
 
-| Category | MUST-cover anchor chains (default category) | Why it matters / notes |
-|----------|---------------------------------------------|------------------------|
-| **コンビニ konbini** | セブン-イレブン (7-Eleven), ファミリーマート (FamilyMart), ローソン (Lawson) + ミニストップ, デイリーヤマザキ, セイコーマート(北海道) | ~90% in top-3; highest-frequency spend. Default → `cat_food`/`cat_daily` (ambiguous — konbini is BOTH; lean `cat_food_other` or rely on keyword). **Konbini is the prime Case-A trap: merchant says "food" but 「コンビニで電池買った」=日用品.** |
-| **スーパー supermarket** | イオン/AEON, まいばすけっと, イトーヨーカドー, 西友/SEIYU, ライフ, 業務スーパー, マルエツ, サミット, OK, トライアル | Default → `cat_food_groceries`. Small-format (まいばすけっと, TRIAL GO) is the growth area. |
-| **牛丼/定食 gyudon** | すき家 (Sukiya, ~2000), 吉野家 (Yoshinoya, ~1287), 松屋 (Matsuya, ~1185), なか卯 | Default → `cat_food_dining_out`. Solo-meal staple; very high spoken frequency. |
-| **ファストフード fast food** | マクドナルド (McDonald's), モスバーガー, ケンタッキー/KFC, ロッテリア, サブウェイ, フレッシュネス | Default → `cat_food_dining_out`. |
-| **ラーメン/うどん/そば** | 一蘭, 一風堂, 餃子の王将, 日高屋, リンガーハット, 丸亀製麺, はなまるうどん, 富士そば, ゆで太郎 | Default → `cat_food_dining_out`. |
-| **カフェ cafe** | スターバックス/スタバ (~2077), ドトール (~1079), コメダ珈琲 (~1095), タリーズ, サンマルク, 星乃珈琲, PRONTO | Default → `cat_food_cafe`. **The Case-A canonical example lives here.** Need katakana+漢字 variants (スタバ/スターバックス). |
-| **ファミレス family restaurant** | ガスト, サイゼリヤ, ジョイフル, ジョナサン, デニーズ, ココス, ロイヤルホスト, バーミヤン, 夢庵 | Default → `cat_food_dining_out`. |
-| **ドラッグストア drugstore** | ウエルシア, ツルハ, マツモトキヨシ/マツキヨ, スギ薬局, ココカラファイン, サンドラッグ, コスモス, クスリのアオキ | ~10兆円 / ~23,000店. Default → `cat_daily_drugstore`. Sells food+cosmetics+medicine → another Case-A trap. |
-| **100円ショップ** | ダイソー/DAISO, セリア/Seria, キャンドゥ/Can★Do, ワッツ | Default → `cat_daily_household`. |
-| **家電量販店 electronics** | ヤマダ電機/YAMADA, ビックカメラ, ヨドバシカメラ, ケーズデンキ, エディオン, ノジマ, ジョーシン | Default → `cat_housing_appliances` / `cat_communication`. Often 悦己-adjacent (hobby gear). |
-| **ファッション fashion** | ユニクロ/UNIQLO (~770), GU, しまむら (~1423), 無印良品/MUJI, ZARA, H&M, ABCマート(shoes), 西松屋(kids) | Default → `cat_clothing_clothes`. MUJI is a Case-A trap (clothes+household+food). |
-| **交通 transit** | Suica, PASMO, ICOCA(関西), manaca, JR各社, 東京メトロ, 都営, 阪急/阪神/京阪/近鉄(関西), 私鉄, 各バス | Default → `cat_transport_train`/`cat_transport_bus`. IC-card top-up vs ride is ambiguous; voice usually says 電車/バス/切符. |
-| **ガソリンスタンド gas** | ENEOS, 出光/apollostation, コスモ石油/COSMO, キグナス, SOLATO | All-47-pref coverage (ENEOS/出光/コスモ). Default → `cat_car_fuel`. **Case-B anchor (加油/ガソリン).** |
-| **デリバリー delivery** | Uber Eats, 出前館, Wolt, menu | Default → `cat_food_delivery`. |
-| **サブスク subscriptions** | Netflix, Spotify, Amazon Prime, YouTube Premium, Apple/iCloud, Disney+, dアニメ, Hulu, U-NEXT, Kindle Unlimited | Default → `cat_hobbies_subscription`/`cat_daily_subscription`. Spoken as service names, not stores. |
-| **EC/総合** | Amazon (アマゾン), 楽天/Rakuten, Yahoo!ショッピング, メルカリ, ヨドバシ.com | Highly ambiguous (sells everything) → strong Case-A trap; should LEAN on keyword, low merchant-confidence. |
+### (c) Donation link
+- **Presentation:** exactly one Settings row, calm copy ("開発を支援する" / "応援する" / "Support development"). No amounts, no frequency, no counters, no popups.
+- **Mechanism:** `url_launcher` with `LaunchMode.externalApplication` (external browser, NOT SFSafariViewController/in-app webview, NOT IAP) → developer-owned/3rd-party donation page (Buy Me a Coffee / Ko-fi / GitHub Sponsors / PayPal.me).
+- **Non-coercive invariants (testable):** grants no in-app benefit; never blocks any feature; never auto-prompts; appears only when the user navigates to Settings.
 
-**Tokyo/Osaka-specific & depachika (regional, lower priority but real):**
-- **デパ地下 depachika** (food halls): 高島屋, 三越伊勢丹, 大丸, 松坂屋, そごう・西武 — default `cat_food_groceries`/`cat_food_other`.
-- **関西/Osaka-leaning:** 阪急/阪神百貨店, 近商ストア, ライフ(関西強い), 関西スーパー, 玉出(激安スーパー大阪), 551蓬莱 — and 関西 IC = ICOCA, 阪急/阪神/京阪/近鉄/南海.
-- **東京/Kanto-leaning:** まいばすけっと(首都圏), 成城石井(高級スーパー), オーケー, 東急ストア, 東京メトロ/都営.
-- These belong in the DB tagged `region` (Kanto/Kansai/national) so the schema's region field earns its keep, but they are NOT where the bulk of spend is — the national chains above dominate.
-
-**Coverage strategy verdict:** ~150-250 national chains (the spine above, with variants) likely capture the large majority of *spoken everyday* JP expenses; the remaining budget (toward 600-800) buys regional chains, depachika, and secondary names for tail robustness and OCR reuse. Merchant DB quality is "did we get the top chains per everyday category," not "how many rows."
+### (d) Legal section
+- **Structure:** a single "About / 法的情報" group in Settings containing three rows: プライバシーポリシー, 利用規約, オープンソースライセンス. Three rows, not one merged screen — each is independently linkable/citable.
+- **Privacy Policy:** publicly **hosted URL is mandatory** for App Store Connect regardless of in-app rendering. In-app: link out and/or render bundled localized copy.
+- **Terms of Use:** bundled localized 利用規約 screen or external link. (Absent your own, Apple's standard EULA applies — but ship a Japanese 利用規約.)
+- **OSS licenses:** Flutter built-in `showLicensePage()` — auto-aggregates incl. transitive deps. Set `applicationName`/`applicationVersion`/`applicationLegalese`. Do not hand-maintain.
+- **No blocking accept-gate.** Reachable, not a wall.
 
 ---
 
-## Recognition UX Patterns: Table Stakes vs Delightful
+## Japanese-Market Expectations (explicit callouts)
 
-| Pattern | Tier | Notes |
-|---------|------|-------|
-| Show the chosen category prominently after recognition | Table stakes | The result must be visible and editable before save. |
-| 3-tier confidence band (color/label), not a raw % | Table stakes | green=trust/auto, amber=glanceable, red=please-confirm. |
-| Tappable alternative chips (category + the merchant's default category) | Table stakes | One-tap correction is the minimum viable repair UX. |
-| Inline correction (no modal detour) that persists to learning tables | Table stakes | Correction must be in-flow and must teach the system. |
-| Proactively surface chips/confirm ONLY when confidence is low | Delightful | "Easy to ignore when right" — don't nag on high confidence. |
-| Show merchant + category as two separate, separately-correctable facets | Delightful | Reflects the decoupling to the user; lets them fix the merchant without re-picking category and vice-versa. |
-| Multimodal echo (chip appears as STT lands) | Delightful | Visual confirmation in noisy environments; pairs with the existing record-button UX. |
-| Brief "why" affordance (e.g. "matched 加油 → 燃料") | Delightful (optional) | Transparency tooltip; low priority, can defer. |
+- **特定商取引法 (Act on Specified Commercial Transactions):** when money changes hands, a 「特定商取引法に基づく表記」 may be required. For donations routed through an **external platform** (Buy Me a Coffee/Ko-fi/etc.), that platform's own 特商法 表記 generally applies and the app links out — but **this is a legal-review flag, not a settled engineering fact.** If the project ever takes donations *directly*, 特商法 表記 + プライバシーポリシー placement rules (easy-to-find, linked from top + transaction page) become directly relevant. Recommend confirming with the chosen donation platform's policy and, if in doubt, adding a 特商法 表記 entry under the legal section. (Confidence: MEDIUM — verify before launch.)
+- **利用規約 is a baseline expectation** in Japan, not optional polish.
+- **プライバシーポリシー in Japanese** is both an App Store requirement (hosted URL) and a strong local expectation; for a local-first app it can honestly state "data stored only on device, no transmission."
+- **Tone:** Japanese users respond poorly to aggressive monetization/nagging. The non-coercive donation framing (応援/支援) and the absence of nags are market-fit features, not just ethics.
+- **Defaults:** ja locale + JPY are the obvious first-run defaults; treat onboarding as confirmation.
 
 ---
 
 ## Feature Dependencies
 
 ```
-Decoupled CategoryRecognizer + MerchantRecognizer
-    └──requires──> existing keyword/synonym dict + JP merchant DB
-Keyword-intent-priority cross-validation
-    └──requires──> Decoupled recognizers (two (id,confidence) tuples)
-Category-only path
-    └──requires──> Decoupled recognizers (CategoryRecognizer runnable w/o merchant)
-JP merchant DB (~600-800)
-    └──requires──> Drift table migration (region + name-variant schema)
-    └──enhances──> MerchantRecognizer, and (future) OCR MOD-005
-Alternative-candidate chips
-    └──requires──> cross-validation producing ranked alternatives
-Inline correction → learning
-    └──requires──> chips + the existing preferences tables
-    └──enhances──> both recognizers over time
-Daily/Joy rule rework
-    └──requires──> cross-validation producing a FINAL category
-    └──requires──> CategoryLedgerConfig (already exists)
-EN voice pragmatic path
-    └──requires──> EN aliases/keywords/currency words in both engines
-Confidence display
-    └──requires──> cross-validation emitting a confidence band
+First-run onboarding
+    ├──requires──> i18n (currentLocaleProvider, ARB ja/zh/en)        [EXISTS]
+    ├──requires──> v1.7 currency selector                             [EXISTS]
+    ├──requires──> voice locale routing (zh-CN/ja-JP/en-US)           [EXISTS]
+    ├──requires──> onboarding gate slot (after AppInitializer,        [NEW — first time]
+    │              before IndexedStack main shell)
+    └──enhances/optionally-embeds──> App-lock prompt (step ⑤)
 
-Confidence display ──conflicts──> raw-percentage display (pick the band)
-Any gamification ──conflicts──> ADR-012 (hard block, structurally tested)
+App-lock (Face ID + PIN)
+    ├──requires──> biometric_service                                  [EXISTS]
+    ├──requires──> secure_storage                                     [EXISTS]
+    ├──requires──> PIN entry UI + salted-hash storage                 [NEW]
+    ├──requires──> lifecycle observer (cold launch + resume gate)     [NEW]
+    └──enhances──> BIP39 recovery phrase as forgot-PIN reset          [EXISTS infra, NEW wiring]
+
+Donation link
+    └──requires──> url_launcher external browser                      [LIKELY NEW dep]
+
+Legal section
+    ├── Privacy Policy ──requires──> hosted URL (App Store Connect)   [NEW, external/ops]
+    ├── Terms of Use   ──requires──> bundled localized copy or link   [NEW content]
+    └── OSS licenses   ──requires──> Flutter showLicensePage()        [BUILT-IN]
+
+App-lock prompt in onboarding ──requires──> App-lock feature complete (ordering constraint)
 ```
 
 ### Dependency Notes
-
-- **Cross-validation requires decoupling first:** you cannot apply "keyword wins on conflict" until the two engines emit independent results. Decoupling is the foundational phase; everything else stacks on it.
-- **JP merchant DB requires the Drift migration first:** the `region` + name-variant schema must land before bulk-loading ~600-800 rows, or the data gets re-migrated.
-- **Daily/Joy rework requires the final category:** the ledger split must read the cross-validated result, not the merchant default — otherwise Case A books 购物 into the wrong ledger. Reuses existing `CategoryLedgerConfig` L1/L2 overrides.
-- **Learning enhances both engines but must route corrections correctly:** correcting a *conflict* case teaches the keyword table, NOT the merchant table (see differentiator note) — a wiring mistake here regresses unrelated entries.
-
----
-
-## MVP Definition (within v1.9)
-
-### Launch With (v1.9 core)
-
-- [ ] **Decoupled CategoryRecognizer + MerchantRecognizer** — premise of the milestone; nothing works without it.
-- [ ] **Keyword-intent-priority cross-validation** — the user-confirmed correctness rule; serves Case A.
-- [ ] **Category-only path** — serves Case B; mostly falls out of decoupling.
-- [ ] **JP merchant DB migration + spine load (~national chains)** — Drift table w/ region + variants; load the §coverage spine.
-- [ ] **Confidence band + alternative chips + inline correction → learning** — the table-stakes recognition UX, with the keyword-not-merchant correction routing.
-- [ ] **Daily/Joy rule rework reading the final category** — keep the core ledger identity correct.
-- [ ] **EN pragmatic path** — aliases/keywords/currency words; no EN number state machine.
-
-### Add After Validation (v1.9.x / next)
-
-- [ ] **Regional/depachika DB rows toward 600-800** — robustness tail; load after the spine proves out.
-- [ ] **"Why this category" transparency tooltip** — nice, not essential.
-- [ ] **Two-facet separate correction (fix merchant vs category independently)** — delightful refinement.
-
-### Future Consideration (v2+ — explicitly out of v1.9)
-
-- [ ] **On-device embedding-similarity fallback** (prior research Option D) — the real accuracy ceiling, but adds a ~40MB asset; defer until correction-loop data justifies it.
-- [ ] **OCR (MOD-005) consuming the merchant DB** — schema is designed for it now; integration is its own milestone.
-- [ ] **EN dictated-number state machine** — deliberately excluded; EN STT returns digits.
+- **Onboarding needs its gate built before its steps:** the "evaluate `onboarding_completed` after `AppInitializer`, before main shell" slot is the app's first onboarding gate and is the structural prerequisite for all onboarding work.
+- **App-lock must land before (or with) the onboarding app-lock prompt:** step ⑤ can't offer to enable a lock that doesn't exist. Sequence app-lock core → then wire the onboarding prompt.
+- **Donation + Legal are independent leaves:** no dependency on onboarding/app-lock; can be built in parallel. Both are low-complexity.
+- **PIN is the only genuinely new security primitive;** biometric, secure storage, and KDF infra already exist and should be reused (no custom crypto per CLAUDE.md).
 
 ---
+
+## MVP Definition
+
+### Launch With (v2.0 — these ARE the milestone)
+- [ ] **Onboarding gate + mandatory locale/currency/voice setup** — required for a public first-run; defaults pre-filled (Japanese-market confirm-not-configure)
+- [ ] **Skippable privacy/local-first intro** — trust differentiator, cheap
+- [ ] **App-lock: PIN (mandatory base) + Face ID/Touch ID (optional), cold-launch + resume re-lock, escalating cooldown** — table stakes for a finance app holding family money data
+- [ ] **App-lock onboarding prompt (skippable) + Settings toggle** — adoption without nagging
+- [ ] **Donation: one external-browser link in Settings** — satisfies the "free + optional support" goal Apple-compliantly
+- [ ] **Legal section: Privacy Policy + 利用規約 + OSS licenses, all localized** — App Store + Japanese-market compliance
+
+### Add After Validation (v2.x)
+- [ ] **Forgot-PIN → BIP39 recovery reset** — strongly recommended; if descoped at launch, document the "forgotten PIN" trade-off explicitly first
+- [ ] **Configurable re-lock grace period (immediate/1m/5m)** — ship a sensible fixed default first, make it a setting later
+- [ ] **特商法 表記 entry** — add if/when legal review says the donation path triggers it
+
+### Future Consideration (v2+)
+- [ ] **Opt-in "erase data after N failures"** — only with heavy warnings + BIP39 awareness; default off, likely never
+- [ ] **Re-onboarding / change-defaults wizard** — defaults are already changeable in Settings, so low value
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Decoupled recognizers | HIGH | MEDIUM | P1 |
-| Keyword-priority cross-validation | HIGH | MEDIUM | P1 |
-| Category-only path | HIGH | LOW | P1 |
-| JP merchant DB migration + spine | HIGH | HIGH | P1 |
-| Confidence band + chips + correction loop | HIGH | MEDIUM | P1 |
-| Daily/Joy rule rework | HIGH | MEDIUM | P1 |
-| EN pragmatic path | MEDIUM | LOW-MEDIUM | P1/P2 |
-| Regional/depachika tail to 600-800 | MEDIUM | MEDIUM | P2 |
-| Two-facet independent correction | MEDIUM | MEDIUM | P2 |
-| "Why this category" tooltip | LOW | LOW | P3 |
-| Embedding-similarity fallback | HIGH | HIGH | P3 (v2) |
+| Onboarding gate + mandatory setup (defaults pre-filled) | HIGH | MEDIUM | P1 |
+| Skippable privacy intro | MEDIUM | LOW | P1 |
+| App-lock PIN + biometric + re-lock + cooldown | HIGH | MEDIUM-HIGH | P1 |
+| App-lock onboarding prompt + Settings toggle | MEDIUM | LOW | P1 |
+| Donation external link | MEDIUM | LOW | P1 |
+| Legal: Privacy / Terms / OSS licenses | HIGH (compliance) | LOW-MEDIUM | P1 |
+| Forgot-PIN BIP39 recovery | MEDIUM | MEDIUM | P2 |
+| Configurable re-lock grace | LOW | LOW | P2 |
+| 特商法 表記 (if triggered) | LOW (legal) | LOW | P2 (gated by legal review) |
+| Opt-in erase-after-N | LOW | MEDIUM | P3 |
 
----
+**Priority key:** P1 = must have for launch · P2 = should have / fast-follow · P3 = future/likely-never.
 
 ## Competitor Feature Analysis
 
-| Feature | Zaim (くふう Zaim) | マネーフォワード ME | Our v1.9 Approach |
-|---------|--------------------|----------------------|-------------------|
-| Auto-classification basis | Card-link + receipt OCR; classifies by **merchant/line-item** | Account-link; auto-buckets by **merchant** | **Voice utterance** cross-checked: keyword intent overrides merchant default |
-| Conflict resolution (place vs item) | None — merchant keyed (Starbucks→cafe regardless) | None — merchant keyed | **Keyword wins on conflict** (the differentiator) |
-| Correction learning | Re-categorize; Zaim noted as needing few re-corrections | Sub-category editable (free tier) | Inline chip → `category_keyword_preferences`, keyword-generalized |
-| Input modality | Receipt photo + manual + auto-link | Auto-link + receipt + manual | **Voice-first** + manual; local-first, no account link |
-| Privacy model | Cloud account aggregation | Cloud account aggregation | **Zero-knowledge on-device**; no cloud NLU |
-| Gamification | Minimal/utility | Minimal/utility | **Explicitly none** (ADR-012) — recognition is pure utility |
-
-Note: Neither major JP competitor does *voice* category recognition with utterance-level cross-validation; their auto-classify is merchant-keyed off linked transactions. The Case-A behavior (keyword beats merchant) is something they structurally cannot do because they have no utterance — this is the v1.9 edge.
-
----
+| Feature | Typical kakeibo / finance app | Privacy-first app norm | Our Approach |
+|---------|------------------------------|------------------------|--------------|
+| Onboarding | Push account/cloud signup, upsell premium | No account, local setup | Mandatory locale/currency/voice only, no account, skippable intro |
+| App-lock | PIN/biometric gate, some wipe-on-fail | Biometric + PIN, escalating delay | PIN-base + biometric layer, cold+resume lock, cooldown (no default wipe), BIP39 recovery |
+| Donation/monetization | IAP tiers, ads, premium paywall | External "support" link | One quiet external-browser link, zero gating, 応援 framing |
+| Legal | Hosted PP/ToS links, license page | Bundled/offline legal | PP (hosted URL req'd) + ja 利用規約 + `showLicensePage()`, localized, no accept-wall |
 
 ## Sources
 
-- [Convenience stores in Japan — statistics & facts (Statista)](https://www.statista.com/topics/8484/convenience-stores-in-japan/) — top-3 konbini ~90% share; ~8% of retail sales; market ¥13.5T
-- [コンビニ店舗数ランキング2026 (日本ソフト販売)](https://www.nipponsoft.co.jp/blog/analysis/chain-conveniencestore2026/) — top-3 = 51,702店 = 90.5% of chains
-- [How Convenience Stores Dominate in Japan (ULPA)](https://www.ulpa.jp/post/how-convenience-stores-dominate-in-japan-a-complete-guide) — konbini dominance, small-format super growth (まいばすけっと, TRIAL GO)
-- [牛丼チェーン店舗数ランキング2026 (JAPAN WANDERER)](https://japan-wanderer.com/gyudon-chain-ranking/) — すき家~2000 / 吉野家~1287 / 松屋~1185
-- [喫茶店・カフェチェーン店舗数ランキング2026 (FC比較ネット)](https://www.fc-hikaku.net/dokuritsu_kaigyo/3127) — スタバ~2077 / ドトール~1079 / コメダ~1095
-- [カジュアル衣料4社既存店売上 (流通ニュース)](https://www.ryutsuu.biz/sales/s041442.html) — ユニクロ770直営 / しまむら1423
-- [ドラッグストア売上・店舗数ランキング2026 (登販ナビ)](https://www.touhan-navi.com/contents/column/cat2/002864.php) — ウエルシア/ツルハ/マツキヨ; ~23,000店 / ~¥10兆
-- [100円ショップ店舗数ランキング (memorva)](https://memorva.jp/ranking/sales/100yen_shop_daiso_seria_cando_tenposuu_pref.php) — ダイソー/セリア/キャンドゥ
-- [飲食店チェーン店舗数ランキング2026 (日本ソフト販売)](https://www.nipponsoft.co.jp/blog/analysis/chain-restaurant2026/) — ファミレス/ラーメン/FF chains
-- [ENEOS 電子マネー・モバイル決済](https://www.eneos.co.jp/consumer/ss/card/electronic_money/) — ENEOS/出光/コスモ all-47-pref; Suica/PASMO IC at gas
-- [家計簿アプリ Zaim と マネーフォワード ME 比較 (warau)](https://www.warau.jp/style/article/) — competitor auto-classification & receipt behavior
-- [家計簿アプリZaimとは (カケイクジャーニー)](https://kakeiku-journey.com/whats-zaim/) — Zaim category auto-split, receipt line-item
-- [Designing a Confidence-Based Feedback UI (Bootcamp/Medium)](https://medium.com/design-bootcamp/designing-a-confidence-based-feedback-ui-f5eba0420c8c) — confidence card + alt suggestions + "easy to ignore when right"
-- [Confidence Visualization — AI UX Design Patterns](https://www.aiuxdesign.guide/patterns/confidence-visualization) — green/amber/red banding, avoid false precision
-- [Voice User Interface (VUI) Design Principles 2026 (Parallel)](https://www.parallelhq.com/blog/voice-user-interface-vui-design-principles) — multimodal echo, suggestion chips, hybrid form+voice confirmation
-- [Gamification Gone Wrong: When Streaks Become the Point (NerdSip)](https://nerdsip.com/blog/gamification-gone-wrong-when-streaks-become-the-point) — finance gamification harms
-- [Gamification in fintech: Financial literacy or just engagement? (11FS)](https://www.11fs.com/article/gamification-in-fintech-financial-literacy-or-just-engagement) — celebratory cues distort risk perception
-- [From play to pay: systematic review of gamification in finance (ScienceDirect)](https://www.sciencedirect.com/science/article/pii/S0001691826005810) — gamified cues + financial bias interaction
-- `.planning/research/voice-category-recognition-improvements.md` — prior first-party research (13-entry merchant DB, dict scaling limits, on-device embedding ceiling, precision-vs-recall open Q)
-- `lib/shared/constants/default_categories.dart` — 19 L1 / 103 L2 taxonomy + `CategoryLedgerConfig` daily/joy defaults
+- [Apple App Review Guidelines (3.1.1 / 3.2.1 donations)](https://developer.apple.com/app-store/review/guidelines/) — donations via external Safari link, free apps collect funds outside app, IAP tip-jar discouraged for developer donations (MEDIUM confidence on exact current wording — verify at submission)
+- [Apple Developer Forums — "Donate to Developer" on a free app](https://developer.apple.com/forums/thread/114186)
+- [Medium — Buy Me a Coffee link vs Apple review experience](https://medium.com/@robert-baer/my-ongoing-battle-with-apple-over-a-buy-me-a-coffee-link-is-over-9c158df81c05)
+- [Stripe — Notation based on Japan's Act on Specified Commercial Transactions (特定商取引法)](https://stripe.com/resources/more/specified-commercial-transactions-act-japan)
+- [PAY.JP — 特定商取引法に基づく表記：寄付の記載例](https://help.pay.jp/ja/articles/3438270)
+- [IT弁護士 中野秀俊 — アプリ/ECに必要な特定商取引法に基づく表記](https://it-bengosi.com/%E3%82%A2%E3%83%97%E3%83%AA%E9%96%8B%E7%99%BA%E3%81%AE%E6%B3%95%E5%BE%8B/ec-apuri/)
+- [Apple Support — Lock or hide an app / re-auth on resume](https://support.apple.com/guide/iphone/lock-or-hide-or-an-app-iph00f208d05/ios)
+- [Medium (Gaurav Harkhani) — Implementing App Lock in iOS (biometric + passcode fallback, lockout)](https://medium.com/@gauravharkhani01/implementing-app-lock-in-ios-everything-you-need-to-know-918d65dff9c0)
+- [App Store Connect — Manage app privacy (privacy policy URL mandatory)](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy/)
+- [Flutter LicensePage / showLicensePage (auto OSS attribution incl. transitive)](https://api.flutter.dev/flutter/material/LicensePage-class.html) · [code with andrea — Show licenses in Flutter](https://codewithandrea.com/tips/show-licenses-flutter-app/)
+- Project context: `.planning/PROJECT.md` (v2.0 milestone scope), CLAUDE.md (existing i18n/currency/voice/biometric infra)
 
 ---
-*Feature research for: v1.9 voice category+merchant recognition redesign (Home Pocket / まもる家計簿)*
-*Researched: 2026-06-23*
+*Feature research for: pre-launch onboarding / app-lock / donation / legal — Japanese-market local-first family accounting app*
+*Researched: 2026-06-28*

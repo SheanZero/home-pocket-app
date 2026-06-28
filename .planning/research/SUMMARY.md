@@ -1,180 +1,156 @@
 # Project Research Summary
 
-**Project:** Home Pocket (まもる家計簿) — v1.9 voice category & merchant recognition redesign
-**Domain:** Offline-first, on-device voice expense-entry recognition (category + Japanese merchant, decoupled & cross-validated) for a local-first dual-ledger kakeibo Flutter app
-**Researched:** 2026-06-23
-**Confidence:** HIGH
+**Project:** Home Pocket (まもる家計簿) — v2.0 pre-launch capstone
+**Domain:** Pre-launch gating/lock/compliance for a shipped local-first encrypted Flutter family-accounting app (Japan market, iOS 14+/Android 7+)
+**Researched:** 2026-06-28
+**Confidence:** HIGH (integration/stack/architecture grounded in current source; store-policy/JP-legal specifics MEDIUM, flagged for legal review)
 
 ## Executive Summary
 
-v1.9 is a **layered decomposition + an arbitration insert, not a rewrite, and it needs essentially ZERO new heavy dependencies.** The existing voice pipeline already has the right bones — a use-case orchestrator (`ParseVoiceInputUseCase`), a category resolver, a merchant lookup, two learning tables (`category_keyword_preferences` / `merchant_category_preferences`), and a DB-backed ledger resolver (`CategoryService.resolveLedgerType`). What it lacks is **independence** (today merchant matching is embedded in `VoiceTextParser` AND short-circuits the category resolver) and **arbitration** (there is no place where two independent verdicts are reconciled). The redesign splits the pipeline into two pure-Dart engines — `MerchantRecognizer` and `CategoryRecognizer` that never call each other — and inserts a pure-domain `RecognitionReconciler` that combines their verdicts. The whole thing is in-house Dart over existing infra; the only structurally new artifact is a Drift `merchants` table (schema v21→v22) holding a hand-curated ~600-800-row Japanese merchant catalog. The single (optional) candidate package is `kana_kit` for kana/romaji normalization.
+This milestone adds four pre-launch surfaces to an already-shipped app — first-run onboarding (mandatory UI-language / currency / voice-language setup), an app-lock (Face ID/biometric + PIN), a Settings donation link, and a Japanese-market legal section (Privacy Policy / Terms / OSS licenses, with 特商法 flagged). The defining characteristic of the research is that **this is an integration milestone, not a greenfield build.** Almost everything needed already exists in the codebase: `local_auth ^3.0.1`, `flutter_secure_storage ^10.2.0` (with a pre-wired `StorageKeys.pinHash` slot), `crypto`/`cryptography` KDFs, the SharedPreferences-backed `SettingsRepository`, the v1.7 JPY-first currency selector, voice-locale routing, and Flutter's built-in `showLicensePage`. The single genuinely-new runtime dependency is **`url_launcher ^6.3.2`** (donation link), and it has been verified clear of the project's `win32`-pinned `file_picker`/`share_plus`/`package_info_plus` trap.
 
-The recommended approach is **dictionary + deterministic rules + curated data + a correction-learning loop — explicitly NOT the embedding/ML path** that the v1.3-era prior research (`voice-category-recognition-improvements.md`) floated as the eventual accuracy ceiling. That embedding fallback (~40 MB asset) remains the v2+ ceiling but is deliberately out of v1.9 scope; v1.9 instead realizes that research's cheap-compounding "Option F" (close the active-learning loop, record the FULL extracted keyword) as a first-class part of the new UX. The two utterances the milestone is judged against are **Case A** 「在星巴克买了个杯子」→ 购物 (keyword intent beats the merchant's cafe default) and **Case B** 「加油用了400块」→ fuel (a merchant-less, category-only resolution). Both are only servable once the engines are decoupled and run unconditionally in parallel.
+The recommended approach is to attach both new gates to the **one existing integration seam** — the synchronous branch ladder in `HomePocketApp._buildHome()` (`lib/main.dart`), mirroring the existing `_needsProfileOnboarding` gate. Gate config is read once in `_initialize()` after `AppInitializer` completes and held in local widget state, so the gates can never race init and never flash protected content. Onboarding writes through existing providers (`localeProvider`, `BookRepository.update` for currency, `setVoiceLanguage`) and sets a single `onboarding_complete` flag **last**; app-lock adds a `PinService` (salted slow-KDF hash in the Keychain), an `AppLockScreen`, and a `WidgetsBindingObserver` for resume re-lock; legal/donation extend the Settings `AboutSection`.
 
-The dominant risks are all about **getting the edges right, not the happy path.** Cross-validation is a none/weak/strong 3×3 truth table (NOT a literal "keyword always wins" — a bare 「スタバ」 must still let the merchant win, a weak keyword must not veto a strong merchant, both-weak falls to ask-user). The 600-800-row merchant matcher will produce silent false-positives from the existing bidirectional-`contains` strategy at scale (短 kana aliases like スギ/コメ collide on incidental overlap) and must be rewritten to anchored/token matching with NFKC + kana-fold normalization. Removing the merchant short-circuit without re-homing `ledgerType` will silently desync the daily/joy split that every downstream aggregate reads. And the new recognition UX is fresh surface where ADR-012 anti-gamification violations (a "95% score", a "corrections streak") can slip past the existing anti-toxicity sweeps. Each of these has a documented prevention and a named regression test.
+The key risks are concentrated in security and compliance, not feature complexity. The highest-severity pitfall is **changing `flutter_secure_storage` keychain accessibility** — on 10.x this silently bricks every existing install (documented project gotcha, quick 260610-ss7); the PIN must reuse the shared `unlocked_this_device` options. Other critical risks: weak/plaintext PIN storage (use salted slow KDF + persisted lockout), onboarding racing `AppInitializer`, missing re-lock-on-resume plus app-switcher data leak, biometric edge cases with no PIN fallback, ARB trilingual-parity / hardcoded-CJK scan failures on the large legal copy volume, and store-review/特商法 rejection of the donation path. Mitigation is well-understood for all of them and mapped to specific phases below.
 
 ## Key Findings
 
 ### Recommended Stack
 
-v1.9 adds **no heavy dependencies**: the decoupled engines, cross-validation, and category-only logic are pure in-house Dart over the existing voice infra; the merchant library is a new Drift table + curated seed data with no external dataset import. Explicitly REJECTED: FTS5 (CJK tokenization is broken by default and SQLCipher ships no custom CJK tokenizer; the 600-800-row set is too small to need an inverted index anyway), Levenshtein/fuzzy-match libs (v1.3 already deleted `FuzzyCategoryMatcher` as net-negative), TFLite/embeddings/on-device LLM, any cloud NLU (breaks zero-knowledge), and bumping `drift` past 2.31.0 (≥2.32.0 drops easy SQLCipher support). See `.planning/research/STACK.md`.
+The milestone needs **almost no new dependencies** — onboarding persistence, biometric, PIN hashing, secure storage, OSS-license display, and the about/version surface are all satisfiable with packages already in `pubspec.yaml` or Flutter built-ins. Frame every decision as "reuse vs add" and default to reuse. No `go_router` (boot-time branch widgets, not routes), no IAP/payment SDK (donation is a link), no `sqlite3_flutter_libs` (banned), no `flutter_markdown` (discontinued 2025), and do not bump the win32-pinned trio.
 
 **Core technologies:**
-- `drift` **2.31.0** (keep) — new `merchants` table, schema v21→v22 — established migration pattern; do NOT bump to ≥2.32.0 (breaks the SQLCipher story).
-- `sqlcipher_flutter_libs` **0.6.8** (keep) — encrypts merchant catalog at rest — pinned by CLAUDE.md; never `sqlite3_flutter_libs`.
-- `speech_to_text` **7.3.0** (keep) — en-US already returns Arabic digits — no spelled-out English numeral state machine needed (verify on-device in UAT, non-blocking).
-- `kana_kit` **^2.1.1** (the ONLY candidate new dep, OPTIONAL) — kana ⇄ romaji normalization for the merchant `matchKey` — pure Dart, MIT, SDK-compatible. Hand-rolled NFKC + katakana→hiragana + fullwidth/lowercase covers the 80% case if zero new deps is preferred; kana_kit's marginal value is romaji handling.
-- `flutter_riverpod`/`freezed` (keep) — wire the two new recognizer providers + verdict value objects.
+- `url_launcher ^6.3.2` (NEW, the only added dep): donation link via `launchUrl(..., LaunchMode.externalApplication)` — verified no win32 conflict (`url_launcher_windows` deps only flutter + platform interface).
+- `local_auth ^3.0.1` (reuse): Face ID/Touch ID/Android biometric — extend existing `biometric_service.dart`, do not re-wrap.
+- `flutter_secure_storage ^10.2.0` (reuse): PIN hash+salt + lock flags in `StorageKeys.pinHash` — keep `unlocked_this_device` accessibility unchanged.
+- `crypto ^3.0.6` / `cryptography ^2.7.0` (reuse): salted slow-KDF (PBKDF2 ≥100k iterations or Argon2id) for the PIN — never plaintext, never fast hash.
+- `shared_preferences ^2.3.4` via `SettingsRepository` (reuse): UI-language, voice-language, and the new `onboarding_complete` flag — same store the app already reads.
+- Flutter built-ins `showLicensePage`/`LicenseRegistry` (reuse): OSS attribution, auto-aggregates transitive deps.
 
 ### Expected Features
 
-The full feature landscape is in `.planning/research/FEATURES.md`. Neither major JP competitor (Zaim, MoneyForward ME) does utterance-level cross-validation — they classify by merchant only and would book the Starbucks cup as cafe. "Keyword beats merchant on conflict" is the headline differentiator, made possible because a voice app hears intent.
-
 **Must have (table stakes):**
-- Decoupled `CategoryRecognizer` + `MerchantRecognizer` — the milestone's premise; nothing works without it.
-- Keyword-intent-priority cross-validation — the user-confirmed correctness rule (serves Case A).
-- Category-only path — serves Case B; mostly falls out of decoupling.
-- JP merchant DB migration + national-chain spine load (~150-250 chains capture the bulk of *spoken everyday* spend).
-- Confidence band (3-tier, not a raw %) + alternative chips + inline correction → learning.
-- Daily/Joy rule rework reading the FINAL cross-validated category.
-- EN pragmatic path — aliases/keywords/currency words; no EN number state machine.
+- Onboarding: device-locale-aware language pre-selection, JPY default, re-entrant (can't get stuck), progress + back nav — "confirm a sensible default," not "fill a blank form."
+- App-lock: biometric-first with mandatory PIN fallback, lock on cold launch, re-lock on resume past grace threshold, failed-attempt feedback + escalating cooldown (no default data-wipe), Settings toggle.
+- Donation: exactly one unobtrusive external-browser link in Settings (応援/支援 framing), no IAP, no webview, no nags.
+- Legal: Privacy Policy (hosted URL mandatory for App Store Connect + in-app), 利用規約, OSS licenses — all localized in ja/zh/en.
 
-**Should have (competitive):**
-- Conflict-aware resolution (keyword beats merchant) — the differentiator competitors structurally cannot do.
-- Region-tagged, multi-variant merchant schema — future CN expansion + OCR (MOD-005) reuse.
-- Learning that generalizes the KEYWORD, not the merchant — correcting 「买杯子」→shopping must teach `category_keyword_preferences`, NOT pollute `merchant_category_preferences` (that would wreck the next coffee entry).
+**Should have (competitive / on-brand):**
+- Skippable privacy/local-first intro slides (trust differentiator vs account-pushing kakeibo apps).
+- Voice-input language confirmed during onboarding, defaulted to chosen UI language.
+- App-lock prompt offered (clearly skippable) during onboarding for adoption-without-nagging.
 
-**Defer (v2+):**
-- Regional/depachika rows toward the 600-800 ceiling (load after the national spine proves out).
-- "Why this category" transparency tooltip; two-facet independent merchant/category correction.
-- On-device embedding-similarity fallback (the accuracy ceiling; ~40 MB asset — defer until correction-loop data justifies it).
-
-**Anti-features (hard-excluded):** any scoring/streak/badge/accuracy-% around recognition (ADR-012 permanent block), confidence as a precise percentage, auto-commit of low-confidence guesses, cloud NLU, an exhaustive every-store-in-Japan DB, punitive copy.
+**Defer (v2.x / future):**
+- Forgot-PIN → BIP39 recovery reset (strongly recommended; if descoped, document the lockout trade-off explicitly).
+- Configurable re-lock grace period (ship a fixed default first).
+- 特商法 表記 entry (add if/when legal review says the donation path triggers it).
+- Opt-in "erase after N failures" (default off, likely never).
 
 ### Architecture Approach
 
-The integration (full detail in `.planning/research/ARCHITECTURE.md`) extracts two independent recognizers into `lib/application/voice/recognition/`, inserts a pure-domain reconciler, migrates the 13-entry in-memory `MerchantDatabase` to a seeded Drift table, and keeps both learning tables structurally unchanged. `ParseVoiceInputUseCase` becomes a thin coordinator: parse → run both recognizers in parallel → reconcile → resolve ledger from the final category. Thin-Feature rule respected: recognizers/use case in `application/`, reconciler + verdict models + repo interface in `domain/`, table/DAO/repo-impl in `data/`.
+There is a single integration seam: the synchronous gate ladder in `HomePocketApp._buildHome()`. `AppInitializer` completes (KeyManager → DB → container) before `runApp`, so by the time `HomePocketApp` mounts the container is guaranteed ready. Both new gates are added as branches in this ladder, **below** the existing error/spinner branches and reading config resolved once in `_initialize()` — never as a second `ProviderScope`, never as an async gate in `build()`, never via go_router. Order: error → loading → onboarding (branch 3, first-run only) → app-lock (branch 4, launch + resume) → profile onboarding (branch 5) → main shell (branch 6).
 
 **Major components:**
-1. `MerchantRecognizer` (application, NEW) — independent merchant identification via `MerchantRepository`; merchant's default category is a **weak signal only**, its `ledgerType` a **hint only**, never authoritative.
-2. `CategoryRecognizer` (application, NEW) — independent keyword-intent → L2 category; absorbs the non-merchant half of `VoiceCategoryResolver` + `_extractKeyword`; runs **unconditionally** (this is the category-only path).
-3. `RecognitionReconciler` (domain, pure, NEW) — the none/weak/strong arbitration: agreement → boost, conflict → keyword wins, merchant fallback when keyword absent, both-weak → ask-user.
-4. `merchants` Drift table + DAO + repo + `japan_merchants.json` asset (data, NEW) — region + multi-locale-name + normalized-key schema, v21→v22, idempotent upsert seeding, explicit `CREATE INDEX`.
-5. `category_ledger_configs` re-seed (data, MODIFIED) — the daily/joy rework target.
+1. `OnboardingFlow` (NEW `features/onboarding/presentation/`) — intro + mandatory language/currency/voice setup writing through existing providers; writes `onboarding_complete` last.
+2. `AppLockScreen` + `AppLockController` (NEW `features/app_lock/`) — biometric + PIN unlock UI; `WidgetsBindingObserver` re-locks on `resumed`-after-`paused` (mirrors `SyncEngine`).
+3. `PinService` (NEW `infrastructure/security/`) — salted-hash PIN, verify, store/clear via pre-wired `StorageKeys.pinHash`.
+4. `LegalSection` / `DonationSection` (extend `AboutSection`) — Privacy/Terms/特商法/OSS + `url_launcher` donation; legal text as bundled localized `assets/legal/` (offline).
+5. Modified `lib/main.dart` (`_initialize()` + `_buildHome()` branches 3/4), `SecuritySection` (PIN setup tile), ARB ja/zh/en.
+
+Persistence is per-setting and justified: PIN hash → Keychain (only true secret); lock toggles + `onboarding_complete` → SharedPreferences (boot-safe, no DB dependency); UI/voice language → SharedPreferences (canonical paths); currency → encrypted Drift `Book.currency` (per-book domain data).
 
 ### Critical Pitfalls
 
-Top 5 of 10 from `.planning/research/PITFALLS.md`:
-
-1. **Bidirectional-substring merchant false-positives at scale** — the current `query.contains(alias) || alias.contains(query)` matcher fires on incidental overlap once short kana aliases (スギ/コメ/丸) multiply 50×, silently forcing wrong category+ledger. Avoid: anchored/token-boundary matching, per-script min alias length, ranked-candidates-with-scores (not first-match-wins), and a `merchant_false_positive_test.dart` adversarial corpus.
-2. **Ledger desync when removing the merchant short-circuit** — if category decouples but merchant `ledgerType` still flows through, a keyword-resolved 购物/joy entry gets stamped daily. Avoid: make ledger a **pure function of the FINAL categoryId** via `resolveLedgerType` AFTER reconciliation; drop the merchant `ledgerType` routing input; invariant test `ledgerType == resolveLedgerType(finalCategoryId)` on every path.
-3. **Cross-validation mis-fires on weak/absent signals** — "keyword wins" must NOT mean "keyword's null wins" (bare 「スタバ」 → merchant wins); a weak `コップ` must not veto a 0.90 Starbucks hit; both-weak → ask-user; "agreement" defined at L1/ledger granularity. Avoid: an explicit 3×3 truth table baked into `cross_validation_test.dart`.
-4. **Japanese name-variant gaps** — スタバ/スターバックス/Starbucks/ｽﾀﾊﾞ/マクド(関西) all miss if the seed stores only canonical kanji; misses are invisible (resolve to null). Avoid: NFKC + lowercase + katakana↔hiragana fold + long-vowel/sokuon-tolerant key, computed at SEED time into a stored normalized-key column; seed regional abbreviations + romaji.
-5. **`customIndices` is decorative + non-idempotent seeding** — the table ships unindexed (full 800-row scan per utterance) and re-seed duplicates rows. Avoid: explicit `CREATE INDEX IF NOT EXISTS` in BOTH onCreate and onUpgrade (verify via `PRAGMA index_list`), stable string ids + `INSERT OR IGNORE`/upsert, batched single-transaction insert, and test the FULL migration ladder (v3→v22, v17→v22) against real sqlite3 with the SQLCipher key.
-
-(Also: #7 English STT returns number-words + locale-not-threaded; #8 ADR-012 leaks in recognition UX; #9 ARB parity — merchant proper-nouns are DATA not ARB, category labels ARE ARB; #10 low-confidence thrash on STT partials — resolve on final + hysteresis.)
-
-### Reconciled Cross-Document Tensions
-
-Three places where the dimension files appeared to disagree, resolved into a single story:
-
-- **The daily/joy "rule rework" target.** ARCHITECTURE found `RuleEngine`/`ClassificationService` is a **DEAD STUB** (Layer-2/3 are `// TODO`, never on the voice path), while PITFALLS noted `RuleEngine` maps only ~14 of the 19 L1/103 L2 ids. These agree once you see the live path is `CategoryService.resolveLedgerType` over the DB-backed `category_ledger_configs`. **Single story:** rework daily/joy by **re-seeding/expanding `category_ledger_configs`** (the live, user-overridable mechanism) and **retiring the dead `RuleEngine`/`ClassificationService`** (grep-verify no other caller — e.g. future OCR — before deleting; fold its intent into the config seed if a consumer exists). Ledger becomes a pure function of the FINAL category; the merchant-`ledgerType` short-circuit at `parse_voice_input_use_case.dart:106` is killed.
-- **Merchant DB size: 600-800 vs "150-250 covers the bulk".** STACK says merchant data is MANUAL CURATION (no importable dataset maps to the 19 L1/103 L2 taxonomy; the expensive work is the per-merchant category mapping, which no source carries). FEATURES says ~150-250 national chains capture the large majority of *spoken everyday* spend, and the 600-800 ceiling buys the regional/depachika tail + OCR-reuse robustness. **No conflict:** the v1.9 MVP loads the **national-chain spine first**; the regional tail toward 600-800 is a post-validation (v1.9.x) load. Quality is "did we get the top chains per everyday category," not row count.
-- **Cross-validation is a 3×3 truth table, NOT "keyword always wins".** FEATURES' Case-A headline ("keyword beats merchant") is only the strong-vs-strong-conflict cell. The full rule (PITFALLS #3, ARCHITECTURE §3.2) is none/weak/strong × none/weak/strong → {merchant, keyword, ask-user}. And corrections on a conflict must teach the **KEYWORD table** (generalizes), never the merchant table (would regress the next coffee entry).
+1. **Changing keychain accessibility bricks every install** — keep the new PIN write on the shared `unlocked_this_device` options object; never pass per-call `IOSOptions(accessibility:)`. Add a regression test asserting the shared options object. (Project memory: quick 260610-ss7.)
+2. **Weak PIN storage** — salted slow KDF (≥100k iterations) in secure storage, constant-time compare, persisted retry counter with escalating backoff (cleared only on success), no auto-wipe. Run KDF off the main isolate (`compute`) to avoid unlock jank on Android 7.
+3. **Onboarding races `AppInitializer`** — derive the onboarding decision from settled init state held in local widget state; write `onboarding_complete` exactly once on explicit finish; never infer completion from "currency != null."
+4. **No re-lock on resume + app-switcher leak** — re-lock on `paused`/resume (NOT `inactive`, which loops the biometric prompt); suppress re-lock while a biometric prompt is in flight; shield overlay on `inactive` so the switcher snapshot shows no data; lock screen sits as a root overlay above the IndexedStack, and fully no-ops when disabled.
+5. **Biometric edge cases with no PIN fallback** — PIN mandatory whenever lock enabled; handle the full `local_auth` error taxonomy (`notAvailable`/`notEnrolled`/`lockedOut`/`permanentlyLockedOut`/`passcodeNotSet`/cancel) → route to PIN; check availability at enable + each unlock.
+6. **i18n parity / CJK scan on new screens (esp. legal)** — every visible string through ARB ×3 + `flutter gen-l10n` + `git add -f lib/generated/`; for long legal docs use bundled per-locale assets WITH a matching "all three locales present" gate; run hardcoded-CJK scan + full `flutter test` before done.
+7. **Donation rejection / 特商法** — external browser only, neutral non-transactional wording, no reward; prepare a 特商法 表記 surface; verify via a real TestFlight/internal-track review, not self-assessment.
+8. **Store privacy forms / OSS attribution** — fill Apple/Google forms truthfully and consistently with the policy (disclose the v1.7 exchange-rate network call); surface `showLicensePage` (don't hand-maintain); hosted Privacy Policy + 利用規約 URLs in all three languages.
 
 ## Implications for Roadmap
 
-Continues phase numbering from Phase 48 — **v1.9 starts at Phase 49.** The order below is dependency-forced: data before logic, recognizers before arbitration, arbitration before ledger (single ledger site must exist first), then UX, then English/coverage as additive trailing data.
+> Numbering continues from v1.9 Phase 52 → this milestone starts at **Phase 53**. The architecture and pitfalls research independently converge on the same four-phase, design-gate-first ordering.
 
-### Phase 49: Merchant Data Foundation (Drift v21→v22)
-**Rationale:** Blocks everything that reads `merchants`; no behavior change, so it lands safely first.
-**Delivers:** `merchants` table + DAO + repo interface/impl + import_guard; v21→v22 migration with explicit `CREATE INDEX`; `japan_merchants.json` (national-chain spine, normalized-key + region + multi-locale-name + aliases schema); idempotent upsert seeding.
-**Uses:** drift 2.31.0, sqlcipher_flutter_libs 0.6.8, (optional) kana_kit for seed-time normalized keys.
-**Avoids:** Pitfall 5 (decorative `customIndices` + non-idempotent seed + migration ladder), Pitfall 4 (normalized-key column computed at seed time), Pitfall 9 (merchant names as DATA, not ARB).
+### Phase 53: HTML design gate (no production code)
+**Rationale:** Mirrors the v1.8 Phase 43 precedent — onboarding flow approved as an HTML draft before any Dart, per the explicit milestone requirement. Can start early/in parallel with research since it produces no code.
+**Delivers:** Approved HTML design drafts for the onboarding flow, the lock screen, and the legal/donation Settings layout.
+**Addresses:** Onboarding UX (step order: language-first), app-lock screen, legal/donation layout.
+**Avoids:** Rework from building the flow before the design is settled.
 
-### Phase 50: Decoupled Recognizers
-**Rationale:** Both recognizers depend on Phase 49 (`MerchantRepository`) but are independent of each other — two parallel-safe plans.
-**Delivers:** Extract merchant methods out of `VoiceTextParser` → `MerchantRecognizer` (anchored/token matcher + NFKC); carve `CategoryRecognizer` out of `VoiceCategoryResolver` (keyword/substring/`_ensureL2`/`_extractKeyword`); `MerchantVerdict`/`CategoryVerdict` domain models. CategoryRecognizer runs unconditionally.
-**Implements:** Components 1 & 2.
-**Avoids:** Pitfall 1 (anchored matcher + ranked scores), Pitfall 4 (NFKC on query), Pitfall 4-quadrant decoupling (category engine runs even when a merchant is present/unmatched).
+### Phase 54: Onboarding flow
+**Rationale:** Build before app-lock because the lock setup is *offered during* onboarding; the onboarding gate slot is the structural prerequisite for the milestone.
+**Delivers:** Gate branch 3 + mandatory language/currency/voice setup writing through existing providers; `onboarding_complete` written last; optional skippable intro; optional "set up app lock" prompt placeholder.
+**Uses:** `localeProvider`, `SettingsRepository`, `BookRepository.update`, `voiceLocaleIdProvider`, v1.7 currency selector.
+**Implements:** `OnboardingFlow` + gate branch in `_buildHome()`.
+**Avoids:** Pitfall 3 (race/idempotency), Pitfall 6 (i18n parity).
 
-### Phase 51: Cross-Validation / Reconciliation
-**Rationale:** Needs both verdict shapes from Phase 50.
-**Delivers:** `RecognitionReconciler` (pure domain) + `RecognitionOutcome`; rewire `ParseVoiceInputUseCase` as coordinator; **delete the merchant short-circuit + ledger-from-merchant branch**; resolve-on-final + hysteresis.
-**Implements:** Component 3.
-**Avoids:** Pitfall 3 (3×3 truth table incl. bare-merchant/weak-keyword/both-weak), Pitfall 10 (no flicker on partials).
+### Phase 55: App-lock (highest-risk — own phase + security review)
+**Rationale:** The highest-risk integration (keychain + lifecycle + biometric). Depends on the onboarding lock prompt existing.
+**Delivers:** `AppLockScreen` (biometric + PIN), `PinService` (salted KDF), `AppLockController` resume re-lock + switcher shield, gate branch 4, `SecuritySection` PIN/toggle controls.
+**Uses:** `local_auth`, `flutter_secure_storage` (shared accessibility), `crypto`/`cryptography`.
+**Avoids:** Pitfalls 1, 2, 4, 5 (keychain brick, weak PIN, resume leak, biometric fallback).
 
-### Phase 52: Daily/Joy Ledger Rework
-**Rationale:** Safest last among the logic phases — depends on the single post-reconciliation ledger site (Phase 51) existing.
-**Delivers:** Re-seed/expand `category_ledger_configs` for all 19 L1 + meaningful L2; retire `RuleEngine`/`ClassificationService` (grep-verify first).
-**Avoids:** Pitfall 2 (ledger as pure function of final category; invariant test; no second hardcoded ledger map).
-
-### Phase 53: Recognition UX + Learning Surface
-**Rationale:** Needs the `RecognitionOutcome` contract from Phase 51.
-**Delivers:** Confidence band (3-tier, no number) + alternative chips + inline correction in `TransactionDetailsForm`; verify the `resolvedKeyword` identity contract (write key == read key) end-to-end; correction routes to KEYWORD table on conflict.
-**Avoids:** Pitfall 8 (ADR-012 — qualitative affordance, no score/streak; extend the anti-toxicity sweep), the silent-orphan-key bug (260526-pg6), keyword-vs-merchant correction mis-routing.
-
-### Phase 54: English Voice + Alias/Keyword/Coverage
-**Rationale:** Additive data + coverage, lowest structural risk, can trail.
-**Delivers:** English merchant aliases/locale-names, category keywords, currency words; bounded English number-word fallback (~30 lines, not a state machine); end-to-end `localeId` threading.
-**Avoids:** Pitfall 7 ("fifty dollars" → 0; English entering CJK numeral path).
-
-(An i18n/ARB-parity + golden-rebaseline + anti-toxicity-sweep gate runs as a cross-cutting close-out concern across Phases 53-54 — keep it inline, not at milestone close, per v1.7/v1.8 lessons. `git add -f lib/generated/` after `flutter gen-l10n`.)
+### Phase 56: Settings legal + donation + Japan compliance (launch gate)
+**Rationale:** Independent of the gates; schedule last but with slack for a real store-review round-trip — donation/privacy rejection is the most likely external blocker.
+**Delivers:** Privacy/Terms/特商法/OSS surfaces, `url_launcher` donation link, bundled localized legal assets, trilingual ARB, hosted-URL coordination, store privacy-form reconciliation.
+**Uses:** `url_launcher`, `showLicensePage`, bundled `assets/legal/`.
+**Avoids:** Pitfalls 6, 7, 8 (i18n, donation/特商法, privacy forms/OSS).
 
 ### Phase Ordering Rationale
-- **Data before logic:** Phase 49 blocks every component that reads `merchants`; re-migrating the schema after rows are loaded is the expensive mistake.
-- **Recognizers before arbitration:** the reconciler is a pure function of two verdicts — both shapes must exist (Phase 50) before Phase 51.
-- **Ledger rework last among logic:** it depends on the single post-reconciliation `resolveLedgerType` site existing (Phase 51), and doing it earlier risks the two-ledger-maps inconsistency.
-- **English/coverage trailing:** additive data over the engines from Phase 50 + alias columns from Phase 49; lowest risk.
+- **Design-gate-first** is a hard milestone requirement (HTML draft → strict implementation) and matches the proven Phase 43 precedent.
+- **Onboarding before app-lock** because step ⑤ of onboarding offers to enable a lock that must already exist.
+- **App-lock isolated** because it concentrates the three highest-severity integration risks and warrants its own security review.
+- **Legal/donation last but early-scheduled for review slack** — it is the only phase whose blocker (store review) is external and non-deterministic.
 
 ### Research Flags
 
-Phases likely needing deeper research / careful spec during planning:
-- **Phase 51 (Cross-Validation):** the 3×3 truth table (band definitions, agreement granularity, confidence floors, hysteresis margin) is where the real logic lives and is easy to under-spec — write the truth table as the test spec before coding.
-- **Phase 49 (Data Foundation):** seed-timing decision (inside-migrator `rootBundle` read vs count-guarded post-open seed, given `AppInitializer` order KeyManager→Database→others) needs an early answer; full migration-ladder test against the encrypted-executor path (not just `NativeDatabase.memory()`).
+Phases likely needing deeper research / external verification during planning:
+- **Phase 55 (App-lock):** keychain-accessibility regression behavior on a populated install, `local_auth` error taxonomy, and off-isolate KDF tuning warrant a focused security review (`--research-phase` or `gsd-secure-phase`).
+- **Phase 56 (Legal/compliance):** 特商法 applicability to an individual developer's external-platform donation, APPI policy wording, and current Apple/Google donation-review stance are MEDIUM-confidence and need a JP-savvy legal advisor + a real review submission — not self-assessment.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 52 (Ledger rework):** mechanism is understood (re-seed `category_ledger_configs`, retire dead stub); just grep-verify the blast radius.
-- **Phase 54 (English):** additive data + a small bounded number-word fallback; well-scoped.
+- **Phase 53 (HTML design):** established Phase 43 precedent.
+- **Phase 54 (Onboarding):** all write paths already exist; pattern mirrors `_needsProfileOnboarding`.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Grounded in `pubspec.lock`, pub.dev API, Drift/SQLCipher docs; "no new heavy deps" verified; en-US digit output is engine-dependent (MEDIUM, UAT-verify, non-blocking). |
-| Features | MEDIUM-HIGH | Chain coverage & spend-dominance HIGH (store-count rankings); UX patterns MEDIUM (general AI-UX literature, no kakeibo-voice competitor); ADR-012 boundary HIGH (first-party). |
-| Architecture | HIGH | Every claim traced to a read file:line in the actual code paths this session. |
-| Pitfalls | HIGH | Grounded in this codebase's actual wiring + documented prior regressions (CR-01 migration lessons, 260526-pg6 orphan-key, voice iOS gotchas). |
+| Stack | HIGH | Versions confirmed in `pubspec.yaml`/`pubspec.lock`; `url_launcher` win32-conflict cleared by transitive analysis. |
+| Features | MEDIUM-HIGH | UX patterns well-established; Apple-policy + Japan-legal specifics MEDIUM and flagged. |
+| Architecture | HIGH | All integration points read directly from current source (main.dart, app_initializer, secure_storage_service, settings/about/security sections, state_locale). |
+| Pitfalls | MEDIUM-HIGH | Integration/security pitfalls HIGH (codebase + project memory grounded); store-policy/legal MEDIUM (policies shift, needs JP legal sign-off). |
 
-**Overall confidence:** HIGH
+**Overall confidence:** HIGH for engineering execution; MEDIUM for external compliance/store-review outcomes.
 
 ### Gaps to Address
-- **Seed timing** (`rootBundle` availability pre-`runApp`): decide inside-migrator vs count-guarded post-open seed in Phase 49 planning; both are valid, the count-guarded post-open is the safer default.
-- **`RuleEngine`/`ClassificationService` deletion blast radius:** grep for consumers (OCR MOD-005? tests?) before retiring in Phase 52; fold into config instead of deleting if a consumer exists.
-- **Reconciler home** (`features/accounting/domain/services/` vs a new `features/voice/`): recommend `accounting` to avoid a one-service feature module; confirm at Phase 51 planning.
-- **Merchant `ledgerType` column:** keep as a stored non-authoritative hint vs drop entirely (always derive). Recommend keep-but-non-authoritative for a future merchant-specific-ledger affordance.
-- **en-US STT digit output** on target iOS/Android versions: confirm in a Phase 54 UAT; if a regional engine returns words, the bounded fallback already covers it.
-- **FTS5:** deferred; only revisit if CN expansion pushes the catalog into the thousands, and verify SQLCipher+fts5 build compatibility first.
+
+- **特商法 applicability** to an external-platform donation by an individual developer — resolve with a JP legal advisor in Phase 56; default to providing a 特商法 表記 surface if in doubt.
+- **Store-review approval of the donation link** — non-deterministic; verify via TestFlight/internal-track submission and keep a fallback (soften wording / external Settings entry) ready.
+- **Forgot-PIN recovery decision** — whether BIP39 recovery resets the PIN; decide explicitly in Phase 55, and if descoped, ensure lock copy promises no recovery that doesn't exist.
+- **Re-lock grace policy** — confirm default (immediate vs 1 min) and whether user-configurable; ship a fixed default first.
+- **PIN length** — pick and fix 4 vs 6 digits (research recommends 6) before Phase 55 implementation.
+- **Hosted legal URLs** — Privacy Policy + 利用規約 must exist as reachable URLs for both store listings (ops/external task, not pure code).
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Codebase (read this session): `parse_voice_input_use_case.dart`, `voice_category_resolver.dart`, `voice_text_parser.dart`, `merchant_database.dart`, `rule_engine.dart`, `classification_service.dart`, `category_service.dart`, `app_database.dart`, learning-table DAOs/tables, `voice_parse_result.dart`, `default_categories.dart` (19 L1 / 103 L2).
-- `pubspec.lock` — drift 2.31.0, speech_to_text 7.3.0, sqlcipher_flutter_libs 0.6.8.
-- pub.dev API + kana_kit page — kana_kit 2.1.1 (MIT, pure Dart, SDK-compatible).
-- Drift FTS5 / extensions docs + drift #3702 — FTS5 available but ≥2.32.0 drops easy SQLCipher.
-- MEMORY.md / CLAUDE.md — `customIndices` decorative, drift/sqlcipher pins, Thin-Feature & Placement rules, ADR-012, voice iOS gotchas, 260526-pg6 orphan-key, CR-01 migration lessons.
-- Statista / chain-ranking sources — top-3 konbini ~90%; per-category chain concentration (HIGH for spend-dominance claim).
+- Repo source: `lib/main.dart`, `lib/core/initialization/app_initializer.dart`, `lib/infrastructure/security/secure_storage_service.dart` + `providers.dart`, `lib/data/repositories/settings_repository_impl.dart`, settings `about_section.dart`/`security_section.dart`, `state_locale.dart`/`state_settings.dart`, `profile_onboarding_screen.dart` — integration seams, pre-wired `pinHash` slot, write-through paths.
+- `pubspec.yaml`/`pubspec.lock` — already-present versions; `url_launcher_windows` resolves win32-free.
+- CLAUDE.md + project memory `flutter-secure-storage-accessibility-read-filter` (quick 260610-ss7) — keychain-accessibility brick, iOS pin constraints, no-go_router / no-sqlite3_flutter_libs, ARB parity discipline.
 
 ### Secondary (MEDIUM confidence)
-- AI-UX confidence-visualization literature — 3-tier band, avoid false precision, "easy to ignore when right".
-- Finance-gamification-harm literature — backs the ADR-012 anti-feature boundary.
-- JP text-normalization (NFKC + katakana/hiragana fold + regional abbrev) — standard CJK matching preprocessing.
-- `voice-category-recognition-improvements.md` (v1.3-era) — "3-layer pipeline is documentation-only"; dict-as-label-set; Option F (close the learning loop) folded into v1.9; embedding fallback (Option D) confirmed as the v2+ ceiling, out of v1.9 scope.
+- Apple App Review Guidelines (3.1.1/3.1.3) + external-link updates; Google Play donation/external-link policy — donation-review stance, region-scoped entitlements.
+- Japan スマホ新法 (in force 2025-12-18) — external payment links permitted/fee-capped, but review approval still required.
+- pub.dev `url_launcher` / `local_auth` / `flutter_secure_storage` docs; Flutter `showLicensePage`/`LicenseRegistry`.
 
-### Tertiary (LOW confidence)
-- en-US STT digit-vs-word formatting — engine/OS-version dependent; verify on-device (non-blocking; bounded fallback covers it).
+### Tertiary (LOW confidence — needs validation)
+- 特定商取引法 表記 applicability for individual-operator external-platform donations — confirm with JP legal advisor.
+- APPI privacy-policy wording expectations — confirm against PPC guidance before store submission.
 
 ---
-*Research completed: 2026-06-23*
+*Research completed: 2026-06-28*
 *Ready for roadmap: yes*
