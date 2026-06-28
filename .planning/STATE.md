@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）
-current_phase: 52
-status: Awaiting next milestone
-stopped_at: Milestone v1.9 shipped & archived (tag v1.9, schema v22); no active milestone — run /gsd-new-milestone
-last_updated: "2026-06-27T13:45:00.000Z"
-last_activity: 2026-06-27
-last_activity_desc: "Completed quick task 260627-v0w: refresh Home/List/Analytics after clear-all & import without restart"
+milestone: v2.0
+milestone_name: 完成第一版上线前最后的功能开发
+status: planning
+last_updated: "2026-06-28T07:00:15.871Z"
+last_activity: 2026-06-28
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 22
-  completed_plans: 22
-  percent: 100
-current_phase_name: recognition-ux-english-voice
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 ## Current Position
 
-Phase: Milestone v1.9 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-27 — Completed quick task 260627-v0w: refresh Home/List/Analytics after clear-all & import without restart
+Status: Defining requirements
+Last activity: 2026-06-28 — Milestone v2.0 started
 
 ### Decisions
 
@@ -119,7 +115,6 @@ Pre-close artifact audit flagged 34 quick-tasks. The **4 genuinely-incomplete v1
 | nyquist_gap | Phases 49/51/52 VALIDATION.md drafts (`nyquist_compliant: false`); Phase 50 compliant. Documentation-grade; suite 3352/3353 green. To clear: `/gsd-validate-phase 49/51/52` (T-04) | accept (documentation-grade) | v1.9 close |
 | summary_frontmatter_drift | MERCH-03, XVAL-02, LEDGER-01, LEDGER-02, VEN-02 left `requirements_completed` empty in owning plan SUMMARYs; all satisfied per VERIFICATION + traceability (T-05) | cosmetic, no functional gap | v1.9 close |
 | confirm | T-03: two learning loops co-fire at save (legacy Phase-18 merchant→category hook + Phase-52 KEYWORD-only correction); RECUX-03 contract literally honored (the correction path never touches the merchant table); pre-v1.9, not a regression — confirm intended | accept (awareness; pre-v1.9) | v1.9 close |
-
 
 ### Items acknowledged and deferred at v1.8 milestone close on 2026-06-22
 

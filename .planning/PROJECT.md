@@ -1,10 +1,16 @@
 # Home Pocket — まもる家計簿
 
-## Current Milestone: (next — TBD)
+## Current Milestone: v2.0 完成第一版上线前最后的功能开发
 
-**v1.9 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库） shipped 2026-06-25** (4 phases 49-52, 22 plans, tag `v1.9`). No milestone is currently active — run `/gsd-new-milestone` to scope the next one. See `## Current State` below for what shipped. **Refresh the seven-milestone-stale `.planning/codebase/` before the next milestone's planning.**
+**Goal:** 在首次公开上线前补齐欢迎引导、应用锁、合规三块「上线必备」能力，使 app 可面向日本市场发布。
 
-**Key context:** 复用现有 voice infra（`speech_to_text` v7、zh/ja 数字状态机 96%/100%、locale 路由 zh-CN/ja-JP/en-US、`VoiceTextParser` 金额/日期抽取）。当前商家库仅 13 条硬编码（`lib/infrastructure/ml/merchant_database.dart`），`VoiceCategoryResolver`（207 LOC）商家优先短路逻辑需重构。19 个 L1 / ~103 个 L2 类目分类法 + 三语本地化复用。OCR（MOD-005）不在本里程碑范围，但新商家库 schema 应可被未来 OCR 复用。
+**Target features:**
+- **欢迎页 / 首启引导（HTML 设计先行关卡）** — 整体 app 介绍 + 首启必填初始化（UI 语言 / 币种 / 语音输入语言）；先用 Claude design 出 HTML 设计稿，确认后严格按稿实现（沿用 v1.8 Phase 43 设计关卡模式，关卡未过不写生产代码）。
+- **应用锁：Face 登录 + PIN 码登录** — 启动/回前台用 Face ID 或 PIN 解锁；欢迎页提示配置、可 skip，Setting 内可开关。复用既有 `biometric_service`/`secure_storage`，PIN 为新增。
+- **Setting 赞助入口** — 加入赞助链接，整体免费、不强制付费。
+- **日本市场合规** — 排查并在 Setting 中补齐所需条款/license（プライバシーポリシー、利用規約、OSS ライセンス表示，赞助涉金可能触发特定商取引法表記等）。
+
+**Key context:** 接 v1.9（Phase 52）→ 本里程碑从 **Phase 53** 起，phase 编号不重置。复用既有 i18n（`currentLocaleProvider`、ARB ja/zh/en、`flutter gen-l10n`）、多币种（v1.7 货币选择器）、语音 locale 路由（zh-CN/ja-JP/en-US）与安全基础设施（Ed25519 设备密钥 / biometric lock / secure storage）。首启是 app 第一次有「onboarding gate」——需在 `AppInitializer` 之后、主 shell 之前判定。`.planning/codebase/` 较陈旧，规划前建议刷新。
 
 ## Current State
 
@@ -459,9 +465,9 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- No active milestone. v1.9 shipped 2026-06-25. Run /gsd-new-milestone to define the next. -->
+<!-- Milestone v2.0 完成第一版上线前最后的功能开发 started 2026-06-28. Phases continue from v1.9's Phase 52 → start at Phase 53. -->
 
-**No active milestone.** v1.9 shipped and archived 2026-06-25 (see Validated above + `.planning/milestones/v1.9-*`). Run `/gsd-new-milestone` to scope the next milestone; its requirements + REQ-IDs will be written to a fresh `.planning/REQUIREMENTS.md`.
+**Milestone v2.0 完成第一版上线前最后的功能开发** (started 2026-06-28) — pre-launch capstone before the first public release, targeting the Japanese market. Four target features: 欢迎页/首启引导（HTML 设计先行关卡，UI语言/币种/语音语言必填）, 应用锁（Face + PIN, 欢迎页可 skip / Setting 配置）, Setting 赞助入口（全免费不强制）, 日本市场合规条款/license 排查. Requirements + REQ-IDs are written to a fresh `.planning/REQUIREMENTS.md`; phases continue from Phase 53.
 
 Deferred next-wave themes (carried, not yet scoped to a milestone): **MOD-005 OCR writer landing** (entry hidden behind reversible `kOcrEntryEnabled` flag — the new merchant DB schema is OCR-reusable), **income entry + real savings-rate** (INCOME-V2-01), **Analytics v2** (ANALYTICS-V2-01/02/03 / CUR-V2-02), **merchant coverage v2** (MERCH-V2-01 region/depachika tail to the 600-800 ceiling, MERCH-V2-02 CN/other-region catalogs, MERCH-V2-03 FTS5), **recognition v2** (RECOG-V2-01 「为什么是这个类目」tooltip, RECOG-V2-02 merchant/category dual-facet correction, RECOG-V2-03 on-device embedding fallback), **VEN-V2-01** full English spoken-number state machine, **`Book.*Balance` DB-column rename**, **THEME-V2-01** runtime palette switching, **FAMILY-V2** privacy hardening, **FUTURE-QA-01** release-readiness QA. **Refresh `.planning/codebase/` first** — now seven milestones stale.
 
@@ -656,7 +662,9 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-25 after v1.9 语音类目与商家识别系统重构 milestone — shipped + archived (4 phases 49-52, 22 plans, tag `v1.9`, schema v21→v22). Decoupled the voice pipeline into two mutually non-calling engines (`MerchantRecognizer` + `CategoryRecognizer`) arbitrated by a pure-domain `RecognitionReconciler` (none/weak/strong 3×3 truth table), reworked the daily/joy ledger into a pure function of the final category at one site (retiring `lib/application/dual_ledger/`), migrated 391 JP merchants into an encrypted Drift table, added a qualitative 3-tier confidence band + alternate chips + KEYWORD-only inline correction, and brought English voice to practical parity. Audit `tech_debt` accepted — 20/20 requirements, 4/4 phases (49:5/5·50:4/4·51:14/14·52:7/7), 5/5 seams, 4/4 E2E flows; T-01/T-02 resolved before close (band re-enabled); residual is documentation/confirm-only (T-03 two-learning-loops, T-04 draft-Nyquist 49/51/52, T-05 SUMMARY frontmatter). Pre-close: the 4 v1.3-era voice-backlog items (260526 k92/l0o/n7b/pg6) resolved as superseded-by-v1.9, 30 cosmetic metadata-drift items acknowledged. Suite 3352/3353 green, analyze 0, drift 2.31.0, no new heavy deps.*
+*Last updated: 2026-06-28 — milestone **v2.0 完成第一版上线前最后的功能开发** started via `/gsd-new-milestone`. Pre-launch capstone targeting the Japanese market: 欢迎页/首启引导（HTML 设计先行关卡，UI语言/币种/语音语言必填）、应用锁（Face + PIN，欢迎页可 skip / Setting 配置，复用 biometric_service + secure_storage，PIN 新增）、Setting 赞助入口（全免费不强制）、日本市场合规条款/license 排查（プライバシーポリシー/利用規約/OSS ライセンス/特商法表記）。Phase 编号续接 v1.9 → 从 Phase 53 起（不重置）。Next: research decision → REQUIREMENTS.md → ROADMAP.md.*
+
+*Prior: Last updated: 2026-06-25 after v1.9 语音类目与商家识别系统重构 milestone — shipped + archived (4 phases 49-52, 22 plans, tag `v1.9`, schema v21→v22). Decoupled the voice pipeline into two mutually non-calling engines (`MerchantRecognizer` + `CategoryRecognizer`) arbitrated by a pure-domain `RecognitionReconciler` (none/weak/strong 3×3 truth table), reworked the daily/joy ledger into a pure function of the final category at one site (retiring `lib/application/dual_ledger/`), migrated 391 JP merchants into an encrypted Drift table, added a qualitative 3-tier confidence band + alternate chips + KEYWORD-only inline correction, and brought English voice to practical parity. Audit `tech_debt` accepted — 20/20 requirements, 4/4 phases (49:5/5·50:4/4·51:14/14·52:7/7), 5/5 seams, 4/4 E2E flows; T-01/T-02 resolved before close (band re-enabled); residual is documentation/confirm-only (T-03 two-learning-loops, T-04 draft-Nyquist 49/51/52, T-05 SUMMARY frontmatter). Pre-close: the 4 v1.3-era voice-backlog items (260526 k92/l0o/n7b/pg6) resolved as superseded-by-v1.9, 30 cosmetic metadata-drift items acknowledged. Suite 3352/3353 green, analyze 0, drift 2.31.0, no new heavy deps.*
 
 *Prior: 2026-06-24 — **Phase 52 Recognition UX + English Voice** complete (v1.9, phase 4/4 — milestone's LAST phase), verified 7/7 must-haves (5/5 success criteria), 0 warnings. Merged RECUX + VEN in one code surgery on `TransactionDetailsForm`. The entry form now shows a purely-visual 3-tier `ConfidenceBandIndicator` (daily/joy accent intensity, no number/text, a11y-only Semantics, ADR-012-safe) + ≤3 ranked `AlternateCategoryChips` + an exit chip reusing `CategorySelectionScreen`; band/chips render at resolve-on-final (D-08), clear on user pick (D-09), absent for manual entry (D-10). Inline correction reflux now defers the `category_keyword_preferences` write to confirmed save (D-05/06/07) — counting both the chip-tap and full-selector paths, writing the verbatim `resolvedKeyword`, skipping null keywords, never touching the merchant table, discarding on reset/continuous-entry/back. English voice parity: ~166 lowercase English category seeds covering every zh/ja-covered L2 (D-12, paired with the 52-01 en-residual lowercasing so capitalized iOS STT keywords match) + a bounded `english_number_words.dart` fallback (fires only on Arabic-regex miss + en locale + money context, routed entirely around the CJK numeral state machine — guards the v1.8 WR-04 regression class) + verified end-to-end `pttVoiceLocaleId` decoupling (D-15). `VoiceParseResult` now actually carries `band`/`alternates`/`keywordMerchantConflict` (D-11; previously dropped at the ctor). Trilingual close-out gate: `anti_toxicity_phase52_test` (21 tests; banned list a strict superset of phase16/47 + the complete v1.8 WR-02 tokens, with a shrink-guard), ARB key sets byte-identical across en/ja/zh (1587 each), no golden rebaseline needed. RECUX-01..05 + VEN-01/02 all Complete. Executed degraded-sequential on main (#683 base-drift; local main 121 commits ahead of origin). Full `flutter test` 3352/3352 green, analyze 0, verifier 7/7 with 0 warnings. **v1.9 all 4 phases (49-52) complete — next: `/gsd-complete-milestone` (refresh stale `.planning/codebase/` first).***
 
