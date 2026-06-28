@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
 status: planning
-last_updated: "2026-06-28T07:00:15.871Z"
+last_updated: "2026-06-28T08:30:00.000Z"
 last_activity: 2026-06-28
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Planning next milestone (run /gsd-new-milestone; refresh the seven-milestone-stale .planning/codebase/ first)
+**Current focus:** Phase 53 — HTML 设计关卡（零生产代码，先于实现）
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-06-28 — Milestone v2.0 started
+Phase: 53 of 56 (HTML 设计关卡 — 零生产代码)
+Plan: — (ready to plan)
+Status: Roadmap created — ready to plan Phase 53
+Last activity: 2026-06-28 — v2.0 roadmap created (4 phases 53-56, 31 requirements mapped, 100% coverage)
+
+Progress: [░░░░░░░░░░] 0% (0/4 phases)
 
 ### Decisions
 
@@ -90,7 +92,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 
 ### Roadmap Evolution
 
-v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/v1.9-ROADMAP.md`, `.planning/MILESTONES.md`, and `.planning/PROJECT.md`. The per-milestone roadmap evolution, locked constraints, open design questions, and pending todos for v1.9 and earlier milestones live in those archives. No active milestone — run `/gsd-new-milestone` to scope the next (refresh the seven-milestone-stale `.planning/codebase/` first).
+v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/v1.9-ROADMAP.md`, `.planning/MILESTONES.md`, and `.planning/PROJECT.md`. The per-milestone roadmap evolution, locked constraints, open design questions, and pending todos for v1.9 and earlier milestones live in those archives. **v2.0 roadmap created 2026-06-28** — 4 phases (53-56) covering 31 requirements (DESIGN 4 · ONBOARD 7 · LOCK 10 · DONATE 4 · LEGAL 6), 100% mapped, 0 orphaned. Design-gate-first (Phase 53, no production code, sequels v1.8 Phase 43) → Onboarding gate (54) → App-lock (55, highest-risk, own security review) → Settings legal/donation/JP-compliance (56, launch gate with store-review slack). Integration milestone; only new runtime dep is `url_launcher`. See `.planning/ROADMAP.md` + `.planning/REQUIREMENTS.md`.
 
 ### Blockers / Concerns
 

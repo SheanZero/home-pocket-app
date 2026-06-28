@@ -12,6 +12,7 @@
 - ✅ **v1.7 多币种支持** — Phases 40-42 (shipped 2026-06-14) — see [archive](milestones/v1.7-ROADMAP.md)
 - ✅ **v1.8 统计页面重设计（实用化 × 悦己情感化）** — Phases 43-48 (shipped 2026-06-22) — see [archive](milestones/v1.8-ROADMAP.md)
 - ✅ **v1.9 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库）** — Phases 49-52 (shipped 2026-06-25) — see [archive](milestones/v1.9-ROADMAP.md)
+- 🚧 **v2.0 完成第一版上线前最后的功能开发** — Phases 53-56 (in progress, started 2026-06-28)
 
 ## Phases
 
@@ -153,6 +154,69 @@
 
 </details>
 
+## 🚧 Active Milestone: v2.0 完成第一版上线前最后的功能开发 (Phases 53-56)
+
+**Milestone Goal:** 在首次公开上线（面向日本市场）前补齐欢迎引导、应用锁、合规/赞助三块「上线必备」能力，使 app 可发布。这是一个**整合里程碑**（几乎全部能力已存在，唯一新运行时依赖 `url_launcher`）：两道新 gate 挂在 `lib/main.dart` `HomePocketApp._buildHome()` 既有同步 gate ladder（`AppInitializer` settle 之后判定）。先用 Claude design 出 HTML 设计稿、用户确认后严格按稿实现（沿用 v1.8 Phase 43 设计关卡模式，关卡未过不写生产代码）。复用既有 i18n / 多币种 / 语音 locale / 安全基础设施。
+
+**Phase summary:**
+
+- [ ] **Phase 53: HTML 设计关卡（零生产代码）** — 欢迎引导 / 应用锁屏 / Setting 法务·赞助三块 HTML 设计稿，经用户确认；零生产 Dart
+- [ ] **Phase 54: 欢迎 / 首启引导（Onboarding gate）** — init-settle 后的首启 gate + UI语言/币种/语音语言强制写穿 + 末尾可跳过的锁配置入口
+- [ ] **Phase 55: 应用锁（生物识别 + PIN，最高风险）** — 冷启动+回前台完整重锁 + 切换器隐私遮罩 + 4位PIN加盐慢哈希兜底；独立安全评审
+- [ ] **Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）** — 隐私政策/利用規約/OSS/特商法 + 外链赞助；为真实 store-review round-trip 留余量
+
+### Phase 53: HTML 设计关卡（零生产代码）
+**Goal**: 产出并经用户确认欢迎引导、应用锁屏、Setting 法务/赞助三块的 HTML 设计稿；关卡未获批前不写对应生产 Dart 代码（沿用 v1.8 Phase 43 precedent，产物仅 `.planning/` 下 HTML/Markdown）。
+**Depends on**: Nothing（里程碑首个 phase；零生产代码，可早/并行启动）
+**Requirements**: DESIGN-01, DESIGN-02, DESIGN-03, DESIGN-04
+**Success Criteria** (what must be TRUE):
+  1. 用户已审阅并批准欢迎/首启引导流程的 HTML 设计稿（含 app 介绍 + UI语言/币种/语音语言三步设置）— DESIGN-01
+  2. 用户已审阅并批准应用锁屏（生物识别提示 + PIN 输入）的 HTML 设计稿 — DESIGN-02
+  3. 用户已审阅并批准 Setting 法务/赞助区块布局的 HTML 设计稿 — DESIGN-03
+  4. 关卡退出时仓库零新增生产 Dart——所有关卡产物仅在 `.planning/` 下的 HTML/Markdown — DESIGN-04
+**Plans**: TBD
+
+### Phase 54: 欢迎 / 首启引导（Onboarding flow）
+**Goal**: 在 `AppInitializer` settle 之后、主 shell 之前插入首启引导 gate（`_buildHome()` branch 3），用户一次性确认 UI 语言 / 记账币种 / 语音输入语言并写穿既有 provider，引导末尾提供可明确跳过的「设置应用锁」入口；`onboarding_complete` 仅在显式完成时一次性落最后。
+**Depends on**: Phase 53（设计稿批准后才实现）
+**Requirements**: ONBOARD-01, ONBOARD-02, ONBOARD-03, ONBOARD-04, ONBOARD-05, ONBOARD-06, ONBOARD-07
+**Success Criteria** (what must be TRUE):
+  1. 全新安装首次启动展示引导；完成后再次启动直接进入主 shell、引导不再出现（幂等；gate 在 init settle 后判定，绝不与 init 竞态、绝不从 currency≠null 反推）— ONBOARD-01/07
+  2. 用户在引导内看到 app 整体介绍（隐私 / 本地优先 / 双账本卖点），介绍部分可跳过 — ONBOARD-02
+  3. 用户确认 UI 语言后 MaterialApp 即时切换；确认记账币种（JPY 默认）写入既有 `Book.currency`（复用 v1.7 货币选择器）；确认语音输入语言（默认=所选 UI 语言）写入既有语音 locale 设置 — ONBOARD-03/04/05
+  4. 引导可返回上一步并显示进度、无法卡死（re-entrant）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
+  5. 所有新增引导文案三语（ja/zh/en）ARB 齐全，过 parity + 硬编码CJK扫描
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 55: 应用锁（生物识别 + PIN — 最高风险，独立 phase + 安全评审）
+**Goal**: 实现「已解密 DB 之上的 UI gate」应用锁：冷启动 + 回前台（`paused`→`resumed`）完整重锁、任务切换器隐私遮罩（`inactive` 盖遮罩层）、生物识别优先 + 4 位 PIN 强制兜底；PIN 以加盐慢哈希存入既有 secure storage（accessibility 保持 unlocked_this_device 不变）；完整 `local_auth` 错误分类一律回退 PIN；Setting 可开关、关闭时完全 no-op。
+**Depends on**: Phase 54（引导末尾的「设置应用锁」入口需先存在）
+**Requirements**: LOCK-01, LOCK-02, LOCK-03, LOCK-04, LOCK-05, LOCK-06, LOCK-07, LOCK-08, LOCK-09, LOCK-10
+**Success Criteria** (what must be TRUE):
+  1. 用户可在 Setting 开启/关闭应用锁；开启必须先设 4 位 PIN（强制兜底凭据）；关闭时锁逻辑完全 no-op — LOCK-01/06
+  2. 启用后冷启动与从后台回前台均需重新解锁才进入主 shell；任务切换器/后台快照显示隐私遮罩不泄露账目（重锁在 `paused`→`resumed`、遮罩在 `inactive`）— LOCK-02/03/04
+  3. 解锁默认先自动尝试生物识别，失败/不可用回退 PIN；完整 `local_auth` 错误分类（notAvailable/notEnrolled/lockedOut/permanentlyLockedOut/passcodeNotSet/cancel）一律回退 PIN，绝不把用户锁在自己数据外 — LOCK-05/10
+  4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文；连续输错有递增冷却（持久化计数，成功才清零），无默认数据擦除 — LOCK-07/08
+  5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
+**Plans**: TBD
+**UI hint**: yes
+**Research flag**: 最高风险整合（keychain accessibility 砖机风险 / 应用生命周期 / 生物识别错误分类 / off-isolate KDF 调优）——规划时做一次专项安全评审（`gsd-secure-phase` 或 `--research-phase`）。
+
+### Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）
+**Goal**: 在 Setting 补齐日本市场上线必备的合规与赞助：隐私政策 / 利用規約（app 内置三语文本离线可读 + 托管 URL 占位）、OSS 许可证（Flutter 内置 `showLicensePage` 自动聚合）、特商法表記页，以及一个不打扰、中性非交易性的外链赞助入口（`url_launcher` 外部浏览器到日本赞助平台，绝不 WebView/IAP）；对齐商店隐私表单；为真实 store-review round-trip 预留余量。
+**Depends on**: Phase 54（Setting 承载面）——与 Phase 55 相互独立、可并行；排在最后但尽早调度外部评审
+**Requirements**: DONATE-01, DONATE-02, DONATE-03, DONATE-04, LEGAL-01, LEGAL-02, LEGAL-03, LEGAL-04, LEGAL-05, LEGAL-06
+**Success Criteria** (what must be TRUE):
+  1. 用户可在 Setting 离线阅读隐私政策（プライバシーポリシー）与利用規約（内置三语文本 + 托管 URL 占位），并查看 OSS 开源许可证页（`showLicensePage` 自动聚合，不手维护清单）— LEGAL-01/02/03
+  2. 用户可在 Setting 看到「特定商取引法に基づく表記」页（运营者信息，参考 napu.co.jp/sale 表記结构，三语承载，细节上线前由日本法务确认）— LEGAL-04
+  3. Setting 内有一个不打扰、中性非交易性措辞的「応援/支援」入口；点击经外部浏览器（`LaunchMode.externalApplication`）打开日本赞助平台（FANBOX/OFUSE）链接，绝不内嵌 WebView / IAP / 反复弹窗；URL 可配置（需求阶段留占位）— DONATE-01/02/03/04
+  4. 商店隐私表单（Apple Privacy Nutrition Labels / Google Data Safety）如实填写，与 v1.7 汇率出站网络调用一致（非反射式「不收集」）— LEGAL-05
+  5. 所有新增法务/合规/赞助文案三语（ja/zh/en）覆盖，过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）— LEGAL-06
+**Plans**: TBD
+**UI hint**: yes
+**Research flag**: MEDIUM-confidence 外部合规——特商法 applicability（个人开发者外部平台赞助）+ Apple/Google donation-review 立场需 JP-legal sign-off + 真实 TestFlight/internal-track 提交（非自评）；调度时为 review round-trip 留余量。
+
 ---
 
 ## Milestone Progress
@@ -169,3 +233,4 @@
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
 | v1.8 统计页面重设计 | 43-48 | 32/32 | Complete | 2026-06-22 |
 | v1.9 语音类目与商家识别系统重构 | 49-52 | 22/22 | Complete | 2026-06-25 |
+| v2.0 完成第一版上线前最后的功能开发 | 53-56 | 0/TBD | In progress | - |

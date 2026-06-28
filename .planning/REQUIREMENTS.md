@@ -87,21 +87,47 @@
 
 ## Traceability
 
-> 由 roadmapper 在创建 ROADMAP 时填充（每条 requirement 恰好映射一个 phase）。
+> 每条 requirement 恰好映射一个 phase（roadmapper 于 2026-06-28 创建 ROADMAP 时填充）。
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DESIGN-01..04 | TBD | Pending |
-| ONBOARD-01..07 | TBD | Pending |
-| LOCK-01..10 | TBD | Pending |
-| DONATE-01..04 | TBD | Pending |
-| LEGAL-01..06 | TBD | Pending |
+| DESIGN-01 | Phase 53 | Pending |
+| DESIGN-02 | Phase 53 | Pending |
+| DESIGN-03 | Phase 53 | Pending |
+| DESIGN-04 | Phase 53 | Pending |
+| ONBOARD-01 | Phase 54 | Pending |
+| ONBOARD-02 | Phase 54 | Pending |
+| ONBOARD-03 | Phase 54 | Pending |
+| ONBOARD-04 | Phase 54 | Pending |
+| ONBOARD-05 | Phase 54 | Pending |
+| ONBOARD-06 | Phase 54 | Pending |
+| ONBOARD-07 | Phase 54 | Pending |
+| LOCK-01 | Phase 55 | Pending |
+| LOCK-02 | Phase 55 | Pending |
+| LOCK-03 | Phase 55 | Pending |
+| LOCK-04 | Phase 55 | Pending |
+| LOCK-05 | Phase 55 | Pending |
+| LOCK-06 | Phase 55 | Pending |
+| LOCK-07 | Phase 55 | Pending |
+| LOCK-08 | Phase 55 | Pending |
+| LOCK-09 | Phase 55 | Pending |
+| LOCK-10 | Phase 55 | Pending |
+| DONATE-01 | Phase 56 | Pending |
+| DONATE-02 | Phase 56 | Pending |
+| DONATE-03 | Phase 56 | Pending |
+| DONATE-04 | Phase 56 | Pending |
+| LEGAL-01 | Phase 56 | Pending |
+| LEGAL-02 | Phase 56 | Pending |
+| LEGAL-03 | Phase 56 | Pending |
+| LEGAL-04 | Phase 56 | Pending |
+| LEGAL-05 | Phase 56 | Pending |
+| LEGAL-06 | Phase 56 | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total (DESIGN 4 · ONBOARD 7 · LOCK 10 · DONATE 4 · LEGAL 6)
-- Mapped to phases: 0 (filled by roadmap)
-- Unmapped: 31 ⚠️ (resolved at roadmap creation)
+- Mapped to phases: 31 (Phase 53: 4 · Phase 54: 7 · Phase 55: 10 · Phase 56: 10)
+- Unmapped: 0 ✓ (100% coverage, no orphans, no duplicates)
 
 ---
 *Requirements defined: 2026-06-28*
-*Last updated: 2026-06-28 after milestone v2.0 requirements definition*
+*Last updated: 2026-06-28 — traceability filled by roadmapper (4 phases 53-56, 31/31 mapped)*
