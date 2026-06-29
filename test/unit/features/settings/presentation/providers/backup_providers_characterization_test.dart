@@ -9,6 +9,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
+import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
+import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
@@ -26,12 +28,16 @@ class _MockSettingsRepository extends Mock implements SettingsRepository {}
 class _MockExchangeRateRepository extends Mock
     implements ExchangeRateRepository {}
 
+class _MockUserProfileRepository extends Mock
+    implements UserProfileRepository {}
+
 void main() {
   late _MockTransactionRepository mockTransactionRepo;
   late _MockCategoryRepository mockCategoryRepo;
   late _MockBookRepository mockBookRepo;
   late _MockSettingsRepository mockSettingsRepo;
   late _MockExchangeRateRepository mockExchangeRateRepo;
+  late _MockUserProfileRepository mockUserProfileRepo;
   late ProviderContainer container;
 
   setUp(() {
@@ -40,6 +46,7 @@ void main() {
     mockBookRepo = _MockBookRepository();
     mockSettingsRepo = _MockSettingsRepository();
     mockExchangeRateRepo = _MockExchangeRateRepository();
+    mockUserProfileRepo = _MockUserProfileRepository();
 
     container = ProviderContainer(
       overrides: [
@@ -50,6 +57,7 @@ void main() {
         appExchangeRateRepositoryProvider.overrideWithValue(
           mockExchangeRateRepo,
         ),
+        userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
       ],
     );
   });
