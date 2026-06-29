@@ -19,10 +19,10 @@ import 'features/family_sync/presentation/providers/repository_providers.dart'
 import 'features/family_sync/presentation/providers/state_sync.dart'
     show syncEngineProvider;
 import 'features/home/presentation/screens/main_shell_screen.dart';
-import 'features/profile/presentation/providers/repository_providers.dart'
-    show getUserProfileUseCaseProvider;
-import 'features/profile/presentation/screens/profile_onboarding_screen.dart';
+import 'features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
+import 'features/settings/presentation/providers/repository_providers.dart'
+    show settingsRepositoryProvider;
 import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
@@ -100,7 +100,7 @@ class HomePocketApp extends ConsumerStatefulWidget {
 class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   String? _bookId;
   bool _initialized = false;
-  bool _needsProfileOnboarding = false;
+  bool _needsOnboarding = false;
   String? _error;
 
   @override
@@ -141,13 +141,16 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // Wire push notifications → sync engine
         final pushService = ref.read(pushNotificationServiceProvider);
         syncEngine.connectPushNotifications(pushService);
-        final existingProfile = await ref
-            .read(getUserProfileUseCaseProvider)
-            .execute();
+
+        // Onboarding gate (ONBOARD-01 / D-04): read the persisted flag AFTER
+        // init has settled. Captured into a field here — NEVER ref.watch in
+        // build() (avoids the loading-null race at branch 3) and NEVER inferred
+        // from the profile/currency.
+        final settings = await ref.read(settingsRepositoryProvider).getSettings();
 
         setState(() {
           _bookId = bookIdResult.data!;
-          _needsProfileOnboarding = existingProfile == null;
+          _needsOnboarding = !settings.onboardingComplete;
           _initialized = true;
         });
       } else {
@@ -174,8 +177,18 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
 
       if (bookIdResult.isSuccess && bookIdResult.data != null) {
         invalidateAllDataProviders(ref);
+        // Re-read the onboarding gate after a destructive reset (D-05/D-06):
+        // delete-all clears the flag (→ onboarding) while import-backup may
+        // restore it (→ shell), and both must re-evaluate without an app
+        // restart. settingsRepository is plaintext SharedPreferences (not wiped
+        // by the Drift data reset), so this reflects the post-reset flag.
+        final settings = await ref
+            .read(settingsRepositoryProvider)
+            .getSettings();
+        if (!mounted) return;
         setState(() {
           _bookId = bookIdResult.data!;
+          _needsOnboarding = !settings.onboardingComplete;
           _initialized = true;
         });
       } else {
@@ -247,8 +260,8 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (_needsProfileOnboarding) {
-      return ProfileOnboardingScreen(bookId: _bookId!);
+    if (_needsOnboarding) {
+      return OnboardingFlowScreen(bookId: _bookId!);
     }
 
     return MainShellScreen(bookId: _bookId!);

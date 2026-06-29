@@ -17,8 +17,8 @@
 // Branches covered:
 //   (1) _error != null                → error Scaffold + AppBar
 //   (2) !_initialized                 → CircularProgressIndicator
-//   (3) _initialized + needs onboarding → ProfileOnboardingScreen
-//   (4) _initialized + no onboarding → MainShellScreen
+//   (3) _initialized + onboardingComplete=false → OnboardingFlowScreen
+//   (4) _initialized + onboardingComplete=true  → MainShellScreen
 
 import 'dart:async';
 
@@ -45,8 +45,11 @@ import 'package:home_pocket/features/home/presentation/screens/main_shell_screen
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show getUserProfileUseCaseProvider;
-import 'package:home_pocket/features/profile/presentation/screens/profile_onboarding_screen.dart';
+import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
+import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart'
+    show settingsRepositoryProvider;
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -133,6 +136,22 @@ class _FakeGetUserProfileUseCase extends Fake implements GetUserProfileUseCase {
   Future<UserProfile?> execute() async => _profile;
 }
 
+/// Drives the onboarding gate: `getSettings()` returns the fixed
+/// `onboardingComplete` flag the gate reads after init settle.
+class _FakeSettingsRepository implements SettingsRepository {
+  _FakeSettingsRepository({required this.onboardingComplete});
+
+  final bool onboardingComplete;
+
+  @override
+  Future<AppSettings> getSettings() async =>
+      AppSettings(onboardingComplete: onboardingComplete);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      super.noSuchMethod(invocation);
+}
+
 final _testBook = Book(
   id: 'book-test-1',
   name: 'Test Book',
@@ -153,6 +172,7 @@ Future<void> _pumpApp(
   WidgetTester tester, {
   required List<Override> overrides,
   AppSettings appSettings = const AppSettings(),
+  bool onboardingComplete = true,
 }) async {
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
@@ -163,6 +183,11 @@ Future<void> _pumpApp(
   final baseOverrides = [
     appDatabaseProvider.overrideWithValue(db),
     appSettingsProvider.overrideWith((ref) => Future.value(appSettings)),
+    // The gate reads settingsRepositoryProvider.getSettings() directly (not
+    // appSettingsProvider) after init settle — drive it explicitly.
+    settingsRepositoryProvider.overrideWith(
+      (ref) => _FakeSettingsRepository(onboardingComplete: onboardingComplete),
+    ),
     currentLocaleProvider.overrideWith(
       (ref) => Future.value(const Locale('ja')),
     ),
@@ -257,11 +282,30 @@ void main() {
     );
 
     testWidgets(
-      '_buildHome shows ProfileOnboardingScreen when profile is null',
+      '_buildHome shows OnboardingFlowScreen when onboardingComplete is false',
       (tester) async {
-        await _pumpApp(tester, overrides: buildSuccessOverrides(profile: null));
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: null),
+          onboardingComplete: false,
+        );
         await tester.pumpAndSettle(const Duration(seconds: 3));
-        expect(find.byType(ProfileOnboardingScreen), findsOneWidget);
+        expect(find.byType(OnboardingFlowScreen), findsOneWidget);
+        expect(find.byType(MainShellScreen), findsNothing);
+      },
+    );
+
+    testWidgets(
+      '_buildHome shows MainShellScreen when onboardingComplete is true',
+      (tester) async {
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: null),
+          onboardingComplete: true,
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+        expect(find.byType(OnboardingFlowScreen), findsNothing);
       },
     );
 
@@ -380,6 +424,10 @@ void main() {
                 ),
                 appSettingsProvider.overrideWith(
                   (ref) => Future.value(const AppSettings()),
+                ),
+                settingsRepositoryProvider.overrideWith(
+                  (ref) =>
+                      _FakeSettingsRepository(onboardingComplete: true),
                 ),
                 currentLocaleProvider.overrideWith(
                   (ref) => Future.value(const Locale('ja')),
