@@ -160,7 +160,7 @@
 
 **Phase summary:**
 
-- [ ] **Phase 53: HTML 设计关卡（零生产代码）** — 欢迎引导 / 应用锁屏 / Setting 法务·赞助三块 HTML 设计稿，经用户确认；零生产 Dart
+- [x] **Phase 53: HTML 设计关卡（零生产代码）** — 欢迎引导 / 应用锁屏 / Setting 法务·赞助三块 HTML 设计稿，经用户确认；零生产 Dart (completed 2026-06-29)
 - [ ] **Phase 54: 欢迎 / 首启引导（Onboarding gate）** — init-settle 后的首启 gate + UI语言/币种/语音语言强制写穿 + 末尾可跳过的锁配置入口
 - [ ] **Phase 55: 应用锁（生物识别 + PIN，最高风险）** — 冷启动+回前台完整重锁 + 切换器隐私遮罩 + 4位PIN加盐慢哈希兜底；独立安全评审
 - [ ] **Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）** — 隐私政策/利用規約/OSS/特商法 + 外链赞助；为真实 store-review round-trip 留余量
@@ -177,7 +177,7 @@
   3. 用户已审阅并批准 Setting 法务/赞助区块布局的 HTML 设计稿 — DESIGN-03
   4. 关卡退出时仓库零新增生产 Dart——所有关卡产物仅在 `.planning/` 下的 HTML/Markdown — DESIGN-04
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans complete
 **Wave 1**
 
 - [x] 53-01-PLAN.md — onboarding (001/A) QA against DESIGN-01 + approval-ready summary [wave 1]
@@ -186,7 +186,7 @@
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 53-04-PLAN.md — gate closure: user approval of all three + Phase 54/55/56 handoff + DESIGN-04 zero-Dart gate-exit [wave 2]
+- [x] 53-04-PLAN.md — gate closure: user approval of all three + Phase 54/55/56 handoff + DESIGN-04 zero-Dart gate-exit [wave 2]
 
 **Cross-cutting constraints:**
 

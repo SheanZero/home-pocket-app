@@ -14,7 +14,7 @@
 - [x] **DESIGN-01**: 欢迎/首启引导流程的 HTML 设计稿产出并经用户确认（含 app 介绍 + UI语言/币种/语音语言三步设置）
 - [x] **DESIGN-02**: 应用锁屏（生物识别提示 + PIN 输入）的 HTML 设计稿产出并经用户确认
 - [x] **DESIGN-03**: Setting 法务/赞助区块布局的 HTML 设计稿产出并经用户确认
-- [ ] **DESIGN-04**: 设计关卡未获批前不写对应生产 Dart 代码（关卡产物仅 `.planning/` 下 HTML/Markdown）
+- [x] **DESIGN-04**: 设计关卡未获批前不写对应生产 Dart 代码（关卡产物仅 `.planning/` 下 HTML/Markdown）
 
 ### Onboarding（欢迎 / 首启引导）
 
@@ -94,7 +94,7 @@
 | DESIGN-01 | Phase 53 | Complete |
 | DESIGN-02 | Phase 53 | Complete |
 | DESIGN-03 | Phase 53 | Complete |
-| DESIGN-04 | Phase 53 | Pending |
+| DESIGN-04 | Phase 53 | Complete |
 | ONBOARD-01 | Phase 54 | Pending |
 | ONBOARD-02 | Phase 54 | Pending |
 | ONBOARD-03 | Phase 54 | Pending |
