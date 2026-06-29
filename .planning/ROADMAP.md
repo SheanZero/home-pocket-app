@@ -205,7 +205,7 @@
   4. 引导可返回上一步、无法卡死（re-entrant）（进度仅靠返回键/手势体现、无显式进度条 — D-12 有意取舍，supersedes 早先「显示进度」措辞）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
   5. 所有新增引导文案三语（ja/zh/en）ARB 齐全，过 parity + 硬编码CJK扫描
 
-**Plans**: 3/7 plans executed
+**Plans**: 4/7 plans executed
 **UI hint**: yes
 
 **Wave 1** *(parallel — independent foundation, zero file overlap)*
@@ -216,7 +216,7 @@
 
 **Wave 2** *(parallel — depends on Wave 1)*
 
-- [ ] 54-04-PLAN.md — data-reset semantics: import forces flag true (D-06); clear resets flag + wipes UserProfile (D-05) [wave 2]
+- [x] 54-04-PLAN.md — data-reset semantics: import forces flag true (D-06); clear resets flag + wipes UserProfile (D-05) [wave 2]
 - [ ] 54-05-PLAN.md — merged onboarding settings page: identity (nickname[req]/avatar) + UI-lang/currency/voice write-through, 行+変更 rows (D-01/03/07/08/09/10/14) [wave 2]
 - [ ] 54-06-PLAN.md — intro (skippable selling points, D-02) + trailing lock-entry screen (D-11/D-13) [wave 2]
 

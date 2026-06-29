@@ -6,15 +6,15 @@ current_phase: 54
 current_phase_name: onboarding-flow
 status: executing
 stopped_at: Completed 54-03-PLAN.md
-last_updated: "2026-06-29T14:14:36.665Z"
+last_updated: "2026-06-29T14:22:38.074Z"
 last_activity: 2026-06-29
-last_activity_desc: Completed 54-03 — SettingsScreen security deep-link target
+last_activity_desc: Completed 54-03 (SettingsScreen security deep-link target)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 11
-  completed_plans: 7
-  percent: 64
+  completed_plans: 8
+  percent: 25
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 54 (onboarding-flow) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-06-29 — Completed 54-03 (SettingsScreen security deep-link target)
 
@@ -48,6 +48,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 54-02: onboarding ARB single-owner — 24 onboarding* keys ja/zh/en (intro 4 selling points/settings rows/lock-entry); onboardingStart=この設定で始める locked, distinct from profileStart
 - [Phase 54]: 54-03: SettingsScreen deep-link uses jumpTo(maxScrollExtent) then post-frame ensureVisible — bare ensureVisible no-ops on a lazy ListView (off-screen SecuritySection element unmounted, GlobalKey context null)
 - [Phase 54]: 54-03: scrollToSecurity defaults false; SecuritySection wrapped in KeyedSubtree so security_section.dart stays byte-unchanged (Phase 55 fills real lock)
+- [Phase ?]: 54-04: import forces onboardingComplete=true (D-06); clear-all resets flag + deletes UserProfile (D-05)
 
 ### Quick Tasks Completed
 
@@ -192,7 +193,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-29T14:14:30.641Z
+Last session: 2026-06-29T14:22:11.890Z
 Stopped at: Completed 54-02-PLAN.md
 Resume file: None
 
@@ -259,6 +260,7 @@ Resume file: None
 | Phase 54 P01 | 12min | 2 tasks | 6 files |
 | Phase 54 P02 | 8min | 2 tasks | 7 files |
 | Phase 54 P03 | 35min | 1 tasks | 2 files |
+| Phase 54 P04 | 11min | 2 tasks | 5 files |
 
 ## Decisions
 
