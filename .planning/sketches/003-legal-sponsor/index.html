@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 003 — Complete Settings (v2)</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  .tone-band { padding:10px 24px 2px; }
+  .tone-band h2 { font-size:17px; margin:0 0 2px; color:#4a3f38; }
+  .tone-band p { font-size:13px; color:#7a6c63; margin:0; }
+
+  .sec-title { font-size:12px; font-weight:800; color:var(--text-muted); margin:18px 4px 8px;
+    letter-spacing:.04em; text-transform:none; }
+  .group { background:#fff; border:1px solid var(--border-soft); border-radius:var(--radius); overflow:hidden; }
+  .row2 { display:flex; align-items:center; gap:12px; padding:13px 14px; cursor:pointer; }
+  .row2 + .row2 { border-top:1px solid var(--border-soft); }
+  .row2 .ico { width:26px; text-align:center; font-size:17px; color:var(--text-muted); }
+  .row2 .t { font-size:15px; font-weight:600; }
+  .row2 .s { font-size:12px; color:var(--text-muted); }
+  .row2 .val { margin-left:auto; color:var(--text-muted); font-size:13.5px; }
+  .row2 .chev { margin-left:auto; color:var(--text-faint); font-size:16px; }
+  .row2 .ext { margin-left:auto; color:var(--shared); font-size:13px; font-weight:700; }
+  .row2 .danger { color:var(--error); }
+  .new { display:inline-block; background:#eef5ee; color:var(--daily-text); font-size:10px; font-weight:800;
+    padding:1px 6px; border-radius:6px; margin-left:6px; vertical-align:middle; }
+  /* toggle */
+  .sw { margin-left:auto; width:42px; height:26px; border-radius:999px; background:var(--primary); position:relative; }
+  .sw::after { content:''; position:absolute; top:3px; left:19px; width:20px; height:20px; border-radius:50%; background:#fff; }
+  .sw.off { background:var(--border); } .sw.off::after { left:3px; }
+  .subrow { padding-left:42px; background:#fcfaf9; }
+  .note { font-size:11px; color:var(--text-muted); padding:8px 14px 12px; background:#fcfaf9; line-height:1.6; }
+  /* profile card */
+  .profcard { display:flex; align-items:center; gap:14px; background:linear-gradient(135deg,#eef5ee,#fbf7f4);
+    border:1px solid var(--border-soft); border-radius:var(--radius); padding:16px; }
+  .avatar { width:52px; height:52px; border-radius:50%; background:#fff; display:flex; align-items:center;
+    justify-content:center; font-size:26px; box-shadow:var(--shadow-card); }
+
+  /* B native */
+  .nat { background:#f2efec; }
+  .nat .group { border-radius:0; border-left:none; border-right:none; }
+  .nat .profcard { border-radius:0; border-left:none; border-right:none; background:#fff; }
+  .nat .sec-title { text-transform:uppercase; letter-spacing:.06em; }
+  .nat .row2 .sw { } .nat .h1 { font-weight:600; }
+  /* C hybrid: warm icons colored */
+  .warm .row2 .ico { color:var(--primary); }
+</style>
+</head>
+<body>
+<div class="phone-label" style="margin-top:18px; font-size:16px;">Sketch 003 v2 · 完整设置页（现有 8 区 + v2.0 新增：应用锁展开 / 法的情報扩充 / 応援外链）·「<span class="new">新</span>」= 本期新增</div>
+
+<div class="phone-row">
+
+  <!-- ================= A 温柔抛茶感 ================= -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen warm">
+      <h1 class="h1" style="font-size:24px; margin-bottom:14px;">設定</h1>
+
+      <!-- profile -->
+      <div class="profcard">
+        <div class="avatar">🐻</div>
+        <div><b style="font-size:16px;">たろう</b><div class="s" style="color:var(--text-muted);font-size:12px;">プロフィールを編集</div></div>
+        <span class="chev" style="margin-left:auto;color:var(--text-faint);">›</span>
+      </div>
+
+      <div class="sec-title">外観</div>
+      <div class="group">
+        <div class="row2"><span class="ico">🎨</span><div class="t">テーマ</div><span class="val">システム ›</span></div>
+        <div class="row2"><span class="ico">🌐</span><div class="t">言語</div><span class="val">日本語 ›</span></div>
+        <div class="row2"><span class="ico">📅</span><div class="t">週の開始</div><span class="val">月曜 ›</span></div>
+      </div>
+
+      <div class="sec-title">音声認識</div>
+      <div class="group">
+        <div class="row2"><span class="ico">🎙️</span><div class="t">認識言語</div><span class="val">日本語 ›</span></div>
+      </div>
+
+      <div class="sec-title">悦己の目標</div>
+      <div class="group">
+        <div class="row2"><span class="ico">🎯</span><div><div class="t">今月の目標 ¥500</div><div class="s">推奨: 過去3ヶ月の中央値 ¥450</div></div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">セキュリティ</div>
+      <div class="group">
+        <div class="row2"><span class="ico">🔐</span><div class="t">アプリロック<span class="new">新</span></div><span class="sw"></span></div>
+        <div class="row2 subrow"><div class="t" style="font-weight:500;">Face ID / 指紋</div><span class="sw"></span></div>
+        <div class="row2 subrow"><div class="t" style="font-weight:500;">PIN コード</div><span class="val">設定済み ›</span></div>
+        <div class="note">🔸 Face ID と PIN を両方設定すると、<b>Face ID が優先</b>されます。</div>
+        <div class="row2"><span class="ico">🔔</span><div class="t">通知</div><span class="sw"></span></div>
+      </div>
+
+      <div class="sec-title">家族共有</div>
+      <div class="group">
+        <div class="row2"><span class="ico">👨‍👩‍👧</span><div class="t">家族共有</div><span class="val">2人 ›</span></div>
+        <div class="row2"><span class="ico">☁️</span><div class="t">今すぐ同期</div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">データ管理</div>
+      <div class="group">
+        <div class="row2"><span class="ico">📤</span><div class="t">バックアップを書き出す</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">📥</span><div class="t">バックアップを復元</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">🗑️</span><div class="t danger">すべてのデータを削除</div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">法的情報・コンプライアンス<span class="new">新</span></div>
+      <div class="group">
+        <div class="row2"><span class="ico">📄</span><div class="t">プライバシーポリシー</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">📜</span><div class="t">利用規約<span class="new">新</span></div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">🏷️</span><div class="t">特定商取引法に基づく表記<span class="new">新</span></div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">⚖️</span><div class="t">オープンソースライセンス</div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">このアプリを応援<span class="new">新</span></div>
+      <div class="group">
+        <div class="row2"><span class="ico">🌸</span><div><div class="t">開発を応援する</div><div class="s">広告なし運営を続けるために</div></div><span class="ext">↗ 外部</span></div>
+      </div>
+      <p class="note" style="background:none;">「応援」はアプリ内課金ではなく、外部ブラウザを開きます。</p>
+
+      <div class="sec-title">アプリについて</div>
+      <div class="group"><div class="row2"><span class="ico">ℹ️</span><div class="t">バージョン</div><span class="val">1.0.0 (1)</span></div></div>
+      <div style="height:24px"></div>
+    </div></div>
+    <div class="phone-label">A · 温柔抛茶感 — 卡片分组 + 暖色图标</div>
+  </div>
+
+  <!-- ================= B 清爽极简 ================= -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen nat">
+      <h1 class="h1" style="font-size:26px; margin-bottom:12px;">設定</h1>
+      <div class="profcard"><div class="avatar">🐻</div><div><b style="font-size:16px;">たろう</b><div class="s" style="font-size:12px;">プロフィールを編集</div></div><span class="chev" style="margin-left:auto;">›</span></div>
+
+      <div class="sec-title">APPEARANCE</div>
+      <div class="group">
+        <div class="row2"><div class="t">テーマ</div><span class="val">システム ›</span></div>
+        <div class="row2"><div class="t">言語</div><span class="val">日本語 ›</span></div>
+        <div class="row2"><div class="t">週の開始</div><span class="val">月曜 ›</span></div>
+      </div>
+      <div class="sec-title">VOICE</div>
+      <div class="group"><div class="row2"><div class="t">認識言語</div><span class="val">日本語 ›</span></div></div>
+      <div class="sec-title">JOY TARGET</div>
+      <div class="group"><div class="row2"><div class="t">今月の目標</div><span class="val">¥500 ›</span></div></div>
+
+      <div class="sec-title">SECURITY</div>
+      <div class="group">
+        <div class="row2"><div class="t">アプリロック<span class="new">新</span></div><span class="sw"></span></div>
+        <div class="row2 subrow"><div class="t" style="font-weight:500;">Face ID</div><span class="sw"></span></div>
+        <div class="row2 subrow"><div class="t" style="font-weight:500;">PIN コード</div><span class="val">設定済み ›</span></div>
+        <div class="row2"><div class="t">通知</div><span class="sw"></span></div>
+      </div>
+      <p class="note" style="background:none;">Face ID と PIN の両方設定時は Face ID が優先。</p>
+
+      <div class="sec-title">FAMILY SYNC</div>
+      <div class="group">
+        <div class="row2"><div class="t">家族共有</div><span class="val">2人 ›</span></div>
+        <div class="row2"><div class="t">今すぐ同期</div><span class="chev">›</span></div>
+      </div>
+      <div class="sec-title">DATA</div>
+      <div class="group">
+        <div class="row2"><div class="t">バックアップを書き出す</div><span class="chev">›</span></div>
+        <div class="row2"><div class="t">バックアップを復元</div><span class="chev">›</span></div>
+        <div class="row2"><div class="t danger">すべてのデータを削除</div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">LEGAL<span class="new">新</span></div>
+      <div class="group">
+        <div class="row2"><div class="t">プライバシーポリシー</div><span class="chev">›</span></div>
+        <div class="row2"><div class="t">利用規約<span class="new">新</span></div><span class="chev">›</span></div>
+        <div class="row2"><div class="t">特定商取引法に基づく表記<span class="new">新</span></div><span class="chev">›</span></div>
+        <div class="row2"><div class="t">ライセンス（OSS）</div><span class="chev">›</span></div>
+      </div>
+      <div class="sec-title">SUPPORT<span class="new">新</span></div>
+      <div class="group"><div class="row2"><span class="ico">♡</span><div class="t">開発を応援する</div><span class="ext">↗ 外部</span></div></div>
+
+      <div class="sec-title">ABOUT</div>
+      <div class="group"><div class="row2"><div class="t">バージョン</div><span class="val">1.0.0</span></div></div>
+      <div style="height:24px"></div>
+    </div></div>
+    <div class="phone-label">B · 清爽极简 — iOS 分组列表，无图标</div>
+  </div>
+
+  <!-- ================= C 混合 ================= -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen warm">
+      <h1 class="h1" style="font-size:24px; margin-bottom:14px;">設定</h1>
+      <div class="profcard"><div class="avatar">🐻</div><div><b style="font-size:16px;">たろう</b><div class="s" style="font-size:12px;">プロフィールを編集</div></div><span class="chev" style="margin-left:auto;">›</span></div>
+
+      <div class="sec-title">一般</div>
+      <div class="group">
+        <div class="row2"><span class="ico">🎨</span><div class="t">テーマ</div><span class="val">システム ›</span></div>
+        <div class="row2"><span class="ico">🌐</span><div class="t">言語</div><span class="val">日本語 ›</span></div>
+        <div class="row2"><span class="ico">📅</span><div class="t">週の開始</div><span class="val">月曜 ›</span></div>
+        <div class="row2"><span class="ico">🎙️</span><div class="t">音声認識言語</div><span class="val">日本語 ›</span></div>
+        <div class="row2"><span class="ico">🎯</span><div class="t">悦己の目標</div><span class="val">¥500 ›</span></div>
+      </div>
+
+      <div class="sec-title">セキュリティ &amp; プライバシー</div>
+      <div class="group">
+        <div class="row2"><span class="ico">🔐</span><div><div class="t">アプリロック<span class="new">新</span></div><div class="s">Face ID・PIN で家計簿を保護</div></div><span class="sw"></span></div>
+        <div class="row2 subrow"><div class="t" style="font-weight:500;">Face ID / 指紋</div><span class="sw"></span></div>
+        <div class="row2 subrow"><div class="t" style="font-weight:500;">PIN コード</div><span class="val">設定する ›</span></div>
+        <div class="note">両方設定時は Face ID が優先。失敗時は PIN に切替。</div>
+        <div class="row2"><span class="ico">🔔</span><div class="t">通知</div><span class="sw"></span></div>
+      </div>
+
+      <div class="sec-title">家族共有</div>
+      <div class="group">
+        <div class="row2"><span class="ico">👨‍👩‍👧</span><div class="t">家族共有</div><span class="val">2人 ›</span></div>
+        <div class="row2"><span class="ico">☁️</span><div class="t">今すぐ同期</div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">データ管理</div>
+      <div class="group">
+        <div class="row2"><span class="ico">📤</span><div class="t">書き出す</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">📥</span><div class="t">復元</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">🗑️</span><div class="t danger">すべて削除</div><span class="chev">›</span></div>
+      </div>
+
+      <div class="sec-title">法的情報・応援<span class="new">新</span></div>
+      <div class="group">
+        <div class="row2"><span class="ico">📄</span><div class="t">プライバシーポリシー</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">📜</span><div class="t">利用規約<span class="new">新</span></div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">🏷️</span><div><div class="t">特定商取引法に基づく表記<span class="new">新</span></div><div class="s">日本での提供に必要な表記</div></div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">⚖️</span><div class="t">OSS ライセンス</div><span class="chev">›</span></div>
+        <div class="row2"><span class="ico">🌸</span><div class="t">開発を応援する<span class="new">新</span></div><span class="ext">↗ 外部</span></div>
+      </div>
+
+      <div class="sec-title">アプリについて</div>
+      <div class="group"><div class="row2"><span class="ico">ℹ️</span><div class="t">バージョン</div><span class="val">1.0.0 (1)</span></div></div>
+      <div style="height:24px"></div>
+    </div></div>
+    <div class="phone-label">C · 混合 ★ 选定 — 合并精简分区 + 法务·应援同组</div>
+  </div>
+
+</div>
+
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity .2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  Sketch 003 v2 · complete-settings
+</div>
+</body>
+</html>

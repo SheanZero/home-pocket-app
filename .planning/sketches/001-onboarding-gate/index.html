@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 001 — Onboarding Gate (v2)</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  .tone-band { padding:10px 24px 2px; }
+  .tone-band h2 { font-size:17px; margin:0 0 2px; color:#4a3f38; }
+  .tone-band p { font-size:13px; color:#7a6c63; margin:0; }
+  .flow-row { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; padding:18px 24px 10px; }
+  .arrow { align-self:center; font-size:26px; color:#b9a99f; }
+
+  /* intro */
+  .intro { display:flex; flex-direction:column; height:100%; text-align:center; }
+  .intro .hero { font-size:60px; margin:18px 0 8px; }
+  .feat { display:flex; align-items:flex-start; gap:12px; text-align:left; padding:11px 6px; }
+  .feat .fi { font-size:22px; width:30px; text-align:center; }
+  .feat b { font-size:15px; } .feat .sub { font-size:12.5px; }
+
+  /* default-only settings rows */
+  .drow { display:flex; align-items:center; gap:12px; padding:16px 14px; }
+  .drow + .drow { border-top:1px solid var(--border-soft); }
+  .drow .ico { width:26px; text-align:center; font-size:18px; }
+  .drow .lbl { font-size:12px; color:var(--text-muted); font-weight:700; }
+  .drow .val { font-size:16px; font-weight:700; color:var(--text); }
+  .drow .change { margin-left:auto; color:var(--shared); font-weight:700; font-size:14px; }
+  .hint { font-size:12px; color:var(--text-muted); text-align:center; line-height:1.6; padding:14px 8px 0; }
+
+  /* modal */
+  .modal-phone .screen { position:relative; }
+  .scrim { position:absolute; inset:0; background:rgba(40,30,25,.38); display:flex; align-items:flex-end; }
+  .sheet { background:#fff; width:100%; border-radius:22px 22px 0 0; padding:18px 16px 22px; }
+  .sheet h3 { margin:2px 0 12px; font-size:17px; text-align:center; }
+  .opt-row { display:flex; align-items:center; gap:12px; padding:13px 12px; border-radius:12px; cursor:pointer; }
+  .opt-row.sel { background:#eef5ee; }
+  .opt-row .ck { margin-left:auto; color:var(--primary); font-weight:800; opacity:0; }
+  .opt-row.sel .ck { opacity:1; }
+
+  .nat .group, .nat .card { border-radius:0 !important; }
+  .nat .h1 { font-weight:600; } .nat .btn { border-radius:12px; }
+</style>
+</head>
+<body>
+<div class="phone-label" style="margin-top:18px; font-size:16px;">Sketch 001 v2 · 引导 = ①介绍页 → ②基础设置（只显默认值，変更弹窗，提示可后改）</div>
+
+<!-- ============ A 温柔抛茶感 ============ -->
+<div class="tone-band"><h2>A · 温柔抛茶感 ★ 选定</h2><p>暖色问候 + 大圆角；介绍页讲价值，设置页只露默认值</p></div>
+<div class="flow-row">
+  <!-- A intro -->
+  <div><div class="phone"><div class="notch"></div><div class="screen intro">
+    <div class="hero">🌸</div>
+    <h1 class="h1" style="font-size:25px;">まもる家計簿</h1>
+    <p class="sub" style="margin-bottom:14px;">家族のお金の話を、やさしく。</p>
+    <div style="text-align:left; margin-top:6px;">
+      <div class="feat"><span class="fi">🔒</span><div><b>すべて端末内・暗号化</b><div class="sub">クラウド送信なし。あなたのデータはあなたのもの。</div></div></div>
+      <div class="feat"><span class="fi">🍀</span><div><b>日常と悦己、ふたつの帳簿</b><div class="sub">必要な支出と、自分を満たす支出を分けて見る。</div></div></div>
+      <div class="feat"><span class="fi">🎙️</span><div><b>声でサッと記録</b><div class="sub">「ランチ 800円」と話すだけ。</div></div></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary">はじめる</button>
+  </div></div><div class="phone-label">①介绍页</div></div>
+
+  <div class="arrow">→</div>
+
+  <!-- A settings defaults -->
+  <div><div class="phone"><div class="notch"></div><div class="screen">
+    <h1 class="h1" style="font-size:22px;">基本設定</h1>
+    <p class="sub" style="margin-bottom:14px;">おすすめの初期設定です。</p>
+    <div class="card" style="padding:0;">
+      <div class="drow"><span class="ico">🌐</span><div><div class="lbl">表示言語</div><div class="val">日本語</div></div><span class="change">変更</span></div>
+      <div class="drow"><span class="ico">💴</span><div><div class="lbl">通貨</div><div class="val">日本円 ¥</div></div><span class="change">変更</span></div>
+      <div class="drow"><span class="ico">🎙️</span><div><div class="lbl">音声入力の言語</div><div class="val">日本語</div></div><span class="change">変更</span></div>
+    </div>
+    <p class="hint">⚙️ これらはあとで「設定」からいつでも変更できます。</p>
+    <div class="spacer"></div>
+    <button class="btn btn-primary">この設定で始める</button>
+  </div></div><div class="phone-label">②基础设置（默认值）</div></div>
+
+  <div class="arrow">→</div>
+
+  <!-- A modal -->
+  <div><div class="phone modal-phone"><div class="notch"></div><div class="screen" style="padding:0;">
+    <div style="padding:44px 22px 22px; filter:blur(1px); opacity:.6;">
+      <h1 class="h1" style="font-size:22px;">基本設定</h1>
+      <div class="card" style="padding:0;"><div class="drow"><span class="ico">💴</span><div><div class="lbl">通貨</div><div class="val">日本円 ¥</div></div><span class="change">変更</span></div></div>
+    </div>
+    <div class="scrim"><div class="sheet">
+      <h3>通貨を選択</h3>
+      <div class="opt-row sel"><span>🇯🇵</span><b>日本円 ¥ (JPY)</b><span class="ck">✓</span></div>
+      <div class="opt-row"><span>🇨🇳</span><b>人民元 ¥ (CNY)</b><span class="ck">✓</span></div>
+      <div class="opt-row"><span>🇺🇸</span><b>米ドル $ (USD)</b><span class="ck">✓</span></div>
+      <div class="opt-row"><span>🇪🇺</span><b>ユーロ € (EUR)</b><span class="ck">✓</span></div>
+      <button class="btn btn-primary" style="margin-top:12px;">決定</button>
+    </div></div>
+  </div></div><div class="phone-label">変更 → 弹窗选择</div></div>
+</div>
+
+<div class="divider" style="max-width:900px; margin:18px auto;"></div>
+
+<!-- ============ B 清爽极简 ============ -->
+<div class="tone-band"><h2>B · 清爽极简</h2><p>系统原生、白底、紧凑；同样「介绍 → 默认设置 → 変更弹窗」流程</p></div>
+<div class="flow-row">
+  <div><div class="phone"><div class="notch"></div><div class="screen nat intro" style="background:#fff;">
+    <div class="hero" style="font-size:48px;">📒</div>
+    <h1 class="h1" style="font-size:27px;">まもる家計簿</h1>
+    <p class="sub" style="margin-bottom:18px;">プライバシー重視の家計簿。</p>
+    <div style="text-align:left;">
+      <div class="feat"><span class="fi">🔒</span><div><b>端末内・暗号化</b></div></div>
+      <div class="divider"></div>
+      <div class="feat"><span class="fi">🍀</span><div><b>日常 / 悦己の二帳簿</b></div></div>
+      <div class="divider"></div>
+      <div class="feat"><span class="fi">🎙️</span><div><b>音声で記録</b></div></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary">続ける</button>
+  </div></div><div class="phone-label">①介绍页</div></div>
+
+  <div class="arrow">→</div>
+
+  <div><div class="phone"><div class="notch"></div><div class="screen nat" style="background:#f2efec;">
+    <h1 class="h1" style="font-size:24px;">基本設定</h1>
+    <div class="sec" style="height:10px"></div>
+    <div class="group card" style="padding:0; border-radius:14px;">
+      <div class="drow"><div><div class="lbl">言語</div><div class="val">日本語</div></div><span class="change">変更 ›</span></div>
+      <div class="drow"><div><div class="lbl">通貨</div><div class="val">JPY ¥</div></div><span class="change">変更 ›</span></div>
+      <div class="drow"><div><div class="lbl">音声入力</div><div class="val">日本語</div></div><span class="change">変更 ›</span></div>
+    </div>
+    <p class="hint" style="text-align:left;">あとで設定から変更できます。</p>
+    <div class="spacer"></div>
+    <button class="btn btn-primary">続ける</button>
+  </div></div><div class="phone-label">②基础设置（默认值）</div></div>
+
+  <div class="arrow">→</div>
+
+  <div><div class="phone modal-phone"><div class="notch"></div><div class="screen" style="padding:0; background:#f2efec;">
+    <div style="padding:44px 22px; opacity:.5;"><h1 class="h1" style="font-size:24px;">基本設定</h1></div>
+    <div class="scrim"><div class="sheet" style="border-radius:14px 14px 0 0;">
+      <h3 style="text-align:left;">言語</h3>
+      <div class="opt-row sel"><b>日本語</b><span class="ck">✓</span></div>
+      <div class="opt-row"><b>中文</b><span class="ck">✓</span></div>
+      <div class="opt-row"><b>English</b><span class="ck">✓</span></div>
+    </div></div>
+  </div></div><div class="phone-label">変更 → 原生选择器</div></div>
+</div>
+
+<div class="divider" style="max-width:900px; margin:18px auto;"></div>
+
+<!-- ============ C 混合 ============ -->
+<div class="tone-band"><h2>C · 混合</h2><p>介绍页暖（首印情感），设置页冷静卡片；変更弹窗 + 末尾提示</p></div>
+<div class="flow-row">
+  <div><div class="phone"><div class="notch"></div><div class="screen intro" style="background:linear-gradient(165deg,#fbeaef,#fbf7f4 45%);">
+    <div class="hero">🌸</div>
+    <h1 class="h1" style="font-size:24px;">ようこそ</h1>
+    <p class="sub" style="margin-bottom:14px;">まもる家計簿へ。</p>
+    <div style="text-align:left;">
+      <div class="feat"><span class="fi">🔒</span><div><b>端末内・暗号化</b><div class="sub">クラウド送信なし。</div></div></div>
+      <div class="feat"><span class="fi">🍀</span><div><b>日常 / 悦己の二帳簿</b><div class="sub">支出を二つの視点で。</div></div></div>
+      <div class="feat"><span class="fi">🎙️</span><div><b>音声で記録</b><div class="sub">話すだけで一行。</div></div></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="dot-row" style="margin-bottom:14px;"><span class="dot on"></span><span class="dot"></span></div>
+    <button class="btn btn-primary">はじめる</button>
+  </div></div><div class="phone-label">①介绍页（暖）</div></div>
+
+  <div class="arrow">→</div>
+
+  <div><div class="phone"><div class="notch"></div><div class="screen">
+    <h1 class="h1" style="font-size:22px;">基本設定</h1>
+    <p class="sub" style="margin-bottom:14px;">推奨の初期値です。タップで変更。</p>
+    <div class="card" style="padding:0;">
+      <div class="drow"><span class="ico">🌐</span><div><div class="lbl">表示言語</div><div class="val">日本語</div></div><span class="change">変更</span></div>
+      <div class="drow"><span class="ico">💴</span><div><div class="lbl">通貨</div><div class="val">日本円 ¥</div></div><span class="change">変更</span></div>
+      <div class="drow"><span class="ico">🎙️</span><div><div class="lbl">音声入力</div><div class="val">日本語</div></div><span class="change">変更</span></div>
+    </div>
+    <p class="hint">設定 › 一般 からいつでも変更できます。</p>
+    <div class="spacer"></div>
+    <div class="dot-row" style="margin-bottom:12px;"><span class="dot"></span><span class="dot on"></span></div>
+    <button class="btn btn-primary">この設定で始める</button>
+  </div></div><div class="phone-label">②基础设置（默认值）</div></div>
+
+  <div class="arrow">→</div>
+
+  <div><div class="phone modal-phone"><div class="notch"></div><div class="screen" style="padding:0;">
+    <div style="padding:44px 22px; opacity:.55;"><h1 class="h1" style="font-size:22px;">基本設定</h1></div>
+    <div class="scrim"><div class="sheet">
+      <h3>音声入力の言語</h3>
+      <div class="opt-row sel"><span>🇯🇵</span><b>日本語</b><span class="ck">✓</span></div>
+      <div class="opt-row"><span>🇨🇳</span><b>中文</b><span class="ck">✓</span></div>
+      <div class="opt-row"><span>🇬🇧</span><b>English</b><span class="ck">✓</span></div>
+      <button class="btn btn-primary" style="margin-top:12px;">決定</button>
+    </div></div>
+  </div></div><div class="phone-label">変更 → 弹窗选择</div></div>
+</div>
+
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity .2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  Sketch 001 v2 · onboarding-gate
+</div>
+</body>
+</html>

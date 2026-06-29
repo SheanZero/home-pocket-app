@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 002 — App Lock (v2)</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  .tone-band { padding:10px 24px 2px; }
+  .tone-band h2 { font-size:17px; margin:0 0 2px; color:#4a3f38; }
+  .tone-band p { font-size:13px; color:#7a6c63; margin:0; }
+  .flow-row { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; padding:18px 24px 10px; }
+
+  .lock-screen { display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:100%; text-align:center; padding:0 26px; }
+  .faceid { width:88px; height:88px; border-radius:26px; display:flex; align-items:center;
+    justify-content:center; font-size:44px; }
+  .scanline { width:64px; height:3px; border-radius:2px; background:var(--primary); opacity:.5; margin-top:16px; }
+  .pin-dots { display:flex; gap:18px; justify-content:center; margin:22px 0 8px; }
+  .pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--primary); }
+  .pin-dot.f { background:var(--primary); }
+  .keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; width:100%; margin-top:16px; }
+  .key { aspect-ratio:1; border-radius:50%; border:none; background:#fff; box-shadow:var(--shadow-card);
+    font-size:25px; font-weight:600; color:var(--text); cursor:pointer; }
+  .key.fn { font-size:13px; color:var(--text-muted); background:transparent; box-shadow:none; }
+  .key sub { display:block; font-size:9px; letter-spacing:2px; color:var(--text-faint); font-weight:600; }
+  .badge-mode { position:absolute; top:48px; left:50%; transform:translateX(-50%);
+    font-size:11px; font-weight:700; color:#fff; background:rgba(0,0,0,.28); padding:4px 10px; border-radius:999px; }
+
+  .dark { background:#171210; color:#fff; }
+  .dark .faceid { background:#231e1b; } .dark .key { background:#2a2421; color:#fff; box-shadow:none; }
+  .dark .pin-dot { border-color:#8DC68D; } .dark .pin-dot.f{ background:#8DC68D; } .dark .sub{ color:#b8a99f; }
+  .dark .key.fn { color:#9a8d83; }
+</style>
+</head>
+<body>
+<div class="phone-label" style="margin-top:18px; font-size:16px;">Sketch 002 v2 · 应用锁 = 两个独立页面（Face ID 页 / PIN 页），按设置选择，二者都开则 Face ID 优先</div>
+
+<div style="text-align:center; max-width:880px; margin:8px auto 0; color:#6b5d54; font-size:13px; line-height:1.7;">
+  逻辑：冷启动 / 回前台 → 读设置 →
+  <b>仅 Face ID</b> 或 <b>Face ID + PIN</b> → 显示「Face ID 页」（识别失败可切到 PIN 页）；
+  <b>仅 PIN</b> → 直接显示「PIN 页」。两页是分离的 surface，不再混排。
+</div>
+
+<!-- ============ A 温柔抛茶感 ============ -->
+<div class="tone-band"><h2>A · 温柔抛茶感</h2><p>暖色渐变 + 大圆角；两页同一视觉语言</p></div>
+<div class="flow-row">
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen" style="background:linear-gradient(160deg,#fbeaef,#fbf7f4 45%);">
+      <div class="badge-mode">Face ID</div>
+      <div class="lock-screen">
+        <div style="font-size:38px; margin-bottom:8px;">🌸</div>
+        <h2 class="h2">まもる家計簿</h2>
+        <div class="faceid" style="background:#fff; box-shadow:var(--shadow-soft); margin:24px 0 4px;">🙂</div>
+        <div class="scanline"></div>
+        <p class="sub" style="font-size:13px; margin-top:14px;">Face ID で解除しています…</p>
+        <div class="spacer" style="height:48px"></div>
+        <button class="btn btn-ghost" style="width:auto;">PIN で解除する</button>
+      </div>
+    </div></div><div class="phone-label">Face ID 页（主）</div></div>
+
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen" style="background:linear-gradient(160deg,#fbeaef,#fbf7f4 45%);">
+      <div class="badge-mode">PIN</div>
+      <div class="lock-screen">
+        <div style="font-size:30px; margin-bottom:4px;">🌸</div>
+        <h2 class="h2" style="font-size:18px;">PIN を入力</h2>
+        <div class="pin-dots"><span class="pin-dot f"></span><span class="pin-dot f"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
+        <div class="keypad">
+          <button class="key">1</button><button class="key">2<sub>ABC</sub></button><button class="key">3<sub>DEF</sub></button>
+          <button class="key">4<sub>GHI</sub></button><button class="key">5<sub>JKL</sub></button><button class="key">6<sub>MNO</sub></button>
+          <button class="key">7<sub>PQRS</sub></button><button class="key">8<sub>TUV</sub></button><button class="key">9<sub>WXYZ</sub></button>
+          <button class="key fn">🙂</button><button class="key">0</button><button class="key fn">⌫</button>
+        </div>
+      </div>
+    </div></div><div class="phone-label">PIN 页（仅PIN / 回退）</div></div>
+</div>
+
+<div class="divider" style="max-width:900px; margin:18px auto;"></div>
+
+<!-- ============ B 清爽极简 ★ 选定（含浅色 + 深色）============ -->
+<div class="tone-band"><h2>B · 清爽极简 ★ 选定</h2><p>系统原生，跟随主题：浅色模式 + 深色模式各一组（Face ID 极简、PIN 标准九宫格）</p></div>
+
+<!-- B 浅色模式 -->
+<div style="text-align:center; font-size:13px; font-weight:700; color:#8a7a6f; padding-top:6px;">浅色模式（テーマ: ライト / システム明）</div>
+<div class="flow-row">
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen" style="background:#fff;">
+      <div class="badge-mode" style="background:rgba(0,0,0,.10); color:#5a5048;">FACE ID</div>
+      <div class="lock-screen">
+        <div class="faceid" style="background:#f4f1ee; box-shadow:var(--shadow-card); margin-bottom:18px;">🔒</div>
+        <h2 class="h2" style="font-weight:600;">まもる家計簿</h2>
+        <p class="sub" style="font-size:13px;">Face ID を見つめてください</p>
+        <div class="spacer" style="height:60px"></div>
+        <button class="btn btn-ghost" style="width:auto; color:var(--primary);">パスコードを使用</button>
+      </div>
+    </div></div><div class="phone-label">Face ID 页（浅色）</div></div>
+
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen" style="background:#fff;">
+      <div class="badge-mode" style="background:rgba(0,0,0,.10); color:#5a5048;">PASSCODE</div>
+      <div class="lock-screen">
+        <h2 class="h2" style="font-weight:600; margin-bottom:2px;">パスコードを入力</h2>
+        <div class="pin-dots"><span class="pin-dot f"></span><span class="pin-dot f"></span><span class="pin-dot f"></span><span class="pin-dot"></span></div>
+        <div class="keypad">
+          <button class="key">1</button><button class="key">2</button><button class="key">3</button>
+          <button class="key">4</button><button class="key">5</button><button class="key">6</button>
+          <button class="key">7</button><button class="key">8</button><button class="key">9</button>
+          <button class="key fn">Face ID</button><button class="key">0</button><button class="key fn">⌫</button>
+        </div>
+      </div>
+    </div></div><div class="phone-label">PIN 页（浅色）</div></div>
+</div>
+
+<!-- B 深色模式 -->
+<div style="text-align:center; font-size:13px; font-weight:700; color:#8a7a6f; padding-top:4px;">深色模式（テーマ: ダーク / システム暗）</div>
+<div class="flow-row">
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen dark">
+      <div class="badge-mode" style="background:rgba(255,255,255,.14)">FACE ID</div>
+      <div class="lock-screen">
+        <div class="faceid" style="margin-bottom:18px;">🔒</div>
+        <h2 class="h2" style="color:#fff; font-weight:600;">まもる家計簿</h2>
+        <p class="sub" style="font-size:13px;">Face ID を見つめてください</p>
+        <div class="spacer" style="height:60px"></div>
+        <button class="btn btn-ghost" style="width:auto; color:#8DC68D;">パスコードを使用</button>
+      </div>
+    </div></div><div class="phone-label">Face ID 页（主）</div></div>
+
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen dark">
+      <div class="badge-mode" style="background:rgba(255,255,255,.14)">PASSCODE</div>
+      <div class="lock-screen">
+        <h2 class="h2" style="color:#fff; font-weight:600; margin-bottom:2px;">パスコードを入力</h2>
+        <div class="pin-dots"><span class="pin-dot f"></span><span class="pin-dot f"></span><span class="pin-dot f"></span><span class="pin-dot"></span></div>
+        <div class="keypad">
+          <button class="key">1</button><button class="key">2</button><button class="key">3</button>
+          <button class="key">4</button><button class="key">5</button><button class="key">6</button>
+          <button class="key">7</button><button class="key">8</button><button class="key">9</button>
+          <button class="key fn">Face ID</button><button class="key">0</button><button class="key fn">⌫</button>
+        </div>
+      </div>
+    </div></div><div class="phone-label">PIN 页（仅PIN / 回退）</div></div>
+</div>
+
+<div class="divider" style="max-width:900px; margin:18px auto;"></div>
+
+<!-- ============ C 混合 ============ -->
+<div class="tone-band"><h2>C · 混合</h2><p>暖底但冷静；Face ID 页含失败态文案，PIN 页含重试计数</p></div>
+<div class="flow-row">
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen" style="background:var(--bg);">
+      <div class="badge-mode">Face ID</div>
+      <div class="lock-screen">
+        <div style="font-size:30px; margin-bottom:6px;">🌸</div>
+        <div class="faceid" style="background:#fff; box-shadow:var(--shadow-soft); margin-bottom:6px;">🙂</div>
+        <div class="scanline"></div>
+        <h2 class="h2" style="font-size:17px; margin-top:18px;">ロックを解除</h2>
+        <p class="sub" style="font-size:13px;">Face ID をご利用ください</p>
+        <div class="spacer" style="height:44px"></div>
+        <button class="btn btn-outline" style="width:auto; padding:11px 22px;">PIN で解除</button>
+      </div>
+    </div></div><div class="phone-label">Face ID 页（主）</div></div>
+
+  <div><div class="phone"><div class="notch"></div>
+    <div class="screen" style="background:var(--bg);">
+      <div class="badge-mode">PIN</div>
+      <div class="lock-screen">
+        <div style="font-size:26px;">🌸</div>
+        <h2 class="h2" style="font-size:17px;">PIN を入力</h2>
+        <div class="pin-dots"><span class="pin-dot f"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
+        <div class="keypad">
+          <button class="key">1</button><button class="key">2</button><button class="key">3</button>
+          <button class="key">4</button><button class="key">5</button><button class="key">6</button>
+          <button class="key">7</button><button class="key">8</button><button class="key">9</button>
+          <button class="key fn">🙂</button><button class="key">0</button><button class="key fn">⌫</button>
+        </div>
+        <p class="sub" style="font-size:12px; margin-top:12px; color:var(--warning);">残り 4 回</p>
+      </div>
+    </div></div><div class="phone-label">PIN 页（含重试计数）</div></div>
+</div>
+
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity .2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  Sketch 002 v2 · app-lock
+</div>
+</body>
+</html>
