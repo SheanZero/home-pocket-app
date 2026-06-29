@@ -11,7 +11,7 @@
 
 > 硬约束（用户要求）：先用 Claude design 出 HTML 设计稿，**经用户确认后才进入对应生产代码**。沿用 v1.8 Phase 43 precedent。
 
-- [ ] **DESIGN-01**: 欢迎/首启引导流程的 HTML 设计稿产出并经用户确认（含 app 介绍 + UI语言/币种/语音语言三步设置）
+- [x] **DESIGN-01**: 欢迎/首启引导流程的 HTML 设计稿产出并经用户确认（含 app 介绍 + UI语言/币种/语音语言三步设置）
 - [ ] **DESIGN-02**: 应用锁屏（生物识别提示 + PIN 输入）的 HTML 设计稿产出并经用户确认
 - [ ] **DESIGN-03**: Setting 法务/赞助区块布局的 HTML 设计稿产出并经用户确认
 - [ ] **DESIGN-04**: 设计关卡未获批前不写对应生产 Dart 代码（关卡产物仅 `.planning/` 下 HTML/Markdown）
@@ -91,7 +91,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DESIGN-01 | Phase 53 | Pending |
+| DESIGN-01 | Phase 53 | Complete |
 | DESIGN-02 | Phase 53 | Pending |
 | DESIGN-03 | Phase 53 | Pending |
 | DESIGN-04 | Phase 53 | Pending |
@@ -124,6 +124,7 @@
 | LEGAL-06 | Phase 56 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 31 total (DESIGN 4 · ONBOARD 7 · LOCK 10 · DONATE 4 · LEGAL 6)
 - Mapped to phases: 31 (Phase 53: 4 · Phase 54: 7 · Phase 55: 10 · Phase 56: 10)
 - Unmapped: 0 ✓ (100% coverage, no orphans, no duplicates)

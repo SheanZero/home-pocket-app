@@ -177,10 +177,10 @@
   3. 用户已审阅并批准 Setting 法务/赞助区块布局的 HTML 设计稿 — DESIGN-03
   4. 关卡退出时仓库零新增生产 Dart——所有关卡产物仅在 `.planning/` 下的 HTML/Markdown — DESIGN-04
 
-**Plans**: 4 plans
+**Plans**: 1/4 plans executed
 **Wave 1**
 
-- [ ] 53-01-PLAN.md — onboarding (001/A) QA against DESIGN-01 + approval-ready summary [wave 1]
+- [x] 53-01-PLAN.md — onboarding (001/A) QA against DESIGN-01 + approval-ready summary [wave 1]
 - [ ] 53-02-PLAN.md — app-lock (002/B light+dark) QA against DESIGN-02 + approval-ready summary [wave 1]
 - [ ] 53-03-PLAN.md — Settings legal/sponsor (003/C) QA against DESIGN-03 + approval-ready summary [wave 1]
 
