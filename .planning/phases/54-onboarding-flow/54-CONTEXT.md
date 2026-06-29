@@ -49,6 +49,13 @@
 ### 昵称必填
 - **D-14 (坚持昵称必填):** 昵称行初始显示「未設定」占位，确认键 `この設定で始める` **被拦截直到用户实际设过昵称**（沿用现有 `ProfileOnboardingScreen` 必填契约，覆盖 D-01 早先草拟的「必填」并明确不给默认占位值）。头像有随机暖 emoji 默认（`randomWarmEmoji()`）、语言/币种/语音有默认值 → **唯一强制动作=设昵称**；不保留「零输入一键确认」。
 
+### Research-Resolved Clarifications (2026-06-29, 调研后修正)
+> 来源：`54-RESEARCH.md`（HIGH confidence，逐文件核实）。以下修正/补强既有锁定决策，**不新增可追踪 D-NN**。
+- **D-04 修正（存储介质，用户确认 2026-06-29）：** `AppSettings` 实际由 **SharedPreferences（明文）** 持久化（`lib/data/repositories/settings_repository_impl.dart`，每字段一 key），并非 Drift 加密库——CONTEXT 早先「Drift 加密」前提有误。决议：`onboarding_complete` 作为 **明文 prefs 字段** 落地（`@Default(false) bool onboardingComplete` + 新 prefs key + getter/setter + 纳入 `updateSettings`），与全部现有设置项同构。**无 Drift 迁移，`schemaVersion` 保持 22**（CLAUDE.md 记「21」为陈旧）。D-04 核心约束不变：**绝不从 currency≠null 反推**。
+- **D-05 补强（擦库须擦身份）：** 现 `ClearAllDataUseCase` 仅 `updateSettings(const AppSettings())`（→ `onboardingComplete=false`，重走引导成立），但 **不删 `UserProfile`**，昵称/头像会残留——违反 D-05「身份也被擦」。planner **必须** 在 clear 路径加入 `UserProfile` 删除（先确认 `UserProfileRepository` 是否已暴露 delete，无则小幅新增）。
+- **D-06 落点确认：** `onboarding_complete` 已随 backup 的 `settings` map 走（**无需给 `BackupData` 加字段**）；`ImportBackupUseCase._restoreData` 须 `.copyWith(onboardingComplete: true)` 后再 `updateSettings`（兼容旧 `.hpb`，import_backup_use_case.dart:163）。
+- **Gate 读取方式（实现细节，Claude's Discretion）：** gate 采用 **init settle 后一次性捕获**（沿用 `_needsProfileOnboarding` 既有 precedent + 「绝不竞态」措辞），并在 `_reinitializeAfterDataReset` 重新捕获；不用 `ref.watch(appSettingsProvider)` 反应式（branch 3 有 loading-null 竞态风险）。
+
 ### Claude's Discretion
 - 新增引导文案的 ARB key 命名与组织（实现期约束，三语 ja/zh/en 齐全，过 ARB parity + 硬编码 CJK 扫描）。
 - 介绍页卖点的具体排版/插画/跳过按钮位置（单屏列卖点；轮播 = ONBOARD-V2-01 已 defer）。
