@@ -202,7 +202,7 @@
   1. 全新安装首次启动展示引导；完成后再次启动直接进入主 shell、引导不再出现（幂等；gate 在 init settle 后判定，绝不与 init 竞态、绝不从 currency≠null 反推）— ONBOARD-01/07
   2. 用户在引导内看到 app 整体介绍（隐私 / 本地优先 / 双账本卖点），介绍部分可跳过 — ONBOARD-02
   3. 用户确认 UI 语言后 MaterialApp 即时切换；确认记账币种（JPY 默认）写入既有 `Book.currency`（复用 v1.7 货币选择器）；确认语音输入语言（默认=所选 UI 语言）写入既有语音 locale 设置 — ONBOARD-03/04/05
-  4. 引导可返回上一步并显示进度、无法卡死（re-entrant）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
+  4. 引导可返回上一步、无法卡死（re-entrant）（进度仅靠返回键/手势体现、无显式进度条 — D-12 有意取舍，supersedes 早先「显示进度」措辞）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
   5. 所有新增引导文案三语（ja/zh/en）ARB 齐全，过 parity + 硬编码CJK扫描
 
 **Plans**: 7 plans

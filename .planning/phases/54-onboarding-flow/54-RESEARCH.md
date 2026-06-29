@@ -365,9 +365,14 @@ From `.planning/sketches/001-onboarding-gate/index.html`: 「すべて端末内�
 | A3 | `UserProfileRepository` can be made to delete the profile (or already can) | Finding #4 | If no delete exists, slightly larger change in clear path |
 | A4 | Captured-after-init gate (not reactive watch) is the intended pattern for "绝不竞态" | Pattern 2 | Reactive watch is a viable alternative (Open Questions) |
 
-## Open Questions
+## Open Questions (ALL RESOLVED 2026-06-29)
 
-1. **D-04 storage medium (plaintext prefs vs Drift-encrypted).**
+> Resolved into `54-CONTEXT.md` § Research-Resolved Clarifications and implemented across the 7 plans:
+> (1) **plaintext SharedPreferences** — user-confirmed 2026-06-29; no Drift migration, schemaVersion stays 22 (54-01).
+> (2) **clear-all wipes `UserProfile`** — `UserProfileRepository.delete(String id)` already exists; injected into `ClearAllDataUseCase` (54-04).
+> (3) **captured-after-init gate** — adopted (not reactive watch); re-read in `_reinitializeAfterDataReset` (54-07).
+
+1. **D-04 storage medium (plaintext prefs vs Drift-encrypted).** → **RESOLVED: plaintext prefs.**
    - What we know: All settings today are plaintext SharedPreferences; `onboarding_complete` is a non-sensitive boolean.
    - What's unclear: Whether D-04's "Drift 加密" wording is a hard requirement or a misdescription of the existing model.
    - Recommendation: Use SharedPreferences (consistent, no migration); surface A1 to discuss-phase as a one-line confirm.

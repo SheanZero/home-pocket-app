@@ -4,11 +4,11 @@ milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 54
 current_phase_name: 欢迎 / 首启引导（Onboarding flow）
-status: verifying
-stopped_at: Phase 54 context gathered
-last_updated: "2026-06-29T07:38:21.669Z"
+status: planned
+stopped_at: Phase 54 planned (7 plans, 3 waves) — ready to execute
+last_updated: "2026-06-29T17:00:00.000Z"
 last_activity: 2026-06-29
-last_activity_desc: Phase 53 complete, transitioned to Phase 54
+last_activity_desc: Phase 54 planned — 7 plans across 3 waves (research + validation + patterns done, plan-checker PASSED)
 progress:
   total_phases: 4
   completed_phases: 1
@@ -24,16 +24,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 53 — html
+**Current focus:** Phase 54 — 欢迎 / 首启引导（Onboarding flow）— planned, ready to execute
 
 ## Current Position
 
 Phase: 54 — 欢迎 / 首启引导（Onboarding flow）
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-06-29 — Phase 53 complete, transitioned to Phase 54
+Plan: 7 plans across 3 waves — ready to execute
+Status: Ready to execute
+Last activity: 2026-06-29 — Phase 54 planned (research + validation + patterns + 7 plans; plan-checker PASSED)
 
-Progress: [██░░░░░░░░] 25% — Phase 53 plans 4/4 complete, ready for verification
+Progress: [██░░░░░░░░] 25% — Phase 54 planned (7 plans / 3 waves); Phase 53 complete (4/4 plans)
+
+> **Planning gate note (verify-phase, re-surface):** §13a decision-coverage-plan gate returned `passed:false` with `total:14, covered:0, uncovered:0` — this is the known CJK-decision-bullet parse false-negative (covered:0 AND uncovered:0 = gate did not evaluate, not a real gap). Override taken: all 14 decisions D-01..D-14 are verified cited across the 7 plans (grep-confirmed + plan-checker VERIFICATION PASSED + §13e gap-analysis "all 21 covered"). Not a real coverage gap.
 
 ### Decisions
 
@@ -186,9 +188,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-29T07:38:21.661Z
-Stopped at: Phase 54 context gathered
-Resume file: .planning/phases/54-onboarding-flow/54-CONTEXT.md
+Last session: 2026-06-29T17:00:00.000Z
+Stopped at: Phase 54 planned (7 plans, 3 waves) — ready to execute
+Resume file: .planning/phases/54-onboarding-flow/ (run /gsd-execute-phase 54)
 
 ## Performance Metrics
 
