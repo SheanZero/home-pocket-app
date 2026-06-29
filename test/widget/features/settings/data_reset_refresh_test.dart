@@ -43,6 +43,9 @@ import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show getUserProfileUseCaseProvider;
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
+import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart'
+    show settingsRepositoryProvider;
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -103,6 +106,24 @@ class _FakeGetUserProfileUseCase implements GetUserProfileUseCase {
   Future<UserProfile?> execute() async => _testProfile;
 }
 
+/// Settings repo whose `getSettings()` returns a fixed onboardingComplete flag.
+/// This test exercises the data-reset refresh path with the app already past
+/// the onboarding gate, so the flag is forced true (the boot gate reads
+/// `settingsRepositoryProvider.getSettings()` directly — 54-07).
+class _FakeSettingsRepository implements SettingsRepository {
+  _FakeSettingsRepository({required this.onboardingComplete});
+
+  final bool onboardingComplete;
+
+  @override
+  Future<AppSettings> getSettings() async =>
+      AppSettings(onboardingComplete: onboardingComplete);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      super.noSuchMethod(invocation);
+}
+
 final _testProfile = UserProfile(
   id: 'profile-1',
   displayName: 'Tester',
@@ -155,6 +176,9 @@ void main() {
         ),
         getUserProfileUseCaseProvider.overrideWithValue(
           _FakeGetUserProfileUseCase(),
+        ),
+        settingsRepositoryProvider.overrideWith(
+          (ref) => _FakeSettingsRepository(onboardingComplete: true),
         ),
       ],
     );
