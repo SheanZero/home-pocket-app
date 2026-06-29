@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 54
-current_phase_name: 欢迎 / 首启引导（Onboarding flow）
-status: planned
+current_phase_name: onboarding-flow
+status: executing
 stopped_at: Phase 54 planned (7 plans, 3 waves) — ready to execute
-last_updated: "2026-06-29T17:00:00.000Z"
+last_updated: "2026-06-29T13:37:56.136Z"
 last_activity: 2026-06-29
-last_activity_desc: Phase 54 planned — 7 plans across 3 waves (research + validation + patterns done, plan-checker PASSED)
+last_activity_desc: Phase 54 execution started
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 11
+  completed_plans: 5
   percent: 25
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 54 — 欢迎 / 首启引导（Onboarding flow）— planned, ready to execute
+**Current focus:** Phase 54 — onboarding-flow
 
 ## Current Position
 
-Phase: 54 — 欢迎 / 首启引导（Onboarding flow）
-Plan: 7 plans across 3 waves — ready to execute
+Phase: 54 (onboarding-flow) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-06-29 — Phase 54 planned (research + validation + patterns + 7 plans; plan-checker PASSED)
+Last activity: 2026-06-29 — Phase 54 execution started
 
 Progress: [██░░░░░░░░] 25% — Phase 54 planned (7 plans / 3 waves); Phase 53 complete (4/4 plans)
 
@@ -44,6 +44,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 53]: 53-01: onboarding sketch 001 tone A satisfies DESIGN-01, zero HTML edits (design-gate record-not-recreate)
 - [Phase 53]: app-lock sketch 002 tone B (Face ID + PIN, light+dark) satisfies DESIGN-02 with zero HTML edits
 - [Phase 53]: 53-04: user approved all three designs (001/A, 002/B, 003/C) — DESIGN-01/02/03 经用户确认 completed; DESIGN-04 zero-Dart gate-exit verified, gate closed
+- [Phase ?]: 54-01: onboardingComplete is plaintext SharedPreferences (no Drift migration, schemaVersion stays 22); voice-default resolver constrains output to {ja,zh,en}, never 'system'
 
 ### Quick Tasks Completed
 
@@ -188,7 +189,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-29T17:00:00.000Z
+Last session: 2026-06-29T13:37:50.499Z
 Stopped at: Phase 54 planned (7 plans, 3 waves) — ready to execute
 Resume file: .planning/phases/54-onboarding-flow/ (run /gsd-execute-phase 54)
 
@@ -252,6 +253,7 @@ Resume file: .planning/phases/54-onboarding-flow/ (run /gsd-execute-phase 54)
 | Phase 53 P01 | ~6m | 2 tasks | 1 files |
 | Phase 53 P02 | 5m | 2 tasks | 1 files |
 | Phase 53 P04 | 5 min | 2 tasks | 2 files |
+| Phase 54 P01 | 12min | 2 tasks | 6 files |
 
 ## Decisions
 

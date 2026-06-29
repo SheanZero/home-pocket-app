@@ -205,12 +205,12 @@
   4. 引导可返回上一步、无法卡死（re-entrant）（进度仅靠返回键/手势体现、无显式进度条 — D-12 有意取舍，supersedes 早先「显示进度」措辞）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
   5. 所有新增引导文案三语（ja/zh/en）ARB 齐全，过 parity + 硬编码CJK扫描
 
-**Plans**: 7 plans
+**Plans**: 1/7 plans executed
 **UI hint**: yes
 
 **Wave 1** *(parallel — independent foundation, zero file overlap)*
 
-- [ ] 54-01-PLAN.md — persisted `onboardingComplete` flag (SharedPreferences, no Drift migration) + pure device-preselect/voice-default resolution helpers [wave 1]
+- [x] 54-01-PLAN.md — persisted `onboardingComplete` flag (SharedPreferences, no Drift migration) + pure device-preselect/voice-default resolution helpers [wave 1]
 - [ ] 54-02-PLAN.md — onboarding ARB copy ja/zh/en (single owner) incl. `この設定で始める` + gen-l10n [wave 1]
 - [ ] 54-03-PLAN.md — Settings deep-link target: `scrollToSecurity` + SecuritySection anchor (D-13) [wave 1]
 
