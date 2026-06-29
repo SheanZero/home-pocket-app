@@ -18,19 +18,69 @@ import '../widgets/security_section.dart';
 import '../widgets/voice_section.dart';
 
 /// Main settings screen with all configuration sections.
-class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key, required this.bookId});
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({
+    super.key,
+    required this.bookId,
+    this.scrollToSecurity = false,
+  });
 
   final String bookId;
 
+  /// Opt-in deep-link intent (D-13 / ONBOARD-06). When true, the list is
+  /// scrolled so the [SecuritySection] is brought into view after the first
+  /// frame. Defaults to false so every existing caller is byte-compatible.
+  final bool scrollToSecurity;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  /// Anchor on the [SecuritySection] slot — the deep-link scroll target.
+  final GlobalKey _securitySectionKey = GlobalKey();
+
+  /// Drives the deep-link scroll. Attaching it has no side-effect on the
+  /// default (non-deep-link) render.
+  final ScrollController _scrollController = ScrollController();
+
+  /// One-shot guard so the scroll does not re-fire on rebuild.
+  bool _didScrollToSecurity = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _maybeScrollToSecurity() {
+    if (!widget.scrollToSecurity || _didScrollToSecurity) return;
+    if (!_scrollController.hasClients) return;
+    _didScrollToSecurity = true;
+    // SecuritySection sits near the end of a lazy ListView, so its element is
+    // not mounted at offset 0 and its GlobalKey context is null. Jump to the
+    // bottom first to force the bottom slice (including SecuritySection) to
+    // build, then center the section precisely once its context exists.
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final targetContext = _securitySectionKey.currentContext;
+      if (targetContext == null) return;
+      Scrollable.ensureVisible(
+        targetContext,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settingsAsync = ref.watch(appSettingsProvider);
-    final bookAsync = ref.watch(bookByIdProvider(bookId: bookId));
+    final bookAsync = ref.watch(bookByIdProvider(bookId: widget.bookId));
     final currencyCode = bookAsync.value?.currency ?? 'JPY';
     final recommendationAsync = ref.watch(
       monthlyJoyTargetRecommendationProvider(
-        bookId: bookId,
+        bookId: widget.bookId,
         currencyCode: currencyCode,
       ),
     );
@@ -44,35 +94,44 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).settings)),
       body: settingsAsync.when(
-        data: (settings) => ListView(
-          children: [
-            const ProfileSectionCard(),
-            const Divider(),
-            AppearanceSection(settings: settings),
-            const Divider(),
-            VoiceSection(settings: settings),
-            const Divider(),
-            JoyTargetSection(
-              configuredTarget: settings.monthlyJoyTarget,
-              recommendedTarget: recommendedTarget,
-              fallbackTarget: fallbackTarget,
-              onSave: (value) async {
-                await ref
-                    .read(settingsRepositoryProvider)
-                    .setMonthlyJoyTarget(value);
-                ref.invalidate(appSettingsProvider);
-              },
-            ),
-            const Divider(),
-            DataManagementSection(bookId: bookId),
-            const Divider(),
-            const FamilySyncSettingsSection(),
-            const Divider(),
-            SecuritySection(settings: settings),
-            const Divider(),
-            const AboutSection(),
-          ],
-        ),
+        data: (settings) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _maybeScrollToSecurity(),
+          );
+          return ListView(
+            controller: _scrollController,
+            children: [
+              const ProfileSectionCard(),
+              const Divider(),
+              AppearanceSection(settings: settings),
+              const Divider(),
+              VoiceSection(settings: settings),
+              const Divider(),
+              JoyTargetSection(
+                configuredTarget: settings.monthlyJoyTarget,
+                recommendedTarget: recommendedTarget,
+                fallbackTarget: fallbackTarget,
+                onSave: (value) async {
+                  await ref
+                      .read(settingsRepositoryProvider)
+                      .setMonthlyJoyTarget(value);
+                  ref.invalidate(appSettingsProvider);
+                },
+              ),
+              const Divider(),
+              DataManagementSection(bookId: widget.bookId),
+              const Divider(),
+              const FamilySyncSettingsSection(),
+              const Divider(),
+              KeyedSubtree(
+                key: _securitySectionKey,
+                child: SecuritySection(settings: settings),
+              ),
+              const Divider(),
+              const AboutSection(),
+            ],
+          );
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
       ),
