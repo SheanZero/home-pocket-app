@@ -2966,5 +2966,101 @@
   "@recognitionAlternatesMore": {
     "description": "Exit chip label on the alternate-category chip row; opens the full category selector (D-04)"
   },
+  "onboardingIntroTitle": "Home Pocket",
+  "@onboardingIntroTitle": {
+    "description": "Onboarding intro screen: app title"
+  },
+  "onboardingIntroSubtitle": "Make family money talk gentle.",
+  "@onboardingIntroSubtitle": {
+    "description": "Onboarding intro screen: subtitle tagline"
+  },
+  "onboardingIntroPrivacyTitle": "All on-device & encrypted",
+  "@onboardingIntroPrivacyTitle": {
+    "description": "Onboarding intro selling point: privacy/encryption title"
+  },
+  "onboardingIntroPrivacyBody": "Never sent to the cloud. Your data is yours.",
+  "@onboardingIntroPrivacyBody": {
+    "description": "Onboarding intro selling point: privacy/encryption body"
+  },
+  "onboardingIntroLocalTitle": "Local-first",
+  "@onboardingIntroLocalTitle": {
+    "description": "Onboarding intro selling point: local-first title"
+  },
+  "onboardingIntroLocalBody": "Works instantly, even offline.",
+  "@onboardingIntroLocalBody": {
+    "description": "Onboarding intro selling point: local-first body"
+  },
+  "onboardingIntroLedgerTitle": "Daily and Joy, two ledgers",
+  "@onboardingIntroLedgerTitle": {
+    "description": "Onboarding intro selling point: dual-ledger title"
+  },
+  "onboardingIntroLedgerBody": "See essential spending and self-fulfilling spending apart.",
+  "@onboardingIntroLedgerBody": {
+    "description": "Onboarding intro selling point: dual-ledger body"
+  },
+  "onboardingIntroVoiceTitle": "Log it with your voice",
+  "@onboardingIntroVoiceTitle": {
+    "description": "Onboarding intro selling point: voice title"
+  },
+  "onboardingIntroVoiceBody": "Just say “Lunch 800 yen.”",
+  "@onboardingIntroVoiceBody": {
+    "description": "Onboarding intro selling point: voice body"
+  },
+  "onboardingIntroContinue": "Get started",
+  "@onboardingIntroContinue": {
+    "description": "Onboarding intro: continue button to the settings step"
+  },
+  "onboardingIntroSkip": "Skip",
+  "@onboardingIntroSkip": {
+    "description": "Onboarding intro: skip button (ONBOARD-02 intro is skippable)"
+  },
+  "onboardingSettingsTitle": "Basic Settings",
+  "@onboardingSettingsTitle": {
+    "description": "Onboarding settings page: heading"
+  },
+  "onboardingSettingsSubtitle": "Recommended initial settings.",
+  "@onboardingSettingsSubtitle": {
+    "description": "Onboarding settings page: subtitle"
+  },
+  "onboardingSettingsHint": "You can change these anytime later in Settings.",
+  "@onboardingSettingsHint": {
+    "description": "Onboarding settings page: change-later hint"
+  },
+  "onboardingRowCurrency": "Currency",
+  "@onboardingRowCurrency": {
+    "description": "Onboarding settings row label: bookkeeping currency (D-10)"
+  },
+  "onboardingRowVoice": "Voice input language",
+  "@onboardingRowVoice": {
+    "description": "Onboarding settings row label: voice input language (D-10)"
+  },
+  "onboardingChange": "Change",
+  "@onboardingChange": {
+    "description": "Onboarding settings row: change action button"
+  },
+  "onboardingNicknameUnset": "Not set",
+  "@onboardingNicknameUnset": {
+    "description": "Onboarding settings nickname row empty-state placeholder (D-14)"
+  },
+  "onboardingStart": "Start with these settings",
+  "@onboardingStart": {
+    "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
+  },
+  "onboardingLockTitle": "Set up an app lock?",
+  "@onboardingLockTitle": {
+    "description": "Onboarding lock-entry screen: title (D-11)"
+  },
+  "onboardingLockDescription": "An app lock keeps your ledger extra safe.",
+  "@onboardingLockDescription": {
+    "description": "Onboarding lock-entry screen: neutral one-line description"
+  },
+  "onboardingLockSkip": "Skip",
+  "@onboardingLockSkip": {
+    "description": "Onboarding lock-entry screen: skip button (lock stays off, D-13)"
+  },
+  "onboardingLockSetupNow": "Set up now",
+  "@onboardingLockSetupNow": {
+    "description": "Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)"
+  },
   "@@locale": "en"
 }

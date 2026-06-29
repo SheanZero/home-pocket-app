@@ -2966,5 +2966,101 @@
   "@recognitionAlternatesMore": {
     "description": "Exit chip label on the alternate-category chip row; opens the full category selector (D-04)"
   },
+  "onboardingIntroTitle": "守护家计簿",
+  "@onboardingIntroTitle": {
+    "description": "Onboarding intro screen: app title"
+  },
+  "onboardingIntroSubtitle": "让家庭的金钱话题，变得温柔。",
+  "@onboardingIntroSubtitle": {
+    "description": "Onboarding intro screen: subtitle tagline"
+  },
+  "onboardingIntroPrivacyTitle": "全部本地存储・加密",
+  "@onboardingIntroPrivacyTitle": {
+    "description": "Onboarding intro selling point: privacy/encryption title"
+  },
+  "onboardingIntroPrivacyBody": "不上传云端。你的数据只属于你。",
+  "@onboardingIntroPrivacyBody": {
+    "description": "Onboarding intro selling point: privacy/encryption body"
+  },
+  "onboardingIntroLocalTitle": "本地优先",
+  "@onboardingIntroLocalTitle": {
+    "description": "Onboarding intro selling point: local-first title"
+  },
+  "onboardingIntroLocalBody": "即使离线也能随时使用。",
+  "@onboardingIntroLocalBody": {
+    "description": "Onboarding intro selling point: local-first body"
+  },
+  "onboardingIntroLedgerTitle": "日常与悦己，两本账簿",
+  "@onboardingIntroLedgerTitle": {
+    "description": "Onboarding intro selling point: dual-ledger title"
+  },
+  "onboardingIntroLedgerBody": "把必要开销与取悦自己的开销分开来看。",
+  "@onboardingIntroLedgerBody": {
+    "description": "Onboarding intro selling point: dual-ledger body"
+  },
+  "onboardingIntroVoiceTitle": "用声音快速记账",
+  "@onboardingIntroVoiceTitle": {
+    "description": "Onboarding intro selling point: voice title"
+  },
+  "onboardingIntroVoiceBody": "只需说一句「午餐 800 日元」。",
+  "@onboardingIntroVoiceBody": {
+    "description": "Onboarding intro selling point: voice body"
+  },
+  "onboardingIntroContinue": "开始",
+  "@onboardingIntroContinue": {
+    "description": "Onboarding intro: continue button to the settings step"
+  },
+  "onboardingIntroSkip": "跳过",
+  "@onboardingIntroSkip": {
+    "description": "Onboarding intro: skip button (ONBOARD-02 intro is skippable)"
+  },
+  "onboardingSettingsTitle": "基本设置",
+  "@onboardingSettingsTitle": {
+    "description": "Onboarding settings page: heading"
+  },
+  "onboardingSettingsSubtitle": "这是推荐的初始设置。",
+  "@onboardingSettingsSubtitle": {
+    "description": "Onboarding settings page: subtitle"
+  },
+  "onboardingSettingsHint": "这些都可以稍后在「设置」中随时修改。",
+  "@onboardingSettingsHint": {
+    "description": "Onboarding settings page: change-later hint"
+  },
+  "onboardingRowCurrency": "货币",
+  "@onboardingRowCurrency": {
+    "description": "Onboarding settings row label: bookkeeping currency (D-10)"
+  },
+  "onboardingRowVoice": "语音输入语言",
+  "@onboardingRowVoice": {
+    "description": "Onboarding settings row label: voice input language (D-10)"
+  },
+  "onboardingChange": "修改",
+  "@onboardingChange": {
+    "description": "Onboarding settings row: change action button"
+  },
+  "onboardingNicknameUnset": "未设置",
+  "@onboardingNicknameUnset": {
+    "description": "Onboarding settings nickname row empty-state placeholder (D-14)"
+  },
+  "onboardingStart": "以此设置开始",
+  "@onboardingStart": {
+    "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
+  },
+  "onboardingLockTitle": "要设置应用锁吗？",
+  "@onboardingLockTitle": {
+    "description": "Onboarding lock-entry screen: title (D-11)"
+  },
+  "onboardingLockDescription": "应用锁能让你的家计簿更安全。",
+  "@onboardingLockDescription": {
+    "description": "Onboarding lock-entry screen: neutral one-line description"
+  },
+  "onboardingLockSkip": "跳过",
+  "@onboardingLockSkip": {
+    "description": "Onboarding lock-entry screen: skip button (lock stays off, D-13)"
+  },
+  "onboardingLockSetupNow": "现在设置",
+  "@onboardingLockSetupNow": {
+    "description": "Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)"
+  },
   "@@locale": "zh"
 }

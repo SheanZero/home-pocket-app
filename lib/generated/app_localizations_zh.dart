@@ -2263,4 +2263,76 @@ class SZh extends S {
 
   @override
   String get recognitionAlternatesMore => '其他';
+
+  @override
+  String get onboardingIntroTitle => '守护家计簿';
+
+  @override
+  String get onboardingIntroSubtitle => '让家庭的金钱话题，变得温柔。';
+
+  @override
+  String get onboardingIntroPrivacyTitle => '全部本地存储・加密';
+
+  @override
+  String get onboardingIntroPrivacyBody => '不上传云端。你的数据只属于你。';
+
+  @override
+  String get onboardingIntroLocalTitle => '本地优先';
+
+  @override
+  String get onboardingIntroLocalBody => '即使离线也能随时使用。';
+
+  @override
+  String get onboardingIntroLedgerTitle => '日常与悦己，两本账簿';
+
+  @override
+  String get onboardingIntroLedgerBody => '把必要开销与取悦自己的开销分开来看。';
+
+  @override
+  String get onboardingIntroVoiceTitle => '用声音快速记账';
+
+  @override
+  String get onboardingIntroVoiceBody => '只需说一句「午餐 800 日元」。';
+
+  @override
+  String get onboardingIntroContinue => '开始';
+
+  @override
+  String get onboardingIntroSkip => '跳过';
+
+  @override
+  String get onboardingSettingsTitle => '基本设置';
+
+  @override
+  String get onboardingSettingsSubtitle => '这是推荐的初始设置。';
+
+  @override
+  String get onboardingSettingsHint => '这些都可以稍后在「设置」中随时修改。';
+
+  @override
+  String get onboardingRowCurrency => '货币';
+
+  @override
+  String get onboardingRowVoice => '语音输入语言';
+
+  @override
+  String get onboardingChange => '修改';
+
+  @override
+  String get onboardingNicknameUnset => '未设置';
+
+  @override
+  String get onboardingStart => '以此设置开始';
+
+  @override
+  String get onboardingLockTitle => '要设置应用锁吗？';
+
+  @override
+  String get onboardingLockDescription => '应用锁能让你的家计簿更安全。';
+
+  @override
+  String get onboardingLockSkip => '跳过';
+
+  @override
+  String get onboardingLockSetupNow => '现在设置';
 }

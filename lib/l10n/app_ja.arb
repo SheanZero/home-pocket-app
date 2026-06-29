@@ -2966,5 +2966,101 @@
   "@recognitionAlternatesMore": {
     "description": "Exit chip label on the alternate-category chip row; opens the full category selector (D-04)"
   },
+  "onboardingIntroTitle": "まもる家計簿",
+  "@onboardingIntroTitle": {
+    "description": "Onboarding intro screen: app title"
+  },
+  "onboardingIntroSubtitle": "家族のお金の話を、やさしく。",
+  "@onboardingIntroSubtitle": {
+    "description": "Onboarding intro screen: subtitle tagline"
+  },
+  "onboardingIntroPrivacyTitle": "すべて端末内・暗号化",
+  "@onboardingIntroPrivacyTitle": {
+    "description": "Onboarding intro selling point: privacy/encryption title"
+  },
+  "onboardingIntroPrivacyBody": "クラウドに送信しません。あなたのデータはあなたのもの。",
+  "@onboardingIntroPrivacyBody": {
+    "description": "Onboarding intro selling point: privacy/encryption body"
+  },
+  "onboardingIntroLocalTitle": "ローカルファースト",
+  "@onboardingIntroLocalTitle": {
+    "description": "Onboarding intro selling point: local-first title"
+  },
+  "onboardingIntroLocalBody": "オフラインでも、すぐに使えます。",
+  "@onboardingIntroLocalBody": {
+    "description": "Onboarding intro selling point: local-first body"
+  },
+  "onboardingIntroLedgerTitle": "日常と悦己、ふたつの帳簿",
+  "@onboardingIntroLedgerTitle": {
+    "description": "Onboarding intro selling point: dual-ledger title"
+  },
+  "onboardingIntroLedgerBody": "必要な支出と、自分を満たす支出を分けて見る。",
+  "@onboardingIntroLedgerBody": {
+    "description": "Onboarding intro selling point: dual-ledger body"
+  },
+  "onboardingIntroVoiceTitle": "声でサッと記録",
+  "@onboardingIntroVoiceTitle": {
+    "description": "Onboarding intro selling point: voice title"
+  },
+  "onboardingIntroVoiceBody": "「ランチ 800円」と話すだけ。",
+  "@onboardingIntroVoiceBody": {
+    "description": "Onboarding intro selling point: voice body"
+  },
+  "onboardingIntroContinue": "はじめる",
+  "@onboardingIntroContinue": {
+    "description": "Onboarding intro: continue button to the settings step"
+  },
+  "onboardingIntroSkip": "スキップ",
+  "@onboardingIntroSkip": {
+    "description": "Onboarding intro: skip button (ONBOARD-02 intro is skippable)"
+  },
+  "onboardingSettingsTitle": "基本設定",
+  "@onboardingSettingsTitle": {
+    "description": "Onboarding settings page: heading"
+  },
+  "onboardingSettingsSubtitle": "おすすめの初期設定です。",
+  "@onboardingSettingsSubtitle": {
+    "description": "Onboarding settings page: subtitle"
+  },
+  "onboardingSettingsHint": "これらはあとで「設定」からいつでも変更できます。",
+  "@onboardingSettingsHint": {
+    "description": "Onboarding settings page: change-later hint"
+  },
+  "onboardingRowCurrency": "通貨",
+  "@onboardingRowCurrency": {
+    "description": "Onboarding settings row label: bookkeeping currency (D-10)"
+  },
+  "onboardingRowVoice": "音声入力の言語",
+  "@onboardingRowVoice": {
+    "description": "Onboarding settings row label: voice input language (D-10)"
+  },
+  "onboardingChange": "変更",
+  "@onboardingChange": {
+    "description": "Onboarding settings row: change action button"
+  },
+  "onboardingNicknameUnset": "未設定",
+  "@onboardingNicknameUnset": {
+    "description": "Onboarding settings nickname row empty-state placeholder (D-14)"
+  },
+  "onboardingStart": "この設定で始める",
+  "@onboardingStart": {
+    "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
+  },
+  "onboardingLockTitle": "アプリロックを設定しますか？",
+  "@onboardingLockTitle": {
+    "description": "Onboarding lock-entry screen: title (D-11)"
+  },
+  "onboardingLockDescription": "アプリロックで、家計簿をさらに安全に守れます。",
+  "@onboardingLockDescription": {
+    "description": "Onboarding lock-entry screen: neutral one-line description"
+  },
+  "onboardingLockSkip": "スキップ",
+  "@onboardingLockSkip": {
+    "description": "Onboarding lock-entry screen: skip button (lock stays off, D-13)"
+  },
+  "onboardingLockSetupNow": "今すぐ設定",
+  "@onboardingLockSetupNow": {
+    "description": "Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)"
+  },
   "@@locale": "ja"
 }

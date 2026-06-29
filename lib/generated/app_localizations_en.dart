@@ -2309,4 +2309,80 @@ class SEn extends S {
 
   @override
   String get recognitionAlternatesMore => 'More';
+
+  @override
+  String get onboardingIntroTitle => 'Home Pocket';
+
+  @override
+  String get onboardingIntroSubtitle => 'Make family money talk gentle.';
+
+  @override
+  String get onboardingIntroPrivacyTitle => 'All on-device & encrypted';
+
+  @override
+  String get onboardingIntroPrivacyBody =>
+      'Never sent to the cloud. Your data is yours.';
+
+  @override
+  String get onboardingIntroLocalTitle => 'Local-first';
+
+  @override
+  String get onboardingIntroLocalBody => 'Works instantly, even offline.';
+
+  @override
+  String get onboardingIntroLedgerTitle => 'Daily and Joy, two ledgers';
+
+  @override
+  String get onboardingIntroLedgerBody =>
+      'See essential spending and self-fulfilling spending apart.';
+
+  @override
+  String get onboardingIntroVoiceTitle => 'Log it with your voice';
+
+  @override
+  String get onboardingIntroVoiceBody => 'Just say “Lunch 800 yen.”';
+
+  @override
+  String get onboardingIntroContinue => 'Get started';
+
+  @override
+  String get onboardingIntroSkip => 'Skip';
+
+  @override
+  String get onboardingSettingsTitle => 'Basic Settings';
+
+  @override
+  String get onboardingSettingsSubtitle => 'Recommended initial settings.';
+
+  @override
+  String get onboardingSettingsHint =>
+      'You can change these anytime later in Settings.';
+
+  @override
+  String get onboardingRowCurrency => 'Currency';
+
+  @override
+  String get onboardingRowVoice => 'Voice input language';
+
+  @override
+  String get onboardingChange => 'Change';
+
+  @override
+  String get onboardingNicknameUnset => 'Not set';
+
+  @override
+  String get onboardingStart => 'Start with these settings';
+
+  @override
+  String get onboardingLockTitle => 'Set up an app lock?';
+
+  @override
+  String get onboardingLockDescription =>
+      'An app lock keeps your ledger extra safe.';
+
+  @override
+  String get onboardingLockSkip => 'Skip';
+
+  @override
+  String get onboardingLockSetupNow => 'Set up now';
 }

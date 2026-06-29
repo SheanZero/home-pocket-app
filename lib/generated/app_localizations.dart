@@ -4266,6 +4266,150 @@ abstract class S {
   /// In en, this message translates to:
   /// **'More'**
   String get recognitionAlternatesMore;
+
+  /// Onboarding intro screen: app title
+  ///
+  /// In en, this message translates to:
+  /// **'Home Pocket'**
+  String get onboardingIntroTitle;
+
+  /// Onboarding intro screen: subtitle tagline
+  ///
+  /// In en, this message translates to:
+  /// **'Make family money talk gentle.'**
+  String get onboardingIntroSubtitle;
+
+  /// Onboarding intro selling point: privacy/encryption title
+  ///
+  /// In en, this message translates to:
+  /// **'All on-device & encrypted'**
+  String get onboardingIntroPrivacyTitle;
+
+  /// Onboarding intro selling point: privacy/encryption body
+  ///
+  /// In en, this message translates to:
+  /// **'Never sent to the cloud. Your data is yours.'**
+  String get onboardingIntroPrivacyBody;
+
+  /// Onboarding intro selling point: local-first title
+  ///
+  /// In en, this message translates to:
+  /// **'Local-first'**
+  String get onboardingIntroLocalTitle;
+
+  /// Onboarding intro selling point: local-first body
+  ///
+  /// In en, this message translates to:
+  /// **'Works instantly, even offline.'**
+  String get onboardingIntroLocalBody;
+
+  /// Onboarding intro selling point: dual-ledger title
+  ///
+  /// In en, this message translates to:
+  /// **'Daily and Joy, two ledgers'**
+  String get onboardingIntroLedgerTitle;
+
+  /// Onboarding intro selling point: dual-ledger body
+  ///
+  /// In en, this message translates to:
+  /// **'See essential spending and self-fulfilling spending apart.'**
+  String get onboardingIntroLedgerBody;
+
+  /// Onboarding intro selling point: voice title
+  ///
+  /// In en, this message translates to:
+  /// **'Log it with your voice'**
+  String get onboardingIntroVoiceTitle;
+
+  /// Onboarding intro selling point: voice body
+  ///
+  /// In en, this message translates to:
+  /// **'Just say “Lunch 800 yen.”'**
+  String get onboardingIntroVoiceBody;
+
+  /// Onboarding intro: continue button to the settings step
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingIntroContinue;
+
+  /// Onboarding intro: skip button (ONBOARD-02 intro is skippable)
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingIntroSkip;
+
+  /// Onboarding settings page: heading
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Settings'**
+  String get onboardingSettingsTitle;
+
+  /// Onboarding settings page: subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended initial settings.'**
+  String get onboardingSettingsSubtitle;
+
+  /// Onboarding settings page: change-later hint
+  ///
+  /// In en, this message translates to:
+  /// **'You can change these anytime later in Settings.'**
+  String get onboardingSettingsHint;
+
+  /// Onboarding settings row label: bookkeeping currency (D-10)
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get onboardingRowCurrency;
+
+  /// Onboarding settings row label: voice input language (D-10)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input language'**
+  String get onboardingRowVoice;
+
+  /// Onboarding settings row: change action button
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get onboardingChange;
+
+  /// Onboarding settings nickname row empty-state placeholder (D-14)
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get onboardingNicknameUnset;
+
+  /// Onboarding settings page: confirm/start button (locked copy, NOT profileStart)
+  ///
+  /// In en, this message translates to:
+  /// **'Start with these settings'**
+  String get onboardingStart;
+
+  /// Onboarding lock-entry screen: title (D-11)
+  ///
+  /// In en, this message translates to:
+  /// **'Set up an app lock?'**
+  String get onboardingLockTitle;
+
+  /// Onboarding lock-entry screen: neutral one-line description
+  ///
+  /// In en, this message translates to:
+  /// **'An app lock keeps your ledger extra safe.'**
+  String get onboardingLockDescription;
+
+  /// Onboarding lock-entry screen: skip button (lock stays off, D-13)
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingLockSkip;
+
+  /// Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)
+  ///
+  /// In en, this message translates to:
+  /// **'Set up now'**
+  String get onboardingLockSetupNow;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

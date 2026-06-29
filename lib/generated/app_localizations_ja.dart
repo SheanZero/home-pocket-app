@@ -2270,4 +2270,76 @@ class SJa extends S {
 
   @override
   String get recognitionAlternatesMore => 'もっと';
+
+  @override
+  String get onboardingIntroTitle => 'まもる家計簿';
+
+  @override
+  String get onboardingIntroSubtitle => '家族のお金の話を、やさしく。';
+
+  @override
+  String get onboardingIntroPrivacyTitle => 'すべて端末内・暗号化';
+
+  @override
+  String get onboardingIntroPrivacyBody => 'クラウドに送信しません。あなたのデータはあなたのもの。';
+
+  @override
+  String get onboardingIntroLocalTitle => 'ローカルファースト';
+
+  @override
+  String get onboardingIntroLocalBody => 'オフラインでも、すぐに使えます。';
+
+  @override
+  String get onboardingIntroLedgerTitle => '日常と悦己、ふたつの帳簿';
+
+  @override
+  String get onboardingIntroLedgerBody => '必要な支出と、自分を満たす支出を分けて見る。';
+
+  @override
+  String get onboardingIntroVoiceTitle => '声でサッと記録';
+
+  @override
+  String get onboardingIntroVoiceBody => '「ランチ 800円」と話すだけ。';
+
+  @override
+  String get onboardingIntroContinue => 'はじめる';
+
+  @override
+  String get onboardingIntroSkip => 'スキップ';
+
+  @override
+  String get onboardingSettingsTitle => '基本設定';
+
+  @override
+  String get onboardingSettingsSubtitle => 'おすすめの初期設定です。';
+
+  @override
+  String get onboardingSettingsHint => 'これらはあとで「設定」からいつでも変更できます。';
+
+  @override
+  String get onboardingRowCurrency => '通貨';
+
+  @override
+  String get onboardingRowVoice => '音声入力の言語';
+
+  @override
+  String get onboardingChange => '変更';
+
+  @override
+  String get onboardingNicknameUnset => '未設定';
+
+  @override
+  String get onboardingStart => 'この設定で始める';
+
+  @override
+  String get onboardingLockTitle => 'アプリロックを設定しますか？';
+
+  @override
+  String get onboardingLockDescription => 'アプリロックで、家計簿をさらに安全に守れます。';
+
+  @override
+  String get onboardingLockSkip => 'スキップ';
+
+  @override
+  String get onboardingLockSetupNow => '今すぐ設定';
 }
