@@ -23,6 +23,7 @@ import 'features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
 import 'features/settings/presentation/providers/repository_providers.dart'
     show settingsRepositoryProvider;
+import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
@@ -98,6 +99,12 @@ class HomePocketApp extends ConsumerStatefulWidget {
 }
 
 class _HomePocketAppState extends ConsumerState<HomePocketApp> {
+  /// Root navigator key — lets the gate push the post-onboarding security
+  /// deep-link (D-13) on top of the live shell without the onboarding flow
+  /// having to grab a `rootNavigator` itself (HI-01).
+  final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+
   String? _bookId;
   bool _initialized = false;
   bool _needsOnboarding = false;
@@ -218,6 +225,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     final locale = localeAsync.value ?? const Locale('ja');
 
     return MaterialApp(
+      navigatorKey: _rootNavigatorKey,
       onGenerateTitle: (context) => S.of(context).appName,
       locale: locale,
       localizationsDelegates: const [
@@ -261,9 +269,31 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     }
 
     if (_needsOnboarding) {
-      return OnboardingFlowScreen(bookId: _bookId!);
+      return OnboardingFlowScreen(
+        bookId: _bookId!,
+        onCompleted: _completeOnboarding,
+      );
     }
 
     return MainShellScreen(bookId: _bookId!);
+  }
+
+  /// Completion handoff from [OnboardingFlowScreen] (HI-01). Flips the gate to
+  /// the shell via `setState` so the live `'/'` Builder renders MainShellScreen
+  /// itself — keeping the gate attached for later `_reinitializeAfterDataReset`
+  /// resets. On 现在设置 (`setupSecurity: true`) deep-links to the
+  /// SecuritySection on top of the freshly-rendered shell (D-13).
+  void _completeOnboarding({required bool setupSecurity}) {
+    setState(() => _needsOnboarding = false);
+    if (setupSecurity) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _rootNavigatorKey.currentState?.push(
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                SettingsScreen(bookId: _bookId!, scrollToSecurity: true),
+          ),
+        );
+      });
+    }
   }
 }

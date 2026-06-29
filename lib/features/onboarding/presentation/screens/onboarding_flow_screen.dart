@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../features/home/presentation/screens/main_shell_screen.dart';
 import '../../../settings/presentation/providers/repository_providers.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
-import '../../../settings/presentation/screens/settings_screen.dart';
 import 'onboarding_intro_screen.dart';
 import 'onboarding_lock_entry_screen.dart';
 import 'onboarding_settings_screen.dart';
@@ -30,9 +28,21 @@ import 'onboarding_settings_screen.dart';
 /// at settings-confirm) — immediately before entering the shell, so a flow
 /// abandoned mid-way leaves the gate showing onboarding on the next boot.
 class OnboardingFlowScreen extends ConsumerStatefulWidget {
-  const OnboardingFlowScreen({super.key, required this.bookId});
+  const OnboardingFlowScreen({
+    super.key,
+    required this.bookId,
+    required this.onCompleted,
+  });
 
   final String bookId;
+
+  /// Fired exactly once when onboarding finishes (after `onboarding_complete`
+  /// has been persisted). The gate owner (`_HomePocketAppState`) wires this to
+  /// flip `_needsOnboarding=false` + `setState`, so the live `'/'` home Builder
+  /// renders the shell itself — the flow host MUST NOT replace the gate route
+  /// (HI-01). `setupSecurity:true` requests the SecuritySection deep-link, which
+  /// the gate owner pushes on top of the now-rendered shell (D-13).
+  final void Function({required bool setupSecurity}) onCompleted;
 
   @override
   ConsumerState<OnboardingFlowScreen> createState() =>
@@ -63,33 +73,24 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
   }
 
   /// Final step (both 跳过 and 现在设置 land here). Writes
-  /// `onboarding_complete = true` LAST, then replaces the gate with the shell.
-  /// On 现在设置 (`setupSecurity: true`) it additionally deep-links to the
-  /// SecuritySection (D-13). Uses the ROOT navigator so the shell replaces the
-  /// onboarding gate, not an inner flow route.
+  /// `onboarding_complete = true` LAST, then hands off to the gate-owned
+  /// [OnboardingFlowScreen.onCompleted] callback instead of navigating itself.
+  ///
+  /// Routing completion through the callback keeps the root `'/'` route bound to
+  /// `_HomePocketAppState`'s live `_buildHome` gate (rather than replacing it
+  /// with a detached shell), so a same-session delete-all / import-backup reset
+  /// can still re-render the gate via `_reinitializeAfterDataReset` without an
+  /// app restart (HI-01). On 现在设置 (`setupSecurity: true`) the gate owner
+  /// deep-links to the SecuritySection on top of the freshly-rendered shell
+  /// (D-13).
   Future<void> _complete({required bool setupSecurity}) async {
-    final rootNavigator = Navigator.of(context, rootNavigator: true);
-
     await ref.read(settingsRepositoryProvider).setOnboardingComplete(true);
     ref.invalidate(appSettingsProvider);
     if (!mounted) {
       return;
     }
 
-    rootNavigator.pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => MainShellScreen(bookId: widget.bookId),
-      ),
-    );
-
-    if (setupSecurity) {
-      rootNavigator.push(
-        MaterialPageRoute<void>(
-          builder: (_) =>
-              SettingsScreen(bookId: widget.bookId, scrollToSecurity: true),
-        ),
-      );
-    }
+    widget.onCompleted(setupSecurity: setupSecurity);
   }
 
   @override

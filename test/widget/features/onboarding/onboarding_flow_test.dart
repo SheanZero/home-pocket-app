@@ -112,19 +112,25 @@ Future<({List<Override> overrides, SharedPreferences prefs})> _buildOverrides({
   );
 }
 
-Widget _host(List<Override> overrides) {
+Widget _host(
+  List<Override> overrides, {
+  void Function({required bool setupSecurity})? onCompleted,
+}) {
   return ProviderScope(
     overrides: overrides,
-    child: const MaterialApp(
-      locale: Locale('ja'),
-      localizationsDelegates: [
+    child: MaterialApp(
+      locale: const Locale('ja'),
+      localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [Locale('ja'), Locale('en'), Locale('zh')],
-      home: OnboardingFlowScreen(bookId: 'book-1'),
+      supportedLocales: const [Locale('ja'), Locale('en'), Locale('zh')],
+      home: OnboardingFlowScreen(
+        bookId: 'book-1',
+        onCompleted: onCompleted ?? ({required bool setupSecurity}) {},
+      ),
     ),
   );
 }
@@ -200,10 +206,17 @@ void main() {
 
     testWidgets(
       'completing lock-entry (skip) writes onboardingComplete=true LAST and '
-      'leaves the onboarding routes',
+      'fires onCompleted(setupSecurity: false) without self-navigating',
       (tester) async {
+        bool? recordedSetupSecurity;
         final h = await _buildOverrides();
-        await tester.pumpWidget(_host(h.overrides));
+        await tester.pumpWidget(
+          _host(
+            h.overrides,
+            onCompleted: ({required bool setupSecurity}) =>
+                recordedSetupSecurity = setupSecurity,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // intro → settings
@@ -219,21 +232,14 @@ void main() {
         // The flag is NOT set before lock-entry completion (lands LAST).
         expect(h.prefs.getBool('onboarding_complete'), isNot(true));
 
-        // lock-entry skip → completion writes the flag, then enters the shell.
+        // lock-entry skip → completion writes the flag LAST, then hands off to
+        // the gate-owned callback (the flow host no longer self-navigates, so
+        // the gate route stays live — HI-01). setupSecurity is false on skip.
         await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
         await _pumpNoSettle(tester);
 
         expect(h.prefs.getBool('onboarding_complete'), true);
-        expect(find.byType(OnboardingLockEntryScreen), findsNothing);
-        expect(find.byType(OnboardingIntroScreen), findsNothing);
-
-        // Unmount the tree inside the test body so MainShellScreen's
-        // Drift stream dispose-timers flush before the teardown invariant
-        // check (avoids the spurious pending-timer assertion). Disposing a
-        // Drift query stream schedules a zero-duration close timer that can
-        // cascade, so flush a few frames.
-        await tester.pumpWidget(const SizedBox());
-        await tester.pump(const Duration(seconds: 1));
+        expect(recordedSetupSecurity, false);
       },
     );
   });
