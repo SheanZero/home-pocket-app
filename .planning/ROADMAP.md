@@ -174,7 +174,11 @@
   2. 用户已审阅并批准应用锁屏（生物识别提示 + PIN 输入）的 HTML 设计稿 — DESIGN-02
   3. 用户已审阅并批准 Setting 法务/赞助区块布局的 HTML 设计稿 — DESIGN-03
   4. 关卡退出时仓库零新增生产 Dart——所有关卡产物仅在 `.planning/` 下的 HTML/Markdown — DESIGN-04
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 53-01-PLAN.md — onboarding (001/A) QA against DESIGN-01 + approval-ready summary [wave 1]
+- [ ] 53-02-PLAN.md — app-lock (002/B light+dark) QA against DESIGN-02 + approval-ready summary [wave 1]
+- [ ] 53-03-PLAN.md — Settings legal/sponsor (003/C) QA against DESIGN-03 + approval-ready summary [wave 1]
+- [ ] 53-04-PLAN.md — gate closure: user approval of all three + Phase 54/55/56 handoff + DESIGN-04 zero-Dart gate-exit [wave 2]
 
 ### Phase 54: 欢迎 / 首启引导（Onboarding flow）
 **Goal**: 在 `AppInitializer` settle 之后、主 shell 之前插入首启引导 gate（`_buildHome()` branch 3），用户一次性确认 UI 语言 / 记账币种 / 语音输入语言并写穿既有 provider，引导末尾提供可明确跳过的「设置应用锁」入口；`onboarding_complete` 仅在显式完成时一次性落最后。
