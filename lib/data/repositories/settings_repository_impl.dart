@@ -13,6 +13,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _languageKey = 'language';
   static const String _notificationsKey = 'notifications_enabled';
   static const String _biometricLockKey = 'biometric_lock_enabled';
+  static const String _onboardingCompleteKey = 'onboarding_complete';
   static const String _voiceLanguageKey = 'voice_language';
   static const String _monthlyJoyTargetKey = 'monthly_joy_target';
   static const String _weekStartDayKey = 'week_start_day';
@@ -24,6 +25,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       language: _prefs.getString(_languageKey) ?? 'system',
       notificationsEnabled: _prefs.getBool(_notificationsKey) ?? true,
       biometricLockEnabled: _prefs.getBool(_biometricLockKey) ?? true,
+      onboardingComplete: _prefs.getBool(_onboardingCompleteKey) ?? false,
       voiceLanguage: _prefs.getString(_voiceLanguageKey) ?? 'zh',
       monthlyJoyTarget: _prefs.getInt(_monthlyJoyTargetKey),
       weekStartDay: _getWeekStartDay(),
@@ -36,6 +38,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     await _prefs.setString(_languageKey, settings.language);
     await _prefs.setBool(_notificationsKey, settings.notificationsEnabled);
     await _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled);
+    await _prefs.setBool(_onboardingCompleteKey, settings.onboardingComplete);
     await _prefs.setString(_voiceLanguageKey, settings.voiceLanguage);
     await _prefs.setString(_weekStartDayKey, settings.weekStartDay.name);
     if (settings.monthlyJoyTarget == null) {
@@ -58,6 +61,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setBiometricLock(bool enabled) async {
     await _prefs.setBool(_biometricLockKey, enabled);
+  }
+
+  @override
+  Future<void> setOnboardingComplete(bool enabled) async {
+    await _prefs.setBool(_onboardingCompleteKey, enabled);
   }
 
   @override

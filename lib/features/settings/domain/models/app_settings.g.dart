@@ -13,6 +13,7 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   language: json['language'] as String? ?? 'system',
   notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
   biometricLockEnabled: json['biometricLockEnabled'] as bool? ?? true,
+  onboardingComplete: json['onboardingComplete'] as bool? ?? false,
   voiceLanguage: json['voiceLanguage'] as String? ?? 'zh',
   monthlyJoyTarget: (json['monthlyJoyTarget'] as num?)?.toInt(),
   weekStartDay:
@@ -26,6 +27,7 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'language': instance.language,
       'notificationsEnabled': instance.notificationsEnabled,
       'biometricLockEnabled': instance.biometricLockEnabled,
+      'onboardingComplete': instance.onboardingComplete,
       'voiceLanguage': instance.voiceLanguage,
       'monthlyJoyTarget': instance.monthlyJoyTarget,
       'weekStartDay': _$WeekStartDayEnumMap[instance.weekStartDay]!,

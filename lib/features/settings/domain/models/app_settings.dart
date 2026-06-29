@@ -17,6 +17,7 @@ abstract class AppSettings with _$AppSettings {
     @Default('system') String language,
     @Default(true) bool notificationsEnabled,
     @Default(true) bool biometricLockEnabled,
+    @Default(false) bool onboardingComplete,
     @Default('zh') String voiceLanguage,
     int? monthlyJoyTarget,
     @Default(WeekStartDay.monday) WeekStartDay weekStartDay,

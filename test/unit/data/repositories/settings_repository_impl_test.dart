@@ -97,6 +97,34 @@ void main() {
     });
   });
 
+  group('onboardingComplete', () {
+    test('defaults to false when key absent', () async {
+      final settings = await repository.getSettings();
+
+      expect(settings.onboardingComplete, false);
+    });
+
+    test('const AppSettings() has onboardingComplete false', () {
+      expect(const AppSettings().onboardingComplete, false);
+    });
+
+    test('setOnboardingComplete round-trips both directions', () async {
+      await repository.setOnboardingComplete(true);
+      expect((await repository.getSettings()).onboardingComplete, true);
+
+      await repository.setOnboardingComplete(false);
+      expect((await repository.getSettings()).onboardingComplete, false);
+    });
+
+    test('updateSettings persists onboardingComplete', () async {
+      await repository.updateSettings(
+        const AppSettings(onboardingComplete: true),
+      );
+
+      expect((await repository.getSettings()).onboardingComplete, true);
+    });
+  });
+
   group('setNotificationsEnabled', () {
     test('persists notifications enabled', () async {
       await repository.setNotificationsEnabled(false);

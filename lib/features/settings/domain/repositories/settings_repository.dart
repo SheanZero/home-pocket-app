@@ -7,6 +7,10 @@ abstract class SettingsRepository {
   Future<void> setThemeMode(AppThemeMode themeMode);
   Future<void> setLanguage(String language);
   Future<void> setBiometricLock(bool enabled);
+
+  /// Persists the onboarding-completion flag (single source of truth for the
+  /// onboarding gate). Plaintext SharedPreferences key, no Drift migration.
+  Future<void> setOnboardingComplete(bool enabled);
   Future<void> setNotificationsEnabled(bool enabled);
   Future<void> setVoiceLanguage(String languageCode);
 
