@@ -3,12 +3,20 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../application/profile/save_user_profile_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/constants/warm_emojis.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
+import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../accounting/presentation/widgets/currency_selector_sheet.dart';
+import '../../../profile/presentation/providers/repository_providers.dart';
+import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/screens/avatar_picker_screen.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
+import '../../../settings/presentation/providers/repository_providers.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
+import '../../../settings/presentation/providers/state_settings.dart';
 import '../utils/onboarding_locale_resolution.dart';
 
 /// The merged onboarding basic-settings page (D-01 / D-03 / D-10).
@@ -58,8 +66,7 @@ class _OnboardingSettingsScreenState
   late String _voiceLanguageCode;
   bool _voiceExplicitlyPicked = false;
 
-  // Becomes a mutable field once the confirm flow writes through (Task 2).
-  final bool _isSaving = false;
+  bool _isSaving = false;
 
   String get _deviceLanguage => PlatformDispatcher.instance.locale.languageCode;
 
@@ -149,10 +156,22 @@ class _OnboardingSettingsScreenState
     if (picked == null || !mounted) {
       return;
     }
-    _applyLanguageSelection(picked);
+    await _applyLanguageSelection(picked);
   }
 
-  void _applyLanguageSelection(String value) {
+  Future<void> _applyLanguageSelection(String value) async {
+    // Write through immediately so MaterialApp switches locale instantly
+    // (D-07/D-08, ONBOARD-03). Explicit pick pins 'ja'/'zh'/'en'; accepting the
+    // system option persists 'system' (keep following the device).
+    if (value == 'system') {
+      await ref.read(localeProvider.notifier).setSystemDefault();
+    } else {
+      await ref.read(localeProvider.notifier).setLocale(Locale(value));
+    }
+    if (!mounted) {
+      return;
+    }
+    ref.invalidate(appSettingsProvider);
     setState(() {
       _languageTouched = true;
       _pickedLanguageCode = value == 'system' ? null : value;
@@ -174,12 +193,24 @@ class _OnboardingSettingsScreenState
       backgroundColor: Colors.transparent,
       builder: (_) => CurrencySelectorSheet(
         selectedCode: _currencyCode,
-        onSelect: _applyCurrencySelection,
+        onSelect: (code) => _applyCurrencySelection(code),
       ),
     );
   }
 
-  void _applyCurrencySelection(String code) {
+  /// Writes the chosen currency through to `Book.currency` — a NEW book-default
+  /// write path (ONBOARD-04 / D-09, RESEARCH Pattern 3).
+  Future<void> _applyCurrencySelection(String code) async {
+    final book = await ref.read(bookByIdProvider(bookId: widget.bookId).future);
+    if (book != null) {
+      await ref
+          .read(bookRepositoryProvider)
+          .update(book.copyWith(currency: code));
+    }
+    if (!mounted) {
+      return;
+    }
+    ref.invalidate(bookByIdProvider);
     setState(() => _currencyCode = code);
   }
 
@@ -214,18 +245,65 @@ class _OnboardingSettingsScreenState
     if (picked == null || !mounted) {
       return;
     }
+    await ref.read(settingsRepositoryProvider).setVoiceLanguage(picked);
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _voiceExplicitlyPicked = true;
       _voiceLanguageCode = picked;
     });
   }
 
-  /// Confirm handler for `この設定で始める`. The write-through + profile save is
-  /// wired in Task 2; this guards on the nickname gate (D-14).
-  void _confirm() {
+  /// Confirm handler for `この設定で始める` (enabled only once a nickname is set,
+  /// D-14). Persists the untouched defaults (system language + concrete voice
+  /// language), saves the profile, and signals completion to the flow host.
+  /// Does NOT set `onboarding_complete` (the flow host's final step, 54-07).
+  Future<void> _confirm() async {
     if (!_canStart) {
       return;
     }
+    final l10n = S.of(context);
+    setState(() => _isSaving = true);
+
+    // D-08: an untouched UI-language row means "keep following the device".
+    if (!_languageExplicitlyPinned) {
+      await ref.read(localeProvider.notifier).setSystemDefault();
+      if (!mounted) {
+        return;
+      }
+      ref.invalidate(appSettingsProvider);
+    }
+
+    // D-09 / Pitfall 4: voice language is always a concrete ja/zh/en code,
+    // never the 'system' sentinel — guaranteed by the 54-01 resolver.
+    final voiceLanguage = resolveVoiceLanguageForOnboarding(
+      explicitlyPicked: _voiceExplicitlyPicked,
+      pickedLanguage: _voiceLanguageCode,
+      deviceLanguage: _deviceLanguage,
+    );
+    await ref.read(settingsRepositoryProvider).setVoiceLanguage(voiceLanguage);
+    if (!mounted) {
+      return;
+    }
+
+    final result = await ref.read(saveUserProfileUseCaseProvider).execute(
+          displayName: _nickname,
+          avatarEmoji: _selectedEmoji,
+          avatarImagePath: _selectedImagePath,
+        );
+    if (!mounted) {
+      return;
+    }
+
+    if (result.isSuccess) {
+      ref.invalidate(userProfileProvider);
+      widget.onConfirmed();
+      return;
+    }
+
+    setState(() => _isSaving = false);
+    showErrorFeedback(context, _messageForError(l10n, result.error));
   }
 
   // ── Labels ──────────────────────────────────────────────────────────────
@@ -350,6 +428,20 @@ class _OnboardingSettingsScreenState
         ),
       ),
     );
+  }
+}
+
+/// Maps a [SaveProfileError] to the localized message (ported from
+/// `ProfileOnboardingScreen._messageForError`).
+String _messageForError(S l10n, SaveProfileError? error) {
+  switch (error) {
+    case SaveProfileError.nameRequired:
+      return l10n.profileNameRequired;
+    case SaveProfileError.nameTooLong:
+      return l10n.profileNameTooLong;
+    case SaveProfileError.invalidEmoji:
+    case null:
+      return l10n.profileSaveFailed;
   }
 }
 
