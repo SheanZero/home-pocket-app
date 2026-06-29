@@ -7,6 +7,8 @@ import '../../../../application/settings/export_backup_use_case.dart';
 import '../../../../application/settings/import_backup_use_case.dart';
 import '../../../../data/repositories/settings_repository_impl.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart';
+import '../../../profile/presentation/providers/repository_providers.dart'
+    as profile;
 import '../../domain/repositories/settings_repository.dart';
 
 part 'repository_providers.g.dart';
@@ -55,5 +57,6 @@ ClearAllDataUseCase clearAllDataUseCase(Ref ref) {
     categoryRepo: ref.watch(categoryRepositoryProvider),
     bookRepo: ref.watch(bookRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
+    userProfileRepo: ref.watch(profile.userProfileRepositoryProvider),
   );
 }

@@ -7,6 +7,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
+import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
+import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
@@ -17,24 +19,33 @@ class MockBookRepository extends Mock implements BookRepository {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 
+class MockUserProfileRepository extends Mock
+    implements UserProfileRepository {}
+
 void main() {
   late ClearAllDataUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockBookRepository mockBookRepo;
   late MockSettingsRepository mockSettingsRepo;
+  late MockUserProfileRepository mockUserProfileRepo;
 
   setUp(() {
     mockTransactionRepo = MockTransactionRepository();
     mockCategoryRepo = MockCategoryRepository();
     mockBookRepo = MockBookRepository();
     mockSettingsRepo = MockSettingsRepository();
+    mockUserProfileRepo = MockUserProfileRepository();
     useCase = ClearAllDataUseCase(
       transactionRepo: mockTransactionRepo,
       categoryRepo: mockCategoryRepo,
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
+      userProfileRepo: mockUserProfileRepo,
     );
+    // Default: no profile present unless a test overrides it.
+    when(() => mockUserProfileRepo.find()).thenAnswer((_) async => null);
+    when(() => mockUserProfileRepo.delete(any())).thenAnswer((_) async {});
   });
 
   setUpAll(() {
@@ -88,6 +99,62 @@ void main() {
     verify(
       () => mockSettingsRepo.updateSettings(const AppSettings()),
     ).called(1);
+  });
+
+  test('D-05: resets settings to defaults so onboardingComplete is false',
+      () async {
+    when(
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
+
+    final result = await useCase.execute();
+
+    expect(result.isSuccess, true);
+    final persisted = verify(
+      () => mockSettingsRepo.updateSettings(captureAny()),
+    ).captured.single as AppSettings;
+    expect(persisted.onboardingComplete, false);
+  });
+
+  test('D-05: deletes the UserProfile when one exists (identity wiped)',
+      () async {
+    final profile = UserProfile(
+      id: 'profile-1',
+      displayName: 'Taro',
+      avatarEmoji: '🦊',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    when(
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
+    when(() => mockUserProfileRepo.find()).thenAnswer((_) async => profile);
+
+    final result = await useCase.execute();
+
+    expect(result.isSuccess, true);
+    verify(() => mockUserProfileRepo.delete('profile-1')).called(1);
+  });
+
+  test('D-05: no delete attempted when no UserProfile exists', () async {
+    when(
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
+    when(() => mockUserProfileRepo.find()).thenAnswer((_) async => null);
+
+    final result = await useCase.execute();
+
+    expect(result.isSuccess, true);
+    verifyNever(() => mockUserProfileRepo.delete(any()));
   });
 
   test('returns error on failure', () async {
