@@ -205,8 +205,24 @@
   4. 引导可返回上一步并显示进度、无法卡死（re-entrant）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
   5. 所有新增引导文案三语（ja/zh/en）ARB 齐全，过 parity + 硬编码CJK扫描
 
-**Plans**: TBD
+**Plans**: 7 plans
 **UI hint**: yes
+
+**Wave 1** *(parallel — independent foundation, zero file overlap)*
+
+- [ ] 54-01-PLAN.md — persisted `onboardingComplete` flag (SharedPreferences, no Drift migration) + pure device-preselect/voice-default resolution helpers [wave 1]
+- [ ] 54-02-PLAN.md — onboarding ARB copy ja/zh/en (single owner) incl. `この設定で始める` + gen-l10n [wave 1]
+- [ ] 54-03-PLAN.md — Settings deep-link target: `scrollToSecurity` + SecuritySection anchor (D-13) [wave 1]
+
+**Wave 2** *(parallel — depends on Wave 1)*
+
+- [ ] 54-04-PLAN.md — data-reset semantics: import forces flag true (D-06); clear resets flag + wipes UserProfile (D-05) [wave 2]
+- [ ] 54-05-PLAN.md — merged onboarding settings page: identity (nickname[req]/avatar) + UI-lang/currency/voice write-through, 行+変更 rows (D-01/03/07/08/09/10/14) [wave 2]
+- [ ] 54-06-PLAN.md — intro (skippable selling points, D-02) + trailing lock-entry screen (D-11/D-13) [wave 2]
+
+**Wave 3** *(depends on Wave 2 screens)*
+
+- [ ] 54-07-PLAN.md — OnboardingFlowScreen nested-Navigator host (re-entrant, D-12) + main.dart captured-after-init gate + retire ProfileOnboardingScreen gate (D-01) [wave 3]
 
 ### Phase 55: 应用锁（生物识别 + PIN — 最高风险，独立 phase + 安全评审）
 
