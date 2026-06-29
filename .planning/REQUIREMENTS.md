@@ -23,7 +23,7 @@
 - [ ] **ONBOARD-03**: 用户确认 UI 语言（设备语言预选）→ 写入既有 `localeProvider`，MaterialApp 即时生效
 - [ ] **ONBOARD-04**: 用户确认记账币种（JPY 默认）→ 写入既有 `Book.currency`（复用 v1.7 货币选择器）
 - [x] **ONBOARD-05**: 用户确认语音输入语言（默认 = 所选 UI 语言）→ 写入既有语音 locale 设置
-- [ ] **ONBOARD-06**: 引导末尾提供「设置应用锁」入口，可明确跳过（skip 后锁保持关闭）
+- [x] **ONBOARD-06**: 引导末尾提供「设置应用锁」入口，可明确跳过（skip 后锁保持关闭）
 - [ ] **ONBOARD-07**: 引导支持返回上一步，且无法卡死（re-entrant）；进度仅靠返回键/手势体现、无显式进度条/步进点（Phase 54 D-12 有意取舍，supersedes 早先「进度提示」措辞）；gate 在 `AppInitializer` settle 之后判定，绝不与 init 竞态
 
 ### App Lock（应用锁 — 生物识别 + PIN）
@@ -100,7 +100,7 @@
 | ONBOARD-03 | Phase 54 | Pending |
 | ONBOARD-04 | Phase 54 | Pending |
 | ONBOARD-05 | Phase 54 | Complete |
-| ONBOARD-06 | Phase 54 | Pending |
+| ONBOARD-06 | Phase 54 | Complete |
 | ONBOARD-07 | Phase 54 | Pending |
 | LOCK-01 | Phase 55 | Pending |
 | LOCK-02 | Phase 55 | Pending |

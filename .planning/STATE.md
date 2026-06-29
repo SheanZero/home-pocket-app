@@ -5,16 +5,16 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 54
 current_phase_name: onboarding-flow
 status: executing
-stopped_at: Completed 54-02-PLAN.md
-last_updated: "2026-06-29T13:43:42.397Z"
+stopped_at: Completed 54-03-PLAN.md
+last_updated: "2026-06-29T14:14:36.665Z"
 last_activity: 2026-06-29
-last_activity_desc: Phase 54 execution started
+last_activity_desc: Completed 54-03 — SettingsScreen security deep-link target
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 11
-  completed_plans: 6
-  percent: 25
+  completed_plans: 7
+  percent: 64
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 54 (onboarding-flow) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
-Last activity: 2026-06-29 — Phase 54 execution started
+Last activity: 2026-06-29 — Completed 54-03 (SettingsScreen security deep-link target)
 
-Progress: [██░░░░░░░░] 25% — Phase 54 planned (7 plans / 3 waves); Phase 53 complete (4/4 plans)
+Progress: [██████░░░░] 64% — Phase 54 executing (3/7 plans done); Phase 53 complete (4/4 plans)
 
 > **Planning gate note (verify-phase, re-surface):** §13a decision-coverage-plan gate returned `passed:false` with `total:14, covered:0, uncovered:0` — this is the known CJK-decision-bullet parse false-negative (covered:0 AND uncovered:0 = gate did not evaluate, not a real gap). Override taken: all 14 decisions D-01..D-14 are verified cited across the 7 plans (grep-confirmed + plan-checker VERIFICATION PASSED + §13e gap-analysis "all 21 covered"). Not a real coverage gap.
 
@@ -46,6 +46,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 53]: 53-04: user approved all three designs (001/A, 002/B, 003/C) — DESIGN-01/02/03 经用户确认 completed; DESIGN-04 zero-Dart gate-exit verified, gate closed
 - [Phase ?]: 54-01: onboardingComplete is plaintext SharedPreferences (no Drift migration, schemaVersion stays 22); voice-default resolver constrains output to {ja,zh,en}, never 'system'
 - [Phase ?]: 54-02: onboarding ARB single-owner — 24 onboarding* keys ja/zh/en (intro 4 selling points/settings rows/lock-entry); onboardingStart=この設定で始める locked, distinct from profileStart
+- [Phase 54]: 54-03: SettingsScreen deep-link uses jumpTo(maxScrollExtent) then post-frame ensureVisible — bare ensureVisible no-ops on a lazy ListView (off-screen SecuritySection element unmounted, GlobalKey context null)
+- [Phase 54]: 54-03: scrollToSecurity defaults false; SecuritySection wrapped in KeyedSubtree so security_section.dart stays byte-unchanged (Phase 55 fills real lock)
 
 ### Quick Tasks Completed
 
@@ -190,7 +192,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-29T13:43:42.391Z
+Last session: 2026-06-29T14:14:30.641Z
 Stopped at: Completed 54-02-PLAN.md
 Resume file: None
 
@@ -256,6 +258,7 @@ Resume file: None
 | Phase 53 P04 | 5 min | 2 tasks | 2 files |
 | Phase 54 P01 | 12min | 2 tasks | 6 files |
 | Phase 54 P02 | 8min | 2 tasks | 7 files |
+| Phase 54 P03 | 35min | 1 tasks | 2 files |
 
 ## Decisions
 
