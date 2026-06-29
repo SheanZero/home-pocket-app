@@ -5,16 +5,16 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 54
 current_phase_name: onboarding-flow
 status: executing
-stopped_at: Completed 54-03-PLAN.md
-last_updated: "2026-06-29T14:22:38.074Z"
+stopped_at: Completed 54-05-PLAN.md
+last_updated: "2026-06-29T14:38:15.951Z"
 last_activity: 2026-06-29
-last_activity_desc: Completed 54-03 (SettingsScreen security deep-link target)
+last_activity_desc: Completed 54-05 (merged onboarding settings page)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
-  percent: 25
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 54 (onboarding-flow) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
-Last activity: 2026-06-29 — Completed 54-03 (SettingsScreen security deep-link target)
+Last activity: 2026-06-29 — Completed 54-05 (merged onboarding settings page)
 
-Progress: [██████░░░░] 64% — Phase 54 executing (3/7 plans done); Phase 53 complete (4/4 plans)
+Progress: [████████░░] 82% — Phase 54 executing (5/7 plans done); Phase 53 complete (4/4 plans)
 
 > **Planning gate note (verify-phase, re-surface):** §13a decision-coverage-plan gate returned `passed:false` with `total:14, covered:0, uncovered:0` — this is the known CJK-decision-bullet parse false-negative (covered:0 AND uncovered:0 = gate did not evaluate, not a real gap). Override taken: all 14 decisions D-01..D-14 are verified cited across the 7 plans (grep-confirmed + plan-checker VERIFICATION PASSED + §13e gap-analysis "all 21 covered"). Not a real coverage gap.
 
@@ -49,6 +49,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 54]: 54-03: SettingsScreen deep-link uses jumpTo(maxScrollExtent) then post-frame ensureVisible — bare ensureVisible no-ops on a lazy ListView (off-screen SecuritySection element unmounted, GlobalKey context null)
 - [Phase 54]: 54-03: scrollToSecurity defaults false; SecuritySection wrapped in KeyedSubtree so security_section.dart stays byte-unchanged (Phase 55 fills real lock)
 - [Phase ?]: 54-04: import forces onboardingComplete=true (D-06); clear-all resets flag + deletes UserProfile (D-05)
+- [Phase 54]: 54-05: OnboardingSettingsScreen merges identity (nickname[required]+avatar) with UI-language/currency/voice as unified 変更 rows; writes through existing providers; voice routed via resolveVoiceLanguageForOnboarding (never 'system'); signals via onConfirmed, never sets onboarding_complete (54-07 owns that)
 
 ### Quick Tasks Completed
 
@@ -193,8 +194,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-29T14:22:11.890Z
-Stopped at: Completed 54-02-PLAN.md
+Last session: 2026-06-29T14:38:15.896Z
+Stopped at: Completed 54-05-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -261,6 +262,7 @@ Resume file: None
 | Phase 54 P02 | 8min | 2 tasks | 7 files |
 | Phase 54 P03 | 35min | 1 tasks | 2 files |
 | Phase 54 P04 | 11min | 2 tasks | 5 files |
+| Phase 54 P05 | 25min | 3 tasks | 3 files |
 
 ## Decisions
 
