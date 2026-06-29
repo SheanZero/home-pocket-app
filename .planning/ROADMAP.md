@@ -161,7 +161,7 @@
 **Phase summary:**
 
 - [x] **Phase 53: HTML 设计关卡（零生产代码）** — 欢迎引导 / 应用锁屏 / Setting 法务·赞助三块 HTML 设计稿，经用户确认；零生产 Dart (completed 2026-06-29)
-- [ ] **Phase 54: 欢迎 / 首启引导（Onboarding gate）** — init-settle 后的首启 gate + UI语言/币种/语音语言强制写穿 + 末尾可跳过的锁配置入口
+- [x] **Phase 54: 欢迎 / 首启引导（Onboarding gate）** — init-settle 后的首启 gate + UI语言/币种/语音语言强制写穿 + 末尾可跳过的锁配置入口 (completed 2026-06-29)
 - [ ] **Phase 55: 应用锁（生物识别 + PIN，最高风险）** — 冷启动+回前台完整重锁 + 切换器隐私遮罩 + 4位PIN加盐慢哈希兜底；独立安全评审
 - [ ] **Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）** — 隐私政策/利用規約/OSS/特商法 + 外链赞助；为真实 store-review round-trip 留余量
 
@@ -205,7 +205,7 @@
   4. 引导可返回上一步、无法卡死（re-entrant）（进度仅靠返回键/手势体现、无显式进度条 — D-12 有意取舍，supersedes 早先「显示进度」措辞）；末尾「设置应用锁」入口可明确跳过，跳过后锁保持关闭 — ONBOARD-06/07
   5. 所有新增引导文案三语（ja/zh/en）ARB 齐全，过 parity + 硬编码CJK扫描
 
-**Plans**: 6/7 plans executed
+**Plans**: 7/7 plans complete
 **UI hint**: yes
 
 **Wave 1** *(parallel — independent foundation, zero file overlap)*
@@ -222,7 +222,7 @@
 
 **Wave 3** *(depends on Wave 2 screens)*
 
-- [ ] 54-07-PLAN.md — OnboardingFlowScreen nested-Navigator host (re-entrant, D-12) + main.dart captured-after-init gate + retire ProfileOnboardingScreen gate (D-01) [wave 3]
+- [x] 54-07-PLAN.md — OnboardingFlowScreen nested-Navigator host (re-entrant, D-12) + main.dart captured-after-init gate + retire ProfileOnboardingScreen gate (D-01) [wave 3]
 
 ### Phase 55: 应用锁（生物识别 + PIN — 最高风险，独立 phase + 安全评审）
 
