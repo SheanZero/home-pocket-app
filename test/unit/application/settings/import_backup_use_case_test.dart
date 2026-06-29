@@ -357,6 +357,100 @@ void main() {
   });
 
   test(
+    'D-06: old backup lacking onboarding_complete → forces onboardingComplete true',
+    () async {
+      final now = DateTime(2026, 2, 7);
+      // Simulate a pre-Phase-54 backup whose settings map omits the key entirely.
+      final settingsMap = const AppSettings(language: 'en').toJson();
+      settingsMap.remove('onboarding_complete');
+
+      final backupData = BackupData(
+        metadata: BackupMetadata(
+          version: '1.0',
+          createdAt: now.millisecondsSinceEpoch,
+          deviceId: 'test',
+          appVersion: '0.1.0',
+        ),
+        transactions: [],
+        categories: [],
+        books: [],
+        settings: settingsMap,
+      );
+
+      final file = await _createEncryptedBackup(
+        password: 'test-password-123',
+        backupData: backupData,
+        filePath: '${tempDir.path}/backup.hpb',
+      );
+
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+      when(
+        () => mockSettingsRepo.updateSettings(any()),
+      ).thenAnswer((_) async {});
+
+      final result = await useCase.execute(
+        backupFile: file,
+        password: 'test-password-123',
+      );
+
+      expect(result.isSuccess, true);
+      final persisted = verify(
+        () => mockSettingsRepo.updateSettings(captureAny()),
+      ).captured.single as AppSettings;
+      expect(persisted.onboardingComplete, true);
+    },
+  );
+
+  test(
+    'D-06: backup with onboarding_complete=false → still forced true',
+    () async {
+      final now = DateTime(2026, 2, 7);
+      final backupData = BackupData(
+        metadata: BackupMetadata(
+          version: '1.0',
+          createdAt: now.millisecondsSinceEpoch,
+          deviceId: 'test',
+          appVersion: '0.1.0',
+        ),
+        transactions: [],
+        categories: [],
+        books: [],
+        settings: const AppSettings(onboardingComplete: false).toJson(),
+      );
+
+      final file = await _createEncryptedBackup(
+        password: 'test-password-123',
+        backupData: backupData,
+        filePath: '${tempDir.path}/backup.hpb',
+      );
+
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+      when(
+        () => mockSettingsRepo.updateSettings(any()),
+      ).thenAnswer((_) async {});
+
+      final result = await useCase.execute(
+        backupFile: file,
+        password: 'test-password-123',
+      );
+
+      expect(result.isSuccess, true);
+      final persisted = verify(
+        () => mockSettingsRepo.updateSettings(captureAny()),
+      ).captured.single as AppSettings;
+      expect(persisted.onboardingComplete, true);
+    },
+  );
+
+  test(
     'CR-01: skips imported rows with an invalid rate but keeps valid ones',
     () async {
       final now = DateTime(2026, 2, 7);

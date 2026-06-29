@@ -159,8 +159,13 @@ class ImportBackupUseCase {
       await _transactionRepo.insert(transaction);
     }
 
-    // Import settings
-    final settings = AppSettings.fromJson(backupData.settings);
+    // Import settings (D-06): a restored backup represents an existing user, so
+    // force onboardingComplete=true — even for pre-Phase-54 backups whose
+    // settings map omits the key — so import skips onboarding. No BackupData
+    // field is added; the flag rides inside the existing settings map.
+    final settings = AppSettings.fromJson(
+      backupData.settings,
+    ).copyWith(onboardingComplete: true);
     await _settingsRepo.updateSettings(settings);
 
     // Import exchange rates (D-10): upsert, not insert — idempotent by the
