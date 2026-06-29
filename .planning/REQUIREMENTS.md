@@ -19,7 +19,7 @@
 ### Onboarding（欢迎 / 首启引导）
 
 - [x] **ONBOARD-01**: 仅首次启动展示欢迎/引导流程，完成后不再出现（幂等；`onboarding_complete` 在显式完成时一次性落最后，绝不从「currency≠null」反推）
-- [ ] **ONBOARD-02**: 引导内提供 app 整体介绍（隐私 / 本地优先 / 双账本卖点），介绍部分可跳过
+- [x] **ONBOARD-02**: 引导内提供 app 整体介绍（隐私 / 本地优先 / 双账本卖点），介绍部分可跳过
 - [ ] **ONBOARD-03**: 用户确认 UI 语言（设备语言预选）→ 写入既有 `localeProvider`，MaterialApp 即时生效
 - [ ] **ONBOARD-04**: 用户确认记账币种（JPY 默认）→ 写入既有 `Book.currency`（复用 v1.7 货币选择器）
 - [x] **ONBOARD-05**: 用户确认语音输入语言（默认 = 所选 UI 语言）→ 写入既有语音 locale 设置
@@ -96,7 +96,7 @@
 | DESIGN-03 | Phase 53 | Complete |
 | DESIGN-04 | Phase 53 | Complete |
 | ONBOARD-01 | Phase 54 | Complete |
-| ONBOARD-02 | Phase 54 | Pending |
+| ONBOARD-02 | Phase 54 | Complete |
 | ONBOARD-03 | Phase 54 | Pending |
 | ONBOARD-04 | Phase 54 | Pending |
 | ONBOARD-05 | Phase 54 | Complete |
