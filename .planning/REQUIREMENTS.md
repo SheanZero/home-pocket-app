@@ -35,7 +35,7 @@
 - [x] **LOCK-05**: 解锁默认先自动尝试生物识别（Face ID/指纹），失败或不可用回退到 PIN
 - [x] **LOCK-06**: PIN 为 4 位，作为强制兜底凭据（启用锁必须先设 PIN）
 - [x] **LOCK-07**: PIN 以加盐慢哈希（KDF，≥100k 迭代或 Argon2id，跑在主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，**accessibility 保持 unlocked_this_device 不变**），常量时间比对，绝不明文
-- [ ] **LOCK-08**: PIN 连续输错有递增冷却/退避（持久化计数，成功才清零），无默认数据擦除
+- [~] **LOCK-08**: ~~PIN 连续输错有递增冷却/退避（持久化计数，成功才清零），无默认数据擦除~~ —— **Descoped per D-06**（MVP 零速率限制，用户知情接受风险；见 `55-RESEARCH.md §Security Domain` Known Accepted Risk sign-off）。递增冷却能力移出 Phase 55 范围、并入 v2 App Lock 家族 → **LOCK-V2-04**。本 phase 仍恒成立的不变量：无默认数据擦除、无恢复路径、成功无需清零计数（因为根本无计数器）；PIN 输错仅抖动+清空、可立即重试（见 D-12）。
 - [x] **LOCK-09**: 锁屏文案明确告知「忘记 PIN 无法找回、需重装 app 且丢失未同步本地数据」，不暗示存在恢复路径
 - [x] **LOCK-10**: 处理 `local_auth` 完整错误分类（notAvailable/notEnrolled/lockedOut/permanentlyLockedOut/passcodeNotSet/cancel）→ 一律回退 PIN，不把用户锁在自己数据外
 
@@ -64,6 +64,7 @@
 - **LOCK-V2-01**: 可配置重锁宽限时间（immediate / 1min / 5min；v2.0 先发固定默认）
 - **LOCK-V2-02**: 忘记 PIN 经 BIP39 恢复词重置（v2.0 选了「无恢复」，未来可加）
 - **LOCK-V2-03**: 可选「连续 N 次失败后擦除本地数据」（默认关）
+- **LOCK-V2-04**: PIN 连错递增冷却/退避（持久化计数，成功才清零）—— 由 v2.0 Phase 55 LOCK-08 descope 而来（D-06，MVP 零速率限制为用户知情接受风险）；v2 补齐在线猜测的速率限制以收窄 4 位 PIN 暴力破解面
 
 ### Onboarding / Legal v2
 
@@ -109,7 +110,7 @@
 | LOCK-05 | Phase 55 | Complete |
 | LOCK-06 | Phase 55 | Complete |
 | LOCK-07 | Phase 55 | Complete |
-| LOCK-08 | Phase 55 | Pending |
+| LOCK-08 | Phase 55 → v2 | Descoped → LOCK-V2-04 (D-06) |
 | LOCK-09 | Phase 55 | Complete |
 | LOCK-10 | Phase 55 | Complete |
 | DONATE-01 | Phase 56 | Pending |
