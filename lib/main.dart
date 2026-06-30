@@ -18,6 +18,7 @@ import 'features/family_sync/presentation/providers/repository_providers.dart'
     show pushNotificationServiceProvider;
 import 'features/family_sync/presentation/providers/state_sync.dart'
     show syncEngineProvider;
+import 'features/applock/presentation/screens/app_lock_screen.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
@@ -28,6 +29,7 @@ import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
+import 'infrastructure/security/providers.dart' show secureStorageServiceProvider;
 import 'shared/utils/invalidate_all_data_providers.dart';
 import 'shared/utils/result.dart';
 
@@ -108,6 +110,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   String? _bookId;
   bool _initialized = false;
   bool _needsOnboarding = false;
+  bool _isLocked = false;
   String? _error;
 
   @override
@@ -155,9 +158,17 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // from the profile/currency.
         final settings = await ref.read(settingsRepositoryProvider).getSettings();
 
+        // App-lock cold-start gate (LOCK-02 / D-01): the lock is effective ONLY
+        // when the master toggle is on AND a PIN hash exists. A half-configured
+        // state (toggle on, no PIN) must never strand the user (T-55-15), so we
+        // require both before showing the lock screen at boot.
+        final pinHash = await ref.read(secureStorageServiceProvider).getPinHash();
+        final lockConfigured = settings.appLockEnabled && pinHash != null;
+
         setState(() {
           _bookId = bookIdResult.data!;
           _needsOnboarding = !settings.onboardingComplete;
+          _isLocked = lockConfigured;
           _initialized = true;
         });
       } else {
@@ -192,10 +203,16 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         final settings = await ref
             .read(settingsRepositoryProvider)
             .getSettings();
+        // Re-evaluate the lock gate after a destructive reset for parity with
+        // cold start (LOCK-02): a wipe may have cleared the PIN hash, so recompute
+        // from post-reset settings + pinHash rather than carrying a stale flag.
+        final pinHash = await ref.read(secureStorageServiceProvider).getPinHash();
+        final lockConfigured = settings.appLockEnabled && pinHash != null;
         if (!mounted) return;
         setState(() {
           _bookId = bookIdResult.data!;
           _needsOnboarding = !settings.onboardingComplete;
+          _isLocked = lockConfigured;
           _initialized = true;
         });
       } else {
@@ -275,6 +292,16 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       );
     }
 
+    // App-lock gate (LOCK-02): sits AFTER onboarding and BEFORE the shell so a
+    // locked cold start (or a lifecycle relock) hard-stops entry to the ledger.
+    // Unlock reports back via [_completeUnlock] (a setState flag flip, never
+    // pushReplacement) so the live '/' Builder keeps rendering this gate and
+    // the _reinitializeAfterDataReset refresh path stays attached
+    // ([[boot-gate-completion-must-flip-flag-not-pushreplacement]]).
+    if (_isLocked) {
+      return AppLockScreen(onUnlocked: _completeUnlock);
+    }
+
     return MainShellScreen(bookId: _bookId!);
   }
 
@@ -283,6 +310,13 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   /// itself — keeping the gate attached for later `_reinitializeAfterDataReset`
   /// resets. On 现在设置 (`setupSecurity: true`) deep-links to the
   /// SecuritySection on top of the freshly-rendered shell (D-13).
+  /// Unlock handoff from [AppLockScreen] (LOCK-03). Mirrors [_completeOnboarding]:
+  /// flips the gate flag via `setState` so the live '/' Builder renders the shell
+  /// itself — NEVER `_rootNavigatorKey...pushReplacement`, which would detach the
+  /// gate and break `_reinitializeAfterDataReset`
+  /// ([[boot-gate-completion-must-flip-flag-not-pushreplacement]]).
+  void _completeUnlock() => setState(() => _isLocked = false);
+
   void _completeOnboarding({required bool setupSecurity}) {
     setState(() => _needsOnboarding = false);
     if (setupSecurity) {
