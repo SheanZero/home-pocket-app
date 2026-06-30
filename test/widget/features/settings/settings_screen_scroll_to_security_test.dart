@@ -28,6 +28,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_ac
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
+import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
 import 'package:home_pocket/features/settings/presentation/screens/settings_screen.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/security_section.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -46,11 +47,20 @@ double _scrollOffset(WidgetTester tester) {
   return tester.state<ScrollableState>(scrollable).position.pixels;
 }
 
-Widget _pumpScreen({required bool scrollToSecurity, required AppDatabase db}) {
+Widget _pumpScreen({
+  required bool scrollToSecurity,
+  required AppDatabase db,
+  // Phase 55 D-10: arriving via this deep-link with the lock NOT yet set now
+  // auto-opens the set-PIN flow. The two original scroll-scope tests pin
+  // `appLockEnabled: true` so that new behavior stays out of their assertions;
+  // the dedicated D-10 test below exercises the auto-open with the default
+  // (lock-not-set) settings.
+  AppSettings settings = const AppSettings(appLockEnabled: true),
+}) {
   return ProviderScope(
     overrides: [
       appDatabaseProvider.overrideWithValue(db),
-      appSettingsProvider.overrideWith((ref) => Future.value(const AppSettings())),
+      appSettingsProvider.overrideWith((ref) => Future.value(settings)),
       bookByIdProvider(bookId: _testBookId).overrideWith((ref) async => null),
       monthlyJoyTargetRecommendationProvider(
         bookId: _testBookId,
@@ -130,6 +140,57 @@ void main() {
         reason: 'default behavior must not scroll',
       );
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'scrollToSecurity + lock-not-set auto-opens the set-PIN flow (D-10)',
+    (tester) async {
+      // A tall viewport so the pushed SetPinScreen keypad has room.
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final db = AppDatabase.forTesting();
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        _pumpScreen(
+          scrollToSecurity: true,
+          db: db,
+          // Fresh user: lock not yet configured -> D-10 should fire.
+          settings: const AppSettings(),
+        ),
+      );
+      await _pumpBounded(tester);
+
+      // The deep-link landed on Security AND launched set-PIN directly.
+      expect(find.byType(SetPinScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'scrollToSecurity with lock already set does NOT auto-open set-PIN (D-10)',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final db = AppDatabase.forTesting();
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        _pumpScreen(
+          scrollToSecurity: true,
+          db: db,
+          settings: const AppSettings(appLockEnabled: true),
+        ),
+      );
+      await _pumpBounded(tester);
+
+      expect(find.byType(SetPinScreen), findsNothing);
     },
   );
 }

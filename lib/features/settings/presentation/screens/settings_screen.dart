@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
+import '../../../../infrastructure/security/providers.dart';
+import '../../../applock/presentation/screens/set_pin_screen.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../features/analytics/domain/models/metric_result.dart';
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
@@ -53,7 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.dispose();
   }
 
-  void _maybeScrollToSecurity() {
+  void _maybeScrollToSecurity({required bool lockNotSet}) {
     if (!widget.scrollToSecurity || _didScrollToSecurity) return;
     if (!_scrollController.hasClients) return;
     _didScrollToSecurity = true;
@@ -70,7 +74,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      // D-10: arriving via the Phase 54 "现在设置" deep-link with the lock not
+      // yet configured starts the set-PIN double-entry flow immediately. The
+      // `_didScrollToSecurity` guard above keeps this one-shot (no re-fire on
+      // rebuild). Non-deep-link callers never reach here.
+      if (lockNotSet) {
+        unawaited(_autoOpenSetPin());
+      }
     });
+  }
+
+  /// Push the double-entry [SetPinScreen]; on success arm the lock exactly as
+  /// the [SecuritySection] master-toggle ON handler does (never lock without a
+  /// PIN). Reads no provider until the user actually sets a PIN.
+  Future<void> _autoOpenSetPin() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()),
+    );
+    if (result != true) return;
+    await ref.read(appLockServiceProvider).enableLock();
+    if (!mounted) return;
+    ref.invalidate(appSettingsProvider);
   }
 
   @override
@@ -96,7 +120,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: settingsAsync.when(
         data: (settings) {
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _maybeScrollToSecurity(),
+            (_) => _maybeScrollToSecurity(
+              lockNotSet: !settings.appLockEnabled,
+            ),
           );
           return ListView(
             controller: _scrollController,
