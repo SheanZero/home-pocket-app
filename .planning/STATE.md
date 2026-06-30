@@ -5,10 +5,10 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 55
 current_phase_name: pin-phase
 status: executing
-stopped_at: Phase 55 plan 10 complete (wave 3) — next 55-11 (wave 4)
-last_updated: "2026-06-30T07:50:44.725Z"
+stopped_at: Phase 55 code-complete (11/11 plans, all waves + gates green); verification 5/5 code must-haves, human_needed — awaiting on-device UAT (/gsd-verify-work 55)
+last_updated: "2026-06-30T06:55:00.000Z"
 last_activity: 2026-06-30
-last_activity_desc: 55-10 executed (Settings app-lock control surface + set-PIN + reauth + D-10 deep-link)
+last_activity_desc: Phase 55 executed (11/11 plans across 4 waves; analyze 0, suite 3467/3467; post-merge fix db98cfe7); verification human_needed — device QA pending
 progress:
   total_phases: 4
   completed_phases: 3
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 ## Current Position
 
-Phase: 55 (pin-phase) — EXECUTING
-Plan: 11 of 11 complete — next 55-11 (wave 4)
-Status: Ready to execute
-Last activity: 2026-06-30 — 55-10 executed (Settings app-lock control surface + set-PIN + reauth + D-10 deep-link)
+Phase: 55 (pin-phase) — CODE-COMPLETE, awaiting on-device UAT
+Plan: 11 of 11 complete (Wave 1: 01-06 · Wave 2: 07-08 · Wave 3: 09-10 · Wave 4: 11)
+Status: Verification 5/5 code must-haves PASS, status human_needed — on-device QA pending (see 55-UAT.md → /gsd-verify-work 55). Not yet marked complete.
+Last activity: 2026-06-30 — Phase 55 executed (11/11 plans, all gates green, post-merge fix); verification human_needed
 
-Progress: [████████░░] 82% — Phase 54 executing (5/7 plans done); Phase 53 complete (4/4 plans)
+Progress: Phase 55 code-complete (analyze 0 · suite 3467/3467); Phase 54 executing; Phase 53 complete (4/4)
 
 > **Planning gate note (verify-phase, re-surface):** §13a decision-coverage-plan gate returned `passed:false` with `total:14, covered:0, uncovered:0` — this is the known CJK-decision-bullet parse false-negative (covered:0 AND uncovered:0 = gate did not evaluate, not a real gap). Override taken: all 14 decisions D-01..D-14 are verified cited across the 7 plans (grep-confirmed + plan-checker VERIFICATION PASSED + §13e gap-analysis "all 21 covered"). Not a real coverage gap.
 
