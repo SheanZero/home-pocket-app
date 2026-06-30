@@ -10,11 +10,12 @@ import '../../../settings/presentation/providers/state_settings.dart';
 /// The trailing onboarding lock-entry screen (D-11 / D-13 / ONBOARD-06).
 ///
 /// Asks「アプリロックを設定しますか？」with two actions:
-///   - スキップ (skip): explicitly turns the biometric lock OFF then
-///     completes with `setupSecurity: false`. The explicit `false` is REQUIRED
-///     because `AppSettings.biometricLockEnabled` defaults to **true** — without
-///     it a fresh user who skips would leave the lock implicitly ON with no PIN
-///     (D-13 / threat T-54-09).
+///   - スキップ (skip): explicitly turns the app-lock master toggle OFF
+///     (`setAppLockEnabled(false)`) then completes with `setupSecurity: false`.
+///     Per D-02 the new lock reads ONLY `appLockEnabled` (default **false**) —
+///     the legacy `biometricLockEnabled` is retired and never armed here. The
+///     explicit `false` write keeps the skip semantic unambiguous and pins the
+///     master off for a fresh user who skips (D-13 / threat T-54-09 / T-55-07).
 ///   - 今すぐ設定 (set up now): performs NO biometric write and completes with
 ///     `setupSecurity: true`. The flow host (54-07) deep-links to the existing
 ///     SecuritySection; Phase 55 enables the real PIN/biometric there.
@@ -42,9 +43,10 @@ class _OnboardingLockEntryScreenState
       return;
     }
     setState(() => _busy = true);
-    // D-13: lock stays OFF on skip — biometricLockEnabled defaults to true, so
-    // an explicit false write is required.
-    await ref.read(settingsRepositoryProvider).setBiometricLock(false);
+    // D-02/D-13: lock stays OFF on skip — write the new master toggle off. The
+    // new lock reads ONLY appLockEnabled; the legacy biometricLockEnabled is
+    // retired and never consulted (T-55-07).
+    await ref.read(settingsRepositoryProvider).setAppLockEnabled(false);
     ref.invalidate(appSettingsProvider);
     if (!mounted) {
       return;
