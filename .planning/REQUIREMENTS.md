@@ -30,8 +30,8 @@
 
 - [x] **LOCK-01**: 用户可在 Setting 开启/关闭应用锁（关闭时锁逻辑完全 no-op）
 - [ ] **LOCK-02**: 启用后 app 冷启动需通过生物识别或 PIN 解锁后才进入主 shell
-- [ ] **LOCK-03**: 启用后 app 从后台回前台需重新解锁（完整重锁；在 `paused`→`resumed` 触发，不在 `inactive`）
-- [ ] **LOCK-04**: 任务切换器/后台快照显示隐私遮罩，不泄露账目内容（`inactive` 时盖遮罩层）
+- [x] **LOCK-03**: 启用后 app 从后台回前台需重新解锁（完整重锁；在 `paused`→`resumed` 触发，不在 `inactive`）
+- [x] **LOCK-04**: 任务切换器/后台快照显示隐私遮罩，不泄露账目内容（`inactive` 时盖遮罩层）
 - [x] **LOCK-05**: 解锁默认先自动尝试生物识别（Face ID/指纹），失败或不可用回退到 PIN
 - [x] **LOCK-06**: PIN 为 4 位，作为强制兜底凭据（启用锁必须先设 PIN）
 - [x] **LOCK-07**: PIN 以加盐慢哈希（KDF，≥100k 迭代或 Argon2id，跑在主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，**accessibility 保持 unlocked_this_device 不变**），常量时间比对，绝不明文
@@ -105,8 +105,8 @@
 | ONBOARD-07 | Phase 54 | Complete |
 | LOCK-01 | Phase 55 | Complete |
 | LOCK-02 | Phase 55 | Pending |
-| LOCK-03 | Phase 55 | Pending |
-| LOCK-04 | Phase 55 | Pending |
+| LOCK-03 | Phase 55 | Complete |
+| LOCK-04 | Phase 55 | Complete |
 | LOCK-05 | Phase 55 | Complete |
 | LOCK-06 | Phase 55 | Complete |
 | LOCK-07 | Phase 55 | Complete |
