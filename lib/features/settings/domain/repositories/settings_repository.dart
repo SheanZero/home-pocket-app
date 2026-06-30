@@ -8,6 +8,19 @@ abstract class SettingsRepository {
   Future<void> setLanguage(String language);
   Future<void> setBiometricLock(bool enabled);
 
+  /// Persists the app-lock master toggle (D-01/LOCK-01, default false).
+  ///
+  /// The new app lock reads ONLY this flag — never the legacy
+  /// [setBiometricLock]/`biometricLockEnabled` (retired per D-02). Plaintext
+  /// SharedPreferences key, no Drift migration.
+  Future<void> setAppLockEnabled(bool enabled);
+
+  /// Persists the biometric-unlock sub-toggle (D-01/LOCK-06, default false).
+  ///
+  /// Only meaningful while [setAppLockEnabled] is on. Plaintext
+  /// SharedPreferences key, no Drift migration.
+  Future<void> setBiometricUnlockEnabled(bool enabled);
+
   /// Persists the onboarding-completion flag (single source of truth for the
   /// onboarding gate). Plaintext SharedPreferences key, no Drift migration.
   Future<void> setOnboardingComplete(bool enabled);

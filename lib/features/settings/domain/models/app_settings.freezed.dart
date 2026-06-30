@@ -17,6 +17,8 @@ mixin _$AppSettings {
   String get language;
   bool get notificationsEnabled;
   bool get biometricLockEnabled;
+  bool get appLockEnabled;
+  bool get biometricUnlockEnabled;
   bool get onboardingComplete;
   String get voiceLanguage;
   int? get monthlyJoyTarget;
@@ -45,6 +47,10 @@ mixin _$AppSettings {
                 other.notificationsEnabled == notificationsEnabled) &&
             (identical(other.biometricLockEnabled, biometricLockEnabled) ||
                 other.biometricLockEnabled == biometricLockEnabled) &&
+            (identical(other.appLockEnabled, appLockEnabled) ||
+                other.appLockEnabled == appLockEnabled) &&
+            (identical(other.biometricUnlockEnabled, biometricUnlockEnabled) ||
+                other.biometricUnlockEnabled == biometricUnlockEnabled) &&
             (identical(other.onboardingComplete, onboardingComplete) ||
                 other.onboardingComplete == onboardingComplete) &&
             (identical(other.voiceLanguage, voiceLanguage) ||
@@ -63,6 +69,8 @@ mixin _$AppSettings {
     language,
     notificationsEnabled,
     biometricLockEnabled,
+    appLockEnabled,
+    biometricUnlockEnabled,
     onboardingComplete,
     voiceLanguage,
     monthlyJoyTarget,
@@ -71,7 +79,7 @@ mixin _$AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -87,6 +95,8 @@ abstract mixin class $AppSettingsCopyWith<$Res> {
     String language,
     bool notificationsEnabled,
     bool biometricLockEnabled,
+    bool appLockEnabled,
+    bool biometricUnlockEnabled,
     bool onboardingComplete,
     String voiceLanguage,
     int? monthlyJoyTarget,
@@ -110,6 +120,8 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
     Object? language = null,
     Object? notificationsEnabled = null,
     Object? biometricLockEnabled = null,
+    Object? appLockEnabled = null,
+    Object? biometricUnlockEnabled = null,
     Object? onboardingComplete = null,
     Object? voiceLanguage = null,
     Object? monthlyJoyTarget = freezed,
@@ -132,6 +144,14 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
         biometricLockEnabled: null == biometricLockEnabled
             ? _self.biometricLockEnabled
             : biometricLockEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        appLockEnabled: null == appLockEnabled
+            ? _self.appLockEnabled
+            : appLockEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        biometricUnlockEnabled: null == biometricUnlockEnabled
+            ? _self.biometricUnlockEnabled
+            : biometricUnlockEnabled // ignore: cast_nullable_to_non_nullable
                   as bool,
         onboardingComplete: null == onboardingComplete
             ? _self.onboardingComplete
@@ -252,6 +272,8 @@ extension AppSettingsPatterns on AppSettings {
       String language,
       bool notificationsEnabled,
       bool biometricLockEnabled,
+      bool appLockEnabled,
+      bool biometricUnlockEnabled,
       bool onboardingComplete,
       String voiceLanguage,
       int? monthlyJoyTarget,
@@ -268,6 +290,8 @@ extension AppSettingsPatterns on AppSettings {
           _that.language,
           _that.notificationsEnabled,
           _that.biometricLockEnabled,
+          _that.appLockEnabled,
+          _that.biometricUnlockEnabled,
           _that.onboardingComplete,
           _that.voiceLanguage,
           _that.monthlyJoyTarget,
@@ -298,6 +322,8 @@ extension AppSettingsPatterns on AppSettings {
       String language,
       bool notificationsEnabled,
       bool biometricLockEnabled,
+      bool appLockEnabled,
+      bool biometricUnlockEnabled,
       bool onboardingComplete,
       String voiceLanguage,
       int? monthlyJoyTarget,
@@ -313,6 +339,8 @@ extension AppSettingsPatterns on AppSettings {
           _that.language,
           _that.notificationsEnabled,
           _that.biometricLockEnabled,
+          _that.appLockEnabled,
+          _that.biometricUnlockEnabled,
           _that.onboardingComplete,
           _that.voiceLanguage,
           _that.monthlyJoyTarget,
@@ -342,6 +370,8 @@ extension AppSettingsPatterns on AppSettings {
       String language,
       bool notificationsEnabled,
       bool biometricLockEnabled,
+      bool appLockEnabled,
+      bool biometricUnlockEnabled,
       bool onboardingComplete,
       String voiceLanguage,
       int? monthlyJoyTarget,
@@ -357,6 +387,8 @@ extension AppSettingsPatterns on AppSettings {
           _that.language,
           _that.notificationsEnabled,
           _that.biometricLockEnabled,
+          _that.appLockEnabled,
+          _that.biometricUnlockEnabled,
           _that.onboardingComplete,
           _that.voiceLanguage,
           _that.monthlyJoyTarget,
@@ -376,6 +408,8 @@ class _AppSettings implements AppSettings {
     this.language = 'system',
     this.notificationsEnabled = true,
     this.biometricLockEnabled = true,
+    this.appLockEnabled = false,
+    this.biometricUnlockEnabled = false,
     this.onboardingComplete = false,
     this.voiceLanguage = 'zh',
     this.monthlyJoyTarget,
@@ -396,6 +430,12 @@ class _AppSettings implements AppSettings {
   @override
   @JsonKey()
   final bool biometricLockEnabled;
+  @override
+  @JsonKey()
+  final bool appLockEnabled;
+  @override
+  @JsonKey()
+  final bool biometricUnlockEnabled;
   @override
   @JsonKey()
   final bool onboardingComplete;
@@ -434,6 +474,10 @@ class _AppSettings implements AppSettings {
                 other.notificationsEnabled == notificationsEnabled) &&
             (identical(other.biometricLockEnabled, biometricLockEnabled) ||
                 other.biometricLockEnabled == biometricLockEnabled) &&
+            (identical(other.appLockEnabled, appLockEnabled) ||
+                other.appLockEnabled == appLockEnabled) &&
+            (identical(other.biometricUnlockEnabled, biometricUnlockEnabled) ||
+                other.biometricUnlockEnabled == biometricUnlockEnabled) &&
             (identical(other.onboardingComplete, onboardingComplete) ||
                 other.onboardingComplete == onboardingComplete) &&
             (identical(other.voiceLanguage, voiceLanguage) ||
@@ -452,6 +496,8 @@ class _AppSettings implements AppSettings {
     language,
     notificationsEnabled,
     biometricLockEnabled,
+    appLockEnabled,
+    biometricUnlockEnabled,
     onboardingComplete,
     voiceLanguage,
     monthlyJoyTarget,
@@ -460,7 +506,7 @@ class _AppSettings implements AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -478,6 +524,8 @@ abstract mixin class _$AppSettingsCopyWith<$Res>
     String language,
     bool notificationsEnabled,
     bool biometricLockEnabled,
+    bool appLockEnabled,
+    bool biometricUnlockEnabled,
     bool onboardingComplete,
     String voiceLanguage,
     int? monthlyJoyTarget,
@@ -501,6 +549,8 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
     Object? language = null,
     Object? notificationsEnabled = null,
     Object? biometricLockEnabled = null,
+    Object? appLockEnabled = null,
+    Object? biometricUnlockEnabled = null,
     Object? onboardingComplete = null,
     Object? voiceLanguage = null,
     Object? monthlyJoyTarget = freezed,
@@ -523,6 +573,14 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
         biometricLockEnabled: null == biometricLockEnabled
             ? _self.biometricLockEnabled
             : biometricLockEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        appLockEnabled: null == appLockEnabled
+            ? _self.appLockEnabled
+            : appLockEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        biometricUnlockEnabled: null == biometricUnlockEnabled
+            ? _self.biometricUnlockEnabled
+            : biometricUnlockEnabled // ignore: cast_nullable_to_non_nullable
                   as bool,
         onboardingComplete: null == onboardingComplete
             ? _self.onboardingComplete
