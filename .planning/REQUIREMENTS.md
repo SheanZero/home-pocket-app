@@ -36,7 +36,7 @@
 - [x] **LOCK-06**: PIN 为 4 位，作为强制兜底凭据（启用锁必须先设 PIN）
 - [x] **LOCK-07**: PIN 以加盐慢哈希（KDF，≥100k 迭代或 Argon2id，跑在主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，**accessibility 保持 unlocked_this_device 不变**），常量时间比对，绝不明文
 - [ ] **LOCK-08**: PIN 连续输错有递增冷却/退避（持久化计数，成功才清零），无默认数据擦除
-- [ ] **LOCK-09**: 锁屏文案明确告知「忘记 PIN 无法找回、需重装 app 且丢失未同步本地数据」，不暗示存在恢复路径
+- [x] **LOCK-09**: 锁屏文案明确告知「忘记 PIN 无法找回、需重装 app 且丢失未同步本地数据」，不暗示存在恢复路径
 - [x] **LOCK-10**: 处理 `local_auth` 完整错误分类（notAvailable/notEnrolled/lockedOut/permanentlyLockedOut/passcodeNotSet/cancel）→ 一律回退 PIN，不把用户锁在自己数据外
 
 ### Donation（赞助入口）
@@ -110,7 +110,7 @@
 | LOCK-06 | Phase 55 | Complete |
 | LOCK-07 | Phase 55 | Complete |
 | LOCK-08 | Phase 55 | Pending |
-| LOCK-09 | Phase 55 | Pending |
+| LOCK-09 | Phase 55 | Complete |
 | LOCK-10 | Phase 55 | Complete |
 | DONATE-01 | Phase 56 | Pending |
 | DONATE-02 | Phase 56 | Pending |
