@@ -234,7 +234,7 @@
   1. 用户可在 Setting 开启/关闭应用锁；开启必须先设 4 位 PIN（强制兜底凭据）；关闭时锁逻辑完全 no-op — LOCK-01/06
   2. 启用后冷启动与从后台回前台均需重新解锁才进入主 shell；任务切换器/后台快照显示隐私遮罩不泄露账目（重锁在 `paused`→`resumed`、遮罩在 `inactive`）— LOCK-02/03/04
   3. 解锁默认先自动尝试生物识别，失败/不可用回退 PIN；完整 `local_auth` 错误分类（notAvailable/notEnrolled/lockedOut/permanentlyLockedOut/passcodeNotSet/cancel）一律回退 PIN，绝不把用户锁在自己数据外 — LOCK-05/10
-  4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文；连续输错有递增冷却（持久化计数，成功才清零），无默认数据擦除 — LOCK-07/08
+  4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文、无默认数据擦除 — LOCK-07。~~连续输错有递增冷却（持久化计数，成功才清零）~~ **DESCOPED per D-06**（MVP 零速率限制，用户知情接受风险；见 `55-RESEARCH.md §Security Domain` Known Accepted Risk sign-off）→ 移入 v2 **LOCK-V2-04**；PIN 输错仅抖动+清空、可立即重试，无失败计数器
   5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
 
 **Plans**: 4/11 plans executed
