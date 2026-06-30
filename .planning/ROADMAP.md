@@ -237,7 +237,7 @@
   4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文、无默认数据擦除 — LOCK-07。~~连续输错有递增冷却（持久化计数，成功才清零）~~ **DESCOPED per D-06**（MVP 零速率限制，用户知情接受风险；见 `55-RESEARCH.md §Security Domain` Known Accepted Risk sign-off）→ 移入 v2 **LOCK-V2-04**；PIN 输错仅抖动+清空、可立即重试，无失败计数器
   5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
 
-**Plans**: 6/11 plans executed
+**Plans**: 7/11 plans executed
 **Wave 1**
 
 - [x] 55-01-PLAN.md — PIN KDF: Argon2id off-isolate + PHC + constant-time [LOCK-07] (wave 1)
@@ -249,7 +249,7 @@
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 55-07-PLAN.md — AppLockService: lockEffective predicate + setPin/verifyPin/reauth/disable [LOCK-01/06] (wave 2)
+- [x] 55-07-PLAN.md — AppLockService: lockEffective predicate + setPin/verifyPin/reauth/disable [LOCK-01/06] (wave 2)
 - [ ] 55-08-PLAN.md — Lock widgets (tone B): PinKeypad/PinDots/FaceIdPanel/PrivacyMask [LOCK-04/06] (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
