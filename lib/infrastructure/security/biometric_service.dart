@@ -108,28 +108,34 @@ class BiometricService {
         _failedAttempts++;
         return AuthResult.failed(failedAttempts: _failedAttempts);
       }
-    } on PlatformException catch (e) {
-      return _handlePlatformException(e);
+    } on LocalAuthException catch (e) {
+      // local_auth 3.x throws LocalAuthException with a LocalAuthExceptionCode
+      // enum. EVERY classification maps to PIN fallback so the user is never
+      // ejected from their own data (LOCK-05 / LOCK-10).
+      //
+      // The two lockout codes are named explicitly because the legacy handler
+      // dead-ended them at AuthResult.lockedOut() (the T-55-06 bug): PIN is
+      // exactly the "other auth" that recovers a biometric lockout, so they
+      // MUST route to fallback, not a dead end. The reachable wildcard covers
+      // the remaining current codes AND any future code the enum doc says may
+      // be added non-breakingly — all on the same PIN-fallback path.
+      return switch (e.code) {
+        LocalAuthExceptionCode.temporaryLockout ||
+        LocalAuthExceptionCode.biometricLockout => const AuthResult.fallbackToPIN(),
+        _ => const AuthResult.fallbackToPIN(),
+      };
+    } on PlatformException catch (_) {
+      // Residual net: a legacy/stray PlatformException can never lock the user
+      // out — route it to PIN fallback.
+      return const AuthResult.fallbackToPIN();
+    } catch (_) {
+      // Belt-and-suspenders: no throw type of any kind escapes uncaught.
+      return const AuthResult.fallbackToPIN();
     }
   }
 
   /// Manually reset the failure counter (e.g. after successful PIN auth).
   void resetFailedAttempts() {
     _failedAttempts = 0;
-  }
-
-  AuthResult _handlePlatformException(PlatformException e) {
-    switch (e.code) {
-      case 'LockedOut':
-      case 'PermanentlyLockedOut':
-        return const AuthResult.lockedOut();
-      case 'NotAvailable':
-      case 'NotEnrolled':
-        return const AuthResult.fallbackToPIN();
-      default:
-        return AuthResult.error(
-          message: e.message ?? 'Unknown biometric error',
-        );
-    }
   }
 }
