@@ -6,14 +6,14 @@ current_phase: 55
 current_phase_name: pin-phase
 status: executing
 stopped_at: Phase 55 planned (11 plans, 4 waves) — ready to execute
-last_updated: "2026-06-30T06:47:05.538Z"
+last_updated: "2026-06-30T06:51:42.435Z"
 last_activity: 2026-06-30
 last_activity_desc: Phase 55 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 22
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 55 (pin-phase) — EXECUTING
-Plan: 5 of 11
+Plan: 6 of 11
 Status: Ready to execute
 Last activity: 2026-06-30 — Phase 55 execution started
 
@@ -56,6 +56,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 55]: 55-03: appLockEnabled/biometricUnlockEnabled default false, plaintext prefs, no Drift (schemaVersion 22)
 - [Phase 55]: 55-03/D-02: onboarding skip writes setAppLockEnabled(false); legacy biometricLockEnabled retired (never read by new lock)
 - [Phase ?]: 55-04: forgot-PIN copy implies no recovery path (LOCK-09/T-55-09); lock i18n keys centralized in one foundation ARB plan
+- [Phase 55]: 55-05: LOCK-08 (PIN 递增冷却) descoped per D-06 (MVP zero rate-limiting, user-informed accepted risk) → relocated to v2 LOCK-V2-04; REQUIREMENTS row + ROADMAP SC-4 annotated covered-by-descope citing 55-RESEARCH §Security Domain sign-off
 
 ### Quick Tasks Completed
 
@@ -200,7 +201,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-30T06:46:57.690Z
+Last session: 2026-06-30T06:51:17.193Z
 Stopped at: Phase 55 planned (11 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 
@@ -275,6 +276,7 @@ Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 | Phase 55 P02 | 3min | 2 tasks | 2 files |
 | Phase 55 P03 | 12min | 3 tasks | 7 files |
 | Phase 55 P04 | 6min | 2 tasks | 7 files |
+| Phase 55 P05 | 2min | 2 tasks | 2 files |
 
 ## Decisions
 
