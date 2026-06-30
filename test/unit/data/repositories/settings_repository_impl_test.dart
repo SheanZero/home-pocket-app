@@ -20,6 +20,9 @@ void main() {
       expect(settings.language, 'system');
       expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
+      // D-01/LOCK-01/LOCK-06: new lock toggles default OFF when keys absent.
+      expect(settings.appLockEnabled, false);
+      expect(settings.biometricUnlockEnabled, false);
       expect(settings.monthlyJoyTarget, isNull);
     });
 
@@ -94,6 +97,64 @@ void main() {
 
       final settings = await repository.getSettings();
       expect(settings.biometricLockEnabled, false);
+    });
+  });
+
+  group('appLockEnabled (D-01/LOCK-01)', () {
+    test('defaults to false when key absent', () async {
+      expect((await repository.getSettings()).appLockEnabled, false);
+    });
+
+    test('setAppLockEnabled round-trips both directions', () async {
+      await repository.setAppLockEnabled(true);
+      expect((await repository.getSettings()).appLockEnabled, true);
+
+      await repository.setAppLockEnabled(false);
+      expect((await repository.getSettings()).appLockEnabled, false);
+    });
+
+    test('reads stored app_lock_enabled key', () async {
+      SharedPreferences.setMockInitialValues({'app_lock_enabled': true});
+      final prefs = await SharedPreferences.getInstance();
+      repository = SettingsRepositoryImpl(prefs: prefs);
+
+      expect((await repository.getSettings()).appLockEnabled, true);
+    });
+
+    test('updateSettings persists appLockEnabled', () async {
+      await repository.updateSettings(
+        const AppSettings(appLockEnabled: true),
+      );
+      expect((await repository.getSettings()).appLockEnabled, true);
+    });
+  });
+
+  group('biometricUnlockEnabled (D-01/LOCK-06)', () {
+    test('defaults to false when key absent', () async {
+      expect((await repository.getSettings()).biometricUnlockEnabled, false);
+    });
+
+    test('setBiometricUnlockEnabled round-trips both directions', () async {
+      await repository.setBiometricUnlockEnabled(true);
+      expect((await repository.getSettings()).biometricUnlockEnabled, true);
+
+      await repository.setBiometricUnlockEnabled(false);
+      expect((await repository.getSettings()).biometricUnlockEnabled, false);
+    });
+
+    test('reads stored biometric_unlock_enabled key', () async {
+      SharedPreferences.setMockInitialValues({'biometric_unlock_enabled': true});
+      final prefs = await SharedPreferences.getInstance();
+      repository = SettingsRepositoryImpl(prefs: prefs);
+
+      expect((await repository.getSettings()).biometricUnlockEnabled, true);
+    });
+
+    test('updateSettings persists biometricUnlockEnabled', () async {
+      await repository.updateSettings(
+        const AppSettings(biometricUnlockEnabled: true),
+      );
+      expect((await repository.getSettings()).biometricUnlockEnabled, true);
     });
   });
 

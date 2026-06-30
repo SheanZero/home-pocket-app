@@ -10,6 +10,23 @@ void main() {
       expect(settings.language, 'system');
       expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
+      // D-01/LOCK-01/LOCK-06: new lock toggles default OFF.
+      expect(settings.appLockEnabled, false);
+      expect(settings.biometricUnlockEnabled, false);
+    });
+
+    test('appLockEnabled and biometricUnlockEnabled round-trip via copyWith', () {
+      const original = AppSettings();
+      final updated = original.copyWith(
+        appLockEnabled: true,
+        biometricUnlockEnabled: true,
+      );
+
+      expect(updated.appLockEnabled, true);
+      expect(updated.biometricUnlockEnabled, true);
+      // Original is unchanged (immutability).
+      expect(original.appLockEnabled, false);
+      expect(original.biometricUnlockEnabled, false);
     });
 
     test('creates with custom values', () {
