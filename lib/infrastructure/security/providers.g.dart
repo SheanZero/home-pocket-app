@@ -168,6 +168,67 @@ final class SecureStorageServiceProvider
 String _$secureStorageServiceHash() =>
     r'f44bb5666baebf64786c7d88095a3ba1b215b1d2';
 
+/// Application-layer app-lock service — single source of truth for the lock
+/// decision (D-01) and all PIN operations (LOCK-01/06).
+///
+/// Consumed by the cold-start gate (Plan 11), lock screen (Plan 09), and the
+/// Settings security section (Plan 10). Wires the keychain (pinHash slot), the
+/// biometric service (re-auth, D-05), and the settings repository (toggles).
+
+@ProviderFor(appLockService)
+final appLockServiceProvider = AppLockServiceProvider._();
+
+/// Application-layer app-lock service — single source of truth for the lock
+/// decision (D-01) and all PIN operations (LOCK-01/06).
+///
+/// Consumed by the cold-start gate (Plan 11), lock screen (Plan 09), and the
+/// Settings security section (Plan 10). Wires the keychain (pinHash slot), the
+/// biometric service (re-auth, D-05), and the settings repository (toggles).
+
+final class AppLockServiceProvider
+    extends $FunctionalProvider<AppLockService, AppLockService, AppLockService>
+    with $Provider<AppLockService> {
+  /// Application-layer app-lock service — single source of truth for the lock
+  /// decision (D-01) and all PIN operations (LOCK-01/06).
+  ///
+  /// Consumed by the cold-start gate (Plan 11), lock screen (Plan 09), and the
+  /// Settings security section (Plan 10). Wires the keychain (pinHash slot), the
+  /// biometric service (re-auth, D-05), and the settings repository (toggles).
+  AppLockServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appLockServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appLockServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<AppLockService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AppLockService create(Ref ref) {
+    return appLockService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppLockService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AppLockService>(value),
+    );
+  }
+}
+
+String _$appLockServiceHash() => r'2170e8bfbef63e945e084abbeaf0e755ae63a0a2';
+
 /// Audit logger — depends on AppDatabase and SecureStorageService.
 ///
 /// NOTE: This provider requires [appDatabaseProvider] to be defined
