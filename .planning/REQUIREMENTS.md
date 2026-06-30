@@ -29,7 +29,7 @@
 ### App Lock（应用锁 — 生物识别 + PIN）
 
 - [x] **LOCK-01**: 用户可在 Setting 开启/关闭应用锁（关闭时锁逻辑完全 no-op）
-- [ ] **LOCK-02**: 启用后 app 冷启动需通过生物识别或 PIN 解锁后才进入主 shell
+- [x] **LOCK-02**: 启用后 app 冷启动需通过生物识别或 PIN 解锁后才进入主 shell
 - [x] **LOCK-03**: 启用后 app 从后台回前台需重新解锁（完整重锁；在 `paused`→`resumed` 触发，不在 `inactive`）
 - [x] **LOCK-04**: 任务切换器/后台快照显示隐私遮罩，不泄露账目内容（`inactive` 时盖遮罩层）
 - [x] **LOCK-05**: 解锁默认先自动尝试生物识别（Face ID/指纹），失败或不可用回退到 PIN
@@ -104,7 +104,7 @@
 | ONBOARD-06 | Phase 54 | Complete |
 | ONBOARD-07 | Phase 54 | Complete |
 | LOCK-01 | Phase 55 | Complete |
-| LOCK-02 | Phase 55 | Pending |
+| LOCK-02 | Phase 55 | Complete |
 | LOCK-03 | Phase 55 | Complete |
 | LOCK-04 | Phase 55 | Complete |
 | LOCK-05 | Phase 55 | Complete |

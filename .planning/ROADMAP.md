@@ -162,7 +162,7 @@
 
 - [x] **Phase 53: HTML 设计关卡（零生产代码）** — 欢迎引导 / 应用锁屏 / Setting 法务·赞助三块 HTML 设计稿，经用户确认；零生产 Dart (completed 2026-06-29)
 - [x] **Phase 54: 欢迎 / 首启引导（Onboarding gate）** — init-settle 后的首启 gate + UI语言/币种/语音语言强制写穿 + 末尾可跳过的锁配置入口 (completed 2026-06-29)
-- [ ] **Phase 55: 应用锁（生物识别 + PIN，最高风险）** — 冷启动+回前台完整重锁 + 切换器隐私遮罩 + 4位PIN加盐慢哈希兜底；独立安全评审
+- [x] **Phase 55: 应用锁（生物识别 + PIN，最高风险）** — 冷启动+回前台完整重锁 + 切换器隐私遮罩 + 4位PIN加盐慢哈希兜底；独立安全评审 (completed 2026-06-30)
 - [ ] **Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）** — 隐私政策/利用規約/OSS/特商法 + 外链赞助；为真实 store-review round-trip 留余量
 
 ### Phase 53: HTML 设计关卡（零生产代码）
@@ -237,7 +237,7 @@
   4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文、无默认数据擦除 — LOCK-07。~~连续输错有递增冷却（持久化计数，成功才清零）~~ **DESCOPED per D-06**（MVP 零速率限制，用户知情接受风险；见 `55-RESEARCH.md §Security Domain` Known Accepted Risk sign-off）→ 移入 v2 **LOCK-V2-04**；PIN 输错仅抖动+清空、可立即重试，无失败计数器
   5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
 
-**Plans**: 9/11 plans executed
+**Plans**: 11/11 plans complete
 **Wave 1**
 
 - [x] 55-01-PLAN.md — PIN KDF: Argon2id off-isolate + PHC + constant-time [LOCK-07] (wave 1)
@@ -259,7 +259,7 @@
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 55-11-PLAN.md — main.dart gate branch + observer + opaque mask host + device QA [LOCK-01/02/03/04] (wave 4)
+- [x] 55-11-PLAN.md — main.dart gate branch + observer + opaque mask host + device QA [LOCK-01/02/03/04] (wave 4)
 
 **UI hint**: yes
 **Research flag**: 最高风险整合（keychain accessibility 砖机风险 / 应用生命周期 / 生物识别错误分类 / off-isolate KDF 调优）——规划时做一次专项安全评审（`gsd-secure-phase` 或 `--research-phase`）。

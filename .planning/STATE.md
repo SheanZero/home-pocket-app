@@ -6,15 +6,15 @@ current_phase: 55
 current_phase_name: pin-phase
 status: executing
 stopped_at: Phase 55 plan 10 complete (wave 3) — next 55-11 (wave 4)
-last_updated: "2026-06-30T08:05:00.000Z"
+last_updated: "2026-06-30T07:50:44.725Z"
 last_activity: 2026-06-30
-last_activity_desc: Executed 55-10 (SecuritySection app-lock master toggle + set-PIN + reauth + deep-link)
+last_activity_desc: 55-10 executed (Settings app-lock control surface + set-PIN + reauth + D-10 deep-link)
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 22
-  completed_plans: 21
-  percent: 50
+  completed_plans: 22
+  percent: 75
 ---
 
 # Project State
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 55 (pin-phase) — EXECUTING
-Plan: 10 of 11 complete — next 55-11 (wave 4)
-Status: Executing
+Plan: 11 of 11 complete — next 55-11 (wave 4)
+Status: Ready to execute
 Last activity: 2026-06-30 — 55-10 executed (Settings app-lock control surface + set-PIN + reauth + D-10 deep-link)
 
 Progress: [████████░░] 82% — Phase 54 executing (5/7 plans done); Phase 53 complete (4/4 plans)
@@ -63,6 +63,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 55-08: PinKeypad bottom-left is a blank cell (numeric-only, reusable by set-PIN flow); Face ID escape lives on FaceIdPanel, sketch keypad Face-ID key intentionally not replicated
 - [Phase 55]: 55-09: AppLockScreen two-surface — Face ID auto-triggers on entry, every non-success AuthResult stays with ghost passcode escape (no dead end, LOCK-05/T-55-20); PIN instant-verifies on 4th digit, wrong shakes+clears zero cooldown (D-12/D-06); unlock via onUnlocked callback only (Plan 11 flips gate); biometric fenced by onBeginAuth/onEndAuth
 - [Phase 55]: 55-10: SetPinScreen double-entry (enter->confirm, mismatch restarts, never persists half-entry, T-55-26); SecuritySection master toggle arms only after PIN set (T-55-24) and disables/changes only after reauth (biometric or in-place _PinReauthDialog verifyPin, D-05/T-55-25, NOT AppLockScreen — avoids wave-3 race); D-10 deep-link lock-not-set read from settings.appLockEnabled (sync, not isLockEffective) to stay test-safe
+- [Phase ?]: App-lock gate uses setState flag flips (never pushReplacement) preserving the data-reset refresh path
 
 ### Quick Tasks Completed
 
@@ -207,7 +208,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-30T07:23:03.508Z
+Last session: 2026-06-30T07:50:31.558Z
 Stopped at: Phase 55 planned (11 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 
@@ -287,6 +288,7 @@ Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 | Phase 55-pin-phase P07 | 9 | 3 tasks | 3 files |
 | Phase 55 P08 | 25m | 2 tasks | 6 files |
 | Phase 55 P09 | 8min | 2 tasks | 3 files |
+| Phase 55 P11 | 30min | 3 tasks | 2 files |
 
 ## Decisions
 
