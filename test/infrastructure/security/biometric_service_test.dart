@@ -226,75 +226,80 @@ void main() {
       expect(result, const AuthResult.fallbackToPIN());
     });
 
+    // LOCK-05 / LOCK-10: local_auth 3.x throws LocalAuthException with a
+    // LocalAuthExceptionCode enum (NOT a PlatformException with string codes).
+    // EVERY one of the 14 codes — including the two lockout codes that the
+    // legacy handler dead-ended at AuthResult.lockedOut() — MUST surface as a
+    // PIN-fallback outcome so the user is never ejected from their own data.
+    void whenAuthenticateThrows(Object error) {
+      when(
+        () => mockAuth.authenticate(
+          localizedReason: any(named: 'localizedReason'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+        ),
+      ).thenThrow(error);
+    }
+
+    // Exhaustive: all 14 LocalAuthExceptionCode values as of platform
+    // interface 1.1.0. If a new code is added upstream the wildcard arm in
+    // BiometricService keeps it on the PIN-fallback path.
+    const allCodes = <LocalAuthExceptionCode>[
+      LocalAuthExceptionCode.authInProgress,
+      LocalAuthExceptionCode.uiUnavailable,
+      LocalAuthExceptionCode.userCanceled,
+      LocalAuthExceptionCode.timeout,
+      LocalAuthExceptionCode.systemCanceled,
+      LocalAuthExceptionCode.noCredentialsSet,
+      LocalAuthExceptionCode.noBiometricsEnrolled,
+      LocalAuthExceptionCode.noBiometricHardware,
+      LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable,
+      LocalAuthExceptionCode.temporaryLockout,
+      LocalAuthExceptionCode.biometricLockout,
+      LocalAuthExceptionCode.userRequestedFallback,
+      LocalAuthExceptionCode.deviceError,
+      LocalAuthExceptionCode.unknownError,
+    ];
+
+    for (final code in allCodes) {
+      test(
+        'LocalAuthException(${code.name}) -> fallbackToPIN (never ejects user)',
+        () async {
+          setupAvailableBiometrics();
+          whenAuthenticateThrows(LocalAuthException(code: code));
+
+          final result = await service.authenticate(reason: 'test');
+
+          expect(result, const AuthResult.fallbackToPIN());
+        },
+      );
+    }
+
+    // Residual safety net: a stray PlatformException (legacy throw type) must
+    // still resolve to PIN fallback, never an uncaught throw.
     test(
-      'returns lockedOut on PlatformException with lockedOut code',
+      'residual net: stray PlatformException -> fallbackToPIN',
       () async {
         setupAvailableBiometrics();
-        when(
-          () => mockAuth.authenticate(
-            localizedReason: any(named: 'localizedReason'),
-            biometricOnly: any(named: 'biometricOnly'),
-            sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(
-              named: 'persistAcrossBackgrounding',
-            ),
-          ),
-        ).thenThrow(PlatformException(code: 'LockedOut'));
+        whenAuthenticateThrows(
+          PlatformException(code: 'LockedOut', message: 'legacy'),
+        );
 
         final result = await service.authenticate(reason: 'test');
 
-        expect(result, const AuthResult.lockedOut());
+        expect(result, const AuthResult.fallbackToPIN());
       },
     );
 
-    test('returns lockedOut on permanentlyLockedOut', () async {
+    // Residual safety net: any other Exception type -> PIN fallback.
+    test('residual net: generic Exception -> fallbackToPIN', () async {
       setupAvailableBiometrics();
-      when(
-        () => mockAuth.authenticate(
-          localizedReason: any(named: 'localizedReason'),
-          biometricOnly: any(named: 'biometricOnly'),
-          sensitiveTransaction: any(named: 'sensitiveTransaction'),
-          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
-        ),
-      ).thenThrow(PlatformException(code: 'PermanentlyLockedOut'));
-
-      final result = await service.authenticate(reason: 'test');
-
-      expect(result, const AuthResult.lockedOut());
-    });
-
-    test('returns fallbackToPIN on notAvailable exception', () async {
-      setupAvailableBiometrics();
-      when(
-        () => mockAuth.authenticate(
-          localizedReason: any(named: 'localizedReason'),
-          biometricOnly: any(named: 'biometricOnly'),
-          sensitiveTransaction: any(named: 'sensitiveTransaction'),
-          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
-        ),
-      ).thenThrow(PlatformException(code: 'NotAvailable'));
+      whenAuthenticateThrows(Exception('unexpected'));
 
       final result = await service.authenticate(reason: 'test');
 
       expect(result, const AuthResult.fallbackToPIN());
-    });
-
-    test('returns error on unknown PlatformException', () async {
-      setupAvailableBiometrics();
-      when(
-        () => mockAuth.authenticate(
-          localizedReason: any(named: 'localizedReason'),
-          biometricOnly: any(named: 'biometricOnly'),
-          sensitiveTransaction: any(named: 'sensitiveTransaction'),
-          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
-        ),
-      ).thenThrow(
-        PlatformException(code: 'UnknownError', message: 'something broke'),
-      );
-
-      final result = await service.authenticate(reason: 'test');
-
-      expect(result, const AuthResult.error(message: 'something broke'));
     });
   });
 
