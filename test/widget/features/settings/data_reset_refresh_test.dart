@@ -50,6 +50,7 @@ import 'package:home_pocket/features/settings/presentation/providers/state_local
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
@@ -124,6 +125,13 @@ class _FakeSettingsRepository implements SettingsRepository {
       super.noSuchMethod(invocation);
 }
 
+/// Drives the app-lock cold-start gate: `getPinHash()` returns null (no PIN
+/// configured) so `lockConfigured` is always false and the lock gate is inert.
+class _FakeSecureStorageService extends Fake implements SecureStorageService {
+  @override
+  Future<String?> getPinHash() async => null;
+}
+
 final _testProfile = UserProfile(
   id: 'profile-1',
   displayName: 'Tester',
@@ -179,6 +187,9 @@ void main() {
         ),
         settingsRepositoryProvider.overrideWith(
           (ref) => _FakeSettingsRepository(onboardingComplete: true),
+        ),
+        secureStorageServiceProvider.overrideWithValue(
+          _FakeSecureStorageService(),
         ),
       ],
     );

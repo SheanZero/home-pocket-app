@@ -35,6 +35,7 @@ import 'package:home_pocket/features/settings/presentation/providers/repository_
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
@@ -109,6 +110,13 @@ class _FakeSettingsRepository implements SettingsRepository {
       super.noSuchMethod(invocation);
 }
 
+/// Drives the app-lock cold-start gate: `getPinHash()` returns null (no PIN
+/// configured) so `lockConfigured` is always false and the lock gate is inert.
+class _FakeSecureStorageService extends Fake implements SecureStorageService {
+  @override
+  Future<String?> getPinHash() async => null;
+}
+
 final _testBook = Book(
   id: 'book-test-1',
   name: 'Test Book',
@@ -147,6 +155,9 @@ Future<AppDatabase> _pumpGate(
       pushNotificationServiceProvider.overrideWithValue(fakePushService),
       familySyncNotificationNavigationProvider.overrideWith(
         (ref) => FamilySyncNotificationNavigationController(fakeListenUseCase),
+      ),
+      secureStorageServiceProvider.overrideWithValue(
+        _FakeSecureStorageService(),
       ),
     ],
   );

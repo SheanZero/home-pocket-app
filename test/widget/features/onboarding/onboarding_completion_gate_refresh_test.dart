@@ -57,6 +57,7 @@ import 'package:home_pocket/features/settings/presentation/providers/repository_
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
@@ -126,6 +127,13 @@ class _FakeUserProfileRepository implements UserProfileRepository {
   Future<void> delete(String id) async {}
 }
 
+/// Drives the app-lock cold-start gate: `getPinHash()` returns null (no PIN
+/// configured) so `lockConfigured` is always false and the lock gate is inert.
+class _FakeSecureStorageService extends Fake implements SecureStorageService {
+  @override
+  Future<String?> getPinHash() async => null;
+}
+
 final _testProfile = UserProfile(
   id: 'profile-1',
   displayName: 'たけし',
@@ -180,6 +188,9 @@ Future<({SharedPreferences prefs, ProviderContainer container})> _pumpApp(
       ),
       currentLocaleProvider.overrideWith(
         (ref) => Future.value(const Locale('ja')),
+      ),
+      secureStorageServiceProvider.overrideWithValue(
+        _FakeSecureStorageService(),
       ),
     ],
   );
