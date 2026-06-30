@@ -14,7 +14,13 @@ abstract final class StorageKeys {
   /// Device ID — SHA-256(publicKey) first 16 chars.
   static const String deviceId = 'device_id';
 
-  /// PIN SHA-256 hash.
+  /// PIN Argon2id slow-hash, PHC-encoded.
+  ///
+  /// Stores a single self-describing PHC-style string produced by
+  /// `pin_kdf.derivePinPhc` — `argon2id$v=19$m=19456,t=2,p=1$<b64 salt>$<b64 hash>`
+  /// — so params + salt + hash travel together (no separate salt key to desync).
+  /// Greenfield slot: never populated with a legacy SHA-256 hash, so no
+  /// migration is needed. Plaintext PINs are never stored.
   static const String pinHash = 'pin_hash';
 
   /// Recovery kit mnemonic SHA-256 hash.
