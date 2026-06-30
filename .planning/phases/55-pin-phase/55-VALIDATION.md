@@ -1,10 +1,11 @@
 ---
 phase: 55
 slug: pin-phase
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-30
+finalized: 2026-06-30
 ---
 
 # Phase 55 — Validation Strategy
@@ -42,26 +43,34 @@ created: 2026-06-30
 
 ## Per-Task Verification Map
 
-> Populated once the planner emits task IDs. Each LOCK-0x criterion maps to the test
-> type below (full requirement→test map in `55-RESEARCH.md` § Validation Architecture).
+> Mapped to the 11 emitted plans (55-01..55-11). Full requirement→test detail in
+> `55-RESEARCH.md` § Validation Architecture. Status is ⬜ pending until execution.
 
-| Requirement | Secure Behavior (must be TRUE) | Test Type | Notes |
-|-------------|--------------------------------|-----------|-------|
-| LOCK-01/06 | "Lock effective" = `appLockEnabled && pinHash != null`; enabling forces 4-digit PIN set; disabling = no-op | unit | predicate has a single source of truth |
-| LOCK-02/03/04 | Cold-start + `paused`→`resumed` relock; mask on `inactive`; mask only when lock enabled | widget | lifecycle guard (`_authInProgress` + `_didPause`) tested with `TestWidgetsFlutterBinding` lifecycle events |
-| LOCK-05/10 | Every `LocalAuthExceptionCode` (all 14, incl. lockedOut/permanentlyLockedOut/cancel) → PIN fallback; wildcard `_ → fallbackToPIN` | unit | regression test asserting the *new* `LocalAuthException` model, not legacy `PlatformException` |
-| LOCK-07 | Salted Argon2id (m=19456,t=2,p=1,32B) off-isolate; PHC-string in `pinHash`; constant-time compare; never plaintext | unit | KDF determinism (same pin+salt→same hash); wrong pin→reject; `constantTimeBytesEquality` used |
-| LOCK-09 | Lock-screen copy states forgotten-PIN is unrecoverable (reinstall + lose unsynced local data); no recovery hint; new ARB keys ja/zh/en parity | arch | ARB parity test + hardcoded-CJK scan (full suite only) |
+| Plan | Wave | Requirement | Secure Behavior (must be TRUE) | Test Type | Automated Command | Status |
+|------|------|-------------|--------------------------------|-----------|-------------------|--------|
+| 55-01 | 1 | LOCK-07 | Salted Argon2id (m=19456,t=2,p=1,32B) off-isolate; PHC string in `pinHash`; constant-time compare; never plaintext | unit | `flutter test test/.../pin_hasher_test.dart` (determinism + reject-wrong-PIN + `constantTimeBytesEquality`) | ⬜ pending |
+| 55-02 | 1 | LOCK-05/10 | Every `LocalAuthExceptionCode` (all 14 incl. lockedOut/permanentlyLockedOut/cancel) + wildcard → `fallbackToPIN`; catches the NEW `LocalAuthException` model, not legacy `PlatformException` | unit | `flutter test test/.../biometric_service_test.dart` | ⬜ pending |
+| 55-03 | 1 | LOCK-01/06 | `appLockEnabled`/`biometricUnlockEnabled` via SharedPreferences (no Drift, schema 22); legacy `biometricLockEnabled` retired; onboarding skip repointed (D-02) | unit | `flutter test test/.../app_settings_test.dart` | ⬜ pending |
+| 55-04 | 1 | LOCK-09 | All lock/PIN/forgot-PIN/SecuritySection keys in ja/zh/en + `@`-descriptions + gen-l10n; forgot-PIN copy = unrecoverable/reinstall/lose-unsynced/no-recovery | arch | full suite: ARB parity + hardcoded-CJK scan | ⬜ pending |
+| 55-05 | 1 | LOCK-08 | Covered-by-descope: REQUIREMENTS LOCK-08 → LOCK-V2-04, ROADMAP SC-4 annotated, RESEARCH sign-off cited; NO rate-limiting implemented | docs | grep REQUIREMENTS.md/ROADMAP.md for the descope edits | ⬜ pending |
+| 55-06 | 1 | LOCK-03/04 | Two-flag guard (`_authInProgress` + `_didPause`): `inactive`→mask-only, `paused`→`resumed`→relock, no relock loop; mask only when lock effective | unit | `flutter test test/.../app_lock_lifecycle_observer_test.dart` (4 scenarios) | ⬜ pending |
+| 55-07 | 2 | LOCK-01/06 | `lockEffective` = `appLockEnabled && pinHash != null` (single source); setPin/verifyPin/reauth/disableLock | unit | `flutter test test/.../app_lock_service_test.dart` | ⬜ pending |
+| 55-08 | 2 | LOCK-04/06 | Tone-B widgets: PinKeypad / PinDots(shake) / FaceIdPanel(ghost escape) / opaque PrivacyMask | widget | `flutter test test/widget/.../app_lock/*` | ⬜ pending |
+| 55-09 | 3 | LOCK-05/06 | AppLockScreen: Face-ID auto-trigger + stay-with-escape, PIN instant-verify, forgot-PIN copy, `onUnlocked` callback | widget | `flutter test test/widget/.../app_lock_screen_test.dart` | ⬜ pending |
+| 55-10 | 3 | LOCK-01/06 | SecuritySection D-11 refactor; enable-requires-PIN (revert on cancel); disable/change require reauth (D-05) via `verifyPin`; deep-link auto-open (D-10) | widget | `flutter test test/widget/.../security_section_test.dart` | ⬜ pending |
+| 55-11 | 4 | LOCK-01/02/03/04 | `main.dart` `_isLocked` gate branch (cold-start) + observer registration + opaque mask host; unlock via setState flag (not pushReplacement) | widget + manual | `flutter test` + on-device QA checkpoint (see Manual-Only) | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky · test paths are indicative — executor sets the exact path*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] Test fakes/mocks for `BiometricService`, `SecureStorageService`, `SettingsRepository`
-      (mocktail) — enabling unit tests of the unlock controller without platform channels.
-- [ ] A lifecycle harness helper to drive `AppLifecycleState` transitions in widget tests.
+Wave 0 is satisfied **inline** in the wave-1 test tasks (no separate Wave 0 plan needed):
+
+- [x] Test fakes/mocks for `BiometricService`, `SecureStorageService`, `SettingsRepository`
+      (mocktail) — created inline in 55-06 / 55-07 test tasks.
+- [x] A lifecycle harness helper to drive `AppLifecycleState` transitions — created inline in 55-06.
 
 *Existing `flutter_test` infrastructure otherwise covers all phase requirements (no framework install needed).*
 
@@ -80,11 +89,11 @@ created: 2026-06-30
 
 ## Validation Sign-Off
 
-- [ ] All tasks have an automated verify or a Wave 0 dependency
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s for the quick loop
-- [ ] `nyquist_compliant: true` set in frontmatter (after planner fills the per-task map)
+- [x] All tasks have an automated verify or a Wave 0 dependency (every autonomous task carries a scoped `<automated>` command; 55-11's OS-driven behaviors covered by the on-device QA checkpoint)
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (fakes + lifecycle harness created inline in 55-06/55-07)
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s for the quick loop
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-06-30 (plan-checker Dimension 8 PASS; per-task map mapped to 55-01..55-11)

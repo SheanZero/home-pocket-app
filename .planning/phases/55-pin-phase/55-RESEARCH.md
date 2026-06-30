@@ -701,18 +701,23 @@ lib/
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> All three were Claude's-discretion technical items; resolved consistently across the plans during planning (Phase 55 plan-checker Dimension 11).
 
 1. **Which `AuthResult` shape after refactor?**
    - Known: all non-success biometric outcomes must route to the PIN page (LOCK-10).
    - Unclear: keep the 6-variant union (for telemetry) vs collapse to `success`/`needsPin`.
    - Recommendation: keep variants, but the lock controller maps every non-`success` to "show PIN" — minimal churn, preserves existing tests' structure.
+   - **RESOLVED: keep the 6-variant `AuthResult` union; lock controller maps every non-`success` → PIN page. Implemented in 55-02.**
 
 2. **PHC single-string vs separate `pinSalt` key?**
    - Recommendation: PHC single string in `pinHash` (no `StorageKeys` change, params travel with hash). Planner may choose two keys if it prefers explicitness — then add `pinSalt` to `allKeys`.
+   - **RESOLVED: PHC single string in the existing `pinHash` slot (no new `StorageKeys`, no migration). Implemented in 55-01.**
 
 3. **`_isLocked` as State field vs Riverpod Notifier?**
    - Recommendation: State field (symmetric with `_needsOnboarding`, avoids watch-in-build race). Open to a `keepAlive` Notifier if a non-gate consumer needs lock state.
+   - **RESOLVED: `_isLocked` as a `main.dart` State field (symmetric with `_needsOnboarding`, avoids watch-in-build race). Implemented in 55-11.**
 
 ---
 
