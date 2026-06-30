@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 55
-current_phase_name: 应用锁（生物识别 + PIN — 最高风险，独立 phase + 安全评审）
+current_phase_name: pin-phase
 status: executing
 stopped_at: Phase 55 planned (11 plans, 4 waves) — ready to execute
-last_updated: "2026-06-30T06:05:37.205Z"
+last_updated: "2026-06-30T06:28:57.595Z"
 last_activity: 2026-06-30
-last_activity_desc: Phase 55 planned — 11 plans across 4 waves, ready to execute
+last_activity_desc: Phase 55 execution started
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 22
+  completed_plans: 12
   percent: 50
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 55 — 应用锁 (app lock: biometric + PIN)
+**Current focus:** Phase 55 — pin-phase
 
 ## Current Position
 
-Phase: 55 — 应用锁（生物识别 + PIN — 最高风险，独立 phase + 安全评审）
-Plan: 11 plans (4 waves) — ready to execute
+Phase: 55 (pin-phase) — EXECUTING
+Plan: 2 of 11
 Status: Ready to execute
-Last activity: 2026-06-30 — Phase 55 planned (11 plans, 4 waves)
+Last activity: 2026-06-30 — Phase 55 execution started
 
 Progress: [████████░░] 82% — Phase 54 executing (5/7 plans done); Phase 53 complete (4/4 plans)
 
@@ -51,6 +51,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 54-04: import forces onboardingComplete=true (D-06); clear-all resets flag + deletes UserProfile (D-05)
 - [Phase 54]: 54-05: OnboardingSettingsScreen merges identity (nickname[required]+avatar) with UI-language/currency/voice as unified 変更 rows; writes through existing providers; voice routed via resolveVoiceLanguageForOnboarding (never 'system'); signals via onConfirmed, never sets onboarding_complete (54-07 owns that)
 - [Phase ?]: 54-06: onboarding intro/lock-entry are presentational callback-only screens; skip path explicitly writes setBiometricLock(false) because biometricLockEnabled defaults true (D-13)
+- [Phase 55]: 55-01: PIN stored only as salted Argon2id PHC (m=19456,t=2,p=1,32B/16B salt) in existing pinHash slot via Isolate.run; constant-time verify; pure functions no Riverpod; greenfield no-migration (LOCK-07)
 
 ### Quick Tasks Completed
 
@@ -195,7 +196,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-30T05:16:07.971Z
+Last session: 2026-06-30T06:27:43.896Z
 Stopped at: Phase 55 planned (11 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 
@@ -266,6 +267,7 @@ Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 | Phase 54 P05 | 25min | 3 tasks | 3 files |
 | Phase 54 P06 | 20min | 2 tasks | 4 files |
 | Phase 54 P07 | 28 | 2 tasks | 7 files |
+| Phase 55 P01 | 8min | 3 tasks | 3 files |
 
 ## Decisions
 

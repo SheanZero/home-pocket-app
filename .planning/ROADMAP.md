@@ -237,10 +237,10 @@
   4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文；连续输错有递增冷却（持久化计数，成功才清零），无默认数据擦除 — LOCK-07/08
   5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
 
-**Plans**: 11 plans (4 waves)
+**Plans**: 1/11 plans executed
 **Wave 1**
 
-- [ ] 55-01-PLAN.md — PIN KDF: Argon2id off-isolate + PHC + constant-time [LOCK-07] (wave 1)
+- [x] 55-01-PLAN.md — PIN KDF: Argon2id off-isolate + PHC + constant-time [LOCK-07] (wave 1)
 - [ ] 55-02-PLAN.md — Biometric error-model rewrite for local_auth 3.x LocalAuthException [LOCK-05/10] (wave 1)
 - [ ] 55-03-PLAN.md — AppSettings appLockEnabled/biometricUnlockEnabled + retire legacy flag (D-02) [LOCK-01/06] (wave 1)
 - [ ] 55-04-PLAN.md — ARB i18n foundation: lock/PIN/forgot-PIN/SecuritySection keys (ja/zh/en) [LOCK-09] (wave 1)
