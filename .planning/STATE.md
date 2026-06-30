@@ -6,14 +6,14 @@ current_phase: 55
 current_phase_name: pin-phase
 status: executing
 stopped_at: Phase 55 planned (11 plans, 4 waves) — ready to execute
-last_updated: "2026-06-30T06:28:57.595Z"
+last_updated: "2026-06-30T06:35:52.837Z"
 last_activity: 2026-06-30
 last_activity_desc: Phase 55 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 22
-  completed_plans: 12
+  completed_plans: 13
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 55 (pin-phase) — EXECUTING
-Plan: 2 of 11
+Plan: 3 of 11
 Status: Ready to execute
 Last activity: 2026-06-30 — Phase 55 execution started
 
@@ -52,6 +52,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 54]: 54-05: OnboardingSettingsScreen merges identity (nickname[required]+avatar) with UI-language/currency/voice as unified 変更 rows; writes through existing providers; voice routed via resolveVoiceLanguageForOnboarding (never 'system'); signals via onConfirmed, never sets onboarding_complete (54-07 owns that)
 - [Phase ?]: 54-06: onboarding intro/lock-entry are presentational callback-only screens; skip path explicitly writes setBiometricLock(false) because biometricLockEnabled defaults true (D-13)
 - [Phase 55]: 55-01: PIN stored only as salted Argon2id PHC (m=19456,t=2,p=1,32B/16B salt) in existing pinHash slot via Isolate.run; constant-time verify; pure functions no Riverpod; greenfield no-migration (LOCK-07)
+- [Phase 55]: 55-02: BiometricService catches local_auth 3.x LocalAuthException; every code + wildcard + residual nets -> PIN fallback (LOCK-05/10, T-55-05/06)
 
 ### Quick Tasks Completed
 
@@ -196,7 +197,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-30T06:27:43.896Z
+Last session: 2026-06-30T06:34:43.808Z
 Stopped at: Phase 55 planned (11 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 
@@ -268,6 +269,7 @@ Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 | Phase 54 P06 | 20min | 2 tasks | 4 files |
 | Phase 54 P07 | 28 | 2 tasks | 7 files |
 | Phase 55 P01 | 8min | 3 tasks | 3 files |
+| Phase 55 P02 | 3min | 2 tasks | 2 files |
 
 ## Decisions
 
