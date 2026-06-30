@@ -6,14 +6,14 @@ current_phase: 55
 current_phase_name: pin-phase
 status: executing
 stopped_at: Phase 55 planned (11 plans, 4 waves) — ready to execute
-last_updated: "2026-06-30T07:03:37.170Z"
+last_updated: "2026-06-30T07:12:52.236Z"
 last_activity: 2026-06-30
 last_activity_desc: Phase 55 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 22
-  completed_plans: 18
+  completed_plans: 19
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 55 (pin-phase) — EXECUTING
-Plan: 8 of 11
+Plan: 9 of 11
 Status: Ready to execute
 Last activity: 2026-06-30 — Phase 55 execution started
 
@@ -59,6 +59,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 55]: 55-05: LOCK-08 (PIN 递增冷却) descoped per D-06 (MVP zero rate-limiting, user-informed accepted risk) → relocated to v2 LOCK-V2-04; REQUIREMENTS row + ROADMAP SC-4 annotated covered-by-descope citing 55-RESEARCH §Security Domain sign-off
 - [Phase 55]: 55-06: AppLockLifecycleObserver — relock gated on _didPause (paused reached), NOT inactive (Control Center masks but never relocks); _authInProgress fences the OS biometric sheet so Face-ID never loops; device-free callback-driven, main.dart wiring deferred to Plan 11
 - [Phase 55]: 55-07: AppLockService = single lockEffective predicate (D-01); disableLock clears PHC (T-55-16); reauth only AuthResultSuccess->true (D-05)
+- [Phase ?]: 55-08: four tone-B lock widgets are presentational/callback-only — PinKeypad(onDigit/onBackspace), PinDots(errorTrigger shake+haptic), FaceIdPanel(onRetry/onUsePasscode, never calls biometric), PrivacyMask(opaque Container not blur, T-55-18/D-07)
+- [Phase ?]: 55-08: PinKeypad bottom-left is a blank cell (numeric-only, reusable by set-PIN flow); Face ID escape lives on FaceIdPanel, sketch keypad Face-ID key intentionally not replicated
 
 ### Quick Tasks Completed
 
@@ -203,7 +205,7 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-06-30T07:03:19.446Z
+Last session: 2026-06-30T07:12:44.098Z
 Stopped at: Phase 55 planned (11 plans, 4 waves) — ready to execute
 Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 
@@ -281,6 +283,7 @@ Resume file: .planning/phases/55-pin-phase/55-01-PLAN.md
 | Phase 55 P05 | 2min | 2 tasks | 2 files |
 | Phase 55 P06 | 6 min | 2 tasks | 2 files |
 | Phase 55-pin-phase P07 | 9 | 3 tasks | 3 files |
+| Phase 55 P08 | 25m | 2 tasks | 6 files |
 
 ## Decisions
 
