@@ -237,7 +237,18 @@
   4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文；连续输错有递增冷却（持久化计数，成功才清零），无默认数据擦除 — LOCK-07/08
   5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
 
-**Plans**: TBD
+**Plans**: 11 plans (4 waves)
+- [ ] 55-01-PLAN.md — PIN KDF: Argon2id off-isolate + PHC + constant-time [LOCK-07] (wave 1)
+- [ ] 55-02-PLAN.md — Biometric error-model rewrite for local_auth 3.x LocalAuthException [LOCK-05/10] (wave 1)
+- [ ] 55-03-PLAN.md — AppSettings appLockEnabled/biometricUnlockEnabled + retire legacy flag (D-02) [LOCK-01/06] (wave 1)
+- [ ] 55-04-PLAN.md — ARB i18n foundation: lock/PIN/forgot-PIN/SecuritySection keys (ja/zh/en) [LOCK-09] (wave 1)
+- [ ] 55-05-PLAN.md — LOCK-08 descope ledger: REQUIREMENTS→LOCK-V2-04 + ROADMAP SC-4 annotation [LOCK-08] (wave 1)
+- [ ] 55-06-PLAN.md — Lifecycle observer: relock + mask two-flag guard [LOCK-03/04] (wave 1)
+- [ ] 55-07-PLAN.md — AppLockService: lockEffective predicate + setPin/verifyPin/reauth/disable [LOCK-01/06] (wave 2)
+- [ ] 55-08-PLAN.md — Lock widgets (tone B): PinKeypad/PinDots/FaceIdPanel/PrivacyMask [LOCK-04/06] (wave 2)
+- [ ] 55-09-PLAN.md — AppLockScreen: Face ID page + PIN page, instant verify, escape [LOCK-05/06] (wave 3)
+- [ ] 55-10-PLAN.md — SecuritySection D-11 refactor + set-PIN double-entry + reauth + deep-link [LOCK-01/06] (wave 3)
+- [ ] 55-11-PLAN.md — main.dart gate branch + observer + opaque mask host + device QA [LOCK-01/02/03/04] (wave 4)
 **UI hint**: yes
 **Research flag**: 最高风险整合（keychain accessibility 砖机风险 / 应用生命周期 / 生物识别错误分类 / off-isolate KDF 调优）——规划时做一次专项安全评审（`gsd-secure-phase` 或 `--research-phase`）。
 
