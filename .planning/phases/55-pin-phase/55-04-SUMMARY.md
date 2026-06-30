@@ -124,3 +124,8 @@ None - no external service configuration required.
 ---
 *Phase: 55-pin-phase*
 *Completed: 2026-06-30*
+
+## Self-Check: PASSED
+- All ARB + generated files present; SUMMARY present.
+- Commits `37881440` (feat) and `d36d6f4a` (docs) exist in history.
+- Generated getters resolve (spot-checked `appLockReauthReason`).
