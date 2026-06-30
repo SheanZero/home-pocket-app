@@ -255,7 +255,7 @@
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 55-09-PLAN.md — AppLockScreen: Face ID page + PIN page, instant verify, escape [LOCK-05/06] (wave 3)
-- [ ] 55-10-PLAN.md — SecuritySection D-11 refactor + set-PIN double-entry + reauth + deep-link [LOCK-01/06] (wave 3)
+- [x] 55-10-PLAN.md — SecuritySection D-11 refactor + set-PIN double-entry + reauth + deep-link [LOCK-01/06] (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
