@@ -41,6 +41,8 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
+import 'package:home_pocket/features/applock/presentation/screens/app_lock_screen.dart';
+import 'package:home_pocket/features/applock/presentation/widgets/privacy_mask.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
@@ -57,7 +59,10 @@ import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/master_key_repository.dart';
+import 'package:home_pocket/infrastructure/security/biometric_service.dart';
+import 'package:home_pocket/infrastructure/security/models/auth_result.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
@@ -136,20 +141,66 @@ class _FakeGetUserProfileUseCase extends Fake implements GetUserProfileUseCase {
   Future<UserProfile?> execute() async => _profile;
 }
 
-/// Drives the onboarding gate: `getSettings()` returns the fixed
-/// `onboardingComplete` flag the gate reads after init settle.
+/// Drives the onboarding + app-lock gates: `getSettings()` returns the fixed
+/// `onboardingComplete` / `appLockEnabled` flags the gate reads after init settle.
 class _FakeSettingsRepository implements SettingsRepository {
-  _FakeSettingsRepository({required this.onboardingComplete});
+  _FakeSettingsRepository({
+    required this.onboardingComplete,
+    this.appLockEnabled = false,
+  });
 
   final bool onboardingComplete;
+  final bool appLockEnabled;
 
   @override
-  Future<AppSettings> getSettings() async =>
-      AppSettings(onboardingComplete: onboardingComplete);
+  Future<AppSettings> getSettings() async => AppSettings(
+        onboardingComplete: onboardingComplete,
+        appLockEnabled: appLockEnabled,
+      );
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       super.noSuchMethod(invocation);
+}
+
+/// Drives the app-lock cold-start gate: `getPinHash()` returns the fixed hash
+/// (null = no PIN configured → lock can never be effective, T-55-15).
+class _FakeSecureStorageService extends Fake implements SecureStorageService {
+  _FakeSecureStorageService({this.pinHash});
+
+  final String? pinHash;
+
+  @override
+  Future<String?> getPinHash() async => pinHash;
+}
+
+/// Biometric stub whose first `authenticate` succeeds (auto-unlock at boot) and
+/// every subsequent call drops to the PIN page — so after a lifecycle relock the
+/// [AppLockScreen] stays visible instead of instantly re-unlocking.
+class _OnceSuccessBiometricService extends Fake implements BiometricService {
+  int _calls = 0;
+
+  @override
+  Future<AuthResult> authenticate({
+    required String reason,
+    bool biometricOnly = false,
+  }) async {
+    _calls++;
+    return _calls == 1
+        ? const AuthResult.success()
+        : const AuthResult.fallbackToPIN();
+  }
+}
+
+/// Biometric stub that always drops to the PIN page (never auto-unlocks) — used
+/// for the cold-start lock-on case so the [AppLockScreen] remains visible.
+class _FallbackBiometricService extends Fake implements BiometricService {
+  @override
+  Future<AuthResult> authenticate({
+    required String reason,
+    bool biometricOnly = false,
+  }) async =>
+      const AuthResult.fallbackToPIN();
 }
 
 final _testBook = Book(
@@ -173,6 +224,9 @@ Future<void> _pumpApp(
   required List<Override> overrides,
   AppSettings appSettings = const AppSettings(),
   bool onboardingComplete = true,
+  bool appLockEnabled = false,
+  String? pinHash,
+  BiometricService? biometric,
 }) async {
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
@@ -186,7 +240,19 @@ Future<void> _pumpApp(
     // The gate reads settingsRepositoryProvider.getSettings() directly (not
     // appSettingsProvider) after init settle — drive it explicitly.
     settingsRepositoryProvider.overrideWith(
-      (ref) => _FakeSettingsRepository(onboardingComplete: onboardingComplete),
+      (ref) => _FakeSettingsRepository(
+        onboardingComplete: onboardingComplete,
+        appLockEnabled: appLockEnabled,
+      ),
+    ),
+    // App-lock cold-start gate reads secureStorageServiceProvider.getPinHash()
+    // and the lock screen auto-triggers biometricServiceProvider — stub both so
+    // tests never hit a real keychain / platform channel.
+    secureStorageServiceProvider.overrideWithValue(
+      _FakeSecureStorageService(pinHash: pinHash),
+    ),
+    biometricServiceProvider.overrideWithValue(
+      biometric ?? _FallbackBiometricService(),
     ),
     currentLocaleProvider.overrideWith(
       (ref) => Future.value(const Locale('ja')),
@@ -466,5 +532,71 @@ void main() {
       );
       expect(rendered.last, isA<InitFailureApp>());
     });
+  });
+
+  group('HomePocketApp app-lock gate wiring (Plan 55-11)', () {
+    testWidgets(
+      'LOCK-01 no-op: lock disabled renders the shell with no lock screen or mask',
+      (tester) async {
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          // appLockEnabled defaults false; even a stray pinHash must not lock.
+          pinHash: 'argon2-phc-should-be-ignored',
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+        expect(find.byType(AppLockScreen), findsNothing);
+        expect(find.byType(PrivacyMask), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'LOCK-02 cold start: lockEffective shows AppLockScreen before the shell',
+      (tester) async {
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          appLockEnabled: true,
+          pinHash: 'argon2-phc',
+          // Stays on the lock surface (never auto-unlocks) so the gate is observable.
+          biometric: _FallbackBiometricService(),
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(AppLockScreen), findsOneWidget);
+        expect(find.byType(MainShellScreen), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'LOCK-03 relock: a true background round-trip re-shows the lock screen',
+      (tester) async {
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          appLockEnabled: true,
+          pinHash: 'argon2-phc',
+          // First biometric auto-unlocks (→ shell); after relock it drops to PIN
+          // so the re-shown AppLockScreen stays visible.
+          biometric: _OnceSuccessBiometricService(),
+        );
+        await _pumpInitNoSettle(tester);
+        // Boot locked → auto-biometric success → shell.
+        expect(find.byType(MainShellScreen), findsOneWidget);
+        expect(find.byType(AppLockScreen), findsNothing);
+
+        // True background round-trip (inactive → paused → resumed).
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await _pumpInitNoSettle(tester);
+
+        expect(find.byType(AppLockScreen), findsOneWidget);
+      },
+    );
   });
 }
