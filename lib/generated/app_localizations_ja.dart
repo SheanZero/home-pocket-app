@@ -2342,4 +2342,51 @@ class SJa extends S {
 
   @override
   String get onboardingLockSetupNow => '今すぐ設定';
+
+  @override
+  String get appLockPinTitle => 'パスコードを入力';
+
+  @override
+  String get appLockFaceIdPrompt => 'Face ID を見つめてください';
+
+  @override
+  String get appLockFaceIdRetry => '再試行';
+
+  @override
+  String get appLockUsePasscode => 'パスコードを使用';
+
+  @override
+  String get appLockForgotPin => 'パスコードをお忘れですか？';
+
+  @override
+  String get appLockForgotPinExplanation =>
+      'パスコードを忘れた場合、復元はできません。アプリを再インストールする必要があり、その際にまだ同期されていない端末内のデータは失われます。';
+
+  @override
+  String get appLockSetPinTitle => 'パスコードを設定';
+
+  @override
+  String get appLockConfirmPinTitle => 'パスコードを再入力';
+
+  @override
+  String get appLockPinMismatch => 'パスコードが一致しません';
+
+  @override
+  String get appLockReauthReason => '続行するには本人確認が必要です';
+
+  @override
+  String get securityAppLock => 'アプリロック';
+
+  @override
+  String get securityAppLockDescription => '起動時と再開時にパスコードでアプリを保護します。';
+
+  @override
+  String get securityBiometricUnlock => '生体認証で解除';
+
+  @override
+  String get securityBiometricUnlockDescription =>
+      'Face ID または指紋でアプリロックを解除します。';
+
+  @override
+  String get securityChangePin => 'パスコードを変更';
 }

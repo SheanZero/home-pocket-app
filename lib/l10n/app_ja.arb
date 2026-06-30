@@ -3062,5 +3062,65 @@
   "@onboardingLockSetupNow": {
     "description": "Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)"
   },
+  "appLockPinTitle": "パスコードを入力",
+  "@appLockPinTitle": {
+    "description": "Lock screen PIN page: title prompting the user to enter their passcode (D-12)"
+  },
+  "appLockFaceIdPrompt": "Face ID を見つめてください",
+  "@appLockFaceIdPrompt": {
+    "description": "Lock screen Face ID page: prompt asking the user to look at the device for biometric unlock (D-09)"
+  },
+  "appLockFaceIdRetry": "再試行",
+  "@appLockFaceIdRetry": {
+    "description": "Lock screen Face ID page: retry button after a failed/cancelled biometric attempt (D-09)"
+  },
+  "appLockUsePasscode": "パスコードを使用",
+  "@appLockUsePasscode": {
+    "description": "Lock screen Face ID page: ghost escape button to switch to the PIN page (D-09)"
+  },
+  "appLockForgotPin": "パスコードをお忘れですか？",
+  "@appLockForgotPin": {
+    "description": "Lock screen: low-key tappable forgot-passcode affordance (D-08)"
+  },
+  "appLockForgotPinExplanation": "パスコードを忘れた場合、復元はできません。アプリを再インストールする必要があり、その際にまだ同期されていない端末内のデータは失われます。",
+  "@appLockForgotPinExplanation": {
+    "description": "Forgot-passcode explanation: states the passcode is unrecoverable, requires reinstalling the app, and loses unsynced local data — implies NO recovery path (LOCK-09, D-08)"
+  },
+  "appLockSetPinTitle": "パスコードを設定",
+  "@appLockSetPinTitle": {
+    "description": "Set-PIN flow: title for the first passcode entry (Plan 10)"
+  },
+  "appLockConfirmPinTitle": "パスコードを再入力",
+  "@appLockConfirmPinTitle": {
+    "description": "Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)"
+  },
+  "appLockPinMismatch": "パスコードが一致しません",
+  "@appLockPinMismatch": {
+    "description": "Set-PIN flow: re-prompt shown when the confirmation passcode does not match the first entry"
+  },
+  "appLockReauthReason": "続行するには本人確認が必要です",
+  "@appLockReauthReason": {
+    "description": "System biometric reason string shown when re-authenticating before disabling or changing the passcode (D-05)"
+  },
+  "securityAppLock": "アプリロック",
+  "@securityAppLock": {
+    "description": "SecuritySection: app-lock master toggle title (D-11)"
+  },
+  "securityAppLockDescription": "起動時と再開時にパスコードでアプリを保護します。",
+  "@securityAppLockDescription": {
+    "description": "SecuritySection: app-lock master toggle description (D-11)"
+  },
+  "securityBiometricUnlock": "生体認証で解除",
+  "@securityBiometricUnlock": {
+    "description": "SecuritySection: biometric-unlock sub-toggle title, shown when app lock is on (D-11)"
+  },
+  "securityBiometricUnlockDescription": "Face ID または指紋でアプリロックを解除します。",
+  "@securityBiometricUnlockDescription": {
+    "description": "SecuritySection: biometric-unlock sub-toggle description (D-11)"
+  },
+  "securityChangePin": "パスコードを変更",
+  "@securityChangePin": {
+    "description": "SecuritySection: entry to change the existing passcode (D-11)"
+  },
   "@@locale": "ja"
 }

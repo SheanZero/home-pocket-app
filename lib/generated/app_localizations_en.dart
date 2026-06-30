@@ -2385,4 +2385,52 @@ class SEn extends S {
 
   @override
   String get onboardingLockSetupNow => 'Set up now';
+
+  @override
+  String get appLockPinTitle => 'Enter passcode';
+
+  @override
+  String get appLockFaceIdPrompt => 'Look at your device to use Face ID';
+
+  @override
+  String get appLockFaceIdRetry => 'Retry';
+
+  @override
+  String get appLockUsePasscode => 'Use passcode';
+
+  @override
+  String get appLockForgotPin => 'Forgot your passcode?';
+
+  @override
+  String get appLockForgotPinExplanation =>
+      'If you forget your passcode, it cannot be recovered. You will need to reinstall the app, which will erase any local data that has not yet been synced.';
+
+  @override
+  String get appLockSetPinTitle => 'Set a passcode';
+
+  @override
+  String get appLockConfirmPinTitle => 'Re-enter passcode';
+
+  @override
+  String get appLockPinMismatch => 'Passcodes don\'t match';
+
+  @override
+  String get appLockReauthReason => 'Verify your identity to continue';
+
+  @override
+  String get securityAppLock => 'App lock';
+
+  @override
+  String get securityAppLockDescription =>
+      'Protect the app with a passcode on launch and when returning to the foreground.';
+
+  @override
+  String get securityBiometricUnlock => 'Unlock with biometrics';
+
+  @override
+  String get securityBiometricUnlockDescription =>
+      'Unlock the app with Face ID or your fingerprint.';
+
+  @override
+  String get securityChangePin => 'Change passcode';
 }

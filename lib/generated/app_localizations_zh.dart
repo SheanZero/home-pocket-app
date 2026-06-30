@@ -2335,4 +2335,50 @@ class SZh extends S {
 
   @override
   String get onboardingLockSetupNow => '现在设置';
+
+  @override
+  String get appLockPinTitle => '输入密码';
+
+  @override
+  String get appLockFaceIdPrompt => '请注视屏幕以使用 Face ID';
+
+  @override
+  String get appLockFaceIdRetry => '重试';
+
+  @override
+  String get appLockUsePasscode => '使用密码';
+
+  @override
+  String get appLockForgotPin => '忘记密码？';
+
+  @override
+  String get appLockForgotPinExplanation =>
+      '如果忘记密码，将无法找回。你需要重新安装应用，这会丢失尚未同步的本地数据。';
+
+  @override
+  String get appLockSetPinTitle => '设置密码';
+
+  @override
+  String get appLockConfirmPinTitle => '再次输入密码';
+
+  @override
+  String get appLockPinMismatch => '密码不一致';
+
+  @override
+  String get appLockReauthReason => '需要验证身份以继续';
+
+  @override
+  String get securityAppLock => '应用锁';
+
+  @override
+  String get securityAppLockDescription => '在启动和返回前台时用密码保护应用。';
+
+  @override
+  String get securityBiometricUnlock => '生物识别解锁';
+
+  @override
+  String get securityBiometricUnlockDescription => '用 Face ID 或指纹解锁应用。';
+
+  @override
+  String get securityChangePin => '修改密码';
 }

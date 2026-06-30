@@ -4410,6 +4410,96 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Set up now'**
   String get onboardingLockSetupNow;
+
+  /// Lock screen PIN page: title prompting the user to enter their passcode (D-12)
+  ///
+  /// In en, this message translates to:
+  /// **'Enter passcode'**
+  String get appLockPinTitle;
+
+  /// Lock screen Face ID page: prompt asking the user to look at the device for biometric unlock (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Look at your device to use Face ID'**
+  String get appLockFaceIdPrompt;
+
+  /// Lock screen Face ID page: retry button after a failed/cancelled biometric attempt (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get appLockFaceIdRetry;
+
+  /// Lock screen Face ID page: ghost escape button to switch to the PIN page (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Use passcode'**
+  String get appLockUsePasscode;
+
+  /// Lock screen: low-key tappable forgot-passcode affordance (D-08)
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your passcode?'**
+  String get appLockForgotPin;
+
+  /// Forgot-passcode explanation: states the passcode is unrecoverable, requires reinstalling the app, and loses unsynced local data — implies NO recovery path (LOCK-09, D-08)
+  ///
+  /// In en, this message translates to:
+  /// **'If you forget your passcode, it cannot be recovered. You will need to reinstall the app, which will erase any local data that has not yet been synced.'**
+  String get appLockForgotPinExplanation;
+
+  /// Set-PIN flow: title for the first passcode entry (Plan 10)
+  ///
+  /// In en, this message translates to:
+  /// **'Set a passcode'**
+  String get appLockSetPinTitle;
+
+  /// Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter passcode'**
+  String get appLockConfirmPinTitle;
+
+  /// Set-PIN flow: re-prompt shown when the confirmation passcode does not match the first entry
+  ///
+  /// In en, this message translates to:
+  /// **'Passcodes don\'t match'**
+  String get appLockPinMismatch;
+
+  /// System biometric reason string shown when re-authenticating before disabling or changing the passcode (D-05)
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity to continue'**
+  String get appLockReauthReason;
+
+  /// SecuritySection: app-lock master toggle title (D-11)
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get securityAppLock;
+
+  /// SecuritySection: app-lock master toggle description (D-11)
+  ///
+  /// In en, this message translates to:
+  /// **'Protect the app with a passcode on launch and when returning to the foreground.'**
+  String get securityAppLockDescription;
+
+  /// SecuritySection: biometric-unlock sub-toggle title, shown when app lock is on (D-11)
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with biometrics'**
+  String get securityBiometricUnlock;
+
+  /// SecuritySection: biometric-unlock sub-toggle description (D-11)
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the app with Face ID or your fingerprint.'**
+  String get securityBiometricUnlockDescription;
+
+  /// SecuritySection: entry to change the existing passcode (D-11)
+  ///
+  /// In en, this message translates to:
+  /// **'Change passcode'**
+  String get securityChangePin;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

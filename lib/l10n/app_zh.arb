@@ -3062,5 +3062,65 @@
   "@onboardingLockSetupNow": {
     "description": "Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)"
   },
+  "appLockPinTitle": "输入密码",
+  "@appLockPinTitle": {
+    "description": "Lock screen PIN page: title prompting the user to enter their passcode (D-12)"
+  },
+  "appLockFaceIdPrompt": "请注视屏幕以使用 Face ID",
+  "@appLockFaceIdPrompt": {
+    "description": "Lock screen Face ID page: prompt asking the user to look at the device for biometric unlock (D-09)"
+  },
+  "appLockFaceIdRetry": "重试",
+  "@appLockFaceIdRetry": {
+    "description": "Lock screen Face ID page: retry button after a failed/cancelled biometric attempt (D-09)"
+  },
+  "appLockUsePasscode": "使用密码",
+  "@appLockUsePasscode": {
+    "description": "Lock screen Face ID page: ghost escape button to switch to the PIN page (D-09)"
+  },
+  "appLockForgotPin": "忘记密码？",
+  "@appLockForgotPin": {
+    "description": "Lock screen: low-key tappable forgot-passcode affordance (D-08)"
+  },
+  "appLockForgotPinExplanation": "如果忘记密码，将无法找回。你需要重新安装应用，这会丢失尚未同步的本地数据。",
+  "@appLockForgotPinExplanation": {
+    "description": "Forgot-passcode explanation: states the passcode is unrecoverable, requires reinstalling the app, and loses unsynced local data — implies NO recovery path (LOCK-09, D-08)"
+  },
+  "appLockSetPinTitle": "设置密码",
+  "@appLockSetPinTitle": {
+    "description": "Set-PIN flow: title for the first passcode entry (Plan 10)"
+  },
+  "appLockConfirmPinTitle": "再次输入密码",
+  "@appLockConfirmPinTitle": {
+    "description": "Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)"
+  },
+  "appLockPinMismatch": "密码不一致",
+  "@appLockPinMismatch": {
+    "description": "Set-PIN flow: re-prompt shown when the confirmation passcode does not match the first entry"
+  },
+  "appLockReauthReason": "需要验证身份以继续",
+  "@appLockReauthReason": {
+    "description": "System biometric reason string shown when re-authenticating before disabling or changing the passcode (D-05)"
+  },
+  "securityAppLock": "应用锁",
+  "@securityAppLock": {
+    "description": "SecuritySection: app-lock master toggle title (D-11)"
+  },
+  "securityAppLockDescription": "在启动和返回前台时用密码保护应用。",
+  "@securityAppLockDescription": {
+    "description": "SecuritySection: app-lock master toggle description (D-11)"
+  },
+  "securityBiometricUnlock": "生物识别解锁",
+  "@securityBiometricUnlock": {
+    "description": "SecuritySection: biometric-unlock sub-toggle title, shown when app lock is on (D-11)"
+  },
+  "securityBiometricUnlockDescription": "用 Face ID 或指纹解锁应用。",
+  "@securityBiometricUnlockDescription": {
+    "description": "SecuritySection: biometric-unlock sub-toggle description (D-11)"
+  },
+  "securityChangePin": "修改密码",
+  "@securityChangePin": {
+    "description": "SecuritySection: entry to change the existing passcode (D-11)"
+  },
   "@@locale": "zh"
 }

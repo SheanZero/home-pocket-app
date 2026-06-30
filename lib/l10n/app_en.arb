@@ -3062,5 +3062,65 @@
   "@onboardingLockSetupNow": {
     "description": "Onboarding lock-entry screen: set-up-now button (deep-link to Settings security, D-13)"
   },
+  "appLockPinTitle": "Enter passcode",
+  "@appLockPinTitle": {
+    "description": "Lock screen PIN page: title prompting the user to enter their passcode (D-12)"
+  },
+  "appLockFaceIdPrompt": "Look at your device to use Face ID",
+  "@appLockFaceIdPrompt": {
+    "description": "Lock screen Face ID page: prompt asking the user to look at the device for biometric unlock (D-09)"
+  },
+  "appLockFaceIdRetry": "Retry",
+  "@appLockFaceIdRetry": {
+    "description": "Lock screen Face ID page: retry button after a failed/cancelled biometric attempt (D-09)"
+  },
+  "appLockUsePasscode": "Use passcode",
+  "@appLockUsePasscode": {
+    "description": "Lock screen Face ID page: ghost escape button to switch to the PIN page (D-09)"
+  },
+  "appLockForgotPin": "Forgot your passcode?",
+  "@appLockForgotPin": {
+    "description": "Lock screen: low-key tappable forgot-passcode affordance (D-08)"
+  },
+  "appLockForgotPinExplanation": "If you forget your passcode, it cannot be recovered. You will need to reinstall the app, which will erase any local data that has not yet been synced.",
+  "@appLockForgotPinExplanation": {
+    "description": "Forgot-passcode explanation: states the passcode is unrecoverable, requires reinstalling the app, and loses unsynced local data — implies NO recovery path (LOCK-09, D-08)"
+  },
+  "appLockSetPinTitle": "Set a passcode",
+  "@appLockSetPinTitle": {
+    "description": "Set-PIN flow: title for the first passcode entry (Plan 10)"
+  },
+  "appLockConfirmPinTitle": "Re-enter passcode",
+  "@appLockConfirmPinTitle": {
+    "description": "Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)"
+  },
+  "appLockPinMismatch": "Passcodes don't match",
+  "@appLockPinMismatch": {
+    "description": "Set-PIN flow: re-prompt shown when the confirmation passcode does not match the first entry"
+  },
+  "appLockReauthReason": "Verify your identity to continue",
+  "@appLockReauthReason": {
+    "description": "System biometric reason string shown when re-authenticating before disabling or changing the passcode (D-05)"
+  },
+  "securityAppLock": "App lock",
+  "@securityAppLock": {
+    "description": "SecuritySection: app-lock master toggle title (D-11)"
+  },
+  "securityAppLockDescription": "Protect the app with a passcode on launch and when returning to the foreground.",
+  "@securityAppLockDescription": {
+    "description": "SecuritySection: app-lock master toggle description (D-11)"
+  },
+  "securityBiometricUnlock": "Unlock with biometrics",
+  "@securityBiometricUnlock": {
+    "description": "SecuritySection: biometric-unlock sub-toggle title, shown when app lock is on (D-11)"
+  },
+  "securityBiometricUnlockDescription": "Unlock the app with Face ID or your fingerprint.",
+  "@securityBiometricUnlockDescription": {
+    "description": "SecuritySection: biometric-unlock sub-toggle description (D-11)"
+  },
+  "securityChangePin": "Change passcode",
+  "@securityChangePin": {
+    "description": "SecuritySection: entry to change the existing passcode (D-11)"
+  },
   "@@locale": "en"
 }
