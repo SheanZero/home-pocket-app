@@ -19,6 +19,7 @@ import 'features/family_sync/presentation/providers/repository_providers.dart'
 import 'features/family_sync/presentation/providers/state_sync.dart'
     show syncEngineProvider;
 import 'features/applock/presentation/screens/app_lock_screen.dart';
+import 'features/applock/presentation/widgets/privacy_mask.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
@@ -29,6 +30,7 @@ import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
+import 'infrastructure/security/app_lock_lifecycle_observer.dart';
 import 'infrastructure/security/providers.dart' show secureStorageServiceProvider;
 import 'shared/utils/invalidate_all_data_providers.dart';
 import 'shared/utils/result.dart';
@@ -113,10 +115,33 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   bool _isLocked = false;
   String? _error;
 
+  /// Synchronous best-effort cache of `appLockEnabled && pinHash != null`,
+  /// refreshed on every (re)initialize. The lifecycle observer's
+  /// `isLockEffective` predicate must be synchronous so the privacy mask can
+  /// paint in the SAME frame the app goes inactive (before the OS snapshot,
+  /// RESEARCH §5) — an async provider hop would miss that frame.
+  bool _lockConfigured = false;
+
+  /// Drives the opaque [PrivacyMask] overlay. Flipped synchronously by the
+  /// observer's `onMask`/`onUnmask` so the cover lands before the app-switcher
+  /// snapshot (LOCK-04 / T-55-28).
+  final ValueNotifier<bool> _maskVisible = ValueNotifier<bool>(false);
+
+  /// Root lifecycle observer driving relock (LOCK-03) + mask (LOCK-04).
+  /// Registered in [_initialize], torn down in [dispose].
+  AppLockLifecycleObserver? _lockObserver;
+
   @override
   void initState() {
     super.initState();
     _initialize();
+  }
+
+  @override
+  void dispose() {
+    _lockObserver?.dispose();
+    _maskVisible.dispose();
+    super.dispose();
   }
 
   /// Shared seed + ensure-default-book step. Returns the active book id on
@@ -148,6 +173,20 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         final syncEngine = ref.read(syncEngineProvider);
         syncEngine.initialize();
 
+        // Register the app-lock lifecycle observer alongside the sync engine's
+        // own observer. `isLockEffective` reads the synchronous [_lockConfigured]
+        // cache so the mask paints before the OS snapshot (RESEARCH §5); relock
+        // flips the [_isLocked] gate flag via setState (never pushReplacement),
+        // and the mask is driven by the synchronous [_maskVisible] notifier.
+        _lockObserver ??= AppLockLifecycleObserver(
+          isLockEffective: () => _lockConfigured,
+          onRelock: () {
+            if (mounted) setState(() => _isLocked = true);
+          },
+          onMask: () => _maskVisible.value = true,
+          onUnmask: () => _maskVisible.value = false,
+        )..start();
+
         // Wire push notifications → sync engine
         final pushService = ref.read(pushNotificationServiceProvider);
         syncEngine.connectPushNotifications(pushService);
@@ -168,6 +207,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         setState(() {
           _bookId = bookIdResult.data!;
           _needsOnboarding = !settings.onboardingComplete;
+          _lockConfigured = lockConfigured;
           _isLocked = lockConfigured;
           _initialized = true;
         });
@@ -212,6 +252,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         setState(() {
           _bookId = bookIdResult.data!;
           _needsOnboarding = !settings.onboardingComplete;
+          _lockConfigured = lockConfigured;
           _isLocked = lockConfigured;
           _initialized = true;
         });
@@ -256,8 +297,24 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       // Cap iOS/Android Dynamic Type so large accessibility font sizes don't
-      // overflow fixed horizontal Rows (quick 260604-fyd — ceiling 1.2).
-      builder: clampTextScaling,
+      // overflow fixed horizontal Rows (quick 260604-fyd — ceiling 1.2), then
+      // host the opaque privacy mask ABOVE everything (LOCK-04). The mask is
+      // driven by the synchronous [_maskVisible] notifier so it paints before
+      // the OS app-switcher snapshot (RESEARCH §5 / T-55-28).
+      builder: (context, child) {
+        return Stack(
+          children: [
+            clampTextScaling(context, child),
+            Positioned.fill(
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _maskVisible,
+                builder: (context, masked, _) =>
+                    masked ? const PrivacyMask() : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        );
+      },
       home: Builder(builder: (context) => _buildHome(context)),
     );
   }
@@ -299,7 +356,11 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     // the _reinitializeAfterDataReset refresh path stays attached
     // ([[boot-gate-completion-must-flip-flag-not-pushreplacement]]).
     if (_isLocked) {
-      return AppLockScreen(onUnlocked: _completeUnlock);
+      return AppLockScreen(
+        onUnlocked: _completeUnlock,
+        onBeginAuth: _lockObserver?.beginAuth,
+        onEndAuth: _lockObserver?.endAuth,
+      );
     }
 
     return MainShellScreen(bookId: _bookId!);
