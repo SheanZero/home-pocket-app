@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/config/legal_urls.dart';
+import '../../../../core/constants/app_info.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../screens/legal_doc_screen.dart';
@@ -91,7 +92,7 @@ class LegalSponsorSection extends StatelessWidget {
             showLicensePage(
               context: context,
               applicationName: S.of(context).appName,
-              applicationVersion: '0.1.0',
+              applicationVersion: appVersion,
             );
           },
         ),

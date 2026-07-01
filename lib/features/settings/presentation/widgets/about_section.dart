@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_info.dart';
 import '../../../../generated/app_localizations.dart';
 
 class AboutSection extends StatelessWidget {
@@ -20,7 +21,7 @@ class AboutSection extends StatelessWidget {
         ListTile(
           leading: const Icon(Icons.info),
           title: Text(S.of(context).version),
-          subtitle: const Text('0.1.0'),
+          subtitle: const Text(appVersion),
         ),
         // Privacy + OSS-license tiles migrated to LegalSponsorSection (tone-C):
         // this section is version-only to avoid duplicate legal entries.
