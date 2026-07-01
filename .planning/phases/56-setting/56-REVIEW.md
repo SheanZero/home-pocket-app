@@ -1,6 +1,6 @@
 ---
 phase: 56-setting
-reviewed: 2026-07-01T00:00:00Z
+reviewed: 2026-07-01T20:15:00Z
 depth: standard
 files_reviewed: 24
 files_reviewed_list:
@@ -29,158 +29,134 @@ files_reviewed_list:
   - test/widget/features/settings/legal_doc_screen_test.dart
   - test/widget/features/settings/legal_sponsor_section_test.dart
 findings:
-  critical: 1
-  warning: 2
-  info: 3
-  total: 6
+  critical: 0
+  warning: 1
+  info: 4
+  total: 5
 status: issues_found
 ---
 
-# Phase 56: Code Review Report
+# Phase 56: Code Review Report (re-review, post-fix cycle)
 
-**Reviewed:** 2026-07-01
+**Reviewed:** 2026-07-01T20:15:00Z
 **Depth:** standard
 **Files Reviewed:** 24
 **Status:** issues_found
 
 ## Summary
 
-Phase 56 adds the "Legal & Support" settings group: an offline per-locale legal-doc
-reader (privacy / terms / 特商法), an OSS-license row, and an external-browser sponsor
-row, plus 9 bundled Markdown assets and 9 new ARB keys.
+Re-review of the CURRENT (post-fix) phase-56 code. The three findings from the prior
+cycle are verified FIXED and not regressed:
 
-Verified clean: ARB key parity across ja/zh/en (all 9 keys present in all 3 files),
-generated getters present in `app_localizations.dart`, `assets/legal/` declared in
-`pubspec.yaml` (line 121), all 9 legal assets present and substantive, the V12
-locale-whitelist guard in `LegalDocScreen` is correct, and the async-gap
-`context.mounted` handling in the sponsor launcher is correct for the SnackBar path.
+- **CR-01 (sponsor `launchUrl` crash):** `_openSponsor` now wraps
+  `Uri.parse` + `launchUrl` in `try/catch (_)` and treats any throw as `!ok`
+  (`legal_sponsor_section.dart:39-49`). Covered by the new
+  "sponsor launch that THROWS still shows the neutral SnackBar" test.
+- **WR-01 (future-in-build spinner flash):** `LegalDocScreen` now memoizes the load
+  future in `_content`, recreated only when `_assetPath` changes
+  (`legal_doc_screen.dart:51-80`).
+- **WR-02 (hardcoded version):** `appVersion` is now a single-source `const` in
+  `lib/core/constants/app_info.dart`, consumed by both `about_section.dart` and
+  `legal_sponsor_section.dart`.
 
-Primary concern: the sponsor launcher's own documented "never crashes" contract is not
-actually met — `launchUrl` can throw and the call is unguarded. Two maintainability
-warnings (future-in-build re-issue, duplicated hardcoded version) and three info items.
+Additional verification this pass:
+
+- **Security clean.** The `rootBundle.loadString` path is composed only from the
+  closed `LegalDoc.slug` enum and the `{ja,zh,en}` whitelist (`_supportedLangs`);
+  unknown locales deterministically fall back to `ja`. No untrusted value reaches the
+  bundle. Proven by the "unsupported locale falls back to ja" test.
+- **i18n non-stale.** All 9 new ARB keys exist in ja/zh/en, and generated
+  `app_localizations_*.dart` values match the ARB source verbatim (spot-checked
+  `sponsorLaunchError`, `legalSponsorSectionTitle`, `tokushoNoticeSubtitle`). No
+  hardcoded CJK in phase-56 Dart. `assets/legal/` is declared in `pubspec.yaml:121`.
+
+One genuine content defect remains in the phase-56 deliverable (Chinese vocabulary in
+the default-locale Japanese legal text), plus four low-severity items. No BLOCKER.
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
-
-### CR-01: `launchUrl` can throw `PlatformException` — unguarded, contradicting the "never crashes" contract
-
-**File:** `lib/features/settings/presentation/widgets/legal_sponsor_section.dart:34-46`
-**Issue:** The method doc explicitly claims "On failure shows one neutral SnackBar —
-never crashes, never retries (T-56-06)", but the implementation only handles the
-`!ok` (returns-false) path:
-
-```dart
-final ok = await launchUrl(
-  Uri.parse(LegalUrls.donation),
-  mode: LaunchMode.externalApplication,
-);
-if (!ok && context.mounted) { ...snackbar... }
-```
-
-`url_launcher.launchUrl` does **not** uniformly return `false` on failure. Per its
-documented contract it may **throw a `PlatformException`** instead (e.g. Android
-`ActivityNotFoundException` when no app can handle the URL). Because `_openSponsor`
-is a fire-and-forget async handler wired to `onTap`, a thrown exception becomes an
-uncaught async error (red error screen in debug, silently-dropped future in release)
-— the exact crash the contract promises to avoid. The widget test only exercises the
-`result = false` branch, so this path is untested. `Uri.parse` can likewise throw
-`FormatException` once the placeholder is replaced with a real (possibly malformed) URL.
-**Fix:**
-```dart
-Future<void> _openSponsor(BuildContext context) async {
-  final l10n = S.of(context);
-  final messenger = ScaffoldMessenger.of(context);
-  var ok = false;
-  try {
-    ok = await launchUrl(
-      Uri.parse(LegalUrls.donation),
-      mode: LaunchMode.externalApplication,
-    );
-  } catch (_) {
-    ok = false;
-  }
-  if (!ok && context.mounted) {
-    messenger.showSnackBar(SnackBar(content: Text(l10n.sponsorLaunchError)));
-  }
-}
-```
-Add a test that sets the mock to throw `PlatformException(...)` and asserts the neutral
-SnackBar still shows and no exception escapes.
-
 ## Warnings
 
-### WR-01: `FutureBuilder` re-creates the `rootBundle.loadString` future on every rebuild
+### WR-01: Japanese legal drafts contain Chinese-only vocabulary (上線 / 復核)
 
-**File:** `lib/features/settings/presentation/screens/legal_doc_screen.dart:65-66`
-**Issue:** `future: rootBundle.loadString(assetPath)` is constructed inline in `build`.
-Any rebuild of this `ConsumerWidget` (locale change is intended, but also
-inherited-widget changes such as theme/`context.palette`, or `MediaQuery` metrics)
-constructs a *new* future, resetting the `FutureBuilder` to `ConnectionState.waiting`
-and flashing the spinner over already-rendered legal text. The test file itself
-documents the fragility of this pattern — `tearDown(rootBundle.clear)` is required
-because "a cache-hit reload leaves the FutureBuilder spinner animating the simulated
-clock, timing out pumpAndSettle" (`legal_doc_screen_test.dart:13-16`). That workaround
-is direct evidence the future-in-build coupling misbehaves on a cache hit.
-**Fix:** Memoize the load outside `build`. Simplest: expose a
-`FutureProvider.family<String, ({LegalDoc doc, String lang})>` that calls
-`rootBundle.loadString`, and `ref.watch` it — the provider caches per (doc, lang) and
-survives unrelated rebuilds. Alternatively convert to a `StatefulWidget` and create the
-future in `didChangeDependencies` keyed on `assetPath`.
+**File:** `assets/legal/privacy_ja.md:7,56,58,66`, `assets/legal/terms_ja.md:7,58,62`, `assets/legal/tokusho_ja.md:7,15,23,49`
+**Issue:** The Japanese (default-locale) legal documents repeatedly use Chinese
+vocabulary that is not natural/correct Japanese:
+- **「上線前」** (Chinese *shàngxiàn*, "before go-live") — appears 9× across the three
+  ja files. Natural Japanese is 「公開前」/「リリース前」.
+- **「復核」** (Chinese *fùhé*, "re-review/re-check") — natural Japanese is
+  「確認」/「レビュー」.
 
-### WR-02: App version `'0.1.0'` hardcoded in two places; drifts from `pubspec.yaml`
-
-**File:** `lib/features/settings/presentation/widgets/about_section.dart:23` and
-`lib/features/settings/presentation/widgets/legal_sponsor_section.dart:86`
-**Issue:** The version string is duplicated as a magic literal in the About tile
-(`subtitle: const Text('0.1.0')`) and in `showLicensePage(applicationVersion: '0.1.0')`.
-`pubspec.yaml` is at `version: 0.1.0+1`; on the next release bump both literals go stale
-silently, showing the wrong version in the About screen and the OS license page. The
-project already depends on `package_info_plus: ^9.0.1` (pubspec line 54) but does not use
-it here. This also violates the project "no hardcoded values" rule (CLAUDE.md /
-coding-style).
-**Fix:** Read the version once via `PackageInfo.fromPlatform()` (or a small
-`FutureProvider<PackageInfo>`) and thread `packageInfo.version` into both the About
-subtitle and `showLicensePage`. At minimum, hoist a single `const _appVersion` so the
-value lives in one place.
+The zh variants correctly use 「上线」, confirming the terminology leaked from a
+Chinese-authored draft into the Japanese translation. Because `ja` is the default app
+language and these are legally-facing store-compliance documents (privacy / terms /
+特商法) rendered verbatim to Japanese users via `SelectableText`, incorrect Japanese in
+the primary legal text is a user-visible quality defect — distinct from the intentional
+「草案」/draft markers, which are fine. No current test would catch this.
+**Fix:** Replace across all three `*_ja.md` files:
+```
+上線前  → 公開前   (or リリース前)
+復核    → 確認     (or レビュー)
+```
+e.g. `本ポリシーは上線前に日本の法務により復核される予定の草案です`
+→ `本ポリシーは公開前に日本の法務により確認される予定の草案です`. Fold this into the
+"reviewed by Japanese legal counsel before launch" pass the drafts already promise.
 
 ## Info
 
-### IN-01: `privacyPolicyHosted` / `termsOfUseHosted` are unused in code
-
-**File:** `lib/core/config/legal_urls.dart:18-21`
-**Issue:** Only `LegalUrls.donation` is referenced by code; `privacyPolicyHosted` and
-`termsOfUseHosted` are referenced only in dartdoc comments. The dartdoc explains they
-exist as the source of truth to paste into App Store Connect metadata, so this is a
-documented deliberate constant rather than accidental dead code — flagged only so a
-future dead-code sweep does not remove them by mistake.
-**Fix:** No action required now; when the store-metadata step lands, reference them from
-that tooling/checklist.
-
-### IN-02: Parity test asserts only file existence, not content or bundle declaration
+### IN-01: `legal_asset_parity_test` asserts existence only, not parity
 
 **File:** `test/architecture/legal_asset_parity_test.dart:17-28`
-**Issue:** The gate checks `File(path).existsSync()` for all 9 assets but not that each
-file is non-empty, nor that `assets/legal/` is declared in `pubspec.yaml`. A zero-byte
-or stub asset would pass this test yet render a blank legal document to users, and a
-missing pubspec declaration would pass the test yet fail `rootBundle.loadString` at
-runtime. (Both hold correctly today — files are substantive and pubspec line 121 declares
-the dir — so this is hardening, not a live defect.)
-**Fix:** Add `expect(File(path).lengthSync(), greaterThan(0))` per asset, and optionally
-assert `pubspec.yaml` contains `assets/legal/`.
+**Issue:** The test is named "legal asset **parity**" and its doc-comment claims it
+gates the drafts, but it only checks `File(path).existsSync()`. A locale that ships a
+one-line stub, an empty file, or a file whose section structure diverges from the other
+two locales still passes. The widget tests cover a few content markers
+(`contains('プライバシーポリシー')`, `contains('隐私政策')`) but not all doc×locale
+combinations, so cross-locale structural drift — and defects like WR-01 — go undetected.
+**Fix:** Strengthen the arch test to assert non-trivial content and cross-locale parity,
+e.g. each file non-empty, starts with a `#` heading, and the count of `##` section
+headers matches across the three locales of the same doc.
 
-### IN-03: Placeholder `example.com` URLs are launch-blocking (documented TODO)
+### IN-02: Placeholder `example.com` / `support@example.com` ship with no enforced launch gate
 
-**File:** `lib/core/config/legal_urls.dart:18-23`
-**Issue:** All three URLs are `https://example.com/homepocket/...` placeholders. The
-sponsor row will open example.com until replaced, and the hosted privacy/terms URLs are
-not real. This is intentional and clearly marked (`上线前填真实值` / `TODO`), so it is
-recorded as an info-level launch-gate item, not a code defect.
-**Fix:** Replace with production URLs before App Store submission; consider a CI check
-that fails if any `LegalUrls` value contains `example.com`.
+**File:** `lib/core/config/legal_urls.dart:18-23`, `assets/legal/*_*.md` (contact lines)
+**Issue:** `privacyPolicyHosted`, `termsOfUseHosted`, and `donation` are all
+`https://example.com/...` placeholders, and every legal doc's contact line is
+`support@example.com`. These are correctly marked (`// TODO 上线前填真实值` / "to be
+replaced before launch"), so this is not a leak — but nothing mechanically blocks a
+store submission with live placeholders. `donation` is handed to the OS browser and the
+hosted URLs are App-Store-mandated, so shipping a placeholder is a plausible foot-gun.
+**Fix:** Add a release gate (CI grep or release-mode assert) that fails if any
+`LegalUrls.*` still contains `example.com` or the bundled legal assets still contain
+`support@example.com`, so the launch checklist is enforced rather than trusted.
+
+### IN-03: Sponsor launch failure swallowed with no diagnostic logging
+
+**File:** `lib/features/settings/presentation/widgets/legal_sponsor_section.dart:44-49`
+**Issue:** `catch (_) { ok = false; }` discards the caught exception entirely. The
+user-facing behavior (neutral SnackBar, never crash) is correct and intentional per
+T-56-06, but the project coding-style rule is "never silently swallow errors — log
+detailed error context." A real production launch failure (malformed `donation` URL,
+no browser) leaves zero diagnostic trail.
+**Fix:** Keep the neutral UX but capture the error for diagnostics, e.g.
+`catch (e, st) { ok = false; debugPrint('sponsor launch failed: $e'); }` (or the
+project's audit/log facility if one is wired for this layer).
+
+### IN-04: Non-localized `'Error: $error'` in settings error branch (pre-existing, out of phase scope)
+
+**File:** `lib/features/settings/presentation/screens/settings_screen.dart:165`
+**Issue:** The `settingsAsync.when(error: ...)` branch renders a hardcoded English
+`'Error: $error'`, which both violates the "all UI text via `S.of(context)`" rule and
+interpolates a raw error object into the UI. Git history shows this line predates phase
+56 (introduced by MOD-007, commit `05e2cc7f`, 2026-02-10); the only phase-56 change to
+this file is the `LegalSponsorSection` + `Divider` insertion at lines 158-159. Recorded
+for completeness because the file is in review scope; fix belongs to a settings/i18n
+cleanup, not this phase.
+**Fix:** Route the error branch through a localized ARB string via `S.of(context)` and
+avoid interpolating the raw error object into user-facing text.
 
 ---
 
-_Reviewed: 2026-07-01_
+_Reviewed: 2026-07-01T20:15:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
