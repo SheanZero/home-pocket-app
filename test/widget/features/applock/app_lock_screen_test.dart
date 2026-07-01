@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/security/app_lock_service.dart';
@@ -135,6 +137,35 @@ void main() {
 
       verify(() => appLock.verifyPin('1234')).called(1);
       expect(unlockCount, 1);
+    });
+
+    testWidgets(
+        'shows a loading indicator while the PIN verifies, then hides it (LOCK-V2-05)',
+        (tester) async {
+      // Hold verifyPin pending so the "verifying" window is observable — the
+      // Argon2id derive is slow on-device (~1s) and used to look frozen because
+      // the PIN dots just sat filled with no feedback.
+      final gate = Completer<bool>();
+      when(() => appLock.verifyPin('1234')).thenAnswer((_) => gate.future);
+
+      await pumpScreen(tester, startOnPinPage: true);
+
+      // Enter 4 digits WITHOUT settling (verify is still pending on the gate).
+      for (final c in '1234'.split('')) {
+        await tester.tap(find.text(c));
+        await tester.pump();
+      }
+      await tester.pump();
+
+      // While verifying: a progress indicator is visible.
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Resolve the verify (fail path) → indicator is gone, screen usable again.
+      gate.complete(false);
+      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(unlockCount, 0);
+      expect(find.byType(PinKeypad), findsOneWidget);
     });
 
     testWidgets(
