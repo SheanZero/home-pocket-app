@@ -18,6 +18,7 @@ import '../widgets/about_section.dart';
 import '../widgets/appearance_section.dart';
 import '../widgets/data_management_section.dart';
 import '../widgets/joy_target_section.dart';
+import '../widgets/legal_sponsor_section.dart';
 import '../widgets/security_section.dart';
 import '../widgets/voice_section.dart';
 
@@ -153,6 +154,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: _securitySectionKey,
                 child: SecuritySection(settings: settings),
               ),
+              const Divider(),
+              const LegalSponsorSection(),
               const Divider(),
               const AboutSection(),
             ],
