@@ -148,15 +148,18 @@ class _FakeSettingsRepository implements SettingsRepository {
   _FakeSettingsRepository({
     required this.onboardingComplete,
     this.appLockEnabled = false,
+    this.biometricUnlockEnabled = false,
   });
 
   final bool onboardingComplete;
   final bool appLockEnabled;
+  final bool biometricUnlockEnabled;
 
   @override
   Future<AppSettings> getSettings() async => AppSettings(
     onboardingComplete: onboardingComplete,
     appLockEnabled: appLockEnabled,
+    biometricUnlockEnabled: biometricUnlockEnabled,
   );
 
   @override
@@ -202,6 +205,23 @@ class _FallbackBiometricService extends Fake implements BiometricService {
   }) async => const AuthResult.fallbackToPIN();
 }
 
+/// Biometric spy that counts `authenticate` invocations (always dropping to the
+/// PIN page) — proves whether the lock screen auto-triggered biometrics at boot.
+/// Used by the G4 gate: with `biometricUnlockEnabled: false` the boot must NOT
+/// auto-prompt Face ID, so `authenticateCalls` stays 0.
+class _SpyBiometricService extends Fake implements BiometricService {
+  int authenticateCalls = 0;
+
+  @override
+  Future<AuthResult> authenticate({
+    required String reason,
+    bool biometricOnly = false,
+  }) async {
+    authenticateCalls++;
+    return const AuthResult.fallbackToPIN();
+  }
+}
+
 final _testBook = Book(
   id: 'book-test-1',
   name: 'Test Book',
@@ -224,6 +244,7 @@ Future<void> _pumpApp(
   AppSettings appSettings = const AppSettings(),
   bool onboardingComplete = true,
   bool appLockEnabled = false,
+  bool biometricUnlockEnabled = false,
   String? pinHash,
   BiometricService? biometric,
   // When true, DO NOT stub appSettings/settingsRepository — exercise the real
@@ -257,6 +278,7 @@ Future<void> _pumpApp(
         (ref) => _FakeSettingsRepository(
           onboardingComplete: onboardingComplete,
           appLockEnabled: appLockEnabled,
+          biometricUnlockEnabled: biometricUnlockEnabled,
         ),
       ),
       // _initialize pre-warms sharedPreferences.future; hand it a resolved
@@ -604,6 +626,8 @@ void main() {
           overrides: buildSuccessOverrides(profile: _testProfile),
           appLockEnabled: true,
           pinHash: 'argon2-phc',
+          // Biometric unlock ON so the boot auto-prompt fires (G4 gate).
+          biometricUnlockEnabled: true,
           // First biometric auto-unlocks (→ shell); after relock it drops to PIN
           // so the re-shown AppLockScreen stays visible.
           biometric: _OnceSuccessBiometricService(),
@@ -624,6 +648,57 @@ void main() {
         await _pumpInitNoSettle(tester);
 
         expect(find.byType(AppLockScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'G4 biometric OFF: lock screen starts on PIN, never auto-prompts Face ID',
+      (tester) async {
+        final spy = _SpyBiometricService();
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          appLockEnabled: true,
+          pinHash: 'argon2-phc',
+          // 生物识别解锁 OFF — the boot lock screen must go straight to the app's
+          // OWN PIN keypad and must NOT invoke the biometric prompt.
+          biometricUnlockEnabled: false,
+          biometric: spy,
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(AppLockScreen), findsOneWidget);
+        // PIN surface is showing (its 忘记PIN control is unique to the PIN page).
+        expect(
+          find.byKey(const ValueKey('app-lock-forgot-pin')),
+          findsOneWidget,
+        );
+        // The critical invariant: no auto Face ID prompt when biometric is off.
+        expect(spy.authenticateCalls, 0);
+      },
+    );
+
+    testWidgets(
+      'G4 biometric ON: boot lock screen auto-prompts Face ID once',
+      (tester) async {
+        final spy = _SpyBiometricService();
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          appLockEnabled: true,
+          pinHash: 'argon2-phc',
+          biometricUnlockEnabled: true,
+          biometric: spy,
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(AppLockScreen), findsOneWidget);
+        // Biometric ON → the Face ID auto-prompt fires exactly once at boot.
+        expect(spy.authenticateCalls, 1);
+        // Still on the Face ID surface (spy fell back to PIN), so the PIN page's
+        // 忘记PIN control is NOT yet shown.
+        expect(
+          find.byKey(const ValueKey('app-lock-forgot-pin')),
+          findsNothing,
+        );
       },
     );
   });
