@@ -232,7 +232,28 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
             errorTrigger: _errorTrigger,
           ),
         ),
-        const SizedBox(height: 36),
+        // Verify-state feedback (LOCK-V2-05): the Argon2id derive is slow
+        // on-device (~1s), so surface a lightweight spinner while verifyPin is
+        // pending instead of leaving the filled dots looking frozen. Reuses the
+        // existing 36px gap so the keypad never shifts. Security-neutral — no
+        // KDF change; the keypad is already input-guarded by `_verifying`.
+        SizedBox(
+          height: 36,
+          child: Center(
+            child: _verifying
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        palette.accentPrimary,
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+        ),
         PinKeypad(onDigit: _onDigit, onBackspace: _onBackspace),
         const SizedBox(height: 12),
         TextButton(
