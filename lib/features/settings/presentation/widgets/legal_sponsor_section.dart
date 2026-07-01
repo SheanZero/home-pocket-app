@@ -41,11 +41,13 @@ class LegalSponsorSection extends StatelessWidget {
         Uri.parse(LegalUrls.donation),
         mode: LaunchMode.externalApplication,
       );
-    } catch (_) {
+    } catch (e) {
       // launchUrl can throw (e.g. Android ActivityNotFoundException) and
       // Uri.parse can throw FormatException — treat any failure as !ok so the
       // handler shows one neutral SnackBar and never crashes (T-56-06).
+      // Capture the error for diagnostics rather than swallowing it silently.
       ok = false;
+      debugPrint('sponsor launch failed: $e');
     }
     if (!ok && context.mounted) {
       messenger.showSnackBar(
