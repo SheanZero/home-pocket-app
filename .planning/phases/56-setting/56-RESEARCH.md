@@ -282,17 +282,19 @@ class LegalUrls {
 | A3 | No new persisted setting is required (all content static) | Runtime State Inventory | LOW — if a toggle emerges, it mirrors `biometricLockEnabled` in prefs, no Drift migration. |
 | A4 | Detail docs render best as separate `MaterialPageRoute` screens (vs inline expanders) | Architecture Patterns | LOW — pure UX choice, CONTEXT marks it Claude's-discretion; reversible. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `AboutSection` survive, or do its tiles fully migrate into `LegalSponsorSection`?**
    - What we know: `AboutSection` today holds version + privacy(TODO) + license(working). The new group owns privacy/terms/tokusho/license/sponsor.
    - What's unclear: Whether to keep a slim `AboutSection` (version/appName only) or fold everything in.
    - Recommendation: Keep `AboutSection` for version/appName; move privacy + license into `LegalSponsorSection` (or point both at the new screens). Planner decides; either is a small, reversible edit. Phase 53 tone-C design (`.planning/sketches/003-legal-sponsor/index.html`) is the tie-breaker — read it.
+   - **RESOLVED (56-05):** slim `AboutSection` to version-only; its privacy + license tiles migrate into `LegalSponsorSection` (no duplicate rows). Matches tone-C `アプリについて` = version only.
 
 2. **Donation platform: FANBOX vs OFUSE (URL shape only).**
    - What we know: URL is a placeholder (DONATE-04, D-04).
    - What's unclear: Which platform — irrelevant to code (any https).
    - Recommendation: Placeholder constant now; real value 上线前. No code impact.
+   - **RESOLVED (D-04):** placeholder `LegalUrls.donation` constant only; platform choice is 上线前 and has zero code impact (any https launches identically).
 
 ## Environment Availability
 
