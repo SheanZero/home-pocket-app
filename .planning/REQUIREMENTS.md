@@ -41,16 +41,16 @@
 
 ### Donation（赞助入口）
 
-- [ ] **DONATE-01**: Setting 内提供一个不打扰的「応援/支援（赞助）」入口
-- [ ] **DONATE-02**: 点击经外部浏览器（`url_launcher` `LaunchMode.externalApplication`）打开日本赞助平台（FANBOX/OFUSE 等）链接，绝不内嵌 WebView、绝不 IAP
-- [ ] **DONATE-03**: 赞助完全可选 —— 不强制付费、不做功能门槛、不反复弹窗，中性非交易性措辞
+- [x] **DONATE-01**: Setting 内提供一个不打扰的「応援/支援（赞助）」入口
+- [x] **DONATE-02**: 点击经外部浏览器（`url_launcher` `LaunchMode.externalApplication`）打开日本赞助平台（FANBOX/OFUSE 等）链接，绝不内嵌 WebView、绝不 IAP
+- [x] **DONATE-03**: 赞助完全可选 —— 不强制付费、不做功能门槛、不反复弹窗，中性非交易性措辞
 - [x] **DONATE-04**: 赞助链接 URL 可配置（需求阶段留占位，上线前填真实链接）
 
 ### Legal & Compliance（合规 / 法务 — 日本市场）
 
 - [x] **LEGAL-01**: Setting 内提供隐私政策（プライバシーポリシー）页 —— app 内置三语文本（离线可读）+ 托管 URL 占位（App Store Connect 强制要求托管 URL，上线前填）
 - [x] **LEGAL-02**: Setting 内提供利用規約（Terms of Use）页 —— app 内置三语文本 + 托管 URL 占位
-- [ ] **LEGAL-03**: Setting 内提供 OSS 开源许可证页，用 Flutter 内置 `showLicensePage`/`LicenseRegistry` 自动聚合（不手维护清单）
+- [x] **LEGAL-03**: Setting 内提供 OSS 开源许可证页，用 Flutter 内置 `showLicensePage`/`LicenseRegistry` 自动聚合（不手维护清单）
 - [x] **LEGAL-04**: Setting 内提供「特定商取引法に基づく表記」页 —— 运营者信息内容**参考 https://www.napu.co.jp/sale/ 的表記结构**（运营者/所在地/联系方式/退款等条目，可遵「请求时提供」型），三语承载，上线前由日本法务确认细节
 - [ ] **LEGAL-05**: 商店隐私表单（Apple Privacy Nutrition Labels / Google Data Safety）如实填写，与 v1.7 汇率出站网络调用一致（非反射式「不收集」）
 - [x] **LEGAL-06**: 所有新增法务/合规文案三语（ja/zh/en）覆盖，通过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）
@@ -114,13 +114,13 @@
 | LOCK-08 | Phase 55 → v2 | Descoped → LOCK-V2-04 (D-06) |
 | LOCK-09 | Phase 55 | Complete |
 | LOCK-10 | Phase 55 | Complete |
-| DONATE-01 | Phase 56 | Pending |
-| DONATE-02 | Phase 56 | Pending |
-| DONATE-03 | Phase 56 | Pending |
+| DONATE-01 | Phase 56 | Complete |
+| DONATE-02 | Phase 56 | Complete |
+| DONATE-03 | Phase 56 | Complete |
 | DONATE-04 | Phase 56 | Complete |
 | LEGAL-01 | Phase 56 | Complete |
 | LEGAL-02 | Phase 56 | Complete |
-| LEGAL-03 | Phase 56 | Pending |
+| LEGAL-03 | Phase 56 | Complete |
 | LEGAL-04 | Phase 56 | Complete |
 | LEGAL-05 | Phase 56 | Pending |
 | LEGAL-06 | Phase 56 | Complete |

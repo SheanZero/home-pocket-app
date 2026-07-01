@@ -5,15 +5,15 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 56
 current_phase_name: setting
 status: executing
-stopped_at: Completed 56-03-PLAN.md
-last_updated: "2026-07-01T10:07:14.118Z"
+stopped_at: Completed 56-05-PLAN.md
+last_updated: "2026-07-01T10:16:33.643Z"
 last_activity: 2026-07-01
-last_activity_desc: Completed 56-03 (legal/sponsor ARB labels)
+last_activity_desc: Completed 56-05 (LegalSponsorSection widget + AboutSection slim)
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 29
-  completed_plans: 27
+  completed_plans: 28
   percent: 75
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 56 (setting) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
-Last activity: 2026-07-01 — Completed 56-03 (legal/sponsor ARB labels)
+Last activity: 2026-07-01 — Completed 56-05 (LegalSponsorSection widget + AboutSection slim)
 
-Progress: Phase 56 EXECUTING (3/6 executed: 56-01, 56-02, 56-03); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete.
+Progress: Phase 56 EXECUTING (5/6 executed: 56-01..56-05); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete.
 
 > **Planning gate note (Phase 56):** §13a decision-coverage-plan gate evaluated cleanly this time — `passed:true, total:5, covered:5` (D-01..D-05). No CJK false-negative and no override needed (contrast Phase 55). §13 requirements coverage = all 10 IDs covered. `state.planned-phase` CLI no-op'd (`updated:[]`, known on this STATE.md) → STATE hand-updated here.
 
@@ -67,6 +67,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 56]: 56-01: LegalUrls (lib/core/config/) single source of truth for hosted privacy/terms + donation placeholder URLs, each with 上线前填真实值 marker (D-04); url_launcher ^6.3.2 added (win32 trio untouched)
 - [Phase 56]: 56-01: trilingual 9-file asset-existence gate (legal_asset_parity_test.dart) enforces LEGAL-06 parity (D-02); GREEN on first run (56-02 assets present same wave)
 - [Phase 56]: 56-03: 7 legal/sponsor short labels centralized in ARB (ja/zh/en parity + @meta); reuse existing privacyPolicy/openSourceLicenses; no long legal prose in ARB (D-02); sponsorLaunchError kept neutral; regenerated S getters, arb_key_parity_test GREEN (LEGAL-06)
+- [Phase 56]: 56-05: LegalSponsorSection renders 5 tone-C rows (privacy/terms/tokusho→LegalDocScreen, OSS→showLicensePage, sponsor→url_launcher external); external affordance uses Icon(open_in_new) colored palette.shared (sketch 「↗ 外部」 CJK label dropped — no S key + hardcoded_cjk_ui_scan)
+- [Phase 56]: 56-05: sponsor launch is direct launchUrl(externalApplication), no canLaunch gate (Android 11+ false-negative), neutral SnackBar on failure, no dialog (DONATE-01/02/03/04); AboutSection slimmed to version-only (no duplicate legal rows)
 
 ### Quick Tasks Completed
 
@@ -211,8 +213,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-07-01T10:07:00.202Z
-Stopped at: Completed 56-03-PLAN.md
+Last session: 2026-07-01T10:16:14.002Z
+Stopped at: Completed 56-05-PLAN.md
 Resume file: .planning/phases/56-setting/56-CONTEXT.md
 
 ## Performance Metrics
@@ -295,6 +297,7 @@ Resume file: .planning/phases/56-setting/56-CONTEXT.md
 | Phase 56 P02 | 8m | 3 tasks | 9 files |
 | Phase 56 P01 | 1 min | 3 tasks | 4 files |
 | Phase 56 P04 | 10min | 1 tasks | 2 files |
+| Phase 56 P05 | 15 min | 2 tasks | 5 files |
 
 ## Decisions
 
