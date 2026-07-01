@@ -3122,5 +3122,33 @@
   "@securityChangePin": {
     "description": "SecuritySection: entry to change the existing passcode (D-11)"
   },
+  "legalSponsorSectionTitle": "法律信息・支持",
+  "@legalSponsorSectionTitle": {
+    "description": "Settings group title for legal info and sponsor entries (LEGAL-06)"
+  },
+  "termsOfUse": "使用条款",
+  "@termsOfUse": {
+    "description": "Terms of Use tile title and terms-screen appbar (LEGAL-06)"
+  },
+  "tokushoNotice": "基于特定商业交易法的标示",
+  "@tokushoNotice": {
+    "description": "Tokusho (特定商取引法) notice tile title and screen appbar; required for JP compliance (LEGAL-06)"
+  },
+  "tokushoNoticeSubtitle": "在日本提供服务所需的标示",
+  "@tokushoNoticeSubtitle": {
+    "description": "Tokusho notice tile subtitle (LEGAL-06)"
+  },
+  "sponsorRow": "支持开发",
+  "@sponsorRow": {
+    "description": "Sponsor tile title, opens external donation link (DONATE)"
+  },
+  "sponsorRowSubtitle": "为了持续无广告运营",
+  "@sponsorRowSubtitle": {
+    "description": "Sponsor tile subtitle (DONATE)"
+  },
+  "sponsorLaunchError": "无法打开浏览器",
+  "@sponsorLaunchError": {
+    "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
+  },
   "@@locale": "zh"
 }
