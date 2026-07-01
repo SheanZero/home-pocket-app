@@ -65,7 +65,7 @@
 - **LOCK-V2-02**: 忘记 PIN 经 BIP39 恢复词重置（v2.0 选了「无恢复」，未来可加）
 - **LOCK-V2-03**: 可选「连续 N 次失败后擦除本地数据」（默认关）
 - **LOCK-V2-04**: PIN 连错递增冷却/退避（持久化计数，成功才清零）—— 由 v2.0 Phase 55 LOCK-08 descope 而来（D-06，MVP 零速率限制为用户知情接受风险）；v2 补齐在线猜测的速率限制以收窄 4 位 PIN 暴力破解面
-- **LOCK-V2-05**: 解锁手感优化（Phase 55 UAT Test 5 观察，~1s 卡顿，非阻塞）—— ① 锁屏 PIN 验证态加轻量 loading 反馈，消除 Argon2id off-isolate 慢哈希（19MiB/t=2，故意的安全成本，**不降低**）期间「圆点填满停住」的卡死错觉；② 主页 `MainShellScreen` 首帧优化（`IndexedStack` 一次 eager 构建 4 个 tab + provider 冷加载，pre-existing、与应用锁无关、惠及所有入口）改为懒加载/延迟非可见 tab。两项均不动 KDF 参数、不削弱安全
+- **LOCK-V2-05**: 解锁手感优化（Phase 55 UAT Test 5 观察，~1s 卡顿，非阻塞）—— ✅**① 已做**（提前落地，commit `e4739e6d`）：锁屏 PIN 验证态在圆点与键盘间既有 36px 间隙里加了轻量 spinner，消除 Argon2id off-isolate 慢哈希（19MiB/t=2，故意的安全成本，**未降低**）期间「圆点填满停住」的卡死错觉；零布局位移、security-neutral、TDD 覆盖（app_lock_screen_test.dart）。⏳**② 仍延后**：主页 `MainShellScreen` 首帧优化（`IndexedStack` 一次 eager 构建 4 个 tab + provider 冷加载，pre-existing、与应用锁无关、惠及所有入口）改为懒加载/延迟非可见 tab。两项均不动 KDF 参数、不削弱安全
 
 ### Onboarding / Legal v2
 
