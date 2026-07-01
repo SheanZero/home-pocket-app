@@ -53,6 +53,10 @@ dependencies:
   share_plus: ^12.0.2
   package_info_plus: ^9.0.1
 
+  # External URL launching (privacy/terms hosted URLs + sponsor link).
+  # url_launcher_windows has no win32 dep → safe with the pinned win32 trio above.
+  url_launcher: ^6.3.2
+
   # Firebase & Notifications
   firebase_core: ^4.1.1
   firebase_messaging: ^16.0.1
@@ -110,3 +114,4 @@ flutter:
 
   assets:
     - assets/satisfaction/
+    - assets/legal/
