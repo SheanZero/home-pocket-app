@@ -34,10 +34,18 @@ class LegalSponsorSection extends StatelessWidget {
   Future<void> _openSponsor(BuildContext context) async {
     final l10n = S.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final ok = await launchUrl(
-      Uri.parse(LegalUrls.donation),
-      mode: LaunchMode.externalApplication,
-    );
+    var ok = false;
+    try {
+      ok = await launchUrl(
+        Uri.parse(LegalUrls.donation),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {
+      // launchUrl can throw (e.g. Android ActivityNotFoundException) and
+      // Uri.parse can throw FormatException — treat any failure as !ok so the
+      // handler shows one neutral SnackBar and never crashes (T-56-06).
+      ok = false;
+    }
     if (!ok && context.mounted) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.sponsorLaunchError)),

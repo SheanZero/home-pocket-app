@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/config/legal_urls.dart';
 import 'package:home_pocket/features/settings/presentation/screens/legal_doc_screen.dart';
@@ -17,11 +18,15 @@ class _MockLauncher extends Fake
   String? lastUrl;
   LaunchOptions? lastOptions;
   bool result = true;
+  bool shouldThrow = false;
 
   @override
   Future<bool> launchUrl(String url, LaunchOptions options) async {
     lastUrl = url;
     lastOptions = options;
+    if (shouldThrow) {
+      throw PlatformException(code: 'ACTIVITY_NOT_FOUND');
+    }
     return result;
   }
 
@@ -142,6 +147,23 @@ void main() {
 
     expect(find.text(l.sponsorLaunchError), findsOneWidget);
     expect(find.byType(AlertDialog), findsNothing);
+  });
+
+  testWidgets(
+      'sponsor launch that THROWS still shows the neutral SnackBar and does not crash (CR-01)',
+      (tester) async {
+    launcher.shouldThrow = true;
+    await pump(tester);
+    final l = l10nOf(tester);
+
+    await tester.tap(find.text(l.sponsorRow));
+    await tester.pumpAndSettle();
+
+    // The thrown PlatformException must be swallowed: neutral SnackBar shows,
+    // no exception escapes to tester.takeException().
+    expect(find.text(l.sponsorLaunchError), findsOneWidget);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
