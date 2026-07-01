@@ -5,14 +5,14 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 55
 current_phase_name: pin-phase
 status: executing
-stopped_at: Phase 55 code-complete (11/11 plans, all waves + gates green); verification 5/5 code must-haves, human_needed — awaiting on-device UAT (/gsd-verify-work 55)
-last_updated: "2026-06-30T06:55:00.000Z"
-last_activity: 2026-06-30
-last_activity_desc: Phase 55 executed (11/11 plans across 4 waves; analyze 0, suite 3467/3467; post-merge fix db98cfe7); verification human_needed — device QA pending
+stopped_at: Phase 55 gap-closure 55-12 (G2 device-passcode fallback) executing — code tasks in progress, on-device re-verify pending
+last_updated: "2026-07-01T04:45:00.000Z"
+last_activity: 2026-07-01
+last_activity_desc: Executing gap-closure 55-12 (biometric-only fix for G2) — Tasks 1-2 code, Task 3 on-device UAT re-verify blocking
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 22
+  total_plans: 23
   completed_plans: 22
   percent: 75
 ---
