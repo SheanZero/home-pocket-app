@@ -123,6 +123,13 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   /// RESEARCH §5) — an async provider hop would miss that frame.
   bool _lockConfigured = false;
 
+  /// Whether biometric (Face ID / fingerprint) unlock is enabled for app-lock.
+  /// Drives [AppLockScreen.startOnPinPage]: when false, the lock screen opens
+  /// directly on the PIN keypad and never auto-prompts biometrics (LOCK-07) —
+  /// otherwise the OS Face ID sheet would appear even though the user disabled
+  /// biometric unlock. Captured on every (re)initialize alongside [_isLocked].
+  bool _biometricUnlockEnabled = false;
+
   /// Drives the opaque [PrivacyMask] overlay. Flipped synchronously by the
   /// observer's `onMask`/`onUnmask` so the cover lands before the app-switcher
   /// snapshot (LOCK-04 / T-55-28).
@@ -227,6 +234,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
           _needsOnboarding = !settings.onboardingComplete;
           _lockConfigured = lockConfigured;
           _isLocked = lockConfigured;
+          _biometricUnlockEnabled = settings.biometricUnlockEnabled;
           _initialized = true;
         });
       } else {
@@ -279,6 +287,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
           _needsOnboarding = !settings.onboardingComplete;
           _lockConfigured = lockConfigured;
           _isLocked = lockConfigured;
+          _biometricUnlockEnabled = settings.biometricUnlockEnabled;
           _initialized = true;
         });
       } else {
@@ -385,6 +394,9 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         onUnlocked: _completeUnlock,
         onBeginAuth: _lockObserver?.beginAuth,
         onEndAuth: _lockObserver?.endAuth,
+        // Skip the Face ID auto-prompt when biometric unlock is disabled — open
+        // straight on the PIN keypad instead of surfacing the OS sheet (LOCK-07).
+        startOnPinPage: !_biometricUnlockEnabled,
       );
     }
 
