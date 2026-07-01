@@ -5,10 +5,10 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 55
 current_phase_name: pin-phase
 status: executing
-stopped_at: Phase 55 gap-closure 55-12 (G2 device-passcode fallback) executing — code tasks in progress, on-device re-verify pending
-last_updated: "2026-07-01T04:45:00.000Z"
+stopped_at: Phase 55 gap-closure 55-12 — G2 (biometric-only) + G3 (NSFaceIDUsageDescription crash) + G4 (biometric-off honored) code-complete, analyze 0 / suite 3472 green; on-device re-verify pending
+last_updated: "2026-07-01T05:30:00.000Z"
 last_activity: 2026-07-01
-last_activity_desc: Executing gap-closure 55-12 (biometric-only fix for G2) — Tasks 1-2 code, Task 3 on-device UAT re-verify blocking
+last_activity_desc: Gap-closure 55-12 — G2 biometric-only, G3 Face ID Info.plist crash, G4 biometric-off no-auto-prompt all fixed (analyze 0, suite 3472); on-device UAT re-verify blocking
 progress:
   total_phases: 4
   completed_phases: 3
