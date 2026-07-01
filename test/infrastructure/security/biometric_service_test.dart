@@ -127,6 +127,37 @@ void main() {
       expect(result, const AuthResult.success());
     });
 
+    // G2 (55-12 / LOCK-05,06,10): app-lock auth must be biometric-only so iOS
+    // never renders its own device-passcode sheet. Calling authenticate WITHOUT
+    // an explicit biometricOnly argument must forward biometricOnly:true
+    // (secure-by-default) to local_auth — otherwise iOS uses
+    // LAPolicy.deviceOwnerAuthentication and accepts the device passcode.
+    test(
+      'defaults to biometricOnly:true so the device passcode is never offered (G2)',
+      () async {
+        setupAvailableBiometrics();
+        when(
+          () => mockAuth.authenticate(
+            localizedReason: any(named: 'localizedReason'),
+            biometricOnly: any(named: 'biometricOnly'),
+            sensitiveTransaction: any(named: 'sensitiveTransaction'),
+            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+          ),
+        ).thenAnswer((_) async => true);
+
+        await service.authenticate(reason: 'test');
+
+        verify(
+          () => mockAuth.authenticate(
+            localizedReason: any(named: 'localizedReason'),
+            biometricOnly: true,
+            sensitiveTransaction: any(named: 'sensitiveTransaction'),
+            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+          ),
+        ).called(1);
+      },
+    );
+
     test('returns failed with attempt count on first failure', () async {
       setupAvailableBiometrics();
       when(

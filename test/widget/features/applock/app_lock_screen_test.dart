@@ -26,8 +26,10 @@ void main() {
     appLock = _MockAppLockService();
     unlockCount = 0;
     // Default auto-trigger outcome: drop to PIN (never a dead end).
-    when(() => biometric.authenticate(reason: any(named: 'reason')))
-        .thenAnswer((_) async => const AuthResult.fallbackToPIN());
+    when(() => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: any(named: 'biometricOnly'),
+        )).thenAnswer((_) async => const AuthResult.fallbackToPIN());
     when(() => appLock.verifyPin(any())).thenAnswer((_) async => false);
   });
 
@@ -69,13 +71,31 @@ void main() {
       await pumpScreen(tester);
 
       // Auto-trigger ran and returned a non-success -> STAY on Face ID page.
-      verify(() => biometric.authenticate(reason: any(named: 'reason')))
-          .called(1);
+      // biometricOnly matcher widened (55-12): once _runBiometric passes
+      // biometricOnly:true, mocktail 1.x will not match a verify that omits it.
+      verify(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: any(named: 'biometricOnly'),
+          )).called(1);
       expect(find.byType(FaceIdPanel), findsOneWidget);
       expect(find.byType(PinKeypad), findsNothing);
       expect(unlockCount, 0);
       // The ghost passcode escape is present.
       expect(find.text(l10nOf(tester).appLockUsePasscode), findsOneWidget);
+    });
+
+    testWidgets(
+        'auto-prompt authenticates biometric-only — device passcode never offered (G2)',
+        (tester) async {
+      await pumpScreen(tester);
+
+      // G2 (55-12 / LOCK-05,10): the unlock auto-prompt must force
+      // biometricOnly:true so iOS never renders its own device-passcode sheet;
+      // every non-success routes to the app's OWN PIN page.
+      verify(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: true,
+          )).called(1);
     });
 
     testWidgets('tapping パスコードを使用 switches to the PIN page',
@@ -91,8 +111,10 @@ void main() {
 
     testWidgets('biometric success unlocks without ever showing the PIN page',
         (tester) async {
-      when(() => biometric.authenticate(reason: any(named: 'reason')))
-          .thenAnswer((_) async => const AuthResult.success());
+      when(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: any(named: 'biometricOnly'),
+          )).thenAnswer((_) async => const AuthResult.success());
 
       await pumpScreen(tester);
 

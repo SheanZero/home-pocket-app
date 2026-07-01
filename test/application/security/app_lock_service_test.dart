@@ -106,16 +106,26 @@ void main() {
   group('reauth (D-05 biometric-or-PIN gate)', () {
     test('biometricUnlockEnabled && authenticate success -> true', () async {
       stubSettings(appLockEnabled: true, biometricUnlockEnabled: true);
-      when(() => biometric.authenticate(reason: any(named: 'reason')))
-          .thenAnswer((_) async => const AuthResult.success());
+      when(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: any(named: 'biometricOnly'),
+          )).thenAnswer((_) async => const AuthResult.success());
       expect(await service.reauth(), isTrue);
+      // G2 (55-12 / LOCK-06,D-05): the reauth gate must authenticate
+      // biometric-only so the iOS device passcode can never clear it.
+      verify(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: true,
+          )).called(1);
     });
 
     test('biometricUnlockEnabled && fallbackToPIN -> false (caller does PIN)',
         () async {
       stubSettings(appLockEnabled: true, biometricUnlockEnabled: true);
-      when(() => biometric.authenticate(reason: any(named: 'reason')))
-          .thenAnswer((_) async => const AuthResult.fallbackToPIN());
+      when(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: any(named: 'biometricOnly'),
+          )).thenAnswer((_) async => const AuthResult.fallbackToPIN());
       expect(await service.reauth(), isFalse);
     });
 
@@ -123,7 +133,10 @@ void main() {
         () async {
       stubSettings(appLockEnabled: true, biometricUnlockEnabled: false);
       expect(await service.reauth(), isFalse);
-      verifyNever(() => biometric.authenticate(reason: any(named: 'reason')));
+      verifyNever(() => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: any(named: 'biometricOnly'),
+          ));
     });
   });
 
