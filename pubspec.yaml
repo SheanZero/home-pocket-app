@@ -100,6 +100,10 @@ dev_dependencies:
   # Testing
   fake_async: ^1.3.3
   mocktail: ^1.0.4
+  # Transitive via url_launcher (56-01); referenced directly to mock
+  # UrlLauncherPlatform.instance in the sponsor-launch widget test (56-05).
+  plugin_platform_interface: ^2.1.8
+  url_launcher_platform_interface: ^2.3.2
 
   # Audit Tooling
   import_guard_custom_lint: ^1.0.0
