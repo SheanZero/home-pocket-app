@@ -281,12 +281,12 @@
   4. 商店隐私表单（Apple Privacy Nutrition Labels / Google Data Safety）如实填写，与 v1.7 汇率出站网络调用一致（非反射式「不收集」）— LEGAL-05
   5. 所有新增法务/合规/赞助文案三语（ja/zh/en）覆盖，过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）— LEGAL-06
 
-**Plans**: 2/6 plans executed
+**Plans**: 3/6 plans executed
 **Wave 1**
 
 - [x] 56-01-PLAN.md — url_launcher dep + assets/legal/ decl + LegalUrls config + asset-parity gate (DONATE-04, LEGAL-06)
 - [x] 56-02-PLAN.md — trilingual legal drafts: privacy / terms / 特商法 (請求時提供 型) (LEGAL-01/02/04/06)
-- [ ] 56-03-PLAN.md — ARB short labels (ja/zh/en) + gen-l10n (LEGAL-06)
+- [x] 56-03-PLAN.md — ARB short labels (ja/zh/en) + gen-l10n (LEGAL-06)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
