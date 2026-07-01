@@ -66,6 +66,7 @@ class AppLockService {
     if (!settings.biometricUnlockEnabled) return false;
     final result = await _biometric.authenticate(
       reason: 'Confirm it\'s you to change app lock settings',
+      biometricOnly: true,
     );
     return result is AuthResultSuccess;
   }

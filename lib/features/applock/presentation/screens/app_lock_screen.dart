@@ -91,7 +91,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
     try {
       final result = await ref
           .read(biometricServiceProvider)
-          .authenticate(reason: reason);
+          .authenticate(reason: reason, biometricOnly: true);
       if (result is AuthResultSuccess) {
         widget.onUnlocked();
         return;

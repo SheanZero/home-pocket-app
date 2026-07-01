@@ -78,10 +78,17 @@ class BiometricService {
   /// Execute biometric authentication.
   ///
   /// [reason] is displayed in the system authentication dialog.
-  /// [biometricOnly] prevents device PIN fallback if true.
+  ///
+  /// [biometricOnly] defaults to `true` (secure-by-default, G2 / LOCK-05,06,10):
+  /// this app's lock credential is its OWN 4-digit Argon2id PIN, so the iOS
+  /// device passcode must NEVER satisfy app-lock auth. With `true`, `local_auth`
+  /// selects a biometric-only LAPolicy and iOS never renders its
+  /// "Enter iPhone passcode" sheet — every non-biometric outcome routes to the
+  /// app's own PIN surface via [AuthResult.fallbackToPIN]. Passing `false` is an
+  /// explicit opt-in to OS-passcode fallback; no caller in this app does so.
   Future<AuthResult> authenticate({
     required String reason,
-    bool biometricOnly = false,
+    bool biometricOnly = true,
   }) async {
     final availability = await checkAvailability();
     if (availability == BiometricAvailability.notSupported ||
