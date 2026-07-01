@@ -1,20 +1,21 @@
 ---
-status: resolved
+status: testing
 phase: 55-pin-phase
 source: [55-VERIFICATION.md]
 started: 2026-06-30T06:50:00Z
-updated: 2026-07-01T05:35:00Z
+updated: 2026-07-01T06:00:00Z
 ---
 
 ## Current Test
 
-number: —
-name: gap-closure re-verify complete (Tests 1 & 2)
+number: 3
+name: Full-UAT continuation — Tests 3–6 (mask timing, Control Center, KDF latency, keychain upgrade)
 expected: |
-  G2/G3/G4 gap-closure (55-12) verified on-device: unlock uses the app's OWN 4-digit
-  PIN (never the iOS device passcode); no Face ID TCC crash; with biometric unlock OFF
-  the lock screen opens straight on the PIN keypad.
-awaiting: nothing — 55-12 approved by user 2026-07-01. Tests 3–6 remain open for a later full-UAT pass (not in the 55-12 gap-closure scope).
+  Tests 1 & 2 already PASS (55-12). Now running the remaining on-device checks: app-switcher
+  snapshot shows the opaque mask (3); Control Center / Notification Center does NOT relock (4);
+  Argon2id set-PIN/unlock latency in band (5); an upgrade-over-existing-install still boots and
+  forgot-PIN copy is honest (6).
+awaiting: user runs Tests 3–6 on device and reports each outcome.
 
 ## Tests
 
