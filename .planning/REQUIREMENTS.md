@@ -48,12 +48,12 @@
 
 ### Legal & Compliance（合规 / 法务 — 日本市场）
 
-- [ ] **LEGAL-01**: Setting 内提供隐私政策（プライバシーポリシー）页 —— app 内置三语文本（离线可读）+ 托管 URL 占位（App Store Connect 强制要求托管 URL，上线前填）
-- [ ] **LEGAL-02**: Setting 内提供利用規約（Terms of Use）页 —— app 内置三语文本 + 托管 URL 占位
+- [x] **LEGAL-01**: Setting 内提供隐私政策（プライバシーポリシー）页 —— app 内置三语文本（离线可读）+ 托管 URL 占位（App Store Connect 强制要求托管 URL，上线前填）
+- [x] **LEGAL-02**: Setting 内提供利用規約（Terms of Use）页 —— app 内置三语文本 + 托管 URL 占位
 - [ ] **LEGAL-03**: Setting 内提供 OSS 开源许可证页，用 Flutter 内置 `showLicensePage`/`LicenseRegistry` 自动聚合（不手维护清单）
-- [ ] **LEGAL-04**: Setting 内提供「特定商取引法に基づく表記」页 —— 运营者信息内容**参考 https://www.napu.co.jp/sale/ 的表記结构**（运营者/所在地/联系方式/退款等条目，可遵「请求时提供」型），三语承载，上线前由日本法务确认细节
+- [x] **LEGAL-04**: Setting 内提供「特定商取引法に基づく表記」页 —— 运营者信息内容**参考 https://www.napu.co.jp/sale/ 的表記结构**（运营者/所在地/联系方式/退款等条目，可遵「请求时提供」型），三语承载，上线前由日本法务确认细节
 - [ ] **LEGAL-05**: 商店隐私表单（Apple Privacy Nutrition Labels / Google Data Safety）如实填写，与 v1.7 汇率出站网络调用一致（非反射式「不收集」）
-- [ ] **LEGAL-06**: 所有新增法务/合规文案三语（ja/zh/en）覆盖，通过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）
+- [x] **LEGAL-06**: 所有新增法务/合规文案三语（ja/zh/en）覆盖，通过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）
 
 ## v2 Requirements
 
@@ -118,12 +118,12 @@
 | DONATE-02 | Phase 56 | Pending |
 | DONATE-03 | Phase 56 | Pending |
 | DONATE-04 | Phase 56 | Pending |
-| LEGAL-01 | Phase 56 | Pending |
-| LEGAL-02 | Phase 56 | Pending |
+| LEGAL-01 | Phase 56 | Complete |
+| LEGAL-02 | Phase 56 | Complete |
 | LEGAL-03 | Phase 56 | Pending |
-| LEGAL-04 | Phase 56 | Pending |
+| LEGAL-04 | Phase 56 | Complete |
 | LEGAL-05 | Phase 56 | Pending |
-| LEGAL-06 | Phase 56 | Pending |
+| LEGAL-06 | Phase 56 | Complete |
 
 **Coverage:**
 
