@@ -22,24 +22,8 @@ class AboutSection extends StatelessWidget {
           title: Text(S.of(context).version),
           subtitle: const Text('0.1.0'),
         ),
-        ListTile(
-          leading: const Icon(Icons.privacy_tip),
-          title: Text(S.of(context).privacyPolicy),
-          onTap: () {
-            // TODO: Navigate to privacy policy
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.description),
-          title: Text(S.of(context).openSourceLicenses),
-          onTap: () {
-            showLicensePage(
-              context: context,
-              applicationName: S.of(context).appName,
-              applicationVersion: '0.1.0',
-            );
-          },
-        ),
+        // Privacy + OSS-license tiles migrated to LegalSponsorSection (tone-C):
+        // this section is version-only to avoid duplicate legal entries.
       ],
     );
   }
