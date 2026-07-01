@@ -163,7 +163,7 @@
 - [x] **Phase 53: HTML 设计关卡（零生产代码）** — 欢迎引导 / 应用锁屏 / Setting 法务·赞助三块 HTML 设计稿，经用户确认；零生产 Dart (completed 2026-06-29)
 - [x] **Phase 54: 欢迎 / 首启引导（Onboarding gate）** — init-settle 后的首启 gate + UI语言/币种/语音语言强制写穿 + 末尾可跳过的锁配置入口 (completed 2026-06-29)
 - [x] **Phase 55: 应用锁（生物识别 + PIN，最高风险）** — 冷启动+回前台完整重锁 + 切换器隐私遮罩 + 4位PIN加盐慢哈希兜底；独立安全评审 (completed 2026-06-30)
-- [ ] **Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）** — 隐私政策/利用規約/OSS/特商法 + 外链赞助；为真实 store-review round-trip 留余量
+- [x] **Phase 56: Setting 法务 + 赞助 + 日本合规（上线关卡）** — 隐私政策/利用規約/OSS/特商法 + 外链赞助；为真实 store-review round-trip 留余量 (completed 2026-07-01)
 
 ### Phase 53: HTML 设计关卡（零生产代码）
 
@@ -281,7 +281,7 @@
   4. 商店隐私表单（Apple Privacy Nutrition Labels / Google Data Safety）如实填写，与 v1.7 汇率出站网络调用一致（非反射式「不收集」）— LEGAL-05
   5. 所有新增法务/合规/赞助文案三语（ja/zh/en）覆盖，过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）— LEGAL-06
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans complete
 **Wave 1**
 
 - [x] 56-01-PLAN.md — url_launcher dep + assets/legal/ decl + LegalUrls config + asset-parity gate (DONATE-04, LEGAL-06)
@@ -298,7 +298,7 @@
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 56-06-PLAN.md — Settings wiring + store-privacy-form checklist (LEGAL-05, LEGAL-06)
+- [x] 56-06-PLAN.md — Settings wiring + store-privacy-form checklist (LEGAL-05, LEGAL-06)
 
 **UI hint**: yes
 **Research flag**: MEDIUM-confidence 外部合规——特商法 applicability（个人开发者外部平台赞助）+ Apple/Google donation-review 立场需 JP-legal sign-off + 真实 TestFlight/internal-track 提交（非自评）；调度时为 review round-trip 留余量。
