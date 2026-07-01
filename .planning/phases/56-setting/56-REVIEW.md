@@ -2,21 +2,37 @@
 phase: 56-setting
 reviewed: 2026-07-01T00:00:00Z
 depth: standard
-files_reviewed: 8
+files_reviewed: 24
 files_reviewed_list:
+  - assets/legal/privacy_en.md
+  - assets/legal/privacy_ja.md
+  - assets/legal/privacy_zh.md
+  - assets/legal/terms_en.md
+  - assets/legal/terms_ja.md
+  - assets/legal/terms_zh.md
+  - assets/legal/tokusho_en.md
+  - assets/legal/tokusho_ja.md
+  - assets/legal/tokusho_zh.md
   - lib/core/config/legal_urls.dart
   - lib/features/settings/presentation/screens/legal_doc_screen.dart
   - lib/features/settings/presentation/screens/settings_screen.dart
   - lib/features/settings/presentation/widgets/about_section.dart
   - lib/features/settings/presentation/widgets/legal_sponsor_section.dart
+  - lib/generated/app_localizations.dart
+  - lib/generated/app_localizations_en.dart
+  - lib/generated/app_localizations_ja.dart
+  - lib/generated/app_localizations_zh.dart
+  - lib/l10n/app_en.arb
+  - lib/l10n/app_ja.arb
+  - lib/l10n/app_zh.arb
   - test/architecture/legal_asset_parity_test.dart
   - test/widget/features/settings/legal_doc_screen_test.dart
   - test/widget/features/settings/legal_sponsor_section_test.dart
 findings:
-  critical: 0
+  critical: 1
   warning: 2
   info: 3
-  total: 5
+  total: 6
 status: issues_found
 ---
 
@@ -24,24 +40,53 @@ status: issues_found
 
 **Reviewed:** 2026-07-01
 **Depth:** standard
-**Files Reviewed:** 8
+**Files Reviewed:** 24
 **Status:** issues_found
 
 ## Summary
 
-Reviewed the Settings 法的情報・応援 section: the offline legal-doc reader (`legal_doc_screen.dart`), the sponsor-link section (`legal_sponsor_section.dart`), the centralized URL holder (`legal_urls.dart`), the slimmed `about_section.dart`, the section wiring in `settings_screen.dart`, and three test files.
+Phase 56 adds the "Legal & Support" settings group: an offline per-locale legal-doc
+reader (privacy / terms / 特商法), an OSS-license row, and an external-browser sponsor
+row, plus 9 bundled Markdown assets and 9 new ARB keys.
 
-The two flagged focus areas hold up well on the injection axis. The asset-path whitelist guard in `LegalDocScreen` is correct: both inputs to `rootBundle.loadString` are closed sets (the `LegalDoc` enum `slug` and the `_supportedLangs`-guarded language code), an unknown locale deterministically falls back to `ja`, and the missing-asset path is covered by the FutureBuilder error branch plus the `legal_asset_parity_test` existence gate. The sponsor launch uses a compile-time `const` https URL (no injection surface), `LaunchMode.externalApplication` (no in-app WebView/IAP), and correctly captures `l10n`/`messenger` before the `await` with a `context.mounted` re-check. All UI strings route through `S.of(context)`; no hardcoded CJK in `lib/`.
+Verified clean: ARB key parity across ja/zh/en (all 9 keys present in all 3 files),
+generated getters present in `app_localizations.dart`, `assets/legal/` declared in
+`pubspec.yaml` (line 121), all 9 legal assets present and substantive, the V12
+locale-whitelist guard in `LegalDocScreen` is correct, and the async-gap
+`context.mounted` handling in the sponsor launcher is correct for the SnackBar path.
 
-Two genuine robustness gaps remain: the sponsor launch only handles the `launchUrl` false-return path (not its thrown-exception path), and the legal reader recreates its load Future on every rebuild. Neither is a security issue; both weaken guarantees the plan explicitly claims.
+Primary concern: the sponsor launcher's own documented "never crashes" contract is not
+actually met — `launchUrl` can throw and the call is unguarded. Two maintainability
+warnings (future-in-build re-issue, duplicated hardcoded version) and three info items.
 
-## Warnings
+## Narrative Findings (AI reviewer)
 
-### WR-01: `launchUrl` thrown exception bypasses the "graceful failure" guarantee
+## Critical Issues
+
+### CR-01: `launchUrl` can throw `PlatformException` — unguarded, contradicting the "never crashes" contract
 
 **File:** `lib/features/settings/presentation/widgets/legal_sponsor_section.dart:34-46`
-**Issue:** `url_launcher`'s `launchUrl` does not only return `false` on failure — per its documented contract it returns `false` *or throws a `PlatformException`* depending on the failure mode (unsupported scheme, no handler activity, platform channel error). `_openSponsor` handles only the `!ok` (false-return) branch. A thrown `PlatformException` propagates out of the un-awaited `onTap: () => _openSponsor(context)` callback as an **unhandled async error**: the neutral SnackBar (`l10n.sponsorLaunchError`) is never shown, and the error is routed to the zone/`FlutterError` handler (which may log the failure). This directly contradicts the method's own doc comment ("On failure shows one neutral SnackBar — never crashes") and the T-56-06 requirement. The widget test mock (`_MockLauncher`) only ever *returns* `false`, so this throw path is both unhandled and untested.
-**Fix:** Wrap the launch in try/catch and funnel both failure modes to the same neutral SnackBar:
+**Issue:** The method doc explicitly claims "On failure shows one neutral SnackBar —
+never crashes, never retries (T-56-06)", but the implementation only handles the
+`!ok` (returns-false) path:
+
+```dart
+final ok = await launchUrl(
+  Uri.parse(LegalUrls.donation),
+  mode: LaunchMode.externalApplication,
+);
+if (!ok && context.mounted) { ...snackbar... }
+```
+
+`url_launcher.launchUrl` does **not** uniformly return `false` on failure. Per its
+documented contract it may **throw a `PlatformException`** instead (e.g. Android
+`ActivityNotFoundException` when no app can handle the URL). Because `_openSponsor`
+is a fire-and-forget async handler wired to `onTap`, a thrown exception becomes an
+uncaught async error (red error screen in debug, silently-dropped future in release)
+— the exact crash the contract promises to avoid. The widget test only exercises the
+`result = false` branch, so this path is untested. `Uri.parse` can likewise throw
+`FormatException` once the placeholder is replaced with a real (possibly malformed) URL.
+**Fix:**
 ```dart
 Future<void> _openSponsor(BuildContext context) async {
   final l10n = S.of(context);
@@ -53,40 +98,86 @@ Future<void> _openSponsor(BuildContext context) async {
       mode: LaunchMode.externalApplication,
     );
   } catch (_) {
-    ok = false; // PlatformException etc. -> treat as launch failure
+    ok = false;
   }
   if (!ok && context.mounted) {
     messenger.showSnackBar(SnackBar(content: Text(l10n.sponsorLaunchError)));
   }
 }
 ```
-Add a test where `_MockLauncher.launchUrl` throws, asserting the SnackBar still appears and no exception escapes (`tester.takeException()` is null).
+Add a test that sets the mock to throw `PlatformException(...)` and asserts the neutral
+SnackBar still shows and no exception escapes.
 
-### WR-02: `FutureBuilder` load Future recreated on every `build()`
+## Warnings
+
+### WR-01: `FutureBuilder` re-creates the `rootBundle.loadString` future on every rebuild
 
 **File:** `lib/features/settings/presentation/screens/legal_doc_screen.dart:65-66`
-**Issue:** `future: rootBundle.loadString(assetPath)` is constructed inline inside `build()`. `LegalDocScreen` is a `ConsumerWidget`, so any rebuild (device rotation / `MediaQuery` change, theme change, `currentLocaleProvider` re-emit, ancestor rebuild) creates a *new* Future, resetting the `FutureBuilder` to `ConnectionState.waiting` and re-flashing the `CircularProgressIndicator` — plus re-issuing the bundle load each time. This is the classic Flutter "future-in-build" anti-pattern. The reader's own test file documents the symptom directly (`tearDown(rootBundle.clear)` with the comment "a cache-hit reload leaves the FutureBuilder spinner animating the simulated clock, timing out pumpAndSettle"), confirming the Future is not memoized. `rootBundle` caches the decoded string so the cost is small, but the UX flash on rotation is real and the pattern is fragile.
-**Fix:** Memoize the load so it fires once per (doc, lang). Cleanest option given the codebase's Riverpod-3 conventions is a small `FutureProvider.family` keyed by the asset path (or `(doc, safeLang)`), watched via `ref.watch(...)` and rendered with `.when(...)`. If keeping `FutureBuilder`, convert to a `ConsumerStatefulWidget` and build the Future once in `initState`/`didChangeDependencies` (recomputing only when `safeLang` changes), storing it in a field.
+**Issue:** `future: rootBundle.loadString(assetPath)` is constructed inline in `build`.
+Any rebuild of this `ConsumerWidget` (locale change is intended, but also
+inherited-widget changes such as theme/`context.palette`, or `MediaQuery` metrics)
+constructs a *new* future, resetting the `FutureBuilder` to `ConnectionState.waiting`
+and flashing the spinner over already-rendered legal text. The test file itself
+documents the fragility of this pattern — `tearDown(rootBundle.clear)` is required
+because "a cache-hit reload leaves the FutureBuilder spinner animating the simulated
+clock, timing out pumpAndSettle" (`legal_doc_screen_test.dart:13-16`). That workaround
+is direct evidence the future-in-build coupling misbehaves on a cache hit.
+**Fix:** Memoize the load outside `build`. Simplest: expose a
+`FutureProvider.family<String, ({LegalDoc doc, String lang})>` that calls
+`rootBundle.loadString`, and `ref.watch` it — the provider caches per (doc, lang) and
+survives unrelated rebuilds. Alternatively convert to a `StatefulWidget` and create the
+future in `didChangeDependencies` keyed on `assetPath`.
+
+### WR-02: App version `'0.1.0'` hardcoded in two places; drifts from `pubspec.yaml`
+
+**File:** `lib/features/settings/presentation/widgets/about_section.dart:23` and
+`lib/features/settings/presentation/widgets/legal_sponsor_section.dart:86`
+**Issue:** The version string is duplicated as a magic literal in the About tile
+(`subtitle: const Text('0.1.0')`) and in `showLicensePage(applicationVersion: '0.1.0')`.
+`pubspec.yaml` is at `version: 0.1.0+1`; on the next release bump both literals go stale
+silently, showing the wrong version in the About screen and the OS license page. The
+project already depends on `package_info_plus: ^9.0.1` (pubspec line 54) but does not use
+it here. This also violates the project "no hardcoded values" rule (CLAUDE.md /
+coding-style).
+**Fix:** Read the version once via `PackageInfo.fromPlatform()` (or a small
+`FutureProvider<PackageInfo>`) and thread `packageInfo.version` into both the About
+subtitle and `showLicensePage`. At minimum, hoist a single `const _appVersion` so the
+value lives in one place.
 
 ## Info
 
-### IN-01: App version `'0.1.0'` hardcoded and duplicated
+### IN-01: `privacyPolicyHosted` / `termsOfUseHosted` are unused in code
 
-**File:** `lib/features/settings/presentation/widgets/about_section.dart:23`, `lib/features/settings/presentation/widgets/legal_sponsor_section.dart:86`
-**Issue:** The version literal `'0.1.0'` appears in the About "version" subtitle and again as `showLicensePage(applicationVersion: '0.1.0')`. On the next version bump one is easily missed, and both drift from the real `pubspec.yaml` version. The project already depends on `package_info_plus`.
-**Fix:** Source the version from `PackageInfo.fromPlatform()` (or a single shared `const` in `core/constants/`) and reference it in both places.
+**File:** `lib/core/config/legal_urls.dart:18-21`
+**Issue:** Only `LegalUrls.donation` is referenced by code; `privacyPolicyHosted` and
+`termsOfUseHosted` are referenced only in dartdoc comments. The dartdoc explains they
+exist as the source of truth to paste into App Store Connect metadata, so this is a
+documented deliberate constant rather than accidental dead code — flagged only so a
+future dead-code sweep does not remove them by mistake.
+**Fix:** No action required now; when the store-metadata step lands, reference them from
+that tooling/checklist.
 
-### IN-02: Redundant `S.of(context)` re-resolution in the OSS row
+### IN-02: Parity test asserts only file existence, not content or bundle declaration
 
-**File:** `lib/features/settings/presentation/widgets/legal_sponsor_section.dart:83-88`
-**Issue:** `build()` already captures `final l10n = S.of(context)` (line 50), but the `showLicensePage` `onTap` calls `S.of(context).appName` again instead of `l10n.appName`. Minor inconsistency; every other row in this widget uses the captured `l10n`.
-**Fix:** Use `l10n.appName`.
+**File:** `test/architecture/legal_asset_parity_test.dart:17-28`
+**Issue:** The gate checks `File(path).existsSync()` for all 9 assets but not that each
+file is non-empty, nor that `assets/legal/` is declared in `pubspec.yaml`. A zero-byte
+or stub asset would pass this test yet render a blank legal document to users, and a
+missing pubspec declaration would pass the test yet fail `rootBundle.loadString` at
+runtime. (Both hold correctly today — files are substantive and pubspec line 121 declares
+the dir — so this is hardening, not a live defect.)
+**Fix:** Add `expect(File(path).lengthSync(), greaterThan(0))` per asset, and optionally
+assert `pubspec.yaml` contains `assets/legal/`.
 
-### IN-03: `addPostFrameCallback` registered on every rebuild in `SettingsScreen`
+### IN-03: Placeholder `example.com` URLs are launch-blocking (documented TODO)
 
-**File:** `lib/features/settings/presentation/screens/settings_screen.dart:123-127`
-**Issue:** Inside the `data:` builder a post-frame callback is registered on every build. `_maybeScrollToSecurity` is idempotent (guarded by `widget.scrollToSecurity` and the `_didScrollToSecurity` one-shot flag), so behavior is correct, but a fresh callback is scheduled on each rebuild. This is pre-existing (Phase 54 deep-link scroll), not introduced by Phase 56 — noted for context since the file is in scope. No action required for this phase.
-**Fix:** Optional — gate registration on `widget.scrollToSecurity && !_didScrollToSecurity` before scheduling, or move the one-shot scroll to `initState`.
+**File:** `lib/core/config/legal_urls.dart:18-23`
+**Issue:** All three URLs are `https://example.com/homepocket/...` placeholders. The
+sponsor row will open example.com until replaced, and the hosted privacy/terms URLs are
+not real. This is intentional and clearly marked (`上线前填真实值` / `TODO`), so it is
+recorded as an info-level launch-gate item, not a code defect.
+**Fix:** Replace with production URLs before App Store submission; consider a CI check
+that fails if any `LegalUrls` value contains `example.com`.
 
 ---
 
