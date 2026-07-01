@@ -282,12 +282,24 @@
   5. 所有新增法务/合规/赞助文案三语（ja/zh/en）覆盖，过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）— LEGAL-06
 
 **Plans**: 6 plans
+**Wave 1**
+
 - [ ] 56-01-PLAN.md — url_launcher dep + assets/legal/ decl + LegalUrls config + asset-parity gate (DONATE-04, LEGAL-06)
 - [ ] 56-02-PLAN.md — trilingual legal drafts: privacy / terms / 特商法 (請求時提供 型) (LEGAL-01/02/04/06)
 - [ ] 56-03-PLAN.md — ARB short labels (ja/zh/en) + gen-l10n (LEGAL-06)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 56-04-PLAN.md — LegalDocScreen per-locale asset reader (rootBundle, V12 whitelist) (LEGAL-01/02/04)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 56-05-PLAN.md — LegalSponsorSection (5 rows, external sponsor launch) + AboutSection slim (DONATE-01/02/03, LEGAL-03)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 56-06-PLAN.md — Settings wiring + store-privacy-form checklist (LEGAL-05, LEGAL-06)
+
 **UI hint**: yes
 **Research flag**: MEDIUM-confidence 外部合规——特商法 applicability（个人开发者外部平台赞助）+ Apple/Google donation-review 立场需 JP-legal sign-off + 真实 TestFlight/internal-track 提交（非自评）；调度时为 review round-trip 留余量。
 

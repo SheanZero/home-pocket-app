@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
-current_phase: 55
-current_phase_name: pin-phase
-status: phase_complete
-stopped_at: Phase 56 context gathered
-last_updated: "2026-07-01T06:03:38.867Z"
+current_phase: 56
+current_phase_name: setting
+status: planned
+stopped_at: Phase 56 planned (6 plans, 4 waves) — ready to execute
+last_updated: "2026-07-01T06:43:59.000Z"
 last_activity: 2026-07-01
-last_activity_desc: Phase 55 fully UAT-verified (all 6 tests); ready for Phase 56
+last_activity_desc: "Phase 56 planned: 6 plans across 4 waves (research→plan→verify passed, 0 blockers)"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,18 +24,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 55 COMPLETE → next is Phase 56 (Settings legal/sponsorship/compliance)
+**Current focus:** Phase 56 PLANNED (6 plans, 4 waves) → ready to execute (Settings legal/sponsorship/日本合规 launch gate)
 
 ## Current Position
 
-Phase: 55 (pin-phase) — COMPLETE (verified on-device 2026-07-01)
-Plan: 12 of 12 complete (Wave 1: 01-06 · Wave 2: 07-08 · Wave 3: 09-10 · Wave 4: 11 · gap-closure: 12)
-Status: Verification 5/5 code must-haves PASS + FULL 6-test on-device UAT complete. Tests 1-4 & 6 pass; Test 5 pass_with_followup (~1s unlock lag → v2 LOCK-V2-05, non-blocking). Gap-closure 55-12 closed G1/G2/G3/G4 (all fixed_verified).
-Last activity: 2026-07-01 — Phase 55 fully UAT-verified (all 6 tests); ready for Phase 56
+Phase: 56 (setting — 法务 + 赞助 + 日本合规 上线关卡) — PLANNED, ready to execute
+Plan: 0 of 6 executed. Wave 1: 56-01 (url_launcher dep + assets/legal decl + LegalUrls + asset-parity gate) · 56-02 (trilingual legal drafts privacy/terms/特商法) · 56-03 (ARB short labels + gen-l10n) · Wave 2: 56-04 (LegalDocScreen per-locale reader, TDD) · Wave 3: 56-05 (LegalSponsorSection + external sponsor launch + AboutSection slim, TDD) · Wave 4: 56-06 (settings wiring + store-privacy-form checklist)
+Status: Planned via research→plan→verify. Plan-checker VERIFICATION PASSED (0 blockers; 3 warnings raised then fixed in revision f8d7e39e, re-checked clean). All 10 requirements (DONATE-01..04, LEGAL-01..06) covered; §13a decision-coverage 5/5 (D-01..D-05); §13 requirements coverage complete.
+Last activity: 2026-07-01 — Phase 56 planned (6 plans, 4 waves); ready to execute
 
-Progress: Phase 55 COMPLETE (12/12 plans); Phase 54 complete; Phase 53 complete. Next: Phase 56.
+Progress: Phase 56 PLANNED (0/6 executed); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete.
 
-> **Planning gate note (verify-phase, re-surface):** §13a decision-coverage-plan gate returned `passed:false` with `total:14, covered:0, uncovered:0` — this is the known CJK-decision-bullet parse false-negative (covered:0 AND uncovered:0 = gate did not evaluate, not a real gap). Override taken: all 14 decisions D-01..D-14 are verified cited across the 7 plans (grep-confirmed + plan-checker VERIFICATION PASSED + §13e gap-analysis "all 21 covered"). Not a real coverage gap.
+> **Planning gate note (Phase 56):** §13a decision-coverage-plan gate evaluated cleanly this time — `passed:true, total:5, covered:5` (D-01..D-05). No CJK false-negative and no override needed (contrast Phase 55). §13 requirements coverage = all 10 IDs covered. `state.planned-phase` CLI no-op'd (`updated:[]`, known on this STATE.md) → STATE hand-updated here.
 
 ### Decisions
 
