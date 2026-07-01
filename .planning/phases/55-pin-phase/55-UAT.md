@@ -1,34 +1,34 @@
 ---
-status: diagnosed
+status: resolved
 phase: 55-pin-phase
 source: [55-VERIFICATION.md]
 started: 2026-06-30T06:50:00Z
-updated: 2026-07-01T05:10:00Z
+updated: 2026-07-01T05:35:00Z
 ---
 
 ## Current Test
 
-number: 2
-name: Background→foreground relock with Face ID auto-prompt (real device)
+number: —
+name: gap-closure re-verify complete (Tests 1 & 2)
 expected: |
-  Fully backgrounding the app then returning re-shows the lock screen with a Face ID
-  auto-prompt; NO flicker / relock loop after the sheet dismisses; cancelling Face ID
-  → 重試 + パスコードを使用 → the app's OWN PIN page; wrong PIN shakes+clears, correct
-  unlocks.
-awaiting: paused — foundational issue found in Test 1 (G2), awaiting user decision to continue or stop
+  G2/G3/G4 gap-closure (55-12) verified on-device: unlock uses the app's OWN 4-digit
+  PIN (never the iOS device passcode); no Face ID TCC crash; with biometric unlock OFF
+  the lock screen opens straight on the PIN keypad.
+awaiting: nothing — 55-12 approved by user 2026-07-01. Tests 3–6 remain open for a later full-UAT pass (not in the 55-12 gap-closure scope).
 
 ## Tests
 
 ### 1. Arm the lock — enable + set-PIN (double-entry) + first unlock
 expected: Enabling app lock forces a 4-digit PIN via the double-entry SetPinScreen (mismatch shakes+clears, no half-entry persisted; cancel ⇒ toggle stays OFF). Once armed, biometric sub-toggle + 修改 PIN are revealed and the master toggle is ON. Disabling the lock requires re-auth (PIN or biometric) first (D-05).
-result: issue
+result: pass
 reported: "解锁是用的iphone密码，不是应用自己的pin码 (screenshot: iOS system '为 Home Pocket 输入 iPhone 密码 / 需要验证身份以继续' device-passcode panel shown instead of the app's own 4-digit PIN screen)"
 severity: major
-note: "Prior on-device run hit startup blocker G1 (init crash) — now FIXED + verified (analyze clean, 3468/3468 green). This rebuild booted, but authentication uses the iOS device passcode (LocalAuthentication device-passcode fallback), NOT the app's own Argon2id PIN. Defeats the central premise of the pin-phase. See Gap G2."
+note: "FIXED + verified on-device 2026-07-01 via gap-closure 55-12. Three gaps closed: G2 (biometric-only — device passcode no longer accepted, commit d7870f8c), G3 (NSFaceIDUsageDescription — Face ID no longer TCC-crashes, commit a27c6b91), G4 (biometricUnlockEnabled honored — with biometric OFF the lock opens straight on the app's own PIN keypad, commit e0599330). User approved: with biometric OFF → app PIN keypad directly, no Face ID/iOS-passcode sheet; with biometric ON → Face ID auto-prompt, cancel → app's own PIN. Prior blocker G1 (init crash) also FIXED + verified."
 
 ### 2. Background→foreground relock with Face ID auto-prompt (real device)
 expected: Fully backgrounding the app (home / app-switcher) then returning re-shows the lock screen with a Face ID auto-prompt. NO flicker and NO relock loop after the Face ID sheet dismisses. Cancelling Face ID stays on the Face ID page with 重試 + パスコードを使用 → tap → PIN page; wrong PIN shakes+clears and is instantly retryable; correct PIN unlocks.
-result: [pending]
+result: pass
+note: "Verified on-device 2026-07-01 (55-12 approved). Relock re-shows the lock screen; with biometric ON the Face ID auto-prompt returns and cancel routes to the app's own PIN; with biometric OFF the relock lands directly on the PIN keypad (G4). No relock loop / iOS-passcode sheet."
 
 ### 3. App-switcher snapshot mask frame timing (real device)
 expected: The app's app-switcher snapshot card shows the opaque brand cover, NOT any ledger amounts — the mask paints before the OS captures the snapshot.
@@ -49,17 +49,18 @@ result: [pending]
 ## Summary
 
 total: 6
-passed: 0
-issues: 1
-pending: 5
+passed: 2
+issues: 0
+pending: 4
 skipped: 0
 blocked: 0
+note: "Tests 1 & 2 PASS on-device 2026-07-01 (gap-closure 55-12: G2+G3+G4). Tests 3–6 (mask snapshot timing, Control Center no-relock, Argon2id KDF latency, keychain upgrade-boot) remain pending — outside the 55-12 scope; run in a later full-UAT pass."
 
 ## Gaps
 
 # G1 — startup crash on real-device cold start (FIXED in code; needs on-device retest)
 - truth: "App boots to the shell/onboarding/lock gate on a real-device cold start"
-  status: fixed_pending_retest
+  status: fixed_verified
   reason: "User reported (screenshot): 初期化失败 ProviderException: Tried to use a provider that is in error state. AsyncValueIsLoadingException: requireValue was called on AsyncLoading<SharedPreferences>(). App never booted → all 6 tests blocked."
   severity: blocker
   test: 1
@@ -75,7 +76,7 @@ blocked: 0
 
 # G2 — unlock authenticates with the iOS device passcode, not the app's own 4-digit PIN
 - truth: "App-lock authentication uses the app's OWN 4-digit Argon2id-hashed PIN (with Face ID as an optional convenience) — the iOS device passcode is NEVER the credential"
-  status: failed
+  status: fixed_verified
   reason: "User reported (screenshot): the unlock/auth prompt is the iOS system panel '为 “Home Pocket” 输入 iPhone 密码 / 需要验证身份以继续' — a 6-dot device-passcode entry with the native iOS keypad — instead of the app's own PIN screen. Verbatim: '解锁是用的iphone密码，不是应用自己的pin码'. This is the LocalAuthentication device-passcode fallback (deviceOwnerAuthentication) rather than the custom PIN flow, which defeats the central premise of the pin-phase (an app-specific PIN independent of the device passcode)."
   severity: major
   test: 1
@@ -92,3 +93,35 @@ blocked: 0
     - "Regression test: fake LocalAuthentication asserts authenticate is invoked with biometricOnly:true from the unlock screen + reauth()"
     - "On-device re-verify Test 1 + Test 2: cancelling Face ID must land on the app's OWN PIN page, never the iOS passcode sheet"
   debug_session: ".planning/debug/55-g2-auth-device-passcode.md"
+
+# G3 — Face ID TCC crash (__abort_with_payload) after the biometric-only fix
+- truth: "Invoking app-lock Face ID on a real device authenticates without crashing"
+  status: fixed_verified
+  reason: "After the G2 biometric-only change, the first real Face ID invocation TCC-aborted the app (lldb: thread on 'com.apple.tcc.auth.kTCCServiceFaceID', __abort_with_payload). Surfaced only after G2 because biometric-only (deviceOwnerAuthenticationWithBiometrics) forces an actual Face ID call, whereas the prior passcode-allowing policy silently degraded to the passcode sheet."
+  severity: blocker
+  test: 1
+  root_cause: "ios/Runner/Info.plist was missing NSFaceIDUsageDescription. iOS requires that privacy usage-description string before an app may evaluate any LAPolicy that invokes Face ID; without it the first Face ID evaluation is TCC-killed. The same missing key ALSO caused the original G2 passcode fallback (Face ID uninvokable → local_auth presented the device passcode sheet)."
+  artifacts:
+    - path: "ios/Runner/Info.plist"
+      issue: "no NSFaceIDUsageDescription key (only NSMicrophone/NSSpeechRecognition were present)"
+  missing:
+    - "Add NSFaceIDUsageDescription (Japanese, matching the existing usage-description convention) — DONE"
+    - "Clean device rebuild so the new Info.plist ships (an incremental install keeps the old plist) — verified on-device"
+  fix_commit: "a27c6b91"
+  debug_session: ".planning/debug/55-g3-faceid-tcc-crash.md"
+
+# G4 — lock screen auto-prompts Face ID even when biometric unlock is OFF
+- truth: "With biometricUnlockEnabled OFF, the lock screen opens directly on the app's own PIN keypad and never auto-invokes biometrics (LOCK-07)"
+  status: fixed_verified
+  reason: "User reported: Settings showed 应用锁 ON but 生物识别解锁 OFF, yet opening the app ran a Face ID prompt. The biometric toggle was ignored by the boot lock gate."
+  severity: major
+  test: 1
+  root_cause: "lib/main.dart _buildHome() mounted AppLockScreen without startOnPinPage, so it defaulted false and always auto-fired the Face ID prompt. main.dart read the settings object at boot (which carries biometricUnlockEnabled) but discarded that field — it only derived _isLocked from appLockEnabled && pinHash."
+  artifacts:
+    - path: "lib/main.dart"
+      issue: "AppLockScreen mount omitted startOnPinPage; biometricUnlockEnabled never captured from the boot settings read"
+  missing:
+    - "Capture settings.biometricUnlockEnabled on both boot paths + pass startOnPinPage: !_biometricUnlockEnabled — DONE"
+    - "Smoke-test guard: biometric-OFF boot shows the PIN page with zero authenticate calls; biometric-ON auto-prompts once — DONE (main_characterization_smoke_test.dart)"
+  fix_commit: "e0599330"
+  debug_session: ".planning/debug/55-g4-biometric-toggle-ignored.md"

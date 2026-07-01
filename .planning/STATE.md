@@ -4,16 +4,16 @@ milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 55
 current_phase_name: pin-phase
-status: executing
-stopped_at: Phase 55 gap-closure 55-12 — G2 (biometric-only) + G3 (NSFaceIDUsageDescription crash) + G4 (biometric-off honored) code-complete, analyze 0 / suite 3472 green; on-device re-verify pending
-last_updated: "2026-07-01T05:30:00.000Z"
+status: phase_complete
+stopped_at: Phase 55 COMPLETE — gap-closure 55-12 (G2 biometric-only + G3 Face ID Info.plist crash + G4 biometric-off honored) verified on-device 2026-07-01; UAT Tests 1&2 pass, Tests 3–6 deferred to a later full-UAT pass. Next: Phase 56 (Settings legal/sponsorship/compliance).
+last_updated: "2026-07-01T05:40:00.000Z"
 last_activity: 2026-07-01
-last_activity_desc: Gap-closure 55-12 — G2 biometric-only, G3 Face ID Info.plist crash, G4 biometric-off no-auto-prompt all fixed (analyze 0, suite 3472); on-device UAT re-verify blocking
+last_activity_desc: Phase 55 closed — 55-12 gap-closure G2/G3/G4 fixed (analyze 0, suite 3472) + on-device UAT approved; ready to start Phase 56
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 23
-  completed_plans: 22
+  completed_plans: 23
   percent: 75
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 55 — pin-phase
+**Current focus:** Phase 55 COMPLETE → next is Phase 56 (Settings legal/sponsorship/compliance)
 
 ## Current Position
 
-Phase: 55 (pin-phase) — CODE-COMPLETE, awaiting on-device UAT
-Plan: 11 of 11 complete (Wave 1: 01-06 · Wave 2: 07-08 · Wave 3: 09-10 · Wave 4: 11)
-Status: Verification 5/5 code must-haves PASS, status human_needed — on-device QA pending (see 55-UAT.md → /gsd-verify-work 55). Not yet marked complete.
-Last activity: 2026-06-30 — Phase 55 executed (11/11 plans, all gates green, post-merge fix); verification human_needed
+Phase: 55 (pin-phase) — COMPLETE (verified on-device 2026-07-01)
+Plan: 12 of 12 complete (Wave 1: 01-06 · Wave 2: 07-08 · Wave 3: 09-10 · Wave 4: 11 · gap-closure: 12)
+Status: Verification 5/5 code must-haves PASS + on-device UAT Tests 1&2 approved. Gap-closure 55-12 closed G2 (biometric-only), G3 (NSFaceIDUsageDescription crash), G4 (biometric-off honored). UAT Tests 3–6 (mask timing, Control Center, KDF latency, keychain upgrade) deferred to a later full-UAT pass.
+Last activity: 2026-07-01 — Phase 55 closed (55-12 G2/G3/G4 fixed, analyze 0 · suite 3472, on-device approved)
 
-Progress: Phase 55 code-complete (analyze 0 · suite 3467/3467); Phase 54 executing; Phase 53 complete (4/4)
+Progress: Phase 55 COMPLETE (12/12 plans); Phase 54 complete; Phase 53 complete. Next: Phase 56.
 
 > **Planning gate note (verify-phase, re-surface):** §13a decision-coverage-plan gate returned `passed:false` with `total:14, covered:0, uncovered:0` — this is the known CJK-decision-bullet parse false-negative (covered:0 AND uncovered:0 = gate did not evaluate, not a real gap). Override taken: all 14 decisions D-01..D-14 are verified cited across the 7 plans (grep-confirmed + plan-checker VERIFICATION PASSED + §13e gap-analysis "all 21 covered"). Not a real coverage gap.
 
