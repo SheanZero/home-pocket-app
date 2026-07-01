@@ -237,7 +237,7 @@
   4. PIN 加盐慢哈希（≥100k 迭代或 Argon2id，跑主 isolate 外）存入既有 secure storage（`StorageKeys.pinHash`，accessibility 不变）、常量时间比对、绝不明文、无默认数据擦除 — LOCK-07。~~连续输错有递增冷却（持久化计数，成功才清零）~~ **DESCOPED per D-06**（MVP 零速率限制，用户知情接受风险；见 `55-RESEARCH.md §Security Domain` Known Accepted Risk sign-off）→ 移入 v2 **LOCK-V2-04**；PIN 输错仅抖动+清空、可立即重试，无失败计数器
   5. 锁屏文案明确告知忘记 PIN 无法找回（需重装且丢失未同步本地数据）、不暗示存在恢复路径；新增锁屏文案三语 ARB 齐全过 parity + 硬编码CJK扫描 — LOCK-09
 
-**Plans**: 11/11 plans complete
+**Plans**: 11/11 plans complete (+1 gap-closure pending: 55-12 — G2)
 **Wave 1**
 
 - [x] 55-01-PLAN.md — PIN KDF: Argon2id off-isolate + PHC + constant-time [LOCK-07] (wave 1)
@@ -260,6 +260,10 @@
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 55-11-PLAN.md — main.dart gate branch + observer + opaque mask host + device QA [LOCK-01/02/03/04] (wave 4)
+
+**Gap closure** *(from 55-UAT.md — G2)*
+
+- [ ] 55-12-PLAN.md — app-lock auth biometric-only; iOS device passcode never accepted, app's own PIN is the only fallback [LOCK-05/06/10] (G2, wave 1)
 
 **UI hint**: yes
 **Research flag**: 最高风险整合（keychain accessibility 砖机风险 / 应用生命周期 / 生物识别错误分类 / off-isolate KDF 调优）——规划时做一次专项安全评审（`gsd-secure-phase` 或 `--research-phase`）。
