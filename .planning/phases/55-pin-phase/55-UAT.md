@@ -1,9 +1,9 @@
 ---
-status: testing
+status: diagnosed
 phase: 55-pin-phase
 source: [55-VERIFICATION.md]
 started: 2026-06-30T06:50:00Z
-updated: 2026-07-01T05:00:00Z
+updated: 2026-07-01T05:10:00Z
 ---
 
 ## Current Test
@@ -79,7 +79,16 @@ blocked: 0
   reason: "User reported (screenshot): the unlock/auth prompt is the iOS system panel '为 “Home Pocket” 输入 iPhone 密码 / 需要验证身份以继续' — a 6-dot device-passcode entry with the native iOS keypad — instead of the app's own PIN screen. Verbatim: '解锁是用的iphone密码，不是应用自己的pin码'. This is the LocalAuthentication device-passcode fallback (deviceOwnerAuthentication) rather than the custom PIN flow, which defeats the central premise of the pin-phase (an app-specific PIN independent of the device passcode)."
   severity: major
   test: 1
-  root_cause: ""     # Filled by diagnosis — likely LAPolicy.deviceOwnerAuthentication (allows device passcode) used where the custom-PIN screen should own the fallback, or biometric path not routing to the app SetPin/UnlockPin screen
-  artifacts: []      # Filled by diagnosis
-  missing: []        # Filled by diagnosis
-  debug_session: ""
+  root_cause: "BiometricService.authenticate() defaults biometricOnly=false → local_auth uses iOS LAPolicy.deviceOwnerAuthentication, which allows the device passcode as a fallback (iOS renders its own 'Enter iPhone passcode' sheet and returns success). Both real call sites invoke authenticate() WITHOUT biometricOnly:true, so both inherit the passcode-allowing default, bypassing the app's own PIN-fallback surface (which is already fully built via AuthResult.fallbackToPIN)."
+  artifacts:
+    - path: "lib/features/applock/presentation/screens/app_lock_screen.dart"
+      issue: "_runBiometric() line 94 calls authenticate(reason: reason) without biometricOnly:true — the unlock auto-prompt the user hit; Face ID cancel/fail drops to iOS device passcode instead of AppLockSurface.pin"
+    - path: "lib/application/security/app_lock_service.dart"
+      issue: "reauth() line 67 (D-05 disable/change-PIN gate) calls authenticate(reason:...) without biometricOnly:true — same device-passcode leak"
+    - path: "lib/infrastructure/security/biometric_service.dart"
+      issue: "authenticate() biometricOnly defaults to false (line 84) — the passcode-allowing default both callers inherit"
+  missing:
+    - "Pass biometricOnly:true at both call sites (app_lock_screen.dart:94, app_lock_service.dart:67) — OR flip BiometricService.authenticate default to true (app never wants device-passcode fallback)"
+    - "Regression test: fake LocalAuthentication asserts authenticate is invoked with biometricOnly:true from the unlock screen + reauth()"
+    - "On-device re-verify Test 1 + Test 2: cancelling Face ID must land on the app's OWN PIN page, never the iOS passcode sheet"
+  debug_session: ".planning/debug/55-g2-auth-device-passcode.md"
