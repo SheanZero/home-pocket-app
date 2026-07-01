@@ -5,15 +5,15 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 56
 current_phase_name: setting
 status: executing
-stopped_at: Phase 56 planned (6 plans, 4 waves) — ready to execute
-last_updated: "2026-07-01T09:46:15.171Z"
+stopped_at: Completed 56-01-PLAN.md
+last_updated: "2026-07-01T09:50:43.317Z"
 last_activity: 2026-07-01
 last_activity_desc: Phase 56 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 29
-  completed_plans: 24
+  completed_plans: 25
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 ## Current Position
 
 Phase: 56 (setting) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-07-01 — Phase 56 execution started
 
@@ -64,6 +64,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 55]: 55-09: AppLockScreen two-surface — Face ID auto-triggers on entry, every non-success AuthResult stays with ghost passcode escape (no dead end, LOCK-05/T-55-20); PIN instant-verifies on 4th digit, wrong shakes+clears zero cooldown (D-12/D-06); unlock via onUnlocked callback only (Plan 11 flips gate); biometric fenced by onBeginAuth/onEndAuth
 - [Phase 55]: 55-10: SetPinScreen double-entry (enter->confirm, mismatch restarts, never persists half-entry, T-55-26); SecuritySection master toggle arms only after PIN set (T-55-24) and disables/changes only after reauth (biometric or in-place _PinReauthDialog verifyPin, D-05/T-55-25, NOT AppLockScreen — avoids wave-3 race); D-10 deep-link lock-not-set read from settings.appLockEnabled (sync, not isLockEffective) to stay test-safe
 - [Phase ?]: App-lock gate uses setState flag flips (never pushReplacement) preserving the data-reset refresh path
+- [Phase 56]: 56-01: LegalUrls (lib/core/config/) single source of truth for hosted privacy/terms + donation placeholder URLs, each with 上线前填真实值 marker (D-04); url_launcher ^6.3.2 added (win32 trio untouched)
+- [Phase 56]: 56-01: trilingual 9-file asset-existence gate (legal_asset_parity_test.dart) enforces LEGAL-06 parity (D-02); GREEN on first run (56-02 assets present same wave)
 
 ### Quick Tasks Completed
 
@@ -208,8 +210,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-07-01T09:46:09.514Z
-Stopped at: Phase 56 context gathered
+Last session: 2026-07-01T09:50:43.310Z
+Stopped at: Completed 56-01-PLAN.md
 Resume file: .planning/phases/56-setting/56-CONTEXT.md
 
 ## Performance Metrics
@@ -290,6 +292,7 @@ Resume file: .planning/phases/56-setting/56-CONTEXT.md
 | Phase 55 P09 | 8min | 2 tasks | 3 files |
 | Phase 55 P11 | 30min | 3 tasks | 2 files |
 | Phase 56 P02 | 8m | 3 tasks | 9 files |
+| Phase 56 P01 | 1 min | 3 tasks | 4 files |
 
 ## Decisions
 

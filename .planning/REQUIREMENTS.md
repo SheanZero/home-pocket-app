@@ -44,7 +44,7 @@
 - [ ] **DONATE-01**: Setting 内提供一个不打扰的「応援/支援（赞助）」入口
 - [ ] **DONATE-02**: 点击经外部浏览器（`url_launcher` `LaunchMode.externalApplication`）打开日本赞助平台（FANBOX/OFUSE 等）链接，绝不内嵌 WebView、绝不 IAP
 - [ ] **DONATE-03**: 赞助完全可选 —— 不强制付费、不做功能门槛、不反复弹窗，中性非交易性措辞
-- [ ] **DONATE-04**: 赞助链接 URL 可配置（需求阶段留占位，上线前填真实链接）
+- [x] **DONATE-04**: 赞助链接 URL 可配置（需求阶段留占位，上线前填真实链接）
 
 ### Legal & Compliance（合规 / 法务 — 日本市场）
 
@@ -117,7 +117,7 @@
 | DONATE-01 | Phase 56 | Pending |
 | DONATE-02 | Phase 56 | Pending |
 | DONATE-03 | Phase 56 | Pending |
-| DONATE-04 | Phase 56 | Pending |
+| DONATE-04 | Phase 56 | Complete |
 | LEGAL-01 | Phase 56 | Complete |
 | LEGAL-02 | Phase 56 | Complete |
 | LEGAL-03 | Phase 56 | Pending |
