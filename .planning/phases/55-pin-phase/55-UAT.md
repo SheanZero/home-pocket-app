@@ -1,21 +1,19 @@
 ---
-status: testing
+status: complete
 phase: 55-pin-phase
 source: [55-VERIFICATION.md]
 started: 2026-06-30T06:50:00Z
-updated: 2026-07-01T06:00:00Z
+updated: 2026-07-01T06:20:00Z
 ---
 
 ## Current Test
 
-number: 3
-name: Full-UAT continuation — Tests 3–6 (mask timing, Control Center, KDF latency, keychain upgrade)
+number: —
+name: UAT complete — all 6 tests done
 expected: |
-  Tests 1 & 2 already PASS (55-12). Now running the remaining on-device checks: app-switcher
-  snapshot shows the opaque mask (3); Control Center / Notification Center does NOT relock (4);
-  Argon2id set-PIN/unlock latency in band (5); an upgrade-over-existing-install still boots and
-  forgot-PIN copy is honest (6).
-awaiting: user runs Tests 3–6 on device and reports each outcome.
+  Full 6-test on-device UAT complete 2026-07-01. Tests 1-4 & 6 PASS; Test 5 pass_with_followup
+  (~1s unlock lag → v2 LOCK-V2-05). Gaps G1-G4 all fixed_verified. Phase 55 fully verified.
+awaiting: nothing — Phase 55 UAT closed.
 
 ## Tests
 
@@ -33,11 +31,13 @@ note: "Verified on-device 2026-07-01 (55-12 approved). Relock re-shows the lock 
 
 ### 3. App-switcher snapshot mask frame timing (real device)
 expected: The app's app-switcher snapshot card shows the opaque brand cover, NOT any ledger amounts — the mask paints before the OS captures the snapshot.
-result: [pending]
+result: pass
+note: "Verified on-device 2026-07-01 — app-switcher card shows the opaque mask, no ledger amounts (LOCK-04 / T-55-28)."
 
 ### 4. Control Center / Notification Center does NOT relock (real device)
 expected: Pulling down Control Center / Notification Center (without backgrounding) does NOT relock on return — the mask may briefly show, but there is no PIN/Face prompt afterward.
-result: [pending]
+result: pass
+note: "Verified on-device 2026-07-01 — Control Center / Notification Center pull-down does not relock (two-flag relock guard correctly ignores the non-backgrounding transition)."
 
 ### 5. Argon2id on-device KDF latency
 expected: Set-PIN and unlock feel responsive — Argon2id (m=19456,t=2,p=1) derivation ~250–500 ms on a modern device (acceptable band 150–800 ms). File a follow-up if far outside the band.
@@ -48,18 +48,19 @@ note: "~1s — perceptible but NOT far outside band, non-blocking, not a phase-5
 
 ### 6. Keychain upgrade-boot (existing install survives an app upgrade)
 expected: An app upgraded over an existing install still boots normally (KeychainAccessibility.unlocked_this_device unchanged ⇒ master key still readable; no brick-on-upgrade, T-55-30). Also confirm the forgot-PIN copy states it is unrecoverable (reinstall + loss of unsynced local data) with no implied recovery path.
-result: [pending]
+result: pass
+note: "Verified on-device 2026-07-01 — upgrade-over-existing-install boots normally (no brick, master key readable); forgot-PIN copy states unrecoverable with no implied recovery path."
 
 ## Summary
 
 total: 6
-passed: 2
+passed: 5
 pass_with_followup: 1
 issues: 0
-pending: 3
+pending: 0
 skipped: 0
 blocked: 0
-note: "Tests 1 & 2 PASS (55-12: G2+G3+G4). Test 5 pass_with_followup (~1s unlock lag → deferred to LOCK-V2-05, non-blocking, not a regression). Still pending: Test 3 (mask snapshot timing), Test 4 (Control Center no-relock), Test 6 (keychain upgrade-boot)."
+note: "ALL 6 tests complete on-device 2026-07-01. Tests 1-4 & 6 PASS; Test 5 pass_with_followup (~1s unlock lag → LOCK-V2-05, non-blocking, not a regression). Gaps G1/G2/G3/G4 all fixed_verified. Phase 55 fully UAT-verified."
 
 ## Gaps
 

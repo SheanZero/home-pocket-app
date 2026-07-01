@@ -5,10 +5,10 @@ milestone_name: 完成第一版上线前最后的功能开发
 current_phase: 55
 current_phase_name: pin-phase
 status: phase_complete
-stopped_at: Phase 55 COMPLETE — gap-closure 55-12 (G2 biometric-only + G3 Face ID Info.plist crash + G4 biometric-off honored) verified on-device 2026-07-01; UAT Tests 1&2 pass, Tests 3–6 deferred to a later full-UAT pass. Next: Phase 56 (Settings legal/sponsorship/compliance).
-last_updated: "2026-07-01T05:40:00.000Z"
+stopped_at: Phase 55 COMPLETE — full 6-test on-device UAT done 2026-07-01 (Tests 1-4 & 6 pass; Test 5 pass_with_followup ~1s unlock lag → v2 LOCK-V2-05). Gaps G1-G4 all fixed_verified. Next: Phase 56 (Settings legal/sponsorship/compliance).
+last_updated: "2026-07-01T06:20:00.000Z"
 last_activity: 2026-07-01
-last_activity_desc: Phase 55 closed — 55-12 gap-closure G2/G3/G4 fixed (analyze 0, suite 3472) + on-device UAT approved; ready to start Phase 56
+last_activity_desc: Phase 55 fully UAT-verified (all 6 tests; Test 5 → v2 LOCK-V2-05 perf followup); ready to start Phase 56
 progress:
   total_phases: 4
   completed_phases: 3
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 
 Phase: 55 (pin-phase) — COMPLETE (verified on-device 2026-07-01)
 Plan: 12 of 12 complete (Wave 1: 01-06 · Wave 2: 07-08 · Wave 3: 09-10 · Wave 4: 11 · gap-closure: 12)
-Status: Verification 5/5 code must-haves PASS + on-device UAT Tests 1&2 approved. Gap-closure 55-12 closed G2 (biometric-only), G3 (NSFaceIDUsageDescription crash), G4 (biometric-off honored). UAT Tests 3–6 (mask timing, Control Center, KDF latency, keychain upgrade) deferred to a later full-UAT pass.
-Last activity: 2026-07-01 — Phase 55 closed (55-12 G2/G3/G4 fixed, analyze 0 · suite 3472, on-device approved)
+Status: Verification 5/5 code must-haves PASS + FULL 6-test on-device UAT complete. Tests 1-4 & 6 pass; Test 5 pass_with_followup (~1s unlock lag → v2 LOCK-V2-05, non-blocking). Gap-closure 55-12 closed G1/G2/G3/G4 (all fixed_verified).
+Last activity: 2026-07-01 — Phase 55 fully UAT-verified (all 6 tests); ready for Phase 56
 
 Progress: Phase 55 COMPLETE (12/12 plans); Phase 54 complete; Phase 53 complete. Next: Phase 56.
 
