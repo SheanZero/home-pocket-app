@@ -20,7 +20,7 @@ created: 2026-07-01
 |----------|-------|
 | **Framework** | `flutter_test` (SDK) + architecture tests under `test/architecture/` |
 | **Config file** | none custom (standard `flutter test`; `flutter_test_config.dart` handles golden platform gate) |
-| **Quick run command** | `flutter test test/features/settings/ test/architecture/legal_asset_parity_test.dart` |
+| **Quick run command** | `flutter test test/widget/features/settings/ test/architecture/legal_asset_parity_test.dart` |
 | **Full suite command** | `flutter test` (MUST run before section/wave gate — architecture tests are global) |
 | **Estimated runtime** | settings scope ~seconds; full suite ~minutes (2300+ tests) |
 
@@ -28,7 +28,7 @@ created: 2026-07-01
 
 ## Sampling Rate
 
-- **After every task commit:** Run `flutter test test/features/settings/ test/architecture/legal_asset_parity_test.dart`
+- **After every task commit:** Run `flutter test test/widget/features/settings/ test/architecture/legal_asset_parity_test.dart`
 - **After every plan wave / before section gate:** Run **FULL** `flutter test` (architecture tests `hardcoded_cjk_ui_scan`, `arb_key_parity`, new asset-parity are global — scoped runs miss them). **Never pipe through `tail`** (masks exit code — memory `main-dart-boot-provider-...`).
 - **Before `/gsd-verify-work`:** Full suite green + `flutter analyze` 0 issues.
 - **Max feedback latency:** quick scope < ~30s; full suite is the wave-gate barrier.
@@ -41,7 +41,7 @@ created: 2026-07-01
 
 | Task ID | Req | Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|-----|----------|-----------|-------------------|-------------|--------|
-| TBD | LEGAL-01 | Privacy screen loads ja/zh/en asset, renders text | widget | `flutter test test/features/settings/legal_doc_screen_test.dart` | ❌ W0 | ⬜ pending |
+| TBD | LEGAL-01 | Privacy screen loads ja/zh/en asset, renders text | widget | `flutter test test/widget/features/settings/legal_doc_screen_test.dart` | ❌ W0 | ⬜ pending |
 | TBD | LEGAL-02 | Terms screen loads + renders | widget | `legal_doc_screen_test.dart` | ❌ W0 | ⬜ pending |
 | TBD | LEGAL-03 | License tile invokes `showLicensePage` | widget | `legal_sponsor_section_test.dart` | ❌ W0 | ⬜ pending |
 | TBD | LEGAL-04 | 特商法 screen renders (「請求時提供」copy present) | widget | `legal_doc_screen_test.dart` | ❌ W0 | ⬜ pending |
@@ -60,8 +60,8 @@ created: 2026-07-01
 ## Wave 0 Requirements
 
 - [ ] `test/architecture/legal_asset_parity_test.dart` — asserts all `assets/legal/{privacy,terms,tokusho}_{ja,zh,en}.md` exist (`File(...).existsSync()` loop; model on `arb_key_parity_test.dart`). Covers **LEGAL-06** (asset gate).
-- [ ] `test/features/settings/legal_sponsor_section_test.dart` — section render, neutral sponsor copy, `launchUrl` mock, license-page invocation. Covers **DONATE-01/02/03/04, LEGAL-03**.
-- [ ] `test/features/settings/legal_doc_screen_test.dart` — per-locale asset load + render (`TestWidgetsFlutterBinding` + `rootBundle`; assets available in test via pubspec). Covers **LEGAL-01/02/04**.
+- [ ] `test/widget/features/settings/legal_sponsor_section_test.dart` — section render, neutral sponsor copy, `launchUrl` mock, license-page invocation. Covers **DONATE-01/02/03/04, LEGAL-03**.
+- [ ] `test/widget/features/settings/legal_doc_screen_test.dart` — per-locale asset load + render (`TestWidgetsFlutterBinding` + `rootBundle`; assets available in test via pubspec). Covers **LEGAL-01/02/04**.
 - [x] Existing `arb_key_parity_test.dart` + `hardcoded_cjk_ui_scan_test.dart` auto-cover new ARB keys / new Dart (no edit needed).
 
 ---
