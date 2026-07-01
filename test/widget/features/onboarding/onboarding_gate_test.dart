@@ -39,9 +39,9 @@ import 'package:home_pocket/infrastructure/security/secure_storage_service.dart'
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class _FakeSeedCategoriesUseCase extends Fake
-    implements SeedCategoriesUseCase {
+class _FakeSeedCategoriesUseCase extends Fake implements SeedCategoriesUseCase {
   @override
   Future<Result<void>> execute() async => Result.success(null);
 }
@@ -66,8 +66,7 @@ class _FakeSyncEngine implements SyncEngine {
   void dispose() {}
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakePushNotificationService implements PushNotificationService {
@@ -80,8 +79,7 @@ class _FakePushNotificationService implements PushNotificationService {
   Stream<PushNavigationIntent> get navigationIntents => _navController.stream;
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeListenToPushNotificationsUseCase extends Fake
@@ -106,8 +104,7 @@ class _FakeSettingsRepository implements SettingsRepository {
       AppSettings(onboardingComplete: onboardingComplete);
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Drives the app-lock cold-start gate: `getPinHash()` returns null (no PIN
@@ -129,6 +126,11 @@ Future<AppDatabase> _pumpGate(
   WidgetTester tester, {
   required bool onboardingComplete,
 }) async {
+  // _initialize() pre-warms sharedPreferences.future before reading the gate; the
+  // settingsRepository override supplies the flag, but the prefs plugin must still
+  // resolve so the pre-warm doesn't fail.
+  SharedPreferences.setMockInitialValues(const {});
+
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
   final fakePushService = _FakePushNotificationService();

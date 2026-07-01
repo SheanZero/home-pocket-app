@@ -24,14 +24,15 @@ import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
 import 'features/settings/presentation/providers/repository_providers.dart'
-    show settingsRepositoryProvider;
+    show settingsRepositoryProvider, sharedPreferencesProvider;
 import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 import 'infrastructure/security/app_lock_lifecycle_observer.dart';
-import 'infrastructure/security/providers.dart' show secureStorageServiceProvider;
+import 'infrastructure/security/providers.dart'
+    show secureStorageServiceProvider;
 import 'shared/utils/invalidate_all_data_providers.dart';
 import 'shared/utils/result.dart';
 
@@ -195,13 +196,30 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // init has settled. Captured into a field here — NEVER ref.watch in
         // build() (avoids the loading-null race at branch 3) and NEVER inferred
         // from the profile/currency.
-        final settings = await ref.read(settingsRepositoryProvider).getSettings();
+        //
+        // Pre-warm SharedPreferences before reading the *synchronous*
+        // settingsRepository: it calls `.requireValue` on the async
+        // sharedPreferencesProvider, so a `ref.read` here while
+        // `SharedPreferences.getInstance()` is still in flight rethrows the
+        // provider's transient AsyncValueIsLoadingException as a FATAL init
+        // failure. On a real-device cold start getInstance() can still be loading
+        // when `_seedAndEnsureDefaultBook()` returns (T-55 UAT blocker), so await
+        // the future first to make the read race-free. `sharedPreferences` is a
+        // clean async provider (never synchronously throws), so awaiting its
+        // `.future` is safe here — unlike `appSettingsProvider.future`, which can
+        // complete with the transient error.
+        await ref.read(sharedPreferencesProvider.future);
+        final settings = await ref
+            .read(settingsRepositoryProvider)
+            .getSettings();
 
         // App-lock cold-start gate (LOCK-02 / D-01): the lock is effective ONLY
         // when the master toggle is on AND a PIN hash exists. A half-configured
         // state (toggle on, no PIN) must never strand the user (T-55-15), so we
         // require both before showing the lock screen at boot.
-        final pinHash = await ref.read(secureStorageServiceProvider).getPinHash();
+        final pinHash = await ref
+            .read(secureStorageServiceProvider)
+            .getPinHash();
         final lockConfigured = settings.appLockEnabled && pinHash != null;
 
         setState(() {
@@ -240,13 +258,20 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // restore it (→ shell), and both must re-evaluate without an app
         // restart. settingsRepository is plaintext SharedPreferences (not wiped
         // by the Drift data reset), so this reflects the post-reset flag.
+        // Pre-warm sharedPreferences first for the same reason as _initialize:
+        // the synchronous settingsRepository calls `.requireValue` on the async
+        // prefs provider, so a bare `ref.read` could rethrow a transient loading
+        // error as a fatal failure.
+        await ref.read(sharedPreferencesProvider.future);
         final settings = await ref
             .read(settingsRepositoryProvider)
             .getSettings();
         // Re-evaluate the lock gate after a destructive reset for parity with
         // cold start (LOCK-02): a wipe may have cleared the PIN hash, so recompute
         // from post-reset settings + pinHash rather than carrying a stale flag.
-        final pinHash = await ref.read(secureStorageServiceProvider).getPinHash();
+        final pinHash = await ref
+            .read(secureStorageServiceProvider)
+            .getPinHash();
         final lockConfigured = settings.appLockEnabled && pinHash != null;
         if (!mounted) return;
         setState(() {

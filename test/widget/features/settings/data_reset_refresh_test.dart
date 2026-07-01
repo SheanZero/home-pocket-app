@@ -54,6 +54,7 @@ import 'package:home_pocket/infrastructure/security/secure_storage_service.dart'
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/test_provider_scope.dart' show waitForFirstValue;
 
@@ -121,8 +122,7 @@ class _FakeSettingsRepository implements SettingsRepository {
       AppSettings(onboardingComplete: onboardingComplete);
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Drives the app-lock cold-start gate: `getPinHash()` returns null (no PIN
@@ -157,6 +157,12 @@ void main() {
   late ProviderContainer container;
 
   Future<void> pumpApp(WidgetTester tester) async {
+    // Both cold-start init and the reset re-bootstrap pre-warm
+    // sharedPreferences.future before reading the settings gate; the
+    // settingsRepository override supplies the flag, but the prefs plugin must
+    // still resolve so the pre-warm doesn't fail.
+    SharedPreferences.setMockInitialValues(const {});
+
     final db = AppDatabase.forTesting();
     addTearDown(db.close);
 

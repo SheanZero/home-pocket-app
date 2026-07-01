@@ -51,7 +51,7 @@ import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart'
-    show settingsRepositoryProvider;
+    show settingsRepositoryProvider, sharedPreferencesProvider;
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -67,6 +67,7 @@ import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Hand-written fake use cases (no Mockito codegen — CONTEXT.md deferred).
 
@@ -154,13 +155,12 @@ class _FakeSettingsRepository implements SettingsRepository {
 
   @override
   Future<AppSettings> getSettings() async => AppSettings(
-        onboardingComplete: onboardingComplete,
-        appLockEnabled: appLockEnabled,
-      );
+    onboardingComplete: onboardingComplete,
+    appLockEnabled: appLockEnabled,
+  );
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Drives the app-lock cold-start gate: `getPinHash()` returns the fixed hash
@@ -199,8 +199,7 @@ class _FallbackBiometricService extends Fake implements BiometricService {
   Future<AuthResult> authenticate({
     required String reason,
     bool biometricOnly = false,
-  }) async =>
-      const AuthResult.fallbackToPIN();
+  }) async => const AuthResult.fallbackToPIN();
 }
 
 final _testBook = Book(
@@ -227,7 +226,21 @@ Future<void> _pumpApp(
   bool appLockEnabled = false,
   String? pinHash,
   BiometricService? biometric,
+  // When true, DO NOT stub appSettings/settingsRepository — exercise the real
+  // sharedPreferences → settingsRepository → appSettings chain so the boot path's
+  // `.requireValue`-on-async-prefs race is actually reproduced (T-55 regression).
+  // `prefsDelay` keeps sharedPreferences in AsyncLoading long enough that the
+  // gate's `ref.read(settingsRepositoryProvider)` observes it mid-flight.
+  bool realSettingsChain = false,
+  Duration prefsDelay = Duration.zero,
 }) async {
+  // _initialize() now pre-warms sharedPreferences.future before the gate read,
+  // so even fake-settings tests must stub the prefs plugin (the settingsRepository
+  // fake used to short-circuit it). realSettingsChain tests seed their own values.
+  if (!realSettingsChain) {
+    SharedPreferences.setMockInitialValues(const {});
+  }
+
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
 
@@ -236,15 +249,31 @@ Future<void> _pumpApp(
 
   final baseOverrides = [
     appDatabaseProvider.overrideWithValue(db),
-    appSettingsProvider.overrideWith((ref) => Future.value(appSettings)),
-    // The gate reads settingsRepositoryProvider.getSettings() directly (not
-    // appSettingsProvider) after init settle — drive it explicitly.
-    settingsRepositoryProvider.overrideWith(
-      (ref) => _FakeSettingsRepository(
-        onboardingComplete: onboardingComplete,
-        appLockEnabled: appLockEnabled,
+    if (!realSettingsChain) ...[
+      appSettingsProvider.overrideWith((ref) => Future.value(appSettings)),
+      // The gate reads settingsRepositoryProvider.getSettings() directly (not
+      // appSettingsProvider) after init settle — drive it explicitly.
+      settingsRepositoryProvider.overrideWith(
+        (ref) => _FakeSettingsRepository(
+          onboardingComplete: onboardingComplete,
+          appLockEnabled: appLockEnabled,
+        ),
       ),
-    ),
+      // _initialize pre-warms sharedPreferences.future; hand it a resolved
+      // instance so these tests never touch the real prefs plugin.
+      sharedPreferencesProvider.overrideWith(
+        (ref) => SharedPreferences.getInstance(),
+      ),
+    ],
+    if (realSettingsChain)
+      // Real settingsRepository reads this; delay it to simulate the slow
+      // real-device cold-start getInstance() the boot race depends on.
+      sharedPreferencesProvider.overrideWith((ref) async {
+        if (prefsDelay > Duration.zero) {
+          await Future<void>.delayed(prefsDelay);
+        }
+        return SharedPreferences.getInstance();
+      }),
     // App-lock cold-start gate reads secureStorageServiceProvider.getPinHash()
     // and the lock screen auto-triggers biometricServiceProvider — stub both so
     // tests never hit a real keychain / platform channel.
@@ -492,8 +521,7 @@ void main() {
                   (ref) => Future.value(const AppSettings()),
                 ),
                 settingsRepositoryProvider.overrideWith(
-                  (ref) =>
-                      _FakeSettingsRepository(onboardingComplete: true),
+                  (ref) => _FakeSettingsRepository(onboardingComplete: true),
                 ),
                 currentLocaleProvider.overrideWith(
                   (ref) => Future.value(const Locale('ja')),
@@ -596,6 +624,35 @@ void main() {
         await _pumpInitNoSettle(tester);
 
         expect(find.byType(AppLockScreen), findsOneWidget);
+      },
+    );
+  });
+
+  group('HomePocketApp cold-start SharedPreferences race (T-55 UAT blocker)', () {
+    testWidgets(
+      'boot survives sharedPreferences still loading when the gate reads settings',
+      (tester) async {
+        // Real settingsRepository chain: getSettings() reads real prefs, so seed
+        // onboarding_complete=true to route past onboarding to the shell.
+        SharedPreferences.setMockInitialValues({'onboarding_complete': true});
+
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          // Exercise the real sharedPreferences → settingsRepository chain, and
+          // keep prefs in AsyncLoading past the point _initialize() reaches the
+          // synchronous `ref.read(settingsRepositoryProvider)` gate read. Before
+          // the fix this rethrows AsyncValueIsLoadingException as a fatal init
+          // failure (「初期化に失敗」screen); after the fix _initialize pre-warms
+          // sharedPreferences.future first, so the read is race-free.
+          realSettingsChain: true,
+          prefsDelay: const Duration(milliseconds: 120),
+        );
+        await _pumpInitNoSettle(tester);
+
+        // Reaches the shell — no init-failure error screen.
+        expect(find.byType(MainShellScreen), findsOneWidget);
+        expect(find.byType(OnboardingFlowScreen), findsNothing);
       },
     );
   });
