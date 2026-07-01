@@ -4500,6 +4500,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Change passcode'**
   String get securityChangePin;
+
+  /// Settings group title for legal info and sponsor entries (LEGAL-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Legal & Support'**
+  String get legalSponsorSectionTitle;
+
+  /// Terms of Use tile title and terms-screen appbar (LEGAL-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get termsOfUse;
+
+  /// Tokusho (特定商取引法) notice tile title and screen appbar; required for JP compliance (LEGAL-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Transaction Notice'**
+  String get tokushoNotice;
+
+  /// Tokusho notice tile subtitle (LEGAL-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Required for offering the service in Japan'**
+  String get tokushoNoticeSubtitle;
+
+  /// Sponsor tile title, opens external donation link (DONATE)
+  ///
+  /// In en, this message translates to:
+  /// **'Support Development'**
+  String get sponsorRow;
+
+  /// Sponsor tile subtitle (DONATE)
+  ///
+  /// In en, this message translates to:
+  /// **'To keep the app running ad-free'**
+  String get sponsorRowSubtitle;
+
+  /// Neutral SnackBar shown when the external donation link fails to launch (DONATE)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the browser'**
+  String get sponsorLaunchError;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

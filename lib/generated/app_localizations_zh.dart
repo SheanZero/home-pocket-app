@@ -2381,4 +2381,25 @@ class SZh extends S {
 
   @override
   String get securityChangePin => '修改密码';
+
+  @override
+  String get legalSponsorSectionTitle => '法律信息・支持';
+
+  @override
+  String get termsOfUse => '使用条款';
+
+  @override
+  String get tokushoNotice => '基于特定商业交易法的标示';
+
+  @override
+  String get tokushoNoticeSubtitle => '在日本提供服务所需的标示';
+
+  @override
+  String get sponsorRow => '支持开发';
+
+  @override
+  String get sponsorRowSubtitle => '为了持续无广告运营';
+
+  @override
+  String get sponsorLaunchError => '无法打开浏览器';
 }

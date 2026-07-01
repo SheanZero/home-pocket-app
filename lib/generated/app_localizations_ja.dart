@@ -2389,4 +2389,25 @@ class SJa extends S {
 
   @override
   String get securityChangePin => 'パスコードを変更';
+
+  @override
+  String get legalSponsorSectionTitle => '法的情報・応援';
+
+  @override
+  String get termsOfUse => '利用規約';
+
+  @override
+  String get tokushoNotice => '特定商取引法に基づく表記';
+
+  @override
+  String get tokushoNoticeSubtitle => '日本での提供に必要な表記';
+
+  @override
+  String get sponsorRow => '開発を応援する';
+
+  @override
+  String get sponsorRowSubtitle => '広告なし運営を続けるために';
+
+  @override
+  String get sponsorLaunchError => 'ブラウザを開けませんでした';
 }

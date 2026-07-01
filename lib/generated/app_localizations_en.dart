@@ -2433,4 +2433,26 @@ class SEn extends S {
 
   @override
   String get securityChangePin => 'Change passcode';
+
+  @override
+  String get legalSponsorSectionTitle => 'Legal & Support';
+
+  @override
+  String get termsOfUse => 'Terms of Use';
+
+  @override
+  String get tokushoNotice => 'Commercial Transaction Notice';
+
+  @override
+  String get tokushoNoticeSubtitle =>
+      'Required for offering the service in Japan';
+
+  @override
+  String get sponsorRow => 'Support Development';
+
+  @override
+  String get sponsorRowSubtitle => 'To keep the app running ad-free';
+
+  @override
+  String get sponsorLaunchError => 'Couldn\'t open the browser';
 }
