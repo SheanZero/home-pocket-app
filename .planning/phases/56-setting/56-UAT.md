@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 56-setting
 source: [56-01-SUMMARY.md, 56-02-SUMMARY.md, 56-03-SUMMARY.md, 56-04-SUMMARY.md, 56-05-SUMMARY.md, 56-06-SUMMARY.md]
 started: 2026-07-01T11:19:30Z
-updated: 2026-07-02T00:20:00Z
+updated: 2026-07-02T03:09:09Z
 ---
 
 ## Current Test
@@ -25,10 +25,9 @@ expected: Tap the 利用規約 / Terms of Use row. A reader opens showing the te
 result: pass
 
 ### 4. Read the 特商法 (Commercial Transaction) notice
-expected: Tap the 特定商取引法に基づく表記 row. A reader opens showing the 特商法 notice in 請求時提供 style — operator name/address/phone disclosed on request, only a placeholder support email shown, and NO home address or phone number published. Japanese text reads as natural Japanese (no stray Chinese-only vocabulary).
-result: issue
-reported: "将 经营者姓名 / 地址 / 电话 公开"
-severity: major
+expected: Tap the 特定商取引法に基づく表記 row. A reader opens showing the 特商法 notice in full 表記型 style (D-06 supersedes D-03) — operator fields 事業者名 / 所在地 / 電話番号 / 運営責任者 published directly on the page (each a [上线前填真实值] placeholder pending the user's real values + Japanese legal review), plus a placeholder support email. Japanese text reads as natural Japanese.
+result: pass
+resolved_by: "56-07 gap-closure (2026-07-02) — reversed 請求時提供 → full 表記型 per user request 将 经营者姓名/地址/电话 公开; D-06 supersedes D-03, LEGAL-V2-01 pulled forward. Real values remain [上线前填真实值] placeholders; pre-launch JP legal-review marker preserved."
 
 ### 5. Open-source licenses page
 expected: Tap the OSS-licenses row. The standard Flutter license page opens, listing the app's packages and their licenses.
@@ -49,8 +48,8 @@ result: pass
 ## Summary
 
 total: 8
-passed: 7
-issues: 1
+passed: 8
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -58,8 +57,9 @@ blocked: 0
 ## Gaps
 
 - truth: "特商法 notice publishes the operator's name, address, and phone number directly (full 表記型), not 請求時提供 (disclose-on-request)"
-  status: failed
+  status: resolved
   reason: "User reported: 将 经营者姓名 / 地址 / 电话 公开 — wants operator name/address/phone published directly in the 特商法 notice instead of the current 請求時提供 型 (D-03)"
+  resolved_by: "56-07 (D-06 supersedes D-03): tokusho_{ja,zh,en}.md rewritten to full 表記型 publishing 事業者名/所在地/電話番号/運営責任者 as [上线前填真实值] placeholders; legal_doc_screen_test flipped to assert 運営責任者; parity gate + full suite (3493/3493) + analyze 0 GREEN. LEGAL-V2-01 pulled forward."
   severity: major
   test: 4
   root_cause: "Not a bug — Test 4 behaves exactly as built. The 請求時提供 (disclose-on-request) approach is a deliberate, gate-covered LOCKED decision (56-CONTEXT D-03), encoded in two coupled layers: (1) content in the three trilingual tokusho asset drafts, and (2) D-03 itself which explicitly defers full 表記 to v2 (LEGAL-V2-01). User is requesting a compliance-approach reversal to full 表記型 (完全表記). Rendering needs no code change (LegalDocScreen renders assets verbatim); this is asset-content + one test-intent update + a superseding-decision record."

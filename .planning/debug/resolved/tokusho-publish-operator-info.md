@@ -1,8 +1,8 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "UAT Test 4 (56-UAT.md): user requests 特商法 notice PUBLISH operator name/address/phone directly (full 表記型) instead of current 請求時提供 (disclose-on-request) approach. 将 经营者姓名 / 地址 / 电话 公开."
 created: 2026-07-02T00:10:00Z
-updated: 2026-07-02T00:25:00Z
+updated: 2026-07-02T03:09:09Z
 ---
 
 ## Current Focus
