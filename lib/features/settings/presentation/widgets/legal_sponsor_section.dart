@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -47,7 +48,9 @@ class LegalSponsorSection extends StatelessWidget {
       // handler shows one neutral SnackBar and never crashes (T-56-06).
       // Capture the error for diagnostics rather than swallowing it silently.
       ok = false;
-      debugPrint('sponsor launch failed: $e');
+      if (kDebugMode) {
+        debugPrint('sponsor launch failed: $e');
+      }
     }
     if (!ok && context.mounted) {
       messenger.showSnackBar(
