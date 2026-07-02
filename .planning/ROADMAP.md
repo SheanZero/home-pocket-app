@@ -281,7 +281,7 @@
   4. 商店隐私表单（Apple Privacy Nutrition Labels / Google Data Safety）如实填写，与 v1.7 汇率出站网络调用一致（非反射式「不收集」）— LEGAL-05
   5. 所有新增法务/合规/赞助文案三语（ja/zh/en）覆盖，过 ARB parity + 硬编码CJK扫描（长文本用 bundled per-locale assets 时附「三语齐全」存在性门）— LEGAL-06
 
-**Plans**: 6 complete + 1 gap-closure (56-07, UAT Test 4)
+**Plans**: 7/7 complete (6 base + 1 gap-closure 56-07 — UAT Test 4 特商法 full 表記型, closed 2026-07-02)
 **Wave 1**
 
 - [x] 56-01-PLAN.md — url_launcher dep + assets/legal/ decl + LegalUrls config + asset-parity gate (DONATE-04, LEGAL-06)
@@ -302,7 +302,7 @@
 
 **Gap closure** *(UAT Test 4 — post-phase)*
 
-- [ ] 56-07-PLAN.md — reverse 特商法 to full 表記型 (publish operator 事業者名/所在地/電話番号/運営責任者 with [上线前填真实值] placeholders); D-06 supersedes D-03; LEGAL-V2-01 pulled forward (LEGAL-04, LEGAL-06, LEGAL-V2-01)
+- [x] 56-07-PLAN.md — reverse 特商法 to full 表記型 (publish operator 事業者名/所在地/電話番号/運営責任者 with [上线前填真实值] placeholders); D-06 supersedes D-03; LEGAL-V2-01 pulled forward (LEGAL-04, LEGAL-06, LEGAL-V2-01) [gap-closure, UAT Test 4 closed 2026-07-02]
 
 **UI hint**: yes
 **Research flag**: MEDIUM-confidence 外部合规——特商法 applicability（个人开发者外部平台赞助）+ Apple/Google donation-review 立场需 JP-legal sign-off + 真实 TestFlight/internal-track 提交（非自评）；调度时为 review round-trip 留余量。

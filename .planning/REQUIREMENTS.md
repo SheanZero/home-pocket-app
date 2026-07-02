@@ -70,7 +70,7 @@
 ### Onboarding / Legal v2
 
 - **ONBOARD-V2-01**: 更丰富的介绍轮播 / 引导内权限预说明
-- **LEGAL-V2-01**: 若日本法务判定需要，扩充完整特商法表記（运营者全表記）
+- **LEGAL-V2-01**: 若日本法务判定需要，扩充完整特商法表記（运营者全表記）—— ✅**已提前落地**（Phase 56 gap-closure 56-07，2026-07-02，D-06 supersedes D-03）：依 UAT Test 4，特商法三语 tokusho 反转为完整表記型，直接公开运营者全字段（事業者名/所在地/電話番号/運営責任者，真实值 `[上线前填真实值]` 占位，保留日本法务上线前复核标记）。**不再 deferred**，见 Traceability。
 
 ## Out of Scope
 
@@ -124,11 +124,13 @@
 | LEGAL-04 | Phase 56 | Complete |
 | LEGAL-05 | Phase 56 | Complete |
 | LEGAL-06 | Phase 56 | Complete |
+| LEGAL-V2-01 | v2 → Phase 56 | Complete (pulled forward, D-06) |
 
 **Coverage:**
 
 - v1 requirements: 31 total (DESIGN 4 · ONBOARD 7 · LOCK 10 · DONATE 4 · LEGAL 6)
 - Mapped to phases: 31 (Phase 53: 4 · Phase 54: 7 · Phase 55: 10 · Phase 56: 10)
+- v2 pulled forward: 1 (LEGAL-V2-01 → implemented early in Phase 56 gap-closure 56-07, D-06 supersedes D-03)
 - Unmapped: 0 ✓ (100% coverage, no orphans, no duplicates)
 
 ---
