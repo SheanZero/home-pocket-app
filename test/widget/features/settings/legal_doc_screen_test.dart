@@ -61,12 +61,16 @@ void main() {
       expect(bodyText(tester), contains('利用規約'));
     });
 
-    testWidgets('tokusho (ja) renders 請求 (請求時提供 copy — LEGAL-04 / D-03)',
-        (tester) async {
+    testWidgets(
+        'tokusho (ja) renders published operator fields '
+        '(full 表記型 — LEGAL-04 / D-06 supersedes D-03)', (tester) async {
       await pump(tester, doc: LegalDoc.tokusho, locale: const Locale('ja'));
 
       expect(find.byType(SelectableText), findsOneWidget);
-      expect(bodyText(tester), contains('請求'));
+      // Full 表記型 (D-06): the notice now publishes the operator fields
+      // directly — 事業者名 / 所在地 / 電話番号 / 運営責任者. 運営責任者 is a
+      // published-operator field that exists ONLY in the full-表記 rewrite.
+      expect(bodyText(tester), contains('運営責任者'));
     });
 
     testWidgets('locale switch (zh) loads the _zh.md variant', (tester) async {
