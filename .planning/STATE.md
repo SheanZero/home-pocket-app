@@ -382,6 +382,7 @@ Resume file: .planning/phases/56-setting/56-CONTEXT.md
 - [Phase ?]: 51-03: category fill gated to first end-of-speech final (resolve-on-final hysteresis, XVAL-03); partials still fill amount/text/merchant/date live; no new timer (D-03).
 - [Phase 51]: 51-04: CreateTransactionUseCase ledger derives from CategoryService.resolveLedgerType(categoryId) ?? daily (D-14/D-16) — single source = category_ledger_configs, never a merchant ledger hint.
 - [Phase 51]: 51-04: lib/application/dual_ledger/ retired (LEDGER-02, D-15) — second divergent hardcoded daily/joy map (RuleEngine, dead ids cat_entertainment/cat_shopping) deleted; ledger_hint_deriver + features/dual_ledger untouched.
+- [quick 260703]: **Phase 42 D-08 zh-branch SUPERSEDED (user-directed)** — bare 「元」 in zh locale no longer resolves to CNY; it is native/null in EVERY locale (aligned with 块/块钱), so no CNY→JPY rate fetch fires on ordinary zh utterances. Explicit 人民币/中国元/RMB/chinese yuan/yuan keep mapping to CNY. `bareYuanToken` removed from voice_currency_suffixes.dart; currency_detection_test locks the new behavior. Same task also shipped the BUG-1 ITN-concat defenses: scan() positional Digit merge, merger space-join + round-Arabic open gate + full-parser commits, spaced-group parser routing, `detectConcatRepairCandidate` + `VoiceParseResult.amountRepairCandidate` + alternates auto-adopt, conversion gated to resolve-on-final with an undo SnackBar, repair-adopt + large-amount (≥¥1M) notices.
 
 ## Operator Next Steps
 

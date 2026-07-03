@@ -118,7 +118,8 @@ class ChineseNumeralStateMachine extends NumeralStateMachine {
       // integer amount stays clean (T-42-07). Their DETECTION is handled
       // separately by the inherited [detectCurrencyToken], which runs a
       // longest-first scan over [VoiceCurrencySuffixes.all]; the use-case layer
-      // then maps the token → ISO (bare 元 → CNY in zh locale per D-08 locked).
+      // then maps the token → ISO (bare 元 → native/null in every locale since
+      // 260703 BUG-2; only explicit 人民币/RMB words map to CNY).
     }
     flushArabicRun();
     return tokens;

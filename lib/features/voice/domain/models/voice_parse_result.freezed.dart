@@ -35,13 +35,23 @@ mixin _$VoiceParseResult {
   // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
   String?
   get resolvedKeyword; // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
-  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「五十元」 in zh →
-  // 'CNY'). Null means JPY-native (「昼ごはんに680円」, bare 円) — no foreign
-  // conversion, preserving the pre-Phase-42 default. The shared form reads
+  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「一百人民币」 →
+  // 'CNY'). Null means native (「昼ごはんに680円」, bare 円/元/块) — no
+  // foreign conversion, preserving the pre-Phase-42 default. 260703 BUG-2:
+  // bare 元 is native in EVERY locale (D-08's zh→CNY branch superseded) —
+  // only the explicit 人民币/RMB/yuan words map to CNY. The shared form reads
   // this to trigger the normal rate-fetch flow; null skips it entirely
   // (Pitfall 1: JPY path must stay byte-identical).
   String?
-  get detectedCurrency; // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
+  get detectedCurrency; // 260703 BUG-1: positional-repair candidate for a suspected ITN-concat
+  // amount (transcript "250046元" → amount 250046, candidate 2546). Non-null
+  // ONLY when the Arabic-path amount matches the concat signature AND no
+  // alternate transcript confirmed the repair (a confirmed repair is adopted
+  // into [amount] directly and this stays null). The form surfaces it as a
+  // one-tap confirm affordance — it must NEVER be applied silently. Always
+  // null on kanji-parsed, comma-grouped, and manual/OCR-constructed results.
+  int?
+  get amountRepairCandidate; // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
   // the MerchantRecognizer produced for this utterance, recall-first (score
   // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
   // can offer below-floor candidates as manual picks. Empty when no merchant
@@ -97,6 +107,8 @@ mixin _$VoiceParseResult {
                 other.resolvedKeyword == resolvedKeyword) &&
             (identical(other.detectedCurrency, detectedCurrency) ||
                 other.detectedCurrency == detectedCurrency) &&
+            (identical(other.amountRepairCandidate, amountRepairCandidate) ||
+                other.amountRepairCandidate == amountRepairCandidate) &&
             const DeepCollectionEquality().equals(
               other.merchantCandidates,
               merchantCandidates,
@@ -127,6 +139,7 @@ mixin _$VoiceParseResult {
     ledgerType,
     resolvedKeyword,
     detectedCurrency,
+    amountRepairCandidate,
     const DeepCollectionEquality().hash(merchantCandidates),
     estimatedSatisfaction,
     band,
@@ -136,7 +149,7 @@ mixin _$VoiceParseResult {
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction, band: $band, alternates: $alternates, keywordMerchantConflict: $keywordMerchantConflict)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, amountRepairCandidate: $amountRepairCandidate, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction, band: $band, alternates: $alternates, keywordMerchantConflict: $keywordMerchantConflict)';
   }
 }
 
@@ -157,6 +170,7 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
     LedgerType? ledgerType,
     String? resolvedKeyword,
     String? detectedCurrency,
+    int? amountRepairCandidate,
     List<MerchantCandidate> merchantCandidates,
     int estimatedSatisfaction,
     ConfidenceBand? band,
@@ -189,6 +203,7 @@ class _$VoiceParseResultCopyWithImpl<$Res>
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
     Object? detectedCurrency = freezed,
+    Object? amountRepairCandidate = freezed,
     Object? merchantCandidates = null,
     Object? estimatedSatisfaction = null,
     Object? band = freezed,
@@ -233,6 +248,10 @@ class _$VoiceParseResultCopyWithImpl<$Res>
             ? _self.detectedCurrency
             : detectedCurrency // ignore: cast_nullable_to_non_nullable
                   as String?,
+        amountRepairCandidate: freezed == amountRepairCandidate
+            ? _self.amountRepairCandidate
+            : amountRepairCandidate // ignore: cast_nullable_to_non_nullable
+                  as int?,
         merchantCandidates: null == merchantCandidates
             ? _self.merchantCandidates
             : merchantCandidates // ignore: cast_nullable_to_non_nullable
@@ -375,6 +394,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? ledgerType,
       String? resolvedKeyword,
       String? detectedCurrency,
+      int? amountRepairCandidate,
       List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
       ConfidenceBand? band,
@@ -397,6 +417,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.ledgerType,
           _that.resolvedKeyword,
           _that.detectedCurrency,
+          _that.amountRepairCandidate,
           _that.merchantCandidates,
           _that.estimatedSatisfaction,
           _that.band,
@@ -433,6 +454,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? ledgerType,
       String? resolvedKeyword,
       String? detectedCurrency,
+      int? amountRepairCandidate,
       List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
       ConfidenceBand? band,
@@ -454,6 +476,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.ledgerType,
           _that.resolvedKeyword,
           _that.detectedCurrency,
+          _that.amountRepairCandidate,
           _that.merchantCandidates,
           _that.estimatedSatisfaction,
           _that.band,
@@ -489,6 +512,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? ledgerType,
       String? resolvedKeyword,
       String? detectedCurrency,
+      int? amountRepairCandidate,
       List<MerchantCandidate> merchantCandidates,
       int estimatedSatisfaction,
       ConfidenceBand? band,
@@ -510,6 +534,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.ledgerType,
           _that.resolvedKeyword,
           _that.detectedCurrency,
+          _that.amountRepairCandidate,
           _that.merchantCandidates,
           _that.estimatedSatisfaction,
           _that.band,
@@ -535,6 +560,7 @@ class _VoiceParseResult implements VoiceParseResult {
     this.ledgerType,
     this.resolvedKeyword,
     this.detectedCurrency,
+    this.amountRepairCandidate,
     final List<MerchantCandidate> merchantCandidates =
         const <MerchantCandidate>[],
     this.estimatedSatisfaction = 5,
@@ -576,13 +602,24 @@ class _VoiceParseResult implements VoiceParseResult {
   @override
   final String? resolvedKeyword;
   // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
-  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「五十元」 in zh →
-  // 'CNY'). Null means JPY-native (「昼ごはんに680円」, bare 円) — no foreign
-  // conversion, preserving the pre-Phase-42 default. The shared form reads
+  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「一百人民币」 →
+  // 'CNY'). Null means native (「昼ごはんに680円」, bare 円/元/块) — no
+  // foreign conversion, preserving the pre-Phase-42 default. 260703 BUG-2:
+  // bare 元 is native in EVERY locale (D-08's zh→CNY branch superseded) —
+  // only the explicit 人民币/RMB/yuan words map to CNY. The shared form reads
   // this to trigger the normal rate-fetch flow; null skips it entirely
   // (Pitfall 1: JPY path must stay byte-identical).
   @override
   final String? detectedCurrency;
+  // 260703 BUG-1: positional-repair candidate for a suspected ITN-concat
+  // amount (transcript "250046元" → amount 250046, candidate 2546). Non-null
+  // ONLY when the Arabic-path amount matches the concat signature AND no
+  // alternate transcript confirmed the repair (a confirmed repair is adopted
+  // into [amount] directly and this stays null). The form surfaces it as a
+  // one-tap confirm affordance — it must NEVER be applied silently. Always
+  // null on kanji-parsed, comma-grouped, and manual/OCR-constructed results.
+  @override
+  final int? amountRepairCandidate;
   // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
   // the MerchantRecognizer produced for this utterance, recall-first (score
   // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
@@ -667,6 +704,8 @@ class _VoiceParseResult implements VoiceParseResult {
                 other.resolvedKeyword == resolvedKeyword) &&
             (identical(other.detectedCurrency, detectedCurrency) ||
                 other.detectedCurrency == detectedCurrency) &&
+            (identical(other.amountRepairCandidate, amountRepairCandidate) ||
+                other.amountRepairCandidate == amountRepairCandidate) &&
             const DeepCollectionEquality().equals(
               other._merchantCandidates,
               _merchantCandidates,
@@ -697,6 +736,7 @@ class _VoiceParseResult implements VoiceParseResult {
     ledgerType,
     resolvedKeyword,
     detectedCurrency,
+    amountRepairCandidate,
     const DeepCollectionEquality().hash(_merchantCandidates),
     estimatedSatisfaction,
     band,
@@ -706,7 +746,7 @@ class _VoiceParseResult implements VoiceParseResult {
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction, band: $band, alternates: $alternates, keywordMerchantConflict: $keywordMerchantConflict)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, amountRepairCandidate: $amountRepairCandidate, merchantCandidates: $merchantCandidates, estimatedSatisfaction: $estimatedSatisfaction, band: $band, alternates: $alternates, keywordMerchantConflict: $keywordMerchantConflict)';
   }
 }
 
@@ -729,6 +769,7 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
     LedgerType? ledgerType,
     String? resolvedKeyword,
     String? detectedCurrency,
+    int? amountRepairCandidate,
     List<MerchantCandidate> merchantCandidates,
     int estimatedSatisfaction,
     ConfidenceBand? band,
@@ -762,6 +803,7 @@ class __$VoiceParseResultCopyWithImpl<$Res>
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
     Object? detectedCurrency = freezed,
+    Object? amountRepairCandidate = freezed,
     Object? merchantCandidates = null,
     Object? estimatedSatisfaction = null,
     Object? band = freezed,
@@ -806,6 +848,10 @@ class __$VoiceParseResultCopyWithImpl<$Res>
             ? _self.detectedCurrency
             : detectedCurrency // ignore: cast_nullable_to_non_nullable
                   as String?,
+        amountRepairCandidate: freezed == amountRepairCandidate
+            ? _self.amountRepairCandidate
+            : amountRepairCandidate // ignore: cast_nullable_to_non_nullable
+                  as int?,
         merchantCandidates: null == merchantCandidates
             ? _self._merchantCandidates
             : merchantCandidates // ignore: cast_nullable_to_non_nullable

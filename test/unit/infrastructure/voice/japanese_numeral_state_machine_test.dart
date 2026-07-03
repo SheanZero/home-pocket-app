@@ -26,7 +26,8 @@ void main() {
         () => expect(
           machine.parse('せんはっぴゃくよんじゅう'),
           1840,
-          reason: 'せん→1000, はっぴゃく→800 (sokuon dict entry), よんじゅう→40; total 1840',
+          reason:
+              'せん→1000, はっぴゃく→800 (sokuon dict entry), よんじゅう→40; total 1840',
         ),
       );
 
@@ -40,7 +41,8 @@ void main() {
         () => expect(
           machine.parse('一万二千'),
           12000,
-          reason: 'kanji digit+unit fallback: 一→Digit(1), 万→Unit(10000), 二→Digit(2), 千→Unit(1000); total 12000',
+          reason:
+              'kanji digit+unit fallback: 一→Digit(1), 万→Unit(10000), 二→Digit(2), 千→Unit(1000); total 12000',
         ),
       );
     });
@@ -67,48 +69,35 @@ void main() {
     });
 
     group('parse — voicing & sokuon variants', () {
-      test(
-        'さんぜん -> 3000 (rendaku)',
-        () => expect(machine.parse('さんぜん'), 3000),
-      );
+      test('さんぜん -> 3000 (rendaku)', () => expect(machine.parse('さんぜん'), 3000));
 
-      test(
-        'はっせん -> 8000 (sokuon)',
-        () => expect(machine.parse('はっせん'), 8000),
-      );
+      test('はっせん -> 8000 (sokuon)', () => expect(machine.parse('はっせん'), 8000));
 
-      test(
-        'ろっぴゃく -> 600 (sokuon)',
-        () => expect(machine.parse('ろっぴゃく'), 600),
-      );
+      test('ろっぴゃく -> 600 (sokuon)', () => expect(machine.parse('ろっぴゃく'), 600));
 
-      test(
-        'さんびゃく -> 300 (voicing)',
-        () => expect(machine.parse('さんびゃく'), 300),
-      );
+      test('さんびゃく -> 300 (voicing)', () => expect(machine.parse('さんびゃく'), 300));
 
       test(
         'はっぴゃく -> 800 (sokuon — longest-match must NOT split into は+っ+ぴ+ゃ+く)',
         () => expect(
           machine.parse('はっぴゃく'),
           800,
-          reason: 'Greedy longest-match must find はっぴゃく (5 chars) in dict before は (1 char)',
+          reason:
+              'Greedy longest-match must find はっぴゃく (5 chars) in dict before は (1 char)',
         ),
       );
     });
 
     group('parse — negative cases', () {
-      test(
-        'empty -> null',
-        () => expect(machine.parse(''), isNull),
-      );
+      test('empty -> null', () => expect(machine.parse(''), isNull));
 
       test(
         'non-numeric (現金) -> null',
         () => expect(
           machine.parse('現金'),
           isNull,
-          reason: 'No numeric tokens recognized; empty token list → scan returns null',
+          reason:
+              'No numeric tokens recognized; empty token list → scan returns null',
         ),
       );
 
@@ -119,29 +108,39 @@ void main() {
     });
 
     group('normalize — token structure', () {
-      test('はっぴゃく yields non-empty token list (longest-match anti-pattern guard)', () {
-        final tokens = machine.normalize('はっぴゃく');
-        expect(tokens, isNotEmpty,
-            reason: 'longest-match MUST find はっぴゃく; empty list = single-char split bug');
-      });
+      test(
+        'はっぴゃく yields non-empty token list (longest-match anti-pattern guard)',
+        () {
+          final tokens = machine.normalize('はっぴゃく');
+          expect(
+            tokens,
+            isNotEmpty,
+            reason:
+                'longest-match MUST find はっぴゃく; empty list = single-char split bug',
+          );
+        },
+      );
 
       test('normalize(現金) yields empty list', () {
         final tokens = machine.normalize('現金');
         expect(tokens, isEmpty);
       });
 
-      test('normalize(1千8百) yields [Digit(1), Unit(1000), Digit(8), Unit(100)]', () {
-        final tokens = machine.normalize('1千8百');
-        expect(tokens.length, 4);
-        expect(tokens[0], isA<Digit>());
-        expect(tokens[1], isA<Unit>());
-        expect(tokens[2], isA<Digit>());
-        expect(tokens[3], isA<Unit>());
-        expect((tokens[0] as Digit).value, 1);
-        expect((tokens[1] as Unit).power, 1000);
-        expect((tokens[2] as Digit).value, 8);
-        expect((tokens[3] as Unit).power, 100);
-      });
+      test(
+        'normalize(1千8百) yields [Digit(1), Unit(1000), Digit(8), Unit(100)]',
+        () {
+          final tokens = machine.normalize('1千8百');
+          expect(tokens.length, 4);
+          expect(tokens[0], isA<Digit>());
+          expect(tokens[1], isA<Unit>());
+          expect(tokens[2], isA<Digit>());
+          expect(tokens[3], isA<Unit>());
+          expect((tokens[0] as Digit).value, 1);
+          expect((tokens[1] as Unit).power, 1000);
+          expect((tokens[2] as Digit).value, 8);
+          expect((tokens[3] as Unit).power, 100);
+        },
+      );
 
       test('normalize(せん) last token is Unit(1000)', () {
         final tokens = machine.normalize('せん');
@@ -155,6 +154,19 @@ void main() {
         expect(tokens, isNotEmpty);
         expect(tokens.first, isA<Digit>());
         expect((tokens.first as Digit).value, 4);
+      });
+    });
+
+    // 260703 BUG-1 (ITN-split positional merge): mirrors the zh machine —
+    // consecutive Digit tokens merge positionally when the second fits inside
+    // the first's trailing zeros ("2500 46円" → 2546), else last-wins.
+    group('parse — ITN-split consecutive digit groups (260703 BUG-1)', () {
+      test('2500 46円 -> 2546 (tail fits trailing zeros)', () {
+        expect(machine.parse('2500 46円'), 2546);
+      });
+
+      test('12 34 -> 34 (no fit, last-wins preserved)', () {
+        expect(machine.parse('12 34'), 34);
       });
     });
   });

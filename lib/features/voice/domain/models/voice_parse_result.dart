@@ -41,12 +41,22 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
     String? resolvedKeyword,
     // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
-    // detected in the utterance (e.g. 「五十美元」 → 'USD', 「五十元」 in zh →
-    // 'CNY'). Null means JPY-native (「昼ごはんに680円」, bare 円) — no foreign
-    // conversion, preserving the pre-Phase-42 default. The shared form reads
+    // detected in the utterance (e.g. 「五十美元」 → 'USD', 「一百人民币」 →
+    // 'CNY'). Null means native (「昼ごはんに680円」, bare 円/元/块) — no
+    // foreign conversion, preserving the pre-Phase-42 default. 260703 BUG-2:
+    // bare 元 is native in EVERY locale (D-08's zh→CNY branch superseded) —
+    // only the explicit 人民币/RMB/yuan words map to CNY. The shared form reads
     // this to trigger the normal rate-fetch flow; null skips it entirely
     // (Pitfall 1: JPY path must stay byte-identical).
     String? detectedCurrency,
+    // 260703 BUG-1: positional-repair candidate for a suspected ITN-concat
+    // amount (transcript "250046元" → amount 250046, candidate 2546). Non-null
+    // ONLY when the Arabic-path amount matches the concat signature AND no
+    // alternate transcript confirmed the repair (a confirmed repair is adopted
+    // into [amount] directly and this stays null). The form surfaces it as a
+    // one-tap confirm affordance — it must NEVER be applied silently. Always
+    // null on kanji-parsed, comma-grouped, and manual/OCR-constructed results.
+    int? amountRepairCandidate,
     // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
     // the MerchantRecognizer produced for this utterance, recall-first (score
     // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips

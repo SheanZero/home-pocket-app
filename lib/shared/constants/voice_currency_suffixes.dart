@@ -38,7 +38,7 @@ class VoiceCurrencySuffixes {
     '英镑', // zh
     '英ポンド', 'ポンド', // ja
     'british pound', 'sterling', 'pounds', 'pound', // en
-    // ── CNY ── (bare 元 stays locale-resolved: zh→CNY / ja→JPY, see below)
+    // ── CNY ── (explicit words only — bare 元 is native/null, 260703 BUG-2)
     '人民币', '人民幣', // zh
     '人民元', '中国元', // ja
     'chinese yuan', 'renminbi', 'yuan', 'rmb', // en
@@ -82,9 +82,11 @@ class VoiceCurrencySuffixes {
   /// uses to trigger the normal rate-fetch flow.
   ///
   /// Bare-native tokens (`元`/`円`/`日元`/`块`/`块钱`/`えん`/`yen`/`jpy`/
-  /// `japanese yen`) are NOT in this map: `元`'s ISO is locale-dependent
-  /// (zh→CNY, ja→JPY per D-08) and is resolved at the use-case layer, while the
-  /// rest are JPY-native and surface as null `detectedCurrency`.
+  /// `japanese yen`) are NOT in this map: they are ALL native and surface as
+  /// null `detectedCurrency` (no conversion). 260703 BUG-2 superseded the
+  /// Phase-42 D-08 rule that resolved bare `元` to CNY in zh locale — for zh
+  /// speakers in this JPY-native app 元 is the generic word for the local
+  /// currency, exactly like 块/块钱.
   ///
   /// Quick task 260614-goh: English tokens (lowercase) and the full supported
   /// currency set added. Every key here MUST also appear in [all].
@@ -99,7 +101,7 @@ class VoiceCurrencySuffixes {
     // GBP
     '英镑': 'GBP', '英ポンド': 'GBP', 'ポンド': 'GBP',
     'british pound': 'GBP', 'sterling': 'GBP', 'pounds': 'GBP', 'pound': 'GBP',
-    // CNY (explicit words only; bare 元 resolved by locale, see bareYuanToken)
+    // CNY (explicit words only; bare 元 is native/null — 260703 BUG-2)
     '人民币': 'CNY', '人民幣': 'CNY', '人民元': 'CNY', '中国元': 'CNY',
     'chinese yuan': 'CNY', 'renminbi': 'CNY', 'yuan': 'CNY', 'rmb': 'CNY',
     // HKD
@@ -122,13 +124,9 @@ class VoiceCurrencySuffixes {
     'singapore dollar': 'SGD',
   };
 
-  /// The bare locale-ambiguous Chinese yuan / Japanese yen token (`元`).
-  ///
-  /// D-08 (locked): in zh locale this resolves to CNY; in ja locale it is
-  /// JPY-native (no foreign conversion). Exposed as a named constant so the
-  /// use-case layer can resolve the ambiguity WITHOUT embedding a raw CJK
-  /// literal (keeps `ParseVoiceInputUseCase` out of the hardcoded-CJK scan).
-  static const String bareYuanToken = '元';
+  // NOTE: `bareYuanToken` (the D-08 zh→CNY disambiguation hook) was removed
+  // 260703 (BUG-2) — bare 元 is a native terminator in every locale now, so
+  // no caller needs the named constant anymore.
 
   /// Tokens ordered longest-first — the matching invariant for the regexes.
   ///
@@ -137,8 +135,8 @@ class VoiceCurrencySuffixes {
   /// having a shorter substring (`dollar`, `ドル`, `元`) match first and leave a
   /// corrupt remainder. Sorting here (not hand-ordering [all]) keeps [all]
   /// readable while guaranteeing the invariant.
-  static final List<String> _longestFirst =
-      List<String>.of(all)..sort((a, b) => b.length.compareTo(a.length));
+  static final List<String> _longestFirst = List<String>.of(all)
+    ..sort((a, b) => b.length.compareTo(a.length));
 
   /// Regex-alternation fragment for use inside a larger pattern, e.g.
   /// `RegExp(r'\d+\s*(?:' + VoiceCurrencySuffixes.regexAlternation + r')')`.

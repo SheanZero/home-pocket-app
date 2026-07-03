@@ -1332,6 +1332,33 @@ class SZh extends S {
   String get voiceRecognitionErrorUnknown => '语音识别出现错误';
 
   @override
+  String voiceCurrencyConverted(
+    String original,
+    String converted,
+    String rate,
+  ) {
+    return '已识别为外币：$original → $converted（汇率 $rate）';
+  }
+
+  @override
+  String get voiceCurrencyConvertedUndo => '撤销';
+
+  @override
+  String voiceAmountRepairSuspect(String original, String candidate) {
+    return '金额识别为 $original，是否应为 $candidate？';
+  }
+
+  @override
+  String voiceAmountRepairApply(String candidate) {
+    return '改为 $candidate';
+  }
+
+  @override
+  String voiceLargeAmountNotice(String amount) {
+    return '金额较大：$amount，保存前请确认';
+  }
+
+  @override
   String get analyticsBudgetProgress => '预算进度';
 
   @override

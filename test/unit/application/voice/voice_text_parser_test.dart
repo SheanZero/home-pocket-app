@@ -46,19 +46,13 @@ void main() {
       () {
         // 周二 contains 二 which triggers _numeralHintPattern, but is not a
         // number — state machine returns null; arabic regex must catch ¥5240.
-        expect(
-          parser.extractAmount('上周二交公交卡用了¥5240'),
-          equals(5240),
-        );
+        expect(parser.extractAmount('上周二交公交卡用了¥5240'), equals(5240));
       },
     );
 
-    test(
-      '260526-n7b: handles ¥-prefix amount with leading CJK context',
-      () {
-        expect(parser.extractAmount('星期三午饭¥680'), equals(680));
-      },
-    );
+    test('260526-n7b: handles ¥-prefix amount with leading CJK context', () {
+      expect(parser.extractAmount('星期三午饭¥680'), equals(680));
+    });
   });
 
   group('VoiceTextParser - extractAmount locale routing', () {
@@ -89,7 +83,10 @@ void main() {
     });
 
     test('non-numeric en-US text returns null', () {
-      expect(routingParser.extractAmount('hello world', localeId: 'en-US'), isNull);
+      expect(
+        routingParser.extractAmount('hello world', localeId: 'en-US'),
+        isNull,
+      );
     });
 
     test('zh all-kanji anchor 二千二百零四 with explicit locale returns 2204', () {
@@ -108,19 +105,13 @@ void main() {
       // 一 (in 一共) trips _numeralHintPattern → the zh state machine used to
       // overwrite each bare Arabic digit and return 9. The scanner must now
       // accumulate the adjacent run "99999" positionally.
-      expect(
-        p.extractAmount('今天买手机，一共用了99999日元', localeId: 'zh-CN'),
-        99999,
-      );
+      expect(p.extractAmount('今天买手机，一共用了99999日元', localeId: 'zh-CN'), 99999);
     });
 
     test('zh: comma-grouped 今天买手机，一共用了99,999日元 → 99999 (not 9)', () {
       // The comma-grouped form must read the full 99,999 — the Arabic regex is
       // authoritative for comma-grouped numbers even when 一 trips the hint.
-      expect(
-        p.extractAmount('今天买手机，一共用了99,999日元', localeId: 'zh-CN'),
-        99999,
-      );
+      expect(p.extractAmount('今天买手机，一共用了99,999日元', localeId: 'zh-CN'), 99999);
     });
 
     test('zh: bare 99999日元 still → 99999 (no regression)', () {
@@ -503,4 +494,84 @@ void main() {
       },
     );
   });
+
+  // 260703 BUG-1: iOS zh ITN splits 「两千五百四十六」 into two pre-normalized
+  // Arabic groups ("2500"+"46"). Spaced pairs must route through the state
+  // machine's positional merge; the Arabic regex would keep only the tail (46).
+  group('extractAmount — ITN-split spaced Arabic groups (260703 BUG-1)', () {
+    test('zh: 2500 46元 -> 2546 (round group + tail routes to machine)', () {
+      expect(parser.extractAmount('2500 46元', localeId: 'zh-CN'), 2546);
+    });
+
+    test('ja: 2500 46円 -> 2546', () {
+      expect(parser.extractAmount('2500 46円', localeId: 'ja-JP'), 2546);
+    });
+
+    test('zh: bare 2500 46 (merger-joined buffer, no suffix) -> 2546', () {
+      expect(parser.extractAmount('2500 46', localeId: 'zh-CN'), 2546);
+    });
+
+    test('zh: date tail 1200 15号 stays 1200 (no misroute into 1215)', () {
+      expect(parser.extractAmount('花了1200 15号', localeId: 'zh-CN'), 1200);
+    });
+
+    test('en isolation unchanged: 2500 46 dollars keeps the Arabic path', () {
+      expect(parser.extractAmount('2500 46 dollars', localeId: 'en-US'), 46);
+    });
+
+    test('zh: unspaced 250046元 stays 250046 (pass-through; repair is a '
+        'candidate, never a silent rewrite)', () {
+      expect(parser.extractAmount('250046元', localeId: 'zh-CN'), 250046);
+    });
+  });
+
+  // 260703 BUG-1: pure signature detector for the UNSPACED ITN concatenation
+  // ("2500"+"46" → "250046"). Only produces a CANDIDATE — callers surface it
+  // for confirmation (or auto-adopt on an alternate-transcript match).
+  group(
+    'detectConcatRepairCandidate — ITN concat signature (260703 BUG-1)',
+    () {
+      test('250046 -> 2546 (the reported bug)', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('250046'), 2546);
+      });
+
+      test('2500046 -> 25046 (three trailing zeros)', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('2500046'), 25046);
+      });
+
+      test('120034 -> 1234', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('120034'), 1234);
+      });
+
+      test('10046 -> 146', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('10046'), 146);
+      });
+
+      test(
+        '3005 -> null (below the 5-digit floor; 三千零五 is a normal amount)',
+        () {
+          expect(VoiceTextParser.detectConcatRepairCandidate('3005'), isNull);
+        },
+      );
+
+      test(
+        '250000 -> null (round amount; all-zero tail is not a signature)',
+        () {
+          expect(VoiceTextParser.detectConcatRepairCandidate('250000'), isNull);
+        },
+      );
+
+      test('99999 -> null (no round group)', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('99999'), isNull);
+      });
+
+      test('2546 -> null (clean amount)', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('2546'), isNull);
+      });
+
+      test('non-digit input -> null', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('2,546'), isNull);
+      });
+    },
+  );
 }

@@ -66,19 +66,55 @@ class ParseVoiceInputUseCase {
   /// When null, the transfer station falls back to ja-then-zh heuristic.
   /// [localeId] also gates particle stripping in keyword extraction (WR-06).
   ///
+  /// [alternateTexts] (260703 BUG-1 / 1D) are the recognizer's alternate
+  /// transcripts for the same utterance (best transcript excluded). They are
+  /// consulted ONLY to cross-validate a suspected ITN-concat amount — see the
+  /// repair block below. Pass empty when the caller has no alternates.
+  ///
   /// Returns [Result.error] if an unexpected exception occurs.
   Future<Result<VoiceParseResult>> execute(
     String recognizedText, {
     String? localeId,
+    List<String> alternateTexts = const [],
   }) async {
     try {
       // 1. Extract amount
-      final amount = _textParser.extractAmount(recognizedText, localeId: localeId);
+      final amount = _textParser.extractAmount(
+        recognizedText,
+        localeId: localeId,
+      );
+
+      // 1a. 260703 BUG-1: ITN-concat repair. iOS zh ITN can join one spoken
+      // number into a poisoned digit run (「两千五百四十六」 → "250046"). The
+      // signature detector only runs when the amount's own digit string appears
+      // verbatim in the transcript — a kanji-parsed amount never matches and is
+      // never second-guessed. If an alternate transcript independently parses
+      // to the candidate, the recognizer itself disagrees with its primary
+      // reading → adopt the repair directly. Otherwise the candidate rides
+      // along on the result for the form's one-tap confirm affordance.
+      var resolvedAmount = amount;
+      int? amountRepairCandidate;
+      if (amount != null && recognizedText.contains(amount.toString())) {
+        final candidate = VoiceTextParser.detectConcatRepairCandidate(
+          amount.toString(),
+        );
+        if (candidate != null) {
+          final confirmedByAlternate = alternateTexts.any(
+            (alt) =>
+                _textParser.extractAmount(alt, localeId: localeId) == candidate,
+          );
+          if (confirmedByAlternate) {
+            resolvedAmount = candidate;
+          } else {
+            amountRepairCandidate = candidate;
+          }
+        }
+      }
 
       // 1b. Detect spoken currency (Phase 42, VOICE-CUR-01/02/03). Runs the
       // longest-first token scan SEPARATELY from the amount path so the
-      // integer amount is never polluted (T-42-07). Locale resolves the
-      // bare 元/円 ambiguity (D-08 locked: zh→CNY, ja→JPY).
+      // integer amount is never polluted (T-42-07). Bare 元/円 are native
+      // (null) in every locale — D-08's zh→CNY branch was superseded 260703.
       final detectedCurrency = _detectCurrency(recognizedText, localeId);
 
       // 2. Extract date
@@ -174,7 +210,8 @@ class ParseVoiceInputUseCase {
       return Result.success(
         VoiceParseResult(
           rawText: recognizedText,
-          amount: amount,
+          amount: resolvedAmount,
+          amountRepairCandidate: amountRepairCandidate,
           parsedDate: parsedDate,
           merchantName: bestCandidate?.displayName,
           merchantCategoryId: bestCandidate?.categoryId,
@@ -198,13 +235,17 @@ class ParseVoiceInputUseCase {
 
   /// Resolves the spoken-currency ISO 4217 code for [text] (Phase 42).
   ///
-  /// Returns null when no currency token is present OR the token is JPY-native
-  /// (`円`/`日元`/`えん`/`yen`/`块`/`塊`/`块钱`) — null means "no foreign
+  /// Returns null when no currency token is present OR the token is native
+  /// (`元`/`円`/`日元`/`えん`/`yen`/`块`/`塊`/`块钱`) — null means "no foreign
   /// conversion", preserving the pre-Phase-42 JPY path (Pitfall 1).
   ///
   /// Token → ISO via [VoiceCurrencySuffixes.tokenToIso] for explicit foreign
-  /// tokens. The locale-ambiguous bare `元` resolves by [localeId] (D-08
-  /// locked): zh → 'CNY', ja → 'JPY' (which we surface as null = JPY-native).
+  /// tokens ONLY. 260703 BUG-2 (supersedes the Phase-42 D-08 zh branch): the
+  /// bare `元` is the generic local-currency word for zh speakers — in this
+  /// JPY-native app 「两千五百四十六元」 means yen, exactly like 块/块钱 which
+  /// were already native. The old zh→CNY default converted every zh utterance
+  /// through a CNY→JPY rate fetch. CNY now requires the explicit words
+  /// (人民币/中国元/RMB/chinese yuan/yuan).
   ///
   /// Locale routing mirrors [VoiceTextParser._runStateMachine]: ja-prefixed →
   /// Japanese detector, zh-prefixed → Chinese detector, null → try ja then zh.
@@ -229,14 +270,9 @@ class ParseVoiceInputUseCase {
     final iso = VoiceCurrencySuffixes.tokenToIso[token];
     if (iso != null) return iso;
 
-    // Bare locale-ambiguous yuan token (D-08): zh → CNY, ja → JPY (native →
-    // null). Compared against the named constant so no raw CJK literal lives
-    // in this file (keeps it out of the hardcoded-CJK architecture scan).
-    if (token == VoiceCurrencySuffixes.bareYuanToken) {
-      return isZh ? 'CNY' : null;
-    }
-
-    // All remaining tokens (円/日元/えん/yen/块/塊/块钱) are JPY-native → null.
+    // All remaining tokens (元/円/日元/えん/yen/块/塊/块钱) are native → null.
+    // 260703 BUG-2: the bare 元 special case (D-08: zh → CNY) is GONE — it
+    // falls through here with the other native terminators in every locale.
     return null;
   }
 

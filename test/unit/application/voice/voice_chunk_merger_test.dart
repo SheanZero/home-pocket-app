@@ -1,6 +1,7 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/voice_chunk_merger.dart';
+import 'package:home_pocket/application/voice/voice_text_parser.dart';
 import 'package:home_pocket/infrastructure/speech/speech_recognition_service.dart';
 import 'package:home_pocket/infrastructure/voice/chinese_numeral_state_machine.dart';
 import 'package:home_pocket/infrastructure/voice/japanese_numeral_state_machine.dart';
@@ -15,11 +16,13 @@ VoiceChunkMerger _buildMerger({
   required AmountResolvedCallback onAmountResolved,
   required FakeAsync async,
   required SpeechRecognitionService speechService,
+  int? Function(String text)? amountExtractor,
 }) {
   return VoiceChunkMerger(
     parser: parser,
     speechService: speechService,
     onAmountResolved: onAmountResolved,
+    amountExtractor: amountExtractor,
     clock: () => async.getClock(DateTime.utc(2026, 1, 1)).now(),
   );
 }
@@ -83,35 +86,32 @@ void main() {
       },
     );
 
-    test(
-      'false-merge regression: 1千8百 + 现金 commits 1800 and drops 现金',
-      () {
-        fakeAsync((async) {
-          final commits = <int>[];
-          final mockSpeech = _MockSpeechRecognitionService();
-          when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+    test('false-merge regression: 1千8百 + 现金 commits 1800 and drops 现金', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
 
-          final merger = _buildMerger(
-            parser: const ChineseNumeralStateMachine(),
-            onAmountResolved: commits.add,
-            async: async,
-            speechService: mockSpeech,
-          );
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+        );
 
-          merger.feedChunk('1千8百', isFinal: true);
-          async.flushMicrotasks();
-          async.elapse(const Duration(milliseconds: 1000));
-          merger.feedChunk('现金', isFinal: true); // lexical gate fails
-          async.flushMicrotasks();
+        merger.feedChunk('1千8百', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 1000));
+        merger.feedChunk('现金', isFinal: true); // lexical gate fails
+        async.flushMicrotasks();
 
-          expect(commits, equals([1800])); // committed immediately on gate fail
-          verify(
-            () => mockSpeech.restartListen(),
-          ).called(1); // only on first feed
-          merger.dispose();
-        });
-      },
-    );
+        expect(commits, equals([1800])); // committed immediately on gate fail
+        verify(
+          () => mockSpeech.restartListen(),
+        ).called(1); // only on first feed
+        merger.dispose();
+      });
+    });
 
     test('window expiry commits single chunk after 2.5s', () {
       fakeAsync((async) {
@@ -129,9 +129,14 @@ void main() {
         // Use Chinese unit-notation so the parser can produce a numeric result.
         // Pure arabic digits (e.g. '680') have no units and parse to null in the
         // section-accumulator — they need explicit 百/十/千 markers.
-        merger.feedChunk('6百8十元', isFinal: true); // 680 in Chinese numeral notation
+        merger.feedChunk(
+          '6百8十元',
+          isFinal: true,
+        ); // 680 in Chinese numeral notation
         async.flushMicrotasks();
-        async.elapse(const Duration(milliseconds: 2501)); // just past window boundary
+        async.elapse(
+          const Duration(milliseconds: 2501),
+        ); // just past window boundary
         async.flushMicrotasks();
 
         expect(commits, equals([680]));
@@ -233,6 +238,120 @@ void main() {
     });
   });
 
+  // 260703 BUG-1: iOS zh ITN can finalize 「两千五百四十六元」 as two separate
+  // Arabic finals "2500" + "46元". The old gate judged the pure-Arabic buffer
+  // "closed" → committed 2500 and silently DROPPED the tail. The buffer must be
+  // treated as open (round group) and the merge must read positionally (2546).
+  group('260703 BUG-1: ITN-split Arabic finals', () {
+    test('2500 + 46元 across finals -> 2546 (not 2500-truncation)', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+        );
+
+        merger.feedChunk('2500', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 1200));
+        merger.feedChunk('46元', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 2500));
+        async.flushMicrotasks();
+
+        expect(commits, equals([2546]));
+        verify(() => mockSpeech.restartListen()).called(2);
+        merger.dispose();
+      });
+    });
+
+    test('2500 + 现金 -> commits 2500 and drops the non-numeric chunk', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+        );
+
+        merger.feedChunk('2500', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 1000));
+        merger.feedChunk('现金', isFinal: true); // chunk-side lexical gate fails
+        async.flushMicrotasks();
+
+        expect(commits, equals([2500]));
+        verify(() => mockSpeech.restartListen()).called(1);
+        merger.dispose();
+      });
+    });
+
+    test('comma-grouped final 2,546元 commits 2546 via the full-parser '
+        'extractor (not the tail-only 546)', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+        final textParser = VoiceTextParser();
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+          amountExtractor: (text) =>
+              textParser.extractAmount(text, localeId: 'zh-CN'),
+        );
+
+        merger.feedChunk('2,546元', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 2501));
+        async.flushMicrotasks();
+
+        expect(commits, equals([2546]));
+        merger.dispose();
+      });
+    });
+
+    test('split finals through the extractor also read 2546', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+        final textParser = VoiceTextParser();
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+          amountExtractor: (text) =>
+              textParser.extractAmount(text, localeId: 'zh-CN'),
+        );
+
+        merger.feedChunk('2500', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 800));
+        merger.feedChunk('46元', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 2500));
+        async.flushMicrotasks();
+
+        expect(commits, equals([2546]));
+        merger.dispose();
+      });
+    });
+  });
+
   group('lastFinalAt (Phase 23 D-05 prep)', () {
     test('returns null before any chunk is fed', () {
       final mockSpeech = _MockSpeechRecognitionService();
@@ -264,13 +383,15 @@ void main() {
 
       expect(merger.lastFinalAt, isNotNull);
       expect(
-        merger.lastFinalAt!
-            .isAfter(before.subtract(const Duration(milliseconds: 1))),
+        merger.lastFinalAt!.isAfter(
+          before.subtract(const Duration(milliseconds: 1)),
+        ),
         isTrue,
       );
       expect(
-        merger.lastFinalAt!
-            .isBefore(after.add(const Duration(milliseconds: 1))),
+        merger.lastFinalAt!.isBefore(
+          after.add(const Duration(milliseconds: 1)),
+        ),
         isTrue,
       );
       merger.dispose();

@@ -7,9 +7,18 @@
 // Locked behavior under test (VOICE-CUR-01/02/03, CONTEXT D-08):
 //   - zh corpus: 美元/欧元/英镑/港币/澳元/加元 → USD/EUR/GBP/HKD/AUD/CAD (≥5 cases).
 //   - ja corpus: ドル/ユーロ/ポンド/香港ドル/豪ドル → USD/EUR/GBP/HKD/AUD (≥5 cases).
-//   - Bare-token defaults & 元/円 ambiguity (LOCKED, D-08):
-//       bare 「元」 in zh locale → CNY; bare 「円」 → JPY; bare 「ドル」 → USD.
+//   - Bare-token defaults & 元/円 ambiguity:
+//       bare 「元」 → native JPY (null) in EVERY locale; bare 「円」 → JPY;
+//       bare 「ドル」 → USD. Explicit 人民币/人民元/RMB/yuan → CNY.
 //   - Regression guard: existing non-currency amount extraction is unchanged.
+//
+// 260703 BUG-2 — D-08's zh branch SUPERSEDED: the original D-08 resolved bare
+// 「元」 in zh locale to CNY. In this JPY-native household app a zh speaker
+// saying 「两千五百四十六元」 means yen (元 is the generic local-currency word,
+// exactly like 块/块钱 which were ALREADY treated as native), so the CNY
+// default triggered a wrong CNY→JPY conversion on every zh utterance.
+// User-directed change 2026-07-03: bare 元 is native in all locales; only the
+// explicit words (人民币/中国元/RMB/chinese yuan/yuan) map to CNY.
 //
 // Do NOT weaken assertions to make them pass. RED is the intended state.
 //
@@ -116,11 +125,19 @@ void main() {
     }
   });
 
-  // ─── Bare-token defaults + 元/円 ambiguity (LOCKED, D-08) ───
-  group('bare-token defaults & 元/円 ambiguity (D-08 locked)', () {
-    test('bare 元 in zh locale → CNY', () async {
+  // ─── Bare-token defaults + 元/円 ambiguity (D-08 zh branch superseded 260703) ───
+  group('bare-token defaults & 元/円 ambiguity', () {
+    // 260703 BUG-2: bare 元 in zh is the generic local-currency word — in this
+    // JPY-native app it means yen (aligned with 块/块钱). CNY now requires the
+    // explicit 人民币/RMB/yuan words. Supersedes the original D-08 zh→CNY rule.
+    test('bare 元 in zh locale → native JPY (null), NOT CNY', () async {
       final r = await parseWith('五十元', 'zh-CN');
       expect(r.amount, 50);
+      expect(r.detectedCurrency, isNull);
+    });
+
+    test('zh 人民币 still → CNY (explicit intent unaffected)', () async {
+      final r = await parseWith('五十元人民币', 'zh-CN');
       expect(r.detectedCurrency, 'CNY');
     });
 
@@ -156,27 +173,30 @@ void main() {
   // ─── WR-03: bare-native token EARLIER than an explicit-foreign token ───
   // Pure leftmost-wins mis-classified these as the bare-native currency. The
   // explicit-foreign token must win regardless of position.
-  group('WR-03: bare-native-before-foreign prefers the explicit foreign token', () {
-    test('zh 元宝店买了美元 → USD (not CNY)', () async {
-      final r = await parseWith('元宝店买了美元', 'zh-CN');
-      expect(r.detectedCurrency, 'USD');
-    });
+  group(
+    'WR-03: bare-native-before-foreign prefers the explicit foreign token',
+    () {
+      test('zh 元宝店买了美元 → USD (not CNY)', () async {
+        final r = await parseWith('元宝店买了美元', 'zh-CN');
+        expect(r.detectedCurrency, 'USD');
+      });
 
-    test('zh 五十块花了美元 → USD (块@2 must not beat 美元)', () async {
-      final r = await parseWith('五十块花了美元', 'zh-CN');
-      expect(r.detectedCurrency, 'USD');
-    });
+      test('zh 五十块花了美元 → USD (块@2 must not beat 美元)', () async {
+        final r = await parseWith('五十块花了美元', 'zh-CN');
+        expect(r.detectedCurrency, 'USD');
+      });
 
-    test('ja 円高でも100ドル → USD (円@0 must not beat ドル)', () async {
-      final r = await parseWith('円高でも100ドル', 'ja-JP');
-      expect(r.detectedCurrency, 'USD');
-    });
+      test('ja 円高でも100ドル → USD (円@0 must not beat ドル)', () async {
+        final r = await parseWith('円高でも100ドル', 'ja-JP');
+        expect(r.detectedCurrency, 'USD');
+      });
 
-    test('containment preserved: ja 香港ドル still wins over ドル', () async {
-      final r = await parseWith('300香港ドル', 'ja-JP');
-      expect(r.detectedCurrency, 'HKD');
-    });
-  });
+      test('containment preserved: ja 香港ドル still wins over ドル', () async {
+        final r = await parseWith('300香港ドル', 'ja-JP');
+        expect(r.detectedCurrency, 'HKD');
+      });
+    },
+  );
 
   // ─── Regression guard: existing non-currency extraction unchanged ───
   group('regression: existing non-currency corpus still parses', () {

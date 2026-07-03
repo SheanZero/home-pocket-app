@@ -94,6 +94,7 @@ class _FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
   Future<Result<VoiceParseResult>> execute(
     String recognizedText, {
     String? localeId,
+    List<String> alternateTexts = const [],
   }) async => Result.success(results[recognizedText]);
 }
 
@@ -348,6 +349,18 @@ void main() {
       await tester.pumpAndSettle();
 
       await commit(tester, speech, utterance);
+
+      // 260703 (2B): the conversion-undo snackbar floats over the bottom
+      // action row right after the commit fill. Swipe it away (as a user
+      // would) so the Save tap lands on the button, not on the snackbar.
+      // Auto-dismiss itself is proven in voice_ptt_session_mixin_test; this
+      // test's runAsync wall-clock dance arms the dismiss timer outside fake
+      // time, so waiting cannot clear it here.
+      if (tester.any(find.byType(SnackBar))) {
+        await tester.drag(find.byType(SnackBar), const Offset(0, 120));
+        await tester.pumpAndSettle();
+      }
+
       await tapSave(tester);
 
       // The rate provider was consumed for the detected currency.

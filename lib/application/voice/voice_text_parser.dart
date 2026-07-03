@@ -49,6 +49,21 @@ class VoiceTextParser {
   /// comma-grouped number is present it is AUTHORITATIVE over the state machine.
   static final _commaGroupedPattern = RegExp(r'\d[,，]\d');
 
+  /// 260703 BUG-1: spaced ITN-split signature — a "round" Arabic group (ends
+  /// in ≥2 zeros, the 「两千五百」→"2500" ITN shape) followed by a short 1–2
+  /// digit tail that is itself followed by a currency suffix or end-of-string.
+  /// Such pairs are ONE spoken number split by the recognizer's inverse text
+  /// normalization and must route through the state machine's positional merge
+  /// ("2500 46元" → 2546); the Arabic regex would keep only the tail (46).
+  /// The suffix/end anchor keeps date-shaped tails (「1200 15号」) on the
+  /// Arabic path — misrouting those would corrupt a correct amount.
+  static final _spacedRoundGroupPattern = RegExp(
+    r'(?<!\d)\d+00[\s　]+\d{1,2}\s*(?:' +
+        VoiceCurrencySuffixes.regexAlternation +
+        r'|$)',
+    caseSensitive: false,
+  );
+
   /// Money-context gate for the en number-word fallback (VEN-02 / D-14):
   /// a recognized currency token (via [VoiceCurrencySuffixes]), a `$` symbol,
   /// or a `dollar`/`dollars` word. Without this gate「five fifty」would be the
@@ -100,11 +115,51 @@ class VoiceTextParser {
     // 「上周二交公交卡用了¥5240」 → 周二 trips the hint, machine fails on the
     // non-numeric context, arabic regex would correctly match ¥5240). When
     // the state machine yields null, try the arabic path instead of giving up.
-    if (hasNumeralHint) {
+    // 260703 BUG-1: a spaced round-group pair ("2500 46元") is an ITN-split
+    // single number — the machine's positional merge is the only reader that
+    // reassembles it correctly. Comma-grouped inputs never reach here (the
+    // comma-authoritative gate above already returned), and en locales are
+    // fully isolated in the branch at the top.
+    if (hasNumeralHint || _spacedRoundGroupPattern.hasMatch(text)) {
       final fromMachine = _runStateMachine(text, localeId);
       if (fromMachine != null) return fromMachine;
     }
     return _extractArabicAmount(text);
+  }
+
+  /// 260703 BUG-1: detects the UNSPACED ITN concatenation signature in a pure
+  /// digit string and returns the positional-repair candidate, or null.
+  ///
+  /// iOS zh ITN can normalize 「两千五百四十六」 as two segments "2500"+"46" and
+  /// join them without a delimiter → "250046". The signature: S = head ++ tail
+  /// where the head ends in ≥2 zeros (a round ITN group), the tail is 1–2
+  /// digits with no leading zero, and the tail fits inside the head's trailing
+  /// zeros. Repair = head + tail (250046 → 2546).
+  ///
+  /// Guardrails (precision over recall — a false rewrite is worse than a miss):
+  /// - length floor 5: 「3005」(三千零五) is a normal amount, never flagged;
+  /// - all-zero / zero-led tails rejected: 「250000」 is a legit round amount;
+  /// - longest-head split wins when several fit ("2500046" → 25000+46).
+  ///
+  /// This NEVER rewrites anything by itself — callers surface the candidate
+  /// for user confirmation, or auto-adopt it only when an alternate transcript
+  /// independently parses to the same value (ParseVoiceInputUseCase).
+  static int? detectConcatRepairCandidate(String digits) {
+    if (digits.length < 5 || digits.length > 9) return null;
+    if (!RegExp(r'^\d+$').hasMatch(digits)) return null;
+    // Shortest tail first == longest head wins.
+    for (var tailLen = 1; tailLen <= 2; tailLen++) {
+      final splitAt = digits.length - tailLen;
+      if (splitAt < 3) continue; // head must be ≥ 100 (three digits)
+      final head = digits.substring(0, splitAt);
+      final tail = digits.substring(splitAt);
+      if (tail.startsWith('0')) continue;
+      final trailingZeros =
+          head.length - head.replaceAll(RegExp(r'0+$'), '').length;
+      if (trailingZeros < 2 || tailLen > trailingZeros) continue;
+      return int.parse(head) + int.parse(tail);
+    }
+    return null;
   }
 
   int? _runStateMachine(String text, String? localeId) {
@@ -275,7 +330,8 @@ class VoiceTextParser {
       final idx = lowerText.lastIndexOf(entry.key);
       if (idx < 0) continue;
       final end = idx + entry.key.length;
-      if (end > bestEnEnd || (end == bestEnEnd && entry.key.length > bestEnLen)) {
+      if (end > bestEnEnd ||
+          (end == bestEnEnd && entry.key.length > bestEnLen)) {
         bestEnEnd = end;
         bestEnLen = entry.key.length;
         bestEnKey = entry.key;

@@ -2589,6 +2589,36 @@ abstract class S {
   /// **'Voice recognition error occurred'**
   String get voiceRecognitionErrorUnknown;
 
+  /// Snackbar after a spoken foreign-currency amount was auto-converted to JPY on the voice fill (260703 2B)
+  ///
+  /// In en, this message translates to:
+  /// **'Detected foreign currency: {original} → {converted} (rate {rate})'**
+  String voiceCurrencyConverted(String original, String converted, String rate);
+
+  /// Snackbar action that reverts the voice foreign-currency conversion back to the spoken amount
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get voiceCurrencyConvertedUndo;
+
+  /// Snackbar shown when the recognized amount matches the STT digit-concatenation signature, e.g. 250046 spoken as 2546 (260703 1A)
+  ///
+  /// In en, this message translates to:
+  /// **'Recognized amount {original} — did you mean {candidate}?'**
+  String voiceAmountRepairSuspect(String original, String candidate);
+
+  /// Snackbar action that adopts the repaired amount candidate
+  ///
+  /// In en, this message translates to:
+  /// **'Use {candidate}'**
+  String voiceAmountRepairApply(String candidate);
+
+  /// Informational snackbar when a voice-filled amount is unusually large (260703 1E)
+  ///
+  /// In en, this message translates to:
+  /// **'Large amount: {amount}. Please double-check before saving'**
+  String voiceLargeAmountNotice(String amount);
+
   /// Analytics section title for budget progress
   ///
   /// In en, this message translates to:

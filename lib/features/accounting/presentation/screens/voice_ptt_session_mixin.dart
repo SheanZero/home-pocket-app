@@ -22,7 +22,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
@@ -37,6 +37,9 @@ import '../../../../application/voice/repository_providers.dart'
         japaneseNumeralStateMachineProvider;
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../../application/voice/voice_chunk_merger.dart';
+import '../../../../application/voice/voice_text_parser.dart';
+import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart'
     show convertToJpy, subunitToUnitFor;
 import '../../domain/models/category.dart';
@@ -58,6 +61,12 @@ import 'voice_recognition_event_handler_mixin.dart';
 /// - [stopped]    — the recognizer self-terminated and was not re-armed, or the
 ///   session ended / a restart failed (grey 「停止聆听」).
 enum PttListenStatus { listening, processing, stopped }
+
+/// 260703 (1E): voice-filled amounts at/above this JPY figure surface a
+/// "please double-check" notice. Voice is the only entry path that can be
+/// poisoned by recognizer ITN artifacts (BUG-1: 「两千五百四十六」 → 250046),
+/// so the guardrail lives in the voice session, not in the shared form.
+const int kVoiceLargeAmountNoticeThreshold = 1000000;
 
 /// Reusable hold-to-record session: speech lifecycle + transcript + chunk merger
 /// + parse + batch-fill + foreign triple + satisfaction, host-agnostic.
@@ -154,7 +163,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   String get pttFinalText => _finalText;
 
   /// Live transcript for the overlay — partial wins while recording, else final.
-  String get pttTranscript => _partialText.isNotEmpty ? _partialText : _finalText;
+  String get pttTranscript =>
+      _partialText.isNotEmpty ? _partialText : _finalText;
   double get pttSoundLevel => _soundLevel;
   String get pttDisplayCurrency => _displayCurrency;
   bool get pttServiceInitialized => _pttServiceInitialized;
@@ -174,8 +184,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// `listening` so the user sees 「正在解析…」 the instant a result lands.
   PttListenStatus get pttListenStatus =>
       _parsing && _listenStatus != PttListenStatus.stopped
-          ? PttListenStatus.processing
-          : _listenStatus;
+      ? PttListenStatus.processing
+      : _listenStatus;
 
   // ── VoiceRecognitionEventHandlerMixin abstract contract ────────────────────
 
@@ -239,6 +249,9 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _soundLevel = 0.0;
       _parseResult = null;
       _mergedAmount = null;
+      // 260703 (2C): partial fills no longer touch the display currency, so a
+      // fresh session resets it here instead of on the first partial fill.
+      _displayCurrency = 'JPY';
       _listenStatus = PttListenStatus.listening;
     });
     _soundLevels.clear();
@@ -273,7 +286,16 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     });
 
     final text = _finalText.isNotEmpty ? _finalText : _partialText;
-    await _fillFormFromText(text);
+    await _fillFormFromText(text, data: _cachedParseFor(text));
+  }
+
+  /// 260703 BUG-1 (1D): reuse the already-parsed result when it matches [text]
+  /// verbatim — an alternate-confirmed amount repair lives ONLY on that
+  /// instance; a re-parse here has no alternates and would resurrect the
+  /// poisoned amount. Falls back to null (fresh parse) on any mismatch.
+  VoiceParseResult? _cachedParseFor(String text) {
+    final cached = _parseResult;
+    return (cached != null && cached.rawText == text) ? cached : null;
   }
 
   /// 260622-nhs R2: parse [text] and batch-fill the embedded form (amount /
@@ -355,7 +377,21 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       }
     }
 
-    final amount = _mergedAmount ?? data.amount ?? 0;
+    var amount = _mergedAmount ?? data.amount ?? 0;
+    // 260703 BUG-1: when the merger's committed amount is exactly the
+    // ITN-concat poisoning of the parse amount (which the use case may have
+    // already repaired via an alternate transcript, 1D), the parse amount
+    // wins — the merger has no alternates to repair with. The merged amount
+    // keeps its priority for every other divergence (multi-chunk kanji).
+    final parsedAmount = data.amount;
+    final mergedAmount = _mergedAmount;
+    if (parsedAmount != null &&
+        mergedAmount != null &&
+        mergedAmount != parsedAmount &&
+        VoiceTextParser.detectConcatRepairCandidate('$mergedAmount') ==
+            parsedAmount) {
+      amount = parsedAmount;
+    }
     if (!mounted) return;
     final state = pttFormState;
     if (state == null) return;
@@ -382,25 +418,143 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
     }
 
-    var nextCurrency = 'JPY';
-    final detectedCurrency = data.detectedCurrency;
-    if (amount > 0 &&
-        detectedCurrency != null &&
-        detectedCurrency.isNotEmpty) {
-      final switched = await pushVoiceForeignTriple(
+    // 260703 BUG-2 (2C): the conversion — and every amount notice — runs ONLY
+    // on the resolve-on-final fill, the same gate as the category (XVAL-03).
+    // Partial-driven fills previously re-fetched the rate every ~300ms and
+    // bounced the amount between raw and converted figures mid-utterance.
+    if (fillCategory) {
+      var nextCurrency = 'JPY';
+      ({int jpy, String rate})? conversion;
+      final detectedCurrency = data.detectedCurrency;
+      if (amount > 0 &&
+          detectedCurrency != null &&
+          detectedCurrency.isNotEmpty) {
+        conversion = await pushVoiceForeignTriple(
+          state: state,
+          currency: detectedCurrency,
+          wholeUnitAmount: amount,
+          date: data.parsedDate ?? DateTime.now(),
+        );
+        if (conversion != null) nextCurrency = detectedCurrency;
+      }
+      if (!mounted) return;
+      onPttSessionChanged(() {
+        _displayCurrency = nextCurrency;
+      });
+      _showVoiceAmountNotice(
         state: state,
-        currency: detectedCurrency,
-        wholeUnitAmount: amount,
-        date: data.parsedDate ?? DateTime.now(),
+        data: data,
+        filledAmount: amount,
+        conversion: conversion,
+        currency: nextCurrency,
       );
-      if (switched) nextCurrency = detectedCurrency;
     }
-
-    onPttSessionChanged(() {
-      _displayCurrency = nextCurrency;
-    });
     // Provenance hook: a PTT fill happened — host stamps EntrySource.voice.
     onPttCommitted();
+  }
+
+  // ── 260703 (2B/1A/1E): post-final amount notices ────────────────────────────
+
+  /// Shows AT MOST ONE notice per final fill, by precedence:
+  /// conversion-undo (2B) > repair-candidate adopt (1A) > large-amount (1E).
+  /// All copy comes from ARB; amounts go through [NumberFormatter] with the
+  /// ambient locale. Notices are informational or one-tap — the fill itself
+  /// never silently rewrites what was recognized.
+  void _showVoiceAmountNotice({
+    required TransactionDetailsFormState state,
+    required VoiceParseResult data,
+    required int filledAmount,
+    required ({int jpy, String rate})? conversion,
+    required String currency,
+  }) {
+    if (!mounted) return;
+    final l10n = S.of(context);
+    final locale = Localizations.localeOf(context);
+    String jpy(int v) => NumberFormatter.formatCurrency(v, 'JPY', locale);
+
+    if (conversion != null) {
+      // 2B: the conversion is visible and reversible. Undo restores the spoken
+      // amount and clears the triple back to a JPY-native row.
+      final spoken = filledAmount;
+      _showVoiceSnackBar(
+        message: l10n.voiceCurrencyConverted(
+          NumberFormatter.formatCurrency(
+            spoken,
+            currency,
+            locale,
+            trimWholeFraction: true,
+          ),
+          jpy(conversion.jpy),
+          conversion.rate,
+        ),
+        actionLabel: l10n.voiceCurrencyConvertedUndo,
+        onAction: () {
+          state.updateAmount(spoken);
+          state.updateCurrencyTriple(
+            originalCurrency: null,
+            originalAmount: null,
+            appliedRate: null,
+          );
+          _lastFilledAmount = spoken;
+          if (mounted) {
+            onPttSessionChanged(() => _displayCurrency = 'JPY');
+          }
+        },
+      );
+      return;
+    }
+
+    // 1A: suspected ITN-concat amount — one-tap adopt, never silent.
+    // Suppressed when the filled amount didn't come from data.amount (a
+    // merger-committed multi-chunk amount makes the candidate meaningless).
+    final candidate = data.amountRepairCandidate;
+    if (candidate != null &&
+        filledAmount == data.amount &&
+        candidate != filledAmount) {
+      _showVoiceSnackBar(
+        message: l10n.voiceAmountRepairSuspect(
+          jpy(filledAmount),
+          jpy(candidate),
+        ),
+        actionLabel: l10n.voiceAmountRepairApply(jpy(candidate)),
+        onAction: () {
+          state.updateAmount(candidate);
+          _lastFilledAmount = candidate;
+          if (mounted) onPttSessionChanged(() {});
+        },
+      );
+      return;
+    }
+
+    // 1E: sanity guardrail — a very large voice-filled amount gets a visible
+    // "please double-check" nudge (non-blocking; the entry stays editable).
+    if (filledAmount >= kVoiceLargeAmountNoticeThreshold) {
+      _showVoiceSnackBar(
+        message: l10n.voiceLargeAmountNotice(jpy(filledAmount)),
+      );
+    }
+  }
+
+  void _showVoiceSnackBar({
+    required String message,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          action: (actionLabel != null && onAction != null)
+              ? SnackBarAction(label: actionLabel, onPressed: onAction)
+              : null,
+        ),
+      );
   }
 
   // ── 260622-nhs R2: tap-toggled continuous auto-fill session ────────────────
@@ -430,7 +584,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _listenStatus = PttListenStatus.stopped;
     });
     final text = _finalText.isNotEmpty ? _finalText : _partialText;
-    await _fillFormFromText(text);
+    await _fillFormFromText(text, data: _cachedParseFor(text));
   }
 
   /// 260622-nhs R4 (BUG A + BUG B): the 「重置·恢复账目」 reset. Unlike the weak
@@ -500,9 +654,15 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     final parser = pttVoiceLocaleId.startsWith('ja')
         ? ref.read(japaneseNumeralStateMachineProvider)
         : ref.read(chineseNumeralStateMachineProvider);
+    // 260703 BUG-1 (1E): commits go through the full parser routing so a
+    // comma-grouped final (「2,546元」) keeps its leading groups — the bare
+    // state machine would drop the comma and read only the tail (546).
+    final textParser = VoiceTextParser();
     _amountMerger = VoiceChunkMerger(
       parser: parser,
       speechService: speechService,
+      amountExtractor: (text) =>
+          textParser.extractAmount(text, localeId: pttVoiceLocaleId),
       onAmountResolved: (amount) {
         if (!mounted) return;
         onPttSessionChanged(() => _mergedAmount = amount);
@@ -614,25 +774,31 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     super.onStatus(status);
   }
 
-  // ── Foreign triple (ported verbatim from _pushVoiceForeignTriple) ───────────
+  // ── Foreign triple (ported from _pushVoiceForeignTriple) ────────────────────
 
-  Future<bool> pushVoiceForeignTriple({
+  /// Pushes the foreign-currency triple + converted JPY amount into [state].
+  ///
+  /// 260703 (2B): returns the conversion outcome — the converted JPY figure and
+  /// the applied rate — so the caller can surface a visible, undoable notice.
+  /// Null means the triple was NOT pushed (non-positive amount, rate
+  /// unavailable, or any error): the JPY-native path stays untouched.
+  Future<({int jpy, String rate})?> pushVoiceForeignTriple({
     required TransactionDetailsFormState state,
     required String currency,
     required int wholeUnitAmount,
     required DateTime date,
   }) async {
     final minorUnits = wholeUnitAmount * subunitToUnitFor(currency);
-    if (minorUnits <= 0) return false;
+    if (minorUnits <= 0) return null;
     try {
       final useCase = ref.read(appGetExchangeRateUseCaseProvider);
       final withSignal = await useCase.execute(
         GetExchangeRateParams(currency: currency, date: date),
       );
-      if (!mounted) return false;
+      if (!mounted) return null;
       final rate = _extractRate(withSignal.result);
       if (rate == null) {
-        return false;
+        return null;
       }
       final jpy = convertToJpy(
         originalMinorUnits: minorUnits,
@@ -646,9 +812,9 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         originalAmount: minorUnits,
         appliedRate: rate,
       );
-      return true;
+      return (jpy: jpy, rate: rate);
     } catch (_) {
-      return false;
+      return null;
     }
   }
 
@@ -717,19 +883,30 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _parseDebounce?.cancel();
       if (text.isNotEmpty) {
         _amountMerger?.feedChunk(text, isFinal: true);
+        // 260703 BUG-1 (1D): the recognizer's alternate transcripts (the
+        // transcription list minus its best entry) ride along so the parse
+        // layer can cross-validate a suspected ITN-concat amount — an
+        // alternate that independently reads the repaired value auto-adopts
+        // the repair.
+        final alternateTexts = <String>[
+          for (final alt in result.alternates.skip(1))
+            if (alt.recognizedWords.isNotEmpty) alt.recognizedWords,
+        ];
         // R2/R4: in the continuous tap session, parse ONCE (with satisfaction)
         // and reuse that single result to auto-fill the form live (BUG D dedupe
         // — the prior code parsed `text` here AND again inside _fillFormFromText).
         // The legacy hold path only refreshes _parseResult here; the fill happens
         // on release (still one parse, via the release commit).
         if (_continuousActive) {
-          _parseFinalResult(text).then((parsed) {
+          _parseFinalResult(text, alternateTexts: alternateTexts).then((
+            parsed,
+          ) {
             if (mounted && _continuousActive) {
               _fillFormFromText(text, data: parsed);
             }
           });
         } else {
-          _parseFinalResult(text);
+          _parseFinalResult(text, alternateTexts: alternateTexts);
         }
       }
     }
@@ -759,10 +936,19 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// can reuse it for the form-fill instead of parsing the same text a second
   /// time. Still mirrors `_parseResult` (drives the learning keyword hook /
   /// satisfaction read) as before.
-  Future<VoiceParseResult?> _parseFinalResult(String text) async {
+  /// 260703 (1D): [alternateTexts] are threaded into the use case for the
+  /// ITN-concat cross-validation.
+  Future<VoiceParseResult?> _parseFinalResult(
+    String text, {
+    List<String> alternateTexts = const [],
+  }) async {
     if (!mounted) return null;
     final useCase = ref.read(parseVoiceInputUseCaseProvider);
-    final result = await useCase.execute(text, localeId: pttVoiceLocaleId);
+    final result = await useCase.execute(
+      text,
+      localeId: pttVoiceLocaleId,
+      alternateTexts: alternateTexts,
+    );
 
     if (!mounted || !result.isSuccess) return null;
 

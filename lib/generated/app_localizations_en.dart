@@ -1356,6 +1356,33 @@ class SEn extends S {
   String get voiceRecognitionErrorUnknown => 'Voice recognition error occurred';
 
   @override
+  String voiceCurrencyConverted(
+    String original,
+    String converted,
+    String rate,
+  ) {
+    return 'Detected foreign currency: $original → $converted (rate $rate)';
+  }
+
+  @override
+  String get voiceCurrencyConvertedUndo => 'Undo';
+
+  @override
+  String voiceAmountRepairSuspect(String original, String candidate) {
+    return 'Recognized amount $original — did you mean $candidate?';
+  }
+
+  @override
+  String voiceAmountRepairApply(String candidate) {
+    return 'Use $candidate';
+  }
+
+  @override
+  String voiceLargeAmountNotice(String amount) {
+    return 'Large amount: $amount. Please double-check before saving';
+  }
+
+  @override
   String get analyticsBudgetProgress => 'Budget Progress';
 
   @override

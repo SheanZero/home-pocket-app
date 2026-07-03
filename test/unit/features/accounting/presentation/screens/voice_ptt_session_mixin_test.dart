@@ -103,6 +103,15 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], true),
   );
 
+  /// 260703 BUG-1 (1D): a final whose transcription list carries alternates —
+  /// entry 0 is the primary transcript (== recognizedWords), the rest are the
+  /// alternates the mixin must thread into execute(alternateTexts:).
+  void emitFinalWithAlternates(List<String> transcripts) => onResult!(
+    SpeechRecognitionResult([
+      for (final t in transcripts) SpeechRecognitionWords(t, null, 0.9),
+    ], true),
+  );
+
   void emitPartial(String words) => onResult!(
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.5)], false),
   );
@@ -123,13 +132,16 @@ class FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
   FakeParseVoiceInputUseCase(this.results);
   final Map<String, VoiceParseResult> results;
   final inputs = <String>[];
+  final alternateInputs = <List<String>>[];
 
   @override
   Future<Result<VoiceParseResult>> execute(
     String recognizedText, {
     String? localeId,
+    List<String> alternateTexts = const [],
   }) async {
     inputs.add(recognizedText);
+    alternateInputs.add(alternateTexts);
     return Result.success(results[recognizedText]);
   }
 }
@@ -364,8 +376,11 @@ void main() {
       expect(parse.inputs, contains('1千8百4十元 星巴克'));
       expect(speech.stopped, isTrue);
       expect(speech.canceled, isFalse);
-      expect(host.committed, isTrue,
-          reason: 'onPttCommitted must fire after a successful batch-fill');
+      expect(
+        host.committed,
+        isTrue,
+        reason: 'onPttCommitted must fire after a successful batch-fill',
+      );
 
       // The form received the batch-fill — assert via the rendered merchant
       // TextField and category chip.
@@ -374,76 +389,78 @@ void main() {
     },
   );
 
-  testWidgets(
-    'misfire (<300ms) discards via cancel — no parse, no commit',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase(const {});
+  testWidgets('misfire (<300ms) discards via cancel — no parse, no commit', (
+    tester,
+  ) async {
+    useTallSurface(tester);
+    final speech = CapturingSpeechService();
+    final parse = FakeParseVoiceInputUseCase(const {});
 
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildHost(speechService: speech, parseUseCase: parse),
+    );
+    await tester.pumpAndSettle();
 
-      final host = hostOf(tester);
-      host.onPttHoldStart();
-      await tester.pump();
-      host.onPttHoldEnd(); // released immediately — under 300 ms
-      await tester.pumpAndSettle();
+    final host = hostOf(tester);
+    host.onPttHoldStart();
+    await tester.pump();
+    host.onPttHoldEnd(); // released immediately — under 300 ms
+    await tester.pumpAndSettle();
 
-      expect(speech.canceled, isTrue);
-      expect(speech.stopped, isFalse);
-      expect(parse.inputs, isEmpty);
-      expect(host.committed, isFalse);
-    },
-  );
+    expect(speech.canceled, isTrue);
+    expect(speech.stopped, isFalse);
+    expect(parse.inputs, isEmpty);
+    expect(host.committed, isFalse);
+  });
 
-  testWidgets(
-    'detected-foreign-currency utterance pushes the foreign triple',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase({
-        '拿铁 十美金': VoiceParseResult(
-          rawText: '拿铁 十美金',
-          amount: 10,
-          parsedDate: DateTime(2026, 4, 27),
-          merchantName: null,
-          categoryMatch: const CategoryMatchResult(
-            categoryId: 'cat_food_cafe',
-            confidence: 0.9,
-            source: MatchSource.keyword,
-          ),
-          ledgerType: LedgerType.daily,
-          detectedCurrency: 'USD',
+  testWidgets('detected-foreign-currency utterance pushes the foreign triple', (
+    tester,
+  ) async {
+    useTallSurface(tester);
+    final speech = CapturingSpeechService();
+    final parse = FakeParseVoiceInputUseCase({
+      '拿铁 十美金': VoiceParseResult(
+        rawText: '拿铁 十美金',
+        amount: 10,
+        parsedDate: DateTime(2026, 4, 27),
+        merchantName: null,
+        categoryMatch: const CategoryMatchResult(
+          categoryId: 'cat_food_cafe',
+          confidence: 0.9,
+          source: MatchSource.keyword,
         ),
-      });
+        ledgerType: LedgerType.daily,
+        detectedCurrency: 'USD',
+      ),
+    });
 
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse, rate: '150.0'),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildHost(speechService: speech, parseUseCase: parse, rate: '150.0'),
+    );
+    await tester.pumpAndSettle();
 
-      final host = hostOf(tester);
-      host.onPttHoldStart();
-      await tester.pump();
-      speech.emitFinal('拿铁 十美金');
-      await tester.pump();
-      await tester.binding.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 350)),
-      );
-      host.onPttHoldEnd();
-      await tester.pumpAndSettle();
+    final host = hostOf(tester);
+    host.onPttHoldStart();
+    await tester.pump();
+    speech.emitFinal('拿铁 十美金');
+    await tester.pump();
+    await tester.binding.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    host.onPttHoldEnd();
+    await tester.pumpAndSettle();
 
-      // The display currency only switches to USD when pushVoiceForeignTriple
-      // returns true — i.e. the COMPLETE triple (originalCurrency/amount/rate)
-      // was pushed into the form. JPY-native or RateUnavailable keep 'JPY'.
-      expect(host.pttDisplayCurrency, 'USD',
-          reason: 'a resolved foreign rate pushes the triple and switches '
-              'the display currency to USD');
-    },
-  );
+    // The display currency only switches to USD when pushVoiceForeignTriple
+    // returns true — i.e. the COMPLETE triple (originalCurrency/amount/rate)
+    // was pushed into the form. JPY-native or RateUnavailable keep 'JPY'.
+    expect(
+      host.pttDisplayCurrency,
+      'USD',
+      reason:
+          'a resolved foreign rate pushes the triple and switches '
+          'the display currency to USD',
+    );
+  });
 
   // ── R2 tap-modal / continuous auto-fill ──────────────────────────────────
 
@@ -482,10 +499,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(parse.inputs, contains('1千8百4十元 星巴克'));
-      expect(host.committed, isTrue,
-          reason: 'an auto-fill fires onPttCommitted');
-      expect(host.pttIsRecording, isTrue,
-          reason: 'the session keeps listening after an auto-fill');
+      expect(
+        host.committed,
+        isTrue,
+        reason: 'an auto-fill fires onPttCommitted',
+      );
+      expect(
+        host.pttIsRecording,
+        isTrue,
+        reason: 'the session keeps listening after an auto-fill',
+      );
       expect(find.text('星巴克'), findsOneWidget);
       expect(find.textContaining('Cafe'), findsOneWidget);
     },
@@ -514,12 +537,21 @@ void main() {
 
       // R6: the iOS continuous re-arm was unreliable (mic died but status stuck
       // on listening). The one-shot model stops cleanly instead of re-arming.
-      expect(host.pttIsRecording, isFalse,
-          reason: 'a terminal status ends the one-shot recording');
-      expect(host.pttListenStatus, PttListenStatus.stopped,
-          reason: 'status reflects the stopped recognizer');
-      expect(speech.startCount, startsBefore,
-          reason: 'no auto re-arm — the recognizer is NOT restarted');
+      expect(
+        host.pttIsRecording,
+        isFalse,
+        reason: 'a terminal status ends the one-shot recording',
+      );
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'status reflects the stopped recognizer',
+      );
+      expect(
+        speech.startCount,
+        startsBefore,
+        reason: 'no auto re-arm — the recognizer is NOT restarted',
+      );
     },
   );
 
@@ -562,8 +594,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(speech.stopped, isTrue);
-      expect(host.pttIsRecording, isFalse,
-          reason: 'exit ends the session');
+      expect(host.pttIsRecording, isFalse, reason: 'exit ends the session');
       // Filled content is retained (D-2 fill-and-stay).
       expect(find.text('スタバ'), findsOneWidget);
     },
@@ -594,13 +625,22 @@ void main() {
       await tester.pumpAndSettle();
 
       // cancel() must have been called to clear the recognizer buffer …
-      expect(speech.cancelCount, greaterThanOrEqualTo(1),
-          reason: 'reset must cancel() to clear the recognizer buffer');
+      expect(
+        speech.cancelCount,
+        greaterThanOrEqualTo(1),
+        reason: 'reset must cancel() to clear the recognizer buffer',
+      );
       // … and a fresh startListening must follow (not the weak no-op restart).
-      expect(speech.startCount, greaterThan(startsBefore),
-          reason: 'reset must start a fresh listening session');
-      expect(speech.isListening, isTrue,
-          reason: 'the session is listening again after reset');
+      expect(
+        speech.startCount,
+        greaterThan(startsBefore),
+        reason: 'reset must start a fresh listening session',
+      );
+      expect(
+        speech.isListening,
+        isTrue,
+        reason: 'the session is listening again after reset',
+      );
       expect(host.pttIsRecording, isTrue);
     },
   );
@@ -641,8 +681,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // The app-side transcript buffers are cleared.
-      expect(host.pttTranscript, isEmpty,
-          reason: 'reset clears the partial/final transcript');
+      expect(
+        host.pttTranscript,
+        isEmpty,
+        reason: 'reset clears the partial/final transcript',
+      );
 
       // A fresh utterance after reset fills the form (no stale accumulation).
       speech.emitFinal('1千8百4十元 星巴克');
@@ -680,9 +723,13 @@ void main() {
 
       // Exactly ONE fresh start from the reset — the suppressed onStatus re-arm
       // must not have added a second concurrent startListening.
-      expect(speech.startCount, 2,
-          reason: 'one start from startPttTapSession + one from reset; the '
-              'in-window terminal status must NOT add a third');
+      expect(
+        speech.startCount,
+        2,
+        reason:
+            'one start from startPttTapSession + one from reset; the '
+            'in-window terminal status must NOT add a third',
+      );
       expect(host.pttIsRecording, isTrue);
       expect(speech.isListening, isTrue);
 
@@ -724,13 +771,19 @@ void main() {
       final host = hostOf(tester);
       host.startPttTapSession();
       await tester.pump();
-      expect(host.pttListenStatus, PttListenStatus.listening,
-          reason: 'an open session starts in listening');
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.listening,
+        reason: 'an open session starts in listening',
+      );
 
       await host.exitPttTapSession();
       await tester.pumpAndSettle();
-      expect(host.pttListenStatus, PttListenStatus.stopped,
-          reason: 'exiting stops the recognizer');
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'exiting stops the recognizer',
+      );
     },
   );
 
@@ -779,20 +832,32 @@ void main() {
       }
 
       // Gate is category-scoped: amount + merchant DID fill from the partials.
-      expect(find.text('星巴克'), findsOneWidget,
-          reason: 'partials still fill merchant live (gate is category-only)');
-      expect(host.pttLastFilledAmount, 1840,
-          reason: 'partials still fill amount live (gate is category-only)');
+      expect(
+        find.text('星巴克'),
+        findsOneWidget,
+        reason: 'partials still fill merchant live (gate is category-only)',
+      );
+      expect(
+        host.pttLastFilledAmount,
+        1840,
+        reason: 'partials still fill amount live (gate is category-only)',
+      );
       // …but the category chip is held until the first end-of-speech final.
-      expect(find.textContaining('Cafe'), findsNothing,
-          reason: 'category is held across partials — no chip flicker (XVAL-03)');
+      expect(
+        find.textContaining('Cafe'),
+        findsNothing,
+        reason: 'category is held across partials — no chip flicker (XVAL-03)',
+      );
 
       // The first end-of-speech final resolves the category exactly once.
       speech.emitFinal('1千8百4十元 星巴克');
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Cafe'), findsOneWidget,
-          reason: 'the final result resolves the category (resolve-on-final)');
+      expect(
+        find.textContaining('Cafe'),
+        findsOneWidget,
+        reason: 'the final result resolves the category (resolve-on-final)',
+      );
       // Amount/merchant remain filled (the final fill is a superset, not a reset).
       expect(find.text('星巴克'), findsOneWidget);
       expect(host.pttLastFilledAmount, 1840);
@@ -838,50 +903,55 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
       await tester.pumpAndSettle();
 
-      expect(find.text('星巴克'), findsOneWidget,
-          reason: 'partial auto-fill updates the form live');
-    },
-  );
-
-  testWidgets(
-    'R4 BUG D: the final branch parses the text only ONCE (dedupe)',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase({
-        'ラテ 1千': VoiceParseResult(
-          rawText: 'ラテ 1千',
-          amount: 1000,
-          parsedDate: DateTime(2026, 4, 27),
-          merchantName: 'スタバ',
-          categoryMatch: const CategoryMatchResult(
-            categoryId: 'cat_food_cafe',
-            confidence: 0.9,
-            source: MatchSource.keyword,
-          ),
-          ledgerType: LedgerType.daily,
-        ),
-      });
-
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse),
+      expect(
+        find.text('星巴克'),
+        findsOneWidget,
+        reason: 'partial auto-fill updates the form live',
       );
-      await tester.pumpAndSettle();
-
-      final host = hostOf(tester);
-      host.startPttTapSession();
-      await tester.pump();
-      speech.emitFinal('ラテ 1千');
-      await tester.pumpAndSettle();
-
-      // BUG D: the final path must parse 'ラテ 1千' exactly once — the prior code
-      // parsed it twice (satisfaction estimate + fill).
-      final count = parse.inputs.where((t) => t == 'ラテ 1千').length;
-      expect(count, 1,
-          reason: 'final result must parse once (deduped), not twice');
-      expect(find.text('スタバ'), findsOneWidget);
     },
   );
+
+  testWidgets('R4 BUG D: the final branch parses the text only ONCE (dedupe)', (
+    tester,
+  ) async {
+    useTallSurface(tester);
+    final speech = CapturingSpeechService();
+    final parse = FakeParseVoiceInputUseCase({
+      'ラテ 1千': VoiceParseResult(
+        rawText: 'ラテ 1千',
+        amount: 1000,
+        parsedDate: DateTime(2026, 4, 27),
+        merchantName: 'スタバ',
+        categoryMatch: const CategoryMatchResult(
+          categoryId: 'cat_food_cafe',
+          confidence: 0.9,
+          source: MatchSource.keyword,
+        ),
+        ledgerType: LedgerType.daily,
+      ),
+    });
+
+    await tester.pumpWidget(
+      buildHost(speechService: speech, parseUseCase: parse),
+    );
+    await tester.pumpAndSettle();
+
+    final host = hostOf(tester);
+    host.startPttTapSession();
+    await tester.pump();
+    speech.emitFinal('ラテ 1千');
+    await tester.pumpAndSettle();
+
+    // BUG D: the final path must parse 'ラテ 1千' exactly once — the prior code
+    // parsed it twice (satisfaction estimate + fill).
+    final count = parse.inputs.where((t) => t == 'ラテ 1千').length;
+    expect(
+      count,
+      1,
+      reason: 'final result must parse once (deduped), not twice',
+    );
+    expect(find.text('スタバ'), findsOneWidget);
+  });
 
   // ── R5 BUG 1: continuous-session onError — swallow transient no-match ───────
 
@@ -913,52 +983,70 @@ void main() {
       await tester.pumpAndSettle();
 
       // No toast surfaced (R5 swallow preserved).
-      expect(find.text('音声を認識できませんでした。もう一度お試しください'), findsNothing,
-          reason: 'a silence no-match must not toast in hands-free mode');
+      expect(
+        find.text('音声を認識できませんでした。もう一度お試しください'),
+        findsNothing,
+        reason: 'a silence no-match must not toast in hands-free mode',
+      );
       // Bar stays usable — isInitialized must NOT flip false.
-      expect(host.pttServiceInitialized, isTrue,
-          reason: 'transient error must not lock the bar');
+      expect(
+        host.pttServiceInitialized,
+        isTrue,
+        reason: 'transient error must not lock the bar',
+      );
       // R6: the one-shot session STOPS (no re-arm); the user taps 重置 to record
       // again. status → stopped surfaces the 「停止聆听」 + tap-reset hint.
-      expect(host.pttIsRecording, isFalse,
-          reason: 'a transient no-match stops the one-shot session');
-      expect(host.pttListenStatus, PttListenStatus.stopped,
-          reason: 'status → stopped so the panel shows 停止聆听 + tap-reset hint');
-      expect(speech.startCount, startsBefore,
-          reason: 'no auto re-arm — the recognizer is NOT restarted');
-    },
-  );
-
-  testWidgets(
-    'R6 BUG 1: a transient speech-timeout STOPS the one-shot session '
-    '(no toast, no lock, no re-arm)',
-    (tester) async {
-      useTallSurface(tester);
-      final speech = CapturingSpeechService();
-      final parse = FakeParseVoiceInputUseCase(const {});
-
-      await tester.pumpWidget(
-        buildHost(speechService: speech, parseUseCase: parse),
+      expect(
+        host.pttIsRecording,
+        isFalse,
+        reason: 'a transient no-match stops the one-shot session',
       );
-      await tester.pumpAndSettle();
-
-      final host = hostOf(tester);
-      host.startPttTapSession();
-      await tester.pump();
-      final startsBefore = speech.startCount;
-
-      speech.emitError('error_speech_timeout', permanent: true);
-      await tester.pumpAndSettle();
-
-      expect(find.text('音声認識でエラーが発生しました'), findsNothing);
-      expect(host.pttServiceInitialized, isTrue);
-      expect(host.pttIsRecording, isFalse,
-          reason: 'a transient timeout stops the one-shot session');
-      expect(host.pttListenStatus, PttListenStatus.stopped);
-      expect(speech.startCount, startsBefore,
-          reason: 'no auto re-arm on a transient timeout');
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'status → stopped so the panel shows 停止聆听 + tap-reset hint',
+      );
+      expect(
+        speech.startCount,
+        startsBefore,
+        reason: 'no auto re-arm — the recognizer is NOT restarted',
+      );
     },
   );
+
+  testWidgets('R6 BUG 1: a transient speech-timeout STOPS the one-shot session '
+      '(no toast, no lock, no re-arm)', (tester) async {
+    useTallSurface(tester);
+    final speech = CapturingSpeechService();
+    final parse = FakeParseVoiceInputUseCase(const {});
+
+    await tester.pumpWidget(
+      buildHost(speechService: speech, parseUseCase: parse),
+    );
+    await tester.pumpAndSettle();
+
+    final host = hostOf(tester);
+    host.startPttTapSession();
+    await tester.pump();
+    final startsBefore = speech.startCount;
+
+    speech.emitError('error_speech_timeout', permanent: true);
+    await tester.pumpAndSettle();
+
+    expect(find.text('音声認識でエラーが発生しました'), findsNothing);
+    expect(host.pttServiceInitialized, isTrue);
+    expect(
+      host.pttIsRecording,
+      isFalse,
+      reason: 'a transient timeout stops the one-shot session',
+    );
+    expect(host.pttListenStatus, PttListenStatus.stopped);
+    expect(
+      speech.startCount,
+      startsBefore,
+      reason: 'no auto re-arm on a transient timeout',
+    );
+  });
 
   testWidgets(
     'R5 BUG 1: a FATAL error during a continuous session tears down cleanly '
@@ -983,23 +1071,44 @@ void main() {
       await tester.pumpAndSettle();
 
       // Clean teardown.
-      expect(host.pttContinuousActive, isFalse,
-          reason: 'a fatal error ends the continuous session');
-      expect(host.pttIsRecording, isFalse,
-          reason: 'a fatal error stops recording');
-      expect(host.pttListenStatus, PttListenStatus.stopped,
-          reason: 'status reflects the stopped recognizer');
+      expect(
+        host.pttContinuousActive,
+        isFalse,
+        reason: 'a fatal error ends the continuous session',
+      );
+      expect(
+        host.pttIsRecording,
+        isFalse,
+        reason: 'a fatal error stops recording',
+      );
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'status reflects the stopped recognizer',
+      );
       // The user IS told (fatal errors toast).
-      expect(find.text('マイクの音声を取得できませんでした'), findsOneWidget,
-          reason: 'a fatal error surfaces a toast');
+      expect(
+        find.text('マイクの音声を取得できませんでした'),
+        findsOneWidget,
+        reason: 'a fatal error surfaces a toast',
+      );
       // The bar recovers — guard passes for the next tap (re-initialized so the
       // next 「语音记录」 tap works without an app restart).
-      expect(host.pttServiceInitialized, isTrue,
-          reason: 'the bar must be re-enabled after a fatal error');
-      expect(speech.initializeCount, greaterThan(initBefore),
-          reason: 'the service was re-initialized to recover the bar');
-      expect(host.pttCanStart, isTrue,
-          reason: 'a new tap can re-enter after a fatal error');
+      expect(
+        host.pttServiceInitialized,
+        isTrue,
+        reason: 'the bar must be re-enabled after a fatal error',
+      );
+      expect(
+        speech.initializeCount,
+        greaterThan(initBefore),
+        reason: 'the service was re-initialized to recover the bar',
+      );
+      expect(
+        host.pttCanStart,
+        isTrue,
+        reason: 'a new tap can re-enter after a fatal error',
+      );
     },
   );
 
@@ -1025,10 +1134,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Legacy behavior preserved: base onError toasts + flips isInitialized.
-      expect(find.text('音声を認識できませんでした。もう一度お試しください'), findsOneWidget,
-          reason: 'the hold path keeps the legacy toast (super.onError)');
-      expect(host.pttServiceInitialized, isFalse,
-          reason: 'the hold path keeps the legacy permanent isInitialized flip');
+      expect(
+        find.text('音声を認識できませんでした。もう一度お試しください'),
+        findsOneWidget,
+        reason: 'the hold path keeps the legacy toast (super.onError)',
+      );
+      expect(
+        host.pttServiceInitialized,
+        isFalse,
+        reason: 'the hold path keeps the legacy permanent isInitialized flip',
+      );
       expect(host.pttIsRecording, isFalse);
     },
   );
@@ -1056,8 +1171,11 @@ void main() {
       speech.emitError('error_client', permanent: true);
       await tester.pumpAndSettle();
 
-      expect(host.pttListenStatus, PttListenStatus.stopped,
-          reason: 'the panel must not show 正在聆听 after the recognizer stopped');
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'the panel must not show 正在聆听 after the recognizer stopped',
+      );
     },
   );
 
@@ -1082,8 +1200,11 @@ void main() {
 
       // R6: the one-shot model goes to stopped — the panel shows 「停止聆听」 and
       // the tap-reset hint, NEVER the stuck-on-listening dead-mic state.
-      expect(host.pttListenStatus, PttListenStatus.stopped,
-          reason: 'a swallowed transient stops cleanly (no stuck listening)');
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'a swallowed transient stops cleanly (no stuck listening)',
+      );
       expect(host.pttIsRecording, isFalse);
     },
   );
@@ -1105,17 +1226,184 @@ void main() {
       final host = hostOf(tester);
       host.startPttTapSession();
       await tester.pump();
-      expect(speech.startCount, 1,
-          reason: 'one-shot: a single startListening opens the session');
+      expect(
+        speech.startCount,
+        1,
+        reason: 'one-shot: a single startListening opens the session',
+      );
 
       // The recognizer self-terminates (timeout) — the old model re-armed here.
       speech.startedLocaleId = null;
       speech.emitTerminalStatus();
       await tester.pumpAndSettle();
 
-      expect(speech.startCount, 1,
-          reason: 'no re-arm — still exactly one startListening after terminal');
+      expect(
+        speech.startCount,
+        1,
+        reason: 'no re-arm — still exactly one startListening after terminal',
+      );
       expect(host.pttIsRecording, isFalse);
+    },
+  );
+
+  // ── 260703 BUG-1/BUG-2 follow-ups: conversion gating, undo, amount notices ──
+
+  testWidgets(
+    '260703 2C+2B: partial fills never convert; the final converts with an '
+    'undo snackbar that restores the spoken amount',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      const vpr = VoiceParseResult(
+        rawText: '五十美元',
+        amount: 50,
+        detectedCurrency: 'USD',
+      );
+      final parse = FakeParseVoiceInputUseCase({'五十美元': vpr});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse, rate: '150.0'),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitPartial('五十美元');
+      // Fire the 300ms partial-parse debounce.
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
+
+      // Partial fill: the raw amount lands live, but NO conversion — no
+      // triple, display currency stays JPY, no snackbar.
+      expect(host.pttFormState!.currentAmount, 50);
+      expect(host.pttFormState!.currentOriginalCurrency, isNull);
+      expect(host.pttDisplayCurrency, 'JPY');
+      expect(find.byType(SnackBar), findsNothing);
+
+      speech.emitFinal('五十美元');
+      await tester.pumpAndSettle();
+
+      // Resolve-on-final: 50 USD → 5000 minor units → ×150.0 → ¥7,500.
+      expect(host.pttFormState!.currentAmount, 7500);
+      expect(host.pttFormState!.currentOriginalCurrency, 'USD');
+      expect(host.pttDisplayCurrency, 'USD');
+
+      // 2B: the conversion is visible and reversible.
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byType(SnackBarAction), findsOneWidget);
+
+      await tester.tap(find.byType(SnackBarAction));
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 50);
+      expect(host.pttFormState!.currentOriginalCurrency, isNull);
+      expect(host.pttDisplayCurrency, 'JPY');
+      expect(host.pttLastFilledAmount, 50);
+    },
+  );
+
+  testWidgets(
+    '260703 1A: a repair candidate surfaces an adopt snackbar; adopting '
+    'replaces the poisoned amount',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '250046元': const VoiceParseResult(
+          rawText: '250046元',
+          amount: 250046,
+          amountRepairCandidate: 2546,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.emitFinal('250046元');
+      await tester.pumpAndSettle();
+
+      // The poisoned amount is filled (never silently rewritten)…
+      expect(host.pttFormState!.currentAmount, 250046);
+      // …and the one-tap adopt affordance is offered.
+      expect(find.byType(SnackBarAction), findsOneWidget);
+
+      await tester.tap(find.byType(SnackBarAction));
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 2546);
+      expect(host.pttLastFilledAmount, 2546);
+    },
+  );
+
+  testWidgets(
+    '260703 1E: a large voice amount surfaces a double-check notice',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '五百万円': const VoiceParseResult(rawText: '五百万円', amount: 5000000),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.emitFinal('五百万円');
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 5000000);
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(
+        find.byType(SnackBarAction),
+        findsNothing,
+        reason: 'the large-amount notice is informational — no action',
+      );
+
+      // Let the auto-dismiss timer fire so no timer leaks past the test —
+      // and prove the notice actually goes away on its own (it must never
+      // permanently cover the bottom actions).
+      await tester.pump(const Duration(seconds: 7));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+    },
+  );
+
+  testWidgets(
+    '260703 1D: final alternates are threaded into the parse use case',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '250046元': const VoiceParseResult(rawText: '250046元', amount: 2546),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      speech.emitFinalWithAlternates(['250046元', '2546元']);
+      await tester.pumpAndSettle();
+
+      expect(
+        parse.alternateInputs.last,
+        ['2546元'],
+        reason: 'the best transcript is excluded; the rest ride along',
+      );
     },
   );
 }

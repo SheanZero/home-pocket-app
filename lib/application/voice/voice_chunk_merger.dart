@@ -38,17 +38,29 @@ class VoiceChunkMerger {
     required NumeralStateMachine parser,
     required SpeechRecognitionService speechService,
     required AmountResolvedCallback onAmountResolved,
+    int? Function(String text)? amountExtractor,
     DateTime Function()? clock,
-  })  : _parser = parser,
-        _speechService = speechService,
-        _onAmountResolved = onAmountResolved,
-        _clock = clock ?? DateTime.now;
+  }) : _parser = parser,
+       _speechService = speechService,
+       _onAmountResolved = onAmountResolved,
+       _amountExtractor = amountExtractor,
+       _clock = clock ?? DateTime.now;
 
   static const _windowDuration = Duration(milliseconds: 2500);
 
   final NumeralStateMachine _parser;
   final SpeechRecognitionService _speechService;
   final AmountResolvedCallback _onAmountResolved;
+
+  /// 260703 BUG-1 (1E hardening): commit-time amount extractor. When provided,
+  /// the merged buffer is parsed through the FULL VoiceTextParser routing —
+  /// comma-authoritative guard included — instead of the bare state machine.
+  /// A comma-grouped final like 「2,546元」 would otherwise lose its leading
+  /// groups (the scanner drops commas and keeps only the tail → 546). The
+  /// state machine stays in charge of the two lexical gates below (they are
+  /// token-shape predicates, not value parses).
+  final int? Function(String text)? _amountExtractor;
+
   final DateTime Function() _clock;
 
   String _buffer = '';
@@ -93,7 +105,13 @@ class VoiceChunkMerger {
 
     if (_shouldMerge(_buffer, text, now)) {
       // Gate pass: extend buffer, reset window.
-      _buffer += text;
+      //
+      // 260703 BUG-1: the chunks are joined with a SPACE so two STT-normalized
+      // Arabic groups ("2500" + "46元") tokenize as separate Digits and the
+      // scanner's positional merge reads 2546 — raw concatenation would fuse
+      // them into the poisoned "250046元". Kanji/kana chunks are unaffected
+      // (whitespace is silently dropped by both tokenizers).
+      _buffer = '$_buffer $text';
       _lastFinalAt = now;
       _restartWindowTimer();
       await _speechService.restartListen();
@@ -158,6 +176,12 @@ class VoiceChunkMerger {
     final last = flat.last;
     if (last is Unit && last.power >= 100) return true;
     if (last is Digit) {
+      // 260703 BUG-1: a buffer ending in a "round" pre-normalized Arabic group
+      // (≥100 with at least two trailing zeros — the 「两千五百」→"2500" ITN
+      // shape) is open: the recognizer may deliver the tail group ("46元") as
+      // the next final. The old rule judged pure-Arabic buffers closed, which
+      // committed 2500 and silently dropped the tail.
+      if (last.value >= 100 && last.value % 100 == 0) return true;
       final units = flat.whereType<Unit>().toList();
       if (units.isNotEmpty && units.last.power >= 100) return true;
     }
@@ -205,7 +229,10 @@ class VoiceChunkMerger {
     _buffer = '';
     _lastFinalAt = null;
     if (pending.isEmpty) return;
-    final amount = _parser.parse(pending);
+    final extractor = _amountExtractor;
+    final amount = extractor != null
+        ? extractor(pending)
+        : _parser.parse(pending);
     if (amount != null) {
       _onAmountResolved(amount);
     }

@@ -1705,6 +1705,41 @@
   "@voiceRecognitionErrorUnknown": {
     "description": "Voice recognition error: unknown / fallback (platform error_speech_timeout / error_client / other)"
   },
+  "voiceCurrencyConverted": "已识别为外币：{original} → {converted}（汇率 {rate}）",
+  "@voiceCurrencyConverted": {
+    "description": "Snackbar after a spoken foreign-currency amount was auto-converted to JPY on the voice fill (260703 2B)",
+    "placeholders": {
+      "original": {"type": "String"},
+      "converted": {"type": "String"},
+      "rate": {"type": "String"}
+    }
+  },
+  "voiceCurrencyConvertedUndo": "撤销",
+  "@voiceCurrencyConvertedUndo": {
+    "description": "Snackbar action that reverts the voice foreign-currency conversion back to the spoken amount"
+  },
+  "voiceAmountRepairSuspect": "金额识别为 {original}，是否应为 {candidate}？",
+  "@voiceAmountRepairSuspect": {
+    "description": "Snackbar shown when the recognized amount matches the STT digit-concatenation signature, e.g. 250046 spoken as 2546 (260703 1A)",
+    "placeholders": {
+      "original": {"type": "String"},
+      "candidate": {"type": "String"}
+    }
+  },
+  "voiceAmountRepairApply": "改为 {candidate}",
+  "@voiceAmountRepairApply": {
+    "description": "Snackbar action that adopts the repaired amount candidate",
+    "placeholders": {
+      "candidate": {"type": "String"}
+    }
+  },
+  "voiceLargeAmountNotice": "金额较大：{amount}，保存前请确认",
+  "@voiceLargeAmountNotice": {
+    "description": "Informational snackbar when a voice-filled amount is unusually large (260703 1E)",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
   "analyticsBudgetProgress": "预算进度",
   "@analyticsBudgetProgress": {
     "description": "Analytics section title for budget progress"

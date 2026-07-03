@@ -98,9 +98,10 @@ abstract class NumeralStateMachine {
   /// from the amount silently; this method runs the SAME longest-first scan
   /// over [VoiceCurrencySuffixes.all] separately so the detected currency is
   /// returned WITHOUT polluting the integer amount result (T-42-07). ISO-code
-  /// and bare-token/locale resolution is the caller's responsibility — the raw
-  /// token is returned so the use-case layer can disambiguate locale-dependent
-  /// bare `元` (zh→CNY, ja→JPY per D-08 locked) from explicit foreign tokens.
+  /// and bare-token resolution is the caller's responsibility — the raw token
+  /// is returned so the use-case layer can separate explicit foreign tokens
+  /// from bare native terminators (元/円 → native/null in every locale; the
+  /// D-08 zh→CNY branch was superseded 260703, BUG-2).
   ///
   /// Returns the FIRST (leftmost) longest match so `香港ドル` wins over the
   /// `ドル` substring it contains, mirroring the [all] ordering invariant.
@@ -130,8 +131,9 @@ abstract class NumeralStateMachine {
     for (final token in VoiceCurrencySuffixes.all) {
       final idx = haystack.indexOf(token.toLowerCase());
       if (idx < 0) continue;
-      final isExplicitForeign =
-          VoiceCurrencySuffixes.tokenToIso.containsKey(token);
+      final isExplicitForeign = VoiceCurrencySuffixes.tokenToIso.containsKey(
+        token,
+      );
       if (isExplicitForeign) {
         // Leftmost-wins within the foreign tier; on an exact index tie [all]'s
         // longest-first ordering keeps the longer token (first-seen retained).
@@ -163,7 +165,7 @@ abstract class NumeralStateMachine {
     for (final tok in _expandPacked(tokens)) {
       switch (tok) {
         case Digit(:final value):
-          digit = value;
+          digit = _mergePositionalDigit(digit, value);
           sawAny = true;
         case Unit(:final power) when power == 10000:
           total += (section + (digit == 0 ? 1 : digit)) * 10000;
@@ -187,6 +189,26 @@ abstract class NumeralStateMachine {
     section += digit;
     total += section;
     return sawAny && total > 0 ? total : null;
+  }
+
+  /// 260703 BUG-1: positional merge for consecutive Digit tokens.
+  ///
+  /// STT inverse-text-normalization can split one spoken number into two
+  /// pre-normalized Arabic groups (「两千五百四十六」 → "2500"+"46"). When those
+  /// groups reach the scanner as consecutive Digits (space-separated transcript,
+  /// or the separator the chunk merger inserts between finals), the tail merges
+  /// into the head's trailing zeros ("2500"+"46" → 2546) instead of overwriting
+  /// it. A tail that does not fit (「12」+「34」, self-corrections like
+  /// 「3000」→「5000」) keeps the pre-existing last-wins semantics.
+  static int _mergePositionalDigit(int previous, int next) {
+    if (previous <= 0) return next;
+    var scale = 1;
+    var head = previous;
+    while (head % 10 == 0) {
+      head ~/= 10;
+      scale *= 10;
+    }
+    return (scale > 1 && next < scale) ? previous + next : next;
   }
 
   Iterable<NumeralToken> _expandPacked(List<NumeralToken> tokens) sync* {

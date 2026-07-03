@@ -1337,6 +1337,33 @@ class SJa extends S {
   String get voiceRecognitionErrorUnknown => '音声認識でエラーが発生しました';
 
   @override
+  String voiceCurrencyConverted(
+    String original,
+    String converted,
+    String rate,
+  ) {
+    return '外貨として認識：$original → $converted（レート $rate）';
+  }
+
+  @override
+  String get voiceCurrencyConvertedUndo => '元に戻す';
+
+  @override
+  String voiceAmountRepairSuspect(String original, String candidate) {
+    return '金額を$originalと認識しました。$candidateではありませんか？';
+  }
+
+  @override
+  String voiceAmountRepairApply(String candidate) {
+    return '$candidateにする';
+  }
+
+  @override
+  String voiceLargeAmountNotice(String amount) {
+    return '高額です：$amount。保存前にご確認ください';
+  }
+
+  @override
   String get analyticsBudgetProgress => '予算の進捗';
 
   @override
