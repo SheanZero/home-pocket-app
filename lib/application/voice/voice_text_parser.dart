@@ -50,15 +50,18 @@ class VoiceTextParser {
   static final _commaGroupedPattern = RegExp(r'\d[,，]\d');
 
   /// 260703 BUG-1: spaced ITN-split signature — a "round" Arabic group (ends
-  /// in ≥2 zeros, the 「两千五百」→"2500" ITN shape) followed by a short 1–2
-  /// digit tail that is itself followed by a currency suffix or end-of-string.
-  /// Such pairs are ONE spoken number split by the recognizer's inverse text
-  /// normalization and must route through the state machine's positional merge
-  /// ("2500 46元" → 2546); the Arabic regex would keep only the tail (46).
-  /// The suffix/end anchor keeps date-shaped tails (「1200 15号」) on the
-  /// Arabic path — misrouting those would corrupt a correct amount.
+  /// in ≥1 zero: 「两千五百」→"2500", and the 十-terminated 「五千三百一十」→
+  /// "5310" reported on-device 260704) followed by a short 1–2 digit tail that
+  /// is itself followed by a currency suffix or end-of-string. Such pairs are
+  /// ONE spoken number split by the recognizer's inverse text normalization
+  /// and must route through the state machine's positional merge ("2500 46元"
+  /// → 2546, "5310 2元" → 5312); the Arabic regex would keep only the tail.
+  /// The machine enforces the exact tail-fits-trailing-zeros check, so this
+  /// gate only needs the cheap shape. The suffix/end anchor keeps date-shaped
+  /// tails (「1200 15号」) on the Arabic path — misrouting those would corrupt
+  /// a correct amount.
   static final _spacedRoundGroupPattern = RegExp(
-    r'(?<!\d)\d+00[\s　]+\d{1,2}\s*(?:' +
+    r'(?<!\d)\d+0[\s　]+\d{1,2}\s*(?:' +
         VoiceCurrencySuffixes.regexAlternation +
         r'|$)',
     caseSensitive: false,
@@ -132,9 +135,11 @@ class VoiceTextParser {
   ///
   /// iOS zh ITN can normalize 「两千五百四十六」 as two segments "2500"+"46" and
   /// join them without a delimiter → "250046". The signature: S = head ++ tail
-  /// where the head ends in ≥2 zeros (a round ITN group), the tail is 1–2
-  /// digits with no leading zero, and the tail fits inside the head's trailing
-  /// zeros. Repair = head + tail (250046 → 2546).
+  /// where the head ends in ≥1 zero (a round ITN group — includes the
+  /// 十-terminated single-zero shape 「五千三百一十」→"5310"+"2"→"53102",
+  /// reported on-device 260704), the tail is 1–2 digits with no leading zero,
+  /// and the tail fits inside the head's trailing zeros. Repair = head + tail
+  /// (250046 → 2546, 53102 → 5312).
   ///
   /// Guardrails (precision over recall — a false rewrite is worse than a miss):
   /// - length floor 5: 「3005」(三千零五) is a normal amount, never flagged;
@@ -156,7 +161,7 @@ class VoiceTextParser {
       if (tail.startsWith('0')) continue;
       final trailingZeros =
           head.length - head.replaceAll(RegExp(r'0+$'), '').length;
-      if (trailingZeros < 2 || tailLen > trailingZeros) continue;
+      if (trailingZeros < 1 || tailLen > trailingZeros) continue;
       return int.parse(head) + int.parse(tail);
     }
     return null;

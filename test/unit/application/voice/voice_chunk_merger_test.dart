@@ -322,6 +322,67 @@ void main() {
       });
     });
 
+    // 260704 on-device report: 「三千二百一十一」 finalized as "3210" + "1元".
+    // A SINGLE-trailing-zero buffer must count as open, else the tail final is
+    // dropped and the amount truncates to 3210 (「最后的1没有记录」).
+    test('3210 + 1元 across finals -> 3211 (single-zero buffer stays open)', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+        final textParser = VoiceTextParser();
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+          amountExtractor: (text) =>
+              textParser.extractAmount(text, localeId: 'zh-CN'),
+        );
+
+        merger.feedChunk('3210', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 900));
+        merger.feedChunk('1元', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 2500));
+        async.flushMicrotasks();
+
+        expect(commits, equals([3211]));
+        merger.dispose();
+      });
+    });
+
+    test('5310 + 2元 across finals -> 5312', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+        final textParser = VoiceTextParser();
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+          amountExtractor: (text) =>
+              textParser.extractAmount(text, localeId: 'zh-CN'),
+        );
+
+        merger.feedChunk('5310', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 900));
+        merger.feedChunk('2元', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 2500));
+        async.flushMicrotasks();
+
+        expect(commits, equals([5312]));
+        merger.dispose();
+      });
+    });
+
     test('split finals through the extractor also read 2546', () {
       fakeAsync((async) {
         final commits = <int>[];

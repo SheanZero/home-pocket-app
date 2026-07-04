@@ -177,11 +177,14 @@ class VoiceChunkMerger {
     if (last is Unit && last.power >= 100) return true;
     if (last is Digit) {
       // 260703 BUG-1: a buffer ending in a "round" pre-normalized Arabic group
-      // (≥100 with at least two trailing zeros — the 「两千五百」→"2500" ITN
-      // shape) is open: the recognizer may deliver the tail group ("46元") as
-      // the next final. The old rule judged pure-Arabic buffers closed, which
-      // committed 2500 and silently dropped the tail.
-      if (last.value >= 100 && last.value % 100 == 0) return true;
+      // (≥10 with at least ONE trailing zero — 「两千五百」→"2500" and the
+      // 十-terminated 「三千二百一十」→"3210" reported on-device 260704) is
+      // open: the recognizer may deliver the tail group ("46元" / "1元") as
+      // the next final. The old closed judgement committed the head and
+      // silently dropped the tail (2500-truncation / 3211→3210). The scan()
+      // positional merge enforces the exact tail-fit, so a non-fitting next
+      // number still reads as a correction (last-wins).
+      if (last.value >= 10 && last.value % 10 == 0) return true;
       final units = flat.whereType<Unit>().toList();
       if (units.isNotEmpty && units.last.power >= 100) return true;
     }

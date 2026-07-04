@@ -216,6 +216,17 @@ void main() {
         expect(machine.parse('3000 5000'), 5000);
       });
 
+      // 260704: single-trailing-zero heads (十-terminated groups) — the
+      // 「五千三百一十二」→"5310"+"2" split reported on-device. scan()'s
+      // positional merge accepts a 1-digit tail into one trailing zero.
+      test('5310 2元 -> 5312 (single-zero head + 1-digit tail)', () {
+        expect(machine.parse('5310 2元'), 5312);
+      });
+
+      test('3210 1元 -> 3211', () {
+        expect(machine.parse('3210 1元'), 3211);
+      });
+
       test('两千五百四十六元 -> 2546 (pure kanji regression)', () {
         expect(machine.parse('两千五百四十六元'), 2546);
       });

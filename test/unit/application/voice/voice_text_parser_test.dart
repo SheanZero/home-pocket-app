@@ -507,6 +507,17 @@ void main() {
       expect(parser.extractAmount('2500 46円', localeId: 'ja-JP'), 2546);
     });
 
+    // 260704 on-device report: 「五千三百一十二」 split as "5310"+"2" — a
+    // SINGLE trailing zero head. The routing gate must accept ≥1 zero (the
+    // machine's positional merge enforces the exact fit).
+    test('zh: 5310 2元 -> 5312 (single-zero head routes to machine)', () {
+      expect(parser.extractAmount('5310 2元', localeId: 'zh-CN'), 5312);
+    });
+
+    test('zh: 3210 1元 -> 3211', () {
+      expect(parser.extractAmount('3210 1元', localeId: 'zh-CN'), 3211);
+    });
+
     test('zh: bare 2500 46 (merger-joined buffer, no suffix) -> 2546', () {
       expect(parser.extractAmount('2500 46', localeId: 'zh-CN'), 2546);
     });
@@ -531,6 +542,20 @@ void main() {
   group(
     'detectConcatRepairCandidate — ITN concat signature (260703 BUG-1)',
     () {
+      // 260704 on-device report: unspaced single-zero concat 「五千三百一十二」
+      // → "53102". One trailing zero admits a 1-digit tail.
+      test('53102 -> 5312 (single-zero head, the second reported bug)', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('53102'), 5312);
+      });
+
+      test('32101 -> 3211', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('32101'), 3211);
+      });
+
+      test('53100 -> null (round amount stays unflagged)', () {
+        expect(VoiceTextParser.detectConcatRepairCandidate('53100'), isNull);
+      });
+
       test('250046 -> 2546 (the reported bug)', () {
         expect(VoiceTextParser.detectConcatRepairCandidate('250046'), 2546);
       });

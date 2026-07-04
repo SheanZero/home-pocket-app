@@ -84,6 +84,19 @@ void main() {
       },
     );
 
+    // 260704 on-device report: single-zero split 「五千三百一十二」 → "53102元".
+    test('poisoned 53102元 → amount kept, candidate 5312 surfaced', () async {
+      final r = await parse('53102元');
+      expect(r.amount, 53102);
+      expect(r.amountRepairCandidate, 5312);
+    });
+
+    test('53102元 with a 5312元 alternate auto-adopts the repair', () async {
+      final r = await parse('53102元', alternateTexts: ['5312元']);
+      expect(r.amount, 5312);
+      expect(r.amountRepairCandidate, isNull);
+    });
+
     test('alternate transcript confirming the repair auto-adopts it', () async {
       final r = await parse('250046元', alternateTexts: ['2546元']);
       expect(r.amount, 2546);
