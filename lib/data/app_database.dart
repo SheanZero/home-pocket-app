@@ -50,7 +50,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration {
@@ -58,14 +58,9 @@ class AppDatabase extends _$AppDatabase {
       onCreate: (migrator) async {
         await migrator.createAll();
         // createAll() does not emit the customIndices getter (not a real Drift
-        // API), so shopping_items indices must be created explicitly on fresh
-        // installs too — not only on the v19→v20 upgrade path.
-        await _createShoppingItemIndexes();
-        // exchange_rates indices are also decorative on the table — create explicitly.
-        await _createExchangeRateIndexes();
-        // merchants + merchant_match_keys indices are decorative on the tables —
-        // create explicitly on fresh installs too (Phase 49, v22).
-        await _createMerchantIndexes();
+        // API), so EVERY declared index must be created explicitly on fresh
+        // installs (CR-01 Phase 36; extended to all tables in v23).
+        await _createAllDeclaredIndexes();
       },
       onUpgrade: (migrator, from, to) async {
         if (from < 3) {
@@ -126,10 +121,20 @@ class AppDatabase extends _$AppDatabase {
           await migrator.createTable(categoryKeywordPreferences);
           await migrator.createTable(syncQueue);
         }
-        if (from >= 7 && from < 8) {
+        if (from < 8) {
+          // P1-4 seam fix: groups/group_members creation used to sit inside
+          // the `from >= 7 && from < 8` block below, so a v≤6 database
+          // upgrading past v8 never got the two tables. createTable emits
+          // CREATE TABLE IF NOT EXISTS, so this is idempotent for v7 devices
+          // that take both branches.
           await migrator.createTable(groups);
           await migrator.createTable(groupMembers);
-
+        }
+        if (from >= 7 && from < 8) {
+          // v7-only: rebuild sync_queue from its v7 pair_id shape. A v≤6
+          // database gets the current group_id shape directly from the
+          // from<7 createTable above, so this rename/copy must not run there
+          // (the SELECT below reads the v7-only pair_id column).
           await customStatement(
             'ALTER TABLE sync_queue RENAME TO sync_queue_old',
           );
@@ -478,7 +483,139 @@ class AppDatabase extends _$AppDatabase {
           await migrator.createTable(merchantMatchKeys);
           await _createMerchantIndexes();
         }
+        if (from < 23) {
+          // v23: index backfill (quality report P1-1). The customIndices
+          // getter is decorative, and only tables added after the CR-01
+          // lesson (Phase 36) got explicit CREATE INDEX calls — 19 declared
+          // indices were never created anywhere, and the audit_logs /
+          // user_profiles / category_ledger_configs indices existed only on
+          // upgraded devices (from<15), never on fresh installs. Backfill
+          // every declared index; IF NOT EXISTS makes this idempotent for
+          // whichever subset a given device already has.
+          await _createAllDeclaredIndexes();
+        }
       },
+    );
+  }
+
+  /// Creates EVERY index declared via a `customIndices` getter across all
+  /// tables. Drift's migrator does not consume that getter, so this is the
+  /// single physical source of truth — called from onCreate (fresh installs)
+  /// and the v23 backfill step. All statements are idempotent
+  /// (IF NOT EXISTS). Guarded by
+  /// test/unit/data/migrations/index_v23_migration_test.dart, which parses
+  /// the declarations from source and fails on any index missing here.
+  Future<void> _createAllDeclaredIndexes() async {
+    await _createLegacyTableIndexes();
+    await _createShoppingItemIndexes();
+    await _createExchangeRateIndexes();
+    await _createMerchantIndexes();
+  }
+
+  /// Indices for the pre-Phase-36 tables that never had explicit CREATE
+  /// INDEX calls (transactions, books, categories, groups, group_members,
+  /// sync_queue, preference tables) plus the from<15 trio that was missing
+  /// from the onCreate path (audit_logs, user_profiles,
+  /// category_ledger_configs).
+  Future<void> _createLegacyTableIndexes() async {
+    // transactions — hottest table: list, calendar and analytics queries all
+    // filter on book_id/timestamp/ledger_type.
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_tx_book_id ON transactions (book_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_tx_category_id '
+      'ON transactions (category_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_tx_timestamp ON transactions (timestamp)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_tx_ledger_type '
+      'ON transactions (ledger_type)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_tx_book_timestamp '
+      'ON transactions (book_id, timestamp)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_tx_book_deleted '
+      'ON transactions (book_id, is_deleted)',
+    );
+    // books
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_books_device_id ON books (device_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_books_archived ON books (is_archived)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_books_group_id ON books (group_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_books_is_shadow ON books (is_shadow)',
+    );
+    // categories
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_categories_parent_id '
+      'ON categories (parent_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_categories_level ON categories (level)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_categories_archived '
+      'ON categories (is_archived)',
+    );
+    // groups / group_members
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_groups_status ON groups (status)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_group_members_group_id '
+      'ON group_members (group_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_group_members_status '
+      'ON group_members (status)',
+    );
+    // sync_queue
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_sync_queue_created '
+      'ON sync_queue (created_at)',
+    );
+    // preference tables
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_keyword_prefs_keyword '
+      'ON category_keyword_preferences (keyword)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_merchant_pref_updated_at '
+      'ON merchant_category_preferences (updated_at)',
+    );
+    // from<15 trio — previously upgrade-path-only, missing on fresh installs.
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_event ON audit_logs (event)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_device_id '
+      'ON audit_logs (device_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp '
+      'ON audit_logs (timestamp)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_user_profiles_updated_at '
+      'ON user_profiles (updated_at)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_ledger_type '
+      'ON category_ledger_configs (ledger_type)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_updated_at '
+      'ON category_ledger_configs (updated_at)',
     );
   }
 

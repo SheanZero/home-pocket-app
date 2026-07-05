@@ -61,10 +61,10 @@ Future<bool> _tableExists(AppDatabase db, String table) async {
 
 void main() {
   group('merchant v22 — fresh install (onCreate)', () {
-    test('AppDatabase schemaVersion is 22', () {
+    test('AppDatabase schemaVersion is at least 22 (merchant era)', () {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      expect(db.schemaVersion, equals(22));
+      expect(db.schemaVersion, greaterThanOrEqualTo(22));
     });
 
     test('merchants table exists with all columns', () async {
@@ -106,10 +106,12 @@ void main() {
     test('PRAGMA index_list is non-empty for both tables', () async {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      final merchantsIdx =
-          await db.customSelect('PRAGMA index_list(merchants)').get();
-      final matchKeysIdx =
-          await db.customSelect('PRAGMA index_list(merchant_match_keys)').get();
+      final merchantsIdx = await db
+          .customSelect('PRAGMA index_list(merchants)')
+          .get();
+      final matchKeysIdx = await db
+          .customSelect('PRAGMA index_list(merchant_match_keys)')
+          .get();
       expect(merchantsIdx, isNotEmpty);
       expect(matchKeysIdx, isNotEmpty);
     });
@@ -128,8 +130,9 @@ void main() {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
       // PRAGMA index_list: column "unique" is 0 for non-unique indexes.
-      final rows =
-          await db.customSelect('PRAGMA index_list(merchant_match_keys)').get();
+      final rows = await db
+          .customSelect('PRAGMA index_list(merchant_match_keys)')
+          .get();
       final matchKeyRow = rows.firstWhere(
         (r) => r.read<String>('name') == 'idx_merchant_match_keys_match_key',
       );
@@ -172,9 +175,7 @@ void main() {
         VALUES ('mer_def', 'D', 'cat_food_other', 'daily')
       ''');
       final row = await db
-          .customSelect(
-            "SELECT region FROM merchants WHERE id = 'mer_def'",
-          )
+          .customSelect("SELECT region FROM merchants WHERE id = 'mer_def'")
           .getSingle();
       expect(row.read<String>('region'), equals('JP'));
     });
@@ -200,62 +201,72 @@ void main() {
     });
 
     test(
-        'real from<22 onUpgrade block recreates both tables + four indexes',
-        () async {
-      // STAGE A — stamp the file at v21: open at v22 (onCreate builds
-      // everything), drop what onCreate built for merchants, and rewind
-      // user_version to 21 so the next open looks like a genuine pre-v22 DB.
-      final staged = AppDatabase(NativeDatabase(dbFile));
-      await staged.customStatement('DROP TABLE IF EXISTS merchant_match_keys');
-      await staged.customStatement('DROP TABLE IF EXISTS merchants');
-      await staged.customStatement('PRAGMA user_version = 21');
-      expect(await _tableExists(staged, 'merchants'), isFalse);
-      expect(await _tableExists(staged, 'merchant_match_keys'), isFalse);
-      await staged.close();
+      'real from<22 onUpgrade block recreates both tables + four indexes',
+      () async {
+        // STAGE A — stamp the file at v21: open at v22 (onCreate builds
+        // everything), drop what onCreate built for merchants, and rewind
+        // user_version to 21 so the next open looks like a genuine pre-v22 DB.
+        final staged = AppDatabase(NativeDatabase(dbFile));
+        await staged.customStatement(
+          'DROP TABLE IF EXISTS merchant_match_keys',
+        );
+        await staged.customStatement('DROP TABLE IF EXISTS merchants');
+        await staged.customStatement('PRAGMA user_version = 21');
+        expect(await _tableExists(staged, 'merchants'), isFalse);
+        expect(await _tableExists(staged, 'merchant_match_keys'), isFalse);
+        await staged.close();
 
-      // STAGE B — reopen the SAME file as AppDatabase (schemaVersion 22). Drift
-      // sees user_version 21 < 22 and runs the production `from < 22` branch:
-      // migrator.createTable(merchants/merchantMatchKeys) + _createMerchantIndexes().
-      final upgraded = AppDatabase(NativeDatabase(dbFile));
-      addTearDown(upgraded.close);
+        // STAGE B — reopen the SAME file as AppDatabase (schemaVersion 22). Drift
+        // sees user_version 21 < 22 and runs the production `from < 22` branch:
+        // migrator.createTable(merchants/merchantMatchKeys) + _createMerchantIndexes().
+        final upgraded = AppDatabase(NativeDatabase(dbFile));
+        addTearDown(upgraded.close);
 
-      // Force the migrator to run by issuing a query (lazy-open).
-      expect(await _tableExists(upgraded, 'merchants'), isTrue);
-      expect(await _tableExists(upgraded, 'merchant_match_keys'), isTrue);
+        // Force the migrator to run by issuing a query (lazy-open).
+        expect(await _tableExists(upgraded, 'merchants'), isTrue);
+        expect(await _tableExists(upgraded, 'merchant_match_keys'), isTrue);
 
-      // Columns come from the REAL Drift table definitions (no hand DDL).
-      final merchantCols = await _columnNames(upgraded, 'merchants');
-      expect(
-        merchantCols,
-        containsAll(<String>[
-          'id',
-          'name_ja',
-          'name_zh',
-          'name_en',
-          'region',
-          'category_id',
-          'ledger_hint',
-        ]),
-      );
-      final keyCols = await _columnNames(upgraded, 'merchant_match_keys');
-      expect(
-        keyCols,
-        containsAll(<String>['id', 'merchant_id', 'surface', 'match_key', 'kind']),
-      );
+        // Columns come from the REAL Drift table definitions (no hand DDL).
+        final merchantCols = await _columnNames(upgraded, 'merchants');
+        expect(
+          merchantCols,
+          containsAll(<String>[
+            'id',
+            'name_ja',
+            'name_zh',
+            'name_en',
+            'region',
+            'category_id',
+            'ledger_hint',
+          ]),
+        );
+        final keyCols = await _columnNames(upgraded, 'merchant_match_keys');
+        expect(
+          keyCols,
+          containsAll(<String>[
+            'id',
+            'merchant_id',
+            'surface',
+            'match_key',
+            'kind',
+          ]),
+        );
 
-      final all = <String>{
-        ...await _indexNames(upgraded, 'merchants'),
-        ...await _indexNames(upgraded, 'merchant_match_keys'),
-      };
-      expect(all, containsAll(_expectedIndexes));
+        final all = <String>{
+          ...await _indexNames(upgraded, 'merchants'),
+          ...await _indexNames(upgraded, 'merchant_match_keys'),
+        };
+        expect(all, containsAll(_expectedIndexes));
 
-      final merchantsIdx =
-          await upgraded.customSelect('PRAGMA index_list(merchants)').get();
-      final matchKeysIdx = await upgraded
-          .customSelect('PRAGMA index_list(merchant_match_keys)')
-          .get();
-      expect(merchantsIdx, isNotEmpty);
-      expect(matchKeysIdx, isNotEmpty);
-    });
+        final merchantsIdx = await upgraded
+            .customSelect('PRAGMA index_list(merchants)')
+            .get();
+        final matchKeysIdx = await upgraded
+            .customSelect('PRAGMA index_list(merchant_match_keys)')
+            .get();
+        expect(merchantsIdx, isNotEmpty);
+        expect(matchKeysIdx, isNotEmpty);
+      },
+    );
   });
 }
