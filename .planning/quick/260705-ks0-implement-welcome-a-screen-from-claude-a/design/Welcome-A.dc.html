@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes drift{0%,100%{transform:translateY(0) rotate(45deg)}50%{transform:translateY(-9px) rotate(60deg)}}
+</style>
+</helmet>
+<template id="__bundler_thumbnail"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#6FA36F"/><g transform="translate(50 52)" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M-16 0 L0 -14 L16 0"/><path d="M-11 -3 V16 H11 V-3"/></g></svg></template>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="sat1" viewBox="0 0 1024 1024"><g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none"> <path d="M355 6302 c-77 -37 -140 -107 -160 -176 -14 -48 -21 -113 -45 -406&#xA;-18 -217 -23 -637 -11 -845 38 -619 152 -1132 384 -1715 130 -328 378 -780&#xA;581 -1059 107 -148 289 -373 398 -491 490 -536 1156 -994 1838 -1265 389 -155&#xA;792 -259 1200 -309 128 -16 454 -36 590 -36 296 0 620 32 912 91 738 148 1404&#xA;449 2038 923 74 55 146 110 160 122 609 523 1007 1031 1335 1699 408 832 576&#xA;1689 525 2685 -14 269 -38 558 -50 601 -12 42 -65 120 -100 146 -83 63 -204&#xA;80 -305 42 -110 -41 -188 -151 -187 -263 0 -23 3 -248 7 -501 10 -608 -8 -897&#xA;-76 -1254 -249 -1301 -1043 -2429 -2163 -3075 -488 -281 -1064 -476 -1606&#xA;-541 -210 -26 -666 -31 -870 -11 -402 41 -732 116 -1087 247 -827 307 -1551&#xA;872 -2067 1614 -167 240 -363 595 -444 800 -11 28 -36 91 -57 140 -54 131&#xA;-131 368 -175 540 -128 492 -161 876 -142 1633 10 436 7 486 -33 549 -58 92&#xA;-135 135 -250 140 -72 4 -86 1 -140 -25z"></path> <path d="M1927 6296 c-129 -46 -209 -174 -194 -308 13 -109 113 -257 292 -433&#xA;219 -216 466 -352 735 -407 148 -29 407 -31 540 -4 388 79 741 322 972 668 89&#xA;132 101 245 37 356 -88 155 -287 188 -438 73 -18 -14 -54 -57 -79 -96 -63 -95&#xA;-230 -260 -317 -313 -155 -92 -300 -128 -475 -119 -241 14 -419 101 -596 290&#xA;-42 45 -96 112 -121 150 -50 75 -85 106 -156 136 -56 24 -143 27 -200 7z"></path> <path d="M6087 6296 c-88 -32 -150 -98 -183 -198 -46 -140 41 -307 282 -545&#xA;220 -217 477 -355 759 -410 123 -24 386 -23 510 0 198 39 397 125 570 247 162&#xA;115 380 354 457 500 19 37 23 60 23 130 0 77 -3 90 -31 140 -36 64 -107 123&#xA;-171 140 -24 7 -71 11 -106 8 -105 -9 -177 -57 -245 -163 -61 -95 -228 -260&#xA;-321 -315 -288 -172 -650 -157 -919 39 -82 60 -206 190 -259 271 -54 83 -82&#xA;110 -148 141 -68 33 -152 38 -218 15z"></path> <path d="M3277 3736 c-173 -62 -251 -246 -173 -412 35 -75 153 -248 240 -352&#xA;291 -349 691 -616 1119 -747 389 -118 838 -125 1241 -20 286 74 614 240 851&#xA;430 170 136 366 350 486 532 104 158 124 205 124 288 -1 160 -112 280 -269&#xA;292 -115 10 -215 -41 -276 -138 -207 -335 -426 -544 -730 -698 -413 -209 -865&#xA;-244 -1300 -101 -383 126 -725 398 -938 748 -29 48 -70 102 -90 119 -74 65&#xA;-197 90 -285 59z"></path> </g></symbol><symbol id="sat2" viewBox="0 0 1024 1024"><g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none"> <path d="M2775 8624 c-124 -19 -260 -50 -346 -80 -576 -200 -980 -725 -1073&#xA;-1392 -44 -319 -27 -438 81 -545 65 -65 134 -90 233 -85 88 5 155 35 212 95&#xA;65 67 80 118 89 288 15 288 76 486 211 682 316 459 980 524 1375 135 202 -199&#xA;323 -508 323 -828 0 -223 109 -360 296 -372 163 -10 290 82 330 240 29 109 8&#xA;359 -47 587 -163 667 -630 1133 -1259 1256 -82 16 -360 28 -425 19z"></path> <path d="M7097 8615 c-265 -43 -495 -141 -706 -300 -408 -309 -660 -842 -665&#xA;-1410 -1 -126 1 -145 22 -189 35 -76 86 -131 150 -163 50 -24 68 -28 147 -28&#xA;78 0 97 4 141 27 27 14 67 45 88 68 65 72 78 115 87 284 15 287 77 493 199&#xA;670 165 239 412 382 694 402 427 30 798 -235 947 -675 42 -122 59 -226 68&#xA;-396 9 -169 21 -208 86 -283 106 -122 302 -137 433 -33 92 73 129 185 118 361&#xA;-30 458 -167 825 -421 1129 -223 265 -539 454 -874 522 -130 27 -394 34 -514&#xA;14z"></path> <path d="M355 6302 c-77 -37 -140 -107 -160 -176 -14 -48 -21 -113 -45 -406&#xA;-18 -217 -23 -637 -11 -845 15 -244 59 -587 101 -795 38 -183 142 -551 199&#xA;-700 22 -58 56 -147 75 -198 117 -307 386 -799 590 -1081 107 -148 289 -373&#xA;398 -491 490 -536 1156 -994 1838 -1265 388 -154 794 -259 1200 -309 128 -16&#xA;454 -36 590 -36 296 0 620 32 912 91 738 148 1404 449 2038 923 74 55 146 110&#xA;160 122 609 523 1007 1031 1335 1699 408 832 576 1689 525 2685 -14 269 -38&#xA;558 -50 601 -12 42 -65 120 -100 146 -83 63 -204 80 -305 42 -112 -42 -189&#xA;-152 -188 -269 1 -25 4 -250 8 -500 8 -493 0 -728 -35 -991 -105 -781 -393&#xA;-1495 -859 -2129 -643 -875 -1590 -1482 -2642 -1694 -259 -52 -408 -67 -729&#xA;-73 -302 -6 -474 5 -738 47 -656 105 -1332 390 -1855 783 -500 377 -863 778&#xA;-1187 1317 -87 144 -223 410 -268 525 -11 28 -36 91 -57 140 -54 131 -131 368&#xA;-175 540 -128 492 -161 876 -142 1633 10 436 7 486 -33 549 -58 92 -135 135&#xA;-250 140 -72 4 -86 1 -140 -25z"></path> <path d="M3277 3736 c-173 -62 -250 -245 -173 -412 69 -147 292 -432 457 -581&#xA;384 -347 826 -547 1339 -604 231 -26 554 1 804 66 286 75 615 241 851 430 170&#xA;136 366 350 488 535 102 153 122 200 122 285 -1 297 -388 406 -545 154 -101&#xA;-163 -186 -274 -293 -382 -403 -407 -994 -585 -1552 -467 -461 97 -875 391&#xA;-1123 798 -29 48 -70 102 -90 119 -74 65 -197 90 -285 59z"></path> </g></symbol><symbol id="sat3" viewBox="0 0 1024 1024"><g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none"> <path d="M2775 8874 c-124 -19 -260 -50 -346 -80 -576 -200 -980 -726 -1073&#xA;-1392 -44 -319 -26 -438 81 -545 65 -65 134 -90 233 -85 91 6 158 37 214 98&#xA;65 72 78 116 87 285 15 290 75 485 211 682 317 459 977 524 1375 135 202 -198&#xA;323 -507 323 -828 0 -223 109 -360 296 -372 160 -10 284 78 330 234 30 103 9&#xA;361 -47 593 -162 666 -630 1133 -1259 1256 -82 16 -360 28 -425 19z"></path> <path d="M7096 8865 c-578 -94 -1026 -469 -1247 -1043 -81 -212 -143 -584&#xA;-125 -755 12 -117 78 -217 174 -264 50 -24 68 -28 147 -28 78 0 97 4 141 27&#xA;27 14 67 45 88 68 65 72 78 115 87 284 10 181 28 282 75 418 43 124 67 172&#xA;132 263 164 232 409 372 686 391 427 30 798 -235 947 -675 42 -122 59 -226 68&#xA;-396 9 -169 21 -208 86 -283 106 -122 302 -137 433 -33 92 74 129 184 117 360&#xA;-29 461 -165 826 -420 1130 -223 265 -539 454 -874 522 -131 27 -394 34 -515&#xA;14z"></path> <path d="M355 6301 c-78 -37 -139 -103 -159 -173 -9 -29 -21 -107 -26 -173 -6&#xA;-66 -15 -169 -20 -230 -17 -198 -23 -659 -11 -855 11 -169 59 -584 81 -698 56&#xA;-289 164 -667 250 -877 16 -38 47 -115 68 -170 88 -221 285 -601 417 -800 30&#xA;-46 55 -87 55 -90 0 -19 292 -399 423 -550 96 -111 383 -393 487 -479 52 -44&#xA;97 -82 100 -85 3 -3 68 -54 145 -112 366 -276 740 -488 1175 -664 116 -47 313&#xA;-116 400 -140 47 -12 123 -34 170 -48 117 -34 418 -95 556 -112 187 -23 509&#xA;-45 669 -45 305 0 698 40 930 95 33 8 96 21 140 30 399 83 951 305 1376 555&#xA;198 117 539 352 659 456 588 506 970 984 1298 1624 188 367 350 807 427 1157&#xA;14 65 32 145 40 178 57 248 105 732 105 1065 0 320 -37 874 -64 963 -24 81&#xA;-76 140 -156 179 -35 18 -63 23 -130 23 -74 0 -93 -4 -143 -29 -67 -33 -130&#xA;-104 -149 -169 -7 -27 -10 -89 -7 -177 2 -74 4 -358 3 -630 0 -530 -6 -618&#xA;-60 -940 -30 -181 -92 -445 -134 -570 -10 -30 -30 -93 -46 -140 -108 -337&#xA;-297 -723 -514 -1050 -119 -180 -174 -256 -269 -370 -26 -30 -55 -65 -66 -79&#xA;-148 -181 -416 -438 -645 -616 -106 -83 -206 -155 -216 -155 -2 0 -28 -17 -57&#xA;-38 -195 -144 -596 -348 -912 -464 -495 -181 -957 -256 -1510 -245 -292 5&#xA;-445 21 -712 73 -169 33 -223 46 -467 118 -246 73 -622 241 -876 391 -260 154&#xA;-500 334 -752 562 -195 177 -459 477 -596 678 -27 39 -69 99 -93 135 -119 171&#xA;-317 536 -379 695 -10 28 -38 95 -60 150 -111 265 -229 692 -270 975 -34 230&#xA;-41 297 -51 530 -9 186 -10 368 -2 675 10 449 8 487 -36 558 -76 124 -250 173&#xA;-386 108z"></path> <path d="M2223 5110 c-97 -20 -177 -82 -223 -172 -27 -56 -30 -70 -30 -159 0&#xA;-312 116 -812 276 -1185 317 -744 858 -1354 1539 -1738 574 -323 1235 -430&#xA;1869 -301 332 67 694 220 1006 426 720 474 1245 1197 1489 2052 82 286 143&#xA;700 121 817 -21 109 -101 209 -198 247 -45 17 -165 18 -2927 19 -1584 1 -2899&#xA;-2 -2922 -6z m5367 -643 c0 -2 -9 -43 -20 -92 -52 -240 -138 -481 -251 -709&#xA;-79 -156 -97 -188 -190 -326 -420 -623 -1033 -1047 -1684 -1162 -176 -32 -469&#xA;-31 -650 1 -479 85 -914 320 -1301 706 -220 218 -346 382 -494 638 -161 282&#xA;-268 568 -346 925 -4 22 -4 22 2466 22 1358 0 2470 -1 2470 -3z"></path> </g></symbol><symbol id="sat4" viewBox="0 0 1024 1024"><g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none"> <path d="M2506 9824 c-146 -35 -277 -144 -344 -286 -22 -45 -77 -190 -122&#xA;-322 -211 -614 -255 -661 -800 -847 -365 -124 -463 -171 -548 -262 -121 -132&#xA;-168 -320 -123 -497 11 -46 36 -109 54 -139 44 -76 132 -163 197 -196 76 -39&#xA;249 -104 435 -164 89 -29 223 -83 302 -121 191 -93 229 -131 323 -325 38 -77&#xA;101 -230 139 -340 134 -382 161 -436 258 -525 61 -56 171 -112 251 -129 180&#xA;-37 360 17 492 149 75 75 103 127 180 340 29 80 75 206 103 280 77 212 149&#xA;351 216 420 47 48 81 70 192 123 74 36 220 95 324 130 222 76 386 140 435 170&#xA;61 37 150 130 185 192 52 92 68 170 63 295 -8 166 -70 292 -191 390 -73 59&#xA;-148 92 -443 193 -488 168 -569 223 -684 461 -32 67 -76 173 -99 236 -22 63&#xA;-70 198 -106 300 -75 211 -107 271 -188 346 -132 123 -322 171 -501 128z m164&#xA;-861 c12 -32 42 -116 67 -188 59 -172 158 -370 237 -476 159 -211 346 -334&#xA;716 -472 223 -83 210 -78 210 -87 0 -4 -55 -28 -123 -53 -230 -85 -332 -128&#xA;-422 -179 -310 -175 -482 -397 -623 -808 -62 -181 -82 -230 -92 -230 -9 0 -30&#xA;52 -87 215 -145 415 -298 626 -576 794 -114 69 -195 105 -414 186 -101 37&#xA;-183 71 -183 75 0 8 39 25 245 101 268 99 434 196 575 338 155 156 246 318&#xA;360 641 35 96 65 181 67 188 10 24 22 11 43 -45z"></path> <path d="M7495 9830 c-113 -24 -196 -72 -283 -165 -72 -77 -91 -116 -176 -360&#xA;-258 -742 -252 -736 -956 -980 -228 -79 -316 -123 -394 -195 -250 -234 -208&#xA;-661 83 -845 55 -34 209 -94 425 -167 199 -66 369 -139 452 -194 78 -52 126&#xA;-112 187 -233 62 -122 66 -132 183 -456 47 -132 100 -266 116 -298 39 -73 157&#xA;-185 231 -221 221 -104 466 -60 630 113 74 79 102 132 172 331 201 566 258&#xA;674 407 771 79 51 241 120 410 175 215 70 413 149 474 190 277 184 316 586 81&#xA;824 -81 81 -170 123 -492 235 -416 144 -549 221 -636 370 -53 90 -129 275&#xA;-209 510 -96 279 -111 315 -164 389 -118 165 -335 248 -541 206z m190 -1010&#xA;c72 -204 148 -367 223 -478 102 -153 290 -312 477 -405 39 -19 144 -62 234&#xA;-96 226 -86 241 -92 241 -101 0 -8 -78 -40 -285 -116 -285 -104 -518 -269&#xA;-657 -464 -57 -81 -137 -233 -171 -325 -15 -38 -49 -133 -78 -210 -28 -77 -55&#xA;-144 -59 -149 -12 -12 -22 12 -91 205 -111 315 -198 469 -349 619 -146 146&#xA;-339 257 -615 354 -171 61 -224 85 -205 96 8 4 92 36 185 70 316 116 460 197&#xA;616 348 160 153 256 322 369 642 70 198 78 216 91 203 5 -5 38 -92 74 -193z"></path> <path d="M355 6301 c-76 -36 -136 -102 -158 -173 -20 -67 -44 -344 -59 -694&#xA;-21 -508 24 -1039 124 -1454 57 -237 138 -506 207 -685 87 -227 84 -220 195&#xA;-448 180 -371 366 -668 614 -977 129 -161 210 -251 391 -429 646 -640 1433&#xA;-1081 2326 -1305 611 -153 1362 -176 1975 -60 1131 213 2164 814 2913 1696&#xA;426 502 747 1077 961 1721 203 607 287 1241 258 1944 -17 405 -38 641 -62 707&#xA;-55 145 -232 223 -384 169 -67 -24 -148 -99 -175 -163 -26 -61 -26 -49 -16&#xA;-625 8 -506 1 -701 -35 -974 -107 -798 -408 -1534 -890 -2176 -505 -671 -1211&#xA;-1192 -2006 -1480 -466 -169 -911 -246 -1419 -246 -905 1 -1783 294 -2515 841&#xA;-834 623 -1413 1489 -1680 2515 -127 486 -160 871 -141 1614 10 392 10 452 -4&#xA;497 -53 178 -251 265 -420 185z"></path> <path d="M4980 5110 c-102 -15 -238 -57 -318 -101 -393 -211 -586 -650 -585&#xA;-1334 0 -562 138 -959 416 -1195 193 -164 415 -239 672 -227 265 13 472 101&#xA;640 273 171 174 277 400 325 694 57 349 49 711 -22 1040 -97 451 -374 754&#xA;-765 835 -95 20 -274 27 -363 15z m257 -642 c123 -40 211 -158 252 -338 71&#xA;-308 47 -836 -46 -1026 -36 -73 -111 -157 -166 -183 -183 -89 -378 -12 -473&#xA;186 -96 199 -124 663 -59 978 66 318 251 462 492 383z"></path> </g></symbol><symbol id="sat5" viewBox="0 0 1024 1024"><g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none"> <path d="M1762 8864 c-337 -57 -624 -269 -767 -568 -79 -167 -108 -295 -109&#xA;-486 0 -171 16 -266 75 -435 101 -294 282 -570 549 -835 191 -191 413 -357&#xA;795 -597 236 -148 276 -165 382 -165 90 0 149 26 366 161 396 245 581 385 802&#xA;606 412 411 618 829 619 1255 0 205 -36 359 -125 530 -230 444 -769 654 -1275&#xA;499 -91 -28 -247 -108 -327 -169 l-64 -48 -73 54 c-78 59 -216 130 -318 164&#xA;-144 47 -365 62 -530 34z m290 -645 c138 -29 234 -108 312 -257 76 -144 147&#xA;-202 271 -222 71 -12 140 1 207 37 64 35 109 87 156 182 91 184 253 283 439&#xA;267 102 -8 173 -38 241 -101 102 -95 148 -210 140 -354 -21 -350 -367 -790&#xA;-906 -1152 -168 -112 -220 -139 -249 -128 -77 29 -383 246 -545 386 -411 357&#xA;-623 740 -564 1021 19 91 56 160 116 216 105 98 240 135 382 105z"></path> <path d="M6650 8865 c-445 -70 -779 -394 -866 -841 -23 -118 -23 -328 0 -449&#xA;51 -264 179 -528 384 -795 152 -196 448 -465 707 -641 164 -112 450 -288 521&#xA;-321 119 -56 222 -55 338 4 78 39 362 220 537 340 500 346 833 740 1000 1184&#xA;68 181 100 409 80 571 -39 315 -168 559 -390 735 -94 75 -268 160 -396 195&#xA;-89 23 -118 26 -270 27 -188 0 -268 -14 -424 -74 -82 -32 -236 -123 -282 -166&#xA;-26 -25 -26 -25 -100 31 -230 173 -539 247 -839 200z m270 -645 c138 -26 239&#xA;-107 316 -252 27 -51 65 -109 84 -129 79 -81 189 -117 300 -97 116 21 186 81&#xA;256 220 77 153 180 234 333 260 232 40 440 -109 481 -345 14 -79 2 -191 -30&#xA;-289 -29 -87 -108 -235 -177 -331 -103 -143 -339 -375 -528 -519 -69 -52 -278&#xA;-192 -347 -232 -55 -32 -47 -35 -223 77 -559 356 -936 818 -962 1182 -21 297&#xA;211 509 497 455z"></path> <path d="M361 6306 c-76 -33 -145 -108 -165 -177 -9 -30 -21 -108 -26 -174 -6&#xA;-66 -16 -174 -22 -240 -15 -159 -15 -871 0 -1000 43 -379 55 -459 99 -670 30&#xA;-140 138 -525 181 -640 148 -402 319 -752 541 -1107 223 -357 642 -838 946&#xA;-1087 50 -41 95 -79 100 -85 6 -6 73 -59 150 -117 645 -487 1387 -810 2175&#xA;-945 296 -51 792 -76 1085 -55 637 46 1174 186 1740 454 683 323 1231 741&#xA;1723 1314 67 79 122 145 122 149 0 3 15 24 34 47 138 170 348 504 488 777 195&#xA;378 355 812 433 1167 14 65 32 147 40 183 59 263 105 729 105 1060 0 317 -37&#xA;877 -64 963 -37 122 -137 197 -271 205 -111 6 -215 -43 -272 -129 -43 -65 -52&#xA;-127 -42 -295 11 -211 11 -848 -1 -1044 -21 -344 -89 -724 -186 -1035 -53&#xA;-169 -78 -243 -114 -335 -157 -395 -306 -671 -565 -1040 -191 -274 -563 -663&#xA;-820 -859 -38 -30 -88 -68 -110 -86 -57 -46 -355 -243 -450 -297 -248 -141&#xA;-616 -302 -845 -370 -470 -139 -709 -176 -1180 -185 -269 -4 -327 -3 -495 16&#xA;-343 39 -532 80 -895 193 -216 67 -594 239 -820 373 -365 217 -735 518 -1025&#xA;835 -79 87 -287 349 -341 430 -17 25 -50 74 -75 110 -117 169 -334 567 -382&#xA;702 -9 24 -34 88 -57 143 -57 137 -134 370 -180 550 -128 492 -161 872 -143&#xA;1635 12 494 10 510 -76 603 -74 81 -233 111 -340 63z"></path> <path d="M4990 5190 c-102 -15 -238 -57 -318 -101 -395 -212 -587 -652 -585&#xA;-1339 1 -374 59 -664 177 -886 191 -359 533 -555 924 -531 384 24 663 217 837&#xA;578 160 335 199 938 93 1429 -97 451 -374 754 -765 835 -95 20 -274 27 -363&#xA;15z m257 -642 c123 -40 211 -158 252 -338 71 -308 47 -836 -46 -1026 -36 -73&#xA;-111 -157 -166 -183 -65 -31 -143 -43 -207 -31 -174 33 -274 160 -328 413 -24&#xA;112 -26 142 -26 377 0 277 11 371 60 520 30 88 54 131 103 183 95 101 219 131&#xA;358 85z"></path> </g></symbol></defs></svg>
+
+<div style="position:absolute;left:80px;top:46px;font:700 30px 'Zen Kaku Gothic New',sans-serif;color:#2c3a31">まもる家計簿 — オンボーディング<span style="font:500 15px 'Outfit',sans-serif;color:#8a978f;margin-left:14px">案A・静 ─ 3つの導入 + 初期設定 ・ ライト & ダーク</span></div>
+
+<div style="position:absolute;left:80px;top:120px;font:600 13px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">ライトテーマ</div>
+
+<!-- ============ 1 LIGHT — welcome (joyful) ============ -->
+<div style="position:absolute;left:80px;top:160px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">01 ・ ようこそ</div>
+<div data-screen-label="A-light-welcome" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#FBF7F4;--card:#FFFFFF;--ink:#20352B;--ink2:#71877A;--ink3:#A8BCB2;--line:#E6DDD8;--accent:#6FA36F;--accentText:#2E6B3A;--accentLight:#EEF6EC;--accentBorder:#CFE6CF;--joy:#D98CA0;--joyText:#A53D5E;--joyLight:#FBEAEF;--joyBorder:#F0D3DC;--shared:#5B8AC4;--onAccent:#FFFFFF;--field:#F4EFEA;--btnShadow:0 8px 20px rgba(111,163,111,.30);--shadow:0 16px 36px rgba(32,53,43,.09)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+  <div style="position:absolute;top:54px;right:26px;font:600 13px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3);z-index:5">スキップ</div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px">
+    <div style="position:relative;width:172px;height:150px;margin-bottom:30px">
+      <span style="position:absolute;top:18px;right:6px;width:12px;height:12px;background:var(--joy);border-radius:62% 0 62% 0;opacity:.5;animation:drift 5s ease-in-out infinite"></span>
+      <span style="position:absolute;bottom:30px;left:0;width:9px;height:9px;background:var(--accent);border-radius:62% 0 62% 0;opacity:.4;animation:drift 6.5s ease-in-out infinite .6s"></span>
+      <div style="position:absolute;top:18px;left:28px;width:116px;height:116px;border-radius:30px;background:var(--accentLight);border:1px solid var(--accentBorder);display:flex;align-items:center;justify-content:center;animation:floaty 6s ease-in-out infinite">
+        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 15 L16 6 L27 15"/>
+          <path d="M8 13.5 V25 a1 1 0 0 0 1 1 H23 a1 1 0 0 0 1-1 V13.5"/>
+          <path d="M16 26 V19.5"/>
+          <path d="M16 19.5 C16 16.8 18.3 16.2 20 16.2 C20 18.7 18 19.5 16 19.5 Z" fill="var(--accentLight)"/>
+          <path d="M16 21.4 C16 18.9 13.9 18.4 12.4 18.4 C12.4 20.7 14.2 21.4 16 21.4 Z" fill="var(--accentLight)"/>
+        </svg>
+      </div>
+      <div style="position:absolute;top:-4px;right:8px;width:52px;height:52px;border-radius:50%;background:var(--joyLight);border:1px solid var(--joyBorder);box-shadow:0 8px 18px rgba(217,140,160,.28);display:flex;align-items:center;justify-content:center;animation:floaty 5s ease-in-out infinite .3s">
+        <svg viewBox="0 0 1024 1024" style="width:32px;height:32px;color:var(--joyText)"><use href="#sat4"></use></svg>
+      </div>
+      <div style="position:absolute;bottom:6px;left:6px;width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--accentBorder);box-shadow:0 8px 16px rgba(111,163,111,.2);display:flex;align-items:center;justify-content:center;animation:floaty 6.5s ease-in-out infinite .5s">
+        <svg viewBox="0 0 1024 1024" style="width:26px;height:26px;color:var(--accentText)"><use href="#sat2"></use></svg>
+      </div>
+    </div>
+
+    <div style="display:inline-flex;align-items:center;gap:7px;background:var(--joyLight);border:1px solid var(--joyBorder);border-radius:999px;padding:6px 15px;margin-bottom:18px">
+      <svg viewBox="0 0 1024 1024" style="width:15px;height:15px;color:var(--joyText)"><use href="#sat4"></use></svg>
+      <span style="font:700 11.5px 'Zen Kaku Gothic New',sans-serif;color:var(--joyText)">たのしく、つづく家計簿</span>
+    </div>
+    <div style="font:700 28px/1.2 'Zen Kaku Gothic New',sans-serif;color:var(--ink);letter-spacing:.01em">まもる家計簿</div>
+    <div style="font:600 11px/1 'Outfit',sans-serif;letter-spacing:.34em;color:var(--ink3);margin-top:12px">HOME&nbsp;&nbsp;POCKET</div>
+    <div style="font:500 14.5px/1.95 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:22px;max-width:300px">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</div>
+  </div>
+
+  <div style="padding:0 28px 32px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center">
+      <span style="width:20px;height:6px;border-radius:3px;background:var(--accent)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+    </div>
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">次へ</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 2 LIGHT — privacy ============ -->
+<div style="position:absolute;left:538px;top:160px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">02 ・ プライバシー</div>
+<div data-screen-label="A-light-privacy" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#FBF7F4;--card:#FFFFFF;--ink:#20352B;--ink2:#71877A;--ink3:#A8BCB2;--line:#E6DDD8;--accent:#6FA36F;--accentText:#2E6B3A;--accentLight:#EEF6EC;--accentBorder:#CFE6CF;--joy:#D98CA0;--joyText:#A53D5E;--joyLight:#FBEAEF;--joyBorder:#F0D3DC;--shared:#5B8AC4;--onAccent:#FFFFFF;--field:#F4EFEA;--btnShadow:0 8px 20px rgba(111,163,111,.30);--shadow:0 16px 36px rgba(32,53,43,.09)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+  <div style="position:absolute;top:54px;right:26px;font:600 13px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3);z-index:5">スキップ</div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 36px 0;text-align:center">
+    <div style="position:relative;width:108px;height:108px;margin-top:38px;margin-bottom:26px;animation:floaty 6s ease-in-out infinite">
+      <div style="position:absolute;inset:0;border-radius:30px;background:var(--accentLight);border:1px solid var(--accentBorder)"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <circle cx="12" cy="10.6" r="1.7"/>
+          <path d="M12 12.3 V15"/>
+        </svg>
+      </div>
+    </div>
+    <div style="font:700 22px/1.5 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">データは、<br>あなたの手の中に。</div>
+    <div style="font:500 13.5px/1.9 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:16px;max-width:300px">すべて端末の中だけで完結。アカウントもサーバーも、いりません。</div>
+
+    <div style="width:100%;display:flex;flex-direction:column;gap:11px;margin-top:30px;text-align:left">
+      <div style="display:flex;gap:13px;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:16px">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+        <div><div style="font:700 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">端末内に保存</div><div style="font:500 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:2px">クラウドには送信しません</div></div>
+      </div>
+      <div style="display:flex;gap:13px;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:16px">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div><div style="font:700 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">エンドツーエンド暗号化</div><div style="font:500 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:2px">あなただけが鍵を持ちます</div></div>
+      </div>
+      <div style="display:flex;gap:13px;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:16px">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M9 12l2 2 5-5"/></svg></div>
+        <div><div style="font:700 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">改ざん防止</div><div style="font:500 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:2px">ハッシュチェーンで記録を保護</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:18px 28px 32px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center">
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:20px;height:6px;border-radius:3px;background:var(--accent)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+    </div>
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">次へ</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 3 LIGHT — joy (calm, matches 1&2) ============ -->
+<div style="position:absolute;left:996px;top:160px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">03 ・ 記録の悦び</div>
+<div data-screen-label="A-light-joy" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#FBF7F4;--card:#FFFFFF;--ink:#20352B;--ink2:#71877A;--ink3:#A8BCB2;--line:#E6DDD8;--accent:#6FA36F;--accentText:#2E6B3A;--accentLight:#EEF6EC;--accentBorder:#CFE6CF;--joy:#D98CA0;--joyText:#A53D5E;--joyLight:#FBEAEF;--joyBorder:#F0D3DC;--shared:#5B8AC4;--onAccent:#FFFFFF;--field:#F4EFEA;--btnShadow:0 8px 20px rgba(111,163,111,.30);--shadow:0 16px 36px rgba(32,53,43,.09)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+  <div style="position:absolute;top:54px;right:26px;font:600 13px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3);z-index:5">スキップ</div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px">
+    <div style="position:relative;width:122px;height:122px;margin-bottom:30px">
+      <span style="position:absolute;top:2px;right:2px;width:14px;height:14px;background:var(--joy);border-radius:62% 0 62% 0;opacity:.5;animation:drift 5s ease-in-out infinite"></span>
+      <span style="position:absolute;bottom:6px;left:-2px;width:10px;height:10px;background:var(--accent);border-radius:62% 0 62% 0;opacity:.4;animation:drift 6.5s ease-in-out infinite .6s"></span>
+      <div style="position:absolute;inset:12px;border-radius:30px;background:var(--joyLight);border:1px solid var(--joyBorder);display:flex;align-items:center;justify-content:center;animation:floaty 6s ease-in-out infinite">
+        <svg viewBox="0 0 1024 1024" style="width:56px;height:56px;color:var(--joyText)"><use href="#sat4"></use></svg>
+      </div>
+    </div>
+    <div style="font:700 23px/1.45 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">使ったお金に、<br>“気持ち”を添えて。</div>
+    <div style="font:500 13.5px/1.9 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:16px;max-width:300px">記帳は、面倒な作業じゃない。その時の満足度も、いっしょに残そう。</div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:32px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink3);opacity:.45"><use href="#sat1"></use></svg>
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink3);opacity:.45"><use href="#sat2"></use></svg>
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink3);opacity:.45"><use href="#sat3"></use></svg>
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--joyLight);border:2px solid var(--joy);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(217,140,160,.22)"><svg viewBox="0 0 1024 1024" style="width:32px;height:32px;color:var(--joyText)"><use href="#sat4"></use></svg></div>
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink3);opacity:.45"><use href="#sat5"></use></svg>
+      </div>
+      <span style="font:600 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3)">満足度を、ワンタップで記録。</span>
+    </div>
+
+    <div style="font:600 13px/1.7 'Zen Kaku Gothic New',sans-serif;color:var(--accentText);margin-top:26px">お金は、自分を満たすために。</div>
+  </div>
+
+  <div style="padding:0 28px 32px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center">
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:20px;height:6px;border-radius:3px;background:var(--accent)"></span>
+    </div>
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">はじめる</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 4 LIGHT — setup ============ -->
+<div style="position:absolute;left:1454px;top:160px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">04 ・ 初期設定</div>
+<div data-screen-label="A-light-setup" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#FBF7F4;--card:#FFFFFF;--ink:#20352B;--ink2:#71877A;--ink3:#A8BCB2;--line:#E6DDD8;--accent:#6FA36F;--accentText:#2E6B3A;--accentLight:#EEF6EC;--accentBorder:#CFE6CF;--joy:#D98CA0;--joyText:#A53D5E;--joyLight:#FBEAEF;--joyBorder:#F0D3DC;--shared:#5B8AC4;--onAccent:#FFFFFF;--field:#F4EFEA;--btnShadow:0 8px 20px rgba(111,163,111,.30);--shadow:0 16px 36px rgba(32,53,43,.09)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;padding:24px 26px 0;overflow:hidden">
+    <div style="font:600 11px/1 'Outfit',sans-serif;letter-spacing:.18em;color:var(--accentText)">最後のステップ</div>
+    <div style="font:700 23px/1.3 'Zen Kaku Gothic New',sans-serif;color:var(--ink);margin-top:8px">はじめる前に、<br>すこしだけ設定を。</div>
+
+    <div style="display:flex;justify-content:center;margin-top:22px;margin-bottom:18px">
+      <div style="position:relative;width:88px;height:88px">
+        <div style="width:88px;height:88px;border-radius:50%;background:var(--accentLight);border:1px solid var(--accentBorder);display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:30px;height:30px;border-radius:50%;background:var(--accent);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h8l2 3h3a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.2"/></svg></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-bottom:6px;padding-left:2px">お名前</div>
+        <div style="display:flex;align-items:center;height:46px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px;font:500 14.5px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">花子<span style="width:1.5px;height:18px;background:var(--accent);margin-left:1px;border-radius:1px"></span></div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-left:2px"><span style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2)">表示言語</span></div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;height:42px;border-radius:12px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 13px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">日本語</div>
+          <div style="flex:1;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;justify-content:center;font:600 13px 'Zen Kaku Gothic New',sans-serif">中文</div>
+          <div style="flex:1.3;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;justify-content:center;font:600 13px 'Outfit',sans-serif">English</div>
+          <div style="flex:1;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;justify-content:center;font:600 13px 'Zen Kaku Gothic New',sans-serif">自動</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start;margin-top:7px;padding-left:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg><span style="font:500 10.5px/1.5 'Zen Kaku Gothic New',sans-serif;color:var(--ink3)">「自動」でも対象外の言語のときは、日本語で表示します。</span></div>
+      </div>
+      <div>
+        <div style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-bottom:6px;padding-left:2px">通貨単位</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;height:46px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:26px;height:26px;border-radius:8px;background:var(--accentLight);display:flex;align-items:center;justify-content:center;font:700 14px 'Outfit',sans-serif;color:var(--accentText)">¥</span><span style="font:500 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">日本円（JPY）</span></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div>
+        <div style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-bottom:6px;padding-left:2px">音声入力の言語</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;height:46px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:26px;height:26px;border-radius:8px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accentText)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 18v3"/></svg></span><span style="font:500 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">日本語</span></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:14px 26px 30px">
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">この設定ではじめる</div>
+  </div>
+</div>
+</div>
+
+<div style="position:absolute;left:80px;top:1014px;font:600 13px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">ダークテーマ ─ 温かい夜</div>
+
+<!-- ============ 1 DARK — welcome (joyful) ============ -->
+<div style="position:absolute;left:80px;top:1054px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">01 ・ ようこそ ・ Dark</div>
+<div data-screen-label="A-dark-welcome" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#171210;--card:#231E1B;--ink:#F0EBE6;--ink2:#9A8E87;--ink3:#6B5F58;--line:#2E2723;--accent:#8DC68D;--accentText:#7DC88D;--accentLight:#1A2E1A;--accentBorder:#283E28;--joy:#E89BB0;--joyText:#E89BB0;--joyLight:#2E1820;--joyBorder:#4A2834;--shared:#7FA8D8;--onAccent:#10210F;--field:#1E1815;--btnShadow:0 10px 26px rgba(141,198,141,.22);--shadow:0 18px 40px rgba(0,0,0,.5)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+  <div style="position:absolute;top:54px;right:26px;font:600 13px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3);z-index:5">スキップ</div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px">
+    <div style="position:relative;width:172px;height:150px;margin-bottom:30px">
+      <span style="position:absolute;top:18px;right:6px;width:12px;height:12px;background:var(--joy);border-radius:62% 0 62% 0;opacity:.7;animation:drift 5s ease-in-out infinite"></span>
+      <span style="position:absolute;bottom:30px;left:0;width:9px;height:9px;background:var(--accent);border-radius:62% 0 62% 0;opacity:.55;animation:drift 6.5s ease-in-out infinite .6s"></span>
+      <div style="position:absolute;top:18px;left:28px;width:116px;height:116px;border-radius:30px;background:var(--accentLight);border:1px solid var(--accentBorder);display:flex;align-items:center;justify-content:center;animation:floaty 6s ease-in-out infinite">
+        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 15 L16 6 L27 15"/>
+          <path d="M8 13.5 V25 a1 1 0 0 0 1 1 H23 a1 1 0 0 0 1-1 V13.5"/>
+          <path d="M16 26 V19.5"/>
+          <path d="M16 19.5 C16 16.8 18.3 16.2 20 16.2 C20 18.7 18 19.5 16 19.5 Z" fill="var(--accentLight)"/>
+          <path d="M16 21.4 C16 18.9 13.9 18.4 12.4 18.4 C12.4 20.7 14.2 21.4 16 21.4 Z" fill="var(--accentLight)"/>
+        </svg>
+      </div>
+      <div style="position:absolute;top:-4px;right:8px;width:52px;height:52px;border-radius:50%;background:var(--joyLight);border:1px solid var(--joyBorder);box-shadow:0 8px 18px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;animation:floaty 5s ease-in-out infinite .3s">
+        <svg viewBox="0 0 1024 1024" style="width:32px;height:32px;color:var(--joyText)"><use href="#sat4"></use></svg>
+      </div>
+      <div style="position:absolute;bottom:6px;left:6px;width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--accentBorder);box-shadow:0 8px 16px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;animation:floaty 6.5s ease-in-out infinite .5s">
+        <svg viewBox="0 0 1024 1024" style="width:26px;height:26px;color:var(--accentText)"><use href="#sat2"></use></svg>
+      </div>
+    </div>
+
+    <div style="display:inline-flex;align-items:center;gap:7px;background:var(--joyLight);border:1px solid var(--joyBorder);border-radius:999px;padding:6px 15px;margin-bottom:18px">
+      <svg viewBox="0 0 1024 1024" style="width:15px;height:15px;color:var(--joyText)"><use href="#sat4"></use></svg>
+      <span style="font:700 11.5px 'Zen Kaku Gothic New',sans-serif;color:var(--joyText)">たのしく、つづく家計簿</span>
+    </div>
+    <div style="font:700 28px/1.2 'Zen Kaku Gothic New',sans-serif;color:var(--ink);letter-spacing:.01em">まもる家計簿</div>
+    <div style="font:600 11px/1 'Outfit',sans-serif;letter-spacing:.34em;color:var(--ink3);margin-top:12px">HOME&nbsp;&nbsp;POCKET</div>
+    <div style="font:500 14.5px/1.95 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:22px;max-width:300px">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</div>
+  </div>
+
+  <div style="padding:0 28px 32px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center">
+      <span style="width:20px;height:6px;border-radius:3px;background:var(--accent)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+    </div>
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">次へ</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 2 DARK — privacy ============ -->
+<div style="position:absolute;left:538px;top:1054px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">02 ・ プライバシー ・ Dark</div>
+<div data-screen-label="A-dark-privacy" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#171210;--card:#231E1B;--ink:#F0EBE6;--ink2:#9A8E87;--ink3:#6B5F58;--line:#2E2723;--accent:#8DC68D;--accentText:#7DC88D;--accentLight:#1A2E1A;--accentBorder:#283E28;--joy:#E89BB0;--joyText:#E89BB0;--joyLight:#2E1820;--joyBorder:#4A2834;--shared:#7FA8D8;--onAccent:#10210F;--field:#1E1815;--btnShadow:0 10px 26px rgba(141,198,141,.22);--shadow:0 18px 40px rgba(0,0,0,.5)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+  <div style="position:absolute;top:54px;right:26px;font:600 13px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3);z-index:5">スキップ</div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 36px 0;text-align:center">
+    <div style="position:relative;width:108px;height:108px;margin-top:38px;margin-bottom:26px;animation:floaty 6s ease-in-out infinite">
+      <div style="position:absolute;inset:0;border-radius:30px;background:var(--accentLight);border:1px solid var(--accentBorder)"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <circle cx="12" cy="10.6" r="1.7"/>
+          <path d="M12 12.3 V15"/>
+        </svg>
+      </div>
+    </div>
+    <div style="font:700 22px/1.5 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">データは、<br>あなたの手の中に。</div>
+    <div style="font:500 13.5px/1.9 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:16px;max-width:300px">すべて端末の中だけで完結。アカウントもサーバーも、いりません。</div>
+
+    <div style="width:100%;display:flex;flex-direction:column;gap:11px;margin-top:30px;text-align:left">
+      <div style="display:flex;gap:13px;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:16px">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+        <div><div style="font:700 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">端末内に保存</div><div style="font:500 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:2px">クラウドには送信しません</div></div>
+      </div>
+      <div style="display:flex;gap:13px;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:16px">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div><div style="font:700 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">エンドツーエンド暗号化</div><div style="font:500 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:2px">あなただけが鍵を持ちます</div></div>
+      </div>
+      <div style="display:flex;gap:13px;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:16px">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M9 12l2 2 5-5"/></svg></div>
+        <div><div style="font:700 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">改ざん防止</div><div style="font:500 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:2px">ハッシュチェーンで記録を保護</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:18px 28px 32px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center">
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:20px;height:6px;border-radius:3px;background:var(--accent)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+    </div>
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">次へ</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 3 DARK — joy (calm) ============ -->
+<div style="position:absolute;left:996px;top:1054px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">03 ・ 記録の悦び ・ Dark</div>
+<div data-screen-label="A-dark-joy" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#171210;--card:#231E1B;--ink:#F0EBE6;--ink2:#9A8E87;--ink3:#6B5F58;--line:#2E2723;--accent:#8DC68D;--accentText:#7DC88D;--joy:#E89BB0;--joyText:#E89BB0;--joyLight:#2E1820;--joyBorder:#4A2834;--shared:#7FA8D8;--onAccent:#10210F;--field:#1E1815;--btnShadow:0 10px 26px rgba(141,198,141,.22);--shadow:0 18px 40px rgba(0,0,0,.5)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+  <div style="position:absolute;top:54px;right:26px;font:600 13px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3);z-index:5">スキップ</div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px">
+    <div style="position:relative;width:122px;height:122px;margin-bottom:30px">
+      <span style="position:absolute;top:2px;right:2px;width:14px;height:14px;background:var(--joy);border-radius:62% 0 62% 0;opacity:.7;animation:drift 5s ease-in-out infinite"></span>
+      <span style="position:absolute;bottom:6px;left:-2px;width:10px;height:10px;background:var(--accent);border-radius:62% 0 62% 0;opacity:.55;animation:drift 6.5s ease-in-out infinite .6s"></span>
+      <div style="position:absolute;inset:12px;border-radius:30px;background:var(--joyLight);border:1px solid var(--joyBorder);display:flex;align-items:center;justify-content:center;animation:floaty 6s ease-in-out infinite">
+        <svg viewBox="0 0 1024 1024" style="width:56px;height:56px;color:var(--joyText)"><use href="#sat4"></use></svg>
+      </div>
+    </div>
+    <div style="font:700 23px/1.45 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">使ったお金に、<br>“気持ち”を添えて。</div>
+    <div style="font:500 13.5px/1.9 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-top:16px;max-width:300px">記帳は、面倒な作業じゃない。その時の満足度も、いっしょに残そう。</div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:32px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink2);opacity:.5"><use href="#sat1"></use></svg>
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink2);opacity:.5"><use href="#sat2"></use></svg>
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink2);opacity:.5"><use href="#sat3"></use></svg>
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--joyLight);border:2px solid var(--joy);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(0,0,0,.35)"><svg viewBox="0 0 1024 1024" style="width:32px;height:32px;color:var(--joyText)"><use href="#sat4"></use></svg></div>
+        <svg viewBox="0 0 1024 1024" style="width:27px;height:27px;color:var(--ink2);opacity:.5"><use href="#sat5"></use></svg>
+      </div>
+      <span style="font:600 12px 'Zen Kaku Gothic New',sans-serif;color:var(--ink3)">満足度を、ワンタップで記録。</span>
+    </div>
+
+    <div style="font:600 13px/1.7 'Zen Kaku Gothic New',sans-serif;color:var(--accentText);margin-top:26px">お金は、自分を満たすために。</div>
+  </div>
+
+  <div style="padding:0 28px 32px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:center">
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:6px;height:6px;border-radius:3px;background:var(--line)"></span>
+      <span style="width:20px;height:6px;border-radius:3px;background:var(--accent)"></span>
+    </div>
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">はじめる</div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 4 DARK — setup ============ -->
+<div style="position:absolute;left:1454px;top:1054px;width:402px">
+<div data-drags-parent="1" style="position:absolute;top:-26px;left:2px;font:600 11px 'Outfit',sans-serif;letter-spacing:.04em;color:#8a978f">04 ・ 初期設定 ・ Dark</div>
+<div data-screen-label="A-dark-setup" style="position:relative;width:402px;height:800px;border-radius:40px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);font-family:'Zen Kaku Gothic New','Outfit',system-ui,sans-serif;--bg:#171210;--card:#231E1B;--ink:#F0EBE6;--ink2:#9A8E87;--ink3:#6B5F58;--line:#2E2723;--accent:#8DC68D;--accentText:#7DC88D;--accentLight:#1A2E1A;--accentBorder:#283E28;--joy:#E89BB0;--joyText:#E89BB0;--joyLight:#2E1820;--joyBorder:#4A2834;--shared:#7FA8D8;--onAccent:#10210F;--field:#1E1815;--btnShadow:0 10px 26px rgba(141,198,141,.22);--shadow:0 18px 40px rgba(0,0,0,.5)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px 0;color:var(--ink);font:600 14px 'Outfit',sans-serif">
+    <span>9:41</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--ink)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M1 4.4C5 1 11 1 15 4.4"/><path d="M3.6 6.9C6 4.7 10 4.7 12.4 6.9"/><path d="M6.1 9.3C7.2 8.4 8.8 8.4 9.9 9.3"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12" fill="none"><rect x="0.6" y="0.6" width="18" height="10.8" rx="2.6" stroke="var(--ink)" stroke-width="1.1" opacity="0.5"/><rect x="2.3" y="2.3" width="11" height="7.4" rx="1.4" fill="var(--ink)"/><rect x="20" y="3.6" width="1.6" height="4.8" rx="0.8" fill="var(--ink)" opacity="0.5"/></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;padding:24px 26px 0;overflow:hidden">
+    <div style="font:600 11px/1 'Outfit',sans-serif;letter-spacing:.18em;color:var(--accentText)">最後のステップ</div>
+    <div style="font:700 23px/1.3 'Zen Kaku Gothic New',sans-serif;color:var(--ink);margin-top:8px">はじめる前に、<br>すこしだけ設定を。</div>
+
+    <div style="display:flex;justify-content:center;margin-top:22px;margin-bottom:18px">
+      <div style="position:relative;width:88px;height:88px">
+        <div style="width:88px;height:88px;border-radius:50%;background:var(--accentLight);border:1px solid var(--accentBorder);display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:30px;height:30px;border-radius:50%;background:var(--accent);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--onAccent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h8l2 3h3a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.2"/></svg></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-bottom:6px;padding-left:2px">お名前</div>
+        <div style="display:flex;align-items:center;height:46px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px;font:500 14.5px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">花子<span style="width:1.5px;height:18px;background:var(--accent);margin-left:1px;border-radius:1px"></span></div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-left:2px"><span style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2)">表示言語</span></div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;height:42px;border-radius:12px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 13px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">日本語</div>
+          <div style="flex:1;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;justify-content:center;font:600 13px 'Zen Kaku Gothic New',sans-serif">中文</div>
+          <div style="flex:1.3;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;justify-content:center;font:600 13px 'Outfit',sans-serif">English</div>
+          <div style="flex:1;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;justify-content:center;font:600 13px 'Zen Kaku Gothic New',sans-serif">自動</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start;margin-top:7px;padding-left:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg><span style="font:500 10.5px/1.5 'Zen Kaku Gothic New',sans-serif;color:var(--ink3)">「自動」でも対象外の言語のときは、日本語で表示します。</span></div>
+      </div>
+      <div>
+        <div style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-bottom:6px;padding-left:2px">通貨単位</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;height:46px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:26px;height:26px;border-radius:8px;background:var(--accentLight);display:flex;align-items:center;justify-content:center;font:700 14px 'Outfit',sans-serif;color:var(--accentText)">¥</span><span style="font:500 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">日本円（JPY）</span></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div>
+        <div style="font:600 11px 'Zen Kaku Gothic New',sans-serif;color:var(--ink2);margin-bottom:6px;padding-left:2px">音声入力の言語</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;height:46px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 14px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:26px;height:26px;border-radius:8px;background:var(--accentLight);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accentText)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 18v3"/></svg></span><span style="font:500 14px 'Zen Kaku Gothic New',sans-serif;color:var(--ink)">日本語</span></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:14px 26px 30px">
+    <div style="height:54px;border-radius:16px;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;font:700 16px 'Zen Kaku Gothic New',sans-serif;box-shadow:var(--btnShadow)">この設定ではじめる</div>
+  </div>
+</div>
+</div>
+</x-dc>
+</body>
+</html>
