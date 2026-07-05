@@ -122,31 +122,66 @@ Widget _host({
   );
 }
 
-/// Opens the nickname editor and commits [name].
+/// Enters [name] into the inline nickname TextField (design 04 — the
+/// tap-to-dialog editor is gone).
 Future<void> _setNickname(WidgetTester tester, String name) async {
-  await tester.tap(find.text('未設定'));
-  await tester.pumpAndSettle();
   await tester.enterText(find.byType(TextField).first, name);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('変更').last);
   await tester.pumpAndSettle();
 }
 
 void main() {
-  group('OnboardingSettingsScreen — D-14 nickname gate (Task 1)', () {
+  group('OnboardingSettingsScreen — design 04 re-skin (WELA-02)', () {
+    testWidgets(
+      'renders eyebrow, title, avatar block, inline name field, 4 language '
+      'segments with info note, currency + voice rows and confirm button',
+      (tester) async {
+        await tester.pumpWidget(_host());
+        await tester.pumpAndSettle();
+
+        expect(find.text('最後のステップ'), findsOneWidget); // eyebrow
+        expect(find.text('はじめる前に、\nすこしだけ設定を。'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('onboarding-avatar-block')),
+          findsOneWidget,
+        );
+        expect(find.text('お名前'), findsOneWidget);
+        expect(find.byType(TextField), findsOneWidget); // inline name field
+        expect(find.text('表示言語'), findsOneWidget);
+        // 4 language segments (日本語 also appears as the voice-row value).
+        expect(find.text('日本語'), findsWidgets);
+        expect(find.text('中文'), findsOneWidget);
+        expect(find.text('English'), findsOneWidget);
+        expect(find.text('自動'), findsOneWidget);
+        expect(
+          find.text('「自動」でも対象外の言語のときは、日本語で表示します。'),
+          findsOneWidget,
+        );
+        expect(find.text('通貨単位'), findsOneWidget);
+        expect(find.textContaining('JPY'), findsOneWidget);
+        expect(find.text('音声入力の言語'), findsOneWidget);
+        expect(
+          find.widgetWithText(TextButton, 'この設定ではじめる'),
+          findsOneWidget,
+        );
+        // The old dialog-based rows are gone.
+        expect(find.text('未設定'), findsNothing);
+        expect(find.text('変更'), findsNothing);
+      },
+    );
+  });
+
+  group('OnboardingSettingsScreen — D-14 nickname gate', () {
     testWidgets('start button is disabled until a nickname is set', (
       tester,
     ) async {
       await tester.pumpWidget(_host());
       await tester.pumpAndSettle();
 
-      final buttonFinder = find.widgetWithText(TextButton, 'この設定で始める');
+      final buttonFinder = find.widgetWithText(TextButton, 'この設定ではじめる');
       expect(buttonFinder, findsOneWidget);
 
       final button = tester.widget<TextButton>(buttonFinder);
       expect(button.onPressed, isNull);
-
-      expect(find.text('未設定'), findsOneWidget);
     });
 
     testWidgets('start button enables once a non-empty nickname is entered', (
@@ -157,31 +192,15 @@ void main() {
 
       await _setNickname(tester, 'たけし');
 
-      final buttonFinder = find.widgetWithText(TextButton, 'この設定で始める');
+      final buttonFinder = find.widgetWithText(TextButton, 'この設定ではじめる');
       final button = tester.widget<TextButton>(buttonFinder);
       expect(button.onPressed, isNotNull);
-      expect(find.text('たけし'), findsOneWidget);
-    });
-
-    testWidgets('renders all five unified rows with default current-values', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_host());
-      await tester.pumpAndSettle();
-
-      expect(find.text('基本設定'), findsOneWidget);
-      expect(find.text('あなたの呼び名'), findsOneWidget); // nickname
-      expect(find.text('言語'), findsOneWidget); // UI language
-      expect(find.text('通貨'), findsOneWidget); // currency
-      expect(find.text('音声入力の言語'), findsOneWidget); // voice
-      expect(find.text('変更'), findsNWidgets(5));
-      expect(find.textContaining('JPY'), findsOneWidget);
     });
   });
 
-  group('OnboardingSettingsScreen — write-through on confirm (Task 2)', () {
+  group('OnboardingSettingsScreen — write-through on confirm', () {
     testWidgets(
-      'explicit UI-language pick persists the concrete code (setLocale)',
+      'tapping the English segment persists the concrete code (setLocale)',
       (tester) async {
         final harness = await _buildHarness(
           prefsSeed: const {'language': 'system'},
@@ -189,16 +208,28 @@ void main() {
         await tester.pumpWidget(_host(overrides: harness.overrides));
         await tester.pumpAndSettle();
 
-        // Open the language picker and choose English explicitly.
-        await tester.tap(find.text('言語'));
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.widgetWithText(RadioListTile<String>, 'English'),
-        );
+        // Tap the English language segment directly (no dialog).
+        await tester.tap(find.text('English'));
         await tester.pumpAndSettle();
 
         // setLocale persisted 'en' — never the 'system' sentinel.
         expect(harness.prefs.getString('language'), 'en');
+      },
+    );
+
+    testWidgets(
+      'tapping the 自動 segment re-persists the system sentinel',
+      (tester) async {
+        final harness = await _buildHarness(
+          prefsSeed: const {'language': 'ja'},
+        );
+        await tester.pumpWidget(_host(overrides: harness.overrides));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('自動'));
+        await tester.pumpAndSettle();
+
+        expect(harness.prefs.getString('language'), 'system');
       },
     );
 
@@ -209,8 +240,10 @@ void main() {
         await tester.pumpWidget(_host(overrides: harness.overrides));
         await tester.pumpAndSettle();
 
-        // Open the currency selector and pick USD.
-        await tester.tap(find.text('通貨'));
+        // Open the currency selector from the currency row and pick USD.
+        await tester.tap(
+          find.byKey(const ValueKey('onboarding-currency-row')),
+        );
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('currency-row-USD')));
         await tester.pumpAndSettle();
@@ -240,7 +273,7 @@ void main() {
 
         await _setNickname(tester, 'たけし');
 
-        await tester.tap(find.widgetWithText(TextButton, 'この設定で始める'));
+        await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
         await tester.pumpAndSettle();
 
         // onConfirmed fired only on save success.
