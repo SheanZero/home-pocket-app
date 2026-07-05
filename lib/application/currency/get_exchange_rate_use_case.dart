@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../features/currency/domain/models/exchange_rate.dart';
 import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 import '../../infrastructure/exchange_rate/exchange_rate_cache_service.dart';
-import 'rate_result.dart';
+import '../../features/currency/domain/models/rate_result.dart';
 
 /// Immutable parameter object for [GetExchangeRateUseCase.execute].
 ///
@@ -157,12 +157,12 @@ class GetExchangeRateUseCase {
   /// Extract the rate string from any rate-bearing variant ([RateUnavailable]
   /// carries no rate).
   String? _extractRate(RateResult result) => switch (result) {
-        RateFetched(:final rate) => rate,
-        RateCached(:final rate) => rate,
-        RateFallback(:final rate) => rate,
-        RateManual(:final rate) => rate,
-        RateUnavailable() => null,
-      };
+    RateFetched(:final rate) => rate,
+    RateCached(:final rate) => rate,
+    RateFallback(:final rate) => rate,
+    RateManual(:final rate) => rate,
+    RateUnavailable() => null,
+  };
 
   /// CR-02: local Y/M/D as UTC midnight — agrees with the cache service, the
   /// repo impl, and the API URL date. Do NOT `d.toUtc()` first (that shifted

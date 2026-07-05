@@ -11,6 +11,7 @@ import '../../../../application/accounting/merchant_category_learning_service.da
 import '../../../../application/accounting/repository_providers.dart'
     as app_accounting;
 import '../../../../application/accounting/seed_categories_use_case.dart';
+import '../../../../application/seed/seed_all_use_case.dart';
 import '../../../../application/accounting/seed_merchants_use_case.dart';
 import '../../../../application/accounting/seed_voice_synonyms_use_case.dart';
 import '../../../../application/voice/parse_voice_input_use_case.dart';
@@ -191,7 +192,9 @@ SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
 @riverpod
 SeedVoiceSynonymsUseCase seedVoiceSynonymsUseCase(Ref ref) {
   return SeedVoiceSynonymsUseCase(
-    preferenceRepository: ref.watch(categoryKeywordPreferenceRepositoryProvider),
+    preferenceRepository: ref.watch(
+      categoryKeywordPreferenceRepositoryProvider,
+    ),
   );
 }
 
@@ -301,4 +304,20 @@ ParseVoiceInputUseCase parseVoiceInputUseCase(Ref ref) {
 @riverpod
 VoiceSatisfactionEstimator voiceSatisfactionEstimator(Ref ref) {
   return VoiceSatisfactionEstimator();
+}
+
+/// Phase 23 D-14: composition of the three seed use cases (quality report
+/// P1-2: moved here from application/seed/seed_providers.dart — wiring
+/// providers belong in a feature composition root, and an application-layer
+/// provider watching presentation providers was a reverse layer dependency).
+///
+/// Composes the three leaf providers via [ref.watch] so the ordering
+/// contract is owned by [SeedAllUseCase.execute()], not by call-site comments.
+@riverpod
+SeedAllUseCase seedAllUseCase(Ref ref) {
+  return SeedAllUseCase(
+    seedCategories: ref.watch(seedCategoriesUseCaseProvider),
+    seedVoiceSynonyms: ref.watch(seedVoiceSynonymsUseCaseProvider),
+    seedMerchants: ref.watch(seedMerchantsUseCaseProvider),
+  );
 }

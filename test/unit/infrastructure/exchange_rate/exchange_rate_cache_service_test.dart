@@ -7,7 +7,7 @@
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/currency/rate_result.dart';
+import 'package:home_pocket/features/currency/domain/models/rate_result.dart';
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/infrastructure/exchange_rate/exchange_rate_api_client.dart';

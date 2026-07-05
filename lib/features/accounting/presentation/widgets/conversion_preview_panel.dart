@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/currency/get_exchange_rate_use_case.dart';
-import '../../../../application/currency/rate_result.dart';
+import '../../../currency/domain/models/rate_result.dart';
 import '../../../../application/currency/repository_providers.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
@@ -67,12 +67,8 @@ class ConversionPreviewArgs {
       other.wasManualOverride == wasManualOverride;
 
   @override
-  int get hashCode => Object.hash(
-        currency,
-        date,
-        previousRate,
-        wasManualOverride,
-      );
+  int get hashCode =>
+      Object.hash(currency, date, previousRate, wasManualOverride);
 }
 
 /// Keyed rate provider. Resolves the [RateResultWithSignal] for the given
@@ -99,12 +95,12 @@ Future<RateResultWithSignal> conversionRate(
 /// Full-precision rate string for any rate-bearing [RateResult] variant; null
 /// for [RateUnavailable]. Single extraction site (ADR-020).
 String? rateStringOf(RateResult r) => switch (r) {
-      RateFetched(:final rate) => rate,
-      RateCached(:final rate) => rate,
-      RateFallback(:final rate) => rate,
-      RateManual(:final rate) => rate,
-      RateUnavailable() => null,
-    };
+  RateFetched(:final rate) => rate,
+  RateCached(:final rate) => rate,
+  RateFallback(:final rate) => rate,
+  RateManual(:final rate) => rate,
+  RateUnavailable() => null,
+};
 
 /// The date the displayed rate is effectively keyed to (for the 汇率日期 row +
 /// staleness). For a [RateFetched] this prefers `actualDate` (weekend/holiday

@@ -14,7 +14,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/currency/rate_result.dart';
+import 'package:home_pocket/features/currency/domain/models/rate_result.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/conversion_preview_panel.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';

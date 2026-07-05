@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/currency/rate_result.dart';
+import '../../../currency/domain/models/rate_result.dart';
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -195,8 +195,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   // its [text] is mirrored into [_amount] so AmountDisplay + save validation
   // keep working unchanged. [_currency] starts at 'JPY' — the CURR-04 invariant
   // path: no rate fetch, no preview, no annotation, dot gated off (decimals==0).
-  late final AmountInputController _controller =
-      AmountInputController(decimals: currencyFractionDigitsFor(_currency));
+  late final AmountInputController _controller = AmountInputController(
+    decimals: currencyFractionDigitsFor(_currency),
+  );
   String _currency = 'JPY';
 
   bool get _isForeign => _currency.toUpperCase() != 'JPY';
@@ -531,10 +532,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
       return;
     }
 
-    final args = ConversionPreviewArgs(
-      currency: currency,
-      date: date,
-    );
+    final args = ConversionPreviewArgs(currency: currency, date: date);
     try {
       final withSignal = await ref.read(conversionRateProvider(args).future);
       // Bail if the user changed currency/amount/date while awaiting.
@@ -594,12 +592,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// Rate string for any rate-bearing [RateResult] variant; null for
   /// [RateUnavailable].
   String? _rateStringOf(RateResult r) => switch (r) {
-        RateFetched(:final rate) => rate,
-        RateCached(:final rate) => rate,
-        RateFallback(:final rate) => rate,
-        RateManual(:final rate) => rate,
-        RateUnavailable() => null,
-      };
+    RateFetched(:final rate) => rate,
+    RateCached(:final rate) => rate,
+    RateFallback(:final rate) => rate,
+    RateManual(:final rate) => rate,
+    RateUnavailable() => null,
+  };
 
   /// Passive sink for the preview's ADR-022 rate signals (D-02 dialog / D-03
   /// toast). During FRESH entry there is no `previousRate` — the entry flow
@@ -622,11 +620,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// previous date's rate), then re-pushes the freshly-resolved triple.
   void _onFormDateChanged(DateTime date) {
     final normalized = DateTime(date.year, date.month, date.day);
-    if (normalized == DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-    )) {
+    if (normalized ==
+        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day)) {
       return;
     }
     setState(() {
@@ -801,15 +796,17 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     // Watch locale provider to trigger rebuild on locale change.
-    final locale =
-        ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
     final palette = context.palette;
 
     // Currency symbol for the active currency — derived the same way the
     // selector sheet does (strip digits/separators from a formatted zero) so the
     // display, keypad, and sheet all show the same glyph.
-    final currencySymbol = NumberFormatter.formatCurrency(0, _currency, locale)
-        .replaceAll(RegExp(r'[\d.,\s]'), '');
+    final currencySymbol = NumberFormatter.formatCurrency(
+      0,
+      _currency,
+      locale,
+    ).replaceAll(RegExp(r'[\d.,\s]'), '');
 
     final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     // Item 3 (260526-j98): bottom padding clears IME only — the SmartKeyboard
@@ -827,10 +824,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: palette.textPrimary,
-          ),
+          icon: Icon(Icons.close, color: palette.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(

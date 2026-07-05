@@ -27,7 +27,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 import '../../../../application/currency/get_exchange_rate_use_case.dart';
-import '../../../../application/currency/rate_result.dart';
+import '../../../currency/domain/models/rate_result.dart';
 import '../../../../application/currency/repository_providers.dart'
     show appGetExchangeRateUseCaseProvider;
 import '../../../../application/voice/repository_providers.dart'

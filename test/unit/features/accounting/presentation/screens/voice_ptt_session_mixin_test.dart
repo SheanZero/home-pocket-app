@@ -16,7 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/currency/get_exchange_rate_use_case.dart';
-import 'package:home_pocket/application/currency/rate_result.dart';
+import 'package:home_pocket/features/currency/domain/models/rate_result.dart';
 import 'package:home_pocket/application/currency/repository_providers.dart'
     show appGetExchangeRateUseCaseProvider;
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';

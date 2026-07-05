@@ -7,6 +7,7 @@ import 'package:home_pocket/features/settings/presentation/widgets/security_sect
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../helpers/test_localizations.dart';

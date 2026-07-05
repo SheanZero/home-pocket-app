@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/currency/rate_result.dart';
+import '../../../currency/domain/models/rate_result.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -56,20 +56,17 @@ class AddScreenForeignCard extends ConsumerWidget {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
 
-    final args = ConversionPreviewArgs(
-      currency: currency,
-      date: date,
-    );
+    final args = ConversionPreviewArgs(currency: currency, date: date);
 
     // RateSignal side-effects (D-02 dialog / D-03 toast) belong in ref.listen,
     // NEVER ref.watch (Riverpod 3 — CLAUDE.md side-effect rule).
-    ref.listen<AsyncValue<RateResultWithSignal>>(
-      conversionRateProvider(args),
-      (previous, next) {
-        final signal = next.value?.signal;
-        if (signal != null) onSignal(signal);
-      },
-    );
+    ref.listen<AsyncValue<RateResultWithSignal>>(conversionRateProvider(args), (
+      previous,
+      next,
+    ) {
+      final signal = next.value?.signal;
+      if (signal != null) onSignal(signal);
+    });
 
     final rateAsync = ref.watch(conversionRateProvider(args));
 

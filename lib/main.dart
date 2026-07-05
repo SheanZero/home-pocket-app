@@ -10,9 +10,8 @@ import 'core/state/data_reset_signal.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_clamp.dart';
 import 'data/app_database.dart';
-import 'application/seed/seed_providers.dart';
 import 'features/accounting/presentation/providers/repository_providers.dart'
-    show ensureDefaultBookUseCaseProvider;
+    show ensureDefaultBookUseCaseProvider, seedAllUseCaseProvider;
 import 'features/family_sync/presentation/providers/repository_providers.dart';
 import 'features/family_sync/presentation/providers/repository_providers.dart'
     show pushNotificationServiceProvider;

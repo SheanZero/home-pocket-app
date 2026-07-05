@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/security/app_lock_service.dart';
 import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
-import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../helpers/test_localizations.dart';

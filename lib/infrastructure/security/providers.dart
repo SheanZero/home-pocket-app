@@ -2,9 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../application/security/app_lock_service.dart';
 import '../../data/app_database.dart';
-import '../../features/settings/presentation/providers/repository_providers.dart';
 import 'audit_logger.dart';
 import 'biometric_service.dart';
 import 'secure_storage_service.dart';
@@ -58,21 +56,6 @@ Future<BiometricAvailability> biometricAvailability(Ref ref) async {
 SecureStorageService secureStorageService(Ref ref) {
   final storage = ref.watch(flutterSecureStorageProvider);
   return SecureStorageService(storage: storage);
-}
-
-/// Application-layer app-lock service — single source of truth for the lock
-/// decision (D-01) and all PIN operations (LOCK-01/06).
-///
-/// Consumed by the cold-start gate (Plan 11), lock screen (Plan 09), and the
-/// Settings security section (Plan 10). Wires the keychain (pinHash slot), the
-/// biometric service (re-auth, D-05), and the settings repository (toggles).
-@riverpod
-AppLockService appLockService(Ref ref) {
-  return AppLockService(
-    settingsRepository: ref.watch(settingsRepositoryProvider),
-    secureStorage: ref.watch(secureStorageServiceProvider),
-    biometricService: ref.watch(biometricServiceProvider),
-  );
 }
 
 /// Audit logger — depends on AppDatabase and SecureStorageService.

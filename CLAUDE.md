@@ -314,7 +314,7 @@ Always check max number before creating, use next sequential, update INDEX.md. S
 1. Don't modify generated files (`.g.dart`, `.freezed.dart`)
    *[Partially enforced — AUDIT-10 catches stale committed files; hand-edits matching generator output go undetected]*
 2. Don't violate layer dependencies (Domain must not import Data)
-   *[Structurally enforced — import_guard via custom_lint + arch test domain_import_rules_test.dart]*
+   *[Structurally enforced — arch test layer_import_rules_test.dart scans REAL imports (relative-safe) for domain/application/infrastructure directions; domain_import_rules_test.dart guards the yaml text. CAVEAT: import_guard deny-mode yamls are inert for intra-project imports (the lint matches `package:` prefixes verbatim but this repo enforces prefer_relative_imports) — only allow-mode subdirectory yamls actually enforce via custom_lint. Do not treat a green `dart run custom_lint` as layer-compliance evidence]*
 3. Don't skip code generation after modifying annotated classes
    *[Structurally enforced — AUDIT-10 CI guardrail blocks PRs with stale generated files]*
 4. Don't mutate objects — always use `copyWith`

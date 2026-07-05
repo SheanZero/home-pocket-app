@@ -6,6 +6,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
 import '../../../../infrastructure/security/providers.dart';
+import '../../../applock/presentation/providers/repository_providers.dart';
 import '../../../applock/presentation/screens/set_pin_screen.dart';
 import '../../../applock/presentation/widgets/pin_dots.dart';
 import '../../../applock/presentation/widgets/pin_keypad.dart';
@@ -36,14 +37,14 @@ class SecuritySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = S.of(context);
-    final biometricAvailable = switch (
-        ref.watch(biometricAvailabilityProvider).value) {
+    final biometricAvailable = switch (ref
+        .watch(biometricAvailabilityProvider)
+        .value) {
       BiometricAvailability.faceId ||
       BiometricAvailability.fingerprint ||
       BiometricAvailability.strongBiometric ||
       BiometricAvailability.weakBiometric ||
-      BiometricAvailability.generic =>
-        true,
+      BiometricAvailability.generic => true,
       _ => false,
     };
 
@@ -62,9 +63,8 @@ class SecuritySection extends ConsumerWidget {
           title: Text(l.securityAppLock),
           subtitle: Text(l.securityAppLockDescription),
           value: settings.appLockEnabled,
-          onChanged: (value) => value
-              ? _enableLock(context, ref)
-              : _disableLock(context, ref),
+          onChanged: (value) =>
+              value ? _enableLock(context, ref) : _disableLock(context, ref),
         ),
         if (settings.appLockEnabled) ...[
           if (biometricAvailable)
@@ -128,9 +128,9 @@ class SecuritySection extends ConsumerWidget {
 
   /// Pushes [SetPinScreen]; returns true only when a PIN was successfully set.
   Future<bool> _openSetPin(BuildContext context, WidgetRef ref) async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()));
     return result ?? false;
   }
 

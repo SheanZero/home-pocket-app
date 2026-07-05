@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../application/currency/rate_result.dart';
+import '../../features/currency/domain/models/rate_result.dart';
 import '../../features/currency/domain/models/exchange_rate.dart';
 import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'exchange_rate_api_client.dart';

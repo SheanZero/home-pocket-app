@@ -1348,3 +1348,67 @@ final class VoiceSatisfactionEstimatorProvider
 
 String _$voiceSatisfactionEstimatorHash() =>
     r'633b00ee3ba24d00f0bf477ac217841dbcb2db4c';
+
+/// Phase 23 D-14: composition of the three seed use cases (quality report
+/// P1-2: moved here from application/seed/seed_providers.dart — wiring
+/// providers belong in a feature composition root, and an application-layer
+/// provider watching presentation providers was a reverse layer dependency).
+///
+/// Composes the three leaf providers via [ref.watch] so the ordering
+/// contract is owned by [SeedAllUseCase.execute()], not by call-site comments.
+
+@ProviderFor(seedAllUseCase)
+final seedAllUseCaseProvider = SeedAllUseCaseProvider._();
+
+/// Phase 23 D-14: composition of the three seed use cases (quality report
+/// P1-2: moved here from application/seed/seed_providers.dart — wiring
+/// providers belong in a feature composition root, and an application-layer
+/// provider watching presentation providers was a reverse layer dependency).
+///
+/// Composes the three leaf providers via [ref.watch] so the ordering
+/// contract is owned by [SeedAllUseCase.execute()], not by call-site comments.
+
+final class SeedAllUseCaseProvider
+    extends $FunctionalProvider<SeedAllUseCase, SeedAllUseCase, SeedAllUseCase>
+    with $Provider<SeedAllUseCase> {
+  /// Phase 23 D-14: composition of the three seed use cases (quality report
+  /// P1-2: moved here from application/seed/seed_providers.dart — wiring
+  /// providers belong in a feature composition root, and an application-layer
+  /// provider watching presentation providers was a reverse layer dependency).
+  ///
+  /// Composes the three leaf providers via [ref.watch] so the ordering
+  /// contract is owned by [SeedAllUseCase.execute()], not by call-site comments.
+  SeedAllUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'seedAllUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$seedAllUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<SeedAllUseCase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SeedAllUseCase create(Ref ref) {
+    return seedAllUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SeedAllUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SeedAllUseCase>(value),
+    );
+  }
+}
+
+String _$seedAllUseCaseHash() => r'2b82c286309cea3e0ee0e058d6824c39014c2137';

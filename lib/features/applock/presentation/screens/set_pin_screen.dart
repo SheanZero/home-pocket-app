@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/security/providers.dart';
+import '../providers/repository_providers.dart';
 import '../widgets/pin_dots.dart';
 import '../widgets/pin_keypad.dart';
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
-import '../../../../infrastructure/security/providers.dart';
+import '../../../applock/presentation/providers/repository_providers.dart';
 import '../../../applock/presentation/screens/set_pin_screen.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../features/analytics/domain/models/metric_result.dart';
@@ -89,9 +89,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// the [SecuritySection] master-toggle ON handler does (never lock without a
   /// PIN). Reads no provider until the user actually sets a PIN.
   Future<void> _autoOpenSetPin() async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()));
     if (result != true) return;
     await ref.read(appLockServiceProvider).enableLock();
     if (!mounted) return;
@@ -121,9 +121,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: settingsAsync.when(
         data: (settings) {
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _maybeScrollToSecurity(
-              lockNotSet: !settings.appLockEnabled,
-            ),
+            (_) => _maybeScrollToSecurity(lockNotSet: !settings.appLockEnabled),
           );
           return ListView(
             controller: _scrollController,

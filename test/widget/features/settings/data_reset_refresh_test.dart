@@ -23,7 +23,6 @@ import 'package:home_pocket/application/family_sync/listen_to_push_notifications
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
 import 'package:home_pocket/application/seed/seed_all_use_case.dart';
-import 'package:home_pocket/application/seed/seed_providers.dart';
 import 'package:home_pocket/core/state/data_reset_signal.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
@@ -32,7 +31,8 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     show
         bookByIdProvider,
         bookRepositoryProvider,
-        deviceIdentityRepositoryProvider;
+        deviceIdentityRepositoryProvider,
+        seedAllUseCaseProvider;
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart'
     show pushNotificationServiceProvider;
 import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';

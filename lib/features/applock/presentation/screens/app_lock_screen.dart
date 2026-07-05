@@ -7,6 +7,7 @@ import '../../../../infrastructure/security/biometric_service.dart';
 import '../../../../infrastructure/security/models/auth_result.dart';
 import '../../../../infrastructure/security/providers.dart';
 import '../providers/app_lock_providers.dart';
+import '../providers/repository_providers.dart';
 import '../widgets/face_id_panel.dart';
 import '../widgets/pin_dots.dart';
 import '../widgets/pin_keypad.dart';
@@ -118,9 +119,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
     if (_verifying || _entered.isEmpty) {
       return;
     }
-    setState(
-      () => _entered = _entered.substring(0, _entered.length - 1),
-    );
+    setState(() => _entered = _entered.substring(0, _entered.length - 1));
   }
 
   Future<void> _verifyPin() async {
@@ -171,9 +170,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(
-              foregroundColor: palette.accentPrimary,
-            ),
+            style: TextButton.styleFrom(foregroundColor: palette.accentPrimary),
             child: Text(MaterialLocalizations.of(context).okButtonLabel),
           ),
         ],
@@ -259,9 +256,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
         TextButton(
           key: const ValueKey('app-lock-forgot-pin'),
           onPressed: _showForgotPin,
-          style: TextButton.styleFrom(
-            foregroundColor: palette.textSecondary,
-          ),
+          style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
           child: Text(
             l.appLockForgotPin,
             style: TextStyle(
