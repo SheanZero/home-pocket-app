@@ -3073,19 +3073,31 @@
   "@onboardingIntroSkip": {
     "description": "Onboarding intro: skip button (ONBOARD-02 intro is skippable)"
   },
-  "onboardingSettingsTitle": "基本设置",
-  "@onboardingSettingsTitle": {
-    "description": "Onboarding settings page: heading"
+  "onboardingSetupEyebrow": "最后一步",
+  "@onboardingSetupEyebrow": {
+    "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
-  "onboardingSettingsSubtitle": "这是推荐的初始设置。",
-  "@onboardingSettingsSubtitle": {
-    "description": "Onboarding settings page: subtitle"
+  "onboardingSetupTitle": "开始之前，\n先做一点小设置。",
+  "@onboardingSetupTitle": {
+    "description": "Design-04 setup screen: two-line title"
   },
-  "onboardingSettingsHint": "这些都可以稍后在「设置」中随时修改。",
-  "@onboardingSettingsHint": {
-    "description": "Onboarding settings page: change-later hint"
+  "onboardingRowName": "姓名",
+  "@onboardingRowName": {
+    "description": "Design-04 setup screen: inline name field label"
   },
-  "onboardingRowCurrency": "货币",
+  "onboardingRowLanguage": "显示语言",
+  "@onboardingRowLanguage": {
+    "description": "Design-04 setup screen: display-language segment group label"
+  },
+  "onboardingLanguageAuto": "自动",
+  "@onboardingLanguageAuto": {
+    "description": "Design-04 setup screen: follow-the-system language segment (D-08)"
+  },
+  "onboardingLanguageAutoNote": "选择「自动」时，如果系统语言不受支持，将以日语显示。",
+  "@onboardingLanguageAutoNote": {
+    "description": "Design-04 setup screen: info note under the language segments"
+  },
+  "onboardingRowCurrency": "货币单位",
   "@onboardingRowCurrency": {
     "description": "Onboarding settings row label: bookkeeping currency (D-10)"
   },
@@ -3093,15 +3105,7 @@
   "@onboardingRowVoice": {
     "description": "Onboarding settings row label: voice input language (D-10)"
   },
-  "onboardingChange": "修改",
-  "@onboardingChange": {
-    "description": "Onboarding settings row: change action button"
-  },
-  "onboardingNicknameUnset": "未设置",
-  "@onboardingNicknameUnset": {
-    "description": "Onboarding settings nickname row empty-state placeholder (D-14)"
-  },
-  "onboardingStart": "以此设置开始",
+  "onboardingStart": "用这些设置开始",
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
   },

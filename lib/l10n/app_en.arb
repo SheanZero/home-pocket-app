@@ -3073,17 +3073,29 @@
   "@onboardingIntroSkip": {
     "description": "Onboarding intro: skip button (ONBOARD-02 intro is skippable)"
   },
-  "onboardingSettingsTitle": "Basic Settings",
-  "@onboardingSettingsTitle": {
-    "description": "Onboarding settings page: heading"
+  "onboardingSetupEyebrow": "Final step",
+  "@onboardingSetupEyebrow": {
+    "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
-  "onboardingSettingsSubtitle": "Recommended initial settings.",
-  "@onboardingSettingsSubtitle": {
-    "description": "Onboarding settings page: subtitle"
+  "onboardingSetupTitle": "Before you begin,\njust a few settings.",
+  "@onboardingSetupTitle": {
+    "description": "Design-04 setup screen: two-line title"
   },
-  "onboardingSettingsHint": "You can change these anytime later in Settings.",
-  "@onboardingSettingsHint": {
-    "description": "Onboarding settings page: change-later hint"
+  "onboardingRowName": "Name",
+  "@onboardingRowName": {
+    "description": "Design-04 setup screen: inline name field label"
+  },
+  "onboardingRowLanguage": "Display language",
+  "@onboardingRowLanguage": {
+    "description": "Design-04 setup screen: display-language segment group label"
+  },
+  "onboardingLanguageAuto": "Auto",
+  "@onboardingLanguageAuto": {
+    "description": "Design-04 setup screen: follow-the-system language segment (D-08)"
+  },
+  "onboardingLanguageAutoNote": "With \u201cAuto\u201d, unsupported system languages fall back to Japanese.",
+  "@onboardingLanguageAutoNote": {
+    "description": "Design-04 setup screen: info note under the language segments"
   },
   "onboardingRowCurrency": "Currency",
   "@onboardingRowCurrency": {
@@ -3092,14 +3104,6 @@
   "onboardingRowVoice": "Voice input language",
   "@onboardingRowVoice": {
     "description": "Onboarding settings row label: voice input language (D-10)"
-  },
-  "onboardingChange": "Change",
-  "@onboardingChange": {
-    "description": "Onboarding settings row: change action button"
-  },
-  "onboardingNicknameUnset": "Not set",
-  "@onboardingNicknameUnset": {
-    "description": "Onboarding settings nickname row empty-state placeholder (D-14)"
   },
   "onboardingStart": "Start with these settings",
   "@onboardingStart": {

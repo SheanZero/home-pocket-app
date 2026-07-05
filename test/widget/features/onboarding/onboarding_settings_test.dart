@@ -33,8 +33,7 @@ class _FakeBookRepository implements BookRepository {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// In-memory profile repository that records the saved profile.
@@ -99,10 +98,7 @@ Future<_Harness> _buildHarness({
   );
 }
 
-Widget _host({
-  List<Override> overrides = const [],
-  VoidCallback? onConfirmed,
-}) {
+Widget _host({List<Override> overrides = const [], VoidCallback? onConfirmed}) {
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
@@ -147,22 +143,30 @@ void main() {
         expect(find.text('お名前'), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget); // inline name field
         expect(find.text('表示言語'), findsOneWidget);
-        // 4 language segments (日本語 also appears as the voice-row value).
-        expect(find.text('日本語'), findsWidgets);
-        expect(find.text('中文'), findsOneWidget);
-        expect(find.text('English'), findsOneWidget);
-        expect(find.text('自動'), findsOneWidget);
+        // 4 language segments (the concrete labels can also appear as the
+        // voice-row value depending on the host device locale — find by key).
         expect(
-          find.text('「自動」でも対象外の言語のときは、日本語で表示します。'),
+          find.byKey(const ValueKey('onboarding-lang-ja')),
           findsOneWidget,
         );
+        expect(
+          find.byKey(const ValueKey('onboarding-lang-zh')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('onboarding-lang-en')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('onboarding-lang-system')),
+          findsOneWidget,
+        );
+        expect(find.text('自動'), findsOneWidget);
+        expect(find.text('「自動」でも対象外の言語のときは、日本語で表示します。'), findsOneWidget);
         expect(find.text('通貨単位'), findsOneWidget);
         expect(find.textContaining('JPY'), findsOneWidget);
         expect(find.text('音声入力の言語'), findsOneWidget);
-        expect(
-          find.widgetWithText(TextButton, 'この設定ではじめる'),
-          findsOneWidget,
-        );
+        expect(find.widgetWithText(TextButton, 'この設定ではじめる'), findsOneWidget);
         // The old dialog-based rows are gone.
         expect(find.text('未設定'), findsNothing);
         expect(find.text('変更'), findsNothing);
@@ -209,7 +213,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap the English language segment directly (no dialog).
-        await tester.tap(find.text('English'));
+        await tester.tap(find.byKey(const ValueKey('onboarding-lang-en')));
         await tester.pumpAndSettle();
 
         // setLocale persisted 'en' — never the 'system' sentinel.
@@ -217,41 +221,35 @@ void main() {
       },
     );
 
-    testWidgets(
-      'tapping the 自動 segment re-persists the system sentinel',
-      (tester) async {
-        final harness = await _buildHarness(
-          prefsSeed: const {'language': 'ja'},
-        );
-        await tester.pumpWidget(_host(overrides: harness.overrides));
-        await tester.pumpAndSettle();
+    testWidgets('tapping the 自動 segment re-persists the system sentinel', (
+      tester,
+    ) async {
+      final harness = await _buildHarness(prefsSeed: const {'language': 'ja'});
+      await tester.pumpWidget(_host(overrides: harness.overrides));
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.text('自動'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('onboarding-lang-system')));
+      await tester.pumpAndSettle();
 
-        expect(harness.prefs.getString('language'), 'system');
-      },
-    );
+      expect(harness.prefs.getString('language'), 'system');
+    });
 
-    testWidgets(
-      'currency selection writes Book.currency via bookRepo.update',
-      (tester) async {
-        final harness = await _buildHarness();
-        await tester.pumpWidget(_host(overrides: harness.overrides));
-        await tester.pumpAndSettle();
+    testWidgets('currency selection writes Book.currency via bookRepo.update', (
+      tester,
+    ) async {
+      final harness = await _buildHarness();
+      await tester.pumpWidget(_host(overrides: harness.overrides));
+      await tester.pumpAndSettle();
 
-        // Open the currency selector from the currency row and pick USD.
-        await tester.tap(
-          find.byKey(const ValueKey('onboarding-currency-row')),
-        );
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const ValueKey('currency-row-USD')));
-        await tester.pumpAndSettle();
+      // Open the currency selector from the currency row and pick USD.
+      await tester.tap(find.byKey(const ValueKey('onboarding-currency-row')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('currency-row-USD')));
+      await tester.pumpAndSettle();
 
-        expect(harness.bookRepo.lastUpdatedCurrency, 'USD');
-        expect(find.textContaining('USD'), findsOneWidget);
-      },
-    );
+      expect(harness.bookRepo.lastUpdatedCurrency, 'USD');
+      expect(find.textContaining('USD'), findsOneWidget);
+    });
 
     testWidgets(
       'confirm: untouched language → setSystemDefault, concrete voice, '

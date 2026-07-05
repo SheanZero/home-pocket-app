@@ -74,6 +74,12 @@ class NumberFormatter {
     return formatter.format(number);
   }
 
+  /// Public currency-symbol lookup for chips/labels that render the symbol
+  /// alone (e.g. the onboarding setup currency row). Amount formatting must
+  /// keep going through [formatCurrency].
+  static String currencySymbol(String currencyCode) =>
+      _getCurrencySymbol(currencyCode);
+
   static String _getCurrencySymbol(String currencyCode) {
     switch (currencyCode.toUpperCase()) {
       case 'JPY':

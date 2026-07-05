@@ -2396,26 +2396,29 @@ class SEn extends S {
   String get onboardingIntroSkip => 'Skip';
 
   @override
-  String get onboardingSettingsTitle => 'Basic Settings';
+  String get onboardingSetupEyebrow => 'Final step';
 
   @override
-  String get onboardingSettingsSubtitle => 'Recommended initial settings.';
+  String get onboardingSetupTitle => 'Before you begin,\njust a few settings.';
 
   @override
-  String get onboardingSettingsHint =>
-      'You can change these anytime later in Settings.';
+  String get onboardingRowName => 'Name';
+
+  @override
+  String get onboardingRowLanguage => 'Display language';
+
+  @override
+  String get onboardingLanguageAuto => 'Auto';
+
+  @override
+  String get onboardingLanguageAutoNote =>
+      'With “Auto”, unsupported system languages fall back to Japanese.';
 
   @override
   String get onboardingRowCurrency => 'Currency';
 
   @override
   String get onboardingRowVoice => 'Voice input language';
-
-  @override
-  String get onboardingChange => 'Change';
-
-  @override
-  String get onboardingNicknameUnset => 'Not set';
 
   @override
   String get onboardingStart => 'Start with these settings';

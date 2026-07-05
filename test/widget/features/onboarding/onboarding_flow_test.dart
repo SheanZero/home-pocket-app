@@ -38,8 +38,7 @@ class _FakeSyncEngine implements SyncEngine {
   void dispose() {}
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// In-memory book repo (currency write-through during settings confirm).
@@ -55,8 +54,7 @@ class _FakeBookRepository implements BookRepository {
   Future<void> update(Book book) async => _book = book;
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// In-memory profile repo (save during settings confirm).
@@ -99,7 +97,9 @@ Future<({List<Override> overrides, SharedPreferences prefs})> _buildOverrides({
       settingsRepositoryProvider.overrideWith(
         (_) => SettingsRepositoryImpl(prefs: prefs),
       ),
-      bookRepositoryProvider.overrideWith((_) => _FakeBookRepository(_testBook())),
+      bookRepositoryProvider.overrideWith(
+        (_) => _FakeBookRepository(_testBook()),
+      ),
       saveUserProfileUseCaseProvider.overrideWith(
         (_) => SaveUserProfileUseCase(_FakeUserProfileRepository()),
       ),
@@ -144,11 +144,8 @@ Future<void> _pumpNoSettle(WidgetTester tester) async {
 }
 
 Future<void> _setNickname(WidgetTester tester, String name) async {
-  await tester.tap(find.text('未設定'));
-  await tester.pumpAndSettle();
+  // Design 04: inline nickname TextField (the tap-to-dialog editor is gone).
   await tester.enterText(find.byType(TextField).first, name);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('変更').last);
   await tester.pumpAndSettle();
 }
 
@@ -163,29 +160,26 @@ void main() {
       expect(find.byType(OnboardingSettingsScreen), findsNothing);
     });
 
-    testWidgets(
-      'onContinue advances to settings; system back returns to intro '
-      '(re-entrant, ONBOARD-07)',
-      (tester) async {
-        final h = await _buildOverrides();
-        await tester.pumpWidget(_host(h.overrides));
-        await tester.pumpAndSettle();
+    testWidgets('onContinue advances to settings; system back returns to intro '
+        '(re-entrant, ONBOARD-07)', (tester) async {
+      final h = await _buildOverrides();
+      await tester.pumpWidget(_host(h.overrides));
+      await tester.pumpAndSettle();
 
-        // Advance: intro → settings (スキップ collapses to onContinue, D-02).
-        await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
-        await tester.pumpAndSettle();
-        expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
-        expect(find.byType(OnboardingIntroScreen), findsNothing);
+      // Advance: intro → settings (スキップ collapses to onContinue, D-02).
+      await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
+      await tester.pumpAndSettle();
+      expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
+      expect(find.byType(OnboardingIntroScreen), findsNothing);
 
-        // System back pops the nested route settings → intro (the root
-        // PopScope guard delegates to the nested Navigator). It must NOT pop
-        // out of the flow.
-        await tester.binding.handlePopRoute();
-        await tester.pumpAndSettle();
-        expect(find.byType(OnboardingIntroScreen), findsOneWidget);
-        expect(find.byType(OnboardingSettingsScreen), findsNothing);
-      },
-    );
+      // System back pops the nested route settings → intro (the root
+      // PopScope guard delegates to the nested Navigator). It must NOT pop
+      // out of the flow.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(OnboardingIntroScreen), findsOneWidget);
+      expect(find.byType(OnboardingSettingsScreen), findsNothing);
+    });
 
     testWidgets(
       'root cannot be popped out of the flow (PopScope guard) — system back '
@@ -230,7 +224,7 @@ void main() {
 
         // settings: nickname required, then confirm → lock-entry
         await _setNickname(tester, 'たけし');
-        await tester.tap(find.widgetWithText(TextButton, 'この設定で始める'));
+        await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
         await tester.pumpAndSettle();
         expect(find.byType(OnboardingLockEntryScreen), findsOneWidget);
 

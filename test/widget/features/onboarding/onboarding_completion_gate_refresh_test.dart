@@ -231,22 +231,19 @@ String _shellBookId(WidgetTester tester) =>
 /// path to completion. Returns the boot bookId captured from the gate.
 Future<String> _completeOnboarding(WidgetTester tester) async {
   expect(find.byType(OnboardingFlowScreen), findsOneWidget);
-  final bootBookId =
-      tester.widget<OnboardingFlowScreen>(find.byType(OnboardingFlowScreen)).bookId;
+  final bootBookId = tester
+      .widget<OnboardingFlowScreen>(find.byType(OnboardingFlowScreen))
+      .bookId;
 
   // intro → settings (スキップ collapses to onContinue, D-02)
   await tester.tap(find.widgetWithText(TextButton, 'スキップ').first);
   await tester.pumpAndSettle();
   expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
 
-  // settings: nickname required, then confirm → lock-entry
-  await tester.tap(find.text('未設定'));
-  await tester.pumpAndSettle();
+  // settings: nickname required (inline TextField), then confirm → lock-entry
   await tester.enterText(find.byType(TextField).first, 'たけし');
   await tester.pumpAndSettle();
-  await tester.tap(find.text('変更').last);
-  await tester.pumpAndSettle();
-  await tester.tap(find.widgetWithText(TextButton, 'この設定で始める'));
+  await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
   await tester.pumpAndSettle();
   expect(find.byType(OnboardingLockEntryScreen), findsOneWidget);
 
@@ -306,33 +303,30 @@ void main() {
       },
     );
 
-    testWidgets(
-      'delete-all after same-session onboarding returns the gate to '
-      'OnboardingFlowScreen (D-05, gate not detached)',
-      (tester) async {
-        final h = await _pumpApp(tester);
+    testWidgets('delete-all after same-session onboarding returns the gate to '
+        'OnboardingFlowScreen (D-05, gate not detached)', (tester) async {
+      final h = await _pumpApp(tester);
 
-        await _completeOnboarding(tester);
-        expect(h.prefs.getBool('onboarding_complete'), true);
-        expect(find.byType(MainShellScreen), findsOneWidget);
+      await _completeOnboarding(tester);
+      expect(h.prefs.getBool('onboarding_complete'), true);
+      expect(find.byType(MainShellScreen), findsOneWidget);
 
-        // Simulate clear-all: clears identity + flag and wipes the books.
-        await h.prefs.setBool('onboarding_complete', false);
-        final bookRepo = h.container.read(bookRepositoryProvider);
-        await bookRepo.deleteAll();
+      // Simulate clear-all: clears identity + flag and wipes the books.
+      await h.prefs.setBool('onboarding_complete', false);
+      final bookRepo = h.container.read(bookRepositoryProvider);
+      await bookRepo.deleteAll();
 
-        // Fire the global reset signal — exactly what clear-all does.
-        h.container.read(dataResetSignalProvider.notifier).fire();
-        await _pumpBounded(tester);
+      // Fire the global reset signal — exactly what clear-all does.
+      h.container.read(dataResetSignalProvider.notifier).fire();
+      await _pumpBounded(tester);
 
-        // D-05: the gate re-evaluates to onboarding WITHOUT a restart. On the
-        // pre-fix code the detached shell stays displayed, so OnboardingFlow
-        // is never re-rendered.
-        expect(find.byType(OnboardingFlowScreen), findsOneWidget);
-        expect(find.byType(MainShellScreen), findsNothing);
+      // D-05: the gate re-evaluates to onboarding WITHOUT a restart. On the
+      // pre-fix code the detached shell stays displayed, so OnboardingFlow
+      // is never re-rendered.
+      expect(find.byType(OnboardingFlowScreen), findsOneWidget);
+      expect(find.byType(MainShellScreen), findsNothing);
 
-        await _flushAndUnmount(tester);
-      },
-    );
+      await _flushAndUnmount(tester);
+    });
   });
 }

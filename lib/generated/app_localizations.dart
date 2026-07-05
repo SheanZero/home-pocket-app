@@ -4405,23 +4405,41 @@ abstract class S {
   /// **'Skip'**
   String get onboardingIntroSkip;
 
-  /// Onboarding settings page: heading
+  /// Design-04 setup screen: letterspaced eyebrow above the title
   ///
   /// In en, this message translates to:
-  /// **'Basic Settings'**
-  String get onboardingSettingsTitle;
+  /// **'Final step'**
+  String get onboardingSetupEyebrow;
 
-  /// Onboarding settings page: subtitle
+  /// Design-04 setup screen: two-line title
   ///
   /// In en, this message translates to:
-  /// **'Recommended initial settings.'**
-  String get onboardingSettingsSubtitle;
+  /// **'Before you begin,\njust a few settings.'**
+  String get onboardingSetupTitle;
 
-  /// Onboarding settings page: change-later hint
+  /// Design-04 setup screen: inline name field label
   ///
   /// In en, this message translates to:
-  /// **'You can change these anytime later in Settings.'**
-  String get onboardingSettingsHint;
+  /// **'Name'**
+  String get onboardingRowName;
+
+  /// Design-04 setup screen: display-language segment group label
+  ///
+  /// In en, this message translates to:
+  /// **'Display language'**
+  String get onboardingRowLanguage;
+
+  /// Design-04 setup screen: follow-the-system language segment (D-08)
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get onboardingLanguageAuto;
+
+  /// Design-04 setup screen: info note under the language segments
+  ///
+  /// In en, this message translates to:
+  /// **'With “Auto”, unsupported system languages fall back to Japanese.'**
+  String get onboardingLanguageAutoNote;
 
   /// Onboarding settings row label: bookkeeping currency (D-10)
   ///
@@ -4434,18 +4452,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Voice input language'**
   String get onboardingRowVoice;
-
-  /// Onboarding settings row: change action button
-  ///
-  /// In en, this message translates to:
-  /// **'Change'**
-  String get onboardingChange;
-
-  /// Onboarding settings nickname row empty-state placeholder (D-14)
-  ///
-  /// In en, this message translates to:
-  /// **'Not set'**
-  String get onboardingNicknameUnset;
 
   /// Onboarding settings page: confirm/start button (locked copy, NOT profileStart)
   ///

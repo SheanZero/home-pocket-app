@@ -2346,28 +2346,31 @@ class SZh extends S {
   String get onboardingIntroSkip => '跳过';
 
   @override
-  String get onboardingSettingsTitle => '基本设置';
+  String get onboardingSetupEyebrow => '最后一步';
 
   @override
-  String get onboardingSettingsSubtitle => '这是推荐的初始设置。';
+  String get onboardingSetupTitle => '开始之前，\n先做一点小设置。';
 
   @override
-  String get onboardingSettingsHint => '这些都可以稍后在「设置」中随时修改。';
+  String get onboardingRowName => '姓名';
 
   @override
-  String get onboardingRowCurrency => '货币';
+  String get onboardingRowLanguage => '显示语言';
+
+  @override
+  String get onboardingLanguageAuto => '自动';
+
+  @override
+  String get onboardingLanguageAutoNote => '选择「自动」时，如果系统语言不受支持，将以日语显示。';
+
+  @override
+  String get onboardingRowCurrency => '货币单位';
 
   @override
   String get onboardingRowVoice => '语音输入语言';
 
   @override
-  String get onboardingChange => '修改';
-
-  @override
-  String get onboardingNicknameUnset => '未设置';
-
-  @override
-  String get onboardingStart => '以此设置开始';
+  String get onboardingStart => '用这些设置开始';
 
   @override
   String get onboardingLockTitle => '要设置应用锁吗？';

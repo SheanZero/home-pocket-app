@@ -2354,28 +2354,31 @@ class SJa extends S {
   String get onboardingIntroSkip => 'スキップ';
 
   @override
-  String get onboardingSettingsTitle => '基本設定';
+  String get onboardingSetupEyebrow => '最後のステップ';
 
   @override
-  String get onboardingSettingsSubtitle => 'おすすめの初期設定です。';
+  String get onboardingSetupTitle => 'はじめる前に、\nすこしだけ設定を。';
 
   @override
-  String get onboardingSettingsHint => 'これらはあとで「設定」からいつでも変更できます。';
+  String get onboardingRowName => 'お名前';
 
   @override
-  String get onboardingRowCurrency => '通貨';
+  String get onboardingRowLanguage => '表示言語';
+
+  @override
+  String get onboardingLanguageAuto => '自動';
+
+  @override
+  String get onboardingLanguageAutoNote => '「自動」でも対象外の言語のときは、日本語で表示します。';
+
+  @override
+  String get onboardingRowCurrency => '通貨単位';
 
   @override
   String get onboardingRowVoice => '音声入力の言語';
 
   @override
-  String get onboardingChange => '変更';
-
-  @override
-  String get onboardingNicknameUnset => '未設定';
-
-  @override
-  String get onboardingStart => 'この設定で始める';
+  String get onboardingStart => 'この設定ではじめる';
 
   @override
   String get onboardingLockTitle => 'アプリロックを設定しますか？';

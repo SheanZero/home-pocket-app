@@ -3073,19 +3073,31 @@
   "@onboardingIntroSkip": {
     "description": "Onboarding intro: skip button (ONBOARD-02 intro is skippable)"
   },
-  "onboardingSettingsTitle": "基本設定",
-  "@onboardingSettingsTitle": {
-    "description": "Onboarding settings page: heading"
+  "onboardingSetupEyebrow": "最後のステップ",
+  "@onboardingSetupEyebrow": {
+    "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
-  "onboardingSettingsSubtitle": "おすすめの初期設定です。",
-  "@onboardingSettingsSubtitle": {
-    "description": "Onboarding settings page: subtitle"
+  "onboardingSetupTitle": "はじめる前に、\nすこしだけ設定を。",
+  "@onboardingSetupTitle": {
+    "description": "Design-04 setup screen: two-line title"
   },
-  "onboardingSettingsHint": "これらはあとで「設定」からいつでも変更できます。",
-  "@onboardingSettingsHint": {
-    "description": "Onboarding settings page: change-later hint"
+  "onboardingRowName": "お名前",
+  "@onboardingRowName": {
+    "description": "Design-04 setup screen: inline name field label"
   },
-  "onboardingRowCurrency": "通貨",
+  "onboardingRowLanguage": "表示言語",
+  "@onboardingRowLanguage": {
+    "description": "Design-04 setup screen: display-language segment group label"
+  },
+  "onboardingLanguageAuto": "自動",
+  "@onboardingLanguageAuto": {
+    "description": "Design-04 setup screen: follow-the-system language segment (D-08)"
+  },
+  "onboardingLanguageAutoNote": "「自動」でも対象外の言語のときは、日本語で表示します。",
+  "@onboardingLanguageAutoNote": {
+    "description": "Design-04 setup screen: info note under the language segments"
+  },
+  "onboardingRowCurrency": "通貨単位",
   "@onboardingRowCurrency": {
     "description": "Onboarding settings row label: bookkeeping currency (D-10)"
   },
@@ -3093,15 +3105,7 @@
   "@onboardingRowVoice": {
     "description": "Onboarding settings row label: voice input language (D-10)"
   },
-  "onboardingChange": "変更",
-  "@onboardingChange": {
-    "description": "Onboarding settings row: change action button"
-  },
-  "onboardingNicknameUnset": "未設定",
-  "@onboardingNicknameUnset": {
-    "description": "Onboarding settings nickname row empty-state placeholder (D-14)"
-  },
-  "onboardingStart": "この設定で始める",
+  "onboardingStart": "この設定ではじめる",
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
   },
