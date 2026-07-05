@@ -22,6 +22,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/models/backup_data.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -142,6 +143,7 @@ void main() {
       settingsRepo: settingsRepo,
       exchangeRateRepo: exchangeRateRepo,
       unitOfWork: UnitOfWorkImpl(db: db),
+      backupCrypto: BackupCryptoService(),
     );
 
     tempDir = await Directory.systemTemp.createTemp('import_atomicity_');

@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
-
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/models/category.dart';
 import '../../features/accounting/domain/models/transaction.dart';
@@ -16,12 +14,14 @@ import '../../features/settings/domain/models/app_settings.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/unit_of_work.dart';
+import '../../infrastructure/crypto/services/backup_crypto_service.dart';
 import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 
 /// Restores app data from an encrypted backup file (.hpb).
 ///
-/// Algorithm: AES-256-GCM decrypt → GZip decompress → JSON parse → DB restore.
+/// Algorithm: decrypt ([BackupCryptoService]) → GZip decompress → JSON parse
+/// → DB restore.
 class ImportBackupUseCase {
   ImportBackupUseCase({
     required TransactionRepository transactionRepo,
@@ -30,12 +30,14 @@ class ImportBackupUseCase {
     required SettingsRepository settingsRepo,
     required ExchangeRateRepository exchangeRateRepo,
     required UnitOfWork unitOfWork,
+    required BackupCryptoService backupCrypto,
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
        _settingsRepo = settingsRepo,
        _exchangeRateRepo = exchangeRateRepo,
-       _unitOfWork = unitOfWork;
+       _unitOfWork = unitOfWork,
+       _backupCrypto = backupCrypto;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
@@ -43,6 +45,7 @@ class ImportBackupUseCase {
   final SettingsRepository _settingsRepo;
   final ExchangeRateRepository _exchangeRateRepo;
   final UnitOfWork _unitOfWork;
+  final BackupCryptoService _backupCrypto;
 
   Future<Result<void>> execute({
     required File backupFile,
@@ -52,16 +55,16 @@ class ImportBackupUseCase {
       // 1. Read encrypted file
       final encryptedData = await backupFile.readAsBytes();
 
-      // 2. Validate minimum size: salt(16) + nonce(12) + mac(16) = 44
-      if (encryptedData.length < 44) {
-        return Result.error('Invalid backup file: too small');
-      }
-
-      // 3. Decrypt
+      // 2. Decrypt (format detection, size validation and KDF handling live
+      // in the crypto layer — legacy and v2 .hpb files both supported).
       final Uint8List decryptedData;
       try {
-        decryptedData = await _decryptData(encryptedData, password);
-      } on IncorrectPasswordException {
+        decryptedData = await _backupCrypto.decrypt(encryptedData, password);
+      } on InvalidBackupFormatException catch (e) {
+        return Result.error(e.toString());
+      } on UnsupportedBackupFormatException catch (e) {
+        return Result.error(e.toString());
+      } on BackupDecryptionException {
         return Result.error('Incorrect password');
       }
 
@@ -92,43 +95,6 @@ class ImportBackupUseCase {
       return Result.success(null);
     } catch (e) {
       return Result.error('Backup import failed: $e');
-    }
-  }
-
-  Future<Uint8List> _decryptData(
-    Uint8List encryptedData,
-    String password,
-  ) async {
-    // Extract components: salt(16) + nonce(12) + ciphertext + mac(16)
-    final salt = encryptedData.sublist(0, 16);
-    final nonce = encryptedData.sublist(16, 28);
-    final cipherText = encryptedData.sublist(28, encryptedData.length - 16);
-    final mac = Mac(encryptedData.sublist(encryptedData.length - 16));
-
-    // Derive key from password
-    final pbkdf2 = Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
-      iterations: 100000,
-      bits: 256,
-    );
-
-    final secretKey = await pbkdf2.deriveKey(
-      secretKey: SecretKey(utf8.encode(password)),
-      nonce: salt,
-    );
-
-    // Decrypt
-    final algorithm = AesGcm.with256bits();
-    final secretBox = SecretBox(cipherText, nonce: nonce, mac: mac);
-
-    try {
-      final plaintext = await algorithm.decrypt(
-        secretBox,
-        secretKey: secretKey,
-      );
-      return Uint8List.fromList(plaintext);
-    } catch (e) {
-      throw IncorrectPasswordException();
     }
   }
 
@@ -235,9 +201,4 @@ class ImportBackupUseCase {
     'fawazahmed0',
     'manual',
   };
-}
-
-class IncorrectPasswordException implements Exception {
-  @override
-  String toString() => 'Incorrect password';
 }

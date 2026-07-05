@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../application/accounting/repository_providers.dart'
     as app_accounting;
 import '../../../../application/currency/repository_providers.dart';
+import '../../../../application/settings/repository_providers.dart'
+    as app_settings;
 import '../../../../application/settings/clear_all_data_use_case.dart';
 import '../../../../application/settings/export_backup_use_case.dart';
 import '../../../../application/settings/import_backup_use_case.dart';
@@ -49,6 +51,7 @@ ExportBackupUseCase exportBackupUseCase(Ref ref) {
     bookRepo: ref.watch(bookRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
     exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
+    backupCrypto: ref.watch(app_settings.appBackupCryptoServiceProvider),
   );
 }
 
@@ -61,6 +64,7 @@ ImportBackupUseCase importBackupUseCase(Ref ref) {
     settingsRepo: ref.watch(settingsRepositoryProvider),
     exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
     unitOfWork: ref.watch(unitOfWorkProvider),
+    backupCrypto: ref.watch(app_settings.appBackupCryptoServiceProvider),
   );
 }
 

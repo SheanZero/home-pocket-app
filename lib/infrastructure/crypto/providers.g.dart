@@ -347,3 +347,56 @@ final class HashChainServiceProvider
 }
 
 String _$hashChainServiceHash() => r'bae731c484fb95a977585d5349b209c78f91c66d';
+
+/// Backup crypto service - password-based .hpb encryption (Argon2id + AES-GCM)
+
+@ProviderFor(backupCryptoService)
+final backupCryptoServiceProvider = BackupCryptoServiceProvider._();
+
+/// Backup crypto service - password-based .hpb encryption (Argon2id + AES-GCM)
+
+final class BackupCryptoServiceProvider
+    extends
+        $FunctionalProvider<
+          BackupCryptoService,
+          BackupCryptoService,
+          BackupCryptoService
+        >
+    with $Provider<BackupCryptoService> {
+  /// Backup crypto service - password-based .hpb encryption (Argon2id + AES-GCM)
+  BackupCryptoServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupCryptoServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupCryptoServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<BackupCryptoService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  BackupCryptoService create(Ref ref) {
+    return backupCryptoService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BackupCryptoService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BackupCryptoService>(value),
+    );
+  }
+}
+
+String _$backupCryptoServiceHash() =>
+    r'e12ccc9734307ae0a945c9f013ad9bad02488035';

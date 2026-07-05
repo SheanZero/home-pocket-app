@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../features/accounting/domain/repositories/book_repository.dart';
@@ -12,12 +10,13 @@ import '../../features/accounting/domain/repositories/transaction_repository.dar
 import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../infrastructure/crypto/services/backup_crypto_service.dart';
 import '../../shared/utils/result.dart';
 
 /// Creates an encrypted backup file (.hpb) containing all app data.
 ///
-/// Algorithm: JSON → GZip → PBKDF2 key derivation → AES-256-GCM encryption.
-/// Binary format: salt(16) + nonce(12) + ciphertext + mac(16).
+/// Algorithm: JSON → GZip → [BackupCryptoService] encryption (Argon2id +
+/// AES-256-GCM, versioned self-describing header).
 class ExportBackupUseCase {
   ExportBackupUseCase({
     required TransactionRepository transactionRepo,
@@ -25,17 +24,20 @@ class ExportBackupUseCase {
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
     required ExchangeRateRepository exchangeRateRepo,
+    required BackupCryptoService backupCrypto,
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
        _settingsRepo = settingsRepo,
-       _exchangeRateRepo = exchangeRateRepo;
+       _exchangeRateRepo = exchangeRateRepo,
+       _backupCrypto = backupCrypto;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
   final BookRepository _bookRepo;
   final SettingsRepository _settingsRepo;
   final ExchangeRateRepository _exchangeRateRepo;
+  final BackupCryptoService _backupCrypto;
 
   Future<Result<File>> execute({
     required String bookId,
@@ -94,8 +96,8 @@ class ExportBackupUseCase {
       // 4. Compress with GZip
       final gzipBytes = gzip.encode(utf8.encode(jsonString));
 
-      // 5. Encrypt with AES-256-GCM
-      final encryptedData = await _encryptData(
+      // 5. Encrypt (Argon2id + AES-256-GCM, crypto layer)
+      final encryptedData = await _backupCrypto.encrypt(
         Uint8List.fromList(gzipBytes),
         password,
       );
@@ -111,45 +113,5 @@ class ExportBackupUseCase {
     } catch (e) {
       return Result.error('Backup export failed: $e');
     }
-  }
-
-  Future<Uint8List> _encryptData(Uint8List data, String password) async {
-    // Derive key from password using PBKDF2
-    final pbkdf2 = Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
-      iterations: 100000,
-      bits: 256,
-    );
-
-    final salt = _generateRandomBytes(16);
-    final secretKey = await pbkdf2.deriveKey(
-      secretKey: SecretKey(utf8.encode(password)),
-      nonce: salt,
-    );
-
-    // Encrypt with AES-GCM
-    final algorithm = AesGcm.with256bits();
-    final nonce = _generateRandomBytes(12);
-
-    final secretBox = await algorithm.encrypt(
-      data,
-      secretKey: secretKey,
-      nonce: nonce,
-    );
-
-    // Combine: salt(16) + nonce(12) + ciphertext + mac(16)
-    final result = <int>[
-      ...salt,
-      ...nonce,
-      ...secretBox.cipherText,
-      ...secretBox.mac.bytes,
-    ];
-
-    return Uint8List.fromList(result);
-  }
-
-  List<int> _generateRandomBytes(int length) {
-    final random = Random.secure();
-    return List.generate(length, (_) => random.nextInt(256));
   }
 }

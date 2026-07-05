@@ -20,6 +20,7 @@ import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
+import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 
 /// Passthrough — these mock-based tests assert repository interactions, not
 /// transactional rollback (covered by the *_atomicity_test with a real DB).
@@ -104,6 +105,9 @@ void main() {
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
       unitOfWork: _FakeUnitOfWork(),
+      // Real service: the legacy-format helper below doubles as coverage for
+      // the pre-v2 back-compat decrypt path.
+      backupCrypto: BackupCryptoService(),
     );
 
     tempDir = await Directory.systemTemp.createTemp('import_test_');

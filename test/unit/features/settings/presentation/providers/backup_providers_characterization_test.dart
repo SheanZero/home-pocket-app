@@ -13,6 +13,8 @@ import 'package:home_pocket/features/profile/domain/repositories/user_profile_re
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/data/app_database.dart';
+import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
@@ -38,6 +40,7 @@ void main() {
   late _MockSettingsRepository mockSettingsRepo;
   late _MockExchangeRateRepository mockExchangeRateRepo;
   late _MockUserProfileRepository mockUserProfileRepo;
+  late AppDatabase testDb;
   late ProviderContainer container;
 
   setUp(() {
@@ -47,6 +50,7 @@ void main() {
     mockSettingsRepo = _MockSettingsRepository();
     mockExchangeRateRepo = _MockExchangeRateRepository();
     mockUserProfileRepo = _MockUserProfileRepository();
+    testDb = AppDatabase.forTesting();
 
     container = ProviderContainer(
       overrides: [
@@ -58,11 +62,17 @@ void main() {
           mockExchangeRateRepo,
         ),
         userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
+        // unitOfWorkProvider reaches the shared AppDatabase for its Drift
+        // transaction scope.
+        appDatabaseProvider.overrideWithValue(testDb),
       ],
     );
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() async {
+    container.dispose();
+    await testDb.close();
+  });
 
   group(
     'settings/backup_providers characterization tests (pre-refactor: all DI providers)',

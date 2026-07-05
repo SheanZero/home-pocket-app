@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/settings/export_backup_use_case.dart';
+import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -29,6 +29,7 @@ class MockExchangeRateRepository extends Mock
     implements ExchangeRateRepository {}
 
 void main() {
+  final backupCrypto = BackupCryptoService();
   late ExportBackupUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
@@ -49,6 +50,7 @@ void main() {
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
+      backupCrypto: backupCrypto,
     );
 
     tempDir = await Directory.systemTemp.createTemp('backup_test_');
@@ -131,29 +133,14 @@ void main() {
     expect(await file.exists(), true);
     expect(file.path.endsWith('.hpb'), true);
 
-    // Verify encrypted format: salt(16) + nonce(12) + ciphertext + mac(16)
+    // Verify the v2 self-describing format: 'HPB' magic + version byte 2
     final bytes = await file.readAsBytes();
-    expect(bytes.length, greaterThan(44)); // minimum size
+    expect(bytes.length, greaterThan(54)); // header + salt + nonce + mac
+    expect(bytes.sublist(0, 3), equals(utf8.encode('HPB')));
+    expect(bytes[3], equals(2));
 
-    // Verify we can decrypt back
-    final salt = bytes.sublist(0, 16);
-    final nonce = bytes.sublist(16, 28);
-    final cipherText = bytes.sublist(28, bytes.length - 16);
-    final mac = Mac(bytes.sublist(bytes.length - 16));
-
-    final pbkdf2 = Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
-      iterations: 100000,
-      bits: 256,
-    );
-    final secretKey = await pbkdf2.deriveKey(
-      secretKey: SecretKey(utf8.encode('test-password-123')),
-      nonce: salt,
-    );
-
-    final algorithm = AesGcm.with256bits();
-    final secretBox = SecretBox(cipherText, nonce: nonce, mac: mac);
-    final plaintext = await algorithm.decrypt(secretBox, secretKey: secretKey);
+    // Verify we can decrypt back through the crypto layer
+    final plaintext = await backupCrypto.decrypt(bytes, 'test-password-123');
 
     // Decompress
     final jsonBytes = gzip.decode(plaintext);
@@ -206,22 +193,7 @@ void main() {
     final file = result.data!;
     final bytes = await file.readAsBytes();
 
-    final salt = bytes.sublist(0, 16);
-    final nonce = bytes.sublist(16, 28);
-    final cipherText = bytes.sublist(28, bytes.length - 16);
-    final mac = Mac(bytes.sublist(bytes.length - 16));
-    final pbkdf2 = Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
-      iterations: 100000,
-      bits: 256,
-    );
-    final secretKey = await pbkdf2.deriveKey(
-      secretKey: SecretKey(utf8.encode('test-password-123')),
-      nonce: salt,
-    );
-    final algorithm = AesGcm.with256bits();
-    final secretBox = SecretBox(cipherText, nonce: nonce, mac: mac);
-    final plaintext = await algorithm.decrypt(secretBox, secretKey: secretKey);
+    final plaintext = await backupCrypto.decrypt(bytes, 'test-password-123');
     final jsonString = utf8.decode(gzip.decode(plaintext));
     final json = jsonDecode(jsonString) as Map<String, dynamic>;
 

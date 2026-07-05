@@ -7,6 +7,7 @@ import 'repositories/key_repository.dart';
 import 'repositories/key_repository_impl.dart';
 import 'repositories/encryption_repository.dart';
 import 'repositories/encryption_repository_impl.dart';
+import 'services/backup_crypto_service.dart';
 import 'services/key_manager.dart';
 import 'services/field_encryption_service.dart';
 import 'services/hash_chain_service.dart';
@@ -59,4 +60,10 @@ FieldEncryptionService fieldEncryptionService(Ref ref) {
 @riverpod
 HashChainService hashChainService(Ref ref) {
   return HashChainService();
+}
+
+/// Backup crypto service - password-based .hpb encryption (Argon2id + AES-GCM)
+@riverpod
+BackupCryptoService backupCryptoService(Ref ref) {
+  return BackupCryptoService();
 }
