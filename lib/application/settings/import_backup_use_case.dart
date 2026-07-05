@@ -15,6 +15,7 @@ import '../../features/currency/domain/repositories/exchange_rate_repository.dar
 import '../../features/settings/domain/models/app_settings.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../features/settings/domain/repositories/unit_of_work.dart';
 import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 
@@ -28,17 +29,20 @@ class ImportBackupUseCase {
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
     required ExchangeRateRepository exchangeRateRepo,
+    required UnitOfWork unitOfWork,
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
        _settingsRepo = settingsRepo,
-       _exchangeRateRepo = exchangeRateRepo;
+       _exchangeRateRepo = exchangeRateRepo,
+       _unitOfWork = unitOfWork;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
   final BookRepository _bookRepo;
   final SettingsRepository _settingsRepo;
   final ExchangeRateRepository _exchangeRateRepo;
+  final UnitOfWork _unitOfWork;
 
   Future<Result<void>> execute({
     required File backupFile,
@@ -129,92 +133,99 @@ class ImportBackupUseCase {
   }
 
   Future<void> _restoreData(BackupData backupData) async {
-    // Delete existing data first
-    // Get all books to delete their transactions
-    final existingBooks = await _bookRepo.findAll(
-      includeArchived: true,
-      includeShadow: true,
-    );
-    for (final book in existingBooks) {
-      await _transactionRepo.deleteAllByBook(book.id);
-    }
-    await _categoryRepo.deleteAll();
-    await _bookRepo.deleteAll();
-
-    // Import books
-    for (final bookJson in backupData.books) {
-      final book = Book.fromJson(bookJson);
-      await _bookRepo.insert(book);
-    }
-
-    // Import categories
-    for (final catJson in backupData.categories) {
-      final category = Category.fromJson(catJson);
-      await _categoryRepo.insert(category);
-    }
-
-    // Import transactions
-    for (final txJson in backupData.transactions) {
-      final transaction = Transaction.fromJson(txJson);
-      await _transactionRepo.insert(transaction);
-    }
-
-    // Import settings (D-06): a restored backup represents an existing user, so
-    // force onboardingComplete=true — even for pre-Phase-54 backups whose
-    // settings map omits the key — so import skips onboarding. No BackupData
-    // field is added; the flag rides inside the existing settings map.
-    final settings = AppSettings.fromJson(
-      backupData.settings,
-    ).copyWith(onboardingComplete: true);
-    await _settingsRepo.updateSettings(settings);
-
-    // Import exchange rates (D-10): upsert, not insert — idempotent by the
-    // (currency, rateDate) composite key. Epoch-seconds → UTC DateTime.
-    //
-    // CR-01 trust boundary: a decrypted backup's contents are NOT
-    // authenticated — the password protects confidentiality, not integrity.
-    // Each imported rate is therefore routed through the SAME canonical
-    // validation floor as the manual-override write path
-    // (validateAppliedRate, ADR-020 single-parse-site / T-41-13). Rows with a
-    // non-numeric / <=0 / non-finite / scientific-notation rate, or an
-    // unrecognized source, are SKIPPED rather than persisted — a hostile or
-    // corrupted row must not poison the cache, where convertToJpy would later
-    // throw on it.
-    for (final erJson in backupData.exchangeRates) {
-      final rawRate = erJson['rate'] as String;
-      if (validateAppliedRate(rawRate) != null) {
-        // Invalid rate literal — skip this row, keep importing the rest.
-        continue;
-      }
-
-      final source = erJson['source'] as String;
-      if (!_validBackupRateSources.contains(source)) {
-        // Unknown source would break the D-07 manual/non-manual fallback
-        // partition — skip rather than trust an arbitrary value.
-        continue;
-      }
-
-      final er = ExchangeRate(
-        currency: erJson['currency'] as String,
-        rateDate: DateTime.fromMillisecondsSinceEpoch(
-          (erJson['rateDate'] as int) * 1000,
-          isUtc: true,
-        ),
-        rate: rawRate,
-        fetchedAt: DateTime.fromMillisecondsSinceEpoch(
-          (erJson['fetchedAt'] as int) * 1000,
-          isUtc: true,
-        ),
-        source: source,
-        actualRateDate: erJson['actualRateDate'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(
-                (erJson['actualRateDate'] as int) * 1000,
-                isUtc: true,
-              )
-            : null,
+    // Atomicity: the whole delete+reinsert sequence runs inside one database
+    // transaction — a corrupt or hostile row that aborts mid-restore must
+    // roll back to the pre-import state instead of leaving the DB half-wiped.
+    await _unitOfWork.run(() async {
+      // Delete existing data first
+      // Get all books to delete their transactions
+      final existingBooks = await _bookRepo.findAll(
+        includeArchived: true,
+        includeShadow: true,
       );
-      await _exchangeRateRepo.upsert(er);
-    }
+      for (final book in existingBooks) {
+        await _transactionRepo.deleteAllByBook(book.id);
+      }
+      await _categoryRepo.deleteAll();
+      await _bookRepo.deleteAll();
+
+      // Import books
+      for (final bookJson in backupData.books) {
+        final book = Book.fromJson(bookJson);
+        await _bookRepo.insert(book);
+      }
+
+      // Import categories
+      for (final catJson in backupData.categories) {
+        final category = Category.fromJson(catJson);
+        await _categoryRepo.insert(category);
+      }
+
+      // Import transactions
+      for (final txJson in backupData.transactions) {
+        final transaction = Transaction.fromJson(txJson);
+        await _transactionRepo.insert(transaction);
+      }
+
+      // Import exchange rates (D-10): upsert, not insert — idempotent by the
+      // (currency, rateDate) composite key. Epoch-seconds → UTC DateTime.
+      //
+      // CR-01 trust boundary: a decrypted backup's contents are NOT
+      // authenticated — the password protects confidentiality, not integrity.
+      // Each imported rate is therefore routed through the SAME canonical
+      // validation floor as the manual-override write path
+      // (validateAppliedRate, ADR-020 single-parse-site / T-41-13). Rows with
+      // a non-numeric / <=0 / non-finite / scientific-notation rate, or an
+      // unrecognized source, are SKIPPED rather than persisted — a hostile or
+      // corrupted row must not poison the cache, where convertToJpy would
+      // later throw on it.
+      for (final erJson in backupData.exchangeRates) {
+        final rawRate = erJson['rate'] as String;
+        if (validateAppliedRate(rawRate) != null) {
+          // Invalid rate literal — skip this row, keep importing the rest.
+          continue;
+        }
+
+        final source = erJson['source'] as String;
+        if (!_validBackupRateSources.contains(source)) {
+          // Unknown source would break the D-07 manual/non-manual fallback
+          // partition — skip rather than trust an arbitrary value.
+          continue;
+        }
+
+        final er = ExchangeRate(
+          currency: erJson['currency'] as String,
+          rateDate: DateTime.fromMillisecondsSinceEpoch(
+            (erJson['rateDate'] as int) * 1000,
+            isUtc: true,
+          ),
+          rate: rawRate,
+          fetchedAt: DateTime.fromMillisecondsSinceEpoch(
+            (erJson['fetchedAt'] as int) * 1000,
+            isUtc: true,
+          ),
+          source: source,
+          actualRateDate: erJson['actualRateDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(
+                  (erJson['actualRateDate'] as int) * 1000,
+                  isUtc: true,
+                )
+              : null,
+        );
+        await _exchangeRateRepo.upsert(er);
+      }
+
+      // Import settings (D-06): a restored backup represents an existing
+      // user, so force onboardingComplete=true — even for pre-Phase-54
+      // backups whose settings map omits the key — so import skips
+      // onboarding. No BackupData field is added; the flag rides inside the
+      // existing settings map. Runs LAST inside the transaction because a
+      // SharedPreferences write cannot be rolled back.
+      final settings = AppSettings.fromJson(
+        backupData.settings,
+      ).copyWith(onboardingComplete: true);
+      await _settingsRepo.updateSettings(settings);
+    });
   }
 
   /// The only `source` values a trusted Phase 41 write path can produce

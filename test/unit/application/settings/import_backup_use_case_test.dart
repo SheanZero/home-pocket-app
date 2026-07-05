@@ -19,6 +19,14 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
+
+/// Passthrough — these mock-based tests assert repository interactions, not
+/// transactional rollback (covered by the *_atomicity_test with a real DB).
+class _FakeUnitOfWork implements UnitOfWork {
+  @override
+  Future<T> run<T>(Future<T> Function() action) => action();
+}
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
@@ -95,6 +103,7 @@ void main() {
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
+      unitOfWork: _FakeUnitOfWork(),
     );
 
     tempDir = await Directory.systemTemp.createTemp('import_test_');
@@ -398,9 +407,11 @@ void main() {
       );
 
       expect(result.isSuccess, true);
-      final persisted = verify(
-        () => mockSettingsRepo.updateSettings(captureAny()),
-      ).captured.single as AppSettings;
+      final persisted =
+          verify(
+                () => mockSettingsRepo.updateSettings(captureAny()),
+              ).captured.single
+              as AppSettings;
       expect(persisted.onboardingComplete, true);
     },
   );
@@ -443,9 +454,11 @@ void main() {
       );
 
       expect(result.isSuccess, true);
-      final persisted = verify(
-        () => mockSettingsRepo.updateSettings(captureAny()),
-      ).captured.single as AppSettings;
+      final persisted =
+          verify(
+                () => mockSettingsRepo.updateSettings(captureAny()),
+              ).captured.single
+              as AppSettings;
       expect(persisted.onboardingComplete, true);
     },
   );
@@ -454,7 +467,10 @@ void main() {
     'CR-01: skips imported rows with an invalid rate but keeps valid ones',
     () async {
       final now = DateTime(2026, 2, 7);
-      Map<String, dynamic> rateJson(String rate, {String source = 'frankfurter'}) {
+      Map<String, dynamic> rateJson(
+        String rate, {
+        String source = 'frankfurter',
+      }) {
         return {
           'currency': 'USD',
           'rateDate': DateTime.utc(2026, 6, 11).millisecondsSinceEpoch ~/ 1000,

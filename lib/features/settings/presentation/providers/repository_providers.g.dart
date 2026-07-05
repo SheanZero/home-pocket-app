@@ -107,6 +107,61 @@ final class SettingsRepositoryProvider
 String _$settingsRepositoryHash() =>
     r'7df289791566178daca2460ffd2566bc518f611c';
 
+/// Atomic multi-repository write runner (single source of truth).
+///
+/// Backs the destructive settings flows (backup restore, clear-all-data)
+/// with a Drift transaction so a mid-way failure rolls back.
+
+@ProviderFor(unitOfWork)
+final unitOfWorkProvider = UnitOfWorkProvider._();
+
+/// Atomic multi-repository write runner (single source of truth).
+///
+/// Backs the destructive settings flows (backup restore, clear-all-data)
+/// with a Drift transaction so a mid-way failure rolls back.
+
+final class UnitOfWorkProvider
+    extends $FunctionalProvider<UnitOfWork, UnitOfWork, UnitOfWork>
+    with $Provider<UnitOfWork> {
+  /// Atomic multi-repository write runner (single source of truth).
+  ///
+  /// Backs the destructive settings flows (backup restore, clear-all-data)
+  /// with a Drift transaction so a mid-way failure rolls back.
+  UnitOfWorkProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'unitOfWorkProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$unitOfWorkHash();
+
+  @$internal
+  @override
+  $ProviderElement<UnitOfWork> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UnitOfWork create(Ref ref) {
+    return unitOfWork(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UnitOfWork value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UnitOfWork>(value),
+    );
+  }
+}
+
+String _$unitOfWorkHash() => r'24a4a9a02558e91c27e6b1f1f903902eb0d89fd5';
+
 @ProviderFor(exportBackupUseCase)
 final exportBackupUseCaseProvider = ExportBackupUseCaseProvider._();
 
@@ -201,7 +256,7 @@ final class ImportBackupUseCaseProvider
 }
 
 String _$importBackupUseCaseHash() =>
-    r'e725c04a591a9df111102dce2b4ddf08a516fe9f';
+    r'a001b8d8e3d0022f2595733d82ff86b3244dd854';
 
 @ProviderFor(clearAllDataUseCase)
 final clearAllDataUseCaseProvider = ClearAllDataUseCaseProvider._();
@@ -249,4 +304,4 @@ final class ClearAllDataUseCaseProvider
 }
 
 String _$clearAllDataUseCaseHash() =>
-    r'25d069f2efa0e66bde8df0115e72b10bf642570b';
+    r'6c1d297811f80ff311d62b023e2476d6828dacb1';

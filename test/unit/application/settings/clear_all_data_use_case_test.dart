@@ -10,6 +10,14 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
+
+/// Passthrough — these mock-based tests assert repository interactions, not
+/// transactional rollback (covered by the *_atomicity_test with a real DB).
+class _FakeUnitOfWork implements UnitOfWork {
+  @override
+  Future<T> run<T>(Future<T> Function() action) => action();
+}
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
@@ -19,8 +27,7 @@ class MockBookRepository extends Mock implements BookRepository {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 
-class MockUserProfileRepository extends Mock
-    implements UserProfileRepository {}
+class MockUserProfileRepository extends Mock implements UserProfileRepository {}
 
 void main() {
   late ClearAllDataUseCase useCase;
@@ -42,6 +49,7 @@ void main() {
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
       userProfileRepo: mockUserProfileRepo,
+      unitOfWork: _FakeUnitOfWork(),
     );
     // Default: no profile present unless a test overrides it.
     when(() => mockUserProfileRepo.find()).thenAnswer((_) async => null);
@@ -101,46 +109,56 @@ void main() {
     ).called(1);
   });
 
-  test('D-05: resets settings to defaults so onboardingComplete is false',
-      () async {
-    when(
-      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
-    ).thenAnswer((_) async => []);
-    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
-    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
-    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
+  test(
+    'D-05: resets settings to defaults so onboardingComplete is false',
+    () async {
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+      when(
+        () => mockSettingsRepo.updateSettings(any()),
+      ).thenAnswer((_) async {});
 
-    final result = await useCase.execute();
+      final result = await useCase.execute();
 
-    expect(result.isSuccess, true);
-    final persisted = verify(
-      () => mockSettingsRepo.updateSettings(captureAny()),
-    ).captured.single as AppSettings;
-    expect(persisted.onboardingComplete, false);
-  });
+      expect(result.isSuccess, true);
+      final persisted =
+          verify(
+                () => mockSettingsRepo.updateSettings(captureAny()),
+              ).captured.single
+              as AppSettings;
+      expect(persisted.onboardingComplete, false);
+    },
+  );
 
-  test('D-05: deletes the UserProfile when one exists (identity wiped)',
-      () async {
-    final profile = UserProfile(
-      id: 'profile-1',
-      displayName: 'Taro',
-      avatarEmoji: '🦊',
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-    );
-    when(
-      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
-    ).thenAnswer((_) async => []);
-    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
-    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
-    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
-    when(() => mockUserProfileRepo.find()).thenAnswer((_) async => profile);
+  test(
+    'D-05: deletes the UserProfile when one exists (identity wiped)',
+    () async {
+      final profile = UserProfile(
+        id: 'profile-1',
+        displayName: 'Taro',
+        avatarEmoji: '🦊',
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+      );
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+      when(
+        () => mockSettingsRepo.updateSettings(any()),
+      ).thenAnswer((_) async {});
+      when(() => mockUserProfileRepo.find()).thenAnswer((_) async => profile);
 
-    final result = await useCase.execute();
+      final result = await useCase.execute();
 
-    expect(result.isSuccess, true);
-    verify(() => mockUserProfileRepo.delete('profile-1')).called(1);
-  });
+      expect(result.isSuccess, true);
+      verify(() => mockUserProfileRepo.delete('profile-1')).called(1);
+    },
+  );
 
   test('D-05: no delete attempted when no UserProfile exists', () async {
     when(
