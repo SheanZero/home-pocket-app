@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Namespace for the onboarding intro decor animation kill-switch.
@@ -52,7 +51,7 @@ class _FloatyLoopState extends State<FloatyLoop>
     if (OnboardingFloatDecor.animationsEnabled) {
       _controller.value =
           (widget.phase.inMilliseconds % widget.period.inMilliseconds) /
-              widget.period.inMilliseconds;
+          widget.period.inMilliseconds;
       _controller.repeat();
     }
   }
@@ -115,7 +114,7 @@ class _DriftPetalState extends State<DriftPetal>
     if (OnboardingFloatDecor.animationsEnabled) {
       _controller.value =
           (widget.phase.inMilliseconds % widget.period.inMilliseconds) /
-              widget.period.inMilliseconds;
+          widget.period.inMilliseconds;
       _controller.repeat();
     }
   }

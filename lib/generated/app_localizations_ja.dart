@@ -2302,31 +2302,50 @@ class SJa extends S {
   String get onboardingIntroTitle => 'まもる家計簿';
 
   @override
-  String get onboardingIntroSubtitle => '家族のお金の話を、やさしく。';
+  String get onboardingWelcomeBadge => 'たのしく、つづく家計簿';
 
   @override
-  String get onboardingIntroPrivacyTitle => 'すべて端末内・暗号化';
+  String get onboardingWelcomeBrand => 'HOME POCKET';
 
   @override
-  String get onboardingIntroPrivacyBody => 'クラウドに送信しません。あなたのデータはあなたのもの。';
+  String get onboardingWelcomeTagline =>
+      '記録するたびに、ちょっと、しあわせ。\nお金とのつきあいを、もっと前向きに。';
 
   @override
-  String get onboardingIntroLocalTitle => 'ローカルファースト';
+  String get onboardingPrivacyTitle => 'データは、\nあなたの手の中に。';
 
   @override
-  String get onboardingIntroLocalBody => 'オフラインでも、すぐに使えます。';
+  String get onboardingPrivacySubtitle => 'すべて端末の中だけで完結。アカウントもサーバーも、いりません。';
 
   @override
-  String get onboardingIntroLedgerTitle => '日常と悦己、ふたつの帳簿';
+  String get onboardingPrivacyCardLocalTitle => '端末内に保存';
 
   @override
-  String get onboardingIntroLedgerBody => '必要な支出と、自分を満たす支出を分けて見る。';
+  String get onboardingPrivacyCardLocalBody => 'クラウドには送信しません';
 
   @override
-  String get onboardingIntroVoiceTitle => '声でサッと記録';
+  String get onboardingPrivacyCardE2eTitle => 'エンドツーエンド暗号化';
 
   @override
-  String get onboardingIntroVoiceBody => '「ランチ 800円」と話すだけ。';
+  String get onboardingPrivacyCardE2eBody => 'あなただけが鍵を持ちます';
+
+  @override
+  String get onboardingPrivacyCardTamperTitle => '改ざん防止';
+
+  @override
+  String get onboardingPrivacyCardTamperBody => 'ハッシュチェーンで記録を保護';
+
+  @override
+  String get onboardingJoyTitle => '使ったお金に、“気持ち”を添えて。';
+
+  @override
+  String get onboardingJoySubtitle => '記帳は、面倒な作業じゃない。その時の満足度も、いっしょに残そう。';
+
+  @override
+  String get onboardingJoyCaption => '満足度を、ワンタップで記録。';
+
+  @override
+  String get onboardingJoyAccent => 'お金は、自分を満たすために。';
 
   @override
   String get onboardingIntroContinue => 'はじめる';

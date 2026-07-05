@@ -2341,33 +2341,53 @@ class SEn extends S {
   String get onboardingIntroTitle => 'Home Pocket';
 
   @override
-  String get onboardingIntroSubtitle => 'Make family money talk gentle.';
+  String get onboardingWelcomeBadge => 'Budgeting that keeps you smiling';
 
   @override
-  String get onboardingIntroPrivacyTitle => 'All on-device & encrypted';
+  String get onboardingWelcomeBrand => 'HOME POCKET';
 
   @override
-  String get onboardingIntroPrivacyBody =>
-      'Never sent to the cloud. Your data is yours.';
+  String get onboardingWelcomeTagline =>
+      'Every entry brings a little joy.\nBuild a brighter relationship with money.';
 
   @override
-  String get onboardingIntroLocalTitle => 'Local-first';
+  String get onboardingPrivacyTitle => 'Your data,\nin your hands.';
 
   @override
-  String get onboardingIntroLocalBody => 'Works instantly, even offline.';
+  String get onboardingPrivacySubtitle =>
+      'Everything stays on your device. No account, no server needed.';
 
   @override
-  String get onboardingIntroLedgerTitle => 'Daily and Joy, two ledgers';
+  String get onboardingPrivacyCardLocalTitle => 'Stored on device';
 
   @override
-  String get onboardingIntroLedgerBody =>
-      'See essential spending and self-fulfilling spending apart.';
+  String get onboardingPrivacyCardLocalBody => 'Never sent to the cloud';
 
   @override
-  String get onboardingIntroVoiceTitle => 'Log it with your voice';
+  String get onboardingPrivacyCardE2eTitle => 'End-to-end encryption';
 
   @override
-  String get onboardingIntroVoiceBody => 'Just say “Lunch 800 yen.”';
+  String get onboardingPrivacyCardE2eBody => 'Only you hold the key';
+
+  @override
+  String get onboardingPrivacyCardTamperTitle => 'Tamper-proof';
+
+  @override
+  String get onboardingPrivacyCardTamperBody =>
+      'Records protected by a hash chain';
+
+  @override
+  String get onboardingJoyTitle => 'Add a feeling to every expense.';
+
+  @override
+  String get onboardingJoySubtitle =>
+      'Tracking is not a chore. Capture how satisfied you felt, too.';
+
+  @override
+  String get onboardingJoyCaption => 'Record satisfaction with one tap.';
+
+  @override
+  String get onboardingJoyAccent => 'Money is for filling your own life.';
 
   @override
   String get onboardingIntroContinue => 'Get started';

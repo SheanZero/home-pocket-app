@@ -3005,41 +3005,65 @@
   "@onboardingIntroTitle": {
     "description": "Onboarding intro screen: app title"
   },
-  "onboardingIntroSubtitle": "Make family money talk gentle.",
-  "@onboardingIntroSubtitle": {
-    "description": "Onboarding intro screen: subtitle tagline"
+  "onboardingWelcomeBadge": "Budgeting that keeps you smiling",
+  "@onboardingWelcomeBadge": {
+    "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingIntroPrivacyTitle": "All on-device & encrypted",
-  "@onboardingIntroPrivacyTitle": {
-    "description": "Onboarding intro selling point: privacy/encryption title"
+  "onboardingWelcomeBrand": "HOME POCKET",
+  "@onboardingWelcomeBrand": {
+    "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
   },
-  "onboardingIntroPrivacyBody": "Never sent to the cloud. Your data is yours.",
-  "@onboardingIntroPrivacyBody": {
-    "description": "Onboarding intro selling point: privacy/encryption body"
+  "onboardingWelcomeTagline": "Every entry brings a little joy.\nBuild a brighter relationship with money.",
+  "@onboardingWelcomeTagline": {
+    "description": "Welcome A intro page 1: two-line tagline"
   },
-  "onboardingIntroLocalTitle": "Local-first",
-  "@onboardingIntroLocalTitle": {
-    "description": "Onboarding intro selling point: local-first title"
+  "onboardingPrivacyTitle": "Your data,\nin your hands.",
+  "@onboardingPrivacyTitle": {
+    "description": "Welcome A intro page 2: privacy title (two lines)"
   },
-  "onboardingIntroLocalBody": "Works instantly, even offline.",
-  "@onboardingIntroLocalBody": {
-    "description": "Onboarding intro selling point: local-first body"
+  "onboardingPrivacySubtitle": "Everything stays on your device. No account, no server needed.",
+  "@onboardingPrivacySubtitle": {
+    "description": "Welcome A intro page 2: privacy subtitle"
   },
-  "onboardingIntroLedgerTitle": "Daily and Joy, two ledgers",
-  "@onboardingIntroLedgerTitle": {
-    "description": "Onboarding intro selling point: dual-ledger title"
+  "onboardingPrivacyCardLocalTitle": "Stored on device",
+  "@onboardingPrivacyCardLocalTitle": {
+    "description": "Welcome A intro page 2: on-device storage card title"
   },
-  "onboardingIntroLedgerBody": "See essential spending and self-fulfilling spending apart.",
-  "@onboardingIntroLedgerBody": {
-    "description": "Onboarding intro selling point: dual-ledger body"
+  "onboardingPrivacyCardLocalBody": "Never sent to the cloud",
+  "@onboardingPrivacyCardLocalBody": {
+    "description": "Welcome A intro page 2: on-device storage card body"
   },
-  "onboardingIntroVoiceTitle": "Log it with your voice",
-  "@onboardingIntroVoiceTitle": {
-    "description": "Onboarding intro selling point: voice title"
+  "onboardingPrivacyCardE2eTitle": "End-to-end encryption",
+  "@onboardingPrivacyCardE2eTitle": {
+    "description": "Welcome A intro page 2: end-to-end encryption card title"
   },
-  "onboardingIntroVoiceBody": "Just say “Lunch 800 yen.”",
-  "@onboardingIntroVoiceBody": {
-    "description": "Onboarding intro selling point: voice body"
+  "onboardingPrivacyCardE2eBody": "Only you hold the key",
+  "@onboardingPrivacyCardE2eBody": {
+    "description": "Welcome A intro page 2: end-to-end encryption card body"
+  },
+  "onboardingPrivacyCardTamperTitle": "Tamper-proof",
+  "@onboardingPrivacyCardTamperTitle": {
+    "description": "Welcome A intro page 2: tamper-proof card title"
+  },
+  "onboardingPrivacyCardTamperBody": "Records protected by a hash chain",
+  "@onboardingPrivacyCardTamperBody": {
+    "description": "Welcome A intro page 2: tamper-proof card body"
+  },
+  "onboardingJoyTitle": "Add a feeling to every expense.",
+  "@onboardingJoyTitle": {
+    "description": "Welcome A intro page 3: joy title"
+  },
+  "onboardingJoySubtitle": "Tracking is not a chore. Capture how satisfied you felt, too.",
+  "@onboardingJoySubtitle": {
+    "description": "Welcome A intro page 3: joy subtitle"
+  },
+  "onboardingJoyCaption": "Record satisfaction with one tap.",
+  "@onboardingJoyCaption": {
+    "description": "Welcome A intro page 3: satisfaction-row caption"
+  },
+  "onboardingJoyAccent": "Money is for filling your own life.",
+  "@onboardingJoyAccent": {
+    "description": "Welcome A intro page 3: closing accent line"
   },
   "onboardingIntroContinue": "Get started",
   "@onboardingIntroContinue": {

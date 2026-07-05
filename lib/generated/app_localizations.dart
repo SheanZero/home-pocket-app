@@ -4303,59 +4303,95 @@ abstract class S {
   /// **'Home Pocket'**
   String get onboardingIntroTitle;
 
-  /// Onboarding intro screen: subtitle tagline
+  /// Welcome A intro page 1: joy pill badge text
   ///
   /// In en, this message translates to:
-  /// **'Make family money talk gentle.'**
-  String get onboardingIntroSubtitle;
+  /// **'Budgeting that keeps you smiling'**
+  String get onboardingWelcomeBadge;
 
-  /// Onboarding intro selling point: privacy/encryption title
+  /// Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)
   ///
   /// In en, this message translates to:
-  /// **'All on-device & encrypted'**
-  String get onboardingIntroPrivacyTitle;
+  /// **'HOME POCKET'**
+  String get onboardingWelcomeBrand;
 
-  /// Onboarding intro selling point: privacy/encryption body
+  /// Welcome A intro page 1: two-line tagline
   ///
   /// In en, this message translates to:
-  /// **'Never sent to the cloud. Your data is yours.'**
-  String get onboardingIntroPrivacyBody;
+  /// **'Every entry brings a little joy.\nBuild a brighter relationship with money.'**
+  String get onboardingWelcomeTagline;
 
-  /// Onboarding intro selling point: local-first title
+  /// Welcome A intro page 2: privacy title (two lines)
   ///
   /// In en, this message translates to:
-  /// **'Local-first'**
-  String get onboardingIntroLocalTitle;
+  /// **'Your data,\nin your hands.'**
+  String get onboardingPrivacyTitle;
 
-  /// Onboarding intro selling point: local-first body
+  /// Welcome A intro page 2: privacy subtitle
   ///
   /// In en, this message translates to:
-  /// **'Works instantly, even offline.'**
-  String get onboardingIntroLocalBody;
+  /// **'Everything stays on your device. No account, no server needed.'**
+  String get onboardingPrivacySubtitle;
 
-  /// Onboarding intro selling point: dual-ledger title
+  /// Welcome A intro page 2: on-device storage card title
   ///
   /// In en, this message translates to:
-  /// **'Daily and Joy, two ledgers'**
-  String get onboardingIntroLedgerTitle;
+  /// **'Stored on device'**
+  String get onboardingPrivacyCardLocalTitle;
 
-  /// Onboarding intro selling point: dual-ledger body
+  /// Welcome A intro page 2: on-device storage card body
   ///
   /// In en, this message translates to:
-  /// **'See essential spending and self-fulfilling spending apart.'**
-  String get onboardingIntroLedgerBody;
+  /// **'Never sent to the cloud'**
+  String get onboardingPrivacyCardLocalBody;
 
-  /// Onboarding intro selling point: voice title
+  /// Welcome A intro page 2: end-to-end encryption card title
   ///
   /// In en, this message translates to:
-  /// **'Log it with your voice'**
-  String get onboardingIntroVoiceTitle;
+  /// **'End-to-end encryption'**
+  String get onboardingPrivacyCardE2eTitle;
 
-  /// Onboarding intro selling point: voice body
+  /// Welcome A intro page 2: end-to-end encryption card body
   ///
   /// In en, this message translates to:
-  /// **'Just say “Lunch 800 yen.”'**
-  String get onboardingIntroVoiceBody;
+  /// **'Only you hold the key'**
+  String get onboardingPrivacyCardE2eBody;
+
+  /// Welcome A intro page 2: tamper-proof card title
+  ///
+  /// In en, this message translates to:
+  /// **'Tamper-proof'**
+  String get onboardingPrivacyCardTamperTitle;
+
+  /// Welcome A intro page 2: tamper-proof card body
+  ///
+  /// In en, this message translates to:
+  /// **'Records protected by a hash chain'**
+  String get onboardingPrivacyCardTamperBody;
+
+  /// Welcome A intro page 3: joy title
+  ///
+  /// In en, this message translates to:
+  /// **'Add a feeling to every expense.'**
+  String get onboardingJoyTitle;
+
+  /// Welcome A intro page 3: joy subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking is not a chore. Capture how satisfied you felt, too.'**
+  String get onboardingJoySubtitle;
+
+  /// Welcome A intro page 3: satisfaction-row caption
+  ///
+  /// In en, this message translates to:
+  /// **'Record satisfaction with one tap.'**
+  String get onboardingJoyCaption;
+
+  /// Welcome A intro page 3: closing accent line
+  ///
+  /// In en, this message translates to:
+  /// **'Money is for filling your own life.'**
+  String get onboardingJoyAccent;
 
   /// Onboarding intro: continue button to the settings step
   ///

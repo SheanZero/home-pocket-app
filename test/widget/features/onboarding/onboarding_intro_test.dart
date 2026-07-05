@@ -45,8 +45,9 @@ void main() {
     });
 
     testWidgets('次へ pages 1 → 2 → 3; page 2 shows privacy cards, page 3 '
-        'shows joy content; はじめる fires onContinue exactly once',
-        (tester) async {
+        'shows joy content; はじめる fires onContinue exactly once', (
+      tester,
+    ) async {
       var count = 0;
       await tester.pumpWidget(_host(onContinue: () => count++));
       await tester.pumpAndSettle();
@@ -73,8 +74,9 @@ void main() {
       expect(count, 1);
     });
 
-    testWidgets('スキップ from page 1 fires onContinue exactly once',
-        (tester) async {
+    testWidgets('スキップ from page 1 fires onContinue exactly once', (
+      tester,
+    ) async {
       var count = 0;
       await tester.pumpWidget(_host(onContinue: () => count++));
       await tester.pumpAndSettle();
@@ -84,8 +86,9 @@ void main() {
       expect(count, 1);
     });
 
-    testWidgets('スキップ from page 2 fires onContinue exactly once',
-        (tester) async {
+    testWidgets('スキップ from page 2 fires onContinue exactly once', (
+      tester,
+    ) async {
       var count = 0;
       await tester.pumpWidget(_host(onContinue: () => count++));
       await tester.pumpAndSettle();

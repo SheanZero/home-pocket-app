@@ -234,8 +234,8 @@ Future<String> _completeOnboarding(WidgetTester tester) async {
   final bootBookId =
       tester.widget<OnboardingFlowScreen>(find.byType(OnboardingFlowScreen)).bookId;
 
-  // intro → settings
-  await tester.tap(find.widgetWithText(TextButton, 'はじめる').first);
+  // intro → settings (スキップ collapses to onContinue, D-02)
+  await tester.tap(find.widgetWithText(TextButton, 'スキップ').first);
   await tester.pumpAndSettle();
   expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
 

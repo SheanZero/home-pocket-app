@@ -3005,41 +3005,65 @@
   "@onboardingIntroTitle": {
     "description": "Onboarding intro screen: app title"
   },
-  "onboardingIntroSubtitle": "家族のお金の話を、やさしく。",
-  "@onboardingIntroSubtitle": {
-    "description": "Onboarding intro screen: subtitle tagline"
+  "onboardingWelcomeBadge": "たのしく、つづく家計簿",
+  "@onboardingWelcomeBadge": {
+    "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingIntroPrivacyTitle": "すべて端末内・暗号化",
-  "@onboardingIntroPrivacyTitle": {
-    "description": "Onboarding intro selling point: privacy/encryption title"
+  "onboardingWelcomeBrand": "HOME POCKET",
+  "@onboardingWelcomeBrand": {
+    "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
   },
-  "onboardingIntroPrivacyBody": "クラウドに送信しません。あなたのデータはあなたのもの。",
-  "@onboardingIntroPrivacyBody": {
-    "description": "Onboarding intro selling point: privacy/encryption body"
+  "onboardingWelcomeTagline": "記録するたびに、ちょっと、しあわせ。\nお金とのつきあいを、もっと前向きに。",
+  "@onboardingWelcomeTagline": {
+    "description": "Welcome A intro page 1: two-line tagline"
   },
-  "onboardingIntroLocalTitle": "ローカルファースト",
-  "@onboardingIntroLocalTitle": {
-    "description": "Onboarding intro selling point: local-first title"
+  "onboardingPrivacyTitle": "データは、\nあなたの手の中に。",
+  "@onboardingPrivacyTitle": {
+    "description": "Welcome A intro page 2: privacy title (two lines)"
   },
-  "onboardingIntroLocalBody": "オフラインでも、すぐに使えます。",
-  "@onboardingIntroLocalBody": {
-    "description": "Onboarding intro selling point: local-first body"
+  "onboardingPrivacySubtitle": "すべて端末の中だけで完結。アカウントもサーバーも、いりません。",
+  "@onboardingPrivacySubtitle": {
+    "description": "Welcome A intro page 2: privacy subtitle"
   },
-  "onboardingIntroLedgerTitle": "日常と悦己、ふたつの帳簿",
-  "@onboardingIntroLedgerTitle": {
-    "description": "Onboarding intro selling point: dual-ledger title"
+  "onboardingPrivacyCardLocalTitle": "端末内に保存",
+  "@onboardingPrivacyCardLocalTitle": {
+    "description": "Welcome A intro page 2: on-device storage card title"
   },
-  "onboardingIntroLedgerBody": "必要な支出と、自分を満たす支出を分けて見る。",
-  "@onboardingIntroLedgerBody": {
-    "description": "Onboarding intro selling point: dual-ledger body"
+  "onboardingPrivacyCardLocalBody": "クラウドには送信しません",
+  "@onboardingPrivacyCardLocalBody": {
+    "description": "Welcome A intro page 2: on-device storage card body"
   },
-  "onboardingIntroVoiceTitle": "声でサッと記録",
-  "@onboardingIntroVoiceTitle": {
-    "description": "Onboarding intro selling point: voice title"
+  "onboardingPrivacyCardE2eTitle": "エンドツーエンド暗号化",
+  "@onboardingPrivacyCardE2eTitle": {
+    "description": "Welcome A intro page 2: end-to-end encryption card title"
   },
-  "onboardingIntroVoiceBody": "「ランチ 800円」と話すだけ。",
-  "@onboardingIntroVoiceBody": {
-    "description": "Onboarding intro selling point: voice body"
+  "onboardingPrivacyCardE2eBody": "あなただけが鍵を持ちます",
+  "@onboardingPrivacyCardE2eBody": {
+    "description": "Welcome A intro page 2: end-to-end encryption card body"
+  },
+  "onboardingPrivacyCardTamperTitle": "改ざん防止",
+  "@onboardingPrivacyCardTamperTitle": {
+    "description": "Welcome A intro page 2: tamper-proof card title"
+  },
+  "onboardingPrivacyCardTamperBody": "ハッシュチェーンで記録を保護",
+  "@onboardingPrivacyCardTamperBody": {
+    "description": "Welcome A intro page 2: tamper-proof card body"
+  },
+  "onboardingJoyTitle": "使ったお金に、\u201c気持ち\u201dを添えて。",
+  "@onboardingJoyTitle": {
+    "description": "Welcome A intro page 3: joy title"
+  },
+  "onboardingJoySubtitle": "記帳は、面倒な作業じゃない。その時の満足度も、いっしょに残そう。",
+  "@onboardingJoySubtitle": {
+    "description": "Welcome A intro page 3: joy subtitle"
+  },
+  "onboardingJoyCaption": "満足度を、ワンタップで記録。",
+  "@onboardingJoyCaption": {
+    "description": "Welcome A intro page 3: satisfaction-row caption"
+  },
+  "onboardingJoyAccent": "お金は、自分を満たすために。",
+  "@onboardingJoyAccent": {
+    "description": "Welcome A intro page 3: closing accent line"
   },
   "onboardingIntroContinue": "はじめる",
   "@onboardingIntroContinue": {

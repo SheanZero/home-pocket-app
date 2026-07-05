@@ -171,8 +171,8 @@ void main() {
         await tester.pumpWidget(_host(h.overrides));
         await tester.pumpAndSettle();
 
-        // Advance: intro → settings.
-        await tester.tap(find.widgetWithText(TextButton, 'はじめる'));
+        // Advance: intro → settings (スキップ collapses to onContinue, D-02).
+        await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
         await tester.pumpAndSettle();
         expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
         expect(find.byType(OnboardingIntroScreen), findsNothing);
@@ -219,7 +219,12 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // intro → settings
+        // intro → settings via the full 3-page path: 次へ ×2, then page-3
+        // はじめる (exercises the real page-through contract).
+        await tester.tap(find.widgetWithText(TextButton, '次へ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(TextButton, '次へ'));
+        await tester.pumpAndSettle();
         await tester.tap(find.widgetWithText(TextButton, 'はじめる'));
         await tester.pumpAndSettle();
 

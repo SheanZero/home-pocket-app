@@ -9,10 +9,7 @@ Widget _host() {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FloatyLoop(
-            period: Duration(seconds: 6),
-            child: Text('floaty-child'),
-          ),
+          FloatyLoop(period: Duration(seconds: 6), child: Text('floaty-child')),
           FloatyLoop(
             period: Duration(seconds: 5),
             phase: Duration(milliseconds: 300),
@@ -34,39 +31,35 @@ Widget _host() {
 
 void main() {
   group('OnboardingFloatDecor kill-switch', () {
-    testWidgets(
-      'animationsEnabled=false (global test default): pumpAndSettle '
-      'terminates and children render statically',
-      (tester) async {
-        // flutter_test_config.dart forces the flag off suite-wide.
-        expect(OnboardingFloatDecor.animationsEnabled, isFalse);
+    testWidgets('animationsEnabled=false (global test default): pumpAndSettle '
+        'terminates and children render statically', (tester) async {
+      // flutter_test_config.dart forces the flag off suite-wide.
+      expect(OnboardingFloatDecor.animationsEnabled, isFalse);
 
-        await tester.pumpWidget(_host());
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(_host());
+      await tester.pumpAndSettle();
 
-        expect(find.text('floaty-child'), findsOneWidget);
-        expect(find.text('floaty-child-2'), findsOneWidget);
-        expect(find.byType(DriftPetal), findsNWidgets(2));
-        // No repeating tickers left running.
-        expect(tester.binding.transientCallbackCount, 0);
-      },
-    );
+      expect(find.text('floaty-child'), findsOneWidget);
+      expect(find.text('floaty-child-2'), findsOneWidget);
+      expect(find.byType(DriftPetal), findsNWidgets(2));
+      // No repeating tickers left running.
+      expect(tester.binding.transientCallbackCount, 0);
+    });
 
-    testWidgets(
-      'animationsEnabled=true: repeating tickers actually run',
-      (tester) async {
-        OnboardingFloatDecor.animationsEnabled = true;
-        addTearDown(() => OnboardingFloatDecor.animationsEnabled = false);
+    testWidgets('animationsEnabled=true: repeating tickers actually run', (
+      tester,
+    ) async {
+      OnboardingFloatDecor.animationsEnabled = true;
+      addTearDown(() => OnboardingFloatDecor.animationsEnabled = false);
 
-        await tester.pumpWidget(_host());
-        await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpWidget(_host());
+      await tester.pump(const Duration(milliseconds: 300));
 
-        // The repeating controllers keep transient frame callbacks scheduled.
-        expect(tester.binding.transientCallbackCount, greaterThan(0));
+      // The repeating controllers keep transient frame callbacks scheduled.
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
 
-        // Tear the tree down so the tickers stop before the flag is restored.
-        await tester.pumpWidget(const SizedBox.shrink());
-      },
-    );
+      // Tear the tree down so the tickers stop before the flag is restored.
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
   });
 }

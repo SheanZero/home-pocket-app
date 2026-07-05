@@ -3005,41 +3005,65 @@
   "@onboardingIntroTitle": {
     "description": "Onboarding intro screen: app title"
   },
-  "onboardingIntroSubtitle": "让家庭的金钱话题，变得温柔。",
-  "@onboardingIntroSubtitle": {
-    "description": "Onboarding intro screen: subtitle tagline"
+  "onboardingWelcomeBadge": "快乐记账，轻松坚持",
+  "@onboardingWelcomeBadge": {
+    "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingIntroPrivacyTitle": "全部本地存储・加密",
-  "@onboardingIntroPrivacyTitle": {
-    "description": "Onboarding intro selling point: privacy/encryption title"
+  "onboardingWelcomeBrand": "HOME POCKET",
+  "@onboardingWelcomeBrand": {
+    "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
   },
-  "onboardingIntroPrivacyBody": "不上传云端。你的数据只属于你。",
-  "@onboardingIntroPrivacyBody": {
-    "description": "Onboarding intro selling point: privacy/encryption body"
+  "onboardingWelcomeTagline": "每一次记录，都有一点小幸福。\n让你与金钱的关系，更加积极。",
+  "@onboardingWelcomeTagline": {
+    "description": "Welcome A intro page 1: two-line tagline"
   },
-  "onboardingIntroLocalTitle": "本地优先",
-  "@onboardingIntroLocalTitle": {
-    "description": "Onboarding intro selling point: local-first title"
+  "onboardingPrivacyTitle": "数据，\n掌握在你手中。",
+  "@onboardingPrivacyTitle": {
+    "description": "Welcome A intro page 2: privacy title (two lines)"
   },
-  "onboardingIntroLocalBody": "即使离线也能随时使用。",
-  "@onboardingIntroLocalBody": {
-    "description": "Onboarding intro selling point: local-first body"
+  "onboardingPrivacySubtitle": "一切都在设备内完成。无需账号，也无需服务器。",
+  "@onboardingPrivacySubtitle": {
+    "description": "Welcome A intro page 2: privacy subtitle"
   },
-  "onboardingIntroLedgerTitle": "日常与悦己，两本账簿",
-  "@onboardingIntroLedgerTitle": {
-    "description": "Onboarding intro selling point: dual-ledger title"
+  "onboardingPrivacyCardLocalTitle": "保存在设备内",
+  "@onboardingPrivacyCardLocalTitle": {
+    "description": "Welcome A intro page 2: on-device storage card title"
   },
-  "onboardingIntroLedgerBody": "把必要开销与取悦自己的开销分开来看。",
-  "@onboardingIntroLedgerBody": {
-    "description": "Onboarding intro selling point: dual-ledger body"
+  "onboardingPrivacyCardLocalBody": "不会上传到云端",
+  "@onboardingPrivacyCardLocalBody": {
+    "description": "Welcome A intro page 2: on-device storage card body"
   },
-  "onboardingIntroVoiceTitle": "用声音快速记账",
-  "@onboardingIntroVoiceTitle": {
-    "description": "Onboarding intro selling point: voice title"
+  "onboardingPrivacyCardE2eTitle": "端到端加密",
+  "@onboardingPrivacyCardE2eTitle": {
+    "description": "Welcome A intro page 2: end-to-end encryption card title"
   },
-  "onboardingIntroVoiceBody": "只需说一句「午餐 800 日元」。",
-  "@onboardingIntroVoiceBody": {
-    "description": "Onboarding intro selling point: voice body"
+  "onboardingPrivacyCardE2eBody": "只有你拥有密钥",
+  "@onboardingPrivacyCardE2eBody": {
+    "description": "Welcome A intro page 2: end-to-end encryption card body"
+  },
+  "onboardingPrivacyCardTamperTitle": "防篡改保护",
+  "@onboardingPrivacyCardTamperTitle": {
+    "description": "Welcome A intro page 2: tamper-proof card title"
+  },
+  "onboardingPrivacyCardTamperBody": "用哈希链保护每条记录",
+  "@onboardingPrivacyCardTamperBody": {
+    "description": "Welcome A intro page 2: tamper-proof card body"
+  },
+  "onboardingJoyTitle": "为每笔支出，记下当时的心情。",
+  "@onboardingJoyTitle": {
+    "description": "Welcome A intro page 3: joy title"
+  },
+  "onboardingJoySubtitle": "记账不是繁琐的任务。把当下的满足感，也一起留下吧。",
+  "@onboardingJoySubtitle": {
+    "description": "Welcome A intro page 3: joy subtitle"
+  },
+  "onboardingJoyCaption": "一键记录满足度。",
+  "@onboardingJoyCaption": {
+    "description": "Welcome A intro page 3: satisfaction-row caption"
+  },
+  "onboardingJoyAccent": "花钱，是为了充实自己。",
+  "@onboardingJoyAccent": {
+    "description": "Welcome A intro page 3: closing accent line"
   },
   "onboardingIntroContinue": "开始",
   "@onboardingIntroContinue": {

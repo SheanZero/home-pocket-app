@@ -2295,31 +2295,49 @@ class SZh extends S {
   String get onboardingIntroTitle => '守护家计簿';
 
   @override
-  String get onboardingIntroSubtitle => '让家庭的金钱话题，变得温柔。';
+  String get onboardingWelcomeBadge => '快乐记账，轻松坚持';
 
   @override
-  String get onboardingIntroPrivacyTitle => '全部本地存储・加密';
+  String get onboardingWelcomeBrand => 'HOME POCKET';
 
   @override
-  String get onboardingIntroPrivacyBody => '不上传云端。你的数据只属于你。';
+  String get onboardingWelcomeTagline => '每一次记录，都有一点小幸福。\n让你与金钱的关系，更加积极。';
 
   @override
-  String get onboardingIntroLocalTitle => '本地优先';
+  String get onboardingPrivacyTitle => '数据，\n掌握在你手中。';
 
   @override
-  String get onboardingIntroLocalBody => '即使离线也能随时使用。';
+  String get onboardingPrivacySubtitle => '一切都在设备内完成。无需账号，也无需服务器。';
 
   @override
-  String get onboardingIntroLedgerTitle => '日常与悦己，两本账簿';
+  String get onboardingPrivacyCardLocalTitle => '保存在设备内';
 
   @override
-  String get onboardingIntroLedgerBody => '把必要开销与取悦自己的开销分开来看。';
+  String get onboardingPrivacyCardLocalBody => '不会上传到云端';
 
   @override
-  String get onboardingIntroVoiceTitle => '用声音快速记账';
+  String get onboardingPrivacyCardE2eTitle => '端到端加密';
 
   @override
-  String get onboardingIntroVoiceBody => '只需说一句「午餐 800 日元」。';
+  String get onboardingPrivacyCardE2eBody => '只有你拥有密钥';
+
+  @override
+  String get onboardingPrivacyCardTamperTitle => '防篡改保护';
+
+  @override
+  String get onboardingPrivacyCardTamperBody => '用哈希链保护每条记录';
+
+  @override
+  String get onboardingJoyTitle => '为每笔支出，记下当时的心情。';
+
+  @override
+  String get onboardingJoySubtitle => '记账不是繁琐的任务。把当下的满足感，也一起留下吧。';
+
+  @override
+  String get onboardingJoyCaption => '一键记录满足度。';
+
+  @override
+  String get onboardingJoyAccent => '花钱，是为了充实自己。';
 
   @override
   String get onboardingIntroContinue => '开始';
