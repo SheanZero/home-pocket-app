@@ -41,6 +41,9 @@ class MerchantRecognizer {
 
   // ── Anchored scoring tiers (RESEARCH Pattern 1) ──
   static const double _scoreExact = 1.00;
+  // 260706-saz: this 0.85 is the anchored-prefix scoring TIER — it only
+  // coincidentally equals `kMerchantAutoFillFloor` (0.85) and is semantically
+  // unrelated. If the auto-fill floor changes, this tier does NOT track it.
   static const double _scoreAnchoredPrefix = 0.85;
   static const double _scoreContainment = 0.60;
   static const double _scoreReverseContainment = 0.55;

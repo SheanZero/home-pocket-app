@@ -41,6 +41,7 @@ import '../../../../application/voice/voice_chunk_merger.dart';
 import '../../../../application/voice/voice_text_parser.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/constants/voice_tuning.dart';
 import '../../../../shared/utils/currency_conversion.dart'
     show convertToJpy, subunitToUnitFor;
 import '../../domain/models/category.dart';
@@ -67,7 +68,8 @@ enum PttListenStatus { listening, processing, stopped }
 /// "please double-check" notice. Voice is the only entry path that can be
 /// poisoned by recognizer ITN artifacts (BUG-1: 「两千五百四十六」 → 250046),
 /// so the guardrail lives in the voice session, not in the shared form.
-const int kVoiceLargeAmountNoticeThreshold = 1000000;
+const int kVoiceLargeAmountNoticeThreshold =
+    VoiceTuning.largeAmountNoticeThresholdJpy;
 
 /// Reusable hold-to-record session: speech lifecycle + transcript + chunk merger
 /// + parse + batch-fill + foreign triple + satisfaction, host-agnostic.
@@ -267,8 +269,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       onResult: _onResult,
       onSoundLevel: _onSoundLevel,
       localeId: localeId,
-      listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds: 3),
+      listenFor: VoiceTuning.listenFor,
+      pauseFor: VoiceTuning.pauseFor,
     );
   }
 
@@ -687,8 +689,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         onResult: _onResult,
         onSoundLevel: _onSoundLevel,
         localeId: pttVoiceLocaleId,
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
+        listenFor: VoiceTuning.listenFor,
+        pauseFor: VoiceTuning.pauseFor,
       );
       if (mounted) {
         onPttSessionChanged(() {
@@ -904,7 +906,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     if (!mounted) return;
     final now = DateTime.now();
     if (_lastSampleTime != null &&
-        now.difference(_lastSampleTime!).inMilliseconds < 100) {
+        now.difference(_lastSampleTime!).inMilliseconds <
+            VoiceTuning.soundLevelThrottle.inMilliseconds) {
       onPttSessionChanged(() => _soundLevel = level);
       return;
     }
@@ -923,7 +926,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       onPttSessionChanged(() => _partialText = result.recognizedWords);
 
       _parseDebounce?.cancel();
-      _parseDebounce = Timer(const Duration(milliseconds: 300), () {
+      _parseDebounce = Timer(VoiceTuning.partialParseDebounce, () {
         if (result.recognizedWords.isNotEmpty) {
           _parseVoiceInput(result.recognizedWords);
         }
@@ -1047,7 +1050,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     if (start == null || !_isRecording) return;
     final held = DateTime.now().difference(start);
     // D-03 misfire threshold: presses shorter than 300 ms are discarded.
-    if (held < const Duration(milliseconds: 300)) {
+    if (held < VoiceTuning.holdMisfireThreshold) {
       cancelPttSessionAndDiscard();
     } else {
       stopPttSessionAndCommit();

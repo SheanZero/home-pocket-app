@@ -1,6 +1,7 @@
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
+import '../../shared/constants/voice_tuning.dart';
 import 'english_number_words.dart';
 
 /// NLP text parser for voice input.
@@ -221,7 +222,9 @@ class VoiceTextParser {
       if (match != null && match.groupCount > 0) {
         final amountStr = match.group(1)!.replaceAll(RegExp(r'[,，]'), '');
         final amount = double.tryParse(amountStr);
-        if (amount != null && amount > 0 && amount < 10000000) {
+        if (amount != null &&
+            amount > 0 &&
+            amount < VoiceTuning.amountUpperBoundExclusive) {
           return amount.round();
         }
       }

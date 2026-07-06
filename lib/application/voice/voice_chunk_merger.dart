@@ -12,6 +12,7 @@ import 'dart:async';
 
 import '../../infrastructure/speech/speech_recognition_service.dart';
 import '../../infrastructure/voice/numeral_state_machine.dart';
+import '../../shared/constants/voice_tuning.dart';
 
 /// Callback invoked when the merger commits a resolved integer amount.
 typedef AmountResolvedCallback = void Function(int amount);
@@ -46,7 +47,7 @@ class VoiceChunkMerger {
        _amountExtractor = amountExtractor,
        _clock = clock ?? DateTime.now;
 
-  static const _windowDuration = Duration(milliseconds: 2500);
+  static const _windowDuration = VoiceTuning.mergerWindow;
 
   final NumeralStateMachine _parser;
   final SpeechRecognitionService _speechService;

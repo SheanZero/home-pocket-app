@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import '../../shared/constants/voice_tuning.dart';
+
 /// Voice recognition service wrapping the speech_to_text plugin.
 ///
 /// Provides a unified interface for speech recognition and handles
@@ -52,8 +54,8 @@ class SpeechRecognitionService {
     required void Function(SpeechRecognitionResult result) onResult,
     required void Function(double normalizedLevel) onSoundLevel,
     required String localeId,
-    Duration listenFor = const Duration(seconds: 30),
-    Duration pauseFor = const Duration(seconds: 3),
+    Duration listenFor = VoiceTuning.listenFor,
+    Duration pauseFor = VoiceTuning.pauseFor,
   }) async {
     // Cache config BEFORE the _isInitialized guard so restartListen can
     // still find config even if a startListening attempt no-ops on uninitialised state.
