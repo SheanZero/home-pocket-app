@@ -49,13 +49,22 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     // this to trigger the normal rate-fetch flow; null skips it entirely
     // (Pitfall 1: JPY path must stay byte-identical).
     String? detectedCurrency,
-    // 260703 BUG-1: positional-repair candidate for a suspected ITN-concat
-    // amount (transcript "250046元" → amount 250046, candidate 2546). Non-null
-    // ONLY when the Arabic-path amount matches the concat signature AND no
-    // alternate transcript confirmed the repair (a confirmed repair is adopted
-    // into [amount] directly and this stays null). The form surfaces it as a
-    // one-tap confirm affordance — it must NEVER be applied silently. Always
-    // null on kanji-parsed, comma-grouped, and manual/OCR-constructed results.
+    // 260703 BUG-1 / 260706-kzr: the OTHER plausible reading of the amount,
+    // one tap away. Two producers share the field (unified semantics —
+    // "candidate = an alternative reading, reachable in one tap"):
+    //   - 1a concat suspect (260703): the Arabic-path amount matches the
+    //     ITN-concat signature and no alternate transcript confirmed the
+    //     repair (transcript "250046元" → amount 250046, candidate 2546).
+    //     Tapping ADOPTS the repair. A confirmed repair is adopted into
+    //     [amount] directly and this stays null.
+    //   - magnitude arbitration (260706-kzr): a spoken magnitude word
+    //     (千/万/thousand) pinned an expected digit count, the resolved
+    //     amount violated it, and a real re-parse (repair candidate /
+    //     state-machine re-read / alternate transcript) was adopted into
+    //     [amount]; the ORIGINAL reading swaps in here so tapping UNDOES
+    //     the arbitration back to the raw reading.
+    // Either way it must NEVER be applied silently. Always null on
+    // kanji-parsed, comma-grouped, and manual/OCR-constructed results.
     int? amountRepairCandidate,
     // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
     // the MerchantRecognizer produced for this utterance, recall-first (score
