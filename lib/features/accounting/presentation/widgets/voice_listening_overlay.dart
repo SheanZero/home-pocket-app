@@ -211,23 +211,49 @@ class VoiceRecordPanel extends StatelessWidget {
                     // 260622-nhs R7: the stopped-only 「点击重置重新录入」 hint
                     // keeps a RESERVED placeholder while listening (maintainSize)
                     // so the panel reads identically in both states (no jump).
-                    Visibility(
-                      visible: isStopped,
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
+                    //
+                    // quick-260706-kax (VRESET-03): the caption is a RESET
+                    // hit-target, and the nesting order is load-bearing:
+                    //  - Transform OUTERMOST: RenderTransform.hitTest skips its
+                    //    own bounds check and inverse-maps the tap into child
+                    //    layout coordinates, so a tap at the VISUAL position
+                    //    (34px above the layout box — where the user actually
+                    //    taps) still reaches the subtree. With Visibility
+                    //    outermost, its maintainSize proxy boxes bounds-check
+                    //    the un-shifted layout box first and the visual tap
+                    //    misses entirely (falls through → accidental exit).
+                    //  - GestureDetector INSIDE the Visibility: maintainSize
+                    //    keeps an IgnorePointer(ignoring: !visible), so in the
+                    //    listening state the detector is inert and the tap
+                    //    falls through to the panel-root exit handler exactly
+                    //    as before. Above the Visibility it would hijack
+                    //    listening-state taps into phantom resets.
+                    // Layout math is unchanged (Transform sizes to child; the
+                    // Column sees the same reserved box), so the fast-hint2
+                    // equal-height / exit-hint-position invariants hold and
+                    // paint output is identical.
+                    Transform.translate(
                       // Paint-only upward shift toward the reset square; the
                       // reserved layout box (and thus the exit hint below) is
                       // unchanged. Tuned to the fixed 356dp / 74dp geometry.
-                      child: Transform.translate(
-                        offset: const Offset(0, -34),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            l10n.voiceTapResetToRerecord,
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: palette.textSecondary,
-                              fontWeight: FontWeight.w700,
+                      offset: const Offset(0, -34),
+                      child: Visibility(
+                        visible: isStopped,
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        child: GestureDetector(
+                          key: const ValueKey('voice-reset-caption'),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: onReset,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              l10n.voiceTapResetToRerecord,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: palette.textSecondary,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
