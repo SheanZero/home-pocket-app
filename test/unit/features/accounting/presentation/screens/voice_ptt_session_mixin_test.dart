@@ -51,6 +51,13 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   var startCount = 0;
   var initializeCount = 0;
 
+  /// quick-260706-kax (belt-and-braces): field-backed availability so a test
+  /// can simulate the platform flipping the recognizer unavailable after a
+  /// fatal error. Defaults (`available: true`, `initializeResult: true`)
+  /// preserve the prior hardcoded behavior for every existing test.
+  var available = true;
+  var initializeResult = true;
+
   @override
   Future<bool> initialize({
     void Function(String status)? onStatus,
@@ -59,11 +66,11 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     this.onStatus = onStatus;
     this.onError = onError;
     initializeCount++;
-    return true;
+    return initializeResult;
   }
 
   @override
-  bool get isAvailable => true;
+  bool get isAvailable => available;
 
   @override
   bool get isListening => startedLocaleId != null && !stopped;
@@ -1404,6 +1411,202 @@ void main() {
         ['2546元'],
         reason: 'the best transcript is excluded; the rest ride along',
       );
+    },
+  );
+
+  // ── quick-260706-kax VRESET: dead-session reset recovery ───────────────────
+
+  testWidgets(
+    'VRESET-01: after a fatal error kills the continuous session, reset '
+    'revives a fresh listening session and the next final auto-fills',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '1千8百4十元 星巴克': VoiceParseResult(
+          rawText: '1千8百4十元 星巴克',
+          amount: 1840,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: '星巴克',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.91,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      // Fatal error: the onError fatal branch tears the session down but the
+      // host panel stays open — 停止聆听 + the red reset square.
+      speech.emitError('error_retry', permanent: true);
+      await tester.pumpAndSettle();
+      expect(
+        host.pttContinuousActive,
+        isFalse,
+        reason: 'precondition: the fatal branch killed the session',
+      );
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'precondition: the panel shows the stopped state',
+      );
+
+      final cancelsBefore = speech.cancelCount;
+      final startsBefore = speech.startCount;
+
+      // The red reset square must revive the DEAD session, not no-op.
+      await host.resetPttSessionAndRestart();
+      await tester.pumpAndSettle();
+
+      expect(
+        speech.cancelCount,
+        greaterThan(cancelsBefore),
+        reason: 'reset must cancel() to clear the recognizer buffer',
+      );
+      expect(
+        speech.startCount,
+        greaterThan(startsBefore),
+        reason: 'reset must issue a fresh startListening on a dead session',
+      );
+      expect(
+        host.pttContinuousActive,
+        isTrue,
+        reason: 'reset restores the continuous session semantics',
+      );
+      expect(host.pttIsRecording, isTrue, reason: 'recording again');
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.listening,
+        reason: 'the panel is back to 正在聆听',
+      );
+
+      // The recovered session's continuous fill path works end-to-end — proves
+      // _continuousActive was restored BEFORE the fill path runs.
+      speech.emitFinal('1千8百4十元 星巴克');
+      await tester.pumpAndSettle();
+      expect(
+        find.text('星巴克'),
+        findsOneWidget,
+        reason: 'a speech-final in the recovered session auto-fills the form',
+      );
+    },
+  );
+
+  testWidgets(
+    'VRESET-02: two back-to-back resets inside the cancel→start window issue '
+    'exactly ONE extra startListening (reentrancy guard)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+      expect(speech.startCount, 1);
+
+      // Dart async bodies run synchronously to the first await, so the second
+      // call lands inside the first reset's cancel→start window and must hit
+      // the _restarting entry guard (else: concurrent double-start → the
+      // plugin hangs, the post-reset 假死).
+      final f1 = host.resetPttSessionAndRestart();
+      final f2 = host.resetPttSessionAndRestart();
+      await f1;
+      await f2;
+      await tester.pumpAndSettle();
+
+      expect(
+        speech.startCount,
+        2,
+        reason:
+            'one start from startPttTapSession + ONE from the first reset; '
+            'the reentrant second call must early-return on _restarting',
+      );
+      expect(host.pttIsRecording, isTrue);
+      expect(speech.isListening, isTrue);
+      expect(host.pttListenStatus, PttListenStatus.listening);
+    },
+  );
+
+  testWidgets(
+    'VRESET belt-and-braces: reset re-initializes an unavailable service '
+    'before restarting; a failed re-init rolls back to stopped (no start)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitError('error_audio', permanent: true);
+      await tester.pumpAndSettle(); // _recoverBarAfterFatalError settles
+
+      // Phase A: the platform left the recognizer unavailable (the async
+      // recover may not have run yet on-device) → reset must re-initialize
+      // FIRST, then restart on success.
+      speech.available = false;
+      final initBefore = speech.initializeCount;
+      final startsBefore = speech.startCount;
+
+      await host.resetPttSessionAndRestart();
+      await tester.pumpAndSettle();
+
+      expect(
+        speech.initializeCount,
+        greaterThan(initBefore),
+        reason: 'reset must re-initialize an unavailable service first',
+      );
+      expect(
+        speech.startCount,
+        greaterThan(startsBefore),
+        reason: 'restart proceeds after a successful re-init',
+      );
+      expect(host.pttContinuousActive, isTrue);
+      expect(host.pttListenStatus, PttListenStatus.listening);
+
+      // Phase B: a FAILED re-init must roll the state back — no
+      // startListening, no optimistic listening flip (a later tap retries).
+      speech.available = false;
+      speech.initializeResult = false;
+      final startsBeforeB = speech.startCount;
+
+      await host.resetPttSessionAndRestart();
+      await tester.pumpAndSettle();
+
+      expect(
+        speech.startCount,
+        startsBeforeB,
+        reason: 'a failed re-init must NOT call startListening',
+      );
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'no optimistic listening flip on a failed re-init',
+      );
+      expect(host.pttContinuousActive, isFalse);
+      expect(host.pttIsRecording, isFalse);
     },
   );
 }

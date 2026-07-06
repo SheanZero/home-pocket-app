@@ -169,6 +169,53 @@ void main() {
     },
   );
 
+  testWidgets(
+    'quick-260706-kax VRESET-03: stopped — tapping the 点击重置重新录入 caption at '
+    'its VISUAL (Transform-shifted) position fires onReset and NOT onExit',
+    (tester) async {
+      var exits = 0;
+      var resets = 0;
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: VoiceRecordPanel(
+              transcript: 'x',
+              soundLevel: 0.1,
+              status: PttListenStatus.stopped,
+              onExit: () => exits++,
+              onReset: () => resets++,
+            ),
+          ),
+          locale: const Locale('zh'),
+        ),
+      );
+      await tester.pump();
+
+      final l10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+
+      // tester.tap resolves the target center via localToGlobal — i.e. the
+      // VISUAL position (34px above the layout box, where the user actually
+      // taps). The caption must be a real reset hit-target there, not a trap
+      // that falls through to the panel-root exit handler. Deliberately NO
+      // warnIfMissed:false — the fix must make the hit real; the warning is
+      // the canary.
+      await tester.tap(find.text(l10n.voiceTapResetToRerecord));
+      await tester.pump();
+
+      expect(
+        resets,
+        1,
+        reason: 'VRESET-03: the caption is a reset hit-target when stopped',
+      );
+      expect(
+        exits,
+        0,
+        reason: 'VRESET-03: the caption tap must NOT exit the panel',
+      );
+    },
+  );
+
   // ── R4 BUG C: live status drives the title ────────────────────────────────
 
   testWidgets('R4 BUG C: status listening shows the listening title', (
