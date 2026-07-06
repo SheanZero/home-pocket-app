@@ -67,6 +67,8 @@ Phase 56 定下的四条约束（接入时不得破坏）：
 4. **页面设置**：Page 名、简介（建议中日英三语各一句）、打赏单价（默认 ¥ 档位可设 300/500 円级）。
 5. **拿 URL**：`https://ko-fi.com/<username>`。
 6. **费用认知**：平台 0%，但 Stripe 日本约 3.6% 卡费率从每笔扣除；到账即时。
+7. **iOS 体验要点（重要）**：连接 Stripe 后，iPhone/iPad 用户在 Safari 打开打赏页会**自动出现 Apple Pay 按钮**——单次打赏 Face ID 一键完成、无需注册。两个限制：Apple Pay 仅对单次打赏/Commission/Shop 生效（月费制会员不支持）；只连 PayPal 则无 Apple Pay。app 的外链跳 Safari 设计（DONATE-02）恰好命中此最优路径。
+8. **合规习惯**：Ko-fi 页**只开 tips，不开 Shop / Membership**——审核员点开链接若看到在售数字商品，会更接近 App Store 3.1.1 敏感区；纯打赏页完全干净。
 
 ---
 
@@ -163,7 +165,7 @@ feat: fill production sponsor URL (OFUSE) for DONATE-04
 ## 参考来源（2026-07-06 核实）
 
 - OFUSE 2026-04 费率改定解说: https://app-tatsujin.com/ofuse-free-plan-fee-2026/ / 官方费用 FAQ: https://support.ofuse.me/hc/ja/articles/4408196935193 / 出金手续费: https://support.ofuse.me/hc/ja/articles/4408207215641
-- Ko-fi 定价: https://ko-fi.com/pricing / Stripe 对应国家: https://help.ko-fi.com/hc/en-us/articles/360009265834
+- Ko-fi 定价: https://ko-fi.com/pricing / Stripe 对应国家: https://help.ko-fi.com/hc/en-us/articles/360009265834 / Apple Pay 支持: https://help.ko-fi.com/hc/en-us/articles/360017645677-Offer-Apple-Pay-to-your-supporters
 - Buy Me a Coffee 手续费计算: https://help.buymeacoffee.com/en/articles/8105744 / 出金支持国家（含日本）: https://help.buymeacoffee.com/en/articles/6258038
 - スマホ新法与 app 外課金解说: https://pay.jp/column/external-payment / https://repro.io/contents/real-external-payment-guidelines/
 - Apple App Review Guidelines: https://developer.apple.com/app-store/review/guidelines/
