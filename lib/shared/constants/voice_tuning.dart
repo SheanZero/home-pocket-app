@@ -71,4 +71,17 @@ class VoiceTuning {
   /// Origin: `category_recognizer.dart` (`kLearnedPromotionThreshold` alias
   /// preserved there).
   static const int learnedPromotionThreshold = 3;
+
+  /// voice-consolidation P0-6 / offline Tier 0 (quick 260706-tm6): start every
+  /// recognition session with `SpeechListenOptions.onDevice: true` so audio
+  /// stays on the device whenever the OS recognizer supports it.
+  ///
+  /// Degrade contract (owned by `speech_recognition_service.dart`): when the
+  /// on-device listen throws, the SAME startListening call retries once with
+  /// identical args and `onDevice: false`, then latches a session-scoped
+  /// fallback flag — later listens (including `restartListen` replays) go
+  /// straight to the degraded mode. The degrade is silent (no UI, no new
+  /// localization keys); a user-visible privacy toggle is deferred to the
+  /// follow-up sherpa task.
+  static const bool preferOnDeviceRecognition = true;
 }
