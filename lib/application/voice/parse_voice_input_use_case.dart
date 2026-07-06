@@ -52,7 +52,7 @@ class ParseVoiceInputUseCase {
   static final JapaneseNumeralStateMachine _jaMachine =
       JapaneseNumeralStateMachine();
 
-  /// 260706-saz (MOD-009 P0-1): single arbitration point for the 260703 1a
+  /// 260706-saz (voice-consolidation P0-1): single arbitration point for the 260703 1a
   /// ITN-concat repair + 260706-kzr 1b magnitude arbitration. Shares the
   /// injected [_textParser] instance so test fakes flow through unchanged.
   late final AmountArbiter _arbiter = AmountArbiter(textParser: _textParser);
@@ -92,7 +92,7 @@ class ParseVoiceInputUseCase {
 
       // 1a/1b. 260706-saz: the 260703 ITN-concat repair and 260706-kzr
       // magnitude arbitration now live in [AmountArbiter.resolveParsedAmount]
-      // (single arbitration point, MOD-009 P0-1) — semantics migrated verbatim.
+      // (single arbitration point, voice-consolidation P0-1) — semantics migrated verbatim.
       final arbitrated = _arbiter.resolveParsedAmount(
         parsed: amount,
         recognizedText: recognizedText,

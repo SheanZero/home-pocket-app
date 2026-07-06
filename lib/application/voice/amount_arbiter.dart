@@ -4,7 +4,7 @@ import 'amount_magnitude_guard.dart';
 import 'english_number_words.dart';
 import 'voice_text_parser.dart';
 
-/// Single arbitration point for voice amount conflicts (MOD-009 P0-1).
+/// Single arbitration point for voice amount conflicts (voice-consolidation P0-1).
 ///
 /// Quick task 260706-saz: the 260703 (ITN-concat repair) and 260706-kzr
 /// (magnitude arbitration) decision logic previously lived in TWO places —

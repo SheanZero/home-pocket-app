@@ -153,7 +153,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   int? _mergedAmount;
   DateTime? _lastSampleTime;
 
-  /// 260706-saz (MOD-009 P0-1): single arbitration point for merged-vs-parsed
+  /// 260706-saz (voice-consolidation P0-1): single arbitration point for merged-vs-parsed
   /// display conflicts and the merger's commit-time amount extraction. The
   /// mixin no longer carries amount-arbitration business logic (S3 fix).
   late final AmountArbiter _amountArbiter = AmountArbiter();
@@ -280,7 +280,14 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   // ── Commit (ported verbatim from _stopRecordingAndCommit) ───────────────────
 
-  Future<void> stopPttSessionAndCommit() async {
+  Future<void> stopPttSessionAndCommit() => _stopAndFill(endContinuous: false);
+
+  /// 260706-saz (voice-consolidation P0-3): the shared stop→fill sequence behind
+  /// [stopPttSessionAndCommit] and [exitPttTapSession] — the two public
+  /// methods were byte-identical except for the exit path's leading
+  /// `_continuousActive = false` ([endContinuous]).
+  Future<void> _stopAndFill({required bool endContinuous}) async {
+    if (endContinuous) _continuousActive = false;
     // Pattern 7: merger.stop() bypasses the 2.5s window. MUST run BEFORE
     // pttSpeechService.stop() to preserve the original ordering invariant.
     _amountMerger?.stop();
@@ -386,7 +393,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
     // 260706-saz: the 260703 concat exception and 260706-kzr magnitude
     // exception now live in [AmountArbiter.resolveDisplayAmount] (single
-    // arbitration point, MOD-009 P0-1) — semantics migrated verbatim.
+    // arbitration point, voice-consolidation P0-1) — semantics migrated verbatim.
     final amount =
         _amountArbiter.resolveDisplayAmount(
           parsed: data.amount,
@@ -576,19 +583,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// Exit the tap session: stop the recognizer, flush the merger, fill the form
   /// one last time from the latest transcript (D-2 fill-and-stay), and end the
   /// session. Filled content is RETAINED — no discard, no auto-save.
-  Future<void> exitPttTapSession() async {
-    _continuousActive = false;
-    _amountMerger?.stop();
-    await pttSpeechService.stop();
-    if (!mounted) return;
-    onPttSessionChanged(() {
-      _isRecording = false;
-      _soundLevel = 0.0;
-      _listenStatus = PttListenStatus.stopped;
-    });
-    final text = _finalText.isNotEmpty ? _finalText : _partialText;
-    await _fillFormFromText(text, data: _cachedParseFor(text));
-  }
+  Future<void> exitPttTapSession() => _stopAndFill(endContinuous: true);
 
   /// 260622-nhs R4 (BUG A + BUG B): the 「重置·恢复账目」 reset. Unlike the weak
   /// R3 `resetPttSessionState() + restartPttListening()` pair (which left the
@@ -630,13 +625,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       //    continuous-branch auto-fill works (VRESET-01).
       onPttSessionChanged(() {
         _continuousActive = true;
-        _displayCurrency = 'JPY';
-        _partialText = '';
-        _finalText = '';
-        _parseResult = null;
-        _mergedAmount = null;
-        _soundLevel = 0.0;
-        _lastFilledAmount = 0;
+        _clearSessionBuffers();
         _parsing = false;
         _listenStatus = PttListenStatus.listening;
       });
@@ -1044,14 +1033,21 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   /// Reset the session's transcript/parse buffers (continuous-entry reset).
   void resetPttSessionState() {
-    onPttSessionChanged(() {
-      _displayCurrency = 'JPY';
-      _partialText = '';
-      _finalText = '';
-      _parseResult = null;
-      _mergedAmount = null;
-      _soundLevel = 0.0;
-      _lastFilledAmount = 0;
-    });
+    onPttSessionChanged(_clearSessionBuffers);
+  }
+
+  /// 260706-saz (voice-consolidation P0-3): the seven session buffers shared by BOTH
+  /// reset paths ([resetPttSessionAndRestart] and [resetPttSessionState]).
+  /// Deliberately EXCLUDES `_continuousActive` / `_parsing` / `_listenStatus`
+  /// — those belong only to the restart path (VRESET-01 revival semantics);
+  /// callers wrap this in [onPttSessionChanged] themselves.
+  void _clearSessionBuffers() {
+    _displayCurrency = 'JPY';
+    _partialText = '';
+    _finalText = '';
+    _parseResult = null;
+    _mergedAmount = null;
+    _soundLevel = 0.0;
+    _lastFilledAmount = 0;
   }
 }

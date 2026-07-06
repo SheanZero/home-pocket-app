@@ -1,4 +1,4 @@
-/// MOD-009 P0-2: single home for the voice pipeline's tuning constants.
+/// voice-consolidation P0-2: single home for the voice pipeline's tuning constants.
 ///
 /// Quick task 260706-saz: these values were previously scattered as magic
 /// literals across the infrastructure / application / presentation layers
