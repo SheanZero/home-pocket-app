@@ -19,6 +19,16 @@
 // It composes with `VoiceRecognitionEventHandlerMixin` (status/error callbacks)
 // and `VoiceLocaleReadinessMixin` (cold-start gate) — the host wires all three
 // `with` mixins, and this mixin satisfies the former's abstract contract.
+//
+// voice-consolidation P1-7: the mixin's method bodies are split across two
+// same-library `part` files as extensions `on VoicePttSessionMixin<W>` —
+// `voice_ptt_session_fill_orchestration.dart` (result/sound-level callbacks,
+// partial/final parse, batch-fill, merger rebuild) and
+// `voice_ptt_session_foreign_notice.dart` (foreign triple, post-final amount
+// notices, satisfaction estimation). The mixin DECLARATION — fields, abstract
+// host contract, overrides, public getters, and the session state machine —
+// stays here; the parts share this file's imports and private visibility, so
+// the split is a byte-faithful move (no renames, no visibility promotion).
 
 import 'dart:async';
 
@@ -51,6 +61,9 @@ import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_error_toast.dart';
 import 'voice_input_screen_helpers.dart';
 import 'voice_recognition_event_handler_mixin.dart';
+
+part 'voice_ptt_session_fill_orchestration.dart';
+part 'voice_ptt_session_foreign_notice.dart';
 
 /// 260622-nhs R4 (BUG C): the live recognizer-driven session status surfaced to
 /// the inline [VoiceRecordPanel] so its title + pulse-dot reflect reality
@@ -303,270 +316,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     await _fillFormFromText(text, data: _cachedParseFor(text));
   }
 
-  /// 260703 BUG-1 (1D): reuse the already-parsed result when it matches [text]
-  /// verbatim — an alternate-confirmed amount repair lives ONLY on that
-  /// instance; a re-parse here has no alternates and would resurrect the
-  /// poisoned amount. Falls back to null (fresh parse) on any mismatch.
-  VoiceParseResult? _cachedParseFor(String text) {
-    final cached = _parseResult;
-    return (cached != null && cached.rawText == text) ? cached : null;
-  }
-
-  /// 260622-nhs R2: parse [text] and batch-fill the embedded form (amount /
-  /// category / merchant / date / satisfaction / foreign triple). Extracted
-  /// VERBATIM from the prior `stopPttSessionAndCommit` body so BOTH the legacy
-  /// hold-release commit AND the new continuous auto-fill (each speech-final)
-  /// share one fill path — no parse/merger/foreign/satisfaction fork.
-  /// 260622-nhs R4 (BUG D): accepts an optional already-parsed [data] so the
-  /// final/partial paths parse ONCE and reuse the result here (the prior code
-  /// parsed `text` again inside this method — a redundant second parse). When
-  /// [data] is null this still parses [text] itself (legacy hold-release path).
-  ///
-  /// XVAL-03 / D-01..D-03 (resolve-on-final hysteresis): [fillCategory] gates
-  /// ONLY the category write. The partial-driven fill passes `false` so partials
-  /// keep filling amount/text/merchant/date LIVE (sub-second feedback, 260622-nhs
-  /// R1-R8 unchanged) but hold the category guess until the first end-of-speech
-  /// final — eliminating category-chip flicker across partials. The final-result
-  /// fill keeps the default `true`, resolving the category exactly once. No new
-  /// timer is introduced (D-03): the single isFinal signal drives the one fill.
-  Future<void> _fillFormFromText(
-    String text, {
-    VoiceParseResult? data,
-    bool fillCategory = true,
-  }) async {
-    if (text.isEmpty && data == null) return;
-
-    onPttSessionChanged(() => _parsing = true);
-    try {
-      await _fillFormFromTextInner(
-        text,
-        preParsed: data,
-        fillCategory: fillCategory,
-      );
-    } finally {
-      if (mounted) onPttSessionChanged(() => _parsing = false);
-    }
-  }
-
-  Future<void> _fillFormFromTextInner(
-    String text, {
-    VoiceParseResult? preParsed,
-    bool fillCategory = true,
-  }) async {
-    var resolved = preParsed;
-    if (resolved == null) {
-      if (text.isEmpty) return;
-      final parseUseCase = ref.read(parseVoiceInputUseCaseProvider);
-      final parseResult = await parseUseCase.execute(
-        text,
-        localeId: pttVoiceLocaleId,
-      );
-      if (!mounted || !parseResult.isSuccess) return;
-      resolved = parseResult.data;
-    }
-    if (resolved == null) return;
-    final data = resolved;
-
-    // XVAL-03 / D-01..D-03: the category guess is held until the first
-    // end-of-speech final. Partial-driven fills pass `fillCategory: false`, so
-    // we skip the repo lookup entirely (saves a read) AND never call
-    // state.updateCategory — the category chip resolves once, on the final.
-    Category? category;
-    Category? parent;
-    if (fillCategory) {
-      // CR-01: auto-stamp the category ONLY from the floor-gated `categoryMatch`
-      // (keyword win, or merchant >= 0.85). Do NOT fall back to
-      // `data.merchantCategoryId` — it carries the best candidate's category
-      // unconditionally (even below the 0.85 floor), so auto-filling it would
-      // silently defeat the floor (ADR-012: low-confidence guesses are
-      // confirmed/corrected, never auto-committed). Below-floor candidates are
-      // surfaced as Phase-52 confidence chips instead.
-      final categoryId = data.categoryMatch?.categoryId;
-      if (categoryId != null) {
-        final repo = ref.read(categoryRepositoryProvider);
-        category = await repo.findById(categoryId);
-        if (category?.parentId != null) {
-          parent = await repo.findById(category!.parentId!);
-        }
-      }
-    }
-
-    // 260706-saz: the 260703 concat exception and 260706-kzr magnitude
-    // exception now live in [AmountArbiter.resolveDisplayAmount] (single
-    // arbitration point, voice-consolidation P0-1) — semantics migrated verbatim.
-    final amount =
-        _amountArbiter.resolveDisplayAmount(
-          parsed: data.amount,
-          merged: _mergedAmount,
-          rawText: data.rawText,
-          localeId: pttVoiceLocaleId,
-        ) ??
-        0;
-    if (!mounted) return;
-    final state = pttFormState;
-    if (state == null) return;
-
-    if (amount > 0) {
-      state.updateAmount(amount);
-      _lastFilledAmount = amount;
-    }
-    if (category != null) state.updateCategory(category, parent);
-    // Phase 52 (RECUX-01/02 / D-08): push the recognition surface (confidence
-    // band + ranked alternates) at resolve-on-final ONLY — the same single
-    // isFinal fill that resolves the category. Partial-driven fills pass
-    // `fillCategory: false` and never reach here, so the band/chips resolve
-    // exactly once (no flicker on partials). Null band on a manual/OCR VPR
-    // leaves the form's no-affordance state intact (D-10).
-    if (fillCategory) {
-      state.updateRecognition(data.band, data.alternates);
-    }
-    if (data.merchantName != null && data.merchantName!.isNotEmpty) {
-      state.updateMerchant(data.merchantName!);
-    }
-    if (data.parsedDate != null) state.updateDate(data.parsedDate!);
-    if (_parseResult?.estimatedSatisfaction != null) {
-      state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
-    }
-
-    // 260703 BUG-2 (2C): the conversion — and every amount notice — runs ONLY
-    // on the resolve-on-final fill, the same gate as the category (XVAL-03).
-    // Partial-driven fills previously re-fetched the rate every ~300ms and
-    // bounced the amount between raw and converted figures mid-utterance.
-    if (fillCategory) {
-      var nextCurrency = 'JPY';
-      ({int jpy, String rate})? conversion;
-      final detectedCurrency = data.detectedCurrency;
-      if (amount > 0 &&
-          detectedCurrency != null &&
-          detectedCurrency.isNotEmpty) {
-        conversion = await pushVoiceForeignTriple(
-          state: state,
-          currency: detectedCurrency,
-          wholeUnitAmount: amount,
-          date: data.parsedDate ?? DateTime.now(),
-        );
-        if (conversion != null) nextCurrency = detectedCurrency;
-      }
-      if (!mounted) return;
-      onPttSessionChanged(() {
-        _displayCurrency = nextCurrency;
-      });
-      _showVoiceAmountNotice(
-        state: state,
-        data: data,
-        filledAmount: amount,
-        conversion: conversion,
-        currency: nextCurrency,
-      );
-    }
-    // Provenance hook: a PTT fill happened — host stamps EntrySource.voice.
-    onPttCommitted();
-  }
-
-  // ── 260703 (2B/1A/1E): post-final amount notices ────────────────────────────
-
-  /// Shows AT MOST ONE notice per final fill, by precedence:
-  /// conversion-undo (2B) > repair-candidate adopt (1A) > large-amount (1E).
-  /// All copy comes from ARB; amounts go through [NumberFormatter] with the
-  /// ambient locale. Notices are informational or one-tap — the fill itself
-  /// never silently rewrites what was recognized.
-  void _showVoiceAmountNotice({
-    required TransactionDetailsFormState state,
-    required VoiceParseResult data,
-    required int filledAmount,
-    required ({int jpy, String rate})? conversion,
-    required String currency,
-  }) {
-    if (!mounted) return;
-    final l10n = S.of(context);
-    final locale = Localizations.localeOf(context);
-    String jpy(int v) => NumberFormatter.formatCurrency(v, 'JPY', locale);
-
-    if (conversion != null) {
-      // 2B: the conversion is visible and reversible. Undo restores the spoken
-      // amount and clears the triple back to a JPY-native row.
-      final spoken = filledAmount;
-      _showVoiceSnackBar(
-        message: l10n.voiceCurrencyConverted(
-          NumberFormatter.formatCurrency(
-            spoken,
-            currency,
-            locale,
-            trimWholeFraction: true,
-          ),
-          jpy(conversion.jpy),
-          conversion.rate,
-        ),
-        actionLabel: l10n.voiceCurrencyConvertedUndo,
-        onAction: () {
-          state.updateAmount(spoken);
-          state.updateCurrencyTriple(
-            originalCurrency: null,
-            originalAmount: null,
-            appliedRate: null,
-          );
-          _lastFilledAmount = spoken;
-          if (mounted) {
-            onPttSessionChanged(() => _displayCurrency = 'JPY');
-          }
-        },
-      );
-      return;
-    }
-
-    // 1A: suspected ITN-concat amount — one-tap adopt, never silent.
-    // Suppressed when the filled amount didn't come from data.amount (a
-    // merger-committed multi-chunk amount makes the candidate meaningless).
-    final candidate = data.amountRepairCandidate;
-    if (candidate != null &&
-        filledAmount == data.amount &&
-        candidate != filledAmount) {
-      _showVoiceSnackBar(
-        message: l10n.voiceAmountRepairSuspect(
-          jpy(filledAmount),
-          jpy(candidate),
-        ),
-        actionLabel: l10n.voiceAmountRepairApply(jpy(candidate)),
-        onAction: () {
-          state.updateAmount(candidate);
-          _lastFilledAmount = candidate;
-          if (mounted) onPttSessionChanged(() {});
-        },
-      );
-      return;
-    }
-
-    // 1E: sanity guardrail — a very large voice-filled amount gets a visible
-    // "please double-check" nudge (non-blocking; the entry stays editable).
-    if (filledAmount >= kVoiceLargeAmountNoticeThreshold) {
-      _showVoiceSnackBar(
-        message: l10n.voiceLargeAmountNotice(jpy(filledAmount)),
-      );
-    }
-  }
-
-  void _showVoiceSnackBar({
-    required String message,
-    String? actionLabel,
-    VoidCallback? onAction,
-  }) {
-    if (!mounted) return;
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-          action: (actionLabel != null && onAction != null)
-              ? SnackBarAction(label: actionLabel, onPressed: onAction)
-              : null,
-        ),
-      );
-  }
-
   // ── 260622-nhs R2: tap-toggled continuous auto-fill session ────────────────
 
   /// Start a tap-toggled continuous listening session (manual-screen modal):
@@ -669,31 +418,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     } finally {
       _restarting = false;
     }
-  }
-
-  /// Rebuild the chunk merger (used by [resetPttSessionAndRestart]) so a reset
-  /// re-accumulates the amount from a clean baseline. Mirrors the merger setup
-  /// in [startPttSession] (same parser selection + onAmountResolved hook).
-  void _rebuildAmountMerger() {
-    _amountMerger?.dispose();
-    final speechService = ref.read(appSpeechRecognitionServiceProvider);
-    final parser = pttVoiceLocaleId.startsWith('ja')
-        ? ref.read(japaneseNumeralStateMachineProvider)
-        : ref.read(chineseNumeralStateMachineProvider);
-    // 260703 BUG-1 (1E): commits go through the full parser routing (via
-    // [AmountArbiter.extractAmount]) so a comma-grouped final (「2,546元」)
-    // keeps its leading groups — the bare state machine would drop the comma
-    // and read only the tail (546).
-    _amountMerger = VoiceChunkMerger(
-      parser: parser,
-      speechService: speechService,
-      amountExtractor: (text) =>
-          _amountArbiter.extractAmount(text, localeId: pttVoiceLocaleId),
-      onAmountResolved: (amount) {
-        if (!mounted) return;
-        onPttSessionChanged(() => _mergedAmount = amount);
-      },
-    );
   }
 
   /// 260622-nhs R5 (BUG 1): silence-class recognizer errors that are NORMAL in
@@ -800,58 +524,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     super.onStatus(status);
   }
 
-  // ── Foreign triple (ported from _pushVoiceForeignTriple) ────────────────────
-
-  /// Pushes the foreign-currency triple + converted JPY amount into [state].
-  ///
-  /// 260703 (2B): returns the conversion outcome — the converted JPY figure and
-  /// the applied rate — so the caller can surface a visible, undoable notice.
-  /// Null means the triple was NOT pushed (non-positive amount, rate
-  /// unavailable, or any error): the JPY-native path stays untouched.
-  Future<({int jpy, String rate})?> pushVoiceForeignTriple({
-    required TransactionDetailsFormState state,
-    required String currency,
-    required int wholeUnitAmount,
-    required DateTime date,
-  }) async {
-    final minorUnits = wholeUnitAmount * subunitToUnitFor(currency);
-    if (minorUnits <= 0) return null;
-    try {
-      final useCase = ref.read(appGetExchangeRateUseCaseProvider);
-      final withSignal = await useCase.execute(
-        GetExchangeRateParams(currency: currency, date: date),
-      );
-      if (!mounted) return null;
-      final rate = _extractRate(withSignal.result);
-      if (rate == null) {
-        return null;
-      }
-      final jpy = convertToJpy(
-        originalMinorUnits: minorUnits,
-        appliedRate: rate,
-        subunitToUnit: subunitToUnitFor(currency),
-      );
-      state.updateAmount(jpy);
-      _lastFilledAmount = jpy;
-      state.updateCurrencyTriple(
-        originalCurrency: currency,
-        originalAmount: minorUnits,
-        appliedRate: rate,
-      );
-      return (jpy: jpy, rate: rate);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  String? _extractRate(RateResult result) => switch (result) {
-    RateFetched(:final rate) => rate,
-    RateCached(:final rate) => rate,
-    RateFallback(:final rate) => rate,
-    RateManual(:final rate) => rate,
-    RateUnavailable() => null,
-  };
-
   // ── Cancel/discard (ported verbatim from _cancelRecordingAndDiscard) ────────
 
   Future<void> cancelPttSessionAndDiscard() async {
@@ -866,140 +538,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _listenStatus = PttListenStatus.stopped;
     });
     _pressStart = null;
-  }
-
-  // ── Sound-level / result callbacks (ported verbatim) ───────────────────────
-
-  void _onSoundLevel(double level) {
-    if (!mounted) return;
-    final now = DateTime.now();
-    if (_lastSampleTime != null &&
-        now.difference(_lastSampleTime!).inMilliseconds <
-            VoiceTuning.soundLevelThrottle.inMilliseconds) {
-      onPttSessionChanged(() => _soundLevel = level);
-      return;
-    }
-    _lastSampleTime = now;
-    _soundLevels.add(level);
-    _timestamps.add(now);
-    onPttSessionChanged(() => _soundLevel = level);
-  }
-
-  void _onResult(SpeechRecognitionResult result) {
-    if (!mounted) return;
-
-    if (!result.finalResult) {
-      _partialResultCount++;
-      _lastWordCount = countVoiceWords(result.recognizedWords);
-      onPttSessionChanged(() => _partialText = result.recognizedWords);
-
-      _parseDebounce?.cancel();
-      _parseDebounce = Timer(VoiceTuning.partialParseDebounce, () {
-        if (result.recognizedWords.isNotEmpty) {
-          _parseVoiceInput(result.recognizedWords);
-        }
-      });
-    } else {
-      final text = result.recognizedWords;
-      onPttSessionChanged(() {
-        _finalText = text;
-        _partialText = '';
-        _soundLevel = 0.0;
-      });
-
-      _parseDebounce?.cancel();
-      if (text.isNotEmpty) {
-        _amountMerger?.feedChunk(text, isFinal: true);
-        // 260703 BUG-1 (1D): the recognizer's alternate transcripts (the
-        // transcription list minus its best entry) ride along so the parse
-        // layer can cross-validate a suspected ITN-concat amount — an
-        // alternate that independently reads the repaired value auto-adopts
-        // the repair.
-        final alternateTexts = <String>[
-          for (final alt in result.alternates.skip(1))
-            if (alt.recognizedWords.isNotEmpty) alt.recognizedWords,
-        ];
-        // R2/R4: in the continuous tap session, parse ONCE (with satisfaction)
-        // and reuse that single result to auto-fill the form live (BUG D dedupe
-        // — the prior code parsed `text` here AND again inside _fillFormFromText).
-        // The legacy hold path only refreshes _parseResult here; the fill happens
-        // on release (still one parse, via the release commit).
-        if (_continuousActive) {
-          _parseFinalResult(text, alternateTexts: alternateTexts).then((
-            parsed,
-          ) {
-            if (mounted && _continuousActive) {
-              _fillFormFromText(text, data: parsed);
-            }
-          });
-        } else {
-          _parseFinalResult(text, alternateTexts: alternateTexts);
-        }
-      }
-    }
-  }
-
-  /// 260622-nhs R4 (BUG D): the debounced PARTIAL parse now ALSO drives a live
-  /// form-fill (continuous session only) so the user sees the entry update as
-  /// they speak — sub-second, not after the 3s pauseFor final. Idempotent: the
-  /// fill is overwritten by the final fill and revertible by reset (the snapshot
-  /// baseline is unchanged). Parses ONCE and reuses the result for both the
-  /// `_parseResult` mirror and the fill.
-  Future<void> _parseVoiceInput(String text) async {
-    if (!mounted) return;
-    final useCase = ref.read(parseVoiceInputUseCaseProvider);
-    final result = await useCase.execute(text, localeId: pttVoiceLocaleId);
-    if (!mounted || !result.isSuccess) return;
-    final data = result.data;
-    onPttSessionChanged(() => _parseResult = data);
-    if (_continuousActive && data != null) {
-      // XVAL-03 / D-01: partial fills amount/text/merchant/date LIVE but holds
-      // the category (fillCategory: false) until the first end-of-speech final.
-      await _fillFormFromText(text, data: data, fillCategory: false);
-    }
-  }
-
-  /// 260622-nhs R4 (BUG D): now RETURNS the resolved parse result so the caller
-  /// can reuse it for the form-fill instead of parsing the same text a second
-  /// time. Still mirrors `_parseResult` (drives the learning keyword hook /
-  /// satisfaction read) as before.
-  /// 260703 (1D): [alternateTexts] are threaded into the use case for the
-  /// ITN-concat cross-validation.
-  Future<VoiceParseResult?> _parseFinalResult(
-    String text, {
-    List<String> alternateTexts = const [],
-  }) async {
-    if (!mounted) return null;
-    final useCase = ref.read(parseVoiceInputUseCaseProvider);
-    final result = await useCase.execute(
-      text,
-      localeId: pttVoiceLocaleId,
-      alternateTexts: alternateTexts,
-    );
-
-    if (!mounted || !result.isSuccess) return null;
-
-    var parseResult = result.data;
-    if (parseResult == null) return null;
-
-    if (parseResult.ledgerType == LedgerType.joy) {
-      final features = buildVoiceAudioFeatures(
-        soundLevels: _soundLevels,
-        timestamps: _timestamps,
-        startTime: _startTime,
-        partialResultCount: _partialResultCount,
-        wordCount: _lastWordCount,
-      );
-      final estimator = ref.read(voiceSatisfactionEstimatorProvider);
-      final satisfaction = estimator.estimate(
-        audioFeatures: features,
-        recognizedText: text,
-      );
-      parseResult = parseResult.copyWith(estimatedSatisfaction: satisfaction);
-    }
-
-    onPttSessionChanged(() => _parseResult = parseResult);
-    return parseResult;
   }
 
   // ── Hold-gesture lifecycle (ported from _onLongPress* + misfire 300ms) ──────
