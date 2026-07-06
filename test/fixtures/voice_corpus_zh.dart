@@ -123,3 +123,86 @@ const List<VoiceCorpusCase> voiceCorpusZh = [
   (input: '12，450日元', expected: 12450, note: 'l0o Issue 1: full-width comma 日元'),
   (input: '1,500元', expected: 1500, note: 'l0o Issue 1 regression: existing 元 + comma'),
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Quick task 260706-tm6 (voice-consolidation P0-4): cn2an-derived golden
+// vectors, two-tier scheme. These lists are NEW and separate — they never feed
+// the voiceCorpusZh statistical bucket above, so the existing ≥95% gate is not
+// polluted by imported vectors. Asserted strictly (per-case) by
+// test/integration/voice/voice_corpus_zh_golden_test.dart.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Record type for a known-gap corpus case (260706-tm6). [reason] documents
+/// why the vector is currently unparseable — the test file skips these via
+/// the `skip:` parameter (never ignore comments) with the reason attached, so
+/// removing the skip activates the strict assertion unchanged.
+typedef VoiceKnownGapCase = ({String input, int expected, String reason});
+
+/// cn2an classic vectors that the current parser reads correctly — asserted
+/// strictly, one test() per entry. `note` records the source semantics.
+const List<VoiceCorpusCase> voiceCorpusZhGolden = [
+  (input: '两百五十', expected: 250, note: 'cn2an: 两 alternate reading + 十位尾'),
+  (input: '两千零五', expected: 2005, note: 'cn2an: 零 placeholder after 千'),
+  (input: '一千零一', expected: 1001, note: 'cn2an: classic 零-skip vector'),
+  (input: '两千三百', expected: 2300, note: 'cn2an: 两 in non-initial scale read'),
+  (input: '五千零四十', expected: 5040, note: 'cn2an: 零 placeholder before 十位'),
+];
+
+/// cn2an vectors the current parser cannot read — each carries the measured
+/// actual and the gap class. Two clusters:
+///   1. 口语「整位+裸尾」缩放 (两千五=2500): conflicts with the anchored
+///      zero-omitted positional read (2千2百零4=2204, にせんにひゃくよん=2204),
+///      so a trailing-digit scaling heuristic would regress existing anchors —
+///      deep semantic change, not a shallow fix.
+///   2. Missing colloquial/archaic tokens (俩/仨/廿/卅) and decimal spoken
+///      forms (块五/五毛) outside the int-JPY parser semantics.
+const List<VoiceKnownGapCase> voiceCorpusZhKnownGaps = [
+  (
+    input: '两千五',
+    expected: 2500,
+    reason: '口语「整千+裸尾数」缩放语义缺失；与零省略位值直读 anchor（2千2百零4=2204）冲突，'
+        '非浅修（现返回 2005）',
+  ),
+  (
+    input: '两万三',
+    expected: 23000,
+    reason: '口语「整万+裸尾数」缩放语义缺失，同 两千五 gap 类（现返回 20003）',
+  ),
+  (
+    input: '3千2',
+    expected: 3200,
+    reason: '混写「整千+裸尾数」缩放语义缺失，同 两千五 gap 类（现返回 3002）',
+  ),
+  (
+    input: '俩块钱',
+    expected: 2,
+    reason: '状态机缺「俩」口语数词 token（现返回 null）',
+  ),
+  (
+    input: '仨百',
+    expected: 300,
+    reason: '状态机缺「仨」口语数词 token（现返回 100 —— 百 implicit-1 误触发）',
+  ),
+  (
+    input: '廿五',
+    expected: 25,
+    reason: '状态机缺「廿」古体十位 token（现返回 5）',
+  ),
+  (
+    input: '卅六',
+    expected: 36,
+    reason: '状态机缺「卅」古体十位 token（现返回 6）',
+  ),
+  (
+    input: '三块五',
+    expected: 4,
+    reason: '小数口形 3.5 超出 int parser 语义；expected 按 Arabic 小数路径的 '
+        'round() 折算（3.5→4）（现返回 5 —— last-wins digit）',
+  ),
+  (
+    input: '十块五毛',
+    expected: 11,
+    reason: '小数口形 10.5 超出 int parser 语义；expected 按 round() 折算'
+        '（10.5→11）（现返回 15 —— 五 被并入整数位）',
+  ),
+];

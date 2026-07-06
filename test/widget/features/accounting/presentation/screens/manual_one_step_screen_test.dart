@@ -1480,4 +1480,233 @@ void main() {
       },
     );
   });
+
+  // ── 260706-tm6 (voice-consolidation P0-5): keypad mirror non-happy path ────
+  //
+  // Additive-only group: characterizes the onPttCommitted host mirror
+  // (AmountDisplay / _amount / keypad controller) for the non-happy paths.
+  // Driven through the real PTT fill via the existing fake speech emitFinal
+  // harness — no private-field poking.
+
+  group('keypad mirror non-happy path (quick 260706-tm6)', () {
+    final micBarFinder = find.byKey(const ValueKey('voice-record-bar'));
+
+    Widget pumpMirror({
+      required _CapturingSpeechService speech,
+      required _FakeParseVoiceInputUseCase parse,
+    }) {
+      return createLocalizedWidget(
+        ManualOneStepScreen(
+          bookId: 'book-1',
+          initialCategory: _l2Category,
+          initialParentCategory: _l1Category,
+          entrySource: EntrySource.manual,
+          speechService: speech,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            FakeCategoryRepository(_fakeCategories),
+          ),
+          createTransactionUseCaseProvider.overrideWithValue(mockCreateUseCase),
+          categoryServiceProvider.overrideWithValue(mockCategoryService),
+          parseVoiceInputUseCaseProvider.overrideWithValue(parse),
+          voiceLocaleIdProvider.overrideWith((ref) async => 'ja-JP'),
+          merchantCategoryLearningServiceProvider.overrideWithValue(
+            mockLearningService,
+          ),
+        ],
+      );
+    }
+
+    void tallView(WidgetTester tester) {
+      tester.view.physicalSize = const Size(390, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+    }
+
+    String displayedAmount(WidgetTester tester) =>
+        tester.widget<AmountDisplay>(find.byType(AmountDisplay)).amount;
+
+    Future<void> tapDigit(WidgetTester tester, String digit) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SmartKeyboard),
+          matching: find.text(digit),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets(
+      '(a) amount-less final keeps the keypad amount (filled==0 branch)',
+      (tester) async {
+        tallView(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {
+          '午饭': VoiceParseResult(rawText: '午饭', merchantName: '午饭'),
+        });
+
+        await tester.pumpWidget(pumpMirror(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        // Keypad-typed pre-speech amount.
+        await tapDigit(tester, '2');
+        await tapDigit(tester, '5');
+        await tapDigit(tester, '0');
+        expect(displayedAmount(tester), '250');
+
+        // Speak an amount-less utterance — merchant fills, amount must not.
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        speech.emitFinal('午饭');
+        await tester.pump();
+        await tester.pump();
+
+        final merchantField = tester.widget<TextField>(
+          find.byKey(const ValueKey('merchant-textfield')),
+        );
+        expect(merchantField.controller?.text, '午饭',
+            reason: 'the fill ran (merchant landed in the form)');
+        expect(displayedAmount(tester), '250',
+            reason: 'onPttCommitted filled==0 branch must not touch the '
+                'controller/_amount mirror');
+      },
+    );
+
+    testWidgets(
+      '(b) a second-session fill fully REPLACES the mirror (no concat '
+      'residue: 1200, never 5001200)',
+      (tester) async {
+        tallView(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {
+          '500円': VoiceParseResult(rawText: '500円', amount: 500),
+          '1200円': VoiceParseResult(rawText: '1200円', amount: 1200),
+        });
+
+        await tester.pumpWidget(pumpMirror(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        // Session 1: fill 500.
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        speech.emitFinal('500円');
+        await tester.pump();
+        await tester.pump();
+        expect(displayedAmount(tester), '500');
+
+        // Exit the panel (content kept), then open a FRESH session.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.listeningTitle));
+        await tester.pumpAndSettle();
+
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        speech.emitFinal('1200円');
+        await tester.pump();
+        await tester.pump();
+
+        expect(displayedAmount(tester), '1200',
+            reason: 'the second fill clears the controller before replaying '
+                'digits — no 5001200 concat residue');
+      },
+    );
+
+    testWidgets(
+      '(c) 重置 after a fill restores the pre-speech keypad amount AND the '
+      'controller stays consistent (typing continues from it)',
+      (tester) async {
+        tallView(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {
+          '500円': VoiceParseResult(rawText: '500円', amount: 500),
+        });
+
+        await tester.pumpWidget(pumpMirror(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        // Keypad-typed pre-speech amount 300 → snapshot captures it on tap.
+        await tapDigit(tester, '3');
+        await tapDigit(tester, '0');
+        await tapDigit(tester, '0');
+        expect(displayedAmount(tester), '300');
+
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        speech.emitFinal('500円');
+        await tester.pump();
+        await tester.pump();
+        expect(displayedAmount(tester), '500',
+            reason: 'precondition: the voice fill mirrored 500');
+
+        // One-shot recognizer self-terminates → the reset square is live (R7).
+        speech.startedLocaleId = null;
+        speech.emitStatus('done');
+        await tester.pump();
+        await tester.pump();
+
+        await tester.tap(find.byKey(const ValueKey('voice-square-reset')));
+        await tester.pump();
+        await tester.pump();
+
+        expect(displayedAmount(tester), '300',
+            reason: '重置 rolls the AmountDisplay back to the snapshot');
+
+        // Exit the (re-armed) panel, then type a digit: the controller must
+        // carry "300" — proving display and controller restored in lockstep.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.listeningTitle));
+        await tester.pumpAndSettle();
+        await tapDigit(tester, '1');
+
+        expect(displayedAmount(tester), '3001',
+            reason: 'typing continues from the RESTORED controller text '
+                '(3001), not from the stale voice fill (5001)');
+      },
+    );
+
+    testWidgets(
+      '(d) exiting the panel WITHOUT reset keeps the fill (snapshot-discard '
+      'semantics) and typing continues from it',
+      (tester) async {
+        tallView(tester);
+        final speech = _CapturingSpeechService();
+        final parse = _FakeParseVoiceInputUseCase(const {
+          '500円': VoiceParseResult(rawText: '500円', amount: 500),
+        });
+
+        await tester.pumpWidget(pumpMirror(speech: speech, parse: parse));
+        await tester.pumpAndSettle();
+
+        await tester.tap(micBarFinder);
+        await tester.pump();
+        await tester.pump();
+        speech.emitFinal('500円');
+        await tester.pump();
+        await tester.pump();
+        expect(displayedAmount(tester), '500');
+
+        // Tap the panel body to exit — the snapshot is discarded, not applied.
+        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
+        await tester.tap(find.text(panelL10n.listeningTitle));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(VoiceRecordPanel), findsNothing);
+        expect(find.byType(SmartKeyboard), findsOneWidget);
+        expect(displayedAmount(tester), '500',
+            reason: 'exit-without-reset keeps the voice fill');
+
+        // Keypad edits continue from the fill (controller mirrored 500).
+        await tapDigit(tester, '1');
+        expect(displayedAmount(tester), '5001',
+            reason: 'the controller carries the fill, so an edit appends');
+      },
+    );
+  });
 }

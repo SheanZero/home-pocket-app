@@ -168,7 +168,13 @@ abstract class NumeralStateMachine {
           digit = _mergePositionalDigit(digit, value);
           sawAny = true;
         case Unit(:final power) when power == 10000:
-          total += (section + (digit == 0 ? 1 : digit)) * 10000;
+          // 260706-tm6 (voice-consolidation P0-4): the implicit-1 fallback on a
+          // 万-flush only applies to a BARE 万 (nothing accumulated at all).
+          // With a non-empty section and no pending digit (十万/百万/じゅうまん),
+          // the correct addend is 0 — the old `digit == 0 ? 1 : digit` misfired
+          // to (10+1)*10000 = 110000 for 十万. Bare まん/万 (section==0,
+          // digit==0) keeps its implicit-1 → 10000.
+          total += (section + (section == 0 && digit == 0 ? 1 : digit)) * 10000;
           section = 0;
           digit = 0;
           sawAny = true;

@@ -17,6 +17,16 @@ class SpeechRecognitionService {
   final stt.SpeechToText _speech;
   bool _isInitialized = false;
 
+  /// voice-consolidation P0-6 / offline Tier 0 (quick 260706-tm6): latched
+  /// true when an on-device listen attempt failed and the session degraded to
+  /// default (network-permitted) recognition. Scoped to this service instance
+  /// — a fresh service (new session) retries on-device first.
+  bool _onDeviceFallbackActive = false;
+
+  /// Exposed for unit testing only. Do not read in production code.
+  @visibleForTesting
+  bool get onDeviceFallbackActive => _onDeviceFallbackActive;
+
   /// Captures the last [startListening] arguments so [restartListen] can
   /// replay them without the caller having to remember 5 params.
   ///
@@ -70,7 +80,55 @@ class SpeechRecognitionService {
 
     if (!_isInitialized) return;
 
-    await _speech.listen(
+    // voice-consolidation P0-6 / offline Tier 0: prefer on-device recognition
+    // unless this session already degraded. Single listen site — restartListen
+    // replays through here, so the fallback needs no second implementation.
+    final wantOnDevice =
+        VoiceTuning.preferOnDeviceRecognition && !_onDeviceFallbackActive;
+    try {
+      await _listen(
+        onResult: onResult,
+        onSoundLevel: onSoundLevel,
+        localeId: localeId,
+        listenFor: listenFor,
+        pauseFor: pauseFor,
+        onDevice: wantOnDevice,
+      );
+    } on Exception {
+      // Only an on-device attempt is retried (once, same args, degraded).
+      // A failure on the already-degraded path propagates unchanged — no loop.
+      if (!wantOnDevice) rethrow;
+      _onDeviceFallbackActive = true;
+      if (kDebugMode) {
+        // Degrade event only — never transcript content.
+        debugPrint(
+          'SpeechRecognitionService: on-device recognition unavailable, '
+          'session degraded to default recognition',
+        );
+      }
+      await _listen(
+        onResult: onResult,
+        onSoundLevel: onSoundLevel,
+        localeId: localeId,
+        listenFor: listenFor,
+        pauseFor: pauseFor,
+        onDevice: false,
+      );
+    }
+  }
+
+  /// Single plugin-listen call site shared by the on-device attempt and the
+  /// degraded retry. All non-onDevice options are byte-identical to the
+  /// pre-P0-6 configuration.
+  Future<void> _listen({
+    required void Function(SpeechRecognitionResult result) onResult,
+    required void Function(double normalizedLevel) onSoundLevel,
+    required String localeId,
+    required Duration listenFor,
+    required Duration pauseFor,
+    required bool onDevice,
+  }) {
+    return _speech.listen(
       onResult: onResult,
       localeId: localeId,
       listenFor: listenFor,
@@ -83,6 +141,7 @@ class SpeechRecognitionService {
         autoPunctuation: true,
         cancelOnError: false,
         partialResults: true,
+        onDevice: onDevice,
       ),
     );
   }
