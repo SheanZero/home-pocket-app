@@ -1609,4 +1609,147 @@ void main() {
       expect(host.pttIsRecording, isFalse);
     },
   );
+
+  // ── quick-260706-kzr: magnitude-anchored merged-vs-parsed arbitration ──────
+  //
+  // Each scenario drives the REAL merger: the first final seeds its buffer,
+  // pumping past the 2.5s window commits it into _mergedAmount, then a second
+  // final delivers the parse result whose rawText may carry a magnitude
+  // anchor (千/万). The fill must obey: merged priority stands UNLESS the
+  // anchor pins a digit count that merged violates and parsed satisfies.
+
+  testWidgets(
+    '260706-kzr: merged 53102 loses to parsed 5312 when rawText anchors '
+    '4 digits (concat-exception regression pin)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '53102円': const VoiceParseResult(rawText: '53102円', amount: 53102),
+        '五千三百十二円': const VoiceParseResult(
+          rawText: '五千三百十二円',
+          amount: 5312,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitFinal('53102円');
+      await tester.pumpAndSettle();
+      // Fire the merger's 2.5s window → commits 53102 into _mergedAmount.
+      await tester.pump(const Duration(seconds: 3));
+
+      speech.emitFinal('五千三百十二円');
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 5312);
+    },
+  );
+
+  testWidgets(
+    '260706-kzr: merged 35016 loses to parsed 3516 via the magnitude branch '
+    'ONLY (concat detector cannot see this shape)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '35016円': const VoiceParseResult(rawText: '35016円', amount: 35016),
+        '三千五百十六円': const VoiceParseResult(
+          rawText: '三千五百十六円',
+          amount: 3516,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitFinal('35016円');
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 3));
+
+      speech.emitFinal('三千五百十六円');
+      await tester.pumpAndSettle();
+
+      // detectConcatRepairCandidate('35016') is null (no usable trailing-zero
+      // head), so only the 千-anchor in rawText (expected 4 digits) can flip
+      // the 5-digit merged amount to the compliant parse amount.
+      expect(host.pttFormState!.currentAmount, 3516);
+    },
+  );
+
+  testWidgets(
+    '260706-kzr: anchor-free rawText keeps merged priority (8000 beats 3500)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '8000円': const VoiceParseResult(rawText: '8000円', amount: 8000),
+        '3500円': const VoiceParseResult(rawText: '3500円', amount: 3500),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitFinal('8000円');
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 3));
+
+      speech.emitFinal('3500円');
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 8000);
+    },
+  );
+
+  testWidgets(
+    '260706-kzr: merged wins when BOTH readings satisfy the anchored digit '
+    'count (flip only on merged-violating + parsed-compliant)',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '8000円': const VoiceParseResult(rawText: '8000円', amount: 8000),
+        '三千五百円': const VoiceParseResult(rawText: '三千五百円', amount: 3500),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitFinal('8000円');
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 3));
+
+      speech.emitFinal('三千五百円');
+      await tester.pumpAndSettle();
+
+      // 三千五百円 anchors 4 digits; merged 8000 is ALSO 4 digits → compliant
+      // → the multi-chunk merged-priority semantic stands.
+      expect(host.pttFormState!.currentAmount, 8000);
+    },
+  );
 }

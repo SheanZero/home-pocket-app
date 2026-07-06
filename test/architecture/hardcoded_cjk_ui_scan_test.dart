@@ -12,6 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 const approvedWhitelist = {
   'lib/application/voice/voice_text_parser.dart',
   'lib/application/voice/voice_satisfaction_estimator.dart',
+  // Quick 260706-kzr — magnitude-word digit-count guard. CJK literals are the
+  // NLP lexicon (magnitude tokens, digit char classes, kana numeral keys),
+  // not UI text — same rationale as voice_text_parser.dart above.
+  'lib/application/voice/amount_magnitude_guard.dart',
   'lib/infrastructure/i18n/formatters/date_formatter.dart',
   'lib/infrastructure/i18n/formatters/number_formatter.dart',
   'lib/infrastructure/category/category_locale_service.dart',

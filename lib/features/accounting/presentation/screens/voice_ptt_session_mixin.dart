@@ -35,6 +35,7 @@ import '../../../../application/voice/repository_providers.dart'
         appSpeechRecognitionServiceProvider,
         chineseNumeralStateMachineProvider,
         japaneseNumeralStateMachineProvider;
+import '../../../../application/voice/amount_magnitude_guard.dart';
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../../application/voice/voice_chunk_merger.dart';
 import '../../../../application/voice/voice_text_parser.dart';
@@ -391,6 +392,27 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         VoiceTextParser.detectConcatRepairCandidate('$mergedAmount') ==
             parsedAmount) {
       amount = parsedAmount;
+    }
+    // 260706-kzr: magnitude generalization of the concat exception above.
+    // When the transcript itself pins an expected digit count (a 千/万/
+    // thousand anchor in rawText), a merged amount that VIOLATES it loses to
+    // a parse amount that SATISFIES it — the merger has no alternates or
+    // magnitude awareness to repair with. Every other divergence keeps the
+    // merged-priority semantic untouched (both-compliant, both-violating,
+    // and anchor-free utterances).
+    if (amount != parsedAmount &&
+        parsedAmount != null &&
+        mergedAmount != null &&
+        mergedAmount != parsedAmount) {
+      final expected = expectedDigitCountForAmount(
+        data.rawText,
+        localeId: pttVoiceLocaleId,
+      );
+      if (expected != null &&
+          '$mergedAmount'.length != expected &&
+          '$parsedAmount'.length == expected) {
+        amount = parsedAmount;
+      }
     }
     if (!mounted) return;
     final state = pttFormState;

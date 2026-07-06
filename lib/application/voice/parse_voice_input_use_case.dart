@@ -6,6 +6,8 @@ import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
 import '../../shared/utils/result.dart';
+import 'amount_magnitude_guard.dart';
+import 'english_number_words.dart';
 import 'recognition/category_recognizer.dart';
 import 'recognition/merchant_recognizer.dart';
 import 'voice_text_parser.dart';
@@ -111,7 +113,43 @@ class ParseVoiceInputUseCase {
         }
       }
 
-      // 1b. Detect spoken currency (Phase 42, VOICE-CUR-01/02/03). Runs the
+      // 1b. 260706-kzr: magnitude-word ↔ digit-count arbitration. A spoken
+      // magnitude word (千/万/thousand…) pins the amount's expected digit
+      // count (multiplier digits + power) via expectedDigitCountForAmount.
+      // When the primary carries no anchor (ITN already poisoned it into a
+      // pure digit run), the anchor is searched in the alternate transcripts.
+      // If the resolved amount violates the expectation, adopt — in order —
+      // the 1a repair candidate, a state-machine re-read of the primary, or
+      // an alternate-transcript reading, but ONLY when the candidate's own
+      // digit count matches (all candidates come from real parses — never
+      // invented). On adoption the ORIGINAL reading swaps into
+      // [amountRepairCandidate], so the form's existing 1A notice becomes a
+      // one-tap UNDO back to the raw reading (zero new ARB keys / fields).
+      // The 1a confirmedByAlternate silent adoption above is UNTOUCHED — a
+      // 1a-repaired amount usually already satisfies the expectation, making
+      // this block a natural no-op. Anchor-free utterances yield a null
+      // expectation and stay byte-identical to the 260703 behavior.
+      final expectedDigits =
+          expectedDigitCountForAmount(recognizedText, localeId: localeId) ??
+          _firstAlternateExpectation(alternateTexts, localeId);
+      if (expectedDigits != null &&
+          resolvedAmount != null &&
+          resolvedAmount.toString().length != expectedDigits) {
+        final adopted = _adoptByMagnitude(
+          expectedDigits: expectedDigits,
+          repairCandidate: amountRepairCandidate,
+          recognizedText: recognizedText,
+          alternateTexts: alternateTexts,
+          localeId: localeId,
+        );
+        if (adopted != null && adopted != resolvedAmount) {
+          final original = resolvedAmount;
+          resolvedAmount = adopted;
+          amountRepairCandidate = original;
+        }
+      }
+
+      // 1c. Detect spoken currency (Phase 42, VOICE-CUR-01/02/03). Runs the
       // longest-first token scan SEPARATELY from the amount path so the
       // integer amount is never polluted (T-42-07). Bare 元/円 are native
       // (null) in every locale — D-08's zh→CNY branch was superseded 260703.
@@ -231,6 +269,59 @@ class ParseVoiceInputUseCase {
     } catch (e) {
       return Result.error('Voice parse failed: $e');
     }
+  }
+
+  /// 260706-kzr: first non-null magnitude expectation among the alternate
+  /// transcripts, in recognizer rank order. Consulted only when the primary
+  /// transcript carries no magnitude anchor (ITN poisoned it into digits).
+  int? _firstAlternateExpectation(
+    List<String> alternateTexts,
+    String? localeId,
+  ) {
+    for (final alt in alternateTexts) {
+      final expected = expectedDigitCountForAmount(alt, localeId: localeId);
+      if (expected != null) return expected;
+    }
+    return null;
+  }
+
+  /// 260706-kzr: candidate adoption ladder for a digit-count violation.
+  /// Sources in order: ① the 1a concat repair candidate, ② a state-machine
+  /// (or en number-word) re-read of the primary transcript, ③ each alternate
+  /// transcript through the full parser routing. A source is adopted ONLY
+  /// when its own digit count matches [expectedDigits] — precision over
+  /// recall; no match keeps the current value and any riding candidate.
+  int? _adoptByMagnitude({
+    required int expectedDigits,
+    required int? repairCandidate,
+    required String recognizedText,
+    required List<String> alternateTexts,
+    required String? localeId,
+  }) {
+    bool fits(int? value) =>
+        value != null && value.toString().length == expectedDigits;
+    if (fits(repairCandidate)) return repairCandidate;
+    final reread = _magnitudeReread(recognizedText, localeId);
+    if (fits(reread)) return reread;
+    for (final alt in alternateTexts) {
+      final fromAlternate = _textParser.extractAmount(alt, localeId: localeId);
+      if (fits(fromAlternate)) return fromAlternate;
+    }
+    return null;
+  }
+
+  /// 260706-kzr: source-② re-read of the primary transcript. Locale routing
+  /// mirrors [VoiceTextParser]: en stays fully isolated on the bounded
+  /// English number-word parser; ja/zh use their state machine; null falls
+  /// back ja-then-zh.
+  int? _magnitudeReread(String text, String? localeId) {
+    final lower = (localeId ?? '').toLowerCase();
+    if (lower.startsWith('en')) {
+      return parseEnglishNumberWords(text, moneyContext: true);
+    }
+    if (lower.startsWith('ja')) return _jaMachine.parse(text);
+    if (lower.startsWith('zh')) return _zhMachine.parse(text);
+    return _jaMachine.parse(text) ?? _zhMachine.parse(text);
   }
 
   /// Resolves the spoken-currency ISO 4217 code for [text] (Phase 42).
