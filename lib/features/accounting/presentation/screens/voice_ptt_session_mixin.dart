@@ -603,8 +603,17 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// notListening/done — that would race a second concurrent startListening and
   /// hang the plugin (post-reset 「假死」). The `await cancel()` completes before
   /// the fresh `await startListening()`, and the guard is cleared in `finally`.
+  ///
+  /// quick-260706-kax (VRESET-01/02): this ALSO revives a session killed by the
+  /// [onError] fatal branch — that branch flips `_continuousActive=false` while
+  /// the host panel stays open (停止聆听 + red reset square), so gating entry on
+  /// `_continuousActive` made every reset tap a silent no-op. The entry guard is
+  /// now the REENTRANCY fence (`_restarting`): a second tap inside the
+  /// cancel→start window early-returns instead of double-starting the plugin,
+  /// and `_continuousActive` is unconditionally restored in step 2 — the reset
+  /// button always honors 重新录入 regardless of how the previous session died.
   Future<void> resetPttSessionAndRestart() async {
-    if (!_continuousActive || !mounted) return;
+    if (_restarting || !mounted) return;
     _restarting = true;
     _parseDebounce?.cancel();
     try {
@@ -613,7 +622,11 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       if (!mounted) return;
 
       // 2. Clear app-side buffers + rebuild the merger from the baseline.
+      //    `_continuousActive = true` is the recovery semantic: it MUST be set
+      //    before startListening so the recovered session's [_onResult]
+      //    continuous-branch auto-fill works (VRESET-01).
       onPttSessionChanged(() {
+        _continuousActive = true;
         _displayCurrency = 'JPY';
         _partialText = '';
         _finalText = '';
@@ -625,6 +638,27 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         _listenStatus = PttListenStatus.listening;
       });
       _rebuildAmountMerger();
+
+      // Belt-and-braces: after a fatal error the platform may have flipped
+      // availability off, and the async [_recoverBarAfterFatalError] may not
+      // have completed yet — re-initialize (idempotent) before restarting. On
+      // failure, roll the state back so the panel honestly shows stopped; the
+      // `finally` still clears `_restarting`, so a later tap can retry.
+      if (!pttSpeechService.isAvailable) {
+        final available = await pttSpeechService.initialize(
+          onStatus: onStatus,
+          onError: onError,
+        );
+        if (!mounted) return;
+        if (!available) {
+          onPttSessionChanged(() {
+            _continuousActive = false;
+            _isRecording = false;
+            _listenStatus = PttListenStatus.stopped;
+          });
+          return;
+        }
+      }
 
       // 3. Fresh listening session so the user can re-speak immediately.
       await pttSpeechService.startListening(
