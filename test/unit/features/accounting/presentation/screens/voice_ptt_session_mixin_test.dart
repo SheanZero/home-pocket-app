@@ -1752,4 +1752,110 @@ void main() {
       expect(host.pttFormState!.currentAmount, 8000);
     },
   );
+
+  // ── quick-260706-saz (MOD-009 P0-5): combined arbitration coverage ─────────
+  //
+  // The two arbitration sites compose: the USE CASE has already performed the
+  // kzr candidate swap (amount=repaired, amountRepairCandidate=original), AND
+  // the merger's cross-final cache is still poisoned with the original digit
+  // run. The display arbitration must land the repaired value in the form,
+  // and the 1A snackbar must offer a one-tap UNDO back to the original
+  // (poisoned) reading — both dimensions asserted per vector.
+
+  testWidgets(
+    '260706-saz P0-5 vector A (53102/5312): use-case candidate swap + '
+    'poisoned merger → form shows 5312; 1A snackbar undoes to 53102',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '53102円': const VoiceParseResult(rawText: '53102円', amount: 53102),
+        // Models the use case AFTER its kzr swap: the repaired 5312 is the
+        // amount, the original poisoned 53102 rides as the undo candidate.
+        '五千三百十二円': const VoiceParseResult(
+          rawText: '五千三百十二円',
+          amount: 5312,
+          amountRepairCandidate: 53102,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitFinal('53102円');
+      await tester.pumpAndSettle();
+      // Fire the merger's 2.5s window → commits 53102 into _mergedAmount.
+      await tester.pump(const Duration(seconds: 3));
+
+      speech.emitFinal('五千三百十二円');
+      await tester.pumpAndSettle();
+
+      // Display arbitration: the poisoned merged 53102 loses to the
+      // use-case-repaired 5312.
+      expect(host.pttFormState!.currentAmount, 5312);
+
+      // 1A undo affordance: the original reading is one tap away.
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byType(SnackBarAction), findsOneWidget);
+
+      await tester.tap(find.byType(SnackBarAction));
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 53102);
+      expect(host.pttLastFilledAmount, 53102);
+    },
+  );
+
+  testWidgets(
+    '260706-saz P0-5 vector B (35016/3516): magnitude-branch composition — '
+    'form shows 3516; 1A snackbar undoes to 35016',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        '35016円': const VoiceParseResult(rawText: '35016円', amount: 35016),
+        // detectConcatRepairCandidate('35016') is null, so the display
+        // arbitration can only flip via the 千-anchor magnitude branch
+        // (rawText pins 4 digits; merged 35016 violates, parsed 3516 fits).
+        '三千五百十六円': const VoiceParseResult(
+          rawText: '三千五百十六円',
+          amount: 3516,
+          amountRepairCandidate: 35016,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      host.startPttTapSession();
+      await tester.pump();
+
+      speech.emitFinal('35016円');
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 3));
+
+      speech.emitFinal('三千五百十六円');
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 3516);
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byType(SnackBarAction), findsOneWidget);
+
+      await tester.tap(find.byType(SnackBarAction));
+      await tester.pumpAndSettle();
+
+      expect(host.pttFormState!.currentAmount, 35016);
+      expect(host.pttLastFilledAmount, 35016);
+    },
+  );
 }

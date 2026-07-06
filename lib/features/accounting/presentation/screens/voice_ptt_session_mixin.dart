@@ -35,12 +35,12 @@ import '../../../../application/voice/repository_providers.dart'
         appSpeechRecognitionServiceProvider,
         chineseNumeralStateMachineProvider,
         japaneseNumeralStateMachineProvider;
-import '../../../../application/voice/amount_magnitude_guard.dart';
+import '../../../../application/voice/amount_arbiter.dart';
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../../application/voice/voice_chunk_merger.dart';
-import '../../../../application/voice/voice_text_parser.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/constants/voice_tuning.dart';
 import '../../../../shared/utils/currency_conversion.dart'
     show convertToJpy, subunitToUnitFor;
 import '../../domain/models/category.dart';
@@ -67,7 +67,8 @@ enum PttListenStatus { listening, processing, stopped }
 /// "please double-check" notice. Voice is the only entry path that can be
 /// poisoned by recognizer ITN artifacts (BUG-1: 「两千五百四十六」 → 250046),
 /// so the guardrail lives in the voice session, not in the shared form.
-const int kVoiceLargeAmountNoticeThreshold = 1000000;
+const int kVoiceLargeAmountNoticeThreshold =
+    VoiceTuning.largeAmountNoticeThresholdJpy;
 
 /// Reusable hold-to-record session: speech lifecycle + transcript + chunk merger
 /// + parse + batch-fill + foreign triple + satisfaction, host-agnostic.
@@ -151,6 +152,11 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   VoiceChunkMerger? _amountMerger;
   int? _mergedAmount;
   DateTime? _lastSampleTime;
+
+  /// 260706-saz (voice-consolidation P0-1): single arbitration point for merged-vs-parsed
+  /// display conflicts and the merger's commit-time amount extraction. The
+  /// mixin no longer carries amount-arbitration business logic (S3 fix).
+  late final AmountArbiter _amountArbiter = AmountArbiter();
 
   /// The amount last pushed into the form by a commit batch-fill (JPY units —
   /// already converted for a foreign utterance). Hosts mirror this into their
@@ -267,14 +273,21 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       onResult: _onResult,
       onSoundLevel: _onSoundLevel,
       localeId: localeId,
-      listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds: 3),
+      listenFor: VoiceTuning.listenFor,
+      pauseFor: VoiceTuning.pauseFor,
     );
   }
 
   // ── Commit (ported verbatim from _stopRecordingAndCommit) ───────────────────
 
-  Future<void> stopPttSessionAndCommit() async {
+  Future<void> stopPttSessionAndCommit() => _stopAndFill(endContinuous: false);
+
+  /// 260706-saz (voice-consolidation P0-3): the shared stop→fill sequence behind
+  /// [stopPttSessionAndCommit] and [exitPttTapSession] — the two public
+  /// methods were byte-identical except for the exit path's leading
+  /// `_continuousActive = false` ([endContinuous]).
+  Future<void> _stopAndFill({required bool endContinuous}) async {
+    if (endContinuous) _continuousActive = false;
     // Pattern 7: merger.stop() bypasses the 2.5s window. MUST run BEFORE
     // pttSpeechService.stop() to preserve the original ordering invariant.
     _amountMerger?.stop();
@@ -378,42 +391,17 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       }
     }
 
-    var amount = _mergedAmount ?? data.amount ?? 0;
-    // 260703 BUG-1: when the merger's committed amount is exactly the
-    // ITN-concat poisoning of the parse amount (which the use case may have
-    // already repaired via an alternate transcript, 1D), the parse amount
-    // wins — the merger has no alternates to repair with. The merged amount
-    // keeps its priority for every other divergence (multi-chunk kanji).
-    final parsedAmount = data.amount;
-    final mergedAmount = _mergedAmount;
-    if (parsedAmount != null &&
-        mergedAmount != null &&
-        mergedAmount != parsedAmount &&
-        VoiceTextParser.detectConcatRepairCandidate('$mergedAmount') ==
-            parsedAmount) {
-      amount = parsedAmount;
-    }
-    // 260706-kzr: magnitude generalization of the concat exception above.
-    // When the transcript itself pins an expected digit count (a 千/万/
-    // thousand anchor in rawText), a merged amount that VIOLATES it loses to
-    // a parse amount that SATISFIES it — the merger has no alternates or
-    // magnitude awareness to repair with. Every other divergence keeps the
-    // merged-priority semantic untouched (both-compliant, both-violating,
-    // and anchor-free utterances).
-    if (amount != parsedAmount &&
-        parsedAmount != null &&
-        mergedAmount != null &&
-        mergedAmount != parsedAmount) {
-      final expected = expectedDigitCountForAmount(
-        data.rawText,
-        localeId: pttVoiceLocaleId,
-      );
-      if (expected != null &&
-          '$mergedAmount'.length != expected &&
-          '$parsedAmount'.length == expected) {
-        amount = parsedAmount;
-      }
-    }
+    // 260706-saz: the 260703 concat exception and 260706-kzr magnitude
+    // exception now live in [AmountArbiter.resolveDisplayAmount] (single
+    // arbitration point, voice-consolidation P0-1) — semantics migrated verbatim.
+    final amount =
+        _amountArbiter.resolveDisplayAmount(
+          parsed: data.amount,
+          merged: _mergedAmount,
+          rawText: data.rawText,
+          localeId: pttVoiceLocaleId,
+        ) ??
+        0;
     if (!mounted) return;
     final state = pttFormState;
     if (state == null) return;
@@ -595,19 +583,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// Exit the tap session: stop the recognizer, flush the merger, fill the form
   /// one last time from the latest transcript (D-2 fill-and-stay), and end the
   /// session. Filled content is RETAINED — no discard, no auto-save.
-  Future<void> exitPttTapSession() async {
-    _continuousActive = false;
-    _amountMerger?.stop();
-    await pttSpeechService.stop();
-    if (!mounted) return;
-    onPttSessionChanged(() {
-      _isRecording = false;
-      _soundLevel = 0.0;
-      _listenStatus = PttListenStatus.stopped;
-    });
-    final text = _finalText.isNotEmpty ? _finalText : _partialText;
-    await _fillFormFromText(text, data: _cachedParseFor(text));
-  }
+  Future<void> exitPttTapSession() => _stopAndFill(endContinuous: true);
 
   /// 260622-nhs R4 (BUG A + BUG B): the 「重置·恢复账目」 reset. Unlike the weak
   /// R3 `resetPttSessionState() + restartPttListening()` pair (which left the
@@ -649,13 +625,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       //    continuous-branch auto-fill works (VRESET-01).
       onPttSessionChanged(() {
         _continuousActive = true;
-        _displayCurrency = 'JPY';
-        _partialText = '';
-        _finalText = '';
-        _parseResult = null;
-        _mergedAmount = null;
-        _soundLevel = 0.0;
-        _lastFilledAmount = 0;
+        _clearSessionBuffers();
         _parsing = false;
         _listenStatus = PttListenStatus.listening;
       });
@@ -687,8 +657,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         onResult: _onResult,
         onSoundLevel: _onSoundLevel,
         localeId: pttVoiceLocaleId,
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
+        listenFor: VoiceTuning.listenFor,
+        pauseFor: VoiceTuning.pauseFor,
       );
       if (mounted) {
         onPttSessionChanged(() {
@@ -710,15 +680,15 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     final parser = pttVoiceLocaleId.startsWith('ja')
         ? ref.read(japaneseNumeralStateMachineProvider)
         : ref.read(chineseNumeralStateMachineProvider);
-    // 260703 BUG-1 (1E): commits go through the full parser routing so a
-    // comma-grouped final (「2,546元」) keeps its leading groups — the bare
-    // state machine would drop the comma and read only the tail (546).
-    final textParser = VoiceTextParser();
+    // 260703 BUG-1 (1E): commits go through the full parser routing (via
+    // [AmountArbiter.extractAmount]) so a comma-grouped final (「2,546元」)
+    // keeps its leading groups — the bare state machine would drop the comma
+    // and read only the tail (546).
     _amountMerger = VoiceChunkMerger(
       parser: parser,
       speechService: speechService,
       amountExtractor: (text) =>
-          textParser.extractAmount(text, localeId: pttVoiceLocaleId),
+          _amountArbiter.extractAmount(text, localeId: pttVoiceLocaleId),
       onAmountResolved: (amount) {
         if (!mounted) return;
         onPttSessionChanged(() => _mergedAmount = amount);
@@ -904,7 +874,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     if (!mounted) return;
     final now = DateTime.now();
     if (_lastSampleTime != null &&
-        now.difference(_lastSampleTime!).inMilliseconds < 100) {
+        now.difference(_lastSampleTime!).inMilliseconds <
+            VoiceTuning.soundLevelThrottle.inMilliseconds) {
       onPttSessionChanged(() => _soundLevel = level);
       return;
     }
@@ -923,7 +894,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       onPttSessionChanged(() => _partialText = result.recognizedWords);
 
       _parseDebounce?.cancel();
-      _parseDebounce = Timer(const Duration(milliseconds: 300), () {
+      _parseDebounce = Timer(VoiceTuning.partialParseDebounce, () {
         if (result.recognizedWords.isNotEmpty) {
           _parseVoiceInput(result.recognizedWords);
         }
@@ -1047,7 +1018,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     if (start == null || !_isRecording) return;
     final held = DateTime.now().difference(start);
     // D-03 misfire threshold: presses shorter than 300 ms are discarded.
-    if (held < const Duration(milliseconds: 300)) {
+    if (held < VoiceTuning.holdMisfireThreshold) {
       cancelPttSessionAndDiscard();
     } else {
       stopPttSessionAndCommit();
@@ -1062,14 +1033,21 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   /// Reset the session's transcript/parse buffers (continuous-entry reset).
   void resetPttSessionState() {
-    onPttSessionChanged(() {
-      _displayCurrency = 'JPY';
-      _partialText = '';
-      _finalText = '';
-      _parseResult = null;
-      _mergedAmount = null;
-      _soundLevel = 0.0;
-      _lastFilledAmount = 0;
-    });
+    onPttSessionChanged(_clearSessionBuffers);
+  }
+
+  /// 260706-saz (voice-consolidation P0-3): the seven session buffers shared by BOTH
+  /// reset paths ([resetPttSessionAndRestart] and [resetPttSessionState]).
+  /// Deliberately EXCLUDES `_continuousActive` / `_parsing` / `_listenStatus`
+  /// — those belong only to the restart path (VRESET-01 revival semantics);
+  /// callers wrap this in [onPttSessionChanged] themselves.
+  void _clearSessionBuffers() {
+    _displayCurrency = 'JPY';
+    _partialText = '';
+    _finalText = '';
+    _parseResult = null;
+    _mergedAmount = null;
+    _soundLevel = 0.0;
+    _lastFilledAmount = 0;
   }
 }

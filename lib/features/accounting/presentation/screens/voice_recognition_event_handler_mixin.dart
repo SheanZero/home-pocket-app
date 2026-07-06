@@ -11,6 +11,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../shared/constants/voice_tuning.dart';
 import '../widgets/voice_error_toast.dart';
 
 /// Phase 23 D-10: mixin that bundles the G-01 (onStatus) and G-02 (onError)
@@ -65,7 +66,8 @@ mixin VoiceRecognitionEventHandlerMixin<W extends StatefulWidget>
   /// during an active press is intra-session (recognizer self-restart) or
   /// terminal (user pause → commit). Declared here so Plan 05 can reference
   /// it without importing a separate constants file.
-  static const Duration intraSessionThreshold = Duration(milliseconds: 800);
+  static const Duration intraSessionThreshold =
+      VoiceTuning.intraSessionThreshold;
 
   // ── G-01: status callback ─────────────────────────────────────────────────
 

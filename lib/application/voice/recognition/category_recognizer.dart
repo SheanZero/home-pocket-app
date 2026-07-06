@@ -25,6 +25,7 @@ import '../../../features/voice/domain/models/voice_parse_result.dart';
 import '../../../features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import '../../../features/accounting/domain/repositories/category_repository.dart';
 import '../../../shared/constants/category_other_id_overrides.dart';
+import '../../../shared/constants/voice_tuning.dart';
 import '../../accounting/category_service.dart';
 
 // _ensureL2 override map lives in lib/shared/constants/category_other_id_overrides.dart per Phase 23 D-12 IN-05
@@ -39,7 +40,7 @@ import '../../accounting/category_service.dart';
 /// step 2 (today's behavior). At or above, it joins seeds in substring
 /// matching, so `坐新干线` learned-then-uttered-as-`坐新干线去东京` resolves
 /// without any dictionary edit.
-const int kLearnedPromotionThreshold = 3;
+const int kLearnedPromotionThreshold = VoiceTuning.learnedPromotionThreshold;
 
 /// Keyword-only voice category recognizer (DECOUP-01/DECOUP-02).
 ///

@@ -14,6 +14,8 @@
 /// bound the Arabic path uses — no unbounded amount can leak through.
 library;
 
+import '../../shared/constants/voice_tuning.dart';
+
 const Map<String, int> _units = {
   'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
   'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11, 'twelve': 12,
@@ -73,4 +75,6 @@ int? parseEnglishNumberWords(String text, {required bool moneyContext}) {
 }
 
 int? _clamp(int amount) =>
-    (amount > 0 && amount < 10000000) ? amount : null;
+    (amount > 0 && amount < VoiceTuning.amountUpperBoundExclusive)
+    ? amount
+    : null;
