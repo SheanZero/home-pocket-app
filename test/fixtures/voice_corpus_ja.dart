@@ -122,3 +122,57 @@ const List<VoiceCorpusCase> voiceCorpusJa = [
   (input: '1,234,567円', expected: 1234567, note: 'l0o Issue 1: million separator ja'),
   (input: '12，450円', expected: 12450, note: 'l0o Issue 1: full-width comma ja'),
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Quick task 260706-tm6 (voice-consolidation P0-4): Kanjize / NeMo-ja-derived
+// golden vectors, two-tier scheme. These lists are NEW and separate — they
+// never feed the voiceCorpusJa statistical bucket above, so the existing ≥95%
+// gate is not polluted by imported vectors. Asserted strictly (per-case) by
+// test/integration/voice/voice_corpus_ja_golden_test.dart.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Record type for a known-gap corpus case (260706-tm6). Intentionally
+/// redeclared here as `VoiceKnownGapCaseJa` to keep the ja fixture
+/// self-contained (siblings the zh `VoiceKnownGapCase`). [reason] documents
+/// why the vector is currently unparseable — the test file skips these via
+/// the `skip:` parameter with the reason attached.
+typedef VoiceKnownGapCaseJa = ({String input, int expected, String reason});
+
+/// Kanjize mixed-notation + NeMo-ja ITN positional vectors the current parser
+/// reads correctly — asserted strictly, one test() per entry. All 万-scale
+/// vectors sit inside the amountUpperBoundExclusive (10M) window.
+const List<VoiceCorpusCase> voiceCorpusJaGolden = [
+  // Kanjize mixed arabic+kanji notation
+  (input: '3千5百', expected: 3500, note: 'Kanjize: mixed arabic+kanji units'),
+  (input: '5百', expected: 500, note: 'Kanjize: single mixed unit'),
+  (input: '1万2千', expected: 12000, note: 'Kanjize: mixed 万-scale'),
+  (input: '千三百', expected: 1300, note: 'Kanjize: bare-千 implicit-1 + section'),
+  (input: '2万3千4百', expected: 23400, note: 'Kanjize: three-section mixed'),
+  // 万-scale boundary crossing (all < 10M upper bound)
+  (input: '十万', expected: 100000, note: 'Kanjize: 十→万 flush, no implicit-1'),
+  (input: '十五万', expected: 150000, note: 'Kanjize: 十位+digit 万 flush'),
+  (input: '百万', expected: 1000000, note: 'Kanjize: 百→万 flush, no implicit-1'),
+  // NeMo-ja ITN spoken positional boundary
+  (input: 'じゅうまん', expected: 100000, note: 'NeMo-ja: spoken 十万'),
+  (input: 'いちまんいっせん', expected: 11000, note: 'NeMo-ja: 万+千 spoken sections'),
+  (input: 'にじゅうまん円', expected: 200000, note: 'NeMo-ja: 二十万 + currency'),
+  (input: 'ひゃくまん', expected: 1000000, note: 'NeMo-ja: spoken 百万'),
+];
+
+/// Kanjize/NeMo-ja vectors the current parser cannot read — same colloquial
+/// trailing-digit scaling gap class as the zh 两千五 cluster (see
+/// voiceCorpusZhKnownGaps): the scaling heuristic would regress the anchored
+/// zero-omitted positional read (にせんにひゃくよん=2204).
+const List<VoiceKnownGapCaseJa> voiceCorpusJaKnownGaps = [
+  (
+    input: '一万五',
+    expected: 15000,
+    reason: '口语「整万+裸尾数」缩放语义缺失；与位值直读 anchor'
+        '（にせんにひゃくよん=2204）冲突，非浅修（现返回 10005）',
+  ),
+  (
+    input: '千五',
+    expected: 1500,
+    reason: '口语「整千+裸尾数」缩放语义缺失，同 一万五 gap 类（现返回 1005）',
+  ),
+];
