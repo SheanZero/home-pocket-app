@@ -37,7 +37,7 @@
 | 🔹 MOD-006 数据分析 | [MOD-006_Analytics.md](../02-module-specs/MOD-006_Analytics.md) | PRD_MVP_App.md | 5天 | ✅ 完成 |
 | 🔹 MOD-007 设置管理 | [MOD-007_Settings.md](../02-module-specs/MOD-007_Settings.md) | PRD_MVP_App.md | 6天 | ✅ 完成 |
 | 🔹 MOD-008 趣味功能 | [MOD-008_Gamification.md](../02-module-specs/MOD-008_Gamification.md) | PRD_Module_Gamification.md | 7天 | ✅ 完成 |
-| 🔹 MOD-009 语音记账 | [MOD-009_VoiceInput.md](../02-module-specs/MOD-009_VoiceInput.md) | — | 8天 | ✅ 完成 |
+| 🔹 MOD-009 语音记账 | [MOD-009_VoiceInput.md](../02-module-specs/MOD-009_VoiceInput.md) | — | 8天 | ✅ 完成（v2.0 as-built 现状架构+改进路线，2026-07-06） |
 
 ### 基础能力 PRD 文档（04-basic）
 
