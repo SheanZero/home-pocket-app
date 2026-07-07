@@ -34,6 +34,8 @@ import 'voice_locale_readiness_mixin.dart';
 import 'voice_ptt_session_mixin.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
+part 'manual_one_step_voice_wiring.dart';
+
 /// WR-01: returns true when a foreign rate-fetch's captured inputs no longer
 /// match the screen's current inputs — i.e. the user changed the currency,
 /// amount, or DATE while the rate fetch was in flight. The caller must then
@@ -161,31 +163,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     if (mounted) setState(apply);
   }
 
+  // voice-consolidation P1-7 (R2): body moved verbatim to
+  // [_mirrorPttFillIntoKeypad] in `manual_one_step_voice_wiring.dart`; the
+  // `@override` must stay in the class, so it delegates.
   @override
-  void onPttCommitted() {
-    if (!mounted) return;
-    // A PTT fill happened — the session mixin already pushed amount / category /
-    // merchant / date / satisfaction (+ foreign triple) into _formKey's state.
-    // Mirror the booked JPY amount into AmountDisplay's string + the keypad
-    // controller so an edit continues from the fill, and flip provenance to
-    // voice so the saved row stamps EntrySource.voice (T-nhs-03). Keep the
-    // keypad on the JPY native path: the form already carries the real foreign
-    // triple for the save, so the headline shows the booked JPY figure (mirrors
-    // the legacy voice screen, D-4) without re-driving _syncAmountToForm.
-    setState(() {
-      _lastFillWasVoice = true;
-      final filled = pttLastFilledAmount;
-      if (filled > 0) {
-        while (_controller.text.isNotEmpty) {
-          _controller.onDelete();
-        }
-        for (final ch in filled.toString().split('')) {
-          _controller.onDigit(ch);
-        }
-        _amount = _controller.text;
-      }
-    });
-  }
+  void onPttCommitted() => _mirrorPttFillIntoKeypad();
 
   @override
   void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
@@ -291,63 +273,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     if (state == AppLifecycleState.paused && pttIsRecording) {
       cancelPttSessionAndDiscard();
     }
-  }
-
-  // ── 260622-nhs R2: tap-modal voice-record lifecycle ───────────────────────
-
-  /// Tap 「语音记录」: snapshot the form (D-2 reset-restore), then start a
-  /// continuous auto-fill listening session and raise the modal.
-  void _onVoiceRecordTap() {
-    if (!pttServiceInitialized || !isLocaleReady || _voiceModalOpen) return;
-    final form = _formKey.currentState;
-    if (form != null) {
-      _voiceSnapshot = ManualEntrySnapshot.capture(
-        amountText: _amount,
-        currency: _currency,
-        manualForeignRate: _manualForeignRate,
-        lastFillWasVoice: _lastFillWasVoice,
-        form: form,
-      );
-    }
-    // 260622-nhs R6 (BUG 1): open the modal (panel visibility) independent of
-    // the recognizer lifecycle, then start the one-shot listening session.
-    setState(() => _voiceModalOpen = true);
-    startPttTapSession();
-  }
-
-  /// Tap the modal/scrim: stop listening + final fill + close, keep content.
-  void _onVoiceModalExit() {
-    exitPttTapSession();
-    setState(() => _voiceModalOpen = false);
-    _voiceSnapshot = null;
-  }
-
-  /// 「重置·恢复账目」: restore the form to the pre-speech snapshot, clear the
-  /// transcript/merger/parse buffers, and KEEP listening (the user can re-speak).
-  void _onVoiceReset() {
-    final snapshot = _voiceSnapshot;
-    final form = _formKey.currentState;
-    if (snapshot != null && form != null) {
-      snapshot.restoreForm(form);
-      // Phase 52 (RECUX-03 / D-05): a 「重置·恢复账目」 reset abandons the
-      // current draft — discard any pending category correction with NO write
-      // (restoreForm clears it only when the snapshot had a category).
-      form.discardPendingCorrection();
-      setState(() {
-        _currency = snapshot.currency;
-        _amount = snapshot.restoreHostAmount(_controller);
-        _manualForeignRate = snapshot.manualForeignRate;
-        // Revert provenance: if the snapshot was a pure-manual slate, drop the
-        // voice flag so a later keypad save stays manual (T-nhs-03).
-        _lastFillWasVoice = snapshot.lastFillWasVoice;
-      });
-    }
-    // 260622-nhs R4 (BUG A + BUG B): a reset must CANCEL the recognizer (to
-    // clear its accumulated in-window buffer — the R3 buffer-only clear left the
-    // iOS recognizer's prior transcript alive, so the next partial re-surfaced
-    // the old text) and start a FRESH serialized listening session (the cancel→
-    // start is guarded so onStatus can't double-start into a freeze).
-    resetPttSessionAndRestart();
   }
 
   // ── Category init (ported verbatim from transaction_entry_screen.dart:52-82, D-24) ──
@@ -962,15 +887,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeInOut,
                 child: _voiceModalOpen
-                    ? VoiceRecordPanel(
-                        transcript: pttTranscript,
-                        soundLevel: pttSoundLevel,
-                        // 260622-nhs R4 (BUG C): live recognizer status drives
-                        // the panel title + pulse-dot colour.
-                        status: pttListenStatus,
-                        onExit: _onVoiceModalExit,
-                        onReset: _onVoiceReset,
-                      )
+                    // voice-consolidation P1-7 (R2): panel construction moved
+                    // verbatim to `manual_one_step_voice_wiring.dart`.
+                    ? _buildVoicePanel()
                     : Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
