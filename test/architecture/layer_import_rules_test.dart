@@ -22,11 +22,21 @@ import 'package:flutter_test/flutter_test.dart';
 ///   3. lib/features/*/domain/** must not import lib/data/**,
 ///      lib/infrastructure/**, lib/application/**, or any presentation/**
 ///      (domain is fully independent).
+///   4. lib/application/** (except composition-root `*_providers.dart`) must
+///      not import lib/data/** — use cases depend on domain repository
+///      interfaces; only the wiring may construct concrete data-layer types.
 ///
 /// To grant a deliberate exception, add the lib-rooted file path to
 /// [_allowlist] with a justification comment.
 const Set<String> _allowlist = {
-  // (empty — no sanctioned violations)
+  // Non-production demo/screenshot data generator: fixed-seed, invoked only
+  // from a debug affordance, zero production callers, zero test coverage.
+  // Reworking it to the repository layer would need a CategoryRepository
+  // budget-update method (cascading invalid_override across every impl/mock) +
+  // manual hash-chain construction, all without a safety net — cost far
+  // outweighs the benefit for a debug-only generator. Formally exempted
+  // (quick-260707-hb8, user decision) rather than reworked.
+  'lib/application/analytics/demo_data_service.dart',
 };
 
 class _Violation {
@@ -103,6 +113,16 @@ final List<_Rule> _rules = [
         t.startsWith('lib/infrastructure/') ||
         t.startsWith('lib/application/') ||
         _presentationDir.hasMatch(t),
+  ),
+  // The application layer holds use cases + business logic; only its
+  // composition-root wiring (`*_providers.dart`) may reach into lib/data/ to
+  // construct concrete repositories/DAOs. Any other application file importing
+  // lib/data/ is a layering inversion (P1 quality report — the `*→data`
+  // direction the import_guard yamls claim to guard but cannot, being inert).
+  _Rule(
+    'application (non composition-root) must not depend on the data layer',
+    (f) => f.startsWith('lib/application/') && !f.endsWith('_providers.dart'),
+    (t) => t.startsWith('lib/data/'),
   ),
 ];
 
