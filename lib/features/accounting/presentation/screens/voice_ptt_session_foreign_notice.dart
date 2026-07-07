@@ -69,9 +69,13 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
 
   /// Shows AT MOST ONE notice per final fill, by precedence:
   /// conversion-undo (2B) > repair-candidate adopt (1A) > large-amount (1E).
-  /// All copy comes from ARB; amounts go through [NumberFormatter] with the
-  /// ambient locale. Notices are informational or one-tap — the fill itself
-  /// never silently rewrites what was recognized.
+  ///
+  /// quick-260707-kfb (KFB-2/KFB-5): the PRECEDENCE now lives in the pure
+  /// [VoiceAmountNoticePolicy] — this part only maps the returned variant to
+  /// ARB copy + SnackBar side effects. All copy comes from ARB; amounts go
+  /// through [NumberFormatter] with the ambient locale. Notices are
+  /// informational or one-tap — the fill itself never silently rewrites what
+  /// was recognized.
   void _showVoiceAmountNotice({
     required TransactionDetailsFormState state,
     required VoiceParseResult data,
@@ -84,66 +88,74 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
     final locale = Localizations.localeOf(context);
     String jpy(int v) => NumberFormatter.formatCurrency(v, 'JPY', locale);
 
-    if (conversion != null) {
-      // 2B: the conversion is visible and reversible. Undo restores the spoken
-      // amount and clears the triple back to a JPY-native row.
-      final spoken = filledAmount;
-      _showVoiceSnackBar(
-        message: l10n.voiceCurrencyConverted(
-          NumberFormatter.formatCurrency(
-            spoken,
-            currency,
-            locale,
-            trimWholeFraction: true,
+    final notice = const VoiceAmountNoticePolicy().decide(
+      conversion: conversion,
+      currency: currency,
+      filledAmount: filledAmount,
+      dataAmount: data.amount,
+      repairCandidate: data.amountRepairCandidate,
+      largeAmountThreshold: kVoiceLargeAmountNoticeThreshold,
+    );
+
+    switch (notice) {
+      case VoiceConversionUndoNotice(
+        :final spokenAmount,
+        jpy: final convertedJpy,
+        :final rate,
+        currency: final noticeCurrency,
+      ):
+        // 2B: the conversion is visible and reversible. Undo restores the
+        // spoken amount and clears the triple back to a JPY-native row.
+        _showVoiceSnackBar(
+          message: l10n.voiceCurrencyConverted(
+            NumberFormatter.formatCurrency(
+              spokenAmount,
+              noticeCurrency,
+              locale,
+              trimWholeFraction: true,
+            ),
+            jpy(convertedJpy),
+            rate,
           ),
-          jpy(conversion.jpy),
-          conversion.rate,
-        ),
-        actionLabel: l10n.voiceCurrencyConvertedUndo,
-        onAction: () {
-          state.updateAmount(spoken);
-          state.updateCurrencyTriple(
-            originalCurrency: null,
-            originalAmount: null,
-            appliedRate: null,
-          );
-          _lastFilledAmount = spoken;
-          if (mounted) {
-            onPttSessionChanged(() => _displayCurrency = 'JPY');
-          }
-        },
-      );
-      return;
-    }
-
-    // 1A: suspected ITN-concat amount — one-tap adopt, never silent.
-    // Suppressed when the filled amount didn't come from data.amount (a
-    // merger-committed multi-chunk amount makes the candidate meaningless).
-    final candidate = data.amountRepairCandidate;
-    if (candidate != null &&
-        filledAmount == data.amount &&
-        candidate != filledAmount) {
-      _showVoiceSnackBar(
-        message: l10n.voiceAmountRepairSuspect(
-          jpy(filledAmount),
-          jpy(candidate),
-        ),
-        actionLabel: l10n.voiceAmountRepairApply(jpy(candidate)),
-        onAction: () {
-          state.updateAmount(candidate);
-          _lastFilledAmount = candidate;
-          if (mounted) onPttSessionChanged(() {});
-        },
-      );
-      return;
-    }
-
-    // 1E: sanity guardrail — a very large voice-filled amount gets a visible
-    // "please double-check" nudge (non-blocking; the entry stays editable).
-    if (filledAmount >= kVoiceLargeAmountNoticeThreshold) {
-      _showVoiceSnackBar(
-        message: l10n.voiceLargeAmountNotice(jpy(filledAmount)),
-      );
+          actionLabel: l10n.voiceCurrencyConvertedUndo,
+          onAction: () {
+            state.updateAmount(spokenAmount);
+            state.updateCurrencyTriple(
+              originalCurrency: null,
+              originalAmount: null,
+              appliedRate: null,
+            );
+            _lastFilledAmount = spokenAmount;
+            if (mounted) {
+              onPttSessionChanged(() => _displayCurrency = 'JPY');
+            }
+          },
+        );
+      case VoiceRepairAdoptNotice(
+        filledAmount: final shownAmount,
+        :final candidate,
+      ):
+        // 1A: suspected ITN-concat amount — one-tap adopt, never silent.
+        _showVoiceSnackBar(
+          message: l10n.voiceAmountRepairSuspect(
+            jpy(shownAmount),
+            jpy(candidate),
+          ),
+          actionLabel: l10n.voiceAmountRepairApply(jpy(candidate)),
+          onAction: () {
+            state.updateAmount(candidate);
+            _lastFilledAmount = candidate;
+            if (mounted) onPttSessionChanged(() {});
+          },
+        );
+      case VoiceLargeAmountNotice(filledAmount: final shownAmount):
+        // 1E: sanity guardrail — a very large voice-filled amount gets a
+        // visible "please double-check" nudge (non-blocking; still editable).
+        _showVoiceSnackBar(
+          message: l10n.voiceLargeAmountNotice(jpy(shownAmount)),
+        );
+      case VoiceNoNotice():
+        break;
     }
   }
 

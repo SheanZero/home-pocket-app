@@ -46,6 +46,8 @@ import '../../../../application/voice/repository_providers.dart'
         chineseNumeralStateMachineProvider,
         japaneseNumeralStateMachineProvider;
 import '../../../../application/voice/amount_arbiter.dart';
+import '../../../../application/voice/voice_amount_notice_policy.dart';
+import '../../../../application/voice/voice_fill_decision.dart';
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../../application/voice/voice_chunk_merger.dart';
 import '../../../../generated/app_localizations.dart';

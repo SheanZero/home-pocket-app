@@ -236,18 +236,35 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
     final state = pttFormState;
     if (state == null) return;
 
-    if (amount > 0) {
+    // quick-260707-kfb (KFB-2): the resolve-on-final gating that used to be
+    // scattered `if (fillCategory)` branches now comes from the pure
+    // [VoiceFillDecision]. The State only EXECUTES the plan — all async
+    // repo/rate IO, `mounted` guards, and `onPttCommitted` stay here. Built
+    // after the arbitrated amount so `_mergedAmount`'s read timing is
+    // byte-identical to the pre-extraction order.
+    final plan = VoiceFillDecision.from(
+      fillCategory: fillCategory,
+      data: data,
+      arbitratedAmount: amount,
+    );
+
+    if (plan.writeAmount) {
       state.updateAmount(amount);
       _lastFilledAmount = amount;
     }
-    if (category != null) state.updateCategory(category, parent);
+    // `category` is only ever non-null when the parse carried a floor-gated
+    // categoryMatch on a final fill, so `plan.resolveCategory` is implied —
+    // the guard keeps the actual write conditioned on the repo lookup result.
+    if (plan.resolveCategory && category != null) {
+      state.updateCategory(category, parent);
+    }
     // Phase 52 (RECUX-01/02 / D-08): push the recognition surface (confidence
     // band + ranked alternates) at resolve-on-final ONLY — the same single
     // isFinal fill that resolves the category. Partial-driven fills pass
     // `fillCategory: false` and never reach here, so the band/chips resolve
     // exactly once (no flicker on partials). Null band on a manual/OCR VPR
     // leaves the form's no-affordance state intact (D-10).
-    if (fillCategory) {
+    if (plan.pushRecognition) {
       state.updateRecognition(data.band, data.alternates);
     }
     if (data.merchantName != null && data.merchantName!.isNotEmpty) {
@@ -262,16 +279,14 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
     // on the resolve-on-final fill, the same gate as the category (XVAL-03).
     // Partial-driven fills previously re-fetched the rate every ~300ms and
     // bounced the amount between raw and converted figures mid-utterance.
-    if (fillCategory) {
+    if (plan.runNotice) {
       var nextCurrency = 'JPY';
       ({int jpy, String rate})? conversion;
       final detectedCurrency = data.detectedCurrency;
-      if (amount > 0 &&
-          detectedCurrency != null &&
-          detectedCurrency.isNotEmpty) {
+      if (plan.attemptConversion) {
         conversion = await pushVoiceForeignTriple(
           state: state,
-          currency: detectedCurrency,
+          currency: detectedCurrency!,
           wholeUnitAmount: amount,
           date: data.parsedDate ?? DateTime.now(),
         );
