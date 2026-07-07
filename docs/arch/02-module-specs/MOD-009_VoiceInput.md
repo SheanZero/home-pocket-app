@@ -1,7 +1,7 @@
 # MOD-009: 语音记账模块 - 架构文档（as-built）
 
 **文档编号:** MOD-009
-**文档版本:** 2.1
+**文档版本:** 2.2
 **创建日期:** 2026-02-22
 **最后更新:** 2026-07-07
 **状态:** 已实施（as-built 现状架构）
@@ -9,7 +9,9 @@
 
 > **v2.0 说明：** v1.0（2026-02-22）是实现前的技术设计稿（FR 规格 + 代码草图），其内容已被 Phase 20/23/40-42/49-52 与 quick task 260614/260622/260703/260706 系列的实际实现全面超越。v2.0 重写为**现状架构梳理 + 生态调研 + 改进路线**三部分。梳理时点 HEAD = `d8509872`（quick-260706-kzr 之后）。历史设计稿见 git history 中的 v1.0。
 >
-> **v2.1 更新（2026-07-07）：** §10 路线图 P0 全部六项与 P1-7/8 已由 quick-260706-saz / 260706-tm6 / 260707-bwy 落地——AmountArbiter（`lib/application/voice/amount_arbiter.dart`）、VoiceTuning（`lib/shared/constants/voice_tuning.dart`）、stop/reset 去重、黄金语料两档制（17 golden + 11 known-gap）、薄弱测试补齐、onDevice 离线默认开+静默降级（`VoiceTuning.preferOnDeviceRecognition`）、插件拼接审读（双拼风险 LOW，详见 260706-tm6 SUMMARY）、mixin 拆三文件（591/320/196，同库 part + extension 形态）、宿主语音接线抽出（残余 946 行，keypad/currency 段留待后续）、alternates 币种矛盾压制。**§2/§3/§8 中的 mixin 行号锚点与 S1/S2/S4/S5 痛点描述截至 v2.0 时点，拆分后已部分失效——以代码为准。** P1-9 sherpa spike 与 P2/P3 未动。另：§9.1 的 7.4.0 为调研时 pub 最新版，仓库实际解析 **7.3.0**（concat 逻辑在 `SpeechToTextPlugin.swift` :915-920 一带）。
+> **v2.1 更新（2026-07-07）：** §10 路线图 P0 全部六项与 P1-7/8 已由 quick-260706-saz / 260706-tm6 / 260707-bwy 落地——AmountArbiter（`lib/application/voice/amount_arbiter.dart`）、VoiceTuning（`lib/shared/constants/voice_tuning.dart`）、stop/reset 去重、黄金语料两档制（17 golden + 11 known-gap）、薄弱测试补齐、onDevice 离线默认开+静默降级（`VoiceTuning.preferOnDeviceRecognition`）、插件拼接审读（双拼风险 LOW，详见 260706-tm6 SUMMARY）、mixin 拆三文件（591/320/196，同库 part + extension 形态）、宿主语音接线抽出（残余 946 行，keypad/currency 段留待后续）、alternates 币种矛盾压制。P1-9 sherpa spike 与 P2/P3 未动。另：§9.1 的 7.4.0 为调研时 pub 最新版，仓库实际解析 **7.3.0**（concat 逻辑在 `SpeechToTextPlugin.swift` :915-920 一带）。
+>
+> **v2.2 深度检查更新（2026-07-07）：** 重新核对当前代码、provider wiring、隐私日志、语音专项测试与架构边界。§2/§7/§8/§10 已按现状修正：旧 P0 痛点改为已落地事实，新增当前风险清单与改进建议。检查范围以 `lib/infrastructure/speech/`、`lib/infrastructure/voice/`、`lib/application/voice/`、`lib/features/voice/domain/`、`lib/features/accounting/presentation/screens/voice_*`、语音相关 tests 为准。
 
 ---
 
@@ -22,7 +24,7 @@
 5. [识别-分类子系统](#5-识别-分类子系统)
 6. [会话状态机与生命周期](#6-会话状态机与生命周期)
 7. [测试覆盖映射](#7-测试覆盖映射)
-8. [架构痛点清单](#8-架构痛点清单)
+8. [深度检查结论与当前风险](#8-深度检查结论与当前风险)
 9. [生态调研（2026-07）](#9-生态调研2026-07)
 10. [改进路线图](#10-改进路线图)
 11. [演进时间线](#11-演进时间线)
@@ -42,13 +44,13 @@
 
 ## 2. 分层架构与文件地图
 
-依赖方向严格遵守 Presentation → Application → Domain ← Data ← Infrastructure（例外见 §8 S3）。
+依赖方向整体遵守 Presentation → Application → Domain ← Data ← Infrastructure。当前仍需关注的边界折中见 §8.2。
 
 ### infrastructure 层（STT 封装 + 数字状态机）
 
 | 路径 | LOC | 职责 | 关键符号 |
 |---|---|---|---|
-| `infrastructure/speech/speech_recognition_service.dart` | 170 | 封装 speech_to_text 插件；平台音量归一化；`restartListen` 配置缓存 | `initialize` `startListening` `restartListen` |
+| `infrastructure/speech/speech_recognition_service.dart` | 231 | 封装 speech_to_text 插件；平台音量归一化；`restartListen` 配置缓存；默认尝试 on-device，失败后同会话静默降级 | `initialize` `startListening` `restartListen` |
 | `infrastructure/voice/numeral_state_machine.dart` | 223 | 数字 token 分类学 + `scan` 累加器基类（ITN 位值合并 L0、`detectCurrencyToken`） | `NumeralStateMachine` `NumeralToken`(sealed) |
 | `infrastructure/voice/chinese_numeral_state_machine.dart` | 127 | 中文汉字/阿拉伯 → int，`零` 显式占位 | `parse` `normalize` |
 | `infrastructure/voice/japanese_numeral_state_machine.dart` | 158 | 日文假名/汉字贪婪最长匹配 → int | `parse` `normalize` |
@@ -59,8 +61,9 @@
 | 路径 | LOC | 职责 | 关键符号 |
 |---|---|---|---|
 | `application/voice/start_speech_recognition_use_case.dart` | 52 | 薄封装 service，隔离 presentation↛infra | — |
-| `application/voice/parse_voice_input_use_case.dart` | 441 | **编排器**：金额/日期/货币/keyword → 双引擎 → reconciler → ledger 派生 | `execute` `kMerchantAutoFillFloor` |
-| `application/voice/voice_text_parser.dart` | 593 | 金额路由 station（Arabic/状态机/spaced/comma 四路）+ 日期抽取 | `extractAmount` `extractDate` `detectConcatRepairCandidate` |
+| `application/voice/parse_voice_input_use_case.dart` | 381 | **编排器**：金额/日期/货币/keyword → 双引擎 → reconciler → ledger 派生；金额冲突委托 `AmountArbiter` | `execute` `kMerchantAutoFillFloor` |
+| `application/voice/voice_text_parser.dart` | 596 | 金额路由 station（Arabic/状态机/spaced/comma 四路）+ 日期抽取 | `extractAmount` `extractDate` `detectConcatRepairCandidate` |
+| `application/voice/amount_arbiter.dart` | 224 | parse-time 与 display-time 金额仲裁单一实现点（ITN concat + magnitude guard） | `resolveParsedAmount` `resolveDisplayAmount` |
 | `application/voice/amount_magnitude_guard.dart` | 336 | L4 纯函数：量级词（千/万/thousand）→ 期望位数 | `expectedDigitCountForAmount` |
 | `application/voice/english_number_words.dart` | 76 | 有界英文数字词解析（与 CJK 机隔离） | `parseEnglishNumberWords` |
 | `application/voice/voice_chunk_merger.dart` | 243 | 跨 final 的 2.5s 窗口缓冲 + 双闸合并（L1） | `feedChunk` `stop` |
@@ -84,10 +87,13 @@
 
 | 路径 | LOC | 职责 |
 |---|---|---|
-| `…/screens/voice_ptt_session_mixin.dart` | **1075** ⚠ | 会话生命周期巨石：录音/转写/parse/merger/金额仲裁/外币/satisfaction/notice |
+| `…/screens/voice_ptt_session_mixin.dart` | 591 | 会话状态机、生命周期、reset/error/status；同库 part 承载填表与 notice |
+| `…/screens/voice_ptt_session_fill_orchestration.dart` | 320 | result/sound-level callback、partial/final parse、batch-fill、merger rebuild |
+| `…/screens/voice_ptt_session_foreign_notice.dart` | 196 | 外币三元组、金额 notice、满意度估算 |
 | `…/screens/voice_recognition_event_handler_mixin.dart` | 139 | onStatus/onError 基类（D-05 intra-session 门） |
 | `…/screens/voice_locale_readiness_mixin.dart` | 99 | cold-start locale 就绪门 |
-| `…/screens/manual_one_step_screen.dart` | **1027** ⚠ | 宿主（keypad + 语音接线，三 mixin 合成） |
+| `…/screens/manual_one_step_screen.dart` | **946** ⚠ | 宿主（keypad/currency/save + 三 mixin 合成；语音接线已抽 part） |
+| `…/screens/manual_one_step_voice_wiring.dart` | 122 | inline 语音面板、tap session 生命周期、PTT fill → keypad mirror |
 | `…/screens/manual_one_step_snapshot.dart` | 110 | `ManualEntrySnapshot` reset 快照/还原 |
 | `…/screens/voice_input_screen.dart` (+helpers) | 512+93 | legacy hold 屏幕 |
 | `…/widgets/voice_listening_overlay.dart` | 402 | 内联 `VoiceRecordPanel`（双态方块） |
@@ -109,22 +115,22 @@
 ### 3.1 连续点按会话（主路径）
 
 ```
-VoiceRecordBar.onTap (manual:981)
-  → _onVoiceRecordTap (manual:300)  守卫: initialized && localeReady && !modalOpen
-  → ManualEntrySnapshot.capture (manual:304)   ← reset 的还原基线
-  → _voiceModalOpen=true → startPttTapSession (mixin:589, _continuousActive=true)
-  → startPttSession (mixin:243)  listenFor:30s pauseFor:3s
-  ├─ partial (mixin:920): _partialText ← ；300ms debounce → _parseVoiceInput
+VoiceRecordBar.onTap
+  → _onVoiceRecordTap  守卫: initialized && localeReady && !modalOpen
+  → ManualEntrySnapshot.capture   ← reset 的还原基线
+  → _voiceModalOpen=true → startPttTapSession (_continuousActive=true)
+  → startPttSession  listenFor:30s pauseFor:3s
+  ├─ partial: _partialText ← ；300ms debounce → _parseVoiceInput
   │    → _fillFormFromText(fillCategory:false)   ← 实时填 amount/merchant/date，扣住 category
-  ├─ final (mixin:931): merger.feedChunk(isFinal) + 收集 result.alternates.skip(1)
+  ├─ final: merger.feedChunk(isFinal) + 收集 result.alternates.skip(1)
   │    → _parseFinalResult(text, alternateTexts) → _fillFormFromText(data:parsed)
   │         resolve-on-final 门: category 查库/updateRecognition/外币换算/全部 notice 只在此时
-  │         金额仲裁 (mixin:381-416): _mergedAmount ?? data.amount
+  │         金额仲裁: AmountArbiter.resolveDisplayAmount(_mergedAmount, data.amount)
   │           例外① concat: detectConcatRepairCandidate(merged)==parsed → parsed 胜
   │           例外② magnitude: merged 违反期望位数而 parsed 满足 → parsed 胜
-  ├─ onPttCommitted → 宿主 _lastFillWasVoice=true + keypad 镜像 (manual:165-188)
+  ├─ onPttCommitted → 宿主 _lastFillWasVoice=true + keypad 镜像
   └─ 退出: 点空白 exitPttTapSession / 红方块 _onVoiceReset(快照还原+复活重录)
-保存: form.submit(entrySource: voice|manual) (manual:932)
+保存: form.submit(entrySource: voice|manual)
 ```
 
 ### 3.2 legacy hold 路径的分叉点
@@ -133,8 +139,8 @@ VoiceRecordBar.onTap (manual:981)
 
 | 分叉 | 连续 tap | legacy hold |
 |---|---|---|
-| partial live-fill | ✅（mixin:984） | ❌ 只刷新 `_parseResult` |
-| final fill | 立即（mixin:956-966） | 延迟到松手 `stopPttSessionAndCommit`（`_cachedParseFor` 缓存复用） |
+| partial live-fill | ✅（`_parseVoiceInput` → `_fillFormFromText(fillCategory:false)`） | ❌ 只刷新 `_parseResult` |
+| final fill | 立即（`_parseFinalResult` → `_fillFormFromText`） | 延迟到松手 `stopPttSessionAndCommit`（`_cachedParseFor` 缓存复用） |
 | onError | 自定分类（§6） | `super.onError` 基类原样 |
 | onStatus terminal | one-shot 停机不 re-arm | 基类 pressStart 驱动 |
 | 误触 | — | <300ms 松手 → `cancelPttSessionAndDiscard` |
@@ -151,11 +157,11 @@ VoiceRecordBar.onTap (manual:981)
 | **L1** merger 空格拼接+整百开放 | 跨 final 两段；`_bufferLooksOpen`（末 Unit≥100 或末 Digit≥10 且 %10==0） | `voice_chunk_merger.dart:114,170-192` | 「2500」+「46元」跨 final；5310+2 |
 | **L2** spaced 路由 | 「圆整组+1~2位尾+货币后缀/EOS」签名 | `voice_text_parser.dart:63`，路由 :126 | 单条转写内「2500 46元」强制走状态机 |
 | **L3** concat 探测 + alternates 采用 | 金额数字串逐字在 transcript 中；5-9 位、尾可嵌 head 尾零 | 探测 `voice_text_parser.dart:152`；采用 `parse_voice_input_use_case.dart:99-114` | UNSPACED「250046」→2546；alternate 独立解析出候选→静默采用，否则挂 `amountRepairCandidate` 一键确认 |
-| **L4** 量级位数仲裁 | rawText/alternate 含量级锚（千/仟/せん/ぜん→乘数位数+3；万/萬/まん→+4；thousand）且 resolvedAmount 位数违反 | 期望 `amount_magnitude_guard.dart:98`；use-case 仲裁 `parse_voice_input_use_case.dart:132-150`；display 仲裁 `mixin:403-416` | 「3千5百16」必须 4 位；「53102」+alternate「五千三百一十二」→5312 |
+| **L4** 量级位数仲裁 | rawText/alternate 含量级锚（千/仟/せん/ぜん→乘数位数+3；万/萬/まん→+4；thousand）且 resolvedAmount 位数违反 | 期望 `expectedDigitCountForAmount`；parse/display 仲裁集中在 `AmountArbiter` | 「3千5百16」必须 4 位；「53102」+alternate「五千三百一十二」→5312 |
 
 L4 采用阶梯（`_adoptByMagnitude`，只采位数==期望的候选，precision over recall）：①L3 候选 → ②状态机/英文词重读 primary → ③逐条 alternate 全路由重解析。采用后 **candidate swap**（原读数换进 `amountRepairCandidate`）使既有 1A notice 变「一键改回原值」。
 
-金额 notice 三级（每 final 至多一条，`mixin:485-558`）：conversion-undo(2B) > repair-adopt(1A) > large-amount ≥¥1M(1E)。
+金额 notice 三级（每 final 至多一条，`voice_ptt_session_foreign_notice.dart`）：conversion-undo(2B) > repair-adopt(1A) > large-amount ≥¥1M(1E)。
 
 **设计公理**（生态调研 §9 佐证）：partial 结果会被全量重写（含数字重切分+重 ITN），金额**只能 resolve-on-final**——现行设计正确，勿与 partials 搏斗。
 
@@ -191,12 +197,12 @@ L4 采用阶梯（`_adoptByMagnitude`，只采位数==期望的候选，precisio
 
 | 事件 | 位置 | 转换 |
 |---|---|---|
-| 识别器自终止（连续） | `onStatus` mixin:816 | **one-shot 停机**：stopped，不 re-arm（iOS re-arm 会麦克风假死却状态卡 listening） |
-| reset 期间 terminal | mixin:805 | `_restarting` 期间直接吞（防 double-start 假死） |
-| 静默错误 | mixin:754 | `{error_no_match, error_speech_timeout}` 按**错误码**白名单（iOS 谎报 permanent:true）→ 干净停机，不 toast 不锁 bar |
-| 致命错误 | mixin:774 | teardown + toast + `_recoverBarAfterFatalError`（重 init 解锁 bar）；面板留在 stopped 态 |
-| 重置·恢复 | mixin:637 | 守 `_restarting`；cancel→清缓冲+rebuild merger→(必要时 re-init)→startListening；`_continuousActive` **无条件复活**（260706-kax：无论上次会话怎么死，「重新录入」必须生效） |
-| app 暂停 | manual:289 | 录音中 → `cancelPttSessionAndDiscard` |
+| 识别器自终止（连续） | `VoicePttSessionMixin.onStatus` | **one-shot 停机**：stopped，不 re-arm（iOS re-arm 会麦克风假死却状态卡 listening） |
+| reset 期间 terminal | `VoicePttSessionMixin.onStatus` | `_restarting` 期间直接吞（防 double-start 假死） |
+| 静默错误 | `VoicePttSessionMixin.onError` | `{error_no_match, error_speech_timeout}` 按**错误码**白名单（iOS 谎报 permanent:true）→ 干净停机，不 toast 不锁 bar |
+| 致命错误 | `VoicePttSessionMixin.onError` | teardown + toast + `_recoverBarAfterFatalError`（重 init 解锁 bar）；面板留在 stopped 态 |
+| 重置·恢复 | `resetPttSessionAndRestart` | 守 `_restarting`；cancel→清缓冲+rebuild merger→(必要时 re-init)→startListening；`_continuousActive` **无条件复活**（260706-kax：无论上次会话怎么死，「重新录入」必须生效） |
+| app 暂停 | `ManualOneStepScreen` lifecycle | 录音中 → `cancelPttSessionAndDiscard` |
 
 **踩坑记录**（勿回退）：reset 必须 `cancel()` 清识别器内部累积 buffer（只清 app 端文本会带回旧转写）；reset caption 的 `Transform` 必须在 `Visibility` 外层（`maintainSize` 代理盒会挡偏移后的命中）。
 
@@ -204,31 +210,47 @@ L4 采用阶梯（`_adoptByMagnitude`，只采位数==期望的候选，precisio
 
 ## 7. 测试覆盖映射
 
-49 个语音专属测试文件：infra 6 / application 金额与解析 9 / recognition 4 / 其他 app 3 / domain 2 / mixin+screen 5 / widget+golden 4 / settings 2 / **三语语料库集成 7 + fixtures 5** / seed 2。
+语音专项测试覆盖 infra、application 金额与解析、recognition、domain、mixin+screen、widget/golden、settings、三语语料库集成与 seed/DAO/repository 路径。当前关键新增保护包括：
+
+- `test/unit/application/voice/amount_arbiter_test.dart`：锁住 ITN concat、magnitude guard、merged-vs-parsed display 仲裁。
+- `test/unit/application/voice/voice_tuning_consistency_test.dart`：锁住 `VoiceTuning` 常量、0.85 floor 双声明一致性与公开 alias。
+- `test/unit/infrastructure/speech/speech_recognition_service_ondevice_test.dart`：锁住默认 `onDevice:true`、失败一次降级、同会话后续与 `restartListen` 走降级路径。
+- `test/unit/features/accounting/presentation/screens/voice_ptt_session_mixin_test.dart`：覆盖 one-shot 不 re-arm、reset 复活死会话、重入栅栏、失败 re-init 不乐观进入 listening。
 
 **覆盖薄弱点**：
 
 | 生产文件 | 状况 |
 |---|---|
-| `manual_one_step_snapshot.dart`（reset 还原核心） | 无直接测试 |
-| `voice_locale_readiness_mixin.dart` | 无直接测试 |
-| `hold_to_talk_bar.dart` / `voice_waveform` / `voice_error_toast` / `voice_section` | 无直接测试 |
-| `seed_voice_synonyms_use_case.dart` | 无 use-case 级测试 |
-| 宿主 keypad 镜像逻辑（manual:165-188） | 仅 happy path |
-| use-case 采用 × mixin display 采用同时命中的组合 | 无组合测试 |
+| `manual_one_step_snapshot.dart`（reset 还原核心） | 仍建议补直接单测；当前主要靠 mixin/screen 路径间接覆盖 |
+| `voice_ptt_session_fill_orchestration.dart` + `voice_ptt_session_foreign_notice.dart` | 同库 part 拆分后建议补“final parse → fill → notice/conversion”组合测试，防私有状态耦合回归 |
+| `voice_locale_readiness_mixin.dart` | 已有单测文件，但建议增加 AsyncError fallback 与 warm-start `fireImmediately` 场景的回归断言 |
+| `manual_one_step_voice_wiring.dart` keypad mirror | 建议增加非 happy path：voice fill 后手动删改、foreign triple 已存在、reset 恢复 provenance |
+| `seed_voice_synonyms_use_case.dart` | 仍缺 use-case 级幂等测试；当前主要依赖 DAO/recognizer 路径 |
 
 ---
 
-## 8. 架构痛点清单
+## 8. 深度检查结论与当前风险
 
-| # | 痛点 | 证据 |
+### 8.1 已确认的正向结构
+
+| # | 结论 | 证据 |
 |---|---|---|
-| **S1** | 两个文件超 800 行规约：mixin **1075**、宿主 **1027** | `voice_ptt_session_mixin.dart` / `manual_one_step_screen.dart` |
-| **S2** | mixin 巨石：会话状态机+金额仲裁+notice 编排+外币换算+satisfaction 触发混居；三 mixin 抽象契约互相回填（mixin:193-209） | 头注释自陈「ported VERBATIM」 |
-| **S3** | 层依赖泄漏：presentation 直连 infra formatter（mixin:43 等 3 处）；mixin 内直接 `VoiceTextParser()` 实例化 + 静态调用（mixin:716/392/407）——金额仲裁**业务逻辑在 presentation**；`kMerchantAutoFillFloor` 为避免 domain→app 依赖而**双份声明** | `parse_voice_input_use_case.dart:21` vs `recognition_reconciler.dart:9` |
-| **S4** | 重复逻辑：`stopPttSessionAndCommit` ≈ `exitPttTapSession` 逐行相同；两处 reset 清零重叠；**量级仲裁双写**（use-case + mixin display）；keypad 镜像循环两份 | mixin:277/598/650/1064 |
-| **S5** | 魔法数散落：30s/3s 三处、300ms 两义、0.85 四处同值异义、2.5s/800ms/100ms/1M/10M/hitCount≥3、satisfaction 权重与拟合系数 | 详见各文件 |
-| **S6** | DI 奇异：`startSpeechRecognitionUseCaseProvider` 无人用（mixin 自建）；merger 另取 service 与 `pttSpeechService` 双封装同底层（`restartListen` 的 `_lastConfig` 缓存跨两封装易漂移）；`voiceLocaleIdProvider` settings→accounting 跨 feature 监听；唯 merchantRecognizer keepAlive | `mixin:217/709`、providers:281 |
+| **G1** | 金额解析已从 presentation 收敛为 application 层单点 | `AmountArbiter` 同时服务 `ParseVoiceInputUseCase` 与 fill orchestration |
+| **G2** | 语音常量已集中并有漂移测试 | `VoiceTuning` + `voice_tuning_consistency_test.dart` |
+| **G3** | 识别引擎保持解耦：keyword/category 与 merchant ranker 独立，仲裁集中在 use-case/domain | `CategoryRecognizer` / `MerchantRecognizer` / `RecognitionReconciler` |
+| **G4** | 默认优先 on-device STT，且降级不记录用户内容 | `SpeechRecognitionService.startListening` 只 debugPrint 降级事件，不打印 transcript/amount/merchant |
+| **G5** | partial 与 final 分工正确：partial 只填金额/商家/日期，category/currency/conversion/notice 在 final gate | `voice_ptt_session_fill_orchestration.dart` 的 `fillCategory` gate |
+
+### 8.2 当前风险
+
+| # | 风险 | 影响 | 建议 |
+|---|---|---|---|
+| **R1** | `manual_one_step_screen.dart` 仍 946 行，超过项目 800 行软上限；keypad/currency/save 与语音宿主状态混在同一 private State | 后续改语音/外币/保存任一路径都容易踩 shared host state | 继续拆 host：优先抽 keypad mirror/currency edit/save orchestration 为同库 part 或独立 controller，目标主文件 <800 行 |
+| **R2** | `VoicePttSessionMixin` 拆成同库 `part + extension` 后仍共享大量 private 字段 | 行数下降但耦合没有真正降低；重构时 IDE/类型边界给的保护有限 | 下一步不要继续只按行数拆；应定义 `VoiceSessionState`/`VoiceFillCoordinator` 等可测试对象，逐步减少 private field 交叉访问 |
+| **R3** | on-device STT 失败会静默降级到默认识别，产品层没有可见隐私状态或用户选择 | local-first 隐私叙事存在灰区：系统默认识别可能走网络/厂商服务，用户无感 | 增加设置项与会话状态：仅设备端 / 自动降级 / 禁用语音；降级时可在设置中查看，不在录入中打扰 |
+| **R4** | `SpeechRecognitionService` 与 `VoiceChunkMerger` 共用同一底层 service，但 service 是 autoDispose provider | 会话内一般安全；若未来把 merger/restart 跨作用域持有，可能被 provider 生命周期影响 | 为语音会话建立显式 session-scoped adapter，或把 speech provider 改 keepAlive 并在 app lifecycle 显式释放 |
+| **R5** | `kMerchantAutoFillFloor` 仍在 application/domain 双声明，靠测试防漂移 | 这是为保持 domain import-free 的可接受折中，但新维护者容易误改其一 | 保留测试；在两个声明处继续互指，并考虑把阈值作为 `RecognitionReconciler` 构造参数由 application 注入 |
+| **R6** | 外币 conversion 与 amount notice 仍在 presentation part 中编排 | UI 层承担了业务顺序：conversion-undo > repair-adopt > large-amount | 若继续扩展外币语音，提取 `VoiceAmountNoticePolicy` / `VoiceForeignFillPolicy` 到 application，widget 只负责展示 |
 
 ---
 
@@ -280,29 +302,28 @@ L4 采用阶梯（`_adoptByMagnitude`，只采位数==期望的候选，precisio
 
 ## 10. 改进路线图
 
-### P0 — 内部收敛（纯 Dart、无新依赖、立即可做）
+### P0 — 当前建议（无新运行时依赖）
 
-1. **金额仲裁收敛**：把 use-case 与 mixin display 两处量级/concat 仲裁提取为 application 层单一 `AmountArbiter`（输入 {parsed, merged, rawText, alternates}，输出 {adopted, undoCandidate, noticeKind}）——同时解决 S3 业务逻辑泄漏与 S4 双写。
-2. **`VoiceTuning` 常量集中**：30s/3s/300ms×2/2.5s/800ms/100ms/0.85×2/1M/10M/hitCount≥3 收口为命名常量单文件（floor 双声明保留 domain 侧，加一致性测试锁值）。
-3. **重复合并**：`stopPttSessionAndCommit`+`exitPttTapSession` 合一；两处 reset 清零合一。
-4. **黄金语料移植**：cn2an（smart 模式容错、两/俩/仨/廿/卅）、Kanjize（混合记法）、NeMo-ja ITN 用例 → `test/fixtures/voice_corpus_*` 扩充。
-5. **补薄弱测试**：snapshot 还原、locale readiness、宿主 keypad 镜像非 happy path、两仲裁站点组合命中。
-6. **审读插件 iOS 拼接逻辑**（`SwiftSpeechToTextPlugin` 7.1.0 的 concat 段），确认与 L1 merger 交互无双重拼接。
+1. **Host 继续瘦身**：把 `manual_one_step_screen.dart` 剩余 keypad/currency/save 段拆出，先只做同库 part 的机械移动并补 characterization test，目标主文件 <800 行。
+2. **把 part 耦合变成对象边界**：从 `voice_ptt_session_fill_orchestration.dart` 中先抽纯 Dart `VoiceFillDecision` / `VoiceAmountNoticePolicy`，让关键业务顺序离开 `State` 私有字段。
+3. **补隐私降级产品面**：设置页增加“语音识别模式”或至少展示当前设备端识别可用性；默认仍可自动降级，但用户必须有关闭降级的入口。
+4. **补 reset/snapshot 与 keypad mirror 非 happy path 测试**：覆盖 voice fill 后手动编辑、reset 恢复 `_lastFillWasVoice`、外币三元组已写入后再 mirror 的路径。
+5. **补 conversion/notice policy 组合测试**：锁住 conversion-undo > repair-adopt > large-amount 的优先级，避免 UI 文案改动时破坏业务顺序。
 
 ### P1 — 结构重构 + 引擎 spike（并行、互不依赖）
 
-7. **mixin 拆分**：`VoicePttSessionMixin`(1075) → 会话状态机 / 填充编排 / 外币+notice 三块，各 <800 行；宿主语音接线随之瘦身。
-8. **alternates 全槽位文法校验**：L3/L4 的「候选过数字文法 accept」模式推广到日期/币种槽位（工业模式②）。
-9. **sherpa-onnx spike**（feature flag 单语区试点，建议 zh）：流式 zipformer + spoken form 直喂自研状态机，实测准确率/体积/内存 vs 系统 STT。**ja 为主语言不可盲切**——ja 需 VAD+SenseVoice 段级方案单独评估（段级识别反而天然规避 partial-rewrite 毒化）。
+6. **alternates 全槽位文法校验**：L3/L4 的「候选过数字文法 accept」模式推广到日期/币种槽位（工业模式②），当前币种已做 contradicting-foreign suppression，可扩展为统一 slot validator。
+7. **sherpa-onnx spike**（feature flag 单语区试点，建议 zh）：流式 zipformer + spoken form 直喂自研状态机，实测准确率/体积/内存 vs 系统 STT。**ja 为主语言不可盲切**——ja 需 VAD+SenseVoice 段级方案单独评估（段级识别反而天然规避 partial-rewrite 毒化）。
+8. **speech provider 生命周期收敛**：建立 session-scoped speech adapter，明确一个会话内 service/merger/restart 的拥有者，避免未来 provider autoDispose 与 callback 生命周期交叉。
 
 ### P2 — 差异化增强
 
-10. **设备端 LLM 兜底层**：先离线评测（现有三语语料跑 FunctionGemma 270M / Qwen3 0.6B 抽取准确率），达标后按「置信度门控 + 可关闭 + CPU 机型跳过」进 app；iOS 26+ 设备用 Foundation Models guided generation。开源领域无先例，是差异化点。
-11. **iOS 26 SpeechAnalyzer 预研**：真机验证 ITN 行为与三语支持清单，跟踪 speech_to_text 适配进度与用户 iOS 26 渗透率，必要时自写 channel。
+9. **设备端 LLM 兜底层**：先离线评测（现有三语语料跑 FunctionGemma 270M / Qwen3 0.6B 抽取准确率），达标后按「置信度门控 + 可关闭 + CPU 机型跳过」进 app；iOS 26+ 设备用 Foundation Models guided generation。开源领域无先例，是差异化点。
+10. **iOS 26 SpeechAnalyzer 预研**：真机验证 ITN 行为与三语支持清单，跟踪 speech_to_text 适配进度与用户 iOS 26 渗透率，必要时自写 channel。
 
 ### P3 — 观察项
 
-12. whisper.cpp 事后重转写兜底（需录音缓存 + 加密义务评估，涉 4 层加密架构）；ML Kit GenAI 跟踪。
+11. whisper.cpp 事后重转写兜底（需录音缓存 + 加密义务评估，涉 4 层加密架构）；ML Kit GenAI 跟踪。
 
 ---
 
@@ -322,6 +343,7 @@ L4 采用阶梯（`_adoptByMagnitude`，只采位数==期望的候选，precisio
 | 260703 | ITN-concat 四层防线（L0-L3）+ bare 元 native + resolve-on-final 门 |
 | 260706-kax | reset 复活死会话 + reentrancy fence + caption 命中修复 |
 | 260706-kzr | L4 量级位数守卫（千=4位/万=5位，zh/ja/en） |
+| 260706-saz / 260706-tm6 / 260707-bwy | AmountArbiter / VoiceTuning / on-device fallback / mixin+host 拆分 / alternates 币种矛盾压制 |
 
 ---
 
