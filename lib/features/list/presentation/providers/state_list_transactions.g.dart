@@ -145,7 +145,7 @@ String _$listSearchQueryHash() => r'08fed1ca3ba3f2a92de522615d08e8e30860eb65';
 /// 3. Own-book + shadow books in group mode (FAM-01)
 /// 4. Call [GetListTransactionsUseCase.execute] for SQL-level filtering
 /// 5. Dart-side day filter (year+month+day comparison on [activeDayFilter])
-/// 6a. Dart-side category filter (D-01 — Set<String> multi-select)
+/// 6a. Dart-side category filter (D-01 — `Set<String>` multi-select)
 /// 7. Wrap surviving [Transaction]s as [TaggedTransaction]
 
 @ProviderFor(listTransactionsBase)
@@ -164,7 +164,7 @@ final listTransactionsBaseProvider = ListTransactionsBaseFamily._();
 /// 3. Own-book + shadow books in group mode (FAM-01)
 /// 4. Call [GetListTransactionsUseCase.execute] for SQL-level filtering
 /// 5. Dart-side day filter (year+month+day comparison on [activeDayFilter])
-/// 6a. Dart-side category filter (D-01 — Set<String> multi-select)
+/// 6a. Dart-side category filter (D-01 — `Set<String>` multi-select)
 /// 7. Wrap surviving [Transaction]s as [TaggedTransaction]
 
 final class ListTransactionsBaseProvider
@@ -190,7 +190,7 @@ final class ListTransactionsBaseProvider
   /// 3. Own-book + shadow books in group mode (FAM-01)
   /// 4. Call [GetListTransactionsUseCase.execute] for SQL-level filtering
   /// 5. Dart-side day filter (year+month+day comparison on [activeDayFilter])
-  /// 6a. Dart-side category filter (D-01 — Set<String> multi-select)
+  /// 6a. Dart-side category filter (D-01 — `Set<String>` multi-select)
   /// 7. Wrap surviving [Transaction]s as [TaggedTransaction]
   ListTransactionsBaseProvider._({
     required ListTransactionsBaseFamily super.from,
@@ -252,7 +252,7 @@ String _$listTransactionsBaseHash() =>
 /// 3. Own-book + shadow books in group mode (FAM-01)
 /// 4. Call [GetListTransactionsUseCase.execute] for SQL-level filtering
 /// 5. Dart-side day filter (year+month+day comparison on [activeDayFilter])
-/// 6a. Dart-side category filter (D-01 — Set<String> multi-select)
+/// 6a. Dart-side category filter (D-01 — `Set<String>` multi-select)
 /// 7. Wrap surviving [Transaction]s as [TaggedTransaction]
 
 final class ListTransactionsBaseFamily extends $Family
@@ -279,7 +279,7 @@ final class ListTransactionsBaseFamily extends $Family
   /// 3. Own-book + shadow books in group mode (FAM-01)
   /// 4. Call [GetListTransactionsUseCase.execute] for SQL-level filtering
   /// 5. Dart-side day filter (year+month+day comparison on [activeDayFilter])
-  /// 6a. Dart-side category filter (D-01 — Set<String> multi-select)
+  /// 6a. Dart-side category filter (D-01 — `Set<String>` multi-select)
   /// 7. Wrap surviving [Transaction]s as [TaggedTransaction]
 
   ListTransactionsBaseProvider call({required String bookId}) =>

@@ -454,7 +454,7 @@ final class MemberFilteredCategoryBreakdownProvider
 }
 
 String _$memberFilteredCategoryBreakdownHash() =>
-    r'c7f1012c4f2f7c8039dbb349e9ec12d8d41f41f2';
+    r'd7c2926b5c756933a63413a4a7c7ddcf78c5951c';
 
 /// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
 /// (deviceId) expense transactions over the active window — the donut's 分类
