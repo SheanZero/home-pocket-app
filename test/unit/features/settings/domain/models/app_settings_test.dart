@@ -104,6 +104,34 @@ void main() {
     });
   });
 
+  group('AppSettings.voiceAllowOnDeviceFallback', () {
+    test('defaults to true (auto-degrade allowed, backward compatible)', () {
+      const settings = AppSettings();
+      expect(settings.voiceAllowOnDeviceFallback, true);
+    });
+
+    test('copyWith(false) round-trips without mutating the original', () {
+      const original = AppSettings();
+      final updated = original.copyWith(voiceAllowOnDeviceFallback: false);
+
+      expect(updated.voiceAllowOnDeviceFallback, false);
+      // Immutability: the original is untouched.
+      expect(original.voiceAllowOnDeviceFallback, true);
+    });
+
+    test('copyWith preserves voiceAllowOnDeviceFallback', () {
+      const settings = AppSettings(voiceAllowOnDeviceFallback: false);
+      final updated = settings.copyWith(themeMode: AppThemeMode.dark);
+      expect(updated.voiceAllowOnDeviceFallback, false);
+    });
+
+    test('fromJson/toJson round-trips voiceAllowOnDeviceFallback', () {
+      const settings = AppSettings(voiceAllowOnDeviceFallback: false);
+      final restored = AppSettings.fromJson(settings.toJson());
+      expect(restored.voiceAllowOnDeviceFallback, false);
+    });
+  });
+
   group('AppThemeMode', () {
     test('has all expected values', () {
       expect(AppThemeMode.values, hasLength(3));

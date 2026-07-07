@@ -17,6 +17,8 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   biometricUnlockEnabled: json['biometricUnlockEnabled'] as bool? ?? false,
   onboardingComplete: json['onboardingComplete'] as bool? ?? false,
   voiceLanguage: json['voiceLanguage'] as String? ?? 'zh',
+  voiceAllowOnDeviceFallback:
+      json['voiceAllowOnDeviceFallback'] as bool? ?? true,
   monthlyJoyTarget: (json['monthlyJoyTarget'] as num?)?.toInt(),
   weekStartDay:
       $enumDecodeNullable(_$WeekStartDayEnumMap, json['weekStartDay']) ??
@@ -33,6 +35,7 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'biometricUnlockEnabled': instance.biometricUnlockEnabled,
       'onboardingComplete': instance.onboardingComplete,
       'voiceLanguage': instance.voiceLanguage,
+      'voiceAllowOnDeviceFallback': instance.voiceAllowOnDeviceFallback,
       'monthlyJoyTarget': instance.monthlyJoyTarget,
       'weekStartDay': _$WeekStartDayEnumMap[instance.weekStartDay]!,
     };

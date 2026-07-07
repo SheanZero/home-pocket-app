@@ -27,6 +27,15 @@ abstract class SettingsRepository {
   Future<void> setNotificationsEnabled(bool enabled);
   Future<void> setVoiceLanguage(String languageCode);
 
+  /// Persists the on-device recognition auto-degradation policy (default true =
+  /// auto-degrade allowed, current behavior).
+  ///
+  /// When false, an on-device recognition failure is surfaced instead of
+  /// silently retrying with cloud recognition (privacy control, T-kfb-01).
+  /// Plaintext SharedPreferences key, no Drift migration (mirror
+  /// [setVoiceLanguage]).
+  Future<void> setVoiceAllowOnDeviceFallback(bool enabled);
+
   /// Reads the configured monthly Joy target.
   ///
   /// Null means unconfigured and is encoded as key absence in persistence.

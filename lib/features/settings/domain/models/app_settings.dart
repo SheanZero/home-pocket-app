@@ -21,6 +21,7 @@ abstract class AppSettings with _$AppSettings {
     @Default(false) bool biometricUnlockEnabled,
     @Default(false) bool onboardingComplete,
     @Default('zh') String voiceLanguage,
+    @Default(true) bool voiceAllowOnDeviceFallback,
     int? monthlyJoyTarget,
     @Default(WeekStartDay.monday) WeekStartDay weekStartDay,
   }) = _AppSettings;

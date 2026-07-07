@@ -21,6 +21,7 @@ mixin _$AppSettings {
   bool get biometricUnlockEnabled;
   bool get onboardingComplete;
   String get voiceLanguage;
+  bool get voiceAllowOnDeviceFallback;
   int? get monthlyJoyTarget;
   WeekStartDay get weekStartDay;
 
@@ -55,6 +56,12 @@ mixin _$AppSettings {
                 other.onboardingComplete == onboardingComplete) &&
             (identical(other.voiceLanguage, voiceLanguage) ||
                 other.voiceLanguage == voiceLanguage) &&
+            (identical(
+                  other.voiceAllowOnDeviceFallback,
+                  voiceAllowOnDeviceFallback,
+                ) ||
+                other.voiceAllowOnDeviceFallback ==
+                    voiceAllowOnDeviceFallback) &&
             (identical(other.monthlyJoyTarget, monthlyJoyTarget) ||
                 other.monthlyJoyTarget == monthlyJoyTarget) &&
             (identical(other.weekStartDay, weekStartDay) ||
@@ -73,13 +80,14 @@ mixin _$AppSettings {
     biometricUnlockEnabled,
     onboardingComplete,
     voiceLanguage,
+    voiceAllowOnDeviceFallback,
     monthlyJoyTarget,
     weekStartDay,
   );
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, voiceAllowOnDeviceFallback: $voiceAllowOnDeviceFallback, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -99,6 +107,7 @@ abstract mixin class $AppSettingsCopyWith<$Res> {
     bool biometricUnlockEnabled,
     bool onboardingComplete,
     String voiceLanguage,
+    bool voiceAllowOnDeviceFallback,
     int? monthlyJoyTarget,
     WeekStartDay weekStartDay,
   });
@@ -124,6 +133,7 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
     Object? biometricUnlockEnabled = null,
     Object? onboardingComplete = null,
     Object? voiceLanguage = null,
+    Object? voiceAllowOnDeviceFallback = null,
     Object? monthlyJoyTarget = freezed,
     Object? weekStartDay = null,
   }) {
@@ -161,6 +171,10 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
             ? _self.voiceLanguage
             : voiceLanguage // ignore: cast_nullable_to_non_nullable
                   as String,
+        voiceAllowOnDeviceFallback: null == voiceAllowOnDeviceFallback
+            ? _self.voiceAllowOnDeviceFallback
+            : voiceAllowOnDeviceFallback // ignore: cast_nullable_to_non_nullable
+                  as bool,
         monthlyJoyTarget: freezed == monthlyJoyTarget
             ? _self.monthlyJoyTarget
             : monthlyJoyTarget // ignore: cast_nullable_to_non_nullable
@@ -276,6 +290,7 @@ extension AppSettingsPatterns on AppSettings {
       bool biometricUnlockEnabled,
       bool onboardingComplete,
       String voiceLanguage,
+      bool voiceAllowOnDeviceFallback,
       int? monthlyJoyTarget,
       WeekStartDay weekStartDay,
     )?
@@ -294,6 +309,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.biometricUnlockEnabled,
           _that.onboardingComplete,
           _that.voiceLanguage,
+          _that.voiceAllowOnDeviceFallback,
           _that.monthlyJoyTarget,
           _that.weekStartDay,
         );
@@ -326,6 +342,7 @@ extension AppSettingsPatterns on AppSettings {
       bool biometricUnlockEnabled,
       bool onboardingComplete,
       String voiceLanguage,
+      bool voiceAllowOnDeviceFallback,
       int? monthlyJoyTarget,
       WeekStartDay weekStartDay,
     )
@@ -343,6 +360,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.biometricUnlockEnabled,
           _that.onboardingComplete,
           _that.voiceLanguage,
+          _that.voiceAllowOnDeviceFallback,
           _that.monthlyJoyTarget,
           _that.weekStartDay,
         );
@@ -374,6 +392,7 @@ extension AppSettingsPatterns on AppSettings {
       bool biometricUnlockEnabled,
       bool onboardingComplete,
       String voiceLanguage,
+      bool voiceAllowOnDeviceFallback,
       int? monthlyJoyTarget,
       WeekStartDay weekStartDay,
     )?
@@ -391,6 +410,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.biometricUnlockEnabled,
           _that.onboardingComplete,
           _that.voiceLanguage,
+          _that.voiceAllowOnDeviceFallback,
           _that.monthlyJoyTarget,
           _that.weekStartDay,
         );
@@ -412,6 +432,7 @@ class _AppSettings implements AppSettings {
     this.biometricUnlockEnabled = false,
     this.onboardingComplete = false,
     this.voiceLanguage = 'zh',
+    this.voiceAllowOnDeviceFallback = true,
     this.monthlyJoyTarget,
     this.weekStartDay = WeekStartDay.monday,
   });
@@ -442,6 +463,9 @@ class _AppSettings implements AppSettings {
   @override
   @JsonKey()
   final String voiceLanguage;
+  @override
+  @JsonKey()
+  final bool voiceAllowOnDeviceFallback;
   @override
   final int? monthlyJoyTarget;
   @override
@@ -482,6 +506,12 @@ class _AppSettings implements AppSettings {
                 other.onboardingComplete == onboardingComplete) &&
             (identical(other.voiceLanguage, voiceLanguage) ||
                 other.voiceLanguage == voiceLanguage) &&
+            (identical(
+                  other.voiceAllowOnDeviceFallback,
+                  voiceAllowOnDeviceFallback,
+                ) ||
+                other.voiceAllowOnDeviceFallback ==
+                    voiceAllowOnDeviceFallback) &&
             (identical(other.monthlyJoyTarget, monthlyJoyTarget) ||
                 other.monthlyJoyTarget == monthlyJoyTarget) &&
             (identical(other.weekStartDay, weekStartDay) ||
@@ -500,13 +530,14 @@ class _AppSettings implements AppSettings {
     biometricUnlockEnabled,
     onboardingComplete,
     voiceLanguage,
+    voiceAllowOnDeviceFallback,
     monthlyJoyTarget,
     weekStartDay,
   );
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, voiceAllowOnDeviceFallback: $voiceAllowOnDeviceFallback, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -528,6 +559,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res>
     bool biometricUnlockEnabled,
     bool onboardingComplete,
     String voiceLanguage,
+    bool voiceAllowOnDeviceFallback,
     int? monthlyJoyTarget,
     WeekStartDay weekStartDay,
   });
@@ -553,6 +585,7 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
     Object? biometricUnlockEnabled = null,
     Object? onboardingComplete = null,
     Object? voiceLanguage = null,
+    Object? voiceAllowOnDeviceFallback = null,
     Object? monthlyJoyTarget = freezed,
     Object? weekStartDay = null,
   }) {
@@ -590,6 +623,10 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
             ? _self.voiceLanguage
             : voiceLanguage // ignore: cast_nullable_to_non_nullable
                   as String,
+        voiceAllowOnDeviceFallback: null == voiceAllowOnDeviceFallback
+            ? _self.voiceAllowOnDeviceFallback
+            : voiceAllowOnDeviceFallback // ignore: cast_nullable_to_non_nullable
+                  as bool,
         monthlyJoyTarget: freezed == monthlyJoyTarget
             ? _self.monthlyJoyTarget
             : monthlyJoyTarget // ignore: cast_nullable_to_non_nullable
