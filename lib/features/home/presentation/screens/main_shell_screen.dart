@@ -92,7 +92,8 @@ class MainShellScreen extends ConsumerWidget {
           );
         }
         // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
-        ref.invalidate(listTransactionsProvider(bookId: bookId));
+        // P2-1: the list's SQL lives in the base; the search layer cascades.
+        ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
         ref.invalidate(
           calendarDailyTotalsProvider(
             bookId: bookId,
@@ -149,7 +150,8 @@ class MainShellScreen extends ConsumerWidget {
         );
       }
       // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
-      ref.invalidate(listTransactionsProvider(bookId: bookId));
+      // P2-1: the list's SQL lives in the base; the search layer cascades.
+      ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
       ref.invalidate(
         calendarDailyTotalsProvider(
           bookId: bookId,

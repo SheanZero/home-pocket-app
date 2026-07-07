@@ -22,8 +22,9 @@ void invalidateTransactionDependents(
   required int year,
   required int month,
 }) {
-  // List + calendar (keyed — need the active filter context).
-  ref.invalidate(listTransactionsProvider(bookId: bookId));
+  // List + calendar (keyed — need the active filter context). The list's SQL
+  // lives in the base provider (P2-1); the search layer cascades from it.
+  ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
   ref.invalidate(
     calendarDailyTotalsProvider(bookId: bookId, year: year, month: month),
   );

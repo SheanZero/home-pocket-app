@@ -118,7 +118,9 @@ class ListScreen extends ConsumerWidget {
     return RefreshIndicator(
       color: palette.accentPrimary,
       onRefresh: () async {
-        ref.invalidate(listTransactionsProvider(bookId: bookId));
+        // Refresh re-fetches data → invalidate the SQL base (P2-1); the search
+        // layer [listTransactionsProvider] cascades because it watches the base.
+        ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
         ref.invalidate(
           calendarDailyTotalsProvider(
             bookId: bookId,

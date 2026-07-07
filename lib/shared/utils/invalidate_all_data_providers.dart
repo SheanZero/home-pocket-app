@@ -29,7 +29,8 @@ import '../../features/settings/presentation/providers/state_settings.dart';
 void invalidateAllDataProviders(WidgetRef ref) {
   // Home / List / Shadow.
   ref.invalidate(todayTransactionsProvider);
-  ref.invalidate(listTransactionsProvider);
+  // The list's SQL lives in the base provider (P2-1); the search layer cascades.
+  ref.invalidate(listTransactionsBaseProvider);
   ref.invalidate(calendarDailyTotalsProvider);
   ref.invalidate(shadowBooksProvider);
   ref.invalidate(shadowAggregateProvider);

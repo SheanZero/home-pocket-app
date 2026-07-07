@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,13 +36,32 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
   bool _searchExpanded = false;
   final _searchController = TextEditingController();
 
+  /// Pending debounce for the search field (P2-1). Cancelled on dispose and on
+  /// any explicit clear so a stale keystroke can never re-apply after a clear.
+  Timer? _searchDebounce;
+
   // GlobalKey to position the sort menu below the sort chip.
   final _sortChipKey = GlobalKey();
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Applies the search query after a 300ms quiet period (P2-1). Coalesces
+  /// rapid keystrokes so the list filter (and its in-memory search scan) updates
+  /// once the user pauses, not on every character. Explicit clears bypass this.
+  void _onSearchChanged(String value) {
+    // Keep the clear (X) affordance in sync with the raw text immediately …
+    setState(() {});
+    // … but defer the actual filter mutation.
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 300),
+      () => ref.read(listFilterProvider.notifier).setSearch(value),
+    );
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -333,9 +354,13 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                     child: TextField(
                       autofocus: true,
                       controller: _searchController,
-                      onChanged: (v) =>
-                          ref.read(listFilterProvider.notifier).setSearch(v),
+                      onChanged: _onSearchChanged,
                       onSubmitted: (_) {
+                        // Enter commits immediately — flush the debounce.
+                        _searchDebounce?.cancel();
+                        ref
+                            .read(listFilterProvider.notifier)
+                            .setSearch(_searchController.text);
                         if (_searchController.text.isEmpty) {
                           setState(() => _searchExpanded = false);
                         }
@@ -365,6 +390,9 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                         suffixIcon: _searchController.text.isNotEmpty
                             ? GestureDetector(
                                 onTap: () {
+                                  // Immediate clear — cancel any pending
+                                  // debounce so it can't re-apply stale text.
+                                  _searchDebounce?.cancel();
                                   ref
                                       .read(listFilterProvider.notifier)
                                       .setSearch('');
@@ -509,6 +537,8 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   backgroundColor: palette.backgroundMuted,
                   side: BorderSide(color: palette.borderDefault, width: 1),
                   onPressed: () {
+                    // Cancel any pending search debounce before the full reset.
+                    _searchDebounce?.cancel();
                     ref.read(listFilterProvider.notifier).clearAll();
                     setState(() {
                       _searchExpanded = false;
