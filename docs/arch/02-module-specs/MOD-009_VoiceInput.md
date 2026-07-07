@@ -1,13 +1,15 @@
 # MOD-009: 语音记账模块 - 架构文档（as-built）
 
 **文档编号:** MOD-009
-**文档版本:** 2.0
+**文档版本:** 2.1
 **创建日期:** 2026-02-22
-**最后更新:** 2026-07-06
+**最后更新:** 2026-07-07
 **状态:** 已实施（as-built 现状架构）
 **作者:** Claude (Fable 5)，人工评审待定
 
 > **v2.0 说明：** v1.0（2026-02-22）是实现前的技术设计稿（FR 规格 + 代码草图），其内容已被 Phase 20/23/40-42/49-52 与 quick task 260614/260622/260703/260706 系列的实际实现全面超越。v2.0 重写为**现状架构梳理 + 生态调研 + 改进路线**三部分。梳理时点 HEAD = `d8509872`（quick-260706-kzr 之后）。历史设计稿见 git history 中的 v1.0。
+>
+> **v2.1 更新（2026-07-07）：** §10 路线图 P0 全部六项与 P1-7/8 已由 quick-260706-saz / 260706-tm6 / 260707-bwy 落地——AmountArbiter（`lib/application/voice/amount_arbiter.dart`）、VoiceTuning（`lib/shared/constants/voice_tuning.dart`）、stop/reset 去重、黄金语料两档制（17 golden + 11 known-gap）、薄弱测试补齐、onDevice 离线默认开+静默降级（`VoiceTuning.preferOnDeviceRecognition`）、插件拼接审读（双拼风险 LOW，详见 260706-tm6 SUMMARY）、mixin 拆三文件（591/320/196，同库 part + extension 形态）、宿主语音接线抽出（残余 946 行，keypad/currency 段留待后续）、alternates 币种矛盾压制。**§2/§3/§8 中的 mixin 行号锚点与 S1/S2/S4/S5 痛点描述截至 v2.0 时点，拆分后已部分失效——以代码为准。** P1-9 sherpa spike 与 P2/P3 未动。另：§9.1 的 7.4.0 为调研时 pub 最新版，仓库实际解析 **7.3.0**（concat 逻辑在 `SpeechToTextPlugin.swift` :915-920 一带）。
 
 ---
 
