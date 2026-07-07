@@ -46,3 +46,14 @@ lib/features/family_sync/presentation/screens/create_group_screen.dart        # 
 lib/features/family_sync/presentation/providers/state_sync.dart      # 62% — needs notifier test for online/offline sync transitions — FUTURE-TOOL-03
 lib/features/home/presentation/providers/state_shadow_books.dart     # 35% — needs notifier test for book-switch flow — FUTURE-TOOL-03
 lib/features/settings/presentation/widgets/appearance_section.dart   # 60% — needs widget test for theme/locale toggles — FUTURE-TOOL-03
+
+# --- Added 2026-07-07 (quick 260707-wq1) ------------------------------------
+# CI run 28872322982 (main) surfaced this file at 68.97% (40/58), one line
+# under the 70 threshold. It is pure provider-wiring — 20 @riverpod use-case
+# getters, zero branching — structurally identical to the application/*/
+# repository_providers.dart entries above. The gap cascades from the
+# already-deferred analytics_screen.dart (53%): these providers are exercised
+# only transitively by that screen's (deferred) widget test, so lifting the
+# screen's coverage under FUTURE-TOOL-03 lifts this file with it. Same bucket.
+
+lib/features/analytics/presentation/providers/repository_providers.dart  # 69% — provider wrapper, .g.dart filtered; 20 use-case getters, no branching; gap cascades from deferred analytics_screen — FUTURE-TOOL-03
