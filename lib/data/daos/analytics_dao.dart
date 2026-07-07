@@ -222,6 +222,59 @@ class AnalyticsDao {
         .toList();
   }
 
+  /// STATSUI-DONUT-MEMBER / D2 / P2-3: per-category expense totals for ONE
+  /// member ([deviceId]) over a window, aggregated in SQL. Replaces the old
+  /// findByBookIds + Dart-loop path in memberFilteredCategoryBreakdownProvider.
+  ///
+  /// [deviceId] == null aggregates across all members: the `device_id` clause
+  /// is omitted entirely (never compared to NULL, which SQL treats as false).
+  /// Mirrors [getCategoryTotals] exactly plus the member narrowing — expense
+  /// (or [type]) only, non-deleted, optional [entrySourceFilter].
+  Future<List<CategoryTotalResult>> getMemberCategoryTotals({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? deviceId,
+    EntrySource? entrySourceFilter,
+    String type = 'expense',
+  }) async {
+    final deviceClause = deviceId != null ? ' AND device_id = ?' : '';
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
+    final results = await _db
+        .customSelect(
+          'SELECT category_id, SUM(amount) as total, COUNT(*) as tx_count '
+          'FROM transactions '
+          'WHERE book_id = ? AND is_deleted = 0 AND type = ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$deviceClause'
+          '$entrySourceClause '
+          'GROUP BY category_id '
+          'ORDER BY total DESC',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withString(type),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+            if (deviceId != null) Variable.withString(deviceId),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => CategoryTotalResult(
+            categoryId: row.read<String>('category_id'),
+            totalAmount: row.read<int>('total'),
+            transactionCount: row.read<int>('tx_count'),
+          ),
+        )
+        .toList();
+  }
+
   /// Get daily expense totals for a given month.
   Future<List<DailyTotalResult>> getDailyTotals({
     required String bookId,

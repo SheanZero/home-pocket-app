@@ -107,53 +107,43 @@ Future<MemberFilteredCategoryBreakdown> memberFilteredCategoryBreakdown(
   required String deviceId,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
-  final repository = ref.watch(transactionRepositoryProvider);
+  final repository = ref.watch(analyticsRepositoryProvider);
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
       : null;
   final start = DateBoundaries.dayRange(startDate).start;
   final end = DateBoundaries.dayRange(endDate).end;
-  final txns = await repository.findByBookIds(
-    [bookId],
-    ledgerType: null,
-    categoryId: null,
+  // P2-3: expense-only, member-only aggregation is pushed into SQL — no more
+  // pulling every row for the window and filtering/summing in a Dart loop.
+  final totals = await repository.getMemberCategoryTotals(
+    bookId: bookId,
     startDate: start,
     endDate: end,
-    sortField: SortField.timestamp,
-    sortDirection: SortDirection.desc,
+    deviceId: deviceId,
+    entrySourceFilter: entrySourceFilter,
   );
-  // Expense rows recorded by the chosen member only.
-  final memberTxns = txns.where(
-    (tx) =>
-        tx.type == TransactionType.expense &&
-        tx.deviceId == deviceId &&
-        (entrySourceFilter == null || tx.entrySource == entrySourceFilter),
-  );
-  // Aggregate by leaf categoryId (DonutHero rolls these up to L1 itself).
-  final amountByCat = <String, int>{};
-  final countByCat = <String, int>{};
   var total = 0;
   var entryCount = 0;
-  for (final tx in memberTxns) {
-    amountByCat[tx.categoryId] = (amountByCat[tx.categoryId] ?? 0) + tx.amount;
-    countByCat[tx.categoryId] = (countByCat[tx.categoryId] ?? 0) + 1;
-    total += tx.amount;
-    entryCount += 1;
+  for (final t in totals) {
+    total += t.totalAmount;
+    entryCount += t.transactionCount;
   }
-  final breakdowns = <CategoryBreakdown>[];
-  amountByCat.forEach((catId, amount) {
-    breakdowns.add(
-      CategoryBreakdown(
-        categoryId: catId,
-        categoryName: catId,
-        icon: '',
-        color: '',
-        amount: amount,
-        percentage: total > 0 ? amount / total * 100 : 0,
-        transactionCount: countByCat[catId] ?? 0,
-      ),
-    );
-  });
+  // One CategoryBreakdown per leaf category (DonutHero rolls these up to L1 and
+  // re-resolves the localized name/icon/color; percentage is off the member's
+  // true total).
+  final breakdowns = totals
+      .map(
+        (t) => CategoryBreakdown(
+          categoryId: t.categoryId,
+          categoryName: t.categoryId,
+          icon: '',
+          color: '',
+          amount: t.totalAmount,
+          percentage: total > 0 ? t.totalAmount / total * 100 : 0,
+          transactionCount: t.transactionCount,
+        ),
+      )
+      .toList();
   return MemberFilteredCategoryBreakdown(
     breakdowns: breakdowns,
     total: total,

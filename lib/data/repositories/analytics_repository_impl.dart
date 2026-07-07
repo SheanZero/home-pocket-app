@@ -65,6 +65,35 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
+  Future<List<CategoryTotal>> getMemberCategoryTotals({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? deviceId,
+    EntrySource? entrySourceFilter,
+    String type = 'expense',
+  }) async {
+    final results = await _dao.getMemberCategoryTotals(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      deviceId: deviceId,
+      entrySourceFilter: entrySourceFilter,
+      type: type,
+    );
+
+    return results
+        .map(
+          (row) => CategoryTotal(
+            categoryId: row.categoryId,
+            totalAmount: row.totalAmount,
+            transactionCount: row.transactionCount,
+          ),
+        )
+        .toList();
+  }
+
+  @override
   Future<List<DailyTotal>> getDailyTotals({
     required String bookId,
     required DateTime startDate,

@@ -23,6 +23,19 @@ abstract class AnalyticsRepository {
     String type = 'expense',
   });
 
+  /// STATSUI-DONUT-MEMBER / D2 / P2-3 — per-category expense totals for ONE
+  /// member ([deviceId]) over the window, aggregated in SQL. [deviceId] == null
+  /// aggregates across all members (the device clause is omitted). Powers
+  /// memberFilteredCategoryBreakdownProvider without pulling every row into Dart.
+  Future<List<CategoryTotal>> getMemberCategoryTotals({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? deviceId,
+    EntrySource? entrySourceFilter,
+    String type = 'expense',
+  });
+
   Future<List<DailyTotal>> getDailyTotals({
     required String bookId,
     required DateTime startDate,

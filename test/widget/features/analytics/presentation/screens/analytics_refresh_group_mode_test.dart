@@ -384,6 +384,16 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }) => throw UnimplementedError();
 
   @override
+  Future<List<CategoryTotal>> getMemberCategoryTotals({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? deviceId,
+    EntrySource? entrySourceFilter,
+    String type = 'expense',
+  }) => throw UnimplementedError();
+
+  @override
   Future<List<DailyTotal>> getDailyTotals({
     required String bookId,
     required DateTime startDate,
