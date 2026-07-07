@@ -1,5 +1,9 @@
 # lib/data/import_guard.yaml — Data uses Domain + Infrastructure
 # Data MUST NOT reach into Application use cases or Presentation.
+#
+# INERT for intra-project imports (deny matches `package:` prefixes; repo uses relative
+# imports). Real enforcement: test/architecture/layer_import_rules_test.dart. Rules kept
+# to preserve intent — a green `dart run custom_lint` is not layer-compliance evidence.
 deny:
   - package:home_pocket/features/*/presentation/**
   - package:home_pocket/application/**

@@ -1,0 +1,10 @@
+# Presentation layer — uses Application + Domain only. MUST NOT reach Infrastructure.
+# Mirrors the sibling feature presentation guards (accounting/settings), filling the
+# applock coverage gap. Advisory only: relative imports bypass these `package:` deny
+# patterns — the real layer enforcement is test/architecture/layer_import_rules_test.dart.
+deny:
+  - package:home_pocket/infrastructure/**
+  - package:home_pocket/data/daos/**
+  - package:home_pocket/data/tables/**
+
+inherit: true

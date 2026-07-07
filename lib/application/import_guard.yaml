@@ -1,5 +1,16 @@
 # lib/application/import_guard.yaml — Application uses Domain + Infrastructure
 # Application MUST NOT reach into Presentation or into Data tables/DAOs directly.
+#
+# INERT for intra-project imports: these deny patterns match `package:home_pocket/…`
+# prefixes, but this repo enforces prefer_relative_imports, so the custom_lint never
+# fires on them. The ACTUAL enforcement of the application→data (and every other layer)
+# direction is test/architecture/layer_import_rules_test.dart, which scans real
+# (relative-normalized) imports. Rules kept here to preserve intent — do NOT treat a
+# green `dart run custom_lint` as layer-compliance evidence.
+#
+# Sanctioned exception, encoded in that test's _allowlist: composition-root wiring
+# (application/*/*_providers.dart) MAY import lib/data/ to construct concrete
+# repositories/DAOs; every other application file depends on domain interfaces only.
 deny:
   - package:home_pocket/features/*/presentation/**
   - package:home_pocket/data/tables/**

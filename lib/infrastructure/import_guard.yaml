@@ -1,4 +1,8 @@
 # lib/infrastructure/import_guard.yaml — Infrastructure depends on external SDKs only
+#
+# INERT for intra-project imports (deny matches `package:` prefixes; repo uses relative
+# imports). Real enforcement: test/architecture/layer_import_rules_test.dart. Rules kept
+# to preserve intent — a green `dart run custom_lint` is not layer-compliance evidence.
 deny:
   - package:home_pocket/features/**
   - package:home_pocket/application/**
