@@ -1701,6 +1701,24 @@ abstract class S {
   /// **'Language used for speech-to-text'**
   String get voiceLanguageSubtitle;
 
+  /// Title of the on-device recognition status row in voice settings
+  ///
+  /// In en, this message translates to:
+  /// **'On-device recognition'**
+  String get voiceOnDeviceRecognitionTitle;
+
+  /// Title of the switch that allows on-device recognition to fall back to cloud recognition
+  ///
+  /// In en, this message translates to:
+  /// **'Allow cloud fallback'**
+  String get voiceAllowCloudFallbackTitle;
+
+  /// Subtitle explaining that disabling cloud fallback keeps recognition on-device and surfaces failures
+  ///
+  /// In en, this message translates to:
+  /// **'When off, recognition stays on-device and a failure is shown instead of using cloud recognition.'**
+  String get voiceAllowCloudFallbackSubtitle;
+
   /// Title for the family sync feature
   ///
   /// In en, this message translates to:

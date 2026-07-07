@@ -1114,6 +1114,18 @@
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
   },
+  "voiceOnDeviceRecognitionTitle": "On-device recognition",
+  "@voiceOnDeviceRecognitionTitle": {
+    "description": "Title of the on-device recognition status row in voice settings"
+  },
+  "voiceAllowCloudFallbackTitle": "Allow cloud fallback",
+  "@voiceAllowCloudFallbackTitle": {
+    "description": "Title of the switch that allows on-device recognition to fall back to cloud recognition"
+  },
+  "voiceAllowCloudFallbackSubtitle": "When off, recognition stays on-device and a failure is shown instead of using cloud recognition.",
+  "@voiceAllowCloudFallbackSubtitle": {
+    "description": "Subtitle explaining that disabling cloud fallback keeps recognition on-device and surfaces failures"
+  },
   "familySync": "Family Sync",
   "@familySync": {
     "description": "Title for the family sync feature"

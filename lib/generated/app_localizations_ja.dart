@@ -850,6 +850,16 @@ class SJa extends S {
   String get voiceLanguageSubtitle => '音声入力に使用する言語';
 
   @override
+  String get voiceOnDeviceRecognitionTitle => 'オンデバイス認識';
+
+  @override
+  String get voiceAllowCloudFallbackTitle => 'クラウドへのフォールバックを許可';
+
+  @override
+  String get voiceAllowCloudFallbackSubtitle =>
+      'オフにすると認識はデバイス内で完結し、失敗時はクラウド認識を使わずエラーを表示します。';
+
+  @override
   String get familySync => 'ファミリー同期';
 
   @override

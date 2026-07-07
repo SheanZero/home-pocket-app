@@ -1114,6 +1114,18 @@
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
   },
+  "voiceOnDeviceRecognitionTitle": "设备端识别",
+  "@voiceOnDeviceRecognitionTitle": {
+    "description": "Title of the on-device recognition status row in voice settings"
+  },
+  "voiceAllowCloudFallbackTitle": "允许云端回退",
+  "@voiceAllowCloudFallbackTitle": {
+    "description": "Title of the switch that allows on-device recognition to fall back to cloud recognition"
+  },
+  "voiceAllowCloudFallbackSubtitle": "关闭后，识别将仅在设备端进行；失败时会提示错误，而不使用云端识别。",
+  "@voiceAllowCloudFallbackSubtitle": {
+    "description": "Subtitle explaining that disabling cloud fallback keeps recognition on-device and surfaces failures"
+  },
   "familySync": "家庭同步",
   "@familySync": {
     "description": "Title for the family sync feature"

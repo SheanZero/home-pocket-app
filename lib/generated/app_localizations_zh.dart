@@ -848,6 +848,16 @@ class SZh extends S {
   String get voiceLanguageSubtitle => '语音转文字所使用的语言';
 
   @override
+  String get voiceOnDeviceRecognitionTitle => '设备端识别';
+
+  @override
+  String get voiceAllowCloudFallbackTitle => '允许云端回退';
+
+  @override
+  String get voiceAllowCloudFallbackSubtitle =>
+      '关闭后，识别将仅在设备端进行；失败时会提示错误，而不使用云端识别。';
+
+  @override
   String get familySync => '家庭同步';
 
   @override

@@ -858,6 +858,16 @@ class SEn extends S {
   String get voiceLanguageSubtitle => 'Language used for speech-to-text';
 
   @override
+  String get voiceOnDeviceRecognitionTitle => 'On-device recognition';
+
+  @override
+  String get voiceAllowCloudFallbackTitle => 'Allow cloud fallback';
+
+  @override
+  String get voiceAllowCloudFallbackSubtitle =>
+      'When off, recognition stays on-device and a failure is shown instead of using cloud recognition.';
+
+  @override
   String get familySync => 'Family Sync';
 
   @override

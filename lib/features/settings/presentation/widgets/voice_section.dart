@@ -30,6 +30,38 @@ class VoiceSection extends ConsumerWidget {
           subtitle: Text(_getLanguageLabel(settings.voiceLanguage, context)),
           onTap: () => _showLanguageDialog(context, ref),
         ),
+        // KFB C3 (T-kfb-01): on-device recognition status + auto-degradation
+        // control. The status reflects the effective POLICY derived from
+        // [settings.voiceAllowOnDeviceFallback] — NOT a hardware-capability
+        // probe (speech_to_text 7.x exposes no synchronous "on-device
+        // supported" query).
+        ListTile(
+          leading: Icon(
+            settings.voiceAllowOnDeviceFallback
+                ? Icons.cloud_queue
+                : Icons.phonelink_lock,
+          ),
+          title: Text(S.of(context).voiceOnDeviceRecognitionTitle),
+          subtitle: Text(
+            key: const ValueKey('voiceOnDeviceStatusSubtitle'),
+            settings.voiceAllowOnDeviceFallback
+                ? S.of(context).voiceAllowCloudFallbackTitle
+                : S.of(context).voiceAllowCloudFallbackSubtitle,
+          ),
+        ),
+        SwitchListTile(
+          key: const ValueKey('voiceAllowCloudFallbackSwitch'),
+          secondary: const Icon(Icons.cloud_sync),
+          title: Text(S.of(context).voiceAllowCloudFallbackTitle),
+          subtitle: Text(S.of(context).voiceAllowCloudFallbackSubtitle),
+          value: settings.voiceAllowOnDeviceFallback,
+          onChanged: (value) async {
+            await ref
+                .read(settingsRepositoryProvider)
+                .setVoiceAllowOnDeviceFallback(value);
+            ref.invalidate(appSettingsProvider);
+          },
+        ),
       ],
     );
   }
