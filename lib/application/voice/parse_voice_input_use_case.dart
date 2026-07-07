@@ -106,7 +106,16 @@ class ParseVoiceInputUseCase {
       // longest-first token scan SEPARATELY from the amount path so the
       // integer amount is never polluted (T-42-07). Bare 元/円 are native
       // (null) in every locale — D-08's zh→CNY branch was superseded 260703.
-      final detectedCurrency = _detectCurrency(recognizedText, localeId);
+      // voice-consolidation P1-8: the primary detection is then cross-validated
+      // against the alternate transcripts (mirrors the 260703 1D amount
+      // cross-validation) — a contradicting foreign ISO on any alternate
+      // conservatively suppresses the conversion.
+      final primaryCurrency = _detectCurrency(recognizedText, localeId);
+      final detectedCurrency = _crossValidateCurrency(
+        primary: primaryCurrency,
+        alternateTexts: alternateTexts,
+        localeId: localeId,
+      );
 
       // 2. Extract date
       final parsedDate = _textParser.extractDate(recognizedText);
@@ -265,6 +274,37 @@ class ParseVoiceInputUseCase {
     // 260703 BUG-2: the bare 元 special case (D-08: zh → CNY) is GONE — it
     // falls through here with the other native terminators in every locale.
     return null;
+  }
+
+  /// Cross-validates the primary currency detection against the recognizer's
+  /// alternate transcripts (voice-consolidation P1-8; mirrors the 260703 1D
+  /// alternates cross-validation for ITN-concat amounts).
+  ///
+  /// A currency conversion is a high-risk write — it rewrites the booked
+  /// amount through a rate fetch — so when ANY alternate explicitly detects a
+  /// DIFFERENT foreign ISO than [primary] (both non-null), the detection is
+  /// conservatively suppressed to null: no conversion fires, the form stays
+  /// JPY-native, and the user can change the currency manually.
+  ///
+  /// Non-contradictions pass [primary] through untouched: an alternate with
+  /// the same ISO, with no currency token, or with only a native token
+  /// (bare 元/円 → null via [_detectCurrency]) never suppresses. Suppression
+  /// is one-sided: a native (null) primary is never promoted to foreign by an
+  /// alternate. Each alternate runs the SAME [_detectCurrency] single
+  /// detection point — no second token-scan implementation.
+  String? _crossValidateCurrency({
+    required String? primary,
+    required List<String> alternateTexts,
+    required String? localeId,
+  }) {
+    if (primary == null) return null;
+    for (final alternate in alternateTexts) {
+      final alternateCurrency = _detectCurrency(alternate, localeId);
+      if (alternateCurrency != null && alternateCurrency != primary) {
+        return null;
+      }
+    }
+    return primary;
   }
 
   /// Extracts the category-relevant keyword from voice input.
