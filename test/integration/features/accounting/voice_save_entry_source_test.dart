@@ -99,6 +99,7 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
     required String localeId,
     Duration listenFor = const Duration(seconds: 30),
     Duration pauseFor = const Duration(seconds: 3),
+    bool allowOnDeviceFallback = true,
   }) async {
     this.onResult = onResult;
     this.onSoundLevel = onSoundLevel;

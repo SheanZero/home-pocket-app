@@ -67,6 +67,7 @@ class CapturingStartSpeechRecognitionUseCase
     required String localeId,
     Duration listenFor = const Duration(seconds: 30),
     Duration pauseFor = const Duration(seconds: 3),
+    bool allowOnDeviceFallback = true,
   }) async {
     this.onResult = onResult;
     startedLocaleId = localeId;
