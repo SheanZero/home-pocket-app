@@ -92,9 +92,13 @@ void main() {
   testWidgets(
     'scrollToSecurity: true brings SecuritySection into view after first frame',
     (tester) async {
-      // A short viewport forces the (8th) SecuritySection off-screen so the
-      // deep-link scroll is observable.
-      tester.view.physicalSize = const Size(390, 300);
+      // A realistic phone viewport (matching the D-10 cases below) still leaves
+      // the 8th SecuritySection well below the fold, so the deep-link scroll is
+      // observable — but unlike a pathologically short 300px viewport it gives
+      // the lazy ListView room to build the target's element so its GlobalKey
+      // context exists for `ensureVisible` (the tile heights above it are not a
+      // contract — a taller section like VoiceSection must not break this).
+      tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -116,7 +120,7 @@ void main() {
       // The security toggle is genuinely on-screen (within the viewport).
       final tileRect = tester.getRect(find.byType(SecuritySection));
       expect(tileRect.bottom, greaterThan(0));
-      expect(tileRect.top, lessThan(300));
+      expect(tileRect.top, lessThan(844));
     },
   );
 
