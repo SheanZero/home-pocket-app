@@ -35,6 +35,9 @@ import 'voice_ptt_session_mixin.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
 part 'manual_one_step_voice_wiring.dart';
+part 'manual_one_step_keypad.dart';
+part 'manual_one_step_currency.dart';
+part 'manual_one_step_save.dart';
 
 /// WR-01: returns true when a foreign rate-fetch's captured inputs no longer
 /// match the screen's current inputs — i.e. the user changed the currency,
@@ -160,6 +163,15 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   String get pttVoiceLocaleId => _voiceLocaleId;
   @override
   void onPttSessionChanged(VoidCallback apply) {
+    if (mounted) setState(apply);
+  }
+
+  /// quick-260707-kfb A2: the sole sanctioned repaint hook for the keypad /
+  /// currency / save `part` extensions. `setState` is `@protected` and cannot be
+  /// called from an extension, so the moved `setState(...)` bodies call this
+  /// instead — behavior-identical (the added `mounted` guard is always true in
+  /// the synchronous handlers and already present in the async ones).
+  void _rebuild(VoidCallback apply) {
     if (mounted) setState(apply);
   }
 
@@ -349,373 +361,14 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     // _isTextFieldFocused = false → _showSmartKeypad = true.
   }
 
-  void _onAmountTap() {
-    _restoreKeypadFocus();
-  }
-
-  // ── Digit handlers (Phase 42: delegated to the currency-aware controller) ──
-  //
-  // Each handler mutates [_controller] (which owns the D-06 dot-gating + D-07
-  // decimal cap per currency) then mirrors the result into [_amount] and the
-  // form via [_syncAmountToForm]. JPY (decimals==0) behaves byte-identically to
-  // the old inline cap: dot gated off, no fractional digits (CURR-04).
-
-  void _onDigit(String digit) {
-    _controller.onDigit(digit);
-    _syncAmountToForm();
-  }
-
-  void _onDoubleZero() {
-    _controller.onDoubleZero();
-    _syncAmountToForm();
-  }
-
-  void _onDot() {
-    _controller.onDot();
-    _syncAmountToForm();
-  }
-
-  void _onDelete() {
-    _controller.onDelete();
-    _syncAmountToForm();
-  }
-
-  void _onClear() {
-    while (_controller.text.isNotEmpty) {
-      _controller.onDelete();
-    }
-    // 260622-nhs: clearing the amount drops voice provenance — a row the user
-    // re-enters by keypad after a clear is `manual`, not `voice` (T-nhs-03).
-    _lastFillWasVoice = false;
-    _syncAmountToForm();
-  }
-
-  /// Mirror the controller's text into [_amount] (for AmountDisplay + the empty
-  /// / zero save guard) and push the converted JPY amount + currency triple into
-  /// the form so `submit()` persists the right figures.
-  ///
-  /// - JPY (CURR-04): the entered figure IS the JPY amount; triple cleared so
-  ///   the create use case persists a native JPY row, byte-identical to before.
-  /// - Foreign: the JPY amount comes from the single-site [convertToJpy] using
-  ///   the rate resolved by the preview's keyed provider; the triple is pushed
-  ///   alongside. When no rate has resolved yet the JPY mirror stays 0 and the
-  ///   triple is withheld (save is still guarded on a non-empty amount).
-  void _syncAmountToForm() {
-    setState(() => _amount = _controller.text);
-    if (!_isForeign) {
-      final parsed = (double.tryParse(_amount) ?? 0.0).round();
-      _formKey.currentState?.updateAmount(parsed);
-      _formKey.currentState?.updateCurrencyTriple(
-        originalCurrency: null,
-        originalAmount: null,
-        appliedRate: null,
-      );
-      return;
-    }
-    // Push the freshly-entered amount/triple immediately so an instant Save
-    // persists the correct figure and the staleness guard compares against live
-    // input. The FX card now reads the LIVE amount too (Quick 260613-wuv2): with
-    // the amount out of the rate provider key, feeding it live refreshes only the
-    // derived-JPY number with no whole-card reload, so no debounce is needed.
-    _pushForeignTriple();
-  }
-
-  /// Resolve the current rate (cache-first via the preview's keyed provider) and
-  /// push the converted JPY amount + foreign triple into the form. The rate
-  /// figure used here is the SAME one the preview renders (single conversion
-  /// site, ADR-020) — guaranteeing preview == persisted.
-  Future<void> _pushForeignTriple() async {
-    final minorUnits = _originalMinorUnits;
-    final currency = _currency;
-    final date = _selectedDate;
-    if (minorUnits <= 0) {
-      _formKey.currentState?.updateAmount(0);
-      _formKey.currentState?.updateCurrencyTriple(
-        originalCurrency: null,
-        originalAmount: null,
-        appliedRate: null,
-      );
-      return;
-    }
-    // Quick 260613-ufn (D-1): a user-edited (manual-override) rate wins over the
-    // auto-resolved one. validateAppliedRate gates a malformed override out so
-    // we never persist garbage; an invalid override falls through to the
-    // auto-resolved rate (the card surfaces its own inline error).
-    final manualRate = _manualForeignRate;
-    if (manualRate != null && validateAppliedRate(manualRate) == null) {
-      final jpy = convertToJpy(
-        originalMinorUnits: minorUnits,
-        appliedRate: manualRate,
-        subunitToUnit: subunitToUnitFor(currency),
-      );
-      _formKey.currentState?.updateAmount(jpy);
-      _formKey.currentState?.updateCurrencyTriple(
-        originalCurrency: currency,
-        originalAmount: minorUnits,
-        appliedRate: manualRate,
-      );
-      return;
-    }
-
-    final args = ConversionPreviewArgs(currency: currency, date: date);
-    try {
-      final withSignal = await ref.read(conversionRateProvider(args).future);
-      // Bail if the user changed currency/amount/date while awaiting.
-      // WR-01: `date` is captured before the await; a date change mid-fetch
-      // would otherwise persist an OLD-date rate against the NEW-date timestamp
-      // (undetectable post-persist — the triple is excluded from the hash chain,
-      // ADR-021). The date guard makes the stale-date push impossible.
-      if (!mounted ||
-          foreignPushIsStale(
-            capturedCurrency: currency,
-            currentCurrency: _currency,
-            capturedMinorUnits: minorUnits,
-            currentMinorUnits: _originalMinorUnits,
-            capturedDate: date,
-            currentDate: _selectedDate,
-          )) {
-        return;
-      }
-      final rate = _rateStringOf(withSignal.result);
-      if (rate == null) {
-        // RateUnavailable — no rate to persist yet. Withhold the triple; the
-        // preview surfaces the mandatory-rate prompt.
-        //
-        // WR-02: a PRIOR successful push may have left `_amount = someJpy`.
-        // Clearing only the triple here would leave that stale JPY as a
-        // JPY-native row, so a Save in this window persists a stale converted
-        // amount. Reset the form amount to 0 FIRST so the create use case
-        // rejects the save (amount <= 0) instead. When the user later supplies
-        // a manual rate the normal push (mandatory-manual-rate, P41 D-08)
-        // re-computes the JPY amount.
-        _formKey.currentState?.updateAmount(0);
-        _formKey.currentState?.updateCurrencyTriple(
-          originalCurrency: null,
-          originalAmount: null,
-          appliedRate: null,
-        );
-        return;
-      }
-      final jpy = convertToJpy(
-        originalMinorUnits: minorUnits,
-        appliedRate: rate,
-        subunitToUnit: subunitToUnitFor(currency),
-      );
-      _formKey.currentState?.updateAmount(jpy);
-      _formKey.currentState?.updateCurrencyTriple(
-        originalCurrency: currency,
-        originalAmount: minorUnits,
-        appliedRate: rate,
-      );
-    } catch (_) {
-      // Rate fetch failed unexpectedly — leave the triple withheld; the preview
-      // renders the mandatory-rate prompt and the save guard blocks an empty
-      // amount. (Network failure degrades to a fallback rate upstream.)
-    }
-  }
-
-  /// Rate string for any rate-bearing [RateResult] variant; null for
-  /// [RateUnavailable].
-  String? _rateStringOf(RateResult r) => switch (r) {
-    RateFetched(:final rate) => rate,
-    RateCached(:final rate) => rate,
-    RateFallback(:final rate) => rate,
-    RateManual(:final rate) => rate,
-    RateUnavailable() => null,
-  };
-
-  /// Passive sink for the preview's ADR-022 rate signals (D-02 dialog / D-03
-  /// toast). During FRESH entry there is no `previousRate` — the entry flow
-  /// does not carry a prior applied rate — so the use case never emits these
-  /// signals on this screen (verified: the panel's args omit previousRate /
-  /// wasManualOverride, the two inputs that gate signal emission). The full
-  /// dialog/toast UX (ADR-022 D-02/D-03) belongs to the EDIT host (42-09),
-  /// where a prior rate exists to diff against. This callback is the documented
-  /// 42-08 boundary; it intentionally no-ops so signals can never block keypad
-  /// entry. Kept non-null so the panel's `ref.listen` has a sink.
-  void _onRateSignal(RateSignal signal) {
-    // No-op on the entry screen (see doc comment). 42-09 wires the real UX.
-  }
-
-  /// Quick 260613-ufn (D-4): the form's date picker changed the transaction
-  /// date. Update the screen's `_selectedDate` so the keyed
-  /// `conversionRateProvider(currency,date)` re-resolves the rate for the
-  /// new date and the unified card's 汇率/日元/汇率日期/staleness all update. A
-  /// date change supersedes any manual override (the override was keyed to the
-  /// previous date's rate), then re-pushes the freshly-resolved triple.
-  void _onFormDateChanged(DateTime date) {
-    final normalized = DateTime(date.year, date.month, date.day);
-    if (normalized ==
-        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day)) {
-      return;
-    }
-    setState(() {
-      _selectedDate = normalized;
-      _manualForeignRate = null;
-    });
-    if (_isForeign) {
-      _pushForeignTriple();
-    }
-  }
-
-  /// Quick 260613-ufn (D-1): the user hand-edited the 汇率 row in the unified
-  /// card. Record the override so `_pushForeignTriple` persists the edited rate
-  /// (manual override) and immediately push the recomputed triple. The card's
-  /// own derived JPY row already reflects the edit (single convertToJpy site).
-  void _onForeignRateEdited(CurrencyLinkedEditValue value) {
-    setState(() => _manualForeignRate = value.appliedRate);
-    _pushForeignTriple();
-  }
-
-  // ── Currency selection (CURR-01/03/05) ──
-
-  /// CURR-01: open the currency selector without leaving the entry screen.
-  void _onCurrencyTap() {
-    FocusManager.instance.primaryFocus?.unfocus();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => CurrencySelectorSheet(
-        selectedCode: _currency,
-        onSelect: _onCurrencySelected,
-      ),
-    );
-    if (mounted) setState(() => _amountFocused = true);
-  }
-
-  /// Apply a selected currency: truncate the amount per the new minor unit
-  /// (D-08), gate the dot key (D-06), feed recent-use (CURR-03), and re-sync the
-  /// converted JPY + triple. Selecting JPY clears the triple (CURR-04).
-  void _onCurrencySelected(String code) {
-    final newCode = code.toUpperCase();
-    final newDecimals = currencyFractionDigitsFor(newCode);
-    // CURR-03: record the foreign selection for the LRU (JPY is ignored inside).
-    ref.read(recentCurrencyProvider.notifier).recordUse(newCode);
-    setState(() {
-      _currency = newCode;
-      // D-08: truncate-not-round to the new minor unit; adopts the new cap.
-      _controller.onCurrencyChange(newDecimals);
-      _amount = _controller.text;
-      // Quick 260613-ufn: a currency change supersedes any manual rate override
-      // (the override was keyed to the previous currency's rate).
-      _manualForeignRate = null;
-    });
-    _syncAmountToForm();
-  }
-
-  // ── Save path ──
-
-  /// P19-W1: short-circuits with a top error toast when category hasn't loaded
-  /// yet or the amount is empty/zero. Both SmartKeyboard.onNext and
-  /// KeyboardToolbar.onSave point here.
-  Future<void> _trySave() async {
-    // 260603-nr1 #1: reject empty / zero amount before any save attempt.
-    if (_amount.isEmpty || (double.tryParse(_amount) ?? 0) <= 0) {
-      showErrorFeedback(context, S.of(context).pleaseEnterAmount);
-      return;
-    }
-    if (!_canSave) {
-      if (_selectedCategory == null) {
-        showErrorFeedback(context, S.of(context).pleaseSelectCategory);
-      }
-      return;
-    }
-    await _save();
-  }
-
-  /// Core save handler — delegates to the embedded form's submit().
-  /// Ported from transaction_confirm_screen.dart:55-81.
-  ///
-  /// WR-01: try/finally ensures _isSubmitting is always reset even if
-  /// submit() throws an unexpected exception, preventing a permanent
-  /// disabled-save-button deadlock.
-  Future<void> _save() async {
-    if (_isSubmitting) return;
-    setState(() => _isSubmitting = true);
-    try {
-      final result = await _formKey.currentState!.submit();
-      if (!mounted) return;
-      result.when(
-        success: (_) {
-          // 260614-iww: branch on continuousMode.
-          if (widget.continuousMode) {
-            // Continuous (FAB long-press) entry: keep the page open, show a
-            // longer-lived warm "keep going" toast with an inline exit link
-            // that returns ONCE to the page before recording, then reset the
-            // form in place for the next entry.
-            showSuccessFeedback(
-              context,
-              S.of(context).continuousKeepGoing,
-              duration: const Duration(seconds: 5),
-              actionLabel: S.of(context).recordingExitLink,
-              onAction: () {
-                if (!mounted) return;
-                Navigator.of(context).pop();
-              },
-            );
-            _resetForContinuousEntry();
-          } else {
-            // Single-tap entry: show a warm "recorded" toast then pop back to
-            // the previous page (no form reset — the screen is closing).
-            showSuccessFeedback(context, S.of(context).entrySavedDone);
-            Navigator.of(context).pop();
-          }
-        },
-        validationError: (msg) {
-          showErrorFeedback(context, msg);
-        },
-        persistError: (msg) {
-          showErrorFeedback(context, msg);
-        },
-      );
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
-    }
-  }
-
-  /// 260603-nr1 #1: reset the form in place after a successful save so the user
-  /// can keep entering without the page closing. Clears the amount (mirrors
-  /// [_onClear]), resets merchant/note, resets the date to today, re-seeds the
-  /// default category, and reclaims amount focus so the SmartKeyboard reappears.
-  Future<void> _resetForContinuousEntry() async {
-    if (!mounted) return;
-    setState(() {
-      // Clear the controller text (mirrors _onClear) and reset to JPY so the
-      // next entry starts on the CURR-04 native path.
-      while (_controller.text.isNotEmpty) {
-        _controller.onDelete();
-      }
-      _currency = 'JPY';
-      _controller.onCurrencyChange(currencyFractionDigitsFor(_currency));
-      _amount = '';
-      _selectedDate = DateTime.now();
-      _manualForeignRate = null;
-      // 260622-nhs: a fresh continuous-entry slate starts as manual provenance.
-      _lastFillWasVoice = false;
-    });
-    resetPttSessionState();
-    final formState = _formKey.currentState;
-    // Phase 52 (RECUX-03 / D-05): 连续记账 (continuous-entry) starts a fresh
-    // slate after a successful save — discard any leftover pending correction
-    // with NO write so the next entry never inherits a stale correction.
-    formState?.discardPendingCorrection();
-    formState?.updateAmount(0);
-    formState?.updateCurrencyTriple(
-      originalCurrency: null,
-      originalAmount: null,
-      appliedRate: null,
-    );
-    formState?.updateMerchant('');
-    formState?.updateNote('');
-    formState?.updateDate(DateTime.now());
-    // Re-seed the default category for the next entry. _initializeDefaultCategory
-    // now pushes the resolved default into the form itself (260603-ti2), so the
-    // form's GlobalKey-preserved state is reset to the default category too.
-    await _initializeDefaultCategory();
-    if (!mounted) return;
-    _restoreKeypadFocus();
-  }
+  // quick-260707-kfb A2: the keypad handlers (_onAmountTap / _onDigit /
+  // _onDoubleZero / _onDot / _onDelete / _onClear / _syncAmountToForm) moved
+  // verbatim to `manual_one_step_keypad.dart`; the currency / foreign-triple
+  // handlers (_pushForeignTriple / _rateStringOf / _onRateSignal /
+  // _onFormDateChanged / _onForeignRateEdited / _onCurrencyTap /
+  // _onCurrencySelected) to `manual_one_step_currency.dart`; and the save path
+  // (_trySave / _save / _resetForContinuousEntry) to `manual_one_step_save.dart`
+  // — all as same-library `part` extensions on _ManualOneStepScreenState.
 
   @override
   Widget build(BuildContext context) {
