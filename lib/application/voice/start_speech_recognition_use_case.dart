@@ -24,18 +24,24 @@ class StartSpeechRecognitionUseCase {
   /// Start listening for speech with [localeId].
   ///
   /// Results arrive via [onResult]; sound level via [onSoundLevel].
+  ///
+  /// [allowOnDeviceFallback] (default true) governs the on-device→cloud retry:
+  /// when false, an on-device failure is surfaced instead of a silent cloud
+  /// retry (privacy control, T-kfb-01).
   Future<void> startListening({
     required void Function(SpeechRecognitionResult result) onResult,
     required void Function(double normalizedLevel) onSoundLevel,
     required String localeId,
     Duration listenFor = const Duration(seconds: 30),
     Duration pauseFor = const Duration(seconds: 3),
+    bool allowOnDeviceFallback = true,
   }) => _service.startListening(
     onResult: onResult,
     onSoundLevel: onSoundLevel,
     localeId: localeId,
     listenFor: listenFor,
     pauseFor: pauseFor,
+    allowOnDeviceFallback: allowOnDeviceFallback,
   );
 
   /// Stop listening and finalize the transcription result.

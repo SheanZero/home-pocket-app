@@ -39,6 +39,7 @@ class SpeechRecognitionService {
     String localeId,
     Duration listenFor,
     Duration pauseFor,
+    bool allowOnDeviceFallback,
   })? _lastConfig;
 
   /// Initialize speech recognition.
@@ -60,12 +61,19 @@ class SpeechRecognitionService {
   }
 
   /// Start listening for speech.
+  ///
+  /// [allowOnDeviceFallback] governs ONLY the on-device→cloud RETRY (privacy
+  /// control, T-kfb-01): when false, a failed on-device attempt propagates
+  /// (surfaced) instead of being silently retried with cloud recognition.
+  /// Default true preserves the existing auto-degrade behavior byte-for-byte.
+  /// The on-device attempt itself is unaffected by this flag.
   Future<void> startListening({
     required void Function(SpeechRecognitionResult result) onResult,
     required void Function(double normalizedLevel) onSoundLevel,
     required String localeId,
     Duration listenFor = VoiceTuning.listenFor,
     Duration pauseFor = VoiceTuning.pauseFor,
+    bool allowOnDeviceFallback = true,
   }) async {
     // Cache config BEFORE the _isInitialized guard so restartListen can
     // still find config even if a startListening attempt no-ops on uninitialised state.
@@ -76,6 +84,7 @@ class SpeechRecognitionService {
       localeId: localeId,
       listenFor: listenFor,
       pauseFor: pauseFor,
+      allowOnDeviceFallback: allowOnDeviceFallback,
     );
 
     if (!_isInitialized) return;
@@ -97,7 +106,10 @@ class SpeechRecognitionService {
     } on Exception {
       // Only an on-device attempt is retried (once, same args, degraded).
       // A failure on the already-degraded path propagates unchanged — no loop.
-      if (!wantOnDevice) rethrow;
+      // When the user has disallowed the cloud fallback (T-kfb-01), an on-device
+      // failure is surfaced (rethrown) instead of silently retrying with cloud
+      // recognition — the on-device attempt still ran, only the RETRY is gated.
+      if (!wantOnDevice || !allowOnDeviceFallback) rethrow;
       _onDeviceFallbackActive = true;
       if (kDebugMode) {
         // Degrade event only — never transcript content.
@@ -176,6 +188,7 @@ class SpeechRecognitionService {
       localeId: cfg.localeId,
       listenFor: cfg.listenFor,
       pauseFor: cfg.pauseFor,
+      allowOnDeviceFallback: cfg.allowOnDeviceFallback,
     );
     return true;
   }

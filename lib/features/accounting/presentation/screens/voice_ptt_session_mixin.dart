@@ -58,6 +58,8 @@ import '../../../../shared/utils/currency_conversion.dart'
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../../../voice/domain/models/voice_parse_result.dart';
+import '../../../settings/presentation/providers/state_settings.dart'
+    show appSettingsProvider;
 import '../providers/repository_providers.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_error_toast.dart';
@@ -290,8 +292,15 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       localeId: localeId,
       listenFor: VoiceTuning.listenFor,
       pauseFor: VoiceTuning.pauseFor,
+      allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
     );
   }
+
+  /// KFB C2 (T-kfb-01): the user's on-device→cloud auto-degradation policy.
+  /// `?? true` keeps behavior byte-identical before the async settings provider
+  /// resolves and in tests that do not override [appSettingsProvider].
+  bool get _voiceAllowOnDeviceFallback =>
+      ref.read(appSettingsProvider).value?.voiceAllowOnDeviceFallback ?? true;
 
   // ── Commit (ported verbatim from _stopRecordingAndCommit) ───────────────────
 
@@ -410,6 +419,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         localeId: pttVoiceLocaleId,
         listenFor: VoiceTuning.listenFor,
         pauseFor: VoiceTuning.pauseFor,
+        allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
       );
       if (mounted) {
         onPttSessionChanged(() {

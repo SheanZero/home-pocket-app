@@ -34,6 +34,7 @@ import 'package:home_pocket/features/accounting/presentation/screens/voice_local
 import 'package:home_pocket/features/accounting/presentation/screens/voice_ptt_session_mixin.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_recognition_event_handler_mixin.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
+import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -50,6 +51,10 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   var canceled = false;
   var startCount = 0;
   var initializeCount = 0;
+
+  /// KFB C2: the last `allowOnDeviceFallback` value threaded into
+  /// [startListening] (default true preserves every existing call site).
+  bool lastAllowOnDeviceFallback = true;
 
   /// quick-260706-kax (belt-and-braces): field-backed availability so a test
   /// can simulate the platform flipping the recognizer unavailable after a
@@ -82,12 +87,14 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     required String localeId,
     Duration listenFor = const Duration(seconds: 30),
     Duration pauseFor = const Duration(seconds: 3),
+    bool allowOnDeviceFallback = true,
   }) async {
     this.onResult = onResult;
     this.onSoundLevel = onSoundLevel;
     startedLocaleId = localeId;
     stopped = false;
     startCount++;
+    lastAllowOnDeviceFallback = allowOnDeviceFallback;
   }
 
   @override
@@ -312,6 +319,7 @@ void main() {
     required CapturingSpeechService speechService,
     required FakeParseVoiceInputUseCase parseUseCase,
     String rate = '150.0',
+    AppSettings? appSettings,
   }) {
     final categoryRepository = FakeCategoryRepository();
     final categoryService = CategoryService(
@@ -329,6 +337,10 @@ void main() {
           FakeGetExchangeRateUseCase(rate),
         ),
         voiceLocaleIdProvider.overrideWith((ref) async => 'ja-JP'),
+        // KFB C2: a synchronous AppSettings (non-Future create) so the mixin's
+        // `ref.read(appSettingsProvider).value` resolves to data immediately.
+        if (appSettings != null)
+          appSettingsProvider.overrideWith((ref) => appSettings),
       ],
     );
   }
@@ -1856,6 +1868,54 @@ void main() {
 
       expect(host.pttFormState!.currentAmount, 35016);
       expect(host.pttLastFilledAmount, 35016);
+    },
+  );
+
+  // ── KFB C2: allowOnDeviceFallback threads from appSettingsProvider ──────────
+  testWidgets(
+    'KFB C2: default (no override) passes allowOnDeviceFallback:true into '
+    'startListening',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      hostOf(tester).startPttTapSession();
+      await tester.pump();
+
+      expect(speech.startCount, 1);
+      expect(speech.lastAllowOnDeviceFallback, isTrue);
+    },
+  );
+
+  testWidgets(
+    'KFB C2: voiceAllowOnDeviceFallback:false threads false into startListening',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({});
+
+      await tester.pumpWidget(
+        buildHost(
+          speechService: speech,
+          parseUseCase: parse,
+          appSettings: const AppSettings(voiceAllowOnDeviceFallback: false),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      hostOf(tester).startPttTapSession();
+      await tester.pump();
+
+      expect(speech.startCount, 1);
+      expect(speech.lastAllowOnDeviceFallback, isFalse,
+          reason: 'the disabled auto-degradation policy propagates to the '
+              'service call');
     },
   );
 }

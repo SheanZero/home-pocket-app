@@ -223,4 +223,48 @@ void main() {
             'not an on-device degrade');
     expect(capturedOptions[2].onDevice, isFalse);
   });
+
+  test('Test 6 (KFB C2): allowOnDeviceFallback:false rethrows the on-device '
+      'failure with NO cloud retry and leaves the session flag false', () async {
+    await initService();
+    stubListen(fail: (opts) => opts.onDevice == true);
+
+    await expectLater(
+      service.startListening(
+        onResult: onResultStub,
+        onSoundLevel: onSoundLevelStub,
+        localeId: 'ja-JP',
+        allowOnDeviceFallback: false,
+      ),
+      throwsA(isA<stt.ListenFailedException>()),
+    );
+
+    expect(capturedOptions, hasLength(1),
+        reason: 'exactly ONE on-device attempt — the cloud retry is disallowed');
+    expect(capturedOptions.single.onDevice, isTrue,
+        reason: 'the on-device attempt itself is unchanged by the flag');
+    expect(service.onDeviceFallbackActive, isFalse,
+        reason: 'no degrade occurred — the session flag stays false');
+  });
+
+  test('Test 7 (KFB C2): allowOnDeviceFallback:true (default) still degrades '
+      'to cloud on an on-device failure', () async {
+    await initService();
+    stubListen(fail: (opts) => opts.onDevice == true);
+
+    await expectLater(
+      service.startListening(
+        onResult: onResultStub,
+        onSoundLevel: onSoundLevelStub,
+        localeId: 'ja-JP',
+        allowOnDeviceFallback: true,
+      ),
+      completes,
+    );
+
+    expect(capturedOptions, hasLength(2));
+    expect(capturedOptions[0].onDevice, isTrue);
+    expect(capturedOptions[1].onDevice, isFalse);
+    expect(service.onDeviceFallbackActive, isTrue);
+  });
 }
