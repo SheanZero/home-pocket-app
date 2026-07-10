@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Pocket — Home + Palette Redesign</title>
+<link rel="stylesheet" href="../themes/default.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0">
+<style>
+  :root {
+    --toolbar-h: 64px;
+    --ease: cubic-bezier(.2,.8,.2,1);
+  }
+  * { box-sizing: border-box; }
+  html { min-height: 100%; }
+  body {
+    min-height: 100%; margin: 0; background: #e9e7e4; color: #202421;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  }
+  button { font: inherit; }
+  .material-symbols-rounded {
+    font-family: "Material Symbols Rounded"; font-weight: normal; font-style: normal;
+    font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none;
+    display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr;
+    -webkit-font-feature-settings: "liga"; -webkit-font-smoothing: antialiased;
+    font-feature-settings: "liga";
+  }
+
+  /* Comparison chrome */
+  .compare-bar {
+    position: fixed; inset: 0 0 auto; height: var(--toolbar-h); z-index: 100;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: rgba(255,255,255,.92); border-bottom: 1px solid rgba(45,49,46,.12);
+    backdrop-filter: blur(18px); padding: 9px 16px;
+  }
+  .variant-tab, .mode-toggle {
+    border: 1px solid #d8d9d7; background: #fff; color: #595e5a; border-radius: 999px;
+    padding: 9px 15px; cursor: pointer; transition: all .18s var(--ease); font-size: 13px;
+    font-weight: 700; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .variant-tab:hover, .mode-toggle:hover { transform: translateY(-1px); border-color: #9da39e; }
+  .variant-tab.active { color: #fff; background: #263a31; border-color: #263a31; }
+  .mode-toggle { margin-left: 10px; }
+  .variant { display: none; min-height: 100vh; padding: 96px 24px 56px; }
+  .variant.active { display: block; }
+  .variant-shell {
+    max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 390px minmax(280px, 420px);
+    gap: 54px; align-items: start; justify-content: center;
+  }
+  .prototype-wrap { position: sticky; top: 88px; }
+  .prototype {
+    width: 390px; height: 844px; border-radius: 38px; overflow: hidden; position: relative;
+    background: var(--screen); color: var(--ink); box-shadow: var(--phone-shadow);
+    border: 8px solid var(--frame); transition: width .2s var(--ease), color .25s, background .25s;
+  }
+  .app-scroll { height: 100%; overflow: auto; padding-bottom: 104px; scrollbar-width: none; }
+  .app-scroll::-webkit-scrollbar { display: none; }
+  .status {
+    height: 34px; padding: 10px 20px 0; display: flex; justify-content: space-between; align-items: center;
+    color: var(--ink); font-size: 11px; font-weight: 800; letter-spacing: .02em;
+  }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons .material-symbols-rounded { font-size: 14px; }
+  .app-main { padding: 10px 20px 24px; }
+  .top-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .month-btn, .icon-btn, .mode-chip, .text-btn, .nav-item, .fab, .tap-row, .story-card, .invite-row {
+    border: 0; cursor: pointer; transition: transform .15s var(--ease), opacity .15s, background .15s;
+  }
+  .month-btn:hover, .icon-btn:hover, .mode-chip:hover, .text-btn:hover, .tap-row:hover, .story-card:hover, .invite-row:hover { opacity: .76; }
+  .month-btn:active, .icon-btn:active, .mode-chip:active, .text-btn:active, .nav-item:active, .fab:active, .tap-row:active, .story-card:active, .invite-row:active { transform: scale(.97); }
+  .month-btn { background: transparent; color: var(--ink); display: flex; align-items: center; gap: 3px; padding: 0; }
+  .month-btn strong { font-size: 19px; letter-spacing: -.02em; }
+  .month-btn .material-symbols-rounded { font-size: 20px; color: var(--muted); }
+  .top-spacer { flex: 1; }
+  .mode-chip { background: var(--primary-soft); color: var(--primary); border-radius: 999px; padding: 7px 10px; display: flex; gap: 5px; align-items: center; font-size: 11px; font-weight: 800; }
+  .mode-chip .material-symbols-rounded { font-size: 15px; }
+  .icon-btn { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--ink); }
+  .eyebrow { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .amount { font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+  .section-heading { display: flex; align-items: center; justify-content: space-between; margin: 22px 0 10px; }
+  .section-heading h2 { margin: 0; font-size: 15px; color: var(--ink); }
+  .text-btn { background: transparent; color: var(--primary); font-size: 12px; font-weight: 800; padding: 5px; }
+  .bottom-nav {
+    position: absolute; left: 14px; right: 14px; bottom: 14px; height: 70px; display: flex; align-items: center;
+    padding: 0 12px; background: var(--nav); border: 1px solid var(--line); border-radius: 26px;
+    box-shadow: var(--nav-shadow); backdrop-filter: blur(18px); z-index: 5;
+  }
+  .nav-item { flex: 1; color: var(--nav-muted); background: transparent; display: grid; place-items: center; gap: 3px; font-size: 9px; padding: 7px 0; border-radius: 14px; }
+  .nav-item .material-symbols-rounded { font-size: 21px; }
+  .nav-item.active { color: var(--primary); }
+  .fab {
+    width: 56px; height: 56px; margin-left: 7px; border-radius: 50%; color: white; background: var(--fab);
+    display: grid; place-items: center; box-shadow: var(--fab-shadow);
+  }
+  .fab .material-symbols-rounded { font-size: 28px; font-variation-settings: "wght" 500; }
+  .sheet-backdrop {
+    position: absolute; inset: 0; background: rgba(13,18,15,.32); z-index: 20; opacity: 0; pointer-events: none;
+    transition: opacity .2s; display: flex; align-items: flex-end;
+  }
+  .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    width: 100%; background: var(--surface); color: var(--ink); border-radius: 26px 26px 0 0; padding: 10px 20px 28px;
+    transform: translateY(100%); transition: transform .25s var(--ease); border-top: 1px solid var(--line);
+  }
+  .sheet-backdrop.open .sheet { transform: translateY(0); }
+  .grabber { width: 40px; height: 4px; border-radius: 99px; background: var(--line); margin: 0 auto 18px; }
+  .sheet h3 { margin: 0 0 14px; font-size: 17px; }
+  .sheet-choice { width: 100%; border: 0; background: var(--screen); color: var(--ink); padding: 13px 14px; border-radius: 14px; margin-top: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .sheet-choice:hover { background: var(--primary-soft); }
+  .toast {
+    position: absolute; left: 50%; bottom: 94px; transform: translate(-50%, 18px); opacity: 0; z-index: 30;
+    background: var(--ink); color: var(--screen); padding: 10px 14px; border-radius: 999px; font-size: 11px;
+    font-weight: 800; pointer-events: none; transition: .22s var(--ease); white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* Notes */
+  .notes { padding-top: 18px; color: var(--note-ink); }
+  .notes .kicker { font-size: 12px; font-weight: 900; letter-spacing: .14em; color: var(--note-muted); }
+  .notes h1 { font-family: var(--display); font-size: 34px; line-height: 1.2; margin: 10px 0 12px; letter-spacing: -.03em; }
+  .notes > p { color: var(--note-muted); line-height: 1.75; margin: 0 0 22px; }
+  .palette-strip { display: flex; gap: 8px; margin: 18px 0 24px; }
+  .swatch { width: 48px; height: 48px; border-radius: 14px; background: var(--swatch); border: 1px solid rgba(30,30,30,.08); position: relative; }
+  .swatch::after { content: attr(data-name); position: absolute; top: 55px; left: 0; font-size: 9px; color: var(--note-muted); white-space: nowrap; }
+  .design-points { display: grid; gap: 10px; margin-top: 35px; }
+  .design-point { padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,.62); border: 1px solid rgba(50,50,50,.08); }
+  .design-point strong { display: block; font-size: 13px; margin-bottom: 4px; }
+  .design-point span { font-size: 12px; color: var(--note-muted); line-height: 1.55; }
+
+  /* Variant A — warm Japanese */
+  .variant-a {
+    --screen: #f5f0e7; --surface: #fffdf8; --surface-2: #ede6d9; --ink: #27362f; --muted: #758178;
+    --line: #e3dacb; --primary: #456b59; --primary-soft: #e2ece4; --daily: #66896d; --daily-soft: #e6eee5;
+    --joy: #c87874; --joy-soft: #f4e3df; --shared: #58758c; --accent: #b4864f; --frame: #282b28;
+    --nav: rgba(255,253,248,.92); --nav-muted: #9b9e98; --fab: #c87874; --phone-shadow: 0 28px 70px rgba(63,49,36,.28);
+    --nav-shadow: 0 8px 30px rgba(75,57,40,.12); --fab-shadow: 0 8px 22px rgba(200,120,116,.34);
+    --display: "Yu Mincho", "Hiragino Mincho ProN", serif; --note-ink: #29352f; --note-muted: #6f786f;
+    background: #e9e1d4;
+  }
+  .dark .variant-a {
+    --screen: #171c19; --surface: #222923; --surface-2: #2b342d; --ink: #eef1eb; --muted: #9ba79d;
+    --line: #354038; --primary: #99bca5; --primary-soft: #293b30; --daily: #92b298; --daily-soft: #29382e;
+    --joy: #e2a09b; --joy-soft: #402b2c; --shared: #91adc2; --accent: #d4ac76; --frame: #080a09;
+    --nav: rgba(34,41,35,.94); --nav-muted: #737c75; --fab: #d58f8b; --note-ink: #e7ebe5; --note-muted: #a7aea8;
+    background: #101411;
+  }
+  .a-overview { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 19px 0 17px; }
+  .a-overview .eyebrow { margin-bottom: 6px; }
+  .a-amount-row { display: flex; align-items: end; justify-content: space-between; }
+  .a-overview .amount { font-family: var(--display); font-size: 39px; font-weight: 700; }
+  .a-delta { color: var(--primary); background: var(--primary-soft); padding: 6px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+  .a-ledgers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .a-ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 13px; }
+  .a-ledger .label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; }
+  .a-ledger .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--daily); }
+  .a-ledger.joy .dot { background: var(--joy); }
+  .a-ledger .amount { display: block; margin-top: 6px; font-size: 18px; font-weight: 800; color: var(--daily); }
+  .a-ledger.joy .amount { color: var(--joy); }
+  .a-joy { display: grid; grid-template-columns: 92px 1fr; gap: 16px; align-items: center; padding: 15px 0 18px; border-bottom: 1px solid var(--line); }
+  .ring { width: 92px; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--joy) 0 80%, var(--joy-soft) 80% 100%); display: grid; place-items: center; position: relative; }
+  .ring::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--screen); }
+  .ring-center { position: relative; z-index: 1; text-align: center; }
+  .ring-center strong { font-size: 19px; color: var(--joy); }
+  .ring-center span { display: block; font-size: 9px; color: var(--muted); margin-top: 1px; }
+  .a-joy-copy h3 { font-family: var(--display); font-size: 17px; margin: 0 0 4px; }
+  .a-joy-copy p { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 0; }
+  .a-joy-meta { display: flex; gap: 12px; margin-top: 9px; color: var(--ink); font-size: 11px; font-weight: 800; }
+  .a-story { margin-top: 14px; background: var(--joy-soft); border-radius: 18px; padding: 14px 15px; display: grid; grid-template-columns: 42px 1fr auto; gap: 11px; align-items: center; color: var(--ink); text-align: left; width: 100%; }
+  .a-story-date { height: 42px; border-radius: 12px; background: var(--surface); display: grid; place-items: center; color: var(--joy); font-weight: 900; font-size: 12px; border: 1px solid color-mix(in srgb, var(--joy) 25%, transparent); }
+  .a-story strong { display: block; font-size: 12px; }
+  .a-story small { color: var(--muted); font-size: 10px; }
+  .a-story .amount { color: var(--joy); font-weight: 900; font-size: 12px; }
+  .a-invite { margin-top: 14px; padding: 12px 0; border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 10px; background: transparent; color: var(--ink); width: 100%; text-align: left; }
+  .a-invite .material-symbols-rounded { color: var(--shared); }
+  .a-invite strong { font-size: 11px; }
+  .a-invite small { display: block; color: var(--muted); font-size: 9px; margin-top: 2px; }
+  .a-tx-list { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .a-tx { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 12px; background: transparent; color: var(--ink); width: 100%; text-align: left; }
+  .a-tx + .a-tx { border-top: 1px solid var(--line); }
+  .tx-icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--daily-soft); color: var(--daily); }
+  .tx-icon.joy { background: var(--joy-soft); color: var(--joy); }
+  .tx-icon .material-symbols-rounded { font-size: 18px; }
+  .tx-copy strong { display: block; font-size: 11px; }
+  .tx-copy small { color: var(--muted); font-size: 9px; }
+  .tx-amount { font-size: 12px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+  /* Variant B — crisp modern */
+  .variant-b {
+    --screen: #f3f7f8; --surface: #ffffff; --surface-2: #e8eff1; --ink: #172a2f; --muted: #657a80;
+    --line: #dce6e8; --primary: #176f78; --primary-soft: #dff1f2; --daily: #167a63; --daily-soft: #ddf2ea;
+    --joy: #c75f7f; --joy-soft: #f7e3ea; --shared: #3d6fa7; --accent: #e49d45; --frame: #1d2426;
+    --nav: rgba(255,255,255,.94); --nav-muted: #9aa9ad; --fab: #176f78; --phone-shadow: 0 28px 70px rgba(34,55,60,.24);
+    --nav-shadow: 0 10px 28px rgba(31,66,73,.12); --fab-shadow: 0 8px 22px rgba(23,111,120,.30);
+    --display: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif; --note-ink: #173038; --note-muted: #667a7f;
+    background: #dfe8ea;
+  }
+  .dark .variant-b {
+    --screen: #0e1719; --surface: #162225; --surface-2: #203033; --ink: #ecf3f3; --muted: #91a6aa;
+    --line: #293a3e; --primary: #68c3cb; --primary-soft: #19353a; --daily: #67c6a5; --daily-soft: #17342d;
+    --joy: #ec91ad; --joy-soft: #3b222c; --shared: #83aee0; --accent: #f0b665; --frame: #060a0b;
+    --nav: rgba(22,34,37,.94); --nav-muted: #687b7f; --fab: #3a9fa8; --note-ink: #e9f0f1; --note-muted: #9dafb2;
+    background: #0a1112;
+  }
+  .b-hero { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 17px; }
+  .b-total-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 6px; }
+  .b-total-row .amount { font-size: 36px; font-weight: 850; }
+  .b-total-row small { color: var(--muted); font-size: 10px; padding-bottom: 5px; }
+  .b-ledger-bar { height: 8px; background: var(--joy); border-radius: 99px; overflow: hidden; margin: 16px 0 10px; display: flex; }
+  .b-ledger-bar span:first-child { width: 71%; background: var(--daily); }
+  .b-ledger-labels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .b-ledger-labels div { font-size: 10px; color: var(--muted); }
+  .b-ledger-labels strong { display: block; font-size: 13px; margin-top: 2px; color: var(--daily); }
+  .b-ledger-labels div:last-child { text-align: right; }
+  .b-ledger-labels div:last-child strong { color: var(--joy); }
+  .b-joy { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px; }
+  .b-joy-head { display: flex; align-items: flex-start; justify-content: space-between; }
+  .b-joy h3 { margin: 0; font-size: 14px; }
+  .b-joy p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+  .b-joy-value { font-size: 13px; font-weight: 900; color: var(--joy); }
+  .b-progress { height: 7px; border-radius: 99px; background: var(--joy-soft); overflow: hidden; margin-top: 13px; }
+  .b-progress span { display: block; width: 80%; height: 100%; background: var(--joy); border-radius: inherit; }
+  .b-joy-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 9px; margin-top: 7px; }
+  .b-shortcut-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 10px; margin-top: 12px; }
+  .b-story { background: var(--joy-soft); color: var(--ink); border-radius: 18px; padding: 14px; border: 0; text-align: left; }
+  .b-story .eyebrow { color: var(--joy); font-size: 9px; }
+  .b-story strong { display: block; font-size: 12px; margin: 7px 0 3px; }
+  .b-story small { color: var(--muted); font-size: 9px; }
+  .b-story .amount { display: block; color: var(--joy); font-weight: 900; margin-top: 8px; font-size: 14px; }
+  .b-family { background: var(--shared); color: #fff; border-radius: 18px; border: 0; padding: 14px 12px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+  .b-family .material-symbols-rounded { font-size: 24px; margin-bottom: auto; }
+  .b-family strong { font-size: 11px; margin-top: 10px; }
+  .b-family small { font-size: 9px; opacity: .78; margin-top: 3px; }
+  .b-tx-list { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+  .b-tx { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 11px 13px; background: transparent; color: var(--ink); width: 100%; text-align: left; }
+  .b-tx + .b-tx { border-top: 1px solid var(--line); }
+
+  /* Variant C — warm refined */
+  .variant-c {
+    --screen: #f7f0f2; --surface: #fffaf8; --surface-2: #eee1e5; --ink: #2c2228; --muted: #806f78;
+    --line: #eadce0; --primary: #6c4056; --primary-soft: #eedfe7; --daily: #557d69; --daily-soft: #e3eee8;
+    --joy: #ce607f; --joy-soft: #f7e0e7; --shared: #566f99; --accent: #cb8d63; --frame: #292126;
+    --nav: rgba(255,250,248,.93); --nav-muted: #a4959d; --fab: linear-gradient(145deg,#d98d77,#c65376);
+    --phone-shadow: 0 30px 76px rgba(76,46,61,.28); --nav-shadow: 0 12px 34px rgba(91,52,70,.14); --fab-shadow: 0 9px 24px rgba(198,83,118,.34);
+    --display: "Yu Mincho", "Hiragino Mincho ProN", serif; --note-ink: #3a2630; --note-muted: #826d77;
+    background: #eadde1;
+  }
+  .dark .variant-c {
+    --screen: #1b1519; --surface: #282027; --surface-2: #392c34; --ink: #f5ecef; --muted: #b09da7;
+    --line: #43343c; --primary: #d5a0b9; --primary-soft: #3b2933; --daily: #8fbea4; --daily-soft: #26382f;
+    --joy: #ee91ad; --joy-soft: #472832; --shared: #94add4; --accent: #e2aa80; --frame: #090709;
+    --nav: rgba(40,32,39,.94); --nav-muted: #7e6e77; --fab: linear-gradient(145deg,#d98d77,#d16082); --note-ink: #f1e8ec; --note-muted: #b5a3ac;
+    background: #120e11;
+  }
+  .c-hero { position: relative; overflow: hidden; background: linear-gradient(145deg, var(--primary), color-mix(in srgb, var(--primary) 72%, var(--joy))); color: #fff; border-radius: 26px; padding: 20px; min-height: 214px; box-shadow: 0 16px 34px color-mix(in srgb, var(--primary) 24%, transparent); }
+  .c-hero::after { content: ""; position: absolute; width: 160px; height: 160px; border-radius: 50%; right: -55px; top: -55px; border: 32px solid rgba(255,255,255,.07); }
+  .c-hero .eyebrow { color: rgba(255,255,255,.68); }
+  .c-hero h1 { font-family: var(--display); font-size: 22px; font-weight: 600; margin: 7px 0 18px; }
+  .c-total { display: flex; justify-content: space-between; align-items: end; position: relative; z-index: 1; }
+  .c-total .amount { font-size: 36px; font-weight: 750; }
+  .c-total small { display: block; color: rgba(255,255,255,.72); font-size: 10px; margin-bottom: 4px; }
+  .c-ledgers { display: flex; gap: 10px; margin-top: 17px; position: relative; z-index: 1; }
+  .c-ledger { flex: 1; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.16); border-radius: 15px; padding: 10px 11px; backdrop-filter: blur(8px); }
+  .c-ledger span { font-size: 9px; color: rgba(255,255,255,.68); }
+  .c-ledger strong { display: block; font-size: 13px; margin-top: 3px; }
+  .c-joy-story { margin-top: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 17px; }
+  .c-joy-top { display: flex; align-items: center; gap: 12px; }
+  .c-joy-mark { width: 48px; height: 48px; border-radius: 16px; background: var(--joy-soft); color: var(--joy); display: grid; place-items: center; }
+  .c-joy-mark .material-symbols-rounded { font-size: 25px; }
+  .c-joy-top h3 { margin: 0; font-family: var(--display); font-size: 16px; }
+  .c-joy-top p { color: var(--muted); font-size: 10px; margin: 4px 0 0; }
+  .c-joy-numbers { margin-left: auto; text-align: right; }
+  .c-joy-numbers strong { display: block; color: var(--joy); font-size: 14px; }
+  .c-joy-numbers small { color: var(--muted); font-size: 9px; }
+  .c-progress { height: 5px; background: var(--joy-soft); border-radius: 99px; margin: 14px 0 15px; overflow: hidden; }
+  .c-progress span { display: block; height: 100%; width: 80%; background: linear-gradient(90deg,var(--joy),var(--accent)); border-radius: inherit; }
+  .c-feature { width: 100%; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--ink); padding: 14px 0 0; display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; text-align: left; align-items: center; }
+  .c-date { width: 38px; height: 42px; border-radius: 11px; background: var(--joy-soft); color: var(--joy); display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+  .c-feature strong { display: block; font-size: 11px; }
+  .c-feature small { color: var(--muted); font-size: 9px; }
+  .c-feature .amount { color: var(--joy); font-weight: 900; font-size: 12px; }
+  .c-tx-list { display: grid; gap: 8px; }
+  .c-tx { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 11px 12px; display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; color: var(--ink); width: 100%; text-align: left; }
+  .c-family { margin-top: 12px; border: 1px solid color-mix(in srgb,var(--shared) 30%,var(--line)); background: color-mix(in srgb,var(--shared) 9%,var(--surface)); color: var(--ink); border-radius: 16px; padding: 11px 13px; display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; }
+  .c-family .material-symbols-rounded { color: var(--shared); }
+  .c-family strong { font-size: 10px; }
+  .c-family small { display: block; color: var(--muted); font-size: 9px; margin-top: 2px; }
+
+  /* Sketch tools + annotations */
+  #sketch-tools { position: fixed; z-index: 120; right: 12px; bottom: 12px; padding: 8px 10px; border-radius: 12px; background: rgba(16,18,17,.78); color: #fff; font: 11px system-ui; display: flex; gap: 6px; opacity: .48; transition: opacity .2s; }
+  #sketch-tools:hover { opacity: 1; }
+  #sketch-tools button { border: 1px solid rgba(255,255,255,.24); background: transparent; color: #fff; border-radius: 7px; padding: 4px 7px; cursor: pointer; }
+  #sketch-tools button:hover { background: rgba(255,255,255,.14); }
+  .annotations .prototype [data-token] { outline: 1px dashed #e04874; outline-offset: 2px; position: relative; }
+  .annotations .prototype [data-token]::before { content: attr(data-token); position: absolute; z-index: 50; top: -14px; left: 0; color: #fff; background: #b62f57; font: 8px system-ui; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
+
+  @media (max-width: 880px) {
+    .compare-bar { justify-content: flex-start; overflow-x: auto; }
+    .variant { padding: 84px 12px 48px; }
+    .variant-shell { grid-template-columns: 1fr; gap: 26px; }
+    .prototype-wrap { position: static; display: flex; justify-content: center; overflow: auto; }
+    .notes { max-width: 390px; margin: 0 auto; }
+    .notes h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+  <nav class="compare-bar" aria-label="设计方案切换">
+    <button class="variant-tab active" data-variant="a" data-testid="variant-a" onclick="showVariant('a', this)">A · 温润日系 ★</button>
+    <button class="variant-tab" data-variant="b" data-testid="variant-b" onclick="showVariant('b', this)">B · 清爽现代</button>
+    <button class="variant-tab" data-variant="c" data-testid="variant-c" onclick="showVariant('c', this)">C · 温暖精致</button>
+    <button class="mode-toggle" data-testid="mode-toggle" onclick="toggleMode(this)"><span class="material-symbols-rounded">dark_mode</span><span>深色</span></button>
+  </nav>
+
+  <!-- A -->
+  <section id="variant-a" class="variant variant-a active">
+    <div class="variant-shell">
+      <div class="prototype-wrap">
+        <div class="prototype" data-prototype="a">
+          <div class="app-scroll">
+            <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
+            <main class="app-main">
+              <header class="top-row">
+                <button class="month-btn" onclick="openSheet(this,'month')"><strong>2026年7月</strong><span class="material-symbols-rounded">expand_more</span></button>
+                <span class="top-spacer"></span>
+                <button class="mode-chip" onclick="toggleFamily(this)"><span class="material-symbols-rounded">person</span><span>个人</span></button>
+                <button class="icon-btn" aria-label="设置" onclick="openSheet(this,'settings')"><span class="material-symbols-rounded">settings</span></button>
+              </header>
+              <section class="a-overview" data-token="月度总览">
+                <div class="eyebrow">今月の支出</div>
+                <div class="a-amount-row"><strong class="amount">¥186,420</strong><span class="a-delta">先月比 −8%</span></div>
+                <div class="a-ledgers">
+                  <div class="a-ledger"><span class="label"><i class="dot"></i>日常</span><strong class="amount">¥132,800</strong></div>
+                  <div class="a-ledger joy"><span class="label"><i class="dot"></i>悦己</span><strong class="amount">¥53,620</strong></div>
+                </div>
+              </section>
+              <section class="a-joy" data-token="Joy 累计">
+                <div class="ring"><div class="ring-center"><strong>64</strong><span>/ 80 Joy</span></div></div>
+                <div class="a-joy-copy"><h3>今月の悦己充盈</h3><p>自分を満たした支出を、静かに積み重ねます。</p><div class="a-joy-meta"><span>満足度 8.2</span><span>小確幸 12</span></div></div>
+              </section>
+              <button class="story-card a-story" onclick="showToast(this,'悦己详情将在统计页打开')">
+                <span class="a-story-date">7/06</span><span><strong>京都の小さな器</strong><small>趣味 · 満足度 9</small></span><span class="amount">¥4,800</span>
+              </button>
+              <button class="invite-row a-invite" onclick="showToast(this,'家庭账本邀请入口')"><span class="material-symbols-rounded">group</span><span><strong>家族と一緒に使う</strong><small>共有账本仍保持独立的蓝色语义</small></span><span class="top-spacer"></span><span class="material-symbols-rounded">chevron_right</span></button>
+              <div class="section-heading"><h2>最近の取引</h2><button class="text-btn" onclick="showToast(this,'切换至交易列表')">すべて見る</button></div>
+              <div class="a-tx-list">
+                <button class="tap-row a-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">local_grocery_store</span></span><span class="tx-copy"><strong>ライフ</strong><small>食費 · 今日</small></span><span class="tx-amount">−¥3,280</span></button>
+                <button class="tap-row a-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon joy"><span class="material-symbols-rounded">local_cafe</span></span><span class="tx-copy"><strong>喫茶 月舟</strong><small>悦己 · 今日</small></span><span class="tx-amount">−¥980</span></button>
+                <button class="tap-row a-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">train</span></span><span class="tx-copy"><strong>Suica</strong><small>交通 · 昨日</small></span><span class="tx-amount">−¥1,240</span></button>
+              </div>
+            </main>
+          </div>
+          <div class="bottom-nav">
+            <button class="nav-item active" onclick="activateNav(this)"><span class="material-symbols-rounded">home</span><span>ホーム</span></button>
+            <button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">receipt_long</span><span>明細</span></button>
+            <button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">monitoring</span><span>統計</span></button>
+            <button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">checklist</span><span>買い物</span></button>
+            <button class="fab" aria-label="记账" onclick="openSheet(this,'entry')"><span class="material-symbols-rounded">add</span></button>
+          </div>
+          <div class="sheet-backdrop" onclick="closeSheet(event)"><div class="sheet"><div class="grabber"></div><h3>記録する</h3><button class="sheet-choice" onclick="showToast(this,'手动记账')"><span class="material-symbols-rounded">edit_note</span>手入力で記録</button><button class="sheet-choice" onclick="showToast(this,'语音记账')"><span class="material-symbols-rounded">mic</span>声で記録</button></div></div>
+          <div class="toast"></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <div class="kicker">A · WARM JAPANESE</div><h1>生活手帐</h1><p>像一本每天愿意打开的纸质家计簿。用和纸米色、松叶绿与低饱和红樱，把“可靠”与“照顾自己”放在同一张安静的页面里。</p>
+        <div class="palette-strip"><span class="swatch" style="--swatch:#f5f0e7" data-name="和纸"></span><span class="swatch" style="--swatch:#456b59" data-name="松叶"></span><span class="swatch" style="--swatch:#66896d" data-name="日常"></span><span class="swatch" style="--swatch:#c87874" data-name="悦己"></span><span class="swatch" style="--swatch:#58758c" data-name="共享"></span></div>
+        <div class="design-points"><div class="design-point"><strong>优先级</strong><span>月度总额 → 双账本 → Joy 累计 → 生活片段 → 最近交易。</span></div><div class="design-point"><strong>气质</strong><span>纸张感、细边线、少阴影；标题适度使用明朝体。</span></div><div class="design-point"><strong>取舍</strong><span>最温和、最有日系记账感，但信息密度低于 B。</span></div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- B -->
+  <section id="variant-b" class="variant variant-b">
+    <div class="variant-shell">
+      <div class="prototype-wrap">
+        <div class="prototype" data-prototype="b">
+          <div class="app-scroll">
+            <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
+            <main class="app-main">
+              <header class="top-row">
+                <button class="month-btn" onclick="openSheet(this,'month')"><strong>2026年7月</strong><span class="material-symbols-rounded">expand_more</span></button><span class="top-spacer"></span>
+                <button class="mode-chip" onclick="toggleFamily(this)"><span class="material-symbols-rounded">person</span><span>个人</span></button><button class="icon-btn" aria-label="设置" onclick="openSheet(this,'settings')"><span class="material-symbols-rounded">settings</span></button>
+              </header>
+              <section class="b-hero" data-token="月度总览">
+                <div class="eyebrow">JULY OVERVIEW</div><div class="b-total-row"><strong class="amount">¥186,420</strong><small>先月比 −8%</small></div>
+                <div class="b-ledger-bar"><span></span><span></span></div><div class="b-ledger-labels"><div>日常<strong>¥132,800</strong></div><div>悦己<strong>¥53,620</strong></div></div>
+              </section>
+              <section class="b-joy" data-token="Joy 线性进度"><div class="b-joy-head"><span><h3>悦己充盈</h3><p>月間 Joy contribution</p></span><span class="b-joy-value">64 / 80</span></div><div class="b-progress"><span></span></div><div class="b-joy-meta"><span>満足度 8.2</span><span>小確幸 12件</span><span>80%</span></div></section>
+              <div class="b-shortcut-grid">
+                <button class="story-card b-story" onclick="showToast(this,'悦己详情将在统计页打开')"><span class="eyebrow">BEST JOY · 7/06</span><strong>京都の小さな器</strong><small>趣味 · 満足度 9</small><span class="amount">¥4,800</span></button>
+                <button class="invite-row b-family" onclick="showToast(this,'家庭账本邀请入口')"><span class="material-symbols-rounded">group_add</span><strong>家族と使う</strong><small>共有账本</small></button>
+              </div>
+              <div class="section-heading"><h2>最近の取引</h2><button class="text-btn" onclick="showToast(this,'切换至交易列表')">すべて見る</button></div>
+              <div class="b-tx-list">
+                <button class="tap-row b-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">local_grocery_store</span></span><span class="tx-copy"><strong>ライフ</strong><small>食費 · 今日 18:40</small></span><span class="tx-amount">−¥3,280</span></button>
+                <button class="tap-row b-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon joy"><span class="material-symbols-rounded">local_cafe</span></span><span class="tx-copy"><strong>喫茶 月舟</strong><small>悦己 · 今日 15:20</small></span><span class="tx-amount">−¥980</span></button>
+                <button class="tap-row b-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">train</span></span><span class="tx-copy"><strong>Suica</strong><small>交通 · 昨日</small></span><span class="tx-amount">−¥1,240</span></button>
+                <button class="tap-row b-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">home</span></span><span class="tx-copy"><strong>東京電力</strong><small>光熱費 · 7/08</small></span><span class="tx-amount">−¥6,840</span></button>
+              </div>
+            </main>
+          </div>
+          <div class="bottom-nav"><button class="nav-item active" onclick="activateNav(this)"><span class="material-symbols-rounded">home</span><span>ホーム</span></button><button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">receipt_long</span><span>明細</span></button><button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">monitoring</span><span>統計</span></button><button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">checklist</span><span>買い物</span></button><button class="fab" aria-label="记账" onclick="openSheet(this,'entry')"><span class="material-symbols-rounded">add</span></button></div>
+          <div class="sheet-backdrop" onclick="closeSheet(event)"><div class="sheet"><div class="grabber"></div><h3>記録する</h3><button class="sheet-choice" onclick="showToast(this,'手动记账')"><span class="material-symbols-rounded">edit_note</span>手入力で記録</button><button class="sheet-choice" onclick="showToast(this,'语音记账')"><span class="material-symbols-rounded">mic</span>声で記録</button></div></div><div class="toast"></div>
+        </div>
+      </div>
+      <aside class="notes"><div class="kicker">B · CRISP MODERN</div><h1>清晰月报</h1><p>把首页当成每天五秒钟扫一眼的月报。冷灰白底、清晰青绿和扁平分组，让金额、双账本比例与近期交易更快进入视线。</p>
+        <div class="palette-strip"><span class="swatch" style="--swatch:#f3f7f8" data-name="雾白"></span><span class="swatch" style="--swatch:#176f78" data-name="青绿"></span><span class="swatch" style="--swatch:#167a63" data-name="日常"></span><span class="swatch" style="--swatch:#c75f7f" data-name="悦己"></span><span class="swatch" style="--swatch:#3d6fa7" data-name="共享"></span></div>
+        <div class="design-points"><div class="design-point"><strong>优先级</strong><span>金额和比例最先读到，Joy 改为更易理解的线性进度。</span></div><div class="design-point"><strong>气质</strong><span>现代、轻快、系统化；全程使用无衬线字体与紧凑间距。</span></div><div class="design-point"><strong>取舍</strong><span>最高效、最容易扩展到全 App，但生活感和品牌情绪最弱。</span></div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- C -->
+  <section id="variant-c" class="variant variant-c">
+    <div class="variant-shell">
+      <div class="prototype-wrap">
+        <div class="prototype" data-prototype="c">
+          <div class="app-scroll">
+            <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
+            <main class="app-main">
+              <header class="top-row"><button class="month-btn" onclick="openSheet(this,'month')"><strong>2026年7月</strong><span class="material-symbols-rounded">expand_more</span></button><span class="top-spacer"></span><button class="mode-chip" onclick="toggleFamily(this)"><span class="material-symbols-rounded">person</span><span>个人</span></button><button class="icon-btn" aria-label="设置" onclick="openSheet(this,'settings')"><span class="material-symbols-rounded">settings</span></button></header>
+              <section class="c-hero" data-token="品牌 Hero"><div class="eyebrow">JULY · MONEY LETTER</div><h1>七月，把钱花在生活与自己身上。</h1><div class="c-total"><span><small>今月の支出</small><strong class="amount">¥186,420</strong></span><small>先月比 −8%</small></div><div class="c-ledgers"><div class="c-ledger"><span>日常</span><strong>¥132,800</strong></div><div class="c-ledger"><span>悦己</span><strong>¥53,620</strong></div></div></section>
+              <section class="c-joy-story" data-token="Joy 编辑卡"><div class="c-joy-top"><span class="c-joy-mark"><span class="material-symbols-rounded">spa</span></span><span><h3>今月の悦己</h3><p>自分を満たした支出の記録</p></span><span class="c-joy-numbers"><strong>64 / 80</strong><small>Joy contribution</small></span></div><div class="c-progress"><span></span></div><button class="c-feature" onclick="showToast(this,'悦己详情将在统计页打开')"><span class="c-date">7/06</span><span><strong>京都の小さな器</strong><small>趣味 · 満足度 9</small></span><span class="amount">¥4,800</span></button></section>
+              <button class="invite-row c-family" onclick="showToast(this,'家庭账本邀请入口')"><span class="material-symbols-rounded">group</span><span><strong>家族と一緒に家計を見守る</strong><small>共享仍使用安定的蓝色，不与悦己混淆</small></span><span class="top-spacer"></span><span class="material-symbols-rounded">chevron_right</span></button>
+              <div class="section-heading"><h2>最近の取引</h2><button class="text-btn" onclick="showToast(this,'切换至交易列表')">すべて見る</button></div>
+              <div class="c-tx-list"><button class="tap-row c-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">local_grocery_store</span></span><span class="tx-copy"><strong>ライフ</strong><small>食費 · 今日</small></span><span class="tx-amount">−¥3,280</span></button><button class="tap-row c-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon joy"><span class="material-symbols-rounded">local_cafe</span></span><span class="tx-copy"><strong>喫茶 月舟</strong><small>悦己 · 今日</small></span><span class="tx-amount">−¥980</span></button><button class="tap-row c-tx" onclick="showToast(this,'打开交易详情')"><span class="tx-icon"><span class="material-symbols-rounded">train</span></span><span class="tx-copy"><strong>Suica</strong><small>交通 · 昨日</small></span><span class="tx-amount">−¥1,240</span></button></div>
+            </main>
+          </div>
+          <div class="bottom-nav"><button class="nav-item active" onclick="activateNav(this)"><span class="material-symbols-rounded">home</span><span>ホーム</span></button><button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">receipt_long</span><span>明細</span></button><button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">monitoring</span><span>統計</span></button><button class="nav-item" onclick="activateNav(this)"><span class="material-symbols-rounded">checklist</span><span>買い物</span></button><button class="fab" aria-label="记账" onclick="openSheet(this,'entry')"><span class="material-symbols-rounded">add</span></button></div>
+          <div class="sheet-backdrop" onclick="closeSheet(event)"><div class="sheet"><div class="grabber"></div><h3>記録する</h3><button class="sheet-choice" onclick="showToast(this,'手动记账')"><span class="material-symbols-rounded">edit_note</span>手入力で記録</button><button class="sheet-choice" onclick="showToast(this,'语音记账')"><span class="material-symbols-rounded">mic</span>声で記録</button></div></div><div class="toast"></div>
+        </div>
+      </div>
+      <aside class="notes"><div class="kicker">C · WARM REFINED</div><h1>情绪月刊</h1><p>把首页做成品牌最强的情绪入口：深梅色建立信任，玫瑰色承接悦己，铜色只作细微温度。信息仍克制，但更像一份属于家庭的月刊。</p>
+        <div class="palette-strip"><span class="swatch" style="--swatch:#f7f0f2" data-name="胭脂白"></span><span class="swatch" style="--swatch:#6c4056" data-name="深梅"></span><span class="swatch" style="--swatch:#557d69" data-name="日常"></span><span class="swatch" style="--swatch:#ce607f" data-name="悦己"></span><span class="swatch" style="--swatch:#cb8d63" data-name="暖铜"></span></div>
+        <div class="design-points"><div class="design-point"><strong>优先级</strong><span>月度叙事 Hero → Joy 片段 → 家庭入口 → 最近交易。</span></div><div class="design-point"><strong>气质</strong><span>有情绪、有品牌记忆点，但不加入任何达标庆祝或游戏化反馈。</span></div><div class="design-point"><strong>取舍</strong><span>品牌感最强，视觉最出彩；跨全 App 推广时需要更严格的色彩纪律。</span></div></div>
+      </aside>
+    </div>
+  </section>
+
+  <div id="sketch-tools"><span>Sketch 004</span><button onclick="setPhoneWidth(390)">390</button><button onclick="setPhoneWidth(430)">430</button><button onclick="toggleAnnotations()">标注</button></div>
+
+<script>
+  function showVariant(id, button) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variant-tab').forEach(v => v.classList.remove('active'));
+    document.getElementById('variant-' + id).classList.add('active');
+    button.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function toggleMode(button) {
+    document.body.classList.toggle('dark');
+    const dark = document.body.classList.contains('dark');
+    button.querySelector('.material-symbols-rounded').textContent = dark ? 'light_mode' : 'dark_mode';
+    button.querySelector('span:last-child').textContent = dark ? '浅色' : '深色';
+  }
+  function getPrototype(source) { return source.closest('.prototype'); }
+  function openSheet(source, type) {
+    const prototype = getPrototype(source);
+    const sheet = prototype.querySelector('.sheet-backdrop');
+    const title = sheet.querySelector('h3');
+    if (type === 'month') title.textContent = '月を選ぶ';
+    else if (type === 'settings') title.textContent = 'ホームの設定';
+    else title.textContent = '記録する';
+    sheet.classList.add('open');
+  }
+  function closeSheet(event) {
+    if (event.target.classList.contains('sheet-backdrop')) event.currentTarget.classList.remove('open');
+  }
+  function showToast(source, text) {
+    const prototype = getPrototype(source);
+    const toast = prototype.querySelector('.toast');
+    const sheet = prototype.querySelector('.sheet-backdrop');
+    if (sheet) sheet.classList.remove('open');
+    toast.textContent = text; toast.classList.add('show');
+    clearTimeout(prototype.toastTimer);
+    prototype.toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+  function toggleFamily(button) {
+    const family = button.querySelector('span:last-child').textContent === '家庭';
+    button.querySelector('.material-symbols-rounded').textContent = family ? 'person' : 'group';
+    button.querySelector('span:last-child').textContent = family ? '个人' : '家庭';
+    showToast(button, family ? '已切换为个人账本' : '已切换为家庭账本');
+  }
+  function activateNav(button) {
+    const prototype = getPrototype(button);
+    prototype.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    button.classList.add('active');
+    showToast(button, button.textContent.trim() + ' 预览');
+  }
+  function setPhoneWidth(width) { document.querySelectorAll('.prototype').forEach(p => p.style.width = width + 'px'); }
+  function toggleAnnotations() { document.body.classList.toggle('annotations'); }
+</script>
+</body>
+</html>
