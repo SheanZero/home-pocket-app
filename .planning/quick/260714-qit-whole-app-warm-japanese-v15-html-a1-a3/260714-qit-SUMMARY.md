@@ -4,10 +4,18 @@ status: complete
 date: 2026-07-14
 verification: human_needed
 commits:
-  - a5f602c6  # home
-  - e2cb6b50  # list
-  - 0014cc54  # analytics
-  - 91616bc2  # shopping
+  # round 1 — 视觉高保真移植（presentation-only，零/极少新 ARB）
+  - a5f602c6  # home r1
+  - e2cb6b50  # list r1
+  - 0014cc54  # analytics r1
+  - 91616bc2  # shopping r1
+  # round 2 — 完全按 mockup 实现（用户逐项决策，新 ARB 放开，含 1 处数据层改动）
+  - 55bb7687  # home r2
+  - 9764ec24  # list r2 (getDailyTotals ledgerType + D-06 revised)
+  - 0b038694  # analytics r2 (month-only window)
+  - 25fc68a4  # shopping r2
+  - c1f98229  # golden rebaseline (cross-cutting)
+  - ea1a627c  # arb metadata parity fix
 ---
 
 # Quick Task 260714-qit — v15 A1/A3 四页面视觉高保真移植
@@ -52,3 +60,43 @@ planner(quick-full) → plan-checker（0 blocker / 2 verify-block warning 已直
 - 设备端浅色(A1)+深色(A3)四页面逐屏 UAT（本任务不含 device run）。
 - shell chrome（底部浮动 pill 导航 + 中央 FAB）——四 tab 共享，明确排除在本轮范围外。
 - 本任务未 push（GSD-quick inline 契约；提交停留在本地 `main`）。
+
+---
+
+## Round 2 — 完全按 mockup 实现（2026-07-14）
+
+用户后续要求：「包括 home 在内，完全按 mockup 实现；不能实现的停下来提问。」放开 round-1 的「零新 ARB / 不重建」约束。
+
+### 流程
+4 屏并行 gap 分析（read-only，逐项分类 IMPL vs BLOCK）→ 批量 4 问决策（AskUserQuestion ×2 轮）→ 4 个全保真 executor（顺序 main tree）→ orchestrator 全量 analyze+test 门（修 2 处跨切漂移）。
+
+### 用户锁定决策
+- **功能取舍（逐项）：** 保留 满足度表情脸 / 成员归属 chip / 多态空态 / 周起始日设置；**移除** 统计多时间窗 → 月-only。
+- **数据层：** ✅ 月历数字按账本过滤（改 `getDailyTotals` + 覆盖 D-06）；✗ 购物数量单位字段（不加 schema）。
+- **满足度底部文案：** 保留中性事实（守 ADR-012），仅对齐「まんなか」措辞。
+- **头部（明细/统计）：** 严格按 mockup —— 月份选择器 + 设置齿轮，去上/下月箭头。
+- **全局文案：** 对齐 mockup 措辞（総支出 / カテゴリ別 / 全員 / 少·多 / ときめき支出·カレンダー·満足度 / 完了 / すべて削除 / 全部·個人 等）。
+
+### 各屏 round-2 交付
+| 屏 | Commit | 关键改动 | Golden(浅+深) |
+|---|---|---|---|
+| home | `55bb7687` | metrics 区重建 goal-ring+満足度 scale+小確幸 count（group 无家庭 joy 目标 → medianSatisfaction 环，不臆造）；family-invite 横向重构 + dismiss + 設定›家庭 path；今月の分析を見る link | 10 |
+| list | `9764ec24` | 头部月份选择器+齿轮（去箭头）；**getDailyTotals +optional ledgerType、D-06 REVISED**、月历随账本过滤；合并 sort pill（方向进菜单）；CJK 日期头 yyyy年M月d日；icon-only clear；保留满足度脸/成员 chip/多态空态 | 32 |
+| analytics | `0b038694` | 月-only 时间窗（删 TimeWindowChip/picker）；trend insight strip；可折叠 joy drawer；日历 summary + day-panel head；删冗余 donut caption；中性满足度文案（まんなか）；registry+GUARD-01 保持 | 26 |
+| shopping | `25fc68a4` | tile meta = category(resolveFromId)·数量(裸数字)；inline 筛选空态；全部·個人 scope（消 私有 重复）；完了·すべて削除；完成行装饰 drag glyph | 24 |
+
+### Orchestrator 全量门（两处跨切漂移，均已修）
+1. **golden 漂移 8 张** → 重基线 `c1f98229`：category_drill_down ×4（list slash-date 传导到只读 tile 镜像）、family_insight_data_card ×2（家族ときめき 文案）、joy_spend_card ×2（drawer 默认折叠）。均预期视觉变更，非逻辑回归。
+2. **arb_key_parity 失败** → `ea1a627c`：analytics 11 个占位符 key 的 @-metadata 仅加到 en 模板，镜像到 ja/zh（值零改动）。
+
+> 二者都只有 orchestrator 的全量 `flutter test` 门能抓（executor scoped 门看不到跨屏 golden / 全局 ARB 一致性）——沿用「per-wave 门必须跑 FULL test」的既有教训。
+
+### 最终门（全绿）
+- `flutter analyze` → **No issues found!**
+- 全量 `flutter test` → **+3712 ~11 All tests passed!**（0 fail；含 color_literal_scan / hardcoded_cjk_ui_scan / theme_dark_mode_coverage / arb_key_parity）。
+
+### 仍待 / 轻量清理
+- **设备端 UAT（human_needed）：** 浅(A1)+深(A3)四屏逐屏对比 mockup。
+- 剩余小取舍：hero 金额保留 tabular（AppTextStyles 硬约束，mockup 金额本身也是 sans）；日历日格 compact 沿用「万」惯例；shopping 数量裸数字；满足度中性文案。
+- `happiness_rings_painter.dart` 现无引用（未删，越范围，可后续清理）。
+- round-2 仍未 push（GSD-quick 契约）。

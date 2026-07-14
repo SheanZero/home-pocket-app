@@ -71,5 +71,27 @@ human_verification:
 
 ---
 
-_Verified: 2026-07-14_
-_Verifier: Claude (gsd-verifier)_
+## Round 2 Update (2026-07-14): 完全按 mockup 实现 + 用户逐项决策
+
+用户要求「完全按 mockup 实现，不能实现的停下来提问」。经 4 屏并行 gap 分析 → 批量决策 → 4 个全保真 executor → orchestrator 全量门。**status 仍 = human_needed**（视觉保真本质需设备 UAT），但 round-1 的多数保真取舍已闭环。
+
+**用户锁定决策：** ①功能取舍逐项：保留满足度表情脸/成员归属 chip/多态空态/周起始日，移除统计多时间窗（→月-only）②数据层：做「月历数字按账本过滤」（改 getDailyTotals + 覆盖 D-06），不做购物数量单位字段 ③满足度底部文案保留中性事实（守 ADR-012）④明细/统计头部严格按 mockup（月份选择器+齿轮，去箭头）⑤全局文案对齐 mockup 措辞。
+
+**Round-2 提交（6）：** `55bb7687` home（metrics 区重建为 goal-ring+scale+count / family-invite 横向重构+dismiss+設定›家庭 / 今月の分析を見る link）· `9764ec24` list（头部月份选择器+齿轮 / **getDailyTotals 加 optional ledgerType + D-06 REVISED** / 合并 sort pill / CJK 日期头 / icon-only clear）· `0b038694` analytics（月-only 时间窗，删 TimeWindowChip / trend insight strip / 可折叠 joy drawer / 日历 summary+day-head / 中性满足度文案 / 删冗余 donut caption）· `25fc68a4` shopping（category·数量 meta / inline 筛选空态 / 全部·個人 scope / 完了·すべて削除 / 完成行装饰 drag）· `c1f98229` golden 重基线 · `ea1a627c` ARB metadata parity 修复。
+
+**Round-2 数据层变更（用户批准，越出 presentation-only）：** `getDailyTotals`(analytics_dao) 加 **optional** `LedgerType? ledgerType`(默认 null，向后兼容) + repo 接口/impl 透传 + `state_calendar_totals` watch `listFilter.ledgerType`；`state_calendar_totals.dart` 的 **D-06 决策已 REVISED**（dated 注释：月历改随所选账本过滤，原为始终全账本）。
+
+**Orchestrator 全量门（两处跨切漂移，均已修）：**
+1. golden 漂移 8 张 → 重基线（category_drill_down ×4：list slash-date 传导到只读 tile 镜像；family_insight_data_card ×2：家族ときめき 文案；joy_spend_card ×2：drawer 默认折叠）——均为预期视觉变更，非逻辑回归。
+2. `arb_key_parity_test` 失败 → analytics 11 个占位符 key 的 @-metadata 仅加到 en 模板；已镜像到 ja/zh（值零改动）。
+
+**最终门（全绿）：** `flutter analyze` → **No issues found!**；全量 `flutter test` → **+3712 ~11 All tests passed!**（0 fail，含 color_literal_scan / hardcoded_cjk_ui_scan / theme_dark_mode_coverage / arb_key_parity）。四屏 round-2 golden 浅+深共约 100 张重基线。
+
+**Round-1 保真取舍闭环情况：** home metrics 区已重建为 goal-ring/scale/count（group 模式无家庭 joy 目标数据 → 用 medianSatisfaction 环，不臆造）；family-invite 已横向重构；list clear/sort/calendar 标签已按 mockup；analytics trend insight strip 已加；shopping tile meta 已改 category·数量。
+
+**仍 human_needed：** 设备端浅(A1)+深(A3)四屏逐屏比对 mockup 的视觉保真 UAT。剩余小取舍：hero 金额保留 tabular（AppTextStyles 硬约束，且 mockup 金额本身为 sans 非 serif）；日历日格 compact 沿用 app 全局「万」惯例（非 mockup「千」）；shopping 数量为裸数字（用户未加 unit 字段）；满足度底部保留中性文案（用户守 ADR-012）。轻量清理：`happiness_rings_painter.dart` 现无引用（未删，越范围）。
+
+---
+
+_Verified: 2026-07-14 (round 1 + round 2)_
+_Verifier: Claude (gsd-verifier round 1; orchestrator gate round 2)_
