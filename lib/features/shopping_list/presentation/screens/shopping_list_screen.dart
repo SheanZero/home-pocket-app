@@ -169,7 +169,12 @@ class ShoppingListScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ),
+              )
+            else
+              // Filtered-empty: no pending items but completed items exist
+              // (a filter hid every pending row). Inline muted card under the
+              // 買うもの header — NOT the big 3-variant empty state.
+              const SliverToBoxAdapter(child: _FilteredEmptyPlaceholder()),
             // Completed section — hidden during reorder mode (pmc-07).
             if (completedItems.isNotEmpty && !reorderMode) ...[
               SliverToBoxAdapter(
@@ -356,7 +361,7 @@ class _CompletedSectionHeader extends ConsumerWidget {
                   .execute(listType);
             },
             child: Text(
-              l10n.shoppingClearCompletedConfirm,
+              l10n.shoppingClearCompletedAction,
               style: AppTextStyles.labelMedium.copyWith(
                 color: palette.textSecondary,
                 fontWeight: FontWeight.w800,
@@ -364,6 +369,43 @@ class _CompletedSectionHeader extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Inline muted placeholder shown under the 買うもの header when the active
+/// (pending) list is filtered-empty but completed items still exist — e.g. a
+/// ledger/category/私有 filter hid every pending item.
+///
+/// This is intentionally NOT the big 3-variant [ShoppingEmptyState]; that is
+/// reserved for the all-empty case (no active AND no completed items). Mockup:
+/// the `.shopping-empty` warm muted card under the 買うもの section title.
+class _FilteredEmptyPlaceholder extends StatelessWidget {
+  const _FilteredEmptyPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final l10n = S.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
+        decoration: BoxDecoration(
+          color: palette.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: palette.borderDefault, width: 1),
+        ),
+        child: Text(
+          l10n.shoppingFilteredEmpty,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: palette.textSecondary,
+          ),
+        ),
       ),
     );
   }

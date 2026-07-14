@@ -14,14 +14,15 @@ import 'shopping_segmented_control.dart';
 ///
 /// Faithful port of the mockup `shoppingFilterCard()`:
 ///   ┌───────────────────────────────────────────┐
-///   │ [すべて|私有]   [すべて|日常|ときめき]        │  ← scope (family) + ledger
+///   │ [全部|個人]   [すべて|日常|ときめき]          │  ← scope (family) + ledger
 ///   │ ( 私有 ) ( カテゴリ )                         │  ← secondary chips
 ///   └───────────────────────────────────────────┘
 ///
 /// Data wiring is unchanged — the Material `SegmentedButton`/chip bar was
 /// swapped for the `.segmented-control` pill visual, but every control still
 /// reads/writes the SAME providers:
-/// - scope segment  → [listTypeProvider] ('all' | 'private'), family only.
+/// - scope segment  → [listTypeProvider] ('all' | 'private'), family only
+///   (labelled 全部 / 個人).
 /// - ledger segment → [shoppingFilterProvider].ledgerType (null | daily | joy).
 /// - 私有 chip       → [shoppingFilterProvider].showPrivateOnly (G8Z).
 /// - カテゴリ chip    → [ShoppingCategoryFilterSheet] → setCategoryIds (D-3).
@@ -71,11 +72,14 @@ class ShoppingFilterBar extends ConsumerWidget {
       },
     );
 
+    // Scope segment (family only): 全部 / 個人. The screenshot labels the
+    // second option 個人 (personal) — the 私有 wording is reserved for the
+    // separate row-2 私有 chip below, resolving the old double-私有 label.
     final scopeSegment = ShoppingSegmentedControl<String>(
       selected: listType,
       segments: [
-        ShoppingSegment(value: 'all', label: l10n.shoppingSegmentAll),
-        ShoppingSegment(value: 'private', label: l10n.shoppingSegmentPrivate),
+        ShoppingSegment(value: 'all', label: l10n.shoppingScopeAll),
+        ShoppingSegment(value: 'private', label: l10n.shoppingScopePersonal),
       ],
       onChanged: (value) =>
           ref.read(listTypeProvider.notifier).setListType(value),

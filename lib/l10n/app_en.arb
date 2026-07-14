@@ -2639,6 +2639,22 @@
   "@shoppingCompletedDivider": {
     "description": "Divider label between active and completed shopping items (Phase 38)"
   },
+  "shoppingScopeAll": "All",
+  "@shoppingScopeAll": {
+    "description": "Shopping filter scope segment — All segment (shows every list)"
+  },
+  "shoppingScopePersonal": "Personal",
+  "@shoppingScopePersonal": {
+    "description": "Shopping filter scope segment — Personal segment (shows only the user's own list)"
+  },
+  "shoppingClearCompletedAction": "Clear all",
+  "@shoppingClearCompletedAction": {
+    "description": "Clear-all button label in the Completed section header (v15) — distinct from the dialog confirm Clear"
+  },
+  "shoppingFilteredEmpty": "No shopping items match your filters",
+  "@shoppingFilteredEmpty": {
+    "description": "Inline placeholder shown under the To-buy header when the active list is filtered-empty but completed items exist (v15)"
+  },
   "shoppingClearCompletedTitle": "Clear all completed?",
   "@shoppingClearCompletedTitle": {
     "description": "Confirmation dialog title for clear-all-completed shopping items (Phase 38)"

@@ -2635,9 +2635,25 @@
   "@shoppingListTypeLockedHint": {
     "description": "Shopping item form — caption shown under the disabled list-type selector in edit mode"
   },
-  "shoppingCompletedDivider": "完了済み",
+  "shoppingCompletedDivider": "完了",
   "@shoppingCompletedDivider": {
     "description": "Divider label between active and completed shopping items (Phase 38)"
+  },
+  "shoppingScopeAll": "全部",
+  "@shoppingScopeAll": {
+    "description": "Shopping filter scope segment — All segment (shows every list)"
+  },
+  "shoppingScopePersonal": "個人",
+  "@shoppingScopePersonal": {
+    "description": "Shopping filter scope segment — Personal segment (shows only the user's own list)"
+  },
+  "shoppingClearCompletedAction": "すべて削除",
+  "@shoppingClearCompletedAction": {
+    "description": "Clear-all button label in the 完了 section header (v15) — distinct from the dialog confirm 削除"
+  },
+  "shoppingFilteredEmpty": "条件に合う買い物はありません",
+  "@shoppingFilteredEmpty": {
+    "description": "Inline placeholder shown under the 買うもの header when the active list is filtered-empty but completed items exist (v15)"
   },
   "shoppingClearCompletedTitle": "完了済みをすべて削除しますか？",
   "@shoppingClearCompletedTitle": {

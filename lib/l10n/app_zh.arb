@@ -2639,6 +2639,22 @@
   "@shoppingCompletedDivider": {
     "description": "Divider label between active and completed shopping items (Phase 38)"
   },
+  "shoppingScopeAll": "全部",
+  "@shoppingScopeAll": {
+    "description": "Shopping filter scope segment — All segment (shows every list)"
+  },
+  "shoppingScopePersonal": "个人",
+  "@shoppingScopePersonal": {
+    "description": "Shopping filter scope segment — Personal segment (shows only the user's own list)"
+  },
+  "shoppingClearCompletedAction": "全部删除",
+  "@shoppingClearCompletedAction": {
+    "description": "Clear-all button label in the 完了 section header (v15) — distinct from the dialog confirm 删除"
+  },
+  "shoppingFilteredEmpty": "没有符合条件的购物项目",
+  "@shoppingFilteredEmpty": {
+    "description": "Inline placeholder shown under the 买うもの header when the active list is filtered-empty but completed items exist (v15)"
+  },
   "shoppingClearCompletedTitle": "清除所有已完成？",
   "@shoppingClearCompletedTitle": {
     "description": "Confirmation dialog title for clear-all-completed shopping items (Phase 38)"

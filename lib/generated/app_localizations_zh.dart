@@ -2043,6 +2043,18 @@ class SZh extends S {
   String get shoppingCompletedDivider => '已完成';
 
   @override
+  String get shoppingScopeAll => '全部';
+
+  @override
+  String get shoppingScopePersonal => '个人';
+
+  @override
+  String get shoppingClearCompletedAction => '全部删除';
+
+  @override
+  String get shoppingFilteredEmpty => '没有符合条件的购物项目';
+
+  @override
   String get shoppingClearCompletedTitle => '清除所有已完成？';
 
   @override

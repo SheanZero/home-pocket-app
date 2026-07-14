@@ -2,11 +2,11 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../domain/models/shopping_item.dart';
@@ -117,10 +117,18 @@ class ShoppingItemTile extends ConsumerWidget {
   ) {
     final locale = Localizations.localeOf(context);
 
-    // Meta line (mockup `.row-copy small`) — estimated price when set.
-    final metaText = item.estimatedPrice != null
-        ? NumberFormatter.formatCurrency(item.estimatedPrice!, 'JPY', locale)
+    // Meta line (mockup `.row-copy small`) — "{category} · {quantity}".
+    // Category resolves via CategoryLocalizationService (the SAME path the list
+    // tile uses; it returns the raw id unchanged for user-created categories).
+    // A null / empty categoryId degrades to the bare quantity number. The
+    // estimated price is intentionally dropped — the v15 tile shows no price.
+    final categoryId = item.categoryId;
+    final categoryName = (categoryId != null && categoryId.isNotEmpty)
+        ? CategoryLocalizationService.resolveFromId(categoryId, locale)
         : null;
+    final metaText = categoryName != null
+        ? '$categoryName · ${item.quantity}'
+        : '${item.quantity}';
 
     return Container(
       // v15 rows sit inside the shopping-list-card; the tile itself is
@@ -158,19 +166,17 @@ class ShoppingItemTile extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  if (metaText != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      metaText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.amountSmall.copyWith(
-                        color: item.isCompleted
-                            ? palette.textTertiary
-                            : palette.textSecondary,
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    metaText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.caption.copyWith(
+                      color: item.isCompleted
+                          ? palette.textTertiary
+                          : palette.textSecondary,
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -325,10 +331,16 @@ class ShoppingItemTile extends ConsumerWidget {
   }
 
   /// Trailing cluster:
-  /// - quantity — number only (no ×), shown for every item.
   /// - normal mode (active item) — a decorative `drag_indicator` glyph; the
   ///   whole active row is long-press draggable in the parent list.
+  /// - normal mode (completed item) — the SAME `drag_indicator` glyph, faded to
+  ///   the .58 done-opacity (mockup CSS) and NON-interactive (completed rows are
+  ///   never reorderable).
   /// - reorder mode (active item) — move-to-top / move-to-bottom + drag handle.
+  ///
+  /// The quantity is no longer shown here — it now lives in the tile meta line
+  /// ("{category} · {quantity}"), matching the v15 mockup which shows no
+  /// trailing quantity number.
   Widget _buildTrailingCluster(
     BuildContext context,
     WidgetRef ref,
@@ -336,21 +348,6 @@ class ShoppingItemTile extends ConsumerWidget {
     bool reorderMode,
   ) {
     final children = <Widget>[];
-
-    // Quantity on the right edge — number only (no ×), shown for every item.
-    if (item.quantity >= 1) {
-      children.add(
-        Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: Text(
-            '${item.quantity}',
-            style: AppTextStyles.amountSmall.copyWith(
-              color: palette.textSecondary,
-            ),
-          ),
-        ),
-      );
-    }
 
     if (reorderMode && isActive) {
       // Move-to-top button (Fix 4): re-sequence the whole active list with this
@@ -452,15 +449,19 @@ class ShoppingItemTile extends ConsumerWidget {
           ),
         ),
       );
-    } else if (isActive) {
-      // Normal mode, active row: decorative drag glyph (mockup `drag_indicator`).
-      // The row is long-press draggable via the parent list's listener.
+    } else {
+      // Normal mode: decorative drag glyph (mockup `drag_indicator`).
+      // Active rows are long-press draggable via the parent list's listener;
+      // completed rows render the SAME glyph faded to the .58 done-opacity
+      // (mockup CSS) but it is purely decorative — completed rows are never
+      // reorderable.
+      final glyph = Icon(
+        Icons.drag_indicator,
+        size: 20,
+        color: palette.textTertiary,
+      );
       children.add(
-        Icon(
-          Icons.drag_indicator,
-          size: 20,
-          color: palette.textTertiary,
-        ),
+        isActive ? glyph : Opacity(opacity: 0.58, child: glyph),
       );
     }
 

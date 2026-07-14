@@ -3829,6 +3829,30 @@ abstract class S {
   /// **'Completed'**
   String get shoppingCompletedDivider;
 
+  /// Shopping filter scope segment — All segment (shows every list)
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get shoppingScopeAll;
+
+  /// Shopping filter scope segment — Personal segment (shows only the user's own list)
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get shoppingScopePersonal;
+
+  /// Clear-all button label in the Completed section header (v15) — distinct from the dialog confirm Clear
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get shoppingClearCompletedAction;
+
+  /// Inline placeholder shown under the To-buy header when the active list is filtered-empty but completed items exist (v15)
+  ///
+  /// In en, this message translates to:
+  /// **'No shopping items match your filters'**
+  String get shoppingFilteredEmpty;
+
   /// Confirmation dialog title for clear-all-completed shopping items (Phase 38)
   ///
   /// In en, this message translates to:

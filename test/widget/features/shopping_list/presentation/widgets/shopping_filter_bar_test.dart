@@ -96,14 +96,18 @@ void main() {
       },
     );
 
-    testWidgets('group mode adds the scope segment (すべて / 私有)',
+    testWidgets('group mode adds the scope segment (全部 / 個人)',
         (tester) async {
       await _pumpFilterBar(tester, isGroupMode: true);
 
-      // Scope segment "all" + ledger segment "all" → two すべて.
-      expect(find.text('すべて'), findsNWidgets(2));
-      // 私有 appears in both the scope segment AND the secondary chip.
-      expect(find.text('私有'), findsNWidgets(2));
+      // Scope segment now uses 全部 / 個人 (v15 screenshot) — 私有 is reserved
+      // for the row-2 chip only, resolving the old double-私有 label.
+      expect(find.text('全部'), findsOneWidget); // scope "all"
+      expect(find.text('個人'), findsOneWidget); // scope "private" (personal)
+      // ledger "all" すべて appears once; scope no longer duplicates it.
+      expect(find.text('すべて'), findsOneWidget);
+      // 私有 now appears ONLY as the secondary chip.
+      expect(find.text('私有'), findsOneWidget);
     });
 
     testWidgets('tapping 日常 sets ledgerType to daily', (tester) async {

@@ -2085,6 +2085,18 @@ class SEn extends S {
   String get shoppingCompletedDivider => 'Completed';
 
   @override
+  String get shoppingScopeAll => 'All';
+
+  @override
+  String get shoppingScopePersonal => 'Personal';
+
+  @override
+  String get shoppingClearCompletedAction => 'Clear all';
+
+  @override
+  String get shoppingFilteredEmpty => 'No shopping items match your filters';
+
+  @override
   String get shoppingClearCompletedTitle => 'Clear all completed?';
 
   @override

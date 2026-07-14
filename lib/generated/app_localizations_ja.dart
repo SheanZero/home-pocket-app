@@ -2047,7 +2047,19 @@ class SJa extends S {
   String get shoppingListTypeLockedHint => '作成後は変更できません';
 
   @override
-  String get shoppingCompletedDivider => '完了済み';
+  String get shoppingCompletedDivider => '完了';
+
+  @override
+  String get shoppingScopeAll => '全部';
+
+  @override
+  String get shoppingScopePersonal => '個人';
+
+  @override
+  String get shoppingClearCompletedAction => 'すべて削除';
+
+  @override
+  String get shoppingFilteredEmpty => '条件に合う買い物はありません';
 
   @override
   String get shoppingClearCompletedTitle => '完了済みをすべて削除しますか？';
