@@ -60,18 +60,29 @@ class CalendarHeaderWidget extends ConsumerWidget {
     // Pass value ?? {} so cells render date numerals during loading/error
     final dailyMap = calendarAsync.value ?? {};
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TableCalendar(
-          firstDay: DateTime(2020, 1, 1),
-          lastDay: DateTime(2030, 12, 31),
-          focusedDay: DateTime(filter.selectedYear, filter.selectedMonth),
-          calendarFormat: CalendarFormat.month,
-          availableCalendarFormats: const {CalendarFormat.month: ''},
-          headerVisible: false,
-          rowHeight: 44,
-          daysOfWeekHeight: 18,
+    // v15 `.list-calendar`: bordered, rounded card wrapping the grid + summary.
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: palette.borderDefault, width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 3),
+            child: TableCalendar(
+              firstDay: DateTime(2020, 1, 1),
+              lastDay: DateTime(2030, 12, 31),
+              focusedDay: DateTime(filter.selectedYear, filter.selectedMonth),
+              calendarFormat: CalendarFormat.month,
+              availableCalendarFormats: const {CalendarFormat.month: ''},
+              headerVisible: false,
+              rowHeight: 40,
+              daysOfWeekHeight: 16,
           locale: locale.toLanguageTag(),
           startingDayOfWeek: weekStartDay == WeekStartDay.monday
               ? StartingDayOfWeek.monday
@@ -109,15 +120,17 @@ class CalendarHeaderWidget extends ConsumerWidget {
                 _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, true),
           ),
         ),
-        _SummaryRow(
-          l10n: l10n,
-          calendarAsync: calendarAsync,
-          dailyMap: dailyMap,
-          activeDayFilter: filter.activeDayFilter,
-          currencyCode: currencyCode,
-          locale: locale,
-        ),
-      ],
+          ),
+          _SummaryRow(
+            l10n: l10n,
+            calendarAsync: calendarAsync,
+            dailyMap: dailyMap,
+            activeDayFilter: filter.activeDayFilter,
+            currencyCode: currencyCode,
+            locale: locale,
+          ),
+        ],
+      ),
     );
   }
 

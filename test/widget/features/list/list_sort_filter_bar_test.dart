@@ -67,19 +67,9 @@ void main() {
           equals(SortField.timestamp));
     });
 
-    testWidgets('FILTER-02: tapping ledger chip sets ledgerFilter',
-        (tester) async {
-      final container = await _pumpBar(tester);
-
-      // Tap the '日常' chip
-      await tester.tap(find.text('日常').first);
-      await tester.pumpAndSettle();
-
-      expect(
-        container.read(listFilterProvider).ledgerType,
-        equals(LedgerType.daily),
-      );
-    });
+    // FILTER-02 (tapping the ledger chip) moved to list_ledger_segments_test.dart
+    // when the ledger filter graduated from inline chips to the full-width
+    // ListLedgerSegments control (v15 A1/A3 port). The bar no longer owns it.
 
     testWidgets('FILTER-04: clear chip appears only when filter active',
         (tester) async {

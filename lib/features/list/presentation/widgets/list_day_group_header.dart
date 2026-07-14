@@ -23,16 +23,17 @@ class ListDayGroupHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    // v15 `.list-day-header`: 28dp, no background, muted small caps-ish label.
     return Container(
-      color: palette.backgroundMuted,
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 28,
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           DateFormatter.formatDate(date, locale),
-          style: AppTextStyles.caption.copyWith(
+          style: AppTextStyles.labelSmall.copyWith(
             color: palette.textSecondary,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),

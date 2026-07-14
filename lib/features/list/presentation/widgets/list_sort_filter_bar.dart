@@ -5,23 +5,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/home/presentation/providers/state_shadow_books.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/list_sort_config.dart';
 import '../providers/state_list_filter.dart';
 import '../../../../shared/constants/sort_config.dart';
 import 'list_category_filter_sheet.dart';
 
-/// Pinned sort + filter chip bar for the transaction list (C-03).
+/// Pinned sort + filter bar for the transaction list — v15 `.list-filter-bar`.
+///
+/// The ledger segments (すべて / 日常 / ときめき) moved out to
+/// [ListLedgerSegments]; this bar now owns only the utilities row:
+/// sort pill → direction arrow → [spacer] → clear → category → search.
 ///
 /// All interactions route through [listFilterProvider] mutators — no local
 /// filter state other than the text-field expand/collapse flag and the
 /// [TextEditingController] for the search field.
-///
-/// Chip order (left-to-right, per UI-SPEC C-03):
-/// Sort chip → Direction arrow → All / 日常 / ときめき → カテゴリ → Search → [Clear]
 class ListSortFilterBar extends ConsumerStatefulWidget {
   const ListSortFilterBar({super.key, required this.bookId});
 
@@ -146,12 +147,8 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final filter = ref.watch(listFilterProvider);
-    final l10n = S.of(context);
     final sortConfig = filter.sortConfig;
     final isGroupMode = ref.watch(isGroupModeProvider);
-    final shadowBooksAsync = isGroupMode
-        ? ref.watch(shadowBooksProvider)
-        : const AsyncData<List<ShadowBookInfo>>([]);
 
     final anyFilterActive =
         filter.activeDayFilter != null ||
@@ -161,394 +158,447 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
         filter.memberBookId != null; // FAM-03 fix (Pitfall B)
 
     return Container(
-      height: 44,
       decoration: BoxDecoration(
         color: palette.background,
         border: Border(
           bottom: BorderSide(color: palette.borderDivider, width: 1),
         ),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ── Sort chip (C-03a) ─────────────────────────────────────────
-            Semantics(
-              label: 'Sort by',
-              child: ActionChip(
-                key: _sortChipKey,
-                avatar: Icon(
-                  Icons.sort,
-                  size: 14,
-                  color: palette.textSecondary,
-                ),
-                label: Text(
-                  _sortFieldLabel(sortConfig.sortField, context),
-                  style: AppTextStyles.caption.copyWith(
-                    color: palette.textPrimary,
-                  ),
-                ),
-                onPressed: () => _showSortMenu(context, sortConfig),
-                side: BorderSide(color: palette.accentPrimary, width: 1),
-                backgroundColor: palette.card,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            const SizedBox(width: 4),
-            // ── Direction arrow (C-03b) ───────────────────────────────────
-            Semantics(
-              label: sortConfig.sortDirection == SortDirection.desc
-                  ? 'Descending'
-                  : 'Ascending',
-              child: IconButton(
-                icon: Icon(
-                  sortConfig.sortDirection == SortDirection.desc
-                      ? Icons.arrow_downward
-                      : Icons.arrow_upward,
-                  size: 18,
-                  color: palette.textPrimary,
-                ),
-                onPressed: () => ref
-                    .read(listFilterProvider.notifier)
-                    .setSort(
-                      sortConfig.copyWith(
-                        sortDirection:
-                            sortConfig.sortDirection == SortDirection.desc
-                            ? SortDirection.asc
-                            : SortDirection.desc,
-                      ),
-                    ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 44),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // ── Ledger: All chip (C-03c) ──────────────────────────────────
-            Semantics(
-              label: 'Show all ledgers',
-              selected: filter.ledgerType == null,
-              child: ActionChip(
-                label: Text(
-                  l10n.listLedgerAll,
-                  style: AppTextStyles.caption.copyWith(
-                    color: filter.ledgerType == null
-                        ? palette.textPrimary
-                        : palette.textSecondary,
-                  ),
-                ),
-                backgroundColor: filter.ledgerType == null
-                    ? palette.backgroundMuted
-                    : palette.card,
-                side: BorderSide(color: palette.borderDefault, width: 1),
-                onPressed: () =>
-                    ref.read(listFilterProvider.notifier).setLedgerFilter(null),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            const SizedBox(width: 4),
-            // ── Ledger: 日常 chip (C-03c) ─────────────────────────────────
-            Semantics(
-              label: l10n.listLedgerDaily,
-              selected: filter.ledgerType == LedgerType.daily,
-              child: ActionChip(
-                label: Text(
-                  l10n.listLedgerDaily,
-                  style: AppTextStyles.caption.copyWith(
-                    color: filter.ledgerType == LedgerType.daily
-                        ? palette.daily
-                        : palette.textSecondary,
-                  ),
-                ),
-                backgroundColor: filter.ledgerType == LedgerType.daily
-                    ? palette.dailyLight
-                    : palette.card,
-                side: BorderSide(
-                  color: filter.ledgerType == LedgerType.daily
-                      ? palette.daily
-                      : palette.borderDefault,
-                  width: 1,
-                ),
-                onPressed: () => ref
-                    .read(listFilterProvider.notifier)
-                    .setLedgerFilter(
-                      filter.ledgerType == LedgerType.daily
-                          ? null
-                          : LedgerType.daily,
-                    ),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            const SizedBox(width: 4),
-            // ── Ledger: ときめき chip (C-03c) ───────────────────────────────────
-            Semantics(
-              label: l10n.listLedgerJoy,
-              selected: filter.ledgerType == LedgerType.joy,
-              child: ActionChip(
-                label: Text(
-                  l10n.listLedgerJoy,
-                  style: AppTextStyles.caption.copyWith(
-                    color: filter.ledgerType == LedgerType.joy
-                        ? palette.joy
-                        : palette.textSecondary,
-                  ),
-                ),
-                backgroundColor: filter.ledgerType == LedgerType.joy
-                    ? palette.joyLight
-                    : palette.card,
-                side: BorderSide(
-                  color: filter.ledgerType == LedgerType.joy
-                      ? palette.joy
-                      : palette.borderDefault,
-                  width: 1,
-                ),
-                onPressed: () => ref
-                    .read(listFilterProvider.notifier)
-                    .setLedgerFilter(
-                      filter.ledgerType == LedgerType.joy
-                          ? null
-                          : LedgerType.joy,
-                    ),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            const SizedBox(width: 8),
-            // ── Category count chip (C-03d) ───────────────────────────────
-            Semantics(
-              label: 'Filter by category',
-              child: ActionChip(
-                avatar: Icon(
-                  Icons.category_outlined,
-                  size: 14,
-                  color: palette.textSecondary,
-                ),
-                label: Text(
-                  filter.categoryIds.isEmpty
-                      ? l10n.listCategoryChip
-                      : l10n.listCategoryChipN(filter.categoryIds.length),
-                  style: AppTextStyles.caption.copyWith(
-                    color: filter.categoryIds.isEmpty
-                        ? palette.textSecondary
-                        : palette.textPrimary,
-                  ),
-                ),
-                backgroundColor: filter.categoryIds.isEmpty
-                    ? palette.card
-                    : palette.backgroundMuted,
-                side: BorderSide(color: palette.borderDefault, width: 1),
-                onPressed: () =>
-                    _openCategorySheet(context, filter.categoryIds),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-            const SizedBox(width: 8),
-            // ── Search expand (C-03e) ─────────────────────────────────────
-            _searchExpanded
-                ? AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    width: 160,
-                    height: 32,
-                    child: TextField(
-                      autofocus: true,
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      onSubmitted: (_) {
-                        // Enter commits immediately — flush the debounce.
-                        _searchDebounce?.cancel();
-                        ref
-                            .read(listFilterProvider.notifier)
-                            .setSearch(_searchController.text);
-                        if (_searchController.text.isEmpty) {
-                          setState(() => _searchExpanded = false);
-                        }
-                      },
-                      style: AppTextStyles.caption.copyWith(
-                        color: palette.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: l10n.listSearchHint,
-                        hintStyle: AppTextStyles.caption.copyWith(
-                          color: palette.textSecondary,
-                        ),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          size: 16,
-                          color: palette.textSecondary,
-                        ),
-                        prefixIconConstraints: const BoxConstraints(
-                          minWidth: 28,
-                          minHeight: 28,
-                        ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () {
-                                  // Immediate clear — cancel any pending
-                                  // debounce so it can't re-apply stale text.
-                                  _searchDebounce?.cancel();
-                                  ref
-                                      .read(listFilterProvider.notifier)
-                                      .setSearch('');
-                                  setState(() {
-                                    _searchExpanded = false;
-                                    _searchController.clear();
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.close,
-                                  size: 16,
-                                  color: palette.textSecondary,
-                                ),
-                              )
-                            : null,
-                        suffixIconConstraints: const BoxConstraints(
-                          minWidth: 28,
-                          minHeight: 28,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: palette.borderDefault,
-                            width: 1,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: palette.borderDefault,
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: palette.accentPrimary,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                    ),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: _searchExpanded
+          ? _buildSearchExpanded(context, palette, filter)
+          : (isGroupMode
+                ? _buildGroupRow(
+                    context,
+                    palette,
+                    filter,
+                    sortConfig,
+                    anyFilterActive,
                   )
-                : Semantics(
-                    label: 'Search transactions',
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.search,
-                        size: 20,
+                : _buildSoloRow(
+                    context,
+                    palette,
+                    filter,
+                    sortConfig,
+                    anyFilterActive,
+                  )),
+    );
+  }
+
+  /// Solo-mode utilities row: sort → arrow → [spacer] → clear → category →
+  /// search (faithful to the v15 `.list-filter-utilities` layout).
+  Widget _buildSoloRow(
+    BuildContext context,
+    AppPalette palette,
+    ListFilterState filter,
+    ListSortConfig sortConfig,
+    bool anyFilterActive,
+  ) {
+    return Row(
+      children: [
+        _buildSortPill(context, palette, sortConfig),
+        const SizedBox(width: 4),
+        _buildDirectionButton(palette, sortConfig),
+        const Spacer(),
+        if (anyFilterActive) ...[
+          _buildClearAction(context, palette),
+          const SizedBox(width: 6),
+        ],
+        _buildCategoryAction(context, palette, filter),
+        const SizedBox(width: 6),
+        _buildSearchIconButton(palette),
+      ],
+    );
+  }
+
+  /// Group-mode utilities row — horizontally scrollable to fit the family
+  /// member chips (FAM-03/FAM-04) while preserving the same controls.
+  Widget _buildGroupRow(
+    BuildContext context,
+    AppPalette palette,
+    ListFilterState filter,
+    ListSortConfig sortConfig,
+    bool anyFilterActive,
+  ) {
+    final shadowBooksAsync = ref.watch(shadowBooksProvider);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildSortPill(context, palette, sortConfig),
+          const SizedBox(width: 4),
+          _buildDirectionButton(palette, sortConfig),
+          const SizedBox(width: 6),
+          _buildCategoryAction(context, palette, filter),
+          const SizedBox(width: 6),
+          _buildSearchIconButton(palette),
+          const SizedBox(width: 6),
+          if (anyFilterActive) ...[
+            _buildClearAction(context, palette),
+            const SizedBox(width: 6),
+          ],
+          // Mine-only chip: always visible in group mode (SC#5)
+          _memberChip(
+            palette,
+            label: S.of(context).listMineOnly,
+            leadingIcon: Icons.person_outline,
+            selected: filter.memberBookId == widget.bookId,
+            onTap: () => ref
+                .read(listFilterProvider.notifier)
+                .setMemberFilter(
+                  filter.memberBookId == widget.bookId ? null : widget.bookId,
+                ),
+          ),
+          ...shadowBooksAsync.when(
+            data: (shadows) => shadows.map((info) {
+              final isSelected = filter.memberBookId == info.book.id;
+              return Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: _memberChip(
+                  palette,
+                  label: '${info.memberAvatarEmoji} ${info.memberDisplayName}',
+                  selected: isSelected,
+                  onTap: () => ref
+                      .read(listFilterProvider.notifier)
+                      .setMemberFilter(isSelected ? null : info.book.id),
+                ),
+              );
+            }).toList(),
+            loading: () => const <Widget>[],
+            error: (e, s) => const <Widget>[],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Expanded search state: full-width search field + category action.
+  Widget _buildSearchExpanded(
+    BuildContext context,
+    AppPalette palette,
+    ListFilterState filter,
+  ) {
+    final l10n = S.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: palette.card,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: palette.borderInputActive, width: 1),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 12),
+                Icon(Icons.search, size: 16, color: palette.textSecondary),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: TextField(
+                    autofocus: true,
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: (_) {
+                      _searchDebounce?.cancel();
+                      ref
+                          .read(listFilterProvider.notifier)
+                          .setSearch(_searchController.text);
+                      if (_searchController.text.isEmpty) {
+                        setState(() => _searchExpanded = false);
+                      }
+                    },
+                    style: AppTextStyles.caption.copyWith(
+                      color: palette.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: l10n.listSearchHint,
+                      hintStyle: AppTextStyles.caption.copyWith(
                         color: palette.textSecondary,
                       ),
-                      onPressed: () => setState(() => _searchExpanded = true),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 44,
-                        minHeight: 44,
-                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                     ),
-                  ),
-            // ── Family segment (FAM-03/FAM-04) — group mode only (D-04 / CC-4) ──
-            if (isGroupMode) ...[
-              const SizedBox(width: 8),
-              // Mine-only chip: always visible in group mode (SC#5)
-              ActionChip(
-                avatar: Icon(
-                  Icons.person_outline,
-                  size: 14,
-                  color: filter.memberBookId == widget.bookId
-                      ? palette.textPrimary
-                      : palette.textSecondary,
-                ),
-                label: Text(
-                  S.of(context).listMineOnly,
-                  style: AppTextStyles.caption.copyWith(
-                    color: palette.textPrimary,
                   ),
                 ),
-                backgroundColor: palette.backgroundMuted,
-                side: BorderSide(color: palette.borderDefault, width: 1),
-                onPressed: () => ref
-                    .read(listFilterProvider.notifier)
-                    .setMemberFilter(
-                      filter.memberBookId == widget.bookId
-                          ? null
-                          : widget.bookId,
-                    ),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              const SizedBox(width: 4),
-              // Per-member chips: one per shadow book
-              ...shadowBooksAsync.when(
-                data: (shadows) => shadows.map((info) {
-                  final isSelected = filter.memberBookId == info.book.id;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: ActionChip(
-                      label: Text(
-                        '${info.memberAvatarEmoji} ${info.memberDisplayName}',
-                        style: AppTextStyles.caption.copyWith(
-                          color: isSelected
-                              ? palette.shared
-                              : palette.textSecondary,
-                        ),
-                      ),
-                      backgroundColor: isSelected
-                          ? palette.sharedLight
-                          : palette.card,
-                      side: BorderSide(
-                        color: isSelected
-                            ? palette.sharedBorder
-                            : palette.borderDefault,
-                        width: 1,
-                      ),
-                      onPressed: () => ref
-                          .read(listFilterProvider.notifier)
-                          .setMemberFilter(isSelected ? null : info.book.id),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  );
-                }).toList(),
-                loading: () => const [],
-                error: (e, s) => const [],
-              ),
-            ],
-            // ── Conditional clear chip (C-03f) ────────────────────────────
-            if (anyFilterActive) ...[
-              const SizedBox(width: 8),
-              Semantics(
-                label: 'Clear all filters',
-                child: ActionChip(
-                  avatar: Icon(
-                    Icons.clear_all,
-                    size: 14,
-                    color: palette.textSecondary,
-                  ),
-                  label: Text(
-                    l10n.listClearAll,
-                    style: AppTextStyles.caption.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
-                  backgroundColor: palette.backgroundMuted,
-                  side: BorderSide(color: palette.borderDefault, width: 1),
-                  onPressed: () {
-                    // Cancel any pending search debounce before the full reset.
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    // Immediate clear — cancel any pending debounce so it can't
+                    // re-apply stale text.
                     _searchDebounce?.cancel();
-                    ref.read(listFilterProvider.notifier).clearAll();
+                    ref.read(listFilterProvider.notifier).setSearch('');
                     setState(() {
                       _searchExpanded = false;
                       _searchController.clear();
                     });
                   },
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        _buildCategoryAction(context, palette, filter),
+      ],
+    );
+  }
+
+  // ── Filter-action pieces (v15 `.list-filter-action`) ───────────────────────
+
+  Widget _buildSortPill(
+    BuildContext context,
+    AppPalette palette,
+    ListSortConfig sortConfig,
+  ) {
+    return Semantics(
+      button: true,
+      label: 'Sort by',
+      child: GestureDetector(
+        key: _sortChipKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _showSortMenu(context, sortConfig),
+        child: Container(
+          height: 40,
+          constraints: const BoxConstraints(minWidth: 108),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: palette.accentPrimary, width: 1),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.sort, size: 14, color: palette.textSecondary),
+              const SizedBox(width: 5),
+              Text(
+                _sortFieldLabel(sortConfig.sortField, context),
+                style: AppTextStyles.micro.copyWith(
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.expand_more,
+                size: 16,
+                color: palette.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDirectionButton(
+    AppPalette palette,
+    ListSortConfig sortConfig,
+  ) {
+    final isDesc = sortConfig.sortDirection == SortDirection.desc;
+    return Semantics(
+      button: true,
+      label: isDesc ? 'Descending' : 'Ascending',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => ref.read(listFilterProvider.notifier).setSort(
+              sortConfig.copyWith(
+                sortDirection:
+                    isDesc ? SortDirection.asc : SortDirection.desc,
+              ),
+            ),
+        child: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: palette.borderDefault, width: 1),
+          ),
+          child: Icon(
+            isDesc ? Icons.arrow_downward : Icons.arrow_upward,
+            size: 18,
+            color: palette.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryAction(
+    BuildContext context,
+    AppPalette palette,
+    ListFilterState filter,
+  ) {
+    final l10n = S.of(context);
+    final active = filter.categoryIds.isNotEmpty;
+    return Semantics(
+      button: true,
+      label: 'Filter by category',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _openCategorySheet(context, filter.categoryIds),
+        child: Container(
+          height: 40,
+          constraints: const BoxConstraints(minWidth: 76),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: active ? palette.accentPrimaryLight : palette.card,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: active ? palette.accentPrimary : palette.borderDefault,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.category_outlined,
+                size: 14,
+                color: active ? palette.accentPrimary : palette.textSecondary,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                active
+                    ? l10n.listCategoryChipN(filter.categoryIds.length)
+                    : l10n.listCategoryChip,
+                style: AppTextStyles.micro.copyWith(
+                  color: active ? palette.accentPrimary : palette.textSecondary,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchIconButton(AppPalette palette) {
+    return Semantics(
+      button: true,
+      label: 'Search transactions',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _searchExpanded = true),
+        child: Container(
+          width: 44,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: palette.borderDefault, width: 1),
+          ),
+          child: Icon(Icons.search, size: 18, color: palette.textPrimary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClearAction(BuildContext context, AppPalette palette) {
+    final l10n = S.of(context);
+    return Semantics(
+      button: true,
+      label: 'Clear all filters',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          // Cancel any pending search debounce before the full reset.
+          _searchDebounce?.cancel();
+          ref.read(listFilterProvider.notifier).clearAll();
+          setState(() {
+            _searchExpanded = false;
+            _searchController.clear();
+          });
+        },
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.filter_alt_off,
+                size: 14,
+                color: palette.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                l10n.listClearAll,
+                style: AppTextStyles.micro.copyWith(
+                  color: palette.textSecondary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _memberChip(
+    AppPalette palette, {
+    required String label,
+    IconData? leadingIcon,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        constraints: const BoxConstraints(maxWidth: 140),
+        decoration: BoxDecoration(
+          color: selected ? palette.sharedLight : palette.card,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? palette.sharedBorder : palette.borderDefault,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (leadingIcon != null) ...[
+              Icon(
+                leadingIcon,
+                size: 14,
+                color: selected ? palette.shared : palette.textSecondary,
+              ),
+              const SizedBox(width: 5),
+            ],
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.micro.copyWith(
+                  color: selected ? palette.shared : palette.textSecondary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
           ],
         ),
       ),

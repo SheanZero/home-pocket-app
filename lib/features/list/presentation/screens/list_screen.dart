@@ -21,6 +21,7 @@ import '../providers/state_list_transactions.dart';
 import '../widgets/list_calendar_header.dart';
 import '../widgets/list_day_group_header.dart';
 import '../widgets/list_empty_state.dart';
+import '../widgets/list_ledger_segments.dart';
 import '../widgets/list_sort_filter_bar.dart';
 import '../widgets/list_transaction_tile.dart';
 
@@ -95,6 +96,11 @@ class ListScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          // v15 order: ledger segments → calendar → filter bar → list.
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: ListLedgerSegments(),
+          ),
           CalendarHeaderWidget(
             bookId: bookId,
             currencyCode: currencyCode,
@@ -190,54 +196,99 @@ class ListScreen extends ConsumerWidget {
           }
 
           // D-01 flat mode: amount sort renders a globally-sorted flat list with
-          // no day-group headers. The transactions are already sorted by the
-          // provider; skip buildFlatList entirely.
+          // no day-group headers, inside a single v15 `.list-transactions` card.
+          // The transactions are already sorted by the provider; skip
+          // buildFlatList entirely.
           if (filter.sortConfig.sortField == SortField.amount) {
-            return ListView.builder(
+            return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 100),
-              itemCount: txs.length,
-              itemBuilder: (context, i) => _buildTile(
-                context,
-                ref,
-                txs[i],
-                filter,
-                locale,
-                txs,
-                i,
-                showDate: true,
-              ),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+              children: [
+                _transactionCard(
+                  context,
+                  ref,
+                  txs,
+                  filter,
+                  locale,
+                  showDate: true,
+                ),
+              ],
             );
           }
 
-          // Default: timestamp sort — grouped-by-day with day headers (unchanged).
+          // Default: timestamp sort — grouped-by-day; each day is a day-header
+          // followed by a `.list-transactions` card (v15 layout).
           final items = buildFlatList(txs, filter.sortConfig.sortDirection);
-          return ListView.builder(
+          final children = <Widget>[];
+          var currentRows = <TaggedTransaction>[];
+          DateTime? currentDate;
+
+          void flushGroup() {
+            if (currentDate != null && currentRows.isNotEmpty) {
+              children.add(
+                ListDayGroupHeader(date: currentDate, locale: locale),
+              );
+              children.add(
+                _transactionCard(context, ref, currentRows, filter, locale),
+              );
+              children.add(const SizedBox(height: 6));
+            }
+            currentRows = <TaggedTransaction>[];
+          }
+
+          for (final item in items) {
+            switch (item) {
+              case DayHeaderItem():
+                flushGroup();
+                currentDate = item.date;
+              case TransactionRowItem():
+                currentRows.add(item.tx);
+            }
+          }
+          flushGroup();
+
+          return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            // Clear the floating bottom navigation bar so the last row is not obscured.
-            padding: const EdgeInsets.only(bottom: 100),
-            itemCount: items.length,
-            itemBuilder: (context, i) {
-              final item = items[i];
-              return switch (item) {
-                DayHeaderItem() => ListDayGroupHeader(
-                  date: item.date,
-                  locale: locale,
-                ),
-                TransactionRowItem() => _buildTile(
-                  context,
-                  ref,
-                  item.tx,
-                  filter,
-                  locale,
-                  items,
-                  i,
-                ),
-              };
-            },
+            // Clear the floating bottom navigation bar so the last row is not
+            // obscured.
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            children: children,
           );
         },
       ),
+    );
+  }
+
+  /// Builds a single v15 `.list-transactions` card wrapping [rows] with
+  /// interior 1dp dividers between consecutive rows (no divider after the last).
+  Widget _transactionCard(
+    BuildContext context,
+    WidgetRef ref,
+    List<TaggedTransaction> rows,
+    ListFilterState filter,
+    Locale locale, {
+    bool showDate = false,
+  }) {
+    final palette = context.palette;
+    final children = <Widget>[];
+    for (var i = 0; i < rows.length; i++) {
+      children.add(
+        _buildTile(context, ref, rows[i], filter, locale, showDate: showDate),
+      );
+      if (i < rows.length - 1) {
+        children.add(
+          Divider(height: 1, thickness: 1, color: palette.borderList),
+        );
+      }
+    }
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.borderDefault, width: 1),
+      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 
@@ -246,18 +297,16 @@ class ListScreen extends ConsumerWidget {
     WidgetRef ref,
     TaggedTransaction tx,
     ListFilterState filter,
-    Locale locale,
-    // Either List<ListItem> (timestamp mode) or List<TaggedTransaction> (amount mode).
-    // Only used for divider lookahead; length is all that matters in amount mode.
-    List<dynamic> items,
-    int index, {
+    Locale locale, {
     bool showDate = false,
   }) {
     final palette = context.palette;
     final transaction = tx.transaction;
     final ledgerType = transaction.ledgerType;
 
-    // Ledger tag colors resolved via palette (COLOR-02 / D-07 dark-mode support)
+    // Ledger tag colors resolved via palette (COLOR-02 / D-07 dark-mode support).
+    // v15 `.list-transaction-tag`/`-icon` use the darker *Text variants for AA
+    // contrast on the soft tag background.
     final tagText = ledgerType == LedgerType.daily
         ? S.of(context).listLedgerDaily
         : S.of(context).listLedgerJoy;
@@ -265,9 +314,9 @@ class ListScreen extends ConsumerWidget {
         ? palette.dailyLight
         : palette.joyLight;
     final tagTextColor = ledgerType == LedgerType.daily
-        ? palette.daily
-        : palette.joy;
-    // Category label uses same color as ledger tag per UI-SPEC Typography table
+        ? palette.dailyText
+        : palette.joyText;
+    // Leading category icon uses the same ledger-text colour as the tag (v15).
     final categoryColor = tagTextColor;
 
     // Locale-resolved category name (FILTER-01 / D-04 — NEVER raw categoryId)
@@ -366,24 +415,8 @@ class ListScreen extends ConsumerWidget {
       foreignAnnotation: foreignAnnotation,
     );
 
-    // Divider between consecutive tiles.
-    // In amount-sort flat mode (showDate == true): always show divider except
-    // after the last row. In timestamp grouped mode: show only between
-    // consecutive transaction rows (not between a row and a day-group header).
-    final nextItem = index + 1 < items.length ? items[index + 1] : null;
-    final showDivider = showDate
-        ? nextItem != null
-        : nextItem is TransactionRowItem;
-
-    if (showDivider) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tile,
-          Divider(height: 1, thickness: 1, color: palette.borderList),
-        ],
-      );
-    }
+    // Dividers between rows are owned by [_transactionCard]; the tile renders
+    // bare.
     return tile;
   }
 
