@@ -80,9 +80,18 @@ class HomeHeroCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: palette.card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: palette.borderDefault),
+          // v15 `.faithful-hero`: surface tinted ~10% toward primary-soft,
+          // radius 22, primary-tinted border, soft ambient shadow.
+          color: Color.lerp(palette.card, palette.accentPrimaryLight, 0.10),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: palette.accentPrimaryBorder),
+          boxShadow: [
+            BoxShadow(
+              color: palette.surfaceScrimLight,
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,10 +171,10 @@ class HomeHeroCard extends StatelessWidget {
 
   Widget _trendChip(AppPalette palette, int trend) {
     final text = trend <= 0 ? '$trend%' : '+$trend%';
-    final chipColor = trend > 0
-        ? palette.warning.withValues(alpha: 0.15)
-        : palette.successLight;
-    final contentColor = trend > 0 ? palette.warning : palette.success;
+    // v15 `.faithful-trend`: calm primary-soft pill with primary-text content
+    // regardless of direction; the arrow icon carries the up/down signal.
+    final chipColor = palette.accentPrimaryLight;
+    final contentColor = palette.accentPrimary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

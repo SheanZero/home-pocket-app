@@ -41,7 +41,7 @@ class FamilyInviteBanner extends StatelessWidget {
                 ),
                 Positioned(
                   left: 36, // 46 - 10
-                  child: _avatarCircle(context, context.palette.success, Icons.face_2),
+                  child: _avatarCircle(context, context.palette.daily, Icons.face_2),
                 ),
               ],
             ),
@@ -74,8 +74,9 @@ class FamilyInviteBanner extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: context.palette.accentPrimary,
-                borderRadius: BorderRadius.circular(12),
+                // v15 `.faithful-invite-cta`: sakura-pink add-family action.
+                color: context.palette.joy,
+                borderRadius: BorderRadius.circular(11),
               ),
               alignment: Alignment.center,
               child: Row(

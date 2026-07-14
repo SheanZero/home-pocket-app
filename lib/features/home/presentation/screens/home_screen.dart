@@ -316,19 +316,21 @@ class HomeScreen extends ConsumerWidget {
                         tagBgColor: isSoul
                             ? context.palette.joyLight
                             : context.palette.dailyLight,
+                        // v15 `.faithful-tag`: badge text uses the darker
+                        // *Text tone for contrast (joyText / dailyText).
                         tagTextColor: isSoul
-                            ? context.palette.joy
-                            : context.palette.daily,
+                            ? context.palette.joyText
+                            : context.palette.dailyText,
                         merchant: tx.merchant,
                         category: CategoryLocalizationService.resolveFromId(
                           tx.categoryId,
                           locale,
                         ),
-                        // Soul rows use brand green for category + amount (user decision 260518-v4v).
-                        // Survival rows use neutral text colors.
+                        // v15 `.faithful-tx-icon`: leading L1 icon tinted by
+                        // ledger *Text tone — joy→joyText, daily→dailyText.
                         categoryColor: isSoul
-                            ? context.palette.joy
-                            : context.palette.textSecondary,
+                            ? context.palette.joyText
+                            : context.palette.dailyText,
                         formattedAmount: _formatAmount(
                           tx,
                           outerCurrencyCode,

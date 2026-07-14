@@ -44,11 +44,12 @@ class HeroHeader extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // v15 `.home-month-title` — deep leaf-green month heading.
               Text(
                 l10n.homeMonthFormat(year, month),
                 style: AppTextStyles.headlineSmall.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: context.palette.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  color: context.palette.accentPrimary,
                 ),
               ),
               Icon(
@@ -65,6 +66,18 @@ class HeroHeader extends StatelessWidget {
         // Mode badge (near settings)
         _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
         const SizedBox(width: 8),
+
+        // Month calendar icon — v15 mainHeader affordance; opens the same
+        // month-grid picker as tapping the title.
+        GestureDetector(
+          onTap: onMonthTap,
+          child: Icon(
+            Icons.calendar_month_outlined,
+            size: 22,
+            color: context.palette.textPrimary,
+          ),
+        ),
+        const SizedBox(width: 14),
 
         // Settings icon
         GestureDetector(
