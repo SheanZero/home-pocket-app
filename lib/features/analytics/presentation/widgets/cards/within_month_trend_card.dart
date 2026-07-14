@@ -10,6 +10,7 @@ import '../../analytics_card_registry.dart';
 import '../../providers/state_analytics.dart';
 import '../../providers/state_joy_metric_variant.dart';
 import '../analytics_card_error_state.dart';
+import '../analytics_segmented_control.dart';
 import '../within_month_cumulative_line_chart.dart';
 import 'analytics_data_card.dart';
 
@@ -158,9 +159,28 @@ class _TrendBodyState extends State<_TrendBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _PillTabs(
-          active: _tab,
+        AnalyticsSegmentedControl<_TrendTab>(
+          selected: _tab,
           onChanged: (tab) => setState(() => _tab = tab),
+          segments: [
+            AnalyticsSegment(
+              value: _TrendTab.total,
+              label: l10n.analyticsKpiTotalLabel,
+              optionKey: const ValueKey('trend_tab_total'),
+            ),
+            AnalyticsSegment(
+              value: _TrendTab.daily,
+              label: l10n.daily,
+              tone: SegmentTone.daily,
+              optionKey: const ValueKey('trend_tab_daily'),
+            ),
+            AnalyticsSegment(
+              value: _TrendTab.joy,
+              label: l10n.joy,
+              tone: SegmentTone.joy,
+              optionKey: const ValueKey('trend_tab_joy'),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         WithinMonthCumulativeLineChart(
@@ -186,10 +206,7 @@ class _TrendBodyState extends State<_TrendBody> {
               ),
               const SizedBox(width: 16),
               // Matches the chart's 上月 line color exactly (muted gray).
-              _LegendSwatch(
-                color: palette.textTertiary,
-                dashed: true,
-              ),
+              _LegendSwatch(color: palette.textTertiary, dashed: true),
               const SizedBox(width: 6),
               Text(
                 l10n.analyticsTrendSeriesLastMonth,
@@ -200,81 +217,6 @@ class _TrendBodyState extends State<_TrendBody> {
             ],
           ),
       ],
-    );
-  }
-}
-
-/// The 总支出 / 日常 / 悦己 pill-tab strip.
-class _PillTabs extends StatelessWidget {
-  const _PillTabs({required this.active, required this.onChanged});
-
-  final _TrendTab active;
-  final ValueChanged<_TrendTab> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    return Wrap(
-      spacing: 8,
-      children: [
-        _Pill(
-          key: const ValueKey('trend_tab_total'),
-          label: l10n.analyticsKpiTotalLabel,
-          selected: active == _TrendTab.total,
-          onTap: () => onChanged(_TrendTab.total),
-        ),
-        _Pill(
-          key: const ValueKey('trend_tab_daily'),
-          label: l10n.daily,
-          selected: active == _TrendTab.daily,
-          onTap: () => onChanged(_TrendTab.daily),
-        ),
-        _Pill(
-          key: const ValueKey('trend_tab_joy'),
-          label: l10n.joy,
-          selected: active == _TrendTab.joy,
-          onTap: () => onChanged(_TrendTab.joy),
-        ),
-      ],
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final bg = selected ? palette.daily : palette.card;
-    final fg = selected ? palette.card : palette.textSecondary;
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.daily, width: 1),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: fg,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ),
     );
   }
 }

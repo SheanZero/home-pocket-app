@@ -8,6 +8,7 @@ import '../../../family_sync/domain/models/group_member.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../providers/state_donut_dimension.dart';
+import 'analytics_segmented_control.dart';
 
 /// §D2 (260620-v2m): the 分类 / 成员 dimension toggle + member-filter dropdown
 /// shown at the top of the donut hero.
@@ -38,29 +39,27 @@ class DonutDimensionMemberControls extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 分类 / 成员 segmented toggle.
-          Flexible(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                _DimPill(
-                  key: const ValueKey('donut_dim_category'),
+          // 分类 / 成员 segmented toggle (v15 mock `.analytics-dimension-segments`:
+          // カテゴリ別 → daily tone, メンバー別 → shared tone).
+          Expanded(
+            child: AnalyticsSegmentedControl<DonutDimension>(
+              selected: view.dimension,
+              onChanged: (dimension) => ref
+                  .read(donutDimensionStateProvider.notifier)
+                  .setDimension(dimension),
+              segments: [
+                AnalyticsSegment(
+                  value: DonutDimension.category,
                   label: l10n.analyticsDonutDimensionCategory,
-                  selected: view.dimension == DonutDimension.category,
-                  onTap: () => ref
-                      .read(donutDimensionStateProvider.notifier)
-                      .setDimension(DonutDimension.category),
+                  tone: SegmentTone.daily,
+                  optionKey: const ValueKey('donut_dim_category'),
                 ),
-                _DimPill(
-                  key: const ValueKey('donut_dim_member'),
+                AnalyticsSegment(
+                  value: DonutDimension.member,
                   label: l10n.analyticsDonutDimensionMember,
-                  selected: view.dimension == DonutDimension.member,
-                  onTap: () => ref
-                      .read(donutDimensionStateProvider.notifier)
-                      .setDimension(DonutDimension.member),
+                  tone: SegmentTone.shared,
+                  optionKey: const ValueKey('donut_dim_member'),
                 ),
               ],
             ),
@@ -68,19 +67,17 @@ class DonutDimensionMemberControls extends ConsumerWidget {
           const SizedBox(width: 8),
           // Member filter trigger — constrained so a long localized member name
           // never overflows the controls row (ellipsized).
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 150),
-              child: _MemberFilterTrigger(
-                key: const ValueKey('donut_member_filter_trigger'),
-                label: _filterLabel(
-                  l10n,
-                  effectiveMembers,
-                  view.memberFilterDeviceId,
-                ),
-                onTap: () =>
-                    _showMemberSheet(context, ref, l10n, effectiveMembers),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 120),
+            child: _MemberFilterTrigger(
+              key: const ValueKey('donut_member_filter_trigger'),
+              label: _filterLabel(
+                l10n,
+                effectiveMembers,
+                view.memberFilterDeviceId,
               ),
+              onTap: () =>
+                  _showMemberSheet(context, ref, l10n, effectiveMembers),
             ),
           ),
         ],
@@ -193,45 +190,6 @@ class DonutDimensionMemberControls extends ConsumerWidget {
   }
 }
 
-class _DimPill extends StatelessWidget {
-  const _DimPill({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final bg = selected ? palette.daily : palette.card;
-    final fg = selected ? palette.card : palette.textSecondary;
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.daily, width: 1),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: fg,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _MemberFilterTrigger extends StatelessWidget {
   const _MemberFilterTrigger({
     super.key,
@@ -245,36 +203,38 @@ class _MemberFilterTrigger extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    // v15 mock `.analytics-member-filter`: pill with a leading person icon,
+    // centered ellipsized label, and a trailing expand_more chevron.
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(999),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: palette.card,
           border: Border.all(color: palette.borderDefault),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Icon(Icons.person_outline, size: 16, color: palette.textSecondary),
+            const SizedBox(width: 3),
             Flexible(
               child: Text(
                 label,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.caption.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
                   color: palette.textPrimary,
                 ),
               ),
             ),
-            const SizedBox(width: 4),
-            Text(
-              '▼',
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 9,
-                color: palette.textSecondary,
-              ),
-            ),
+            const SizedBox(width: 2),
+            Icon(Icons.expand_more, size: 15, color: palette.textSecondary),
           ],
         ),
       ),
