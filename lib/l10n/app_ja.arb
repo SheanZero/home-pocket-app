@@ -1741,9 +1741,15 @@
   "@voiceCurrencyConverted": {
     "description": "Snackbar after a spoken foreign-currency amount was auto-converted to JPY on the voice fill (260703 2B)",
     "placeholders": {
-      "original": {"type": "String"},
-      "converted": {"type": "String"},
-      "rate": {"type": "String"}
+      "original": {
+        "type": "String"
+      },
+      "converted": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
     }
   },
   "voiceCurrencyConvertedUndo": "元に戻す",
@@ -1754,22 +1760,30 @@
   "@voiceAmountRepairSuspect": {
     "description": "Snackbar shown when the recognized amount matches the STT digit-concatenation signature, e.g. 250046 spoken as 2546 (260703 1A)",
     "placeholders": {
-      "original": {"type": "String"},
-      "candidate": {"type": "String"}
+      "original": {
+        "type": "String"
+      },
+      "candidate": {
+        "type": "String"
+      }
     }
   },
   "voiceAmountRepairApply": "{candidate}にする",
   "@voiceAmountRepairApply": {
     "description": "Snackbar action that adopts the repaired amount candidate",
     "placeholders": {
-      "candidate": {"type": "String"}
+      "candidate": {
+        "type": "String"
+      }
     }
   },
   "voiceLargeAmountNotice": "高額です：{amount}。保存前にご確認ください",
   "@voiceLargeAmountNotice": {
     "description": "Informational snackbar when a voice-filled amount is unusually large (260703 1E)",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "analyticsBudgetProgress": "予算の進捗",
@@ -3133,7 +3147,7 @@
   "@onboardingPrivacyCardTamperBody": {
     "description": "Welcome A intro page 2: tamper-proof card body"
   },
-  "onboardingJoyTitle": "使ったお金に、\u201c気持ち\u201dを添えて。",
+  "onboardingJoyTitle": "使ったお金に、“気持ち”を添えて。",
   "@onboardingJoyTitle": {
     "description": "Welcome A intro page 3: joy title"
   },
@@ -3298,15 +3312,114 @@
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
   "analyticsTrendInsightTotal": "今月は {amount}",
+  "@analyticsTrendInsightTotal": {
+    "description": "Trend card insight strip — total tab, no previous-month reference",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightTotalDelta": "今月は {amount} · 先月より{pct}%{direction, select, less{少なく} more{多く} other{}}推移",
+  "@analyticsTrendInsightTotalDelta": {
+    "description": "Trend card insight strip — total tab with a signed delta vs last month (descriptive, not a target)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightTotalSame": "今月は {amount} · 先月と同水準",
+  "@analyticsTrendInsightTotalSame": {
+    "description": "Trend card insight strip — total tab when the delta rounds to zero",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightDaily": "日常支出は {amount}",
+  "@analyticsTrendInsightDaily": {
+    "description": "Trend card insight strip — daily tab, no previous-month reference",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightDailyDelta": "日常支出は {amount} · 先月より{pct}%{direction, select, less{少なく} more{多く} other{}}推移",
+  "@analyticsTrendInsightDailyDelta": {
+    "description": "Trend card insight strip — daily tab with a signed delta vs last month",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightDailySame": "日常支出は {amount} · 先月と同水準",
+  "@analyticsTrendInsightDailySame": {
+    "description": "Trend card insight strip — daily tab when the delta rounds to zero",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightJoy": "今月のときめき支出は {amount}",
+  "@analyticsTrendInsightJoy": {
+    "description": "Trend card insight strip — joy tab (joy never crosses periods, so no delta)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsCalSummary": "今月{count}件 · {days}日間に記録",
+  "@analyticsCalSummary": {
+    "description": "Calendar heat legend computed summary — total joy entries this month and number of days with a record",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsJoyCalendarDayHead": "{month}月{day}日 · {count}件のときめき",
+  "@analyticsJoyCalendarDayHead": {
+    "description": "Inline day-panel head line above the tapped day's joy records",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsJoyDrawerToggleExpand": "ときめき支出の内訳を開く",
+  "@analyticsJoyDrawerToggleExpand": {
+    "description": "A11y label for the collapsible joy-spend drawer toggle when collapsed"
+  },
   "analyticsJoyDrawerToggleCollapse": "ときめき支出の内訳を閉じる",
+  "@analyticsJoyDrawerToggleCollapse": {
+    "description": "A11y label for the collapsible joy-spend drawer toggle when expanded"
+  },
   "@@locale": "ja"
 }

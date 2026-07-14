@@ -1741,9 +1741,15 @@
   "@voiceCurrencyConverted": {
     "description": "Snackbar after a spoken foreign-currency amount was auto-converted to JPY on the voice fill (260703 2B)",
     "placeholders": {
-      "original": {"type": "String"},
-      "converted": {"type": "String"},
-      "rate": {"type": "String"}
+      "original": {
+        "type": "String"
+      },
+      "converted": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
     }
   },
   "voiceCurrencyConvertedUndo": "撤销",
@@ -1754,22 +1760,30 @@
   "@voiceAmountRepairSuspect": {
     "description": "Snackbar shown when the recognized amount matches the STT digit-concatenation signature, e.g. 250046 spoken as 2546 (260703 1A)",
     "placeholders": {
-      "original": {"type": "String"},
-      "candidate": {"type": "String"}
+      "original": {
+        "type": "String"
+      },
+      "candidate": {
+        "type": "String"
+      }
     }
   },
   "voiceAmountRepairApply": "改为 {candidate}",
   "@voiceAmountRepairApply": {
     "description": "Snackbar action that adopts the repaired amount candidate",
     "placeholders": {
-      "candidate": {"type": "String"}
+      "candidate": {
+        "type": "String"
+      }
     }
   },
   "voiceLargeAmountNotice": "金额较大：{amount}，保存前请确认",
   "@voiceLargeAmountNotice": {
     "description": "Informational snackbar when a voice-filled amount is unusually large (260703 1E)",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "analyticsBudgetProgress": "预算进度",
@@ -3298,15 +3312,114 @@
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
   "analyticsTrendInsightTotal": "本月 {amount}",
+  "@analyticsTrendInsightTotal": {
+    "description": "Trend card insight strip — total tab, no previous-month reference",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightTotalDelta": "本月 {amount} · 较上月{direction, select, less{少} more{多} other{}}{pct}%",
+  "@analyticsTrendInsightTotalDelta": {
+    "description": "Trend card insight strip — total tab with a signed delta vs last month (descriptive, not a target)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightTotalSame": "本月 {amount} · 与上月持平",
+  "@analyticsTrendInsightTotalSame": {
+    "description": "Trend card insight strip — total tab when the delta rounds to zero",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightDaily": "日常支出 {amount}",
+  "@analyticsTrendInsightDaily": {
+    "description": "Trend card insight strip — daily tab, no previous-month reference",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightDailyDelta": "日常支出 {amount} · 较上月{direction, select, less{少} more{多} other{}}{pct}%",
+  "@analyticsTrendInsightDailyDelta": {
+    "description": "Trend card insight strip — daily tab with a signed delta vs last month",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightDailySame": "日常支出 {amount} · 与上月持平",
+  "@analyticsTrendInsightDailySame": {
+    "description": "Trend card insight strip — daily tab when the delta rounds to zero",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsTrendInsightJoy": "本月悦己支出 {amount}",
+  "@analyticsTrendInsightJoy": {
+    "description": "Trend card insight strip — joy tab (joy never crosses periods, so no delta)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "analyticsCalSummary": "本月{count}笔 · 记录于{days}天",
+  "@analyticsCalSummary": {
+    "description": "Calendar heat legend computed summary — total joy entries this month and number of days with a record",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsJoyCalendarDayHead": "{month}月{day}日 · {count}笔小确幸",
+  "@analyticsJoyCalendarDayHead": {
+    "description": "Inline day-panel head line above the tapped day's joy records",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsJoyDrawerToggleExpand": "展开悦己花销明细",
+  "@analyticsJoyDrawerToggleExpand": {
+    "description": "A11y label for the collapsible joy-spend drawer toggle when collapsed"
+  },
   "analyticsJoyDrawerToggleCollapse": "收起悦己花销明细",
+  "@analyticsJoyDrawerToggleCollapse": {
+    "description": "A11y label for the collapsible joy-spend drawer toggle when expanded"
+  },
   "@@locale": "zh"
 }
