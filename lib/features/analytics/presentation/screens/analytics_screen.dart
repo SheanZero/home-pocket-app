@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../../features/home/presentation/providers/state_shadow_books.dart';
+import '../../../../features/home/presentation/widgets/month_picker_dialog.dart';
+import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
+import '../../domain/models/time_window.dart';
 import '../analytics_card_registry.dart';
-import '../providers/state_analytics.dart';
+import '../providers/state_time_window.dart';
 import '../widgets/analytics_section_header.dart';
 import '../widgets/cards/family_insight_data_card.dart';
-import '../widgets/time_window_chip.dart';
 
 /// Round-5 r5 analytics dashboard (260620-lfp / D2).
 ///
@@ -34,9 +38,16 @@ class AnalyticsScreen extends ConsumerWidget {
     // and invalidation keys cannot drift (D-A1 / D-B2).
     final ctx = buildAnalyticsCardContext(context, ref, bookId: bookId);
 
-    // AppBar-only read: the TimeWindowChip surfaces the earliest data month.
-    final earliestMonthAsync = ref.watch(
-      earliestTransactionMonthProvider(bookId: bookId),
+    // v15 header (260714): month-only. The AppBar title is the selected month
+    // (joy-tinted per mock `.analytics-month-title`) and opens the same
+    // month-grid picker the home/list headers use. The multi-granularity
+    // TimeWindowChip + its sheet were removed — the UI exposes ONLY month
+    // selection, though the underlying TimeWindow type is kept intact (the data
+    // pipeline is month-keyed already).
+    final window = ref.watch(selectedTimeWindowProvider);
+    final anchorMonth = DateTime(
+      window.range.end.year,
+      window.range.end.month,
     );
 
     // Display-only home-feature read (NOT an invalidation target — never in the
@@ -48,13 +59,46 @@ class AnalyticsScreen extends ConsumerWidget {
               .whenData<List<Object>?>((value) => value)
         : const AsyncValue<List<Object>?>.data(null);
 
+    // Opens the shared month-grid picker (same widget home/list use) and applies
+    // the choice to the analytics time window as a MonthWindow. Future months are
+    // disabled by the picker itself.
+    Future<void> openMonthPicker() async {
+      final picked = await showMonthPickerDialog(
+        context,
+        selectedYear: anchorMonth.year,
+        selectedMonth: anchorMonth.month,
+      );
+      if (picked == null || !context.mounted) return;
+      ref
+          .read(selectedTimeWindowProvider.notifier)
+          .setWindow(TimeWindow.month(year: picked.year, month: picked.month));
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.analyticsTitle),
+        centerTitle: false,
+        title: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: openMonthPicker,
+          child: Text(
+            DateFormatter.formatMonthYear(anchorMonth, ctx.locale),
+            style: TextStyle(color: context.palette.joyText),
+          ),
+        ),
         actions: [
-          TimeWindowChip(
-            locale: ctx.locale,
-            earliestData: earliestMonthAsync.value,
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            tooltip: l10n.analyticsTimeWindowChipTooltip,
+            onPressed: openMonthPicker,
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: l10n.settings,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => SettingsScreen(bookId: bookId),
+              ),
+            ),
           ),
         ],
       ),
@@ -62,7 +106,8 @@ class AnalyticsScreen extends ConsumerWidget {
         onRefresh: () async => _refresh(ref, ctx),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          // v15 `.analytics-screen`: horizontal 20 (was 16).
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: _buildCardChildren(l10n, ctx, shadowBooksAsync),

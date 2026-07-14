@@ -35,7 +35,6 @@ import 'package:home_pocket/features/analytics/presentation/widgets/cards/within
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_drawer.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/time_window_chip.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
@@ -179,7 +178,10 @@ void main() {
       (tester) async {
         await _pump(tester, _buildSubject());
 
-        expect(find.byType(TimeWindowChip), findsOneWidget);
+        // v15 header (260714): the AppBar title is the selected month (month-only
+        // header — the multi-granularity TimeWindowChip was removed). The fixed
+        // test window is 2026-05 → "May 2026" in the en locale.
+        expect(find.text('May 2026'), findsOneWidget);
         // round-5 r5 (D2) reverses Phase-46 D-F2: the 4 section headers
         // (支出趋势·实用 / 分类支出·实用 / 小确幸日历·悦己 / 悦己满足度分布·悦己) are back.
         expect(
@@ -252,20 +254,18 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('time window sheet includes the earliest transaction month', (
+    testWidgets('month picker opens from the header month button', (
       tester,
     ) async {
       await _pump(tester, _buildSubject());
 
-      await tester.tap(find.byType(TimeWindowChip));
+      // v15 header (260714): tapping the calendar_month action opens the shared
+      // month-grid picker dialog (the removed TimeWindowChip's granularity sheet
+      // is gone). The dialog surfaces the year label + month cells.
+      await tester.tap(find.byIcon(Icons.calendar_month_outlined));
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.text('December 2024'),
-        500,
-        scrollable: find.byType(Scrollable).last,
-      );
-      expect(find.text('December 2024'), findsOneWidget);
+      expect(find.byType(Dialog), findsOneWidget);
     });
 
     testWidgets('family insight is gated by group mode and shadow books', (

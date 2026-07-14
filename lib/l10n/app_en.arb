@@ -3281,5 +3281,58 @@
   "@sponsorLaunchError": {
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
+  "analyticsTrendInsightTotal": "This month {amount}",
+  "@analyticsTrendInsightTotal": {
+    "description": "Trend card insight strip — total tab, no previous-month reference",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "analyticsTrendInsightTotalDelta": "This month {amount} · {pct}% {direction, select, less{lower} more{higher} other{}} than last month",
+  "@analyticsTrendInsightTotalDelta": {
+    "description": "Trend card insight strip — total tab with a signed delta vs last month (descriptive, not a target)",
+    "placeholders": { "amount": { "type": "String" }, "pct": { "type": "int" }, "direction": { "type": "String" } }
+  },
+  "analyticsTrendInsightTotalSame": "This month {amount} · about the same as last month",
+  "@analyticsTrendInsightTotalSame": {
+    "description": "Trend card insight strip — total tab when the delta rounds to zero",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "analyticsTrendInsightDaily": "Daily spending {amount}",
+  "@analyticsTrendInsightDaily": {
+    "description": "Trend card insight strip — daily tab, no previous-month reference",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "analyticsTrendInsightDailyDelta": "Daily spending {amount} · {pct}% {direction, select, less{lower} more{higher} other{}} than last month",
+  "@analyticsTrendInsightDailyDelta": {
+    "description": "Trend card insight strip — daily tab with a signed delta vs last month",
+    "placeholders": { "amount": { "type": "String" }, "pct": { "type": "int" }, "direction": { "type": "String" } }
+  },
+  "analyticsTrendInsightDailySame": "Daily spending {amount} · about the same as last month",
+  "@analyticsTrendInsightDailySame": {
+    "description": "Trend card insight strip — daily tab when the delta rounds to zero",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "analyticsTrendInsightJoy": "This month's joy spending {amount}",
+  "@analyticsTrendInsightJoy": {
+    "description": "Trend card insight strip — joy tab (joy never crosses periods, so no delta)",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "analyticsCalSummary": "{count} this month · logged across {days} days",
+  "@analyticsCalSummary": {
+    "description": "Calendar heat legend computed summary — total joy entries this month and number of days with a record",
+    "placeholders": { "count": { "type": "int" }, "days": { "type": "int" } }
+  },
+  "analyticsJoyCalendarDayHead": "{month}/{day} · {count} joy moments",
+  "@analyticsJoyCalendarDayHead": {
+    "description": "Inline day-panel head line above the tapped day's joy records",
+    "placeholders": { "month": { "type": "int" }, "day": { "type": "int" }, "count": { "type": "int" } }
+  },
+  "analyticsJoyDrawerToggleExpand": "Expand joy spending breakdown",
+  "@analyticsJoyDrawerToggleExpand": {
+    "description": "A11y label for the collapsible joy-spend drawer toggle when collapsed"
+  },
+  "analyticsJoyDrawerToggleCollapse": "Collapse joy spending breakdown",
+  "@analyticsJoyDrawerToggleCollapse": {
+    "description": "A11y label for the collapsible joy-spend drawer toggle when expanded"
+  },
   "@@locale": "en"
 }

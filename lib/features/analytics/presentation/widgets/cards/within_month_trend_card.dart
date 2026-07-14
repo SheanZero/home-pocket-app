@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/misc.dart';
 import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../generated/app_localizations.dart';
+import '../../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../settings/presentation/providers/state_locale.dart';
 import '../../../domain/models/within_month_cumulative_trend.dart';
 import '../../analytics_card_registry.dart';
 import '../../providers/state_analytics.dart';
@@ -57,6 +59,8 @@ class WithinMonthTrendCard extends ConsumerWidget {
     final ctx = _ctx();
     final targets = withinMonthTrendRefreshTargets(ctx);
 
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+
     final trendAsync = ref.watch(
       withinMonthCumulativeTrendProvider(
         bookId: bookId,
@@ -74,7 +78,11 @@ class WithinMonthTrendCard extends ConsumerWidget {
         showHeader: false,
         title: S.of(context).analyticsCardTitleWithinMonthTrend,
         caption: S.of(context).analyticsCardCaptionWithinMonthTrend,
-        child: _TrendBody(trend: trend, anchor: ctx.trendAnchor),
+        child: _TrendBody(
+          trend: trend,
+          anchor: ctx.trendAnchor,
+          locale: locale,
+        ),
       ),
       loading: () => const SizedBox(height: 280),
       error: (_, _) => AnalyticsCardErrorState(
@@ -115,12 +123,19 @@ List<ProviderBase<Object?>> withinMonthTrendRefreshTargets(
 /// here so a tab switch never re-watches the provider (D-12 — only the rendered
 /// series changes).
 class _TrendBody extends StatefulWidget {
-  const _TrendBody({required this.trend, required this.anchor});
+  const _TrendBody({
+    required this.trend,
+    required this.anchor,
+    required this.locale,
+  });
 
   final WithinMonthCumulativeTrend trend;
 
   /// Current-month anchor, threaded to the chart for endpoint annotation dates.
   final DateTime anchor;
+
+  /// Locale for formatting the insight-strip amount.
+  final Locale locale;
 
   @override
   State<_TrendBody> createState() => _TrendBodyState();
@@ -182,6 +197,11 @@ class _TrendBodyState extends State<_TrendBody> {
             ),
           ],
         ),
+        // v15 `.analytics-insight` banner between the segmented control and the
+        // plot (260714 / task #2). Descriptive delta vs last month — never a
+        // target (ADR-012). The joy tab has no previous by design → amount only.
+        const SizedBox(height: 10),
+        _buildInsight(context, l10n, palette, current, previous),
         const SizedBox(height: 12),
         WithinMonthCumulativeLineChart(
           // Re-key per tab so the chart rebuilds cleanly on a ledger switch.
@@ -217,6 +237,94 @@ class _TrendBodyState extends State<_TrendBody> {
             ],
           ),
       ],
+    );
+  }
+
+  /// The `.analytics-insight` banner: one line of descriptive copy (this-month
+  /// amount + optional signed delta vs last month) tinted by the active ledger
+  /// (daily-soft for total/daily, joy-soft for joy). Delta is DESCRIPTIVE, never
+  /// a target (ADR-012); the joy tab shows the amount only (no cross-period).
+  Widget _buildInsight(
+    BuildContext context,
+    S l10n,
+    AppPalette palette,
+    List<CumulativePoint> current,
+    List<CumulativePoint>? previous,
+  ) {
+    final bool isJoy = _tab == _TrendTab.joy;
+    final bool isTotal = _tab == _TrendTab.total;
+    final int curLast = current.isEmpty ? 0 : current.last.cumulativeAmount;
+    final int prevLast = (previous == null || previous.isEmpty)
+        ? 0
+        : previous.last.cumulativeAmount;
+    final String amountStr = NumberFormatter.formatCurrency(
+      curLast,
+      'JPY',
+      widget.locale,
+    );
+
+    final String text;
+    if (isJoy) {
+      text = l10n.analyticsTrendInsightJoy(amountStr);
+    } else if (prevLast <= 0) {
+      // No previous-month reference → drop the "先月より…" clause.
+      text = isTotal
+          ? l10n.analyticsTrendInsightTotal(amountStr)
+          : l10n.analyticsTrendInsightDaily(amountStr);
+    } else {
+      final int pct = ((curLast - prevLast).abs() / prevLast * 100).round();
+      if (pct == 0) {
+        // |delta| ≈ 0 → 同水準.
+        text = isTotal
+            ? l10n.analyticsTrendInsightTotalSame(amountStr)
+            : l10n.analyticsTrendInsightDailySame(amountStr);
+      } else {
+        final String direction = curLast < prevLast ? 'less' : 'more';
+        text = isTotal
+            ? l10n.analyticsTrendInsightTotalDelta(amountStr, pct, direction)
+            : l10n.analyticsTrendInsightDailyDelta(amountStr, pct, direction);
+      }
+    }
+
+    final IconData icon;
+    if (isJoy) {
+      icon = Icons.favorite_border;
+    } else if (prevLast <= 0 || curLast == prevLast) {
+      icon = Icons.trending_flat;
+    } else if (curLast < prevLast) {
+      icon = Icons.trending_down;
+    } else {
+      icon = Icons.trending_up;
+    }
+
+    final Color bg = isJoy ? palette.joyLight : palette.dailyLight;
+    final Color fg = isJoy ? palette.joyText : palette.dailyText;
+
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 15, color: fg),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                color: fg,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

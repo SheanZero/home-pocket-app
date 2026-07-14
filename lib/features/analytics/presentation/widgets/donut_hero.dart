@@ -145,40 +145,9 @@ class DonutHero extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // §1b hero-top: caption (left) + entry-count·month pill (right).
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                l10n.analyticsDonutHeroCap,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: palette.textPrimary,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-              decoration: BoxDecoration(
-                color: palette.dailyLight,
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: Text(
-                l10n.analyticsDonutHeroTag(entryCount, month),
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w600,
-                  color: palette.dailyText,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
+        // v15 (260714 task #4): the hero-top caption「今月、お金はどこへ」+ the
+        // entry-count·month pill are removed — the mock donut card goes straight
+        // to the ring (the entry count already shows in the ring center).
         SizedBox(
           // 260621-ti1: donut outer ø ×1.2 (radius 41.4 + centerSpace 59.4 →
           // ~201.6px) — box grown from 200 so the larger ring isn't clipped.
@@ -391,40 +360,8 @@ class DonutHero extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // §1b hero-top reused (same caption + entry-count·month pill).
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                l10n.analyticsDonutHeroCap,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: palette.textPrimary,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-              decoration: BoxDecoration(
-                color: palette.dailyLight,
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: Text(
-                l10n.analyticsDonutHeroTag(entryCount, month),
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w600,
-                  color: palette.dailyText,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
+        // v15 (260714 task #4): hero-top caption + entry-count·month pill removed
+        // (see the category-mode build above) — straight to the ring.
         SizedBox(
           // 260621-ti1: donut outer ø ×1.2 (radius 41.4 + centerSpace 59.4 →
           // ~201.6px) — box grown from 200 so the larger ring isn't clipped.

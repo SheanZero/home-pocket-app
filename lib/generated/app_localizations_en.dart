@@ -2552,4 +2552,74 @@ class SEn extends S {
 
   @override
   String get sponsorLaunchError => 'Couldn\'t open the browser';
+
+  @override
+  String analyticsTrendInsightTotal(String amount) {
+    return 'This month $amount';
+  }
+
+  @override
+  String analyticsTrendInsightTotalDelta(
+    String amount,
+    int pct,
+    String direction,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'less': 'lower',
+      'more': 'higher',
+      'other': '',
+    });
+    return 'This month $amount · $pct% $_temp0 than last month';
+  }
+
+  @override
+  String analyticsTrendInsightTotalSame(String amount) {
+    return 'This month $amount · about the same as last month';
+  }
+
+  @override
+  String analyticsTrendInsightDaily(String amount) {
+    return 'Daily spending $amount';
+  }
+
+  @override
+  String analyticsTrendInsightDailyDelta(
+    String amount,
+    int pct,
+    String direction,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'less': 'lower',
+      'more': 'higher',
+      'other': '',
+    });
+    return 'Daily spending $amount · $pct% $_temp0 than last month';
+  }
+
+  @override
+  String analyticsTrendInsightDailySame(String amount) {
+    return 'Daily spending $amount · about the same as last month';
+  }
+
+  @override
+  String analyticsTrendInsightJoy(String amount) {
+    return 'This month\'s joy spending $amount';
+  }
+
+  @override
+  String analyticsCalSummary(int count, int days) {
+    return '$count this month · logged across $days days';
+  }
+
+  @override
+  String analyticsJoyCalendarDayHead(int month, int day, int count) {
+    return '$month/$day · $count joy moments';
+  }
+
+  @override
+  String get analyticsJoyDrawerToggleExpand => 'Expand joy spending breakdown';
+
+  @override
+  String get analyticsJoyDrawerToggleCollapse =>
+      'Collapse joy spending breakdown';
 }

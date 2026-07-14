@@ -1496,7 +1496,7 @@ class SJa extends S {
   String get analyticsTimeWindowEmptyPreset => 'このビュー用のデータがありません。取引を追加してください。';
 
   @override
-  String get analyticsKpiTotalLabel => '支出合計';
+  String get analyticsKpiTotalLabel => '総支出';
 
   @override
   String get analyticsKpiJoyLabel => '平均満足度';
@@ -1577,7 +1577,7 @@ class SJa extends S {
   String get analyticsCardCaptionJoySpend => 'あなたの悦己支出の内訳';
 
   @override
-  String get analyticsJoySpendHeaderLabel => '悦己支出';
+  String get analyticsJoySpendHeaderLabel => 'ときめき支出';
 
   @override
   String get analyticsJoySpendEmpty => 'この期間の悦己支出はまだありません';
@@ -1598,10 +1598,10 @@ class SJa extends S {
   String get analyticsSectionCategory => 'カテゴリ支出';
 
   @override
-  String get analyticsSectionJoyCalendar => '小さな幸せカレンダー';
+  String get analyticsSectionJoyCalendar => 'ときめきカレンダー';
 
   @override
-  String get analyticsSectionSatisfaction => '悦びの満足度';
+  String get analyticsSectionSatisfaction => 'ときめきの満足度';
 
   @override
   String analyticsJoyDrawerTitle(String amount) {
@@ -1619,17 +1619,17 @@ class SJa extends S {
   }
 
   @override
-  String get analyticsCalLegendLow => '淡';
+  String get analyticsCalLegendLow => '少';
 
   @override
-  String get analyticsCalLegendHigh => '濃';
+  String get analyticsCalLegendHigh => '多';
 
   @override
   String get analyticsCalLegendNote => '色が濃いほど、その日の悦びの記録が多いという意味です';
 
   @override
   String analyticsHistogramMedianPill(int value) {
-    return '中央の満足度 $value';
+    return 'まんなかは$value点';
   }
 
   @override
@@ -1641,13 +1641,13 @@ class SJa extends S {
   String get analyticsCategoryDonutOther => 'その他';
 
   @override
-  String get analyticsDonutDimensionCategory => 'カテゴリ';
+  String get analyticsDonutDimensionCategory => 'カテゴリ別';
 
   @override
-  String get analyticsDonutDimensionMember => 'メンバー';
+  String get analyticsDonutDimensionMember => 'メンバー別';
 
   @override
-  String get analyticsDonutMemberFilterAll => '全メンバー';
+  String get analyticsDonutMemberFilterAll => '全員';
 
   @override
   String get analyticsDonutMemberFilterLabel => 'メンバー';
@@ -1722,7 +1722,7 @@ class SJa extends S {
 
   @override
   String analyticsFamilyHighlightsSentence(int N) {
-    return '家族の小確幸 $N回';
+    return '家族のときめき $N回';
   }
 
   @override
@@ -1731,7 +1731,7 @@ class SJa extends S {
     int count,
     String avg,
   ) {
-    return 'みんなで [$categoryName] が好きみたい (n=$count, 平均$avg/10)';
+    return 'みんなで「$categoryName」を楽しんでいます（$count件、平均 $avg / 10）';
   }
 
   @override
@@ -2507,4 +2507,73 @@ class SJa extends S {
 
   @override
   String get sponsorLaunchError => 'ブラウザを開けませんでした';
+
+  @override
+  String analyticsTrendInsightTotal(String amount) {
+    return '今月は $amount';
+  }
+
+  @override
+  String analyticsTrendInsightTotalDelta(
+    String amount,
+    int pct,
+    String direction,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'less': '少なく',
+      'more': '多く',
+      'other': '',
+    });
+    return '今月は $amount · 先月より$pct%$_temp0推移';
+  }
+
+  @override
+  String analyticsTrendInsightTotalSame(String amount) {
+    return '今月は $amount · 先月と同水準';
+  }
+
+  @override
+  String analyticsTrendInsightDaily(String amount) {
+    return '日常支出は $amount';
+  }
+
+  @override
+  String analyticsTrendInsightDailyDelta(
+    String amount,
+    int pct,
+    String direction,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'less': '少なく',
+      'more': '多く',
+      'other': '',
+    });
+    return '日常支出は $amount · 先月より$pct%$_temp0推移';
+  }
+
+  @override
+  String analyticsTrendInsightDailySame(String amount) {
+    return '日常支出は $amount · 先月と同水準';
+  }
+
+  @override
+  String analyticsTrendInsightJoy(String amount) {
+    return '今月のときめき支出は $amount';
+  }
+
+  @override
+  String analyticsCalSummary(int count, int days) {
+    return '今月$count件 · $days日間に記録';
+  }
+
+  @override
+  String analyticsJoyCalendarDayHead(int month, int day, int count) {
+    return '$month月$day日 · $count件のときめき';
+  }
+
+  @override
+  String get analyticsJoyDrawerToggleExpand => 'ときめき支出の内訳を開く';
+
+  @override
+  String get analyticsJoyDrawerToggleCollapse => 'ときめき支出の内訳を閉じる';
 }

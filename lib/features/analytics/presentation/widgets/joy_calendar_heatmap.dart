@@ -118,7 +118,13 @@ class JoyCalendarHeatmap extends StatelessWidget {
           children: cells,
         ),
         const SizedBox(height: 14),
-        _CalLegend(palette: palette),
+        _CalLegend(
+          palette: palette,
+          // v15 (260714 task #8): computed summary replaces the static note —
+          // total joy entries this month + number of days with a record.
+          totalCount: countByDay.values.fold<int>(0, (sum, c) => sum + c),
+          daysWithRecord: countByDay.values.where((c) => c > 0).length,
+        ),
       ],
     );
   }
@@ -189,9 +195,19 @@ class _DayCell extends StatelessWidget {
 /// `AnalyticsCategoryPalette.heat[0..3]` ramp (§2e), matching the day-cell heat
 /// buckets exactly. The note says depth = per-day joy COUNT (not a streak).
 class _CalLegend extends StatelessWidget {
-  const _CalLegend({required this.palette});
+  const _CalLegend({
+    required this.palette,
+    required this.totalCount,
+    required this.daysWithRecord,
+  });
 
   final AppPalette palette;
+
+  /// v15 (260714 task #8): total joy entries this month (Σ countByDay).
+  final int totalCount;
+
+  /// v15 (260714 task #8): number of days with ≥1 joy record.
+  final int daysWithRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +242,7 @@ class _CalLegend extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            l10n.analyticsCalLegendNote,
+            l10n.analyticsCalSummary(totalCount, daysWithRecord),
             textAlign: TextAlign.end,
             style: AppTextStyles.caption.copyWith(color: palette.textTertiary),
             maxLines: 2,

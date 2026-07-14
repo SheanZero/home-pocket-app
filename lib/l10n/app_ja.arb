@@ -1934,7 +1934,7 @@
   "@analyticsTimeWindowEmptyPreset": {
     "description": "Analytics screen time-window picker empty preset list message"
   },
-  "analyticsKpiTotalLabel": "支出合計",
+  "analyticsKpiTotalLabel": "総支出",
   "analyticsKpiJoyLabel": "平均満足度",
   "analyticsKpiJoySubMedianCoverage": "中央値 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
@@ -2039,7 +2039,7 @@
   "@analyticsCardCaptionJoySpend": {
     "description": "悦己花在哪 stacked-bar card caption (descriptive, celebrate-past, ADR-012-safe)"
   },
-  "analyticsJoySpendHeaderLabel": "悦己支出",
+  "analyticsJoySpendHeaderLabel": "ときめき支出",
   "@analyticsJoySpendHeaderLabel": {
     "description": "悦己花在哪 header label above the count-up joy total (D-D2 anchor #2)"
   },
@@ -2067,11 +2067,11 @@
   "@analyticsSectionCategory": {
     "description": "Section header above the category-spend donut hero card (round-5 r5 mock, 实用 section)"
   },
-  "analyticsSectionJoyCalendar": "小さな幸せカレンダー",
+  "analyticsSectionJoyCalendar": "ときめきカレンダー",
   "@analyticsSectionJoyCalendar": {
     "description": "Section header above the 小确幸日历 heatmap card (round-5 r5 mock, 悦己 section)"
   },
-  "analyticsSectionSatisfaction": "悦びの満足度",
+  "analyticsSectionSatisfaction": "ときめきの満足度",
   "@analyticsSectionSatisfaction": {
     "description": "Section header above the satisfaction-distribution histogram card (round-5 r5 mock, 悦己 section)"
   },
@@ -2102,11 +2102,11 @@
       }
     }
   },
-  "analyticsCalLegendLow": "淡",
+  "analyticsCalLegendLow": "少",
   "@analyticsCalLegendLow": {
     "description": "Calendar heat legend low-end label (lighter = fewer joy entries that day)"
   },
-  "analyticsCalLegendHigh": "濃",
+  "analyticsCalLegendHigh": "多",
   "@analyticsCalLegendHigh": {
     "description": "Calendar heat legend high-end label (deeper = more joy entries that day)"
   },
@@ -2114,7 +2114,7 @@
   "@analyticsCalLegendNote": {
     "description": "Calendar heat legend note — depth = per-day joy count, not a streak (ADR-012)"
   },
-  "analyticsHistogramMedianPill": "中央の満足度 {value}",
+  "analyticsHistogramMedianPill": "まんなかは{value}点",
   "@analyticsHistogramMedianPill": {
     "description": "Histogram median pill — data-derived weighted median satisfaction (descriptive, not a target)",
     "placeholders": {
@@ -2133,15 +2133,15 @@
     }
   },
   "analyticsCategoryDonutOther": "その他",
-  "analyticsDonutDimensionCategory": "カテゴリ",
+  "analyticsDonutDimensionCategory": "カテゴリ別",
   "@analyticsDonutDimensionCategory": {
     "description": "Donut dimension toggle: split by category (260620-v2m)"
   },
-  "analyticsDonutDimensionMember": "メンバー",
+  "analyticsDonutDimensionMember": "メンバー別",
   "@analyticsDonutDimensionMember": {
     "description": "Donut dimension toggle: split by member/device (260620-v2m)"
   },
-  "analyticsDonutMemberFilterAll": "全メンバー",
+  "analyticsDonutMemberFilterAll": "全員",
   "@analyticsDonutMemberFilterAll": {
     "description": "Donut member-filter option: show all members (default) (260620-v2m)"
   },
@@ -2228,7 +2228,7 @@
   },
   "analyticsCardEmptyBestJoy": "最大ハイライトはまだ見つからない",
   "analyticsCardTitleFamilyInsight": "家族 · ハイライトサマリー",
-  "analyticsFamilyHighlightsSentence": "家族の小確幸 {N}回",
+  "analyticsFamilyHighlightsSentence": "家族のときめき {N}回",
   "@analyticsFamilyHighlightsSentence": {
     "description": "Family highlights aggregate sentence",
     "placeholders": {
@@ -2237,7 +2237,7 @@
       }
     }
   },
-  "analyticsFamilySharedJoySentence": "みんなで [{categoryName}] が好きみたい (n={count}, 平均{avg}/10)",
+  "analyticsFamilySharedJoySentence": "みんなで「{categoryName}」を楽しんでいます（{count}件、平均 {avg} / 10）",
   "@analyticsFamilySharedJoySentence": {
     "description": "Family shared joy insight sentence",
     "placeholders": {
@@ -3281,5 +3281,16 @@
   "@sponsorLaunchError": {
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
+  "analyticsTrendInsightTotal": "今月は {amount}",
+  "analyticsTrendInsightTotalDelta": "今月は {amount} · 先月より{pct}%{direction, select, less{少なく} more{多く} other{}}推移",
+  "analyticsTrendInsightTotalSame": "今月は {amount} · 先月と同水準",
+  "analyticsTrendInsightDaily": "日常支出は {amount}",
+  "analyticsTrendInsightDailyDelta": "日常支出は {amount} · 先月より{pct}%{direction, select, less{少なく} more{多く} other{}}推移",
+  "analyticsTrendInsightDailySame": "日常支出は {amount} · 先月と同水準",
+  "analyticsTrendInsightJoy": "今月のときめき支出は {amount}",
+  "analyticsCalSummary": "今月{count}件 · {days}日間に記録",
+  "analyticsJoyCalendarDayHead": "{month}月{day}日 · {count}件のときめき",
+  "analyticsJoyDrawerToggleExpand": "ときめき支出の内訳を開く",
+  "analyticsJoyDrawerToggleCollapse": "ときめき支出の内訳を閉じる",
   "@@locale": "ja"
 }

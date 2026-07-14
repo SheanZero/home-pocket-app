@@ -53,7 +53,7 @@ void main() {
       await tester.pumpWidget(_buildSubject(_monthlyReport()));
       await tester.pumpAndSettle();
 
-      expect(find.text('支出合計'), findsOneWidget);
+      expect(find.text('総支出'), findsOneWidget);
       expect(find.text('¥41,200'), findsOneWidget);
     });
 

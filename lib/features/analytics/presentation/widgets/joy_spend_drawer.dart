@@ -78,9 +78,10 @@ class JoySpendDrawer extends ConsumerWidget {
     return body;
   }
 
-  /// The shared chrome (D1): a top divider, then the label row
-  /// (♡悦び chip — count — ¥total), then the bar/body. [activeBar] is the active
-  /// dimension's rendered bar/body (category body or member stacked bar).
+  /// The shared chrome (D1 + v15 260714 task #6): a top divider, then a
+  /// COLLAPSIBLE toggle row (♡ときめき chip — count — ¥total — rotating
+  /// expand_more) that reveals the bar/body via [AnimatedSize]. Default
+  /// COLLAPSED. [activeBar] is the active dimension's rendered bar/body.
   Widget _chrome({
     required BuildContext context,
     required AppPalette palette,
@@ -89,58 +90,12 @@ class JoySpendDrawer extends ConsumerWidget {
     required String countText,
     required Widget activeBar,
   }) {
-    final l10n = S.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // D1: 1px divider separates 悦己 from the donut/legend above.
-        Container(
-          height: 1,
-          color: palette.borderDivider,
-          margin: const EdgeInsets.only(top: 16, bottom: 14),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // D1 label row: ♡悦び chip — count — ¥total (total right-aligned).
-              Row(
-                children: [
-                  _JoyChip(palette: palette, label: l10n.analyticsJoySpendHeaderLabel),
-                  const SizedBox(width: 7),
-                  // Count takes the remaining space (left-aligned) so the ¥total
-                  // stays pinned to the row end; ellipsizes if cramped.
-                  Expanded(
-                    child: Text(
-                      countText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption.copyWith(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: palette.joyText,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    NumberFormatter.formatCurrency(total, 'JPY', locale),
-                    style: AppTextStyles.amountSmall.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: palette.joyText,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 9),
-              activeBar,
-            ],
-          ),
-        ),
-      ],
+    return _CollapsibleJoyBody(
+      palette: palette,
+      locale: locale,
+      total: total,
+      countText: countText,
+      activeBar: activeBar,
     );
   }
 
@@ -276,6 +231,131 @@ class JoySpendDrawer extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// v15 (260714 task #6): the collapsible joy body. A tappable toggle row
+/// (♡ chip — count — ¥total — rotating expand_more) reveals the stacked bar +
+/// legend rows via [AnimatedSize]. Default COLLAPSED. The count + ¥total stay on
+/// the always-visible toggle row (mock `.analytics-joy-toggle`); only the detail
+/// (`.analytics-joy-details`) collapses.
+class _CollapsibleJoyBody extends StatefulWidget {
+  const _CollapsibleJoyBody({
+    required this.palette,
+    required this.locale,
+    required this.total,
+    required this.countText,
+    required this.activeBar,
+  });
+
+  final AppPalette palette;
+  final Locale locale;
+  final int total;
+  final String countText;
+  final Widget activeBar;
+
+  @override
+  State<_CollapsibleJoyBody> createState() => _CollapsibleJoyBodyState();
+}
+
+class _CollapsibleJoyBodyState extends State<_CollapsibleJoyBody> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = widget.palette;
+    final l10n = S.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // D1: 1px divider separates 悦己 from the donut/legend above.
+        Container(
+          height: 1,
+          color: palette.borderDivider,
+          margin: const EdgeInsets.only(top: 16, bottom: 14),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Toggle row: ♡ chip — count — ¥total — rotating chevron.
+              Semantics(
+                button: true,
+                expanded: _expanded,
+                label: _expanded
+                    ? l10n.analyticsJoyDrawerToggleCollapse
+                    : l10n.analyticsJoyDrawerToggleExpand,
+                child: InkWell(
+                  key: const ValueKey('analytics_joy_toggle'),
+                  onTap: () => setState(() => _expanded = !_expanded),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        _JoyChip(
+                          palette: palette,
+                          label: l10n.analyticsJoySpendHeaderLabel,
+                        ),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            widget.countText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.caption.copyWith(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: palette.joyText,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          NumberFormatter.formatCurrency(
+                            widget.total,
+                            'JPY',
+                            widget.locale,
+                          ),
+                          style: AppTextStyles.amountSmall.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: palette.joyText,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        AnimatedRotation(
+                          turns: _expanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 150),
+                          child: Icon(
+                            Icons.expand_more,
+                            size: 18,
+                            color: palette.joyText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // The detail (stacked bar + legend rows) grows/shrinks in place.
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                child: _expanded
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 9),
+                        child: widget.activeBar,
+                      )
+                    : const SizedBox(width: double.infinity),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

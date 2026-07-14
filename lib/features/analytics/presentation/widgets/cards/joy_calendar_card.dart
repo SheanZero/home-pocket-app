@@ -28,11 +28,9 @@ import 'analytics_data_card.dart';
 /// through the single-source [joyCalendarRefreshTargets].
 ///
 /// On data: an `AnalyticsDataCard` with the custom [JoyCalendarHeatmap] (R-2 —
-/// NOT fl_chart) and, BELOW it, an INLINE expandable panel (the card grows in
-/// place via `AnimatedSize` — D-C1, NOT a sheet/route). The tapped day is held
-/// in local state by [_JoyCalendarBody]; the day's joy一刻 list is read on demand
-/// from [joyDayTransactionsProvider] (a day-scoped `findByBookIds(joy)` window —
-/// the count model stays count-only). Ambient celebrate-past — the cell depth is
+/// NOT fl_chart) and, BELOW it, an INLINE expandable panel ([AnimatedSize],
+/// D-C1). The tapped day is held in local state by [_JoyCalendarBody]; the day's
+/// joy一刻 list is read on demand from [joyDayTransactionsProvider]. Cell depth is
 /// f(count), explicitly NOT a streak (ADR-016 §5).
 class JoyCalendarCard extends ConsumerWidget {
   const JoyCalendarCard({
@@ -223,15 +221,9 @@ class _InlineDayPanel extends ConsumerWidget {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
 
-    // WR-04 (46-REVIEW option (a) / D-05 "失效重算"): pull-to-refresh invalidates
-    // `perDayJoyCountsProvider` (it is in `joyCalendarRefreshTargets`), but the
-    // expanded day's inline list reads the day-keyed `joyDayTransactionsProvider`,
-    // whose `day` key is LOCAL `_JoyCalendarBody` state — unknown at registry
-    // build, so the registry union cannot key it. We mirror the refresh from the
-    // panel: when the month-anchored counts provider is recomputed, invalidate
-    // THIS day's list provider so the inline rows re-fetch alongside the heatmap
-    // count (no stale/deleted rows). GUARD-01: `joyDayTransactionsProvider` is an
-    // analytics provider — no home-feature provider enters the union.
+    // WR-04 / D-05: the day-keyed list uses LOCAL `_JoyCalendarBody` state, so the
+    // registry union can't key it — mirror the refresh here (invalidate this day's
+    // list when the month-anchored counts recompute). GUARD-01 still holds.
     ref.listen(
       perDayJoyCountsProvider(
         bookId: bookId,
@@ -259,21 +251,41 @@ class _InlineDayPanel extends ConsumerWidget {
       padding: const EdgeInsets.only(top: 12),
       child: dayTxnsAsync.when(
         data: (txns) {
-          if (txns.isEmpty) {
-            return Padding(
-              key: const ValueKey('joy_calendar_day_empty'),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                l10n.analyticsJoyCalendarDayEmpty,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: palette.textSecondary,
-                ),
+          // v15 (260714 task #8): a day-panel head line
+          // 「{month}月{day}日 · {count}件のときめき」above the day's records.
+          final head = Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              l10n.analyticsJoyCalendarDayHead(day.month, day.day, txns.length),
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: palette.joyText,
               ),
+            ),
+          );
+          if (txns.isEmpty) {
+            return Column(
+              key: const ValueKey('joy_calendar_day_empty'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                head,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    l10n.analyticsJoyCalendarDayEmpty,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             );
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              head,
               for (final tx in txns)
                 _readOnlyTile(context, tx, locale, palette),
             ],

@@ -79,7 +79,7 @@ void main() {
       ),
     );
 
-    expect(find.text('家族の小確幸 23回'), findsOneWidget);
+    expect(find.text('家族のときめき 23回'), findsOneWidget);
   });
 
   testWidgets('renders shared joy sentence from aggregate tuple', (
@@ -97,7 +97,10 @@ void main() {
       ),
     );
 
-    expect(find.text('みんなで [食費] が好きみたい (n=5, 平均8.2/10)'), findsOneWidget);
+    expect(
+      find.text('みんなで「食費」を楽しんでいます（5件、平均 8.2 / 10）'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('renders empty sentence when shared joy insight is empty', (

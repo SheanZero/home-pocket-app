@@ -2102,11 +2102,11 @@
       }
     }
   },
-  "analyticsCalLegendLow": "淡",
+  "analyticsCalLegendLow": "少",
   "@analyticsCalLegendLow": {
     "description": "Calendar heat legend low-end label (lighter = fewer joy entries that day)"
   },
-  "analyticsCalLegendHigh": "浓",
+  "analyticsCalLegendHigh": "多",
   "@analyticsCalLegendHigh": {
     "description": "Calendar heat legend high-end label (deeper = more joy entries that day)"
   },
@@ -3281,5 +3281,16 @@
   "@sponsorLaunchError": {
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
+  "analyticsTrendInsightTotal": "本月 {amount}",
+  "analyticsTrendInsightTotalDelta": "本月 {amount} · 较上月{direction, select, less{少} more{多} other{}}{pct}%",
+  "analyticsTrendInsightTotalSame": "本月 {amount} · 与上月持平",
+  "analyticsTrendInsightDaily": "日常支出 {amount}",
+  "analyticsTrendInsightDailyDelta": "日常支出 {amount} · 较上月{direction, select, less{少} more{多} other{}}{pct}%",
+  "analyticsTrendInsightDailySame": "日常支出 {amount} · 与上月持平",
+  "analyticsTrendInsightJoy": "本月悦己支出 {amount}",
+  "analyticsCalSummary": "本月{count}笔 · 记录于{days}天",
+  "analyticsJoyCalendarDayHead": "{month}月{day}日 · {count}笔小确幸",
+  "analyticsJoyDrawerToggleExpand": "展开悦己花销明细",
+  "analyticsJoyDrawerToggleCollapse": "收起悦己花销明细",
   "@@locale": "zh"
 }

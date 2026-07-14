@@ -558,6 +558,11 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('donut_dim_member')));
     await tester.pumpAndSettle();
 
+    // v15 (260714 task #6): the joy drawer is collapsible and defaults COLLAPSED,
+    // so expand it before asserting on the detail (stacked bar) content.
+    await tester.tap(find.byKey(const ValueKey('analytics_joy_toggle')));
+    await tester.pumpAndSettle();
+
     final drawer = find.byType(JoySpendDrawer);
     // The member-dim joy bar renders via JoySpendStackedBar with person icons.
     expect(

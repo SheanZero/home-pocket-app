@@ -1612,10 +1612,10 @@ class SZh extends S {
   }
 
   @override
-  String get analyticsCalLegendLow => '淡';
+  String get analyticsCalLegendLow => '少';
 
   @override
-  String get analyticsCalLegendHigh => '浓';
+  String get analyticsCalLegendHigh => '多';
 
   @override
   String get analyticsCalLegendNote => '颜色越浓 = 那天的悦己笔数越多';
@@ -2498,4 +2498,73 @@ class SZh extends S {
 
   @override
   String get sponsorLaunchError => '无法打开浏览器';
+
+  @override
+  String analyticsTrendInsightTotal(String amount) {
+    return '本月 $amount';
+  }
+
+  @override
+  String analyticsTrendInsightTotalDelta(
+    String amount,
+    int pct,
+    String direction,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'less': '少',
+      'more': '多',
+      'other': '',
+    });
+    return '本月 $amount · 较上月$_temp0$pct%';
+  }
+
+  @override
+  String analyticsTrendInsightTotalSame(String amount) {
+    return '本月 $amount · 与上月持平';
+  }
+
+  @override
+  String analyticsTrendInsightDaily(String amount) {
+    return '日常支出 $amount';
+  }
+
+  @override
+  String analyticsTrendInsightDailyDelta(
+    String amount,
+    int pct,
+    String direction,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(direction, {
+      'less': '少',
+      'more': '多',
+      'other': '',
+    });
+    return '日常支出 $amount · 较上月$_temp0$pct%';
+  }
+
+  @override
+  String analyticsTrendInsightDailySame(String amount) {
+    return '日常支出 $amount · 与上月持平';
+  }
+
+  @override
+  String analyticsTrendInsightJoy(String amount) {
+    return '本月悦己支出 $amount';
+  }
+
+  @override
+  String analyticsCalSummary(int count, int days) {
+    return '本月$count笔 · 记录于$days天';
+  }
+
+  @override
+  String analyticsJoyCalendarDayHead(int month, int day, int count) {
+    return '$month月$day日 · $count笔小确幸';
+  }
+
+  @override
+  String get analyticsJoyDrawerToggleExpand => '展开悦己花销明细';
+
+  @override
+  String get analyticsJoyDrawerToggleCollapse => '收起悦己花销明细';
 }

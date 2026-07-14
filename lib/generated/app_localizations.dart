@@ -4704,6 +4704,80 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Couldn\'t open the browser'**
   String get sponsorLaunchError;
+
+  /// Trend card insight strip — total tab, no previous-month reference
+  ///
+  /// In en, this message translates to:
+  /// **'This month {amount}'**
+  String analyticsTrendInsightTotal(String amount);
+
+  /// Trend card insight strip — total tab with a signed delta vs last month (descriptive, not a target)
+  ///
+  /// In en, this message translates to:
+  /// **'This month {amount} · {pct}% {direction, select, less{lower} more{higher} other{}} than last month'**
+  String analyticsTrendInsightTotalDelta(
+    String amount,
+    int pct,
+    String direction,
+  );
+
+  /// Trend card insight strip — total tab when the delta rounds to zero
+  ///
+  /// In en, this message translates to:
+  /// **'This month {amount} · about the same as last month'**
+  String analyticsTrendInsightTotalSame(String amount);
+
+  /// Trend card insight strip — daily tab, no previous-month reference
+  ///
+  /// In en, this message translates to:
+  /// **'Daily spending {amount}'**
+  String analyticsTrendInsightDaily(String amount);
+
+  /// Trend card insight strip — daily tab with a signed delta vs last month
+  ///
+  /// In en, this message translates to:
+  /// **'Daily spending {amount} · {pct}% {direction, select, less{lower} more{higher} other{}} than last month'**
+  String analyticsTrendInsightDailyDelta(
+    String amount,
+    int pct,
+    String direction,
+  );
+
+  /// Trend card insight strip — daily tab when the delta rounds to zero
+  ///
+  /// In en, this message translates to:
+  /// **'Daily spending {amount} · about the same as last month'**
+  String analyticsTrendInsightDailySame(String amount);
+
+  /// Trend card insight strip — joy tab (joy never crosses periods, so no delta)
+  ///
+  /// In en, this message translates to:
+  /// **'This month\'s joy spending {amount}'**
+  String analyticsTrendInsightJoy(String amount);
+
+  /// Calendar heat legend computed summary — total joy entries this month and number of days with a record
+  ///
+  /// In en, this message translates to:
+  /// **'{count} this month · logged across {days} days'**
+  String analyticsCalSummary(int count, int days);
+
+  /// Inline day-panel head line above the tapped day's joy records
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day} · {count} joy moments'**
+  String analyticsJoyCalendarDayHead(int month, int day, int count);
+
+  /// A11y label for the collapsible joy-spend drawer toggle when collapsed
+  ///
+  /// In en, this message translates to:
+  /// **'Expand joy spending breakdown'**
+  String get analyticsJoyDrawerToggleExpand;
+
+  /// A11y label for the collapsible joy-spend drawer toggle when expanded
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse joy spending breakdown'**
+  String get analyticsJoyDrawerToggleCollapse;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
