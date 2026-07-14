@@ -548,17 +548,22 @@ class SEn extends S {
   String get homeJoyPercentLabel => 'Joy spending ratio';
 
   @override
-  String get homeFamilyInviteTitle => 'Invite Family';
+  String get homeFamilyInviteTitle => 'Add Family';
 
   @override
   String get homeFamilyInviteDesc => 'Share your ledger with your partner';
 
   @override
-  String get homeFamilyBannerTitle => 'Manage Together';
+  String get homeFamilyInviteDismissLabel => 'Dismiss family invite';
 
   @override
-  String get homeFamilyBannerSubtitle =>
-      'Invite your partner to share your ledger in real time';
+  String get homeFamilyInviteSettingsPath => 'Settings › Family';
+
+  @override
+  String get homeFamilyBannerTitle => 'Share your budget';
+
+  @override
+  String get homeFamilyBannerSubtitle => 'Add anytime from Settings';
 
   @override
   String get homeTodayTitle => 'Today\'s Records';
@@ -645,6 +650,15 @@ class SEn extends S {
 
   @override
   String get homeRingSectionTitleGroup => 'Family Joy';
+
+  @override
+  String get homeViewMonthlyAnalysis => 'View monthly analysis';
+
+  @override
+  String get homeMetricJoyUnit => 'Joy';
+
+  @override
+  String get homeMetricCountUnit => '';
 
   @override
   String get homeBestJoyTagSingle => 'Top of the Month';

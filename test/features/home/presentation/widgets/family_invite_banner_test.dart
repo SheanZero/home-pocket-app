@@ -4,34 +4,44 @@ import 'package:home_pocket/features/home/presentation/widgets/family_invite_ban
 import 'package:home_pocket/generated/app_localizations.dart';
 
 void main() {
-  Widget buildSubject({VoidCallback? onTap}) {
+  Widget buildSubject({
+    VoidCallback? onTap,
+    VoidCallback? onSettingsTap,
+    VoidCallback? onDismiss,
+  }) {
     return MaterialApp(
       locale: const Locale('ja'),
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      home: Scaffold(body: FamilyInviteBanner(onTap: onTap ?? () {})),
+      home: Scaffold(
+        body: FamilyInviteBanner(
+          onTap: onTap ?? () {},
+          onSettingsTap: onSettingsTap ?? () {},
+          onDismiss: onDismiss ?? () {},
+        ),
+      ),
     );
   }
 
   testWidgets('shows CTA button text', (tester) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
-    // ja: homeFamilyInviteTitle = "家族を招待する"
-    expect(find.text('家族を招待する'), findsOneWidget);
+    // ja: homeFamilyInviteTitle = "家族を追加"
+    expect(find.text('家族を追加'), findsOneWidget);
   });
 
   testWidgets('shows title', (tester) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
-    // ja: homeFamilyBannerTitle = "家族と一緒に管理しよう"
-    expect(find.text('家族と一緒に管理しよう'), findsOneWidget);
+    // ja: homeFamilyBannerTitle = "家族と家計を共有"
+    expect(find.text('家族と家計を共有'), findsOneWidget);
   });
 
   testWidgets('shows subtitle', (tester) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
-    // ja: homeFamilyBannerSubtitle (note: newline removed; text widget wraps naturally)
-    expect(find.text('パートナーを招待して、家計簿をリアルタイムで共有しよう'), findsOneWidget);
+    // ja: homeFamilyBannerSubtitle = "設定からいつでも追加できます"
+    expect(find.text('設定からいつでも追加できます'), findsOneWidget);
   });
 
   testWidgets('onTap triggers when CTA button is tapped', (tester) async {
@@ -39,8 +49,17 @@ void main() {
     await tester.pumpWidget(buildSubject(onTap: () => tapped = true));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('家族を招待する'));
+    await tester.tap(find.text('家族を追加'));
     expect(tapped, isTrue);
+  });
+
+  testWidgets('onDismiss triggers when close button is tapped', (tester) async {
+    var dismissed = false;
+    await tester.pumpWidget(buildSubject(onDismiss: () => dismissed = true));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.close));
+    expect(dismissed, isTrue);
   });
 
   testWidgets('displays two avatar circles with material icons', (
@@ -52,20 +71,9 @@ void main() {
     expect(find.byIcon(Icons.face_2), findsOneWidget);
   });
 
-  testWidgets('CTA button includes heart icon', (tester) async {
+  testWidgets('CTA button includes group_add icon', (tester) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.favorite), findsOneWidget);
-  });
-
-  testWidgets('uses vertical Column layout', (tester) async {
-    await tester.pumpWidget(buildSubject());
-    await tester.pumpAndSettle();
-
-    final columnFinder = find.descendant(
-      of: find.byType(FamilyInviteBanner),
-      matching: find.byType(Column),
-    );
-    expect(columnFinder, findsWidgets);
+    expect(find.byIcon(Icons.group_add), findsOneWidget);
   });
 }

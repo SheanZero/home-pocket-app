@@ -38,16 +38,27 @@ import '../widgets/transaction_list_card.dart';
 ///
 /// Flat vertical scroll layout with section dividers.
 /// Wires providers to pure UI widgets. No Scaffold, no bottom nav.
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.bookId, this.onSettingsTap});
 
   final String bookId;
   final VoidCallback? onSettingsTap;
 
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   static const _fmt = FormatterService();
 
+  /// Ephemeral, session-only dismissal of the family-invite banner (v15).
+  /// Intentionally NOT persisted — resets on rebuild/relaunch to avoid adding
+  /// a codegen-backed provider for a low-stakes affordance.
+  bool _inviteDismissed = false;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final bookId = widget.bookId;
     final l10n = S.of(context);
     final localeAsync = ref.watch(currentLocaleProvider);
     final locale = localeAsync.value ?? const Locale('ja');
@@ -76,7 +87,7 @@ class HomeScreen extends ConsumerWidget {
                 year: year,
                 month: month,
                 isGroupMode: isGroupMode,
-                onSettingsTap: onSettingsTap ?? () {},
+                onSettingsTap: widget.onSettingsTap ?? () {},
                 onMonthTap: () async {
                   final picked = await showMonthPickerDialog(
                     context,
@@ -242,7 +253,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox.shrink(),
                 const SizedBox(height: 16),
               ],
-              if (!isGroupMode) ...[
+              if (!isGroupMode && !_inviteDismissed) ...[
                 FamilyInviteBanner(
                   onTap: () {
                     Navigator.of(context).push(
@@ -251,6 +262,8 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     );
                   },
+                  onSettingsTap: widget.onSettingsTap ?? () {},
+                  onDismiss: () => setState(() => _inviteDismissed = true),
                 ),
                 const SizedBox(height: 16),
               ],

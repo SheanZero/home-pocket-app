@@ -669,7 +669,7 @@
   "@homeJoyPercentLabel": {
     "description": "Joy spending percentage metric label"
   },
-  "homeFamilyInviteTitle": "Invite Family",
+  "homeFamilyInviteTitle": "Add Family",
   "@homeFamilyInviteTitle": {
     "description": "Family invite banner title"
   },
@@ -677,11 +677,19 @@
   "@homeFamilyInviteDesc": {
     "description": "Family invite banner description"
   },
-  "homeFamilyBannerTitle": "Manage Together",
+  "homeFamilyInviteDismissLabel": "Dismiss family invite",
+  "@homeFamilyInviteDismissLabel": {
+    "description": "Accessibility label for the family invite banner dismiss button"
+  },
+  "homeFamilyInviteSettingsPath": "Settings › Family",
+  "@homeFamilyInviteSettingsPath": {
+    "description": "Settings navigation path shown in the family invite banner"
+  },
+  "homeFamilyBannerTitle": "Share your budget",
   "@homeFamilyBannerTitle": {
     "description": "Family invite banner heading text"
   },
-  "homeFamilyBannerSubtitle": "Invite your partner to share your ledger in real time",
+  "homeFamilyBannerSubtitle": "Add anytime from Settings",
   "@homeFamilyBannerSubtitle": {
     "description": "Family invite banner subtitle text"
   },
@@ -829,6 +837,18 @@
   "homeRingSectionTitleGroup": "Family Joy",
   "@homeRingSectionTitleGroup": {
     "description": "Ring section title — group mode"
+  },
+  "homeViewMonthlyAnalysis": "View monthly analysis",
+  "@homeViewMonthlyAnalysis": {
+    "description": "Link in the joy section title row that opens the monthly analysis"
+  },
+  "homeMetricJoyUnit": "Joy",
+  "@homeMetricJoyUnit": {
+    "description": "Unit label under the goal ring value (Joy points)"
+  },
+  "homeMetricCountUnit": "",
+  "@homeMetricCountUnit": {
+    "description": "Count suffix for the highlights metric (empty in locales with no counter word)"
   },
   "homeBestJoyTagSingle": "Top of the Month",
   "@homeBestJoyTagSingle": {

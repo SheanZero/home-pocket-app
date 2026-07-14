@@ -669,7 +669,7 @@
   "@homeJoyPercentLabel": {
     "description": "Joy spending percentage metric label"
   },
-  "homeFamilyInviteTitle": "邀请家人",
+  "homeFamilyInviteTitle": "添加家人",
   "@homeFamilyInviteTitle": {
     "description": "Family invite banner title"
   },
@@ -677,11 +677,19 @@
   "@homeFamilyInviteDesc": {
     "description": "Family invite banner description"
   },
-  "homeFamilyBannerTitle": "一起管理家庭账本",
+  "homeFamilyInviteDismissLabel": "关闭家人添加提示",
+  "@homeFamilyInviteDismissLabel": {
+    "description": "Accessibility label for the family invite banner dismiss button"
+  },
+  "homeFamilyInviteSettingsPath": "设置 › 家庭",
+  "@homeFamilyInviteSettingsPath": {
+    "description": "Settings navigation path shown in the family invite banner"
+  },
+  "homeFamilyBannerTitle": "与家人共享家计",
   "@homeFamilyBannerTitle": {
     "description": "Family invite banner heading text"
   },
-  "homeFamilyBannerSubtitle": "邀请伴侣，实时共享家庭账本",
+  "homeFamilyBannerSubtitle": "可随时在设置中添加",
   "@homeFamilyBannerSubtitle": {
     "description": "Family invite banner subtitle text"
   },
@@ -826,9 +834,21 @@
   "@homeRingSectionTitleSingle": {
     "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
   },
-  "homeRingSectionTitleGroup": "家族的小确幸",
+  "homeRingSectionTitleGroup": "家族的悦己",
   "@homeRingSectionTitleGroup": {
     "description": "Ring section title — group mode"
+  },
+  "homeViewMonthlyAnalysis": "查看本月分析",
+  "@homeViewMonthlyAnalysis": {
+    "description": "Link in the ときめき section title row that opens the monthly analysis"
+  },
+  "homeMetricJoyUnit": "Joy",
+  "@homeMetricJoyUnit": {
+    "description": "Unit label under the goal ring value (Joy points)"
+  },
+  "homeMetricCountUnit": "件",
+  "@homeMetricCountUnit": {
+    "description": "Count suffix for the 小確幸 metric (empty in locales with no counter word)"
   },
   "homeBestJoyTagSingle": "本月最爱",
   "@homeBestJoyTagSingle": {

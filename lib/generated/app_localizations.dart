@@ -1134,7 +1134,7 @@ abstract class S {
   /// Family invite banner title
   ///
   /// In en, this message translates to:
-  /// **'Invite Family'**
+  /// **'Add Family'**
   String get homeFamilyInviteTitle;
 
   /// Family invite banner description
@@ -1143,16 +1143,28 @@ abstract class S {
   /// **'Share your ledger with your partner'**
   String get homeFamilyInviteDesc;
 
+  /// Accessibility label for the family invite banner dismiss button
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss family invite'**
+  String get homeFamilyInviteDismissLabel;
+
+  /// Settings navigation path shown in the family invite banner
+  ///
+  /// In en, this message translates to:
+  /// **'Settings › Family'**
+  String get homeFamilyInviteSettingsPath;
+
   /// Family invite banner heading text
   ///
   /// In en, this message translates to:
-  /// **'Manage Together'**
+  /// **'Share your budget'**
   String get homeFamilyBannerTitle;
 
   /// Family invite banner subtitle text
   ///
   /// In en, this message translates to:
-  /// **'Invite your partner to share your ledger in real time'**
+  /// **'Add anytime from Settings'**
   String get homeFamilyBannerSubtitle;
 
   /// Today's transaction section title
@@ -1286,6 +1298,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Family Joy'**
   String get homeRingSectionTitleGroup;
+
+  /// Link in the joy section title row that opens the monthly analysis
+  ///
+  /// In en, this message translates to:
+  /// **'View monthly analysis'**
+  String get homeViewMonthlyAnalysis;
+
+  /// Unit label under the goal ring value (Joy points)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy'**
+  String get homeMetricJoyUnit;
+
+  /// Count suffix for the highlights metric (empty in locales with no counter word)
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get homeMetricCountUnit;
 
   /// Best Joy tag — single mode (D-04)
   ///

@@ -342,8 +342,9 @@ void main() {
         await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
         await tester.pumpAndSettle();
 
-        // ja "まだ記録なし" — legend empty value
-        expect(find.textContaining('まだ記録なし'), findsWidgets);
+        // Empty metrics render an em-dash placeholder in the goal ring +
+        // support stack (legend "まだ記録なし" removed with the v15 rebuild).
+        expect(find.text('—'), findsWidgets);
         // ja "今月の最愛がここに表示されます" — Best Joy Variant A empty Small.
         // homeBestJoyEmptyBig was removed by 260518-v4v Variant A redesign.
         expect(find.textContaining('今月の最愛がここに'), findsOneWidget);
@@ -375,15 +376,17 @@ void main() {
   });
 
   group('HomeHeroCard — info icons (HOMEUI-04, D-10)', () {
-    testWidgets('exactly 2 Icons.info_outline instances total', (tester) async {
+    testWidgets('exactly 1 Icons.info_outline instance total', (tester) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
       await tester.pumpAndSettle();
 
+      // v15 faithfulHero exposes a single ⓘ in the ときめき region title; the
+      // legacy legend info icon was removed with the ring→goal-ring rebuild.
       final iconFinder = find.descendant(
         of: find.byType(HomeHeroCard),
         matching: find.byIcon(Icons.info_outline),
       );
-      expect(iconFinder, findsNWidgets(2));
+      expect(iconFinder, findsNWidgets(1));
     });
 
     testWidgets(

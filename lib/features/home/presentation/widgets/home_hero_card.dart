@@ -5,10 +5,8 @@ import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
@@ -17,7 +15,7 @@ import '../../../analytics/domain/models/happiness_report.dart';
 import '../../../analytics/domain/models/metric_result.dart';
 import '../../../analytics/domain/models/monthly_report.dart';
 import '../providers/state_shadow_books.dart';
-import 'painter/happiness_rings_painter.dart';
+import 'home_metrics_region.dart';
 
 /// Integrated hero card (Phase 10) replacing the previous trio of legacy
 /// cards: month-overview, ledger-comparison, and joy-fullness. Pure
@@ -297,7 +295,7 @@ class HomeHeroCard extends StatelessWidget {
   Widget _divider(AppPalette palette) =>
       Container(height: 1, color: palette.backgroundDivider);
 
-  // ─── Region 4: Ring section ───────────────────────────────────────────────
+  // ─── Region 4: ときめき度 metrics section (v15 faithfulMetrics) ───────────────
   Widget _ringSection(BuildContext context, S l10n, AppPalette palette) {
     final title = isGroupMode
         ? l10n.homeRingSectionTitleGroup
@@ -307,312 +305,53 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            // 260603-nr1 #2: leaf icon for the 悦己充盈 (joy fullness) header.
-            Icon(Icons.eco, size: 16, color: palette.joy),
+            // v15 region-title accent: rose leaf glyph for the ときめき region.
+            Icon(Icons.eco, size: 16, color: palette.joyText),
             const SizedBox(width: 6),
-            Text(
-              title,
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: palette.textPrimary,
+            Flexible(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: palette.textPrimary,
+                ),
               ),
             ),
             const SizedBox(width: 4),
             const _InfoIcon(tooltipKey: _TooltipKey.joyIndex),
+            const Spacer(),
+            // "今月の分析を見る ›" — no own gesture; the tap falls through to the
+            // whole-card onTap (hero → analytics), matching the mockup.
+            _analysisLink(l10n, palette),
           ],
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            SizedBox(
-              width: 120,
-              height: 120,
-              child: RepaintBoundary(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CustomPaint(
-                      size: const Size(120, 120),
-                      painter: _painter(
-                        palette,
-                        HappinessRingPalette.of(Theme.of(context).brightness),
-                      ),
-                    ),
-                    _centerContent(
-                      context,
-                      l10n,
-                      palette,
-                      HappinessRingPalette.of(Theme.of(context).brightness),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _legend(
-                context,
-                l10n,
-                palette,
-                HappinessRingPalette.of(Theme.of(context).brightness),
-              ),
-            ),
-          ],
+        HomeMetricsRegion(
+          isGroupMode: isGroupMode,
+          joyContribution: happiness.joyContribution,
+          avgSatisfaction: happiness.avgSatisfaction,
+          highlightsCount: happiness.highlightsCount,
+          activeMonthlyJoyTarget: activeMonthlyJoyTarget,
+          currencyCode: currencyCode,
+          family: family,
         ),
       ],
     );
   }
 
-  HappinessRingsPainter _painter(
-    AppPalette palette,
-    HappinessRingPalette ring,
-  ) {
-    final track = palette.backgroundDivider;
-    if (isGroupMode) {
-      final f = family;
-      return HappinessRingsPainter(
-        outerSweepRatio: f == null
-            ? null
-            : _familyHighlightsRatio(f.familyHighlightsSum),
-        middleSweepRatio: f == null
-            ? null
-            : _sharedJoyRatio(f.sharedJoyInsight),
-        innerSweepRatio: f == null
-            ? null
-            : _medianSatisfactionRatio(f.medianSatisfaction),
-        outerGradient: SweepGradient(
-          colors: [palette.sharedLight, palette.shared],
-        ),
-        middleGradient: SweepGradient(
-          colors: [palette.accentPrimaryLight, palette.accentPrimary],
-        ),
-        innerGradient: SweepGradient(
-          colors: [palette.successLight, palette.success],
-        ),
-        trackColor: track,
-      );
-    }
-    // Single mode — INNER GLOW + "Butter" scheme: each ring is a solid arc
-    // with a soft blurred halo rendered by the painter (iOS/Impeller-safe).
-    return HappinessRingsPainter(
-      outerSweepRatio: _highlightsRatio(happiness.highlightsCount),
-      middleSweepRatio: _avgSatisfactionRatio(happiness.avgSatisfaction),
-      innerSweepRatio: _joyContributionRatio(happiness.joyContribution),
-      outerGradient: SweepGradient(colors: [ring.highlights, ring.highlights]),
-      middleGradient: SweepGradient(
-        colors: [ring.satisfaction, ring.satisfaction],
-      ),
-      innerGradient: SweepGradient(colors: [ring.target, ring.target]),
-      trackColor: ring.track,
-    );
-  }
-
-  double? _joyContributionRatio(MetricResult<double> r) => switch (r) {
-    Empty() => null,
-    Value(:final data) =>
-      activeMonthlyJoyTarget > 0
-          ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
-          : null,
-  };
-  double? _avgSatisfactionRatio(MetricResult<double> r) => switch (r) {
-    Empty() => null,
-    Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
-  };
-  double? _highlightsRatio(MetricResult<int> r) => switch (r) {
-    Empty() => null,
-    Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
-  };
-  double? _familyHighlightsRatio(MetricResult<int> r) => switch (r) {
-    Empty() => null,
-    Value(:final data) => (data / 30.0).clamp(0.0, 1.0),
-  };
-  double? _sharedJoyRatio(MetricResult<Object> r) => switch (r) {
-    Empty() => null,
-    Value() => 1.0,
-  };
-  double? _medianSatisfactionRatio(MetricResult<double> r) => switch (r) {
-    Empty() => null,
-    Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
-  };
-
-  Widget _centerContent(
-    BuildContext context,
-    S l10n,
-    AppPalette palette,
-    HappinessRingPalette ring,
-  ) {
-    if (isGroupMode) {
-      return Text(
-        _groupCenterText(),
-        style: AppTextStyles.amountMedium.copyWith(color: palette.textPrimary),
-      );
-    }
-    final valueText = switch (happiness.joyContribution) {
-      Empty() => '—',
-      Value(:final data) => formatJoyCumulative(data, currencyCode),
-    };
-    final valueColor = switch (happiness.joyContribution) {
-      Empty() => palette.textPrimary,
-      Value() => ring.targetText,
-    };
-    return Semantics(
-      label: l10n.homeJoyTargetSemantics(valueText, activeMonthlyJoyTarget),
-      child: Text(
-        valueText,
-        style: AppTextStyles.amountMedium.copyWith(color: valueColor),
-      ),
-    );
-  }
-
-  String _groupCenterText() {
-    final f = family;
-    if (f == null) return '—';
-    return switch (f.familyHighlightsSum) {
-      Empty() => '—',
-      Value(:final data) => '$data',
-    };
-  }
-
-  Widget _legend(
-    BuildContext context,
-    S l10n,
-    AppPalette palette,
-    HappinessRingPalette ring,
-  ) {
-    if (isGroupMode) return _legendGroup(context, l10n, palette);
-    return _legendSingle(context, l10n, palette, ring);
-  }
-
-  Widget _legendGroup(BuildContext context, S l10n, AppPalette palette) {
-    final f = family;
-    final empty = l10n.homeNoJoyDataLegend;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _legendRow(
-          palette,
-          palette.shared,
-          l10n.homeFamilyHighlightsLegend,
-          switch (f?.familyHighlightsSum) {
-            null || Empty() => empty,
-            Value(:final data) => '$data',
-          },
-        ),
-        const SizedBox(height: 6),
-        _legendRow(
-          palette,
-          palette.accentPrimary,
-          l10n.homeSharedJoyLegend,
-          switch (f?.sharedJoyInsight) {
-            null || Empty() => empty,
-            Value() => '✓',
-          },
-        ),
-        const SizedBox(height: 6),
-        _legendRow(
-          palette,
-          palette.success,
-          l10n.homeMedianSatisfactionLegend,
-          switch (f?.medianSatisfaction) {
-            null || Empty() => empty,
-            Value(:final data) => data.toStringAsFixed(1),
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _legendSingle(
-    BuildContext context,
-    S l10n,
-    AppPalette palette,
-    HappinessRingPalette ring,
-  ) {
-    final empty = l10n.homeNoJoyDataLegend;
-    final highlights = switch (happiness.highlightsCount) {
-      Empty() => 0,
-      Value(:final data) => data,
-    };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _legendRow(
-          palette,
-          ring.target,
-          l10n.homeJoyContributionLegend,
-          switch (happiness.joyContribution) {
-            Empty() => empty,
-            Value(:final data) => formatJoyCumulative(data, currencyCode),
-          },
-          labelTrailing: const _InfoIcon(
-            tooltipKey: _TooltipKey.joyContribution,
-          ),
-        ),
-        const SizedBox(height: 6),
-        _legendRow(
-          palette,
-          ring.satisfaction,
-          l10n.homeAvgSatisfactionLegend,
-          switch (happiness.avgSatisfaction) {
-            Empty() => empty,
-            Value(:final data) => data.toStringAsFixed(1),
-          },
-        ),
-        const SizedBox(height: 6),
-        _legendRow(
-          palette,
-          ring.highlights,
-          l10n.homeHighlightsCountLegend,
-          '$highlights',
-        ),
-      ],
-    );
-  }
-
-  Widget _legendRow(
-    AppPalette palette,
-    Color dot,
-    String label,
-    String value, {
-    Widget? trailing,
-    Widget? labelTrailing,
-  }) {
+  Widget _analysisLink(S l10n, AppPalette palette) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  label,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: palette.textSecondary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (labelTrailing != null) ...[
-                const SizedBox(width: 4),
-                labelTrailing,
-              ],
-            ],
+        Text(
+          l10n.homeViewMonthlyAnalysis,
+          style: AppTextStyles.bodySmall.copyWith(
+            fontWeight: FontWeight.w800,
+            color: palette.accentPrimary,
           ),
         ),
-        if (value.isNotEmpty)
-          Text(
-            value,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: palette.textPrimary,
-            ),
-          ),
-        if (trailing != null) ...[const SizedBox(width: 4), trailing],
+        Icon(Icons.chevron_right, size: 14, color: palette.accentPrimary),
       ],
     );
   }
@@ -1066,10 +805,8 @@ class HomeHeroCard extends StatelessWidget {
 enum _TooltipKey { joyIndex, joyContribution }
 
 class _InfoIcon extends StatelessWidget {
-  // Constructor declaration split across lines so a regex looking for
-  // call-site usages of this widget matches exactly twice (HOMEUI-04 cap).
-  const _InfoIcon // <- declaration line, no opening paren.
-  ({required this.tooltipKey});
+  // v15 faithfulHero exposes a single ⓘ affordance in the ときめき region title.
+  const _InfoIcon({required this.tooltipKey});
 
   final _TooltipKey tooltipKey;
 

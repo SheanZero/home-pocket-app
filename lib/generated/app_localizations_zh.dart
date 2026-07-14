@@ -543,16 +543,22 @@ class SZh extends S {
   String get homeJoyPercentLabel => '本月悦己支出占比';
 
   @override
-  String get homeFamilyInviteTitle => '邀请家人';
+  String get homeFamilyInviteTitle => '添加家人';
 
   @override
   String get homeFamilyInviteDesc => '与伴侣共享家计簿';
 
   @override
-  String get homeFamilyBannerTitle => '一起管理家庭账本';
+  String get homeFamilyInviteDismissLabel => '关闭家人添加提示';
 
   @override
-  String get homeFamilyBannerSubtitle => '邀请伴侣，实时共享家庭账本';
+  String get homeFamilyInviteSettingsPath => '设置 › 家庭';
+
+  @override
+  String get homeFamilyBannerTitle => '与家人共享家计';
+
+  @override
+  String get homeFamilyBannerSubtitle => '可随时在设置中添加';
 
   @override
   String get homeTodayTitle => '今日记录';
@@ -636,7 +642,16 @@ class SZh extends S {
   String get homeRingSectionTitleSingle => '悦己充盈';
 
   @override
-  String get homeRingSectionTitleGroup => '家族的小确幸';
+  String get homeRingSectionTitleGroup => '家族的悦己';
+
+  @override
+  String get homeViewMonthlyAnalysis => '查看本月分析';
+
+  @override
+  String get homeMetricJoyUnit => 'Joy';
+
+  @override
+  String get homeMetricCountUnit => '件';
 
   @override
   String get homeBestJoyTagSingle => '本月最爱';

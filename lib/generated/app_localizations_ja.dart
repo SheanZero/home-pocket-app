@@ -543,16 +543,22 @@ class SJa extends S {
   String get homeJoyPercentLabel => '今月のときめき支出の割合';
 
   @override
-  String get homeFamilyInviteTitle => '家族を招待する';
+  String get homeFamilyInviteTitle => '家族を追加';
 
   @override
   String get homeFamilyInviteDesc => 'パートナーと家計簿を共有しよう';
 
   @override
-  String get homeFamilyBannerTitle => '家族と一緒に管理しよう';
+  String get homeFamilyInviteDismissLabel => '家族の追加案内を閉じる';
 
   @override
-  String get homeFamilyBannerSubtitle => 'パートナーを招待して、家計簿をリアルタイムで共有しよう';
+  String get homeFamilyInviteSettingsPath => '設定 › 家庭';
+
+  @override
+  String get homeFamilyBannerTitle => '家族と家計を共有';
+
+  @override
+  String get homeFamilyBannerSubtitle => '設定からいつでも追加できます';
 
   @override
   String get homeTodayTitle => '今日の記録';
@@ -638,7 +644,16 @@ class SJa extends S {
   String get homeRingSectionTitleSingle => 'ときめき度';
 
   @override
-  String get homeRingSectionTitleGroup => '家族の小確幸';
+  String get homeRingSectionTitleGroup => '家族のときめき';
+
+  @override
+  String get homeViewMonthlyAnalysis => '今月の分析を見る';
+
+  @override
+  String get homeMetricJoyUnit => 'Joy';
+
+  @override
+  String get homeMetricCountUnit => '件';
 
   @override
   String get homeBestJoyTagSingle => '今月の最愛';
