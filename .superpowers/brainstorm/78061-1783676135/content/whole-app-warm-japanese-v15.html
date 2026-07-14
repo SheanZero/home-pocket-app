@@ -102,12 +102,27 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   --hp-primary: #456b59;
   --hp-primary-text: #365a49;
   --hp-primary-soft: #e2ece4;
-  --hp-daily: #66896d;
-  --hp-daily-text: #45674d;
-  --hp-daily-soft: #e6eee5;
-  --hp-joy: #c87874;
-  --hp-joy-text: #984a47;
-  --hp-joy-soft: #f4e3df;
+  --hp-daily: #5fae72;
+  --hp-daily-text: #2e6b3a;
+  --hp-daily-soft: #eef6ec;
+  --hp-joy: #d98ca0;
+  --hp-joy-text: #a53d5e;
+  --hp-joy-soft: #fbeaef;
+  --hp-faithful-accent: #a54a63;
+  --hp-faithful-divider: #c7c7b7;
+  --hp-faithful-satisfaction: #4d9058;
+  --hp-faithful-satisfaction-text: #467f4e;
+  --hp-faithful-satisfaction-track: #e7ece1;
+  --hp-faithful-small-win: #c1953e;
+  --hp-goal-progress: #b76376;
+  --hp-goal-track: #f4dde1;
+  --hp-goal-value: #9b455a;
+  --hp-goal-shadow: 0 2px 7px rgba(155, 69, 90, .10);
+  --hp-ticket-surface: #f3f7f0;
+  --hp-ticket-border: #df9fa7;
+  --hp-ticket-accent: #a54a63;
+  --hp-ticket-calendar: #de929b;
+  --hp-ticket-text: #9b455a;
   --hp-shared: #58758c;
   --hp-shared-text: #3f6078;
   --hp-shared-soft: #e4ebf0;
@@ -139,12 +154,27 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   --hp-primary: #99bca5;
   --hp-primary-text: #b4d2bc;
   --hp-primary-soft: #293b30;
-  --hp-daily: #92b298;
-  --hp-daily-text: #a8c8ae;
-  --hp-daily-soft: #29382e;
-  --hp-joy: #e2a09b;
-  --hp-joy-text: #f0b7b3;
-  --hp-joy-soft: #402b2c;
+  --hp-daily: #7dc88d;
+  --hp-daily-text: #7dc88d;
+  --hp-daily-soft: #1a2e1a;
+  --hp-joy: #e89bb0;
+  --hp-joy-text: #e89bb0;
+  --hp-joy-soft: #2e1820;
+  --hp-faithful-accent: #e89bb0;
+  --hp-faithful-divider: #465248;
+  --hp-faithful-satisfaction: #7dc88d;
+  --hp-faithful-satisfaction-text: #91d39e;
+  --hp-faithful-satisfaction-track: #2f3a32;
+  --hp-faithful-small-win: #d3a571;
+  --hp-goal-progress: #d57891;
+  --hp-goal-track: #4a2d37;
+  --hp-goal-value: #f0a9bb;
+  --hp-goal-shadow: 0 2px 7px rgba(0, 0, 0, .18);
+  --hp-ticket-surface: #243128;
+  --hp-ticket-border: #b36b7e;
+  --hp-ticket-accent: #e89bb0;
+  --hp-ticket-calendar: #c9788f;
+  --hp-ticket-text: #e89bb0;
   --hp-shared: #91adc2;
   --hp-shared-text: #aac4d7;
   --hp-shared-soft: #263640;
@@ -326,48 +356,48 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .faithful-ledger-label.daily .faithful-dot { background: var(--hp-daily); order: 3; }
   .faithful-split { height: 6px; margin-top: 8px; border-radius: 4px; background: var(--hp-daily); overflow: hidden; }
   .faithful-split span { display: block; width: 29%; height: 100%; background: var(--hp-joy); }
-  .faithful-divider { height: 1px; margin: 12px 0; background: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); }
+  .faithful-divider { height: 1px; margin: 12px 0; background: var(--hp-faithful-divider); }
   .faithful-region-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 850; }
-  .faithful-region-title > .material-symbols-rounded { color: var(--hp-joy-text); font-size: 16px; }
+  .faithful-region-title > .material-symbols-rounded { color: var(--hp-faithful-accent); font-size: 16px; }
   .faithful-info { margin-left: 1px; color: var(--hp-text-muted) !important; font-size: 14px !important; }
   .faithful-analysis-link { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; color: var(--hp-primary-text); font-size: 8px; font-weight: 800; }
   .faithful-analysis-link .material-symbols-rounded { font-size: 14px; }
-  .faithful-metric-grid { --joy-satisfaction: var(--hp-joy-text); --joy-small-win: color-mix(in srgb, var(--hp-joy) 68%, var(--hp-joy-text)); height: 100px; margin-top: 10px; display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 14px; align-items: center; }
-  .faithful-goal-ring { --goal: 80%; width: 100px; height: 100px; position: relative; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--hp-joy) 0 var(--goal), var(--hp-surface-muted) var(--goal)); box-shadow: 0 0 11px color-mix(in srgb,var(--hp-joy) 20%,transparent); }
+  .faithful-metric-grid { height: 100px; margin-top: 10px; display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 14px; align-items: center; }
+  .faithful-goal-ring { --goal: 80%; width: 100px; height: 100px; position: relative; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--hp-goal-progress) 0 var(--goal), var(--hp-goal-track) var(--goal) 100%); box-shadow: var(--hp-goal-shadow); }
   .faithful-goal-ring::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); }
-  .faithful-goal-copy { position: relative; z-index: 1; display: grid; justify-items: center; line-height: 1; color: var(--hp-joy-text); }
+  .faithful-goal-copy { position: relative; z-index: 1; display: grid; justify-items: center; line-height: 1; color: var(--hp-goal-value); }
   .faithful-goal-copy > span { color: var(--hp-text-muted); font-size: 8px; font-weight: 750; }
   .faithful-goal-copy > strong { margin-top: 6px; font-size: 23px; font-weight: 900; font-variant-numeric: tabular-nums; }
-  .faithful-goal-copy > strong small { font-size: 13px; font-weight: 700; }
-  .faithful-goal-copy > em { margin-top: 5px; font-size: 10px; font-style: normal; font-weight: 850; }
+  .faithful-goal-copy > strong small { color: var(--hp-goal-value); font-size: 13px; font-weight: 700; }
+  .faithful-goal-copy > em { margin-top: 5px; color: var(--hp-goal-value); font-size: 10px; font-style: normal; font-weight: 850; }
   .faithful-support-stack { height: 100px; min-width: 0; display: grid; grid-template-rows: minmax(0,1fr) 1px minmax(0,1fr); }
-  .faithful-support-divider { background: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); }
+  .faithful-support-divider { background: var(--hp-faithful-divider); }
   .faithful-support-block { min-height: 0; display: flex; flex-direction: column; justify-content: center; }
   .faithful-satisfaction-head { display: flex; align-items: baseline; justify-content: space-between; gap: 7px; }
   .faithful-satisfaction-head > span { color: var(--hp-text); font-size: 9px; font-weight: 850; }
-  .faithful-satisfaction-head > strong { color: var(--joy-satisfaction); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .faithful-satisfaction-head > strong { color: var(--hp-faithful-satisfaction-text); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .faithful-satisfaction-head > strong small { font-size: 9px; font-weight: 700; }
-  .faithful-satisfaction-scale { height: 3px; margin-top: 6px; border-radius: 3px; background: var(--hp-surface-muted); overflow: hidden; }
-  .faithful-satisfaction-scale span { display: block; width: var(--satisfaction,82%); height: 100%; background: var(--joy-satisfaction); }
+  .faithful-satisfaction-scale { height: 3px; margin-top: 6px; border-radius: 3px; background: var(--hp-faithful-satisfaction-track); overflow: hidden; }
+  .faithful-satisfaction-scale span { display: block; width: var(--satisfaction,82%); height: 100%; background: var(--hp-faithful-satisfaction); }
   .faithful-small-win { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
   .faithful-small-win-copy { display: grid; gap: 3px; }
   .faithful-small-win-copy strong { font-size: 9px; }
   .faithful-small-win-copy small { color: var(--hp-text-muted); font-size: 8px; }
-  .faithful-small-win-value { margin-left: auto; color: var(--joy-small-win); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .faithful-small-win-value { margin-left: auto; color: var(--hp-faithful-small-win); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .faithful-small-win-value small { margin-left: 2px; font-size: 9px; font-weight: 700; }
-  .faithful-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px 1fr 58px; min-height: 74px; overflow: visible; border: 1px solid color-mix(in srgb, var(--hp-joy) 23%, var(--hp-border)); border-radius: 14px; background: color-mix(in srgb, var(--hp-joy-soft) 86%, var(--hp-surface)); }
-  .faithful-ticket-accent { border-radius: 13px 0 0 13px; background: var(--hp-joy); }
+  .faithful-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px 1fr 58px; min-height: 74px; overflow: visible; border: 1px solid var(--hp-ticket-border); border-radius: 14px; background: var(--hp-ticket-surface); }
+  .faithful-ticket-accent { border-radius: 13px 0 0 13px; background: var(--hp-ticket-accent); }
   .faithful-calendar { align-self: center; width: 48px; margin-left: 10px; overflow: hidden; border-radius: 10px; background: var(--hp-surface); box-shadow: 0 2px 7px color-mix(in srgb,var(--hp-joy) 18%,transparent); text-align: center; }
-  .faithful-calendar b { display: block; padding: 3px 0; background: var(--hp-joy); color: var(--hp-bg); font-size: 7px; }
-  .faithful-calendar strong { display: block; padding-top: 4px; color: var(--hp-joy-text); font-size: 14px; }
+  .faithful-calendar b { display: block; padding: 3px 0; background: var(--hp-ticket-calendar); color: var(--hp-bg); font-size: 7px; }
+  .faithful-calendar strong { display: block; padding-top: 4px; color: var(--hp-ticket-text); font-size: 14px; }
   .faithful-calendar small { display: block; padding-bottom: 4px; color: var(--hp-text-muted); font-size: 7px; }
   .faithful-ticket-copy { min-width: 0; align-self: center; padding: 10px 8px 10px 12px; }
   .faithful-ticket-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
-  .faithful-ticket-copy span { display: block; margin-top: 5px; color: var(--hp-joy-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
-  .faithful-seal { position: relative; align-self: stretch; display: grid; place-items: center; align-content: center; gap: 3px; border-left: 1px dashed color-mix(in srgb,var(--hp-joy) 35%,transparent); color: var(--hp-joy-text); font-size: 7px; font-weight: 850; }
-  .faithful-seal::before, .faithful-seal::after { content: ""; position: absolute; z-index: 2; left: -6px; width: 12px; height: 12px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); pointer-events: none; }
-  .faithful-seal::before { top: -7px; }
-  .faithful-seal::after { bottom: -7px; }
+  .faithful-ticket-copy span { display: block; margin-top: 5px; color: var(--hp-ticket-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-seal { position: relative; align-self: stretch; display: grid; place-items: center; align-content: center; gap: 3px; border-left: 1px dashed var(--hp-ticket-border); color: var(--hp-ticket-text); font-size: 7px; font-weight: 850; }
+  .faithful-seal::before, .faithful-seal::after { content: ""; position: absolute; z-index: 2; left: -6px; width: 12px; height: 7px; border: 1px solid var(--hp-ticket-border); background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); pointer-events: none; }
+  .faithful-seal::before { top: -1px; border-top: 0; border-radius: 0 0 7px 7px; }
+  .faithful-seal::after { bottom: -1px; border-bottom: 0; border-radius: 7px 7px 0 0; }
   .faithful-seal .material-symbols-rounded { font-size: 22px; }
   .faithful-members { display: grid; gap: 8px; }
   .faithful-member { display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: 9px; }
@@ -394,17 +424,19 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .faithful-recent { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
   .faithful-recent h2 { margin: 0; font-size: 13px; }
   .faithful-list { margin-top: 12px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); }
-  .faithful-tx { width: 100%; min-height: 62px; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); background: transparent; padding: 10px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
-  .faithful-tx:last-child { border-bottom: 0; }
-  .faithful-tx-icon { width: 28px; display: grid; place-items: center; color: var(--hp-text-muted); }
+  .faithful-tx { width: 100%; min-height: 60px; padding: 9px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+  .faithful-tx + .faithful-tx { border-top: 1px solid var(--hp-border); }
+  .faithful-tx:hover { background: color-mix(in srgb, var(--hp-surface-muted) 52%, transparent); }
+  .faithful-tx-icon { width: 28px; flex: 0 0 auto; display: grid; place-items: center; color: var(--hp-daily-text); }
   .faithful-tx-icon.joy { color: var(--hp-joy-text); }
-  .faithful-tx-icon .material-symbols-rounded { font-size: 28px; }
-  .faithful-tx-copy { min-width: 0; flex: 1; }
-  .faithful-tx-copy > strong { display: block; font-size: 10px; }
-  .faithful-tx-meta { margin-top: 4px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 7px; }
-  .faithful-tag { padding: 2px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-weight: 850; }
+  .faithful-tx-icon .material-symbols-rounded { font-size: 25px; }
+  .faithful-tx-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
+  .faithful-tx-copy > strong { overflow: hidden; color: var(--hp-text); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .faithful-tx-meta { min-width: 0; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 8px; }
+  .faithful-tag { padding: 1px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-style: normal; font-weight: 850; white-space: nowrap; }
   .faithful-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
-  .faithful-tx-amount { color: var(--hp-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-tx-merchant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .faithful-tx-amount { color: var(--hp-text); font-size: 12px; font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .faithful-tx-amount.joy { color: var(--hp-joy-text); }
 
   /* Calendar / charts / lists */
@@ -436,18 +468,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .list-calendar-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--hp-text-muted); font-size: 9px; }
   .list-calendar-summary-row strong { color: var(--hp-text); font-size: 12px; font-variant-numeric: tabular-nums; }
   .list-filter-bar { position: sticky; top: 0; z-index: 5; margin: 10px -20px 0; padding: 6px 20px 8px; border-bottom: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-bg) 96%, transparent); backdrop-filter: blur(14px); }
-  .list-filter-ledgers { position: relative; height: 44px; margin: 0 0 8px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .list-filter-ledgers::before { content: ""; position: absolute; inset: 4px 0; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); }
-  .list-ledger-option { position: relative; z-index: 1; isolation: isolate; min-width: 0; min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--hp-text-muted); font-size: 10px; font-weight: 800; cursor: pointer; }
-  .list-ledger-option::before { content: ""; position: absolute; z-index: -1; inset: 4px 0; border-right: 1px solid var(--hp-border); }
-  .list-ledger-option:first-child::before { border-radius: var(--hp-radius-pill) 0 0 var(--hp-radius-pill); }
-  .list-ledger-option:last-child::before { border-right: 0; border-radius: 0 var(--hp-radius-pill) var(--hp-radius-pill) 0; }
-  .list-ledger-option.active { color: var(--hp-primary-text); }
-  .list-ledger-option.active::before { background: var(--hp-primary-soft); box-shadow: inset 0 0 0 1px var(--hp-primary); }
-  .list-ledger-option.daily.active { color: var(--hp-daily-text); }
-  .list-ledger-option.daily.active::before { background: var(--hp-daily-soft); box-shadow: inset 0 0 0 1px var(--hp-daily); }
-  .list-ledger-option.joy.active { color: var(--hp-joy-text); }
-  .list-ledger-option.joy.active::before { background: var(--hp-joy-soft); box-shadow: inset 0 0 0 1px var(--hp-joy); }
+  .list-ledger-segments { margin: 0 0 8px; }
   .list-filter-utilities { min-width: 0; height: 44px; display: flex; align-items: center; gap: 6px; }
   .list-filter-spacer { min-width: 0; flex: 1; }
   .list-filter-action { min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; font-size: 10px; font-weight: 800; cursor: pointer; }
@@ -495,11 +516,6 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .analytics-insight { min-height: 32px; margin-top: 10px; padding: 7px 10px; border-radius: 10px; background: var(--hp-daily-soft); color: var(--hp-daily-text); display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 750; line-height: 1.35; }
   .analytics-insight.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
   .analytics-insight .material-symbols-rounded { flex: 0 0 auto; font-size: 15px; }
-  .analytics-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-  .analytics-pill { min-height: 44px; padding: 0 16px; border: 1px solid var(--hp-daily); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s ease; }
-  .analytics-pill:hover { transform: translateY(-1px); }
-  .analytics-pill.active { background: var(--hp-daily); color: var(--hp-surface); }
-  .analytics-pill.joy.active { border-color: var(--hp-joy); background: var(--hp-joy); }
   .analytics-trend-plot { height: 190px; margin: 8px -2px 0; position: relative; }
   .analytics-trend-plot svg { width: 100%; height: 100%; overflow: visible; }
   .analytics-grid-line { stroke: var(--hp-border); stroke-width: 1; }
@@ -553,14 +569,8 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .analytics-ring-note.b { right: auto; bottom: 20px; left: 50%; transform: translateX(-50%); }
   .analytics-ring-note.c { top: 94px; bottom: auto; left: 16px; }
   .analytics-ring-note.d { top: 20px; left: 44%; transform: translateX(-50%); }
-  .analytics-donut-controls { min-height: 40px; margin-top: 21px; margin-bottom: 13px; display: grid; grid-template-columns: 164px 88px; align-items: center; justify-content: space-between; gap: 8px; }
-  .analytics-dimensions { min-width: 0; overflow: visible; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); display: grid; grid-template-columns: 1.05fr .95fr; }
-  .analytics-control-pill { min-width: 0; min-height: 38px; margin: 0; padding: 0 8px; border: 0; border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text-muted); font-size: 11px; font-weight: 750; white-space: nowrap; cursor: pointer; transition: background .15s ease,color .15s ease,box-shadow .15s ease; }
-  .analytics-control-pill + .analytics-control-pill { border-left: 0; }
-  .analytics-control-pill.active { min-height: 40px; margin: -1px; position: relative; z-index: 1; color: var(--hp-surface); }
-  .analytics-control-pill[data-analytics-dimension="category"].active { background: var(--hp-daily); box-shadow: 0 0 0 1px var(--hp-daily); }
-  .analytics-control-pill[data-analytics-dimension="member"].active { background: color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); box-shadow: 0 0 0 1px color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); }
-  .analytics-member-filter { width: 88px; min-width: 0; min-height: 40px; padding: 0 8px; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-grid; grid-template-columns: 16px minmax(0,1fr) 14px; align-items: center; gap: 3px; font-size: 11px; font-weight: 750; cursor: pointer; }
+  .analytics-donut-controls { min-height: 42px; margin-top: 21px; margin-bottom: 13px; display: grid; grid-template-columns: 164px 88px; align-items: center; justify-content: space-between; gap: 8px; }
+  .analytics-member-filter { width: 88px; min-width: 0; min-height: 42px; padding: 0 8px; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-grid; grid-template-columns: 16px minmax(0,1fr) 14px; align-items: center; gap: 3px; font-size: 11px; font-weight: 750; cursor: pointer; }
   .analytics-member-filter-label { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-member-filter .material-symbols-rounded { font-size: 14px; }
   .analytics-member-filter .material-symbols-rounded:first-child { font-size: 16px; }
@@ -632,10 +642,21 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .analytics-window-option.selected { color: var(--hp-primary-text); font-weight: 800; }
   .analytics-window-option .material-symbols-rounded { font-size: 16px; }
 
+  /* Common segmented control */
+  .segmented-control { --segmented-count: 2; width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(var(--segmented-count),minmax(0,1fr)); min-height: 42px; padding: 2px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: color-mix(in srgb,var(--hp-surface-muted) 54%,var(--hp-surface)); box-shadow: 0 3px 12px rgba(76,61,48,.035); }
+  .segmented-option { min-width: 0; min-height: 36px; padding: 0 8px; border: 0; border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text); font-size: 10.5px; font-weight: 850; white-space: nowrap; cursor: pointer; transition: color .15s, background .15s, box-shadow .15s, transform .12s; }
+  .segmented-option:active { transform: scale(.97); }
+  .segmented-option.active { background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 3px 10px color-mix(in srgb,var(--hp-primary) 22%,transparent); }
+  .segmented-option.daily.active { background: var(--hp-daily-soft); color: var(--hp-daily); box-shadow: inset 0 0 0 1.5px var(--hp-daily); }
+  .segmented-option.joy.active { background: var(--hp-joy-soft); color: var(--hp-joy); box-shadow: inset 0 0 0 1.5px var(--hp-joy); }
+  .segmented-option.shared.active { background: color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); color: var(--hp-surface); box-shadow: 0 3px 10px color-mix(in srgb,var(--hp-shared) 22%,transparent); }
+
   /* Shopping */
-  .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--hp-surface-muted); border-radius: 13px; padding: 3px; }
-  .segment { min-height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--hp-text-muted); font-size: 10px; font-weight: 850; cursor: pointer; }
-  .segment.active { background: var(--hp-surface); color: var(--hp-primary-text); box-shadow: var(--hp-shadow-card); }
+  .shopping-filter-card { margin: 2px -8px 0; }
+  .shopping-filter-grid { display: grid; gap: 8px; }
+  .shopping-filter-card.family .shopping-filter-grid { grid-template-columns: minmax(0,1fr); }
+  .shopping-filter-group { min-width: 0; }
+  .shopping-empty { margin-top: 8px; padding: 36px 16px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); color: var(--hp-text-muted); text-align: center; font-size: 10px; }
   .shopping-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 14px; margin-top: 8px; }
   .shopping-list-card { margin-top: 8px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); }
   .shopping-list-card .shopping-item { margin-top: 0; border: 0; border-radius: 0; }
@@ -803,7 +824,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
       <span id="inspect-kicker" class="screen-name">Main shell</span>
       <h2 id="inspect-title">主页</h2>
       <p id="inspect-copy">月度总览是第一阅读层，双账本、Joy 累计和近期交易依次向下展开；粉色只承担悦己与唯一 FAB。</p>
-      <div class="token-strip"><span class="token" style="--c:#f5f0e7"></span><span class="token" style="--c:#456b59"></span><span class="token" style="--c:#66896d"></span><span class="token" style="--c:#c87874"></span><span class="token" style="--c:#58758c"></span></div>
+      <div class="token-strip"><span class="token" style="--c:#f5f0e7"></span><span class="token" style="--c:#456b59"></span><span class="token" style="--c:#5fae72"></span><span class="token" style="--c:#d98ca0"></span><span class="token" style="--c:#58758c"></span></div>
       <div class="coverage"><div><strong>结构：</strong><span id="inspect-structure">主导航 + 月度快照</span></div><div><strong>状态：</strong><span id="inspect-states">个人 / 家庭 / 明暗</span></div><div><strong>实现：</strong><span id="inspect-build">复用现有 Riverpod 数据与导航</span></div></div>
       <div id="home-design-note" class="joy-variant-panel">
         <span class="screen-name">Home 方案</span>
@@ -818,7 +839,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   <div id="sketch-tools"><span>Sketch 005</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
 
 <script>
-  const state = { screen: 'home', theme: 'light', family: false, inviteDismissed: false, amount: '3480', pin: '', recording: false, uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, history: [] };
+  const state = { screen: 'home', theme: 'light', family: false, inviteDismissed: false, amount: '3480', pin: '', recording: false, uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, shoppingScope: 'all', shoppingLedger: 'all', history: [] };
   const mainScreens = ['home','list','analytics','shopping'];
   const info = {
     foundation: ['Foundation','设计系统','色彩、字体、间距、组件与反馈都以生活手帐为同一来源。','令牌 + 原子组件','浅色 / 深色 / 可访问性','对应 AppPalette、AppTextStyles 与共享 widgets'],
@@ -826,7 +847,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     home: ['Main shell','主页','选定 C「层次纸面」已回写；主页严格保留现有 Flutter 组合，只更新视觉表面。','HeroHeader + HomeHeroCard + Invite + Recent','个人 / 家庭 / 明暗','直接映射现有 Home widgets 与 providers'],
     list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
     analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
-    shopping: ['Main shell','购物清单','清单以纸面勾选为核心，公共/个人和批量管理保持可见但克制。','分段 + 过滤 + 可排序清单','家庭 / 个人 / 完成态','复用购物 providers 与 reorder 交互'],
+    shopping: ['Main shell','购物清单','清单以纸面勾选为核心，共享范围和账簿筛选保持可见但克制。','范围 + 账簿 + 可排序清单','全部 / 私有 / 账簿 / 完成态','复用购物 providers 与 reorder 交互'],
     'shopping-form': ['Main shell','购物项目','从购物页进入的单任务表单，名称、数量、公开范围和备注保持清楚。','项目表单 + 公开范围','新建 / 编辑 / 个人 / 共享','复用 ShoppingItemFormScreen'],
     entry: ['Entry','手动记账','金额优先、详情其次、键盘稳定驻底；语音入口仍是快捷方式而不是第二套表单。','金额 + 共用详情表单 + 键盘','JPY / 外币 / 连续记账','复用 TransactionDetailsForm 与 SmartKeyboard'],
     voice: ['Entry','语音记账','识别结果先确认金额/商家/类目，再保存；录音状态使用语义红，不使用悦己粉。','转写 + 识别结果 + 录音','监听 / 解析 / 纠错','复用 PTT session 与识别仲裁'],
@@ -851,17 +872,21 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   const mainHeader = () => `<header class="app-header"><h1>${monthTitle('home')}</h1><span class="spacer"></span><button class="chip" data-action="toggle-family">${icon(state.family?'group':'person')} ${state.family?'家族':'個人'}</button><span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span></header>`;
   const txRow = (name, meta, value, type='daily', ico='payments') => `<button class="tap-row row-divider tx" data-action="toast" data-message="取引の詳細"><span class="row-icon ${type==='joy'?'joy':type==='shared'?'shared':''}">${icon(ico)}</span><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="row-value">${value}</span></button>`;
   const nav = active => `<div class="bottom-pill">${[['home','home','ホーム'],['list','receipt_long','明細'],['analytics','monitoring','統計'],['shopping','checklist','買い物']].map(([id,ico,label])=>`<button class="nav-item ${id===active?'active':''}" data-nav="${id}">${icon(ico)}<span>${label}</span></button>`).join('')}</div><button class="fab" data-action="fab" aria-label="追加">${icon('add')}</button>`;
+  function segmentedControl({ariaLabel,value,dataAttribute,options,className=''}) {
+    const buttons = options.map(option=>`<button class="segmented-option ${option.tone||''} ${value===option.value?'active':''}" ${dataAttribute}="${option.value}" aria-pressed="${value===option.value}">${option.label}</button>`).join('');
+    return `<div class="segmented-control ${className}" style="--segmented-count:${options.length}" role="group" aria-label="${ariaLabel}">${buttons}</div>`;
+  }
 
   function foundation() { return `<section class="screen">${backHeader('デザインシステム')}<div class="eyebrow">A · 生活手帐</div><h2 class="display" style="font-size:24px;margin:8px 0 5px">温润、可靠、留白</h2><p class="hint">和纸背景承载生活感；松叶绿处理行动与日常；红樱只属于悦己与添加。</p><div class="section-title"><h2>色彩语义</h2></div><div class="ledger-grid"><div class="ledger"><span><i class="semantic-dot" style="background:var(--hp-primary)"></i>主行动</span><strong style="color:var(--hp-primary-text)">松叶绿</strong></div><div class="ledger joy"><span><i class="semantic-dot" style="background:var(--hp-joy)"></i>悦己</span><strong>红樱</strong></div><div class="ledger"><span><i class="semantic-dot" style="background:var(--hp-daily)"></i>日常</span><strong>若草</strong></div><div class="ledger shared"><span><i class="semantic-dot" style="background:var(--hp-shared)"></i>共享</span><strong>雾蓝</strong></div></div><div class="section-title"><h2>字体层级</h2></div><div class="card"><div class="display" style="font-size:26px;font-weight:700">七月の家計</div><div style="font-size:16px;font-weight:800;margin-top:10px">页面与区块标题</div><p class="hint" style="font-size:13px">正文使用系统日文无衬线，金额使用 tabular figures。</p><strong class="amount" style="font-size:30px">¥186,420</strong></div><div class="section-title"><h2>操作与反馈</h2></div><button class="primary-btn" data-action="toast" data-message="主要操作反馈">主要操作</button><div style="height:8px"></div><button class="secondary-btn" data-action="toast" data-message="次要操作反馈">次要操作</button><div style="height:8px"></div><div class="flat-card">${txRow('交易行','说明文字','−¥3,280','daily','local_grocery_store')}</div></section>`; }
 
-  function statesScreen() { const content = state.uiState==='empty' ? `<div class="state-hero">${icon('inventory_2')}<h2 class="display">まだ記録がありません</h2><p class="hint">最初の取引を記録すると、ここに月の流れが見えてきます。</p><button class="primary-btn" style="margin-top:16px" data-screen="entry">最初の取引を記録</button></div>` : state.uiState==='error' ? `<div class="state-hero">${icon('cloud_off')}<h2 class="display">読み込めませんでした</h2><p class="hint">データは失われていません。接続を確認して、もう一度お試しください。</p><button class="secondary-btn" style="margin-top:16px" data-action="toast" data-message="再読み込みしました">もう一度試す</button></div>` : `<div style="padding-top:28px"><div class="skeleton" style="width:45%;height:20px"></div><div class="skeleton" style="width:72%;height:38px;margin-top:14px"></div>${[1,2,3,4].map(()=>`<div class="card" style="margin-top:12px"><div class="skeleton" style="width:58%"></div><div class="skeleton" style="width:82%;margin-top:10px"></div></div>`).join('')}<p class="hint" style="text-align:center;margin-top:22px">データを準備しています</p></div>`; return `<section class="screen">${backHeader('システム状態')}<div class="segmented" style="grid-template-columns:repeat(3,1fr)"><button class="segment ${state.uiState==='empty'?'active':''}" data-ui-state="empty">空</button><button class="segment ${state.uiState==='loading'?'active':''}" data-ui-state="loading">読み込み</button><button class="segment ${state.uiState==='error'?'active':''}" data-ui-state="error">エラー</button></div>${content}</section>`; }
+  function statesScreen() { const content = state.uiState==='empty' ? `<div class="state-hero">${icon('inventory_2')}<h2 class="display">まだ記録がありません</h2><p class="hint">最初の取引を記録すると、ここに月の流れが見えてきます。</p><button class="primary-btn" style="margin-top:16px" data-screen="entry">最初の取引を記録</button></div>` : state.uiState==='error' ? `<div class="state-hero">${icon('cloud_off')}<h2 class="display">読み込めませんでした</h2><p class="hint">データは失われていません。接続を確認して、もう一度お試しください。</p><button class="secondary-btn" style="margin-top:16px" data-action="toast" data-message="再読み込みしました">もう一度試す</button></div>` : `<div style="padding-top:28px"><div class="skeleton" style="width:45%;height:20px"></div><div class="skeleton" style="width:72%;height:38px;margin-top:14px"></div>${[1,2,3,4].map(()=>`<div class="card" style="margin-top:12px"><div class="skeleton" style="width:58%"></div><div class="skeleton" style="width:82%;margin-top:10px"></div></div>`).join('')}<p class="hint" style="text-align:center;margin-top:22px">データを準備しています</p></div>`; return `<section class="screen">${backHeader('システム状態')}${segmentedControl({ariaLabel:'表示状態',value:state.uiState,dataAttribute:'data-ui-state',options:[{value:'empty',label:'空'},{value:'loading',label:'読み込み'},{value:'error',label:'エラー'}]})}${content}</section>`; }
 
   function faithfulMetrics() {
     const goal = state.family ? ['18','24','75%'] : ['64','80','80%'];
     const satisfaction = state.family ? ['8.6','86%'] : ['8.2','82%'];
     const smallWins = state.family ? '24' : '12';
     const goalLabel = state.family ? `家族のときめき目標 ${goal[0]} / ${goal[1]} Joy` : `ときめき目標 ${goal[0]} / ${goal[1]} Joy`;
-    return `<div class="faithful-metric-grid"><div class="faithful-goal-ring" style="--goal:${goal[2]}" role="img" aria-label="${goalLabel}"><span class="faithful-goal-copy"><span>ときめき目標</span><strong>${goal[0]}<small> / ${goal[1]}</small></strong><em>Joy</em></span></div><div class="faithful-support-stack"><div class="faithful-support-block"><div class="faithful-satisfaction-head"><span>満足度の平均</span><strong>${satisfaction[0]} <small>/ 10</small></strong></div><div class="faithful-satisfaction-scale" style="--satisfaction:${satisfaction[1]}" role="img" aria-label="満足度の平均 ${satisfaction[0]} / 10"><span></span></div></div><div class="faithful-support-divider" aria-hidden="true"></div><div class="faithful-support-block faithful-small-win"><span class="faithful-small-win-copy"><strong>小確幸</strong><small>今月の記録</small></span><strong class="faithful-small-win-value">${smallWins}<small>件</small></strong></div></div></div>`;
+    return `<div class="faithful-metric-grid"><div class="faithful-goal-ring" style="--goal:${goal[2]}" role="img" aria-label="${goalLabel}"><span class="faithful-goal-copy"><span>ときめき目標</span><strong>${goal[0]}<small> / ${goal[1]}</small></strong><em>Joy</em></span></div><div class="faithful-support-stack"><div class="faithful-support-block"><div class="faithful-satisfaction-head"><span>満足度の平均</span><strong>${satisfaction[0]} <small>/ 10</small></strong></div><div class="faithful-satisfaction-scale" style="--satisfaction:${satisfaction[1]}" role="img" aria-label="満足度の平均 ${satisfaction[0]} / 10"><span></span></div></div><div class="faithful-support-divider" aria-hidden="true"></div><div class="faithful-support-block faithful-small-win"><span class="faithful-small-win-copy"><strong>小確幸</strong></span><strong class="faithful-small-win-value">${smallWins}<small>件</small></strong></div></div></div>`;
   }
 
   function faithfulMembers() {
@@ -879,7 +904,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   }
 
   function homeTxRow(ico, category, ledger, merchant, amount, joy=false) {
-    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span>${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
+    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span class="faithful-tx-merchant">${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
   }
 
   function home() {
@@ -927,7 +952,13 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   }
 
   function listLedgerFilter() {
-    return `<div class="list-filter-ledgers" role="group" aria-label="帳簿"><button class="list-ledger-option ${state.listLedger==='all'?'active':''}" data-list-ledger="all" aria-pressed="${state.listLedger==='all'}">すべて</button><button class="list-ledger-option daily ${state.listLedger==='daily'?'active':''}" data-list-ledger="daily" aria-pressed="${state.listLedger==='daily'}">日常</button><button class="list-ledger-option joy ${state.listLedger==='joy'?'active':''}" data-list-ledger="joy" aria-pressed="${state.listLedger==='joy'}">ときめき</button></div>`;
+    return segmentedControl({
+      ariaLabel: '帳簿',
+      value: state.listLedger,
+      dataAttribute: 'data-list-ledger',
+      className: 'list-ledger-segments',
+      options: [{value:'all',label:'すべて'},{value:'daily',label:'日常',tone:'daily'},{value:'joy',label:'ときめき',tone:'joy'}],
+    });
   }
 
   function listFilterBar() {
@@ -982,7 +1013,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
       joy: ['favorite_border','今月のときめき支出は ¥53,620']
     }[state.analyticsTrend];
     return `<div class="analytics-card" data-token="WithinMonthTrendCard">
-      <div class="analytics-pills"><button class="analytics-pill ${state.analyticsTrend==='total'?'active':''}" data-analytics-trend="total">総支出</button><button class="analytics-pill ${state.analyticsTrend==='daily'?'active':''}" data-analytics-trend="daily">日常</button><button class="analytics-pill joy ${state.analyticsTrend==='joy'?'active':''}" data-analytics-trend="joy">ときめき</button></div>
+      ${segmentedControl({ariaLabel:'支出の種類',value:state.analyticsTrend,dataAttribute:'data-analytics-trend',className:'analytics-trend-segments',options:[{value:'total',label:'総支出'},{value:'daily',label:'日常',tone:'daily'},{value:'joy',label:'ときめき',tone:'joy'}]})}
       <div class="analytics-insight ${state.analyticsTrend==='joy'?'joy':''}">${icon(insight[0])}<span>${insight[1]}</span></div>
       <div class="analytics-trend-plot"><svg viewBox="0 0 330 200" role="img" aria-label="${state.analyticsTrend==='joy'?'今月のときめき支出':'今月と先月の累計支出'}"><defs><linearGradient id="trendFillDaily" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-daily)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-daily)" stop-opacity="0"/></linearGradient><linearGradient id="trendFillJoy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-joy)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-joy)" stop-opacity="0"/></linearGradient></defs>${[28,72,116,160].map(y=>`<line class="analytics-grid-line" x1="34" x2="320" y1="${y}" y2="${y}"/>`).join('')}<text class="analytics-axis" x="2" y="31">20万</text><text class="analytics-axis" x="2" y="75">15万</text><text class="analytics-axis" x="2" y="119">10万</text><text class="analytics-axis" x="8" y="163">5万</text><path class="analytics-trend-fill ${active.klass}" d="${active.fill}"/>${active.previous?`<path class="analytics-trend-previous" d="${active.prior}"/><text class="analytics-end-sub" x="224" y="${active.py+17}">先月 ${active.previous}</text>`:''}<path class="analytics-trend-current ${active.klass}" d="${active.current}"/><circle class="analytics-end-dot ${active.klass}" cx="316" cy="${active.y}" r="4"/><text class="analytics-end-label" x="224" y="${Math.max(12,active.y-12)}">7/31 ${active.end}</text>${[6,12,18,24].map((d,i)=>`<text class="analytics-axis" x="${80+i*55}" y="190">${d}日</text>`).join('')}</svg></div>
       <div class="analytics-trend-legend"><i class="${active.klass}"></i><span>今月</span>${active.previous?`<i class="dashed"></i><span>先月</span>`:''}</div>
@@ -1023,7 +1054,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     const shares = categoryMode ? categoryRows : memberRows;
     const donutStyle=`background:conic-gradient(${shares.map((row,i)=>`${row[4]} ${i?shares.slice(0,i).reduce((s,r)=>s+r[3],0):0}% ${shares.slice(0,i+1).reduce((s,r)=>s+r[3],0)}%`).join(',')})`;
     const positions=['a','b','c','d'];
-    return `<div class="analytics-card analytics-category-card" data-token="CategoryDonutCard"><div class="analytics-donut-wrap"><div class="analytics-donut" style="${donutStyle}">${shares.map((row,i)=>`<span class="analytics-ring-note ${positions[i]||'d'}">${categoryMode?icon(row[0]):`<span class="analytics-ring-emoji">${row[0]}</span>`}<b>${row[3]}%</b></span>`).join('')}<span class="analytics-donut-center"><span>今月の支出</span><strong>¥${total.toLocaleString('ja-JP')}</strong><small>${memberCount}件</small></span></div></div><div class="analytics-donut-controls"><span class="analytics-dimensions" role="group" aria-label="支出の集計方法"><button class="analytics-control-pill ${categoryMode?'active':''}" data-analytics-dimension="category" aria-pressed="${categoryMode}">カテゴリ別</button><button class="analytics-control-pill ${!categoryMode?'active':''}" data-analytics-dimension="member" aria-pressed="${!categoryMode}">メンバー別</button></span><button class="analytics-member-filter" data-action="analytics-member-filter" aria-label="対象メンバー ${analyticsMemberName()}">${icon('person')}<span class="analytics-member-filter-label">${state.analyticsMember==='all'?'全員':analyticsMemberName()}</span>${icon('expand_more')}</button></div>${rows.map(row=>analyticsLegendRow(row,!categoryMode)).join('')}${analyticsJoyDrawer(!categoryMode)}</div>`;
+    return `<div class="analytics-card analytics-category-card" data-token="CategoryDonutCard"><div class="analytics-donut-wrap"><div class="analytics-donut" style="${donutStyle}">${shares.map((row,i)=>`<span class="analytics-ring-note ${positions[i]||'d'}">${categoryMode?icon(row[0]):`<span class="analytics-ring-emoji">${row[0]}</span>`}<b>${row[3]}%</b></span>`).join('')}<span class="analytics-donut-center"><span>今月の支出</span><strong>¥${total.toLocaleString('ja-JP')}</strong><small>${memberCount}件</small></span></div></div><div class="analytics-donut-controls">${segmentedControl({ariaLabel:'支出の集計方法',value:state.analyticsDimension,dataAttribute:'data-analytics-dimension',className:'analytics-dimension-segments',options:[{value:'category',label:'カテゴリ別',tone:'daily'},{value:'member',label:'メンバー別',tone:'shared'}]})}<button class="analytics-member-filter" data-action="analytics-member-filter" aria-label="対象メンバー ${analyticsMemberName()}">${icon('person')}<span class="analytics-member-filter-label">${state.analyticsMember==='all'?'全員':analyticsMemberName()}</span>${icon('expand_more')}</button></div>${rows.map(row=>analyticsLegendRow(row,!categoryMode)).join('')}${analyticsJoyDrawer(!categoryMode)}</div>`;
   }
 
   function analyticsCalendarCard() {
@@ -1059,8 +1090,27 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     return `<section class="screen analytics-screen">${header}${analyticsSection('支出の推移','',true)}${analyticsTrendCard()}${analyticsSection('カテゴリ支出','category')}${analyticsDonutCard()}${analyticsSection('ときめきカレンダー','joy')}${analyticsCalendarCard()}${analyticsSection('ときめきの満足度','joy')}${analyticsHistogramCard()}${family}</section>`;
   }
 
-  function shopping() { return `<section class="screen">${tabHeader('買い物リスト')} ${state.family?`<div class="segmented"><button class="segment active" data-action="segment">全部</button><button class="segment" data-action="segment">個人</button></div>`:''}<div class="filter-row"><button class="filter-chip active" data-action="filter">すべて</button><button class="filter-chip" data-action="filter">食品</button><button class="filter-chip" data-action="filter">日用品</button><button class="filter-chip" data-action="filter">担当</button></div><div class="section-title"><h2>買うもの</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div><div id="shopping-list" class="shopping-list-card">${shopItem('牛乳','食品 · 1本',false,'daily')}${shopItem('トイレットペーパー','日用品 · 12ロール',false,'daily')}${shopItem('味噌','食品 · 赤味噌',false,'daily')}${shopItem('コーヒー豆','嗜好品 · 200g',false,'joy')}</div><div class="section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${shopItem('食器用洗剤','日用品',true,'daily')}</section>`; }
-  function shopItem(name,meta,done,ledger='daily'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span>${icon('drag_indicator')}</div>`; }
+  function shoppingFilterCard() {
+    const scope = state.family ? `<div class="shopping-filter-group">${segmentedControl({ariaLabel:'公開範囲',value:state.shoppingScope,dataAttribute:'data-shopping-scope',options:[{value:'all',label:'全部'},{value:'private',label:'私有'}]})}</div>` : '';
+    const ledger = segmentedControl({ariaLabel:'帳簿',value:state.shoppingLedger,dataAttribute:'data-shopping-ledger',options:[{value:'all',label:'すべて'},{value:'daily',label:'日常',tone:'daily'},{value:'joy',label:'ときめき',tone:'joy'}]});
+    return `<div class="shopping-filter-card ${state.family?'family':'solo'}"><div class="shopping-filter-grid">${scope}<div class="shopping-filter-group">${ledger}</div></div></div>`;
+  }
+  function shopping() {
+    const items = [
+      ['牛乳','食品 · 1本',false,'daily','shared'],
+      ['トイレットペーパー','日用品 · 12ロール',false,'daily','shared'],
+      ['味噌','食品 · 赤味噌',false,'daily','private'],
+      ['コーヒー豆','嗜好品 · 200g',false,'joy','private'],
+      ['食器用洗剤','日用品',true,'daily','shared'],
+    ];
+    const visible = items.filter(([, , , ledger, scope])=>(!state.family||state.shoppingScope==='all'||scope==='private')&&(state.shoppingLedger==='all'||ledger===state.shoppingLedger));
+    const pending = visible.filter(([, , done])=>!done);
+    const completed = visible.filter(([, , done])=>done);
+    const pendingContent = pending.length ? `<div id="shopping-list" class="shopping-list-card">${pending.map(item=>shopItem(...item)).join('')}</div>` : `<div class="shopping-empty">条件に合う買い物はありません</div>`;
+    const completedContent = completed.length ? `<div class="section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${completed.map(item=>shopItem(...item)).join('')}` : '';
+    return `<section class="screen">${tabHeader('買い物リスト')}${shoppingFilterCard()}<div class="section-title"><h2>買うもの</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div>${pendingContent}${completedContent}</section>`;
+  }
+  function shopItem(name,meta,done,ledger='daily',scope='shared'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}" data-shopping-scope="${scope}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span>${icon('drag_indicator')}</div>`; }
   function shoppingForm() { return `<section class="screen">${backHeader('買うものを追加')}<div class="section-title"><h2>品名</h2></div><input class="search" value="オリーブオイル" aria-label="品名"><div class="flat-card"><div class="form-row"><label>数量</label><strong>1本</strong>${icon('chevron_right')}</div><div class="form-row"><label>カテゴリ</label><strong>食品</strong>${icon('chevron_right')}</div><div class="form-row"><label>リスト</label><strong>${state.family?'共有':'個人'}</strong>${icon('chevron_right')}</div><div class="form-row"><label>メモ</label><strong>エクストラバージン</strong>${icon('chevron_right')}</div></div><p class="hint">個人にした項目は家族同期へ送信されません。</p><button class="primary-btn" data-action="save-shopping">リストに追加</button></section>`; }
 
   function entry() { return `<section class="screen">${backHeader('記帳')}<div class="amount-display"><span>支出金額 · JPY</span><strong class="amount" id="amount-value">¥${Number(state.amount||0).toLocaleString('ja-JP')}</strong></div><div class="flat-card"><div class="form-row"><label>カテゴリ</label><strong>食費 · スーパー</strong><button class="text-btn" data-screen="category">変更</button></div><div class="form-row"><label>日付</label><strong>2026年7月10日</strong>${icon('chevron_right')}</div><div class="form-row"><label>店舗</label><strong>ライフ</strong>${icon('chevron_right')}</div><div class="form-row"><label>帳本</label><strong style="color:var(--hp-daily-text)">日常</strong>${icon('chevron_right')}</div></div><div class="numpad">${['1','2','3','4','5','6','7','8','9','mic','0','backspace'].map(k=>`<button class="key" data-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}<button class="key" data-action="decimal">.</button><button class="key" data-action="continuous">連続</button><button class="key save" data-action="save-entry">記録</button></div></section>`; }
@@ -1115,12 +1165,14 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   document.addEventListener('click', e => {
     const screen=e.target.closest('[data-screen]'); if(screen){ setScreen(screen.dataset.screen); return; }
     const navEl=e.target.closest('[data-nav]'); if(navEl){ setScreen(navEl.dataset.nav); return; }
-    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; render(); return; }
+    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.shoppingScope='all'; render(); return; }
     const key=e.target.closest('[data-key]'); if(key){ const k=key.dataset.key; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='mic') setScreen('voice'); else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
     const lockKey=e.target.closest('[data-lock-key]'); if(lockKey){ const k=lockKey.dataset.lockKey; if(k==='backspace') state.pin=state.pin.slice(0,-1); else if(k==='fingerprint'){ toast('Face ID で認証しました'); setTimeout(()=>setScreen('home'),500); return; } else if(state.pin.length<4) state.pin+=k; if(state.pin.length===4){ toast('ロックを解除しました'); setTimeout(()=>{state.pin='';setScreen('home')},550); } else render(); return; }
     const uiState=e.target.closest('[data-ui-state]'); if(uiState){ state.uiState=uiState.dataset.uiState; render(); return; }
     const listDay=e.target.closest('[data-list-day]'); if(listDay){ const day=Number(listDay.dataset.listDay); state.listDay=state.listDay===day?null:day; render(); return; }
     const listLedger=e.target.closest('[data-list-ledger]'); if(listLedger){ state.listLedger=listLedger.dataset.listLedger; render(); return; }
+    const shoppingScope=e.target.closest('[data-shopping-scope]'); if(shoppingScope && shoppingScope.matches('button')){ state.shoppingScope=shoppingScope.dataset.shoppingScope; render(); return; }
+    const shoppingLedger=e.target.closest('[data-shopping-ledger]'); if(shoppingLedger){ state.shoppingLedger=shoppingLedger.dataset.shoppingLedger; render(); return; }
     const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
     const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
     const analyticsDimension=e.target.closest('[data-analytics-dimension]'); if(analyticsDimension){ state.analyticsDimension=analyticsDimension.dataset.analyticsDimension; render(); return; }
@@ -1131,7 +1183,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     const tool=e.target.closest('[data-tool]'); if(tool){ if(tool.dataset.tool==='annotations') document.body.classList.toggle('annotations'); else document.getElementById('phone').style.width=tool.dataset.tool+'px'; return; }
     const action=e.target.closest('[data-action]'); if(!action) return; const a=action.dataset.action;
     if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
-    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; render(); toast(state.family?'家庭モード':'個人モード'); }
+    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.shoppingScope='all'; render(); toast(state.family?'家庭モード':'個人モード'); }
     else if(a==='dismiss-invite'){ state.inviteDismissed=true; render(); }
     else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='list-sort-option'){ state.listSort=action.dataset.sort; state.listDirection=action.dataset.direction; closeModal(); render(); }
@@ -1152,7 +1204,6 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     else if(a==='hero-analytics') setScreen('analytics');
     else if(a==='toast') toast(action.dataset.message||'操作を確認しました');
     else if(a==='filter'){ action.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
-    else if(a==='segment'){ action.parentElement.querySelectorAll('.segment').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
     else if(a==='check'){ const item=action.closest('.shopping-item'); item.classList.toggle('done'); action.innerHTML=item.classList.contains('done')?icon('check'):''; }
     else if(a==='record'){ state.recording=!state.recording; render(); if(!state.recording) toast('音声を解析しました'); }
     else if(a==='save-entry'){ toast('記録しました'); setTimeout(()=>setScreen('home'),550); }

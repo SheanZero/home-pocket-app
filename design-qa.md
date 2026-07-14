@@ -609,3 +609,69 @@ final result: passed
 - 无必须处理的 P3 项。
 
 final result: passed
+
+---
+
+# Latest QA Status — 主页悦己区「梅粉 × 鼠尾草」方案
+
+**Source visual truth**
+
+- 用户明确附加的选定方案：`/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/codex-clipboard-b207ef6c-33bb-4e36-8395-01a041bfa87a.png`
+- 易撕口缺线截图：`/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_2YujE4/截屏2026-07-14 18.38.50.png`；用户要求补全上下半圆边界线。
+
+**Implementation evidence**
+
+- 实现文件：`/Users/xinz/Development/home-pocket-app/.superpowers/brainstorm/78061-1783676135/content/whole-app-warm-japanese-v15.html`
+- 浏览器实现截图：未取得；本地预览重新加载被浏览器 URL 安全策略拦截。
+
+**Viewport and state**
+
+- 目标为 390 × 844、A1 个人浅色、主页、2026 年 7 月，目标值 64 / 80 Joy。
+- 同步实现了 A3 个人深色的对应令牌，但尚未取得浏览器截图。
+
+**Full-view comparison evidence**
+
+- 已打开并检查选定视觉方案；由于浏览器未允许重新加载本地 URL，无法把同状态实现截图与源图放入同一比较输入。
+
+**Focused region comparison evidence**
+
+- 已检查源图中的目标环、满足度、小确幸和今月最爱票券；实现端聚焦截图同样因浏览器策略缺失。
+
+**Findings**
+
+- [P2] 视觉验证尚未完成。
+  Location: 主页悦己指标区与今月最爱票券。
+  Evidence: 代码已将目标环改为梅粉与浅粉轨道，满足度改为叶绿，小确幸改为暖金，票券改为鼠尾草底与樱粉边框，但没有浏览器渲染证据。
+  Impact: 无法确认目标环、三类指标、分隔线和票券在 390px 实际页面中的对比度与层级是否与选定方案一致。
+  Fix: 在当前本地预览页手动重新加载后，补录浅色与深色截图并完成同画面对照。
+
+**Open Questions**
+
+- 等待用户在当前预览页手动重新加载，以解除本轮浏览器验证阻塞。
+
+**Implementation Checklist**
+
+- [x] 只更新 v15，不修改 index。
+- [x] 目标环使用梅粉 `#B76376`，未完成轨道使用浅粉 `#F4DDE1`。
+- [x] 满足度使用叶绿系，数值和进度条保持同一语义层。
+- [x] 小确幸数值改为暖金 `#C1953E`。
+- [x] 分隔线改为低对比鼠尾草灰。
+- [x] 今月最爱票券改为 `#F3F7F0` 浅鼠尾草底、樱粉边框与梅粉强调。
+- [x] 日历、金额和大满足印章统一使用梅粉语义。
+- [x] 上下易撕口仅保留内凹弧线，遮断缺口范围内的票券横线和竖向虚线。
+- [x] 补充深色模式对应令牌。
+- [ ] 取得 390 × 844 浏览器实现截图。
+- [ ] 检查控制台、横向溢出和深色模式。
+
+**Comparison History**
+
+- 初始实现：香槟金目标环、叶绿以外的粉色满足度、粉色票券表面，整体区分度不足。
+- 本轮实现：按用户附图采用梅粉目标环、叶绿满足度、暖金小确幸和鼠尾草票券，四个层级分别承担不同颜色语义。
+- 易撕口修正：上一版补上弧线后，票券上下横线仍从缺口后方穿过；现用半圆遮罩覆盖缺口范围内的横线，仅保留内凹弧线，并让中间虚线从弧线端点后继续。
+- 后续对照：尚未执行，原因是本地 URL 被浏览器安全策略拦截。
+
+**Follow-up Polish**
+
+- 完成浏览器复核后再判断是否需要调整梅粉环饱和度、暖金亮度或票券鼠尾草底色。
+
+final result: blocked
