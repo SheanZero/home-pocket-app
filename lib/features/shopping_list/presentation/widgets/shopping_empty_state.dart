@@ -74,8 +74,15 @@ class ShoppingEmptyState extends ConsumerWidget {
 
     final palette = context.palette;
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        // v15 `.shopping-empty` — warm card surface, rounded 14, soft border.
+        decoration: BoxDecoration(
+          color: palette.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: palette.borderDefault, width: 1),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -3715,6 +3715,12 @@ abstract class S {
   /// **'Public'**
   String get shoppingSegmentPublic;
 
+  /// Shopping list — section heading above the active (to-buy) items list (v15)
+  ///
+  /// In en, this message translates to:
+  /// **'To Buy'**
+  String get shoppingSectionToBuy;
+
   /// Shopping list tab — screen title heading (T1T-01)
   ///
   /// In en, this message translates to:

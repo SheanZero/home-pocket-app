@@ -2555,6 +2555,10 @@
   "@shoppingSegmentPublic": {
     "description": "Shopping item form — public (shared) list option label"
   },
+  "shoppingSectionToBuy": "買うもの",
+  "@shoppingSectionToBuy": {
+    "description": "Shopping list — section heading above the active (to-buy) items list (v15)"
+  },
   "shoppingListScreenTitle": "買い物リスト",
   "@shoppingListScreenTitle": {
     "description": "Shopping list tab — screen title heading (T1T-01)"

@@ -16,28 +16,23 @@ import '../providers/state_shopping_reorder.dart';
 import '../screens/shopping_item_form_screen.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 
-/// Shopping list item tile implementing the EC2 interaction model.
+/// Shopping list item tile — v15 warm-Japanese port (D-02, ADR-019).
 ///
-/// Covers:
-/// - SHOP-02: item.name as primary text
-/// - SHOP-03: 4px left-border with dual-ledger accent colour
-/// - DONE-01: leading circular toggle (strikethrough + opacity); tapping the
-///   circle calls [ToggleItemCompletedUseCase] (EC2 D-domain#1 — was full-row)
-/// - EC2 D-domain#3: tapping the tile BODY opens [ShoppingItemFormScreen]
-///   (replaces the removed edit chevron, EC2 D-1)
-/// - EC2 D-1: quantity at the trailing edge — number only (no ×), shown for
-///   every item; the edit chevron is gone
-/// - G8Z2 FIX-3: 私有 marker to the right of the title for private items only
-///   (the 日常/悦己 ledger badge was removed); public items show no marker
-/// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; [showSuccessFeedback]
-///   BEFORE use-case call
-/// - MGMT-02: long-press enters batch mode
-/// - MGMT-03: swipe and drag handle disabled in batch mode
-/// - SYNC-04: attribution chip on public tiles when shadow book resolves
-/// - EC2 D-2: drag handle via [ReorderableDragStartListener] is gated on
-///   [shoppingReorderModeProvider] — rendered ONLY in reorder mode (was always
-///   shown for active items). In reorder mode toggle / body-edit / swipe-delete
-///   are all suppressed so the only available gesture is dragging.
+/// Faithful to the mockup `shopItem()`: a check circle (ledger-coloured hollow
+/// ring → filled + white tick when done), the item name + meta copy, a ledger
+/// badge (日常/ときめき), and a drag affordance. The dual-ledger accent is now
+/// carried by the check circle and the badge — the old 4px left accent bar and
+/// the 私有 lock marker were removed to match the mockup.
+///
+/// Interaction model is UNCHANGED:
+/// - DONE-01: tapping the leading circle calls [ToggleItemCompletedUseCase].
+/// - EC2 D-domain#3: tapping the tile body opens [ShoppingItemFormScreen].
+/// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; feedback BEFORE the
+///   use-case call.
+/// - MGMT-02: long-press enters batch mode.
+/// - MGMT-03 / EC2 D-2: swipe + toggle are suppressed in batch/reorder mode; in
+///   reorder mode the move-to-top/bottom buttons + drag handle appear.
+/// - SYNC-04: attribution chip on public tiles when the shadow book resolves.
 class ShoppingItemTile extends ConsumerWidget {
   const ShoppingItemTile({
     super.key,
@@ -122,79 +117,57 @@ class ShoppingItemTile extends ConsumerWidget {
   ) {
     final locale = Localizations.localeOf(context);
 
-    // Left-border accent colour per SHOP-03. 悦己 (joy) shows its accent bar
-    // again (G8Z2 FIX-1, restored from the earlier transparent treatment).
-    final borderColor = switch (item.ledgerType) {
-      LedgerType.daily => palette.daily,
-      LedgerType.joy => palette.joy,
-      null => palette.borderList,
-    };
+    // Meta line (mockup `.row-copy small`) — estimated price when set.
+    final metaText = item.estimatedPrice != null
+        ? NumberFormatter.formatCurrency(item.estimatedPrice!, 'JPY', locale)
+        : null;
 
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(color: borderColor, width: 4),
-        ),
-      ),
+      // v15 rows sit inside the shopping-list-card; the tile itself is
+      // transparent so the card fill + rounded corners show through.
+      color: Colors.transparent,
       child: Padding(
-        // 14px vertical matches list_transaction_tile.dart golden (UI-SPEC off-grid exception)
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: Row(
           children: [
-            // Leading circular completion toggle (EC2 D-domain#1)
+            // Leading circular completion toggle (DONE-01).
             _buildCompletionToggle(context, ref, palette, reorderMode),
-            const SizedBox(width: 12),
-            // Title + 日常/悦己 badge inline. The badge sits to the RIGHT of
-            // the title; the Row's default center cross-axis alignment keeps the
-            // title vertically centred now that nothing stacks below it.
+            const SizedBox(width: 10),
+            // Copy: item name (strong) + meta (small).
             Expanded(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Primary: animated strikethrough + fade (DONE-01). Flexible
-                  // so a long name ellipsizes before crowding the badge.
-                  Flexible(
-                    child: AnimatedDefaultTextStyle(
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    style: item.isCompleted
+                        ? AppTextStyles.bodyLarge.copyWith(
+                            decoration: TextDecoration.lineThrough,
+                            color: palette.textTertiary,
+                          )
+                        : AppTextStyles.bodyLarge,
+                    child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      style: item.isCompleted
-                          ? AppTextStyles.bodyLarge.copyWith(
-                              decoration: TextDecoration.lineThrough,
-                              color: palette.textTertiary,
-                            )
-                          : AppTextStyles.bodyLarge,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: item.isCompleted ? 0.5 : 1.0,
-                        child: Text(
-                          item.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      opacity: item.isCompleted ? 0.58 : 1.0,
+                      child: Text(
+                        item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
-                  // 私有 marker — right of the title, private items only
-                  // (G8Z2 FIX-3). Public items render nothing here.
-                  if (item.listType == 'private') ...[
-                    const SizedBox(width: 8),
-                    _buildPrivateMarker(context, palette),
-                  ],
-                  // Estimated price (when set) trails the badge.
-                  if (item.estimatedPrice != null) ...[
-                    const SizedBox(width: 8),
+                  if (metaText != null) ...[
+                    const SizedBox(height: 2),
                     Text(
-                      NumberFormatter.formatCurrency(
-                        item.estimatedPrice!,
-                        'JPY',
-                        locale,
-                      ),
+                      metaText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.amountSmall.copyWith(
-                        color: switch (item.ledgerType) {
-                          LedgerType.daily => palette.dailyText,
-                          // NEVER raw palette.joy — fails WCAG AA
-                          LedgerType.joy => palette.joyText,
-                          null => palette.textSecondary,
-                        },
+                        color: item.isCompleted
+                            ? palette.textTertiary
+                            : palette.textSecondary,
                       ),
                     ),
                   ],
@@ -204,42 +177,10 @@ class ShoppingItemTile extends ConsumerWidget {
             const SizedBox(width: 8),
             // Attribution chip — public-list tiles only (SYNC-04 / T-38-04-01)
             if (item.listType == 'public' && item.addedByBookId != null)
-              Builder(builder: (ctx) {
-                // Riverpod 3: .value (nullable), NOT .valueOrNull (removed in v3)
-                final shadows = ref.watch(shadowBooksProvider).value ?? const [];
-                final tag = shadows.firstWhereOrNull(
-                  (s) => s.book.id == item.addedByBookId,
-                );
-                if (tag == null) return const SizedBox.shrink();
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 72),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: palette.sharedLight,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1,
-                        ),
-                        child: Text(
-                          '${tag.memberAvatarEmoji} ${tag.memberDisplayName}',
-                          style: AppTextStyles.micro
-                              .copyWith(color: palette.sharedText),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                );
-              }),
-            // Trailing cluster: quantity badge (quantity > 1) + reorder-mode
-            // move-to-top/bottom buttons + drag handle (active items only).
+              _buildAttributionChip(context, ref, palette),
+            // Ledger badge (日常 / ときめき) — mockup `.shopping-ledger-badge`.
+            _buildLedgerBadge(context, palette),
+            // Trailing cluster: quantity + reorder controls / drag affordance.
             _buildTrailingCluster(context, ref, palette, reorderMode),
           ],
         ),
@@ -247,21 +188,100 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  /// Leading circular completion toggle (EC2 D-domain#1).
+  /// Attribution chip — public-list tiles only (SYNC-04 / T-38-04-01).
+  Widget _buildAttributionChip(
+    BuildContext context,
+    WidgetRef ref,
+    AppPalette palette,
+  ) {
+    // Riverpod 3: .value (nullable), NOT .valueOrNull (removed in v3)
+    final shadows = ref.watch(shadowBooksProvider).value ?? const [];
+    final tag = shadows.firstWhereOrNull(
+      (s) => s.book.id == item.addedByBookId,
+    );
+    if (tag == null) return const SizedBox.shrink();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 72),
+          child: Container(
+            decoration: BoxDecoration(
+              color: palette.sharedLight,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 6,
+              vertical: 1,
+            ),
+            child: Text(
+              '${tag.memberAvatarEmoji} ${tag.memberDisplayName}',
+              style: AppTextStyles.micro.copyWith(color: palette.sharedText),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  /// Ledger badge (日常 / ときめき) — mockup `.badge.shopping-ledger-badge`.
   ///
-  /// Unfilled (incomplete): neutral outline circle with a faint check.
-  /// Filled (complete): ledger-accent fill + white check.
-  /// Tapping toggles completion via [ToggleItemCompletedUseCase]; the onTap is
-  /// suppressed in reorder mode (gestures locked — drag only).
+  /// daily → `dailyLight` fill + `dailyText`; joy → `joyLight` + `joyText`
+  /// (never raw `joy`/`daily` on text — WCAG AA). Fades to .58 opacity when
+  /// the item is completed. Null ledger renders nothing.
+  Widget _buildLedgerBadge(BuildContext context, AppPalette palette) {
+    final l10n = S.of(context);
+    final (Color bg, Color fg, String label) = switch (item.ledgerType) {
+      LedgerType.daily => (
+          palette.dailyLight,
+          palette.dailyText,
+          l10n.listLedgerDaily,
+        ),
+      LedgerType.joy => (
+          palette.joyLight,
+          palette.joyText,
+          l10n.listLedgerJoy,
+        ),
+      null => (palette.backgroundMuted, palette.textSecondary, ''),
+    };
+    if (label.isEmpty) return const SizedBox.shrink();
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: item.isCompleted ? 0.58 : 1.0,
+      child: Container(
+        margin: const EdgeInsets.only(right: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.micro.copyWith(
+            color: fg,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Leading circular completion toggle (DONE-01).
+  ///
+  /// Unchecked: hollow ring in the item's ledger colour (daily/joy; null falls
+  /// back to daily). Checked: ledger-colour fill + white tick. Tapping toggles
+  /// completion via [ToggleItemCompletedUseCase]; suppressed in reorder mode.
   Widget _buildCompletionToggle(
     BuildContext context,
     WidgetRef ref,
     AppPalette palette,
     bool reorderMode,
   ) {
-    // Filled colour uses the item's ledger accent; null ledger falls back to
-    // the neutral daily green (EC2 Claude's Discretion).
-    final fillColor = switch (item.ledgerType) {
+    final ledgerColor = switch (item.ledgerType) {
       LedgerType.daily => palette.daily,
       LedgerType.joy => palette.joy,
       null => palette.daily,
@@ -270,23 +290,16 @@ class ShoppingItemTile extends ConsumerWidget {
     final circle = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
-      width: 24,
-      height: 24,
+      width: 23,
+      height: 23,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: item.isCompleted ? fillColor : Colors.transparent,
-        border: Border.all(
-          color: item.isCompleted ? fillColor : palette.borderDefault,
-          width: 2,
-        ),
+        color: item.isCompleted ? ledgerColor : Colors.transparent,
+        border: Border.all(color: ledgerColor, width: 2),
       ),
-      child: Icon(
-        Icons.check,
-        size: 16,
-        color: item.isCompleted
-            ? palette.card
-            : palette.textTertiary.withValues(alpha: 0.4),
-      ),
+      child: item.isCompleted
+          ? Icon(Icons.check, size: 15, color: palette.card)
+          : null,
     );
 
     return Semantics(
@@ -311,37 +324,11 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  /// 私有 marker shown to the right of the item title for private (local-only)
-  /// items (G8Z2 FIX-3). Public items render nothing.
-  ///
-  /// Mirrors the removed ledger badge's container shape but uses the shared
-  /// (steel-blue) scope palette and a small lock glyph — consistent with the
-  /// filter-bar 私有 chip. Label reuses `shoppingSegmentPrivate`.
-  Widget _buildPrivateMarker(BuildContext context, AppPalette palette) {
-    return Container(
-      decoration: BoxDecoration(
-        color: palette.sharedLight,
-        borderRadius: BorderRadius.circular(3),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.lock_outline, size: 11, color: palette.sharedText),
-          const SizedBox(width: 3),
-          Text(
-            S.of(context).shoppingSegmentPrivate,
-            style: AppTextStyles.micro.copyWith(color: palette.sharedText),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Trailing cluster (EC2 D-1 / D-2 / Fix 4):
-  /// - quantity — number only (no ×), shown for every item with a right margin
-  /// - move-to-top / move-to-bottom buttons — only in reorder mode, active items only
-  /// - drag handle — only in reorder mode AND for active items
+  /// Trailing cluster:
+  /// - quantity — number only (no ×), shown for every item.
+  /// - normal mode (active item) — a decorative `drag_indicator` glyph; the
+  ///   whole active row is long-press draggable in the parent list.
+  /// - reorder mode (active item) — move-to-top / move-to-bottom + drag handle.
   Widget _buildTrailingCluster(
     BuildContext context,
     WidgetRef ref,
@@ -351,8 +338,6 @@ class ShoppingItemTile extends ConsumerWidget {
     final children = <Widget>[];
 
     // Quantity on the right edge — number only (no ×), shown for every item.
-    // Right padding gives the count margin from the screen edge (and from the
-    // drag handle when it appears in reorder mode).
     if (item.quantity >= 1) {
       children.add(
         Padding(
@@ -367,16 +352,9 @@ class ShoppingItemTile extends ConsumerWidget {
       );
     }
 
-    // Move-to-top + move-to-bottom + drag handle — reorder mode only, active items only.
     if (reorderMode && isActive) {
-      if (children.isNotEmpty) {
-        children.add(const SizedBox(width: 4));
-      }
-
       // Move-to-top button (Fix 4): re-sequence the whole active list with this
-      // item moved to the front, persisting a contiguous 0..N-1 order. This is
-      // collision-free for repeated taps AND keeps the persisted order contiguous
-      // so a subsequent drag still lands correctly (quick-260609-pmc-04).
+      // item moved to the front, persisting a contiguous 0..N-1 order.
       children.add(
         Semantics(
           label: S.of(context).shoppingMoveToTop,
@@ -414,9 +392,7 @@ class ShoppingItemTile extends ConsumerWidget {
         ),
       );
 
-      // Move-to-bottom button (Fix 4): re-sequence the whole active list with this
-      // item moved to the back, persisting a contiguous 0..N-1 order (same
-      // rationale as move-to-top; quick-260609-pmc-04).
+      // Move-to-bottom button (Fix 4).
       children.add(
         Semantics(
           label: S.of(context).shoppingMoveToBottom,
@@ -454,12 +430,8 @@ class ShoppingItemTile extends ConsumerWidget {
         ),
       );
 
-      // Drag handle — instant drag affordance for users targeting the handle.
-      // No Tooltip: a Tooltip fires on long-press, which is exactly the gesture
-      // used to start a drag — it popped "重新排序" instead of dragging
-      // (quick-260609-pmc-05). Semantics keeps the accessible label.
-      // Icon is Icons.reorder (three lines, matches the filter-bar reorder glyph);
-      // a wide 56px hit target makes the handle easy to grab.
+      // Drag handle — instant drag affordance (Icons.reorder, no Tooltip:
+      // a Tooltip fires on long-press, which is the drag gesture).
       children.add(
         Semantics(
           label: S.of(context).shoppingReorderItem,
@@ -478,6 +450,16 @@ class ShoppingItemTile extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+      );
+    } else if (isActive) {
+      // Normal mode, active row: decorative drag glyph (mockup `drag_indicator`).
+      // The row is long-press draggable via the parent list's listener.
+      children.add(
+        Icon(
+          Icons.drag_indicator,
+          size: 20,
+          color: palette.textTertiary,
         ),
       );
     }

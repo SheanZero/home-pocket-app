@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_list_filter.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_filter.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_filter_bar.dart';
@@ -44,6 +45,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
       locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
       shoppingFilterProvider.overrideWith(() => _FixedShoppingFilter()),
       listTypeProvider.overrideWith(() => ListType()),
+      isGroupModeProvider.overrideWith((_) => false),
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -61,7 +63,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
       home: const Scaffold(
         body: SizedBox(
           width: 390,
-          height: 44,
+          height: 150,
           child: ShoppingFilterBar(),
         ),
       ),

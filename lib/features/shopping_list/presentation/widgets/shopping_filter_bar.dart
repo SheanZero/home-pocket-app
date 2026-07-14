@@ -4,241 +4,144 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/state_shopping_filter.dart';
-import '../providers/state_shopping_reorder.dart';
 import 'shopping_category_filter_sheet.dart';
+import 'shopping_segmented_control.dart';
 
-/// Shopping-specific filter bar (FILT-01, D-1, D-2, D-3, EC2 D-2, G8Z).
+/// v15 warm-Japanese shopping filter card (D-02 visual port, ADR-019).
 ///
-/// Reads from [shoppingFilterProvider] — NOT [listFilterProvider] (the category
-/// sheet writes back via its [onApply] callback).
+/// Faithful port of the mockup `shoppingFilterCard()`:
+///   ┌───────────────────────────────────────────┐
+///   │ [すべて|私有]   [すべて|日常|ときめき]        │  ← scope (family) + ledger
+///   │ ( 私有 ) ( カテゴリ )                         │  ← secondary chips
+///   └───────────────────────────────────────────┘
 ///
-/// Layout (left-to-right):
-///   [ left-aligned scrollable chips: 全部 | 日常·悦己 | 私有 | Category ] [ ≡ / ✓ ]
+/// Data wiring is unchanged — the Material `SegmentedButton`/chip bar was
+/// swapped for the `.segmented-control` pill visual, but every control still
+/// reads/writes the SAME providers:
+/// - scope segment  → [listTypeProvider] ('all' | 'private'), family only.
+/// - ledger segment → [shoppingFilterProvider].ledgerType (null | daily | joy).
+/// - 私有 chip       → [shoppingFilterProvider].showPrivateOnly (G8Z).
+/// - カテゴリ chip    → [ShoppingCategoryFilterSheet] → setCategoryIds (D-3).
 ///
-/// - The chip cluster is wrapped in an [Expanded] horizontal scroll view so it
-///   stays left-aligned and the reorder toggle pins to the right edge (EC2 D-2).
-/// - 全部 is a standalone reset control (the global clear entry, not part of the
-///   segmented control). It highlights ONLY when nothing is filtered
-///   (`ledgerType == null && categoryIds.isEmpty`) and tapping it calls
-///   `clearAll()` (D-2).
-/// - 日常 | 悦己 is a SINGLE connected segmented control with two
-///   mutually-exclusive, re-tappable-to-deselect segments (D-1).
-/// - Category opens the shopping-only [ShoppingCategoryFilterSheet] (D-3).
-/// - The trailing ≡/✓ button toggles [shoppingReorderModeProvider] (EC2 D-2):
-///   ≡ enters manual drag-reorder mode, ✓ (red) exits it. The chip row layout
-///   is identical in both modes — no drag-indicator prefix on any chip (Fix 1).
+/// The reorder (並べ替え) toggle now lives in the screen's 買うもの section
+/// header, matching the mockup — it is intentionally NOT rendered here.
 class ShoppingFilterBar extends ConsumerWidget {
   const ShoppingFilterBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(shoppingFilterProvider);
-    final reorderMode = ref.watch(shoppingReorderModeProvider);
+    final listType = ref.watch(listTypeProvider);
+    final isGroupMode = ref.watch(isGroupModeProvider);
     final palette = context.palette;
     final l10n = S.of(context);
 
-    // 全部 highlights only when nothing is filtered (D-2).
-    final noneActive =
-        filter.ledgerType == null && filter.categoryIds.isEmpty;
+    // Ledger segment: null → 'all', otherwise 'daily' / 'joy'.
+    final ledgerValue = switch (filter.ledgerType) {
+      LedgerType.daily => 'daily',
+      LedgerType.joy => 'joy',
+      null => 'all',
+    };
 
-    final dailySelected = filter.ledgerType == LedgerType.daily;
-    final joySelected = filter.ledgerType == LedgerType.joy;
-    // 私有 chip — always visible, active when showPrivateOnly is true (G8Z).
-    final privateOnly = filter.showPrivateOnly;
+    final ledgerSegment = ShoppingSegmentedControl<String>(
+      selected: ledgerValue,
+      segments: [
+        ShoppingSegment(value: 'all', label: l10n.shoppingFilterLedgerAll),
+        ShoppingSegment(
+          value: 'daily',
+          label: l10n.listLedgerDaily,
+          tone: SegmentTone.daily,
+        ),
+        ShoppingSegment(
+          value: 'joy',
+          label: l10n.listLedgerJoy,
+          tone: SegmentTone.joy,
+        ),
+      ],
+      onChanged: (value) {
+        final next = switch (value) {
+          'daily' => LedgerType.daily,
+          'joy' => LedgerType.joy,
+          _ => null,
+        };
+        ref.read(shoppingFilterProvider.notifier).setLedgerFilter(next);
+      },
+    );
+
+    final scopeSegment = ShoppingSegmentedControl<String>(
+      selected: listType,
+      segments: [
+        ShoppingSegment(value: 'all', label: l10n.shoppingSegmentAll),
+        ShoppingSegment(value: 'private', label: l10n.shoppingSegmentPrivate),
+      ],
+      onChanged: (value) =>
+          ref.read(listTypeProvider.notifier).setListType(value),
+    );
 
     return Container(
-      height: 44,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: palette.background,
-        border: Border(
-          bottom: BorderSide(color: palette.borderDivider, width: 1),
-        ),
+        color: palette.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: palette.borderDefault, width: 1),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Left-aligned scrollable chip cluster ──────────────────────────
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // ── 全部 standalone reset control (D-2) ──────────────────
-                  ActionChip(
-                    label: Text(
-                      l10n.shoppingFilterLedgerAll,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: noneActive
-                            ? palette.borderInputActive
-                            : palette.textSecondary,
-                      ),
-                    ),
-                    backgroundColor:
-                        noneActive ? palette.dailyLight : palette.card,
-                    side: BorderSide(
-                      color: noneActive
-                          ? palette.borderInputActive
-                          : palette.borderDefault,
-                      width: 1,
-                    ),
-                    onPressed: () =>
-                        ref.read(shoppingFilterProvider.notifier).clearAll(),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  const SizedBox(width: 8),
-
-                  // ── 日常 | 悦己 connected segmented control (D-1) ──────────
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: palette.card,
-                        borderRadius: BorderRadius.circular(8),
-                        border:
-                            Border.all(color: palette.borderDefault, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // 日常 segment
-                          _SegmentButton(
-                            label: l10n.listLedgerDaily,
-                            selected: dailySelected,
-                            selectedBackground: palette.dailyLight,
-                            selectedLabelColor: palette.daily,
-                            idleLabelColor: palette.textSecondary,
-                            onTap: () => ref
-                                .read(shoppingFilterProvider.notifier)
-                                .setLedgerFilter(
-                                  dailySelected ? null : LedgerType.daily,
-                                ),
-                          ),
-                          // 1px vertical divider — reads as one connected control
-                          Container(
-                            width: 1,
-                            height: 32,
-                            color: palette.borderDefault,
-                          ),
-                          // 悦己 segment
-                          _SegmentButton(
-                            label: l10n.listLedgerJoy,
-                            selected: joySelected,
-                            selectedBackground: palette.joyLight,
-                            selectedLabelColor: palette.joy,
-                            idleLabelColor: palette.textSecondary,
-                            onTap: () => ref
-                                .read(shoppingFilterProvider.notifier)
-                                .setLedgerFilter(
-                                  joySelected ? null : LedgerType.joy,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // ── 私有 chip — always visible, scopes to private list (G8Z) ──
-                  ActionChip(
-                    key: const Key('shopping_filter_private_chip'),
-                    label: Text(
-                      l10n.shoppingFilterPrivate,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: privateOnly
-                            ? palette.sharedText
-                            : palette.textSecondary,
-                      ),
-                    ),
-                    backgroundColor:
-                        privateOnly ? palette.sharedLight : palette.card,
-                    side: BorderSide(
-                      color: privateOnly
-                          ? palette.shared
-                          : palette.borderDefault,
-                      width: 1,
-                    ),
-                    onPressed: () => ref
-                        .read(shoppingFilterProvider.notifier)
-                        .setPrivateFilter(!privateOnly),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  const SizedBox(width: 8),
-
-                  // ── Category chip (D-3) ──────────────────────────────────
-                  ActionChip(
-                    label: Text(
-                      l10n.shoppingFilterCategory,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: filter.categoryIds.isNotEmpty
-                            ? palette.borderInputActive
-                            : palette.textSecondary,
-                      ),
-                    ),
-                    backgroundColor: filter.categoryIds.isNotEmpty
-                        ? palette.dailyLight
-                        : palette.card,
-                    side: BorderSide(
-                      color: filter.categoryIds.isNotEmpty
-                          ? palette.borderInputActive
-                          : palette.borderDefault,
-                      width: 1,
-                    ),
-                    onPressed: () {
-                      showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => ShoppingCategoryFilterSheet(
-                          initialSelected: filter.categoryIds,
-                          onApply: (ids) => ref
-                              .read(shoppingFilterProvider.notifier)
-                              .setCategoryIds(ids),
-                        ),
-                      );
-                    },
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ],
+          // Row 1: scope (family only) + ledger segments.
+          if (isGroupMode)
+            Row(
+              children: [
+                Expanded(flex: 2, child: scopeSegment),
+                const SizedBox(width: 8),
+                Expanded(flex: 3, child: ledgerSegment),
+              ],
+            )
+          else
+            ledgerSegment,
+          const SizedBox(height: 10),
+          // Row 2: 私有 + カテゴリ chips (left-aligned).
+          Row(
+            children: [
+              _FilterChip(
+                key: const Key('shopping_filter_private_chip'),
+                label: l10n.shoppingFilterPrivate,
+                icon: Icons.lock_outline,
+                active: filter.showPrivateOnly,
+                activeBackground: palette.sharedLight,
+                activeForeground: palette.sharedText,
+                activeBorder: palette.shared,
+                onTap: () => ref
+                    .read(shoppingFilterProvider.notifier)
+                    .setPrivateFilter(!filter.showPrivateOnly),
               ),
-            ),
-          ),
-
-          // ── Trailing ≡ / ✓ reorder-mode toggle (EC2 D-2) ──────────────────
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Semantics(
-              label: reorderMode
-                  ? l10n.shoppingExitReorderMode
-                  : l10n.shoppingEnterReorderMode,
-              button: true,
-              child: Tooltip(
-                message: reorderMode
-                    ? l10n.shoppingExitReorderMode
-                    : l10n.shoppingEnterReorderMode,
-                child: InkWell(
-                  onTap: () =>
-                      ref.read(shoppingReorderModeProvider.notifier).toggle(),
-                  customBorder: const CircleBorder(),
-                  // ≥44px hit target (WCAG 2.1 SC 2.5.5)
-                  child: SizedBox(
-                    width: 44,
-                    height: 44,
-                    child: Center(
-                      child: Icon(
-                        reorderMode ? Icons.check : Icons.reorder,
-                        size: 22,
-                        color: reorderMode
-                            ? palette.error
-                            : palette.textSecondary,
-                      ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: l10n.shoppingFilterCategory,
+                icon: Icons.tune,
+                active: filter.categoryIds.isNotEmpty,
+                activeBackground: palette.dailyLight,
+                activeForeground: palette.borderInputActive,
+                activeBorder: palette.borderInputActive,
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => ShoppingCategoryFilterSheet(
+                      initialSelected: filter.categoryIds,
+                      onApply: (ids) => ref
+                          .read(shoppingFilterProvider.notifier)
+                          .setCategoryIds(ids),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -246,40 +149,59 @@ class ShoppingFilterBar extends ConsumerWidget {
   }
 }
 
-/// One tappable segment within the connected 日常 | 悦己 control (D-1).
-///
-/// Renders a [Text] label so it stays findable via `find.text` in widget tests.
-class _SegmentButton extends StatelessWidget {
-  const _SegmentButton({
+/// Pill chip used for the secondary 私有 / カテゴリ filters (mockup `.chip`).
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    super.key,
     required this.label,
-    required this.selected,
-    required this.selectedBackground,
-    required this.selectedLabelColor,
-    required this.idleLabelColor,
+    required this.icon,
+    required this.active,
+    required this.activeBackground,
+    required this.activeForeground,
+    required this.activeBorder,
     required this.onTap,
   });
 
   final String label;
-  final bool selected;
-  final Color selectedBackground;
-  final Color selectedLabelColor;
-  final Color idleLabelColor;
+  final IconData icon;
+  final bool active;
+  final Color activeBackground;
+  final Color activeForeground;
+  final Color activeBorder;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    final palette = context.palette;
+    final foreground = active ? activeForeground : palette.textSecondary;
+
+    return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        height: 32,
-        alignment: Alignment.center,
-        color: selected ? selectedBackground : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text(
-          label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: selected ? selectedLabelColor : idleLabelColor,
+        height: 34,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: active ? activeBackground : palette.card,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: active ? activeBorder : palette.borderDefault,
+            width: 1,
           ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: foreground),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: foreground,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ),
       ),
     );

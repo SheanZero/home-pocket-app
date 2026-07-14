@@ -1984,6 +1984,9 @@ class SZh extends S {
   String get shoppingSegmentPublic => '公共';
 
   @override
+  String get shoppingSectionToBuy => '购买清单';
+
+  @override
   String get shoppingListScreenTitle => '购物清单';
 
   @override

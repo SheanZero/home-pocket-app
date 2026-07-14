@@ -290,6 +290,54 @@ void main() {
       expect(find.text('Active One'), findsOneWidget);
       expect(find.text('Done One'), findsNothing);
     });
+
+    testWidgets(
+        'tapping the 買うもの header 並べ替え button enters reorder mode',
+        (tester) async {
+      late ProviderContainer container;
+      final activeItem = _makeItem(id: 'a-1', name: 'Active One');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            filteredShoppingItemsProvider.overrideWith(
+              (ref) => Stream.value([activeItem]),
+            ),
+            deleteShoppingItemUseCaseProvider
+                .overrideWithValue(MockDeleteShoppingItemUseCase()),
+            toggleItemCompletedUseCaseProvider
+                .overrideWithValue(MockToggleItemCompletedUseCase()),
+            reorderShoppingItemsUseCaseProvider
+                .overrideWithValue(MockReorderShoppingItemsUseCase()),
+            clearCompletedItemsUseCaseProvider
+                .overrideWithValue(MockClearCompletedItemsUseCase()),
+            shadowBooksProvider.overrideWith(
+              (ref) async => const <ShadowBookInfo>[],
+            ),
+            isGroupModeProvider.overrideWith((ref) => false),
+          ],
+          child: Builder(
+            builder: (ctx) {
+              container = ProviderScope.containerOf(ctx);
+              return const MaterialApp(
+                localizationsDelegates: S.localizationsDelegates,
+                supportedLocales: S.supportedLocales,
+                home: Scaffold(body: ShoppingListScreen()),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(container.read(shoppingReorderModeProvider), isFalse);
+
+      await tester.tap(find.byKey(const Key('shopping_reorder_toggle')));
+      await tester.pumpAndSettle();
+
+      expect(container.read(shoppingReorderModeProvider), isTrue);
+    });
   });
 }
 

@@ -2555,6 +2555,10 @@
   "@shoppingSegmentPublic": {
     "description": "Shopping item form — public (shared) list option label"
   },
+  "shoppingSectionToBuy": "购买清单",
+  "@shoppingSectionToBuy": {
+    "description": "Shopping list — section heading above the active (to-buy) items list (v15)"
+  },
   "shoppingListScreenTitle": "购物清单",
   "@shoppingListScreenTitle": {
     "description": "Shopping list tab — screen title heading (T1T-01)"

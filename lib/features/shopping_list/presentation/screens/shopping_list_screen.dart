@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
@@ -17,14 +16,15 @@ import '../widgets/shopping_filter_bar.dart';
 import '../widgets/shopping_item_tile.dart';
 import '../widgets/shopping_selection_header.dart';
 
-/// Main shopping list shell screen (SC2, D38-02, DONE-03, MGMT-02).
+/// Main shopping list shell screen — v15 warm-Japanese port (D-02, ADR-019).
 ///
-/// Structure (top → bottom):
-/// 1. SegmentedButton: Public / Private (SHOP-01)
-/// 2. ShoppingFilterBar (D38-04)
-/// 3. ShoppingSelectionHeader — visible only when batch mode is active (D38-03)
-/// 4. Expanded body: _buildBody() — the streaming item list
-/// 5. ShoppingBatchActionBar — visible only when batch mode is active (D38-03)
+/// Structure (top → bottom), mirroring the mockup `shopping()`:
+/// 1. ShoppingFilterBar — the v15 filter card (scope + ledger segments +
+///    私有/カテゴリ chips). Scope segment shows only in group mode.
+/// 2. ShoppingSelectionHeader — visible only in batch mode (D38-03).
+/// 3. Body: 買うもの section header (with 並べ替え reorder toggle) → active
+///    items list-card → 完了 section header → completed items list-card.
+/// 4. ShoppingBatchActionBar — visible only in batch mode (D38-03).
 ///
 /// NEVER call ref.invalidate(filteredShoppingItemsProvider) for sync-driven
 /// updates — the Drift .watch() stream handles reactivity (GAP-2 lesson).
@@ -37,80 +37,27 @@ class ShoppingListScreen extends ConsumerWidget {
     final palette = context.palette;
     final listType = ref.watch(listTypeProvider);
     final batchActive = ref.watch(batchSelectModeProvider).isActive;
-    // Only family-group members see the 全部 / 个人 view toggle. When solo,
-    // 个人 IS 全部, so the toggle would be meaningless (and is hidden).
-    final isGroupMode = ref.watch(isGroupModeProvider);
 
     return Scaffold(
       backgroundColor: palette.background,
-      // Screen title via standard AppBar (T1T-01) — matches AnalyticsScreen,
-      // the sibling tab in MainShellScreen's IndexedStack, for cross-tab
-      // title consistency. Title text style is owned by the app's appBarTheme.
       appBar: AppBar(
         title: Text(S.of(context).shoppingListScreenTitle),
       ),
-      // SafeArea(top) keeps the toggle/filter bar clear of the iOS status bar
-      // and Dynamic Island; bottom is owned by the floating nav bar.
+      // SafeArea(top) keeps the filter card clear of the status bar / Dynamic
+      // Island; bottom is owned by the floating nav bar.
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            // All/Personal segmented control — group mode only (SHOP-01)
-            if (isGroupMode)
-              _buildSegmentedControl(context, ref, palette, listType),
-            // Chip filter bar (D38-04)
+            // v15 filter card — scope + ledger segments + 私有/カテゴリ chips.
             const ShoppingFilterBar(),
             // Batch chrome — selection header (D38-03, MGMT-02)
-            if (batchActive)
-              // Pass active item IDs via a watch to avoid prop drilling issues;
-              // ShoppingSelectionHeader receives allItemIds from the parent build context.
-              _BatchHeaderWrapper(),
+            if (batchActive) _BatchHeaderWrapper(),
             // Main body
             Expanded(child: _buildBody(context, ref, palette, listType)),
             // Batch chrome — bottom action bar (D38-03, MGMT-02)
             if (batchActive) const ShoppingBatchActionBar(),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSegmentedControl(
-    BuildContext context,
-    WidgetRef ref,
-    AppPalette palette,
-    String listType,
-  ) {
-    final l10n = S.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SegmentedButton<String>(
-        segments: [
-          // 全部 (All) first and default; then 个人 (Personal).
-          ButtonSegment(
-            value: 'all',
-            label: Text(
-              l10n.shoppingSegmentAll,
-              style: AppTextStyles.titleSmall,
-            ),
-          ),
-          ButtonSegment(
-            value: 'private',
-            label: Text(
-              l10n.shoppingSegmentPrivate,
-              style: AppTextStyles.titleSmall,
-            ),
-          ),
-        ],
-        selected: {listType},
-        onSelectionChanged: (newSet) {
-          if (newSet.isNotEmpty) {
-            ref.read(listTypeProvider.notifier).setListType(newSet.first);
-          }
-        },
-        style: SegmentedButton.styleFrom(
-          selectedBackgroundColor: palette.borderInputActive,
-          selectedForegroundColor: Colors.white,
         ),
       ),
     );
@@ -124,9 +71,7 @@ class ShoppingListScreen extends ConsumerWidget {
   ) {
     final l10n = S.of(context);
     final itemsAsync = ref.watch(filteredShoppingItemsProvider);
-    // Hide the completed section while reordering — the user is focused on
-    // arranging active items, and completed rows are not draggable
-    // (quick-260609-pmc-07). It reappears on exiting reorder mode.
+    // Hide the completed section while reordering (quick-260609-pmc-07).
     final reorderMode = ref.watch(shoppingReorderModeProvider);
 
     return itemsAsync.when(
@@ -153,7 +98,7 @@ class ShoppingListScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            // ref.invalidate is appropriate here — user-triggered retry (not a sync update)
+            // ref.invalidate is appropriate here — user-triggered retry.
             TextButton(
               onPressed: () => ref.invalidate(filteredShoppingItemsProvider),
               child: Text(l10n.shoppingRetry),
@@ -162,10 +107,8 @@ class ShoppingListScreen extends ConsumerWidget {
         ),
       ),
       data: (items) {
-        final activeItems =
-            items.where((i) => !i.isCompleted).toList();
-        final completedItems =
-            items.where((i) => i.isCompleted).toList();
+        final activeItems = items.where((i) => !i.isCompleted).toList();
+        final completedItems = items.where((i) => i.isCompleted).toList();
 
         if (activeItems.isEmpty && completedItems.isEmpty) {
           return ShoppingEmptyState(listType: listType);
@@ -173,92 +116,173 @@ class ShoppingListScreen extends ConsumerWidget {
 
         return CustomScrollView(
           slivers: [
-            // Active items — SliverReorderableList (D38-02).
-            // Fix 2: ReorderableDelayedDragStartListener wraps the full tile so
-            // a long-press anywhere on the row initiates drag (not just the handle).
-            // Fix 3: proxyDecorator wraps the dragged item in an opaque card surface
-            // (palette.card) with an animated elevation shadow (0→6) for visual lift.
-            // onReorderItem provides the already-adjusted newIndex (item removed before insertion).
-            // We persist the FULL new order (contiguous 0..N-1) rather than a single
-            // sort_order, so a drag to the very top/bottom truly lands first/last even
-            // when other items hold non-contiguous values (quick-260609-pmc-04).
-            SliverReorderableList(
-              itemCount: activeItems.length,
-              proxyDecorator: (child, index, animation) {
-                return AnimatedBuilder(
-                  animation: animation,
-                  builder: (ctx, _) {
-                    final double elevation =
-                        Tween<double>(begin: 0, end: 6)
-                            .animate(CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOut,
-                            ))
-                            .value;
-                    return Material(
-                      elevation: elevation,
-                      color: ctx.palette.card,
-                      child: child,
-                    );
-                  },
-                );
-              },
-              onReorderItem: (oldIndex, newIndex) {
-                final orderedIds =
-                    activeItems.map((e) => e.id).toList(growable: true);
-                final moved = orderedIds.removeAt(oldIndex);
-                orderedIds.insert(newIndex, moved);
-                ref
-                    .read(reorderShoppingItemsUseCaseProvider)
-                    .applyOrder(orderedIds);
-              },
-              itemBuilder: (context, index) =>
-                  ReorderableDelayedDragStartListener(
-                key: ValueKey(activeItems[index].id),
-                index: index,
-                child: ShoppingItemTile(
-                  item: activeItems[index],
-                  index: index,
-                  isActive: true,
+            // 買うもの section header + 並べ替え reorder toggle.
+            SliverToBoxAdapter(child: _ToBuySectionHeader()),
+            // Active items — single list-card with SliverReorderableList (D38-02).
+            if (activeItems.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: DecoratedSliver(
+                  decoration: _cardDecoration(palette),
+                  sliver: SliverReorderableList(
+                    itemCount: activeItems.length,
+                    proxyDecorator: (child, index, animation) {
+                      return AnimatedBuilder(
+                        animation: animation,
+                        builder: (ctx, _) {
+                          final double elevation = Tween<double>(begin: 0, end: 6)
+                              .animate(CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOut,
+                              ))
+                              .value;
+                          return Material(
+                            elevation: elevation,
+                            color: ctx.palette.card,
+                            borderRadius: BorderRadius.circular(14),
+                            child: child,
+                          );
+                        },
+                      );
+                    },
+                    onReorderItem: (oldIndex, newIndex) {
+                      final orderedIds =
+                          activeItems.map((e) => e.id).toList(growable: true);
+                      final moved = orderedIds.removeAt(oldIndex);
+                      orderedIds.insert(newIndex, moved);
+                      ref
+                          .read(reorderShoppingItemsUseCaseProvider)
+                          .applyOrder(orderedIds);
+                    },
+                    itemBuilder: (context, index) =>
+                        ReorderableDelayedDragStartListener(
+                      key: ValueKey(activeItems[index].id),
+                      index: index,
+                      child: _DividedRow(
+                        showDivider: index > 0,
+                        child: ShoppingItemTile(
+                          item: activeItems[index],
+                          index: index,
+                          isActive: true,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            // Completed section — hidden during reorder mode (pmc-07)
+            // Completed section — hidden during reorder mode (pmc-07).
             if (completedItems.isNotEmpty && !reorderMode) ...[
-              // Clear-all-completed button + divider row (DONE-03)
               SliverToBoxAdapter(
                 child: _CompletedSectionHeader(
                   listType: listType,
                   completedCount: completedItems.length,
                 ),
               ),
-              // Completed items list (plain SliverList — no drag)
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => ShoppingItemTile(
-                    key: ValueKey(completedItems[i].id),
-                    item: completedItems[i],
-                    index: i,
-                    isActive: false,
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: DecoratedSliver(
+                  decoration: _cardDecoration(palette),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) => _DividedRow(
+                        key: ValueKey(completedItems[i].id),
+                        showDivider: i > 0,
+                        child: ShoppingItemTile(
+                          item: completedItems[i],
+                          index: i,
+                          isActive: false,
+                        ),
+                      ),
+                      childCount: completedItems.length,
+                    ),
                   ),
-                  childCount: completedItems.length,
                 ),
               ),
             ],
-            // Bottom padding so last item clears the FAB
+            // Bottom padding so last item clears the FAB.
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         );
       },
     );
   }
+
+  BoxDecoration _cardDecoration(AppPalette palette) => BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.borderDefault, width: 1),
+      );
+}
+
+/// A list-card row that draws a top divider between rows (mockup
+/// `.shopping-list-card .shopping-item + .shopping-item`). Transparent so the
+/// parent card fill / rounded corners show through.
+class _DividedRow extends StatelessWidget {
+  const _DividedRow({super.key, required this.child, required this.showDivider});
+
+  final Widget child;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(top: BorderSide(color: palette.borderList, width: 1))
+            : null,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// 買うもの section header with the 並べ替え / 完了 reorder toggle
+/// (mockup `<div class="section-title"><h2>買うもの</h2>…`).
+class _ToBuySectionHeader extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.palette;
+    final l10n = S.of(context);
+    final reorderMode = ref.watch(shoppingReorderModeProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(17, 18, 17, 8),
+      child: Row(
+        children: [
+          Text(
+            l10n.shoppingSectionToBuy,
+            style: AppTextStyles.titleMedium.copyWith(
+              color: palette.textPrimary,
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            key: const Key('shopping_reorder_toggle'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(48, 36),
+            ),
+            onPressed: () =>
+                ref.read(shoppingReorderModeProvider.notifier).toggle(),
+            child: Text(
+              reorderMode
+                  ? l10n.shoppingExitReorderMode
+                  : l10n.shoppingEnterReorderMode,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: palette.accentPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Wrapper widget that reads active item IDs and passes them to
 /// [ShoppingSelectionHeader] for the "Select All" functionality.
-///
-/// Uses a separate [ConsumerWidget] to avoid rebuild of the whole screen
-/// body when batch IDs change.
 class _BatchHeaderWrapper extends ConsumerWidget {
   const _BatchHeaderWrapper();
 
@@ -275,8 +299,7 @@ class _BatchHeaderWrapper extends ConsumerWidget {
   }
 }
 
-/// Header row above the completed section — shows completed-items divider
-/// and a clear-all button (DONE-03).
+/// 完了 section header — heading + すべて削除 clear-all button (DONE-03).
 ///
 /// The clear-all button fires [ClearCompletedItemsUseCase] for [listType]
 /// regardless of active filter (SC5 — clears all completed in the segment).
@@ -295,38 +318,21 @@ class _CompletedSectionHeader extends ConsumerWidget {
     final l10n = S.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(17, 18, 17, 8),
       child: Row(
         children: [
-          Expanded(
-            child: Divider(
-              height: 1,
-              thickness: 1,
-              color: palette.borderList,
+          Text(
+            l10n.shoppingCompletedDivider,
+            style: AppTextStyles.titleMedium.copyWith(
+              color: palette.textPrimary,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              l10n.shoppingCompletedDivider,
-              style: AppTextStyles.dividerLabel.copyWith(
-                color: palette.textSecondary,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Divider(
-              height: 1,
-              thickness: 1,
-              color: palette.borderList,
-            ),
-          ),
-          const SizedBox(width: 8),
+          const Spacer(),
           // Clear-all-completed button (DONE-03, SC5)
           TextButton(
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(48, 32),
+              minimumSize: const Size(48, 36),
             ),
             onPressed: () async {
               final confirmed = await showSoftConfirmDialog(
@@ -349,10 +355,12 @@ class _CompletedSectionHeader extends ConsumerWidget {
                   .read(clearCompletedItemsUseCaseProvider)
                   .execute(listType);
             },
-            child: Icon(
-              Icons.delete_sweep_outlined,
-              size: 20,
-              color: palette.textSecondary,
+            child: Text(
+              l10n.shoppingClearCompletedConfirm,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: palette.textSecondary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],

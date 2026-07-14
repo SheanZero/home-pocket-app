@@ -1991,6 +1991,9 @@ class SJa extends S {
   String get shoppingSegmentPublic => '公開';
 
   @override
+  String get shoppingSectionToBuy => '買うもの';
+
+  @override
   String get shoppingListScreenTitle => '買い物リスト';
 
   @override
