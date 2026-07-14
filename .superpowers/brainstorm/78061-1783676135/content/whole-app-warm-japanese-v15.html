@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Pocket — Whole App A 温润日系</title>
+<style>/* Home Pocket — Sketch theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
+   Mirrors lib/core/theme/app_palette.dart light values. Throwaway sketch only. */
+:root {
+  /* Brand */
+  --primary:        #6FA36F; /* 若叶绿 leaf green — nav/tab/CTA/active */
+  --primary-press:  #5E8E5E;
+  --daily:          #5FAE72; /* 日常 */
+  --daily-text:     #2E6B3A;
+  --joy:            #D98CA0; /* 悦己 + FAB 樱粉 sakura pink */
+  --joy-text:       #A53D5E;
+  --joy-bg:         #FBEAEF;
+  --shared:         #5B8AC4; /* steel-blue */
+
+  /* Surfaces */
+  --bg:             #FBF7F4; /* 暖米白 warm cream */
+  --card:           #FFFFFF;
+  --card-alt:       #FCF9F7;
+  --border:         #E6DDD8;
+  --border-soft:    #EAE1DC;
+
+  /* Text */
+  --text:           #20352B;
+  --text-muted:     #71877A;
+  --text-faint:     #9CA99F;
+
+  /* Semantic */
+  --success:        #2FA37A;
+  --warning:        #C98A00;
+  --error:          #E5484D;
+  --info:           #2A8FB8;
+
+  /* Shape & motion */
+  --radius-sm: 10px;
+  --radius:    16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 6px 20px rgba(120,90,70,0.10);
+  --shadow-card: 0 2px 10px rgba(120,90,70,0.07);
+  --gap: 16px;
+
+  --font: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "PingFang SC", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--text); }
+
+/* ---- Phone frame ---- */
+.phone-row { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; padding:88px 24px 48px; }
+.phone {
+  width: 375px; height: 760px; background: var(--bg);
+  border-radius: 40px; box-shadow: 0 12px 40px rgba(80,60,50,0.22);
+  border: 10px solid #2b2622; overflow: hidden; position: relative;
+  display: flex; flex-direction: column;
+}
+.phone .notch { position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:140px; height:26px; background:#2b2622; border-radius:0 0 16px 16px; z-index:5; }
+.phone-label { text-align:center; font-size:13px; color:#6b5d54; margin-top:10px; font-weight:600; }
+.screen { flex:1; overflow-y:auto; padding: 44px 22px 22px; }
+.screen::-webkit-scrollbar { width:0; }
+
+/* ---- Common atoms ---- */
+.h1 { font-size: 26px; font-weight: 700; letter-spacing:-0.01em; margin:0 0 8px; }
+.h2 { font-size: 19px; font-weight: 700; margin:0 0 6px; }
+.sub { font-size: 14px; color: var(--text-muted); line-height:1.6; margin:0; }
+.btn { border:none; border-radius: var(--radius-pill); padding:15px 20px; font-size:16px;
+  font-weight:700; font-family:var(--font); cursor:pointer; width:100%; transition:transform .08s, filter .15s; }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color:#fff; box-shadow: var(--shadow-soft); }
+.btn-joy { background: var(--joy); color:#fff; box-shadow:0 6px 18px rgba(217,140,160,.35); }
+.btn-ghost { background: transparent; color: var(--text-muted); font-weight:600; }
+.btn-outline { background:#fff; color: var(--primary); border:1.5px solid var(--primary); }
+.card { background: var(--card); border:1px solid var(--border-soft); border-radius: var(--radius);
+  padding:16px; box-shadow: var(--shadow-card); }
+.pill { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--radius-pill);
+  font-size:13px; font-weight:600; }
+.row { display:flex; align-items:center; gap:12px; }
+.spacer { flex:1; }
+.divider { height:1px; background:var(--border-soft); margin:4px 0; }
+.link { color: var(--shared); text-decoration:none; font-weight:600; }
+.dot-row { display:flex; gap:8px; justify-content:center; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--border); }
+.dot.on { background: var(--primary); width:20px; border-radius:4px; }
+</style>
+<style>/* Sketch 005 — A 温润日系 / 生活手帐
+   Token-only theme. Production values remain undecided until the sketch is approved. */
+:root {
+  --hp-bg: #f5f0e7;
+  --hp-surface: #fffdf8;
+  --hp-surface-muted: #eee7db;
+  --hp-surface-strong: #e4dac9;
+  --hp-text: #27362f;
+  --hp-text-muted: #637168;
+  --hp-text-faint: #637168;
+  --hp-border: #e3dacb;
+  --hp-border-strong: #d3c7b5;
+  --hp-primary: #456b59;
+  --hp-primary-text: #365a49;
+  --hp-primary-soft: #e2ece4;
+  --hp-daily: #66896d;
+  --hp-daily-text: #45674d;
+  --hp-daily-soft: #e6eee5;
+  --hp-joy: #c87874;
+  --hp-joy-text: #984a47;
+  --hp-joy-soft: #f4e3df;
+  --hp-shared: #58758c;
+  --hp-shared-text: #3f6078;
+  --hp-shared-soft: #e4ebf0;
+  --hp-success: #4f826a;
+  --hp-warning: #a8733f;
+  --hp-error: #b64f4f;
+  --hp-info: #4f7186;
+  --hp-shadow-soft: 0 8px 30px rgba(75, 57, 40, .11);
+  --hp-shadow-card: 0 2px 12px rgba(75, 57, 40, .07);
+  --hp-font-body: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --hp-font-display: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --hp-radius-sm: 10px;
+  --hp-radius-md: 14px;
+  --hp-radius-card: 18px;
+  --hp-radius-hero: 24px;
+  --hp-radius-pill: 999px;
+}
+
+[data-theme="dark"] {
+  --hp-bg: #171c19;
+  --hp-surface: #222923;
+  --hp-surface-muted: #2b342d;
+  --hp-surface-strong: #354039;
+  --hp-text: #eef1eb;
+  --hp-text-muted: #a1ada4;
+  --hp-text-faint: #8b978e;
+  --hp-border: #354038;
+  --hp-border-strong: #465248;
+  --hp-primary: #99bca5;
+  --hp-primary-text: #b4d2bc;
+  --hp-primary-soft: #293b30;
+  --hp-daily: #92b298;
+  --hp-daily-text: #a8c8ae;
+  --hp-daily-soft: #29382e;
+  --hp-joy: #e2a09b;
+  --hp-joy-text: #f0b7b3;
+  --hp-joy-soft: #402b2c;
+  --hp-shared: #91adc2;
+  --hp-shared-text: #aac4d7;
+  --hp-shared-soft: #263640;
+  --hp-success: #89b49c;
+  --hp-warning: #d3a571;
+  --hp-error: #e58c8c;
+  --hp-info: #8cb1c8;
+  --hp-shadow-soft: 0 10px 34px rgba(0, 0, 0, .24);
+  --hp-shadow-card: 0 2px 12px rgba(0, 0, 0, .18);
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0">
+<style>
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body { margin: 0; background: #ddd6cb; color: #28322d; font-family: var(--hp-font-body); transition: background .2s; }
+  button, input, select { font: inherit; }
+  button { color: inherit; }
+  .material-symbols-rounded { font-family: "Material Symbols Rounded"; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; direction: ltr; -webkit-font-feature-settings: "liga"; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; }
+  [data-theme="dark"] body { background: #0f1311; color: #edf0eb; }
+  :focus-visible { outline: 3px solid color-mix(in srgb, var(--hp-primary) 45%, transparent); outline-offset: 2px; }
+
+  /* Design-center chrome */
+  .hub-bar { position: fixed; inset: 0 0 auto; z-index: 100; height: 62px; display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: rgba(255,253,248,.94); border-bottom: 1px solid #d8d0c4; backdrop-filter: blur(18px); }
+  [data-theme="dark"] .hub-bar { background: rgba(24,29,26,.95); border-color: #354038; }
+  .hub-title { font-family: var(--hp-font-display); font-size: 17px; font-weight: 700; margin-right: auto; white-space: nowrap; }
+  .preset, .hub-action { min-height: 40px; border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text-muted); border-radius: var(--hp-radius-pill); padding: 8px 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; transition: .15s ease; }
+  .preset:hover, .hub-action:hover { transform: translateY(-1px); border-color: var(--hp-primary); }
+  .preset.active { background: var(--hp-primary); border-color: var(--hp-primary); color: var(--hp-surface); }
+  .workspace { width: min(1180px, 100%); margin: 0 auto; padding: 86px 18px 52px; display: grid; grid-template-columns: 220px 390px minmax(240px, 330px); gap: 28px; align-items: start; justify-content: center; }
+  .catalog, .inspector { position: sticky; top: 82px; max-height: calc(100vh - 100px); overflow: auto; background: rgba(255,253,248,.76); border: 1px solid rgba(100,86,67,.13); border-radius: 22px; padding: 14px; backdrop-filter: blur(16px); }
+  [data-theme="dark"] .catalog, [data-theme="dark"] .inspector { background: rgba(34,41,35,.76); border-color: #354038; }
+  .catalog h2, .inspector h2 { margin: 2px 4px 10px; font-family: var(--hp-font-display); font-size: 16px; color: var(--hp-text); }
+  .catalog-group { margin-top: 14px; }
+  .catalog-group > span { display: block; padding: 0 7px 5px; color: var(--hp-text-faint); font-size: 9px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+  .screen-link { width: 100%; min-height: 38px; border: 0; background: transparent; color: var(--hp-text-muted); border-radius: 11px; padding: 8px 9px; display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; font-size: 11px; font-weight: 750; transition: .15s; }
+  .screen-link:hover { background: var(--hp-surface-muted); color: var(--hp-text); }
+  .screen-link.active { background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .screen-link .material-symbols-rounded { font-size: 17px; }
+  .phone-wrap { display: flex; justify-content: center; }
+  .phone { width: 390px; height: 844px; border: 8px solid #282b28; border-radius: 40px; overflow: hidden; position: relative; background: var(--hp-bg); color: var(--hp-text); box-shadow: 0 28px 70px rgba(63,49,36,.28); transition: width .2s, background .2s, color .2s; }
+  [data-theme="dark"] .phone { border-color: #070908; box-shadow: 0 28px 70px rgba(0,0,0,.4); }
+  .status { height: 34px; padding: 10px 19px 0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 900; }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons .material-symbols-rounded { font-size: 14px; }
+  #app-screen { height: calc(100% - 34px); overflow-y: auto; scrollbar-width: none; padding-bottom: 94px; }
+  #app-screen::-webkit-scrollbar { display: none; }
+  .phone.no-nav #app-screen { padding-bottom: 0; }
+  .screen { min-height: 100%; padding: 11px 20px 28px; }
+  .screen.flush { padding-left: 0; padding-right: 0; }
+  .app-header { min-height: 46px; display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
+  .list-header-actions { display: flex; align-items: center; gap: 0; }
+  .list-header-actions .icon-btn { width: 40px; height: 40px; }
+  .list-header-actions .material-symbols-rounded { font-size: 24px; }
+  .app-header h1 { margin: 0; font-size: 18px; font-weight: 800; color: var(--hp-text); }
+  .page-month-title { font-family: var(--hp-font-body); font-size: 18px; font-weight: 800; line-height: 1.2; letter-spacing: 0; white-space: nowrap; }
+  .home-month-title { color: var(--hp-primary-text); }
+  .list-month-title { color: var(--hp-info); }
+  .analytics-month-title { color: var(--hp-joy-text); }
+  .spacer { flex: 1; }
+  .icon-btn, .back-btn, .chip, .text-btn, .primary-btn, .secondary-btn, .ghost-btn, .tap-row, .nav-item, .fab, .key, .filter-chip { border: 0; cursor: pointer; transition: transform .12s ease, opacity .12s, background .12s; }
+  .icon-btn:active, .back-btn:active, .chip:active, .text-btn:active, .primary-btn:active, .secondary-btn:active, .ghost-btn:active, .tap-row:active, .nav-item:active, .fab:active, .key:active, .filter-chip:active { transform: scale(.97); }
+  .icon-btn { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--hp-text); }
+  .back-btn { min-width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--hp-text-muted); margin-left: -10px; }
+  .chip { min-height: 34px; padding: 6px 10px; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 10px; font-weight: 850; }
+  .chip .material-symbols-rounded { font-size: 15px; }
+  .eyebrow { color: var(--hp-text-muted); font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+  .display { font-family: var(--hp-font-display); }
+  .amount { font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
+  .card { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); padding: 15px; box-shadow: var(--hp-shadow-card); }
+  .flat-card { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); overflow: hidden; }
+  .section-title { display: flex; align-items: center; justify-content: space-between; margin: 21px 1px 10px; }
+  .section-title h2 { margin: 0; font-size: 14px; }
+  .text-btn { background: transparent; color: var(--hp-primary-text); font-size: 11px; font-weight: 850; padding: 6px; }
+  .primary-btn, .secondary-btn, .ghost-btn { width: 100%; min-height: 48px; border-radius: 14px; font-size: 13px; font-weight: 850; }
+  .primary-btn { background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 7px 18px color-mix(in srgb, var(--hp-primary) 24%, transparent); }
+  .secondary-btn { background: var(--hp-surface); color: var(--hp-primary-text); border: 1px solid var(--hp-border-strong); }
+  .ghost-btn { background: transparent; color: var(--hp-text-muted); }
+  .hint { color: var(--hp-text-muted); font-size: 10px; line-height: 1.55; }
+  .semantic-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .row-divider + .row-divider { border-top: 1px solid var(--hp-border); }
+  .tap-row { width: 100%; min-height: 54px; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 11px; padding: 10px 12px; text-align: left; }
+  .tap-row:hover { background: color-mix(in srgb, var(--hp-surface-muted) 52%, transparent); }
+  .row-icon { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--hp-daily-soft); color: var(--hp-daily-text); flex: 0 0 auto; }
+  .row-icon.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .row-icon.shared { background: var(--hp-shared-soft); color: var(--hp-shared-text); }
+  .row-icon .material-symbols-rounded { font-size: 19px; }
+  .row-copy { min-width: 0; flex: 1; }
+  .row-copy strong { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-copy small { display: block; color: var(--hp-text-muted); font-size: 9px; margin-top: 2px; }
+  .row-value { font-size: 11px; font-weight: 900; white-space: nowrap; }
+  .badge { border-radius: var(--hp-radius-pill); padding: 4px 7px; font-size: 8px; font-weight: 900; background: var(--hp-surface-muted); color: var(--hp-text-muted); }
+
+  /* Shell */
+  .bottom-nav { position: absolute; z-index: 10; left: 0; right: 0; bottom: 0; height: auto; background: linear-gradient(transparent, var(--hp-bg) 35%); border: 0; display: flex; align-items: flex-end; gap: 12px; padding: 16px 21px 21px; }
+  .bottom-pill { flex: 1; height: 62px; background: color-mix(in srgb, var(--hp-surface) 96%, transparent); border: 1px solid var(--hp-border); border-radius: 32px; display: flex; align-items: center; padding: 0 12px; box-shadow: var(--hp-shadow-soft); backdrop-filter: blur(18px); }
+  .nav-item { flex: 1; background: transparent; color: var(--hp-text-faint); min-height: 50px; border-radius: 13px; display: grid; place-items: center; gap: 3px; font-size: 8px; }
+  .nav-item .material-symbols-rounded { font-size: 20px; }
+  .nav-item.active { color: var(--hp-primary-text); }
+  .fab { width: 62px; height: 62px; flex: 0 0 auto; border-radius: 50%; background: linear-gradient(var(--hp-joy), color-mix(in srgb, var(--hp-joy) 76%, #8f4645)); color: var(--hp-surface); display: grid; place-items: center; box-shadow: 0 8px 22px color-mix(in srgb, var(--hp-joy) 34%, transparent); }
+  .fab .material-symbols-rounded { font-size: 27px; }
+
+  /* Home */
+  .home-overview { border-top: 1px solid var(--hp-border); border-bottom: 1px solid var(--hp-border); padding: 17px 0; }
+  .home-total { display: flex; align-items: end; justify-content: space-between; margin: 7px 0 13px; }
+  .home-total strong { font-family: var(--hp-font-display); font-size: 36px; }
+  .delta { padding: 5px 8px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 9px; font-weight: 900; }
+  .ledger-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .ledger { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 15px; padding: 11px; }
+  .ledger span { display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
+  .ledger strong { display: block; margin-top: 5px; color: var(--hp-daily-text); font-size: 15px; }
+  .ledger.joy strong { color: var(--hp-joy-text); }
+  .ledger.shared strong { color: var(--hp-shared-text); }
+  .home-joy { padding: 15px 0; border-bottom: 1px solid var(--hp-border); }
+  .home-joy-ring { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; }
+  .joy-ring, .donut { border-radius: 50%; background: conic-gradient(var(--hp-joy) 0 80%, var(--hp-joy-soft) 80% 100%); display: grid; place-items: center; position: relative; }
+  .joy-ring { width: 84px; height: 84px; }
+  .joy-ring::after, .donut::after { content: ""; position: absolute; inset: 9px; background: var(--hp-bg); border-radius: 50%; }
+  .joy-ring span, .donut span { position: relative; z-index: 1; text-align: center; font-size: 9px; color: var(--hp-text-muted); }
+  .joy-ring strong { display: block; color: var(--hp-joy-text); font-size: 17px; }
+  .home-joy h3 { margin: 0 0 4px; font-family: var(--hp-font-display); font-size: 16px; }
+  .joy-meta { display: flex; gap: 11px; margin-top: 7px; font-size: 9px; font-weight: 850; }
+  .home-joy-track { display: grid; gap: 11px; }
+  .joy-track-head { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; }
+  .joy-track-head h3 { font-family: var(--hp-font-body); font-size: 13px; margin-bottom: 2px; }
+  .joy-target { color: var(--hp-joy-text); font-size: 19px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .joy-target small { color: var(--hp-text-muted); font-size: 9px; }
+  .joy-progress { height: 8px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); overflow: hidden; }
+  .joy-progress span { display: block; width: 80%; height: 100%; border-radius: inherit; background: var(--hp-joy); }
+  .joy-support-grid { display: grid; grid-template-columns: 1fr 94px; gap: 9px; align-items: stretch; }
+  .joy-support-metric { min-width: 0; padding: 8px 10px; border: 1px solid var(--hp-border); border-radius: 12px; background: color-mix(in srgb, var(--hp-surface) 72%, transparent); }
+  .joy-support-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--hp-text-muted); font-size: 8px; font-weight: 850; }
+  .joy-support-head strong { color: var(--hp-joy-text); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .joy-support-track { height: 4px; margin-top: 7px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); overflow: hidden; }
+  .joy-support-track span { display: block; width: 82%; height: 100%; border-radius: inherit; background: var(--hp-joy); }
+  .joy-small-win { display: flex; flex-direction: column; justify-content: center; padding: 8px 10px; border-radius: 12px; background: var(--hp-joy-soft); color: var(--hp-text-muted); }
+  .joy-small-win > span { font-size: 8px; font-weight: 850; }
+  .joy-small-win strong { margin-top: 2px; color: var(--hp-joy-text); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .joy-small-win small { margin-top: 1px; font-size: 7px; }
+  .home-joy-number { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+  .joy-number-copy h3 { margin-top: 4px; }
+  .joy-number-copy .hint { margin: 0; max-width: 180px; }
+  .joy-number-score { min-width: 94px; padding-left: 15px; border-left: 1px solid var(--hp-border); text-align: right; }
+  .joy-number-score strong { display: block; color: var(--hp-joy-text); font-family: var(--hp-font-display); font-size: 36px; line-height: .95; font-variant-numeric: tabular-nums; }
+  .joy-number-score span { display: block; margin-top: 7px; color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
+  .joy-number-meta { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+  .joy-number-meta span { padding: 7px 8px; border-radius: 10px; background: var(--hp-joy-soft); color: var(--hp-joy-text); font-size: 8px; font-weight: 850; text-align: center; }
+  .joy-story-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 13px 2px 7px; }
+  .joy-story-intro h3 { margin: 0; color: var(--hp-text); font-size: 11px; font-weight: 850; }
+  .joy-story-intro p { margin: 3px 0 0; color: var(--hp-text-muted); font-size: 8px; line-height: 1.45; }
+  .joy-story-intro .material-symbols-rounded { color: var(--hp-joy-text); font-size: 18px; }
+  .joy-story { margin-top: 0; background: var(--hp-joy-soft); border: 0; border-radius: 16px; width: 100%; min-height: 58px; padding: 10px; display: grid; grid-template-columns: 38px 1fr auto; gap: 9px; align-items: center; color: var(--hp-text); text-align: left; cursor: pointer; }
+  .story-end { display: grid; justify-items: end; gap: 4px; color: var(--hp-joy-text); }
+  .story-end strong { font-size: 11px; font-variant-numeric: tabular-nums; }
+  .story-end small { display: inline-flex; align-items: center; gap: 1px; font-size: 7px; font-weight: 850; }
+  .story-end .material-symbols-rounded { font-size: 13px; }
+  .story-date { width: 38px; height: 38px; border-radius: 10px; background: var(--hp-surface); color: var(--hp-joy-text); display: grid; place-items: center; font-size: 9px; font-weight: 900; }
+
+  /* Home — selected Sketch 006 C, faithful to shipped Flutter composition. */
+  .home-faithful { padding-left: 20px; padding-right: 20px; }
+  .home-faithful .app-header { min-height: 46px; margin-bottom: 13px; }
+  .home-faithful .app-header .page-month-title { padding: 4px 0; }
+  .home-faithful .app-header .chip { min-height: 27px; padding: 4px 10px; border-radius: 8px; }
+  .faithful-hero { width: 100%; margin-top: 0; padding: 18px; border: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); border-radius: 22px; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); box-shadow: var(--hp-shadow-soft); color: var(--hp-text); cursor: pointer; transition: .15s ease; }
+  .faithful-hero:hover { transform: translateY(-1px); }
+  .faithful-label { color: var(--hp-text-muted); font-size: 10px; font-weight: 700; }
+  .faithful-amount-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .faithful-amount-row > strong { flex: 1; font-family: var(--hp-font-body); font-size: 33px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .faithful-trend { padding: 5px 9px; border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 3px; background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 8px; font-weight: 850; }
+  .faithful-trend .material-symbols-rounded { font-size: 13px; }
+  .faithful-previous { margin: 7px 0 0; color: var(--hp-text-muted); font-size: 9px; }
+  .faithful-ledgers { margin-top: 16px; }
+  .faithful-ledger-labels { display: flex; justify-content: space-between; gap: 10px; }
+  .faithful-ledger-label { display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 8px; }
+  .faithful-ledger-label strong { color: var(--hp-joy-text); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .faithful-ledger-label.daily strong { color: var(--hp-daily-text); }
+  .faithful-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--hp-joy); }
+  .faithful-ledger-label.daily .faithful-dot { background: var(--hp-daily); order: 3; }
+  .faithful-split { height: 6px; margin-top: 8px; border-radius: 4px; background: var(--hp-daily); overflow: hidden; }
+  .faithful-split span { display: block; width: 29%; height: 100%; background: var(--hp-joy); }
+  .faithful-divider { height: 1px; margin: 12px 0; background: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); }
+  .faithful-region-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 850; }
+  .faithful-region-title > .material-symbols-rounded { color: var(--hp-joy-text); font-size: 16px; }
+  .faithful-info { margin-left: 1px; color: var(--hp-text-muted) !important; font-size: 14px !important; }
+  .faithful-analysis-link { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; color: var(--hp-primary-text); font-size: 8px; font-weight: 800; }
+  .faithful-analysis-link .material-symbols-rounded { font-size: 14px; }
+  .faithful-metric-grid { --joy-satisfaction: var(--hp-joy-text); --joy-small-win: color-mix(in srgb, var(--hp-joy) 68%, var(--hp-joy-text)); height: 100px; margin-top: 10px; display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 14px; align-items: center; }
+  .faithful-goal-ring { --goal: 80%; width: 100px; height: 100px; position: relative; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--hp-joy) 0 var(--goal), var(--hp-surface-muted) var(--goal)); box-shadow: 0 0 11px color-mix(in srgb,var(--hp-joy) 20%,transparent); }
+  .faithful-goal-ring::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); }
+  .faithful-goal-copy { position: relative; z-index: 1; display: grid; justify-items: center; line-height: 1; color: var(--hp-joy-text); }
+  .faithful-goal-copy > span { color: var(--hp-text-muted); font-size: 8px; font-weight: 750; }
+  .faithful-goal-copy > strong { margin-top: 6px; font-size: 23px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-goal-copy > strong small { font-size: 13px; font-weight: 700; }
+  .faithful-goal-copy > em { margin-top: 5px; font-size: 10px; font-style: normal; font-weight: 850; }
+  .faithful-support-stack { height: 100px; min-width: 0; display: grid; grid-template-rows: minmax(0,1fr) 1px minmax(0,1fr); }
+  .faithful-support-divider { background: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); }
+  .faithful-support-block { min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+  .faithful-satisfaction-head { display: flex; align-items: baseline; justify-content: space-between; gap: 7px; }
+  .faithful-satisfaction-head > span { color: var(--hp-text); font-size: 9px; font-weight: 850; }
+  .faithful-satisfaction-head > strong { color: var(--joy-satisfaction); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .faithful-satisfaction-head > strong small { font-size: 9px; font-weight: 700; }
+  .faithful-satisfaction-scale { height: 3px; margin-top: 6px; border-radius: 3px; background: var(--hp-surface-muted); overflow: hidden; }
+  .faithful-satisfaction-scale span { display: block; width: var(--satisfaction,82%); height: 100%; background: var(--joy-satisfaction); }
+  .faithful-small-win { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+  .faithful-small-win-copy { display: grid; gap: 3px; }
+  .faithful-small-win-copy strong { font-size: 9px; }
+  .faithful-small-win-copy small { color: var(--hp-text-muted); font-size: 8px; }
+  .faithful-small-win-value { margin-left: auto; color: var(--joy-small-win); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .faithful-small-win-value small { margin-left: 2px; font-size: 9px; font-weight: 700; }
+  .faithful-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px 1fr 58px; min-height: 74px; overflow: visible; border: 1px solid color-mix(in srgb, var(--hp-joy) 23%, var(--hp-border)); border-radius: 14px; background: color-mix(in srgb, var(--hp-joy-soft) 86%, var(--hp-surface)); }
+  .faithful-ticket-accent { border-radius: 13px 0 0 13px; background: var(--hp-joy); }
+  .faithful-calendar { align-self: center; width: 48px; margin-left: 10px; overflow: hidden; border-radius: 10px; background: var(--hp-surface); box-shadow: 0 2px 7px color-mix(in srgb,var(--hp-joy) 18%,transparent); text-align: center; }
+  .faithful-calendar b { display: block; padding: 3px 0; background: var(--hp-joy); color: var(--hp-bg); font-size: 7px; }
+  .faithful-calendar strong { display: block; padding-top: 4px; color: var(--hp-joy-text); font-size: 14px; }
+  .faithful-calendar small { display: block; padding-bottom: 4px; color: var(--hp-text-muted); font-size: 7px; }
+  .faithful-ticket-copy { min-width: 0; align-self: center; padding: 10px 8px 10px 12px; }
+  .faithful-ticket-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+  .faithful-ticket-copy span { display: block; margin-top: 5px; color: var(--hp-joy-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-seal { position: relative; align-self: stretch; display: grid; place-items: center; align-content: center; gap: 3px; border-left: 1px dashed color-mix(in srgb,var(--hp-joy) 35%,transparent); color: var(--hp-joy-text); font-size: 7px; font-weight: 850; }
+  .faithful-seal::before, .faithful-seal::after { content: ""; position: absolute; z-index: 2; left: -6px; width: 12px; height: 12px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); pointer-events: none; }
+  .faithful-seal::before { top: -7px; }
+  .faithful-seal::after { bottom: -7px; }
+  .faithful-seal .material-symbols-rounded { font-size: 22px; }
+  .faithful-members { display: grid; gap: 8px; }
+  .faithful-member { display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: 9px; }
+  .faithful-member-avatar { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--hp-shared-soft); color: var(--hp-shared-text); font-size: 8px; font-weight: 900; }
+  .faithful-member strong { margin-left: auto; color: var(--hp-text); font-size: 9px; }
+  .faithful-invite { width: 100%; min-height: 112px; margin-top: 16px; padding: 14px 12px; border: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); border-radius: 16px; background: var(--hp-surface); box-shadow: var(--hp-shadow-soft); display: grid; grid-template-columns: 52px minmax(0,1fr) 92px; gap: 10px; align-items: center; text-align: left; }
+  .faithful-avatar-pair { display: block; width: 52px; height: 36px; position: relative; }
+  .faithful-avatar-pair > span { position: absolute; width: 36px; height: 36px; display: grid; place-items: center; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-primary); color: #fff; }
+  .faithful-avatar-pair > span:last-child { left: 18px; background: var(--hp-daily); }
+  .faithful-avatar-pair .material-symbols-rounded { font-size: 18px; }
+  .faithful-invite-copy { min-width: 0; }
+  .faithful-invite h3 { margin: 0; font-size: 12px; line-height: 1.35; }
+  .faithful-invite p { margin: 4px 0 6px; color: var(--hp-text-muted); font-size: 8px; line-height: 1.45; }
+  .faithful-settings-path { min-height: 40px; margin: -4px 0 -7px -7px; padding: 5px 7px; border: 0; border-radius: 8px; background: transparent; color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 2px; font-size: 9px; font-weight: 850; cursor: pointer; }
+  .faithful-settings-path:hover { background: var(--hp-primary-soft); }
+  .faithful-settings-path .material-symbols-rounded { font-size: 13px; }
+  .faithful-invite-actions { align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px; }
+  .faithful-invite-close { width: 40px; height: 40px; margin: -9px -7px 0 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
+  .faithful-invite-close:hover { background: var(--hp-surface-muted); color: var(--hp-text); }
+  .faithful-invite-close .material-symbols-rounded { font-size: 18px; }
+  .faithful-invite-cta { width: 92px; min-height: 40px; padding: 7px 8px; border: 0; border-radius: 11px; background: var(--hp-joy); color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 9px; font-weight: 850; white-space: nowrap; cursor: pointer; }
+  .faithful-invite-cta:hover { background: color-mix(in srgb, var(--hp-joy) 88%, var(--hp-text)); }
+  .faithful-invite-cta .material-symbols-rounded { font-size: 14px; }
+  .faithful-recent { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .faithful-recent h2 { margin: 0; font-size: 13px; }
+  .faithful-list { margin-top: 12px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); }
+  .faithful-tx { width: 100%; min-height: 62px; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); background: transparent; padding: 10px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+  .faithful-tx:last-child { border-bottom: 0; }
+  .faithful-tx-icon { width: 28px; display: grid; place-items: center; color: var(--hp-text-muted); }
+  .faithful-tx-icon.joy { color: var(--hp-joy-text); }
+  .faithful-tx-icon .material-symbols-rounded { font-size: 28px; }
+  .faithful-tx-copy { min-width: 0; flex: 1; }
+  .faithful-tx-copy > strong { display: block; font-size: 10px; }
+  .faithful-tx-meta { margin-top: 4px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 7px; }
+  .faithful-tag { padding: 2px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-weight: 850; }
+  .faithful-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .faithful-tx-amount { color: var(--hp-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-tx-amount.joy { color: var(--hp-joy-text); }
+
+  /* Calendar / charts / lists */
+  .calendar-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 9px; }
+  .day { aspect-ratio: 1; display: grid; place-items: center; border-radius: 9px; color: var(--hp-text-muted); font-size: 9px; position: relative; }
+  .day.has::after { content: ""; position: absolute; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--hp-daily); }
+  .day.today { background: var(--hp-primary); color: var(--hp-surface); font-weight: 900; }
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 2px; scrollbar-width: none; }
+  .filter-chip { min-height: 32px; padding: 6px 10px; white-space: nowrap; border-radius: var(--hp-radius-pill); border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
+  .filter-chip.active { background: var(--hp-primary); border-color: var(--hp-primary); color: var(--hp-surface); }
+  .search { width: 100%; min-height: 42px; border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text); border-radius: 13px; padding: 0 13px; font-size: 11px; margin: 9px 0 3px; }
+  .list-screen { padding-left: 20px; padding-right: 20px; }
+  .list-calendar { overflow: hidden; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); background: var(--hp-surface); box-shadow: var(--hp-shadow-card); }
+  .list-calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 8px 8px 3px; }
+  .list-calendar-weekday { height: 16px; display: grid; place-items: center; color: var(--hp-text-muted); font-size: 8px; font-weight: 750; }
+  .list-calendar-weekday.weekend { color: var(--hp-info); }
+  .list-calendar-day { position: relative; min-width: 0; height: 40px; padding: 2px 1px; border: 0; border-radius: 7px; background: transparent; color: var(--hp-text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; }
+  .list-calendar-day::after { content: ""; position: absolute; inset: -2px 0; }
+  .list-calendar-day:hover { background: var(--hp-surface-muted); }
+  .list-calendar-day > span { font-size: 10px; line-height: 1; }
+  .list-calendar-day > small { min-height: 10px; color: var(--hp-text-muted); font-size: 9px; line-height: 10px; font-variant-numeric: tabular-nums; }
+  .list-calendar-day.weekend > span { color: var(--hp-info); }
+  .list-calendar-day.today > span { color: var(--hp-error); font-weight: 850; }
+  .list-calendar-day.selected { background: var(--hp-primary); }
+  .list-calendar-day.selected > span, .list-calendar-day.selected > small { color: var(--hp-surface); }
+  .list-calendar-day.outside { opacity: .35; cursor: default; }
+  .list-calendar-day.outside:hover { background: transparent; }
+  .list-calendar-summary { padding: 10px 14px; border-top: 1px solid var(--hp-border); display: grid; gap: 4px; }
+  .list-calendar-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--hp-text-muted); font-size: 9px; }
+  .list-calendar-summary-row strong { color: var(--hp-text); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .list-filter-bar { position: sticky; top: 0; z-index: 5; margin: 10px -20px 0; padding: 6px 20px 8px; border-bottom: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-bg) 96%, transparent); backdrop-filter: blur(14px); }
+  .list-filter-ledgers { position: relative; height: 44px; margin: 0 0 8px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .list-filter-ledgers::before { content: ""; position: absolute; inset: 4px 0; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); }
+  .list-ledger-option { position: relative; z-index: 1; isolation: isolate; min-width: 0; min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--hp-text-muted); font-size: 10px; font-weight: 800; cursor: pointer; }
+  .list-ledger-option::before { content: ""; position: absolute; z-index: -1; inset: 4px 0; border-right: 1px solid var(--hp-border); }
+  .list-ledger-option:first-child::before { border-radius: var(--hp-radius-pill) 0 0 var(--hp-radius-pill); }
+  .list-ledger-option:last-child::before { border-right: 0; border-radius: 0 var(--hp-radius-pill) var(--hp-radius-pill) 0; }
+  .list-ledger-option.active { color: var(--hp-primary-text); }
+  .list-ledger-option.active::before { background: var(--hp-primary-soft); box-shadow: inset 0 0 0 1px var(--hp-primary); }
+  .list-ledger-option.daily.active { color: var(--hp-daily-text); }
+  .list-ledger-option.daily.active::before { background: var(--hp-daily-soft); box-shadow: inset 0 0 0 1px var(--hp-daily); }
+  .list-ledger-option.joy.active { color: var(--hp-joy-text); }
+  .list-ledger-option.joy.active::before { background: var(--hp-joy-soft); box-shadow: inset 0 0 0 1px var(--hp-joy); }
+  .list-filter-utilities { min-width: 0; height: 44px; display: flex; align-items: center; gap: 6px; }
+  .list-filter-spacer { min-width: 0; flex: 1; }
+  .list-filter-action { min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; font-size: 10px; font-weight: 800; cursor: pointer; }
+  .list-filter-action .material-symbols-rounded { font-size: 14px; }
+  .list-filter-action.sort { min-width: 108px; border-color: var(--hp-primary); color: var(--hp-text); }
+  .list-filter-action.sort .material-symbols-rounded:last-child { margin-left: 2px; font-size: 16px; }
+  .list-filter-action.category { min-width: 76px; }
+  .list-filter-action.icon-only { width: 44px; padding: 0; color: var(--hp-text); }
+  .list-filter-action.clear { width: 44px; padding: 0; border-color: transparent; background: transparent; }
+  .list-filter-action.active { border-color: var(--hp-primary); background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .list-filter-search { min-width: 0; height: 44px; flex: 1; display: flex; align-items: center; overflow: hidden; border: 1px solid var(--hp-primary); border-radius: var(--hp-radius-pill); background: var(--hp-surface); }
+  .list-filter-search > .material-symbols-rounded { margin-left: 12px; color: var(--hp-text-muted); font-size: 16px; }
+  .list-filter-search input { min-width: 0; flex: 1; height: 100%; padding: 0 8px; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: 10px; }
+  .list-filter-search button { width: 44px; height: 44px; flex: 0 0 auto; padding: 0; border: 0; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
+  .list-day-header { height: 28px; padding: 0 2px; color: var(--hp-text-muted); display: flex; align-items: center; font-size: 9px; font-weight: 750; }
+  .list-transactions { margin: 0 0 10px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); box-shadow: 0 4px 14px rgba(76,61,48,.035); }
+  .list-transaction { width: 100%; min-height: 60px; padding: 9px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+  .list-transaction + .list-transaction { border-top: 1px solid var(--hp-border); }
+  .list-transaction:hover { background: color-mix(in srgb, var(--hp-surface-muted) 52%, transparent); }
+  .list-transaction-icon { width: 28px; flex: 0 0 auto; color: var(--hp-daily-text); display: grid; place-items: center; }
+  .list-transaction-icon.joy { color: var(--hp-joy-text); }
+  .list-transaction-icon .material-symbols-rounded { font-size: 25px; }
+  .list-transaction-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
+  .list-transaction-copy > strong { overflow: hidden; color: var(--hp-text); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .list-transaction-meta { min-width: 0; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 8px; }
+  .list-transaction-tag { padding: 1px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-style: normal; white-space: nowrap; }
+  .list-transaction-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .list-transaction-merchant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list-transaction-amount { color: var(--hp-text); font-size: 12px; font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .list-transaction-chevron { margin-left: -6px; color: var(--hp-text-muted); font-size: 18px; }
+  .list-empty-filtered { padding: 42px 20px; color: var(--hp-text-muted); text-align: center; font-size: 10px; }
+  /* Analytics — current Flutter registry restored in the selected warm system. */
+  .analytics-screen { padding-left: 20px; padding-right: 20px; }
+  .analytics-screen .app-header { min-height: 46px; margin-bottom: 13px; }
+  .analytics-window { min-height: 44px; max-width: 172px; padding: 6px 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 10px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 8px rgba(76,61,48,.035); }
+  .analytics-window span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-window .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-text-muted); font-size: 15px; }
+  .analytics-section-head { margin: 26px 4px 10px; display: flex; align-items: center; gap: 7px; color: var(--hp-text-muted); }
+  .analytics-section-head.first { margin-top: 4px; }
+  .analytics-section-head::before { content: ""; width: 3px; height: 13px; flex: 0 0 auto; border-radius: 2px; background: var(--hp-primary); }
+  .analytics-section-head.joy::before { background: var(--hp-joy); }
+  .analytics-section-head h2 { margin: 0; overflow: hidden; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-card { width: 100%; padding: 14px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); box-shadow: 0 3px 14px rgba(76,61,48,.05); }
+  .analytics-category-card { padding: 18px; }
+  .analytics-insight { min-height: 32px; margin-top: 10px; padding: 7px 10px; border-radius: 10px; background: var(--hp-daily-soft); color: var(--hp-daily-text); display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 750; line-height: 1.35; }
+  .analytics-insight.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .analytics-insight .material-symbols-rounded { flex: 0 0 auto; font-size: 15px; }
+  .analytics-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .analytics-pill { min-height: 44px; padding: 0 16px; border: 1px solid var(--hp-daily); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s ease; }
+  .analytics-pill:hover { transform: translateY(-1px); }
+  .analytics-pill.active { background: var(--hp-daily); color: var(--hp-surface); }
+  .analytics-pill.joy.active { border-color: var(--hp-joy); background: var(--hp-joy); }
+  .analytics-trend-plot { height: 190px; margin: 8px -2px 0; position: relative; }
+  .analytics-trend-plot svg { width: 100%; height: 100%; overflow: visible; }
+  .analytics-grid-line { stroke: var(--hp-border); stroke-width: 1; }
+  .analytics-trend-fill { fill: url(#trendFillDaily); opacity: .72; }
+  .analytics-trend-fill.joy { fill: url(#trendFillJoy); }
+  .analytics-trend-current { fill: none; stroke: var(--hp-daily); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
+  .analytics-trend-current.joy { stroke: var(--hp-joy); }
+  .analytics-trend-previous { fill: none; stroke: var(--hp-text-faint); stroke-dasharray: 4 4; stroke-linecap: round; stroke-width: 1.8; opacity: .72; }
+  .analytics-axis { fill: var(--hp-text-muted); font: 10px var(--hp-font-body); }
+  .analytics-end-label { fill: var(--hp-text); font: 750 10px var(--hp-font-body); }
+  .analytics-end-sub { fill: var(--hp-text-muted); font: 9px var(--hp-font-body); }
+  .analytics-end-dot { fill: var(--hp-daily); stroke: var(--hp-surface); stroke-width: 2; }
+  .analytics-end-dot.joy { fill: var(--hp-joy); }
+  .analytics-trend-legend { min-height: 24px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-trend-legend i { width: 18px; height: 2px; background: var(--hp-daily); }
+  .analytics-trend-legend i.joy { background: var(--hp-joy); }
+  .analytics-trend-legend i.dashed { background: repeating-linear-gradient(90deg,var(--hp-text-faint) 0 4px,transparent 4px 7px); }
+  [data-theme="dark"] .analytics-trend-previous {
+    stroke: color-mix(in srgb, var(--hp-text) 72%, var(--hp-surface));
+    opacity: .88;
+  }
+  [data-theme="dark"] .analytics-axis {
+    fill: color-mix(in srgb, var(--hp-text) 68%, var(--hp-surface));
+  }
+  [data-theme="dark"] .analytics-end-sub {
+    fill: color-mix(in srgb, var(--hp-text) 78%, var(--hp-surface));
+  }
+  [data-theme="dark"] .analytics-trend-legend i.dashed {
+    background: repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--hp-text) 70%, var(--hp-surface)) 0 4px,
+      transparent 4px 7px
+    );
+  }
+  .analytics-trend-legend span + i { margin-left: 9px; }
+  .analytics-donut-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .analytics-donut-top strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-data-tag { flex: 0 0 auto; padding: 3px 9px; border-radius: 7px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: 10px; font-weight: 750; }
+  .analytics-donut-wrap { height: 260px; display: grid; place-items: center; }
+  .analytics-donut { width: 242px; height: 242px; position: relative; border-radius: 50%; background: conic-gradient(#69a873 0 37%, #5f8dca 37% 66%, var(--hp-joy) 66% 91%, #86c994 91% 100%); }
+  .analytics-donut::after { content: ""; position: absolute; inset: 58px; border-radius: 50%; background: var(--hp-surface); }
+  .analytics-donut-center { position: absolute; z-index: 1; inset: 0; display: grid; align-content: center; justify-items: center; text-align: center; }
+  .analytics-donut-center span { color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-donut-center strong { max-width: 112px; margin-top: 3px; overflow: hidden; color: var(--hp-text); font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-donut-center small { margin-top: 3px; color: var(--hp-text-faint); font-size: 10px; }
+  .analytics-ring-note { min-width: 28px; position: absolute; z-index: 2; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 1px; font-weight: 850; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .analytics-ring-note .material-symbols-rounded { font-size: 15px; line-height: 1; }
+  .analytics-ring-note b { font-size: 13px; line-height: 1; }
+  .analytics-ring-emoji { font-size: 12px; line-height: 1; }
+  .analytics-ring-note.a { top: 70px; right: 18px; }
+  .analytics-ring-note.b { right: auto; bottom: 20px; left: 50%; transform: translateX(-50%); }
+  .analytics-ring-note.c { top: 94px; bottom: auto; left: 16px; }
+  .analytics-ring-note.d { top: 20px; left: 44%; transform: translateX(-50%); }
+  .analytics-donut-controls { min-height: 40px; margin-top: 21px; margin-bottom: 13px; display: grid; grid-template-columns: 164px 88px; align-items: center; justify-content: space-between; gap: 8px; }
+  .analytics-dimensions { min-width: 0; overflow: visible; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); display: grid; grid-template-columns: 1.05fr .95fr; }
+  .analytics-control-pill { min-width: 0; min-height: 38px; margin: 0; padding: 0 8px; border: 0; border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text-muted); font-size: 11px; font-weight: 750; white-space: nowrap; cursor: pointer; transition: background .15s ease,color .15s ease,box-shadow .15s ease; }
+  .analytics-control-pill + .analytics-control-pill { border-left: 0; }
+  .analytics-control-pill.active { min-height: 40px; margin: -1px; position: relative; z-index: 1; color: var(--hp-surface); }
+  .analytics-control-pill[data-analytics-dimension="category"].active { background: var(--hp-daily); box-shadow: 0 0 0 1px var(--hp-daily); }
+  .analytics-control-pill[data-analytics-dimension="member"].active { background: color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); box-shadow: 0 0 0 1px color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); }
+  .analytics-member-filter { width: 88px; min-width: 0; min-height: 40px; padding: 0 8px; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-grid; grid-template-columns: 16px minmax(0,1fr) 14px; align-items: center; gap: 3px; font-size: 11px; font-weight: 750; cursor: pointer; }
+  .analytics-member-filter-label { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-member-filter .material-symbols-rounded { font-size: 14px; }
+  .analytics-member-filter .material-symbols-rounded:first-child { font-size: 16px; }
+  .analytics-legend-row { width: calc(100% - 12px); min-height: 52px; margin: 0 6px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: grid; grid-template-columns: 24px minmax(0,1fr) auto 38px; align-items: center; gap: 10px; text-align: left; cursor: pointer; }
+  .analytics-legend-row:last-child { border-bottom: 0; }
+  .analytics-legend-row:hover { background: color-mix(in srgb,var(--hp-surface-muted) 38%,transparent); }
+  .analytics-legend-row .material-symbols-rounded { font-size: 15px; color: var(--legend-color); }
+  .analytics-legend-row .legend-emoji { font-size: 14px; }
+  .analytics-legend-row > span:nth-child(2) { overflow: hidden; font-size: 11.5px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-legend-row strong { font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .analytics-legend-row small { color: var(--hp-text-muted); font-size: 11px; font-weight: 750; text-align: right; }
+  .analytics-joy-drawer { margin-top: 10px; padding: 6px 2px 0; }
+  .analytics-joy-toggle { width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 7px; text-align: left; cursor: pointer; }
+  .analytics-joy-toggle > .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-joy-text); font-size: 18px; transition: transform .15s ease; }
+  .analytics-joy-drawer.expanded .analytics-joy-toggle > .material-symbols-rounded { transform: rotate(180deg); }
+  .analytics-joy-details { padding-top: 2px; }
+  .analytics-joy-chip { padding: 3px 9px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); color: var(--hp-joy-text); display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 850; }
+  .analytics-joy-chip .material-symbols-rounded { font-size: 11px; }
+  .analytics-joy-count { flex: 1; color: var(--hp-joy-text); font-size: 10px; font-weight: 700; }
+  .analytics-joy-total { color: var(--hp-joy-text); font-size: 11px; font-weight: 850; font-variant-numeric: tabular-nums; }
+  .analytics-joy-stack { height: 18px; margin: 9px 0 4px; overflow: hidden; border: 1px solid color-mix(in srgb,var(--hp-joy) 30%,var(--hp-border)); border-radius: 7px; display: flex; }
+  .analytics-joy-stack i:nth-child(1) { width: 63%; background: var(--hp-joy); }
+  .analytics-joy-stack i:nth-child(2) { width: 25%; background: #e8ad6d; }
+  .analytics-joy-stack i:nth-child(3) { flex: 1; background: var(--hp-joy-soft); }
+  .analytics-joy-row { min-height: 36px; display: grid; grid-template-columns: 20px minmax(0,1fr) auto 32px; gap: 6px; align-items: center; color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-joy-row .material-symbols-rounded { color: var(--joy-row-color,var(--hp-joy)); font-size: 13px; }
+  .analytics-joy-row strong { color: var(--hp-text); font-size: 10px; }
+  .analytics-joy-row small { text-align: right; }
+  .analytics-calendar-card { padding-left: 8px; padding-right: 8px; }
+  .analytics-calendar-weekdays, .analytics-calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+  .analytics-calendar-weekdays { margin-bottom: 4px; }
+  .analytics-calendar-weekdays span { color: var(--hp-text-faint); font-size: 10px; font-weight: 750; text-align: center; }
+  .analytics-calendar-day { aspect-ratio: 1; position: relative; padding: 3px 4px; border: 0; border-radius: 8px; background: var(--heat,var(--hp-surface-muted)); color: var(--hp-text-faint); cursor: pointer; transition: .15s ease; }
+  .analytics-calendar-day:hover { transform: translateY(-1px); }
+  .analytics-calendar-day.empty { pointer-events: none; background: transparent; }
+  .analytics-calendar-day.selected { box-shadow: inset 0 0 0 2px var(--hp-joy-text); }
+  .analytics-calendar-day[data-count="1"] { color: var(--hp-joy-text); }
+  .analytics-calendar-day[data-count="2"], .analytics-calendar-day[data-count="3"] { color: #fff; }
+  .analytics-calendar-day span { position: absolute; top: 5px; right: 6px; font-size: 10px; font-weight: 800; }
+  .analytics-calendar-day:not(.empty):not([data-count="0"])::after { content: ""; width: 5px; height: 5px; position: absolute; left: 6px; bottom: 6px; border-radius: 50%; background: currentColor; opacity: .9; }
+  .analytics-calendar-legend { min-height: 32px; margin-top: 10px; padding: 0 5px; display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-heat { width: 12px; height: 12px; border-radius: 4px; }
+  .analytics-calendar-legend p { flex: 1; margin: 0 0 0 5px; color: var(--hp-text-faint); line-height: 1.35; text-align: right; }
+  .analytics-day-panel { margin: 10px 8px 0; padding-top: 10px; border-top: 1px solid var(--hp-border); }
+  .analytics-day-panel-head { margin-bottom: 4px; color: var(--hp-joy-text); font-size: 10px; font-weight: 800; }
+  .analytics-day-row { min-height: 44px; display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; }
+  .analytics-day-row + .analytics-day-row { border-top: 1px solid var(--hp-border); }
+  .analytics-day-row .material-symbols-rounded { color: var(--hp-joy-text); font-size: 18px; }
+  .analytics-day-row span { overflow: hidden; font-size: 10px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-day-row span small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: 10px; font-weight: 600; }
+  .analytics-day-row strong { font-size: 10px; font-variant-numeric: tabular-nums; }
+  .analytics-histogram { height: 142px; display: grid; grid-template-columns: repeat(10,1fr); gap: 4px; align-items: end; }
+  .analytics-histogram-col { height: 100%; display: grid; grid-template-rows: 16px 1fr; align-items: end; justify-items: center; }
+  .analytics-histogram-col > span { color: var(--hp-joy-text); font-size: 10px; font-weight: 750; }
+  .analytics-histogram-bar { width: min(20px,100%); min-height: 3px; align-self: end; border-radius: 5px 5px 2px 2px; background: linear-gradient(var(--hp-joy),#e7a6b6); }
+  .analytics-histogram-bar.zero { background: var(--hp-surface-muted); }
+  .analytics-histogram-bar.median { outline: 2px solid color-mix(in srgb,var(--hp-joy) 44%,var(--hp-joy-soft)); outline-offset: 1px; }
+  .analytics-histogram-axis { margin-top: 5px; display: grid; grid-template-columns: repeat(10,1fr); color: var(--hp-text-muted); font-size: 10px; font-weight: 650; text-align: center; }
+  .analytics-histogram-foot { min-height: 34px; margin-top: 8px; display: flex; align-items: center; color: var(--hp-joy-text); font-size: 10px; font-weight: 750; line-height: 1.4; }
+  .analytics-median { padding: 3px 8px; border-radius: 7px; background: var(--hp-joy-soft); color: var(--hp-joy-text); font-weight: 700; white-space: nowrap; }
+  .analytics-family-card { margin-top: 8px; padding: 14px; border: 1px solid color-mix(in srgb,var(--hp-success) 30%,var(--hp-border)); border-radius: 16px; background: color-mix(in srgb,var(--hp-success) 10%,var(--hp-surface)); }
+  .analytics-family-card h3 { margin: 0 0 8px; color: var(--hp-success); font-size: 13px; }
+  .analytics-family-card p { margin: 5px 0 0; color: var(--hp-text); font-size: 9px; line-height: 1.5; }
+  .analytics-window-types { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 3px; }
+  .analytics-window-type { min-width: 48px; min-height: 34px; padding: 5px 10px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text); font-size: 9px; font-weight: 700; cursor: pointer; }
+  .analytics-window-type.active { border-color: var(--hp-primary); background: var(--hp-primary); color: var(--hp-surface); }
+  .analytics-window-list { margin-top: 14px; }
+  .analytics-window-option { width: 100%; min-height: 45px; padding: 8px 10px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: 10px; cursor: pointer; }
+  .analytics-window-option.selected { color: var(--hp-primary-text); font-weight: 800; }
+  .analytics-window-option .material-symbols-rounded { font-size: 16px; }
+
+  /* Shopping */
+  .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--hp-surface-muted); border-radius: 13px; padding: 3px; }
+  .segment { min-height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--hp-text-muted); font-size: 10px; font-weight: 850; cursor: pointer; }
+  .segment.active { background: var(--hp-surface); color: var(--hp-primary-text); box-shadow: var(--hp-shadow-card); }
+  .shopping-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 14px; margin-top: 8px; }
+  .shopping-list-card { margin-top: 8px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); }
+  .shopping-list-card .shopping-item { margin-top: 0; border: 0; border-radius: 0; }
+  .shopping-list-card .shopping-item + .shopping-item { border-top: 1px solid var(--hp-border); }
+  .check { width: 23px; height: 23px; border-radius: 50%; border: 2px solid var(--hp-daily); background: transparent; display: grid; place-items: center; color: var(--hp-surface); cursor: pointer; }
+  .shopping-item.joy .check { border-color: var(--hp-joy); }
+  .shopping-item.done .row-copy, .shopping-item.done > .material-symbols-rounded, .shopping-item.done .shopping-ledger-badge { opacity: .58; }
+  .shopping-item.done .check { background: var(--hp-daily); }
+  .shopping-item.joy.done .check { background: var(--hp-joy); }
+  .shopping-item.done .row-copy strong { text-decoration: line-through; }
+  .shopping-ledger-badge.daily { background: var(--hp-daily-soft); color: var(--hp-daily-text); }
+  .shopping-ledger-badge.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+
+  /* Forms + keypad */
+  .amount-display { text-align: center; padding: 10px 0 14px; }
+  .amount-display span { display: block; color: var(--hp-text-muted); font-size: 9px; margin-bottom: 5px; }
+  .amount-display strong { font-size: 39px; color: var(--hp-text); }
+  .form-row { min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--hp-surface); border-bottom: 1px solid var(--hp-border); }
+  .form-row:first-child { border-radius: 15px 15px 0 0; }
+  .form-row:last-child { border-radius: 0 0 15px 15px; border-bottom: 0; }
+  .form-row label { width: 68px; color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
+  .form-row strong { flex: 1; font-size: 11px; }
+  .numpad, .pinpad { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 12px; }
+  .key { min-height: 52px; border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); font-size: 18px; font-weight: 750; box-shadow: var(--hp-shadow-card); }
+  .key.save { background: var(--hp-joy); color: var(--hp-surface); font-size: 12px; }
+  .voice-zone { margin-top: 12px; padding: 16px; border-radius: 18px; background: var(--hp-primary-soft); text-align: center; }
+  .mic { width: 64px; height: 64px; margin: 0 auto; border: 0; border-radius: 50%; background: var(--hp-primary); color: var(--hp-surface); display: grid; place-items: center; cursor: pointer; box-shadow: 0 8px 22px color-mix(in srgb,var(--hp-primary) 28%,transparent); }
+  .mic.recording { background: var(--hp-error); }
+  .wave { height: 34px; display: flex; gap: 4px; align-items: center; justify-content: center; margin: 10px 0; }
+  .wave i { width: 3px; border-radius: 99px; background: var(--hp-primary); }
+  .camera { height: 390px; border-radius: 22px; background: #151a17; color: #fff; display: grid; place-items: center; position: relative; overflow: hidden; }
+  .viewfinder { width: 78%; height: 66%; border: 2px solid rgba(255,255,255,.68); border-radius: 18px; display: grid; place-items: center; color: rgba(255,255,255,.72); }
+  .viewfinder .material-symbols-rounded { font-size: 54px; }
+  .camera-controls { display: flex; align-items: center; justify-content: space-around; margin-top: 16px; }
+  .shutter { width: 66px; height: 66px; border-radius: 50%; border: 5px solid var(--hp-surface); background: var(--hp-primary); box-shadow: 0 0 0 2px var(--hp-border-strong); cursor: pointer; }
+
+  /* Family / onboarding / settings */
+  .avatar-stack { display: flex; justify-content: center; margin: 20px 0; }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--hp-bg); display: grid; place-items: center; background: linear-gradient(145deg,var(--hp-primary-soft),var(--hp-surface)); color: var(--hp-primary-text); font-family: var(--hp-font-display); font-weight: 900; margin-left: -9px; }
+  .avatar:first-child { margin-left: 0; }
+  .action-card { width: 100%; min-height: 86px; margin-top: 10px; border: 1px solid var(--hp-border); background: var(--hp-surface); border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; color: var(--hp-text); }
+  .member { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 10px 12px; }
+  .member + .member { border-top: 1px solid var(--hp-border); }
+  .member .avatar { width: 38px; height: 38px; margin: 0; border-width: 2px; font-size: 12px; }
+  .code { display: flex; justify-content: center; gap: 8px; margin: 24px 0; }
+  .digit { width: 42px; height: 52px; display: grid; place-items: center; border-radius: 12px; border: 1px solid var(--hp-border); background: var(--hp-surface); font-size: 18px; font-weight: 900; }
+  .intro-hero { padding: 24px 0 13px; text-align: center; }
+  .intro-mark { width: 86px; height: 86px; border-radius: 30px; margin: 0 auto 18px; background: var(--hp-primary-soft); color: var(--hp-primary); display: grid; place-items: center; }
+  .intro-mark .material-symbols-rounded { font-size: 46px; }
+  .intro-hero h1 { font-family: var(--hp-font-display); font-size: 25px; margin: 0 0 7px; }
+  .feature { display: flex; gap: 11px; align-items: flex-start; padding: 11px 2px; }
+  .feature .material-symbols-rounded { color: var(--hp-primary); font-size: 21px; }
+  .switch { width: 42px; height: 24px; border: 0; border-radius: 99px; background: var(--hp-surface-strong); padding: 3px; cursor: pointer; }
+  .switch::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--hp-surface); box-shadow: var(--hp-shadow-card); transition: transform .15s; }
+  .switch.on { background: var(--hp-primary); }
+  .switch.on::after { transform: translateX(18px); }
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 20px 0 8px; }
+  .pin-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--hp-primary); }
+  .pin-dot.filled { background: var(--hp-primary); }
+  .legal-copy { color: var(--hp-text-muted); font-size: 10px; line-height: 1.75; }
+  .state-hero { min-height: 330px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  .state-hero .material-symbols-rounded { font-size: 52px; color: var(--hp-primary); }
+  .skeleton { height: 14px; border-radius: 7px; background: linear-gradient(90deg,var(--hp-surface-muted),var(--hp-surface),var(--hp-surface-muted)); background-size: 200% 100%; animation: shimmer 1.4s infinite linear; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* Modal and toast */
+  .modal-layer { position: absolute; inset: 0; z-index: 30; display: flex; align-items: flex-end; background: rgba(16,20,18,.36); opacity: 0; pointer-events: none; transition: opacity .18s; }
+  .modal-layer.open { opacity: 1; pointer-events: auto; }
+  .modal-sheet { width: 100%; max-height: 78%; overflow: auto; background: var(--hp-surface); color: var(--hp-text); border-radius: 26px 26px 0 0; padding: 10px 20px 28px; transform: translateY(100%); transition: transform .22s ease; }
+  .modal-layer.open .modal-sheet { transform: translateY(0); }
+  .grabber { width: 38px; height: 4px; border-radius: 99px; background: var(--hp-border-strong); margin: 0 auto 16px; }
+  .modal-sheet h3 { font-family: var(--hp-font-display); margin: 0 0 12px; font-size: 17px; }
+  .toast { position: absolute; z-index: 40; left: 50%; bottom: 94px; transform: translate(-50%,14px); opacity: 0; pointer-events: none; background: var(--hp-text); color: var(--hp-bg); border-radius: 99px; padding: 9px 13px; font-size: 10px; font-weight: 850; white-space: nowrap; transition: .18s; }
+  .phone.no-nav .toast { bottom: 28px; }
+  .toast.show { opacity: 1; transform: translate(-50%,0); }
+
+  /* Inspector */
+  .inspector .screen-name { color: var(--hp-primary-text); font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+  .inspector p { color: var(--hp-text-muted); font-size: 11px; line-height: 1.65; }
+  .token-strip { display: flex; gap: 6px; margin: 12px 0 20px; }
+  .token { width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgba(20,20,20,.08); background: var(--c); }
+  .coverage { display: grid; gap: 7px; }
+  .coverage div { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 12px; padding: 10px 11px; color: var(--hp-text-muted); font-size: 10px; }
+  .coverage strong { color: var(--hp-text); }
+  .joy-variant-panel { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hp-border); }
+  .joy-variant-options { display: grid; gap: 7px; margin-top: 9px; }
+  .joy-variant-option { width: 100%; min-height: 40px; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); color: var(--hp-text-muted); padding: 8px 10px; text-align: left; font-size: 10px; font-weight: 800; cursor: pointer; transition: .15s ease; }
+  .joy-variant-option:hover { border-color: var(--hp-joy); transform: translateY(-1px); }
+  .joy-variant-option.active { border-color: var(--hp-joy); background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .joy-variant-panel p { margin: 9px 2px 0; }
+  #sketch-tools { position: fixed; right: 12px; bottom: 12px; z-index: 140; display: flex; gap: 5px; align-items: center; padding: 7px 9px; border-radius: 10px; background: rgba(15,18,16,.78); color: #fff; font: 10px system-ui; opacity: .48; transition: opacity .2s; }
+  #sketch-tools:hover { opacity: 1; }
+  #sketch-tools button { border: 1px solid rgba(255,255,255,.24); background: transparent; color: #fff; border-radius: 7px; padding: 4px 7px; cursor: pointer; }
+  .annotations .phone [data-token] { outline: 1px dashed #d96b78; outline-offset: 2px; position: relative; }
+  .annotations .phone [data-token]::before { content: attr(data-token); position: absolute; z-index: 20; top: -13px; left: 0; color: #fff; background: #a94354; font: 8px system-ui; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
+
+  @media (max-width: 990px) {
+    .hub-bar { overflow-x: auto; justify-content: flex-start; }
+    .hub-title { display: none; }
+    .workspace { display: block; padding: 76px 10px 46px; }
+    .catalog { position: static; max-width: 390px; height: auto; margin: 0 auto 14px; display: flex; gap: 5px; overflow-x: auto; border-radius: 16px; padding: 8px; }
+    .catalog h2, .catalog-group > span { display: none; }
+    .catalog-group { display: contents; }
+    .screen-link { width: auto; min-width: max-content; padding: 8px 10px; }
+    .inspector { position: static; max-width: 390px; max-height: none; margin: 18px auto 0; }
+  }
+</style>
+</head>
+<body>
+  <header class="hub-bar">
+    <div class="hub-title">Home Pocket · A「生活手帐」整 App 设计</div>
+    <button class="preset active" data-preset="solo-light"><span class="material-symbols-rounded">person</span>A1 个人 · 浅色</button>
+    <button class="preset" data-preset="family-light"><span class="material-symbols-rounded">group</span>A2 家庭 · 浅色</button>
+    <button class="preset" data-preset="solo-dark"><span class="material-symbols-rounded">dark_mode</span>A3 个人 · 深色</button>
+    <button class="hub-action" data-action="toggle-theme"><span class="material-symbols-rounded">contrast</span>明暗</button>
+  </header>
+
+  <div class="workspace">
+    <aside class="catalog" aria-label="全 App 页面目录">
+      <h2>页面目录</h2>
+      <div class="catalog-group"><span>Foundation</span>
+        <button class="screen-link" data-screen="foundation"><span class="material-symbols-rounded">palette</span>设计系统</button>
+        <button class="screen-link" data-screen="states"><span class="material-symbols-rounded">hourglass_top</span>系统状态</button>
+      </div>
+      <div class="catalog-group"><span>Main shell</span>
+        <button class="screen-link active" data-screen="home"><span class="material-symbols-rounded">home</span>主页</button>
+        <button class="screen-link" data-screen="list"><span class="material-symbols-rounded">receipt_long</span>明细</button>
+        <button class="screen-link" data-screen="analytics"><span class="material-symbols-rounded">monitoring</span>统计</button>
+        <button class="screen-link" data-screen="shopping"><span class="material-symbols-rounded">checklist</span>购物</button>
+        <button class="screen-link" data-screen="shopping-form"><span class="material-symbols-rounded">add_shopping_cart</span>购物项目</button>
+      </div>
+      <div class="catalog-group"><span>Entry</span>
+        <button class="screen-link" data-screen="entry"><span class="material-symbols-rounded">edit_note</span>手动记账</button>
+        <button class="screen-link" data-screen="voice"><span class="material-symbols-rounded">mic</span>语音记账</button>
+        <button class="screen-link" data-screen="ocr"><span class="material-symbols-rounded">document_scanner</span>OCR 扫描</button>
+        <button class="screen-link" data-screen="category"><span class="material-symbols-rounded">category</span>类目选择</button>
+        <button class="screen-link" data-screen="edit"><span class="material-symbols-rounded">edit</span>编辑交易</button>
+      </div>
+      <div class="catalog-group"><span>Family</span>
+        <button class="screen-link" data-screen="family"><span class="material-symbols-rounded">diversity_3</span>家庭入口</button>
+        <button class="screen-link" data-screen="join"><span class="material-symbols-rounded">login</span>加入家庭</button>
+        <button class="screen-link" data-screen="group"><span class="material-symbols-rounded">group</span>家庭管理</button>
+      </div>
+      <div class="catalog-group"><span>Setup & safety</span>
+        <button class="screen-link" data-screen="onboarding"><span class="material-symbols-rounded">waving_hand</span>欢迎引导</button>
+        <button class="screen-link" data-screen="preferences"><span class="material-symbols-rounded">tune</span>初始设置</button>
+        <button class="screen-link" data-screen="lock"><span class="material-symbols-rounded">lock</span>应用锁</button>
+        <button class="screen-link" data-screen="settings"><span class="material-symbols-rounded">settings</span>设置</button>
+        <button class="screen-link" data-screen="profile"><span class="material-symbols-rounded">account_circle</span>个人资料</button>
+        <button class="screen-link" data-screen="legal"><span class="material-symbols-rounded">policy</span>法务与赞助</button>
+      </div>
+    </aside>
+
+    <div class="phone-wrap">
+      <div class="phone" id="phone">
+        <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
+        <main id="app-screen" aria-live="polite"></main>
+        <nav id="bottom-nav" class="bottom-nav"></nav>
+        <div id="modal" class="modal-layer"><div class="modal-sheet"><div class="grabber"></div><div id="modal-content"></div></div></div>
+        <div id="toast" class="toast"></div>
+      </div>
+    </div>
+
+    <aside class="inspector">
+      <span id="inspect-kicker" class="screen-name">Main shell</span>
+      <h2 id="inspect-title">主页</h2>
+      <p id="inspect-copy">月度总览是第一阅读层，双账本、Joy 累计和近期交易依次向下展开；粉色只承担悦己与唯一 FAB。</p>
+      <div class="token-strip"><span class="token" style="--c:#f5f0e7"></span><span class="token" style="--c:#456b59"></span><span class="token" style="--c:#66896d"></span><span class="token" style="--c:#c87874"></span><span class="token" style="--c:#58758c"></span></div>
+      <div class="coverage"><div><strong>结构：</strong><span id="inspect-structure">主导航 + 月度快照</span></div><div><strong>状态：</strong><span id="inspect-states">个人 / 家庭 / 明暗</span></div><div><strong>实现：</strong><span id="inspect-build">复用现有 Riverpod 数据与导航</span></div></div>
+      <div id="home-design-note" class="joy-variant-panel">
+        <span class="screen-name">Home 方案</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>C · 层次纸面 ★ 已选</strong><br>来自 Sketch 006，严格保留现有 Flutter 主页结构。</div>
+        </div>
+        <p>HeroHeader → HomeHeroCard → FamilyInviteBanner → TransactionListCard → detached nav + FAB</p>
+      </div>
+    </aside>
+  </div>
+
+  <div id="sketch-tools"><span>Sketch 005</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
+
+<script>
+  const state = { screen: 'home', theme: 'light', family: false, inviteDismissed: false, amount: '3480', pin: '', recording: false, uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, history: [] };
+  const mainScreens = ['home','list','analytics','shopping'];
+  const info = {
+    foundation: ['Foundation','设计系统','色彩、字体、间距、组件与反馈都以生活手帐为同一来源。','令牌 + 原子组件','浅色 / 深色 / 可访问性','对应 AppPalette、AppTextStyles 与共享 widgets'],
+    states: ['Foundation','系统状态','空、加载与错误状态共享同一套安静反馈语言；不使用插画占位或焦虑文案。','状态切换 + 恢复动作','空 / 加载 / 错误','对应 AsyncValue 与现有 EmptyState widgets'],
+    home: ['Main shell','主页','选定 C「层次纸面」已回写；主页严格保留现有 Flutter 组合，只更新视觉表面。','HeroHeader + HomeHeroCard + Invite + Recent','个人 / 家庭 / 明暗','直接映射现有 Home widgets 与 providers'],
+    list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
+    analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
+    shopping: ['Main shell','购物清单','清单以纸面勾选为核心，公共/个人和批量管理保持可见但克制。','分段 + 过滤 + 可排序清单','家庭 / 个人 / 完成态','复用购物 providers 与 reorder 交互'],
+    'shopping-form': ['Main shell','购物项目','从购物页进入的单任务表单，名称、数量、公开范围和备注保持清楚。','项目表单 + 公开范围','新建 / 编辑 / 个人 / 共享','复用 ShoppingItemFormScreen'],
+    entry: ['Entry','手动记账','金额优先、详情其次、键盘稳定驻底；语音入口仍是快捷方式而不是第二套表单。','金额 + 共用详情表单 + 键盘','JPY / 外币 / 连续记账','复用 TransactionDetailsForm 与 SmartKeyboard'],
+    voice: ['Entry','语音记账','识别结果先确认金额/商家/类目，再保存；录音状态使用语义红，不使用悦己粉。','转写 + 识别结果 + 录音','监听 / 解析 / 纠错','复用 PTT session 与识别仲裁'],
+    ocr: ['Entry','OCR 扫描','沉浸相机保持深色；拍摄完成后回到同一套详情确认语言。','取景框 + 拍摄控制','权限 / 拍摄 / 复核','复用 OCR scanner 与 review'],
+    category: ['Entry','类目选择','搜索优先，L1 分组稳定，L2 使用轻量行而不是彩色 chip 墙。','搜索 + 分组 + 最近使用','搜索 / 展开 / 排序','复用类目树与学习逻辑'],
+    edit: ['Entry','编辑交易','编辑与新建共享表单，但危险操作退到页尾并保持明确确认。','金额 + 详情 + 保存 / 删除','外币联动 / 删除确认','复用 TransactionDetailsForm.edit'],
+    family: ['Family','家庭入口','创建与加入是两条清楚路径，E2EE 说明始终随入口出现。','家庭价值 + 两个动作','未加入 / 已加入','复用 GroupChoiceScreen'],
+    join: ['Family','加入家庭','六位邀请码是一项单任务流程，避免同时展示不相关设置。','邀请码 + 隐私提示','输入 / 校验 / 等待批准','复用 join / confirm / waiting 流程'],
+    group: ['Family','家庭管理','同步状态、待批准、成员与危险动作按重要性分层。','组信息 + 成员 + 同步','所有者 / 成员 / 待批准','复用现有 group 与 sync providers'],
+    onboarding: ['Setup','欢迎引导','一页说明本地优先、双账本与语音价值，保持温和但不使用装饰性 emoji。','价值说明 + 单一继续动作','首次启动 / 可跳过介绍','复用现有 onboarding gate'],
+    preferences: ['Setup','初始设置','昵称、头像、语言、币种与语音语言在一页完成，所有值之后都可修改。','身份 + 三项基础偏好','三语 / 多币种','复用现有 provider 写穿'],
+    lock: ['Safety','应用锁','锁屏专注一个任务；生物识别优先，PIN 永远可回退。','生物识别 + PIN','冷启动 / 回前台 / 错误','复用 AppLockService 与 local_auth'],
+    settings: ['Setup','设置','个人资料、常规、安全、数据、家庭与法务按稳定分组组织。','分组列表 + 明确层级','个人 / 家庭 / 明暗','复用现有 Settings sections'],
+    profile: ['Setup','个人资料','身份编辑采用普通表单与真实头像槽位，不让装饰背景抢占任务。','头像 + 昵称 + 保存','空值 / 图片 / 文本','复用 profile providers'],
+    legal: ['Safety','法务与赞助','合规信息保持阅读优先；赞助作为外部支持入口，不与核心功能竞争。','文档列表 + 长文阅读','日本合规 / 外链','复用 LegalSponsorSection 与 LegalDocScreen']
+  };
+
+  const icon = (name, cls='') => `<span class="material-symbols-rounded ${cls}">${name}</span>`;
+  const backHeader = (title, extra='') => `<header class="app-header"><button class="back-btn" data-action="back" aria-label="戻る">${icon('chevron_left')}</button><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
+  const tabHeader = (title, extra='') => `<header class="app-header"><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
+  const monthTitle = tone => `<span class="page-month-title ${tone}-month-title">${state.listYear}年${state.listMonth}月</span>`;
+  const mainHeader = () => `<header class="app-header"><h1>${monthTitle('home')}</h1><span class="spacer"></span><button class="chip" data-action="toggle-family">${icon(state.family?'group':'person')} ${state.family?'家族':'個人'}</button><span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span></header>`;
+  const txRow = (name, meta, value, type='daily', ico='payments') => `<button class="tap-row row-divider tx" data-action="toast" data-message="取引の詳細"><span class="row-icon ${type==='joy'?'joy':type==='shared'?'shared':''}">${icon(ico)}</span><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="row-value">${value}</span></button>`;
+  const nav = active => `<div class="bottom-pill">${[['home','home','ホーム'],['list','receipt_long','明細'],['analytics','monitoring','統計'],['shopping','checklist','買い物']].map(([id,ico,label])=>`<button class="nav-item ${id===active?'active':''}" data-nav="${id}">${icon(ico)}<span>${label}</span></button>`).join('')}</div><button class="fab" data-action="fab" aria-label="追加">${icon('add')}</button>`;
+
+  function foundation() { return `<section class="screen">${backHeader('デザインシステム')}<div class="eyebrow">A · 生活手帐</div><h2 class="display" style="font-size:24px;margin:8px 0 5px">温润、可靠、留白</h2><p class="hint">和纸背景承载生活感；松叶绿处理行动与日常；红樱只属于悦己与添加。</p><div class="section-title"><h2>色彩语义</h2></div><div class="ledger-grid"><div class="ledger"><span><i class="semantic-dot" style="background:var(--hp-primary)"></i>主行动</span><strong style="color:var(--hp-primary-text)">松叶绿</strong></div><div class="ledger joy"><span><i class="semantic-dot" style="background:var(--hp-joy)"></i>悦己</span><strong>红樱</strong></div><div class="ledger"><span><i class="semantic-dot" style="background:var(--hp-daily)"></i>日常</span><strong>若草</strong></div><div class="ledger shared"><span><i class="semantic-dot" style="background:var(--hp-shared)"></i>共享</span><strong>雾蓝</strong></div></div><div class="section-title"><h2>字体层级</h2></div><div class="card"><div class="display" style="font-size:26px;font-weight:700">七月の家計</div><div style="font-size:16px;font-weight:800;margin-top:10px">页面与区块标题</div><p class="hint" style="font-size:13px">正文使用系统日文无衬线，金额使用 tabular figures。</p><strong class="amount" style="font-size:30px">¥186,420</strong></div><div class="section-title"><h2>操作与反馈</h2></div><button class="primary-btn" data-action="toast" data-message="主要操作反馈">主要操作</button><div style="height:8px"></div><button class="secondary-btn" data-action="toast" data-message="次要操作反馈">次要操作</button><div style="height:8px"></div><div class="flat-card">${txRow('交易行','说明文字','−¥3,280','daily','local_grocery_store')}</div></section>`; }
+
+  function statesScreen() { const content = state.uiState==='empty' ? `<div class="state-hero">${icon('inventory_2')}<h2 class="display">まだ記録がありません</h2><p class="hint">最初の取引を記録すると、ここに月の流れが見えてきます。</p><button class="primary-btn" style="margin-top:16px" data-screen="entry">最初の取引を記録</button></div>` : state.uiState==='error' ? `<div class="state-hero">${icon('cloud_off')}<h2 class="display">読み込めませんでした</h2><p class="hint">データは失われていません。接続を確認して、もう一度お試しください。</p><button class="secondary-btn" style="margin-top:16px" data-action="toast" data-message="再読み込みしました">もう一度試す</button></div>` : `<div style="padding-top:28px"><div class="skeleton" style="width:45%;height:20px"></div><div class="skeleton" style="width:72%;height:38px;margin-top:14px"></div>${[1,2,3,4].map(()=>`<div class="card" style="margin-top:12px"><div class="skeleton" style="width:58%"></div><div class="skeleton" style="width:82%;margin-top:10px"></div></div>`).join('')}<p class="hint" style="text-align:center;margin-top:22px">データを準備しています</p></div>`; return `<section class="screen">${backHeader('システム状態')}<div class="segmented" style="grid-template-columns:repeat(3,1fr)"><button class="segment ${state.uiState==='empty'?'active':''}" data-ui-state="empty">空</button><button class="segment ${state.uiState==='loading'?'active':''}" data-ui-state="loading">読み込み</button><button class="segment ${state.uiState==='error'?'active':''}" data-ui-state="error">エラー</button></div>${content}</section>`; }
+
+  function faithfulMetrics() {
+    const goal = state.family ? ['18','24','75%'] : ['64','80','80%'];
+    const satisfaction = state.family ? ['8.6','86%'] : ['8.2','82%'];
+    const smallWins = state.family ? '24' : '12';
+    const goalLabel = state.family ? `家族のときめき目標 ${goal[0]} / ${goal[1]} Joy` : `ときめき目標 ${goal[0]} / ${goal[1]} Joy`;
+    return `<div class="faithful-metric-grid"><div class="faithful-goal-ring" style="--goal:${goal[2]}" role="img" aria-label="${goalLabel}"><span class="faithful-goal-copy"><span>ときめき目標</span><strong>${goal[0]}<small> / ${goal[1]}</small></strong><em>Joy</em></span></div><div class="faithful-support-stack"><div class="faithful-support-block"><div class="faithful-satisfaction-head"><span>満足度の平均</span><strong>${satisfaction[0]} <small>/ 10</small></strong></div><div class="faithful-satisfaction-scale" style="--satisfaction:${satisfaction[1]}" role="img" aria-label="満足度の平均 ${satisfaction[0]} / 10"><span></span></div></div><div class="faithful-support-divider" aria-hidden="true"></div><div class="faithful-support-block faithful-small-win"><span class="faithful-small-win-copy"><strong>小確幸</strong><small>今月の記録</small></span><strong class="faithful-small-win-value">${smallWins}<small>件</small></strong></div></div></div>`;
+  }
+
+  function faithfulMembers() {
+    if (!state.family) return '';
+    return `<div class="faithful-divider"></div><div class="faithful-region-title">メンバー</div><div class="faithful-members"><div class="faithful-member"><span class="faithful-member-avatar">私</span><span>あおい</span><strong>¥84,200</strong></div><div class="faithful-member"><span class="faithful-member-avatar">花</span><span>花子</span><strong>¥62,600</strong></div><div class="faithful-member"><span class="faithful-member-avatar">太</span><span>太郎</span><strong>¥80,820</strong></div></div>`;
+  }
+
+  function faithfulHero() {
+    return `<div class="faithful-hero" data-token="HomeHeroCard · C" data-action="hero-analytics" role="button" tabindex="0"><div class="faithful-label">${state.family?'家族の支出':'今月の支出'}</div><div class="faithful-amount-row"><strong>${state.family?'¥227,620':'¥186,420'}</strong><span class="faithful-trend">${icon('trending_down')}−8%</span></div><p class="faithful-previous">先月同期 ${state.family?'¥246,900':'¥202,640'}</p><div class="faithful-ledgers"><div class="faithful-ledger-labels"><span class="faithful-ledger-label"><i class="faithful-dot"></i><span>ときめき帳</span><strong>¥53,620</strong></span><span class="faithful-ledger-label daily"><strong>${state.family?'¥174,000':'¥132,800'}</strong><span>日々の帳</span><i class="faithful-dot"></i></span></div><div class="faithful-split"><span></span></div></div><div class="faithful-divider"></div><div class="faithful-region-title">${icon('eco')}<span>${state.family?'家族のときめき':'ときめき度'}</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics()}<div class="faithful-divider"></div><div class="faithful-region-title">${icon('workspace_premium')}<span>今月の最愛</span></div><div class="faithful-ticket"><span class="faithful-ticket-accent"></span><span class="faithful-calendar"><b>JUL</b><strong>06</strong><small>MON</small></span><span class="faithful-ticket-copy"><strong>趣味・コレクション</strong><span>¥4,800</span></span><span class="faithful-seal">${icon('sentiment_very_satisfied')}<span>大満足</span></span></div>${faithfulMembers()}</div>`;
+  }
+
+  function faithfulInvite() {
+    if (state.family || state.inviteDismissed) return '';
+    return `<section class="faithful-invite" data-token="FamilyInviteBanner" aria-label="家族の追加案内"><span class="faithful-avatar-pair" aria-hidden="true"><span>${icon('face')}</span><span>${icon('face_2')}</span></span><span class="faithful-invite-copy"><h3>家族と家計を共有</h3><p>設定からいつでも追加できます</p><button class="faithful-settings-path" data-screen="settings">設定 ${icon('chevron_right')} 家庭</button></span><span class="faithful-invite-actions"><button class="faithful-invite-close" data-action="dismiss-invite" aria-label="家族の追加案内を閉じる">${icon('close')}</button><button class="faithful-invite-cta" data-screen="family">${icon('group_add')}家族を追加</button></span></section>`;
+  }
+
+  function homeTxRow(ico, category, ledger, merchant, amount, joy=false) {
+    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span>${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
+  }
+
+  function home() {
+    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulInvite()}<div class="faithful-recent"><h2>最近の取引</h2><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}</div></section>`;
+  }
+
+  function listCalendarDays(year, month) {
+    const first = new Date(year, month - 1, 1);
+    const offset = (first.getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const previousMonthDays = new Date(year, month - 1, 0).getDate();
+    const count = Math.ceil((offset + daysInMonth) / 7) * 7;
+    const totalsByLedger = year === 2026 && month === 7 ? {
+      daily: {1:1280,3:2380,6:3200,9:8080,10:3280,15:6800,21:3200,24:920,30:2180},
+      joy: {2:980,10:980,12:1240,18:4800,27:4500},
+    } : {daily:{},joy:{}};
+    const totals = state.listLedger === 'all'
+      ? Object.keys({...totalsByLedger.daily,...totalsByLedger.joy}).reduce((result, day) => ({...result,[day]:(totalsByLedger.daily[day]||0)+(totalsByLedger.joy[day]||0)}), {})
+      : totalsByLedger[state.listLedger];
+    return Array.from({length:count}, (_, index) => {
+      const raw = index - offset + 1;
+      const outside = raw < 1 || raw > daysInMonth;
+      const day = raw < 1 ? previousMonthDays + raw : raw > daysInMonth ? raw - daysInMonth : raw;
+      return { day, outside, total: outside ? 0 : (totals[day] || 0), weekend: index % 7 > 4 };
+    });
+  }
+
+  function listCompactAmount(value) {
+    if (!value) return '';
+    if (value < 1000) return String(value);
+    const compact = value / 1000;
+    return `${Number.isInteger(compact) ? compact.toFixed(0) : compact.toFixed(1)}千`;
+  }
+
+  function listCalendar() {
+    const weekdays = ['月','火','水','木','金','土','日'];
+    const days = listCalendarDays(state.listYear, state.listMonth);
+    const monthTotals = state.listYear === 2026 && state.listMonth === 7
+      ? {all:186420,daily:132800,joy:53620}
+      : {all:202640,daily:146020,joy:56620};
+    const monthTotal = monthTotals[state.listLedger];
+    const summaryLabel = state.listLedger === 'daily' ? '日常の合計' : state.listLedger === 'joy' ? 'ときめきの合計' : '今月の合計';
+    const selectedTotal = state.listDay == null ? 0 : (days.find(x=>!x.outside && x.day===state.listDay)?.total || 0);
+    return `<div class="list-calendar"><div class="list-calendar-grid">${weekdays.map((day,index)=>`<span class="list-calendar-weekday ${index>4?'weekend':''}">${day}</span>`).join('')}${days.map(({day,outside,total,weekend})=>`<button class="list-calendar-day ${outside?'outside':''} ${weekend?'weekend':''} ${!outside && state.listYear===2026 && state.listMonth===7 && day===12?'today':''} ${!outside && state.listDay===day?'selected':''}" ${outside?'disabled aria-hidden="true"':`data-list-day="${day}" aria-label="${state.listMonth}月${day}日${total?` 支出 ${total}円`:''}"`}><span>${day}</span><small>${listCompactAmount(total)}</small></button>`).join('')}</div><div class="list-calendar-summary"><div class="list-calendar-summary-row"><span>${summaryLabel}</span><strong>¥${monthTotal.toLocaleString('ja-JP')}</strong></div>${state.listDay==null?'':`<div class="list-calendar-summary-row"><span>${state.listMonth}月${state.listDay}日</span><span>¥${selectedTotal.toLocaleString('ja-JP')}</span></div>`}</div></div>`;
+  }
+
+  function listLedgerFilter() {
+    return `<div class="list-filter-ledgers" role="group" aria-label="帳簿"><button class="list-ledger-option ${state.listLedger==='all'?'active':''}" data-list-ledger="all" aria-pressed="${state.listLedger==='all'}">すべて</button><button class="list-ledger-option daily ${state.listLedger==='daily'?'active':''}" data-list-ledger="daily" aria-pressed="${state.listLedger==='daily'}">日常</button><button class="list-ledger-option joy ${state.listLedger==='joy'?'active':''}" data-list-ledger="joy" aria-pressed="${state.listLedger==='joy'}">ときめき</button></div>`;
+  }
+
+  function listFilterBar() {
+    const anyFilter = state.listDay != null || state.listLedger !== 'all' || state.listCategory || state.listSearch;
+    const sortLabel = `${state.listSort==='date'?'日付':'金額'}・${state.listDirection==='desc'?'降順':'昇順'}`;
+    const utilities = state.listSearchExpanded
+      ? `<div class="list-filter-utilities"><span class="list-filter-search">${icon('search')}<input aria-label="取引を検索" placeholder="取引を検索" value="${state.listSearch}" oninput="state.listSearch=this.value;filterTransactions(this.value)"><button data-action="list-search-clear" aria-label="検索を閉じる">${icon('close')}</button></span><button class="list-filter-action category ${state.listCategory?'active':''}" data-action="list-category">${icon('category')}<span>${state.listCategory?'カテゴリ 1':'カテゴリ'}</span></button></div>`
+      : `<div class="list-filter-utilities"><button class="list-filter-action sort" data-action="list-sort-menu" aria-label="並び替え ${sortLabel}">${icon('sort')}<span>${sortLabel}</span>${icon('expand_more')}</button><span class="list-filter-spacer"></span>${anyFilter?`<button class="list-filter-action clear" data-action="list-clear" aria-label="フィルターを解除">${icon('filter_alt_off')}</button>`:''}<button class="list-filter-action category ${state.listCategory?'active':''}" data-action="list-category">${icon('category')}<span>${state.listCategory?'カテゴリ 1':'カテゴリ'}</span></button><button class="list-filter-action icon-only" data-action="list-search" aria-label="取引を検索">${icon('search')}</button></div>`;
+    return `<div class="list-filter-bar">${utilities}</div>`;
+  }
+
+  function listTransactionRow(row, showDate=false) {
+    const joy = row.ledger === 'joy';
+    const title = showDate ? `${row.month}/${row.day} ${row.category}` : row.category;
+    return `<button class="list-transaction" data-screen="edit" data-list-ledger-row="${row.ledger}" data-search="${row.category} ${row.merchant}"><span class="list-transaction-icon ${joy?'joy':''}">${icon(row.icon)}</span><span class="list-transaction-copy"><strong>${title}</strong><span class="list-transaction-meta"><i class="list-transaction-tag ${joy?'joy':''}">${joy?'ときめき':'日常'}</i><span class="list-transaction-merchant">${row.merchant}</span></span></span><strong class="list-transaction-amount">¥${row.amount.toLocaleString('ja-JP')}</strong><span class="material-symbols-rounded list-transaction-chevron">chevron_right</span></button>`;
+  }
+
+  function listTransactionGroups() {
+    const groups = [
+      {day:10,label:'2026年7月10日',rows:[{day:10,month:7,icon:'local_grocery_store',category:'食費',merchant:'ライフ',amount:3280,ledger:'daily'},{day:10,month:7,icon:'local_cafe',category:'カフェ',merchant:'喫茶 月舟',amount:980,ledger:'joy'}]},
+      {day:9,label:'2026年7月9日',rows:[{day:9,month:7,icon:'train',category:'交通',merchant:'Suica',amount:1240,ledger:'daily'},{day:9,month:7,icon:'bolt',category:'光熱費',merchant:'東京電力',amount:6840,ledger:'daily'}]},
+    ];
+    const filteredGroups = groups.map(group=>({...group,rows:group.rows.filter(row=>(state.listLedger==='all'||row.ledger===state.listLedger)&&(!state.listCategory||row.category==='食費')&&(!state.listDay||group.day===state.listDay))})).filter(group=>group.rows.length);
+    if (!filteredGroups.length) return `<div class="list-empty-filtered">条件に合う取引はありません</div>`;
+    if (state.listSort === 'amount') {
+      const rows = filteredGroups.flatMap(group=>group.rows).sort((a,b)=>state.listDirection==='desc'?b.amount-a.amount:a.amount-b.amount);
+      return `<div class="list-transactions">${rows.map(row=>listTransactionRow(row,true)).join('')}</div>`;
+    }
+    const ordered = state.listDirection === 'desc' ? filteredGroups : [...filteredGroups].reverse();
+    return ordered.map(group=>`<div class="list-day-header">${group.label}</div><div class="list-transactions">${group.rows.map(row=>listTransactionRow(row)).join('')}</div>`).join('');
+  }
+
+  function listScreen() {
+    const header = tabHeader(monthTitle('list'),`<span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`);
+    return `<section class="screen list-screen">${header}${listLedgerFilter()}${listCalendar()}${listFilterBar()}<div id="transaction-list">${listTransactionGroups()}</div></section>`;
+  }
+
+  function analyticsSection(title, tone='', first=false) {
+    return `<div class="analytics-section-head ${tone} ${first?'first':''}"><h2>${title}</h2></div>`;
+  }
+
+  function analyticsTrendCard() {
+    const trends = {
+      total: {end:'¥186,420', previous:'¥202,640', current:'M34 160 C70 145 92 129 126 118 S185 91 218 72 S282 49 316 34', prior:'M34 160 C73 141 98 132 129 119 S188 98 221 79 S280 62 316 52', fill:'M34 160 C70 145 92 129 126 118 S185 91 218 72 S282 49 316 34 L316 166 L34 166 Z', y:34, py:52, klass:''},
+      daily: {end:'¥132,800', previous:'¥146,020', current:'M34 160 C70 151 96 137 126 127 S187 108 220 89 S280 76 316 65', prior:'M34 160 C70 147 98 140 130 129 S186 112 222 98 S282 85 316 78', fill:'M34 160 C70 151 96 137 126 127 S187 108 220 89 S280 76 316 65 L316 166 L34 166 Z', y:65, py:78, klass:''},
+      joy: {end:'¥53,620', previous:null, current:'M34 160 C74 158 100 149 128 143 S184 132 218 116 S282 101 316 91', prior:'', fill:'M34 160 C74 158 100 149 128 143 S184 132 218 116 S282 101 316 91 L316 166 L34 166 Z', y:91, py:0, klass:'joy'}
+    };
+    const active = trends[state.analyticsTrend];
+    const insight = {
+      total: ['trending_down','今月は ¥186,420 · 先月より8%少なく推移'],
+      daily: ['trending_down','日常支出は ¥132,800 · 先月より9%少なく推移'],
+      joy: ['favorite_border','今月のときめき支出は ¥53,620']
+    }[state.analyticsTrend];
+    return `<div class="analytics-card" data-token="WithinMonthTrendCard">
+      <div class="analytics-pills"><button class="analytics-pill ${state.analyticsTrend==='total'?'active':''}" data-analytics-trend="total">総支出</button><button class="analytics-pill ${state.analyticsTrend==='daily'?'active':''}" data-analytics-trend="daily">日常</button><button class="analytics-pill joy ${state.analyticsTrend==='joy'?'active':''}" data-analytics-trend="joy">ときめき</button></div>
+      <div class="analytics-insight ${state.analyticsTrend==='joy'?'joy':''}">${icon(insight[0])}<span>${insight[1]}</span></div>
+      <div class="analytics-trend-plot"><svg viewBox="0 0 330 200" role="img" aria-label="${state.analyticsTrend==='joy'?'今月のときめき支出':'今月と先月の累計支出'}"><defs><linearGradient id="trendFillDaily" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-daily)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-daily)" stop-opacity="0"/></linearGradient><linearGradient id="trendFillJoy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-joy)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-joy)" stop-opacity="0"/></linearGradient></defs>${[28,72,116,160].map(y=>`<line class="analytics-grid-line" x1="34" x2="320" y1="${y}" y2="${y}"/>`).join('')}<text class="analytics-axis" x="2" y="31">20万</text><text class="analytics-axis" x="2" y="75">15万</text><text class="analytics-axis" x="2" y="119">10万</text><text class="analytics-axis" x="8" y="163">5万</text><path class="analytics-trend-fill ${active.klass}" d="${active.fill}"/>${active.previous?`<path class="analytics-trend-previous" d="${active.prior}"/><text class="analytics-end-sub" x="224" y="${active.py+17}">先月 ${active.previous}</text>`:''}<path class="analytics-trend-current ${active.klass}" d="${active.current}"/><circle class="analytics-end-dot ${active.klass}" cx="316" cy="${active.y}" r="4"/><text class="analytics-end-label" x="224" y="${Math.max(12,active.y-12)}">7/31 ${active.end}</text>${[6,12,18,24].map((d,i)=>`<text class="analytics-axis" x="${80+i*55}" y="190">${d}日</text>`).join('')}</svg></div>
+      <div class="analytics-trend-legend"><i class="${active.klass}"></i><span>今月</span>${active.previous?`<i class="dashed"></i><span>先月</span>`:''}</div>
+    </div>`;
+  }
+
+  function analyticsMemberName() {
+    return ({all:'すべてのメンバー',self:'あおい',hanako:'花子',taro:'太郎'})[state.analyticsMember] || 'すべてのメンバー';
+  }
+
+  function analyticsLegendRow(row, member=false) {
+    const lead = member ? `<span class="legend-emoji">${row[0]}</span>` : icon(row[0]);
+    const attrs = member ? '' : `data-action="analytics-category-drill" data-category="${row[1]}"`;
+    const tag = member ? 'div' : 'button';
+    return `<${tag} class="analytics-legend-row" style="--legend-color:${row[4]}" ${attrs}>${lead}<span>${row[1]}</span><strong>${row[2]}</strong><small>${row[3]}%</small></${tag}>`;
+  }
+
+  function analyticsJoyDrawer(memberMode=false) {
+    const categorySets={all:[['sports_esports','趣味・コレクション',33800,63,'var(--hp-joy)'],['school','学び',13420,25,'#e8ad6d'],['groups','交際',6400,12,'var(--hp-shared)']],self:[['sports_esports','趣味・コレクション',18400,65,'var(--hp-joy)'],['school','学び',6200,22,'#e8ad6d'],['groups','交際',3800,13,'var(--hp-shared)']],hanako:[['sports_esports','趣味・コレクション',9800,60,'var(--hp-joy)'],['school','学び',4120,25,'#e8ad6d'],['groups','交際',2500,15,'var(--hp-shared)']],taro:[['sports_esports','趣味・コレクション',5600,64,'var(--hp-joy)'],['school','学び',3100,36,'#e8ad6d']]};
+    const memberSets=[['person','あおい',28400,53,'var(--hp-joy)'],['person','花子',16420,31,'#e8ad6d'],['person','太郎',8800,16,'var(--hp-shared)']];
+    const rows = memberMode ? (state.analyticsMember==='all'?memberSets:memberSets.filter(row=>row[1]===analyticsMemberName()).map(row=>[row[0],row[1],row[2],100,row[4]])) : (categorySets[state.analyticsMember]||categorySets.all);
+    const total=rows.reduce((sum,row)=>sum+row[2],0);
+    return `<div class="analytics-joy-drawer ${state.analyticsJoyExpanded?'expanded':''}"><button class="analytics-joy-toggle" data-action="analytics-joy-toggle" aria-expanded="${state.analyticsJoyExpanded}" aria-label="ときめき支出の内訳を${state.analyticsJoyExpanded?'閉じる':'開く'}"><span class="analytics-joy-chip">${icon('favorite_border')}ときめき支出</span><span class="analytics-joy-count">${rows.length} ${memberMode?'メンバー':'カテゴリ'}</span><strong class="analytics-joy-total">¥${total.toLocaleString('ja-JP')}</strong>${icon('expand_more')}</button>${state.analyticsJoyExpanded?`<div class="analytics-joy-details"><div class="analytics-joy-stack">${rows.map(row=>`<i style="width:${row[3]}%;background:${row[4]}"></i>`).join('')}</div>${rows.map(row=>`<div class="analytics-joy-row" style="--joy-row-color:${row[4]}">${icon(row[0])}<span>${row[1]}</span><strong>¥${row[2].toLocaleString('ja-JP')}</strong><small>${row[3]}%</small></div>`).join('')}</div>`:''}</div>`;
+  }
+
+  function analyticsDonutCard() {
+    const categorySets={all:[['restaurant','食費',68400,37,'#69a873'],['home','住居',54000,29,'#5f8dca'],['sports_esports','趣味・ときめき',53620,29,'var(--hp-joy)'],['train','交通',10400,5,'#86c994']],self:[['restaurant','食費',32000,38,'#69a873'],['home','住居',24000,29,'#5f8dca'],['sports_esports','趣味・ときめき',18400,22,'var(--hp-joy)'],['train','交通',9800,11,'#86c994']],hanako:[['restaurant','食費',24600,39,'#69a873'],['home','住居',17500,28,'#5f8dca'],['sports_esports','趣味・ときめき',16420,26,'var(--hp-joy)'],['train','交通',4080,7,'#86c994']],taro:[['restaurant','食費',29200,36,'#69a873'],['home','住居',22500,28,'#5f8dca'],['sports_esports','趣味・ときめき',18800,23,'var(--hp-joy)'],['train','交通',10320,13,'#86c994']]};
+    const categoryRows = categorySets[state.analyticsMember] || categorySets.all;
+    const familyRows = [['🌿','あおい','¥84,200',37,'#6fa36f'],['🌸','花子','¥62,600',28,'#5b8ac4'],['☕','太郎','¥80,820',35,'#86c79a']];
+    const soloRows = [['🌿','あおい','¥186,420',100,'#6fa36f']];
+    let memberRows = state.family ? familyRows : soloRows;
+    if(state.analyticsMember!=='all') memberRows = memberRows.filter(row=>row[1]===analyticsMemberName()).map(row=>[row[0],row[1],row[2],100,row[4]]);
+    const memberTotal = memberRows.reduce((sum,row)=>sum+Number(row[2].replace(/\D/g,'')),0);
+    const memberCount = state.analyticsMember==='all' ? (state.family?28:18) : 8;
+    const categoryMode = state.analyticsDimension==='category';
+    const total = categoryMode ? categoryRows.reduce((sum,row)=>sum+row[2],0) : memberTotal;
+    const rows = categoryMode ? categoryRows.map(row=>[row[0],row[1],`¥${row[2].toLocaleString('ja-JP')}`,row[3],row[4]]) : memberRows;
+    const shares = categoryMode ? categoryRows : memberRows;
+    const donutStyle=`background:conic-gradient(${shares.map((row,i)=>`${row[4]} ${i?shares.slice(0,i).reduce((s,r)=>s+r[3],0):0}% ${shares.slice(0,i+1).reduce((s,r)=>s+r[3],0)}%`).join(',')})`;
+    const positions=['a','b','c','d'];
+    return `<div class="analytics-card analytics-category-card" data-token="CategoryDonutCard"><div class="analytics-donut-wrap"><div class="analytics-donut" style="${donutStyle}">${shares.map((row,i)=>`<span class="analytics-ring-note ${positions[i]||'d'}">${categoryMode?icon(row[0]):`<span class="analytics-ring-emoji">${row[0]}</span>`}<b>${row[3]}%</b></span>`).join('')}<span class="analytics-donut-center"><span>今月の支出</span><strong>¥${total.toLocaleString('ja-JP')}</strong><small>${memberCount}件</small></span></div></div><div class="analytics-donut-controls"><span class="analytics-dimensions" role="group" aria-label="支出の集計方法"><button class="analytics-control-pill ${categoryMode?'active':''}" data-analytics-dimension="category" aria-pressed="${categoryMode}">カテゴリ別</button><button class="analytics-control-pill ${!categoryMode?'active':''}" data-analytics-dimension="member" aria-pressed="${!categoryMode}">メンバー別</button></span><button class="analytics-member-filter" data-action="analytics-member-filter" aria-label="対象メンバー ${analyticsMemberName()}">${icon('person')}<span class="analytics-member-filter-label">${state.analyticsMember==='all'?'全員':analyticsMemberName()}</span>${icon('expand_more')}</button></div>${rows.map(row=>analyticsLegendRow(row,!categoryMode)).join('')}${analyticsJoyDrawer(!categoryMode)}</div>`;
+  }
+
+  function analyticsCalendarCard() {
+    const counts = {2:1,6:2,12:3,18:1,21:2,28:1};
+    const offset = (new Date(2026,6,1).getDay()+6)%7;
+    const recordSets = {
+      2: [['local_cafe','カフェ','珈琲 小径','¥620']],
+      6: [['music_note','音楽','音楽配信','¥980'],['icecream','おやつ','甘味処 花月','¥560']],
+      12: [['local_cafe','カフェ','喫茶 月舟','¥980'],['book_2','書籍','青灯書房','¥1,240'],['local_florist','花','季節の花','¥880']],
+      18: [['spa','ケア','入浴剤','¥760']],
+      21: [['movie','映画','ミニシアター','¥1,800'],['restaurant','ランチ','小春食堂','¥1,200']],
+      28: [['bakery_dining','パン','朝のベーカリー','¥540']]
+    };
+    const cells = [...Array(offset)].map(()=>`<span class="analytics-calendar-day empty"></span>`).concat([...Array(31)].map((_,i)=>{ const day=i+1, count=counts[day]||0; const heat=count===0?'var(--hp-surface-muted)':count===1?'var(--hp-joy-soft)':count===2?'color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))':'var(--hp-joy)'; return `<button class="analytics-calendar-day ${state.analyticsJoyDay===day?'selected':''}" style="--heat:${heat}" data-count="${count}" data-analytics-joy-day="${day}" aria-label="7月${day}日 ときめき${count}件" aria-pressed="${state.analyticsJoyDay===day}"><span>${day}</span></button>`; })).join('');
+    const panelRows = recordSets[state.analyticsJoyDay] || [];
+    const panel = state.analyticsJoyDay==null ? '' : `<div class="analytics-day-panel"><div class="analytics-day-panel-head">7月${state.analyticsJoyDay}日 · ${counts[state.analyticsJoyDay]||0}件のときめき</div>${panelRows.length?panelRows.map(row=>`<div class="analytics-day-row">${icon(row[0])}<span>${row[1]}<small>${row[2]}</small></span><strong>${row[3]}</strong></div>`).join(''):`<p class="hint">この日のときめき支出はありません。</p>`}</div>`;
+    return `<div class="analytics-card analytics-calendar-card" data-token="JoyCalendarCard"><div class="analytics-calendar-weekdays">${['月','火','水','木','金','土','日'].map(day=>`<span>${day}</span>`).join('')}</div><div class="analytics-calendar-grid">${cells}</div><div class="analytics-calendar-legend"><span>少</span><i class="analytics-heat" style="background:var(--hp-surface-muted)"></i><i class="analytics-heat" style="background:var(--hp-joy-soft)"></i><i class="analytics-heat" style="background:color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))"></i><i class="analytics-heat" style="background:var(--hp-joy)"></i><span>多</span><p>今月10件 · 6日間に記録</p></div>${panel}</div>`;
+  }
+
+  function analyticsHistogramCard() {
+    const counts=[0,0,0,0,0,3,5,8,4,2], max=8;
+    return `<div class="analytics-card" data-token="SatisfactionHistogramCard"><div class="analytics-histogram">${counts.map((count,i)=>`<span class="analytics-histogram-col"><span>${count||''}</span><i class="analytics-histogram-bar ${count===0?'zero':''} ${i===7?'median':''}" style="height:${count?Math.max(8,count/max*110):3}px"></i></span>`).join('')}</div><div class="analytics-histogram-axis">${counts.map((_,i)=>`<span>${i+1}</span>`).join('')}</div><div class="analytics-histogram-foot"><span>今月のときめきは「選んでよかった」が多め · まんなかは8点</span></div></div>`;
+  }
+
+  function analyticsWindowPicker() {
+    const months=[['2026-7','2026年7月'],['2026-6','2026年6月'],['2026-5','2026年5月']];
+    return `<h3>月を選ぶ</h3>${months.map(([value,label])=>`<button class="tap-row row-divider" data-analytics-window="${value}" data-label="${label}"><span class="row-copy"><strong>${label}</strong></span>${icon('chevron_right')}</button>`).join('')}`;
+  }
+
+  function analytics() {
+    const header=tabHeader(monthTitle('analytics'),`<span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`);
+    const family=state.family?`<div class="analytics-family-card" data-token="FamilyInsightDataCard"><h3>家族 · ハイライトサマリー</h3><p>家族のときめき 24回</p><p>みんなで「趣味・コレクション」を楽しんでいます（12件、平均 8.6 / 10）</p></div>`:'';
+    return `<section class="screen analytics-screen">${header}${analyticsSection('支出の推移','',true)}${analyticsTrendCard()}${analyticsSection('カテゴリ支出','category')}${analyticsDonutCard()}${analyticsSection('ときめきカレンダー','joy')}${analyticsCalendarCard()}${analyticsSection('ときめきの満足度','joy')}${analyticsHistogramCard()}${family}</section>`;
+  }
+
+  function shopping() { return `<section class="screen">${tabHeader('買い物リスト')} ${state.family?`<div class="segmented"><button class="segment active" data-action="segment">全部</button><button class="segment" data-action="segment">個人</button></div>`:''}<div class="filter-row"><button class="filter-chip active" data-action="filter">すべて</button><button class="filter-chip" data-action="filter">食品</button><button class="filter-chip" data-action="filter">日用品</button><button class="filter-chip" data-action="filter">担当</button></div><div class="section-title"><h2>買うもの</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div><div id="shopping-list" class="shopping-list-card">${shopItem('牛乳','食品 · 1本',false,'daily')}${shopItem('トイレットペーパー','日用品 · 12ロール',false,'daily')}${shopItem('味噌','食品 · 赤味噌',false,'daily')}${shopItem('コーヒー豆','嗜好品 · 200g',false,'joy')}</div><div class="section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${shopItem('食器用洗剤','日用品',true,'daily')}</section>`; }
+  function shopItem(name,meta,done,ledger='daily'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span>${icon('drag_indicator')}</div>`; }
+  function shoppingForm() { return `<section class="screen">${backHeader('買うものを追加')}<div class="section-title"><h2>品名</h2></div><input class="search" value="オリーブオイル" aria-label="品名"><div class="flat-card"><div class="form-row"><label>数量</label><strong>1本</strong>${icon('chevron_right')}</div><div class="form-row"><label>カテゴリ</label><strong>食品</strong>${icon('chevron_right')}</div><div class="form-row"><label>リスト</label><strong>${state.family?'共有':'個人'}</strong>${icon('chevron_right')}</div><div class="form-row"><label>メモ</label><strong>エクストラバージン</strong>${icon('chevron_right')}</div></div><p class="hint">個人にした項目は家族同期へ送信されません。</p><button class="primary-btn" data-action="save-shopping">リストに追加</button></section>`; }
+
+  function entry() { return `<section class="screen">${backHeader('記帳')}<div class="amount-display"><span>支出金額 · JPY</span><strong class="amount" id="amount-value">¥${Number(state.amount||0).toLocaleString('ja-JP')}</strong></div><div class="flat-card"><div class="form-row"><label>カテゴリ</label><strong>食費 · スーパー</strong><button class="text-btn" data-screen="category">変更</button></div><div class="form-row"><label>日付</label><strong>2026年7月10日</strong>${icon('chevron_right')}</div><div class="form-row"><label>店舗</label><strong>ライフ</strong>${icon('chevron_right')}</div><div class="form-row"><label>帳本</label><strong style="color:var(--hp-daily-text)">日常</strong>${icon('chevron_right')}</div></div><div class="numpad">${['1','2','3','4','5','6','7','8','9','mic','0','backspace'].map(k=>`<button class="key" data-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}<button class="key" data-action="decimal">.</button><button class="key" data-action="continuous">連続</button><button class="key save" data-action="save-entry">記録</button></div></section>`; }
+
+  function voice() { return `<section class="screen">${backHeader('声で記帳')}<div class="card"><div class="eyebrow">認識した内容</div><h2 style="font-size:17px;margin:9px 0" id="transcript">ランチを松屋で 1,200円</h2><div class="filter-row"><span class="chip">¥1,200</span><span class="chip">松屋</span><span class="chip">食費</span><span class="chip">日常</span></div></div><div class="voice-zone"><div class="wave">${[12,22,30,18,34,25,16,29,19,11].map(h=>`<i style="height:${h}px"></i>`).join('')}</div><button class="mic ${state.recording?'recording':''}" data-action="record">${icon(state.recording?'stop':'mic')}</button><p class="hint">${state.recording?'離すと解析します':'タップして話す'}</p></div><div class="section-title"><h2>確認</h2></div><div class="flat-card"><div class="form-row"><label>金額</label><strong>¥1,200</strong></div><div class="form-row"><label>カテゴリ</label><strong>食費</strong><span class="badge">高信頼</span></div><div class="form-row"><label>帳本</label><strong>日常</strong></div></div><div style="height:12px"></div><button class="primary-btn" data-action="save-entry">この内容で記録</button></section>`; }
+
+  function ocr() { return `<section class="screen">${backHeader('レシート撮影')}<div class="camera"><div class="viewfinder">${icon('document_scanner')}<span style="position:absolute;bottom:34px;font-size:10px">レシート全体を枠内に</span></div></div><div class="camera-controls"><button class="icon-btn" data-action="toast" data-message="アルバムを開く">${icon('photo_library')}</button><button class="shutter" data-action="ocr-capture" aria-label="撮影"></button><button class="icon-btn" data-action="toast" data-message="フラッシュ切替">${icon('flash_off')}</button></div><p class="hint" style="text-align:center">画像は端末内で処理されます。</p></section>`; }
+
+  function category() { const groups=[['restaurant','食費','スーパー、外食、カフェ'],['train','交通','電車、バス、タクシー'],['home','住居','家賃、光熱費'],['spa','趣味・悦己','趣味、旅行、学び'],['health_and_safety','健康','医療、運動']]; return `<section class="screen">${backHeader('カテゴリを選択')}<input class="search" placeholder="カテゴリを検索" aria-label="カテゴリを検索"><div class="section-title"><h2>最近使ったカテゴリ</h2></div><div class="filter-row"><button class="filter-chip active" data-action="pick-category">食費</button><button class="filter-chip" data-action="pick-category">交通</button><button class="filter-chip" data-action="pick-category">カフェ</button></div><div class="section-title"><h2>すべて</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div><div class="flat-card">${groups.map(([ico,n,m])=>`<button class="tap-row row-divider" data-action="pick-category"><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${n}</strong><small>${m}</small></span>${icon('expand_more')}</button>`).join('')}</div></section>`; }
+
+  function edit() { return `<section class="screen">${backHeader('取引を編集',`<button class="icon-btn" data-action="delete">${icon('delete')}</button>`)}<div class="amount-display"><span>支出金額</span><strong class="amount">¥3,280</strong></div><div class="flat-card"><div class="form-row"><label>カテゴリ</label><strong>食費 · スーパー</strong>${icon('chevron_right')}</div><div class="form-row"><label>日付</label><strong>2026年7月10日</strong>${icon('chevron_right')}</div><div class="form-row"><label>店舗</label><strong>ライフ</strong>${icon('chevron_right')}</div><div class="form-row"><label>メモ</label><strong>週末の買い出し</strong>${icon('chevron_right')}</div><div class="form-row"><label>帳本</label><strong style="color:var(--hp-daily-text)">日常</strong>${icon('chevron_right')}</div></div><div style="height:14px"></div><button class="primary-btn" data-action="toast" data-message="変更を保存しました">変更を保存</button><button class="ghost-btn" data-action="delete">この取引を削除</button></section>`; }
+
+  function family() { return `<section class="screen">${backHeader('家族同期')}<div class="avatar-stack"><span class="avatar">私</span><span class="avatar">花</span><span class="avatar">太</span></div><div style="text-align:center"><h2 class="display" style="font-size:22px;margin:0">家族と家計を見守る</h2><p class="hint">必要な情報だけを、E2EE で安全に共有します。</p></div><button class="action-card" data-action="create-family"><span class="row-icon">${icon('add_circle')}</span><span class="row-copy"><strong>新しい家族を作る</strong><small>招待コードを発行します</small></span>${icon('chevron_right')}</button><button class="action-card" data-screen="join"><span class="row-icon shared">${icon('login')}</span><span class="row-copy"><strong>家族に参加する</strong><small>6桁の招待コードを入力</small></span>${icon('chevron_right')}</button><p class="hint" style="text-align:center;margin-top:24px">${icon('shield')} サーバーは内容を読むことができません。</p></section>`; }
+
+  function join() { return `<section class="screen">${backHeader('家族に参加')}<div class="intro-mark" style="width:70px;height:70px;border-radius:24px">${icon('key')}</div><div style="text-align:center"><h2 class="display">招待コードを入力</h2><p class="hint">家族の管理者から受け取った6桁のコード</p></div><div class="code">${['4','8','2','1','6','9'].map(x=>`<span class="digit">${x}</span>`).join('')}</div><button class="primary-btn" data-action="join-family">内容を確認</button><p class="hint" style="text-align:center">参加後も個人の非公開データは共有されません。</p></section>`; }
+
+  function group() { return `<section class="screen">${backHeader('家族管理',`<span class="chip">${icon('sync')} 同期済み</span>`)}<div class="card"><div class="eyebrow">GROUP</div><h2 class="display" style="font-size:22px;margin:7px 0">青木家の家計</h2><p class="hint">オーナー · 3人 · 最終同期 たった今</p></div><button class="action-card" data-action="toast" data-message="承認待ちメンバー"><span class="row-icon">${icon('notifications')}</span><span class="row-copy"><strong>1人が承認を待っています</strong><small>内容を確認してください</small></span>${icon('chevron_right')}</button><div class="section-title"><h2>メンバー</h2><button class="text-btn" data-action="toast" data-message="招待コードを発行">招待</button></div><div class="flat-card"><div class="member"><span class="avatar">私</span><span class="row-copy"><strong>あなた</strong><small>オーナー</small></span><span class="badge">管理者</span></div><div class="member"><span class="avatar">花</span><span class="row-copy"><strong>花子</strong><small>iPhone · 同期済み</small></span>${icon('more_horiz')}</div><div class="member"><span class="avatar">太</span><span class="row-copy"><strong>太郎</strong><small>Android · 2分前</small></span>${icon('more_horiz')}</div></div><div style="height:13px"></div><button class="secondary-btn" data-action="toast" data-message="手動同期を開始">${icon('sync')} 今すぐ同期</button><button class="ghost-btn" data-action="delete">家族を解散</button></section>`; }
+
+  function onboarding() { return `<section class="screen"><div class="intro-hero"><div class="intro-mark">${icon('account_balance_wallet')}</div><h1>まもる家計簿</h1><p class="hint">家族のお金の話を、やさしく。</p></div><div class="feature">${icon('encrypted')}<span><strong>端末内で暗号化</strong><small class="hint" style="display:block">あなたのデータは、あなたのもの。</small></span></div><div class="feature">${icon('balance')}<span><strong>日常と悦己、ふたつの帳本</strong><small class="hint" style="display:block">必要な支出と、自分を満たす支出。</small></span></div><div class="feature">${icon('mic')}<span><strong>声ですばやく記録</strong><small class="hint" style="display:block">話した内容を確認してから保存。</small></span></div><div style="height:28px"></div><button class="primary-btn" data-screen="preferences">はじめる</button><button class="ghost-btn" data-screen="preferences">紹介をスキップ</button></section>`; }
+
+  function preferences() { return `<section class="screen">${backHeader('基本設定')}<div class="section-title"><h2>あなたについて</h2></div><div class="card" style="display:flex;align-items:center;gap:12px"><span class="avatar" style="margin:0">私</span><span class="row-copy"><strong>あおい</strong><small>タップしてプロフィールを変更</small></span><button class="text-btn" data-screen="profile">変更</button></div><div class="section-title"><h2>おすすめの初期値</h2></div><div class="flat-card"><button class="tap-row row-divider" data-action="toast" data-message="表示言語を変更"><span class="row-icon">${icon('language')}</span><span class="row-copy"><strong>表示言語</strong><small>日本語</small></span><span class="text-btn">変更</span></button><button class="tap-row row-divider" data-action="toast" data-message="通貨を変更"><span class="row-icon">${icon('currency_yen')}</span><span class="row-copy"><strong>通貨</strong><small>日本円 · JPY</small></span><span class="text-btn">変更</span></button><button class="tap-row" data-action="toast" data-message="音声言語を変更"><span class="row-icon">${icon('mic')}</span><span class="row-copy"><strong>音声入力</strong><small>日本語</small></span><span class="text-btn">変更</span></button></div><p class="hint">これらは後から設定でいつでも変更できます。</p><button class="primary-btn" data-screen="lock">この設定で始める</button></section>`; }
+
+  function lock() { return `<section class="screen"><div class="intro-hero" style="padding-top:46px"><div class="intro-mark" style="border-radius:50%">${icon('fingerprint')}</div><h1>おかえりなさい</h1><p class="hint">Face ID または PIN でロックを解除</p></div><div class="pin-dots">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.pin.length?'filled':''}"></i>`).join('')}</div><div class="pinpad">${['1','2','3','4','5','6','7','8','9','fingerprint','0','backspace'].map(k=>`<button class="key" data-lock-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}</div><button class="ghost-btn" data-action="forgot-pin">PINを忘れた場合</button></section>`; }
+
+  function settings() { const section=(title,rows)=>`<div class="section-title"><h2>${title}</h2></div><div class="flat-card">${rows}</div>`; const row=(ico,title,sub,go='',toggle=false)=>`<button class="tap-row row-divider" ${go?`data-screen="${go}"`:'data-action="toast" data-message="設定を開く"'}><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${title}</strong><small>${sub}</small></span>${toggle?`<span class="switch on" data-action="switch"></span>`:icon('chevron_right')}</button>`; return `<section class="screen">${backHeader('設定')}${section('プロフィール',row('account_circle','あおい','個人情報とアバター','profile'))}${section('一般',row('contrast','外観','端末の設定に合わせる')+row('language','言語','日本語')+row('spa','月間 Joy 目標','80 Joy'))}${section('セキュリティ',row('lock','アプリロック','Face ID + PIN','lock',true))}${section('データ',row('database','バックアップと復元','暗号化ファイル')+row('download','CSV エクスポート','ローカル保存'))}${section('家族',row('group','家族同期',state.family?'青木家の家計':'未設定',state.family?'group':'family'))}${section('このアプリ',row('policy','法的情報・応援','プライバシー、規約、OSS','legal'))}<p class="hint" style="text-align:center">Home Pocket 2.0.0 · データは端末内で保護</p></section>`; }
+
+  function profile() { return `<section class="screen">${backHeader('プロフィール')}<div class="avatar-stack" style="margin-top:8px"><span class="avatar" style="width:82px;height:82px;margin:0;font-size:20px">私</span></div><button class="text-btn" style="display:block;margin:0 auto" data-action="toast" data-message="写真を選択">写真を変更</button><div class="section-title"><h2>表示名</h2></div><input class="search" value="あおい" aria-label="表示名"><div class="section-title"><h2>家族での表示</h2></div><div class="card"><p class="hint" style="margin:0">この名前とアバターは、参加している家族のメンバーに表示されます。</p></div><div style="height:18px"></div><button class="primary-btn" data-action="toast" data-message="プロフィールを保存しました">保存</button></section>`; }
+
+  function legal() { return `<section class="screen">${backHeader('法的情報・応援')}<div class="flat-card"><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('privacy_tip')}</span><span class="row-copy"><strong>プライバシーポリシー</strong><small>データの扱いについて</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('description')}</span><span class="row-copy"><strong>利用規約</strong><small>サービス利用条件</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('storefront')}</span><span class="row-copy"><strong>特定商取引法に基づく表記</strong><small>日本向け法定表示</small></span>${icon('chevron_right')}</button><button class="tap-row" data-action="legal-doc"><span class="row-icon">${icon('code')}</span><span class="row-copy"><strong>オープンソースライセンス</strong><small>使用ライブラリ</small></span>${icon('chevron_right')}</button></div><div class="section-title"><h2>開発を応援</h2></div><div class="card"><span class="row-icon joy">${icon('favorite')}</span><h2 class="display" style="font-size:18px">静かな家計簿を育てる</h2><p class="legal-copy">スポンサーリンクは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。</p><button class="secondary-btn" data-action="toast" data-message="外部スポンサーサイトを確認">スポンサーについて</button></div></section>`; }
+
+  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, voice, ocr, category, edit, family, join, group, onboarding, preferences, lock, settings, profile, legal };
+
+  function render() {
+    document.documentElement.dataset.theme = state.theme;
+    const phone = document.getElementById('phone');
+    phone.classList.toggle('no-nav', !mainScreens.includes(state.screen));
+    document.getElementById('app-screen').innerHTML = renderers[state.screen]();
+    const bottom = document.getElementById('bottom-nav');
+    bottom.style.display = mainScreens.includes(state.screen) ? 'flex' : 'none';
+    bottom.innerHTML = mainScreens.includes(state.screen) ? nav(state.screen) : '';
+    document.querySelectorAll('.screen-link').forEach(b=>b.classList.toggle('active',b.dataset.screen===state.screen));
+    const d=info[state.screen];
+    ['inspect-kicker','inspect-title','inspect-copy','inspect-structure','inspect-states','inspect-build'].forEach((id,i)=>document.getElementById(id).textContent=d[i]);
+    document.getElementById('home-design-note').hidden=state.screen!=='home';
+  }
+  function setScreen(id, push=true){ if(!renderers[id]) return; if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; }
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t.timer); t.timer=setTimeout(()=>t.classList.remove('show'),1500); }
+  function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal').classList.add('open'); }
+  function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+  function filterTransactions(q){ document.querySelectorAll('#transaction-list .list-transaction').forEach(x=>x.style.display=(x.dataset.search||x.textContent).toLowerCase().includes(q.toLowerCase())?'flex':'none'); }
+
+  document.addEventListener('click', e => {
+    const screen=e.target.closest('[data-screen]'); if(screen){ setScreen(screen.dataset.screen); return; }
+    const navEl=e.target.closest('[data-nav]'); if(navEl){ setScreen(navEl.dataset.nav); return; }
+    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; render(); return; }
+    const key=e.target.closest('[data-key]'); if(key){ const k=key.dataset.key; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='mic') setScreen('voice'); else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
+    const lockKey=e.target.closest('[data-lock-key]'); if(lockKey){ const k=lockKey.dataset.lockKey; if(k==='backspace') state.pin=state.pin.slice(0,-1); else if(k==='fingerprint'){ toast('Face ID で認証しました'); setTimeout(()=>setScreen('home'),500); return; } else if(state.pin.length<4) state.pin+=k; if(state.pin.length===4){ toast('ロックを解除しました'); setTimeout(()=>{state.pin='';setScreen('home')},550); } else render(); return; }
+    const uiState=e.target.closest('[data-ui-state]'); if(uiState){ state.uiState=uiState.dataset.uiState; render(); return; }
+    const listDay=e.target.closest('[data-list-day]'); if(listDay){ const day=Number(listDay.dataset.listDay); state.listDay=state.listDay===day?null:day; render(); return; }
+    const listLedger=e.target.closest('[data-list-ledger]'); if(listLedger){ state.listLedger=listLedger.dataset.listLedger; render(); return; }
+    const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
+    const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
+    const analyticsDimension=e.target.closest('[data-analytics-dimension]'); if(analyticsDimension){ state.analyticsDimension=analyticsDimension.dataset.analyticsDimension; render(); return; }
+    const analyticsJoyDay=e.target.closest('[data-analytics-joy-day]'); if(analyticsJoyDay){ const day=Number(analyticsJoyDay.dataset.analyticsJoyDay); state.analyticsJoyDay=state.analyticsJoyDay===day?null:day; render(); return; }
+    const analyticsWindowType=e.target.closest('[data-analytics-window-type]'); if(analyticsWindowType){ state.analyticsWindowType=analyticsWindowType.dataset.analyticsWindowType; document.getElementById('modal-content').innerHTML=analyticsWindowPicker(); return; }
+    const analyticsWindow=e.target.closest('[data-analytics-window]'); if(analyticsWindow){ state.analyticsWindow=analyticsWindow.dataset.analyticsWindow; state.analyticsWindowLabel=analyticsWindow.dataset.label; closeModal(); render(); toast(`${state.analyticsWindowLabel}に更新しました`); return; }
+    const analyticsMember=e.target.closest('[data-analytics-member]'); if(analyticsMember){ state.analyticsMember=analyticsMember.dataset.analyticsMember; closeModal(); render(); return; }
+    const tool=e.target.closest('[data-tool]'); if(tool){ if(tool.dataset.tool==='annotations') document.body.classList.toggle('annotations'); else document.getElementById('phone').style.width=tool.dataset.tool+'px'; return; }
+    const action=e.target.closest('[data-action]'); if(!action) return; const a=action.dataset.action;
+    if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
+    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; render(); toast(state.family?'家庭モード':'個人モード'); }
+    else if(a==='dismiss-invite'){ state.inviteDismissed=true; render(); }
+    else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='list-sort-option'){ state.listSort=action.dataset.sort; state.listDirection=action.dataset.direction; closeModal(); render(); }
+    else if(a==='list-search'){ state.listSearchExpanded=true; render(); requestAnimationFrame(()=>document.querySelector('.list-filter-search input')?.focus()); }
+    else if(a==='list-search-clear'){ state.listSearch=''; state.listSearchExpanded=false; render(); }
+    else if(a==='list-clear'){ state.listYear=2026; state.listMonth=7; state.listDay=null; state.listSort='date'; state.listDirection='desc'; state.listLedger='all'; state.listCategory=false; state.listSearch=''; state.listSearchExpanded=false; render(); }
+    else if(a==='list-category') openModal(`<h3>カテゴリで絞り込む</h3><p class="hint">複数カテゴリ選択は既存のフィルター構造を使用します。</p><div class="flat-card"><button class="tap-row row-divider" data-action="list-category-apply"><span class="row-icon">${icon('restaurant')}</span><span class="row-copy"><strong>食費</strong><small>スーパー、外食、カフェ</small></span>${icon('check')}</button><button class="tap-row row-divider" data-action="toast" data-message="交通を選択"><span class="row-icon">${icon('train')}</span><span class="row-copy"><strong>交通</strong><small>電車、バス、タクシー</small></span></button><button class="tap-row" data-action="toast" data-message="住居を選択"><span class="row-icon">${icon('home')}</span><span class="row-copy"><strong>住居</strong><small>家賃、光熱費</small></span></button></div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='list-category-apply'){ state.listCategory=true; closeModal(); render(); }
+    else if(a==='analytics-window') openModal(analyticsWindowPicker());
+    else if(a==='analytics-custom-window'){ state.analyticsWindow='custom'; state.analyticsWindowLabel='6月15日 〜 7月12日'; closeModal(); render(); toast('カスタム期間に更新しました'); }
+    else if(a==='analytics-joy-toggle'){ state.analyticsJoyExpanded=!state.analyticsJoyExpanded; render(); }
+    else if(a==='analytics-member-filter'){ const members=[['all','すべてのメンバー'],['self','🌿 あおい'],...(state.family?[['hanako','🌸 花子'],['taro','☕ 太郎']]:[])]; openModal(`<h3>メンバーで絞り込む</h3><div class="flat-card">${members.map(([value,label],index)=>`<button class="tap-row ${index<members.length-1?'row-divider':''}" data-analytics-member="${value}"><span class="row-copy"><strong>${label}</strong></span>${state.analyticsMember===value?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`); }
+    else if(a==='analytics-category-drill'){ const category=action.dataset.category; openModal(`<h3>${category}</h3><p class="hint">選択期間の取引を、現在のカテゴリ階層で読み取り専用表示します。</p><div class="flat-card"><div class="tap-row row-divider"><span class="row-icon">${icon('receipt_long')}</span><span class="row-copy"><strong>7月10日 · ${category}</strong><small>日常 · 取引の詳細</small></span><strong class="row-value">¥3,280</strong></div><div class="tap-row"><span class="row-icon joy">${icon('receipt_long')}</span><span class="row-copy"><strong>7月6日 · ${category}</strong><small>ときめき · 取引の詳細</small></span><strong class="row-value">¥980</strong></div></div><button class="ghost-btn" data-action="close-modal">閉じる</button>`); }
+    else if(a==='month') openModal(`<h3>月を選ぶ</h3>${[[2026,7],[2026,6],[2026,5]].map(([year,month])=>`<button class="tap-row row-divider" data-list-year="${year}" data-list-month="${month}"><span class="row-copy"><strong>${year}年${month}月</strong></span>${icon('chevron_right')}</button>`).join('')}`);
+    else if(a==='close-modal') closeModal();
+    else if(a==='back'){ const previous=state.history.pop()||'home'; setScreen(previous,false); }
+    else if(a==='fab') setScreen(state.screen==='shopping'?'shopping-form':'entry');
+    else if(a==='hero-analytics') setScreen('analytics');
+    else if(a==='toast') toast(action.dataset.message||'操作を確認しました');
+    else if(a==='filter'){ action.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
+    else if(a==='segment'){ action.parentElement.querySelectorAll('.segment').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
+    else if(a==='check'){ const item=action.closest('.shopping-item'); item.classList.toggle('done'); action.innerHTML=item.classList.contains('done')?icon('check'):''; }
+    else if(a==='record'){ state.recording=!state.recording; render(); if(!state.recording) toast('音声を解析しました'); }
+    else if(a==='save-entry'){ toast('記録しました'); setTimeout(()=>setScreen('home'),550); }
+    else if(a==='save-shopping'){ toast('買い物リストに追加しました'); setTimeout(()=>setScreen('shopping'),550); }
+    else if(a==='ocr-capture'){ toast('レシートを読み取りました'); setTimeout(()=>setScreen('edit'),550); }
+    else if(a==='pick-category'){ toast(action.textContent.trim()+'を選択'); setTimeout(()=>setScreen('entry'),450); }
+    else if(a==='create-family'){ state.family=true; toast('招待コードを作成しました'); setTimeout(()=>setScreen('group'),450); }
+    else if(a==='join-family'){ toast('家族情報を確認しました'); setTimeout(()=>setScreen('group'),450); }
+    else if(a==='switch') action.classList.toggle('on');
+    else if(a==='delete') openModal(`<h3>この操作を確認</h3><p class="hint">削除した内容は元に戻せません。</p><button class="primary-btn" style="background:var(--hp-error)" data-action="close-modal">削除する</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='forgot-pin') openModal(`<h3>PINを忘れた場合</h3><p class="legal-copy">PINを復元する仕組みはありません。再インストールすると、同期されていない端末内データは失われます。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
+    else if(a==='legal-doc') openModal(`<h3>${action.innerText.trim()}</h3><p class="legal-copy">この文書は読みやすさを優先し、見出し・本文・更新日を一つの紙面として表示します。正式な内容は既存の法務文書を使用します。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
+  });
+  document.addEventListener('keydown', e => {
+    const hero=e.target.closest?.('.faithful-hero');
+    if(hero && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); setScreen('analytics'); }
+  });
+  document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+  render();
+</script>
+</body>
+</html>

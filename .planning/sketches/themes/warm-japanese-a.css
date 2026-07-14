@@ -1,0 +1,68 @@
+/* Sketch 005 — A 温润日系 / 生活手帐
+   Token-only theme. Production values remain undecided until the sketch is approved. */
+:root {
+  --hp-bg: #f5f0e7;
+  --hp-surface: #fffdf8;
+  --hp-surface-muted: #eee7db;
+  --hp-surface-strong: #e4dac9;
+  --hp-text: #27362f;
+  --hp-text-muted: #637168;
+  --hp-text-faint: #637168;
+  --hp-border: #e3dacb;
+  --hp-border-strong: #d3c7b5;
+  --hp-primary: #456b59;
+  --hp-primary-text: #365a49;
+  --hp-primary-soft: #e2ece4;
+  --hp-daily: #66896d;
+  --hp-daily-text: #45674d;
+  --hp-daily-soft: #e6eee5;
+  --hp-joy: #c87874;
+  --hp-joy-text: #984a47;
+  --hp-joy-soft: #f4e3df;
+  --hp-shared: #58758c;
+  --hp-shared-text: #3f6078;
+  --hp-shared-soft: #e4ebf0;
+  --hp-success: #4f826a;
+  --hp-warning: #a8733f;
+  --hp-error: #b64f4f;
+  --hp-info: #4f7186;
+  --hp-shadow-soft: 0 8px 30px rgba(75, 57, 40, .11);
+  --hp-shadow-card: 0 2px 12px rgba(75, 57, 40, .07);
+  --hp-font-body: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --hp-font-display: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --hp-radius-sm: 10px;
+  --hp-radius-md: 14px;
+  --hp-radius-card: 18px;
+  --hp-radius-hero: 24px;
+  --hp-radius-pill: 999px;
+}
+
+[data-theme="dark"] {
+  --hp-bg: #171c19;
+  --hp-surface: #222923;
+  --hp-surface-muted: #2b342d;
+  --hp-surface-strong: #354039;
+  --hp-text: #eef1eb;
+  --hp-text-muted: #a1ada4;
+  --hp-text-faint: #8b978e;
+  --hp-border: #354038;
+  --hp-border-strong: #465248;
+  --hp-primary: #99bca5;
+  --hp-primary-text: #b4d2bc;
+  --hp-primary-soft: #293b30;
+  --hp-daily: #92b298;
+  --hp-daily-text: #a8c8ae;
+  --hp-daily-soft: #29382e;
+  --hp-joy: #e2a09b;
+  --hp-joy-text: #f0b7b3;
+  --hp-joy-soft: #402b2c;
+  --hp-shared: #91adc2;
+  --hp-shared-text: #aac4d7;
+  --hp-shared-soft: #263640;
+  --hp-success: #89b49c;
+  --hp-warning: #d3a571;
+  --hp-error: #e58c8c;
+  --hp-info: #8cb1c8;
+  --hp-shadow-soft: 0 10px 34px rgba(0, 0, 0, .24);
+  --hp-shadow-card: 0 2px 12px rgba(0, 0, 0, .18);
+}

@@ -32,6 +32,8 @@ semantic separation, light/dark viability, local-first restraint, and ADR-012/01
 | 002 | app-lock | Separate Face ID page + PIN page, chosen by settings; Face ID preferred when both on | **B · 清爽极简** (light + dark) | security, lock, biometric |
 | 003 | legal-sponsor | Complete Settings page = existing 8 sections + App Lock expansion + legal + external sponsor | **C · 混合** | settings, legal, compliance, app-lock |
 | 004 | home-palette-redesign | Which palette and homepage hierarchy should define the next Home Pocket identity? | **A · 温润日系** | home, palette, navigation, joy, light-dark |
+| 005 | whole-app-warm-japanese | How does A scale coherently across every primary Home Pocket journey and state? | — | design-system, whole-app, navigation, entry, family, security |
+| 006 | home-existing-layout-redraw | How should the selected system redraw Home without changing the shipped Flutter layout? | **C · 层次纸面** | home, faithful-redraw, existing-layout, design-system |
 
 ## Decisions
 - **001 = A (温柔抛茶感):** two-step first run — intro page (value prop) → basic settings showing
@@ -45,3 +47,16 @@ semantic separation, light/dark viability, local-first restraint, and ADR-012/01
 - **004 = A (温润日系):** warm washi canvas + pine green + muted benizakura, with a calm monthly
   overview, quiet Joy accumulation, one obvious add-entry action, and shared blue preserved as a
   distinct family-ledger semantic. This becomes the foundation for the whole-app design pass.
+- **005 Home integration = 006 C (层次纸面):** the whole-app Home now uses the selected faithful
+  redraw from Sketch 006. It preserves the shipped Home widget order, integrates the subtly
+  pine-tinted layered hero and detached pill navigation, and keeps personal/family plus light/dark
+  states inside the same design center.
+- **005 Analytics restoration:** the accepted List page is locked. Analytics now mirrors the
+  production registry order (`WithinMonthTrendCard`, `CategoryDonutCard` with nested Joy drawer,
+  `JoyCalendarCard`, `SatisfactionHistogramCard`, then conditional family insight) while applying
+  the selected warm Japanese tokens. Time-window, trend-tab, dimension/member-filter, category
+  drill-down, and inline calendar-day interactions are all represented in the mockup.
+- **006 = C (层次纸面):** discard the structural re-composition from 005 for Home. Preserve the
+  shipped `HeroHeader → HomeHeroCard → FamilyInviteBanner → TransactionListCard → HomeBottomNavBar`
+  skeleton exactly, then use a subtly pine-tinted hero surface, larger radius, and stronger paper
+  layering from the selected design system.

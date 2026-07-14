@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light" data-treatment="layered">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Pocket — Existing Home Layout Redraw</title>
+<link rel="stylesheet" href="../themes/default.css">
+<link rel="stylesheet" href="../themes/warm-japanese-a.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0">
+<style>
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body { margin: 0; background: #ddd6cb; color: var(--hp-text); font-family: var(--hp-font-body); }
+  button { font: inherit; color: inherit; }
+  .material-symbols-rounded { font-family: "Material Symbols Rounded"; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; direction: ltr; -webkit-font-feature-settings: "liga"; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 3px solid color-mix(in srgb, var(--hp-primary) 42%, transparent); outline-offset: 2px; }
+
+  /* One system, three surface treatments. Layout metrics do not change. */
+  :root {
+    --draw-card-radius: 18px;
+    --draw-card-shadow: var(--hp-shadow-card);
+    --draw-card-border: var(--hp-border);
+    --draw-hero-bg: var(--hp-surface);
+    --draw-divider: var(--hp-border);
+    --draw-ticket-bg: var(--hp-joy-soft);
+  }
+  [data-treatment="flat"] {
+    --draw-card-radius: 14px;
+    --draw-card-shadow: none;
+    --draw-card-border: var(--hp-border-strong);
+    --draw-hero-bg: var(--hp-bg);
+    --draw-divider: var(--hp-border-strong);
+    --draw-ticket-bg: color-mix(in srgb, var(--hp-joy-soft) 62%, var(--hp-bg));
+  }
+  [data-treatment="layered"] {
+    --draw-card-radius: 22px;
+    --draw-card-shadow: var(--hp-shadow-soft);
+    --draw-card-border: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border));
+    --draw-hero-bg: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft));
+    --draw-divider: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border));
+    --draw-ticket-bg: color-mix(in srgb, var(--hp-joy-soft) 86%, var(--hp-surface));
+  }
+
+  .topbar { position: fixed; inset: 0 0 auto; z-index: 100; min-height: 62px; display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: color-mix(in srgb, var(--hp-surface) 94%, transparent); border-bottom: 1px solid var(--hp-border); backdrop-filter: blur(18px); }
+  .topbar-title { margin-right: auto; font-family: var(--hp-font-display); font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .variant-tab, .preset, .top-action { min-height: 40px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); padding: 8px 12px; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; cursor: pointer; transition: .15s ease; }
+  .variant-tab:hover, .preset:hover, .top-action:hover { border-color: var(--hp-primary); transform: translateY(-1px); }
+  .variant-tab.active, .preset.active { background: var(--hp-primary); border-color: var(--hp-primary); color: var(--hp-surface); }
+
+  .workspace { width: min(920px, 100%); margin: 0 auto; padding: 86px 18px 54px; display: grid; grid-template-columns: 390px 320px; justify-content: center; align-items: start; gap: 30px; }
+  .phone { width: 390px; height: 844px; position: relative; overflow: hidden; border: 8px solid #282b28; border-radius: 40px; background: var(--hp-bg); color: var(--hp-text); box-shadow: 0 28px 70px rgba(63,49,36,.28); }
+  [data-theme="dark"] body { background: #0f1311; }
+  [data-theme="dark"] .phone { border-color: #070908; box-shadow: 0 28px 70px rgba(0,0,0,.42); }
+  .status { height: 34px; padding: 10px 19px 0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 900; }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons .material-symbols-rounded { font-size: 14px; }
+  .home-scroll { height: calc(100% - 34px); overflow-y: auto; scrollbar-width: none; padding-bottom: 104px; }
+  .home-scroll::-webkit-scrollbar { display: none; }
+  .home-content { padding: 4px 28px 0; }
+
+  /* Existing HeroHeader geometry */
+  .hero-header { min-height: 34px; display: flex; align-items: center; gap: 8px; }
+  .month-button, .mode-badge, .icon-button { border: 0; cursor: pointer; transition: .15s ease; }
+  .month-button { display: inline-flex; align-items: center; gap: 1px; padding: 4px 3px; margin-left: -3px; background: transparent; border-radius: 8px; font-size: 18px; font-weight: 500; }
+  .month-button .material-symbols-rounded { color: var(--hp-text-muted); font-size: 20px; }
+  .hero-spacer { flex: 1; }
+  .mode-badge { min-height: 27px; padding: 4px 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: 9px; font-weight: 800; }
+  .mode-badge.family { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .mode-badge .material-symbols-rounded { font-size: 12px; }
+  .icon-button { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: transparent; }
+  .icon-button:hover, .month-button:hover { background: var(--hp-surface-muted); }
+
+  /* Existing HomeHeroCard composition: one card, same region order. */
+  .home-hero { margin-top: 24px; padding: 18px; border: 1px solid var(--draw-card-border); border-radius: var(--draw-card-radius); background: var(--draw-hero-bg); box-shadow: var(--draw-card-shadow); cursor: pointer; transition: .15s ease; }
+  .home-hero:hover { transform: translateY(-1px); }
+  .hero-label { color: var(--hp-text-muted); font-size: 10px; font-weight: 700; }
+  .hero-amount-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .hero-amount { flex: 1; font-family: var(--hp-font-display); font-size: 33px; font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+  .trend-chip { padding: 5px 9px; border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 3px; background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 8px; font-weight: 850; }
+  .trend-chip .material-symbols-rounded { font-size: 13px; }
+  .previous { margin: 7px 0 0; color: var(--hp-text-muted); font-size: 9px; }
+  .ledger-split { margin-top: 16px; }
+  .ledger-labels { display: flex; justify-content: space-between; gap: 10px; }
+  .ledger-label { display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 8px; }
+  .ledger-label strong { color: var(--hp-joy-text); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .ledger-label.daily strong { color: var(--hp-daily-text); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--hp-joy); }
+  .ledger-label.daily .dot { background: var(--hp-daily); order: 3; }
+  .split-track { height: 6px; margin-top: 8px; border-radius: 4px; background: var(--hp-daily); overflow: hidden; }
+  .split-track span { display: block; width: 29%; height: 100%; background: var(--hp-joy); }
+  .hero-divider { height: 1px; margin: 12px 0; background: var(--draw-divider); }
+  .region-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 850; }
+  .region-title > .material-symbols-rounded { color: var(--hp-joy-text); font-size: 16px; }
+  .info-button { width: 24px; height: 24px; border: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--hp-text-muted); cursor: pointer; }
+  .info-button .material-symbols-rounded { font-size: 14px; }
+  .ring-row { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; margin-top: 12px; }
+  .rings { width: 120px; height: 120px; position: relative; display: grid; place-items: center; }
+  .ring { position: absolute; border-radius: 50%; display: grid; place-items: center; }
+  .ring::after { content: ""; position: absolute; border-radius: 50%; background: var(--draw-hero-bg); }
+  .ring.outer { width: 120px; height: 120px; background: conic-gradient(#c87874 0 80%, var(--hp-surface-muted) 80%); box-shadow: 0 0 13px color-mix(in srgb,#c87874 25%,transparent); }
+  .ring.outer::after { inset: 8px; }
+  .ring.middle { width: 92px; height: 92px; background: conic-gradient(#75a883 0 82%, var(--hp-surface-muted) 82%); z-index: 2; }
+  .ring.middle::after { inset: 7px; }
+  .ring.inner { width: 66px; height: 66px; background: conic-gradient(#4caeb0 0 72%, var(--hp-surface-muted) 72%); z-index: 3; }
+  .ring.inner::after { inset: 7px; }
+  .ring-value { position: relative; z-index: 5; color: var(--hp-joy-text); font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .ring-legend { display: grid; gap: 7px; }
+  .legend-row { display: grid; grid-template-columns: 8px minmax(0,1fr) auto; gap: 6px; align-items: center; color: var(--hp-text-muted); font-size: 8px; }
+  .legend-row i { width: 7px; height: 7px; border-radius: 50%; background: var(--legend); }
+  .legend-row strong { color: var(--hp-text); font-size: 9px; font-variant-numeric: tabular-nums; }
+
+  /* Existing Best Joy ticket stays inside HomeHeroCard. */
+  .best-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px 1fr 58px; min-height: 74px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--hp-joy) 23%, var(--hp-border)); border-radius: 14px; background: var(--draw-ticket-bg); }
+  .ticket-accent { background: var(--hp-joy); }
+  .calendar-tile { align-self: center; width: 48px; margin-left: 10px; overflow: hidden; border-radius: 10px; background: var(--hp-surface); box-shadow: 0 2px 7px color-mix(in srgb,var(--hp-joy) 18%,transparent); text-align: center; }
+  .calendar-tile b { display: block; padding: 3px 0; background: var(--hp-joy); color: var(--hp-bg); font-size: 7px; }
+  .calendar-tile strong { display: block; padding-top: 4px; color: var(--hp-joy-text); font-size: 14px; }
+  .calendar-tile small { display: block; padding-bottom: 4px; color: var(--hp-text-muted); font-size: 7px; }
+  .ticket-copy { min-width: 0; align-self: center; padding: 10px 8px 10px 12px; }
+  .ticket-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+  .ticket-copy span { display: block; margin-top: 5px; color: var(--hp-joy-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .satisfaction-seal { align-self: stretch; display: grid; place-items: center; align-content: center; gap: 3px; border-left: 1px dashed color-mix(in srgb,var(--hp-joy) 35%,transparent); color: var(--hp-joy-text); font-size: 7px; font-weight: 850; }
+  .satisfaction-seal .material-symbols-rounded { font-size: 22px; }
+  .member-section { display: grid; gap: 8px; }
+  .member-row { display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: 9px; }
+  .member-avatar { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--hp-shared-soft); color: var(--hp-shared-text); font-size: 8px; font-weight: 900; }
+  .member-row strong { margin-left: auto; color: var(--hp-text); font-size: 9px; }
+
+  /* Existing vertical FamilyInviteBanner. */
+  .family-invite { width: 100%; margin-top: 16px; padding: 20px; border: 1px solid var(--draw-card-border); border-radius: 16px; background: var(--hp-surface); box-shadow: var(--draw-card-shadow); text-align: center; cursor: pointer; }
+  .avatar-pair { display: block; width: 82px; height: 46px; margin: 0 auto 14px; position: relative; }
+  .avatar-pair > span { position: absolute; width: 46px; height: 46px; display: grid; place-items: center; border: 3px solid var(--hp-surface); border-radius: 50%; background: var(--hp-primary); color: #fff; }
+  .avatar-pair > span:last-child { left: 36px; background: var(--hp-daily); }
+  .family-invite h3 { margin: 0; font-size: 13px; }
+  .family-invite p { margin: 5px 0 14px; color: var(--hp-text-muted); font-size: 8px; line-height: 1.5; }
+  .invite-cta { width: 100%; min-height: 36px; border: 0; border-radius: 12px; background: var(--hp-joy); color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 10px; font-weight: 850; }
+  .invite-cta .material-symbols-rounded { font-size: 14px; }
+
+  /* Existing recent header + TransactionListCard. */
+  .recent-head { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .recent-head h2 { margin: 0; font-size: 13px; }
+  .text-link { border: 0; background: transparent; color: var(--hp-primary-text); font-size: 9px; font-weight: 850; cursor: pointer; }
+  .transaction-card { margin-top: 12px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); }
+  .tx-row { width: 100%; min-height: 62px; border: 0; border-bottom: 1px solid var(--draw-divider); background: transparent; padding: 10px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+  .tx-row:last-child { border-bottom: 0; }
+  .tx-row:hover { background: var(--hp-surface-muted); }
+  .tx-icon { width: 28px; display: grid; place-items: center; color: var(--hp-text-muted); }
+  .tx-icon.joy { color: var(--hp-joy-text); }
+  .tx-icon .material-symbols-rounded { font-size: 28px; }
+  .tx-copy { min-width: 0; flex: 1; }
+  .tx-copy strong { display: block; font-size: 10px; }
+  .tx-meta { margin-top: 4px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 7px; }
+  .ledger-tag { padding: 2px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-weight: 850; }
+  .ledger-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .tx-amount { color: var(--hp-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .tx-amount.joy { color: var(--hp-joy-text); }
+
+  /* Existing HomeBottomNavBar: pill + detached FAB. */
+  .bottom-shell { position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; padding: 16px 21px 21px; display: flex; align-items: end; gap: 12px; background: linear-gradient(transparent, var(--hp-bg) 35%); }
+  .bottom-pill { flex: 1; height: 62px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: 32px; background: color-mix(in srgb,var(--hp-surface) 96%,transparent); box-shadow: var(--hp-shadow-soft); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(14px); }
+  .nav-button { min-width: 48px; border: 0; background: transparent; color: var(--hp-text-faint); display: grid; place-items: center; gap: 4px; font-size: 7px; cursor: pointer; }
+  .nav-button.active { color: var(--hp-primary-text); font-weight: 900; }
+  .nav-button .material-symbols-rounded { font-size: 20px; }
+  .fab { width: 62px; height: 62px; border: 0; border-radius: 50%; background: linear-gradient(var(--hp-joy), color-mix(in srgb,var(--hp-joy) 76%,#8f4645)); color: #fff; display: grid; place-items: center; box-shadow: 0 7px 20px color-mix(in srgb,var(--hp-joy) 35%,transparent); cursor: pointer; }
+  .fab .material-symbols-rounded { font-size: 25px; }
+
+  .inspector { position: sticky; top: 82px; padding: 18px; border: 1px solid var(--hp-border); border-radius: 22px; background: color-mix(in srgb,var(--hp-surface) 80%,transparent); backdrop-filter: blur(16px); }
+  .inspector .kicker { color: var(--hp-primary-text); font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+  .inspector h1 { margin: 7px 0; font-family: var(--hp-font-display); font-size: 22px; }
+  .inspector p { color: var(--hp-text-muted); font-size: 10px; line-height: 1.65; }
+  .layout-map { display: grid; gap: 7px; margin-top: 16px; }
+  .layout-map div { padding: 10px 11px; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); font-size: 9px; }
+  .layout-map strong { color: var(--hp-primary-text); }
+  .treatment-note { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hp-border); }
+  .treatment-note h2 { margin: 0 0 5px; font-size: 13px; }
+  .swatches { display: flex; gap: 6px; margin-top: 12px; }
+  .swatches i { width: 32px; height: 32px; border-radius: 9px; border: 1px solid rgba(0,0,0,.07); background: var(--c); }
+
+  .modal { position: absolute; inset: 0; z-index: 40; display: flex; align-items: end; background: rgba(16,20,18,.36); opacity: 0; pointer-events: none; transition: .18s; }
+  .modal.open { opacity: 1; pointer-events: auto; }
+  .sheet { width: 100%; padding: 12px 24px 28px; border-radius: 26px 26px 0 0; background: var(--hp-surface); transform: translateY(100%); transition: .2s; }
+  .modal.open .sheet { transform: translateY(0); }
+  .sheet h3 { margin: 8px 0 12px; font-size: 15px; }
+  .month-option { width: 100%; min-height: 45px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; text-align: left; font-weight: 800; cursor: pointer; }
+  .toast { position: absolute; z-index: 50; left: 50%; bottom: 100px; transform: translate(-50%,12px); opacity: 0; pointer-events: none; padding: 9px 12px; border-radius: var(--hp-radius-pill); background: var(--hp-text); color: var(--hp-bg); font-size: 9px; font-weight: 850; white-space: nowrap; transition: .18s; }
+  .toast.show { opacity: 1; transform: translate(-50%,0); }
+
+  #sketch-tools { position: fixed; right: 12px; bottom: 12px; z-index: 140; display: flex; gap: 5px; align-items: center; padding: 7px 9px; border-radius: 10px; background: rgba(15,18,16,.78); color: #fff; font: 10px system-ui; opacity: .48; transition: opacity .2s; }
+  #sketch-tools:hover { opacity: 1; }
+  #sketch-tools button { border: 1px solid rgba(255,255,255,.24); background: transparent; color: #fff; border-radius: 7px; padding: 4px 7px; cursor: pointer; }
+  .annotations [data-region] { outline: 1px dashed #d96b78; outline-offset: 2px; position: relative; }
+  .annotations [data-region]::before { content: attr(data-region); position: absolute; z-index: 30; top: -12px; left: 0; padding: 2px 4px; border-radius: 4px; background: #a94354; color: #fff; font: 8px system-ui; white-space: nowrap; }
+
+  @media (max-width: 860px) {
+    .topbar { overflow-x: auto; justify-content: flex-start; }
+    .topbar-title { display: none; }
+    .workspace { display: block; padding: 76px 8px 48px; }
+    .phone { margin: 0 auto; }
+    .inspector { position: static; width: min(390px,100%); margin: 18px auto 0; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-title">Home Pocket · 现有主页布局 × 新设计系统</div>
+    <button class="variant-tab" data-treatment-button="paper">A · 温润纸感</button>
+    <button class="variant-tab" data-treatment-button="flat">B · 克制平面</button>
+    <button class="variant-tab active" data-treatment-button="layered">C · 层次纸面 ★ 已选</button>
+    <button class="preset active" data-preset="solo-light">个人 · 浅色</button>
+    <button class="preset" data-preset="family-light">家庭 · 浅色</button>
+    <button class="preset" data-preset="solo-dark">个人 · 深色</button>
+    <button class="top-action" data-action="theme"><span class="material-symbols-rounded">contrast</span>明暗</button>
+  </header>
+
+  <main class="workspace">
+    <div class="phone" id="phone">
+      <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
+      <div id="home-scroll" class="home-scroll"></div>
+      <div id="bottom-shell" class="bottom-shell"></div>
+      <div id="modal" class="modal"><div class="sheet"><h3>月を選ぶ</h3><button class="month-option" data-action="close-modal">2026年7月</button><button class="month-option" data-action="close-modal">2026年6月</button><button class="month-option" data-action="close-modal">2026年5月</button></div></div>
+      <div id="toast" class="toast"></div>
+    </div>
+
+    <aside class="inspector">
+      <span class="kicker">FAITHFUL REDRAW</span>
+      <h1>保留实现骨架</h1>
+      <p>不再拆分或重组信息。三个方案拥有完全相同的 Flutter 区块顺序、内边距关系与入口位置，只比较新设计系统在表面层级上的表达。</p>
+      <div class="layout-map">
+        <div><strong>1 · HeroHeader</strong><br>月份、模式徽章、设置</div>
+        <div><strong>2 · HomeHeroCard</strong><br>月总额 → 双账本 → 三环 → 今月最爱</div>
+        <div><strong>3 · FamilyInviteBanner</strong><br>个人模式下的纵向邀请卡</div>
+        <div><strong>4 · TransactionListCard</strong><br>标题行与连续交易纸面</div>
+        <div><strong>5 · HomeBottomNavBar</strong><br>独立胶囊导航 + 圆形 FAB</div>
+      </div>
+      <div class="treatment-note"><h2 id="treatment-title">C · 层次纸面</h2><p id="treatment-copy">不改变布局，以轻微松叶底色和更大圆角强化主卡层级。</p></div>
+      <div class="swatches"><i style="--c:#f5f0e7"></i><i style="--c:#456b59"></i><i style="--c:#66896d"></i><i style="--c:#c87874"></i><i style="--c:#58758c"></i></div>
+    </aside>
+  </main>
+
+  <div id="sketch-tools"><span>Sketch 006</span><button data-width="375">375</button><button data-width="390">390</button><button data-width="430">430</button><button data-action="annotations">标注</button></div>
+
+<script>
+  const state = { treatment: 'layered', theme: 'light', family: false };
+  const icon = name => `<span class="material-symbols-rounded">${name}</span>`;
+  const treatmentCopy = {
+    paper: ['A · 温润纸感','轻边框与柔和阴影平衡生活感和数据清晰度，是新系统的标准表达。'],
+    flat: ['B · 克制平面','取消卡片阴影并加强边界，最贴近当前实现的朴素结构感。'],
+    layered: ['C · 层次纸面','不改变布局，以轻微松叶底色和更大圆角强化主卡层级。']
+  };
+
+  function ringLegend() {
+    if (state.family) return `<div class="ring-legend"><div class="legend-row" style="--legend:var(--hp-shared)"><i></i><span>家族の小確幸</span><strong>18</strong></div><div class="legend-row" style="--legend:var(--hp-primary)"><i></i><span>共有の悦己</span><strong>同期済み</strong></div><div class="legend-row" style="--legend:var(--hp-daily)"><i></i><span>満足度の中央値</span><strong>8.0</strong></div></div>`;
+    return `<div class="ring-legend"><div class="legend-row" style="--legend:#4caeb0"><i></i><span>ときめき目標</span><strong>64 / 80</strong></div><div class="legend-row" style="--legend:#75a883"><i></i><span>満足度の平均</span><strong>8.2</strong></div><div class="legend-row" style="--legend:#c87874"><i></i><span>小確幸</span><strong>12</strong></div></div>`;
+  }
+
+  function memberSection() {
+    if (!state.family) return '';
+    return `<div class="hero-divider"></div><div class="region-title">メンバー</div><div class="member-section"><div class="member-row"><span class="member-avatar">私</span><span>あおい</span><strong>¥84,200</strong></div><div class="member-row"><span class="member-avatar">花</span><span>花子</span><strong>¥62,600</strong></div></div>`;
+  }
+
+  function heroCard() {
+    return `<section class="home-hero" data-region="HomeHeroCard" data-action="analytics" role="button" tabindex="0">
+      <div class="hero-label">${state.family?'家族の支出':'今月の支出'}</div>
+      <div class="hero-amount-row"><strong class="hero-amount">${state.family?'¥227,620':'¥186,420'}</strong><span class="trend-chip">${icon('trending_down')}−8%</span></div>
+      <p class="previous">先月同期 ${state.family?'¥246,900':'¥202,640'}</p>
+      <div class="ledger-split"><div class="ledger-labels"><span class="ledger-label"><i class="dot"></i><span>ときめき帳</span><strong>¥53,620</strong></span><span class="ledger-label daily"><strong>${state.family?'¥174,000':'¥132,800'}</strong><span>日々の帳</span><i class="dot"></i></span></div><div class="split-track"><span></span></div></div>
+      <div class="hero-divider"></div>
+      <div class="region-title">${icon('eco')}<span>${state.family?'家族の小確幸':'ときめき度'}</span><button class="info-button" data-action="info" aria-label="悦己指标说明">${icon('info')}</button></div>
+      <div class="ring-row"><div class="rings" aria-label="悦己目标、满足度与小确幸的三环图"><div class="ring outer"></div><div class="ring middle"></div><div class="ring inner"></div><strong class="ring-value">${state.family?'18':'64 Joy'}</strong></div>${ringLegend()}</div>
+      <div class="hero-divider"></div>
+      <div class="region-title">${icon('workspace_premium')}<span>今月の最愛</span></div>
+      <div class="best-ticket"><span class="ticket-accent"></span><span class="calendar-tile"><b>JUL</b><strong>06</strong><small>MON</small></span><span class="ticket-copy"><strong>趣味・コレクション</strong><span>¥4,800</span></span><span class="satisfaction-seal">${icon('sentiment_very_satisfied')}<span>大満足</span></span></div>
+      ${memberSection()}
+    </section>`;
+  }
+
+  function familyInvite() {
+    if (state.family) return '';
+    return `<button class="family-invite" data-region="FamilyInviteBanner" data-action="family"><span class="avatar-pair"><span>${icon('face')}</span><span>${icon('face_2')}</span></span><h3>家族と一緒に管理しよう</h3><p>パートナーを招待して、家計簿をリアルタイムで共有しよう</p><span class="invite-cta">${icon('favorite')}家族を招待する</span></button>`;
+  }
+
+  function txRow(iconName, category, ledger, merchant, amount, joy=false) {
+    return `<button class="tx-row" data-action="transaction"><span class="tx-icon ${joy?'joy':''}">${icon(iconName)}</span><span class="tx-copy"><strong>${category}</strong><span class="tx-meta"><i class="ledger-tag ${joy?'joy':''}">${ledger}</i><span>${merchant}</span></span></span><strong class="tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
+  }
+
+  function home() {
+    return `<div class="home-content"><header class="hero-header" data-region="HeroHeader"><button class="month-button" data-action="month">2026年7月 ${icon('keyboard_arrow_down')}</button><span class="hero-spacer"></span><button class="mode-badge ${state.family?'family':''}" data-action="family-toggle">${icon(state.family?'people':'person')}${state.family?'家族モード':'個人モード'}</button><button class="icon-button" data-action="settings" aria-label="設定">${icon('settings')}</button></header>${heroCard()}${familyInvite()}<div class="recent-head" data-region="Recent header"><h2>最近の取引</h2><button class="text-link" data-action="list">すべて見る</button></div><div class="transaction-card" data-region="TransactionListCard">${txRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${txRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${txRow('train','交通','日々の帳','Suica','¥1,240')}</div></div>`;
+  }
+
+  function bottomNav() {
+    return `<nav class="bottom-pill" data-region="HomeBottomNavBar">${[['home','ホーム'],['list','明細'],['bar_chart','統計'],['shopping_bag','買い物']].map(([ico,label],i)=>`<button class="nav-button ${i===0?'active':''}" data-action="nav">${icon(ico)}<span>${label}</span></button>`).join('')}</nav><button class="fab" data-action="fab" aria-label="追加">${icon('add')}</button>`;
+  }
+
+  function render() {
+    document.documentElement.dataset.theme = state.theme;
+    document.documentElement.dataset.treatment = state.treatment;
+    document.getElementById('home-scroll').innerHTML = home();
+    document.getElementById('bottom-shell').innerHTML = bottomNav();
+    document.querySelectorAll('[data-treatment-button]').forEach(button=>button.classList.toggle('active',button.dataset.treatmentButton===state.treatment));
+    document.querySelectorAll('[data-preset]').forEach(button=>button.classList.toggle('active',(button.dataset.preset==='solo-light'&&!state.family&&state.theme==='light')||(button.dataset.preset==='family-light'&&state.family&&state.theme==='light')||(button.dataset.preset==='solo-dark'&&!state.family&&state.theme==='dark')));
+    const note=treatmentCopy[state.treatment]; document.getElementById('treatment-title').textContent=note[0]; document.getElementById('treatment-copy').textContent=note[1];
+  }
+
+  function toast(message) { const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(el.timer); el.timer=setTimeout(()=>el.classList.remove('show'),1500); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  document.addEventListener('click', event => {
+    const treatment=event.target.closest('[data-treatment-button]'); if(treatment){state.treatment=treatment.dataset.treatmentButton;render();return;}
+    const preset=event.target.closest('[data-preset]'); if(preset){state.family=preset.dataset.preset==='family-light';state.theme=preset.dataset.preset==='solo-dark'?'dark':'light';render();return;}
+    const width=event.target.closest('[data-width]'); if(width){document.getElementById('phone').style.width=width.dataset.width+'px';return;}
+    const action=event.target.closest('[data-action]'); if(!action)return;
+    const name=action.dataset.action;
+    if(name==='theme'){state.theme=state.theme==='light'?'dark':'light';render();}
+    else if(name==='annotations')document.body.classList.toggle('annotations');
+    else if(name==='month')document.getElementById('modal').classList.add('open');
+    else if(name==='close-modal')closeModal();
+    else if(name==='family-toggle'){state.family=!state.family;render();toast(state.family?'家族モード':'個人モード');}
+    else if(name==='info')toast('3つの輪は目標・満足度・小確幸を表します');
+    else if(name==='analytics')toast('統計を開く');
+    else if(name==='family')toast('家族招待フローを開く');
+    else if(name==='settings')toast('設定を開く');
+    else if(name==='list'||name==='nav')toast('対象タブへ移動');
+    else if(name==='transaction')toast('取引を編集');
+    else if(name==='fab')toast('記帳画面を開く');
+  });
+  document.getElementById('modal').addEventListener('click',event=>{if(event.target.id==='modal')closeModal();});
+  render();
+</script>
+</body>
+</html>
