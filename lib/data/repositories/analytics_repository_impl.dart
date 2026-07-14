@@ -1,4 +1,5 @@
 import '../../features/accounting/domain/models/entry_source.dart';
+import '../../features/accounting/domain/models/transaction.dart' show LedgerType;
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
@@ -100,6 +101,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required DateTime endDate,
     EntrySource? entrySourceFilter,
     String type = 'expense',
+    LedgerType? ledgerType,
   }) async {
     final results = await _dao.getDailyTotals(
       bookId: bookId,
@@ -107,6 +109,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       endDate: endDate,
       entrySourceFilter: entrySourceFilter,
       type: type,
+      ledgerType: ledgerType,
     );
 
     return results

@@ -193,10 +193,10 @@ void main() {
           filterState: filterWithMember,
         );
 
-        // RED until anyFilterActive || filter.memberBookId != null is added (Plan 03)
-        // In ja locale, the clear chip label is 'クリア'
+        // Clear affordance is now icon-only (quick 260714-qit): assert on the
+        // filter_alt_off icon rather than the removed 'クリア' label.
         expect(
-          find.text('クリア'),
+          find.byIcon(Icons.filter_alt_off),
           findsOneWidget,
           reason:
               'FAM-03/Pitfall B: memberBookId != null → anyFilterActive == true → Clear chip visible',

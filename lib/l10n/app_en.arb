@@ -2336,9 +2336,17 @@
       }
     }
   },
-  "calMonthTotal": "Monthly Spend",
+  "calMonthTotal": "Monthly total",
   "@calMonthTotal": {
-    "description": "Calendar header: monthly expense total label (Phase 27 placeholder)"
+    "description": "Calendar header: month total label, all ledgers (すべて)"
+  },
+  "calMonthTotalDaily": "Daily total",
+  "@calMonthTotalDaily": {
+    "description": "Calendar header: month total label when the Daily ledger is selected"
+  },
+  "calMonthTotalJoy": "Joy total",
+  "@calMonthTotalJoy": {
+    "description": "Calendar header: month total label when the Joy ledger is selected"
   },
   "calDayTotal": "{date} Spend",
   "@calDayTotal": {
@@ -2381,7 +2389,7 @@
   "@listCategoryChip": {
     "description": "Category filter chip label when no categories selected (Phase 28)"
   },
-  "listCategoryChipN": "Categories ({n})",
+  "listCategoryChipN": "Categories {n}",
   "@listCategoryChipN": {
     "description": "Category filter chip label when N categories selected (Phase 28)",
     "placeholders": {
@@ -2478,6 +2486,30 @@
   "listCalNavCurrentMonth": "Return to current month",
   "@listCalNavCurrentMonth": {
     "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
+  },
+  "listMonthPickerLabel": "Select month",
+  "@listMonthPickerLabel": {
+    "description": "Accessibility label for the month-picker button in the list header (quick 260714-qit)"
+  },
+  "listSortDirectionDesc": "Descending",
+  "@listSortDirectionDesc": {
+    "description": "Sort direction label: descending (quick 260714-qit)"
+  },
+  "listSortDirectionAsc": "Ascending",
+  "@listSortDirectionAsc": {
+    "description": "Sort direction label: ascending (quick 260714-qit)"
+  },
+  "listSortPillLabel": "{field}・{direction}",
+  "@listSortPillLabel": {
+    "description": "Combined sort pill label: field・direction (quick 260714-qit)",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
   },
   "shoppingDeleteConfirmTitle": "Delete this item?",
   "@shoppingDeleteConfirmTitle": {

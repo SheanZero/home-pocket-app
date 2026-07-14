@@ -51,6 +51,27 @@ class DateFormatter {
     }
   }
 
+  /// Full CJK-form date for day-group headers (ja/zh `2026年7月10日`, en
+  /// `Jul 10, 2026`). Distinct from [formatDate] (which renders the numeric
+  /// `yyyy/MM/dd` form) so existing callers keep their format.
+  static String formatFullDateCjk(DateTime date, Locale locale) {
+    switch (locale.languageCode) {
+      case 'ja':
+      case 'zh':
+        return DateFormat('yyyy年M月d日', locale.toString()).format(date);
+      case 'en':
+      default:
+        return DateFormat('MMM d, yyyy', locale.toString()).format(date);
+    }
+  }
+
+  /// Compact `M/D` slash form (e.g. `7/10`) used as a row date prefix in the
+  /// amount-sort flat list. Locale-stable digits, no CJK affix — kept separate
+  /// from [formatShortMonthDay] so its `M月d日` callers are unaffected.
+  static String formatSlashMonthDay(DateTime date, Locale locale) {
+    return DateFormat('M/d', locale.toString()).format(date);
+  }
+
   /// Day-of-month axis tick label (ja/zh `7日`, en plain `7`).
   ///
   /// Used by within-month chart X-axis markers. The `日` glyph is a CJK date

@@ -4,6 +4,8 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/accounting/domain/models/transaction.dart'
+    show LedgerType;
 import '../../../../features/settings/domain/models/app_settings.dart';
 import '../../../../features/settings/presentation/providers/state_settings.dart';
 import '../../../../generated/app_localizations.dart';
@@ -126,6 +128,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
             calendarAsync: calendarAsync,
             dailyMap: dailyMap,
             activeDayFilter: filter.activeDayFilter,
+            ledgerType: filter.ledgerType,
             currencyCode: currencyCode,
             locale: locale,
           ),
@@ -223,6 +226,7 @@ class _SummaryRow extends StatelessWidget {
     required this.calendarAsync,
     required this.dailyMap,
     required this.activeDayFilter,
+    required this.ledgerType,
     required this.currencyCode,
     required this.locale,
   });
@@ -231,8 +235,17 @@ class _SummaryRow extends StatelessWidget {
   final AsyncValue<Map<DateTime, int>> calendarAsync;
   final Map<DateTime, int> dailyMap;
   final DateTime? activeDayFilter;
+  final LedgerType? ledgerType;
   final String currencyCode;
   final Locale locale;
+
+  /// Month-total label that swaps with the selected ledger (quick 260714-qit):
+  /// null (すべて) → 今月の合計, daily → 日常の合計, joy → ときめきの合計.
+  String get _summaryLabel => switch (ledgerType) {
+    LedgerType.daily => l10n.calMonthTotalDaily,
+    LedgerType.joy => l10n.calMonthTotalJoy,
+    null => l10n.calMonthTotal,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +266,7 @@ class _SummaryRow extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.calMonthTotal,
+                  _summaryLabel,
                   style: AppTextStyles.caption,
                 ),
                 calendarAsync.when(

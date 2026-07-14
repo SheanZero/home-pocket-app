@@ -43,7 +43,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
       home: const Scaffold(
         body: SizedBox(
           width: 390,
-          height: 56,
+          height: 60,
           child: ListSortFilterBar(bookId: 'book_golden'),
         ),
       ),

@@ -112,40 +112,9 @@ void main() {
     registerFallbackValue(DateTime(2026));
   });
 
-  group('ListScreen right chevron visibility', () {
+  group('ListScreen header affordances (quick 260714-qit — STRICT mockup)', () {
     testWidgets(
-      'right chevron absent when on current month',
-      (tester) async {
-        final mockUseCase = _MockGetListTransactionsUseCase();
-        final mockRepo = _MockAnalyticsRepository();
-        final now = DateTime.now();
-
-        when(() => mockUseCase.execute(any())).thenAnswer(
-          (_) async => Result.success(<Transaction>[]),
-        );
-        when(
-          () => mockRepo.getDailyTotals(
-            bookId: any(named: 'bookId'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-          ),
-        ).thenAnswer((_) async => []);
-
-        await _pumpScreen(
-          tester,
-          mockUseCase,
-          mockRepo,
-          year: now.year,
-          month: now.month,
-        );
-
-        // When on the current month, the right chevron must not be present.
-        expect(find.byIcon(Icons.chevron_right), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'right chevron present when on a past month',
+      'header has month-picker + settings buttons and no prev/next chevrons',
       (tester) async {
         final mockUseCase = _MockGetListTransactionsUseCase();
         final mockRepo = _MockAnalyticsRepository();
@@ -161,7 +130,8 @@ void main() {
           ),
         ).thenAnswer((_) async => []);
 
-        // May 2026 is a past month (current is June 2026)
+        // May 2026 is a past month; the STRICT header must NOT offer chevrons
+        // regardless of the selected month.
         await _pumpScreen(
           tester,
           mockUseCase,
@@ -170,7 +140,12 @@ void main() {
           month: 5,
         );
 
-        expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+        // Month-picker (calendar_month) + settings gear present.
+        expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+        // Prev/next chevrons removed from the header entirely.
+        expect(find.byIcon(Icons.chevron_left), findsNothing);
+        expect(find.byIcon(Icons.chevron_right), findsNothing);
       },
     );
   });

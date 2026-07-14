@@ -174,7 +174,7 @@ class ListTransactionTile extends ConsumerWidget {
                   Flexible(
                     child: Text(
                       showDate
-                          ? '${DateFormatter.formatShortMonthDay(taggedTx.transaction.timestamp, locale)} $category'
+                          ? '${DateFormatter.formatSlashMonthDay(taggedTx.transaction.timestamp, locale)} $category'
                           : category,
                       style: AppTextStyles.bodyMedium,
                       overflow: TextOverflow.ellipsis,

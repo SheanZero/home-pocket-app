@@ -1865,7 +1865,13 @@ class SEn extends S {
   }
 
   @override
-  String get calMonthTotal => 'Monthly Spend';
+  String get calMonthTotal => 'Monthly total';
+
+  @override
+  String get calMonthTotalDaily => 'Daily total';
+
+  @override
+  String get calMonthTotalJoy => 'Joy total';
 
   @override
   String calDayTotal(String date) {
@@ -1898,7 +1904,7 @@ class SEn extends S {
 
   @override
   String listCategoryChipN(int n) {
-    return 'Categories ($n)';
+    return 'Categories $n';
   }
 
   @override
@@ -1966,6 +1972,20 @@ class SEn extends S {
 
   @override
   String get listCalNavCurrentMonth => 'Return to current month';
+
+  @override
+  String get listMonthPickerLabel => 'Select month';
+
+  @override
+  String get listSortDirectionDesc => 'Descending';
+
+  @override
+  String get listSortDirectionAsc => 'Ascending';
+
+  @override
+  String listSortPillLabel(String field, String direction) {
+    return '$field・$direction';
+  }
 
   @override
   String get shoppingDeleteConfirmTitle => 'Delete this item?';

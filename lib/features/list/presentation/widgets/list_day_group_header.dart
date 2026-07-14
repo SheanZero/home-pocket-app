@@ -30,7 +30,7 @@ class ListDayGroupHeader extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          DateFormatter.formatDate(date, locale),
+          DateFormatter.formatFullDateCjk(date, locale),
           style: AppTextStyles.labelSmall.copyWith(
             color: palette.textSecondary,
             fontWeight: FontWeight.w700,

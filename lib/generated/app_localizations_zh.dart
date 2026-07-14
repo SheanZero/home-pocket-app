@@ -1825,7 +1825,13 @@ class SZh extends S {
   }
 
   @override
-  String get calMonthTotal => '本月支出';
+  String get calMonthTotal => '本月合计';
+
+  @override
+  String get calMonthTotalDaily => '日常合计';
+
+  @override
+  String get calMonthTotalJoy => '悦己合计';
 
   @override
   String calDayTotal(String date) {
@@ -1858,7 +1864,7 @@ class SZh extends S {
 
   @override
   String listCategoryChipN(int n) {
-    return '分类 ($n)';
+    return '分类 $n';
   }
 
   @override
@@ -1925,6 +1931,20 @@ class SZh extends S {
 
   @override
   String get listCalNavCurrentMonth => '返回本月';
+
+  @override
+  String get listMonthPickerLabel => '选择月份';
+
+  @override
+  String get listSortDirectionDesc => '降序';
+
+  @override
+  String get listSortDirectionAsc => '升序';
+
+  @override
+  String listSortPillLabel(String field, String direction) {
+    return '$field・$direction';
+  }
 
   @override
   String get shoppingDeleteConfirmTitle => '删除此商品？';

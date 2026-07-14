@@ -1,4 +1,5 @@
 import '../../../accounting/domain/models/entry_source.dart';
+import '../../../accounting/domain/models/transaction.dart' show LedgerType;
 import '../models/analytics_aggregate.dart';
 import '../models/best_joy_moment_row.dart';
 import '../models/ledger_snapshot.dart';
@@ -42,6 +43,7 @@ abstract class AnalyticsRepository {
     required DateTime endDate,
     EntrySource? entrySourceFilter,
     String type = 'expense',
+    LedgerType? ledgerType,
   });
 
   Future<List<LedgerTotal>> getLedgerTotals({

@@ -61,33 +61,49 @@ class ListEmptyState extends ConsumerWidget {
     final palette = context.palette;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: palette.textTertiary),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: palette.textSecondary,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: onAction,
-                child: Text(
-                  actionLabel,
-                  style: AppTextStyles.caption.copyWith(
-                    color: palette.accentPrimary,
-                  ),
-                ),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        // v15 warm rounded card: soft surface, warm border, generous padding.
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: palette.borderDefault, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: palette.navShadow,
+                blurRadius: 14,
+                offset: const Offset(0, 4),
               ),
             ],
-          ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 48, color: palette.textTertiary),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: palette.textSecondary,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: onAction,
+                  child: Text(
+                    actionLabel,
+                    style: AppTextStyles.caption.copyWith(
+                      color: palette.accentPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

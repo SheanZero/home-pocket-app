@@ -7,7 +7,9 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
+import '../../../../features/home/presentation/widgets/month_picker_dialog.dart';
 import '../../../../features/settings/presentation/providers/state_locale.dart';
+import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
@@ -42,34 +44,29 @@ class ListScreen extends ConsumerWidget {
     // Phase 29: resolve currencyCode from bookByIdProvider
     const currencyCode = 'JPY';
     final filter = ref.watch(listFilterProvider);
-    final now = DateTime.now();
-    final isCurrentMonth =
-        filter.selectedYear == now.year && filter.selectedMonth == now.month;
+
+    // Opens the shared month-grid picker (same widget the home header uses) and
+    // applies the choice to the list's selected-month state. Future months are
+    // disabled by the picker itself (quick 260714-qit — STRICT mockup header:
+    // no prev/next chevrons).
+    Future<void> openMonthPicker() async {
+      final picked = await showMonthPickerDialog(
+        context,
+        selectedYear: filter.selectedYear,
+        selectedMonth: filter.selectedMonth,
+      );
+      if (picked == null || !context.mounted) return;
+      ref
+          .read(listFilterProvider.notifier)
+          .selectMonth(picked.year, picked.month);
+    }
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          tooltip: S.of(context).listCalNavPrev,
-          onPressed: () {
-            final prev = DateTime(
-              filter.selectedYear,
-              filter.selectedMonth - 1,
-            );
-            ref
-                .read(listFilterProvider.notifier)
-                .selectMonth(prev.year, prev.month);
-          },
-        ),
+        centerTitle: false,
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () {
-            final now = DateTime.now();
-            ref
-                .read(listFilterProvider.notifier)
-                .selectMonth(now.year, now.month);
-          },
+          onTap: openMonthPicker,
           child: Text(
             DateFormatter.formatMonthYear(
               DateTime(filter.selectedYear, filter.selectedMonth),
@@ -78,20 +75,20 @@ class ListScreen extends ConsumerWidget {
           ),
         ),
         actions: [
-          if (!isCurrentMonth)
-            IconButton(
-              icon: const Icon(Icons.chevron_right),
-              tooltip: S.of(context).listCalNavNext,
-              onPressed: () {
-                final next = DateTime(
-                  filter.selectedYear,
-                  filter.selectedMonth + 1,
-                );
-                ref
-                    .read(listFilterProvider.notifier)
-                    .selectMonth(next.year, next.month);
-              },
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            tooltip: S.of(context).listMonthPickerLabel,
+            onPressed: openMonthPicker,
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: S.of(context).settings,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => SettingsScreen(bookId: bookId),
+              ),
             ),
+          ),
         ],
       ),
       body: Column(
@@ -287,6 +284,14 @@ class ListScreen extends ConsumerWidget {
         color: palette.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: palette.borderDefault, width: 1),
+        // v15 `.list-transactions`: very-light warm card shadow (0 4px 14px).
+        boxShadow: [
+          BoxShadow(
+            color: palette.navShadow,
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );

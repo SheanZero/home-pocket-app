@@ -2336,9 +2336,17 @@
       }
     }
   },
-  "calMonthTotal": "本月支出",
+  "calMonthTotal": "本月合计",
   "@calMonthTotal": {
-    "description": "Calendar header: monthly expense total label (Phase 27 placeholder)"
+    "description": "Calendar header: month total label, all ledgers (すべて)"
+  },
+  "calMonthTotalDaily": "日常合计",
+  "@calMonthTotalDaily": {
+    "description": "Calendar header: month total label when the Daily ledger is selected"
+  },
+  "calMonthTotalJoy": "悦己合计",
+  "@calMonthTotalJoy": {
+    "description": "Calendar header: month total label when the Joy ledger is selected"
   },
   "calDayTotal": "{date}支出",
   "@calDayTotal": {
@@ -2381,7 +2389,7 @@
   "@listCategoryChip": {
     "description": "Category filter chip label when no categories selected (Phase 28)"
   },
-  "listCategoryChipN": "分类 ({n})",
+  "listCategoryChipN": "分类 {n}",
   "@listCategoryChipN": {
     "description": "Category filter chip label when N categories selected (Phase 28)",
     "placeholders": {
@@ -2478,6 +2486,30 @@
   "listCalNavCurrentMonth": "返回本月",
   "@listCalNavCurrentMonth": {
     "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
+  },
+  "listMonthPickerLabel": "选择月份",
+  "@listMonthPickerLabel": {
+    "description": "Accessibility label for the month-picker button in the list header (quick 260714-qit)"
+  },
+  "listSortDirectionDesc": "降序",
+  "@listSortDirectionDesc": {
+    "description": "Sort direction label: descending (quick 260714-qit)"
+  },
+  "listSortDirectionAsc": "升序",
+  "@listSortDirectionAsc": {
+    "description": "Sort direction label: ascending (quick 260714-qit)"
+  },
+  "listSortPillLabel": "{field}・{direction}",
+  "@listSortPillLabel": {
+    "description": "Combined sort pill label: field・direction (quick 260714-qit)",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
   },
   "shoppingDeleteConfirmTitle": "删除此商品？",
   "@shoppingDeleteConfirmTitle": {

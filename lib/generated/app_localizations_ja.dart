@@ -1832,7 +1832,13 @@ class SJa extends S {
   }
 
   @override
-  String get calMonthTotal => '今月の支出';
+  String get calMonthTotal => '今月の合計';
+
+  @override
+  String get calMonthTotalDaily => '日常の合計';
+
+  @override
+  String get calMonthTotalJoy => 'ときめきの合計';
 
   @override
   String calDayTotal(String date) {
@@ -1865,7 +1871,7 @@ class SJa extends S {
 
   @override
   String listCategoryChipN(int n) {
-    return 'カテゴリ ($n)';
+    return 'カテゴリ $n';
   }
 
   @override
@@ -1932,6 +1938,20 @@ class SJa extends S {
 
   @override
   String get listCalNavCurrentMonth => '今月に戻る';
+
+  @override
+  String get listMonthPickerLabel => '月を選ぶ';
+
+  @override
+  String get listSortDirectionDesc => '降順';
+
+  @override
+  String get listSortDirectionAsc => '昇順';
+
+  @override
+  String listSortPillLabel(String field, String direction) {
+    return '$field・$direction';
+  }
 
   @override
   String get shoppingDeleteConfirmTitle => 'アイテムを削除しますか？';

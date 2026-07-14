@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../features/analytics/presentation/providers/repository_providers.dart'
@@ -5,6 +6,7 @@ import '../../../../features/analytics/presentation/providers/repository_provide
 import '../../../../shared/utils/date_boundaries.dart';
 import '../../../family_sync/presentation/providers/state_active_group.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
+import 'state_list_filter.dart';
 
 part 'state_calendar_totals.g.dart';
 
@@ -17,9 +19,11 @@ DateTime _dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
 
 /// Per-day expense totals for the calendar header.
 ///
-/// Watches only (bookId, year, month) — isolated from listFilterProvider
-/// filter state (D-09, Pitfall 3). Rebuilding on text search would
-/// re-render 31 day cells on every keystroke.
+/// Watches (bookId, year, month) AND the selected ledger from
+/// [listFilterProvider] via a narrow `.select`, so day-cell amounts and the
+/// month total reflect the active ledger. It still does NOT watch
+/// memberBookId/search — narrowing to `ledgerType` alone keeps the "31 cells
+/// re-render on every keystroke" hazard (Pitfall 3) away.
 ///
 /// Phase 29 seam: bookId is a single value (own-book only).
 @riverpod
@@ -29,8 +33,13 @@ Future<Map<DateTime, int>> calendarDailyTotals(
   required int year,
   required int month,
 }) async {
-  // CRITICAL: watch only (bookIds, year, month) — NEVER watch memberBookId/ledger/search
-  // Pitfall 3 / D-06: calendar always full-family combined, isolated from filter state
+  // D-06 REVISED 2026-07-14 (quick 260714-qit): calendar now filters by
+  // selected ledger per user decision; was previously always full-ledger.
+  // Watch ONLY the ledgerType field (not the whole filter) — search/day/member
+  // changes must NOT rebuild the 31-cell grid (Pitfall 3). すべて = null = all.
+  final ledgerType = ref.watch(
+    listFilterProvider.select((f) => f.ledgerType),
+  );
   final isGroup = ref.watch(isGroupModeProvider);
   final shadowBookList = isGroup
       ? (await ref.watch(shadowBooksProvider.future))
@@ -48,6 +57,7 @@ Future<Map<DateTime, int>> calendarDailyTotals(
       bookId: bid,
       startDate: range.start,
       endDate: range.end,
+      ledgerType: ledgerType, // null = all ledgers (すべて)
       // type defaults to 'expense' (Pitfall 6)
     );
     for (final t in totals) {

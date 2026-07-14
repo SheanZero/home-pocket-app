@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../features/accounting/domain/models/entry_source.dart';
+import '../../features/accounting/domain/models/transaction.dart' show LedgerType;
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
@@ -276,23 +277,32 @@ class AnalyticsDao {
   }
 
   /// Get daily expense totals for a given month.
+  ///
+  /// [ledgerType] is OPTIONAL (default null). When non-null it adds an
+  /// `AND ledger_type = ?` narrowing so the calendar can reflect the selected
+  /// ledger (quick 260714-qit). All existing callers that omit it are
+  /// byte-for-byte unaffected (backward compatible — the clause is only emitted
+  /// when non-null).
   Future<List<DailyTotalResult>> getDailyTotals({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
     String type = 'expense',
+    LedgerType? ledgerType,
   }) async {
     final entrySourceClause = entrySourceFilter != null
         ? ' AND entry_source = ?'
         : '';
+    final ledgerClause = ledgerType != null ? ' AND ledger_type = ?' : '';
     final results = await _db
         .customSelect(
           'SELECT DATE(timestamp, \'unixepoch\', \'localtime\') as day, SUM(amount) as total '
           'FROM transactions '
           'WHERE book_id = ? AND is_deleted = 0 AND type = ? '
           'AND timestamp >= ? AND timestamp <= ?'
-          '$entrySourceClause '
+          '$entrySourceClause'
+          '$ledgerClause '
           'GROUP BY day '
           'ORDER BY day ASC',
           variables: [
@@ -302,6 +312,7 @@ class AnalyticsDao {
             Variable.withDateTime(endDate),
             if (entrySourceFilter != null)
               Variable.withString(entrySourceFilter.name),
+            if (ledgerType != null) Variable.withString(ledgerType.name),
           ],
         )
         .get();

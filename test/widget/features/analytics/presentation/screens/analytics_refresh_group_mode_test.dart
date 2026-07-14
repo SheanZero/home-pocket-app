@@ -29,6 +29,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/analytics/get_family_happiness_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
+    show LedgerType;
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
@@ -400,6 +402,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required DateTime endDate,
     String type = 'expense',
     EntrySource? entrySourceFilter,
+    LedgerType? ledgerType,
   }) => throw UnimplementedError();
 
   @override

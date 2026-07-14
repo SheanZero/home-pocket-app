@@ -57,8 +57,10 @@ void main() {
       // — label should be '日付' (ja), NOT a generic 'Sort' string.
       final container = await _pumpBar(tester);
 
-      // Verify active-field label is present
-      expect(find.text('日付'), findsOneWidget);
+      // Combined pill now shows field・direction (quick 260714-qit): the initial
+      // state is timestamp + desc → '日付・降順'. The field name must still be
+      // present (not a generic 'Sort').
+      expect(find.text('日付・降順'), findsOneWidget);
       // Generic 'Sort' must not appear
       expect(find.text('Sort'), findsNothing);
 
@@ -75,15 +77,17 @@ void main() {
         (tester) async {
       final container = await _pumpBar(tester);
 
+      // Clear affordance is now icon-only (quick 260714-qit): assert on the
+      // filter_alt_off icon rather than the removed 'クリア' label.
       // Initially no filter active → clear chip should be absent.
-      expect(find.text('クリア'), findsNothing);
+      expect(find.byIcon(Icons.filter_alt_off), findsNothing);
 
       // Set a ledger filter → clear chip should appear.
       container
           .read(listFilterProvider.notifier)
           .setLedgerFilter(LedgerType.joy);
       await tester.pump();
-      expect(find.text('クリア'), findsOneWidget);
+      expect(find.byIcon(Icons.filter_alt_off), findsOneWidget);
 
       // Provider state reflects the change.
       expect(

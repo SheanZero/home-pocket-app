@@ -3409,11 +3409,23 @@ abstract class S {
   /// **'Exceeded: {amount}'**
   String budgetExceededAmount(String amount);
 
-  /// Calendar header: monthly expense total label (Phase 27 placeholder)
+  /// Calendar header: month total label, all ledgers (すべて)
   ///
   /// In en, this message translates to:
-  /// **'Monthly Spend'**
+  /// **'Monthly total'**
   String get calMonthTotal;
+
+  /// Calendar header: month total label when the Daily ledger is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Daily total'**
+  String get calMonthTotalDaily;
+
+  /// Calendar header: month total label when the Joy ledger is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Joy total'**
+  String get calMonthTotalJoy;
 
   /// Calendar day-tap summary: daily expense total label (Phase 27 placeholder)
   ///
@@ -3472,7 +3484,7 @@ abstract class S {
   /// Category filter chip label when N categories selected (Phase 28)
   ///
   /// In en, this message translates to:
-  /// **'Categories ({n})'**
+  /// **'Categories {n}'**
   String listCategoryChipN(int n);
 
   /// Search field hint text in sort/filter bar (Phase 28)
@@ -3600,6 +3612,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Return to current month'**
   String get listCalNavCurrentMonth;
+
+  /// Accessibility label for the month-picker button in the list header (quick 260714-qit)
+  ///
+  /// In en, this message translates to:
+  /// **'Select month'**
+  String get listMonthPickerLabel;
+
+  /// Sort direction label: descending (quick 260714-qit)
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get listSortDirectionDesc;
+
+  /// Sort direction label: ascending (quick 260714-qit)
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get listSortDirectionAsc;
+
+  /// Combined sort pill label: field・direction (quick 260714-qit)
+  ///
+  /// In en, this message translates to:
+  /// **'{field}・{direction}'**
+  String listSortPillLabel(String field, String direction);
 
   /// Title of the confirm dialog when swiping to delete a shopping item (Phase 38)
   ///
