@@ -20,9 +20,14 @@ import '../../../../generated/app_localizations.dart';
 /// line-style [Icons.mic_none] (not filled). All colors via [AppPalette]; the
 /// label via [S].
 class VoiceRecordBar extends StatelessWidget {
-  const VoiceRecordBar({super.key, required this.onTap});
+  const VoiceRecordBar({
+    super.key,
+    required this.onTap,
+    this.useV16Layout = false,
+  });
 
   final VoidCallback onTap;
+  final bool useV16Layout;
 
   /// 260623-0cj: approved A/B midpoint width; R2 height = 44 dp (HIG touch
   /// target, equal to the keypad's bottom row).
@@ -34,6 +39,10 @@ class VoiceRecordBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final l10n = S.of(context);
+
+    final pillWidth = useV16Layout ? 304.0 : _pillWidth;
+    final pillHeight = useV16Layout ? 46.0 : _pillHeight;
+    final pillRadius = useV16Layout ? 12.0 : _pillRadius;
 
     return Container(
       key: const ValueKey('voice-record-bar'),
@@ -47,58 +56,112 @@ class VoiceRecordBar extends StatelessWidget {
       // gap); 0 below because the keypad's own 12 dp top padding supplies the
       // 12 dp gap to row 1 — so the pill sits 12 dp from the top edge AND 12 dp
       // from the digits, evenly, like another keypad row.
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: useV16Layout ? 10 : 12),
       alignment: Alignment.center,
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(_pillRadius),
+        borderRadius: BorderRadius.circular(pillRadius),
         child: InkWell(
-          borderRadius: BorderRadius.circular(_pillRadius),
+          borderRadius: BorderRadius.circular(pillRadius),
           onTap: onTap,
           child: Ink(
             decoration: BoxDecoration(
-              // Same color scheme as the 「记录」 button (_GradientKey).
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [palette.fabGradientStart, palette.fabGradientEnd],
-              ),
-              borderRadius: BorderRadius.circular(_pillRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: palette.actionShadow,
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: useV16Layout ? palette.backgroundMuted : null,
+              gradient: useV16Layout
+                  ? null
+                  : LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        palette.fabGradientStart,
+                        palette.fabGradientEnd,
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(pillRadius),
+              border: useV16Layout
+                  ? Border.all(color: palette.borderDefault)
+                  : null,
+              boxShadow: useV16Layout
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: palette.actionShadow,
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
             child: SizedBox(
               key: const ValueKey('voice-record-pill'),
-              width: _pillWidth,
-              height: _pillHeight,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.mic_none, size: 18, color: Colors.white),
-                  const SizedBox(width: 8),
-                  // Loose Flexible: keeps the icon+label centered as a group at
-                  // its natural width, but never overflows the fixed 200 dp
-                  // capsule on a very long localization.
-                  Flexible(
-                    child: Text(
-                      l10n.voiceRecordBar,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      // Same font as the 「记录」 button (_GradientKey).
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
+              width: pillWidth,
+              height: pillHeight,
+              child: useV16Layout
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.mic_none,
+                            size: 20,
+                            color: palette.accentPrimary,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.voiceRecordBar,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.label.copyWith(
+                                    color: palette.textPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  l10n.entryVoiceLaunchHelp,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.micro.copyWith(
+                                    color: palette.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: palette.textTertiary,
+                          ),
+                        ],
                       ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.mic_none,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            l10n.voiceRecordBar,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),

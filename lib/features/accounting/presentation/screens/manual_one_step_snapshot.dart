@@ -8,6 +8,7 @@
 import '../../../../shared/utils/currency_conversion.dart'
     show currencyFractionDigitsFor;
 import '../../domain/models/category.dart';
+import '../../domain/models/transaction.dart';
 import '../widgets/amount_input_controller.dart';
 import '../widgets/transaction_details_form.dart';
 
@@ -26,6 +27,8 @@ class ManualEntrySnapshot {
     required this.merchant,
     required this.note,
     required this.satisfaction,
+    required this.ledgerType,
+    required this.bookedJpyAmount,
     required this.originalCurrency,
     required this.originalAmount,
     required this.appliedRate,
@@ -44,6 +47,12 @@ class ManualEntrySnapshot {
   final String merchant;
   final String note;
   final int satisfaction;
+  final LedgerType ledgerType;
+
+  /// Authoritative JPY amount persisted by the form. This is captured
+  /// separately from [amountText]: for a foreign draft the host text is the
+  /// original whole-unit amount, while this remains the converted booked JPY.
+  final int bookedJpyAmount;
   final String? originalCurrency;
   final int? originalAmount;
   final String? appliedRate;
@@ -67,6 +76,8 @@ class ManualEntrySnapshot {
       merchant: form.currentMerchant,
       note: form.currentNote,
       satisfaction: form.currentSatisfaction,
+      ledgerType: form.currentLedgerType,
+      bookedJpyAmount: form.currentAmount,
       originalCurrency: form.currentOriginalCurrency,
       originalAmount: form.currentOriginalAmount,
       appliedRate: form.currentAppliedRate,
@@ -93,14 +104,20 @@ class ManualEntrySnapshot {
 
   /// Re-apply this snapshot's form-owned fields via the imperative form API.
   /// The host re-applies the amount/currency context separately (it owns the
-  /// AmountInputController + currency state).
+  /// AmountInputController + currency state). [bookedJpyAmount] is restored
+  /// directly rather than parsing [amountText], because a foreign host amount
+  /// is not JPY and its minor units must never be persisted as JPY.
   void restoreForm(TransactionDetailsFormState form) {
-    final cat = category;
-    if (cat != null) form.updateCategory(cat, parentCategory);
+    form.updateAmount(bookedJpyAmount);
+    form.restoreCategory(category, parentCategory);
     form.updateMerchant(merchant);
     form.updateNote(note);
     form.updateDate(date);
     form.updateSatisfaction(satisfaction);
+    form.updateLedgerType(ledgerType);
+    // A restored manual draft is authoritative. Voice confidence and alternate
+    // suggestions belong only to the discarded recognition result.
+    form.updateRecognition(null, const []);
     form.updateCurrencyTriple(
       originalCurrency: originalCurrency,
       originalAmount: originalAmount,

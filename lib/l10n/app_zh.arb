@@ -2786,6 +2786,14 @@
   "@shoppingFormLedgerLabel": {
     "description": "Section label for the ledger type selector in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormLedgerDaily": "日常",
+  "@shoppingFormLedgerDaily": {
+    "description": "Short daily-purpose segment label in the v16 shopping item form"
+  },
+  "shoppingFormLedgerJoy": "悦己",
+  "@shoppingFormLedgerJoy": {
+    "description": "Short Joy-purpose segment label in the v16 shopping item form"
+  },
   "shoppingFormCategoryLabel": "分类",
   "@shoppingFormCategoryLabel": {
     "description": "Label for the category field in the shopping item form (Phase 38-07)"
@@ -2806,6 +2814,10 @@
   "@shoppingFormNoteLabel": {
     "description": "Label for the note field in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormNotePlaceholder": "输入需要的备注",
+  "@shoppingFormNotePlaceholder": {
+    "description": "Placeholder for the note field in the v16 shopping item form"
+  },
   "shoppingFormQuantityLabel": "数量",
   "@shoppingFormQuantityLabel": {
     "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
@@ -2818,6 +2830,115 @@
   "@shoppingFormSaveError": {
     "description": "Error message shown when saving a shopping item fails (Phase 38-07)"
   },
+  "shoppingListTypeCreateHint": "保存后无法更改类型",
+  "@shoppingListTypeCreateHint": {
+    "description": "Neutral list-type immutability hint shown while creating a shopping item"
+  },
+  "shoppingFormSaving": "保存中…",
+  "@shoppingFormSaving": {
+    "description": "Disabled shopping item form action while a save is in progress"
+  },
+  "shoppingFormPricePlaceholder": "未填写",
+  "@shoppingFormPricePlaceholder": {
+    "description": "Placeholder for an empty shopping item estimated-price field"
+  },
+  "shoppingVoiceManualTitle": "语音输入",
+  "@shoppingVoiceManualTitle": {
+    "description": "Title of the shopping item voice-draft launch card"
+  },
+  "shoppingVoiceManualHelp": "一次说出商品名、数量、用途、分类和参考价格",
+  "@shoppingVoiceManualHelp": {
+    "description": "Supporting copy on the shopping item voice-draft launch card"
+  },
+  "shoppingVoicePrivacy": "优先使用设备端识别",
+  "@shoppingVoicePrivacy": {
+    "description": "Privacy caption in the shopping item voice-draft panel"
+  },
+  "shoppingVoiceListeningStatus": "正在聆听",
+  "@shoppingVoiceListeningStatus": {
+    "description": "Shopping item voice-draft listening status"
+  },
+  "shoppingVoiceProcessingStatus": "正在解析",
+  "@shoppingVoiceProcessingStatus": {
+    "description": "Shopping item voice-draft processing status"
+  },
+  "shoppingVoiceReviewStatus": "已填写到表单",
+  "@shoppingVoiceReviewStatus": {
+    "description": "Shopping item voice-draft review status"
+  },
+  "shoppingVoiceUnavailableStatus": "无法使用麦克风",
+  "@shoppingVoiceUnavailableStatus": {
+    "description": "Shopping item voice-draft unavailable status"
+  },
+  "shoppingVoiceKeyboardAction": "返回手动输入",
+  "@shoppingVoiceKeyboardAction": {
+    "description": "Semantic label for leaving shopping item voice input"
+  },
+  "shoppingVoiceListeningPlaceholder": "“牛奶两瓶，日常，参考价格20元……”",
+  "@shoppingVoiceListeningPlaceholder": {
+    "description": "Example transcript shown before shopping speech is recognized"
+  },
+  "shoppingVoiceProcessingPlaceholder": "“牛奶两瓶，日常，参考价格20元”",
+  "@shoppingVoiceProcessingPlaceholder": {
+    "description": "Example transcript shown while shopping speech is parsed"
+  },
+  "shoppingVoiceReviewPlaceholder": "请检查已填写到表单的内容",
+  "@shoppingVoiceReviewPlaceholder": {
+    "description": "Fallback transcript copy after shopping speech is parsed"
+  },
+  "shoppingVoiceStopAction": "立即结束并解析",
+  "@shoppingVoiceStopAction": {
+    "description": "Semantic label for stopping shopping speech recognition"
+  },
+  "shoppingVoiceRerecordAction": "重新录音",
+  "@shoppingVoiceRerecordAction": {
+    "description": "Semantic label for restarting shopping speech recognition"
+  },
+  "shoppingVoiceListeningHelp": "说完约3秒后自动解析 · 点方块立即结束",
+  "@shoppingVoiceListeningHelp": {
+    "description": "Guidance shown while listening for a shopping item"
+  },
+  "shoppingVoiceProcessingHelp": "正在将语音整理为购物项内容",
+  "@shoppingVoiceProcessingHelp": {
+    "description": "Guidance shown while parsing a shopping item voice draft"
+  },
+  "shoppingVoiceReviewHelp": "请确认内容，然后点击右上角“保存”添加",
+  "@shoppingVoiceReviewHelp": {
+    "description": "Guidance shown after a shopping item voice draft is applied"
+  },
+  "shoppingVoiceUnavailableHelp": "仍可继续使用手动输入",
+  "@shoppingVoiceUnavailableHelp": {
+    "description": "Guidance shown when shopping item voice input is unavailable"
+  },
+  "shoppingVoiceSettingsAction": "麦克风权限说明",
+  "@shoppingVoiceSettingsAction": {
+    "description": "Action shown when shopping item voice input is unavailable"
+  },
+  "entryVoiceLaunchHelp": "一次说出金额、商家、分类和日期",
+  "entryVoicePrivacy": "按语音设置处理",
+  "entryVoiceIdleStatus": "可以记录下一笔",
+  "entryVoiceListeningStatus": "正在聆听",
+  "entryVoiceProcessingStatus": "正在整理内容",
+  "entryVoiceReviewStatus": "已填入账目",
+  "entryVoiceUnavailableStatus": "无法使用语音输入",
+  "entryVoiceIdleTranscript": "可以开始记录下一笔",
+  "entryVoiceListeningPlaceholder": "“森林咖啡，午餐两千三百八十日元……”",
+  "entryVoiceProcessingPlaceholder": "“森林咖啡，午餐两千三百八十日元”",
+  "entryVoiceIdleHelp": "点按麦克风开始下一笔",
+  "entryVoiceListeningHelp": "说完稍候将自动识别，也可点按立即完成",
+  "entryVoiceProcessingHelp": "正在把识别结果填入同一份表单",
+  "entryVoiceReviewHelp": "点按麦克风重新录音，也可修改后直接记录",
+  "entryVoiceUnavailableHelp": "请在系统设置中允许麦克风，也可继续手动输入",
+  "entryVoiceKeyboardAction": "切换到键盘输入",
+  "entryVoiceStartAction": "开始语音输入",
+  "entryVoiceStopAction": "立即结束并解析",
+  "entryVoiceRerecordAction": "重新录音",
+  "entryVoiceSourceBadge": "语音填入",
+  "entryCategorySelectRequired": "需选择",
+  "entryContinuousReturnHome": "记录后返回主页",
+  "entryContinuousKeepNext": "记录后继续下一笔",
+  "entryContinuousEnable": "连续记账",
+  "entryContinuousDisable": "关闭连续记账",
   "currencySelectorTitle": "选择货币",
   "@currencySelectorTitle": {
     "description": "Title of the CurrencySelectorSheet (Phase 42-06)"

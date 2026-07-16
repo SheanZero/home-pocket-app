@@ -12,12 +12,22 @@ class LedgerTypeSelector extends StatelessWidget {
     required this.onChanged,
     required this.dailyLabel,
     required this.joyLabel,
+    this.showIcons = true,
+    this.chipMinHeight,
+    this.chipMinWidth,
   });
 
   final LedgerType selected;
   final ValueChanged<LedgerType> onChanged;
   final String dailyLabel;
   final String joyLabel;
+
+  /// Opt-out for text-only segmented controls such as the v16 shopping form.
+  final bool showIcons;
+
+  /// Optional opt-in geometry. Null preserves the legacy selector footprint.
+  final double? chipMinHeight;
+  final double? chipMinWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +78,15 @@ class LedgerTypeSelector extends StatelessWidget {
       child: AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
+        constraints: chipMinHeight == null && chipMinWidth == null
+            ? null
+            : BoxConstraints(
+                minHeight: chipMinHeight ?? 0,
+                minWidth: chipMinWidth ?? 0,
+              ),
+        alignment: chipMinHeight == null && chipMinWidth == null
+            ? null
+            : Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
         decoration: BoxDecoration(
           color: isActive ? activeBg : palette.backgroundMuted,
@@ -80,12 +99,14 @@ class LedgerTypeSelector extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isActive ? activeColor : palette.textSecondary,
-            ),
-            const SizedBox(width: 6),
+            if (showIcons) ...[
+              Icon(
+                icon,
+                size: 15,
+                color: isActive ? activeColor : palette.textSecondary,
+              ),
+              const SizedBox(width: 6),
+            ],
             Text(
               label,
               style: AppTextStyles.titleSmall.copyWith(

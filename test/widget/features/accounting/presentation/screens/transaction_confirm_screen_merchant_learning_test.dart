@@ -15,7 +15,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
         merchantCategoryLearningServiceProvider,
         categoryRepositoryProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -200,7 +199,10 @@ void main() {
 
       await pumpScreen(tester);
 
-      expect(find.byType(SatisfactionEmojiPicker), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('v16-satisfaction-card')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('calls recordSelection on successful save with merchant', (

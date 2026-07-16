@@ -27,7 +27,7 @@ import '../../../../shared/widgets/feedback_toast.dart';
 import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
 import '../widgets/transaction_details_form.dart';
-import '../widgets/voice_listening_overlay.dart' show VoiceRecordPanel;
+import '../widgets/unified_voice_entry_dock.dart';
 import 'manual_one_step_foreign_card.dart';
 import 'manual_one_step_snapshot.dart';
 import 'voice_locale_readiness_mixin.dart';
@@ -93,6 +93,7 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
     this.entrySource = EntrySource.manual,
     this.continuousMode = false,
     this.speechService,
+    this.onHistoryTap,
   });
 
   final String bookId;
@@ -114,6 +115,10 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
   /// pass a fake; production builds it from the provider via the mixin).
   final StartSpeechRecognitionUseCase? speechService;
 
+  /// Optional host-owned navigation into transaction history. Keeping the
+  /// callback at the shell boundary avoids coupling accounting to home tabs.
+  final VoidCallback? onHistoryTap;
+
   @override
   ConsumerState<ManualOneStepScreen> createState() =>
       _ManualOneStepScreenState();
@@ -134,6 +139,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   bool _amountFocused = true;
   bool _isTextFieldFocused = false;
   bool _isSubmitting = false;
+  late bool _continuousMode;
+  bool _voiceIdleForNext = false;
 
   /// 260622-nhs (D-2 / T-nhs-03): the synchronous voice-locale mirror, and the
   /// provenance flag flipped true after a PTT batch-fill so the saved row stamps
@@ -162,6 +169,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   @override
   String get pttVoiceLocaleId => _voiceLocaleId;
   @override
+  bool get pttSessionHostActive => _voiceModalOpen;
+  @override
   void onPttSessionChanged(VoidCallback apply) {
     if (mounted) setState(apply);
   }
@@ -180,6 +189,15 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   // `@override` must stay in the class, so it delegates.
   @override
   void onPttCommitted() => _mirrorPttFillIntoKeypad();
+
+  @override
+  void onPttCategoryNeedsSelection() {
+    if (!mounted) return;
+    setState(() {
+      _selectedCategory = null;
+      _selectedParentCategory = null;
+    });
+  }
 
   @override
   void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
@@ -221,7 +239,15 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   // resolves. Callers pass `isSubmitting: _isSubmitting || !_canSave` to
   // KeyboardToolbar and `onNext: _trySave` to SmartKeyboard (which internally
   // shows a toast and returns if !_canSave).
-  bool get _canSave => _selectedCategory != null && !_isSubmitting;
+  bool get _canSave =>
+      (_formKey.currentState?.currentCategory ?? _selectedCategory) != null &&
+      !_isSubmitting;
+
+  /// Voice owns the draft while recognition or its asynchronous fill is live.
+  /// Text-field focus can slide the dock away and expose KeyboardToolbar, so
+  /// save gating must be host state rather than a property of the dock alone.
+  bool get _isVoiceDraftTransient =>
+      _voiceModalOpen && (pttIsRecording || pttIsParsing || pttIsRestarting);
 
   // D-05: SmartKeyboard slides off-screen when any TextField is focused.
   bool get _showSmartKeypad => _amountFocused && !_isTextFieldFocused;
@@ -229,6 +255,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   @override
   void initState() {
     super.initState();
+    _continuousMode = widget.continuousMode;
 
     // P19-W3: per-host FocusNodes wired through the form config so the form's
     // TextFields use them. Listeners update _isTextFieldFocused.
@@ -289,7 +316,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
 
   // ── Category init (ported verbatim from transaction_entry_screen.dart:52-82, D-24) ──
 
-  Future<void> _initializeDefaultCategory() async {
+  Future<void> _initializeDefaultCategory({bool forFreshEntry = false}) async {
     final repo = ref.read(categoryRepositoryProvider);
     final allCategories = await repo.findActive();
 
@@ -330,7 +357,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     // voice-fill paths. `_formKey.currentState` is non-null here because the
     // first build completed during the awaited repo read above.
     if (defaultL2 != null) {
-      _formKey.currentState?.updateCategory(defaultL2, defaultL1);
+      final form = _formKey.currentState;
+      if (forFreshEntry) {
+        await form?.seedFreshEntryCategory(defaultL2, defaultL1);
+      } else {
+        form?.updateCategory(defaultL2, defaultL1);
+      }
     }
   }
 
@@ -398,7 +430,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
       resizeToAvoidBottomInset: false,
       backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: palette.card,
+        toolbarHeight: 52,
+        backgroundColor: palette.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -412,36 +445,21 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
           ),
         ),
         centerTitle: true,
-        // 260614-iww: the leading AppBar close (×) already exits continuous
-        // mode; no separate right-side text exit button (per user request).
+        actions: [
+          if (widget.onHistoryTap != null)
+            IconButton(
+              key: const ValueKey('manual-entry-history-action'),
+              tooltip: l10n.transactions,
+              onPressed: widget.onHistoryTap,
+              icon: Icon(Icons.history_rounded, color: palette.textPrimary),
+            ),
+        ],
       ),
       body: Stack(
         children: [
           // Main content column
           Column(
             children: [
-              const SizedBox(height: 8),
-
-              // 260614-iww: continuous-mode hint explaining the exit affordance.
-              if (widget.continuousMode)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 2,
-                  ),
-                  child: Text(
-                    l10n.continuousExitHint,
-                    style: AppTextStyles.caption.copyWith(
-                      color: palette.textTertiary,
-                    ),
-                  ),
-                ),
-
-              // 260622-nhs (D-3): the 手工/语音 mode Tab is gone — manual keypad is
-              // the only resident state; voice is the push-to-talk bar below the
-              // keypad. No mode switching, no page replacement.
-              const SizedBox(height: 8),
-
               // Amount display — tap to activate SmartKeyboard (D-10)
               GestureDetector(
                 onTap: _onAmountTap,
@@ -451,6 +469,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                   onClear: _onClear,
                   currencySymbol: currencySymbol,
                   currencyLabel: _currency,
+                  layout: AmountDisplayLayout.v16,
+                  onCurrencyTap: _onCurrencyTap,
                 ),
               ),
 
@@ -494,6 +514,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                       ],
                       TransactionDetailsForm(
                         key: _formKey,
+                        useV16Layout: true,
                         config: TransactionDetailsFormConfig.$new(
                           bookId: widget.bookId,
                           initialAmount: widget.initialAmount,
@@ -533,47 +554,61 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
               // this NOT `pttIsRecording`, so the one-shot recognizer stopping
               // does NOT snap the keypad back) the inline VoiceRecordPanel
               // occupies the keypad's footprint; otherwise the 「语音记录」 strip +
-              // SmartKeyboard. The SmartKeyboard's built-in 24dp bottom padding
-              // clears the home indicator (no SafeArea wrapper).
-              AnimatedSlide(
-                offset: Offset(0, _showSmartKeypad ? 0 : 1),
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeInOut,
-                child: _voiceModalOpen
-                    // voice-consolidation P1-7 (R2): panel construction moved
-                    // verbatim to `manual_one_step_voice_wiring.dart`.
-                    ? _buildVoicePanel()
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
-                          // inline auto-fill panel. Above the keypad; hidden with
-                          // the keypad when a TextField is focused.
-                          if (_showSmartKeypad)
-                            VoiceRecordBar(onTap: _onVoiceRecordTap),
-                          SmartKeyboard(
-                            onDigit: _onDigit,
-                            onDoubleZero: _onDoubleZero,
-                            // D-06: gate the dot key on the active currency's
-                            // minor unit. 0-decimal currencies (JPY/KRW) pass
-                            // null → disabled blank tile; JPY keeps onDot:null.
-                            onDot: _controller.decimals > 0 ? _onDot : null,
-                            onDelete: _onDelete,
-                            // P19-W1: route through _trySave for category guard.
-                            onNext: _trySave,
-                            actionLabel: l10n.record,
-                            currencyLabel: _currency,
-                            currencySymbol: currencySymbol,
-                            // CURR-01: open the currency selector sheet.
-                            onCurrencyTap: _onCurrencyTap,
-                            // 260623-0cj R2: the white VoiceRecordBar above
-                            // carries the assembly's top border, so the keypad
-                            // omits its own → voice key + keypad read as ONE
-                            // unified white surface (一体).
-                            showTopBorder: false,
-                          ),
-                        ],
-                      ),
+              // SmartKeyboard. The whole interchangeable slot shares the same
+              // system-bottom inset so keypad, voice dock, and continuous
+              // control all stay clear of the home indicator.
+              SafeArea(
+                key: const ValueKey('manual-entry-bottom-safe-area'),
+                top: false,
+                child: AnimatedSlide(
+                  offset: Offset(0, _showSmartKeypad ? 0 : 1),
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeInOut,
+                  child: _voiceModalOpen
+                      // voice-consolidation P1-7 (R2): panel construction moved
+                      // verbatim to `manual_one_step_voice_wiring.dart`.
+                      ? _buildVoicePanel()
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 260622-nhs R2: tap 「语音记录」 (line mic) to raise the
+                            // inline auto-fill panel. Above the keypad; hidden with
+                            // the keypad when a TextField is focused.
+                            if (_showSmartKeypad)
+                              VoiceRecordBar(
+                                onTap: _onVoiceRecordTap,
+                                useV16Layout: true,
+                              ),
+                            SmartKeyboard(
+                              onDigit: _onDigit,
+                              onDoubleZero: _onDoubleZero,
+                              // D-06: gate the dot key on the active currency's
+                              // minor unit. 0-decimal currencies (JPY/KRW) pass
+                              // null → disabled blank tile; JPY keeps onDot:null.
+                              onDot: _controller.decimals > 0 ? _onDot : null,
+                              onDelete: _onDelete,
+                              // P19-W1: route through _trySave for category guard.
+                              onNext: _trySave,
+                              actionLabel: l10n.record,
+                              currencyLabel: _currency,
+                              currencySymbol: currencySymbol,
+                              // CURR-01: open the currency selector sheet.
+                              onCurrencyTap: _onCurrencyTap,
+                              // 260623-0cj R2: the white VoiceRecordBar above
+                              // carries the assembly's top border, so the keypad
+                              // omits its own → voice key + keypad read as ONE
+                              // unified white surface (一体).
+                              showTopBorder: false,
+                              useV16Layout: true,
+                              // Match the V16 active CTA once category loading
+                              // completes; `_trySave` owns localized empty/zero
+                              // validation and still blocks persistence.
+                              isActionEnabled: _canSave,
+                            ),
+                            _buildContinuousControl(l10n, palette),
+                          ],
+                        ),
+                ),
               ),
             ],
           ),
@@ -589,10 +624,70 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                 onDone: () => FocusManager.instance.primaryFocus?.unfocus(),
                 onSave: _trySave,
                 // P19-W1: disable while category null or submit in flight.
-                isSubmitting: _isSubmitting || !_canSave,
+                isSubmitting:
+                    _isSubmitting || !_canSave || _isVoiceDraftTransient,
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildContinuousControl(S l10n, AppPalette palette) {
+    final summary = _continuousMode
+        ? l10n.entryContinuousKeepNext
+        : l10n.entryContinuousReturnHome;
+    final action = _continuousMode
+        ? l10n.entryContinuousDisable
+        : l10n.entryContinuousEnable;
+    void toggleContinuousMode() {
+      setState(() => _continuousMode = !_continuousMode);
+    }
+
+    return Material(
+      color: palette.card,
+      child: Semantics(
+        key: const ValueKey('manual-entry-continuous-control'),
+        button: true,
+        toggled: _continuousMode,
+        label: '$summary $action',
+        onTap: toggleContinuousMode,
+        excludeSemantics: true,
+        child: InkWell(
+          onTap: toggleContinuousMode,
+          child: SizedBox(
+            height: 43,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        summary,
+                        maxLines: 1,
+                        style: AppTextStyles.supporting.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        action,
+                        maxLines: 1,
+                        style: AppTextStyles.compact.copyWith(
+                          color: palette.accentPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

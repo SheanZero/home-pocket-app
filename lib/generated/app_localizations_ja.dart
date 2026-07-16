@@ -2142,6 +2142,12 @@ class SJa extends S {
   String get shoppingFormLedgerLabel => '帳簿';
 
   @override
+  String get shoppingFormLedgerDaily => '日常';
+
+  @override
+  String get shoppingFormLedgerJoy => 'ときめき';
+
+  @override
   String get shoppingFormCategoryLabel => 'カテゴリ';
 
   @override
@@ -2157,6 +2163,9 @@ class SJa extends S {
   String get shoppingFormNoteLabel => 'メモ';
 
   @override
+  String get shoppingFormNotePlaceholder => '必要なメモを入力';
+
+  @override
   String get shoppingFormQuantityLabel => '数量';
 
   @override
@@ -2164,6 +2173,144 @@ class SJa extends S {
 
   @override
   String get shoppingFormSaveError => '保存に失敗しました。もう一度お試しください。';
+
+  @override
+  String get shoppingListTypeCreateHint => '保存後はタイプを変更できません';
+
+  @override
+  String get shoppingFormSaving => '保存中…';
+
+  @override
+  String get shoppingFormPricePlaceholder => '未入力';
+
+  @override
+  String get shoppingVoiceManualTitle => '音声で入力';
+
+  @override
+  String get shoppingVoiceManualHelp => '品名・数量・用途・カテゴリ・参考価格をまとめて話す';
+
+  @override
+  String get shoppingVoicePrivacy => '端末内認識を優先';
+
+  @override
+  String get shoppingVoiceListeningStatus => '聞いています';
+
+  @override
+  String get shoppingVoiceProcessingStatus => '解析しています';
+
+  @override
+  String get shoppingVoiceReviewStatus => 'フォームに入力しました';
+
+  @override
+  String get shoppingVoiceUnavailableStatus => 'マイクを使えません';
+
+  @override
+  String get shoppingVoiceKeyboardAction => '手動入力へ戻る';
+
+  @override
+  String get shoppingVoiceListeningPlaceholder => '「牛乳を2本、日常、参考価格500円……」';
+
+  @override
+  String get shoppingVoiceProcessingPlaceholder => '「牛乳を2本、日常、参考価格500円」';
+
+  @override
+  String get shoppingVoiceReviewPlaceholder => 'フォームに入力した内容を確認してください';
+
+  @override
+  String get shoppingVoiceStopAction => 'すぐに終了して解析';
+
+  @override
+  String get shoppingVoiceRerecordAction => 'もう一度録音';
+
+  @override
+  String get shoppingVoiceListeningHelp => '話し終えると約3秒で自動解析 · 四角で今すぐ終了';
+
+  @override
+  String get shoppingVoiceProcessingHelp => '入力内容をショッピング項目に整理しています';
+
+  @override
+  String get shoppingVoiceReviewHelp => '内容を確認し、右上の「保存」で追加';
+
+  @override
+  String get shoppingVoiceUnavailableHelp => '手動入力はそのまま利用できます';
+
+  @override
+  String get shoppingVoiceSettingsAction => 'マイク権限の案内';
+
+  @override
+  String get entryVoiceLaunchHelp => '金額・店名・カテゴリ・日付をまとめて話せます';
+
+  @override
+  String get entryVoicePrivacy => '音声設定に沿って処理';
+
+  @override
+  String get entryVoiceIdleStatus => '次の記録を待機中';
+
+  @override
+  String get entryVoiceListeningStatus => '聞いています';
+
+  @override
+  String get entryVoiceProcessingStatus => '内容を整理しています';
+
+  @override
+  String get entryVoiceReviewStatus => '明細に入力しました';
+
+  @override
+  String get entryVoiceUnavailableStatus => '音声入力を利用できません';
+
+  @override
+  String get entryVoiceIdleTranscript => '次の内容を話せます';
+
+  @override
+  String get entryVoiceListeningPlaceholder => '“森のカフェ、ランチ、2,380円…”';
+
+  @override
+  String get entryVoiceProcessingPlaceholder => '“森のカフェ、ランチ、2,380円”';
+
+  @override
+  String get entryVoiceIdleHelp => 'マイクをタップして次の記録を開始';
+
+  @override
+  String get entryVoiceListeningHelp => '話し終えると自動認識。タップですぐ完了';
+
+  @override
+  String get entryVoiceProcessingHelp => '認識結果を同じフォームに入力しています';
+
+  @override
+  String get entryVoiceReviewHelp => 'マイクで録音し直すか、修正してそのまま記録';
+
+  @override
+  String get entryVoiceUnavailableHelp => 'システム設定でマイクを許可するか、そのまま手動入力を続けられます';
+
+  @override
+  String get entryVoiceKeyboardAction => 'キーボード入力に切り替える';
+
+  @override
+  String get entryVoiceStartAction => '音声入力を開始';
+
+  @override
+  String get entryVoiceStopAction => 'すぐに終了して解析';
+
+  @override
+  String get entryVoiceRerecordAction => '録音し直す';
+
+  @override
+  String get entryVoiceSourceBadge => '音声入力';
+
+  @override
+  String get entryCategorySelectRequired => '選択が必要';
+
+  @override
+  String get entryContinuousReturnHome => '記録後にホームへ戻る';
+
+  @override
+  String get entryContinuousKeepNext => '記録後に次の明細へ進む';
+
+  @override
+  String get entryContinuousEnable => '連続記録';
+
+  @override
+  String get entryContinuousDisable => '連続記録を終了';
 
   @override
   String get currencySelectorTitle => '通貨を選択';

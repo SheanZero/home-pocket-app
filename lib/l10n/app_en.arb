@@ -2772,6 +2772,14 @@
   "@shoppingFormLedgerLabel": {
     "description": "Section label for the ledger type selector in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormLedgerDaily": "Daily",
+  "@shoppingFormLedgerDaily": {
+    "description": "Short daily-purpose segment label in the v16 shopping item form"
+  },
+  "shoppingFormLedgerJoy": "Joy",
+  "@shoppingFormLedgerJoy": {
+    "description": "Short Joy-purpose segment label in the v16 shopping item form"
+  },
   "shoppingFormCategoryLabel": "Category",
   "@shoppingFormCategoryLabel": {
     "description": "Label for the category field in the shopping item form (Phase 38-07)"
@@ -2792,6 +2800,10 @@
   "@shoppingFormNoteLabel": {
     "description": "Label for the note field in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormNotePlaceholder": "Add any needed note",
+  "@shoppingFormNotePlaceholder": {
+    "description": "Placeholder for the note field in the v16 shopping item form"
+  },
   "shoppingFormQuantityLabel": "Quantity",
   "@shoppingFormQuantityLabel": {
     "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
@@ -2804,6 +2816,115 @@
   "@shoppingFormSaveError": {
     "description": "Error message shown when saving a shopping item fails (Phase 38-07)"
   },
+  "shoppingListTypeCreateHint": "Type cannot be changed after saving",
+  "@shoppingListTypeCreateHint": {
+    "description": "Neutral list-type immutability hint shown while creating a shopping item"
+  },
+  "shoppingFormSaving": "Saving…",
+  "@shoppingFormSaving": {
+    "description": "Disabled shopping item form action while a save is in progress"
+  },
+  "shoppingFormPricePlaceholder": "Not entered",
+  "@shoppingFormPricePlaceholder": {
+    "description": "Placeholder for an empty shopping item estimated-price field"
+  },
+  "shoppingVoiceManualTitle": "Enter by voice",
+  "@shoppingVoiceManualTitle": {
+    "description": "Title of the shopping item voice-draft launch card"
+  },
+  "shoppingVoiceManualHelp": "Say the item, quantity, purpose, category, and estimated price together",
+  "@shoppingVoiceManualHelp": {
+    "description": "Supporting copy on the shopping item voice-draft launch card"
+  },
+  "shoppingVoicePrivacy": "On-device recognition preferred",
+  "@shoppingVoicePrivacy": {
+    "description": "Privacy caption in the shopping item voice-draft panel"
+  },
+  "shoppingVoiceListeningStatus": "Listening",
+  "@shoppingVoiceListeningStatus": {
+    "description": "Shopping item voice-draft listening status"
+  },
+  "shoppingVoiceProcessingStatus": "Analyzing",
+  "@shoppingVoiceProcessingStatus": {
+    "description": "Shopping item voice-draft processing status"
+  },
+  "shoppingVoiceReviewStatus": "Filled into the form",
+  "@shoppingVoiceReviewStatus": {
+    "description": "Shopping item voice-draft review status"
+  },
+  "shoppingVoiceUnavailableStatus": "Microphone unavailable",
+  "@shoppingVoiceUnavailableStatus": {
+    "description": "Shopping item voice-draft unavailable status"
+  },
+  "shoppingVoiceKeyboardAction": "Return to manual input",
+  "@shoppingVoiceKeyboardAction": {
+    "description": "Semantic label for leaving shopping item voice input"
+  },
+  "shoppingVoiceListeningPlaceholder": "“Two bottles of milk, daily, estimated price ¥500…”",
+  "@shoppingVoiceListeningPlaceholder": {
+    "description": "Example transcript shown before shopping speech is recognized"
+  },
+  "shoppingVoiceProcessingPlaceholder": "“Two bottles of milk, daily, estimated price ¥500”",
+  "@shoppingVoiceProcessingPlaceholder": {
+    "description": "Example transcript shown while shopping speech is parsed"
+  },
+  "shoppingVoiceReviewPlaceholder": "Review the information added to the form",
+  "@shoppingVoiceReviewPlaceholder": {
+    "description": "Fallback transcript copy after shopping speech is parsed"
+  },
+  "shoppingVoiceStopAction": "Stop now and analyze",
+  "@shoppingVoiceStopAction": {
+    "description": "Semantic label for stopping shopping speech recognition"
+  },
+  "shoppingVoiceRerecordAction": "Record again",
+  "@shoppingVoiceRerecordAction": {
+    "description": "Semantic label for restarting shopping speech recognition"
+  },
+  "shoppingVoiceListeningHelp": "Pause for about 3 seconds to analyze automatically · Tap the square to stop now",
+  "@shoppingVoiceListeningHelp": {
+    "description": "Guidance shown while listening for a shopping item"
+  },
+  "shoppingVoiceProcessingHelp": "Organizing your speech into shopping item fields",
+  "@shoppingVoiceProcessingHelp": {
+    "description": "Guidance shown while parsing a shopping item voice draft"
+  },
+  "shoppingVoiceReviewHelp": "Review the details, then tap Save at the top right to add",
+  "@shoppingVoiceReviewHelp": {
+    "description": "Guidance shown after a shopping item voice draft is applied"
+  },
+  "shoppingVoiceUnavailableHelp": "Manual input remains available",
+  "@shoppingVoiceUnavailableHelp": {
+    "description": "Guidance shown when shopping item voice input is unavailable"
+  },
+  "shoppingVoiceSettingsAction": "Microphone help",
+  "@shoppingVoiceSettingsAction": {
+    "description": "Action shown when shopping item voice input is unavailable"
+  },
+  "entryVoiceLaunchHelp": "Say the amount, merchant, category, and date in one go",
+  "entryVoicePrivacy": "Processed using voice settings",
+  "entryVoiceIdleStatus": "Ready for the next entry",
+  "entryVoiceListeningStatus": "Listening",
+  "entryVoiceProcessingStatus": "Organizing the details",
+  "entryVoiceReviewStatus": "Added to this entry",
+  "entryVoiceUnavailableStatus": "Voice input unavailable",
+  "entryVoiceIdleTranscript": "Ready when you are",
+  "entryVoiceListeningPlaceholder": "“Forest Café, lunch, 2,380 yen…”",
+  "entryVoiceProcessingPlaceholder": "“Forest Café, lunch, 2,380 yen”",
+  "entryVoiceIdleHelp": "Tap the microphone to start the next entry",
+  "entryVoiceListeningHelp": "Pause to recognize automatically, or tap to finish now",
+  "entryVoiceProcessingHelp": "Adding the recognition result to this form",
+  "entryVoiceReviewHelp": "Tap the microphone to record again, or edit and record",
+  "entryVoiceUnavailableHelp": "Allow microphone access in system Settings, or continue with manual input",
+  "entryVoiceKeyboardAction": "Switch to keyboard input",
+  "entryVoiceStartAction": "Start voice input",
+  "entryVoiceStopAction": "Finish now and analyze",
+  "entryVoiceRerecordAction": "Record again",
+  "entryVoiceSourceBadge": "Voice filled",
+  "entryCategorySelectRequired": "Select required",
+  "entryContinuousReturnHome": "Return home after recording",
+  "entryContinuousKeepNext": "Continue to the next entry after recording",
+  "entryContinuousEnable": "Continuous entry",
+  "entryContinuousDisable": "Turn off continuous entry",
   "currencySelectorTitle": "Select currency",
   "@currencySelectorTitle": {
     "description": "Title of the CurrencySelectorSheet (Phase 42-06)"

@@ -58,6 +58,8 @@ import '../../../../shared/utils/currency_conversion.dart'
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../../../voice/domain/models/voice_parse_result.dart';
+import '../../../voice/domain/models/recognition_outcome.dart'
+    show ConfidenceBand;
 import '../../../settings/presentation/providers/state_settings.dart'
     show appSettingsProvider;
 import '../providers/repository_providers.dart';
@@ -122,6 +124,16 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// flip provenance to `EntrySource.voice`. Default no-op.
   void onPttCommitted() {}
 
+  /// A final result exposed only low-confidence category suggestions. Hosts
+  /// with a preloaded default category clear their own selection mirror so the
+  /// user must make an explicit category choice before saving.
+  void onPttCategoryNeedsSelection() {}
+
+  /// Host-owned intent gate for async session work. The manual-entry host
+  /// overrides this with its voice-dock visibility; legacy hosts keep the
+  /// always-active default.
+  bool get pttSessionHostActive => true;
+
   // ── Owned recording-session state (ported from _VoiceInputScreenState) ─────
 
   late final StartSpeechRecognitionUseCase pttSpeechService;
@@ -154,10 +166,21 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// flight, so the status surfaces 「正在解析…」 (processing). Live-driven, set
   /// around the parse/fill calls and cleared when they settle.
   bool _parsing = false;
+  int _activeParsingOperations = 0;
 
   /// 260622-nhs R4 (BUG C): live recognizer status mirror. Driven by
   /// [onStatus] (listening ↔ stopped) and the [_parsing] flag (processing).
   PttListenStatus _listenStatus = PttListenStatus.stopped;
+
+  /// Monotonic cancellation epoch. Every new session/reset receives a token;
+  /// keyboard exit, fresh-entry reset, fatal error, and dispose invalidate all
+  /// older parse/category/rate/restart futures before they can write state.
+  int _pttSessionGeneration = 0;
+
+  /// Orders recognizer callbacks inside one session. A later partial/final
+  /// result invalidates any older parse that is still awaiting the parser, so
+  /// a slow partial can never overwrite a newer final fill.
+  int _pttResultRevision = 0;
 
   final List<double> _soundLevels = [];
   final List<DateTime> _timestamps = [];
@@ -203,13 +226,52 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// open (the manual-screen modal). False during the legacy hold path.
   bool get pttContinuousActive => _continuousActive;
 
+  /// True while parse/category/rate orchestration can still mutate the draft.
+  /// Hosts use this to gate save affordances even if the recognizer emits a
+  /// terminal status before the final asynchronous fill has settled.
+  bool get pttIsParsing => _parsing;
+
+  /// True across the serialized cancel -> fresh-listen re-record window.
+  /// The host treats this exactly like parsing: the restored draft is visible,
+  /// but must not be saved until the fresh recognizer is ready.
+  bool get pttIsRestarting => _restarting;
+
   /// 260622-nhs R4 (BUG C): live recognizer-driven status for the panel title +
   /// pulse-dot. `processing` while a parse/fill is in flight overrides
   /// `listening` so the user sees 「正在解析…」 the instant a result lands.
   PttListenStatus get pttListenStatus =>
-      _parsing && _listenStatus != PttListenStatus.stopped
-      ? PttListenStatus.processing
-      : _listenStatus;
+      _parsing || _restarting ? PttListenStatus.processing : _listenStatus;
+
+  bool _isPttSessionCurrent(int generation) =>
+      mounted && generation == _pttSessionGeneration && pttSessionHostActive;
+
+  bool _isPttResultCurrent(int generation, int revision) =>
+      _isPttSessionCurrent(generation) && revision == _pttResultRevision;
+
+  bool _isPttWorkCurrent(int generation, int? revision) => revision == null
+      ? _isPttSessionCurrent(generation)
+      : _isPttResultCurrent(generation, revision);
+
+  void _beginPttParsing(int generation) {
+    if (!_isPttSessionCurrent(generation)) return;
+    _activeParsingOperations++;
+    if (_activeParsingOperations == 1) {
+      onPttSessionChanged(() => _parsing = true);
+    }
+  }
+
+  void _endPttParsing(int generation) {
+    if (!_isPttSessionCurrent(generation)) return;
+    if (_activeParsingOperations > 0) _activeParsingOperations--;
+    if (_activeParsingOperations == 0 && _parsing) {
+      onPttSessionChanged(() => _parsing = false);
+    }
+  }
+
+  void _clearPttParsingFields() {
+    _activeParsingOperations = 0;
+    _parsing = false;
+  }
 
   // ── VoiceRecognitionEventHandlerMixin abstract contract ────────────────────
 
@@ -254,6 +316,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   /// Tear down the session. Call from the host's dispose (before super.dispose).
   void disposePttSession() {
+    _pttSessionGeneration++;
     _continuousActive = false;
     _parseDebounce?.cancel();
     _amountMerger?.dispose();
@@ -264,6 +327,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   // ── Recording start (ported from _startRecording) ──────────────────────────
 
   Future<void> startPttSession() async {
+    final generation = ++_pttSessionGeneration;
     final localeId = pttVoiceLocaleId;
 
     onPttSessionChanged(() {
@@ -273,6 +337,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       _soundLevel = 0.0;
       _parseResult = null;
       _mergedAmount = null;
+      _pttResultRevision = 0;
+      _clearPttParsingFields();
       // 260703 (2C): partial fills no longer touch the display currency, so a
       // fresh session resets it here instead of on the first partial fill.
       _displayCurrency = 'JPY';
@@ -284,16 +350,29 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     _partialResultCount = 0;
     _lastWordCount = 0;
 
-    _rebuildAmountMerger();
+    _rebuildAmountMerger(generation);
 
-    await pttSpeechService.startListening(
-      onResult: _onResult,
-      onSoundLevel: _onSoundLevel,
-      localeId: localeId,
-      listenFor: VoiceTuning.listenFor,
-      pauseFor: VoiceTuning.pauseFor,
-      allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
-    );
+    try {
+      await pttSpeechService.startListening(
+        onResult: (result) => _onResult(result, generation),
+        onSoundLevel: (level) => _onSoundLevel(level, generation),
+        localeId: localeId,
+        listenFor: VoiceTuning.listenFor,
+        pauseFor: VoiceTuning.pauseFor,
+        allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
+      );
+    } catch (_) {
+      if (!_isPttSessionCurrent(generation)) return;
+      onPttSessionChanged(() {
+        _continuousActive = false;
+        _isRecording = false;
+        _clearPttParsingFields();
+        _soundLevel = 0.0;
+        _listenStatus = PttListenStatus.stopped;
+      });
+      if (!mounted) return;
+      showVoiceRecognitionErrorToast(context, 'error_client');
+    }
   }
 
   /// KFB C2 (T-kfb-01): the user's on-device→cloud auto-degradation policy.
@@ -311,12 +390,13 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// methods were byte-identical except for the exit path's leading
   /// `_continuousActive = false` ([endContinuous]).
   Future<void> _stopAndFill({required bool endContinuous}) async {
+    final generation = _pttSessionGeneration;
     if (endContinuous) _continuousActive = false;
     // Pattern 7: merger.stop() bypasses the 2.5s window. MUST run BEFORE
     // pttSpeechService.stop() to preserve the original ordering invariant.
     _amountMerger?.stop();
     await pttSpeechService.stop();
-    if (!mounted) return;
+    if (!_isPttSessionCurrent(generation)) return;
     onPttSessionChanged(() {
       _isRecording = false;
       _soundLevel = 0.0;
@@ -324,7 +404,11 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     });
 
     final text = _finalText.isNotEmpty ? _finalText : _partialText;
-    await _fillFormFromText(text, data: _cachedParseFor(text));
+    await _fillFormFromText(
+      text,
+      data: _cachedParseFor(text),
+      generation: generation,
+    );
   }
 
   // ── 260622-nhs R2: tap-toggled continuous auto-fill session ────────────────
@@ -372,12 +456,13 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// button always honors 重新录入 regardless of how the previous session died.
   Future<void> resetPttSessionAndRestart() async {
     if (_restarting || !mounted) return;
-    _restarting = true;
+    final generation = ++_pttSessionGeneration;
+    onPttSessionChanged(() => _restarting = true);
     _parseDebounce?.cancel();
     try {
       // 1. Cancel the recognizer to clear its accumulated buffer.
       await pttSpeechService.cancel();
-      if (!mounted) return;
+      if (!_isPttSessionCurrent(generation)) return;
 
       // 2. Clear app-side buffers + rebuild the merger from the baseline.
       //    `_continuousActive = true` is the recovery semantic: it MUST be set
@@ -386,10 +471,10 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       onPttSessionChanged(() {
         _continuousActive = true;
         _clearSessionBuffers();
-        _parsing = false;
+        _clearPttParsingFields();
         _listenStatus = PttListenStatus.listening;
       });
-      _rebuildAmountMerger();
+      _rebuildAmountMerger(generation);
 
       // Belt-and-braces: after a fatal error the platform may have flipped
       // availability off, and the async [_recoverBarAfterFatalError] may not
@@ -401,7 +486,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
           onStatus: onStatus,
           onError: onError,
         );
-        if (!mounted) return;
+        if (!_isPttSessionCurrent(generation)) return;
         if (!available) {
           onPttSessionChanged(() {
             _continuousActive = false;
@@ -413,22 +498,36 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
       }
 
       // 3. Fresh listening session so the user can re-speak immediately.
-      await pttSpeechService.startListening(
-        onResult: _onResult,
-        onSoundLevel: _onSoundLevel,
-        localeId: pttVoiceLocaleId,
-        listenFor: VoiceTuning.listenFor,
-        pauseFor: VoiceTuning.pauseFor,
-        allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
-      );
-      if (mounted) {
+      try {
+        await pttSpeechService.startListening(
+          onResult: (result) => _onResult(result, generation),
+          onSoundLevel: (level) => _onSoundLevel(level, generation),
+          localeId: pttVoiceLocaleId,
+          listenFor: VoiceTuning.listenFor,
+          pauseFor: VoiceTuning.pauseFor,
+          allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
+        );
+      } catch (_) {
+        if (!_isPttSessionCurrent(generation)) return;
+        onPttSessionChanged(() {
+          _continuousActive = false;
+          _isRecording = false;
+          _clearPttParsingFields();
+          _soundLevel = 0.0;
+          _listenStatus = PttListenStatus.stopped;
+        });
+        if (!mounted) return;
+        showVoiceRecognitionErrorToast(context, 'error_client');
+        return;
+      }
+      if (_isPttSessionCurrent(generation)) {
         onPttSessionChanged(() {
           _isRecording = true;
           _listenStatus = PttListenStatus.listening;
         });
       }
     } finally {
-      _restarting = false;
+      if (mounted) onPttSessionChanged(() => _restarting = false);
     }
   }
 
@@ -477,28 +576,30 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     // stopped), surface the toast, AND recover the bar so the next tap works
     // without an app restart (re-initialize if the platform flipped
     // isInitialized=false on a permanent error).
+    final generation = ++_pttSessionGeneration;
     onPttSessionChanged(() {
       _continuousActive = false;
       _isRecording = false;
       _restarting = false;
+      _clearPttParsingFields();
       _soundLevel = 0.0;
       _listenStatus = PttListenStatus.stopped;
     });
     showVoiceRecognitionErrorToast(context, errorMsg);
-    unawaited(_recoverBarAfterFatalError());
+    unawaited(_recoverBarAfterFatalError(generation));
   }
 
   /// 260622-nhs R5 (BUG 1): after a fatal error the platform may have flipped
   /// `isInitialized=false` (iOS reports permanent), which would lock the bar's
   /// tap guard. Re-initialize the speech service so the next 「语音记录」 tap can
   /// re-enter, and re-enable the bar (`_pttServiceInitialized=true`).
-  Future<void> _recoverBarAfterFatalError() async {
-    if (!mounted) return;
+  Future<void> _recoverBarAfterFatalError(int generation) async {
+    if (!_isPttSessionCurrent(generation)) return;
     final available = await pttSpeechService.initialize(
       onStatus: onStatus,
       onError: onError,
     );
-    if (!mounted) return;
+    if (!_isPttSessionCurrent(generation)) return;
     onPttSessionChanged(() => _pttServiceInitialized = available);
   }
 
@@ -539,13 +640,16 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   // ── Cancel/discard (ported verbatim from _cancelRecordingAndDiscard) ────────
 
   Future<void> cancelPttSessionAndDiscard() async {
+    final generation = ++_pttSessionGeneration;
     _continuousActive = false;
+    _parseDebounce?.cancel();
     _amountMerger?.dispose();
     _amountMerger = null;
     await pttSpeechService.cancel();
-    if (!mounted) return;
+    if (!_isPttSessionCurrent(generation)) return;
     onPttSessionChanged(() {
       _isRecording = false;
+      _clearPttParsingFields();
       _soundLevel = 0.0;
       _listenStatus = PttListenStatus.stopped;
     });
@@ -583,7 +687,12 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   /// Reset the session's transcript/parse buffers (continuous-entry reset).
   void resetPttSessionState() {
-    onPttSessionChanged(_clearSessionBuffers);
+    _pttSessionGeneration++;
+    _parseDebounce?.cancel();
+    onPttSessionChanged(() {
+      _clearSessionBuffers();
+      _clearPttParsingFields();
+    });
   }
 
   /// 260706-saz (voice-consolidation P0-3): the seven session buffers shared by BOTH
@@ -599,5 +708,6 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     _mergedAmount = null;
     _soundLevel = 0.0;
     _lastFilledAmount = 0;
+    _pttResultRevision = 0;
   }
 }

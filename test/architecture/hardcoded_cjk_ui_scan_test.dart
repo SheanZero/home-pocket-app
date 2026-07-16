@@ -16,6 +16,10 @@ const approvedWhitelist = {
   // NLP lexicon (magnitude tokens, digit char classes, kana numeral keys),
   // not UI text — same rationale as voice_text_parser.dart above.
   'lib/application/voice/amount_magnitude_guard.dart',
+  // v16 shopping voice draft parser. Japanese and Chinese literals are the
+  // recognition lexicon (counters, ledger keywords, and price markers), not
+  // user-visible copy; localized presentation strings remain in ARB files.
+  'lib/application/shopping_list/parse_shopping_voice_input_use_case.dart',
   'lib/infrastructure/i18n/formatters/date_formatter.dart',
   'lib/infrastructure/i18n/formatters/number_formatter.dart',
   'lib/infrastructure/category/category_locale_service.dart',

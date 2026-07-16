@@ -26,6 +26,9 @@ class ListTypeSelector extends StatelessWidget {
     required this.publicLabel,
     required this.privateLabel,
     this.enabled = true,
+    this.showIcons = true,
+    this.chipMinHeight,
+    this.chipMinWidth,
   });
 
   final String selected;
@@ -33,6 +36,13 @@ class ListTypeSelector extends StatelessWidget {
   final String publicLabel;
   final String privateLabel;
   final bool enabled;
+
+  /// Opt-out for text-only segmented controls such as the v16 shopping form.
+  final bool showIcons;
+
+  /// Optional opt-in geometry. Null preserves the legacy selector footprint.
+  final double? chipMinHeight;
+  final double? chipMinWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +72,7 @@ class ListTypeSelector extends StatelessWidget {
     );
 
     if (!enabled) {
-      return Opacity(
-        opacity: 0.6,
-        child: IgnorePointer(child: row),
-      );
+      return Opacity(opacity: 0.6, child: IgnorePointer(child: row));
     }
 
     return row;
@@ -86,6 +93,15 @@ class ListTypeSelector extends StatelessWidget {
       child: AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
+        constraints: chipMinHeight == null && chipMinWidth == null
+            ? null
+            : BoxConstraints(
+                minHeight: chipMinHeight ?? 0,
+                minWidth: chipMinWidth ?? 0,
+              ),
+        alignment: chipMinHeight == null && chipMinWidth == null
+            ? null
+            : Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
         decoration: BoxDecoration(
           color: isActive ? palette.sharedLight : palette.backgroundMuted,
@@ -98,12 +114,14 @@ class ListTypeSelector extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isActive ? palette.shared : palette.textSecondary,
-            ),
-            const SizedBox(width: 6),
+            if (showIcons) ...[
+              Icon(
+                icon,
+                size: 15,
+                color: isActive ? palette.shared : palette.textSecondary,
+              ),
+              const SizedBox(width: 6),
+            ],
             Text(
               label,
               style: AppTextStyles.titleSmall.copyWith(

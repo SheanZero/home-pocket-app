@@ -77,7 +77,6 @@ ShoppingItem _makeItem({
     createdAt: DateTime(2026, 6, 8),
   );
 }
-
 // ── Pump helper ──────────────────────────────────────────────────────────────
 
 Future<void> _pumpForm(
@@ -108,10 +107,7 @@ Future<void> _pumpForm(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: S.supportedLocales,
-        home: ShoppingItemFormScreen(
-          listType: listType,
-          item: item,
-        ),
+        home: ShoppingItemFormScreen(listType: listType, item: item),
       ),
     ),
   );
@@ -136,62 +132,78 @@ void main() {
     mockDeviceIdentityRepo = _MockDeviceIdentityRepository();
 
     // Default stubs — override per test as needed
-    when(() => mockCreate.execute(any()))
-        .thenAnswer((_) async => Result.success(_makeItem()));
-    when(() => mockUpdate.execute(any()))
-        .thenAnswer((_) async => Result.success(_makeItem()));
-    when(() => mockDeviceIdentityRepo.getDeviceId())
-        .thenAnswer((_) async => 'test-device-id');
+    when(
+      () => mockCreate.execute(any()),
+    ).thenAnswer((_) async => Result.success(_makeItem()));
+    when(
+      () => mockUpdate.execute(any()),
+    ).thenAnswer((_) async => Result.success(_makeItem()));
+    when(
+      () => mockDeviceIdentityRepo.getDeviceId(),
+    ).thenAnswer((_) async => 'test-device-id');
   });
 
   // ── ITEM-01: Name field required validation ─────────────────────────────
 
   group('ITEM-01 — name required validation', () {
     testWidgets(
-        'tapping Save with empty name shows validation error; use case NOT called',
-        (tester) async {
-      await _pumpForm(
-        tester,
-        createUseCase: mockCreate,
-        updateUseCase: mockUpdate,
-        deviceIdentityRepo: mockDeviceIdentityRepo,
-      );
+      'tapping Save with empty name shows validation error; use case NOT called',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+        );
+        final nameCard = find.byKey(const Key('shopping_form_name_card'));
+        final errorSlot = find.byKey(
+          const Key('shopping_form_name_error_slot'),
+        );
+        final nameHeightBeforeValidation = tester.getSize(nameCard).height;
+        final slotHeightBeforeValidation = tester.getSize(errorSlot).height;
 
-      // Tap Save button without entering a name
-      await tester.tap(find.text('Save'));
-      await tester.pump();
+        // Tap Save button without entering a name
+        await tester.tap(find.text('Save'));
+        await tester.pump();
 
-      // Validation error should appear (ITEM-01)
-      expect(find.text('Name is required'), findsOneWidget);
+        // Validation error should appear (ITEM-01)
+        expect(find.text('Name is required'), findsOneWidget);
+        expect(tester.getSize(nameCard).height, nameHeightBeforeValidation);
+        expect(tester.getSize(errorSlot).height, slotHeightBeforeValidation);
+        expect(slotHeightBeforeValidation, 22);
 
-      // CreateShoppingItemUseCase must NOT have been called
-      verifyNever(() => mockCreate.execute(any()));
-    });
+        // CreateShoppingItemUseCase must NOT have been called
+        verifyNever(() => mockCreate.execute(any()));
+      },
+    );
 
     testWidgets(
-        'entering a name and tapping Save calls CreateShoppingItemUseCase once',
-        (tester) async {
-      await _pumpForm(
-        tester,
-        createUseCase: mockCreate,
-        updateUseCase: mockUpdate,
-        deviceIdentityRepo: mockDeviceIdentityRepo,
-      );
+      'entering a name and tapping Save calls CreateShoppingItemUseCase once',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+        );
 
-      // Enter a non-empty name
-      await tester.enterText(
-          find.byKey(const Key('shopping_form_name_field')), 'Test Item');
-      await tester.pump();
+        // Enter a non-empty name
+        await tester.enterText(
+          find.byKey(const Key('shopping_form_name_field')),
+          'Test Item',
+        );
+        await tester.pump();
 
-      // Tap Save
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+        // Tap Save
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
 
-      // CreateShoppingItemUseCase must have been called exactly once
-      verify(() => mockCreate.execute(any())).called(1);
-      // UpdateShoppingItemUseCase must NOT be called in create mode
-      verifyNever(() => mockUpdate.execute(any()));
-    });
+        // CreateShoppingItemUseCase must have been called exactly once
+        verify(() => mockCreate.execute(any())).called(1);
+        // UpdateShoppingItemUseCase must NOT be called in create mode
+        verifyNever(() => mockUpdate.execute(any()));
+      },
+    );
   });
 
   // ── ITEM-02: D4 optional fields present ────────────────────────────────
@@ -212,8 +224,9 @@ void main() {
       );
     });
 
-    testWidgets('quantity and estimated price fields are present',
-        (tester) async {
+    testWidgets('quantity and estimated price fields are present', (
+      tester,
+    ) async {
       await _pumpForm(
         tester,
         createUseCase: mockCreate,
@@ -244,8 +257,9 @@ void main() {
       );
     });
 
-    testWidgets('note field is present; tags field is hidden (D-2)',
-        (tester) async {
+    testWidgets('note field is present; tags field is hidden (D-2)', (
+      tester,
+    ) async {
       await _pumpForm(
         tester,
         createUseCase: mockCreate,
@@ -254,16 +268,10 @@ void main() {
       );
 
       // Note field must be present
-      expect(
-        find.byKey(const Key('shopping_form_note_field')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('shopping_form_note_field')), findsOneWidget);
 
       // Tags field hidden per D-2; data passes through transparently.
-      expect(
-        find.byKey(const Key('shopping_form_tags_field')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('shopping_form_tags_field')), findsNothing);
     });
 
     testWidgets('category row (InkWell with label) is present', (tester) async {
@@ -329,27 +337,29 @@ void main() {
       expect(find.text('Add item'), findsOneWidget);
     });
 
-    testWidgets('save in edit mode calls UpdateShoppingItemUseCase not Create',
-        (tester) async {
-      final editItem = _makeItem(name: 'Bread');
+    testWidgets(
+      'save in edit mode calls UpdateShoppingItemUseCase not Create',
+      (tester) async {
+        final editItem = _makeItem(name: 'Bread');
 
-      await _pumpForm(
-        tester,
-        createUseCase: mockCreate,
-        updateUseCase: mockUpdate,
-        deviceIdentityRepo: mockDeviceIdentityRepo,
-        item: editItem,
-      );
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          item: editItem,
+        );
 
-      // Tap Save — name is already pre-populated, form is valid
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+        // Tap Save — name is already pre-populated, form is valid
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
 
-      // UpdateShoppingItemUseCase must be called (ITEM-04)
-      verify(() => mockUpdate.execute(any())).called(1);
-      // CreateShoppingItemUseCase must NOT be called in edit mode
-      verifyNever(() => mockCreate.execute(any()));
-    });
+        // UpdateShoppingItemUseCase must be called (ITEM-04)
+        verify(() => mockUpdate.execute(any())).called(1);
+        // CreateShoppingItemUseCase must NOT be called in edit mode
+        verifyNever(() => mockCreate.execute(any()));
+      },
+    );
   });
 
   // ── List-type selector (G8Z / G8Z2) ──────────────────────────────────────
@@ -375,10 +385,7 @@ void main() {
           reason: 'ListTypeSelector must render in create mode (solo)',
         );
         // Must be a ListTypeSelector widget (not SegmentedButton)
-        expect(
-          find.byType(ListTypeSelector),
-          findsOneWidget,
-        );
+        expect(find.byType(ListTypeSelector), findsOneWidget);
       },
     );
 
@@ -432,10 +439,16 @@ void main() {
         final widget = tester.widget<ListTypeSelector>(
           find.byKey(const Key('shopping_form_list_type_selector')),
         );
-        expect(widget.selected, equals('public'),
-            reason: 'Edit mode must show stored listType as selected');
-        expect(widget.enabled, isFalse,
-            reason: 'Edit mode must disable the selector');
+        expect(
+          widget.selected,
+          equals('public'),
+          reason: 'Edit mode must show stored listType as selected',
+        );
+        expect(
+          widget.enabled,
+          isFalse,
+          reason: 'Edit mode must disable the selector',
+        );
 
         // c) Non-interactive: tap 'Private' chip, selection unchanged
         // (IgnorePointer absorbs the tap — no onChanged fired)
@@ -449,14 +462,19 @@ void main() {
         final widgetAfter = tester.widget<ListTypeSelector>(
           find.byKey(const Key('shopping_form_list_type_selector')),
         );
-        expect(widgetAfter.selected, equals('public'),
-            reason: 'Selection must remain public after tapping disabled selector');
+        expect(
+          widgetAfter.selected,
+          equals('public'),
+          reason:
+              'Selection must remain public after tapping disabled selector',
+        );
       },
     );
 
-    // FORM-SELECTOR-04: locked-hint caption present in BOTH edit and create modes (T1T-02).
+    // FORM-SELECTOR-04: v16 uses neutral create guidance and an error-toned
+    // immutable hint only in edit mode.
     testWidgets(
-      'FORM-SELECTOR-04: locked-hint caption present in both edit and create modes',
+      'FORM-SELECTOR-04: create hint is neutral while edit hint is locked',
       (tester) async {
         final editItem = _makeItem(listType: 'private');
 
@@ -477,7 +495,7 @@ void main() {
           reason: 'Locked-hint caption must be present in edit mode',
         );
 
-        // Create mode — hint is now ALSO shown (T1T-02)
+        // Create mode — the warning remains informative, not error-toned.
         await _pumpForm(
           tester,
           createUseCase: mockCreate,
@@ -488,9 +506,9 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          find.text('Cannot be changed after creation'),
+          find.text('Type cannot be changed after saving'),
           findsOneWidget,
-          reason: 'Locked-hint caption must also be present in create mode (T1T-02)',
+          reason: 'Create mode must explain immutability before first save',
         );
       },
     );
@@ -521,8 +539,11 @@ void main() {
         final selectorBefore = tester.widget<ListTypeSelector>(
           find.byKey(const Key('shopping_form_list_type_selector')),
         );
-        expect(selectorBefore.selected, equals('public'),
-            reason: 'Default selection in create mode must be "public"');
+        expect(
+          selectorBefore.selected,
+          equals('public'),
+          reason: 'Default selection in create mode must be "public"',
+        );
 
         // Tap 'Private' chip to switch
         await tester.tap(find.byKey(const ValueKey('list_type_private_chip')));
@@ -540,7 +561,8 @@ void main() {
         expect(
           capturedParams.listType,
           equals('private'),
-          reason: 'After tapping private, createUseCase must be called with listType=private',
+          reason:
+              'After tapping private, createUseCase must be called with listType=private',
         );
       },
     );
@@ -601,8 +623,11 @@ void main() {
         final ledgerSelector = tester.widget<LedgerTypeSelector>(
           find.byKey(const Key('shopping_form_ledger_selector')),
         );
-        expect(ledgerSelector.selected, equals(LedgerType.daily),
-            reason: 'Create mode must pre-select daily ledger');
+        expect(
+          ledgerSelector.selected,
+          equals(LedgerType.daily),
+          reason: 'Create mode must pre-select daily ledger',
+        );
       },
     );
 
@@ -663,8 +688,11 @@ void main() {
         final listTypeOffset = tester.getTopLeft(
           find.byKey(const Key('shopping_form_list_type_selector')),
         );
-        expect(ledgerOffset.dy, lessThan(listTypeOffset.dy),
-            reason: 'Ledger selector must appear above the list-type selector');
+        expect(
+          ledgerOffset.dy,
+          lessThan(listTypeOffset.dy),
+          reason: 'Ledger selector must appear above the list-type selector',
+        );
       },
     );
   });
@@ -672,7 +700,9 @@ void main() {
   // ── New tests for redesigned UI ───────────────────────────────────────────
 
   group('Stepper', () {
-    testWidgets('STEPPER-01: create mode quantity defaults to 1', (tester) async {
+    testWidgets('STEPPER-01: create mode quantity defaults to 1', (
+      tester,
+    ) async {
       await _pumpForm(
         tester,
         createUseCase: mockCreate,
@@ -717,38 +747,37 @@ void main() {
   });
 
   group('Tags D-2 passthrough', () {
-    testWidgets(
-      'TAGS-D2-01: edit save passes original item.tags through',
-      (tester) async {
-        late UpdateShoppingItemParams capturedParams;
-        when(() => mockUpdate.execute(any())).thenAnswer((inv) async {
-          capturedParams =
-              inv.positionalArguments.first as UpdateShoppingItemParams;
-          return Result.success(_makeItem());
-        });
+    testWidgets('TAGS-D2-01: edit save passes original item.tags through', (
+      tester,
+    ) async {
+      late UpdateShoppingItemParams capturedParams;
+      when(() => mockUpdate.execute(any())).thenAnswer((inv) async {
+        capturedParams =
+            inv.positionalArguments.first as UpdateShoppingItemParams;
+        return Result.success(_makeItem());
+      });
 
-        // Use an item with a non-empty tags list for a meaningful assertion.
-        final editItem = _makeItem(name: 'Bread', tags: ['organic', 'bakery']);
-        await _pumpForm(
-          tester,
-          createUseCase: mockCreate,
-          updateUseCase: mockUpdate,
-          deviceIdentityRepo: mockDeviceIdentityRepo,
-          item: editItem,
-        );
-        await tester.pumpAndSettle();
+      // Use an item with a non-empty tags list for a meaningful assertion.
+      final editItem = _makeItem(name: 'Bread', tags: ['organic', 'bakery']);
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+        item: editItem,
+      );
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Save'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
 
-        verify(() => mockUpdate.execute(any())).called(1);
-        expect(
-          capturedParams.tags,
-          equals(editItem.tags),
-          reason: 'Edit save must pass original item.tags through (D-2)',
-        );
-      },
-    );
+      verify(() => mockUpdate.execute(any())).called(1);
+      expect(
+        capturedParams.tags,
+        equals(editItem.tags),
+        reason: 'Edit save must pass original item.tags through (D-2)',
+      );
+    });
   });
 
   // ── Category display — localized name, NOT the raw key/id ─────────────────

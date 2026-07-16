@@ -113,6 +113,10 @@ class MainShellScreen extends ConsumerWidget {
           builder: (_) => ManualOneStepScreen(
             bookId: bookId,
             continuousMode: continuousMode,
+            onHistoryTap: () {
+              ref.read(selectedTabIndexProvider.notifier).select(1);
+              Navigator.of(context).pop();
+            },
           ),
         ),
       );

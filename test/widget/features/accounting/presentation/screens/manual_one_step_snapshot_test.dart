@@ -3,11 +3,10 @@
 /// 「重置·恢复账目」 restore path.
 ///
 /// Coverage:
-///   - capture(): all 13 fields (4 host-owned + 9 form-owned) are captured
+///   - capture(): all 15 fields (4 host-owned + 11 form-owned) are captured
 ///     from a live TransactionDetailsFormState.
-///   - restoreForm(): a dirtied form rolls back to the snapshot values; a
-///     null-category snapshot does NOT call updateCategory (characterizes the
-///     current branch — the dirtied category survives).
+///   - restoreForm(): a dirtied form rolls back to the snapshot values,
+///     including clearing a voice-filled category when the snapshot has none.
 ///   - restoreHostAmount(): pure AmountInputController replay — clear, restore
 ///     the currency decimal cap, replay digits/dot, return the result string.
 library;
@@ -18,6 +17,7 @@ import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_details_form_config.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
@@ -25,7 +25,10 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     show categoryRepositoryProvider, categoryServiceProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_snapshot.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_input_controller.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
+import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart';
+import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/shared/utils/currency_conversion.dart'
     show currencyFractionDigitsFor;
 
@@ -129,6 +132,8 @@ ManualEntrySnapshot _hostAmountSnapshot({
     merchant: '',
     note: '',
     satisfaction: 2,
+    ledgerType: LedgerType.daily,
+    bookedJpyAmount: 0,
     originalCurrency: null,
     originalAmount: null,
     appliedRate: null,
@@ -152,22 +157,24 @@ void main() {
       expect(controller.decimals, 0, reason: 'JPY restores a 0-decimal cap');
     });
 
-    test('replays a 2-decimal foreign amount including the dot (onDot path)',
-        () {
-      final controller = AmountInputController(
-        decimals: currencyFractionDigitsFor('USD'),
-      );
-      final snapshot = _hostAmountSnapshot(
-        amountText: '12.50',
-        currency: 'USD',
-      );
+    test(
+      'replays a 2-decimal foreign amount including the dot (onDot path)',
+      () {
+        final controller = AmountInputController(
+          decimals: currencyFractionDigitsFor('USD'),
+        );
+        final snapshot = _hostAmountSnapshot(
+          amountText: '12.50',
+          currency: 'USD',
+        );
 
-      final result = snapshot.restoreHostAmount(controller);
+        final result = snapshot.restoreHostAmount(controller);
 
-      expect(result, '12.50');
-      expect(controller.text, '12.50');
-      expect(controller.decimals, 2);
-    });
+        expect(result, '12.50');
+        expect(controller.text, '12.50');
+        expect(controller.decimals, 2);
+      },
+    );
 
     test('empty snapshot amount clears the controller and returns ""', () {
       final controller = AmountInputController(decimals: 0)
@@ -182,19 +189,21 @@ void main() {
       expect(controller.text, '');
     });
 
-    test('a pre-dirtied controller is cleared BEFORE the replay (no concat)',
-        () {
-      final controller = AmountInputController(decimals: 0)
-        ..onDigit('9')
-        ..onDigit('9')
-        ..onDigit('9');
-      final snapshot = _hostAmountSnapshot(amountText: '42', currency: 'JPY');
+    test(
+      'a pre-dirtied controller is cleared BEFORE the replay (no concat)',
+      () {
+        final controller = AmountInputController(decimals: 0)
+          ..onDigit('9')
+          ..onDigit('9')
+          ..onDigit('9');
+        final snapshot = _hostAmountSnapshot(amountText: '42', currency: 'JPY');
 
-      final result = snapshot.restoreHostAmount(controller);
+        final result = snapshot.restoreHostAmount(controller);
 
-      expect(result, '42', reason: 'must be 42, never 99942');
-      expect(controller.text, '42');
-    });
+        expect(result, '42', reason: 'must be 42, never 99942');
+        expect(controller.text, '42');
+      },
+    );
 
     test('restoring a JPY snapshot onto a foreign-configured controller '
         'reverts the decimal cap', () {
@@ -208,8 +217,11 @@ void main() {
       final result = snapshot.restoreHostAmount(controller);
 
       expect(result, '500');
-      expect(controller.decimals, 0,
-          reason: 'onCurrencyChange restores the snapshot currency cap');
+      expect(
+        controller.decimals,
+        0,
+        reason: 'onCurrencyChange restores the snapshot currency cap',
+      );
     });
   });
 
@@ -254,134 +266,181 @@ void main() {
       return formKey;
     }
 
-    testWidgets('capture records all 13 fields (4 host-owned + 9 form-owned)',
-        (tester) async {
-      final formKey = await pumpForm(tester);
-      final form = formKey.currentState!;
+    testWidgets(
+      'capture records all 15 fields (4 host-owned + 11 form-owned)',
+      (tester) async {
+        final formKey = await pumpForm(tester);
+        final form = formKey.currentState!;
 
-      form.updateCategory(_catA, _parentA);
-      form.updateMerchant('Store A');
-      form.updateNote('note A');
-      form.updateDate(DateTime(2026, 7, 1));
-      form.updateSatisfaction(5);
-      form.updateCurrencyTriple(
-        originalCurrency: 'USD',
-        originalAmount: 1250,
-        appliedRate: '155.0',
-      );
-      await tester.pumpAndSettle();
+        form.updateCategory(_catA, _parentA);
+        form.updateMerchant('Store A');
+        form.updateNote('note A');
+        form.updateDate(DateTime(2026, 7, 1));
+        form.updateSatisfaction(5);
+        form.updateLedgerType(LedgerType.daily);
+        form.updateAmount(1938);
+        form.updateCurrencyTriple(
+          originalCurrency: 'USD',
+          originalAmount: 1250,
+          appliedRate: '155.0',
+        );
+        await tester.pumpAndSettle();
 
-      final snapshot = ManualEntrySnapshot.capture(
-        amountText: '1937',
-        currency: 'USD',
-        manualForeignRate: '155.0',
-        lastFillWasVoice: true,
-        form: form,
-      );
+        final snapshot = ManualEntrySnapshot.capture(
+          amountText: '12.50',
+          currency: 'USD',
+          manualForeignRate: '155.0',
+          lastFillWasVoice: true,
+          form: form,
+        );
 
-      // Host-owned quadruple.
-      expect(snapshot.amountText, '1937');
-      expect(snapshot.currency, 'USD');
-      expect(snapshot.manualForeignRate, '155.0');
-      expect(snapshot.lastFillWasVoice, isTrue);
-      // Form-owned nine.
-      expect(snapshot.category?.id, 'cat-a');
-      expect(snapshot.parentCategory?.id, 'parent-a');
-      expect(snapshot.date, DateTime(2026, 7, 1));
-      expect(snapshot.merchant, 'Store A');
-      expect(snapshot.note, 'note A');
-      expect(snapshot.satisfaction, 5);
-      expect(snapshot.originalCurrency, 'USD');
-      expect(snapshot.originalAmount, 1250);
-      expect(snapshot.appliedRate, '155.0');
-    });
-
-    testWidgets('restoreForm rolls a dirtied form back to the snapshot values',
-        (tester) async {
-      final formKey = await pumpForm(tester);
-      final form = formKey.currentState!;
-
-      // Seed the pre-speech state and capture it.
-      form.updateCategory(_catA, _parentA);
-      form.updateMerchant('Store A');
-      form.updateNote('note A');
-      form.updateDate(DateTime(2026, 7, 1));
-      form.updateSatisfaction(5);
-      form.updateCurrencyTriple(
-        originalCurrency: 'USD',
-        originalAmount: 1250,
-        appliedRate: '155.0',
-      );
-      await tester.pumpAndSettle();
-      final snapshot = ManualEntrySnapshot.capture(
-        amountText: '1937',
-        currency: 'USD',
-        manualForeignRate: '155.0',
-        lastFillWasVoice: false,
-        form: form,
-      );
-
-      // Dirty every form-owned field (simulates a voice auto-fill).
-      form.updateCategory(_catB, null);
-      form.updateMerchant('dirty merchant');
-      form.updateNote('dirty note');
-      form.updateDate(DateTime(2026, 7, 4));
-      form.updateSatisfaction(9);
-      form.updateCurrencyTriple(
-        originalCurrency: null,
-        originalAmount: null,
-        appliedRate: null,
-      );
-      await tester.pumpAndSettle();
-      expect(form.currentCategory?.id, 'cat-b',
-          reason: 'precondition: form is dirty');
-
-      snapshot.restoreForm(form);
-      await tester.pumpAndSettle();
-
-      expect(form.currentCategory?.id, 'cat-a');
-      expect(form.currentParentCategory?.id, 'parent-a');
-      expect(form.currentMerchant, 'Store A');
-      expect(form.currentNote, 'note A');
-      expect(form.currentDate, DateTime(2026, 7, 1));
-      expect(form.currentSatisfaction, 5);
-      expect(form.currentOriginalCurrency, 'USD');
-      expect(form.currentOriginalAmount, 1250);
-      expect(form.currentAppliedRate, '155.0');
-    });
+        // Host-owned quadruple.
+        expect(snapshot.amountText, '12.50');
+        expect(snapshot.currency, 'USD');
+        expect(snapshot.manualForeignRate, '155.0');
+        expect(snapshot.lastFillWasVoice, isTrue);
+        // Form-owned ten.
+        expect(snapshot.category?.id, 'cat-a');
+        expect(snapshot.parentCategory?.id, 'parent-a');
+        expect(snapshot.date, DateTime(2026, 7, 1));
+        expect(snapshot.merchant, 'Store A');
+        expect(snapshot.note, 'note A');
+        expect(snapshot.satisfaction, 5);
+        expect(snapshot.ledgerType, LedgerType.daily);
+        expect(snapshot.bookedJpyAmount, 1938);
+        expect(snapshot.originalCurrency, 'USD');
+        expect(snapshot.originalAmount, 1250);
+        expect(snapshot.appliedRate, '155.0');
+      },
+    );
 
     testWidgets(
-        'a null-category snapshot does NOT call updateCategory on restore '
-        '(characterizes the current guard branch)', (tester) async {
-      final formKey = await pumpForm(tester);
-      final form = formKey.currentState!;
+      'restoreForm rolls a dirtied form back to the snapshot values',
+      (tester) async {
+        final formKey = await pumpForm(tester);
+        final form = formKey.currentState!;
 
-      // Capture a fresh form: category is still null.
-      final snapshot = ManualEntrySnapshot.capture(
-        amountText: '',
-        currency: 'JPY',
-        manualForeignRate: null,
-        lastFillWasVoice: false,
-        form: form,
-      );
-      expect(snapshot.category, isNull,
-          reason: 'precondition: pre-speech form had no category');
+        // Seed the pre-speech state and capture it.
+        form.updateCategory(_catA, _parentA);
+        form.updateMerchant('Store A');
+        form.updateNote('note A');
+        form.updateDate(DateTime(2026, 7, 1));
+        form.updateSatisfaction(5);
+        form.updateLedgerType(LedgerType.daily);
+        form.updateAmount(1938);
+        form.updateCurrencyTriple(
+          originalCurrency: 'USD',
+          originalAmount: 1250,
+          appliedRate: '155.0',
+        );
+        await tester.pumpAndSettle();
+        final snapshot = ManualEntrySnapshot.capture(
+          amountText: '12.50',
+          currency: 'USD',
+          manualForeignRate: '155.0',
+          lastFillWasVoice: false,
+          form: form,
+        );
 
-      // Voice fill resolves a category + merchant.
-      form.updateCategory(_catB, null);
-      form.updateMerchant('voice merchant');
-      await tester.pumpAndSettle();
+        // Dirty every form-owned field (simulates a voice auto-fill).
+        form.updateCategory(_catB, null);
+        form.updateMerchant('dirty merchant');
+        form.updateNote('dirty note');
+        form.updateDate(DateTime(2026, 7, 4));
+        form.updateSatisfaction(9);
+        form.updateLedgerType(LedgerType.joy);
+        form.updateAmount(777);
+        form.updateRecognition(ConfidenceBand.weak, const [
+          CategoryMatchResult(
+            categoryId: 'cat-b',
+            confidence: 0.4,
+            source: MatchSource.fallback,
+          ),
+        ]);
+        form.updateCurrencyTriple(
+          originalCurrency: null,
+          originalAmount: null,
+          appliedRate: null,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          form.currentCategory?.id,
+          'cat-b',
+          reason: 'precondition: form is dirty',
+        );
+        expect(find.byType(ConfidenceBandIndicator), findsOneWidget);
 
-      snapshot.restoreForm(form);
-      await tester.pumpAndSettle();
+        snapshot.restoreForm(form);
+        await tester.pumpAndSettle();
 
-      // Characterization: the `if (cat != null)` guard skips the category
-      // write, so the voice-resolved category SURVIVES the restore while the
-      // text fields roll back.
-      expect(form.currentCategory?.id, 'cat-b',
-          reason: 'null-category snapshot leaves the filled category as-is');
-      expect(form.currentMerchant, '',
-          reason: 'merchant still rolls back to the pre-speech empty string');
-    });
+        expect(form.currentCategory?.id, 'cat-a');
+        expect(form.currentParentCategory?.id, 'parent-a');
+        expect(form.currentMerchant, 'Store A');
+        expect(form.currentNote, 'note A');
+        expect(form.currentDate, DateTime(2026, 7, 1));
+        expect(form.currentSatisfaction, 5);
+        expect(form.currentLedgerType, LedgerType.daily);
+        expect(
+          form.currentAmount,
+          1938,
+          reason: 'restore uses captured booked JPY, not USD text/minor units',
+        );
+        expect(form.currentOriginalCurrency, 'USD');
+        expect(form.currentOriginalAmount, 1250);
+        expect(form.currentAppliedRate, '155.0');
+        expect(
+          find.byType(ConfidenceBandIndicator),
+          findsNothing,
+          reason: 'discarded voice confidence must not survive restore',
+        );
+      },
+    );
+
+    testWidgets(
+      'a null-category snapshot clears the voice category and restores its '
+      'authoritative ledger type',
+      (tester) async {
+        final formKey = await pumpForm(tester);
+        final form = formKey.currentState!;
+
+        // Capture a fresh form: category is still null.
+        final snapshot = ManualEntrySnapshot.capture(
+          amountText: '',
+          currency: 'JPY',
+          manualForeignRate: null,
+          lastFillWasVoice: false,
+          form: form,
+        );
+        expect(
+          snapshot.category,
+          isNull,
+          reason: 'precondition: pre-speech form had no category',
+        );
+
+        // Voice fill resolves a category + merchant.
+        form.updateCategory(_catB, null);
+        form.updateMerchant('voice merchant');
+        form.updateLedgerType(LedgerType.joy);
+        await tester.pumpAndSettle();
+        expect(form.currentCategory?.id, 'cat-b');
+        expect(form.currentLedgerType, LedgerType.joy);
+
+        snapshot.restoreForm(form);
+        await tester.pumpAndSettle();
+
+        expect(
+          form.currentCategory,
+          isNull,
+          reason: 'reset must clear the category added by voice',
+        );
+        expect(form.currentParentCategory, isNull);
+        expect(
+          form.currentLedgerType,
+          snapshot.ledgerType,
+          reason: 'snapshot ledger type wins over category inference',
+        );
+        expect(form.currentMerchant, '');
+      },
+    );
   });
 }

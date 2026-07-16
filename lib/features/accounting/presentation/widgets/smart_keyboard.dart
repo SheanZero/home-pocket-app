@@ -30,6 +30,8 @@ class SmartKeyboard extends StatelessWidget {
     this.currencySymbol = '¥',
     this.onCurrencyTap,
     this.showTopBorder = true,
+    this.useV16Layout = false,
+    this.isActionEnabled = true,
   });
 
   final ValueChanged<String> onDigit;
@@ -44,6 +46,12 @@ class SmartKeyboard extends StatelessWidget {
   /// unified white surface (一体). Defaults to true so standalone callers
   /// (edit / ocr-review / amount sheet) keep their top edge.
   final bool showTopBorder;
+
+  /// Opt-in geometry and green primary action from the v16 unified-entry mockup.
+  /// Legacy callers keep their established responsive sizing and pink action.
+  final bool useV16Layout;
+
+  final bool isActionEnabled;
 
   /// CURR-01: tap handler for the currency key. When non-null the currency cell
   /// becomes a tappable Material+InkWell that opens the currency selector
@@ -71,33 +79,38 @@ class SmartKeyboard extends StatelessWidget {
     // §Pitfall 1 (iPhone SE 667pt gives ~36.96 dp without the clamp).
     final available = mq.size.height * 0.40 - mq.padding.bottom - (4 * 12.0);
     final rawKeyHeight = available / 5;
-    final keyHeight = math.max(48.0, rawKeyHeight); // §Pitfall 1 NON-NEGOTIABLE
+    final keyHeight = useV16Layout
+        ? 48.0
+        : math.max(48.0, rawKeyHeight); // §Pitfall 1 NON-NEGOTIABLE
+    final rowGap = useV16Layout ? 7.0 : 12.0;
 
     return Container(
       key: const ValueKey('smart_keyboard_root'),
       decoration: BoxDecoration(
         color: palette.card,
         border: showTopBorder
-            ? Border(
-                top: BorderSide(
-                  color: palette.borderDefault,
-                ),
-              )
+            ? Border(top: BorderSide(color: palette.borderDefault))
             : null,
       ),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+      padding: useV16Layout
+          ? const EdgeInsets.fromLTRB(10.5, 7, 10.5, 10)
+          : const EdgeInsets.fromLTRB(12, 12, 12, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildDigitRow(context, ['1', '2', '3'], keyHeight, palette),
-          const SizedBox(height: 12), // D-07: 8 -> 12 dp inter-row gap
+          SizedBox(height: rowGap), // D-07: v16 compacts this to 7 dp.
           _buildDigitRow(context, ['4', '5', '6'], keyHeight, palette),
-          const SizedBox(height: 12),
+          SizedBox(height: rowGap),
           _buildDigitRow(context, ['7', '8', '9'], keyHeight, palette),
-          const SizedBox(height: 12),
+          SizedBox(height: rowGap),
           _buildExtraRow(context, keyHeight, palette),
-          const SizedBox(height: 12),
-          _buildActionRow(context, palette, _actionRowHeight),
+          SizedBox(height: rowGap),
+          _buildActionRow(
+            context,
+            palette,
+            useV16Layout ? 48 : _actionRowHeight,
+          ),
         ],
       ),
     );
@@ -120,7 +133,9 @@ class SmartKeyboard extends StatelessWidget {
             (key) => Expanded(
               child: Padding(
                 // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-                padding: const EdgeInsets.symmetric(horizontal: 3),
+                padding: EdgeInsets.symmetric(
+                  horizontal: useV16Layout ? 3.5 : 3,
+                ),
                 child: _DigitKey(
                   label: key,
                   onTap: () => onDigit(key),
@@ -135,13 +150,17 @@ class SmartKeyboard extends StatelessWidget {
   }
 
   /// Row 4: 00, 0, .
-  Widget _buildExtraRow(BuildContext context, double keyHeight, AppPalette palette) {
+  Widget _buildExtraRow(
+    BuildContext context,
+    double keyHeight,
+    AppPalette palette,
+  ) {
     return Row(
       children: [
         Expanded(
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: useV16Layout ? 3.5 : 3),
             child: _DigitKey(
               label: '00',
               onTap: () => onDoubleZero?.call(),
@@ -153,7 +172,7 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: useV16Layout ? 3.5 : 3),
             child: _DigitKey(
               label: '0',
               onTap: () => onDigit('0'),
@@ -165,7 +184,7 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: useV16Layout ? 3.5 : 3),
             // D-06: dot key is gated on currency minor unit. When the host
             // passes onDot == null (0-decimal currency, e.g. JPY/KRW) we render
             // a disabled blank tile of the SAME equal width + 48dp floor so the
@@ -178,6 +197,7 @@ class SmartKeyboard extends StatelessWidget {
                     key: const ValueKey('smart_keyboard_dot_disabled'),
                     palette: palette,
                     height: keyHeight,
+                    showGlyph: useV16Layout,
                   )
                 : _DigitKey(
                     label: '.',
@@ -206,7 +226,7 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: useV16Layout ? 3.5 : 3),
             child: _ActionKey(
               color: palette.backgroundMuted,
               height: rowHeight, // 260623-0cj: shortened bottom-row height
@@ -223,7 +243,7 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: useV16Layout ? 3.5 : 3),
             child: _CurrencyKey(
               symbol: currencySymbol,
               label: currencyLabel,
@@ -237,12 +257,13 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: useV16Layout ? 3.5 : 3),
             child: _GradientKey(
               label: actionLabel,
-              onTap: onNext,
+              onTap: isActionEnabled ? onNext : null,
               palette: palette,
               height: rowHeight, // 260623-0cj: shortened bottom-row height
+              useV16Layout: useV16Layout,
             ),
           ),
         ),
@@ -301,20 +322,32 @@ class _DisabledKey extends StatelessWidget {
     super.key,
     required this.palette,
     required this.height,
+    this.showGlyph = false,
   });
 
   final AppPalette palette;
   final double height;
+  final bool showGlyph;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: height,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         // Muted/transparent so it reads as a non-key gap, not a tappable key.
         color: palette.backgroundMuted.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
       ),
+      child: showGlyph
+          ? Text(
+              '.',
+              style: AppTextStyles.labelMedium.copyWith(
+                fontSize: 20,
+                color: palette.textTertiary.withValues(alpha: 0.45),
+              ),
+            )
+          : null,
     );
   }
 }
@@ -418,12 +451,14 @@ class _GradientKey extends StatelessWidget {
     required this.onTap,
     required this.palette,
     required this.height,
+    this.useV16Layout = false,
   });
 
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final AppPalette palette;
   final double height;
+  final bool useV16Layout;
 
   @override
   Widget build(BuildContext context) {
@@ -435,14 +470,18 @@ class _GradientKey extends StatelessWidget {
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                palette.fabGradientStart,
-                palette.fabGradientEnd,
-              ],
-            ),
+            color: useV16Layout
+                ? palette.accentPrimary.withValues(
+                    alpha: onTap == null ? 0.45 : 1,
+                  )
+                : null,
+            gradient: useV16Layout
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [palette.fabGradientStart, palette.fabGradientEnd],
+                  ),
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(

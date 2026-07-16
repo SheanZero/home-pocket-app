@@ -50,8 +50,8 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   /// Host-owned display amount (Phase 19 D-14 spillover).
   ///
   /// JPY-native rows: this IS the JPY figure shown in the top [AmountDisplay],
-  /// updated by [_editAmount] (sheet confirm) and the clear button, kept in sync
-  /// with the form's internal _amount via [updateAmount].
+  /// updated by [_editAmount] (sheet confirm), kept in sync with the form's
+  /// internal _amount via [updateAmount].
   ///
   /// Foreign rows: this is NOT shown at the top (the top headline shows the
   /// ORIGINAL currency + amount per the UAT fix). It is still tracked because
@@ -177,8 +177,7 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   /// original-minor state and push it into the form via [updateOriginalAmount],
   /// which re-derives the read-only JPY via the single `convertToJpy` site.
   Future<void> _editForeignAmount(String currency) async {
-    final locale =
-        ref.read(currentLocaleProvider).value ?? const Locale('ja');
+    final locale = ref.read(currentLocaleProvider).value ?? const Locale('ja');
     await AmountEditBottomSheet.show(
       context,
       initialAmount: _displayOriginalMinor,
@@ -221,18 +220,15 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
     return Scaffold(
       backgroundColor: palette.background,
       appBar: AppBar(
+        toolbarHeight: 52,
         backgroundColor: palette.card,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: TextButton.icon(
+        leading: IconButton(
           onPressed: () => Navigator.pop(context), // D-10 — silent discard
-          icon: Icon(Icons.chevron_left, color: palette.daily),
-          label: Text(
-            l10n.back,
-            style: AppTextStyles.titleMedium.copyWith(color: palette.daily),
-          ),
+          tooltip: l10n.back,
+          icon: Icon(Icons.chevron_left, color: palette.textPrimary),
         ),
-        leadingWidth: 100,
         title: Text(
           l10n.transactionEditTitle,
           style: AppTextStyles.headlineMedium.copyWith(
@@ -254,31 +250,51 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
           // JPY-native: tapping opens AmountEditBottomSheet (JPY-integer mode).
           // Foreign (quick 260613-mgc): tapping opens the SAME sheet in
           // currency-aware mode to edit the ORIGINAL amount; the read-only JPY
-          // is re-derived via the single convertToJpy site. No clear button for
-          // foreign rows (original-zero is reachable by deleting in the keypad).
+          // is re-derived via the single convertToJpy site. Both variants omit
+          // the legacy clear action; editing flows through the tappable headline.
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: (_isForeignRow && currency != null)
                 ? () => _editForeignAmount(currency)
                 : _editAmount,
-            child: AmountDisplay(
-              amount: topAmount,
-              currencySymbol: topSymbol,
-              currencyLabel: topLabel,
-              onClear: _isForeignRow
-                  ? null
-                  : () {
-                      if (!mounted) return;
-                      setState(() => _displayAmount = 0);
-                      _formKey.currentState?.updateAmount(0);
-                    },
+            child: SizedBox(
+              height: 88,
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 22),
+                    child: AmountDisplay(
+                      amount: topAmount,
+                      currencySymbol: topSymbol,
+                      currencyLabel: topLabel,
+                      layout: AmountDisplayLayout.v16,
+                    ),
+                  ),
+                  Positioned(
+                    right: 18,
+                    top: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: Icon(
+                        Icons.edit_outlined,
+                        key: const ValueKey(
+                          'transaction-edit-amount-affordance',
+                        ),
+                        size: 16,
+                        color: palette.textTertiary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
               child: TransactionDetailsForm(
                 key: _formKey,
+                useV16Layout: true,
                 config: TransactionDetailsFormConfig.edit(
                   seed: widget.transaction,
                 ),
@@ -314,17 +330,15 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
       height: 52,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [palette.fabGradientStart, palette.fabGradientEnd],
-          ),
+          color: _isSubmitting
+              ? palette.accentPrimary.withValues(alpha: 0.55)
+              : palette.accentPrimary,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: palette.actionShadow,
-              blurRadius: 14,
-              offset: const Offset(0, 4),
+              color: palette.navShadow,
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -343,12 +357,24 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : Text(
-                      l10n.save,
-                      style: AppTextStyles.titleLarge.copyWith(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_rounded,
+                          key: ValueKey('transaction-edit-save-check'),
+                          size: 19,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.save,
+                          style: AppTextStyles.titleLarge.copyWith(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
             ),
           ),

@@ -30,6 +30,7 @@ import '../../../../shared/utils/currency_conversion.dart'
     show convertToJpy, subunitToUnitFor, validateAppliedRate;
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
+import '../../domain/models/entry_source.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
@@ -37,7 +38,8 @@ import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/alternate_category_chips.dart';
 import '../widgets/confidence_band_indicator.dart';
-import '../../../voice/domain/models/recognition_outcome.dart' show ConfidenceBand;
+import '../../../voice/domain/models/recognition_outcome.dart'
+    show ConfidenceBand;
 import '../../../voice/domain/models/voice_parse_result.dart'
     show CategoryMatchResult;
 import '../widgets/conversion_preview_panel.dart'
@@ -64,9 +66,15 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.onForeignChanged,
     this.onDateChanged,
     this.showAlternateChips = false,
+    this.useV16Layout = false,
   });
 
   final TransactionDetailsFormConfig config;
+
+  /// Opt-in compact presentation used by the unified-entry and transaction
+  /// edit surfaces in the v16 mockup. The legacy layout remains the default so
+  /// voice/OCR and other existing hosts keep their current geometry.
+  final bool useV16Layout;
 
   /// Phase 52 / 52-UAT (test 2): whether the alternate-category chip row (≤3
   /// suggested alternates + the trailing "more" exit chip) renders under the
@@ -169,12 +177,18 @@ class TransactionDetailsFormState
   // 260526-pg6) plus the corrected categoryId. The KEYWORD-table write is
   // DEFERRED to confirmed save and fires exactly once (D-05). Cleared with NO
   // write when the category returns to the original, or on the host-driven
-  // reset / 连续记账 / back paths (via [updateCategory] / [discardPendingCorrection]).
+  // reset / 连续记账 / back paths (via [updateCategory], [restoreCategory],
+  // or [discardPendingCorrection]).
   // A null/empty keyword never produces a stash — and the merchant table is
   // never touched on this path (D-07, D-16).
   _PendingCategoryCorrection? _pendingCorrection;
 
   LedgerType _ledgerType = LedgerType.daily;
+
+  /// Invalidates stale asynchronous category-to-ledger resolutions when a host
+  /// restores an authoritative ledger snapshot.
+  int _ledgerResolutionEpoch = 0;
+
   int _joyFullness = 2;
   bool _isSubmitting = false;
 
@@ -210,6 +224,22 @@ class TransactionDetailsFormState
   /// Phase 42-09 foreign-currency edit host, which only renders in edit mode.
   bool get _isEditMode =>
       widget.config.maybeWhen(edit: (_) => true, orElse: () => false);
+
+  /// The V16 provenance marker belongs only to a newly-created row whose live
+  /// config has been promoted to voice after a successful PTT fill. Edit mode
+  /// and pure manual entry intentionally stay visually quiet.
+  bool get _isV16VoiceNewEntry =>
+      widget.useV16Layout &&
+      widget.config.maybeWhen(
+        $new: (_, _, _, _, _, _, _, entrySource, _) =>
+            entrySource == EntrySource.voice,
+        orElse: () => false,
+      );
+
+  bool get _needsV16CategorySelection =>
+      _isV16VoiceNewEntry &&
+      _category == null &&
+      (_band == ConfidenceBand.weak || _alternates.isNotEmpty);
 
   @override
   void initState() {
@@ -316,9 +346,10 @@ class TransactionDetailsFormState
   /// Called only in .new mode — after initState and after a category change.
   /// .edit mode uses seed.ledgerType verbatim (W3).
   Future<void> _resolveLedgerType(String categoryId) async {
+    final epoch = ++_ledgerResolutionEpoch;
     final service = ref.read(categoryServiceProvider);
     final resolved = await service.resolveLedgerType(categoryId);
-    if (mounted && resolved != null) {
+    if (mounted && epoch == _ledgerResolutionEpoch && resolved != null) {
       setState(() => _ledgerType = resolved);
     }
   }
@@ -395,10 +426,65 @@ class TransactionDetailsFormState
   /// Current joy-ledger satisfaction value.
   int get currentSatisfaction => _joyFullness;
 
+  /// Current ledger selection. Exposed for host-owned draft snapshots.
+  LedgerType get currentLedgerType => _ledgerType;
+
   /// Current foreign-currency triple (all null on a JPY-native row).
   String? get currentOriginalCurrency => _originalCurrency;
   int? get currentOriginalAmount => _originalAmount;
   String? get currentAppliedRate => _appliedRate;
+
+  /// Clears every draft-scoped field before a continuous-entry default is
+  /// resolved. This is intentionally one synchronous state transition so no
+  /// prior category/ledger/satisfaction/recognition state is observable as the
+  /// next entry while the default-category lookup is in flight.
+  void resetForFreshEntry({required DateTime date}) {
+    if (!mounted) return;
+    _ledgerResolutionEpoch++;
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    setState(() {
+      _amount = 0;
+      _originalCurrency = null;
+      _originalAmount = null;
+      _appliedRate = null;
+      _foreignAmountInvalid = false;
+      _foreignActualRateDate = null;
+      _foreignStalenessNote = null;
+      _category = null;
+      _parentCategory = null;
+      _initialCategoryId = null;
+      _storeController.clear();
+      _memoController.clear();
+      _date = normalizedDate;
+      _ledgerType = LedgerType.daily;
+      _joyFullness = 2;
+      _band = null;
+      _alternates = const <CategoryMatchResult>[];
+      _pendingCorrection = null;
+      _showCelebration = false;
+    });
+  }
+
+  /// Seeds the resolved default category after [resetForFreshEntry] and waits
+  /// for its ledger mapping, keeping the host's submitting/resetting lock held
+  /// until the fresh draft is fully coherent.
+  Future<void> seedFreshEntryCategory(
+    Category category,
+    Category? parentCategory,
+  ) async {
+    if (!mounted) return;
+    setState(() {
+      _categoryById[category.id] = category;
+      if (parentCategory != null) {
+        _categoryById[parentCategory.id] = parentCategory;
+      }
+      _category = category;
+      _parentCategory = parentCategory;
+      _initialCategoryId = category.id;
+      _pendingCorrection = null;
+    });
+    await _resolveLedgerType(category.id);
+  }
 
   /// Phase 42-09 (DISP-03 / ADR-022 D-01) — imperative host sync for the
   /// foreign currency code. Mirrors [updateAmount]'s idempotency short-circuit
@@ -488,12 +574,39 @@ class TransactionDetailsFormState
       _category = category;
       _parentCategory = parentCategory;
     });
-    // Phase 52 (RECUX-03 / D-05): a host-driven category push (voice batch-fill,
-    // snapshot-restore, continuous-entry re-seed) is a fresh slate, NOT an
+    // Phase 52 (RECUX-03 / D-05): a host-driven category push (voice batch-fill
+    // or continuous-entry re-seed) is a fresh slate, NOT an
     // interactive user correction — discard any pending stash so an abandoned
     // draft's correction never carries into the next entry.
     _pendingCorrection = null;
     _resolveLedgerType(category.id);
+  }
+
+  /// Restores a category snapshot without deriving a new ledger type.
+  ///
+  /// Unlike [updateCategory], this accepts null so resetting a voice session
+  /// can clear a category that did not exist before recording. It also
+  /// invalidates any in-flight category inference; the caller restores the
+  /// captured ledger explicitly through [updateLedgerType].
+  void restoreCategory(Category? category, Category? parentCategory) {
+    if (!mounted) return;
+    _ledgerResolutionEpoch++;
+    final restoredParent = category == null ? null : parentCategory;
+    final categoryUnchanged = category?.id == _category?.id;
+    final parentUnchanged = restoredParent?.id == _parentCategory?.id;
+    if (!categoryUnchanged || !parentUnchanged) {
+      setState(() {
+        if (category != null) {
+          _categoryById[category.id] = category;
+        }
+        if (restoredParent != null) {
+          _categoryById[restoredParent.id] = restoredParent;
+        }
+        _category = category;
+        _parentCategory = restoredParent;
+      });
+    }
+    _pendingCorrection = null;
   }
 
   /// Phase 52 (RECUX-01/02 / D-08): the voice host pushes the recognized
@@ -572,6 +685,15 @@ class TransactionDetailsFormState
     if (!mounted) return;
     if (satisfaction == _joyFullness) return;
     setState(() => _joyFullness = satisfaction.clamp(1, 10));
+  }
+
+  /// Restores a host-owned ledger snapshot without re-running category
+  /// inference. Category changes still use [_resolveLedgerType] as before.
+  void updateLedgerType(LedgerType ledgerType) {
+    if (!mounted) return;
+    _ledgerResolutionEpoch++;
+    if (ledgerType == _ledgerType) return;
+    setState(() => _ledgerType = ledgerType);
   }
 
   /// Phase 23 D-08 / WR-04: host-await accessor used by the voice screen to
@@ -710,7 +832,8 @@ class TransactionDetailsFormState
       _clearRecognitionBand();
       return;
     }
-    final cat = _categoryById[categoryId] ??
+    final cat =
+        _categoryById[categoryId] ??
         await ref.read(categoryRepositoryProvider).findById(categoryId);
     if (!mounted || cat == null) return;
     await _applyCategorySelection(cat);
@@ -1111,6 +1234,562 @@ class TransactionDetailsFormState
     );
   }
 
+  Widget _buildV16DetailsCard({
+    required S l10n,
+    required Locale locale,
+    required Category? displayCategory,
+  }) {
+    final palette = context.palette;
+
+    return Container(
+      key: const ValueKey('v16-details-card'),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildV16InfoRow(
+            key: const ValueKey('category-chip'),
+            icon: displayCategory != null
+                ? resolveCategoryIcon(displayCategory.icon)
+                : Icons.shopping_bag_outlined,
+            label: l10n.category,
+            value: _categoryLabel(locale, l10n),
+            subline: _isV16VoiceNewEntry
+                ? Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 4,
+                    runSpacing: 2,
+                    children: [
+                      _buildV16VoiceSourceBadge(
+                        l10n,
+                        key: const ValueKey('v16-voice-source-category'),
+                      ),
+                      if (_needsV16CategorySelection)
+                        _buildV16CategoryRequiredBadge(l10n),
+                    ],
+                  )
+                : null,
+            onTap: _editCategory,
+          ),
+          Divider(height: 1, thickness: 1, color: palette.borderDefault),
+          _buildV16InfoRow(
+            key: const ValueKey('date-chip'),
+            icon: Icons.calendar_month_outlined,
+            label: l10n.date,
+            value: const FormatterService().formatDate(_date, locale),
+            onTap: _editDate,
+          ),
+          Divider(height: 1, thickness: 1, color: palette.borderDefault),
+          _buildV16MerchantRow(l10n),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildV16InfoRow({
+    required Key key,
+    required IconData icon,
+    required String label,
+    required String value,
+    Widget? subline,
+    required VoidCallback onTap,
+  }) {
+    final palette = context.palette;
+
+    return Material(
+      key: key,
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 58),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  child: Icon(icon, size: 20, color: palette.textSecondary),
+                ),
+                const SizedBox(width: 9),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    label,
+                    style: AppTextStyles.label.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        value,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: AppTextStyles.label.copyWith(
+                          color: palette.textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (subline != null) ...[
+                        const SizedBox(height: 2),
+                        subline,
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: palette.textTertiary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildV16MerchantRow(S l10n) {
+    final palette = context.palette;
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 58),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              child: Icon(
+                Icons.storefront_outlined,
+                size: 20,
+                color: palette.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 9),
+            SizedBox(
+              width: 48,
+              child: Text(
+                l10n.merchant,
+                style: AppTextStyles.label.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  TextField(
+                    key: const ValueKey('merchant-textfield'),
+                    controller: _storeController,
+                    focusNode: widget.merchantFocusNode,
+                    groupId: kKeyboardToolbarTapRegionGroup,
+                    textAlign: TextAlign.end,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                    onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      hintText: l10n.enterStore,
+                      hintStyle: AppTextStyles.label.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    style: AppTextStyles.label.copyWith(
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (_isV16VoiceNewEntry) ...[
+                    const SizedBox(height: 2),
+                    _buildV16VoiceSourceBadge(
+                      l10n,
+                      key: const ValueKey('v16-voice-source-merchant'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildV16PurposeCard(S l10n) {
+    final palette = context.palette;
+
+    return Container(
+      key: const ValueKey('v16-purpose-card'),
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      child: Row(
+        children: [
+          Text(
+            l10n.expenseClassification,
+            style: AppTextStyles.label.copyWith(
+              color: palette.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: _buildV16LedgerOption(
+                    key: const ValueKey('ledger_type_daily_chip'),
+                    type: LedgerType.daily,
+                    icon: Icons.shield_outlined,
+                    label: l10n.dailyExpense,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _buildV16LedgerOption(
+                    key: const ValueKey('ledger_type_joy_chip'),
+                    type: LedgerType.joy,
+                    icon: Icons.auto_awesome,
+                    label: l10n.joyExpense,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildV16LedgerOption({
+    required Key key,
+    required LedgerType type,
+    required IconData icon,
+    required String label,
+  }) {
+    final palette = context.palette;
+    final selected = _ledgerType == type;
+    final activeColor = type == LedgerType.daily
+        ? palette.dailyText
+        : palette.joyText;
+    final activeBorder = type == LedgerType.daily ? palette.daily : palette.joy;
+    final activeBackground = type == LedgerType.daily
+        ? palette.dailyLight
+        : palette.joyLight;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: key,
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => updateLedgerType(type),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: selected ? activeBackground : palette.backgroundMuted,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: selected ? activeBorder : palette.borderDefault,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 15,
+                  color: selected ? activeColor : palette.textSecondary,
+                ),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.label.copyWith(
+                      color: selected ? activeColor : palette.textSecondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildV16SatisfactionCard(S l10n) {
+    const values = <int>[2, 4, 6, 8, 10];
+    const icons = <IconData>[
+      Icons.sentiment_very_dissatisfied_outlined,
+      Icons.sentiment_dissatisfied_outlined,
+      Icons.sentiment_neutral_outlined,
+      Icons.sentiment_satisfied_outlined,
+      Icons.sentiment_very_satisfied_outlined,
+    ];
+    final labels = <String>[
+      l10n.satisfactionBad,
+      l10n.satisfactionSlightlyBad,
+      l10n.satisfactionNormal,
+      l10n.satisfactionGood,
+      l10n.satisfactionVeryGood,
+    ];
+    final selectedIndex = _joyFullness <= 2
+        ? 0
+        : _joyFullness <= 4
+        ? 1
+        : _joyFullness <= 6
+        ? 2
+        : _joyFullness <= 8
+        ? 3
+        : 4;
+    final palette = context.palette;
+
+    return Container(
+      key: const ValueKey('v16-satisfaction-card'),
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Text(
+                l10n.satisfactionLevel,
+                style: AppTextStyles.label.copyWith(
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${labels[selectedIndex]} · $_joyFullness/10',
+                style: AppTextStyles.compact.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Row(
+            children: List.generate(values.length, (index) {
+              final selected = index == selectedIndex;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: index == 0 ? 0 : 5),
+                  child: Semantics(
+                    button: true,
+                    selected: selected,
+                    label: labels[index],
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        key: ValueKey('face_$index'),
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => updateSatisfaction(values[index]),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 160),
+                          height: 44,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 2,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? palette.joyLight
+                                : palette.backgroundMuted,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: selected
+                                  ? palette.joy
+                                  : palette.borderDefault,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                icons[index],
+                                size: 21,
+                                color: selected
+                                    ? palette.joyText
+                                    : palette.textSecondary,
+                              ),
+                              Text(
+                                labels[index],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.micro.copyWith(
+                                  color: selected
+                                      ? palette.joyText
+                                      : palette.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildV16NoteCard(S l10n) {
+    final palette = context.palette;
+
+    return Container(
+      key: const ValueKey('v16-note-card'),
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 11),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 20,
+            child: Icon(
+              Icons.description_outlined,
+              size: 20,
+              color: palette.textSecondary,
+            ),
+          ),
+          const SizedBox(width: 9),
+          SizedBox(
+            width: 48,
+            child: Text(
+              l10n.note,
+              style: AppTextStyles.label.copyWith(color: palette.textSecondary),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              key: const ValueKey('note-textfield'),
+              controller: _memoController,
+              focusNode: widget.noteFocusNode,
+              groupId: kKeyboardToolbarTapRegionGroup,
+              maxLines: 1,
+              textAlign: TextAlign.end,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
+              onTapOutside: (_) => FocusScope.of(context).unfocus(),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                hintText: l10n.enterMemo,
+                hintStyle: AppTextStyles.label.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+              style: AppTextStyles.label.copyWith(color: palette.textPrimary),
+            ),
+          ),
+          if (_isV16VoiceNewEntry) ...[
+            const SizedBox(width: 5),
+            _buildV16VoiceSourceBadge(
+              l10n,
+              key: const ValueKey('v16-voice-source-note'),
+            ),
+          ],
+          const SizedBox(width: 5),
+          Icon(Icons.chevron_right, size: 18, color: palette.textTertiary),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildV16VoiceSourceBadge(S l10n, {required Key key}) {
+    final palette = context.palette;
+    return Container(
+      key: key,
+      constraints: const BoxConstraints(minHeight: 21),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: palette.accentPrimaryLight,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.graphic_eq, size: 13, color: palette.accentPrimary),
+          const SizedBox(width: 3),
+          Text(
+            l10n.entryVoiceSourceBadge,
+            style: AppTextStyles.micro.copyWith(
+              color: palette.accentPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildV16CategoryRequiredBadge(S l10n) {
+    final palette = context.palette;
+    return Container(
+      key: const ValueKey('v16-category-select-required'),
+      constraints: const BoxConstraints(minHeight: 21),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: palette.warning.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        l10n.entryCategorySelectRequired,
+        style: AppTextStyles.micro.copyWith(
+          color: palette.warning,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+
   /// Item 1 (260526-j98): shared rounded-card wrapper for Card B (ledger +
   /// satisfaction) and Card C (note). Dedupes the inline Container decoration
   /// previously used only for Card B.
@@ -1133,6 +1812,7 @@ class TransactionDetailsFormState
     final locale = localeAsync.value ?? const Locale('ja');
     final palette = context.palette;
     final displayCategory = _parentCategory ?? _category;
+    final sectionGap = widget.useV16Layout ? 10.0 : 16.0;
 
     // AbsorbPointer prevents field interaction while submit is in progress.
     final formBody = AbsorbPointer(
@@ -1193,32 +1873,39 @@ class TransactionDetailsFormState
                   },
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: sectionGap),
             ],
 
-            DetailInfoCard(
-              rows: [
-                DetailInfoRow(
-                  key: const ValueKey('category-chip'),
-                  icon: displayCategory != null
-                      ? resolveCategoryIcon(displayCategory.icon)
-                      : Icons.shopping_bag_outlined,
-                  label: l10n.category,
-                  value: _categoryLabel(locale, l10n),
-                  showChevron: true,
-                  onTap: _editCategory,
-                ),
-                DetailInfoRow(
-                  key: const ValueKey('date-chip'),
-                  icon: Icons.calendar_today_outlined,
-                  label: l10n.date,
-                  value: const FormatterService().formatDate(_date, locale),
-                  showChevron: true,
-                  onTap: _editDate,
-                ),
-              ],
-              trailing: _buildMerchantRow(l10n),
-            ),
+            if (widget.useV16Layout)
+              _buildV16DetailsCard(
+                l10n: l10n,
+                locale: locale,
+                displayCategory: displayCategory,
+              )
+            else
+              DetailInfoCard(
+                rows: [
+                  DetailInfoRow(
+                    key: const ValueKey('category-chip'),
+                    icon: displayCategory != null
+                        ? resolveCategoryIcon(displayCategory.icon)
+                        : Icons.shopping_bag_outlined,
+                    label: l10n.category,
+                    value: _categoryLabel(locale, l10n),
+                    showChevron: true,
+                    onTap: _editCategory,
+                  ),
+                  DetailInfoRow(
+                    key: const ValueKey('date-chip'),
+                    icon: Icons.calendar_today_outlined,
+                    label: l10n.date,
+                    value: const FormatterService().formatDate(_date, locale),
+                    showChevron: true,
+                    onTap: _editDate,
+                  ),
+                ],
+                trailing: _buildMerchantRow(l10n),
+              ),
 
             // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): the recognition surface —
             // a pure-visual confidence band (RECUX-01) plus, behind the
@@ -1230,13 +1917,10 @@ class TransactionDetailsFormState
             // user-directed) but is retained behind its flag for a reversible
             // re-enable. Both clear the instant the user picks a category (D-09).
             if (_band != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: widget.useV16Layout ? 10 : 12),
               Row(
                 children: [
-                  ConfidenceBandIndicator(
-                    band: _band,
-                    ledgerType: _ledgerType,
-                  ),
+                  ConfidenceBandIndicator(band: _band, ledgerType: _ledgerType),
                   if (widget.showAlternateChips) ...[
                     const SizedBox(width: 8),
                     Expanded(
@@ -1251,74 +1935,83 @@ class TransactionDetailsFormState
               ),
             ],
 
-            const SizedBox(height: 16),
+            SizedBox(height: sectionGap),
 
             // Card B: 用途 (Purpose) header + ledger + (joy) satisfaction.
-            _formCard(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 260529-e5f: 用途 title and the ledger pills share one
-                    // row (pills on the right) so Card B is shorter and the
-                    // joy satisfaction picker below gets more vertical room.
-                    // Flexible wraps the title so a long localized label
-                    // ellipsises instead of overflowing the row.
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            l10n.expenseClassification,
-                            style: AppTextStyles.titleMedium.copyWith(
-                              fontSize: 13,
-                              color: palette.textPrimary,
+            if (widget.useV16Layout) ...[
+              _buildV16PurposeCard(l10n),
+              if (_ledgerType == LedgerType.joy) ...[
+                const SizedBox(height: 10),
+                _buildV16SatisfactionCard(l10n),
+              ],
+            ] else
+              _formCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 260529-e5f: 用途 title and the ledger pills share one
+                      // row (pills on the right) so Card B is shorter and the
+                      // joy satisfaction picker below gets more vertical room.
+                      // Flexible wraps the title so a long localized label
+                      // ellipsises instead of overflowing the row.
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l10n.expenseClassification,
+                              style: AppTextStyles.titleMedium.copyWith(
+                                fontSize: 13,
+                                color: palette.textPrimary,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        LedgerTypeSelector(
-                          selected: _ledgerType,
-                          onChanged: (type) =>
-                              setState(() => _ledgerType = type),
-                          dailyLabel: l10n.dailyExpense,
-                          joyLabel: l10n.joyExpense,
-                        ),
-                      ],
-                    ),
-                    if (_ledgerType == LedgerType.joy) ...[
-                      const SizedBox(height: 12),
-                      SatisfactionEmojiPicker(
-                        value: _joyFullness,
-                        onChanged: (v) => setState(() => _joyFullness = v),
-                        title: l10n.satisfactionLevel,
-                        levelLabels: [
-                          l10n.satisfactionBad,
-                          l10n.satisfactionSlightlyBad,
-                          l10n.satisfactionNormal,
-                          l10n.satisfactionGood,
-                          l10n.satisfactionVeryGood,
-                        ],
-                        bottomLabels: [
-                          l10n.satisfactionBad,
-                          l10n.satisfactionNormal,
-                          l10n.satisfactionExcellent,
+                          const SizedBox(width: 12),
+                          LedgerTypeSelector(
+                            selected: _ledgerType,
+                            onChanged: updateLedgerType,
+                            dailyLabel: l10n.dailyExpense,
+                            joyLabel: l10n.joyExpense,
+                          ),
                         ],
                       ),
+                      if (_ledgerType == LedgerType.joy) ...[
+                        const SizedBox(height: 12),
+                        SatisfactionEmojiPicker(
+                          value: _joyFullness,
+                          onChanged: updateSatisfaction,
+                          title: l10n.satisfactionLevel,
+                          levelLabels: [
+                            l10n.satisfactionBad,
+                            l10n.satisfactionSlightlyBad,
+                            l10n.satisfactionNormal,
+                            l10n.satisfactionGood,
+                            l10n.satisfactionVeryGood,
+                          ],
+                          bottomLabels: [
+                            l10n.satisfactionBad,
+                            l10n.satisfactionNormal,
+                            l10n.satisfactionExcellent,
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: sectionGap),
 
             // Card C: 备注 (note) — extracted from Card A's trailing so the
             // note has its own rounded card per Item 1 (260526-j98).
-            _formCard(child: _buildNoteSection(l10n)),
+            if (widget.useV16Layout)
+              _buildV16NoteCard(l10n)
+            else
+              _formCard(child: _buildNoteSection(l10n)),
 
-            const SizedBox(height: 16),
+            SizedBox(height: sectionGap),
           ],
         ),
       ),

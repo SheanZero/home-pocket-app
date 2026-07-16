@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
+enum AmountDisplayLayout { legacy, v16 }
+
 /// Displays the current amount with currency label and clear button.
 ///
 /// Shows "¥ JPY" as plain text on the left, the formatted amount in the center,
@@ -14,6 +16,8 @@ class AmountDisplay extends StatelessWidget {
     this.onClear,
     this.currencySymbol = '¥',
     this.currencyLabel = 'JPY',
+    this.layout = AmountDisplayLayout.legacy,
+    this.onCurrencyTap,
   });
 
   /// Raw amount string (digits only, e.g. "3280").
@@ -27,6 +31,13 @@ class AmountDisplay extends StatelessWidget {
 
   /// Currency code label (e.g. "JPY", "USD", "CNY").
   final String currencyLabel;
+
+  /// v16 places the amount on the left and the compact currency action on the
+  /// right. The legacy layout stays the default for OCR/voice review surfaces.
+  final AmountDisplayLayout layout;
+
+  /// Optional currency selector action used by the unified-entry header.
+  final VoidCallback? onCurrencyTap;
 
   String get _formatted {
     if (amount.isEmpty) return '0';
@@ -59,6 +70,92 @@ class AmountDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+
+    if (layout == AmountDisplayLayout.v16) {
+      return SizedBox(
+        height: 88,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Row(
+            children: [
+              Text(
+                currencySymbol,
+                style: AppTextStyles.amountHero.copyWith(
+                  color: palette.textPrimary,
+                  fontSize: 44,
+                  height: 1,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _formatted,
+                    style: AppTextStyles.amountHero.copyWith(
+                      color: palette.textPrimary,
+                      fontSize: 44,
+                      height: 1,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+              if (amount.isNotEmpty && onClear != null) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  key: const ValueKey('amount_clear_button'),
+                  onPressed: onClear,
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ],
+              const SizedBox(width: 10),
+              Material(
+                key: const ValueKey('amount_currency_badge'),
+                color: palette.dailyLight,
+                shape: const StadiumBorder(),
+                child: InkWell(
+                  onTap: onCurrencyTap,
+                  borderRadius: BorderRadius.circular(999),
+                  child: SizedBox(
+                    width: 67,
+                    height: 36,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          currencyLabel,
+                          style: AppTextStyles.label.copyWith(
+                            color: palette.dailyText,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (onCurrencyTap != null) ...[
+                          const SizedBox(width: 2),
+                          Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 18,
+                            color: palette.dailyText,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

@@ -2178,6 +2178,12 @@ class SEn extends S {
   String get shoppingFormLedgerLabel => 'Ledger';
 
   @override
+  String get shoppingFormLedgerDaily => 'Daily';
+
+  @override
+  String get shoppingFormLedgerJoy => 'Joy';
+
+  @override
   String get shoppingFormCategoryLabel => 'Category';
 
   @override
@@ -2193,6 +2199,9 @@ class SEn extends S {
   String get shoppingFormNoteLabel => 'Note';
 
   @override
+  String get shoppingFormNotePlaceholder => 'Add any needed note';
+
+  @override
   String get shoppingFormQuantityLabel => 'Quantity';
 
   @override
@@ -2200,6 +2209,160 @@ class SEn extends S {
 
   @override
   String get shoppingFormSaveError => 'Failed to save. Please try again.';
+
+  @override
+  String get shoppingListTypeCreateHint =>
+      'Type cannot be changed after saving';
+
+  @override
+  String get shoppingFormSaving => 'Saving…';
+
+  @override
+  String get shoppingFormPricePlaceholder => 'Not entered';
+
+  @override
+  String get shoppingVoiceManualTitle => 'Enter by voice';
+
+  @override
+  String get shoppingVoiceManualHelp =>
+      'Say the item, quantity, purpose, category, and estimated price together';
+
+  @override
+  String get shoppingVoicePrivacy => 'On-device recognition preferred';
+
+  @override
+  String get shoppingVoiceListeningStatus => 'Listening';
+
+  @override
+  String get shoppingVoiceProcessingStatus => 'Analyzing';
+
+  @override
+  String get shoppingVoiceReviewStatus => 'Filled into the form';
+
+  @override
+  String get shoppingVoiceUnavailableStatus => 'Microphone unavailable';
+
+  @override
+  String get shoppingVoiceKeyboardAction => 'Return to manual input';
+
+  @override
+  String get shoppingVoiceListeningPlaceholder =>
+      '“Two bottles of milk, daily, estimated price ¥500…”';
+
+  @override
+  String get shoppingVoiceProcessingPlaceholder =>
+      '“Two bottles of milk, daily, estimated price ¥500”';
+
+  @override
+  String get shoppingVoiceReviewPlaceholder =>
+      'Review the information added to the form';
+
+  @override
+  String get shoppingVoiceStopAction => 'Stop now and analyze';
+
+  @override
+  String get shoppingVoiceRerecordAction => 'Record again';
+
+  @override
+  String get shoppingVoiceListeningHelp =>
+      'Pause for about 3 seconds to analyze automatically · Tap the square to stop now';
+
+  @override
+  String get shoppingVoiceProcessingHelp =>
+      'Organizing your speech into shopping item fields';
+
+  @override
+  String get shoppingVoiceReviewHelp =>
+      'Review the details, then tap Save at the top right to add';
+
+  @override
+  String get shoppingVoiceUnavailableHelp => 'Manual input remains available';
+
+  @override
+  String get shoppingVoiceSettingsAction => 'Microphone help';
+
+  @override
+  String get entryVoiceLaunchHelp =>
+      'Say the amount, merchant, category, and date in one go';
+
+  @override
+  String get entryVoicePrivacy => 'Processed using voice settings';
+
+  @override
+  String get entryVoiceIdleStatus => 'Ready for the next entry';
+
+  @override
+  String get entryVoiceListeningStatus => 'Listening';
+
+  @override
+  String get entryVoiceProcessingStatus => 'Organizing the details';
+
+  @override
+  String get entryVoiceReviewStatus => 'Added to this entry';
+
+  @override
+  String get entryVoiceUnavailableStatus => 'Voice input unavailable';
+
+  @override
+  String get entryVoiceIdleTranscript => 'Ready when you are';
+
+  @override
+  String get entryVoiceListeningPlaceholder =>
+      '“Forest Café, lunch, 2,380 yen…”';
+
+  @override
+  String get entryVoiceProcessingPlaceholder =>
+      '“Forest Café, lunch, 2,380 yen”';
+
+  @override
+  String get entryVoiceIdleHelp => 'Tap the microphone to start the next entry';
+
+  @override
+  String get entryVoiceListeningHelp =>
+      'Pause to recognize automatically, or tap to finish now';
+
+  @override
+  String get entryVoiceProcessingHelp =>
+      'Adding the recognition result to this form';
+
+  @override
+  String get entryVoiceReviewHelp =>
+      'Tap the microphone to record again, or edit and record';
+
+  @override
+  String get entryVoiceUnavailableHelp =>
+      'Allow microphone access in system Settings, or continue with manual input';
+
+  @override
+  String get entryVoiceKeyboardAction => 'Switch to keyboard input';
+
+  @override
+  String get entryVoiceStartAction => 'Start voice input';
+
+  @override
+  String get entryVoiceStopAction => 'Finish now and analyze';
+
+  @override
+  String get entryVoiceRerecordAction => 'Record again';
+
+  @override
+  String get entryVoiceSourceBadge => 'Voice filled';
+
+  @override
+  String get entryCategorySelectRequired => 'Select required';
+
+  @override
+  String get entryContinuousReturnHome => 'Return home after recording';
+
+  @override
+  String get entryContinuousKeepNext =>
+      'Continue to the next entry after recording';
+
+  @override
+  String get entryContinuousEnable => 'Continuous entry';
+
+  @override
+  String get entryContinuousDisable => 'Turn off continuous entry';
 
   @override
   String get currencySelectorTitle => 'Select currency';

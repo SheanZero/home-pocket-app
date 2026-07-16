@@ -5,7 +5,7 @@
 ///
 /// Everything here asserts on OBSERVABLE surfaces only — the rendered
 /// `AmountDisplay.amount` / `.currencyLabel`, the public `TransactionDetailsForm`
-/// getters (read via `tester.state`), the error-toast text, and the saved
+/// getters (read via `tester.state`), the V16 save-action gate, and the saved
 /// `CreateTransactionParams.entrySource`. No private field is poked, so the
 /// suite stays valid across the A2 relocation of the method bodies into
 /// same-library `part` extensions.
@@ -17,8 +17,9 @@
 ///   - currency characterization: the JPY→foreign→JPY round trip relabels the
 ///     display and re-syncs; returning to JPY clears the form's foreign triple
 ///     (CURR-04).
-///   - save-guard characterization: `_trySave` short-circuits with an error
-///     toast on an empty/zero amount, and on a null category.
+///   - save-guard characterization: the V16 record action keeps the mockup's
+///     active styling for empty/zero amounts while validation still blocks save;
+///     unresolved categories remain disabled.
 ///   - item 4a: a manual keypad edit AFTER a voice fill keeps voice provenance
 ///     (the edited row still saves EntrySource.voice) until the amount is cleared.
 ///   - item 4b: a reset restores `_lastFillWasVoice` from the pre-speech snapshot
@@ -54,13 +55,11 @@ import 'package:home_pocket/features/accounting/presentation/screens/manual_one_
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/voice_listening_overlay.dart'
-    show VoiceRecordPanel;
+import 'package:home_pocket/features/accounting/presentation/widgets/unified_voice_entry_dock.dart';
 import 'package:home_pocket/features/currency/domain/models/rate_result.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart'
     show voiceLocaleIdProvider;
 import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
-import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -202,6 +201,10 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], true),
   );
 
+  void emitPartial(String words) => onResult!(
+    SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.95)], false),
+  );
+
   void emitStatus(String status) => onStatus!(status);
 }
 
@@ -333,10 +336,8 @@ void main() {
   String displayedCurrency(WidgetTester tester) =>
       tester.widget<AmountDisplay>(find.byType(AmountDisplay)).currencyLabel;
 
-  TransactionDetailsFormState formState(WidgetTester tester) =>
-      tester.state<TransactionDetailsFormState>(
-        find.byType(TransactionDetailsForm),
-      );
+  TransactionDetailsFormState formState(WidgetTester tester) => tester
+      .state<TransactionDetailsFormState>(find.byType(TransactionDetailsForm));
 
   Future<void> tapKey(WidgetTester tester, String label) async {
     await tester.tap(
@@ -349,6 +350,25 @@ void main() {
   }
 
   final micBarFinder = find.byKey(const ValueKey('voice-record-bar'));
+
+  UnifiedVoiceEntryDock voiceDock(WidgetTester tester) =>
+      tester.widget<UnifiedVoiceEntryDock>(find.byType(UnifiedVoiceEntryDock));
+
+  Future<void> finishVoiceUtterance(
+    WidgetTester tester,
+    _CapturingSpeechService speech,
+  ) async {
+    speech.startedLocaleId = null;
+    speech.emitStatus('done');
+    await tester.pump();
+    await tester.pump();
+  }
+
+  Future<void> switchVoiceDockToKeyboard(WidgetTester tester) async {
+    await tester.tap(find.byKey(const ValueKey('unified-voice-keyboard')));
+    await tester.pump();
+    await tester.pump();
+  }
 
   // ── keypad characterization ────────────────────────────────────────────────
 
@@ -377,8 +397,9 @@ void main() {
       '(a later keypad row saves manual)',
       (tester) async {
         tall(tester);
-        when(() => mockCreateUseCase.execute(any()))
-            .thenAnswer((_) async => Result.success(_successTransaction));
+        when(
+          () => mockCreateUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.success(_successTransaction));
 
         final speech = _CapturingSpeechService();
         final parse = _FakeParseVoiceInputUseCase(const {
@@ -405,10 +426,9 @@ void main() {
         await tester.pump();
         expect(displayedAmount(tester), '500');
 
-        // Exit the panel (content kept).
-        final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
-        await tester.tap(find.text(panelL10n.listeningTitle));
-        await tester.pumpAndSettle();
+        await finishVoiceUtterance(tester, speech);
+        expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
+        await switchVoiceDockToKeyboard(tester);
 
         // Tap the AmountDisplay clear (x) → amount empties, provenance dropped.
         await tester.tap(
@@ -427,8 +447,9 @@ void main() {
         await tapKey(tester, 'Record');
         await tester.pumpAndSettle();
 
-        final captured =
-            verify(() => mockCreateUseCase.execute(captureAny())).captured;
+        final captured = verify(
+          () => mockCreateUseCase.execute(captureAny()),
+        ).captured;
         expect(captured.length, 1);
         expect(
           (captured.first as CreateTransactionParams).entrySource,
@@ -463,8 +484,11 @@ void main() {
         await tapKey(tester, '2');
         await tapKey(tester, '3');
         expect(displayedCurrency(tester), 'JPY');
-        expect(formState(tester).currentOriginalCurrency, isNull,
-            reason: 'JPY-native: no foreign triple');
+        expect(
+          formState(tester).currentOriginalCurrency,
+          isNull,
+          reason: 'JPY-native: no foreign triple',
+        );
 
         // Open the currency sheet and select USD.
         await tester.tap(
@@ -474,8 +498,11 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('currency-row-USD')));
         await tester.pumpAndSettle();
 
-        expect(displayedCurrency(tester), 'USD',
-            reason: 'selecting a non-JPY currency relabels the display');
+        expect(
+          displayedCurrency(tester),
+          'USD',
+          reason: 'selecting a non-JPY currency relabels the display',
+        );
 
         // Return to JPY — the triple must be cleared (CURR-04).
         await tester.tap(
@@ -486,8 +513,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(displayedCurrency(tester), 'JPY');
-        expect(formState(tester).currentOriginalCurrency, isNull,
-            reason: 'selecting JPY clears the foreign triple (CURR-04)');
+        expect(
+          formState(tester).currentOriginalCurrency,
+          isNull,
+          reason: 'selecting JPY clears the foreign triple (CURR-04)',
+        );
       },
     );
   });
@@ -495,8 +525,9 @@ void main() {
   // ── save-guard characterization ─────────────────────────────────────────────
 
   group('save-guard characterization', () {
-    testWidgets('empty/zero amount short-circuits with an error toast',
-        (tester) async {
+    testWidgets('empty/zero amount stays active but validation blocks save', (
+      tester,
+    ) async {
       tall(tester);
       await tester.pumpWidget(
         pumpManual(
@@ -507,22 +538,24 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final l10n = S.of(tester.element(find.byType(AmountDisplay)));
-
-      // No amount entered — tap Record.
-      await tapKey(tester, 'Record');
+      expect(
+        tester
+            .widget<SmartKeyboard>(find.byType(SmartKeyboard))
+            .isActionEnabled,
+        isTrue,
+        reason: 'V16 mirrors the mockup while _trySave owns amount validation',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SmartKeyboard),
+          matching: find.text('Record'),
+        ),
+      );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(find.text(l10n.pleaseEnterAmount), findsOneWidget,
-          reason: 'empty amount surfaces the enter-amount error toast');
       verifyNever(() => mockCreateUseCase.execute(any()));
-
-      await tester.pumpAndSettle(const Duration(seconds: 5));
     });
 
-    testWidgets('null category short-circuits with a select-category toast',
-        (tester) async {
+    testWidgets('null category disables the V16 record action', (tester) async {
       tall(tester);
       await tester.pumpWidget(
         pumpManual(
@@ -532,23 +565,15 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      final l10n = S.of(tester.element(find.byType(AmountDisplay)));
-
-      // Before saving, the text renders ONCE — the category-chip placeholder
-      // (category is still null while the slow repo resolves).
-      expect(find.text(l10n.pleaseSelectCategory), findsOneWidget,
-          reason: 'precondition: only the chip placeholder renders the text');
-
-      // Enter an amount (so the empty-amount guard passes) then tap Record.
+      // Enter an amount while the slow repository still leaves category null.
       await tapKey(tester, '1');
-      await tapKey(tester, 'Record');
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      // After the blocked save the same string ALSO appears as the error toast
-      // (chip placeholder + toast = 2) — proving _trySave surfaced it.
-      expect(find.text(l10n.pleaseSelectCategory), findsNWidgets(2),
-          reason: 'null category surfaces the select-category error toast');
+      expect(
+        tester
+            .widget<SmartKeyboard>(find.byType(SmartKeyboard))
+            .isActionEnabled,
+        isFalse,
+        reason: 'V16 prevents submit until the category has resolved',
+      );
       verifyNever(() => mockCreateUseCase.execute(any()));
 
       // Flush the slow-repo delayed future + toast timers.
@@ -558,58 +583,61 @@ void main() {
 
   // ── item 4a: manual edit after a voice fill keeps voice provenance ──────────
 
-  testWidgets(
-    '4a: a keypad edit after a voice fill keeps EntrySource.voice',
-    (tester) async {
-      tall(tester);
-      when(() => mockCreateUseCase.execute(any()))
-          .thenAnswer((_) async => Result.success(_successTransaction));
+  testWidgets('4a: a keypad edit after a voice fill keeps EntrySource.voice', (
+    tester,
+  ) async {
+    tall(tester);
+    when(
+      () => mockCreateUseCase.execute(any()),
+    ).thenAnswer((_) async => Result.success(_successTransaction));
 
-      final speech = _CapturingSpeechService();
-      final parse = _FakeParseVoiceInputUseCase(const {
-        '500円': VoiceParseResult(rawText: '500円', amount: 500),
-      });
+    final speech = _CapturingSpeechService();
+    final parse = _FakeParseVoiceInputUseCase(const {
+      '500円': VoiceParseResult(rawText: '500円', amount: 500),
+    });
 
-      await tester.pumpWidget(
-        pumpManual(
-          categoryRepo: _FakeCategoryRepository(_fakeCategories),
-          initialCategory: _l2Category,
-          initialParentCategory: _l1Category,
-          speech: speech,
-          parse: parse,
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      pumpManual(
+        categoryRepo: _FakeCategoryRepository(_fakeCategories),
+        initialCategory: _l2Category,
+        initialParentCategory: _l1Category,
+        speech: speech,
+        parse: parse,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await tester.tap(micBarFinder);
-      await tester.pump();
-      await tester.pump();
-      speech.emitFinal('500円');
-      await tester.pump();
-      await tester.pump();
-      expect(displayedAmount(tester), '500');
+    await tester.tap(micBarFinder);
+    await tester.pump();
+    await tester.pump();
+    speech.emitFinal('500円');
+    await tester.pump();
+    await tester.pump();
+    expect(displayedAmount(tester), '500');
 
-      // Exit the panel, then EDIT via the keypad (append a digit).
-      final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
-      await tester.tap(find.text(panelL10n.listeningTitle));
-      await tester.pumpAndSettle();
-      await tapKey(tester, '1');
-      expect(displayedAmount(tester), '5001',
-          reason: 'the edit continues from the mirrored fill');
+    await finishVoiceUtterance(tester, speech);
+    expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
+    await switchVoiceDockToKeyboard(tester);
+    await tapKey(tester, '1');
+    expect(
+      displayedAmount(tester),
+      '5001',
+      reason: 'the edit continues from the mirrored fill',
+    );
 
-      await tapKey(tester, 'Record');
-      await tester.pumpAndSettle();
+    await tapKey(tester, 'Record');
+    await tester.pumpAndSettle();
 
-      final captured =
-          verify(() => mockCreateUseCase.execute(captureAny())).captured;
-      expect(captured.length, 1);
-      expect(
-        (captured.first as CreateTransactionParams).entrySource,
-        EntrySource.voice,
-        reason: 'a manual edit after a voice fill keeps voice provenance',
-      );
-    },
-  );
+    final captured = verify(
+      () => mockCreateUseCase.execute(captureAny()),
+    ).captured;
+    expect(captured.length, 1);
+    expect(
+      (captured.first as CreateTransactionParams).entrySource,
+      EntrySource.voice,
+      reason: 'a manual edit after a voice fill keeps voice provenance',
+    );
+  });
 
   // ── item 4b: reset restores _lastFillWasVoice from the snapshot ─────────────
 
@@ -617,8 +645,9 @@ void main() {
     '4b: reset from a pure-manual snapshot rolls provenance back to manual',
     (tester) async {
       tall(tester);
-      when(() => mockCreateUseCase.execute(any()))
-          .thenAnswer((_) async => Result.success(_successTransaction));
+      when(
+        () => mockCreateUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(_successTransaction));
 
       final speech = _CapturingSpeechService();
       final parse = _FakeParseVoiceInputUseCase(const {
@@ -647,31 +676,30 @@ void main() {
       await tester.pump();
       expect(displayedAmount(tester), '500');
 
-      // One-shot recognizer self-terminates → the reset square is live.
-      speech.startedLocaleId = null;
-      speech.emitStatus('done');
-      await tester.pump();
-      await tester.pump();
+      await finishVoiceUtterance(tester, speech);
+      expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
-      // Reset → restore the pre-speech (manual, empty) snapshot.
-      await tester.tap(find.byKey(const ValueKey('voice-square-reset')));
+      // Review mic → restore the pre-speech snapshot and re-record.
+      await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
       await tester.pump();
       await tester.pump();
-      expect(displayedAmount(tester), '',
-          reason: 'reset rolls the amount back to the empty snapshot');
+      expect(
+        displayedAmount(tester),
+        '',
+        reason: 'reset rolls the amount back to the empty snapshot',
+      );
 
-      // Exit the re-armed panel, enter a keypad amount, save → manual again.
-      final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
-      await tester.tap(find.text(panelL10n.listeningTitle));
-      await tester.pumpAndSettle();
+      expect(voiceDock(tester).state, UnifiedVoiceEntryState.listening);
+      await switchVoiceDockToKeyboard(tester);
       await tapKey(tester, '1');
       await tapKey(tester, '1');
       await tapKey(tester, '1');
       await tapKey(tester, 'Record');
       await tester.pumpAndSettle();
 
-      final captured =
-          verify(() => mockCreateUseCase.execute(captureAny())).captured;
+      final captured = verify(
+        () => mockCreateUseCase.execute(captureAny()),
+      ).captured;
       expect(captured.length, 1);
       expect(
         (captured.first as CreateTransactionParams).entrySource,
@@ -684,12 +712,98 @@ void main() {
   // ── item 4c: keypad mirror with a foreign triple already written ───────────
 
   testWidgets(
+    'foreign snapshot restore keeps original units in the triple and restores '
+    'the converted booked JPY amount',
+    (tester) async {
+      tall(tester);
+      when(
+        () => mockCreateUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(_successTransaction));
+
+      final speech = _CapturingSpeechService();
+      final parse = _FakeParseVoiceInputUseCase(const {
+        '500円': VoiceParseResult(rawText: '500円', amount: 500),
+      });
+      await tester.pumpWidget(
+        pumpManual(
+          categoryRepo: _FakeCategoryRepository(_fakeCategories),
+          initialCategory: _l2Category,
+          initialParentCategory: _l1Category,
+          speech: speech,
+          parse: parse,
+          rate: RateFetched(
+            rate: '150.0',
+            currency: 'USD',
+            rateDate: DateTime(2026, 7, 7),
+            source: 'test',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const ValueKey('smart_keyboard_currency_key')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('currency-row-USD')));
+      await tester.pumpAndSettle();
+      await tapKey(tester, '1');
+      await tapKey(tester, '0');
+      await tester.pumpAndSettle();
+
+      final form = formState(tester);
+      expect(displayedAmount(tester), '10');
+      expect(displayedCurrency(tester), 'USD');
+      expect(form.currentAmount, 1500);
+      expect(form.currentOriginalAmount, 1000);
+      expect(form.currentAppliedRate, '150.0');
+
+      await tester.tap(micBarFinder);
+      await tester.pump();
+      await tester.pump();
+      speech.emitPartial('500円');
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump();
+      await tester.pump();
+      expect(
+        form.currentAmount,
+        500,
+        reason: 'precondition: voice dirtied JPY',
+      );
+
+      await switchVoiceDockToKeyboard(tester);
+      expect(displayedAmount(tester), '10');
+      expect(displayedCurrency(tester), 'USD');
+      expect(
+        form.currentAmount,
+        1500,
+        reason: 'restore uses captured booked JPY, never USD text/minor units',
+      );
+      expect(form.currentOriginalCurrency, 'USD');
+      expect(form.currentOriginalAmount, 1000);
+      expect(form.currentAppliedRate, '150.0');
+
+      await tapKey(tester, 'Record');
+      await tester.pumpAndSettle();
+
+      final saved =
+          verify(() => mockCreateUseCase.execute(captureAny())).captured.single
+              as CreateTransactionParams;
+      expect(saved.amount, 1500);
+      expect(saved.originalCurrency, 'USD');
+      expect(saved.originalAmount, 1000);
+      expect(saved.appliedRate, '150.0');
+    },
+  );
+
+  testWidgets(
     '4c: the PTT-commit mirror writes booked JPY into the display WITHOUT '
     'clobbering the form foreign triple (D-4)',
     (tester) async {
       tall(tester);
-      when(() => mockCreateUseCase.execute(any()))
-          .thenAnswer((_) async => Result.success(_successTransaction));
+      when(
+        () => mockCreateUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(_successTransaction));
 
       final speech = _CapturingSpeechService();
       final parse = _FakeParseVoiceInputUseCase(const {
@@ -735,26 +849,38 @@ void main() {
 
       final form = formState(tester);
       // The voice fill wrote the foreign triple onto the form.
-      expect(form.currentOriginalCurrency, 'USD',
-          reason: 'the foreign triple was written before the mirror ran');
-      expect(form.currentOriginalAmount, 1000,
-          reason: '10 USD → 1000 minor units');
+      expect(
+        form.currentOriginalCurrency,
+        'USD',
+        reason: 'the foreign triple was written before the mirror ran',
+      );
+      expect(
+        form.currentOriginalAmount,
+        1000,
+        reason: '10 USD → 1000 minor units',
+      );
       // The mirror wrote the booked JPY figure into the keypad/AmountDisplay
       // (host stays JPY-native, headline shows booked JPY, D-4) WITHOUT
       // re-syncing the form (the triple survives).
-      expect(displayedAmount(tester), form.currentAmount.toString(),
-          reason: 'the display mirrors the booked JPY from the form');
-      expect(displayedCurrency(tester), 'JPY',
-          reason: 'the keypad stays on the JPY native path (D-4)');
-      expect(form.currentOriginalCurrency, 'USD',
-          reason: 'the mirror did not clobber the foreign triple');
+      expect(
+        displayedAmount(tester),
+        form.currentAmount.toString(),
+        reason: 'the display mirrors the booked JPY from the form',
+      );
+      expect(
+        displayedCurrency(tester),
+        'JPY',
+        reason: 'the keypad stays on the JPY native path (D-4)',
+      );
+      expect(
+        form.currentOriginalCurrency,
+        'USD',
+        reason: 'the mirror did not clobber the foreign triple',
+      );
 
-      // Exit the voice panel (its pulse animation never settles) so the keypad
-      // returns; use fixed pumps while the panel is open.
-      final panelL10n = S.of(tester.element(find.byType(VoiceRecordPanel)));
-      await tester.tap(find.text(panelL10n.listeningTitle));
-      await tester.pump();
-      await tester.pump();
+      await finishVoiceUtterance(tester, speech);
+      expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
+      await switchVoiceDockToKeyboard(tester);
       // Clear the floating conversion-notice snackbar so it cannot obscure the
       // Record key at the bottom of the screen.
       ScaffoldMessenger.of(
@@ -766,8 +892,9 @@ void main() {
       await tapKey(tester, 'Record');
       await tester.pumpAndSettle();
 
-      final captured =
-          verify(() => mockCreateUseCase.execute(captureAny())).captured;
+      final captured = verify(
+        () => mockCreateUseCase.execute(captureAny()),
+      ).captured;
       expect(captured.length, 1);
       expect(
         (captured.first as CreateTransactionParams).entrySource,

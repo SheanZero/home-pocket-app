@@ -24,7 +24,7 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
   /// Tap 「语音记录」: snapshot the form (D-2 reset-restore), then start a
   /// continuous auto-fill listening session and raise the modal.
   void _onVoiceRecordTap() {
-    if (!pttServiceInitialized || !isLocaleReady || _voiceModalOpen) return;
+    if (_voiceModalOpen || _isSubmitting) return;
     final form = _formKey.currentState;
     if (form != null) {
       _voiceSnapshot = ManualEntrySnapshot.capture(
@@ -37,43 +37,75 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
     }
     // 260622-nhs R6 (BUG 1): open the modal (panel visibility) independent of
     // the recognizer lifecycle, then start the one-shot listening session.
-    onPttSessionChanged(() => _voiceModalOpen = true);
-    startPttTapSession();
+    onPttSessionChanged(() {
+      _voiceModalOpen = true;
+      _voiceIdleForNext = false;
+    });
+    if (pttServiceInitialized && isLocaleReady) {
+      unawaited(startPttTapSession());
+    }
   }
 
-  /// Tap the modal/scrim: stop listening + final fill + close, keep content.
-  void _onVoiceModalExit() {
-    exitPttTapSession();
-    onPttSessionChanged(() => _voiceModalOpen = false);
+  Future<void> _onVoiceKeyboard() async {
+    if (_isSubmitting) return;
+    final shouldRestore =
+        _voiceDockState == UnifiedVoiceEntryState.listening ||
+        _voiceDockState == UnifiedVoiceEntryState.processing;
+    // Always invalidate/cancel, including review: a review→re-record reset may
+    // still be awaiting its first cancel and must not reopen the microphone
+    // after this dock closes.
+    await cancelPttSessionAndDiscard();
+    if (shouldRestore) _restoreVoiceSnapshot();
+    if (!mounted) return;
+    onPttSessionChanged(() {
+      _voiceModalOpen = false;
+      _voiceIdleForNext = false;
+    });
     _voiceSnapshot = null;
+  }
+
+  Future<void> _onVoiceCore() async {
+    if (_isSubmitting) return;
+    switch (_voiceDockState) {
+      case UnifiedVoiceEntryState.idle:
+        onPttSessionChanged(() => _voiceIdleForNext = false);
+        await startPttTapSession();
+      case UnifiedVoiceEntryState.listening:
+        await exitPttTapSession();
+      case UnifiedVoiceEntryState.review:
+        await _onVoiceReset();
+      case UnifiedVoiceEntryState.processing:
+      case UnifiedVoiceEntryState.unavailable:
+        return;
+    }
+  }
+
+  void _restoreVoiceSnapshot() {
+    final snapshot = _voiceSnapshot;
+    final form = _formKey.currentState;
+    if (snapshot == null || form == null) return;
+    snapshot.restoreForm(form);
+    form.discardPendingCorrection();
+    onPttSessionChanged(() {
+      _currency = snapshot.currency;
+      _amount = snapshot.restoreHostAmount(_controller);
+      _manualForeignRate = snapshot.manualForeignRate;
+      _lastFillWasVoice = snapshot.lastFillWasVoice;
+      _selectedCategory = snapshot.category;
+      _selectedParentCategory = snapshot.parentCategory;
+    });
   }
 
   /// 「重置·恢复账目」: restore the form to the pre-speech snapshot, clear the
   /// transcript/merger/parse buffers, and KEEP listening (the user can re-speak).
-  void _onVoiceReset() {
-    final snapshot = _voiceSnapshot;
-    final form = _formKey.currentState;
-    if (snapshot != null && form != null) {
-      snapshot.restoreForm(form);
-      // Phase 52 (RECUX-03 / D-05): a 「重置·恢复账目」 reset abandons the
-      // current draft — discard any pending category correction with NO write
-      // (restoreForm clears it only when the snapshot had a category).
-      form.discardPendingCorrection();
-      onPttSessionChanged(() {
-        _currency = snapshot.currency;
-        _amount = snapshot.restoreHostAmount(_controller);
-        _manualForeignRate = snapshot.manualForeignRate;
-        // Revert provenance: if the snapshot was a pure-manual slate, drop the
-        // voice flag so a later keypad save stays manual (T-nhs-03).
-        _lastFillWasVoice = snapshot.lastFillWasVoice;
-      });
-    }
+  Future<void> _onVoiceReset() async {
+    _restoreVoiceSnapshot();
     // 260622-nhs R4 (BUG A + BUG B): a reset must CANCEL the recognizer (to
     // clear its accumulated in-window buffer — the R3 buffer-only clear left the
     // iOS recognizer's prior transcript alive, so the next partial re-surfaced
     // the old text) and start a FRESH serialized listening session (the cancel→
     // start is guarded so onStatus can't double-start into a freeze).
-    resetPttSessionAndRestart();
+    await resetPttSessionAndRestart();
   }
 
   /// 260622-nhs (T-nhs-03) / voice-consolidation P1-7 (R2): the PTT-commit
@@ -108,15 +140,88 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
   /// voice-consolidation P1-7 (R2): the inline voice panel builder — the
   /// `VoiceRecordPanel` construction from `build`'s bottom-slot ternary, moved
   /// verbatim (the ternary now calls this).
+  UnifiedVoiceEntryState get _voiceDockState {
+    if (!pttServiceInitialized || !isLocaleReady) {
+      return UnifiedVoiceEntryState.unavailable;
+    }
+    if (_voiceIdleForNext) return UnifiedVoiceEntryState.idle;
+    return switch (pttListenStatus) {
+      PttListenStatus.listening => UnifiedVoiceEntryState.listening,
+      PttListenStatus.processing => UnifiedVoiceEntryState.processing,
+      PttListenStatus.stopped =>
+        pttTranscript.trim().isEmpty
+            ? UnifiedVoiceEntryState.idle
+            : UnifiedVoiceEntryState.review,
+    };
+  }
+
   Widget _buildVoicePanel() {
-    return VoiceRecordPanel(
-      transcript: pttTranscript,
+    final l10n = S.of(context);
+    final state = _voiceDockState;
+    final status = switch (state) {
+      UnifiedVoiceEntryState.idle => l10n.entryVoiceIdleStatus,
+      UnifiedVoiceEntryState.listening => l10n.entryVoiceListeningStatus,
+      UnifiedVoiceEntryState.processing => l10n.entryVoiceProcessingStatus,
+      UnifiedVoiceEntryState.review => l10n.entryVoiceReviewStatus,
+      UnifiedVoiceEntryState.unavailable => l10n.entryVoiceUnavailableStatus,
+    };
+    final fallbackTranscript = switch (state) {
+      UnifiedVoiceEntryState.idle => l10n.entryVoiceIdleTranscript,
+      UnifiedVoiceEntryState.listening => l10n.entryVoiceListeningPlaceholder,
+      UnifiedVoiceEntryState.processing => l10n.entryVoiceProcessingPlaceholder,
+      UnifiedVoiceEntryState.review => l10n.entryVoiceProcessingPlaceholder,
+      UnifiedVoiceEntryState.unavailable =>
+        l10n.voiceMicrophonePermissionRequired,
+    };
+    final transcript = pttTranscript.trim().isEmpty
+        ? fallbackTranscript
+        : pttTranscript;
+    final help = switch (state) {
+      UnifiedVoiceEntryState.idle => l10n.entryVoiceIdleHelp,
+      UnifiedVoiceEntryState.listening => l10n.entryVoiceListeningHelp,
+      UnifiedVoiceEntryState.processing => l10n.entryVoiceProcessingHelp,
+      UnifiedVoiceEntryState.review => l10n.entryVoiceReviewHelp,
+      UnifiedVoiceEntryState.unavailable => l10n.entryVoiceUnavailableHelp,
+    };
+    final coreSemanticLabel = switch (state) {
+      UnifiedVoiceEntryState.idle => l10n.entryVoiceStartAction,
+      UnifiedVoiceEntryState.listening => l10n.entryVoiceStopAction,
+      UnifiedVoiceEntryState.processing => l10n.entryVoiceProcessingStatus,
+      UnifiedVoiceEntryState.review => l10n.entryVoiceRerecordAction,
+      UnifiedVoiceEntryState.unavailable => l10n.entryVoiceUnavailableStatus,
+    };
+
+    return UnifiedVoiceEntryDock(
+      state: state,
+      copy: UnifiedVoiceEntryCopy(
+        privacy: l10n.entryVoicePrivacy,
+        status: status,
+        transcript: transcript,
+        help: help,
+        keyboardSemanticLabel: l10n.entryVoiceKeyboardAction,
+        coreSemanticLabel: coreSemanticLabel,
+        primaryAction: l10n.record,
+        settingsAction: l10n.shoppingVoiceSettingsAction,
+        continuousSummary: _continuousMode
+            ? l10n.entryContinuousKeepNext
+            : l10n.entryContinuousReturnHome,
+        continuousAction: _continuousMode
+            ? l10n.entryContinuousDisable
+            : l10n.entryContinuousEnable,
+      ),
       soundLevel: pttSoundLevel,
-      // 260622-nhs R4 (BUG C): live recognizer status drives
-      // the panel title + pulse-dot colour.
-      status: pttListenStatus,
-      onExit: _onVoiceModalExit,
-      onReset: _onVoiceReset,
+      continuousMode: _continuousMode,
+      isSubmitting: _isSubmitting || _isVoiceDraftTransient || !_canSave,
+      onKeyboard: _onVoiceKeyboard,
+      onCore: _onVoiceCore,
+      onPrimary: _trySave,
+      onSettings: () {
+        showErrorFeedback(context, l10n.entryVoiceUnavailableHelp);
+      },
+      onToggleContinuous: () {
+        if (_isSubmitting) return;
+        onPttSessionChanged(() => _continuousMode = !_continuousMode);
+      },
     );
   }
 }

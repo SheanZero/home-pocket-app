@@ -2135,6 +2135,12 @@ class SZh extends S {
   String get shoppingFormLedgerLabel => '账本';
 
   @override
+  String get shoppingFormLedgerDaily => '日常';
+
+  @override
+  String get shoppingFormLedgerJoy => '悦己';
+
+  @override
   String get shoppingFormCategoryLabel => '分类';
 
   @override
@@ -2150,6 +2156,9 @@ class SZh extends S {
   String get shoppingFormNoteLabel => '备注';
 
   @override
+  String get shoppingFormNotePlaceholder => '输入需要的备注';
+
+  @override
   String get shoppingFormQuantityLabel => '数量';
 
   @override
@@ -2157,6 +2166,144 @@ class SZh extends S {
 
   @override
   String get shoppingFormSaveError => '保存失败，请重试。';
+
+  @override
+  String get shoppingListTypeCreateHint => '保存后无法更改类型';
+
+  @override
+  String get shoppingFormSaving => '保存中…';
+
+  @override
+  String get shoppingFormPricePlaceholder => '未填写';
+
+  @override
+  String get shoppingVoiceManualTitle => '语音输入';
+
+  @override
+  String get shoppingVoiceManualHelp => '一次说出商品名、数量、用途、分类和参考价格';
+
+  @override
+  String get shoppingVoicePrivacy => '优先使用设备端识别';
+
+  @override
+  String get shoppingVoiceListeningStatus => '正在聆听';
+
+  @override
+  String get shoppingVoiceProcessingStatus => '正在解析';
+
+  @override
+  String get shoppingVoiceReviewStatus => '已填写到表单';
+
+  @override
+  String get shoppingVoiceUnavailableStatus => '无法使用麦克风';
+
+  @override
+  String get shoppingVoiceKeyboardAction => '返回手动输入';
+
+  @override
+  String get shoppingVoiceListeningPlaceholder => '“牛奶两瓶，日常，参考价格20元……”';
+
+  @override
+  String get shoppingVoiceProcessingPlaceholder => '“牛奶两瓶，日常，参考价格20元”';
+
+  @override
+  String get shoppingVoiceReviewPlaceholder => '请检查已填写到表单的内容';
+
+  @override
+  String get shoppingVoiceStopAction => '立即结束并解析';
+
+  @override
+  String get shoppingVoiceRerecordAction => '重新录音';
+
+  @override
+  String get shoppingVoiceListeningHelp => '说完约3秒后自动解析 · 点方块立即结束';
+
+  @override
+  String get shoppingVoiceProcessingHelp => '正在将语音整理为购物项内容';
+
+  @override
+  String get shoppingVoiceReviewHelp => '请确认内容，然后点击右上角“保存”添加';
+
+  @override
+  String get shoppingVoiceUnavailableHelp => '仍可继续使用手动输入';
+
+  @override
+  String get shoppingVoiceSettingsAction => '麦克风权限说明';
+
+  @override
+  String get entryVoiceLaunchHelp => '一次说出金额、商家、分类和日期';
+
+  @override
+  String get entryVoicePrivacy => '按语音设置处理';
+
+  @override
+  String get entryVoiceIdleStatus => '可以记录下一笔';
+
+  @override
+  String get entryVoiceListeningStatus => '正在聆听';
+
+  @override
+  String get entryVoiceProcessingStatus => '正在整理内容';
+
+  @override
+  String get entryVoiceReviewStatus => '已填入账目';
+
+  @override
+  String get entryVoiceUnavailableStatus => '无法使用语音输入';
+
+  @override
+  String get entryVoiceIdleTranscript => '可以开始记录下一笔';
+
+  @override
+  String get entryVoiceListeningPlaceholder => '“森林咖啡，午餐两千三百八十日元……”';
+
+  @override
+  String get entryVoiceProcessingPlaceholder => '“森林咖啡，午餐两千三百八十日元”';
+
+  @override
+  String get entryVoiceIdleHelp => '点按麦克风开始下一笔';
+
+  @override
+  String get entryVoiceListeningHelp => '说完稍候将自动识别，也可点按立即完成';
+
+  @override
+  String get entryVoiceProcessingHelp => '正在把识别结果填入同一份表单';
+
+  @override
+  String get entryVoiceReviewHelp => '点按麦克风重新录音，也可修改后直接记录';
+
+  @override
+  String get entryVoiceUnavailableHelp => '请在系统设置中允许麦克风，也可继续手动输入';
+
+  @override
+  String get entryVoiceKeyboardAction => '切换到键盘输入';
+
+  @override
+  String get entryVoiceStartAction => '开始语音输入';
+
+  @override
+  String get entryVoiceStopAction => '立即结束并解析';
+
+  @override
+  String get entryVoiceRerecordAction => '重新录音';
+
+  @override
+  String get entryVoiceSourceBadge => '语音填入';
+
+  @override
+  String get entryCategorySelectRequired => '需选择';
+
+  @override
+  String get entryContinuousReturnHome => '记录后返回主页';
+
+  @override
+  String get entryContinuousKeepNext => '记录后继续下一笔';
+
+  @override
+  String get entryContinuousEnable => '连续记账';
+
+  @override
+  String get entryContinuousDisable => '关闭连续记账';
 
   @override
   String get currencySelectorTitle => '选择货币';

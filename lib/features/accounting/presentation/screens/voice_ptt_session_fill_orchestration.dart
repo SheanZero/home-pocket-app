@@ -15,8 +15,8 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
     on VoicePttSessionMixin<W> {
   // ── Sound-level / result callbacks (ported verbatim) ───────────────────────
 
-  void _onSoundLevel(double level) {
-    if (!mounted) return;
+  void _onSoundLevel(double level, int generation) {
+    if (!_isPttSessionCurrent(generation)) return;
     final now = DateTime.now();
     if (_lastSampleTime != null &&
         now.difference(_lastSampleTime!).inMilliseconds <
@@ -30,8 +30,9 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
     onPttSessionChanged(() => _soundLevel = level);
   }
 
-  void _onResult(SpeechRecognitionResult result) {
-    if (!mounted) return;
+  void _onResult(SpeechRecognitionResult result, int generation) {
+    if (!_isPttSessionCurrent(generation)) return;
+    final resultRevision = ++_pttResultRevision;
 
     if (!result.finalResult) {
       _partialResultCount++;
@@ -40,8 +41,9 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
 
       _parseDebounce?.cancel();
       _parseDebounce = Timer(VoiceTuning.partialParseDebounce, () {
-        if (result.recognizedWords.isNotEmpty) {
-          _parseVoiceInput(result.recognizedWords);
+        if (_isPttResultCurrent(generation, resultRevision) &&
+            result.recognizedWords.isNotEmpty) {
+          _parseVoiceInput(result.recognizedWords, generation, resultRevision);
         }
       });
     } else {
@@ -70,15 +72,21 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
         // The legacy hold path only refreshes _parseResult here; the fill happens
         // on release (still one parse, via the release commit).
         if (_continuousActive) {
-          _parseFinalResult(text, alternateTexts: alternateTexts).then((
-            parsed,
-          ) {
-            if (mounted && _continuousActive) {
-              _fillFormFromText(text, data: parsed);
-            }
-          });
+          unawaited(
+            _parseAndFillContinuousFinal(
+              text,
+              generation: generation,
+              resultRevision: resultRevision,
+              alternateTexts: alternateTexts,
+            ),
+          );
         } else {
-          _parseFinalResult(text, alternateTexts: alternateTexts);
+          _parseFinalResult(
+            text,
+            generation: generation,
+            resultRevision: resultRevision,
+            alternateTexts: alternateTexts,
+          );
         }
       }
     }
@@ -90,17 +98,68 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
   /// fill is overwritten by the final fill and revertible by reset (the snapshot
   /// baseline is unchanged). Parses ONCE and reuses the result for both the
   /// `_parseResult` mirror and the fill.
-  Future<void> _parseVoiceInput(String text) async {
-    if (!mounted) return;
-    final useCase = ref.read(parseVoiceInputUseCaseProvider);
-    final result = await useCase.execute(text, localeId: pttVoiceLocaleId);
-    if (!mounted || !result.isSuccess) return;
-    final data = result.data;
-    onPttSessionChanged(() => _parseResult = data);
-    if (_continuousActive && data != null) {
-      // XVAL-03 / D-01: partial fills amount/text/merchant/date LIVE but holds
-      // the category (fillCategory: false) until the first end-of-speech final.
-      await _fillFormFromText(text, data: data, fillCategory: false);
+  Future<void> _parseVoiceInput(
+    String text,
+    int generation,
+    int resultRevision,
+  ) async {
+    if (!_isPttResultCurrent(generation, resultRevision)) return;
+    _beginPttParsing(generation);
+    try {
+      final useCase = ref.read(parseVoiceInputUseCaseProvider);
+      final result = await useCase.execute(text, localeId: pttVoiceLocaleId);
+      if (!_isPttResultCurrent(generation, resultRevision) ||
+          !result.isSuccess) {
+        return;
+      }
+      final data = result.data;
+      onPttSessionChanged(() => _parseResult = data);
+      if (_continuousActive && data != null) {
+        // XVAL-03 / D-01: partial fills amount/text/merchant/date LIVE but holds
+        // the category (fillCategory: false) until the first end-of-speech final.
+        await _fillFormFromText(
+          text,
+          data: data,
+          fillCategory: false,
+          generation: generation,
+          resultRevision: resultRevision,
+        );
+      }
+    } finally {
+      _endPttParsing(generation);
+    }
+  }
+
+  /// Keeps the whole final parse→fill chain transient. Some recognizers emit
+  /// `done` immediately after the final result; without this outer scope there
+  /// was a gap before [_fillFormFromText] set `_parsing`, exposing a saveable
+  /// review draft while parsing was still in flight.
+  Future<void> _parseAndFillContinuousFinal(
+    String text, {
+    required int generation,
+    required int resultRevision,
+    required List<String> alternateTexts,
+  }) async {
+    if (!_isPttResultCurrent(generation, resultRevision)) return;
+    _beginPttParsing(generation);
+    try {
+      final parsed = await _parseFinalResult(
+        text,
+        generation: generation,
+        resultRevision: resultRevision,
+        alternateTexts: alternateTexts,
+      );
+      if (_isPttResultCurrent(generation, resultRevision) &&
+          _continuousActive) {
+        await _fillFormFromText(
+          text,
+          data: parsed,
+          generation: generation,
+          resultRevision: resultRevision,
+        );
+      }
+    } finally {
+      _endPttParsing(generation);
     }
   }
 
@@ -112,9 +171,11 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
   /// ITN-concat cross-validation.
   Future<VoiceParseResult?> _parseFinalResult(
     String text, {
+    required int generation,
+    required int resultRevision,
     List<String> alternateTexts = const [],
   }) async {
-    if (!mounted) return null;
+    if (!_isPttResultCurrent(generation, resultRevision)) return null;
     final useCase = ref.read(parseVoiceInputUseCaseProvider);
     final result = await useCase.execute(
       text,
@@ -122,7 +183,9 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
       alternateTexts: alternateTexts,
     );
 
-    if (!mounted || !result.isSuccess) return null;
+    if (!_isPttResultCurrent(generation, resultRevision) || !result.isSuccess) {
+      return null;
+    }
 
     var parseResult = result.data;
     if (parseResult == null) return null;
@@ -161,28 +224,38 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
   /// timer is introduced (D-03): the single isFinal signal drives the one fill.
   Future<void> _fillFormFromText(
     String text, {
+    required int generation,
     VoiceParseResult? data,
     bool fillCategory = true,
+    int? resultRevision,
   }) async {
-    if (text.isEmpty && data == null) return;
+    if (!_isPttWorkCurrent(generation, resultRevision) ||
+        (text.isEmpty && data == null)) {
+      return;
+    }
 
-    onPttSessionChanged(() => _parsing = true);
+    _beginPttParsing(generation);
     try {
       await _fillFormFromTextInner(
         text,
+        generation: generation,
         preParsed: data,
         fillCategory: fillCategory,
+        resultRevision: resultRevision,
       );
     } finally {
-      if (mounted) onPttSessionChanged(() => _parsing = false);
+      _endPttParsing(generation);
     }
   }
 
   Future<void> _fillFormFromTextInner(
     String text, {
+    required int generation,
     VoiceParseResult? preParsed,
     bool fillCategory = true,
+    int? resultRevision,
   }) async {
+    if (!_isPttWorkCurrent(generation, resultRevision)) return;
     var resolved = preParsed;
     if (resolved == null) {
       if (text.isEmpty) return;
@@ -191,7 +264,10 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
         text,
         localeId: pttVoiceLocaleId,
       );
-      if (!mounted || !parseResult.isSuccess) return;
+      if (!_isPttWorkCurrent(generation, resultRevision) ||
+          !parseResult.isSuccess) {
+        return;
+      }
       resolved = parseResult.data;
     }
     if (resolved == null) return;
@@ -215,8 +291,10 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
       if (categoryId != null) {
         final repo = ref.read(categoryRepositoryProvider);
         category = await repo.findById(categoryId);
+        if (!_isPttWorkCurrent(generation, resultRevision)) return;
         if (category?.parentId != null) {
           parent = await repo.findById(category!.parentId!);
+          if (!_isPttWorkCurrent(generation, resultRevision)) return;
         }
       }
     }
@@ -232,7 +310,7 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
           localeId: pttVoiceLocaleId,
         ) ??
         0;
-    if (!mounted) return;
+    if (!_isPttWorkCurrent(generation, resultRevision)) return;
     final state = pttFormState;
     if (state == null) return;
 
@@ -247,6 +325,11 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
       data: data,
       arbitratedAmount: amount,
     );
+    final categoryNeedsSelection =
+        plan.pushRecognition &&
+        category == null &&
+        data.categoryMatch == null &&
+        (data.band == ConfidenceBand.weak || data.alternates.isNotEmpty);
 
     if (plan.writeAmount) {
       state.updateAmount(amount);
@@ -255,7 +338,10 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
     // `category` is only ever non-null when the parse carried a floor-gated
     // categoryMatch on a final fill, so `plan.resolveCategory` is implied —
     // the guard keeps the actual write conditioned on the repo lookup result.
-    if (plan.resolveCategory && category != null) {
+    if (categoryNeedsSelection) {
+      state.restoreCategory(null, null);
+      onPttCategoryNeedsSelection();
+    } else if (plan.resolveCategory && category != null) {
       state.updateCategory(category, parent);
     }
     // Phase 52 (RECUX-01/02 / D-08): push the recognition surface (confidence
@@ -289,10 +375,12 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
           currency: detectedCurrency!,
           wholeUnitAmount: amount,
           date: data.parsedDate ?? DateTime.now(),
+          generation: generation,
+          resultRevision: resultRevision,
         );
         if (conversion != null) nextCurrency = detectedCurrency;
       }
-      if (!mounted) return;
+      if (!_isPttWorkCurrent(generation, resultRevision)) return;
       onPttSessionChanged(() {
         _displayCurrency = nextCurrency;
       });
@@ -305,13 +393,13 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
       );
     }
     // Provenance hook: a PTT fill happened — host stamps EntrySource.voice.
-    onPttCommitted();
+    if (_isPttWorkCurrent(generation, resultRevision)) onPttCommitted();
   }
 
   /// Rebuild the chunk merger (used by [resetPttSessionAndRestart]) so a reset
   /// re-accumulates the amount from a clean baseline. Mirrors the merger setup
   /// in [startPttSession] (same parser selection + onAmountResolved hook).
-  void _rebuildAmountMerger() {
+  void _rebuildAmountMerger(int generation) {
     _amountMerger?.dispose();
     final speechService = ref.read(appSpeechRecognitionServiceProvider);
     final parser = pttVoiceLocaleId.startsWith('ja')
@@ -327,7 +415,7 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
       amountExtractor: (text) =>
           _amountArbiter.extractAmount(text, localeId: pttVoiceLocaleId),
       onAmountResolved: (amount) {
-        if (!mounted) return;
+        if (!_isPttSessionCurrent(generation)) return;
         onPttSessionChanged(() => _mergedAmount = amount);
       },
     );

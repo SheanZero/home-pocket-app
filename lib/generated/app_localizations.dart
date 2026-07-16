@@ -3997,6 +3997,18 @@ abstract class S {
   /// **'Ledger'**
   String get shoppingFormLedgerLabel;
 
+  /// Short daily-purpose segment label in the v16 shopping item form
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get shoppingFormLedgerDaily;
+
+  /// Short Joy-purpose segment label in the v16 shopping item form
+  ///
+  /// In en, this message translates to:
+  /// **'Joy'**
+  String get shoppingFormLedgerJoy;
+
   /// Label for the category field in the shopping item form (Phase 38-07)
   ///
   /// In en, this message translates to:
@@ -4027,6 +4039,12 @@ abstract class S {
   /// **'Note'**
   String get shoppingFormNoteLabel;
 
+  /// Placeholder for the note field in the v16 shopping item form
+  ///
+  /// In en, this message translates to:
+  /// **'Add any needed note'**
+  String get shoppingFormNotePlaceholder;
+
   /// Label for the quantity field in the shopping item form (Phase 38-07)
   ///
   /// In en, this message translates to:
@@ -4044,6 +4062,282 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Failed to save. Please try again.'**
   String get shoppingFormSaveError;
+
+  /// Neutral list-type immutability hint shown while creating a shopping item
+  ///
+  /// In en, this message translates to:
+  /// **'Type cannot be changed after saving'**
+  String get shoppingListTypeCreateHint;
+
+  /// Disabled shopping item form action while a save is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get shoppingFormSaving;
+
+  /// Placeholder for an empty shopping item estimated-price field
+  ///
+  /// In en, this message translates to:
+  /// **'Not entered'**
+  String get shoppingFormPricePlaceholder;
+
+  /// Title of the shopping item voice-draft launch card
+  ///
+  /// In en, this message translates to:
+  /// **'Enter by voice'**
+  String get shoppingVoiceManualTitle;
+
+  /// Supporting copy on the shopping item voice-draft launch card
+  ///
+  /// In en, this message translates to:
+  /// **'Say the item, quantity, purpose, category, and estimated price together'**
+  String get shoppingVoiceManualHelp;
+
+  /// Privacy caption in the shopping item voice-draft panel
+  ///
+  /// In en, this message translates to:
+  /// **'On-device recognition preferred'**
+  String get shoppingVoicePrivacy;
+
+  /// Shopping item voice-draft listening status
+  ///
+  /// In en, this message translates to:
+  /// **'Listening'**
+  String get shoppingVoiceListeningStatus;
+
+  /// Shopping item voice-draft processing status
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing'**
+  String get shoppingVoiceProcessingStatus;
+
+  /// Shopping item voice-draft review status
+  ///
+  /// In en, this message translates to:
+  /// **'Filled into the form'**
+  String get shoppingVoiceReviewStatus;
+
+  /// Shopping item voice-draft unavailable status
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone unavailable'**
+  String get shoppingVoiceUnavailableStatus;
+
+  /// Semantic label for leaving shopping item voice input
+  ///
+  /// In en, this message translates to:
+  /// **'Return to manual input'**
+  String get shoppingVoiceKeyboardAction;
+
+  /// Example transcript shown before shopping speech is recognized
+  ///
+  /// In en, this message translates to:
+  /// **'“Two bottles of milk, daily, estimated price ¥500…”'**
+  String get shoppingVoiceListeningPlaceholder;
+
+  /// Example transcript shown while shopping speech is parsed
+  ///
+  /// In en, this message translates to:
+  /// **'“Two bottles of milk, daily, estimated price ¥500”'**
+  String get shoppingVoiceProcessingPlaceholder;
+
+  /// Fallback transcript copy after shopping speech is parsed
+  ///
+  /// In en, this message translates to:
+  /// **'Review the information added to the form'**
+  String get shoppingVoiceReviewPlaceholder;
+
+  /// Semantic label for stopping shopping speech recognition
+  ///
+  /// In en, this message translates to:
+  /// **'Stop now and analyze'**
+  String get shoppingVoiceStopAction;
+
+  /// Semantic label for restarting shopping speech recognition
+  ///
+  /// In en, this message translates to:
+  /// **'Record again'**
+  String get shoppingVoiceRerecordAction;
+
+  /// Guidance shown while listening for a shopping item
+  ///
+  /// In en, this message translates to:
+  /// **'Pause for about 3 seconds to analyze automatically · Tap the square to stop now'**
+  String get shoppingVoiceListeningHelp;
+
+  /// Guidance shown while parsing a shopping item voice draft
+  ///
+  /// In en, this message translates to:
+  /// **'Organizing your speech into shopping item fields'**
+  String get shoppingVoiceProcessingHelp;
+
+  /// Guidance shown after a shopping item voice draft is applied
+  ///
+  /// In en, this message translates to:
+  /// **'Review the details, then tap Save at the top right to add'**
+  String get shoppingVoiceReviewHelp;
+
+  /// Guidance shown when shopping item voice input is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Manual input remains available'**
+  String get shoppingVoiceUnavailableHelp;
+
+  /// Action shown when shopping item voice input is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone help'**
+  String get shoppingVoiceSettingsAction;
+
+  /// No description provided for @entryVoiceLaunchHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Say the amount, merchant, category, and date in one go'**
+  String get entryVoiceLaunchHelp;
+
+  /// No description provided for @entryVoicePrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Processed using voice settings'**
+  String get entryVoicePrivacy;
+
+  /// No description provided for @entryVoiceIdleStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for the next entry'**
+  String get entryVoiceIdleStatus;
+
+  /// No description provided for @entryVoiceListeningStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening'**
+  String get entryVoiceListeningStatus;
+
+  /// No description provided for @entryVoiceProcessingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizing the details'**
+  String get entryVoiceProcessingStatus;
+
+  /// No description provided for @entryVoiceReviewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to this entry'**
+  String get entryVoiceReviewStatus;
+
+  /// No description provided for @entryVoiceUnavailableStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input unavailable'**
+  String get entryVoiceUnavailableStatus;
+
+  /// No description provided for @entryVoiceIdleTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready when you are'**
+  String get entryVoiceIdleTranscript;
+
+  /// No description provided for @entryVoiceListeningPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'“Forest Café, lunch, 2,380 yen…”'**
+  String get entryVoiceListeningPlaceholder;
+
+  /// No description provided for @entryVoiceProcessingPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'“Forest Café, lunch, 2,380 yen”'**
+  String get entryVoiceProcessingPlaceholder;
+
+  /// No description provided for @entryVoiceIdleHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the microphone to start the next entry'**
+  String get entryVoiceIdleHelp;
+
+  /// No description provided for @entryVoiceListeningHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause to recognize automatically, or tap to finish now'**
+  String get entryVoiceListeningHelp;
+
+  /// No description provided for @entryVoiceProcessingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding the recognition result to this form'**
+  String get entryVoiceProcessingHelp;
+
+  /// No description provided for @entryVoiceReviewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the microphone to record again, or edit and record'**
+  String get entryVoiceReviewHelp;
+
+  /// No description provided for @entryVoiceUnavailableHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow microphone access in system Settings, or continue with manual input'**
+  String get entryVoiceUnavailableHelp;
+
+  /// No description provided for @entryVoiceKeyboardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to keyboard input'**
+  String get entryVoiceKeyboardAction;
+
+  /// No description provided for @entryVoiceStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start voice input'**
+  String get entryVoiceStartAction;
+
+  /// No description provided for @entryVoiceStopAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish now and analyze'**
+  String get entryVoiceStopAction;
+
+  /// No description provided for @entryVoiceRerecordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Record again'**
+  String get entryVoiceRerecordAction;
+
+  /// No description provided for @entryVoiceSourceBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice filled'**
+  String get entryVoiceSourceBadge;
+
+  /// No description provided for @entryCategorySelectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select required'**
+  String get entryCategorySelectRequired;
+
+  /// No description provided for @entryContinuousReturnHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Return home after recording'**
+  String get entryContinuousReturnHome;
+
+  /// No description provided for @entryContinuousKeepNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to the next entry after recording'**
+  String get entryContinuousKeepNext;
+
+  /// No description provided for @entryContinuousEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous entry'**
+  String get entryContinuousEnable;
+
+  /// No description provided for @entryContinuousDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off continuous entry'**
+  String get entryContinuousDisable;
 
   /// Title of the CurrencySelectorSheet (Phase 42-06)
   ///

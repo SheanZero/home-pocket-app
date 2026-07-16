@@ -51,6 +51,7 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   var canceled = false;
   var startCount = 0;
   var initializeCount = 0;
+  Object? startError;
 
   /// KFB C2: the last `allowOnDeviceFallback` value threaded into
   /// [startListening] (default true preserves every existing call site).
@@ -95,6 +96,8 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     stopped = false;
     startCount++;
     lastAllowOnDeviceFallback = allowOnDeviceFallback;
+    final error = startError;
+    if (error != null) throw error;
   }
 
   @override
@@ -1638,10 +1641,7 @@ void main() {
       final speech = CapturingSpeechService();
       final parse = FakeParseVoiceInputUseCase({
         '53102円': const VoiceParseResult(rawText: '53102円', amount: 53102),
-        '五千三百十二円': const VoiceParseResult(
-          rawText: '五千三百十二円',
-          amount: 5312,
-        ),
+        '五千三百十二円': const VoiceParseResult(rawText: '五千三百十二円', amount: 5312),
       });
 
       await tester.pumpWidget(
@@ -1673,10 +1673,7 @@ void main() {
       final speech = CapturingSpeechService();
       final parse = FakeParseVoiceInputUseCase({
         '35016円': const VoiceParseResult(rawText: '35016円', amount: 35016),
-        '三千五百十六円': const VoiceParseResult(
-          rawText: '三千五百十六円',
-          amount: 3516,
-        ),
+        '三千五百十六円': const VoiceParseResult(rawText: '三千五百十六円', amount: 3516),
       });
 
       await tester.pumpWidget(
@@ -1913,9 +1910,42 @@ void main() {
       await tester.pump();
 
       expect(speech.startCount, 1);
-      expect(speech.lastAllowOnDeviceFallback, isFalse,
-          reason: 'the disabled auto-degradation policy propagates to the '
-              'service call');
+      expect(
+        speech.lastAllowOnDeviceFallback,
+        isFalse,
+        reason:
+            'the disabled auto-degradation policy propagates to the '
+            'service call',
+      );
+    },
+  );
+
+  testWidgets(
+    'KFB C2: a startListening exception with fallback disabled rolls back '
+    'without escaping or leaving a listening session',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService()
+        ..startError = StateError('platform start failed');
+      final parse = FakeParseVoiceInputUseCase({});
+
+      await tester.pumpWidget(
+        buildHost(
+          speechService: speech,
+          parseUseCase: parse,
+          appSettings: const AppSettings(voiceAllowOnDeviceFallback: false),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await hostOf(tester).startPttTapSession();
+      await tester.pump();
+
+      expect(speech.startCount, 1);
+      expect(speech.lastAllowOnDeviceFallback, isFalse);
+      expect(hostOf(tester).pttIsRecording, isFalse);
+      expect(hostOf(tester).pttContinuousActive, isFalse);
+      expect(hostOf(tester).pttListenStatus, PttListenStatus.stopped);
     },
   );
 }

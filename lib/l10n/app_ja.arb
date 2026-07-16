@@ -2786,6 +2786,14 @@
   "@shoppingFormLedgerLabel": {
     "description": "Section label for the ledger type selector in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormLedgerDaily": "日常",
+  "@shoppingFormLedgerDaily": {
+    "description": "Short daily-purpose segment label in the v16 shopping item form"
+  },
+  "shoppingFormLedgerJoy": "ときめき",
+  "@shoppingFormLedgerJoy": {
+    "description": "Short Joy-purpose segment label in the v16 shopping item form"
+  },
   "shoppingFormCategoryLabel": "カテゴリ",
   "@shoppingFormCategoryLabel": {
     "description": "Label for the category field in the shopping item form (Phase 38-07)"
@@ -2806,6 +2814,10 @@
   "@shoppingFormNoteLabel": {
     "description": "Label for the note field in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormNotePlaceholder": "必要なメモを入力",
+  "@shoppingFormNotePlaceholder": {
+    "description": "Placeholder for the note field in the v16 shopping item form"
+  },
   "shoppingFormQuantityLabel": "数量",
   "@shoppingFormQuantityLabel": {
     "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
@@ -2818,6 +2830,115 @@
   "@shoppingFormSaveError": {
     "description": "Error message shown when saving a shopping item fails (Phase 38-07)"
   },
+  "shoppingListTypeCreateHint": "保存後はタイプを変更できません",
+  "@shoppingListTypeCreateHint": {
+    "description": "Neutral list-type immutability hint shown while creating a shopping item"
+  },
+  "shoppingFormSaving": "保存中…",
+  "@shoppingFormSaving": {
+    "description": "Disabled shopping item form action while a save is in progress"
+  },
+  "shoppingFormPricePlaceholder": "未入力",
+  "@shoppingFormPricePlaceholder": {
+    "description": "Placeholder for an empty shopping item estimated-price field"
+  },
+  "shoppingVoiceManualTitle": "音声で入力",
+  "@shoppingVoiceManualTitle": {
+    "description": "Title of the shopping item voice-draft launch card"
+  },
+  "shoppingVoiceManualHelp": "品名・数量・用途・カテゴリ・参考価格をまとめて話す",
+  "@shoppingVoiceManualHelp": {
+    "description": "Supporting copy on the shopping item voice-draft launch card"
+  },
+  "shoppingVoicePrivacy": "端末内認識を優先",
+  "@shoppingVoicePrivacy": {
+    "description": "Privacy caption in the shopping item voice-draft panel"
+  },
+  "shoppingVoiceListeningStatus": "聞いています",
+  "@shoppingVoiceListeningStatus": {
+    "description": "Shopping item voice-draft listening status"
+  },
+  "shoppingVoiceProcessingStatus": "解析しています",
+  "@shoppingVoiceProcessingStatus": {
+    "description": "Shopping item voice-draft processing status"
+  },
+  "shoppingVoiceReviewStatus": "フォームに入力しました",
+  "@shoppingVoiceReviewStatus": {
+    "description": "Shopping item voice-draft review status"
+  },
+  "shoppingVoiceUnavailableStatus": "マイクを使えません",
+  "@shoppingVoiceUnavailableStatus": {
+    "description": "Shopping item voice-draft unavailable status"
+  },
+  "shoppingVoiceKeyboardAction": "手動入力へ戻る",
+  "@shoppingVoiceKeyboardAction": {
+    "description": "Semantic label for leaving shopping item voice input"
+  },
+  "shoppingVoiceListeningPlaceholder": "「牛乳を2本、日常、参考価格500円……」",
+  "@shoppingVoiceListeningPlaceholder": {
+    "description": "Example transcript shown before shopping speech is recognized"
+  },
+  "shoppingVoiceProcessingPlaceholder": "「牛乳を2本、日常、参考価格500円」",
+  "@shoppingVoiceProcessingPlaceholder": {
+    "description": "Example transcript shown while shopping speech is parsed"
+  },
+  "shoppingVoiceReviewPlaceholder": "フォームに入力した内容を確認してください",
+  "@shoppingVoiceReviewPlaceholder": {
+    "description": "Fallback transcript copy after shopping speech is parsed"
+  },
+  "shoppingVoiceStopAction": "すぐに終了して解析",
+  "@shoppingVoiceStopAction": {
+    "description": "Semantic label for stopping shopping speech recognition"
+  },
+  "shoppingVoiceRerecordAction": "もう一度録音",
+  "@shoppingVoiceRerecordAction": {
+    "description": "Semantic label for restarting shopping speech recognition"
+  },
+  "shoppingVoiceListeningHelp": "話し終えると約3秒で自動解析 · 四角で今すぐ終了",
+  "@shoppingVoiceListeningHelp": {
+    "description": "Guidance shown while listening for a shopping item"
+  },
+  "shoppingVoiceProcessingHelp": "入力内容をショッピング項目に整理しています",
+  "@shoppingVoiceProcessingHelp": {
+    "description": "Guidance shown while parsing a shopping item voice draft"
+  },
+  "shoppingVoiceReviewHelp": "内容を確認し、右上の「保存」で追加",
+  "@shoppingVoiceReviewHelp": {
+    "description": "Guidance shown after a shopping item voice draft is applied"
+  },
+  "shoppingVoiceUnavailableHelp": "手動入力はそのまま利用できます",
+  "@shoppingVoiceUnavailableHelp": {
+    "description": "Guidance shown when shopping item voice input is unavailable"
+  },
+  "shoppingVoiceSettingsAction": "マイク権限の案内",
+  "@shoppingVoiceSettingsAction": {
+    "description": "Action shown when shopping item voice input is unavailable"
+  },
+  "entryVoiceLaunchHelp": "金額・店名・カテゴリ・日付をまとめて話せます",
+  "entryVoicePrivacy": "音声設定に沿って処理",
+  "entryVoiceIdleStatus": "次の記録を待機中",
+  "entryVoiceListeningStatus": "聞いています",
+  "entryVoiceProcessingStatus": "内容を整理しています",
+  "entryVoiceReviewStatus": "明細に入力しました",
+  "entryVoiceUnavailableStatus": "音声入力を利用できません",
+  "entryVoiceIdleTranscript": "次の内容を話せます",
+  "entryVoiceListeningPlaceholder": "“森のカフェ、ランチ、2,380円…”",
+  "entryVoiceProcessingPlaceholder": "“森のカフェ、ランチ、2,380円”",
+  "entryVoiceIdleHelp": "マイクをタップして次の記録を開始",
+  "entryVoiceListeningHelp": "話し終えると自動認識。タップですぐ完了",
+  "entryVoiceProcessingHelp": "認識結果を同じフォームに入力しています",
+  "entryVoiceReviewHelp": "マイクで録音し直すか、修正してそのまま記録",
+  "entryVoiceUnavailableHelp": "システム設定でマイクを許可するか、そのまま手動入力を続けられます",
+  "entryVoiceKeyboardAction": "キーボード入力に切り替える",
+  "entryVoiceStartAction": "音声入力を開始",
+  "entryVoiceStopAction": "すぐに終了して解析",
+  "entryVoiceRerecordAction": "録音し直す",
+  "entryVoiceSourceBadge": "音声入力",
+  "entryCategorySelectRequired": "選択が必要",
+  "entryContinuousReturnHome": "記録後にホームへ戻る",
+  "entryContinuousKeepNext": "記録後に次の明細へ進む",
+  "entryContinuousEnable": "連続記録",
+  "entryContinuousDisable": "連続記録を終了",
   "currencySelectorTitle": "通貨を選択",
   "@currencySelectorTitle": {
     "description": "Title of the CurrencySelectorSheet (Phase 42-06)"

@@ -19,6 +19,7 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
   /// yet or the amount is empty/zero. Both SmartKeyboard.onNext and
   /// KeyboardToolbar.onSave point here.
   Future<void> _trySave() async {
+    if (_isVoiceDraftTransient) return;
     // 260603-nr1 #1: reject empty / zero amount before any save attempt.
     if (_amount.isEmpty || (double.tryParse(_amount) ?? 0) <= 0) {
       showErrorFeedback(context, S.of(context).pleaseEnterAmount);
@@ -45,10 +46,10 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
     try {
       final result = await _formKey.currentState!.submit();
       if (!mounted) return;
-      result.when(
-        success: (_) {
+      await result.when(
+        success: (_) async {
           // 260614-iww: branch on continuousMode.
-          if (widget.continuousMode) {
+          if (_continuousMode) {
             // Continuous (FAB long-press) entry: keep the page open, show a
             // longer-lived warm "keep going" toast with an inline exit link
             // that returns ONCE to the page before recording, then reset the
@@ -63,7 +64,7 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
                 Navigator.of(context).pop();
               },
             );
-            _resetForContinuousEntry();
+            await _resetForContinuousEntry();
           } else {
             // Single-tap entry: show a warm "recorded" toast then pop back to
             // the previous page (no form reset — the screen is closing).
@@ -71,10 +72,10 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
             Navigator.of(context).pop();
           }
         },
-        validationError: (msg) {
+        validationError: (msg) async {
           showErrorFeedback(context, msg);
         },
-        persistError: (msg) {
+        persistError: (msg) async {
           showErrorFeedback(context, msg);
         },
       );
@@ -89,6 +90,8 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
   /// default category, and reclaims amount focus so the SmartKeyboard reappears.
   Future<void> _resetForContinuousEntry() async {
     if (!mounted) return;
+    final freshDate = DateTime.now();
+    resetPttSessionState();
     _rebuild(() {
       // Clear the controller text (mirrors _onClear) and reset to JPY so the
       // next entry starts on the CURR-04 native path.
@@ -98,31 +101,37 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
       _currency = 'JPY';
       _controller.onCurrencyChange(currencyFractionDigitsFor(_currency));
       _amount = '';
-      _selectedDate = DateTime.now();
+      _selectedDate = freshDate;
+      _selectedCategory = null;
+      _selectedParentCategory = null;
+      _categoryById = {};
       _manualForeignRate = null;
+      _voiceSnapshot = null;
+      _voiceIdleForNext = false;
       // 260622-nhs: a fresh continuous-entry slate starts as manual provenance.
       _lastFillWasVoice = false;
     });
-    resetPttSessionState();
     final formState = _formKey.currentState;
-    // Phase 52 (RECUX-03 / D-05): 连续记账 (continuous-entry) starts a fresh
-    // slate after a successful save — discard any leftover pending correction
-    // with NO write so the next entry never inherits a stale correction.
-    formState?.discardPendingCorrection();
-    formState?.updateAmount(0);
-    formState?.updateCurrencyTriple(
-      originalCurrency: null,
-      originalAmount: null,
-      appliedRate: null,
-    );
-    formState?.updateMerchant('');
-    formState?.updateNote('');
-    formState?.updateDate(DateTime.now());
+    // One synchronous form transition clears category, ledger, satisfaction,
+    // confidence/correction state, amount, text, and foreign-currency state.
+    formState?.resetForFreshEntry(date: freshDate);
     // Re-seed the default category for the next entry. _initializeDefaultCategory
-    // now pushes the resolved default into the form itself (260603-ti2), so the
-    // form's GlobalKey-preserved state is reset to the default category too.
-    await _initializeDefaultCategory();
+    // awaits the form's ledger mapping; `_isSubmitting` remains true throughout.
+    await _initializeDefaultCategory(forFreshEntry: true);
     if (!mounted) return;
+    if (_voiceModalOpen) {
+      final freshForm = _formKey.currentState;
+      if (freshForm != null) {
+        _voiceSnapshot = ManualEntrySnapshot.capture(
+          amountText: _amount,
+          currency: _currency,
+          manualForeignRate: _manualForeignRate,
+          lastFillWasVoice: _lastFillWasVoice,
+          form: freshForm,
+        );
+      }
+      _rebuild(() => _voiceIdleForNext = true);
+    }
     _restoreKeypadFocus();
   }
 }

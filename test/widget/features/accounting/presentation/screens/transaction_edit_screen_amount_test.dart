@@ -205,10 +205,10 @@ void main() {
     },
   );
 
-  // ── TEST 2: onClear resets display to 0 and screen does not pop on failure ───
+  // ── TEST 2: V16 edit affordances match the reference ───────────────────────
 
   testWidgets(
-    'TEST 2: onClear resets AmountDisplay to 0; screen remains mounted (P19-W5)',
+    'TEST 2: no amount clear; edit affordance opens keypad; save has check',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -226,64 +226,47 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify AmountDisplay is visible with initial amount.
       expect(find.byType(AmountDisplay), findsOneWidget);
       expect(find.text('1,500'), findsOneWidget);
 
-      // Action: tap the clear button (Icons.close) inside AmountDisplay.
-      // AmountDisplay renders the clear button only when amount is non-empty.
-      final clearButton = find.descendant(
-        of: find.byType(AmountDisplay),
-        matching: find.byIcon(Icons.close),
-      );
-      expect(
-        clearButton,
-        findsOneWidget,
-        reason:
-            'Clear button (Icons.close) must be visible when amount is non-zero',
-      );
-
-      await tester.tap(clearButton);
-      await tester.pumpAndSettle();
-
-      // Assert: AmountDisplay now shows "0" (empty string → display '0' via _formatted getter).
       expect(
         find.descendant(
           of: find.byType(AmountDisplay),
-          matching: find.text('0'),
+          matching: find.byIcon(Icons.close),
         ),
-        findsOneWidget,
-        reason: 'After onClear, AmountDisplay must show 0',
+        findsNothing,
+        reason: 'the edit headline omits the legacy clear action',
       );
 
-      // Assert: form's internal _amount is synced to 0 (verified by checking
-      // the screen remains mounted — if _displayAmount and form amount drifted,
-      // the subsequent save test would catch it).
+      final editAffordance = find.byKey(
+        const ValueKey('transaction-edit-amount-affordance'),
+      );
+      expect(editAffordance, findsOneWidget);
+      final editIcon = tester.widget<Icon>(editAffordance);
+      expect(editIcon.icon, Icons.edit_outlined);
+      expect(editIcon.size, 16);
+      final badge = find.byKey(const ValueKey('amount_currency_badge'));
       expect(
-        find.byType(AmountDisplay),
-        findsOneWidget,
-        reason: 'Screen must remain mounted after clear (no premature pop)',
+        tester.getRect(editAffordance).left - tester.getRect(badge).right,
+        closeTo(6, 0.5),
+        reason: 'the 16dp edit affordance follows the JPY badge',
       );
 
-      // Action: tap the Save button.
-      // P19-W5 contract: the form's submit() fires. Category is seeded from
-      // widget.transaction (cat-food), so the category-null guard passes.
-      // Amount guard (> 0) fires next — submit() returns validationError.
-      // P19-W5 deterministic branch: use case NOT invoked because form's own
-      // amount > 0 guard fires before calling the use case.
-      final saveButton = find.text('Save');
-      expect(saveButton, findsOneWidget);
-      await tester.tap(saveButton);
-      await tester.pumpAndSettle();
+      final saveCheck = find.byKey(
+        const ValueKey('transaction-edit-save-check'),
+      );
+      expect(saveCheck, findsOneWidget);
+      final saveIcon = tester.widget<Icon>(saveCheck);
+      expect(saveIcon.icon, Icons.check_rounded);
+      expect(saveIcon.size, 19);
+      expect(saveIcon.color, Colors.white);
 
-      // Assert: use case was NOT invoked (form rejects amount=0 before calling it).
-      verifyNever(() => mockUpdate.execute(any()));
-
-      // Assert: screen did NOT pop (still mounted with AmountDisplay).
+      await tester.tapAt(tester.getCenter(editAffordance));
+      await tester.pump();
       expect(
-        find.byType(AmountDisplay),
+        find.byType(AmountEditBottomSheet),
         findsOneWidget,
-        reason: 'Screen must NOT pop on validation failure',
+        reason: 'the whole amount headline remains tappable for editing',
       );
     },
   );
@@ -321,9 +304,12 @@ void main() {
         reason: 'Foreign headline badge must show the ORIGINAL ISO code (USD)',
       );
       expect(
-        find.descendant(of: badge, matching: find.text(r'$')),
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text(r'$'),
+        ),
         findsOneWidget,
-        reason: 'Foreign headline badge must show the ORIGINAL symbol (\$)',
+        reason: 'Foreign headline must show the ORIGINAL symbol (\$)',
       );
 
       // The headline amount is the ORIGINAL major-unit value, not the JPY one.
@@ -422,7 +408,7 @@ void main() {
       reason: 'JPY-native headline must keep the JPY badge (CURR-04)',
     );
     expect(
-      find.descendant(of: badge, matching: find.text('¥')),
+      find.descendant(of: find.byType(AmountDisplay), matching: find.text('¥')),
       findsOneWidget,
     );
     expect(
@@ -460,10 +446,7 @@ void main() {
       // input is gone — editing flows through the headline keypad now). Quick
       // 260613-ufn moved the card's key to a GlobalKey (for the host-driven
       // date-change re-fetch), so find it by type.
-      expect(
-        find.byType(CurrencyLinkedEditFields),
-        findsOneWidget,
-      );
+      expect(find.byType(CurrencyLinkedEditFields), findsOneWidget);
       expect(
         find.byKey(const Key('edit_original_amount_field')),
         findsNothing,
@@ -512,7 +495,8 @@ void main() {
           matching: find.text('200'),
         ),
         findsOneWidget,
-        reason: 'Headline must reflect the keypad-edited original amount '
+        reason:
+            'Headline must reflect the keypad-edited original amount '
             'without a trailing all-zero ".00" (260614-dx1)',
       );
       expect(

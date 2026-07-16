@@ -26,7 +26,10 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
     required String currency,
     required int wholeUnitAmount,
     required DateTime date,
+    required int generation,
+    int? resultRevision,
   }) async {
+    if (!_isPttWorkCurrent(generation, resultRevision)) return null;
     final minorUnits = wholeUnitAmount * subunitToUnitFor(currency);
     if (minorUnits <= 0) return null;
     try {
@@ -34,7 +37,7 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
       final withSignal = await useCase.execute(
         GetExchangeRateParams(currency: currency, date: date),
       );
-      if (!mounted) return null;
+      if (!_isPttWorkCurrent(generation, resultRevision)) return null;
       final rate = _extractRate(withSignal.result);
       if (rate == null) {
         return null;
