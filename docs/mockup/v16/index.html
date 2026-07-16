@@ -3,9 +3,218 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Home Pocket — Whole App A 温润日系</title>
-<link rel="stylesheet" href="../themes/default.css">
-<link rel="stylesheet" href="../themes/warm-japanese-a.css">
+  <title>Home Pocket — V16 Whole App Mockup</title>
+<style>/* Home Pocket V16 theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
+   Mirrors the current lib/core/theme/app_palette.dart values. */
+:root {
+  /* Brand */
+  --primary:        #6FA36F; /* 若叶绿 leaf green — nav/tab/CTA/active */
+  --primary-press:  #5E8E5E;
+  --daily:          #5FAE72; /* 日常 */
+  --daily-text:     #2E6B3A;
+  --joy:            #D98CA0; /* 悦己 + FAB 樱粉 sakura pink */
+  --joy-text:       #A53D5E;
+  --joy-bg:         #FBEAEF;
+  --shared:         #5B8AC4; /* steel-blue */
+
+  /* Surfaces */
+  --bg:             #FBF7F4; /* 暖米白 warm cream */
+  --card:           #FFFFFF;
+  --card-alt:       #FCF9F7;
+  --border:         #E6DDD8;
+  --border-soft:    #EAE1DC;
+
+  /* Text */
+  --text:           #20352B;
+  --text-muted:     #71877A;
+  --text-faint:     #9CA99F;
+
+  /* Semantic */
+  --success:        #2FA37A;
+  --warning:        #C98A00;
+  --error:          #E5484D;
+  --info:           #2A8FB8;
+
+  /* Shape & motion */
+  --radius-sm: 10px;
+  --radius:    16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 6px 20px rgba(120,90,70,0.10);
+  --shadow-card: 0 2px 10px rgba(120,90,70,0.07);
+  --gap: 16px;
+
+  --font: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "PingFang SC", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--text); }
+
+/* ---- Phone frame ---- */
+.phone-row { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; padding:88px 24px 48px; }
+.phone {
+  width: 375px; height: 760px; background: var(--bg);
+  border-radius: 40px; box-shadow: 0 12px 40px rgba(80,60,50,0.22);
+  border: 10px solid #2b2622; overflow: hidden; position: relative;
+  display: flex; flex-direction: column;
+}
+.phone .notch { position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:140px; height:26px; background:#2b2622; border-radius:0 0 16px 16px; z-index:5; }
+.phone-label { text-align:center; font-size:13px; color:#6b5d54; margin-top:10px; font-weight:600; }
+.screen { flex:1; overflow-y:auto; padding: 44px 22px 22px; }
+.screen::-webkit-scrollbar { width:0; }
+
+/* ---- Common atoms ---- */
+.h1 { font-size: 26px; font-weight: 700; letter-spacing:-0.01em; margin:0 0 8px; }
+.h2 { font-size: 19px; font-weight: 700; margin:0 0 6px; }
+.sub { font-size: 14px; color: var(--text-muted); line-height:1.6; margin:0; }
+.btn { border:none; border-radius: var(--radius-pill); padding:15px 20px; font-size:16px;
+  font-weight:700; font-family:var(--font); cursor:pointer; width:100%; transition:transform .08s, filter .15s; }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color:#fff; box-shadow: var(--shadow-soft); }
+.btn-joy { background: var(--joy); color:#fff; box-shadow:0 6px 18px rgba(217,140,160,.35); }
+.btn-ghost { background: transparent; color: var(--text-muted); font-weight:600; }
+.btn-outline { background:#fff; color: var(--primary); border:1.5px solid var(--primary); }
+.card { background: var(--card); border:1px solid var(--border-soft); border-radius: var(--radius);
+  padding:16px; box-shadow: var(--shadow-card); }
+.pill { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--radius-pill);
+  font-size:13px; font-weight:600; }
+.row { display:flex; align-items:center; gap:12px; }
+.spacer { flex:1; }
+.divider { height:1px; background:var(--border-soft); margin:4px 0; }
+.link { color: var(--shared); text-decoration:none; font-weight:600; }
+.dot-row { display:flex; gap:8px; justify-content:center; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--border); }
+.dot.on { background: var(--primary); width:20px; border-radius:4px; }
+</style>
+<style>/* Mockup V16 — A 温润日系 / 生活手帐
+   Canonical whole-app reference synchronized with the current Flutter app. */
+:root {
+  --hp-bg: #f5f0e7;
+  --hp-surface: #fffdf8;
+  --hp-surface-muted: #eee7db;
+  --hp-surface-strong: #e4dac9;
+  --hp-text: #27362f;
+  --hp-text-muted: #637168;
+  --hp-text-faint: #637168;
+  --hp-border: #e3dacb;
+  --hp-border-strong: #d3c7b5;
+  --hp-primary: #456b59;
+  --hp-primary-text: #365a49;
+  --hp-primary-soft: #e2ece4;
+  --hp-daily: #5fae72;
+  --hp-daily-text: #2e6b3a;
+  --hp-daily-soft: #eef6ec;
+  --hp-joy: #d98ca0;
+  --hp-joy-text: #a53d5e;
+  --hp-joy-soft: #fbeaef;
+  --hp-faithful-accent: #a54a63;
+  --hp-faithful-divider: #c7c7b7;
+  --hp-faithful-satisfaction: #4d9058;
+  --hp-faithful-satisfaction-text: #467f4e;
+  --hp-faithful-satisfaction-track: #e7ece1;
+  --hp-faithful-small-win: #c1953e;
+  --hp-goal-progress: #b76376;
+  --hp-goal-track: #f4dde1;
+  --hp-goal-value: #9b455a;
+  --hp-goal-shadow: 0 2px 7px rgba(155, 69, 90, .10);
+  --hp-ticket-surface: #f3f7f0;
+  --hp-ticket-border: #df9fa7;
+  --hp-ticket-accent: #a54a63;
+  --hp-ticket-calendar: #de929b;
+  --hp-ticket-text: #9b455a;
+  --hp-shared: #58758c;
+  --hp-shared-text: #3f6078;
+  --hp-shared-soft: #e4ebf0;
+  --hp-success: #4f826a;
+  --hp-warning: #a8733f;
+  --hp-error: #b64f4f;
+  --hp-info: #4f7186;
+  --hp-shadow-soft: 0 8px 30px rgba(75, 57, 40, .11);
+  --hp-shadow-card: 0 2px 12px rgba(75, 57, 40, .07);
+  --hp-font-body: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --hp-font-display: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  /* Semantic type scale — 1:1 with Flutter AppTypography. */
+  --type-page-title: 20px;
+  --line-page-title: 28px;
+  --type-section: 16px;
+  --line-section: 22px;
+  --type-item: 15px;
+  --line-item: 21px;
+  --type-body: 14px;
+  --line-body: 21px;
+  --type-label: 13px;
+  --line-label: 18px;
+  --type-supporting: 12px;
+  --line-supporting: 17px;
+  --type-compact: 11px;
+  --line-compact: 15px;
+  --type-navigation: 11px;
+  --line-navigation: 14px;
+  --type-button: 14px;
+  --line-button: 20px;
+  --type-amount-hero: 34px;
+  --line-amount-hero: 38px;
+  --type-amount-large: 24px;
+  --line-amount-large: 30px;
+  --type-amount-medium: 18px;
+  --line-amount-medium: 24px;
+  --type-amount-small: 15px;
+  --line-amount-small: 20px;
+  --type-micro: 10px;
+  --line-micro: 14px;
+  --hp-radius-sm: 10px;
+  --hp-radius-md: 14px;
+  --hp-radius-card: 18px;
+  --hp-radius-hero: 24px;
+  --hp-radius-pill: 999px;
+}
+
+[data-theme="dark"] {
+  --hp-bg: #171c19;
+  --hp-surface: #222923;
+  --hp-surface-muted: #2b342d;
+  --hp-surface-strong: #354039;
+  --hp-text: #eef1eb;
+  --hp-text-muted: #a1ada4;
+  --hp-text-faint: #8b978e;
+  --hp-border: #354038;
+  --hp-border-strong: #465248;
+  --hp-primary: #99bca5;
+  --hp-primary-text: #b4d2bc;
+  --hp-primary-soft: #293b30;
+  --hp-daily: #7dc88d;
+  --hp-daily-text: #7dc88d;
+  --hp-daily-soft: #1a2e1a;
+  --hp-joy: #e89bb0;
+  --hp-joy-text: #e89bb0;
+  --hp-joy-soft: #2e1820;
+  --hp-faithful-accent: #e89bb0;
+  --hp-faithful-divider: #465248;
+  --hp-faithful-satisfaction: #7dc88d;
+  --hp-faithful-satisfaction-text: #91d39e;
+  --hp-faithful-satisfaction-track: #2f3a32;
+  --hp-faithful-small-win: #d3a571;
+  --hp-goal-progress: #d57891;
+  --hp-goal-track: #4a2d37;
+  --hp-goal-value: #f0a9bb;
+  --hp-goal-shadow: 0 2px 7px rgba(0, 0, 0, .18);
+  --hp-ticket-surface: #243128;
+  --hp-ticket-border: #b36b7e;
+  --hp-ticket-accent: #e89bb0;
+  --hp-ticket-calendar: #c9788f;
+  --hp-ticket-text: #e89bb0;
+  --hp-shared: #91adc2;
+  --hp-shared-text: #aac4d7;
+  --hp-shared-soft: #263640;
+  --hp-success: #89b49c;
+  --hp-warning: #d3a571;
+  --hp-error: #e58c8c;
+  --hp-info: #8cb1c8;
+  --hp-shadow-soft: 0 10px 34px rgba(0, 0, 0, .24);
+  --hp-shadow-card: 0 2px 12px rgba(0, 0, 0, .18);
+}
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0">
 <style>
@@ -25,7 +234,7 @@
   .preset, .hub-action { min-height: 40px; border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text-muted); border-radius: var(--hp-radius-pill); padding: 8px 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; transition: .15s ease; }
   .preset:hover, .hub-action:hover { transform: translateY(-1px); border-color: var(--hp-primary); }
   .preset.active { background: var(--hp-primary); border-color: var(--hp-primary); color: var(--hp-surface); }
-  .workspace { width: min(1180px, 100%); margin: 0 auto; padding: 86px 18px 52px; display: grid; grid-template-columns: 220px 390px minmax(240px, 330px); gap: 28px; align-items: start; justify-content: center; }
+  .workspace { width: min(1180px, 100%); margin: 0 auto; padding: 86px 18px 52px; display: grid; grid-template-columns: 220px minmax(390px, 430px) minmax(240px, 330px); gap: 28px; align-items: start; justify-content: center; }
   .catalog, .inspector { position: sticky; top: 82px; max-height: calc(100vh - 100px); overflow: auto; background: rgba(255,253,248,.76); border: 1px solid rgba(100,86,67,.13); border-radius: 22px; padding: 14px; backdrop-filter: blur(16px); }
   [data-theme="dark"] .catalog, [data-theme="dark"] .inspector { background: rgba(34,41,35,.76); border-color: #354038; }
   .catalog h2, .inspector h2 { margin: 2px 4px 10px; font-family: var(--hp-font-display); font-size: 16px; color: var(--hp-text); }
@@ -36,23 +245,23 @@
   .screen-link.active { background: var(--hp-primary-soft); color: var(--hp-primary-text); }
   .screen-link .material-symbols-rounded { font-size: 17px; }
   .phone-wrap { display: flex; justify-content: center; }
-  .phone { width: 390px; height: 844px; border: 8px solid #282b28; border-radius: 40px; overflow: hidden; position: relative; background: var(--hp-bg); color: var(--hp-text); box-shadow: 0 28px 70px rgba(63,49,36,.28); transition: width .2s, background .2s, color .2s; }
-  [data-theme="dark"] .phone { border-color: #070908; box-shadow: 0 28px 70px rgba(0,0,0,.4); }
-  .status { height: 34px; padding: 10px 19px 0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 900; }
+  .phone { width: 390px; height: 844px; border: 0; outline: 8px solid #282b28; border-radius: 40px; overflow: hidden; position: relative; container: phone / inline-size; background: var(--hp-bg); color: var(--hp-text); box-shadow: 0 28px 70px rgba(63,49,36,.28); transition: width .2s, background .2s, color .2s; }
+  [data-theme="dark"] .phone { outline-color: #070908; box-shadow: 0 28px 70px rgba(0,0,0,.4); }
+  .status { height: 34px; padding: 10px 19px 0; display: flex; justify-content: space-between; align-items: center; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
   .status-icons { display: flex; gap: 5px; align-items: center; }
   .status-icons .material-symbols-rounded { font-size: 14px; }
   #app-screen { height: calc(100% - 34px); overflow-y: auto; scrollbar-width: none; padding-bottom: 94px; }
   #app-screen::-webkit-scrollbar { display: none; }
   .phone.no-nav #app-screen { padding-bottom: 0; }
-  .screen { min-height: 100%; padding: 11px 20px 28px; }
+  .screen { min-height: 100%; padding: 11px 20px 28px; overflow: visible; flex: none; }
   .screen.flush { padding-left: 0; padding-right: 0; }
   .app-header { min-height: 46px; display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
   .list-header-actions { display: flex; align-items: center; gap: 0; }
   .list-header-actions .icon-btn { width: 40px; height: 40px; }
   .list-header-actions .material-symbols-rounded { font-size: 24px; }
-  .app-header h1 { margin: 0; font-size: 18px; font-weight: 800; color: var(--hp-text); }
-  .page-month-title { font-family: var(--hp-font-body); font-size: 18px; font-weight: 800; line-height: 1.2; letter-spacing: 0; white-space: nowrap; }
-  .home-month-title { color: var(--hp-primary-text); }
+  .app-header h1 { margin: 0; color: var(--hp-text); font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; }
+  .page-month-title { padding: 4px 0; border: 0; background: transparent; font-family: var(--hp-font-body); font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; letter-spacing: 0; white-space: nowrap; cursor: pointer; }
+  .home-month-title { color: var(--hp-primary); }
   .list-month-title { color: var(--hp-info); }
   .analytics-month-title { color: var(--hp-joy-text); }
   .spacer { flex: 1; }
@@ -60,21 +269,21 @@
   .icon-btn:active, .back-btn:active, .chip:active, .text-btn:active, .primary-btn:active, .secondary-btn:active, .ghost-btn:active, .tap-row:active, .nav-item:active, .fab:active, .key:active, .filter-chip:active { transform: scale(.97); }
   .icon-btn { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--hp-text); }
   .back-btn { min-width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--hp-text-muted); margin-left: -10px; }
-  .chip { min-height: 34px; padding: 6px 10px; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 10px; font-weight: 850; }
+  .chip { min-height: 36px; padding: 6px 10px; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
   .chip .material-symbols-rounded { font-size: 15px; }
-  .eyebrow { color: var(--hp-text-muted); font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+  .eyebrow { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
   .display { font-family: var(--hp-font-display); }
   .amount { font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
   .card { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); padding: 15px; box-shadow: var(--hp-shadow-card); }
   .flat-card { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); overflow: hidden; }
   .section-title { display: flex; align-items: center; justify-content: space-between; margin: 21px 1px 10px; }
-  .section-title h2 { margin: 0; font-size: 14px; }
-  .text-btn { background: transparent; color: var(--hp-primary-text); font-size: 11px; font-weight: 850; padding: 6px; }
-  .primary-btn, .secondary-btn, .ghost-btn { width: 100%; min-height: 48px; border-radius: 14px; font-size: 13px; font-weight: 850; }
+  .section-title h2 { margin: 0; font-size: var(--type-section); line-height: var(--line-section); }
+  .text-btn { background: transparent; color: var(--hp-primary-text); font-size: var(--type-button); line-height: var(--line-button); font-weight: 850; padding: 6px; }
+  .primary-btn, .secondary-btn, .ghost-btn { width: 100%; min-height: 50px; border-radius: 14px; font-size: var(--type-button); line-height: var(--line-button); font-weight: 850; }
   .primary-btn { background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 7px 18px color-mix(in srgb, var(--hp-primary) 24%, transparent); }
   .secondary-btn { background: var(--hp-surface); color: var(--hp-primary-text); border: 1px solid var(--hp-border-strong); }
   .ghost-btn { background: transparent; color: var(--hp-text-muted); }
-  .hint { color: var(--hp-text-muted); font-size: 10px; line-height: 1.55; }
+  .hint { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .semantic-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
   .row-divider + .row-divider { border-top: 1px solid var(--hp-border); }
   .tap-row { width: 100%; min-height: 54px; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 11px; padding: 10px 12px; text-align: left; }
@@ -84,15 +293,15 @@
   .row-icon.shared { background: var(--hp-shared-soft); color: var(--hp-shared-text); }
   .row-icon .material-symbols-rounded { font-size: 19px; }
   .row-copy { min-width: 0; flex: 1; }
-  .row-copy strong { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row-copy small { display: block; color: var(--hp-text-muted); font-size: 9px; margin-top: 2px; }
-  .row-value { font-size: 11px; font-weight: 900; white-space: nowrap; }
-  .badge { border-radius: var(--hp-radius-pill); padding: 4px 7px; font-size: 8px; font-weight: 900; background: var(--hp-surface-muted); color: var(--hp-text-muted); }
+  .row-copy strong { display: block; font-size: var(--type-item); line-height: var(--line-item); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-copy small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .row-value { font-size: var(--type-item); line-height: var(--line-item); font-weight: 900; white-space: nowrap; }
+  .badge { border-radius: var(--hp-radius-pill); padding: 4px 8px; background: var(--hp-surface-muted); color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
 
   /* Shell */
   .bottom-nav { position: absolute; z-index: 10; left: 0; right: 0; bottom: 0; height: auto; background: linear-gradient(transparent, var(--hp-bg) 35%); border: 0; display: flex; align-items: flex-end; gap: 12px; padding: 16px 21px 21px; }
   .bottom-pill { flex: 1; height: 62px; background: color-mix(in srgb, var(--hp-surface) 96%, transparent); border: 1px solid var(--hp-border); border-radius: 32px; display: flex; align-items: center; padding: 0 12px; box-shadow: var(--hp-shadow-soft); backdrop-filter: blur(18px); }
-  .nav-item { flex: 1; background: transparent; color: var(--hp-text-faint); min-height: 50px; border-radius: 13px; display: grid; place-items: center; gap: 3px; font-size: 8px; }
+  .nav-item { flex: 1; background: transparent; color: var(--hp-text-faint); min-height: 50px; border-radius: 13px; display: grid; place-items: center; gap: 3px; font-size: var(--type-navigation); line-height: var(--line-navigation); }
   .nav-item .material-symbols-rounded { font-size: 20px; }
   .nav-item.active { color: var(--hp-primary-text); }
   .fab { width: 62px; height: 62px; flex: 0 0 auto; border-radius: 50%; background: linear-gradient(var(--hp-joy), color-mix(in srgb, var(--hp-joy) 76%, #8f4645)); color: var(--hp-surface); display: grid; place-items: center; box-shadow: 0 8px 22px color-mix(in srgb, var(--hp-joy) 34%, transparent); }
@@ -101,12 +310,12 @@
   /* Home */
   .home-overview { border-top: 1px solid var(--hp-border); border-bottom: 1px solid var(--hp-border); padding: 17px 0; }
   .home-total { display: flex; align-items: end; justify-content: space-between; margin: 7px 0 13px; }
-  .home-total strong { font-family: var(--hp-font-display); font-size: 36px; }
-  .delta { padding: 5px 8px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 9px; font-weight: 900; }
+  .home-total strong { font-family: var(--hp-font-display); font-size: var(--type-amount-hero); line-height: var(--line-amount-hero); }
+  .delta { padding: 5px 8px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
   .ledger-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
   .ledger { background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 15px; padding: 11px; }
-  .ledger span { display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
-  .ledger strong { display: block; margin-top: 5px; color: var(--hp-daily-text); font-size: 15px; }
+  .ledger span { display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .ledger strong { display: block; margin-top: 5px; color: var(--hp-daily-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); }
   .ledger.joy strong { color: var(--hp-joy-text); }
   .ledger.shared strong { color: var(--hp-shared-text); }
   .home-joy { padding: 15px 0; border-bottom: 1px solid var(--hp-border); }
@@ -114,168 +323,172 @@
   .joy-ring, .donut { border-radius: 50%; background: conic-gradient(var(--hp-joy) 0 80%, var(--hp-joy-soft) 80% 100%); display: grid; place-items: center; position: relative; }
   .joy-ring { width: 84px; height: 84px; }
   .joy-ring::after, .donut::after { content: ""; position: absolute; inset: 9px; background: var(--hp-bg); border-radius: 50%; }
-  .joy-ring span, .donut span { position: relative; z-index: 1; text-align: center; font-size: 9px; color: var(--hp-text-muted); }
-  .joy-ring strong { display: block; color: var(--hp-joy-text); font-size: 17px; }
-  .home-joy h3 { margin: 0 0 4px; font-family: var(--hp-font-display); font-size: 16px; }
-  .joy-meta { display: flex; gap: 11px; margin-top: 7px; font-size: 9px; font-weight: 850; }
+  .joy-ring span, .donut span { position: relative; z-index: 1; color: var(--hp-text-muted); text-align: center; font-size: var(--type-compact); line-height: var(--line-compact); }
+  .joy-ring strong { display: block; color: var(--hp-joy-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); }
+  .home-joy h3 { margin: 0 0 4px; font-family: var(--hp-font-display); font-size: var(--type-section); line-height: var(--line-section); }
+  .joy-meta { display: flex; gap: 11px; margin-top: 7px; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 850; }
   .home-joy-track { display: grid; gap: 11px; }
   .joy-track-head { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; }
-  .joy-track-head h3 { font-family: var(--hp-font-body); font-size: 13px; margin-bottom: 2px; }
-  .joy-target { color: var(--hp-joy-text); font-size: 19px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .joy-target small { color: var(--hp-text-muted); font-size: 9px; }
+  .joy-track-head h3 { margin-bottom: 2px; font-family: var(--hp-font-body); font-size: var(--type-label); line-height: var(--line-label); }
+  .joy-target { color: var(--hp-joy-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .joy-target small { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
   .joy-progress { height: 8px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); overflow: hidden; }
   .joy-progress span { display: block; width: 80%; height: 100%; border-radius: inherit; background: var(--hp-joy); }
   .joy-support-grid { display: grid; grid-template-columns: 1fr 94px; gap: 9px; align-items: stretch; }
   .joy-support-metric { min-width: 0; padding: 8px 10px; border: 1px solid var(--hp-border); border-radius: 12px; background: color-mix(in srgb, var(--hp-surface) 72%, transparent); }
-  .joy-support-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--hp-text-muted); font-size: 8px; font-weight: 850; }
-  .joy-support-head strong { color: var(--hp-joy-text); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .joy-support-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
+  .joy-support-head strong { color: var(--hp-joy-text); font-size: var(--type-label); line-height: var(--line-label); font-variant-numeric: tabular-nums; }
   .joy-support-track { height: 4px; margin-top: 7px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); overflow: hidden; }
   .joy-support-track span { display: block; width: 82%; height: 100%; border-radius: inherit; background: var(--hp-joy); }
   .joy-small-win { display: flex; flex-direction: column; justify-content: center; padding: 8px 10px; border-radius: 12px; background: var(--hp-joy-soft); color: var(--hp-text-muted); }
-  .joy-small-win > span { font-size: 8px; font-weight: 850; }
-  .joy-small-win strong { margin-top: 2px; color: var(--hp-joy-text); font-size: 14px; font-variant-numeric: tabular-nums; }
-  .joy-small-win small { margin-top: 1px; font-size: 7px; }
+  .joy-small-win > span { font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
+  .joy-small-win strong { margin-top: 2px; color: var(--hp-joy-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-variant-numeric: tabular-nums; }
+  .joy-small-win small { margin-top: 1px; font-size: var(--type-compact); line-height: var(--line-compact); }
   .home-joy-number { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
   .joy-number-copy h3 { margin-top: 4px; }
   .joy-number-copy .hint { margin: 0; max-width: 180px; }
   .joy-number-score { min-width: 94px; padding-left: 15px; border-left: 1px solid var(--hp-border); text-align: right; }
-  .joy-number-score strong { display: block; color: var(--hp-joy-text); font-family: var(--hp-font-display); font-size: 36px; line-height: .95; font-variant-numeric: tabular-nums; }
-  .joy-number-score span { display: block; margin-top: 7px; color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
+  .joy-number-score strong { display: block; color: var(--hp-joy-text); font-family: var(--hp-font-display); font-size: var(--type-amount-hero); line-height: var(--line-amount-hero); font-variant-numeric: tabular-nums; }
+  .joy-number-score span { display: block; margin-top: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
   .joy-number-meta { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
-  .joy-number-meta span { padding: 7px 8px; border-radius: 10px; background: var(--hp-joy-soft); color: var(--hp-joy-text); font-size: 8px; font-weight: 850; text-align: center; }
+  .joy-number-meta span { padding: 7px 8px; border-radius: 10px; background: var(--hp-joy-soft); color: var(--hp-joy-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; text-align: center; }
   .joy-story-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 13px 2px 7px; }
-  .joy-story-intro h3 { margin: 0; color: var(--hp-text); font-size: 11px; font-weight: 850; }
-  .joy-story-intro p { margin: 3px 0 0; color: var(--hp-text-muted); font-size: 8px; line-height: 1.45; }
+  .joy-story-intro h3 { margin: 0; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
+  .joy-story-intro p { margin: 3px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .joy-story-intro .material-symbols-rounded { color: var(--hp-joy-text); font-size: 18px; }
   .joy-story { margin-top: 0; background: var(--hp-joy-soft); border: 0; border-radius: 16px; width: 100%; min-height: 58px; padding: 10px; display: grid; grid-template-columns: 38px 1fr auto; gap: 9px; align-items: center; color: var(--hp-text); text-align: left; cursor: pointer; }
   .story-end { display: grid; justify-items: end; gap: 4px; color: var(--hp-joy-text); }
-  .story-end strong { font-size: 11px; font-variant-numeric: tabular-nums; }
-  .story-end small { display: inline-flex; align-items: center; gap: 1px; font-size: 7px; font-weight: 850; }
+  .story-end strong { font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
+  .story-end small { display: inline-flex; align-items: center; gap: 1px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
   .story-end .material-symbols-rounded { font-size: 13px; }
-  .story-date { width: 38px; height: 38px; border-radius: 10px; background: var(--hp-surface); color: var(--hp-joy-text); display: grid; place-items: center; font-size: 9px; font-weight: 900; }
+  .story-date { width: 40px; height: 40px; border-radius: 10px; background: var(--hp-surface); color: var(--hp-joy-text); display: grid; place-items: center; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
 
-  /* Home — selected Sketch 006 C, faithful to shipped Flutter composition. */
+  /* Home — V16 synchronized with the shipped Flutter composition. */
   .home-faithful { padding-left: 20px; padding-right: 20px; }
   .home-faithful .app-header { min-height: 46px; margin-bottom: 13px; }
-  .home-faithful .app-header .page-month-title { padding: 4px 0; }
-  .home-faithful .app-header .chip { min-height: 27px; padding: 4px 10px; border-radius: 8px; }
+  .home-mode-badge { min-height: 27px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px; border-radius: 8px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; white-space: nowrap; }
+  .home-mode-badge.personal { background: var(--hp-daily-soft); color: var(--hp-daily); }
+  .home-mode-badge.family { background: var(--hp-primary-soft); color: var(--hp-primary); }
+  .home-mode-badge .material-symbols-rounded { font-size: 15px; }
   .faithful-hero { width: 100%; margin-top: 0; padding: 18px; border: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); border-radius: 22px; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); box-shadow: var(--hp-shadow-soft); color: var(--hp-text); cursor: pointer; transition: .15s ease; }
   .faithful-hero:hover { transform: translateY(-1px); }
-  .faithful-label { color: var(--hp-text-muted); font-size: 10px; font-weight: 700; }
-  .faithful-amount-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-  .faithful-amount-row > strong { flex: 1; font-family: var(--hp-font-body); font-size: 33px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .faithful-trend { padding: 5px 9px; border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 3px; background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 8px; font-weight: 850; }
+  .faithful-label { color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .faithful-amount-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .faithful-amount-row > strong { flex: 1; font-family: var(--hp-font-body); font-size: var(--type-amount-hero); line-height: var(--line-amount-hero); font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .faithful-trend { padding: 5px 9px; border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 3px; background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
   .faithful-trend .material-symbols-rounded { font-size: 13px; }
-  .faithful-previous { margin: 7px 0 0; color: var(--hp-text-muted); font-size: 9px; }
+  .faithful-previous { margin: 7px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .faithful-ledgers { margin-top: 16px; }
   .faithful-ledger-labels { display: flex; justify-content: space-between; gap: 10px; }
-  .faithful-ledger-label { display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 8px; }
-  .faithful-ledger-label strong { color: var(--hp-joy-text); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .faithful-ledger-label { display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .faithful-ledger-label strong { color: var(--hp-joy-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
   .faithful-ledger-label.daily strong { color: var(--hp-daily-text); }
   .faithful-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--hp-joy); }
   .faithful-ledger-label.daily .faithful-dot { background: var(--hp-daily); order: 3; }
   .faithful-split { height: 6px; margin-top: 8px; border-radius: 4px; background: var(--hp-daily); overflow: hidden; }
   .faithful-split span { display: block; width: 29%; height: 100%; background: var(--hp-joy); }
-  .faithful-divider { height: 1px; margin: 12px 0; background: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); }
-  .faithful-region-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 850; }
-  .faithful-region-title > .material-symbols-rounded { color: var(--hp-joy-text); font-size: 16px; }
+  .faithful-divider { height: 1px; margin: 12px 0; background: var(--hp-faithful-divider); }
+  .faithful-region-title { display: flex; align-items: center; gap: 6px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
+  .faithful-region-title > .material-symbols-rounded { color: var(--hp-faithful-accent); font-size: 16px; }
   .faithful-info { margin-left: 1px; color: var(--hp-text-muted) !important; font-size: 14px !important; }
-  .faithful-analysis-link { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; color: var(--hp-primary-text); font-size: 8px; font-weight: 800; }
+  .faithful-analysis-link { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
   .faithful-analysis-link .material-symbols-rounded { font-size: 14px; }
-  .faithful-metric-grid { --joy-satisfaction: var(--hp-joy-text); --joy-small-win: color-mix(in srgb, var(--hp-joy) 68%, var(--hp-joy-text)); height: 100px; margin-top: 10px; display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 14px; align-items: center; }
-  .faithful-goal-ring { --goal: 80%; width: 100px; height: 100px; position: relative; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--hp-joy) 0 var(--goal), var(--hp-surface-muted) var(--goal)); box-shadow: 0 0 11px color-mix(in srgb,var(--hp-joy) 20%,transparent); }
+  .faithful-metric-grid { height: 108px; margin-top: 10px; display: grid; grid-template-columns: 108px minmax(0,1fr); gap: 14px; align-items: center; }
+  .faithful-goal-ring { --goal: 80%; width: 108px; height: 108px; position: relative; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--hp-goal-progress) 0 var(--goal), var(--hp-goal-track) var(--goal) 100%); box-shadow: var(--hp-goal-shadow); }
   .faithful-goal-ring::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); }
-  .faithful-goal-copy { position: relative; z-index: 1; display: grid; justify-items: center; line-height: 1; color: var(--hp-joy-text); }
-  .faithful-goal-copy > span { color: var(--hp-text-muted); font-size: 8px; font-weight: 750; }
-  .faithful-goal-copy > strong { margin-top: 6px; font-size: 23px; font-weight: 900; font-variant-numeric: tabular-nums; }
-  .faithful-goal-copy > strong small { font-size: 13px; font-weight: 700; }
-  .faithful-goal-copy > em { margin-top: 5px; font-size: 10px; font-style: normal; font-weight: 850; }
-  .faithful-support-stack { height: 100px; min-width: 0; display: grid; grid-template-rows: minmax(0,1fr) 1px minmax(0,1fr); }
-  .faithful-support-divider { background: color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); }
+  .faithful-goal-copy { position: relative; z-index: 1; display: grid; justify-items: center; line-height: 1; color: var(--hp-goal-value); }
+  .faithful-goal-copy > span { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .faithful-goal-copy > strong { margin-top: 4px; font-size: var(--type-amount-large); line-height: var(--line-amount-large); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-goal-copy > strong small { color: var(--hp-goal-value); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .faithful-goal-copy > em { margin-top: 2px; color: var(--hp-goal-value); font-size: var(--type-compact); line-height: var(--line-compact); font-style: normal; font-weight: 850; }
+  .faithful-support-stack { height: 108px; min-width: 0; display: grid; grid-template-rows: minmax(0,1fr) 1px minmax(0,1fr); }
+  .faithful-support-divider { background: var(--hp-faithful-divider); }
   .faithful-support-block { min-height: 0; display: flex; flex-direction: column; justify-content: center; }
   .faithful-satisfaction-head { display: flex; align-items: baseline; justify-content: space-between; gap: 7px; }
-  .faithful-satisfaction-head > span { color: var(--hp-text); font-size: 9px; font-weight: 850; }
-  .faithful-satisfaction-head > strong { color: var(--joy-satisfaction); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .faithful-satisfaction-head > strong small { font-size: 9px; font-weight: 700; }
-  .faithful-satisfaction-scale { height: 3px; margin-top: 6px; border-radius: 3px; background: var(--hp-surface-muted); overflow: hidden; }
-  .faithful-satisfaction-scale span { display: block; width: var(--satisfaction,82%); height: 100%; background: var(--joy-satisfaction); }
+  .faithful-satisfaction-head > span { color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 850; }
+  .faithful-satisfaction-head > strong { color: var(--hp-faithful-satisfaction-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .faithful-satisfaction-head > strong small { font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; }
+  .faithful-satisfaction-scale { height: 3px; margin-top: 6px; border-radius: 3px; background: var(--hp-faithful-satisfaction-track); overflow: hidden; }
+  .faithful-satisfaction-scale span { display: block; width: var(--satisfaction,82%); height: 100%; background: var(--hp-faithful-satisfaction); }
   .faithful-small-win { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
   .faithful-small-win-copy { display: grid; gap: 3px; }
-  .faithful-small-win-copy strong { font-size: 9px; }
-  .faithful-small-win-copy small { color: var(--hp-text-muted); font-size: 8px; }
-  .faithful-small-win-value { margin-left: auto; color: var(--joy-small-win); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .faithful-small-win-value small { margin-left: 2px; font-size: 9px; font-weight: 700; }
-  .faithful-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px 1fr 58px; min-height: 74px; overflow: visible; border: 1px solid color-mix(in srgb, var(--hp-joy) 23%, var(--hp-border)); border-radius: 14px; background: color-mix(in srgb, var(--hp-joy-soft) 86%, var(--hp-surface)); }
-  .faithful-ticket-accent { border-radius: 13px 0 0 13px; background: var(--hp-joy); }
+  .faithful-small-win-copy strong { font-size: var(--type-label); line-height: var(--line-label); }
+  .faithful-small-win-copy small { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .faithful-small-win-value { margin-left: auto; color: var(--hp-faithful-small-win); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .faithful-small-win-value small { margin-left: 2px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; }
+  .faithful-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px minmax(0,1fr) 58px; min-height: 82px; overflow: visible; border: 1px solid var(--hp-ticket-border); border-radius: 14px; background: var(--hp-ticket-surface); }
+  .faithful-ticket-accent { border-radius: 13px 0 0 13px; background: var(--hp-ticket-accent); }
   .faithful-calendar { align-self: center; width: 48px; margin-left: 10px; overflow: hidden; border-radius: 10px; background: var(--hp-surface); box-shadow: 0 2px 7px color-mix(in srgb,var(--hp-joy) 18%,transparent); text-align: center; }
-  .faithful-calendar b { display: block; padding: 3px 0; background: var(--hp-joy); color: var(--hp-bg); font-size: 7px; }
-  .faithful-calendar strong { display: block; padding-top: 4px; color: var(--hp-joy-text); font-size: 14px; }
-  .faithful-calendar small { display: block; padding-bottom: 4px; color: var(--hp-text-muted); font-size: 7px; }
+  .faithful-calendar b { display: block; padding: 3px 0; background: var(--hp-ticket-calendar); color: var(--hp-bg); font-size: var(--type-micro); line-height: var(--line-micro); }
+  .faithful-calendar strong { display: block; padding-top: 4px; color: var(--hp-ticket-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); }
+  .faithful-calendar small { display: block; padding-bottom: 4px; color: var(--hp-text-muted); font-size: var(--type-micro); line-height: var(--line-micro); }
   .faithful-ticket-copy { min-width: 0; align-self: center; padding: 10px 8px 10px 12px; }
-  .faithful-ticket-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
-  .faithful-ticket-copy span { display: block; margin-top: 5px; color: var(--hp-joy-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
-  .faithful-seal { position: relative; align-self: stretch; display: grid; place-items: center; align-content: center; gap: 3px; border-left: 1px dashed color-mix(in srgb,var(--hp-joy) 35%,transparent); color: var(--hp-joy-text); font-size: 7px; font-weight: 850; }
-  .faithful-seal::before, .faithful-seal::after { content: ""; position: absolute; z-index: 2; left: -6px; width: 12px; height: 12px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); pointer-events: none; }
-  .faithful-seal::before { top: -7px; }
-  .faithful-seal::after { bottom: -7px; }
+  .faithful-ticket-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-label); line-height: var(--line-label); }
+  .faithful-ticket-copy span { display: block; margin-top: 5px; color: var(--hp-ticket-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-seal { position: relative; align-self: stretch; display: grid; place-items: center; align-content: center; gap: 3px; border-left: 1px dashed var(--hp-ticket-border); color: var(--hp-ticket-text); font-size: var(--type-micro); line-height: var(--line-micro); font-weight: 850; }
+  .faithful-seal::before, .faithful-seal::after { content: ""; position: absolute; z-index: 2; left: -6px; width: 12px; height: 7px; border: 1px solid var(--hp-ticket-border); background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); pointer-events: none; }
+  .faithful-seal::before { top: -1px; border-top: 0; border-radius: 0 0 7px 7px; }
+  .faithful-seal::after { bottom: -1px; border-bottom: 0; border-radius: 7px 7px 0 0; }
   .faithful-seal .material-symbols-rounded { font-size: 22px; }
   .faithful-members { display: grid; gap: 8px; }
-  .faithful-member { display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: 9px; }
-  .faithful-member-avatar { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--hp-shared-soft); color: var(--hp-shared-text); font-size: 8px; font-weight: 900; }
-  .faithful-member strong { margin-left: auto; color: var(--hp-text); font-size: 9px; }
-  .faithful-invite { width: 100%; min-height: 112px; margin-top: 16px; padding: 14px 12px; border: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); border-radius: 16px; background: var(--hp-surface); box-shadow: var(--hp-shadow-soft); display: grid; grid-template-columns: 52px minmax(0,1fr) 92px; gap: 10px; align-items: center; text-align: left; }
+  .faithful-member { display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .faithful-member-avatar { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--hp-shared-soft); color: var(--hp-shared-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
+  .faithful-member strong { margin-left: auto; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+  .faithful-invite { width: 100%; min-height: 132px; margin-top: 16px; padding: 14px 12px; border: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); border-radius: 16px; background: var(--hp-surface); box-shadow: var(--hp-shadow-soft); display: grid; grid-template-columns: 52px minmax(0,1fr) 104px; gap: 10px; align-items: center; text-align: left; }
   .faithful-avatar-pair { display: block; width: 52px; height: 36px; position: relative; }
   .faithful-avatar-pair > span { position: absolute; width: 36px; height: 36px; display: grid; place-items: center; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-primary); color: #fff; }
   .faithful-avatar-pair > span:last-child { left: 18px; background: var(--hp-daily); }
   .faithful-avatar-pair .material-symbols-rounded { font-size: 18px; }
   .faithful-invite-copy { min-width: 0; }
-  .faithful-invite h3 { margin: 0; font-size: 12px; line-height: 1.35; }
-  .faithful-invite p { margin: 4px 0 6px; color: var(--hp-text-muted); font-size: 8px; line-height: 1.45; }
-  .faithful-settings-path { min-height: 40px; margin: -4px 0 -7px -7px; padding: 5px 7px; border: 0; border-radius: 8px; background: transparent; color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 2px; font-size: 9px; font-weight: 850; cursor: pointer; }
+  .faithful-invite h3 { margin: 0; font-size: var(--type-item); line-height: var(--line-item); }
+  .faithful-invite p { margin: 4px 0 6px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .faithful-settings-path { min-height: 40px; margin: -4px 0 -7px -7px; padding: 5px 7px; border: 0; border-radius: 8px; background: transparent; color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 2px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; cursor: pointer; }
   .faithful-settings-path:hover { background: var(--hp-primary-soft); }
   .faithful-settings-path .material-symbols-rounded { font-size: 13px; }
   .faithful-invite-actions { align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px; }
   .faithful-invite-close { width: 40px; height: 40px; margin: -9px -7px 0 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
   .faithful-invite-close:hover { background: var(--hp-surface-muted); color: var(--hp-text); }
   .faithful-invite-close .material-symbols-rounded { font-size: 18px; }
-  .faithful-invite-cta { width: 92px; min-height: 40px; padding: 7px 8px; border: 0; border-radius: 11px; background: var(--hp-joy); color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 9px; font-weight: 850; white-space: nowrap; cursor: pointer; }
+  .faithful-invite-cta { width: 104px; min-height: 44px; padding: 7px 8px; border: 0; border-radius: 11px; background: var(--hp-joy); color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--type-button); line-height: var(--line-button); font-weight: 850; white-space: nowrap; cursor: pointer; }
   .faithful-invite-cta:hover { background: color-mix(in srgb, var(--hp-joy) 88%, var(--hp-text)); }
   .faithful-invite-cta .material-symbols-rounded { font-size: 14px; }
   .faithful-recent { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
-  .faithful-recent h2 { margin: 0; font-size: 13px; }
+  .faithful-recent h2 { margin: 0; font-size: var(--type-section); line-height: var(--line-section); }
   .faithful-list { margin-top: 12px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); }
-  .faithful-tx { width: 100%; min-height: 62px; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); background: transparent; padding: 10px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
-  .faithful-tx:last-child { border-bottom: 0; }
-  .faithful-tx-icon { width: 28px; display: grid; place-items: center; color: var(--hp-text-muted); }
+  .faithful-tx { width: 100%; min-height: 68px; padding: 11px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+  .faithful-tx + .faithful-tx { border-top: 1px solid var(--hp-border); }
+  .faithful-tx:hover { background: color-mix(in srgb, var(--hp-surface-muted) 52%, transparent); }
+  .faithful-tx-icon { width: 28px; flex: 0 0 auto; display: grid; place-items: center; color: var(--hp-daily-text); }
   .faithful-tx-icon.joy { color: var(--hp-joy-text); }
-  .faithful-tx-icon .material-symbols-rounded { font-size: 28px; }
-  .faithful-tx-copy { min-width: 0; flex: 1; }
-  .faithful-tx-copy > strong { display: block; font-size: 10px; }
-  .faithful-tx-meta { margin-top: 4px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 7px; }
-  .faithful-tag { padding: 2px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-weight: 850; }
+  .faithful-tx-icon .material-symbols-rounded { font-size: 25px; }
+  .faithful-tx-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
+  .faithful-tx-copy > strong { overflow: hidden; color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); text-overflow: ellipsis; white-space: nowrap; }
+  .faithful-tx-meta { min-width: 0; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .faithful-tag { padding: 1px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: var(--type-compact); line-height: var(--line-compact); font-style: normal; font-weight: 850; white-space: nowrap; }
   .faithful-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
-  .faithful-tx-amount { color: var(--hp-text); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .faithful-tx-merchant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .faithful-tx-amount { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .faithful-tx-amount.joy { color: var(--hp-joy-text); }
 
   /* Calendar / charts / lists */
   .calendar-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 9px; }
-  .day { aspect-ratio: 1; display: grid; place-items: center; border-radius: 9px; color: var(--hp-text-muted); font-size: 9px; position: relative; }
+  .day { aspect-ratio: 1; display: grid; place-items: center; border-radius: 9px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); position: relative; }
   .day.has::after { content: ""; position: absolute; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--hp-daily); }
   .day.today { background: var(--hp-primary); color: var(--hp-surface); font-weight: 900; }
   .filter-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 2px; scrollbar-width: none; }
-  .filter-chip { min-height: 32px; padding: 6px 10px; white-space: nowrap; border-radius: var(--hp-radius-pill); border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
+  .filter-chip { min-height: 36px; padding: 6px 10px; white-space: nowrap; border-radius: var(--hp-radius-pill); border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
   .filter-chip.active { background: var(--hp-primary); border-color: var(--hp-primary); color: var(--hp-surface); }
-  .search { width: 100%; min-height: 42px; border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text); border-radius: 13px; padding: 0 13px; font-size: 11px; margin: 9px 0 3px; }
+  .search { width: 100%; min-height: 44px; border: 1px solid var(--hp-border); background: var(--hp-surface); color: var(--hp-text); border-radius: 13px; padding: 0 13px; font-size: var(--type-body); line-height: var(--line-body); margin: 9px 0 3px; }
   .list-screen { padding-left: 20px; padding-right: 20px; }
   .list-calendar { overflow: hidden; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); background: var(--hp-surface); box-shadow: var(--hp-shadow-card); }
   .list-calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 8px 8px 3px; }
-  .list-calendar-weekday { height: 16px; display: grid; place-items: center; color: var(--hp-text-muted); font-size: 8px; font-weight: 750; }
+  .list-calendar-weekday { height: 20px; display: grid; place-items: center; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
   .list-calendar-weekday.weekend { color: var(--hp-info); }
-  .list-calendar-day { position: relative; min-width: 0; height: 40px; padding: 2px 1px; border: 0; border-radius: 7px; background: transparent; color: var(--hp-text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; }
+  .list-calendar-day { position: relative; min-width: 0; height: 46px; padding: 2px 1px; border: 0; border-radius: 7px; background: transparent; color: var(--hp-text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; }
   .list-calendar-day::after { content: ""; position: absolute; inset: -2px 0; }
   .list-calendar-day:hover { background: var(--hp-surface-muted); }
-  .list-calendar-day > span { font-size: 10px; line-height: 1; }
-  .list-calendar-day > small { min-height: 10px; color: var(--hp-text-muted); font-size: 9px; line-height: 10px; font-variant-numeric: tabular-nums; }
+  .list-calendar-day > span { font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .list-calendar-day > small { min-height: var(--line-compact); color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-variant-numeric: tabular-nums; }
   .list-calendar-day.weekend > span { color: var(--hp-info); }
   .list-calendar-day.today > span { color: var(--hp-error); font-weight: 850; }
   .list-calendar-day.selected { background: var(--hp-primary); }
@@ -283,24 +496,13 @@
   .list-calendar-day.outside { opacity: .35; cursor: default; }
   .list-calendar-day.outside:hover { background: transparent; }
   .list-calendar-summary { padding: 10px 14px; border-top: 1px solid var(--hp-border); display: grid; gap: 4px; }
-  .list-calendar-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--hp-text-muted); font-size: 9px; }
-  .list-calendar-summary-row strong { color: var(--hp-text); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .list-calendar-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .list-calendar-summary-row strong { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
   .list-filter-bar { position: sticky; top: 0; z-index: 5; margin: 10px -20px 0; padding: 6px 20px 8px; border-bottom: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-bg) 96%, transparent); backdrop-filter: blur(14px); }
-  .list-filter-ledgers { position: relative; height: 44px; margin: 0 0 8px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .list-filter-ledgers::before { content: ""; position: absolute; inset: 4px 0; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); }
-  .list-ledger-option { position: relative; z-index: 1; isolation: isolate; min-width: 0; min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--hp-text-muted); font-size: 10px; font-weight: 800; cursor: pointer; }
-  .list-ledger-option::before { content: ""; position: absolute; z-index: -1; inset: 4px 0; border-right: 1px solid var(--hp-border); }
-  .list-ledger-option:first-child::before { border-radius: var(--hp-radius-pill) 0 0 var(--hp-radius-pill); }
-  .list-ledger-option:last-child::before { border-right: 0; border-radius: 0 var(--hp-radius-pill) var(--hp-radius-pill) 0; }
-  .list-ledger-option.active { color: var(--hp-primary-text); }
-  .list-ledger-option.active::before { background: var(--hp-primary-soft); box-shadow: inset 0 0 0 1px var(--hp-primary); }
-  .list-ledger-option.daily.active { color: var(--hp-daily-text); }
-  .list-ledger-option.daily.active::before { background: var(--hp-daily-soft); box-shadow: inset 0 0 0 1px var(--hp-daily); }
-  .list-ledger-option.joy.active { color: var(--hp-joy-text); }
-  .list-ledger-option.joy.active::before { background: var(--hp-joy-soft); box-shadow: inset 0 0 0 1px var(--hp-joy); }
+  .list-ledger-segments { margin: 0 0 8px; }
   .list-filter-utilities { min-width: 0; height: 44px; display: flex; align-items: center; gap: 6px; }
   .list-filter-spacer { min-width: 0; flex: 1; }
-  .list-filter-action { min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; font-size: 10px; font-weight: 800; cursor: pointer; }
+  .list-filter-action { min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; cursor: pointer; }
   .list-filter-action .material-symbols-rounded { font-size: 14px; }
   .list-filter-action.sort { min-width: 108px; border-color: var(--hp-primary); color: var(--hp-text); }
   .list-filter-action.sort .material-symbols-rounded:last-child { margin-left: 2px; font-size: 16px; }
@@ -310,47 +512,42 @@
   .list-filter-action.active { border-color: var(--hp-primary); background: var(--hp-primary-soft); color: var(--hp-primary-text); }
   .list-filter-search { min-width: 0; height: 44px; flex: 1; display: flex; align-items: center; overflow: hidden; border: 1px solid var(--hp-primary); border-radius: var(--hp-radius-pill); background: var(--hp-surface); }
   .list-filter-search > .material-symbols-rounded { margin-left: 12px; color: var(--hp-text-muted); font-size: 16px; }
-  .list-filter-search input { min-width: 0; flex: 1; height: 100%; padding: 0 8px; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: 10px; }
+  .list-filter-search input { min-width: 0; flex: 1; height: 100%; padding: 0 8px; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); }
   .list-filter-search button { width: 44px; height: 44px; flex: 0 0 auto; padding: 0; border: 0; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
-  .list-day-header { height: 28px; padding: 0 2px; color: var(--hp-text-muted); display: flex; align-items: center; font-size: 9px; font-weight: 750; }
+  .list-day-header { height: 32px; padding: 0 2px; color: var(--hp-text-muted); display: flex; align-items: center; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
   .list-transactions { margin: 0 0 10px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); box-shadow: 0 4px 14px rgba(76,61,48,.035); }
-  .list-transaction { width: 100%; min-height: 60px; padding: 9px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+  .list-transaction { width: 100%; min-height: 68px; padding: 11px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
   .list-transaction + .list-transaction { border-top: 1px solid var(--hp-border); }
   .list-transaction:hover { background: color-mix(in srgb, var(--hp-surface-muted) 52%, transparent); }
   .list-transaction-icon { width: 28px; flex: 0 0 auto; color: var(--hp-daily-text); display: grid; place-items: center; }
   .list-transaction-icon.joy { color: var(--hp-joy-text); }
   .list-transaction-icon .material-symbols-rounded { font-size: 25px; }
   .list-transaction-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
-  .list-transaction-copy > strong { overflow: hidden; color: var(--hp-text); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-  .list-transaction-meta { min-width: 0; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 8px; }
-  .list-transaction-tag { padding: 1px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-style: normal; white-space: nowrap; }
+  .list-transaction-copy > strong { overflow: hidden; color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); text-overflow: ellipsis; white-space: nowrap; }
+  .list-transaction-meta { min-width: 0; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .list-transaction-tag { padding: 1px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: var(--type-compact); line-height: var(--line-compact); font-style: normal; white-space: nowrap; }
   .list-transaction-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
   .list-transaction-merchant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .list-transaction-amount { color: var(--hp-text); font-size: 12px; font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .list-transaction-amount { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .list-transaction-chevron { margin-left: -6px; color: var(--hp-text-muted); font-size: 18px; }
-  .list-empty-filtered { padding: 42px 20px; color: var(--hp-text-muted); text-align: center; font-size: 10px; }
+  .list-empty-filtered { padding: 42px 20px; color: var(--hp-text-muted); text-align: center; font-size: var(--type-body); line-height: var(--line-body); }
   /* Analytics — current Flutter registry restored in the selected warm system. */
   .analytics-screen { padding-left: 20px; padding-right: 20px; }
   .analytics-screen .app-header { min-height: 46px; margin-bottom: 13px; }
-  .analytics-window { min-height: 44px; max-width: 172px; padding: 6px 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 10px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 8px rgba(76,61,48,.035); }
+  .analytics-window { min-height: 44px; max-width: 172px; padding: 6px 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; cursor: pointer; box-shadow: 0 2px 8px rgba(76,61,48,.035); }
   .analytics-window span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-window .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-text-muted); font-size: 15px; }
   .analytics-section-head { margin: 26px 4px 10px; display: flex; align-items: center; gap: 7px; color: var(--hp-text-muted); }
   .analytics-section-head.first { margin-top: 4px; }
   .analytics-section-head::before { content: ""; width: 3px; height: 13px; flex: 0 0 auto; border-radius: 2px; background: var(--hp-primary); }
   .analytics-section-head.joy::before { background: var(--hp-joy); }
-  .analytics-section-head h2 { margin: 0; overflow: hidden; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-section-head h2 { margin: 0; overflow: hidden; font-size: var(--type-section); line-height: var(--line-section); font-weight: 750; letter-spacing: .03em; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-card { width: 100%; padding: 14px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); box-shadow: 0 3px 14px rgba(76,61,48,.05); }
   .analytics-category-card { padding: 18px; }
-  .analytics-insight { min-height: 32px; margin-top: 10px; padding: 7px 10px; border-radius: 10px; background: var(--hp-daily-soft); color: var(--hp-daily-text); display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 750; line-height: 1.35; }
+  .analytics-insight { min-height: 44px; margin-top: 10px; padding: 8px 10px; border-radius: 10px; background: var(--hp-daily-soft); color: var(--hp-daily-text); display: flex; align-items: center; gap: 6px; font-size: var(--type-body); line-height: var(--line-body); font-weight: 750; }
   .analytics-insight.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
   .analytics-insight .material-symbols-rounded { flex: 0 0 auto; font-size: 15px; }
-  .analytics-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-  .analytics-pill { min-height: 44px; padding: 0 16px; border: 1px solid var(--hp-daily); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text-muted); font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s ease; }
-  .analytics-pill:hover { transform: translateY(-1px); }
-  .analytics-pill.active { background: var(--hp-daily); color: var(--hp-surface); }
-  .analytics-pill.joy.active { border-color: var(--hp-joy); background: var(--hp-joy); }
-  .analytics-trend-plot { height: 190px; margin: 8px -2px 0; position: relative; }
+  .analytics-trend-plot { height: 204px; margin: 8px -2px 0; position: relative; }
   .analytics-trend-plot svg { width: 100%; height: 100%; overflow: visible; }
   .analytics-grid-line { stroke: var(--hp-border); stroke-width: 1; }
   .analytics-trend-fill { fill: url(#trendFillDaily); opacity: .72; }
@@ -358,12 +555,12 @@
   .analytics-trend-current { fill: none; stroke: var(--hp-daily); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
   .analytics-trend-current.joy { stroke: var(--hp-joy); }
   .analytics-trend-previous { fill: none; stroke: var(--hp-text-faint); stroke-dasharray: 4 4; stroke-linecap: round; stroke-width: 1.8; opacity: .72; }
-  .analytics-axis { fill: var(--hp-text-muted); font: 10px var(--hp-font-body); }
-  .analytics-end-label { fill: var(--hp-text); font: 750 10px var(--hp-font-body); }
-  .analytics-end-sub { fill: var(--hp-text-muted); font: 9px var(--hp-font-body); }
+  .analytics-axis { fill: var(--hp-text-muted); font-family: var(--hp-font-body); font-size: var(--type-compact); }
+  .analytics-end-label { fill: var(--hp-text); font-family: var(--hp-font-body); font-size: var(--type-compact); font-weight: 750; }
+  .analytics-end-sub { fill: var(--hp-text-muted); font-family: var(--hp-font-body); font-size: var(--type-compact); }
   .analytics-end-dot { fill: var(--hp-daily); stroke: var(--hp-surface); stroke-width: 2; }
   .analytics-end-dot.joy { fill: var(--hp-joy); }
-  .analytics-trend-legend { min-height: 24px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-trend-legend { min-height: 28px; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-trend-legend i { width: 18px; height: 2px; background: var(--hp-daily); }
   .analytics-trend-legend i.joy { background: var(--hp-joy); }
   .analytics-trend-legend i.dashed { background: repeating-linear-gradient(90deg,var(--hp-text-faint) 0 4px,transparent 4px 7px); }
@@ -386,31 +583,25 @@
   }
   .analytics-trend-legend span + i { margin-left: 9px; }
   .analytics-donut-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .analytics-donut-top strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-  .analytics-data-tag { flex: 0 0 auto; padding: 3px 9px; border-radius: 7px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: 10px; font-weight: 750; }
-  .analytics-donut-wrap { height: 260px; display: grid; place-items: center; }
-  .analytics-donut { width: 242px; height: 242px; position: relative; border-radius: 50%; background: conic-gradient(#69a873 0 37%, #5f8dca 37% 66%, var(--hp-joy) 66% 91%, #86c994 91% 100%); }
-  .analytics-donut::after { content: ""; position: absolute; inset: 58px; border-radius: 50%; background: var(--hp-surface); }
+  .analytics-donut-top strong { overflow: hidden; font-size: var(--type-item); line-height: var(--line-item); text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-data-tag { flex: 0 0 auto; padding: 3px 9px; border-radius: 7px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .analytics-donut-wrap { height: 272px; display: grid; place-items: center; }
+  .analytics-donut { width: 250px; height: 250px; position: relative; border-radius: 50%; background: conic-gradient(#69a873 0 37%, #5f8dca 37% 66%, var(--hp-joy) 66% 91%, #86c994 91% 100%); }
+  .analytics-donut::after { content: ""; position: absolute; inset: 60px; border-radius: 50%; background: var(--hp-surface); }
   .analytics-donut-center { position: absolute; z-index: 1; inset: 0; display: grid; align-content: center; justify-items: center; text-align: center; }
-  .analytics-donut-center span { color: var(--hp-text-muted); font-size: 10px; }
-  .analytics-donut-center strong { max-width: 112px; margin-top: 3px; overflow: hidden; color: var(--hp-text); font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
-  .analytics-donut-center small { margin-top: 3px; color: var(--hp-text-faint); font-size: 10px; }
+  .analytics-donut-center span { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .analytics-donut-center strong { max-width: 124px; margin-top: 3px; overflow: hidden; color: var(--hp-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-variant-numeric: tabular-nums; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-donut-center small { margin-top: 3px; color: var(--hp-text-faint); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-ring-note { min-width: 28px; position: absolute; z-index: 2; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 1px; font-weight: 850; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,.12); }
   .analytics-ring-note .material-symbols-rounded { font-size: 15px; line-height: 1; }
-  .analytics-ring-note b { font-size: 13px; line-height: 1; }
-  .analytics-ring-emoji { font-size: 12px; line-height: 1; }
+  .analytics-ring-note b { font-size: var(--type-label); line-height: var(--line-label); }
+  .analytics-ring-emoji { font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-ring-note.a { top: 70px; right: 18px; }
   .analytics-ring-note.b { right: auto; bottom: 20px; left: 50%; transform: translateX(-50%); }
   .analytics-ring-note.c { top: 94px; bottom: auto; left: 16px; }
   .analytics-ring-note.d { top: 20px; left: 44%; transform: translateX(-50%); }
-  .analytics-donut-controls { min-height: 40px; margin-top: 21px; margin-bottom: 13px; display: grid; grid-template-columns: 164px 88px; align-items: center; justify-content: space-between; gap: 8px; }
-  .analytics-dimensions { min-width: 0; overflow: visible; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); display: grid; grid-template-columns: 1.05fr .95fr; }
-  .analytics-control-pill { min-width: 0; min-height: 38px; margin: 0; padding: 0 8px; border: 0; border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text-muted); font-size: 11px; font-weight: 750; white-space: nowrap; cursor: pointer; transition: background .15s ease,color .15s ease,box-shadow .15s ease; }
-  .analytics-control-pill + .analytics-control-pill { border-left: 0; }
-  .analytics-control-pill.active { min-height: 40px; margin: -1px; position: relative; z-index: 1; color: var(--hp-surface); }
-  .analytics-control-pill[data-analytics-dimension="category"].active { background: var(--hp-daily); box-shadow: 0 0 0 1px var(--hp-daily); }
-  .analytics-control-pill[data-analytics-dimension="member"].active { background: color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); box-shadow: 0 0 0 1px color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); }
-  .analytics-member-filter { width: 88px; min-width: 0; min-height: 40px; padding: 0 8px; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-grid; grid-template-columns: 16px minmax(0,1fr) 14px; align-items: center; gap: 3px; font-size: 11px; font-weight: 750; cursor: pointer; }
+  .analytics-donut-controls { min-height: 44px; margin-top: 21px; margin-bottom: 13px; display: grid; grid-template-columns: minmax(0,1fr) 88px; align-items: center; justify-content: space-between; gap: 8px; }
+  .analytics-member-filter { width: 88px; min-width: 0; min-height: 44px; padding: 0 8px; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-grid; grid-template-columns: 16px minmax(0,1fr) 14px; align-items: center; gap: 3px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; cursor: pointer; }
   .analytics-member-filter-label { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-member-filter .material-symbols-rounded { font-size: 14px; }
   .analytics-member-filter .material-symbols-rounded:first-child { font-size: 16px; }
@@ -419,85 +610,114 @@
   .analytics-legend-row:hover { background: color-mix(in srgb,var(--hp-surface-muted) 38%,transparent); }
   .analytics-legend-row .material-symbols-rounded { font-size: 15px; color: var(--legend-color); }
   .analytics-legend-row .legend-emoji { font-size: 14px; }
-  .analytics-legend-row > span:nth-child(2) { overflow: hidden; font-size: 11.5px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-  .analytics-legend-row strong { font-size: 11.5px; font-variant-numeric: tabular-nums; }
-  .analytics-legend-row small { color: var(--hp-text-muted); font-size: 11px; font-weight: 750; text-align: right; }
+  .analytics-legend-row > span:nth-child(2) { overflow: hidden; font-size: var(--type-item); line-height: var(--line-item); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-legend-row strong { font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
+  .analytics-legend-row small { color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; text-align: right; }
   .analytics-joy-drawer { margin-top: 10px; padding: 6px 2px 0; }
   .analytics-joy-toggle { width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 7px; text-align: left; cursor: pointer; }
   .analytics-joy-toggle > .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-joy-text); font-size: 18px; transition: transform .15s ease; }
   .analytics-joy-drawer.expanded .analytics-joy-toggle > .material-symbols-rounded { transform: rotate(180deg); }
   .analytics-joy-details { padding-top: 2px; }
-  .analytics-joy-chip { padding: 3px 9px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); color: var(--hp-joy-text); display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 850; }
+  .analytics-joy-chip { padding: 3px 9px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); color: var(--hp-joy-text); display: inline-flex; align-items: center; gap: 4px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
   .analytics-joy-chip .material-symbols-rounded { font-size: 11px; }
-  .analytics-joy-count { flex: 1; color: var(--hp-joy-text); font-size: 10px; font-weight: 700; }
-  .analytics-joy-total { color: var(--hp-joy-text); font-size: 11px; font-weight: 850; font-variant-numeric: tabular-nums; }
+  .analytics-joy-count { flex: 1; color: var(--hp-joy-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
+  .analytics-joy-total { color: var(--hp-joy-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; font-variant-numeric: tabular-nums; }
   .analytics-joy-stack { height: 18px; margin: 9px 0 4px; overflow: hidden; border: 1px solid color-mix(in srgb,var(--hp-joy) 30%,var(--hp-border)); border-radius: 7px; display: flex; }
   .analytics-joy-stack i:nth-child(1) { width: 63%; background: var(--hp-joy); }
   .analytics-joy-stack i:nth-child(2) { width: 25%; background: #e8ad6d; }
   .analytics-joy-stack i:nth-child(3) { flex: 1; background: var(--hp-joy-soft); }
-  .analytics-joy-row { min-height: 36px; display: grid; grid-template-columns: 20px minmax(0,1fr) auto 32px; gap: 6px; align-items: center; color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-joy-row { min-height: 44px; display: grid; grid-template-columns: 20px minmax(0,1fr) auto 32px; gap: 6px; align-items: center; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-joy-row .material-symbols-rounded { color: var(--joy-row-color,var(--hp-joy)); font-size: 13px; }
-  .analytics-joy-row strong { color: var(--hp-text); font-size: 10px; }
+  .analytics-joy-row strong { color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-joy-row small { text-align: right; }
   .analytics-calendar-card { padding-left: 8px; padding-right: 8px; }
   .analytics-calendar-weekdays, .analytics-calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
   .analytics-calendar-weekdays { margin-bottom: 4px; }
-  .analytics-calendar-weekdays span { color: var(--hp-text-faint); font-size: 10px; font-weight: 750; text-align: center; }
+  .analytics-calendar-weekdays span { color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; text-align: center; }
   .analytics-calendar-day { aspect-ratio: 1; position: relative; padding: 3px 4px; border: 0; border-radius: 8px; background: var(--heat,var(--hp-surface-muted)); color: var(--hp-text-faint); cursor: pointer; transition: .15s ease; }
   .analytics-calendar-day:hover { transform: translateY(-1px); }
   .analytics-calendar-day.empty { pointer-events: none; background: transparent; }
   .analytics-calendar-day.selected { box-shadow: inset 0 0 0 2px var(--hp-joy-text); }
   .analytics-calendar-day[data-count="1"] { color: var(--hp-joy-text); }
   .analytics-calendar-day[data-count="2"], .analytics-calendar-day[data-count="3"] { color: #fff; }
-  .analytics-calendar-day span { position: absolute; top: 5px; right: 6px; font-size: 10px; font-weight: 800; }
+  .analytics-calendar-day span { position: absolute; top: 5px; right: 6px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
   .analytics-calendar-day:not(.empty):not([data-count="0"])::after { content: ""; width: 5px; height: 5px; position: absolute; left: 6px; bottom: 6px; border-radius: 50%; background: currentColor; opacity: .9; }
-  .analytics-calendar-legend { min-height: 32px; margin-top: 10px; padding: 0 5px; display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: 10px; }
+  .analytics-calendar-legend { min-height: 36px; margin-top: 10px; padding: 0 5px; display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-heat { width: 12px; height: 12px; border-radius: 4px; }
   .analytics-calendar-legend p { flex: 1; margin: 0 0 0 5px; color: var(--hp-text-faint); line-height: 1.35; text-align: right; }
   .analytics-day-panel { margin: 10px 8px 0; padding-top: 10px; border-top: 1px solid var(--hp-border); }
-  .analytics-day-panel-head { margin-bottom: 4px; color: var(--hp-joy-text); font-size: 10px; font-weight: 800; }
-  .analytics-day-row { min-height: 44px; display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; }
+  .analytics-day-panel-head { margin-bottom: 4px; color: var(--hp-joy-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .analytics-day-row { min-height: 50px; display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; }
   .analytics-day-row + .analytics-day-row { border-top: 1px solid var(--hp-border); }
   .analytics-day-row .material-symbols-rounded { color: var(--hp-joy-text); font-size: 18px; }
-  .analytics-day-row span { overflow: hidden; font-size: 10px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-  .analytics-day-row span small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: 10px; font-weight: 600; }
-  .analytics-day-row strong { font-size: 10px; font-variant-numeric: tabular-nums; }
-  .analytics-histogram { height: 142px; display: grid; grid-template-columns: repeat(10,1fr); gap: 4px; align-items: end; }
+  .analytics-day-row span { overflow: hidden; font-size: var(--type-body); line-height: var(--line-body); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-day-row span small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 600; }
+  .analytics-day-row strong { font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
+  .analytics-histogram { height: 154px; display: grid; grid-template-columns: repeat(10,1fr); gap: 4px; align-items: end; }
   .analytics-histogram-col { height: 100%; display: grid; grid-template-rows: 16px 1fr; align-items: end; justify-items: center; }
-  .analytics-histogram-col > span { color: var(--hp-joy-text); font-size: 10px; font-weight: 750; }
+  .analytics-histogram-col > span { color: var(--hp-joy-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
   .analytics-histogram-bar { width: min(20px,100%); min-height: 3px; align-self: end; border-radius: 5px 5px 2px 2px; background: linear-gradient(var(--hp-joy),#e7a6b6); }
   .analytics-histogram-bar.zero { background: var(--hp-surface-muted); }
   .analytics-histogram-bar.median { outline: 2px solid color-mix(in srgb,var(--hp-joy) 44%,var(--hp-joy-soft)); outline-offset: 1px; }
-  .analytics-histogram-axis { margin-top: 5px; display: grid; grid-template-columns: repeat(10,1fr); color: var(--hp-text-muted); font-size: 10px; font-weight: 650; text-align: center; }
-  .analytics-histogram-foot { min-height: 34px; margin-top: 8px; display: flex; align-items: center; color: var(--hp-joy-text); font-size: 10px; font-weight: 750; line-height: 1.4; }
+  .analytics-histogram-axis { margin-top: 5px; display: grid; grid-template-columns: repeat(10,1fr); color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 650; text-align: center; }
+  .analytics-histogram-foot { min-height: 38px; margin-top: 8px; display: flex; align-items: center; color: var(--hp-joy-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
   .analytics-median { padding: 3px 8px; border-radius: 7px; background: var(--hp-joy-soft); color: var(--hp-joy-text); font-weight: 700; white-space: nowrap; }
   .analytics-family-card { margin-top: 8px; padding: 14px; border: 1px solid color-mix(in srgb,var(--hp-success) 30%,var(--hp-border)); border-radius: 16px; background: color-mix(in srgb,var(--hp-success) 10%,var(--hp-surface)); }
-  .analytics-family-card h3 { margin: 0 0 8px; color: var(--hp-success); font-size: 13px; }
-  .analytics-family-card p { margin: 5px 0 0; color: var(--hp-text); font-size: 9px; line-height: 1.5; }
+  .analytics-family-card h3 { margin: 0 0 8px; color: var(--hp-success); font-size: var(--type-item); line-height: var(--line-item); }
+  .analytics-family-card p { margin: 5px 0 0; color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-window-types { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 3px; }
-  .analytics-window-type { min-width: 48px; min-height: 34px; padding: 5px 10px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text); font-size: 9px; font-weight: 700; cursor: pointer; }
+  .analytics-window-type { min-width: 48px; min-height: 36px; padding: 5px 10px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; cursor: pointer; }
   .analytics-window-type.active { border-color: var(--hp-primary); background: var(--hp-primary); color: var(--hp-surface); }
   .analytics-window-list { margin-top: 14px; }
-  .analytics-window-option { width: 100%; min-height: 45px; padding: 8px 10px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: 10px; cursor: pointer; }
+  .analytics-window-option { width: 100%; min-height: 48px; padding: 8px 10px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: var(--type-body); line-height: var(--line-body); cursor: pointer; }
   .analytics-window-option.selected { color: var(--hp-primary-text); font-weight: 800; }
   .analytics-window-option .material-symbols-rounded { font-size: 16px; }
 
+  /* Common segmented control */
+  .segmented-control { --segmented-count: 2; width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(var(--segmented-count),minmax(0,1fr)); min-height: 44px; padding: 2px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: color-mix(in srgb,var(--hp-surface-muted) 54%,var(--hp-surface)); box-shadow: 0 3px 12px rgba(76,61,48,.035); }
+  .segmented-option { min-width: 0; min-height: 40px; padding: 0 8px; border: 0; border-radius: var(--hp-radius-pill); background: transparent; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; white-space: nowrap; cursor: pointer; transition: color .15s, background .15s, box-shadow .15s, transform .12s; }
+  .segmented-option:active { transform: scale(.97); }
+  .segmented-option.active { background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 3px 10px color-mix(in srgb,var(--hp-primary) 22%,transparent); }
+  .segmented-option.daily.active { background: var(--hp-daily-soft); color: var(--hp-daily); box-shadow: inset 0 0 0 1.5px var(--hp-daily); }
+  .segmented-option.joy.active { background: var(--hp-joy-soft); color: var(--hp-joy); box-shadow: inset 0 0 0 1.5px var(--hp-joy); }
+  .segmented-option.shared.active { background: color-mix(in srgb,var(--hp-shared) 58%,var(--hp-joy)); color: var(--hp-surface); box-shadow: 0 3px 10px color-mix(in srgb,var(--hp-shared) 22%,transparent); }
+
   /* Shopping */
-  .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--hp-surface-muted); border-radius: 13px; padding: 3px; }
-  .segment { min-height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--hp-text-muted); font-size: 10px; font-weight: 850; cursor: pointer; }
-  .segment.active { background: var(--hp-surface); color: var(--hp-primary-text); box-shadow: var(--hp-shadow-card); }
-  .shopping-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 14px; margin-top: 8px; }
+  .shopping-filter-card { margin: 0 -4px 4px; padding: 12px; border: 1px solid var(--hp-border); border-radius: 18px; background: var(--hp-surface); box-shadow: none; }
+  .shopping-filter-grid { display: grid; gap: 8px; }
+  .shopping-filter-card.family .shopping-filter-grid { grid-template-columns: minmax(0,1fr); }
+  .shopping-filter-group { min-width: 0; }
+  .shopping-filter-secondary { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .shopping-filter-chip { height: 34px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 5px; background: var(--hp-surface); color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; cursor: pointer; transition: transform .12s ease, background .12s, border-color .12s, color .12s; }
+  .shopping-filter-chip:active { transform: scale(.97); }
+  .shopping-filter-chip .material-symbols-rounded { font-size: 15px; }
+  .shopping-filter-chip.private.active { border-color: var(--hp-shared); background: var(--hp-shared-soft); color: var(--hp-shared-text); }
+  .shopping-filter-chip.category.active { border-color: var(--hp-primary); background: var(--hp-daily-soft); color: var(--hp-primary-text); }
+  .shopping-category-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .shopping-category-header h3 { margin: 0; }
+  .shopping-category-actions { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 8px; padding-top: 14px; }
+  .shopping-category-actions .ghost-btn { width: auto; min-width: 92px; }
+  .shopping-empty { margin-top: 8px; padding: 36px 16px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); color: var(--hp-text-muted); text-align: center; font-size: var(--type-body); line-height: var(--line-body); }
+  .shopping-item { min-height: 68px; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 14px; margin-top: 8px; user-select: none; }
   .shopping-list-card { margin-top: 8px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); }
   .shopping-list-card .shopping-item { margin-top: 0; border: 0; border-radius: 0; }
   .shopping-list-card .shopping-item + .shopping-item { border-top: 1px solid var(--hp-border); }
-  .check { width: 23px; height: 23px; border-radius: 50%; border: 2px solid var(--hp-daily); background: transparent; display: grid; place-items: center; color: var(--hp-surface); cursor: pointer; }
+  .check { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; border: 2px solid var(--hp-daily); background: transparent; display: grid; place-items: center; color: var(--hp-surface); cursor: pointer; }
+  .check .material-symbols-rounded { font-size: 16px; }
   .shopping-item.joy .check { border-color: var(--hp-joy); }
-  .shopping-item.done .row-copy, .shopping-item.done > .material-symbols-rounded, .shopping-item.done .shopping-ledger-badge { opacity: .58; }
-  .shopping-item.done .check { background: var(--hp-daily); }
-  .shopping-item.joy.done .check { background: var(--hp-joy); }
+  .shopping-item.done { opacity: .58; }
+  .shopping-item.done .check { background: var(--hp-daily); border-color: var(--hp-daily); }
+  .shopping-item.joy.done .check { background: var(--hp-joy); border-color: var(--hp-joy); }
+  .shopping-item.done .shopping-ledger-badge { background: var(--hp-surface-muted); color: var(--hp-text-muted); }
+  .shopping-item.done .shopping-drag-handle { color: var(--hp-text); }
   .shopping-item.done .row-copy strong { text-decoration: line-through; }
   .shopping-ledger-badge.daily { background: var(--hp-daily-soft); color: var(--hp-daily-text); }
   .shopping-ledger-badge.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .shopping-drag-handle { width: 44px; height: 44px; flex: 0 0 44px; margin: -6px -8px -6px 0; padding: 0; border: 0; border-radius: 12px; display: grid; place-items: center; background: transparent; color: var(--hp-text-muted); cursor: grab; touch-action: none; }
+  .shopping-drag-handle .material-symbols-rounded { font-size: 20px; }
+  .shopping-drag-handle:active { cursor: grabbing; }
+  .shopping-item.dragging { opacity: .78; box-shadow: var(--hp-shadow-card); transform: scale(.99); }
+  .shopping-action-delete, .shopping-action-delete strong { color: var(--hp-error) !important; }
 
   /* Forms + keypad */
   .amount-display { text-align: center; padding: 10px 0 14px; }
@@ -516,6 +736,120 @@
   .mic.recording { background: var(--hp-error); }
   .wave { height: 34px; display: flex; gap: 4px; align-items: center; justify-content: center; margin: 10px 0; }
   .wave i { width: 3px; border-radius: 99px; background: var(--hp-primary); }
+
+  /* Unified accounting entry — manual form stays mounted while the input dock
+     changes between keypad and voice. Scoped to avoid changing edit / lock. */
+  .accounting-screen { min-height: 100%; padding: 7px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+  .accounting-screen .entry-header { min-height: 46px; margin: 0 20px 7px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .accounting-screen .entry-header .back-btn { position: absolute; left: 0; margin: 0; }
+  .accounting-screen .entry-header h1 { margin: 0; font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; }
+  .entry-method-switch { margin: 0 20px 9px; }
+  .entry-method-switch .segmented-control { min-height: 40px; }
+  .entry-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 20px 12px; scrollbar-width: none; }
+  .entry-body::-webkit-scrollbar { display: none; }
+  .entry-amount { min-height: 74px; padding: 4px 2px 10px; display: grid; place-items: center; position: relative; text-align: center; }
+  .entry-amount-meta { display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
+  .entry-currency-chip { min-height: 26px; padding: 4px 8px; border-radius: var(--hp-radius-pill); background: var(--hp-daily-soft); color: var(--hp-daily-text); display: inline-flex; align-items: center; gap: 4px; }
+  .entry-currency-chip .material-symbols-rounded { font-size: 14px; }
+  .entry-amount strong { margin-top: 2px; color: var(--hp-text); font-size: 38px; line-height: 44px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
+  .entry-amount.voice-updated strong { color: var(--hp-primary-text); }
+  .entry-amount-voice { width: 48px; height: 48px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: grid; place-items: center; cursor: pointer; box-shadow: var(--hp-shadow-card); }
+  .entry-amount-voice .material-symbols-rounded { font-size: 23px; }
+  .entry-source-badge { min-height: 22px; padding: 3px 7px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 3px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; white-space: nowrap; }
+  .entry-source-badge .material-symbols-rounded { font-size: 13px; }
+  .entry-review-banner { margin: 1px 0 9px; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--hp-warning) 45%, var(--hp-border)); border-radius: 12px; background: color-mix(in srgb, var(--hp-warning) 10%, var(--hp-surface)); color: var(--hp-text-muted); display: flex; align-items: flex-start; gap: 8px; font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .entry-review-banner .material-symbols-rounded { color: var(--hp-warning); font-size: 18px; flex: 0 0 auto; }
+  .entry-form { border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); overflow: hidden; }
+  .entry-form-row { width: 100%; min-height: 48px; padding: 8px 11px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 9px; text-align: left; }
+  .entry-form-row:last-child { border-bottom: 0; }
+  button.entry-form-row { cursor: pointer; }
+  .entry-form-row > .material-symbols-rounded:first-child { width: 18px; color: var(--hp-text-muted); font-size: 18px; }
+  .entry-form-label { width: 56px; flex: 0 0 auto; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
+  .entry-form-value, .entry-inline-input { min-width: 0; flex: 1; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .entry-inline-input { height: 32px; padding: 0; border: 0; outline: 0; background: transparent; text-align: right; }
+  .entry-form-row > .material-symbols-rounded:last-child { color: var(--hp-text-faint); font-size: 18px; }
+  .entry-form-row.voice-updated { background: color-mix(in srgb, var(--hp-primary-soft) 54%, transparent); }
+  .entry-form-row.needs-confirmation { box-shadow: inset 3px 0 0 var(--hp-warning); background: color-mix(in srgb, var(--hp-warning) 9%, var(--hp-surface)); }
+  .entry-confirm-badge { min-height: 22px; padding: 3px 7px; border-radius: var(--hp-radius-pill); background: color-mix(in srgb, var(--hp-warning) 16%, var(--hp-surface)); color: var(--hp-warning); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; white-space: nowrap; }
+  .entry-purpose-card { margin-top: 8px; min-height: 54px; padding: 9px 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); display: flex; align-items: center; gap: 8px; }
+  .entry-purpose-card > span { margin-right: auto; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
+  .entry-ledger-option { min-height: 34px; padding: 6px 11px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface-muted); color: var(--hp-text-muted); display: inline-flex; align-items: center; gap: 5px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; cursor: pointer; }
+  .entry-ledger-option.active.daily { border-color: var(--hp-daily); background: var(--hp-daily-soft); color: var(--hp-daily-text); }
+  .entry-ledger-option.active.joy { border-color: var(--hp-joy); background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .entry-note-card { margin-top: 8px; padding: 9px 11px 10px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); }
+  .entry-note-card label { display: flex; align-items: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
+  .entry-note-card label .material-symbols-rounded { font-size: 17px; }
+  .entry-note-card input { width: 100%; height: 34px; margin-top: 3px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+  .entry-input-dock { flex: 0 0 auto; padding: 11px 14px 18px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-surface) 97%, transparent); box-shadow: 0 -8px 22px rgba(75,57,40,.05); }
+  .entry-voice-launch { width: min(100%, 304px); min-height: 46px; margin: 0 auto 10px; padding: 7px 12px; border: 1px solid color-mix(in srgb, var(--hp-primary) 34%, var(--hp-border)); border-radius: 15px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; }
+  .entry-voice-launch > .material-symbols-rounded:first-child { width: 32px; height: 32px; border-radius: 11px; background: var(--hp-primary); color: var(--hp-surface); display: grid; place-items: center; font-size: 19px; }
+  .entry-voice-launch-copy { min-width: 0; flex: 1; }
+  .entry-voice-launch-copy strong { display: block; font-size: var(--type-label); line-height: var(--line-label); }
+  .entry-voice-launch-copy small { display: block; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .entry-voice-launch > .material-symbols-rounded:last-child { font-size: 18px; }
+  .entry-keypad { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; }
+  .entry-key { min-height: 48px; border: 0; border-radius: 12px; background: var(--hp-surface-muted); color: var(--hp-text); display: grid; place-items: center; font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-weight: 650; cursor: pointer; }
+  .entry-key .material-symbols-rounded { font-size: 21px; }
+  .entry-key.currency { color: var(--hp-daily-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .entry-key.save { background: var(--hp-primary); color: var(--hp-surface); font-size: var(--type-button); line-height: var(--line-button); font-weight: 850; box-shadow: 0 5px 13px color-mix(in srgb, var(--hp-primary) 22%, transparent); }
+  .entry-key:disabled { opacity: .43; cursor: not-allowed; box-shadow: none; }
+  .entry-continuous-row { min-height: 27px; margin: 6px 2px -4px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .entry-continuous-row button { border: 0; background: transparent; color: var(--hp-primary-text); font-weight: 850; cursor: pointer; }
+
+  .entry-voice-dock { flex: 0 0 auto; min-height: 322px; padding: 12px 18px 20px; border-top: 1px solid var(--hp-border); background: var(--hp-surface); box-shadow: 0 -8px 22px rgba(75,57,40,.06); }
+  .entry-voice-status { min-height: 24px; display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .entry-voice-status .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hp-error); }
+  .entry-voice-status.listening .status-dot { animation: entry-pulse 1s ease-in-out infinite alternate; }
+  .entry-voice-status.processing .status-dot { background: var(--hp-warning); animation: entry-pulse .7s ease-in-out infinite alternate; }
+  .entry-voice-status.review .status-dot { background: var(--hp-success); }
+  .entry-voice-status.unavailable .status-dot { background: var(--hp-text-faint); }
+  .entry-private-note { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; }
+  .entry-private-note .material-symbols-rounded { font-size: 14px; }
+  .entry-voice-main { min-height: 189px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .entry-voice-copy { width: 100%; }
+  .entry-voice-copy strong { display: block; color: var(--hp-text); font-size: var(--type-section); line-height: var(--line-section); }
+  .entry-transcript { min-height: 40px; margin: 7px auto 5px; color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); font-weight: 650; }
+  .entry-result-chips { min-height: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+  .entry-result-chip { padding: 4px 7px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
+  .entry-result-chip.warning { background: color-mix(in srgb, var(--hp-warning) 14%, var(--hp-surface)); color: var(--hp-warning); }
+  .entry-voice-wave { height: 30px; margin: 6px 0 8px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .entry-voice-wave i { width: 3px; height: var(--voice-height, 14px); border-radius: var(--hp-radius-pill); background: var(--hp-daily); opacity: .72; }
+  .entry-voice-status.listening + .entry-voice-main .entry-voice-wave i { animation: entry-wave .8s ease-in-out infinite alternate; animation-delay: calc(var(--voice-index, 1) * -45ms); }
+  .entry-voice-core { width: 66px; height: 66px; margin: 4px auto 7px; border: 0; border-radius: 21px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; box-shadow: var(--hp-shadow-card); }
+  .entry-voice-core.listening { background: var(--hp-error); color: #fff; box-shadow: 0 7px 17px color-mix(in srgb, var(--hp-error) 26%, transparent); }
+  .entry-voice-core.review { background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .entry-voice-core:disabled { opacity: .7; cursor: wait; }
+  .entry-voice-core .material-symbols-rounded { font-size: 30px; }
+  .entry-voice-help { min-height: 17px; margin: 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .entry-voice-actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .entry-voice-actions.single { grid-template-columns: minmax(0,1fr); }
+  .entry-voice-actions .primary-btn, .entry-voice-actions .secondary-btn { min-height: 46px; }
+  @keyframes entry-pulse { to { opacity: .32; transform: scale(.78); } }
+  @keyframes entry-wave { to { transform: scaleY(.35); opacity: .38; } }
+
+  /* B makes the input method explicit for first-time learnability. */
+  .accounting-variant-b .entry-voice-launch { display: none; }
+  .accounting-variant-b .entry-voice-main { min-height: 185px; display: grid; grid-template-columns: minmax(0,1fr) 78px; gap: 8px; text-align: left; }
+  .accounting-variant-b .entry-voice-copy { min-width: 0; }
+  .accounting-variant-b .entry-transcript { margin-left: 0; }
+  .accounting-variant-b .entry-result-chips, .accounting-variant-b .entry-voice-wave { justify-content: flex-start; }
+
+  /* C moves the mic beside the amount and keeps a denser voice review dock. */
+  .accounting-variant-c .entry-amount { min-height: 74px; padding-right: 62px; place-items: start; text-align: left; }
+  .accounting-variant-c .entry-amount-meta { justify-content: flex-start; }
+  .accounting-variant-c .entry-amount-voice { position: absolute; right: 2px; top: 13px; }
+  .accounting-variant-c .entry-voice-launch { display: none; }
+  .accounting-variant-c .entry-voice-dock { min-height: 280px; }
+  .accounting-variant-c .entry-voice-main { min-height: 152px; display: grid; grid-template-columns: minmax(0,1fr) 76px; gap: 9px; text-align: left; }
+  .accounting-variant-c .entry-transcript { min-height: 28px; margin-left: 0; }
+  .accounting-variant-c .entry-result-chips, .accounting-variant-c .entry-voice-wave { justify-content: flex-start; }
+
+  @container phone (max-width: 380px) {
+    .entry-input-dock { padding-left: 11px; padding-right: 11px; }
+    .entry-key { min-height: 46px; }
+    .entry-voice-dock { min-height: 304px; padding-left: 14px; padding-right: 14px; }
+    .entry-private-note { display: none; }
+  }
   .camera { height: 390px; border-radius: 22px; background: #151a17; color: #fff; display: grid; place-items: center; position: relative; overflow: hidden; }
   .viewfinder { width: 78%; height: 66%; border: 2px solid rgba(255,255,255,.68); border-radius: 18px; display: grid; place-items: center; color: rgba(255,255,255,.72); }
   .viewfinder .material-symbols-rounded { font-size: 54px; }
@@ -582,6 +916,20 @@
   .annotations .phone [data-token] { outline: 1px dashed #d96b78; outline-offset: 2px; position: relative; }
   .annotations .phone [data-token]::before { content: attr(data-token); position: absolute; z-index: 20; top: -13px; left: 0; color: #fff; background: #a94354; font: 8px system-ui; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
 
+  @container phone (max-width: 340px) {
+    .faithful-ticket { grid-template-columns: 6px 52px minmax(0,1fr) 50px; }
+    .faithful-calendar { width: 44px; margin-left: 6px; }
+    .faithful-ticket-copy { padding: 8px 4px 8px 6px; }
+    .faithful-invite { min-height: 0; grid-template-columns: 44px minmax(0,1fr); }
+    .faithful-avatar-pair { width: 44px; height: 32px; }
+    .faithful-avatar-pair > span { width: 32px; height: 32px; }
+    .faithful-avatar-pair > span:last-child { left: 14px; }
+    .faithful-invite-actions { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
+    .faithful-invite-close { margin: 0; }
+    .analytics-category-card { padding: 12px; }
+    .analytics-legend-row { grid-template-columns: 20px minmax(0,1fr) auto 30px; gap: 5px; }
+  }
+
   @media (max-width: 990px) {
     .hub-bar { overflow-x: auto; justify-content: flex-start; }
     .hub-title { display: none; }
@@ -596,7 +944,7 @@
 </head>
 <body>
   <header class="hub-bar">
-    <div class="hub-title">Home Pocket · A「生活手帐」整 App 设计</div>
+    <div class="hub-title">Home Pocket · V16 整 App Mockup</div>
     <button class="preset active" data-preset="solo-light"><span class="material-symbols-rounded">person</span>A1 个人 · 浅色</button>
     <button class="preset" data-preset="family-light"><span class="material-symbols-rounded">group</span>A2 家庭 · 浅色</button>
     <button class="preset" data-preset="solo-dark"><span class="material-symbols-rounded">dark_mode</span>A3 个人 · 深色</button>
@@ -618,8 +966,8 @@
         <button class="screen-link" data-screen="shopping-form"><span class="material-symbols-rounded">add_shopping_cart</span>购物项目</button>
       </div>
       <div class="catalog-group"><span>Entry</span>
-        <button class="screen-link" data-screen="entry"><span class="material-symbols-rounded">edit_note</span>手动记账</button>
-        <button class="screen-link" data-screen="voice"><span class="material-symbols-rounded">mic</span>语音记账</button>
+        <button class="screen-link" data-screen="entry"><span class="material-symbols-rounded">edit_note</span>统一记账 · 手动</button>
+        <button class="screen-link" data-screen="voice"><span class="material-symbols-rounded">mic</span>统一记账 · 语音</button>
         <button class="screen-link" data-screen="ocr"><span class="material-symbols-rounded">document_scanner</span>OCR 扫描</button>
         <button class="screen-link" data-screen="category"><span class="material-symbols-rounded">category</span>类目选择</button>
         <button class="screen-link" data-screen="edit"><span class="material-symbols-rounded">edit</span>编辑交易</button>
@@ -653,22 +1001,36 @@
       <span id="inspect-kicker" class="screen-name">Main shell</span>
       <h2 id="inspect-title">主页</h2>
       <p id="inspect-copy">月度总览是第一阅读层，双账本、Joy 累计和近期交易依次向下展开；粉色只承担悦己与唯一 FAB。</p>
-      <div class="token-strip"><span class="token" style="--c:#f5f0e7"></span><span class="token" style="--c:#456b59"></span><span class="token" style="--c:#66896d"></span><span class="token" style="--c:#c87874"></span><span class="token" style="--c:#58758c"></span></div>
+      <div class="token-strip"><span class="token" style="--c:#f5f0e7"></span><span class="token" style="--c:#456b59"></span><span class="token" style="--c:#5fae72"></span><span class="token" style="--c:#d98ca0"></span><span class="token" style="--c:#58758c"></span></div>
       <div class="coverage"><div><strong>结构：</strong><span id="inspect-structure">主导航 + 月度快照</span></div><div><strong>状态：</strong><span id="inspect-states">个人 / 家庭 / 明暗</span></div><div><strong>实现：</strong><span id="inspect-build">复用现有 Riverpod 数据与导航</span></div></div>
       <div id="home-design-note" class="joy-variant-panel">
         <span class="screen-name">Home 方案</span>
         <div class="coverage" style="margin-top:9px">
-          <div><strong>C · 层次纸面 ★ 已选</strong><br>来自 Sketch 006，严格保留现有 Flutter 主页结构。</div>
+          <div><strong>C · 层次纸面 ★ 已选</strong><br>V16 严格映射当前 Flutter 主页结构。</div>
         </div>
         <p>HeroHeader → HomeHeroCard → FamilyInviteBanner → TransactionListCard → detached nav + FAB</p>
+      </div>
+      <div id="entry-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">统一记账方案</span>
+        <div class="joy-variant-options" role="group" aria-label="统一记账设计方案">
+          <button class="joy-variant-option active" data-entry-variant="a"><strong>A · 原位替换（推荐）</strong><br>共享表单不动，语音面板替换数字键盘；最贴近当前实现。</button>
+          <button class="joy-variant-option" data-entry-variant="b"><strong>B · 双轨提示</strong><br>增加“键盘 / 语音”选择，首次使用更易理解，但实现改动较大。</button>
+          <button class="joy-variant-option" data-entry-variant="c"><strong>C · 金额旁快捷</strong><br>麦克风靠近金额，底部语音区更紧凑，表单可见面积最大。</button>
+        </div>
+        <p id="entry-variant-rationale">默认 A 保留现有状态机，只把隐藏的“点空白退出”改为明确按钮，并增加识别来源与待确认提示。</p>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="manual">手动</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="listening">聆听</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="review">识别结果</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="unavailable">麦克风不可用</button></span></div>
+          <div><strong>安全约束</strong><br>解析中不可保存；低置信度类别必须确认；重录恢复语音前内容；金额始终只有一个数据源。</div>
+        </div>
       </div>
     </aside>
   </div>
 
-  <div id="sketch-tools"><span>Sketch 005</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
+  <div id="sketch-tools"><span>Mockup V16</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
 
 <script>
-  const state = { screen: 'home', theme: 'light', family: false, inviteDismissed: false, amount: '3480', pin: '', recording: false, uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, history: [] };
+  const state = { screen: 'home', theme: 'light', family: false, inviteDismissed: false, amount: '3480', entryVariant: 'a', entryVoiceState: 'review', entryVoiceApplied: false, entryNeedsReview: false, entryMerchant: 'ライフ', entryCategory: '食費 · スーパー', entryLedger: 'daily', entryNote: '', entryContinuous: false, entrySnapshot: null, pin: '', uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1', shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [], history: [] };
+  let shoppingCategoryDraft = new Set();
   const mainScreens = ['home','list','analytics','shopping'];
   const info = {
     foundation: ['Foundation','设计系统','色彩、字体、间距、组件与反馈都以生活手帐为同一来源。','令牌 + 原子组件','浅色 / 深色 / 可访问性','对应 AppPalette、AppTextStyles 与共享 widgets'],
@@ -676,10 +1038,10 @@
     home: ['Main shell','主页','选定 C「层次纸面」已回写；主页严格保留现有 Flutter 组合，只更新视觉表面。','HeroHeader + HomeHeroCard + Invite + Recent','个人 / 家庭 / 明暗','直接映射现有 Home widgets 与 providers'],
     list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
     analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
-    shopping: ['Main shell','购物清单','清单以纸面勾选为核心，公共/个人和批量管理保持可见但克制。','分段 + 过滤 + 可排序清单','家庭 / 个人 / 完成态','复用购物 providers 与 reorder 交互'],
+    shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
     'shopping-form': ['Main shell','购物项目','从购物页进入的单任务表单，名称、数量、公开范围和备注保持清楚。','项目表单 + 公开范围','新建 / 编辑 / 个人 / 共享','复用 ShoppingItemFormScreen'],
-    entry: ['Entry','手动记账','金额优先、详情其次、键盘稳定驻底；语音入口仍是快捷方式而不是第二套表单。','金额 + 共用详情表单 + 键盘','JPY / 外币 / 连续记账','复用 TransactionDetailsForm 与 SmartKeyboard'],
-    voice: ['Entry','语音记账','识别结果先确认金额/商家/类目，再保存；录音状态使用语义红，不使用悦己粉。','转写 + 识别结果 + 录音','监听 / 解析 / 纠错','复用 PTT session 与识别仲裁'],
+    entry: ['Entry','统一记账 · 手动','金额、类目、日期、商家、用途与备注始终属于同一表单；语音只是底部输入工具，不再跳到第二套页面。','共享表单 + 语音入口 + 数字键盘','手动 / 语音已反映 / 待确认 / 连续记账','映射 ManualOneStepScreen、TransactionDetailsForm 与 SmartKeyboard'],
+    voice: ['Entry','统一记账 · 语音','语音面板原位替换数字键盘，表单持续可见；明确提供停止、恢复原内容与返回表单按钮，并阻止未确认的低置信度结果直接保存。','共享表单 + 状态转写 + 明确恢复 / 确认','聆听 / 解析 / 复核 / 权限不可用','复用 PTT session、快照恢复与同一表单状态'],
     ocr: ['Entry','OCR 扫描','沉浸相机保持深色；拍摄完成后回到同一套详情确认语言。','取景框 + 拍摄控制','权限 / 拍摄 / 复核','复用 OCR scanner 与 review'],
     category: ['Entry','类目选择','搜索优先，L1 分组稳定，L2 使用轻量行而不是彩色 chip 墙。','搜索 + 分组 + 最近使用','搜索 / 展开 / 排序','复用类目树与学习逻辑'],
     edit: ['Entry','编辑交易','编辑与新建共享表单，但危险操作退到页尾并保持明确确认。','金额 + 详情 + 保存 / 删除','外币联动 / 删除确认','复用 TransactionDetailsForm.edit'],
@@ -694,24 +1056,29 @@
     legal: ['Safety','法务与赞助','合规信息保持阅读优先；赞助作为外部支持入口，不与核心功能竞争。','文档列表 + 长文阅读','日本合规 / 外链','复用 LegalSponsorSection 与 LegalDocScreen']
   };
 
+  const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   const icon = (name, cls='') => `<span class="material-symbols-rounded ${cls}">${name}</span>`;
   const backHeader = (title, extra='') => `<header class="app-header"><button class="back-btn" data-action="back" aria-label="戻る">${icon('chevron_left')}</button><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
   const tabHeader = (title, extra='') => `<header class="app-header"><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
-  const monthTitle = tone => `<span class="page-month-title ${tone}-month-title">${state.listYear}年${state.listMonth}月</span>`;
-  const mainHeader = () => `<header class="app-header"><h1>${monthTitle('home')}</h1><span class="spacer"></span><button class="chip" data-action="toggle-family">${icon(state.family?'group':'person')} ${state.family?'家族':'個人'}</button><span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span></header>`;
+  const monthTitle = tone => `<button class="page-month-title ${tone}-month-title" data-action="month" aria-label="${state.listYear}年${state.listMonth}月、月を選ぶ">${state.listYear}年${state.listMonth}月</button>`;
+  const mainHeader = () => `<header class="app-header"><h1>${monthTitle('home')}</h1><span class="spacer"></span><span class="home-mode-badge ${state.family?'family':'personal'}">${icon(state.family?'group':'person')} ${state.family?'家族':'個人'}</span><span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span></header>`;
   const txRow = (name, meta, value, type='daily', ico='payments') => `<button class="tap-row row-divider tx" data-action="toast" data-message="取引の詳細"><span class="row-icon ${type==='joy'?'joy':type==='shared'?'shared':''}">${icon(ico)}</span><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="row-value">${value}</span></button>`;
   const nav = active => `<div class="bottom-pill">${[['home','home','ホーム'],['list','receipt_long','明細'],['analytics','monitoring','統計'],['shopping','checklist','買い物']].map(([id,ico,label])=>`<button class="nav-item ${id===active?'active':''}" data-nav="${id}">${icon(ico)}<span>${label}</span></button>`).join('')}</div><button class="fab" data-action="fab" aria-label="追加">${icon('add')}</button>`;
+  function segmentedControl({ariaLabel,value,dataAttribute,options,className=''}) {
+    const buttons = options.map(option=>`<button class="segmented-option ${option.tone||''} ${value===option.value?'active':''}" ${dataAttribute}="${option.value}" aria-pressed="${value===option.value}">${option.label}</button>`).join('');
+    return `<div class="segmented-control ${className}" style="--segmented-count:${options.length}" role="group" aria-label="${ariaLabel}">${buttons}</div>`;
+  }
 
   function foundation() { return `<section class="screen">${backHeader('デザインシステム')}<div class="eyebrow">A · 生活手帐</div><h2 class="display" style="font-size:24px;margin:8px 0 5px">温润、可靠、留白</h2><p class="hint">和纸背景承载生活感；松叶绿处理行动与日常；红樱只属于悦己与添加。</p><div class="section-title"><h2>色彩语义</h2></div><div class="ledger-grid"><div class="ledger"><span><i class="semantic-dot" style="background:var(--hp-primary)"></i>主行动</span><strong style="color:var(--hp-primary-text)">松叶绿</strong></div><div class="ledger joy"><span><i class="semantic-dot" style="background:var(--hp-joy)"></i>悦己</span><strong>红樱</strong></div><div class="ledger"><span><i class="semantic-dot" style="background:var(--hp-daily)"></i>日常</span><strong>若草</strong></div><div class="ledger shared"><span><i class="semantic-dot" style="background:var(--hp-shared)"></i>共享</span><strong>雾蓝</strong></div></div><div class="section-title"><h2>字体层级</h2></div><div class="card"><div class="display" style="font-size:26px;font-weight:700">七月の家計</div><div style="font-size:16px;font-weight:800;margin-top:10px">页面与区块标题</div><p class="hint" style="font-size:13px">正文使用系统日文无衬线，金额使用 tabular figures。</p><strong class="amount" style="font-size:30px">¥186,420</strong></div><div class="section-title"><h2>操作与反馈</h2></div><button class="primary-btn" data-action="toast" data-message="主要操作反馈">主要操作</button><div style="height:8px"></div><button class="secondary-btn" data-action="toast" data-message="次要操作反馈">次要操作</button><div style="height:8px"></div><div class="flat-card">${txRow('交易行','说明文字','−¥3,280','daily','local_grocery_store')}</div></section>`; }
 
-  function statesScreen() { const content = state.uiState==='empty' ? `<div class="state-hero">${icon('inventory_2')}<h2 class="display">まだ記録がありません</h2><p class="hint">最初の取引を記録すると、ここに月の流れが見えてきます。</p><button class="primary-btn" style="margin-top:16px" data-screen="entry">最初の取引を記録</button></div>` : state.uiState==='error' ? `<div class="state-hero">${icon('cloud_off')}<h2 class="display">読み込めませんでした</h2><p class="hint">データは失われていません。接続を確認して、もう一度お試しください。</p><button class="secondary-btn" style="margin-top:16px" data-action="toast" data-message="再読み込みしました">もう一度試す</button></div>` : `<div style="padding-top:28px"><div class="skeleton" style="width:45%;height:20px"></div><div class="skeleton" style="width:72%;height:38px;margin-top:14px"></div>${[1,2,3,4].map(()=>`<div class="card" style="margin-top:12px"><div class="skeleton" style="width:58%"></div><div class="skeleton" style="width:82%;margin-top:10px"></div></div>`).join('')}<p class="hint" style="text-align:center;margin-top:22px">データを準備しています</p></div>`; return `<section class="screen">${backHeader('システム状態')}<div class="segmented" style="grid-template-columns:repeat(3,1fr)"><button class="segment ${state.uiState==='empty'?'active':''}" data-ui-state="empty">空</button><button class="segment ${state.uiState==='loading'?'active':''}" data-ui-state="loading">読み込み</button><button class="segment ${state.uiState==='error'?'active':''}" data-ui-state="error">エラー</button></div>${content}</section>`; }
+  function statesScreen() { const content = state.uiState==='empty' ? `<div class="state-hero">${icon('inventory_2')}<h2 class="display">まだ記録がありません</h2><p class="hint">最初の取引を記録すると、ここに月の流れが見えてきます。</p><button class="primary-btn" style="margin-top:16px" data-screen="entry">最初の取引を記録</button></div>` : state.uiState==='error' ? `<div class="state-hero">${icon('cloud_off')}<h2 class="display">読み込めませんでした</h2><p class="hint">データは失われていません。接続を確認して、もう一度お試しください。</p><button class="secondary-btn" style="margin-top:16px" data-action="toast" data-message="再読み込みしました">もう一度試す</button></div>` : `<div style="padding-top:28px"><div class="skeleton" style="width:45%;height:20px"></div><div class="skeleton" style="width:72%;height:38px;margin-top:14px"></div>${[1,2,3,4].map(()=>`<div class="card" style="margin-top:12px"><div class="skeleton" style="width:58%"></div><div class="skeleton" style="width:82%;margin-top:10px"></div></div>`).join('')}<p class="hint" style="text-align:center;margin-top:22px">データを準備しています</p></div>`; return `<section class="screen">${backHeader('システム状態')}${segmentedControl({ariaLabel:'表示状態',value:state.uiState,dataAttribute:'data-ui-state',options:[{value:'empty',label:'空'},{value:'loading',label:'読み込み'},{value:'error',label:'エラー'}]})}${content}</section>`; }
 
   function faithfulMetrics() {
     const goal = state.family ? ['18','24','75%'] : ['64','80','80%'];
     const satisfaction = state.family ? ['8.6','86%'] : ['8.2','82%'];
     const smallWins = state.family ? '24' : '12';
     const goalLabel = state.family ? `家族のときめき目標 ${goal[0]} / ${goal[1]} Joy` : `ときめき目標 ${goal[0]} / ${goal[1]} Joy`;
-    return `<div class="faithful-metric-grid"><div class="faithful-goal-ring" style="--goal:${goal[2]}" role="img" aria-label="${goalLabel}"><span class="faithful-goal-copy"><span>ときめき目標</span><strong>${goal[0]}<small> / ${goal[1]}</small></strong><em>Joy</em></span></div><div class="faithful-support-stack"><div class="faithful-support-block"><div class="faithful-satisfaction-head"><span>満足度の平均</span><strong>${satisfaction[0]} <small>/ 10</small></strong></div><div class="faithful-satisfaction-scale" style="--satisfaction:${satisfaction[1]}" role="img" aria-label="満足度の平均 ${satisfaction[0]} / 10"><span></span></div></div><div class="faithful-support-divider" aria-hidden="true"></div><div class="faithful-support-block faithful-small-win"><span class="faithful-small-win-copy"><strong>小確幸</strong><small>今月の記録</small></span><strong class="faithful-small-win-value">${smallWins}<small>件</small></strong></div></div></div>`;
+    return `<div class="faithful-metric-grid"><div class="faithful-goal-ring" style="--goal:${goal[2]}" role="img" aria-label="${goalLabel}"><span class="faithful-goal-copy"><span>ときめき目標</span><strong>${goal[0]}<small> / ${goal[1]}</small></strong><em>Joy</em></span></div><div class="faithful-support-stack"><div class="faithful-support-block"><div class="faithful-satisfaction-head"><span>満足度の平均</span><strong>${satisfaction[0]} <small>/ 10</small></strong></div><div class="faithful-satisfaction-scale" style="--satisfaction:${satisfaction[1]}" role="img" aria-label="満足度の平均 ${satisfaction[0]} / 10"><span></span></div></div><div class="faithful-support-divider" aria-hidden="true"></div><div class="faithful-support-block faithful-small-win"><span class="faithful-small-win-copy"><strong>小確幸</strong></span><strong class="faithful-small-win-value">${smallWins}<small>件</small></strong></div></div></div>`;
   }
 
   function faithfulMembers() {
@@ -729,7 +1096,7 @@
   }
 
   function homeTxRow(ico, category, ledger, merchant, amount, joy=false) {
-    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span>${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
+    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span class="faithful-tx-merchant">${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
   }
 
   function home() {
@@ -777,7 +1144,13 @@
   }
 
   function listLedgerFilter() {
-    return `<div class="list-filter-ledgers" role="group" aria-label="帳簿"><button class="list-ledger-option ${state.listLedger==='all'?'active':''}" data-list-ledger="all" aria-pressed="${state.listLedger==='all'}">すべて</button><button class="list-ledger-option daily ${state.listLedger==='daily'?'active':''}" data-list-ledger="daily" aria-pressed="${state.listLedger==='daily'}">日常</button><button class="list-ledger-option joy ${state.listLedger==='joy'?'active':''}" data-list-ledger="joy" aria-pressed="${state.listLedger==='joy'}">ときめき</button></div>`;
+    return segmentedControl({
+      ariaLabel: '帳簿',
+      value: state.listLedger,
+      dataAttribute: 'data-list-ledger',
+      className: 'list-ledger-segments',
+      options: [{value:'all',label:'すべて'},{value:'daily',label:'日常',tone:'daily'},{value:'joy',label:'ときめき',tone:'joy'}],
+    });
   }
 
   function listFilterBar() {
@@ -831,11 +1204,19 @@
       daily: ['trending_down','日常支出は ¥132,800 · 先月より9%少なく推移'],
       joy: ['favorite_border','今月のときめき支出は ¥53,620']
     }[state.analyticsTrend];
+    const emptyInsight = {
+      total: ['trending_flat','今月は ¥0'],
+      daily: ['trending_flat','日常支出は ¥0'],
+      joy: ['favorite_border','今月のときめき支出は ¥0']
+    }[state.analyticsTrend];
+    const shownInsight = state.analyticsEmpty ? emptyInsight : insight;
+    const amountAxis = state.analyticsEmpty ? '<text class="analytics-axis" x="8" y="163">0</text>' : '<text class="analytics-axis" x="2" y="31">20万</text><text class="analytics-axis" x="2" y="75">15万</text><text class="analytics-axis" x="2" y="119">10万</text><text class="analytics-axis" x="8" y="163">5万</text>';
+    const trendSeries = state.analyticsEmpty ? '' : `<path class="analytics-trend-fill ${active.klass}" d="${active.fill}"/>${active.previous?`<path class="analytics-trend-previous" d="${active.prior}"/><text class="analytics-end-sub" x="224" y="${active.py+17}">先月 ${active.previous}</text>`:''}<path class="analytics-trend-current ${active.klass}" d="${active.current}"/><circle class="analytics-end-dot ${active.klass}" cx="316" cy="${active.y}" r="4"/><text class="analytics-end-label" x="224" y="${Math.max(12,active.y-12)}">7/31 ${active.end}</text>`;
     return `<div class="analytics-card" data-token="WithinMonthTrendCard">
-      <div class="analytics-pills"><button class="analytics-pill ${state.analyticsTrend==='total'?'active':''}" data-analytics-trend="total">総支出</button><button class="analytics-pill ${state.analyticsTrend==='daily'?'active':''}" data-analytics-trend="daily">日常</button><button class="analytics-pill joy ${state.analyticsTrend==='joy'?'active':''}" data-analytics-trend="joy">ときめき</button></div>
-      <div class="analytics-insight ${state.analyticsTrend==='joy'?'joy':''}">${icon(insight[0])}<span>${insight[1]}</span></div>
-      <div class="analytics-trend-plot"><svg viewBox="0 0 330 200" role="img" aria-label="${state.analyticsTrend==='joy'?'今月のときめき支出':'今月と先月の累計支出'}"><defs><linearGradient id="trendFillDaily" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-daily)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-daily)" stop-opacity="0"/></linearGradient><linearGradient id="trendFillJoy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-joy)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-joy)" stop-opacity="0"/></linearGradient></defs>${[28,72,116,160].map(y=>`<line class="analytics-grid-line" x1="34" x2="320" y1="${y}" y2="${y}"/>`).join('')}<text class="analytics-axis" x="2" y="31">20万</text><text class="analytics-axis" x="2" y="75">15万</text><text class="analytics-axis" x="2" y="119">10万</text><text class="analytics-axis" x="8" y="163">5万</text><path class="analytics-trend-fill ${active.klass}" d="${active.fill}"/>${active.previous?`<path class="analytics-trend-previous" d="${active.prior}"/><text class="analytics-end-sub" x="224" y="${active.py+17}">先月 ${active.previous}</text>`:''}<path class="analytics-trend-current ${active.klass}" d="${active.current}"/><circle class="analytics-end-dot ${active.klass}" cx="316" cy="${active.y}" r="4"/><text class="analytics-end-label" x="224" y="${Math.max(12,active.y-12)}">7/31 ${active.end}</text>${[6,12,18,24].map((d,i)=>`<text class="analytics-axis" x="${80+i*55}" y="190">${d}日</text>`).join('')}</svg></div>
-      <div class="analytics-trend-legend"><i class="${active.klass}"></i><span>今月</span>${active.previous?`<i class="dashed"></i><span>先月</span>`:''}</div>
+      ${segmentedControl({ariaLabel:'支出の種類',value:state.analyticsTrend,dataAttribute:'data-analytics-trend',className:'analytics-trend-segments',options:[{value:'total',label:'すべて'},{value:'daily',label:'日常',tone:'daily'},{value:'joy',label:'ときめき',tone:'joy'}]})}
+      <div class="analytics-insight ${state.analyticsTrend==='joy'?'joy':''}">${icon(shownInsight[0])}<span>${shownInsight[1]}</span></div>
+      <div class="analytics-trend-plot"><svg viewBox="0 0 330 200" role="img" aria-label="${state.analyticsTrend==='joy'?'今月のときめき支出':'今月と先月の累計支出'}"><defs><linearGradient id="trendFillDaily" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-daily)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-daily)" stop-opacity="0"/></linearGradient><linearGradient id="trendFillJoy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hp-joy)" stop-opacity=".2"/><stop offset="1" stop-color="var(--hp-joy)" stop-opacity="0"/></linearGradient></defs>${[28,72,116,160].map(y=>`<line class="analytics-grid-line" x1="34" x2="320" y1="${y}" y2="${y}"/>`).join('')}${amountAxis}${trendSeries}${[6,12,18,24].map((d,i)=>`<text class="analytics-axis" x="${80+i*55}" y="190">${d}日</text>`).join('')}</svg></div>
+      ${state.analyticsEmpty?'':`<div class="analytics-trend-legend"><i class="${active.klass}"></i><span>今月</span>${active.previous?`<i class="dashed"></i><span>先月</span>`:''}</div>`}
     </div>`;
   }
 
@@ -853,27 +1234,27 @@
   function analyticsJoyDrawer(memberMode=false) {
     const categorySets={all:[['sports_esports','趣味・コレクション',33800,63,'var(--hp-joy)'],['school','学び',13420,25,'#e8ad6d'],['groups','交際',6400,12,'var(--hp-shared)']],self:[['sports_esports','趣味・コレクション',18400,65,'var(--hp-joy)'],['school','学び',6200,22,'#e8ad6d'],['groups','交際',3800,13,'var(--hp-shared)']],hanako:[['sports_esports','趣味・コレクション',9800,60,'var(--hp-joy)'],['school','学び',4120,25,'#e8ad6d'],['groups','交際',2500,15,'var(--hp-shared)']],taro:[['sports_esports','趣味・コレクション',5600,64,'var(--hp-joy)'],['school','学び',3100,36,'#e8ad6d']]};
     const memberSets=[['person','あおい',28400,53,'var(--hp-joy)'],['person','花子',16420,31,'#e8ad6d'],['person','太郎',8800,16,'var(--hp-shared)']];
-    const rows = memberMode ? (state.analyticsMember==='all'?memberSets:memberSets.filter(row=>row[1]===analyticsMemberName()).map(row=>[row[0],row[1],row[2],100,row[4]])) : (categorySets[state.analyticsMember]||categorySets.all);
+    const rows = state.analyticsEmpty ? [] : (memberMode ? (state.analyticsMember==='all'?memberSets:memberSets.filter(row=>row[1]===analyticsMemberName()).map(row=>[row[0],row[1],row[2],100,row[4]])) : (categorySets[state.analyticsMember]||categorySets.all));
     const total=rows.reduce((sum,row)=>sum+row[2],0);
     return `<div class="analytics-joy-drawer ${state.analyticsJoyExpanded?'expanded':''}"><button class="analytics-joy-toggle" data-action="analytics-joy-toggle" aria-expanded="${state.analyticsJoyExpanded}" aria-label="ときめき支出の内訳を${state.analyticsJoyExpanded?'閉じる':'開く'}"><span class="analytics-joy-chip">${icon('favorite_border')}ときめき支出</span><span class="analytics-joy-count">${rows.length} ${memberMode?'メンバー':'カテゴリ'}</span><strong class="analytics-joy-total">¥${total.toLocaleString('ja-JP')}</strong>${icon('expand_more')}</button>${state.analyticsJoyExpanded?`<div class="analytics-joy-details"><div class="analytics-joy-stack">${rows.map(row=>`<i style="width:${row[3]}%;background:${row[4]}"></i>`).join('')}</div>${rows.map(row=>`<div class="analytics-joy-row" style="--joy-row-color:${row[4]}">${icon(row[0])}<span>${row[1]}</span><strong>¥${row[2].toLocaleString('ja-JP')}</strong><small>${row[3]}%</small></div>`).join('')}</div>`:''}</div>`;
   }
 
   function analyticsDonutCard() {
     const categorySets={all:[['restaurant','食費',68400,37,'#69a873'],['home','住居',54000,29,'#5f8dca'],['sports_esports','趣味・ときめき',53620,29,'var(--hp-joy)'],['train','交通',10400,5,'#86c994']],self:[['restaurant','食費',32000,38,'#69a873'],['home','住居',24000,29,'#5f8dca'],['sports_esports','趣味・ときめき',18400,22,'var(--hp-joy)'],['train','交通',9800,11,'#86c994']],hanako:[['restaurant','食費',24600,39,'#69a873'],['home','住居',17500,28,'#5f8dca'],['sports_esports','趣味・ときめき',16420,26,'var(--hp-joy)'],['train','交通',4080,7,'#86c994']],taro:[['restaurant','食費',29200,36,'#69a873'],['home','住居',22500,28,'#5f8dca'],['sports_esports','趣味・ときめき',18800,23,'var(--hp-joy)'],['train','交通',10320,13,'#86c994']]};
-    const categoryRows = categorySets[state.analyticsMember] || categorySets.all;
+    const categoryRows = state.analyticsEmpty ? [] : (categorySets[state.analyticsMember] || categorySets.all);
     const familyRows = [['🌿','あおい','¥84,200',37,'#6fa36f'],['🌸','花子','¥62,600',28,'#5b8ac4'],['☕','太郎','¥80,820',35,'#86c79a']];
     const soloRows = [['🌿','あおい','¥186,420',100,'#6fa36f']];
-    let memberRows = state.family ? familyRows : soloRows;
+    let memberRows = state.analyticsEmpty ? [] : (state.family ? familyRows : soloRows);
     if(state.analyticsMember!=='all') memberRows = memberRows.filter(row=>row[1]===analyticsMemberName()).map(row=>[row[0],row[1],row[2],100,row[4]]);
     const memberTotal = memberRows.reduce((sum,row)=>sum+Number(row[2].replace(/\D/g,'')),0);
-    const memberCount = state.analyticsMember==='all' ? (state.family?28:18) : 8;
+    const memberCount = state.analyticsEmpty ? 0 : (state.analyticsMember==='all' ? (state.family?28:18) : 8);
     const categoryMode = state.analyticsDimension==='category';
     const total = categoryMode ? categoryRows.reduce((sum,row)=>sum+row[2],0) : memberTotal;
     const rows = categoryMode ? categoryRows.map(row=>[row[0],row[1],`¥${row[2].toLocaleString('ja-JP')}`,row[3],row[4]]) : memberRows;
     const shares = categoryMode ? categoryRows : memberRows;
-    const donutStyle=`background:conic-gradient(${shares.map((row,i)=>`${row[4]} ${i?shares.slice(0,i).reduce((s,r)=>s+r[3],0):0}% ${shares.slice(0,i+1).reduce((s,r)=>s+r[3],0)}%`).join(',')})`;
+    const donutStyle=shares.length ? `background:conic-gradient(${shares.map((row,i)=>`${row[4]} ${i?shares.slice(0,i).reduce((s,r)=>s+r[3],0):0}% ${shares.slice(0,i+1).reduce((s,r)=>s+r[3],0)}%`).join(',')})` : 'background:var(--hp-surface-muted)';
     const positions=['a','b','c','d'];
-    return `<div class="analytics-card analytics-category-card" data-token="CategoryDonutCard"><div class="analytics-donut-wrap"><div class="analytics-donut" style="${donutStyle}">${shares.map((row,i)=>`<span class="analytics-ring-note ${positions[i]||'d'}">${categoryMode?icon(row[0]):`<span class="analytics-ring-emoji">${row[0]}</span>`}<b>${row[3]}%</b></span>`).join('')}<span class="analytics-donut-center"><span>今月の支出</span><strong>¥${total.toLocaleString('ja-JP')}</strong><small>${memberCount}件</small></span></div></div><div class="analytics-donut-controls"><span class="analytics-dimensions" role="group" aria-label="支出の集計方法"><button class="analytics-control-pill ${categoryMode?'active':''}" data-analytics-dimension="category" aria-pressed="${categoryMode}">カテゴリ別</button><button class="analytics-control-pill ${!categoryMode?'active':''}" data-analytics-dimension="member" aria-pressed="${!categoryMode}">メンバー別</button></span><button class="analytics-member-filter" data-action="analytics-member-filter" aria-label="対象メンバー ${analyticsMemberName()}">${icon('person')}<span class="analytics-member-filter-label">${state.analyticsMember==='all'?'全員':analyticsMemberName()}</span>${icon('expand_more')}</button></div>${rows.map(row=>analyticsLegendRow(row,!categoryMode)).join('')}${analyticsJoyDrawer(!categoryMode)}</div>`;
+    return `<div class="analytics-card analytics-category-card" data-token="CategoryDonutCard"><div class="analytics-donut-wrap"><div class="analytics-donut" style="${donutStyle}">${shares.map((row,i)=>`<span class="analytics-ring-note ${positions[i]||'d'}">${categoryMode?icon(row[0]):`<span class="analytics-ring-emoji">${row[0]}</span>`}<b>${row[3]}%</b></span>`).join('')}<span class="analytics-donut-center"><span>今月の支出</span><strong>¥${total.toLocaleString('ja-JP')}</strong><small>${memberCount}件</small></span></div></div><div class="analytics-donut-controls">${segmentedControl({ariaLabel:'支出の集計方法',value:state.analyticsDimension,dataAttribute:'data-analytics-dimension',className:'analytics-dimension-segments',options:[{value:'category',label:'カテゴリ別',tone:'daily'},{value:'member',label:'メンバー別',tone:'shared'}]})}<button class="analytics-member-filter" data-action="analytics-member-filter" aria-label="対象メンバー ${analyticsMemberName()}">${icon('person')}<span class="analytics-member-filter-label">${state.analyticsMember==='all'?'全員':analyticsMemberName()}</span>${icon('expand_more')}</button></div>${rows.map(row=>analyticsLegendRow(row,!categoryMode)).join('')}${analyticsJoyDrawer(!categoryMode)}</div>`;
   }
 
   function analyticsCalendarCard() {
@@ -895,7 +1276,7 @@
 
   function analyticsHistogramCard() {
     const counts=[0,0,0,0,0,3,5,8,4,2], max=8;
-    return `<div class="analytics-card" data-token="SatisfactionHistogramCard"><div class="analytics-histogram">${counts.map((count,i)=>`<span class="analytics-histogram-col"><span>${count||''}</span><i class="analytics-histogram-bar ${count===0?'zero':''} ${i===7?'median':''}" style="height:${count?Math.max(8,count/max*110):3}px"></i></span>`).join('')}</div><div class="analytics-histogram-axis">${counts.map((_,i)=>`<span>${i+1}</span>`).join('')}</div><div class="analytics-histogram-foot"><span>今月のときめきは「選んでよかった」が多め · まんなかは8点</span></div></div>`;
+    return `<div class="analytics-card" data-token="SatisfactionHistogramCard"><div class="analytics-histogram">${counts.map((count,i)=>`<span class="analytics-histogram-col"><span>${count||''}</span><i class="analytics-histogram-bar ${count===0?'zero':''} ${i===7?'median':''}" style="height:${count?Math.max(8,count/max*110):3}px"></i></span>`).join('')}</div><div class="analytics-histogram-axis">${counts.map((_,i)=>`<span>${i+1}</span>`).join('')}</div><div class="analytics-histogram-foot"><span>今月のときめきの満足度は、まんなかが8点です</span></div></div>`;
   }
 
   function analyticsWindowPicker() {
@@ -909,13 +1290,136 @@
     return `<section class="screen analytics-screen">${header}${analyticsSection('支出の推移','',true)}${analyticsTrendCard()}${analyticsSection('カテゴリ支出','category')}${analyticsDonutCard()}${analyticsSection('ときめきカレンダー','joy')}${analyticsCalendarCard()}${analyticsSection('ときめきの満足度','joy')}${analyticsHistogramCard()}${family}</section>`;
   }
 
-  function shopping() { return `<section class="screen">${tabHeader('買い物リスト')} ${state.family?`<div class="segmented"><button class="segment active" data-action="segment">全部</button><button class="segment" data-action="segment">個人</button></div>`:''}<div class="filter-row"><button class="filter-chip active" data-action="filter">すべて</button><button class="filter-chip" data-action="filter">食品</button><button class="filter-chip" data-action="filter">日用品</button><button class="filter-chip" data-action="filter">担当</button></div><div class="section-title"><h2>買うもの</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div><div id="shopping-list" class="shopping-list-card">${shopItem('牛乳','食品 · 1本',false,'daily')}${shopItem('トイレットペーパー','日用品 · 12ロール',false,'daily')}${shopItem('味噌','食品 · 赤味噌',false,'daily')}${shopItem('コーヒー豆','嗜好品 · 200g',false,'joy')}</div><div class="section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${shopItem('食器用洗剤','日用品',true,'daily')}</section>`; }
-  function shopItem(name,meta,done,ledger='daily'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span>${icon('drag_indicator')}</div>`; }
+  function shoppingFilterCard() {
+    const scope = state.family ? `<div class="shopping-filter-group">${segmentedControl({ariaLabel:'公開範囲',value:state.shoppingScope,dataAttribute:'data-shopping-scope',options:[{value:'all',label:'全部'},{value:'private',label:'個人'}]})}</div>` : '';
+    const ledger = segmentedControl({ariaLabel:'帳簿',value:state.shoppingLedger,dataAttribute:'data-shopping-ledger',options:[{value:'all',label:'すべて'},{value:'daily',label:'日常',tone:'daily'},{value:'joy',label:'ときめき',tone:'joy'}]});
+    const privateActive = state.shoppingPrivateOnly;
+    const categoryActive = state.shoppingCategoryIds.length > 0;
+    return `<div class="shopping-filter-card ${state.family?'family':'solo'}"><div class="shopping-filter-grid">${scope}<div class="shopping-filter-group">${ledger}</div></div><div class="shopping-filter-secondary"><button class="shopping-filter-chip private ${privateActive?'active':''}" data-action="shopping-private" aria-pressed="${privateActive}">${icon('lock')}<span>私有</span></button><button class="shopping-filter-chip category ${categoryActive?'active':''}" data-action="shopping-category" aria-pressed="${categoryActive}">${icon('tune')}<span>カテゴリ</span></button></div></div>`;
+  }
+  function shoppingCategoryPicker() {
+    const categories = [
+      ['food','restaurant','食費'],
+      ['household','cleaning_services','日用品'],
+      ['transport','train','交通'],
+      ['hobby','palette','趣味・ときめき'],
+    ];
+    const rows = categories.map(([id,ico,label],index)=>{ const selected=shoppingCategoryDraft.has(id); return `<button class="tap-row ${index<categories.length-1?'row-divider':''}" data-action="shopping-category-toggle" data-shopping-category="${id}" aria-pressed="${selected}"><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${label}</strong></span>${icon(selected?'check_box':'check_box_outline_blank')}</button>`; }).join('');
+    const applyLabel = shoppingCategoryDraft.size ? `${shoppingCategoryDraft.size}件を適用` : '適用';
+    return `<div class="shopping-category-header"><h3>カテゴリで絞り込む</h3><button class="text-btn" data-action="shopping-category-clear">クリア</button></div><div class="flat-card">${rows}</div><div class="shopping-category-actions"><button class="ghost-btn" data-action="close-modal">キャンセル</button><button class="primary-btn" data-action="shopping-category-apply">${applyLabel}</button></div>`;
+  }
+  function shopping() {
+    const items = [
+      ['牛乳','食品 · 1本',false,'daily','shared','food'],
+      ['トイレットペーパー','日用品 · 12ロール',false,'daily','shared','household'],
+      ['味噌','食品 · 赤味噌',false,'daily','private','food'],
+      ['コーヒー豆','嗜好品 · 200g',false,'joy','private','hobby'],
+      ['食器用洗剤','日用品',true,'daily','shared','household'],
+    ];
+    const visible = items.filter(([, , , ledger, scope, category])=>{
+      const scopeMatches = (!state.family || state.shoppingScope==='all' || scope==='private') && (!state.shoppingPrivateOnly || scope==='private');
+      const ledgerMatches = state.shoppingLedger==='all' || ledger===state.shoppingLedger;
+      const categoryMatches = state.shoppingCategoryIds.length===0 || state.shoppingCategoryIds.includes(category);
+      return scopeMatches && ledgerMatches && categoryMatches;
+    });
+    const pending = visible.filter(([, , done])=>!done);
+    const completed = visible.filter(([, , done])=>done);
+    const pendingContent = pending.length ? `<div id="shopping-list" class="shopping-list-card" data-shopping-reorder-list>${pending.map(item=>shopItem(...item)).join('')}</div>` : `<div class="shopping-empty">条件に合う買い物はありません</div>`;
+    const completedContent = completed.length ? `<div class="section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${completed.map(item=>shopItem(...item)).join('')}` : '';
+    const settings = `<span class="list-header-actions"><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`;
+    return `<section class="screen">${tabHeader('買い物リスト',settings)}${shoppingFilterCard()}<div class="section-title"><h2>買うもの</h2></div>${pendingContent}${completedContent}</section>`;
+  }
+  function shopItem(name,meta,done,ledger='daily',scope='shared',category='food'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}" data-shopping-scope="${scope}" data-shopping-category="${category}" data-shopping-actions data-shopping-name="${name}" data-shopping-completed="${done}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span><button class="shopping-drag-handle" data-shopping-drag-handle aria-label="${name}を長押しして並べ替え">${icon('drag_indicator')}</button></div>`; }
   function shoppingForm() { return `<section class="screen">${backHeader('買うものを追加')}<div class="section-title"><h2>品名</h2></div><input class="search" value="オリーブオイル" aria-label="品名"><div class="flat-card"><div class="form-row"><label>数量</label><strong>1本</strong>${icon('chevron_right')}</div><div class="form-row"><label>カテゴリ</label><strong>食品</strong>${icon('chevron_right')}</div><div class="form-row"><label>リスト</label><strong>${state.family?'共有':'個人'}</strong>${icon('chevron_right')}</div><div class="form-row"><label>メモ</label><strong>エクストラバージン</strong>${icon('chevron_right')}</div></div><p class="hint">個人にした項目は家族同期へ送信されません。</p><button class="primary-btn" data-action="save-shopping">リストに追加</button></section>`; }
 
-  function entry() { return `<section class="screen">${backHeader('記帳')}<div class="amount-display"><span>支出金額 · JPY</span><strong class="amount" id="amount-value">¥${Number(state.amount||0).toLocaleString('ja-JP')}</strong></div><div class="flat-card"><div class="form-row"><label>カテゴリ</label><strong>食費 · スーパー</strong><button class="text-btn" data-screen="category">変更</button></div><div class="form-row"><label>日付</label><strong>2026年7月10日</strong>${icon('chevron_right')}</div><div class="form-row"><label>店舗</label><strong>ライフ</strong>${icon('chevron_right')}</div><div class="form-row"><label>帳本</label><strong style="color:var(--hp-daily-text)">日常</strong>${icon('chevron_right')}</div></div><div class="numpad">${['1','2','3','4','5','6','7','8','9','mic','0','backspace'].map(k=>`<button class="key" data-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}<button class="key" data-action="decimal">.</button><button class="key" data-action="continuous">連続</button><button class="key save" data-action="save-entry">記録</button></div></section>`; }
+  function entryHeader() {
+    return `<header class="entry-header"><button class="back-btn" data-action="back" aria-label="記帳を閉じる">${icon('close')}</button><h1>取引を記録</h1></header>`;
+  }
 
-  function voice() { return `<section class="screen">${backHeader('声で記帳')}<div class="card"><div class="eyebrow">認識した内容</div><h2 style="font-size:17px;margin:9px 0" id="transcript">ランチを松屋で 1,200円</h2><div class="filter-row"><span class="chip">¥1,200</span><span class="chip">松屋</span><span class="chip">食費</span><span class="chip">日常</span></div></div><div class="voice-zone"><div class="wave">${[12,22,30,18,34,25,16,29,19,11].map(h=>`<i style="height:${h}px"></i>`).join('')}</div><button class="mic ${state.recording?'recording':''}" data-action="record">${icon(state.recording?'stop':'mic')}</button><p class="hint">${state.recording?'離すと解析します':'タップして話す'}</p></div><div class="section-title"><h2>確認</h2></div><div class="flat-card"><div class="form-row"><label>金額</label><strong>¥1,200</strong></div><div class="form-row"><label>カテゴリ</label><strong>食費</strong><span class="badge">高信頼</span></div><div class="form-row"><label>帳本</label><strong>日常</strong></div></div><div style="height:12px"></div><button class="primary-btn" data-action="save-entry">この内容で記録</button></section>`; }
+  function entryMethodSwitch(mode) {
+    if (state.entryVariant !== 'b') return '';
+    return `<div class="entry-method-switch">${segmentedControl({ariaLabel:'入力方法',value:mode,dataAttribute:'data-entry-method',options:[{value:'manual',label:'キーボード'},{value:'voice',label:'音声'}],className:'entry-method-control'})}</div>`;
+  }
+
+  function entryVoiceMarker() {
+    return `<span class="entry-source-badge">${icon('mic')}音声</span>`;
+  }
+
+  function entryAmount(hasVoiceResult) {
+    const amount = Number(state.amount || 0).toLocaleString('ja-JP');
+    const quickMic = state.entryVariant === 'c' ? `<button class="entry-amount-voice" data-action="entry-voice-open" aria-label="声で入力">${icon('mic_none')}</button>` : '';
+    return `<div class="entry-amount ${hasVoiceResult?'voice-updated':''}"><div class="entry-amount-meta"><span>支出金額</span><span class="entry-currency-chip">¥ JPY</span>${hasVoiceResult?entryVoiceMarker():''}</div><strong class="amount" id="amount-value">${amount}</strong>${quickMic}</div>`;
+  }
+
+  function entryDetails(hasVoiceResult) {
+    const categoryNeedsReview = hasVoiceResult && state.entryNeedsReview;
+    const voiceClass = hasVoiceResult ? 'voice-updated' : '';
+    return `<div class="entry-form">
+      <button class="entry-form-row ${voiceClass} ${categoryNeedsReview?'needs-confirmation':''}" data-screen="category">${icon('category')}<span class="entry-form-label">カテゴリ</span><strong class="entry-form-value">${escapeHtml(state.entryCategory)}</strong>${categoryNeedsReview?'<span class="entry-confirm-badge">要確認</span>':hasVoiceResult?entryVoiceMarker():''}${icon('chevron_right')}</button>
+      <button class="entry-form-row ${voiceClass}" data-action="entry-date">${icon('calendar_today')}<span class="entry-form-label">日付</span><strong class="entry-form-value">2026年7月16日</strong>${hasVoiceResult?entryVoiceMarker():''}${icon('chevron_right')}</button>
+      <div class="entry-form-row ${voiceClass}">${icon('storefront')}<label class="entry-form-label" for="entry-merchant">店舗</label><input id="entry-merchant" class="entry-inline-input" data-entry-input="merchant" value="${escapeHtml(state.entryMerchant)}" aria-label="店舗">${hasVoiceResult?entryVoiceMarker():''}</div>
+    </div>
+    <div class="entry-purpose-card"><span>用途</span><button class="entry-ledger-option daily ${state.entryLedger==='daily'?'active':''}" data-entry-ledger="daily">${icon('eco')}日常</button><button class="entry-ledger-option joy ${state.entryLedger==='joy'?'active':''}" data-entry-ledger="joy">${icon('favorite_border')}悦己</button></div>
+    <div class="entry-note-card"><label for="entry-note">${icon('edit_note')}メモ</label><input id="entry-note" data-entry-input="note" value="${escapeHtml(state.entryNote)}" placeholder="必要なときだけ追加" aria-label="メモ"></div>`;
+  }
+
+  function entryManualDock() {
+    const voiceLaunch = `<button class="entry-voice-launch" data-action="entry-voice-open"><span class="material-symbols-rounded">mic_none</span><span class="entry-voice-launch-copy"><strong>声でまとめて入力</strong><small>金額・店舗・カテゴリ・日付を同じフォームへ</small></span>${icon('chevron_right')}</button>`;
+    const decimalDisabled = true;
+    const keys = ['1','2','3','4','5','6','7','8','9','00','0','.'];
+    const keypad = `${keys.map(key=>`<button class="entry-key" data-entry-key="${key}" ${key==='.'&&decimalDisabled?'disabled aria-label="JPY は小数入力できません"':''}>${key}</button>`).join('')}
+      <button class="entry-key" data-entry-key="backspace" aria-label="一文字削除">${icon('backspace')}</button>
+      <button class="entry-key currency" data-action="entry-currency">¥&nbsp; JPY</button>
+      <button class="entry-key save" data-action="save-entry" ${state.entryVoiceApplied&&state.entryNeedsReview?'disabled aria-label="カテゴリを確認してから記録"':''}>記録</button>`;
+    return `<div class="entry-input-dock">${voiceLaunch}<div class="entry-keypad">${keypad}</div><div class="entry-continuous-row"><span>${state.entryContinuous?'保存後もこの画面を続けます':'1件保存するとホームへ戻ります'}</span><button data-action="entry-continuous">${state.entryContinuous?'連続を解除':'連続記帳'}</button></div></div>`;
+  }
+
+  function entryVoiceWave() {
+    return `<div class="entry-voice-wave" aria-hidden="true">${[9,18,13,25,17,29,12,22,30,16,25,11,21,15,27,10].map((height,index)=>`<i style="--voice-height:${height}px;--voice-index:${index}"></i>`).join('')}</div>`;
+  }
+
+  function entryVoiceDock() {
+    const voiceState = state.entryVoiceState;
+    const status = {
+      listening: ['聞いています','listening'],
+      processing: ['内容を整理しています','processing'],
+      review: ['聞き取り結果','review'],
+      unavailable: ['音声入力を利用できません','unavailable'],
+    }[voiceState] || ['聞いています','listening'];
+    const amount = Number(state.amount || 0).toLocaleString('ja-JP');
+    const transcript = voiceState === 'unavailable' ? 'マイクの利用が許可されていません' : voiceState === 'listening' ? '「松屋でランチ、1,200円…」' : voiceState === 'processing' ? '「松屋でランチ、1,200円」' : `「${escapeHtml(state.entryMerchant)}で ${amount}円」`;
+    const chips = voiceState === 'review' ? `<div class="entry-result-chips"><span class="entry-result-chip">¥${amount}</span><span class="entry-result-chip">${escapeHtml(state.entryMerchant)}</span><span class="entry-result-chip warning">${escapeHtml(state.entryCategory)} · 要確認</span><span class="entry-result-chip">${state.entryLedger==='joy'?'悦己':'日常'}</span></div>` : '<div class="entry-result-chips"></div>';
+    const core = voiceState === 'listening'
+      ? `<button class="entry-voice-core listening" data-action="entry-voice-stop" aria-label="音声入力を停止して解析">${icon('stop')}</button>`
+      : voiceState === 'processing'
+        ? `<button class="entry-voice-core" disabled aria-label="解析中">${icon('progress_activity')}</button>`
+        : voiceState === 'review'
+          ? `<button class="entry-voice-core review" disabled aria-label="識別結果をフォームへ反映しました">${icon('task_alt')}</button>`
+          : `<button class="entry-voice-core" disabled aria-label="マイクを利用できません">${icon('mic_off')}</button>`;
+    const help = {
+      listening: '話し終えたら赤い停止ボタンを押してください',
+      processing: '金額とフォームの値を一つの状態へ反映しています',
+      review: 'フォームのオレンジ項目を確認すると記録できます',
+      unavailable: '設定で許可するか、キーボード入力を続けてください',
+    }[voiceState];
+    const actions = voiceState === 'review'
+      ? `<div class="entry-voice-actions"><button class="secondary-btn" data-action="entry-voice-rerecord">元に戻して録り直す</button><button class="primary-btn" data-action="entry-voice-keep">フォームで確認</button></div>`
+      : voiceState === 'unavailable'
+        ? `<div class="entry-voice-actions"><button class="secondary-btn" data-action="entry-mic-settings">設定を開く</button><button class="primary-btn" data-action="entry-voice-cancel">キーボードを使う</button></div>`
+        : `<div class="entry-voice-actions single"><button class="secondary-btn" data-action="entry-voice-cancel">中止して元の内容へ</button></div>`;
+    return `<div class="entry-voice-dock"><div class="entry-voice-status ${status[1]}" role="status" aria-live="polite"><span class="status-dot"></span><strong>${status[0]}</strong><span class="entry-private-note">${icon('shield')}端末内で処理</span></div><div class="entry-voice-main"><div class="entry-voice-copy"><strong>${voiceState==='review'?'この内容を同じフォームで確認':'声で取引を入力'}</strong><p class="entry-transcript">${transcript}</p>${chips}${entryVoiceWave()}</div><div>${core}<p class="entry-voice-help">${help}</p></div></div>${actions}</div>`;
+  }
+
+  function accountingEntry(mode) {
+    const isVoice = mode === 'voice';
+    const hasVoiceResult = state.entryVoiceApplied || (isVoice && state.entryVoiceState === 'review');
+    const reviewBanner = !isVoice && state.entryVoiceApplied ? `<div class="entry-review-banner">${icon('fact_check')}<span>音声から内容を反映しました。<strong>カテゴリを確認</strong>すると記録できます。</span></div>` : '';
+    return `<section class="screen accounting-screen accounting-${mode} accounting-variant-${state.entryVariant}">${entryHeader()}${entryMethodSwitch(mode)}<div class="entry-body">${entryAmount(hasVoiceResult)}${reviewBanner}${entryDetails(hasVoiceResult)}</div>${isVoice?entryVoiceDock():entryManualDock()}</section>`;
+  }
+
+  function entry() { return accountingEntry('manual'); }
+
+  function voice() { return accountingEntry('voice'); }
 
   function ocr() { return `<section class="screen">${backHeader('レシート撮影')}<div class="camera"><div class="viewfinder">${icon('document_scanner')}<span style="position:absolute;bottom:34px;font-size:10px">レシート全体を枠内に</span></div></div><div class="camera-controls"><button class="icon-btn" data-action="toast" data-message="アルバムを開く">${icon('photo_library')}</button><button class="shutter" data-action="ocr-capture" aria-label="撮影"></button><button class="icon-btn" data-action="toast" data-message="フラッシュ切替">${icon('flash_off')}</button></div><p class="hint" style="text-align:center">画像は端末内で処理されます。</p></section>`; }
 
@@ -955,22 +1459,94 @@
     const d=info[state.screen];
     ['inspect-kicker','inspect-title','inspect-copy','inspect-structure','inspect-states','inspect-build'].forEach((id,i)=>document.getElementById(id).textContent=d[i]);
     document.getElementById('home-design-note').hidden=state.screen!=='home';
+    const isEntryScreen=['entry','voice'].includes(state.screen);
+    const entryPanel=document.getElementById('entry-design-note');
+    entryPanel.hidden=!isEntryScreen;
+    entryPanel.querySelectorAll('[data-entry-variant]').forEach(button=>button.classList.toggle('active',button.dataset.entryVariant===state.entryVariant));
+    const rationale={a:'默认 A 保留现有状态机，只把隐藏的“点空白退出”改为明确按钮，并增加识别来源与待确认提示。',b:'B 用显式输入方法切换降低首次学习成本；共享表单仍不切页，但 Flutter 需要恢复一个轻量模式控件。',c:'C 把麦克风放在金额旁，适合熟练用户；底部面板更紧凑，但金额区的信息密度更高。'};
+    document.getElementById('entry-variant-rationale').textContent=rationale[state.entryVariant];
+    entryPanel.querySelectorAll('[data-entry-demo]').forEach(button=>{ const demo=button.dataset.entryDemo; const active=(demo==='manual'&&state.screen==='entry')||(demo===state.entryVoiceState&&state.screen==='voice'); button.classList.toggle('active',active); });
   }
   function setScreen(id, push=true){ if(!renderers[id]) return; if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; }
   function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t.timer); t.timer=setTimeout(()=>t.classList.remove('show'),1500); }
   function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal').classList.add('open'); }
   function closeModal(){ document.getElementById('modal').classList.remove('open'); }
   function filterTransactions(q){ document.querySelectorAll('#transaction-list .list-transaction').forEach(x=>x.style.display=(x.dataset.search||x.textContent).toLowerCase().includes(q.toLowerCase())?'flex':'none'); }
+  function resetShoppingFilters(){ state.shoppingLedger='all'; state.shoppingPrivateOnly=false; state.shoppingCategoryIds=[]; }
+
+  let entryVoiceSequence = 0;
+  function captureEntrySnapshot(){
+    state.entrySnapshot = { amount:state.amount, merchant:state.entryMerchant, category:state.entryCategory, ledger:state.entryLedger, note:state.entryNote, voiceApplied:state.entryVoiceApplied, needsReview:state.entryNeedsReview };
+  }
+  function restoreEntrySnapshot(){
+    if(!state.entrySnapshot) return;
+    const snapshot=state.entrySnapshot;
+    state.amount=snapshot.amount; state.entryMerchant=snapshot.merchant; state.entryCategory=snapshot.category; state.entryLedger=snapshot.ledger; state.entryNote=snapshot.note; state.entryVoiceApplied=snapshot.voiceApplied; state.entryNeedsReview=snapshot.needsReview;
+  }
+  function beginEntryVoice(){
+    captureEntrySnapshot(); entryVoiceSequence+=1; state.entryVoiceState='listening'; state.entryVoiceApplied=false; state.entryNeedsReview=false; state.screen='voice'; closeModal(); render();
+  }
+  function applyEntryVoiceResult(){
+    state.amount='1200'; state.entryMerchant='松屋'; state.entryCategory='食費 · 外食'; state.entryLedger='daily'; state.entryVoiceState='review'; state.entryNeedsReview=true;
+  }
+  function showEntryDemo(demo){
+    entryVoiceSequence+=1;
+    if(demo==='manual'){ state.screen='entry'; state.entryVoiceApplied=false; state.entryNeedsReview=false; state.entryVoiceState='review'; state.entrySnapshot=null; }
+    else if(demo==='listening'){ captureEntrySnapshot(); state.screen='voice'; state.entryVoiceState='listening'; state.entryVoiceApplied=false; state.entryNeedsReview=false; }
+    else if(demo==='review'){ if(!state.entrySnapshot) captureEntrySnapshot(); applyEntryVoiceResult(); state.screen='voice'; }
+    else if(demo==='unavailable'){ captureEntrySnapshot(); state.screen='voice'; state.entryVoiceState='unavailable'; state.entryVoiceApplied=false; state.entryNeedsReview=false; }
+    render();
+  }
+
+  let shoppingActionItem = null;
+  const shoppingPress = { timer:null, item:null, list:null, startX:0, startY:0, dragging:false, suppressClickUntil:0 };
+  function finishShoppingPress(){ clearTimeout(shoppingPress.timer); shoppingPress.item?.classList.remove('dragging'); shoppingPress.timer=null; shoppingPress.item=null; shoppingPress.list=null; shoppingPress.dragging=false; }
+  function openShoppingActions(item){ shoppingActionItem=item; const reorder=item.dataset.shoppingCompleted==='true'?'':`<button class="tap-row row-divider" data-action="shopping-item-action" data-shopping-item-action="top"><span class="row-copy"><strong>一番上へ</strong></span></button><button class="tap-row row-divider" data-action="shopping-item-action" data-shopping-item-action="bottom"><span class="row-copy"><strong>一番下へ</strong></span></button>`; openModal(`<div class="flat-card"><button class="tap-row row-divider" data-action="shopping-item-action" data-shopping-item-action="edit"><span class="row-copy"><strong>編集</strong></span></button>${reorder}<button class="tap-row shopping-action-delete" data-action="shopping-item-action" data-shopping-item-action="delete"><span class="row-copy"><strong>削除</strong></span></button></div>`); }
+  document.addEventListener('pointerdown', e=>{
+    const item=e.target.closest?.('[data-shopping-actions]'); if(!item) return;
+    const handle=e.target.closest('[data-shopping-drag-handle]');
+    shoppingPress.item=item; shoppingPress.list=item.closest('[data-shopping-reorder-list]'); shoppingPress.startX=e.clientX; shoppingPress.startY=e.clientY; shoppingPress.dragging=false;
+    if(handle) e.preventDefault();
+    shoppingPress.timer=setTimeout(()=>{
+      if(handle && shoppingPress.list){ shoppingPress.dragging=true; item.classList.add('dragging'); }
+      else if(!handle){ shoppingPress.suppressClickUntil=Date.now()+700; openShoppingActions(item); }
+    },500);
+  });
+  document.addEventListener('pointermove', e=>{
+    if(!shoppingPress.item) return;
+    const moved=Math.hypot(e.clientX-shoppingPress.startX,e.clientY-shoppingPress.startY);
+    if(!shoppingPress.dragging && moved>8){ clearTimeout(shoppingPress.timer); shoppingPress.timer=null; return; }
+    if(!shoppingPress.dragging || !shoppingPress.list) return;
+    e.preventDefault();
+    const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('[data-shopping-actions]');
+    if(!target || target===shoppingPress.item || target.parentElement!==shoppingPress.list) return;
+    const rect=target.getBoundingClientRect(); shoppingPress.list.insertBefore(shoppingPress.item,e.clientY<rect.top+rect.height/2?target:target.nextSibling);
+  },{passive:false});
+  document.addEventListener('pointerup', finishShoppingPress);
+  document.addEventListener('pointercancel', finishShoppingPress);
+  document.addEventListener('click', e=>{ if(Date.now()<shoppingPress.suppressClickUntil && e.target.closest?.('[data-shopping-actions]')){ e.preventDefault(); e.stopImmediatePropagation(); } },true);
+  document.addEventListener('input', e=>{
+    const input=e.target.closest?.('[data-entry-input]'); if(!input) return;
+    if(input.dataset.entryInput==='merchant') state.entryMerchant=input.value;
+    if(input.dataset.entryInput==='note') state.entryNote=input.value;
+  });
 
   document.addEventListener('click', e => {
-    const screen=e.target.closest('[data-screen]'); if(screen){ setScreen(screen.dataset.screen); return; }
+    const screen=e.target.closest('[data-screen]'); if(screen){ if(screen.dataset.screen==='voice'&&screen.matches('.screen-link')){ state.entryVoiceState='review'; state.entryNeedsReview=true; } setScreen(screen.dataset.screen); return; }
     const navEl=e.target.closest('[data-nav]'); if(navEl){ setScreen(navEl.dataset.nav); return; }
-    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; render(); return; }
+    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); return; }
+    const entryVariant=e.target.closest('[data-entry-variant]'); if(entryVariant){ state.entryVariant=entryVariant.dataset.entryVariant; render(); return; }
+    const entryDemo=e.target.closest('[data-entry-demo]'); if(entryDemo){ showEntryDemo(entryDemo.dataset.entryDemo); return; }
+    const entryMethod=e.target.closest('[data-entry-method]'); if(entryMethod){ if(entryMethod.dataset.entryMethod==='voice') beginEntryVoice(); else { if(state.entryVoiceState==='review'){ state.entryVoiceApplied=true; } else { restoreEntrySnapshot(); } entryVoiceSequence+=1; state.entrySnapshot=null; state.screen='entry'; render(); } return; }
+    const entryLedger=e.target.closest('[data-entry-ledger]'); if(entryLedger){ state.entryLedger=entryLedger.dataset.entryLedger; render(); return; }
+    const entryKey=e.target.closest('[data-entry-key]'); if(entryKey){ const k=entryKey.dataset.entryKey; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='.') { if(!state.amount.includes('.')) state.amount=(state.amount||'0')+'.'; } else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
     const key=e.target.closest('[data-key]'); if(key){ const k=key.dataset.key; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='mic') setScreen('voice'); else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
     const lockKey=e.target.closest('[data-lock-key]'); if(lockKey){ const k=lockKey.dataset.lockKey; if(k==='backspace') state.pin=state.pin.slice(0,-1); else if(k==='fingerprint'){ toast('Face ID で認証しました'); setTimeout(()=>setScreen('home'),500); return; } else if(state.pin.length<4) state.pin+=k; if(state.pin.length===4){ toast('ロックを解除しました'); setTimeout(()=>{state.pin='';setScreen('home')},550); } else render(); return; }
     const uiState=e.target.closest('[data-ui-state]'); if(uiState){ state.uiState=uiState.dataset.uiState; render(); return; }
     const listDay=e.target.closest('[data-list-day]'); if(listDay){ const day=Number(listDay.dataset.listDay); state.listDay=state.listDay===day?null:day; render(); return; }
     const listLedger=e.target.closest('[data-list-ledger]'); if(listLedger){ state.listLedger=listLedger.dataset.listLedger; render(); return; }
+    const shoppingScope=e.target.closest('[data-shopping-scope]'); if(shoppingScope && shoppingScope.matches('button')){ state.shoppingScope=shoppingScope.dataset.shoppingScope; resetShoppingFilters(); render(); return; }
+    const shoppingLedger=e.target.closest('[data-shopping-ledger]'); if(shoppingLedger){ state.shoppingLedger=shoppingLedger.dataset.shoppingLedger; render(); return; }
     const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
     const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
     const analyticsDimension=e.target.closest('[data-analytics-dimension]'); if(analyticsDimension){ state.analyticsDimension=analyticsDimension.dataset.analyticsDimension; render(); return; }
@@ -981,8 +1557,17 @@
     const tool=e.target.closest('[data-tool]'); if(tool){ if(tool.dataset.tool==='annotations') document.body.classList.toggle('annotations'); else document.getElementById('phone').style.width=tool.dataset.tool+'px'; return; }
     const action=e.target.closest('[data-action]'); if(!action) return; const a=action.dataset.action;
     if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
-    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; render(); toast(state.family?'家庭モード':'個人モード'); }
+    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); toast(state.family?'家庭モード':'個人モード'); }
     else if(a==='dismiss-invite'){ state.inviteDismissed=true; render(); }
+    else if(a==='entry-voice-open') beginEntryVoice();
+    else if(a==='entry-voice-stop'){ const sequence=++entryVoiceSequence; state.entryVoiceState='processing'; render(); setTimeout(()=>{ if(sequence!==entryVoiceSequence||state.screen!=='voice') return; applyEntryVoiceResult(); render(); },650); }
+    else if(a==='entry-voice-cancel'){ entryVoiceSequence+=1; restoreEntrySnapshot(); state.entrySnapshot=null; state.entryVoiceState='review'; state.screen='entry'; render(); }
+    else if(a==='entry-voice-rerecord'){ entryVoiceSequence+=1; restoreEntrySnapshot(); state.entryVoiceApplied=false; state.entryNeedsReview=false; state.entryVoiceState='listening'; state.screen='voice'; render(); }
+    else if(a==='entry-voice-keep'){ state.entryVoiceApplied=state.entryVoiceState==='review'; state.entryNeedsReview=state.entryVoiceApplied; state.entrySnapshot=null; state.entryVoiceState='review'; state.screen='entry'; render(); }
+    else if(a==='entry-mic-settings') toast('マイク権限の設定を開きます');
+    else if(a==='entry-date') toast('日付を選択');
+    else if(a==='entry-currency') toast('通貨を選択');
+    else if(a==='entry-continuous'){ state.entryContinuous=!state.entryContinuous; render(); }
     else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='list-sort-option'){ state.listSort=action.dataset.sort; state.listDirection=action.dataset.direction; closeModal(); render(); }
     else if(a==='list-search'){ state.listSearchExpanded=true; render(); requestAnimationFrame(()=>document.querySelector('.list-filter-search input')?.focus()); }
@@ -996,19 +1581,23 @@
     else if(a==='analytics-member-filter'){ const members=[['all','すべてのメンバー'],['self','🌿 あおい'],...(state.family?[['hanako','🌸 花子'],['taro','☕ 太郎']]:[])]; openModal(`<h3>メンバーで絞り込む</h3><div class="flat-card">${members.map(([value,label],index)=>`<button class="tap-row ${index<members.length-1?'row-divider':''}" data-analytics-member="${value}"><span class="row-copy"><strong>${label}</strong></span>${state.analyticsMember===value?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`); }
     else if(a==='analytics-category-drill'){ const category=action.dataset.category; openModal(`<h3>${category}</h3><p class="hint">選択期間の取引を、現在のカテゴリ階層で読み取り専用表示します。</p><div class="flat-card"><div class="tap-row row-divider"><span class="row-icon">${icon('receipt_long')}</span><span class="row-copy"><strong>7月10日 · ${category}</strong><small>日常 · 取引の詳細</small></span><strong class="row-value">¥3,280</strong></div><div class="tap-row"><span class="row-icon joy">${icon('receipt_long')}</span><span class="row-copy"><strong>7月6日 · ${category}</strong><small>ときめき · 取引の詳細</small></span><strong class="row-value">¥980</strong></div></div><button class="ghost-btn" data-action="close-modal">閉じる</button>`); }
     else if(a==='month') openModal(`<h3>月を選ぶ</h3>${[[2026,7],[2026,6],[2026,5]].map(([year,month])=>`<button class="tap-row row-divider" data-list-year="${year}" data-list-month="${month}"><span class="row-copy"><strong>${year}年${month}月</strong></span>${icon('chevron_right')}</button>`).join('')}`);
+    else if(a==='shopping-private'){ state.shoppingPrivateOnly=!state.shoppingPrivateOnly; render(); }
+    else if(a==='shopping-category'){ shoppingCategoryDraft=new Set(state.shoppingCategoryIds); openModal(shoppingCategoryPicker()); }
+    else if(a==='shopping-category-toggle'){ const id=action.dataset.shoppingCategory; if(shoppingCategoryDraft.has(id)) shoppingCategoryDraft.delete(id); else shoppingCategoryDraft.add(id); document.getElementById('modal-content').innerHTML=shoppingCategoryPicker(); }
+    else if(a==='shopping-category-clear'){ shoppingCategoryDraft.clear(); document.getElementById('modal-content').innerHTML=shoppingCategoryPicker(); }
+    else if(a==='shopping-category-apply'){ state.shoppingCategoryIds=[...shoppingCategoryDraft]; closeModal(); render(); }
     else if(a==='close-modal') closeModal();
     else if(a==='back'){ const previous=state.history.pop()||'home'; setScreen(previous,false); }
-    else if(a==='fab') setScreen(state.screen==='shopping'?'shopping-form':'entry');
+    else if(a==='fab'){ if(state.screen==='shopping') setScreen('shopping-form'); else { state.entryVoiceApplied=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); } }
     else if(a==='hero-analytics') setScreen('analytics');
     else if(a==='toast') toast(action.dataset.message||'操作を確認しました');
     else if(a==='filter'){ action.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
-    else if(a==='segment'){ action.parentElement.querySelectorAll('.segment').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
     else if(a==='check'){ const item=action.closest('.shopping-item'); item.classList.toggle('done'); action.innerHTML=item.classList.contains('done')?icon('check'):''; }
-    else if(a==='record'){ state.recording=!state.recording; render(); if(!state.recording) toast('音声を解析しました'); }
-    else if(a==='save-entry'){ toast('記録しました'); setTimeout(()=>setScreen('home'),550); }
+    else if(a==='shopping-item-action'){ const operation=action.dataset.shoppingItemAction; const item=shoppingActionItem; closeModal(); if(!item) return; if(operation==='top') item.parentElement.prepend(item); else if(operation==='bottom') item.parentElement.append(item); else if(operation==='delete') item.remove(); toast(operation==='edit'?`${item.dataset.shoppingName}を編集`:(operation==='delete'?'削除しました':'順序を変更しました')); shoppingActionItem=null; }
+    else if(a==='save-entry'){ if(state.entryVoiceApplied&&state.entryNeedsReview){ toast('カテゴリを確認してください'); return; } toast('記録しました'); if(state.entryContinuous){ state.amount='0'; state.entryMerchant=''; state.entryNote=''; state.entryVoiceApplied=false; state.entryNeedsReview=false; render(); } else setTimeout(()=>setScreen('home'),550); }
     else if(a==='save-shopping'){ toast('買い物リストに追加しました'); setTimeout(()=>setScreen('shopping'),550); }
     else if(a==='ocr-capture'){ toast('レシートを読み取りました'); setTimeout(()=>setScreen('edit'),550); }
-    else if(a==='pick-category'){ toast(action.textContent.trim()+'を選択'); setTimeout(()=>setScreen('entry'),450); }
+    else if(a==='pick-category'){ state.entryCategory='食費 · カフェ'; state.entryNeedsReview=false; state.entryVoiceApplied=true; toast(action.textContent.trim()+'を選択'); setTimeout(()=>{ if(['entry','voice'].includes(state.history.at(-1))) state.history.pop(); setScreen('entry',false); },450); }
     else if(a==='create-family'){ state.family=true; toast('招待コードを作成しました'); setTimeout(()=>setScreen('group'),450); }
     else if(a==='join-family'){ toast('家族情報を確認しました'); setTimeout(()=>setScreen('group'),450); }
     else if(a==='switch') action.classList.toggle('on');

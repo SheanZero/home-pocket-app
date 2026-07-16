@@ -16,13 +16,16 @@ only — zero production Dart.
 - iOS system onboarding / Face ID lock conventions
 - Japanese store-compliance: 特定商取引法, 利用規約, プライバシーポリシー, OSS ライセンス
 
-## Current Exploration — 2026-07-10 Home + Palette Refresh
+## Current Whole-App Reference — 2026-07-15
 
-Reframe the shipped homepage around one calm monthly snapshot and one obvious entry action. Compare
-three intentionally different identities with identical product data: **A 温润日系** (washi paper,
-pine green, muted benizakura), **B 清爽现代** (cool neutral, crisp teal, flat hierarchy), and
-**C 温暖精致** (plum, rose, copper, editorial storytelling). All three preserve Daily/Joy/Shared
-semantic separation, light/dark viability, local-first restraint, and ADR-012/016 anti-gamification.
+The selected warm-Japanese whole-app design has graduated from planning sketches into the canonical
+interactive reference at [`docs/mockup/v16/index.html`](../../docs/mockup/v16/index.html). V16 is
+synchronized with the current Flutter main-surface headers and shopping filters. Do not keep a
+second whole-app HTML copy under `.planning/sketches`.
+
+This directory retains only the still-relevant pre-launch input sketches 001–003. Historical audits,
+quick experiments, and milestone archives remain in their own evidence directories and are not
+current whole-app mockups.
 
 ## Sketches
 
@@ -31,9 +34,6 @@ semantic separation, light/dark viability, local-first restraint, and ADR-012/01
 | 001 | onboarding-gate | First-run intro page → default-only basic settings with on-demand picker modal | **A · 温柔抛茶感** | onboarding, gate, i18n |
 | 002 | app-lock | Separate Face ID page + PIN page, chosen by settings; Face ID preferred when both on | **B · 清爽极简** (light + dark) | security, lock, biometric |
 | 003 | legal-sponsor | Complete Settings page = existing 8 sections + App Lock expansion + legal + external sponsor | **C · 混合** | settings, legal, compliance, app-lock |
-| 004 | home-palette-redesign | Which palette and homepage hierarchy should define the next Home Pocket identity? | **A · 温润日系** | home, palette, navigation, joy, light-dark |
-| 005 | whole-app-warm-japanese | How does A scale coherently across every primary Home Pocket journey and state? | — | design-system, whole-app, navigation, entry, family, security |
-| 006 | home-existing-layout-redraw | How should the selected system redraw Home without changing the shipped Flutter layout? | **C · 层次纸面** | home, faithful-redraw, existing-layout, design-system |
 
 ## Decisions
 - **001 = A (温柔抛茶感):** two-step first run — intro page (value prop) → basic settings showing
@@ -44,19 +44,3 @@ semantic separation, light/dark viability, local-first restraint, and ADR-012/01
 - **003 = C (混合):** complete Settings page. Merged 一般 group (appearance + voice + joy target),
   App Lock expanded under セキュリティ (master + Face ID + PIN + priority note), and a single
   法的情報・応援 group (Privacy / Terms / 特商法 / OSS + external 応援 row).
-- **004 = A (温润日系):** warm washi canvas + pine green + muted benizakura, with a calm monthly
-  overview, quiet Joy accumulation, one obvious add-entry action, and shared blue preserved as a
-  distinct family-ledger semantic. This becomes the foundation for the whole-app design pass.
-- **005 Home integration = 006 C (层次纸面):** the whole-app Home now uses the selected faithful
-  redraw from Sketch 006. It preserves the shipped Home widget order, integrates the subtly
-  pine-tinted layered hero and detached pill navigation, and keeps personal/family plus light/dark
-  states inside the same design center.
-- **005 Analytics restoration:** the accepted List page is locked. Analytics now mirrors the
-  production registry order (`WithinMonthTrendCard`, `CategoryDonutCard` with nested Joy drawer,
-  `JoyCalendarCard`, `SatisfactionHistogramCard`, then conditional family insight) while applying
-  the selected warm Japanese tokens. Time-window, trend-tab, dimension/member-filter, category
-  drill-down, and inline calendar-day interactions are all represented in the mockup.
-- **006 = C (层次纸面):** discard the structural re-composition from 005 for Home. Preserve the
-  shipped `HeroHeader → HomeHeroCard → FamilyInviteBanner → TransactionListCard → HomeBottomNavBar`
-  skeleton exactly, then use a subtly pine-tinted hero surface, larger radius, and stronger paper
-  layering from the selected design system.
