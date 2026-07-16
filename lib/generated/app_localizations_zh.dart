@@ -569,10 +569,10 @@ class SZh extends S {
   }
 
   @override
-  String get homePersonalMode => '个人模式';
+  String get homePersonalMode => '个人';
 
   @override
-  String get homeFamilyMode => '家庭模式';
+  String get homeFamilyMode => '家庭';
 
   @override
   String get homeTabHome => '主页';
@@ -1494,6 +1494,9 @@ class SZh extends S {
   String get analyticsKpiTotalLabel => '支出合计';
 
   @override
+  String get analyticsTrendTabAll => '全部';
+
+  @override
   String get analyticsKpiJoyLabel => '平均满足度';
 
   @override
@@ -1628,6 +1631,11 @@ class SZh extends S {
   @override
   String analyticsHistogramCountFooter(int count) {
     return '$count 笔悦己支出的满足度';
+  }
+
+  @override
+  String analyticsHistogramNarrative(int value) {
+    return '本月悦己支出的满足度中位数为 $value 分';
   }
 
   @override
@@ -1963,6 +1971,9 @@ class SZh extends S {
 
   @override
   String get shoppingEditItem => '编辑商品';
+
+  @override
+  String get shoppingActionEdit => '修改';
 
   @override
   String get shoppingReorderItem => '重新排序';

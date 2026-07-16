@@ -15,7 +15,7 @@ enum SectionTone {
 
 /// A section header above an analytics card (round-5 r5 mock `.sect-h`).
 ///
-/// Renders a 3px-wide rounded vertical bar + a 12px/w600 letter-spaced [title].
+/// Renders a 3px-wide rounded vertical bar + a compact V15 section [title].
 /// Per the mock:
 ///   - [SectionTone.practical] → bar = `palette.accentPrimary` (leaf green).
 ///   - [SectionTone.joy] → bar = `palette.joy` (sakura).
@@ -53,23 +53,20 @@ class AnalyticsSectionHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         children: [
-          // 3px × 13px rounded vertical bar.
+          // The bar tracks the semantic section-title size.
           Container(
             width: 3,
-            height: 13,
+            height: AppTypography.sectionTitle,
             decoration: BoxDecoration(
               color: barColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(width: 7),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               title,
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.96, // .08em on 12px
+              style: AppTextStyles.sectionTitle.copyWith(
                 color: palette.textSecondary,
               ),
               maxLines: 1,

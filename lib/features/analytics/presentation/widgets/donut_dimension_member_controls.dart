@@ -19,6 +19,9 @@ import 'analytics_segmented_control.dart';
 class DonutDimensionMemberControls extends ConsumerWidget {
   const DonutDimensionMemberControls({super.key});
 
+  static const double dimensionControlWidth = 164;
+  static const double memberFilterWidth = 104;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
@@ -37,12 +40,16 @@ class DonutDimensionMemberControls extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 13),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 分类 / 成员 segmented toggle (v15 mock `.analytics-dimension-segments`:
           // カテゴリ別 → daily tone, メンバー別 → shared tone).
-          Expanded(
+          SizedBox(
+            key: const ValueKey('donut_dimension_segments'),
+            width: dimensionControlWidth,
+            height: AnalyticsSegmentedControl.controlHeight,
             child: AnalyticsSegmentedControl<DonutDimension>(
               selected: view.dimension,
               onChanged: (dimension) => ref
@@ -67,8 +74,10 @@ class DonutDimensionMemberControls extends ConsumerWidget {
           const SizedBox(width: 8),
           // Member filter trigger — constrained so a long localized member name
           // never overflows the controls row (ellipsized).
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 120),
+          SizedBox(
+            key: const ValueKey('donut_member_filter_box'),
+            width: memberFilterWidth,
+            height: AnalyticsSegmentedControl.controlHeight,
             child: _MemberFilterTrigger(
               key: const ValueKey('donut_member_filter_trigger'),
               label: _filterLabel(
@@ -152,7 +161,7 @@ class DonutDimensionMemberControls extends ConsumerWidget {
               children: [
                 Text(
                   l10n.analyticsDonutMemberFilterLabel,
-                  style: AppTextStyles.titleSmall.copyWith(
+                  style: AppTextStyles.itemTitle.copyWith(
                     color: context.palette.textPrimary,
                   ),
                 ),
@@ -209,7 +218,7 @@ class _MemberFilterTrigger extends StatelessWidget {
       borderRadius: BorderRadius.circular(999),
       onTap: onTap,
       child: Container(
-        height: 42,
+        height: AnalyticsSegmentedControl.controlHeight,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: palette.card,
@@ -226,8 +235,7 @@ class _MemberFilterTrigger extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 11,
+                style: AppTextStyles.label.copyWith(
                   fontWeight: FontWeight.w700,
                   color: palette.textPrimary,
                 ),
@@ -266,7 +274,7 @@ class _MemberOptionTile extends StatelessWidget {
           : null,
       title: Text(
         title,
-        style: AppTextStyles.bodyMedium.copyWith(
+        style: AppTextStyles.body.copyWith(
           color: selected ? palette.accentPrimary : palette.textPrimary,
           fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
         ),

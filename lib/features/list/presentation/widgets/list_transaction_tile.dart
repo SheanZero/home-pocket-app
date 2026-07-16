@@ -106,10 +106,7 @@ class ListTransactionTile extends ConsumerWidget {
     if (readOnly) {
       // No Dismissible, no tap-to-edit — pure descriptive row (D-B3). The
       // trailing chevron affordance is dropped since there is nothing to open.
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: _buildRow(context, palette, showChevron: false),
-      );
+      return _buildContent(context, palette, showChevron: false);
     }
 
     return Dismissible(
@@ -141,10 +138,23 @@ class ListTransactionTile extends ConsumerWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: _buildRow(context, palette, showChevron: true),
-        ),
+        child: _buildContent(context, palette, showChevron: true),
+      ),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    AppPalette palette, {
+    required bool showChevron,
+  }) {
+    return ConstrainedBox(
+      key: const Key('list-transaction-row'),
+      constraints: const BoxConstraints(minHeight: 68),
+      child: Padding(
+        key: const Key('list-transaction-content'),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: _buildRow(context, palette, showChevron: showChevron),
       ),
     );
   }
@@ -160,7 +170,17 @@ class ListTransactionTile extends ConsumerWidget {
     return Row(
       children: [
         // Leading: enlarged, vertically-centered L1 category icon
-        Icon(l1Icon, size: 28, color: categoryColor),
+        SizedBox(
+          width: 28,
+          child: Center(
+            child: Icon(
+              l1Icon,
+              key: const Key('list-transaction-icon'),
+              size: 25,
+              color: categoryColor,
+            ),
+          ),
+        ),
         const SizedBox(width: 12),
         // Left info column (title + ledger badge aligned to title)
         Expanded(
@@ -176,7 +196,10 @@ class ListTransactionTile extends ConsumerWidget {
                       showDate
                           ? '${DateFormatter.formatSlashMonthDay(taggedTx.transaction.timestamp, locale)} $category'
                           : category,
-                      style: AppTextStyles.bodyMedium,
+                      key: const Key('list-transaction-title'),
+                      style: AppTextStyles.itemTitle.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -191,7 +214,7 @@ class ListTransactionTile extends ConsumerWidget {
                   ],
                 ],
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 4),
               // Secondary: ledger badge (background pill) + optional merchant
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -207,7 +230,9 @@ class ListTransactionTile extends ConsumerWidget {
                     ),
                     child: Text(
                       tagText,
-                      style: AppTextStyles.micro.copyWith(color: tagTextColor),
+                      style: AppTextStyles.compact.copyWith(
+                        color: tagTextColor,
+                      ),
                       maxLines: 1,
                     ),
                   ),
@@ -216,7 +241,7 @@ class ListTransactionTile extends ConsumerWidget {
                     Flexible(
                       child: Text(
                         merchant!,
-                        style: AppTextStyles.micro.copyWith(
+                        style: AppTextStyles.supporting.copyWith(
                           color: palette.textSecondary,
                         ),
                         maxLines: 1,
@@ -243,7 +268,9 @@ class ListTransactionTile extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               child: Text(
                 '${tag.emoji} ${tag.name}',
-                style: AppTextStyles.micro.copyWith(color: palette.sharedText),
+                style: AppTextStyles.compact.copyWith(
+                  color: palette.sharedText,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -261,6 +288,7 @@ class ListTransactionTile extends ConsumerWidget {
         if (foreignAnnotation == null)
           Text(
             formattedAmount,
+            key: const Key('list-transaction-amount'),
             style: AppTextStyles.amountSmall.copyWith(
               color: palette.textPrimary,
             ),
@@ -272,6 +300,7 @@ class ListTransactionTile extends ConsumerWidget {
             children: [
               Text(
                 formattedAmount,
+                key: const Key('list-transaction-amount'),
                 style: AppTextStyles.amountSmall.copyWith(
                   color: palette.textPrimary,
                 ),
@@ -279,7 +308,7 @@ class ListTransactionTile extends ConsumerWidget {
               const SizedBox(height: 2),
               Text(
                 foreignAnnotation!,
-                style: AppTextStyles.labelMedium.copyWith(
+                style: AppTextStyles.supporting.copyWith(
                   color: palette.textSecondary,
                 ),
               ),

@@ -39,9 +39,7 @@ class ProfileSectionCard extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: palette.card,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: palette.borderDefault,
-                ),
+                border: Border.all(color: palette.borderDefault),
               ),
               child: Row(
                 children: [
@@ -58,7 +56,6 @@ class ProfileSectionCard extends ConsumerWidget {
                         Text(
                           profile.displayName,
                           style: const TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -67,7 +64,6 @@ class ProfileSectionCard extends ConsumerWidget {
                         Text(
                           S.of(context).profileEdit,
                           style: TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 12,
                             color: palette.textSecondary,
                           ),

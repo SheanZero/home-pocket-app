@@ -574,10 +574,10 @@ class SEn extends S {
   }
 
   @override
-  String get homePersonalMode => 'Personal Mode';
+  String get homePersonalMode => 'Personal';
 
   @override
-  String get homeFamilyMode => 'Family Mode';
+  String get homeFamilyMode => 'Family';
 
   @override
   String get homeTabHome => 'Home';
@@ -1521,6 +1521,9 @@ class SEn extends S {
   String get analyticsKpiTotalLabel => 'Total spending';
 
   @override
+  String get analyticsTrendTabAll => 'All';
+
+  @override
   String get analyticsKpiJoyLabel => 'Avg satisfaction';
 
   @override
@@ -1662,6 +1665,11 @@ class SEn extends S {
   @override
   String analyticsHistogramCountFooter(int count) {
     return 'Satisfaction of $count joy expenses';
+  }
+
+  @override
+  String analyticsHistogramNarrative(int value) {
+    return 'This month’s Joy-purchase satisfaction midpoint was $value';
   }
 
   @override
@@ -2005,6 +2013,9 @@ class SEn extends S {
 
   @override
   String get shoppingEditItem => 'Edit item';
+
+  @override
+  String get shoppingActionEdit => 'Edit';
 
   @override
   String get shoppingReorderItem => 'Reorder item';

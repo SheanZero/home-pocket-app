@@ -10,6 +10,7 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_anal
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/joy_calendar_compact_transaction_row.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/joy_calendar_heatmap.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
@@ -118,11 +119,15 @@ void main() {
       final delegate =
           grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       expect(delegate.crossAxisCount, 7);
+      expect(delegate.crossAxisSpacing, 1);
+      expect(delegate.mainAxisSpacing, 1);
 
       // The widget received the per-day counts so depth = f(count).
       expect(heatmap.countByDay[12], 4);
       expect(heatmap.countByDay[3], 1);
       expect(heatmap.countByDay.containsKey(4), isFalse);
+      expect(find.byKey(const ValueKey('joy_day_count_dot_3')), findsOneWidget);
+      expect(find.byKey(const ValueKey('joy_day_count_dot_4')), findsNothing);
     },
   );
 
@@ -171,6 +176,57 @@ void main() {
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('A9 tapping the selected day again collapses the panel', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_subject());
+    await tester.pumpAndSettle();
+
+    final day = find.byKey(const ValueKey('joy_day_12'));
+    await tester.tap(day);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('joy_calendar_inline_panel')),
+      findsOneWidget,
+    );
+
+    await tester.tap(day);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('joy_calendar_inline_panel')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('A9 expanded panel uses inset border and readable compact rows', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_subject());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('joy_day_12')));
+    await tester.pumpAndSettle();
+
+    final panel = tester.widget<Container>(
+      find.byKey(const ValueKey('joy_calendar_day_panel')),
+    );
+    expect(panel.margin, const EdgeInsets.fromLTRB(8, 10, 8, 0));
+    final decoration = panel.decoration! as BoxDecoration;
+    expect(decoration.border?.top.style, BorderStyle.solid);
+
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey('joy_calendar_compact_row_t1')))
+          .height,
+      JoyCalendarCompactTransactionRow.rowHeight,
+    );
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey('joy_calendar_compact_row_t2')))
+          .height,
+      JoyCalendarCompactTransactionRow.rowHeight,
+    );
   });
 
   testWidgets('Test 4: ADR-016 §5 ambient — no streak/target/ranking copy '

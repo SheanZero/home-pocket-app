@@ -11,8 +11,6 @@ import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart';
-import '../providers/state_shopping_batch.dart';
-import '../providers/state_shopping_reorder.dart';
 import '../screens/shopping_item_form_screen.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 
@@ -24,14 +22,14 @@ import '../../../home/presentation/providers/state_shadow_books.dart';
 /// carried by the check circle and the badge — the old 4px left accent bar and
 /// the 私有 lock marker were removed to match the mockup.
 ///
-/// Interaction model is UNCHANGED:
+/// Interaction model:
 /// - DONE-01: tapping the leading circle calls [ToggleItemCompletedUseCase].
 /// - EC2 D-domain#3: tapping the tile body opens [ShoppingItemFormScreen].
 /// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; feedback BEFORE the
 ///   use-case call.
-/// - MGMT-02: long-press enters batch mode.
-/// - MGMT-03 / EC2 D-2: swipe + toggle are suppressed in batch/reorder mode; in
-///   reorder mode the move-to-top/bottom buttons + drag handle appear.
+/// - Long-pressing the body opens edit / top / bottom / delete actions.
+/// - Long-pressing the trailing handle starts reorder directly; there is no
+///   batch-selection or separate reorder mode.
 /// - SYNC-04: attribution chip on public tiles when the shadow book resolves.
 class ShoppingItemTile extends ConsumerWidget {
   const ShoppingItemTile({
@@ -48,24 +46,17 @@ class ShoppingItemTile extends ConsumerWidget {
   final int index;
 
   /// `true` for active (uncompleted) items; `false` for completed items.
-  /// Only active items render a drag handle (and only in reorder mode).
+  /// Active items expose a delayed drag handle. Completed items keep the V15
+  /// faded drag glyph as a non-interactive visual affordance.
   final bool isActive;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
-    final batchActive = ref.watch(batchSelectModeProvider).isActive;
-    final reorderMode = ref.watch(shoppingReorderModeProvider);
-
-    // Reorder mode suppresses every gesture except dragging (EC2 D-2 /
-    // Claude's Discretion). Batch mode keeps its existing guard (MGMT-03).
-    final gesturesLocked = batchActive || reorderMode;
 
     return Dismissible(
       key: ValueKey(item.id),
-      direction: gesturesLocked
-          ? DismissDirection.none
-          : DismissDirection.endToStart,
+      direction: DismissDirection.endToStart,
       background: Container(
         color: palette.error,
         alignment: Alignment.centerRight,
@@ -84,36 +75,78 @@ class ShoppingItemTile extends ConsumerWidget {
         showSuccessFeedback(context, S.of(context).shoppingDeletedSnackBar);
         ref.read(deleteShoppingItemUseCaseProvider).execute(item.id);
       },
-      child: GestureDetector(
-        // EC2 D-domain#3: tapping the tile body opens the edit form
-        // (replaces the old full-row toggle). Suppressed while gestures locked.
-        onTap: gesturesLocked
-            ? null
-            : () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ShoppingItemFormScreen(
-                      listType: item.listType,
-                      item: item,
-                    ),
-                  ),
-                ),
-        onLongPress: gesturesLocked
-            ? null
-            : () {
-                ref.read(batchSelectModeProvider.notifier).enter();
-                ref.read(batchSelectModeProvider.notifier).toggle(item.id);
-              },
-        behavior: HitTestBehavior.opaque,
-        child: _buildTileContent(context, ref, palette, reorderMode),
+      child: _buildTileContent(context, ref, palette),
+    );
+  }
+
+  void _openEdit(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            ShoppingItemFormScreen(listType: item.listType, item: item),
       ),
     );
+  }
+
+  Future<void> _showItemActions(BuildContext context, WidgetRef ref) async {
+    final palette = context.palette;
+    final action = await showModalBottomSheet<_ShoppingItemAction>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: palette.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => _ShoppingItemActionSheet(
+        showReorderActions: isActive,
+        onSelected: (selected) => Navigator.pop(sheetContext, selected),
+      ),
+    );
+    if (action == null || !context.mounted) return;
+
+    switch (action) {
+      case _ShoppingItemAction.edit:
+        _openEdit(context);
+      case _ShoppingItemAction.moveToTop:
+        _moveToEdge(ref, moveToTop: true);
+      case _ShoppingItemAction.moveToBottom:
+        _moveToEdge(ref, moveToTop: false);
+      case _ShoppingItemAction.delete:
+        final l10n = S.of(context);
+        final confirmed = await showSoftConfirmDialog(
+          context,
+          title: l10n.shoppingDeleteConfirmTitle,
+          body: l10n.shoppingDeleteConfirmBody,
+          confirmLabel: l10n.shoppingDeleteConfirmButton,
+          cancelLabel: l10n.shoppingDeleteCancelButton,
+        );
+        if (!confirmed || !context.mounted) return;
+        showSuccessFeedback(context, l10n.shoppingDeletedSnackBar);
+        await ref.read(deleteShoppingItemUseCaseProvider).execute(item.id);
+    }
+  }
+
+  void _moveToEdge(WidgetRef ref, {required bool moveToTop}) {
+    if (!isActive) return;
+    final items = ref.read(filteredShoppingItemsProvider).value ?? const [];
+    final ids = items
+        .where((candidate) => !candidate.isCompleted)
+        .map((candidate) => candidate.id)
+        .toList(growable: true);
+    if (!ids.remove(item.id)) return;
+    if (moveToTop) {
+      ids.insert(0, item.id);
+    } else {
+      ids.add(item.id);
+    }
+    ref.read(reorderShoppingItemsUseCaseProvider).applyOrder(ids);
   }
 
   Widget _buildTileContent(
     BuildContext context,
     WidgetRef ref,
     AppPalette palette,
-    bool reorderMode,
   ) {
     final locale = Localizations.localeOf(context);
 
@@ -131,63 +164,76 @@ class ShoppingItemTile extends ConsumerWidget {
         : '${item.quantity}';
 
     return Container(
+      key: const Key('shopping_item_content'),
       // v15 rows sit inside the shopping-list-card; the tile itself is
       // transparent so the card fill + rounded corners show through.
       color: Colors.transparent,
+      constraints: const BoxConstraints(minHeight: 68),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
-            // Leading circular completion toggle (DONE-01).
-            _buildCompletionToggle(context, ref, palette, reorderMode),
-            const SizedBox(width: 10),
-            // Copy: item name (strong) + meta (small).
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    style: item.isCompleted
-                        ? AppTextStyles.bodyLarge.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: palette.textTertiary,
-                          )
-                        : AppTextStyles.bodyLarge,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: item.isCompleted ? 0.58 : 1.0,
-                      child: Text(
-                        item.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              child: GestureDetector(
+                key: ValueKey('shopping-item-body-${item.id}'),
+                onTap: () => _openEdit(context),
+                onLongPress: () => _showItemActions(context, ref),
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    // Leading circular completion toggle (DONE-01).
+                    _buildCompletionToggle(context, ref, palette),
+                    const SizedBox(width: 10),
+                    // The completed card owns the single .58 opacity layer so
+                    // every visual element fades by the same amount.
+                    Expanded(
+                      child: KeyedSubtree(
+                        key: ValueKey('shopping-copy-${item.id}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                              style: AppTextStyles.itemTitle.copyWith(
+                                fontWeight: FontWeight.w700,
+                                decoration: item.isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                                color: palette.textPrimary,
+                              ),
+                              child: Text(
+                                item.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              metaText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.supporting.copyWith(
+                                color: palette.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    metaText,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.caption.copyWith(
-                      color: item.isCompleted
-                          ? palette.textTertiary
-                          : palette.textSecondary,
-                    ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    // Attribution chip — public-list tiles only (SYNC-04).
+                    if (item.listType == 'public' && item.addedByBookId != null)
+                      _buildAttributionChip(context, ref, palette),
+                    _buildLedgerBadge(context, palette),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            // Attribution chip — public-list tiles only (SYNC-04 / T-38-04-01)
-            if (item.listType == 'public' && item.addedByBookId != null)
-              _buildAttributionChip(context, ref, palette),
-            // Ledger badge (日常 / ときめき) — mockup `.shopping-ledger-badge`.
-            _buildLedgerBadge(context, palette),
-            // Trailing cluster: quantity + reorder controls / drag affordance.
-            _buildTrailingCluster(context, ref, palette, reorderMode),
+            // The trailing lane is deliberately outside the body detector so
+            // its long press can only start a drag and never open the menu.
+            _buildTrailingHandle(context, palette),
           ],
         ),
       ),
@@ -216,13 +262,10 @@ class ShoppingItemTile extends ConsumerWidget {
               color: palette.sharedLight,
               borderRadius: BorderRadius.circular(3),
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 6,
-              vertical: 1,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
             child: Text(
               '${tag.memberAvatarEmoji} ${tag.memberDisplayName}',
-              style: AppTextStyles.micro.copyWith(color: palette.sharedText),
+              style: AppTextStyles.compact.copyWith(color: palette.sharedText),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -236,40 +279,37 @@ class ShoppingItemTile extends ConsumerWidget {
   /// Ledger badge (日常 / ときめき) — mockup `.badge.shopping-ledger-badge`.
   ///
   /// daily → `dailyLight` fill + `dailyText`; joy → `joyLight` + `joyText`
-  /// (never raw `joy`/`daily` on text — WCAG AA). Fades to .58 opacity when
-  /// the item is completed. Null ledger renders nothing.
+  /// (never raw `joy`/`daily` on text — WCAG AA). Completed-state fading is
+  /// applied once by the surrounding card. Null ledger renders nothing.
   Widget _buildLedgerBadge(BuildContext context, AppPalette palette) {
     final l10n = S.of(context);
     final (Color bg, Color fg, String label) = switch (item.ledgerType) {
       LedgerType.daily => (
-          palette.dailyLight,
-          palette.dailyText,
-          l10n.listLedgerDaily,
-        ),
-      LedgerType.joy => (
-          palette.joyLight,
-          palette.joyText,
-          l10n.listLedgerJoy,
-        ),
+        palette.dailyLight,
+        palette.dailyText,
+        l10n.listLedgerDaily,
+      ),
+      LedgerType.joy => (palette.joyLight, palette.joyText, l10n.listLedgerJoy),
       null => (palette.backgroundMuted, palette.textSecondary, ''),
     };
     if (label.isEmpty) return const SizedBox.shrink();
+    final badgeBackground = item.isCompleted ? palette.backgroundMuted : bg;
+    final badgeForeground = item.isCompleted ? palette.textSecondary : fg;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
-      opacity: item.isCompleted ? 0.58 : 1.0,
+    return KeyedSubtree(
+      key: ValueKey('shopping-ledger-badge-${item.id}'),
       child: Container(
         margin: const EdgeInsets.only(right: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
         decoration: BoxDecoration(
-          color: bg,
+          color: badgeBackground,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
           label,
-          style: AppTextStyles.micro.copyWith(
-            color: fg,
-            fontWeight: FontWeight.w900,
+          style: AppTextStyles.compact.copyWith(
+            color: badgeForeground,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -279,32 +319,40 @@ class ShoppingItemTile extends ConsumerWidget {
   /// Leading circular completion toggle (DONE-01).
   ///
   /// Unchecked: hollow ring in the item's ledger colour (daily/joy; null falls
-  /// back to daily). Checked: ledger-colour fill + white tick. Tapping toggles
-  /// completion via [ToggleItemCompletedUseCase]; suppressed in reorder mode.
+  /// back to daily). Checked: matching ledger-colour fill + white tick, then
+  /// the whole completed card is muted uniformly. Tapping toggles completion via
+  /// [ToggleItemCompletedUseCase]; suppressed in reorder mode.
   Widget _buildCompletionToggle(
     BuildContext context,
     WidgetRef ref,
     AppPalette palette,
-    bool reorderMode,
   ) {
     final ledgerColor = switch (item.ledgerType) {
       LedgerType.daily => palette.daily,
       LedgerType.joy => palette.joy,
       null => palette.daily,
     };
+    final checkColor = ledgerColor;
 
     final circle = AnimatedContainer(
+      key: ValueKey('shopping-check-${item.id}'),
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
-      width: 23,
-      height: 23,
+      width: 28,
+      height: 28,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: item.isCompleted ? ledgerColor : Colors.transparent,
-        border: Border.all(color: ledgerColor, width: 2),
+        color: item.isCompleted ? checkColor : Colors.transparent,
+        border: Border.all(color: checkColor, width: 2),
       ),
       child: item.isCompleted
-          ? Icon(Icons.check, size: 15, color: palette.card)
+          ? Transform.translate(
+              key: ValueKey('shopping-check-icon-${item.id}'),
+              // Material's Flutter check is optically centred by default,
+              // while the V15 reference places the painted mark lower-right.
+              offset: const Offset(5, 2),
+              child: Icon(Icons.check, size: 18, color: palette.card),
+            )
           : null,
     );
 
@@ -315,163 +363,130 @@ class ShoppingItemTile extends ConsumerWidget {
       child: GestureDetector(
         // ValueKey for stable test targeting.
         key: ValueKey('toggle-${item.id}'),
-        onTap: reorderMode
-            ? null
-            : () =>
-                ref.read(toggleItemCompletedUseCaseProvider).execute(item.id),
+        onTap: () =>
+            ref.read(toggleItemCompletedUseCaseProvider).execute(item.id),
         behavior: HitTestBehavior.opaque,
-        // ≥44px hit target (WCAG 2.1 SC 2.5.5)
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: Center(child: circle),
-        ),
+        // Keep the 44px vertical tap lane without reserving 44px horizontally;
+        // V15 places copy 10px after the 23px circle.
+        child: SizedBox(width: 28, height: 44, child: Center(child: circle)),
       ),
     );
   }
 
-  /// Trailing cluster:
-  /// - normal mode (active item) — a decorative `drag_indicator` glyph; the
-  ///   whole active row is long-press draggable in the parent list.
-  /// - normal mode (completed item) — the SAME `drag_indicator` glyph, faded to
-  ///   the .58 done-opacity (mockup CSS) and NON-interactive (completed rows are
-  ///   never reorderable).
-  /// - reorder mode (active item) — move-to-top / move-to-bottom + drag handle.
-  ///
-  /// The quantity is no longer shown here — it now lives in the tile meta line
-  /// ("{category} · {quantity}"), matching the v15 mockup which shows no
-  /// trailing quantity number.
-  Widget _buildTrailingCluster(
-    BuildContext context,
-    WidgetRef ref,
-    AppPalette palette,
-    bool reorderMode,
-  ) {
-    final children = <Widget>[];
-
-    if (reorderMode && isActive) {
-      // Move-to-top button (Fix 4): re-sequence the whole active list with this
-      // item moved to the front, persisting a contiguous 0..N-1 order.
-      children.add(
-        Semantics(
-          label: S.of(context).shoppingMoveToTop,
-          button: true,
-          child: Tooltip(
-            message: S.of(context).shoppingMoveToTop,
-            child: InkWell(
-              onTap: () {
-                final items =
-                    ref.read(filteredShoppingItemsProvider).value ?? const [];
-                final ids = items
-                    .where((i) => !i.isCompleted)
-                    .map((i) => i.id)
-                    .toList(growable: true);
-                ids.remove(item.id);
-                ids.insert(0, item.id);
-                ref
-                    .read(reorderShoppingItemsUseCaseProvider)
-                    .applyOrder(ids);
-              },
-              customBorder: const CircleBorder(),
-              child: SizedBox(
-                width: 36,
-                height: 44,
-                child: Center(
-                  child: Icon(
-                    Icons.vertical_align_top,
-                    size: 20,
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
+  /// Active rows reserve a 44px trailing lane for delayed drag. Completed rows
+  /// preserve the same V15 glyph but remain fixed below the completed divider;
+  /// the surrounding completed card applies the uniform visual fade.
+  Widget _buildTrailingHandle(BuildContext context, AppPalette palette) {
+    final glyph = SizedBox(
+      width: 44,
+      height: 48,
+      child: Center(
+        child: Icon(
+          Icons.drag_indicator,
+          size: 20,
+          color: isActive ? palette.textTertiary : palette.textPrimary,
         ),
-      );
+      ),
+    );
 
-      // Move-to-bottom button (Fix 4).
-      children.add(
-        Semantics(
-          label: S.of(context).shoppingMoveToBottom,
-          button: true,
-          child: Tooltip(
-            message: S.of(context).shoppingMoveToBottom,
-            child: InkWell(
-              onTap: () {
-                final items =
-                    ref.read(filteredShoppingItemsProvider).value ?? const [];
-                final ids = items
-                    .where((i) => !i.isCompleted)
-                    .map((i) => i.id)
-                    .toList(growable: true);
-                ids.remove(item.id);
-                ids.add(item.id);
-                ref
-                    .read(reorderShoppingItemsUseCaseProvider)
-                    .applyOrder(ids);
-              },
-              customBorder: const CircleBorder(),
-              child: SizedBox(
-                width: 36,
-                height: 44,
-                child: Center(
-                  child: Icon(
-                    Icons.vertical_align_bottom,
-                    size: 20,
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Drag handle — instant drag affordance (Icons.reorder, no Tooltip:
-      // a Tooltip fires on long-press, which is the drag gesture).
-      children.add(
-        Semantics(
-          label: S.of(context).shoppingReorderItem,
-          button: true,
-          child: ReorderableDragStartListener(
-            index: index,
-            child: SizedBox(
-              width: 56,
-              height: 44,
-              child: Center(
-                child: Icon(
-                  Icons.reorder,
-                  size: 24,
-                  color: palette.textTertiary,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    } else {
-      // Normal mode: decorative drag glyph (mockup `drag_indicator`).
-      // Active rows are long-press draggable via the parent list's listener;
-      // completed rows render the SAME glyph faded to the .58 done-opacity
-      // (mockup CSS) but it is purely decorative — completed rows are never
-      // reorderable.
-      final glyph = Icon(
-        Icons.drag_indicator,
-        size: 20,
-        color: palette.textTertiary,
-      );
-      children.add(
-        isActive ? glyph : Opacity(opacity: 0.58, child: glyph),
+    if (!isActive) {
+      return KeyedSubtree(
+        key: ValueKey('shopping-drag-glyph-${item.id}'),
+        child: glyph,
       );
     }
 
-    if (children.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    return Semantics(
+      label: S.of(context).shoppingReorderItem,
+      button: true,
+      child: ReorderableDelayedDragStartListener(
+        key: ValueKey('shopping-drag-handle-${item.id}'),
+        index: index,
+        child: glyph,
+      ),
+    );
+  }
+}
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: children,
+enum _ShoppingItemAction { edit, moveToTop, moveToBottom, delete }
+
+class _ShoppingItemActionSheet extends StatelessWidget {
+  const _ShoppingItemActionSheet({
+    required this.showReorderActions,
+    required this.onSelected,
+  });
+
+  final bool showReorderActions;
+  final ValueChanged<_ShoppingItemAction> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final l10n = S.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _actionRow(
+            key: const Key('shopping_action_edit'),
+            label: l10n.shoppingActionEdit,
+            color: palette.textPrimary,
+            onTap: () => onSelected(_ShoppingItemAction.edit),
+          ),
+          if (showReorderActions) ...[
+            _actionRow(
+              key: const Key('shopping_action_top'),
+              label: l10n.shoppingMoveToTop,
+              color: palette.textPrimary,
+              onTap: () => onSelected(_ShoppingItemAction.moveToTop),
+            ),
+            _actionRow(
+              key: const Key('shopping_action_bottom'),
+              label: l10n.shoppingMoveToBottom,
+              color: palette.textPrimary,
+              onTap: () => onSelected(_ShoppingItemAction.moveToBottom),
+            ),
+          ],
+          _actionRow(
+            key: const Key('shopping_action_delete'),
+            label: l10n.shoppingDeleteConfirmButton,
+            color: palette.error,
+            onTap: () => onSelected(_ShoppingItemAction.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionRow({
+    required Key key,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      key: key,
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

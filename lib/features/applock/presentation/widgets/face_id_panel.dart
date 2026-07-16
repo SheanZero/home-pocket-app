@@ -57,7 +57,6 @@ class FaceIdPanel extends StatelessWidget {
           l.appLockFaceIdPrompt,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 15,
             height: 1.4,
             color: palette.textSecondary,
@@ -72,7 +71,6 @@ class FaceIdPanel extends StatelessWidget {
           child: Text(
             l.appLockUsePasscode,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: palette.accentPrimary,
@@ -123,7 +121,6 @@ class _RetryButton extends StatelessWidget {
           child: Text(
             label,
             style: const TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Colors.white,

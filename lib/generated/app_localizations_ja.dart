@@ -569,10 +569,10 @@ class SJa extends S {
   }
 
   @override
-  String get homePersonalMode => '個人モード';
+  String get homePersonalMode => '個人';
 
   @override
-  String get homeFamilyMode => '家族モード';
+  String get homeFamilyMode => '家族';
 
   @override
   String get homeTabHome => 'ホーム';
@@ -1499,6 +1499,9 @@ class SJa extends S {
   String get analyticsKpiTotalLabel => '総支出';
 
   @override
+  String get analyticsTrendTabAll => 'すべて';
+
+  @override
   String get analyticsKpiJoyLabel => '平均満足度';
 
   @override
@@ -1635,6 +1638,11 @@ class SJa extends S {
   @override
   String analyticsHistogramCountFooter(int count) {
     return '悦び支出 $count 件の満足度';
+  }
+
+  @override
+  String analyticsHistogramNarrative(int value) {
+    return '今月のときめきの満足度は、まんなかが$value点です';
   }
 
   @override
@@ -1970,6 +1978,9 @@ class SJa extends S {
 
   @override
   String get shoppingEditItem => 'アイテムを編集';
+
+  @override
+  String get shoppingActionEdit => '編集';
 
   @override
   String get shoppingReorderItem => 'アイテムを並べ替え';

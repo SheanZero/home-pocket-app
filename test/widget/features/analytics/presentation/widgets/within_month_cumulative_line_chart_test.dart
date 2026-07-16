@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/analytics/domain/models/within_month_cumulative_trend.dart';
@@ -74,32 +75,37 @@ void main() {
       await tester.pumpAndSettle();
 
       final bars = _bars(tester);
-      expect(bars.length, 1, reason: 'joy mode is single-line, zero cross-period');
+      expect(
+        bars.length,
+        1,
+        reason: 'joy mode is single-line, zero cross-period',
+      );
       expect(bars[0].dashArray, isNull);
     },
   );
 
-  testWidgets('Test 3: series color comes from the passed palette color (ADR-019)', (
-    tester,
-  ) async {
-    final color = AppPalette.light.joy;
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        WithinMonthCumulativeLineChart(
-          currentMonth: _series(const [10, 20]),
-          previousMonth: null,
-          seriesColor: color,
-          anchor: _anchor,
+  testWidgets(
+    'Test 3: series color comes from the passed palette color (ADR-019)',
+    (tester) async {
+      final color = AppPalette.light.joy;
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          WithinMonthCumulativeLineChart(
+            currentMonth: _series(const [10, 20]),
+            previousMonth: null,
+            seriesColor: color,
+            anchor: _anchor,
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final bars = _bars(tester);
-    expect(bars[0].color, color);
-  });
+      final bars = _bars(tester);
+      expect(bars[0].color, color);
+    },
+  );
 
-  testWidgets('Test 4: empty current series renders a placeholder, no throw', (
+  testWidgets('Test 4: empty current series still renders axes and grid', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -110,11 +116,25 @@ void main() {
           seriesColor: AppPalette.light.daily,
           anchor: _anchor,
         ),
+        locale: const Locale('ja'),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(LineChart), findsNothing);
+    expect(find.byType(LineChart), findsOneWidget);
+    final chart = _chart(tester).data;
+    expect(chart.lineBarsData, isEmpty);
+    expect(chart.minX, 1);
+    expect(chart.maxX, 31);
+    expect(chart.minY, 0);
+    expect(chart.maxY, greaterThan(0));
+    expect(chart.gridData.show, isTrue);
+    expect(chart.gridData.drawVerticalLine, isFalse);
+    expect(chart.titlesData.leftTitles.sideTitles.showTitles, isTrue);
+    expect(chart.titlesData.bottomTitles.sideTitles.showTitles, isTrue);
+    expect(chart.titlesData.topTitles.sideTitles.showTitles, isFalse);
+    expect(chart.titlesData.rightTitles.sideTitles.showTitles, isFalse);
+    expect(_endpointLabels(), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -192,6 +212,7 @@ void main() {
           seriesColor: AppPalette.light.daily,
           anchor: _anchor,
         ),
+        locale: const Locale('ja'),
       ),
     );
     await tester.pumpAndSettle();
@@ -286,55 +307,80 @@ void main() {
     },
   );
 
-  test(
-    'Test 12 (above/below comparison, D-3): 本月 label is ABOVE when current '
-    '>= prev, BELOW when current < prev',
-    () {
-      // 本月 >= 上月 ⇒ above.
-      expect(
-        WithinMonthCumulativeLineChart.labelAbove(
-          currentEndAmount: 600,
-          prevAtComparisonAmount: 500,
+  testWidgets('A3 endpoint annotations are single-line V15 labels', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        WithinMonthCumulativeLineChart(
+          currentMonth: _series(const [100, 300, 600]),
+          previousMonth: _series(const [120, 250, 500]),
+          seriesColor: AppPalette.light.daily,
+          anchor: _anchor,
         ),
-        isTrue,
-      );
-      expect(
-        WithinMonthCumulativeLineChart.labelAbove(
-          currentEndAmount: 500,
-          prevAtComparisonAmount: 500,
-        ),
-        isTrue,
-      );
-      // 本月 < 上月 ⇒ below.
-      expect(
-        WithinMonthCumulativeLineChart.labelAbove(
-          currentEndAmount: 400,
-          prevAtComparisonAmount: 500,
-        ),
-        isFalse,
-      );
-    },
-  );
+        locale: const Locale('ja'),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-  test(
-    'Test 13b (round-3 X-axis markers): bottom-axis labels render only at '
-    '6/12/18/24 — multiples of 6, dropping edges and the near-month-end mark '
-    '(no 28日/30日)',
-    () {
-      // 30-day month (June): 6/12/18/24 show; 30 dropped; edges/non-multiples no.
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(6, 30), isTrue);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(12, 30), isTrue);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(18, 30), isTrue);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(24, 30), isTrue);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(30, 30), isFalse);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(28, 30), isFalse);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(1, 30), isFalse);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(7, 30), isFalse);
-      // 31-day month: 24 still shows, 30 dropped.
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(24, 31), isTrue);
-      expect(WithinMonthCumulativeLineChart.showDayAxisLabel(30, 31), isFalse);
-    },
-  );
+    final labels = tester
+        .widgetList<WithinMonthEndpointAnnotation>(_endpointLabels())
+        .toList();
+    expect(labels, hasLength(2));
+    for (final label in labels) {
+      final texts = find.descendant(
+        of: find.byWidget(label),
+        matching: find.byType(Text),
+      );
+      expect(texts, findsOneWidget);
+    }
+    expect(find.textContaining('5/3'), findsOneWidget);
+    expect(find.textContaining('先月'), findsOneWidget);
+  });
+
+  test('Test 12 (above/below comparison, D-3): 本月 label is ABOVE when current '
+      '>= prev, BELOW when current < prev', () {
+    // 本月 >= 上月 ⇒ above.
+    expect(
+      WithinMonthCumulativeLineChart.labelAbove(
+        currentEndAmount: 600,
+        prevAtComparisonAmount: 500,
+      ),
+      isTrue,
+    );
+    expect(
+      WithinMonthCumulativeLineChart.labelAbove(
+        currentEndAmount: 500,
+        prevAtComparisonAmount: 500,
+      ),
+      isTrue,
+    );
+    // 本月 < 上月 ⇒ below.
+    expect(
+      WithinMonthCumulativeLineChart.labelAbove(
+        currentEndAmount: 400,
+        prevAtComparisonAmount: 500,
+      ),
+      isFalse,
+    );
+  });
+
+  test('Test 13b (round-3 X-axis markers): bottom-axis labels render only at '
+      '6/12/18/24 — multiples of 6, dropping edges and the near-month-end mark '
+      '(no 28日/30日)', () {
+    // 30-day month (June): 6/12/18/24 show; 30 dropped; edges/non-multiples no.
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(6, 30), isTrue);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(12, 30), isTrue);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(18, 30), isTrue);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(24, 30), isTrue);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(30, 30), isFalse);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(28, 30), isFalse);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(1, 30), isFalse);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(7, 30), isFalse);
+    // 31-day month: 24 still shows, 30 dropped.
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(24, 31), isTrue);
+    expect(WithinMonthCumulativeLineChart.showDayAxisLabel(30, 31), isFalse);
+  });
 
   testWidgets(
     'Test 13 (opposite placement, D-4): the 上月 label sits at the OPPOSITE '

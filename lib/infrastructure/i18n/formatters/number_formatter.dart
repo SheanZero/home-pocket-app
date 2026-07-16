@@ -60,14 +60,14 @@ class NumberFormatter {
 
   static String formatCompact(num number, Locale locale) {
     if (locale.languageCode == 'ja' || locale.languageCode == 'zh') {
-      if (number >= 10000) {
-        final manValue = number / 10000;
+      if (number >= 1000) {
+        final thousandValue = number / 1000;
         final formatted = formatNumber(
-          manValue,
+          thousandValue,
           locale,
-          decimals: manValue >= 100 ? 0 : 1,
+          decimals: thousandValue == thousandValue.roundToDouble() ? 0 : 1,
         );
-        return '$formatted\u4e07';
+        return '$formatted\u5343';
       }
     }
     final formatter = NumberFormat.compact(locale: locale.toString());

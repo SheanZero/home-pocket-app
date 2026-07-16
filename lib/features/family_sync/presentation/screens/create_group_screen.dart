@@ -211,11 +211,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             Text(
               _errorMessage ?? '',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontSize: 14,
-                color: palette.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: palette.textSecondary),
             ),
           ],
         ),
@@ -250,7 +246,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           Text(
             profile.displayName,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: palette.textPrimary,
@@ -260,7 +255,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           Text(
             l10n.groupOwner,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -280,7 +274,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                 Text(
                   _groupName,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: palette.textPrimary,
@@ -318,7 +311,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                 Text(
                   l10n.groupInviteCode,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -332,7 +324,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                     Text(
                       firstHalf,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 36,
                         fontWeight: FontWeight.w700,
                         color: palette.accentPrimary,
@@ -343,7 +334,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                     Text(
                       secondHalf,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 36,
                         fontWeight: FontWeight.w700,
                         color: palette.accentPrimary,
@@ -400,7 +390,6 @@ class _Header extends StatelessWidget {
               Text(
                 l10n.groupBack,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: palette.textSecondary,
@@ -413,7 +402,6 @@ class _Header extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: palette.textPrimary,
@@ -449,7 +437,6 @@ class _TimerRow extends StatelessWidget {
         Text(
           l10n.groupInviteExpiry(minutes),
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 12,
             fontWeight: FontWeight.w400,
             color: palette.textSecondary,
@@ -500,7 +487,6 @@ class _GradientButton extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                fontFamily: 'Outfit',
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,

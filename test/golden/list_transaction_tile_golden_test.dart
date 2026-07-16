@@ -55,12 +55,9 @@ Widget _wrap({
   Color? tagTextColor,
   Color? categoryColor,
 }) {
-  final effectiveTagBgColor =
-      tagBgColor ?? AppPalette.light.dailyLight;
-  final effectiveTagTextColor =
-      tagTextColor ?? AppPalette.light.daily;
-  final effectiveCategoryColor =
-      categoryColor ?? AppPalette.light.daily;
+  final effectiveTagBgColor = tagBgColor ?? AppPalette.light.dailyLight;
+  final effectiveTagTextColor = tagTextColor ?? AppPalette.light.daily;
+  final effectiveCategoryColor = categoryColor ?? AppPalette.light.daily;
   return ProviderScope(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -78,7 +75,7 @@ Widget _wrap({
       home: Scaffold(
         body: SizedBox(
           width: 390,
-          height: 80,
+          height: 68,
           child: ListTransactionTile(
             taggedTx: _makeTx(),
             bookId: 'book_golden',

@@ -1,6 +1,6 @@
 // Widget tests for ShoppingListScreen shell.
 //
-// Covers: SC2, DONE-03, MGMT-02
+// Covers: SC2, DONE-03, single-item management, and direct reorder
 //
 // Run: flutter test test/widget/features/shopping_list/presentation/screens/shopping_list_screen_test.dart
 
@@ -12,13 +12,13 @@ import 'package:home_pocket/application/shopping_list/clear_completed_items_use_
 import 'package:home_pocket/application/shopping_list/delete_shopping_item_use_case.dart';
 import 'package:home_pocket/application/shopping_list/reorder_shopping_items_use_case.dart';
 import 'package:home_pocket/application/shopping_list/toggle_item_completed_use_case.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
-import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_reorder.dart';
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_list_screen.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_batch_action_bar.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_selection_header.dart';
@@ -69,6 +69,7 @@ Future<void> _pumpScreen(
   MockToggleItemCompletedUseCase? toggle,
   MockReorderShoppingItemsUseCase? reorder,
   MockClearCompletedItemsUseCase? clearCompleted,
+  VoidCallback? onSettingsTap,
   List<Override> extraOverrides = const [],
 }) async {
   final deleteUC = delete ?? MockDeleteShoppingItemUseCase();
@@ -76,12 +77,15 @@ Future<void> _pumpScreen(
   final reorderUC = reorder ?? MockReorderShoppingItemsUseCase();
   final clearUC = clearCompleted ?? MockClearCompletedItemsUseCase();
 
-  when(() => deleteUC.execute(any()))
-      .thenAnswer((_) async => Result.success(null));
-  when(() => toggleUC.execute(any()))
-      .thenAnswer((_) async => Result.success(null));
-  when(() => clearUC.execute(any()))
-      .thenAnswer((_) async => Result.success(null));
+  when(
+    () => deleteUC.execute(any()),
+  ).thenAnswer((_) async => Result.success(null));
+  when(
+    () => toggleUC.execute(any()),
+  ).thenAnswer((_) async => Result.success(null));
+  when(
+    () => clearUC.execute(any()),
+  ).thenAnswer((_) async => Result.success(null));
 
   await tester.pumpWidget(
     ProviderScope(
@@ -102,10 +106,10 @@ Future<void> _pumpScreen(
         isGroupModeProvider.overrideWith((ref) => false),
         ...extraOverrides,
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         localizationsDelegates: S.localizationsDelegates,
         supportedLocales: S.supportedLocales,
-        home: Scaffold(body: ShoppingListScreen()),
+        home: Scaffold(body: ShoppingListScreen(onSettingsTap: onSettingsTap)),
       ),
     ),
   );
@@ -118,17 +122,60 @@ void main() {
   setUpAll(() {
     // Register fallback values for mocktail
     registerFallbackValue('private');
+    registerFallbackValue(<String>[]);
+  });
+
+  group('ShoppingListScreen — main header', () {
+    testWidgets('matches the shared title geometry and opens settings', (
+      tester,
+    ) async {
+      var settingsTaps = 0;
+      await _pumpScreen(
+        tester,
+        items: const [],
+        onSettingsTap: () => settingsTaps++,
+      );
+
+      final header = find.byKey(const Key('shopping-main-header'));
+      final title = find.byKey(const Key('shopping-main-title'));
+      final settings = find.byKey(const Key('shopping-settings-button'));
+      final filter = find.byKey(const Key('shopping_filter_surface'));
+
+      expect(find.byType(AppBar), findsNothing);
+      expect(tester.getSize(header).height, 46);
+      expect(tester.getTopLeft(header).dx, 20);
+      expect(tester.getTopLeft(title).dx, 20);
+      expect(
+        tester.widget<Text>(title).style?.fontSize,
+        AppTypography.pageTitle,
+      );
+      expect(
+        tester.widget<Text>(title).style?.height,
+        AppTypography.pageTitleLineHeight / AppTypography.pageTitle,
+      );
+      expect(tester.getSize(settings), const Size(40, 40));
+      expect(
+        tester.getSize(find.byIcon(Icons.settings_outlined)),
+        const Size(24, 24),
+      );
+      expect(
+        tester.getTopLeft(filter).dy - tester.getBottomLeft(header).dy,
+        13,
+      );
+
+      await tester.tap(settings);
+      expect(settingsTaps, 1);
+    });
   });
 
   group('ShoppingListScreen — loading state (SC2)', () {
-    testWidgets('shows CircularProgressIndicator while stream is loading',
-        (tester) async {
+    testWidgets('shows CircularProgressIndicator while stream is loading', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            filteredShoppingItemsProvider.overrideWith(
-              (ref) => Stream.empty(),
-            ),
+            filteredShoppingItemsProvider.overrideWith((ref) => Stream.empty()),
             shadowBooksProvider.overrideWith(
               (ref) async => const <ShadowBookInfo>[],
             ),
@@ -148,8 +195,9 @@ void main() {
   });
 
   group('ShoppingListScreen — empty state (SC2)', () {
-    testWidgets('shows ShoppingEmptyState when both sections are empty',
-        (tester) async {
+    testWidgets('shows ShoppingEmptyState when both sections are empty', (
+      tester,
+    ) async {
       await _pumpScreen(tester, items: const []);
       // ShoppingEmptyState should be visible — renders with a shopping bag icon
       expect(find.byIcon(Icons.shopping_bag_outlined), findsAny);
@@ -157,8 +205,9 @@ void main() {
   });
 
   group('ShoppingListScreen — completed section (DONE-03)', () {
-    testWidgets('renders completed item text when completed items present',
-        (tester) async {
+    testWidgets('renders completed item text when completed items present', (
+      tester,
+    ) async {
       final completedItem = _makeItem(
         id: 'c-1',
         isCompleted: true,
@@ -168,23 +217,67 @@ void main() {
       expect(find.text('Completed Item'), findsOneWidget);
     });
 
-    testWidgets(
-        'does not show completed-section divider when no completed items',
-        (tester) async {
-      final activeItem = _makeItem(
-        id: 'a-1',
-        isCompleted: false,
-        name: 'Active Item',
+    testWidgets('completed card owns one uniform 0.58 opacity layer', (
+      tester,
+    ) async {
+      final completedItem = _makeItem(
+        id: 'c-opacity',
+        isCompleted: true,
+        name: 'Muted completed item',
       );
-      await _pumpScreen(tester, items: [activeItem]);
-      // Completed divider label should NOT appear
-      expect(find.text('Completed'), findsNothing);
-      expect(find.text('完了済み'), findsNothing);
-      expect(find.text('已完成'), findsNothing);
+      await _pumpScreen(tester, items: [completedItem]);
+
+      const opacityKey = ValueKey('completed-item-opacity-c-opacity');
+      const cardKey = ValueKey('completed-item-card-c-opacity');
+      final opacity = tester.widget<AnimatedOpacity>(find.byKey(opacityKey));
+
+      expect(opacity.opacity, 0.58);
+      expect(
+        find.descendant(
+          of: find.byKey(opacityKey),
+          matching: find.byKey(cardKey),
+        ),
+        findsOneWidget,
+      );
     });
+
+    testWidgets('completed items render as separate cards with an 8px gap', (
+      tester,
+    ) async {
+      final items = [
+        _makeItem(id: 'c-1', isCompleted: true, name: 'Done One'),
+        _makeItem(id: 'c-2', isCompleted: true, name: 'Done Two'),
+      ];
+      await _pumpScreen(tester, items: items);
+
+      const firstKey = ValueKey('completed-item-card-c-1');
+      const secondKey = ValueKey('completed-item-card-c-2');
+      final first = tester.getRect(find.byKey(firstKey));
+      final second = tester.getRect(find.byKey(secondKey));
+
+      expect(first.left, 20);
+      expect(first.right, 800 - 20);
+      expect(second.top - first.bottom, 8);
+    });
+
+    testWidgets(
+      'does not show completed-section divider when no completed items',
+      (tester) async {
+        final activeItem = _makeItem(
+          id: 'a-1',
+          isCompleted: false,
+          name: 'Active Item',
+        );
+        await _pumpScreen(tester, items: [activeItem]);
+        // Completed divider label should NOT appear
+        expect(find.text('Completed'), findsNothing);
+        expect(find.text('完了済み'), findsNothing);
+        expect(find.text('已完成'), findsNothing);
+      },
+    );
   });
 
-  group('ShoppingListScreen — batch mode chrome (MGMT-02)', () {
+  group('ShoppingListScreen — single-item management', () {
     testWidgets('renders active items in list', (tester) async {
       final a1 = _makeItem(id: 'a-1', name: 'Active 1');
       final a2 = _makeItem(id: 'a-2', name: 'Active 2');
@@ -195,58 +288,28 @@ void main() {
     });
 
     testWidgets(
-        'batch selection header visible when batchSelectModeProvider isActive',
-        (tester) async {
-      final activeItem = _makeItem(id: 'a-1', isCompleted: false);
-      await _pumpScreen(
-        tester,
-        items: [activeItem],
-        extraOverrides: [
-          batchSelectModeProvider.overrideWith(
-            () => _FixedBatchNotifier(
-              BatchSelectModeState(isActive: true, selectedIds: const {'a-1'}),
+      'legacy batch state never exposes selection header or delete bar',
+      (tester) async {
+        final activeItem = _makeItem(id: 'a-1', isCompleted: false);
+        await _pumpScreen(
+          tester,
+          items: [activeItem],
+          extraOverrides: [
+            batchSelectModeProvider.overrideWith(
+              () => _FixedBatchNotifier(
+                BatchSelectModeState(
+                  isActive: true,
+                  selectedIds: const {'a-1'},
+                ),
+              ),
             ),
-          ),
-        ],
-      );
+          ],
+        );
 
-      // ShoppingSelectionHeader renders the selection count (locale-dependent)
-      // and Cancel / Select All buttons — assert on widget type so the test
-      // is locale-independent.
-      expect(find.byType(ShoppingSelectionHeader), findsOneWidget);
-    });
-
-    testWidgets(
-        'batch action bar visible when batchSelectModeProvider isActive',
-        (tester) async {
-      final activeItem = _makeItem(id: 'a-1', isCompleted: false);
-      await _pumpScreen(
-        tester,
-        items: [activeItem],
-        extraOverrides: [
-          batchSelectModeProvider.overrideWith(
-            () => _FixedBatchNotifier(
-              BatchSelectModeState(isActive: true, selectedIds: const {'a-1'}),
-            ),
-          ),
-        ],
-      );
-
-      // ShoppingBatchActionBar shows the selecting-count (locale-dependent) —
-      // assert on widget type so the test is locale-independent.
-      expect(find.byType(ShoppingBatchActionBar), findsOneWidget);
-    });
-
-    testWidgets(
-        'batch chrome is hidden when batchSelectModeProvider isActive=false',
-        (tester) async {
-      final activeItem = _makeItem(id: 'a-1', isCompleted: false);
-      await _pumpScreen(tester, items: [activeItem]);
-
-      // With default batch state (inactive), the batch chrome must be absent.
-      expect(find.byType(ShoppingBatchActionBar), findsNothing);
-      expect(find.byType(ShoppingSelectionHeader), findsNothing);
-    });
+        expect(find.byType(ShoppingBatchActionBar), findsNothing);
+        expect(find.byType(ShoppingSelectionHeader), findsNothing);
+      },
+    );
   });
 
   group('ShoppingListScreen — reorderable list (D38-02)', () {
@@ -257,8 +320,7 @@ void main() {
       expect(find.byType(CustomScrollView), findsOneWidget);
     });
 
-    testWidgets(
-        'normal mode shows both active and completed items '
+    testWidgets('normal mode shows both active and completed items '
         '(quick-260609-pmc-07 baseline)', (tester) async {
       final items = [
         _makeItem(id: 'a-1', name: 'Active One'),
@@ -270,84 +332,52 @@ void main() {
       expect(find.text('Done One'), findsOneWidget);
     });
 
-    testWidgets(
-        'reorder mode hides the completed section; active stays visible '
-        '(quick-260609-pmc-07)', (tester) async {
+    testWidgets('has no standalone reorder button', (tester) async {
+      final activeItem = _makeItem(id: 'a-1', name: 'Active One');
+      await _pumpScreen(tester, items: [activeItem]);
+
+      expect(find.byKey(const Key('shopping_reorder_toggle')), findsNothing);
+    });
+
+    testWidgets('only the active item trailing handle owns delayed drag', (
+      tester,
+    ) async {
       final items = [
         _makeItem(id: 'a-1', name: 'Active One'),
         _makeItem(id: 'c-1', name: 'Done One', isCompleted: true),
       ];
-      await _pumpScreen(
-        tester,
-        items: items,
-        extraOverrides: [
-          shoppingReorderModeProvider.overrideWith(
-            () => _FixedReorderMode(true),
-          ),
-        ],
-      );
+      await _pumpScreen(tester, items: items);
 
-      expect(find.text('Active One'), findsOneWidget);
-      expect(find.text('Done One'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('shopping-drag-handle-a-1')),
+        findsOneWidget,
+      );
+      expect(find.byType(ReorderableDelayedDragStartListener), findsOneWidget);
+      expect(find.text('Done One'), findsOneWidget);
     });
 
-    testWidgets(
-        'tapping the 買うもの header 並べ替え button enters reorder mode',
-        (tester) async {
-      late ProviderContainer container;
-      final activeItem = _makeItem(id: 'a-1', name: 'Active One');
+    testWidgets('reorder callback persists the active item order', (
+      tester,
+    ) async {
+      final reorder = MockReorderShoppingItemsUseCase();
+      when(
+        () => reorder.applyOrder(any()),
+      ).thenAnswer((_) async => Result.success(null));
+      final items = [
+        _makeItem(id: 'a-1', name: 'First'),
+        _makeItem(id: 'a-2', name: 'Second'),
+      ];
+      await _pumpScreen(tester, items: items, reorder: reorder);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            filteredShoppingItemsProvider.overrideWith(
-              (ref) => Stream.value([activeItem]),
-            ),
-            deleteShoppingItemUseCaseProvider
-                .overrideWithValue(MockDeleteShoppingItemUseCase()),
-            toggleItemCompletedUseCaseProvider
-                .overrideWithValue(MockToggleItemCompletedUseCase()),
-            reorderShoppingItemsUseCaseProvider
-                .overrideWithValue(MockReorderShoppingItemsUseCase()),
-            clearCompletedItemsUseCaseProvider
-                .overrideWithValue(MockClearCompletedItemsUseCase()),
-            shadowBooksProvider.overrideWith(
-              (ref) async => const <ShadowBookInfo>[],
-            ),
-            isGroupModeProvider.overrideWith((ref) => false),
-          ],
-          child: Builder(
-            builder: (ctx) {
-              container = ProviderScope.containerOf(ctx);
-              return const MaterialApp(
-                localizationsDelegates: S.localizationsDelegates,
-                supportedLocales: S.supportedLocales,
-                home: Scaffold(body: ShoppingListScreen()),
-              );
-            },
-          ),
-        ),
+      final list = tester.widget<SliverReorderableList>(
+        find.byType(SliverReorderableList),
       );
+      list.onReorderItem?.call(0, 1);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
 
-      expect(container.read(shoppingReorderModeProvider), isFalse);
-
-      await tester.tap(find.byKey(const Key('shopping_reorder_toggle')));
-      await tester.pumpAndSettle();
-
-      expect(container.read(shoppingReorderModeProvider), isTrue);
+      verify(() => reorder.applyOrder(['a-2', 'a-1'])).called(1);
     });
   });
-}
-
-/// Fixed-state [ShoppingReorderMode] notifier for use in tests.
-class _FixedReorderMode extends ShoppingReorderMode {
-  _FixedReorderMode(this._fixed);
-  final bool _fixed;
-
-  @override
-  bool build() => _fixed;
 }
 
 /// Fixed-state [BatchSelectMode] notifier for use in tests.

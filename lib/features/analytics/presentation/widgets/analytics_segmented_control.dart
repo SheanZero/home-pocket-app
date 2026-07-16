@@ -11,7 +11,7 @@ import '../../../../core/theme/app_text_styles.dart';
 ///   - [joy]     → joy-soft fill, joy text, 1.5px inset joy border
 ///     (mock `.joy.active`).
 ///   - [shared]  → solid steel-blue fill, surface text (mock `.shared.active`).
-/// Inactive options are always transparent with muted text regardless of tone.
+/// Inactive options are transparent with the V15 primary text color.
 enum SegmentTone { primary, daily, joy, shared }
 
 /// One option in an [AnalyticsSegmentedControl].
@@ -44,7 +44,7 @@ class AnalyticsSegment<T> {
 ///
 /// Replaces the earlier per-tab outlined `_Pill` / `_DimPill` strips with the
 /// mock's single pill-shaped container of equal-width options: a
-/// `backgroundMuted` track + `borderDefault` hairline, each option pill-rounded,
+/// mixed muted/paper track + `borderDefault` hairline, each option pill-rounded,
 /// only the ACTIVE one tinted by its [SegmentTone]. All colours resolve via
 /// `context.palette` (`color_literal_scan` — the only bare literal is
 /// `Colors.transparent` for inactive fills, which the scan permits) and amounts
@@ -62,17 +62,32 @@ class AnalyticsSegmentedControl<T> extends StatelessWidget {
   final T selected;
   final ValueChanged<T> onChanged;
 
+  /// Shared geometry for the readable 13px segmented label.
+  static const double controlHeight = 46;
+  static const double optionHeight = 40;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final trackColor = Color.alphaBlend(
+      palette.backgroundMuted.withValues(alpha: 0.54),
+      palette.card,
+    );
 
     return Container(
-      height: 42,
+      height: controlHeight,
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: palette.backgroundMuted,
+        color: trackColor,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: palette.borderDefault),
+        boxShadow: [
+          BoxShadow(
+            offset: const Offset(0, 3),
+            blurRadius: 12,
+            color: palette.navShadow.withValues(alpha: 0.035),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -111,29 +126,47 @@ class _SegmentOption<T> extends StatelessWidget {
     final Color? bg;
     final Color fg;
     final Color? insetBorder;
+    final List<BoxShadow> shadows;
 
     if (!active) {
       bg = Colors.transparent;
-      fg = palette.textSecondary;
+      fg = palette.textPrimary;
       insetBorder = null;
+      shadows = const [];
     } else {
       switch (segment.tone) {
         case SegmentTone.primary:
           bg = palette.accentPrimary;
           fg = palette.card;
           insetBorder = null;
+          shadows = [
+            BoxShadow(
+              offset: const Offset(0, 3),
+              blurRadius: 10,
+              color: palette.accentPrimary.withValues(alpha: 0.22),
+            ),
+          ];
         case SegmentTone.daily:
           bg = palette.dailyLight;
           fg = palette.daily;
           insetBorder = palette.daily;
+          shadows = const [];
         case SegmentTone.joy:
           bg = palette.joyLight;
           fg = palette.joy;
           insetBorder = palette.joy;
+          shadows = const [];
         case SegmentTone.shared:
-          bg = palette.shared;
+          bg = Color.lerp(palette.joy, palette.shared, 0.58);
           fg = palette.card;
           insetBorder = null;
+          shadows = [
+            BoxShadow(
+              offset: const Offset(0, 3),
+              blurRadius: 10,
+              color: palette.shared.withValues(alpha: 0.22),
+            ),
+          ];
       }
     }
 
@@ -141,7 +174,7 @@ class _SegmentOption<T> extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        height: 36,
+        height: AnalyticsSegmentedControl.optionHeight,
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
@@ -150,15 +183,15 @@ class _SegmentOption<T> extends StatelessWidget {
           border: insetBorder != null
               ? Border.all(color: insetBorder, width: 1.5)
               : null,
+          boxShadow: shadows,
         ),
         child: Text(
           segment.label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: AppTextStyles.caption.copyWith(
-            fontSize: 10.5,
-            fontWeight: FontWeight.w800,
+          style: AppTextStyles.label.copyWith(
+            fontWeight: FontWeight.w700,
             color: fg,
           ),
         ),

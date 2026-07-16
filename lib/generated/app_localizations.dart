@@ -1182,13 +1182,13 @@ abstract class S {
   /// Mode badge for personal/solo mode
   ///
   /// In en, this message translates to:
-  /// **'Personal Mode'**
+  /// **'Personal'**
   String get homePersonalMode;
 
   /// Mode badge for family/group mode
   ///
   /// In en, this message translates to:
-  /// **'Family Mode'**
+  /// **'Family'**
   String get homeFamilyMode;
 
   /// Bottom nav home tab label
@@ -2859,6 +2859,12 @@ abstract class S {
   /// **'Total spending'**
   String get analyticsKpiTotalLabel;
 
+  /// Label for the aggregate option in the within-month trend segmented control
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get analyticsTrendTabAll;
+
   /// No description provided for @analyticsKpiJoyLabel.
   ///
   /// In en, this message translates to:
@@ -3082,6 +3088,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Satisfaction of {count} joy expenses'**
   String analyticsHistogramCountFooter(int count);
+
+  /// Neutral V15 histogram footer with the data-derived weighted median satisfaction
+  ///
+  /// In en, this message translates to:
+  /// **'This month’s Joy-purchase satisfaction midpoint was {value}'**
+  String analyticsHistogramNarrative(int value);
 
   /// No description provided for @analyticsCategoryDonutOther.
   ///
@@ -3672,6 +3684,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Edit item'**
   String get shoppingEditItem;
+
+  /// Edit action in the shopping item long-press menu
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get shoppingActionEdit;
 
   /// Semantics label for the drag handle on a shopping item tile (Phase 38)
   ///

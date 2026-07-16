@@ -6,6 +6,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
     show LedgerType;
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
@@ -171,6 +172,38 @@ Future<void> _resetProviderScope(WidgetTester tester) async {
 }
 
 void main() {
+  group('AnalyticsScreen — main header', () {
+    testWidgets('matches the shared title and action geometry', (tester) async {
+      await _pump(tester, _buildSubject());
+
+      final header = find.byKey(const Key('analytics-main-header'));
+      final title = find.byKey(const Key('analytics-main-title'));
+      final calendar = find.byKey(const Key('analytics-month-picker-button'));
+      final settings = find.byKey(const Key('analytics-settings-button'));
+      final firstSection = find.byType(AnalyticsSectionHeader).first;
+
+      expect(find.byType(AppBar), findsNothing);
+      expect(tester.getSize(header).height, 46);
+      expect(tester.getTopLeft(header).dx, 20);
+      expect(tester.getTopLeft(title).dx, 20);
+      expect(
+        tester.widget<Text>(title).style?.fontSize,
+        AppTypography.pageTitle,
+      );
+      expect(
+        tester.widget<Text>(title).style?.height,
+        AppTypography.pageTitleLineHeight / AppTypography.pageTitle,
+      );
+      expect(tester.getSize(calendar), const Size(40, 40));
+      expect(tester.getSize(settings), const Size(40, 40));
+      expect(tester.getCenter(settings).dx - tester.getCenter(calendar).dx, 40);
+      expect(
+        tester.getTopLeft(firstSection).dy - tester.getBottomLeft(header).dy,
+        13,
+      );
+    });
+  });
+
   group('AnalyticsScreen round-5 B lineup', () {
     testWidgets(
       'renders the round-5 r5 sectioned lineup with 4 section headers + nested '

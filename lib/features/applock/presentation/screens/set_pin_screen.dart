@@ -144,7 +144,6 @@ class _SetPinScreenState extends ConsumerState<SetPinScreen> {
                   title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: palette.textPrimary,
@@ -167,7 +166,6 @@ class _SetPinScreenState extends ConsumerState<SetPinScreen> {
                           key: const ValueKey('set-pin-mismatch'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: palette.error,

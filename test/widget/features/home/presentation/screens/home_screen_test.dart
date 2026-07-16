@@ -227,7 +227,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(FamilyInviteBanner), findsOneWidget);
-        expect(find.text('Personal Mode'), findsOneWidget);
+        expect(find.text('Personal'), findsOneWidget);
       },
     );
 
@@ -242,7 +242,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(FamilyInviteBanner), findsNothing);
-        expect(find.text('Family Mode'), findsOneWidget);
+        expect(find.text('Family'), findsOneWidget);
       },
     );
 

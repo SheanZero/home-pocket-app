@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 
-
 class MemberListTile extends StatelessWidget {
   const MemberListTile({
     super.key,
@@ -55,7 +54,6 @@ class MemberListTile extends StatelessWidget {
                 Text(
                   name,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: palette.textPrimary,
@@ -65,7 +63,6 @@ class MemberListTile extends StatelessWidget {
                 Text(
                   roleLabel,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: isOwner ? FontWeight.w500 : FontWeight.w400,
                     color: isOwner

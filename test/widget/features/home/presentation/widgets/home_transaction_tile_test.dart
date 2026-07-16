@@ -1,10 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_transaction_tile.dart';
 
 void main() {
   group('HomeTransactionTile', () {
+    testWidgets('uses the readable global row typography', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 350,
+                  child: HomeTransactionTile(
+                    l1Icon: Icons.restaurant,
+                    tagText: '日々の帳',
+                    tagBgColor: AppPalette.light.dailyLight,
+                    tagTextColor: AppPalette.light.dailyText,
+                    merchant: 'ライフ',
+                    category: '食費',
+                    categoryColor: AppPalette.light.dailyText,
+                    formattedAmount: '¥3,280',
+                    amountColor: AppPalette.light.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester
+            .getSize(find.byKey(const Key('home-transaction-row-size')))
+            .height,
+        68,
+      );
+      expect(tester.widget<Icon>(find.byIcon(Icons.restaurant)).size, 25);
+      expect(
+        tester.widget<Text>(find.text('食費')).style?.fontSize,
+        AppTypography.itemTitle,
+      );
+      expect(
+        tester.widget<Text>(find.text('¥3,280')).style?.fontSize,
+        AppTypography.amountSmall,
+      );
+    });
+
     testWidgets('displays merchant, category, and formatted amount', (
       tester,
     ) async {
@@ -26,10 +71,7 @@ void main() {
         ),
       );
 
-      expect(
-        find.text('イオンスーパー'),
-        findsOneWidget,
-      );
+      expect(find.text('イオンスーパー'), findsOneWidget);
       expect(find.text('食費 · 生存'), findsOneWidget);
       expect(find.text('-¥3,280'), findsOneWidget);
     });
@@ -155,9 +197,7 @@ void main() {
       );
 
       // categoryColor now drives the leading L1 icon tint (matches list tile).
-      final iconWidget = tester.widget<Icon>(
-        find.byIcon(Icons.sports_esports),
-      );
+      final iconWidget = tester.widget<Icon>(find.byIcon(Icons.sports_esports));
       expect(iconWidget.color, joyColor);
     });
   });

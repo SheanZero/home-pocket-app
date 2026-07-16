@@ -50,13 +50,15 @@ Widget _subject({AsyncValue<WithinMonthCumulativeTrend>? override}) {
       withinMonthCumulativeTrendProvider(
         bookId: _bookId,
         anchor: _anchor,
-      ).overrideWith((_) => value.when(
-            data: (d) async => d,
-            // Never completes → stays in the loading state with no pending timer.
-            loading: () => Completer<WithinMonthCumulativeTrend>().future,
-            // Throw synchronously inside the provider build → error state.
-            error: (e, _) async => throw StateError(e.toString()),
-          )),
+      ).overrideWith(
+        (_) => value.when(
+          data: (d) async => d,
+          // Never completes → stays in the loading state with no pending timer.
+          loading: () => Completer<WithinMonthCumulativeTrend>().future,
+          // Throw synchronously inside the provider build → error state.
+          error: (e, _) async => throw StateError(e.toString()),
+        ),
+      ),
     ],
   );
 }
@@ -79,6 +81,16 @@ void main() {
 
     expect(find.byType(WithinMonthCumulativeLineChart), findsOneWidget);
     expect(find.byType(LineChart), findsOneWidget);
+    expect(find.text('全部'), findsOneWidget);
+    expect(find.text('支出合计'), findsNothing);
+    expect(
+      tester
+          .widget<WithinMonthCumulativeLineChart>(
+            find.byType(WithinMonthCumulativeLineChart),
+          )
+          .height,
+      WithinMonthCumulativeLineChart.defaultHeight,
+    );
     // Default tab = 总支出 → spend side → 2 series (本月 + 上月).
     expect(_seriesCount(tester), 2);
   });
@@ -116,10 +128,10 @@ void main() {
     expect(widget.previousMonth, anyOf(isNull, isEmpty));
   });
 
-  testWidgets('Test 3: loading → SizedBox(height: 280)', (tester) async {
-    await tester.pumpWidget(
-      _subject(override: const AsyncValue.loading()),
-    );
+  testWidgets('Test 3: loading keeps the readable card height stable', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_subject(override: const AsyncValue.loading()));
     await tester.pump(); // do not settle — keep it loading
 
     expect(find.byType(LineChart), findsNothing);
@@ -131,7 +143,7 @@ void main() {
           )
           .first,
     );
-    expect(box.height, 280);
+    expect(box.height, WithinMonthTrendCard.loadingHeight);
   });
 
   testWidgets('Test 3b: error → AnalyticsCardErrorState with a retry button', (

@@ -8,7 +8,6 @@ import '../../../profile/presentation/widgets/avatar_display.dart';
 import 'create_group_screen.dart';
 import 'join_group_screen.dart';
 
-
 class GroupChoiceScreen extends ConsumerWidget {
   const GroupChoiceScreen({super.key});
 
@@ -32,7 +31,6 @@ class GroupChoiceScreen extends ConsumerWidget {
               Text(
                 l10n.groupChoiceTitle,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: palette.textPrimary,
@@ -43,7 +41,6 @@ class GroupChoiceScreen extends ConsumerWidget {
                 l10n.groupChoiceSubtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: palette.textSecondary,
@@ -114,7 +111,6 @@ class _Header extends StatelessWidget {
               Text(
                 l10n.groupBack,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: palette.textSecondary,
@@ -127,7 +123,6 @@ class _Header extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: palette.textPrimary,
@@ -264,7 +259,6 @@ class _ActionCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: palette.textPrimary,
@@ -274,7 +268,6 @@ class _ActionCard extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: palette.textSecondary,
@@ -316,7 +309,6 @@ class _E2eeHint extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 11,
             fontWeight: FontWeight.w400,
             color: palette.textSecondary.withValues(alpha: 0.6),

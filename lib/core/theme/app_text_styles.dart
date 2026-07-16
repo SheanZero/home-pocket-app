@@ -1,198 +1,241 @@
 import 'package:flutter/material.dart';
 
-// app_colors.dart import removed (D-06 — olive merged into success token).
-// Static const text styles use ADR-018 hex literals for textPrimary (#112025) and
-// textSecondary (#5A7176). Apply ledger-color overrides at call site:
-//   AppTextStyles.amountLarge.copyWith(color: context.palette.dailyText)
+/// Global typography geometry for Home Pocket.
+///
+/// The short semantic names are font sizes in logical pixels. Each has a
+/// matching `*LineHeight` value so Flutter styles and the V15 mockup can share
+/// the same physical line box. Font weights are limited to the native-friendly
+/// 400–700 range used by the Japanese platform font stack.
+abstract final class AppTypography {
+  static const double pageTitle = 20;
+  static const double pageTitleLineHeight = 28;
+  static const FontWeight pageTitleWeight = FontWeight.w700;
 
+  static const double sectionTitle = 16;
+  static const double sectionTitleLineHeight = 22;
+  static const FontWeight sectionTitleWeight = FontWeight.w700;
+
+  static const double itemTitle = 15;
+  static const double itemTitleLineHeight = 21;
+  static const FontWeight itemTitleWeight = FontWeight.w600;
+
+  static const double body = 14;
+  static const double bodyLineHeight = 21;
+  static const FontWeight bodyWeight = FontWeight.w500;
+
+  static const double label = 13;
+  static const double labelLineHeight = 18;
+  static const FontWeight labelWeight = FontWeight.w600;
+
+  static const double supporting = 12;
+  static const double supportingLineHeight = 17;
+  static const FontWeight supportingWeight = FontWeight.w500;
+
+  /// Minimum size for semantic content such as compact controls and chart axes.
+  static const double compact = 11;
+  static const double compactLineHeight = 15;
+  static const FontWeight compactWeight = FontWeight.w600;
+
+  static const double navigation = 11;
+  static const double navigationLineHeight = 14;
+  static const FontWeight navigationWeight = FontWeight.w600;
+
+  static const double button = 14;
+  static const double buttonLineHeight = 20;
+  static const FontWeight buttonWeight = FontWeight.w700;
+
+  static const double amountHero = 34;
+  static const double amountHeroLineHeight = 38;
+  static const FontWeight amountHeroWeight = FontWeight.w700;
+
+  static const double amountLarge = 24;
+  static const double amountLargeLineHeight = 30;
+  static const FontWeight amountLargeWeight = FontWeight.w700;
+
+  static const double amountMedium = 18;
+  static const double amountMediumLineHeight = 24;
+  static const FontWeight amountMediumWeight = FontWeight.w700;
+
+  static const double amountSmall = 15;
+  static const double amountSmallLineHeight = 20;
+  static const FontWeight amountSmallWeight = FontWeight.w700;
+
+  /// Compatibility only; do not use for essential content on new surfaces.
+  static const double micro = 10;
+  static const double microLineHeight = 14;
+  static const FontWeight microWeight = FontWeight.w600;
+}
+
+/// Color-neutral, platform-font text styles for Home Pocket.
+///
+/// Font families are intentionally omitted. Flutter resolves the native UI
+/// stack (San Francisco/Hiragino on iOS, Roboto/Noto on Android). New UI should
+/// use the semantic names at the top of this class; the Material-style names
+/// below remain compatibility aliases while existing screens migrate.
 abstract final class AppTextStyles {
-  static const _fontFamily = 'Outfit';
-  static const _tabularFigures = [FontFeature.tabularFigures()];
+  static const _tabularFigures = <FontFeature>[FontFeature.tabularFigures()];
 
-  // ADR-018 Light hex constants (static const TextStyles cannot reference context.palette)
-  static const _textPrimary = Color(0xFF112025); // ADR-018 light textPrimary
-  static const _textSecondary = Color(0xFF5A7176); // ADR-018 light textSecondary
+  // ── Semantic styles ──
 
-  // ── Headlines ──
-
-  static const headlineLarge = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 30,
-    fontWeight: FontWeight.w700,
-    height: 0.9,
-    color: _textPrimary,
+  static const pageTitle = TextStyle(
+    fontSize: AppTypography.pageTitle,
+    height: AppTypography.pageTitleLineHeight / AppTypography.pageTitle,
+    fontWeight: AppTypography.pageTitleWeight,
   );
 
-  static const headlineMedium = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 24,
-    fontWeight: FontWeight.w700,
-    color: _textPrimary,
+  static const sectionTitle = TextStyle(
+    fontSize: AppTypography.sectionTitle,
+    height: AppTypography.sectionTitleLineHeight / AppTypography.sectionTitle,
+    fontWeight: AppTypography.sectionTitleWeight,
   );
 
-  static const headlineSmall = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
-    color: _textPrimary,
+  static const itemTitle = TextStyle(
+    fontSize: AppTypography.itemTitle,
+    height: AppTypography.itemTitleLineHeight / AppTypography.itemTitle,
+    fontWeight: AppTypography.itemTitleWeight,
   );
 
-  // ── Titles ──
-
-  static const titleLarge = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
-    color: _textPrimary,
+  static const body = TextStyle(
+    fontSize: AppTypography.body,
+    height: AppTypography.bodyLineHeight / AppTypography.body,
+    fontWeight: AppTypography.bodyWeight,
   );
 
-  static const titleMedium = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 15,
-    fontWeight: FontWeight.w600,
-    color: _textPrimary,
+  static const label = TextStyle(
+    fontSize: AppTypography.label,
+    height: AppTypography.labelLineHeight / AppTypography.label,
+    fontWeight: AppTypography.labelWeight,
   );
 
-  static const titleSmall = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    color: _textPrimary,
+  static const supporting = TextStyle(
+    fontSize: AppTypography.supporting,
+    height: AppTypography.supportingLineHeight / AppTypography.supporting,
+    fontWeight: AppTypography.supportingWeight,
   );
 
-  // ── Body ──
-
-  static const bodyLarge = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 15,
-    fontWeight: FontWeight.w600,
-    color: _textPrimary,
+  static const compact = TextStyle(
+    fontSize: AppTypography.compact,
+    height: AppTypography.compactLineHeight / AppTypography.compact,
+    fontWeight: AppTypography.compactWeight,
   );
 
-  static const bodyMedium = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: _textPrimary,
+  static const navigation = TextStyle(
+    fontSize: AppTypography.navigation,
+    height: AppTypography.navigationLineHeight / AppTypography.navigation,
+    fontWeight: AppTypography.navigationWeight,
   );
 
-  static const bodySmall = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 13,
-    fontWeight: FontWeight.w500,
-    color: _textSecondary,
+  static const button = TextStyle(
+    fontSize: AppTypography.button,
+    height: AppTypography.buttonLineHeight / AppTypography.button,
+    fontWeight: AppTypography.buttonWeight,
   );
 
-  // ── Captions & Labels ──
-
-  static const caption = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
-    color: _textSecondary,
+  static const amountHero = TextStyle(
+    fontSize: AppTypography.amountHero,
+    height: AppTypography.amountHeroLineHeight / AppTypography.amountHero,
+    fontWeight: AppTypography.amountHeroWeight,
+    fontFeatures: _tabularFigures,
   );
-
-  static const overline = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
-    color: _textSecondary,
-  );
-
-  static const micro = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 10,
-    fontWeight: FontWeight.w700,
-    color: _textPrimary,
-  );
-
-  // ── Section divider label ──
-
-  static const dividerLabel = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 13,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 2,
-    color: _textSecondary,
-  );
-
-  // ── Labels (compat) ──
-
-  static const labelMedium = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-    color: _textSecondary,
-  );
-
-  static const labelSmall = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-    color: _textSecondary,
-  );
-
-  // ── Nav ──
-
-  static const navLabel = TextStyle(
-    fontFamily: 'DM Sans',
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-  );
-
-  static const navLabelActive = TextStyle(
-    fontFamily: 'DM Sans',
-    fontSize: 10,
-    fontWeight: FontWeight.w600,
-    color: Colors.white,
-  );
-
-  // ── Amount styles (tabular figures for numeric alignment) ──
-  // Apply ledger color via .copyWith(color: context.palette.dailyText) at call site.
-  // NEVER use palette.joy directly for amount text — use palette.joyText (#6B4877 light).
 
   static const amountLarge = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 30,
-    fontWeight: FontWeight.w700,
-    height: 0.9,
-    color: _textPrimary,
+    fontSize: AppTypography.amountLarge,
+    height: AppTypography.amountLargeLineHeight / AppTypography.amountLarge,
+    fontWeight: AppTypography.amountLargeWeight,
     fontFeatures: _tabularFigures,
   );
 
   static const amountMedium = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
-    color: _textPrimary,
+    fontSize: AppTypography.amountMedium,
+    height: AppTypography.amountMediumLineHeight / AppTypography.amountMedium,
+    fontWeight: AppTypography.amountMediumWeight,
     fontFeatures: _tabularFigures,
   );
 
   static const amountSmall = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 15,
-    fontWeight: FontWeight.w700,
-    color: _textPrimary,
+    fontSize: AppTypography.amountSmall,
+    height: AppTypography.amountSmallLineHeight / AppTypography.amountSmall,
+    fontWeight: AppTypography.amountSmallWeight,
     fontFeatures: _tabularFigures,
   );
 
   // ── Compatibility aliases ──
-  // TODO: Remove after all screens are migrated to Wa-Modern
 
-  static const tabLabel = navLabel;
+  static const headlineLarge = pageTitle;
+  static const headlineMedium = pageTitle;
+  static const headlineSmall = pageTitle;
 
-  // olive reference removed (D-06 — merged into success token).
-  // Apply color at call site: .copyWith(color: context.palette.success)
+  static const titleLarge = sectionTitle;
+  static const titleMedium = itemTitle;
+  static const titleSmall = itemTitle;
+
+  static const bodyLarge = itemTitle;
+  static const bodyMedium = body;
+  static const bodySmall = label;
+
+  static const caption = supporting;
+  static const overline = compact;
+  static const micro = TextStyle(
+    fontSize: AppTypography.micro,
+    height: AppTypography.microLineHeight / AppTypography.micro,
+    fontWeight: AppTypography.microWeight,
+  );
+
+  static const dividerLabel = TextStyle(
+    fontSize: AppTypography.label,
+    height: AppTypography.labelLineHeight / AppTypography.label,
+    fontWeight: AppTypography.labelWeight,
+    letterSpacing: 2,
+  );
+
+  static const labelMedium = label;
+  static const labelSmall = compact;
+
+  static const navLabel = navigation;
+  static const navLabelActive = navigation;
+  static const tabLabel = navigation;
+
   static const comparisonDelta = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 12,
+    fontSize: AppTypography.supporting,
+    height: AppTypography.supportingLineHeight / AppTypography.supporting,
     fontWeight: FontWeight.w700,
   );
 
   static const legendLabel = TextStyle(
-    fontFamily: _fontFamily,
-    fontSize: 9,
+    fontSize: AppTypography.compact,
+    height: AppTypography.compactLineHeight / AppTypography.compact,
     fontWeight: FontWeight.w500,
-    color: _textSecondary,
   );
+
+  /// Builds a Material text theme for a concrete light or dark palette.
+  ///
+  /// Typography tokens stay color-neutral. Primary and secondary colors are
+  /// injected here so direct TextTheme lookups cannot carry light-theme colors
+  /// into dark mode.
+  static TextTheme buildTextTheme({
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    TextStyle primary(TextStyle style) => style.copyWith(color: textPrimary);
+    TextStyle secondary(TextStyle style) =>
+        style.copyWith(color: textSecondary);
+
+    return TextTheme(
+      displayLarge: primary(amountHero),
+      displayMedium: primary(amountLarge),
+      displaySmall: primary(amountMedium),
+      headlineLarge: primary(pageTitle),
+      headlineMedium: primary(pageTitle),
+      headlineSmall: primary(sectionTitle),
+      titleLarge: primary(sectionTitle),
+      titleMedium: primary(itemTitle),
+      titleSmall: primary(itemTitle),
+      bodyLarge: primary(body),
+      bodyMedium: primary(body),
+      bodySmall: secondary(supporting),
+      labelLarge: primary(button),
+      labelMedium: secondary(label),
+      labelSmall: secondary(compact),
+    );
+  }
 }

@@ -112,8 +112,7 @@ class JoySpendStackedBarState extends State<JoySpendStackedBar> {
                         isLast: entry.key == segments.length - 1,
                         selected: selectedIndex == entry.key,
                         dimmed:
-                            selectedIndex != null &&
-                            selectedIndex != entry.key,
+                            selectedIndex != null && selectedIndex != entry.key,
                       ),
                     ),
                   ),
@@ -179,9 +178,8 @@ class _Segment extends StatelessWidget {
           ? Center(
               child: Text(
                 '$percent%',
-                style: TextStyle(
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w800,
+                style: AppTextStyles.compact.copyWith(
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                   letterSpacing: 0.02,
                   shadows: [
@@ -241,8 +239,7 @@ class _LegendRow extends StatelessWidget {
             Expanded(
               child: Text(
                 segment.label,
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 12.5,
+                style: AppTextStyles.label.copyWith(
                   color: palette.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
@@ -254,7 +251,8 @@ class _LegendRow extends StatelessWidget {
             Text(
               segment.formattedAmount,
               style: AppTextStyles.amountSmall.copyWith(
-                fontSize: 12,
+                fontSize: AppTypography.label,
+                height: AppTypography.labelLineHeight / AppTypography.label,
                 color: palette.joyText,
                 fontWeight: FontWeight.w700,
               ),
@@ -265,8 +263,7 @@ class _LegendRow extends StatelessWidget {
               child: Text(
                 '${segment.percent}%',
                 textAlign: TextAlign.end,
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 10.5,
+                style: AppTextStyles.supporting.copyWith(
                   color: palette.textTertiary,
                   fontWeight: FontWeight.w600,
                 ),

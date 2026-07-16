@@ -24,8 +24,7 @@ import 'package:home_pocket/generated/app_localizations.dart';
 Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
   return ProviderScope(
     overrides: [
-      locale_providers.currentLocaleProvider
-          .overrideWith((_) async => locale),
+      locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -43,7 +42,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
       home: const Scaffold(
         body: SizedBox(
           width: 390,
-          height: 60,
+          height: 68,
           child: ListSortFilterBar(bookId: 'book_golden'),
         ),
       ),

@@ -84,12 +84,11 @@ class DonutHero extends ConsumerWidget {
   /// suppression intent stays explicit and grep-clean.
   static const String _suppressedRingTitle = '';
 
-  /// Max width (px) for the donut center total. The hole is
-  /// `centerSpaceRadius: 59.4` → ~119px inner ø (260621-ti1: inner ø ×1.1);
+  /// Max width (px) for the donut center total. V15 uses a 116px inner hole;
   /// this keeps the count-up amount inside the ring with margin. Paired with
   /// `FittedBox.scaleDown` so large (7+ digit JPY) totals shrink to fit instead
   /// of overflowing the donut.
-  static const double _centerTotalMaxWidth = 106;
+  static const double _centerTotalMaxWidth = 112;
 
   /// On-ring % label for a slice, or the suppressed label when below the
   /// threshold (small slice → legend-only, D3).
@@ -99,6 +98,19 @@ class DonutHero extends ConsumerWidget {
     if (share < _onRingPctThreshold) return _suppressedRingTitle;
     return '${(share * 100).round()}%';
   }
+
+  /// A neutral track used when the selected window contains no spend. Keeping
+  /// this inside the same PieChart preserves the populated-state geometry and
+  /// avoids presenting a fabricated zero-value slice as real data.
+  static PieChartSectionData _emptyRingSection(AppPalette palette) =>
+      PieChartSectionData(
+        value: 1,
+        title: _suppressedRingTitle,
+        showTitle: false,
+        color: palette.backgroundDivider,
+        radius: 63,
+        cornerRadius: 0,
+      );
 
   bool get _memberMode => members != null;
 
@@ -149,101 +161,95 @@ class DonutHero extends ConsumerWidget {
         // entry-count·month pill are removed — the mock donut card goes straight
         // to the ring (the entry count already shows in the ring center).
         SizedBox(
-          // 260621-ti1: donut outer ø ×1.2 (radius 41.4 + centerSpace 59.4 →
-          // ~201.6px) — box grown from 200 so the larger ring isn't clipped.
-          height: 234,
+          key: const ValueKey('analytics_donut_wrap'),
+          height: 260,
           child: Stack(
             alignment: Alignment.center,
             children: [
-              if (rows.isNotEmpty)
-                PieChart(
-                  PieChartData(
-                    sections: [
-                      for (final entry in rows.asMap().entries)
-                        PieChartSectionData(
-                          value: entry.value.amount.toDouble(),
-                          // §D3 + TI1-ICON-01: the on-ring % and its L1 icon are
-                          // rendered TOGETHER as one centered Column badge (icon
-                          // ABOVE the %, centre-line aligned). The built-in title
-                          // is suppressed so the icon never overlaps the digits
-                          // (fl_chart positions title/badge radially, which is not
-                          // "vertically above" off the 6/12-o'clock axis). Small
-                          // slices below [_onRingPctThreshold] stay legend-only
-                          // (badge null). % 口径 = amount / true total.
-                          title: _suppressedRingTitle,
-                          showTitle: false,
-                          color: rowColors[entry.key],
-                          // §1c→D3: thicker ring so the on-ring badge is legible.
-                          radius: 41.4,
-                          cornerRadius: 0,
-                          badgeWidget:
-                              _onRingPctTitle(entry.value.amount, total) ==
-                                  _suppressedRingTitle
-                              ? null
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      parentCategoryIconFromId(
-                                        entry.value.categoryId,
-                                      ),
-                                      size: 11,
+              PieChart(
+                PieChartData(
+                  sections: [
+                    if (rows.isEmpty && !hasOther) _emptyRingSection(palette),
+                    for (final entry in rows.asMap().entries)
+                      PieChartSectionData(
+                        value: entry.value.amount.toDouble(),
+                        // §D3 + TI1-ICON-01: the on-ring % and its L1 icon are
+                        // rendered TOGETHER as one centered Column badge (icon
+                        // ABOVE the %, centre-line aligned). The built-in title
+                        // is suppressed so the icon never overlaps the digits
+                        // (fl_chart positions title/badge radially, which is not
+                        // "vertically above" off the 6/12-o'clock axis). Small
+                        // slices below [_onRingPctThreshold] stay legend-only
+                        // (badge null). % 口径 = amount / true total.
+                        title: _suppressedRingTitle,
+                        showTitle: false,
+                        color: rowColors[entry.key],
+                        // §1c→D3: thicker ring so the on-ring badge is legible.
+                        radius: 63,
+                        cornerRadius: 0,
+                        badgeWidget:
+                            _onRingPctTitle(entry.value.amount, total) ==
+                                _suppressedRingTitle
+                            ? null
+                            : Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    parentCategoryIconFromId(
+                                      entry.value.categoryId,
+                                    ),
+                                    size: 15,
+                                    color: palette.card,
+                                  ),
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    _onRingPctTitle(entry.value.amount, total),
+                                    style: AppTextStyles.label.copyWith(
+                                      fontWeight: FontWeight.w700,
                                       color: palette.card,
                                     ),
-                                    const SizedBox(height: 1),
-                                    Text(
-                                      _onRingPctTitle(
-                                        entry.value.amount,
-                                        total,
-                                      ),
-                                      style: AppTextStyles.caption.copyWith(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: palette.card,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                          // Badge centred in the band middle; the Column stacks
-                          // icon-over-% itself, so no radial-offset trickery.
-                          badgePositionPercentageOffset: 0.5,
-                        ),
-                      // WR-02: neutral long-tail "Other" slice, sorted last — its
-                      // on-ring % is suppressed (D3: long-tail Other stays
-                      // legend-only) regardless of size.
-                      if (hasOther)
-                        PieChartSectionData(
-                          value: otherAmount.toDouble(),
-                          title: _suppressedRingTitle,
-                          color: otherColor,
-                          radius: 41.4,
-                          cornerRadius: 0,
-                        ),
-                    ],
-                    sectionsSpace: 0,
-                    centerSpaceRadius: 59.4,
-                  ),
-                  // 260622-d5i fix: disable fl_chart's implicit slice-morph
-                  // animation. `RenderPieChart.badgeWidgetPaint` indexes the
-                  // animation-LERPED `data.sections` by badge-child position;
-                  // when the section count changes, the first post-change frame
-                  // evaluates the tween at the OLD (shorter) data while the badge
-                  // children are already the NEW (longer) list →
-                  // `data.sections[counter]` throws RangeError. Zero duration
-                  // keeps `data == target` every frame so the child/section
-                  // counts can never desync. The center count-up (a separate
-                  // TweenAnimationBuilder) is unaffected.
-                  duration: Duration.zero,
+                                  ),
+                                ],
+                              ),
+                        // Badge centred in the band middle; the Column stacks
+                        // icon-over-% itself, so no radial-offset trickery.
+                        badgePositionPercentageOffset: 0.5,
+                      ),
+                    // WR-02: neutral long-tail "Other" slice, sorted last — its
+                    // on-ring % is suppressed (D3: long-tail Other stays
+                    // legend-only) regardless of size.
+                    if (hasOther)
+                      PieChartSectionData(
+                        value: otherAmount.toDouble(),
+                        title: _suppressedRingTitle,
+                        color: otherColor,
+                        radius: 63,
+                        cornerRadius: 0,
+                      ),
+                  ],
+                  sectionsSpace: 0,
+                  centerSpaceRadius: 58,
                 ),
+                // 260622-d5i fix: disable fl_chart's implicit slice-morph
+                // animation. `RenderPieChart.badgeWidgetPaint` indexes the
+                // animation-LERPED `data.sections` by badge-child position;
+                // when the section count changes, the first post-change frame
+                // evaluates the tween at the OLD (shorter) data while the badge
+                // children are already the NEW (longer) list →
+                // `data.sections[counter]` throws RangeError. Zero duration
+                // keeps `data == target` every frame so the child/section
+                // counts can never desync. The center count-up (a separate
+                // TweenAnimationBuilder) is unaffected.
+                duration: Duration.zero,
+              ),
               // §1e center: 3 lines (label / count-up total / entry-count).
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     l10n.analyticsDonutCenterLabel,
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 11,
+                    style: AppTextStyles.supporting.copyWith(
                       color: palette.textSecondary,
                     ),
                   ),
@@ -263,9 +269,7 @@ class DonutHero extends ConsumerWidget {
                         child: Text(
                           NumberFormatter.formatCurrency(value, 'JPY', locale),
                           maxLines: 1,
-                          style: AppTextStyles.amountMedium.copyWith(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
+                          style: AppTextStyles.amountLarge.copyWith(
                             color: palette.textPrimary,
                           ),
                         ),
@@ -275,8 +279,7 @@ class DonutHero extends ConsumerWidget {
                   const SizedBox(height: 3),
                   Text(
                     l10n.analyticsDonutCenterCount(entryCount),
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 10.5,
+                    style: AppTextStyles.compact.copyWith(
                       color: palette.textTertiary,
                     ),
                   ),
@@ -285,7 +288,7 @@ class DonutHero extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 21),
         // 260621-son Bug 3: 分类/成员 toggle + filter row between donut & legend.
         ?controls,
         // §1f: L1-rollup legend ROWS — each fully tappable → drill push (D-B1).
@@ -363,48 +366,45 @@ class DonutHero extends ConsumerWidget {
         // v15 (260714 task #4): hero-top caption + entry-count·month pill removed
         // (see the category-mode build above) — straight to the ring.
         SizedBox(
-          // 260621-ti1: donut outer ø ×1.2 (radius 41.4 + centerSpace 59.4 →
-          // ~201.6px) — box grown from 200 so the larger ring isn't clipped.
-          height: 234,
+          key: const ValueKey('analytics_donut_wrap'),
+          height: 260,
           child: Stack(
             alignment: Alignment.center,
             children: [
-              if (memberRows.isNotEmpty)
-                PieChart(
-                  PieChartData(
-                    sections: [
-                      for (final entry in memberRows.asMap().entries)
-                        PieChartSectionData(
-                          value: entry.value.amount.toDouble(),
-                          title: _onRingPctTitle(entry.value.amount, total),
-                          color: memberColors[entry.key],
-                          radius: 41.4,
-                          cornerRadius: 0,
-                          titlePositionPercentageOffset: 0.5,
-                          titleStyle: AppTextStyles.caption.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: palette.card,
-                          ),
+              PieChart(
+                PieChartData(
+                  sections: [
+                    if (memberRows.isEmpty) _emptyRingSection(palette),
+                    for (final entry in memberRows.asMap().entries)
+                      PieChartSectionData(
+                        value: entry.value.amount.toDouble(),
+                        title: _onRingPctTitle(entry.value.amount, total),
+                        color: memberColors[entry.key],
+                        radius: 63,
+                        cornerRadius: 0,
+                        titlePositionPercentageOffset: 0.5,
+                        titleStyle: AppTextStyles.label.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: palette.card,
                         ),
-                    ],
-                    sectionsSpace: 0,
-                    centerSpaceRadius: 59.4,
-                  ),
-                  // 260622-d5i fix: see the category-mode PieChart above —
-                  // zero-duration keeps `data == target` so fl_chart's
-                  // badgeWidgetPaint can never index a stale shorter sections
-                  // list (RangeError). Member mode uses on-ring titles rather
-                  // than badge widgets, but the same lerp/desync guard applies.
-                  duration: Duration.zero,
+                      ),
+                  ],
+                  sectionsSpace: 0,
+                  centerSpaceRadius: 58,
                 ),
+                // 260622-d5i fix: see the category-mode PieChart above —
+                // zero-duration keeps `data == target` so fl_chart's
+                // badgeWidgetPaint can never index a stale shorter sections
+                // list (RangeError). Member mode uses on-ring titles rather
+                // than badge widgets, but the same lerp/desync guard applies.
+                duration: Duration.zero,
+              ),
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     l10n.analyticsDonutCenterLabel,
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 11,
+                    style: AppTextStyles.supporting.copyWith(
                       color: palette.textSecondary,
                     ),
                   ),
@@ -424,9 +424,7 @@ class DonutHero extends ConsumerWidget {
                         child: Text(
                           NumberFormatter.formatCurrency(value, 'JPY', locale),
                           maxLines: 1,
-                          style: AppTextStyles.amountMedium.copyWith(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
+                          style: AppTextStyles.amountLarge.copyWith(
                             color: palette.textPrimary,
                           ),
                         ),
@@ -436,8 +434,7 @@ class DonutHero extends ConsumerWidget {
                   const SizedBox(height: 3),
                   Text(
                     l10n.analyticsDonutCenterCount(entryCount),
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 10.5,
+                    style: AppTextStyles.compact.copyWith(
                       color: palette.textTertiary,
                     ),
                   ),
@@ -446,7 +443,7 @@ class DonutHero extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 21),
         // 260621-son Bug 3: 分类/成员 toggle + filter row between donut & legend.
         ?controls,
         // §D2 member legend rows: emoji + display name + ¥amount + %. Not tappable
@@ -462,9 +459,7 @@ class DonutHero extends ConsumerWidget {
               'JPY',
               locale,
             ),
-            percent: total > 0
-                ? (entry.value.amount / total * 100).round()
-                : 0,
+            percent: total > 0 ? (entry.value.amount / total * 100).round() : 0,
             showDivider: entry.key != memberRows.length - 1,
             onTap: null,
           ),
@@ -514,12 +509,16 @@ class LegendRow extends StatelessWidget {
 
   final VoidCallback? onTap;
 
+  static const double rowHeight = 56;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final tappable = onTap != null;
     final row = Container(
-      padding: const EdgeInsets.symmetric(vertical: 9),
+      height: rowHeight,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: showDivider
           ? BoxDecoration(
               border: Border(bottom: BorderSide(color: palette.borderDivider)),
@@ -531,33 +530,28 @@ class LegendRow extends StatelessWidget {
           // category-icon rows (TI1-ICON-01) — the L1 icon itself now carries
           // the arc colour. Member rows (emoji) and the long-tail 「其他」 row
           // (no L1 icon) keep the swatch.
-          if (leadingIcon == null) ...[
-            Container(
-              width: 11,
-              height: 11,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4),
-              ),
+          SizedBox(
+            width: 24,
+            child: Center(
+              child: leadingIcon != null
+                  ? Icon(leadingIcon, size: 15, color: color)
+                  : leadingEmoji != null && leadingEmoji!.isNotEmpty
+                  ? Text(leadingEmoji!, style: const TextStyle(fontSize: 14))
+                  : Container(
+                      width: 11,
+                      height: 11,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
             ),
-            const SizedBox(width: 11),
-          ],
-          // §D2: member rows show the avatar emoji before the name.
-          if (leadingEmoji != null && leadingEmoji!.isNotEmpty) ...[
-            Text(leadingEmoji!, style: const TextStyle(fontSize: 15)),
-            const SizedBox(width: 7),
-          ],
-          // TI1-ICON-01: category-dimension rows show the L1 category icon
-          // — coloured with the arc colour, replacing the swatch — before name.
-          if (leadingIcon != null) ...[
-            Icon(leadingIcon, size: 14, color: color),
-            const SizedBox(width: 7),
-          ],
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               name,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontSize: 13,
+              style: AppTextStyles.label.copyWith(
                 fontWeight: FontWeight.w600,
                 color: palette.textPrimary,
               ),
@@ -565,23 +559,23 @@ class LegendRow extends StatelessWidget {
               maxLines: 1,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Text(
             amount,
             style: AppTextStyles.amountSmall.copyWith(
-              fontSize: 13,
+              fontSize: AppTypography.label,
+              height: AppTypography.labelLineHeight / AppTypography.label,
               fontWeight: FontWeight.w700,
               color: palette.textPrimary,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           SizedBox(
-            width: 46,
+            width: 42,
             child: Text(
               '$percent%',
               textAlign: TextAlign.end,
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 11,
+              style: AppTextStyles.supporting.copyWith(
                 fontWeight: FontWeight.w600,
                 color: palette.textSecondary,
               ),

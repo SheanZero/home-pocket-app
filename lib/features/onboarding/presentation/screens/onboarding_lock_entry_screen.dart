@@ -88,7 +88,6 @@ class _OnboardingLockEntryScreenState
                     S.of(context).onboardingLockTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: palette.textPrimary,
@@ -99,7 +98,6 @@ class _OnboardingLockEntryScreenState
                     S.of(context).onboardingLockDescription,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 14,
                       height: 1.4,
                       color: palette.textSecondary,
@@ -119,7 +117,6 @@ class _OnboardingLockEntryScreenState
                     child: Text(
                       S.of(context).onboardingLockSkip,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: palette.textSecondary,
@@ -178,7 +175,6 @@ class _OnboardingGradientButton extends StatelessWidget {
           child: Text(
             label,
             style: const TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Colors.white,

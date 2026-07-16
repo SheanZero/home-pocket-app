@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -209,31 +210,40 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
         filter.searchQuery.isNotEmpty ||
         filter.memberBookId != null; // FAM-03 fix (Pitfall B)
 
-    return Container(
-      decoration: BoxDecoration(
-        color: palette.background,
-        border: Border(
-          bottom: BorderSide(color: palette.borderDivider, width: 1),
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: ClipRect(
+        key: const Key('list-filter-glass'),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            decoration: BoxDecoration(
+              color: palette.background.withValues(alpha: 0.96),
+              border: Border(
+                bottom: BorderSide(color: palette.borderDivider, width: 1),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
+            child: _searchExpanded
+                ? _buildSearchExpanded(context, palette, filter)
+                : (isGroupMode
+                      ? _buildGroupRow(
+                          context,
+                          palette,
+                          filter,
+                          sortConfig,
+                          anyFilterActive,
+                        )
+                      : _buildSoloRow(
+                          context,
+                          palette,
+                          filter,
+                          sortConfig,
+                          anyFilterActive,
+                        )),
+          ),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: _searchExpanded
-          ? _buildSearchExpanded(context, palette, filter)
-          : (isGroupMode
-                ? _buildGroupRow(
-                    context,
-                    palette,
-                    filter,
-                    sortConfig,
-                    anyFilterActive,
-                  )
-                : _buildSoloRow(
-                    context,
-                    palette,
-                    filter,
-                    sortConfig,
-                    anyFilterActive,
-                  )),
     );
   }
 
@@ -456,18 +466,14 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   pillLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.micro.copyWith(
+                  style: AppTextStyles.compact.copyWith(
                     color: palette.textPrimary,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
               const SizedBox(width: 2),
-              Icon(
-                Icons.expand_more,
-                size: 16,
-                color: palette.textSecondary,
-              ),
+              Icon(Icons.expand_more, size: 16, color: palette.textSecondary),
             ],
           ),
         ),
@@ -513,7 +519,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 active
                     ? l10n.listCategoryChipN(filter.categoryIds.length)
                     : l10n.listCategoryChip,
-                style: AppTextStyles.micro.copyWith(
+                style: AppTextStyles.compact.copyWith(
                   color: active ? palette.accentPrimary : palette.textSecondary,
                   fontWeight: FontWeight.w800,
                 ),
@@ -620,7 +626,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.micro.copyWith(
+                style: AppTextStyles.compact.copyWith(
                   color: selected ? palette.shared : palette.textSecondary,
                   fontWeight: FontWeight.w800,
                 ),

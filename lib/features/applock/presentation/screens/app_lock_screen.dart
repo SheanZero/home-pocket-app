@@ -153,7 +153,6 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
         title: Text(
           l.appLockForgotPin,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontWeight: FontWeight.w700,
             color: palette.textPrimary,
           ),
@@ -161,11 +160,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
         content: Text(
           l.appLockForgotPinExplanation,
           key: const ValueKey('app-lock-forgot-explanation'),
-          style: TextStyle(
-            fontFamily: 'Outfit',
-            height: 1.5,
-            color: palette.textSecondary,
-          ),
+          style: TextStyle(height: 1.5, color: palette.textSecondary),
         ),
         actions: [
           TextButton(
@@ -215,7 +210,6 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
           l.appLockPinTitle,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: palette.textPrimary,
@@ -260,7 +254,6 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
           child: Text(
             l.appLockForgotPin,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: palette.textSecondary,

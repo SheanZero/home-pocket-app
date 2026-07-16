@@ -25,13 +25,13 @@ class ListDayGroupHeader extends StatelessWidget {
     final palette = context.palette;
     // v15 `.list-day-header`: 28dp, no background, muted small caps-ish label.
     return Container(
-      height: 28,
+      height: 32,
       padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           DateFormatter.formatFullDateCjk(date, locale),
-          style: AppTextStyles.labelSmall.copyWith(
+          style: AppTextStyles.compact.copyWith(
             color: palette.textSecondary,
             fontWeight: FontWeight.w700,
           ),
@@ -84,9 +84,8 @@ List<ListItem> buildFlatList(
   }
   final sortedKeys = map.keys.toList()
     ..sort(
-      (a, b) => direction == SortDirection.desc
-          ? b.compareTo(a)
-          : a.compareTo(b),
+      (a, b) =>
+          direction == SortDirection.desc ? b.compareTo(a) : a.compareTo(b),
     );
   return [
     for (final k in sortedKeys) ...[

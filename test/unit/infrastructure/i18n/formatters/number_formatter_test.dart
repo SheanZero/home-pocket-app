@@ -249,16 +249,19 @@ void main() {
           expect(result.contains('.'), isFalse);
         });
 
-        test('JPY whole amount unaffected by trimming (already 0 decimals)', () {
-          final result = NumberFormatter.formatCurrency(
-            1000,
-            'JPY',
-            ja,
-            trimWholeFraction: true,
-          );
-          expect(result, contains('\u00a5'));
-          expect(result.contains('.'), isFalse);
-        });
+        test(
+          'JPY whole amount unaffected by trimming (already 0 decimals)',
+          () {
+            final result = NumberFormatter.formatCurrency(
+              1000,
+              'JPY',
+              ja,
+              trimWholeFraction: true,
+            );
+            expect(result, contains('\u00a5'));
+            expect(result.contains('.'), isFalse);
+          },
+        );
 
         test('default (flag off) still renders ".00" for whole USD', () {
           final result = NumberFormatter.formatCurrency(12211, 'USD', en);
@@ -290,12 +293,15 @@ void main() {
     });
 
     group('formatCompact', () {
-      test('formats Japanese numbers with wan for 10000+', () {
-        expect(NumberFormatter.formatCompact(12345, ja), contains('\u4e07'));
+      test('formats Japanese amounts from 1000 with fixed sen units', () {
+        expect(NumberFormatter.formatCompact(999, ja), '999');
+        expect(NumberFormatter.formatCompact(1000, ja), '1\u5343');
+        expect(NumberFormatter.formatCompact(1500, ja), '1.5\u5343');
+        expect(NumberFormatter.formatCompact(12345, ja), '12.3\u5343');
       });
 
-      test('formats Chinese numbers with wan for 10000+', () {
-        expect(NumberFormatter.formatCompact(12345, zh), contains('\u4e07'));
+      test('formats Chinese amounts from 1000 with fixed sen units', () {
+        expect(NumberFormatter.formatCompact(12000, zh), '12\u5343');
       });
 
       test('formats English with K for 1000+', () {
@@ -303,11 +309,8 @@ void main() {
         expect(result, contains('K'));
       });
 
-      test('does not use wan below 10000 for Japanese', () {
-        expect(
-          NumberFormatter.formatCompact(9999, ja),
-          isNot(contains('\u4e07')),
-        );
+      test('never switches Japanese calendar amounts to wan', () {
+        expect(NumberFormatter.formatCompact(10000, ja), '10\u5343');
       });
     });
   });

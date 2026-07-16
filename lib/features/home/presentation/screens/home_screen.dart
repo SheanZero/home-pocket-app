@@ -26,7 +26,9 @@ import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../../../accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
-import '../../../../shared/utils/currency_conversion.dart' show subunitToUnitFor;
+import '../../../../shared/utils/currency_conversion.dart'
+    show subunitToUnitFor;
+import '../../../../shared/widgets/main_surface_header.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
@@ -78,7 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(28, 4, 28, 0),
+          padding: MainSurfaceHeader.screenPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -100,11 +102,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       .selectMonth(picked.year, picked.month);
                 },
               ),
-              // 24 (not 16) to visually match AnalyticsScreen's AppBar+padding stack (user decision 260518-v4v).
-              // Analytics has a 56px opaque AppBar creating structural visual weight absent on home
-              // (inline body HeroHeader). Reducing analytics padding to 8px would look cramped;
-              // bumping home from 16px to 24px achieves visual equivalence. Numeric asymmetry intentional.
-              const SizedBox(height: 24),
+              // V15 `.home-faithful .app-header`: 13px before the hero card.
+              const SizedBox(height: MainSurfaceHeader.contentSpacing),
 
               // ── Home hero card (Phase 10 — integrates the legacy
               //    month-overview, ledger-comparison, and joy-fullness cards
@@ -274,7 +273,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Text(
                     l10n.homeRecentTransactions,
-                    style: AppTextStyles.titleSmall.copyWith(
+                    style: AppTextStyles.sectionTitle.copyWith(
                       color: context.palette.textPrimary,
                     ),
                   ),
@@ -284,13 +283,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ref
                           .read(listFilterProvider.notifier)
                           .selectMonth(now.year, now.month);
-                      ref
-                          .read(selectedTabIndexProvider.notifier)
-                          .select(1);
+                      ref.read(selectedTabIndexProvider.notifier).select(1);
                     },
                     child: Text(
                       l10n.homeViewAllTransactions,
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: AppTextStyles.label.copyWith(
                         color: context.palette.accentPrimary,
                       ),
                     ),
@@ -366,9 +363,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             final result = await Navigator.of(context)
                                 .push<bool>(
                                   MaterialPageRoute<bool>(
-                                    builder: (_) => TransactionEditScreen(
-                                      transaction: tx,
-                                    ),
+                                    builder: (_) =>
+                                        TransactionEditScreen(transaction: tx),
                                   ),
                                 );
                             if (result == true) {

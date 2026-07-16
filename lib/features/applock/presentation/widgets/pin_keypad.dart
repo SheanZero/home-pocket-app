@@ -10,7 +10,7 @@ import '../../../../core/theme/app_palette.dart';
 /// (Plans 09/10) owns the entered digits, instant-verify and error handling.
 ///
 /// Theming is strictly via [AppPaletteContext.palette] (ADR-019 v1.6) and the
-/// 'Outfit' display font; no hardcoded theme colours. Accessibility labels use
+/// platform font stack; no hardcoded theme colours. Accessibility labels use
 /// the digit value and the platform delete tooltip so the scan stays CJK-free.
 class PinKeypad extends StatelessWidget {
   const PinKeypad({
@@ -45,9 +45,7 @@ class PinKeypad extends StatelessWidget {
   }
 
   Widget _row(BuildContext context, List<int> digits) {
-    return Row(
-      children: [for (final d in digits) _digitKey(context, d)],
-    );
+    return Row(children: [for (final d in digits) _digitKey(context, d)]);
   }
 
   Widget _digitKey(BuildContext context, int digit) {
@@ -74,7 +72,6 @@ class PinKeypad extends StatelessWidget {
                   child: Text(
                     '$digit',
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 26,
                       fontWeight: FontWeight.w500,
                       color: palette.textPrimary,

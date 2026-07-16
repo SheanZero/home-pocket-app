@@ -1,5 +1,7 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/analytics/domain/models/joy_category_amount.dart';
 import 'package:home_pocket/features/analytics/domain/models/member_spend_breakdown.dart';
@@ -9,6 +11,9 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_donu
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/category_drill_down_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/analytics_segmented_control.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/donut_dimension_member_controls.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/donut_hero.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_drawer.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_stacked_bar.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
@@ -71,7 +76,7 @@ final _breakdowns = [
   _bd('cat_hobbies', 'Hobbies', 3000, 10),
 ];
 
-Widget _subject({List<CategoryBreakdown>? breakdowns}) {
+Widget _subject({List<CategoryBreakdown>? breakdowns, MonthlyReport? report}) {
   return createLocalizedWidget(
     // The bare card can exceed the 800x600 test viewport (taller donut + legend
     // rows); on the real screen it lives in a scroll view, so wrap it here to
@@ -96,7 +101,7 @@ Widget _subject({List<CategoryBreakdown>? breakdowns}) {
         bookId: _bookId,
         startDate: _start,
         endDate: _end,
-      ).overrideWith((_) async => _report(breakdowns ?? _breakdowns)),
+      ).overrideWith((_) async => report ?? _report(breakdowns ?? _breakdowns)),
       analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
     ],
   );
@@ -109,13 +114,79 @@ Future<void> _pump(WidgetTester tester, Widget widget) async {
 }
 
 void main() {
+  testWidgets('A1/A4/A6 category card follows the V15 sizing contract', (
+    tester,
+  ) async {
+    await _pump(tester, _subject());
+
+    final cardPadding = tester.widget<Padding>(
+      find.byKey(const ValueKey('analytics_data_card_padding')),
+    );
+    expect(cardPadding.padding, const EdgeInsets.all(18));
+
+    final wrap = tester.widget<SizedBox>(
+      find.byKey(const ValueKey('analytics_donut_wrap')),
+    );
+    expect(wrap.height, 260);
+
+    final pie = tester.widget<PieChart>(find.byType(PieChart));
+    expect(pie.data.centerSpaceRadius, 58);
+    expect(pie.data.sections.first.radius, 63);
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey('donut_dimension_segments'))),
+      const Size(
+        DonutDimensionMemberControls.dimensionControlWidth,
+        AnalyticsSegmentedControl.controlHeight,
+      ),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('donut_member_filter_box'))),
+      const Size(
+        DonutDimensionMemberControls.memberFilterWidth,
+        AnalyticsSegmentedControl.controlHeight,
+      ),
+    );
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey('donut_legend_row_cat_food')))
+          .height,
+      LegendRow.rowHeight,
+    );
+  });
+
+  testWidgets('empty category data keeps a neutral donut ring visible', (
+    tester,
+  ) async {
+    final emptyReport = _report(
+      const [],
+    ).copyWith(totalExpenses: 0, dailyTotal: 0, joyTotal: 0);
+
+    await _pump(tester, _subject(report: emptyReport));
+
+    expect(find.byType(PieChart), findsOneWidget);
+    final pie = tester.widget<PieChart>(find.byType(PieChart));
+    expect(pie.data.centerSpaceRadius, 58);
+    expect(pie.data.sections, hasLength(1));
+    final section = pie.data.sections.single;
+    expect(section.value, 1);
+    expect(section.radius, 63);
+    expect(section.showTitle, isFalse);
+    expect(section.color, AppPalette.light.backgroundDivider);
+    expect(find.byType(LegendRow), findsNothing);
+    expect(find.text('¥0'), findsOneWidget);
+  });
+
   testWidgets('renders L1-rollup legend rows amount-descending', (
     tester,
   ) async {
     await _pump(tester, _subject());
 
     // 3 L1 rows: food (18000), transport (9000), hobbies (3000).
-    expect(find.byKey(const ValueKey('donut_legend_row_cat_food')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('donut_legend_row_cat_food')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('donut_legend_row_cat_transport')),
       findsOneWidget,
@@ -245,7 +316,10 @@ void main() {
       ),
     );
 
-    expect(find.byKey(const ValueKey('donut_legend_row_cat_food')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('donut_legend_row_cat_food')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('donut_legend_row_cat_transport')),
       findsOneWidget,
@@ -292,7 +366,9 @@ void main() {
             startDate: _start,
             endDate: _end,
           ).overrideWith((_) async => _report(_breakdowns)),
-          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          analyticsCategoriesMapProvider.overrideWith(
+            (_) async => _categoryMap,
+          ),
           userProfileProvider.overrideWith((_) async => profile),
           currentDeviceIdProvider.overrideWith((_) async => selfId),
           activeGroupMembersProvider.overrideWith(
@@ -364,7 +440,9 @@ void main() {
             startDate: _start,
             endDate: _end,
           ).overrideWith((_) async => _report(_breakdowns)),
-          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          analyticsCategoriesMapProvider.overrideWith(
+            (_) async => _categoryMap,
+          ),
           userProfileProvider.overrideWith((_) async => profile),
           currentDeviceIdProvider.overrideWith((_) async => selfId),
           // No group joined → activeGroupMembers is empty.
@@ -382,7 +460,10 @@ void main() {
     // The sheet (ListTile options) offers both「All members」and「Shean」(self).
     // "All members" also appears on the closed trigger, so scope to ListTiles.
     expect(
-      find.descendant(of: find.byType(ListTile), matching: find.text('All members')),
+      find.descendant(
+        of: find.byType(ListTile),
+        matching: find.text('All members'),
+      ),
       findsOneWidget,
     );
     expect(
@@ -417,7 +498,9 @@ void main() {
             startDate: _start,
             endDate: _end,
           ).overrideWith((_) async => _report(_breakdowns)),
-          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          analyticsCategoriesMapProvider.overrideWith(
+            (_) async => _categoryMap,
+          ),
           // Category-dim drawer watches joyCategoryAmounts with deviceId: null.
           joyCategoryAmountsProvider(
             bookId: _bookId,
@@ -448,7 +531,10 @@ void main() {
     );
     // Category count "2 categories" + ¥total 10,000 on the label row.
     expect(
-      find.descendant(of: drawer, matching: find.textContaining('2 categories')),
+      find.descendant(
+        of: drawer,
+        matching: find.textContaining('2 categories'),
+      ),
       findsOneWidget,
     );
     expect(
@@ -473,11 +559,15 @@ void main() {
     });
     expect(hasPinkBox, isFalse);
 
-    // The divider Container (height 1) is present in the drawer.
+    // V15 has no extra divider above the drawer.
     final hasDivider = drawerContainers.any(
       (c) => c.constraints?.maxHeight == 1,
     );
-    expect(hasDivider, isTrue);
+    expect(hasDivider, isFalse);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('analytics_joy_toggle'))).height,
+      JoySpendDrawer.toggleMinHeight,
+    );
   });
 
   // ── 260622-d5i / D3: member dimension splits 悦己 by member ───────────────────
@@ -509,7 +599,9 @@ void main() {
             startDate: _start,
             endDate: _end,
           ).overrideWith((_) async => _report(_breakdowns)),
-          analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
+          analyticsCategoriesMapProvider.overrideWith(
+            (_) async => _categoryMap,
+          ),
           activeGroupMembersProvider.overrideWith(
             (_) => Stream.value(const <GroupMember>[]),
           ),

@@ -205,7 +205,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                     Text(
                       l10n.groupBack,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: palette.textSecondary,
@@ -231,7 +230,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                 Text(
                   group.groupName,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: palette.textPrimary,
@@ -284,7 +282,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                       child: Text(
                         l10n.familySyncApprovalTitle,
                         style: TextStyle(
-                          fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: palette.accentPrimary,
@@ -307,7 +304,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           Text(
             l10n.familySyncMembers,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -380,7 +376,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                     Text(
                       l10n.groupInviteMembers,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: palette.textPrimary,
@@ -404,7 +399,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                       ? l10n.groupDisband
                       : l10n.familySyncLeaveGroup,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: palette.textSecondary,
@@ -453,7 +447,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           Text(
             l10n.familySyncNoDevicePaired,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: palette.textPrimary,
@@ -462,11 +455,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           const SizedBox(height: 8),
           Text(
             l10n.familySyncPairPrompt,
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 14,
-              color: palette.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: palette.textSecondary),
           ),
         ],
       ),

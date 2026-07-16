@@ -28,9 +28,7 @@ class ListLedgerSegments extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
     final l10n = S.of(context);
-    final ledger = ref.watch(
-      listFilterProvider.select((f) => f.ledgerType),
-    );
+    final ledger = ref.watch(listFilterProvider.select((f) => f.ledgerType));
 
     void select(LedgerType? type) =>
         ref.read(listFilterProvider.notifier).setLedgerFilter(type);
@@ -120,7 +118,7 @@ class _Segment extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Container(
-          height: 36,
+          height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: background,
@@ -131,9 +129,9 @@ class _Segment extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.micro.copyWith(
+            style: AppTextStyles.label.copyWith(
               color: foreground,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

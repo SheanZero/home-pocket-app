@@ -49,7 +49,7 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('HomeHeader month label shows the down-chevron affordance', (
+  testWidgets('HomeHeader month label omits redundant down-chevron', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -64,7 +64,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+    expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
   });
 
   testWidgets('HomeHeader tapping the month label fires onMonthTap', (
@@ -118,7 +118,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.people), findsOneWidget);
-    expect(find.text('家族モード'), findsOneWidget);
+    expect(find.text('家族'), findsOneWidget);
   });
 
   testWidgets('HomeHeader shows personal badge in solo mode', (tester) async {
@@ -134,7 +134,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('個人モード'), findsOneWidget);
+    expect(find.text('個人'), findsOneWidget);
   });
 
   testWidgets('HomeHeader displays formatted month text', (tester) async {

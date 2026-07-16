@@ -8,8 +8,8 @@ import '../../../../generated/app_localizations.dart';
 ///
 /// The pill has rounded corners (32px radius) and a subtle shadow. The active
 /// tab has no background — its icon and label are tinted with the primary
-/// accent colour and slightly bolded; inactive tabs are tertiary grey. The FAB
-/// sits to the right of the pill with a coral gradient.
+/// accent colour and slightly bolded; inactive tabs use the V15 faint text
+/// token. The FAB sits to the right of the pill with a Joy-to-deep-rose gradient.
 class HomeBottomNavBar extends StatelessWidget {
   const HomeBottomNavBar({
     super.key,
@@ -53,6 +53,17 @@ class HomeBottomNavBar extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(21, 16, 21, 21),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            context.palette.background.withValues(alpha: 0),
+            context.palette.background,
+          ],
+          stops: const [0, 0.35],
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -61,13 +72,13 @@ class HomeBottomNavBar extends StatelessWidget {
             child: Container(
               height: 62,
               decoration: BoxDecoration(
-                color: context.palette.card,
+                color: context.palette.card.withValues(alpha: 0.96),
                 borderRadius: BorderRadius.circular(32),
                 border: Border.all(color: context.palette.borderDefault),
                 boxShadow: [
                   BoxShadow(
-                    offset: const Offset(0, 4),
-                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                    blurRadius: 30,
                     color: context.palette.navShadow,
                   ),
                 ],
@@ -94,15 +105,14 @@ class HomeBottomNavBar extends StatelessWidget {
     final isActive = index == currentIndex;
 
     final activeColor = context.palette.accentPrimary;
-    // Pure neutral grey from the palette (light #BDBDBD / dark #8A8A8A) —
-    // resolved per-brightness by the theme extension (COLOR-01).
+    // V15 text-faint token, resolved per brightness by the theme extension.
     final inactiveColor = context.palette.navInactive;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => onTap(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -114,6 +124,9 @@ class HomeBottomNavBar extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.fade,
+              softWrap: false,
               style: isActive
                   ? AppTextStyles.navLabelActive.copyWith(color: activeColor)
                   : AppTextStyles.navLabel.copyWith(color: inactiveColor),
@@ -141,13 +154,13 @@ class HomeBottomNavBar extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              offset: const Offset(0, 4),
-              blurRadius: 14,
+              offset: const Offset(0, 8),
+              blurRadius: 22,
               color: palette.fabShadow,
             ),
           ],
         ),
-        child: const Icon(Icons.add, color: Colors.white, size: 24),
+        child: Icon(Icons.add, color: palette.card, size: 27),
       ),
     );
   }

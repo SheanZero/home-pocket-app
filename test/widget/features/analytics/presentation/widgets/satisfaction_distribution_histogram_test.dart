@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/analytics_category_palette.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
 
@@ -113,7 +114,9 @@ void main() {
     expect(borderedWrappers, hasLength(1));
   });
 
-  testWidgets('footer count + median pill render', (tester) async {
+  testWidgets('A10 footer is a neutral data-derived V15 narrative', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         const SatisfactionDistributionHistogram(buckets: buckets),
@@ -121,10 +124,16 @@ void main() {
       ),
     );
 
-    // Count footer (total = 10).
-    expect(find.textContaining('10'), findsWidgets);
-    // Median pill text (median = 4).
-    expect(find.textContaining('Median satisfaction 4'), findsOneWidget);
+    final narrative = tester.widget<Text>(
+      find.byKey(const ValueKey('analytics_histogram_narrative')),
+    );
+    expect(
+      narrative.data,
+      'This month\u2019s Joy-purchase satisfaction midpoint was 4',
+    );
+    expect(narrative.data, isNot(contains('glad I chose it')));
+    expect(narrative.style?.fontSize, AppTypography.supporting);
+    expect(find.textContaining('Median satisfaction 4'), findsNothing);
   });
 
   testWidgets('semantic label is neutral and factual', (tester) async {

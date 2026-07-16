@@ -14,7 +14,6 @@ import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart';
 import 'confirm_join_screen.dart';
 
-
 class JoinGroupScreen extends ConsumerStatefulWidget {
   const JoinGroupScreen({super.key});
 
@@ -125,7 +124,6 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                 Text(
                   profile.displayName,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: palette.textPrimary,
@@ -135,7 +133,6 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                 Text(
                   l10n.groupMyName,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -214,7 +211,6 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
               Text(
                 l10n.groupCodeHint,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: palette.textSecondary,
@@ -227,7 +223,6 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                   _errorMessage!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: palette.accentPrimary,
@@ -278,7 +273,6 @@ class _Header extends StatelessWidget {
               Text(
                 l10n.groupBack,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: palette.textSecondary,
@@ -291,7 +285,6 @@ class _Header extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: palette.textPrimary,
@@ -331,7 +324,6 @@ class _DigitDisplay extends StatelessWidget {
       child: Text(
         digit,
         style: TextStyle(
-          fontFamily: 'Outfit',
           fontSize: 22,
           fontWeight: FontWeight.w700,
           color: palette.textPrimary,
@@ -398,7 +390,6 @@ class _GradientButton extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,

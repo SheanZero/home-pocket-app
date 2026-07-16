@@ -219,7 +219,6 @@ class _PinReauthDialogState extends State<_PinReauthDialog> {
                 l.appLockReauthReason,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: palette.textPrimary,

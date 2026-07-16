@@ -2,21 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 
-import '../../../../../application/accounting/category_localization_service.dart';
 import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../generated/app_localizations.dart';
-import '../../../../../infrastructure/i18n/formatters/number_formatter.dart';
-import '../../../../../shared/utils/currency_conversion.dart';
-import '../../../../accounting/domain/models/transaction.dart';
-import '../../../../list/domain/models/tagged_transaction.dart';
-import '../../../../list/presentation/widgets/list_transaction_tile.dart';
 import '../../../../settings/presentation/providers/state_locale.dart';
 import '../../../domain/models/per_day_joy_count.dart';
 import '../../analytics_card_registry.dart';
 import '../../providers/state_analytics.dart';
 import '../../providers/state_joy_metric_variant.dart';
 import '../analytics_card_error_state.dart';
+import '../joy_calendar_compact_transaction_row.dart';
 import '../joy_calendar_heatmap.dart';
 import 'analytics_data_card.dart';
 
@@ -66,6 +61,7 @@ class JoyCalendarCard extends ConsumerWidget {
         // round-5 r5 §2a: drop the in-card title/caption — the section header
         // already labels it (same handling as the donut + trend cards).
         showHeader: false,
+        padding: const EdgeInsets.fromLTRB(8, 14, 8, 14),
         child: _JoyCalendarBody(
           bookId: bookId,
           anchor: ctx.trendAnchor,
@@ -169,7 +165,15 @@ class _JoyCalendarBodyState extends State<_JoyCalendarBody> {
           anchor: widget.anchor,
           countByDay: countByDay,
           selectedDay: _selectedDay,
-          onDayTap: (day) => setState(() => _selectedDay = day),
+          onDayTap: (day) => setState(() {
+            final selected = _selectedDay;
+            final isSameDay =
+                selected != null &&
+                selected.year == day.year &&
+                selected.month == day.month &&
+                selected.day == day.day;
+            _selectedDay = isSameDay ? null : day;
+          }),
         ),
         // Inline expansion: grow in place (D-C1). AnimatedSize gives a calm
         // one-shot grow (D-D1 — no loop/glow/pulse).
@@ -193,7 +197,7 @@ class _JoyCalendarBodyState extends State<_JoyCalendarBody> {
 }
 
 /// The inline-expanded panel for one tapped day: reads the day's joy一刻 list and
-/// renders read-only [ListTransactionTile]s (D-B3 reuse). Empty day → neutral
+/// renders readable compact read-only rows. Empty day → neutral
 /// copy. Reads [joyDayTransactionsProvider] — a day-scoped `findByBookIds(joy)`
 /// window (the count model stays count-only, D-C1).
 class _InlineDayPanel extends ConsumerWidget {
@@ -247,8 +251,13 @@ class _InlineDayPanel extends ConsumerWidget {
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
+    return Container(
+      key: const ValueKey('joy_calendar_day_panel'),
+      margin: const EdgeInsets.fromLTRB(8, 10, 8, 0),
+      padding: const EdgeInsets.only(top: 10),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: palette.borderDivider)),
+      ),
       child: dayTxnsAsync.when(
         data: (txns) {
           // v15 (260714 task #8): a day-panel head line
@@ -257,9 +266,8 @@ class _InlineDayPanel extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 4),
             child: Text(
               l10n.analyticsJoyCalendarDayHead(day.month, day.day, txns.length),
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
+              style: AppTextStyles.supporting.copyWith(
+                fontWeight: FontWeight.w700,
                 color: palette.joyText,
               ),
             ),
@@ -274,7 +282,7 @@ class _InlineDayPanel extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
                     l10n.analyticsJoyCalendarDayEmpty,
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: AppTextStyles.body.copyWith(
                       color: palette.textSecondary,
                     ),
                   ),
@@ -287,7 +295,11 @@ class _InlineDayPanel extends ConsumerWidget {
             children: [
               head,
               for (final tx in txns)
-                _readOnlyTile(context, tx, locale, palette),
+                JoyCalendarCompactTransactionRow(
+                  key: ValueKey('joy_calendar_compact_row_${tx.id}'),
+                  transaction: tx,
+                  locale: locale,
+                ),
             ],
           );
         },
@@ -296,100 +308,10 @@ class _InlineDayPanel extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Text(
             l10n.analyticsDrillLoadError,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: palette.textSecondary,
-            ),
+            style: AppTextStyles.body.copyWith(color: palette.textSecondary),
           ),
         ),
       ),
     );
-  }
-
-  /// READ-ONLY [ListTransactionTile] (D-B3) — mirrors the drill screen's
-  /// pre-formatting contract; `readOnly: true` suppresses swipe-delete +
-  /// tap-to-edit. These are joy-ledger rows only.
-  Widget _readOnlyTile(
-    BuildContext context,
-    Transaction transaction,
-    Locale locale,
-    AppPalette palette,
-  ) {
-    final tagText = S.of(context).listLedgerJoy;
-    final tagBgColor = palette.joyLight;
-    final tagTextColor = palette.joy;
-
-    final category = CategoryLocalizationService.resolveFromId(
-      transaction.categoryId,
-      locale,
-    );
-    final formattedAmount = NumberFormatter.formatCurrency(
-      transaction.amount,
-      'JPY',
-      locale,
-    );
-
-    final originalCurrency = transaction.originalCurrency;
-    final originalAmount = transaction.originalAmount;
-    final String? foreignAnnotation =
-        (originalCurrency != null &&
-            originalCurrency.toUpperCase() != 'JPY' &&
-            originalAmount != null)
-        ? NumberFormatter.formatCurrency(
-            originalAmount / subunitToUnitFor(originalCurrency),
-            originalCurrency,
-            locale,
-            trimWholeFraction: true,
-          )
-        : null;
-
-    return ListTransactionTile(
-      taggedTx: TaggedTransaction(transaction: transaction),
-      bookId: bookId,
-      onTap: _noop,
-      onDeleted: _noop,
-      tagText: tagText,
-      tagBgColor: tagBgColor,
-      tagTextColor: tagTextColor,
-      category: category,
-      categoryColor: tagTextColor,
-      formattedAmount: formattedAmount,
-      l1Icon: _resolveL1IconForCategory(transaction.categoryId),
-      locale: locale,
-      merchant: transaction.merchant,
-      satisfactionValue: transaction.joyFullness,
-      showDate: false,
-      foreignAnnotation: foreignAnnotation,
-      readOnly: true,
-    );
-  }
-
-  static void _noop() {}
-
-  /// Mirrors `list_screen.dart` / drill screen's static L1 icon map.
-  static IconData _resolveL1IconForCategory(String categoryId) {
-    const iconMap = <String, IconData>{
-      'cat_food': Icons.restaurant,
-      'cat_daily': Icons.local_mall,
-      'cat_transport': Icons.directions_bus,
-      'cat_hobbies': Icons.sports_esports,
-      'cat_clothing': Icons.checkroom,
-      'cat_social': Icons.people,
-      'cat_health': Icons.local_hospital,
-      'cat_education': Icons.school,
-      'cat_utilities': Icons.flash_on,
-      'cat_communication': Icons.phone_iphone,
-      'cat_housing': Icons.home,
-      'cat_car': Icons.directions_car,
-      'cat_tax': Icons.account_balance,
-      'cat_insurance': Icons.security,
-      'cat_special': Icons.star,
-      'cat_savings': Icons.savings,
-      'cat_other': Icons.more_horiz,
-    };
-    if (!categoryId.startsWith('cat_')) return Icons.category;
-    final withoutPrefix = categoryId.substring(4);
-    final parts = withoutPrefix.split('_');
-    final l1Key = 'cat_${parts.first}';
-    return iconMap[l1Key] ?? Icons.category;
   }
 }

@@ -130,7 +130,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     Text(
                       l10n.profileEdit,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: palette.textPrimary,
@@ -158,7 +157,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                               '✏️ ${l10n.profileChangeAvatar}',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'Outfit',
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: palette.textSecondary,
@@ -173,7 +171,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                         child: Text(
                           l10n.profileNickname,
                           style: TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
@@ -186,7 +183,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                         controller: _nicknameController,
                         onChanged: (_) => setState(() {}),
                         style: TextStyle(
-                          fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: palette.textPrimary,
@@ -194,7 +190,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                         decoration: InputDecoration(
                           hintText: l10n.profileNicknamePlaceholder,
                           hintStyle: TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 14,
                             color: palette.textSecondary,
                           ),
@@ -323,7 +318,6 @@ class _ProfileEditButton extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Colors.white.withValues(alpha: enabled ? 1 : 0.7),

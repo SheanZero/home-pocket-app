@@ -304,7 +304,6 @@ class _OnboardingSettingsScreenState
                   Text(
                     l10n.onboardingSetupEyebrow,
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 2,
@@ -425,7 +424,6 @@ class _OnboardingSettingsScreenState
                     chip: Text(
                       NumberFormatter.currencySymbol(_currencyCode),
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: palette.dailyText,

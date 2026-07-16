@@ -3,33 +3,42 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
 
-/// Unit test for AppPalette ThemeExtension — ADR-019 hex contract.
+/// Unit test for AppPalette ThemeExtension — V15 warm-Japanese contract.
 ///
-/// This test file is the machine-readable specification for which ADR-019 hex
-/// values app_palette.dart must encode. All expected Color values are sourced
-/// directly from ADR-019's "逐角色 Hex 表" (Light / Dark columns).
-///
-/// ADR-019 Sakura Mochi × Wakaba replaces ADR-018 Teal Clarity.
+/// This test file is the machine-readable specification for the approved V15
+/// light palette. The daily and Joy ledger colors remain unchanged.
 ///
 /// Run: flutter test test/core/theme/app_palette_test.dart
 
 void main() {
-  group('AppPalette.light — ADR-019 contract', () {
-    test('background is warm cream #FBF7F4', () {
-      expect(AppPalette.light.background, const Color(0xFFFBF7F4));
+  group('AppPalette.light — V15 contract', () {
+    test('background is warm beige #F5F0E7', () {
+      expect(AppPalette.light.background, const Color(0xFFF5F0E7));
     });
 
-    test('accentPrimary is leaf green #6FA36F (not teal)', () {
-      expect(AppPalette.light.accentPrimary, const Color(0xFF6FA36F));
+    test('card is paper white #FFFDF8', () {
+      expect(AppPalette.light.card, const Color(0xFFFFFDF8));
+    });
+
+    test('accentPrimary is V15 deep green #456B59', () {
+      expect(AppPalette.light.accentPrimary, const Color(0xFF456B59));
+    });
+
+    test('shared and info use the V15 information blue #4F7186', () {
+      expect(AppPalette.light.shared, const Color(0xFF4F7186));
+      expect(AppPalette.light.info, const Color(0xFF4F7186));
     });
 
     test('daily is leaf-green #5FAE72', () {
       expect(AppPalette.light.daily, const Color(0xFF5FAE72));
     });
 
-    test('joy is 樱粉 Sakura Pink #D98CA0 (quick 260603-lr5b, Amber → Sakura)', () {
-      expect(AppPalette.light.joy, const Color(0xFFD98CA0));
-    });
+    test(
+      'joy is 樱粉 Sakura Pink #D98CA0 (quick 260603-lr5b, Amber → Sakura)',
+      () {
+        expect(AppPalette.light.joy, const Color(0xFFD98CA0));
+      },
+    );
 
     test('dailyText (WCAG amount) is #2E6B3A', () {
       expect(AppPalette.light.dailyText, const Color(0xFF2E6B3A));
@@ -39,12 +48,12 @@ void main() {
       expect(AppPalette.light.joyText, const Color(0xFFA53D5E));
     });
 
-    test('success is emerald #2FA37A (unchanged from ADR-018)', () {
-      expect(AppPalette.light.success, const Color(0xFF2FA37A));
+    test('success uses V15 muted green #4F826A', () {
+      expect(AppPalette.light.success, const Color(0xFF4F826A));
     });
 
-    test('error is #E5484D (red — semantic only, not brand)', () {
-      expect(AppPalette.light.error, const Color(0xFFE5484D));
+    test('error uses V15 muted red #B64F4F', () {
+      expect(AppPalette.light.error, const Color(0xFFB64F4F));
     });
   });
 

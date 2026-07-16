@@ -54,6 +54,8 @@ class WithinMonthTrendCard extends ConsumerWidget {
   final DateTime endDate;
   final JoyMetricVariant joyMetricVariant;
 
+  static const double loadingHeight = 360;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctx = _ctx();
@@ -84,7 +86,7 @@ class WithinMonthTrendCard extends ConsumerWidget {
           locale: locale,
         ),
       ),
-      loading: () => const SizedBox(height: 280),
+      loading: () => const SizedBox(height: loadingHeight),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(targets.single),
       ),
@@ -180,7 +182,7 @@ class _TrendBodyState extends State<_TrendBody> {
           segments: [
             AnalyticsSegment(
               value: _TrendTab.total,
-              label: l10n.analyticsKpiTotalLabel,
+              label: l10n.analyticsTrendTabAll,
               optionKey: const ValueKey('trend_tab_total'),
             ),
             AnalyticsSegment(
@@ -220,7 +222,7 @@ class _TrendBodyState extends State<_TrendBody> {
               const SizedBox(width: 6),
               Text(
                 l10n.analyticsTrendSeriesThisMonth,
-                style: AppTextStyles.caption.copyWith(
+                style: AppTextStyles.supporting.copyWith(
                   color: palette.textSecondary,
                 ),
               ),
@@ -230,7 +232,7 @@ class _TrendBodyState extends State<_TrendBody> {
               const SizedBox(width: 6),
               Text(
                 l10n.analyticsTrendSeriesLastMonth,
-                style: AppTextStyles.caption.copyWith(
+                style: AppTextStyles.supporting.copyWith(
                   color: palette.textSecondary,
                 ),
               ),
@@ -302,24 +304,22 @@ class _TrendBodyState extends State<_TrendBody> {
 
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 32),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      constraints: const BoxConstraints(minHeight: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 15, color: fg),
-          const SizedBox(width: 6),
+          Icon(icon, size: 16, color: fg),
+          const SizedBox(width: 7),
           Expanded(
             child: Text(
               text,
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 10.5,
+              style: AppTextStyles.supporting.copyWith(
                 fontWeight: FontWeight.w700,
                 color: fg,
-                height: 1.35,
               ),
             ),
           ),

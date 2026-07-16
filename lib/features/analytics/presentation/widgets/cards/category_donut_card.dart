@@ -112,6 +112,7 @@ class CategoryDonutCard extends ConsumerWidget {
       // round-5 r5 §1a: drop the in-card 「分类支出」 title/caption — the section
       // header already labels it (same handling as the trend card).
       showHeader: false,
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -151,9 +152,7 @@ class CategoryDonutCard extends ConsumerWidget {
           final filtered = donutView.memberFilterDeviceId == null
               ? allMembers
               : allMembers
-                    .where(
-                      (m) => m.deviceId == donutView.memberFilterDeviceId,
-                    )
+                    .where((m) => m.deviceId == donutView.memberFilterDeviceId)
                     .toList();
           final memberTotal = filtered.fold<int>(0, (s, m) => s + m.amount);
           final memberCount = filtered.fold<int>(
@@ -253,9 +252,8 @@ class CategoryDonutCard extends ConsumerWidget {
       loading: () => const SizedBox(height: 280),
       // `targets` now folds in joyCategoryAmountsProvider (Pitfall-3); the donut's
       // own error branch owns the monthlyReport target — invalidate `.first`.
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(targets.first),
-      ),
+      error: (_, _) =>
+          AnalyticsCardErrorState(onRetry: () => ref.invalidate(targets.first)),
     );
   }
 
@@ -349,5 +347,3 @@ List<ProviderBase<Object?>> categoryDonutRefreshTargets(
       joyMetricVariant: ctx.joyMetricVariant,
     ),
 ];
-
-

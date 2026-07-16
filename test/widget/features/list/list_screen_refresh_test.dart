@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/list/get_list_transactions_use_case.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
@@ -65,13 +67,13 @@ Future<ProviderContainer> _pumpScreen(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        locale_providers.currentLocaleProvider
-            .overrideWith((_) async => const Locale('ja')),
+        locale_providers.currentLocaleProvider.overrideWith(
+          (_) async => const Locale('ja'),
+        ),
         listFilterProvider.overrideWith(
-          () => _FixedListFilter(ListFilterState(
-            selectedYear: year,
-            selectedMonth: month,
-          )),
+          () => _FixedListFilter(
+            ListFilterState(selectedYear: year, selectedMonth: month),
+          ),
         ),
         isGroupModeProvider.overrideWithValue(false),
         shadowBooksProvider.overrideWith((_) async => const []),
@@ -88,8 +90,8 @@ Future<ProviderContainer> _pumpScreen(
             localizationsDelegates: S.localizationsDelegates,
             supportedLocales: S.supportedLocales,
             locale: const Locale('ja'),
-            // ListScreen now provides its own Scaffold + AppBar (Task 1 oqn-ui),
-            // so we use it directly as the home widget without wrapping it in Scaffold.
+            // ListScreen provides its own Scaffold and custom header, so use it
+            // directly without an additional Scaffold wrapper.
             home: const ListScreen(bookId: 'book1'),
           );
         },
@@ -102,13 +104,12 @@ Future<ProviderContainer> _pumpScreen(
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(const GetListParams(
-      bookIds: ['book1'],
-      filter: ListFilterState(
-        selectedYear: 2026,
-        selectedMonth: 5,
+    registerFallbackValue(
+      const GetListParams(
+        bookIds: ['book1'],
+        filter: ListFilterState(selectedYear: 2026, selectedMonth: 5),
       ),
-    ));
+    );
     registerFallbackValue(DateTime(2026));
   });
 
@@ -119,9 +120,9 @@ void main() {
         final mockUseCase = _MockGetListTransactionsUseCase();
         final mockRepo = _MockAnalyticsRepository();
 
-        when(() => mockUseCase.execute(any())).thenAnswer(
-          (_) async => Result.success(<Transaction>[]),
-        );
+        when(
+          () => mockUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.success(<Transaction>[]));
         when(
           () => mockRepo.getDailyTotals(
             bookId: any(named: 'bookId'),
@@ -132,13 +133,7 @@ void main() {
 
         // May 2026 is a past month; the STRICT header must NOT offer chevrons
         // regardless of the selected month.
-        await _pumpScreen(
-          tester,
-          mockUseCase,
-          mockRepo,
-          year: 2026,
-          month: 5,
-        );
+        await _pumpScreen(tester, mockUseCase, mockRepo, year: 2026, month: 5);
 
         // Month-picker (calendar_month) + settings gear present.
         expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
@@ -148,34 +143,73 @@ void main() {
         expect(find.byIcon(Icons.chevron_right), findsNothing);
       },
     );
+
+    testWidgets('uses the V15 46dp custom header and 20dp content baseline', (
+      tester,
+    ) async {
+      final mockUseCase = _MockGetListTransactionsUseCase();
+      final mockRepo = _MockAnalyticsRepository();
+
+      when(
+        () => mockUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(<Transaction>[]));
+      when(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await _pumpScreen(tester, mockUseCase, mockRepo);
+
+      final header = find.byKey(const Key('list-v15-header'));
+      final title = find.byKey(const Key('list-month-title'));
+      expect(find.byType(AppBar), findsNothing);
+      expect(tester.getSize(header).height, 46);
+      expect(tester.getTopLeft(header).dx, 20);
+      expect(tester.getTopLeft(title).dx, 20);
+      expect(
+        tester.widget<Text>(title).style?.fontSize,
+        AppTypography.pageTitle,
+      );
+      expect(tester.widget<Text>(title).style?.color, AppPalette.light.info);
+      expect(
+        tester.getSize(find.byKey(const Key('list-month-picker-button'))),
+        const Size(40, 40),
+      );
+      expect(
+        tester.getSize(find.byKey(const Key('list-settings-button'))),
+        const Size(40, 40),
+      );
+    });
   });
 
   group('ListScreen pull-to-refresh (LIST-04)', () {
     setUp(() {});
 
-    testWidgets(
-      'LIST-04: RefreshIndicator is present in list screen',
-      (tester) async {
-        final mockUseCase = _MockGetListTransactionsUseCase();
-        final mockRepo = _MockAnalyticsRepository();
+    testWidgets('LIST-04: RefreshIndicator is present in list screen', (
+      tester,
+    ) async {
+      final mockUseCase = _MockGetListTransactionsUseCase();
+      final mockRepo = _MockAnalyticsRepository();
 
-        when(() => mockUseCase.execute(any())).thenAnswer(
-          (_) async => Result.success(<Transaction>[]),
-        );
-        when(
-          () => mockRepo.getDailyTotals(
-            bookId: any(named: 'bookId'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-          ),
-        ).thenAnswer((_) async => []);
+      when(
+        () => mockUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(<Transaction>[]));
+      when(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
 
-        await _pumpScreen(tester, mockUseCase, mockRepo);
+      await _pumpScreen(tester, mockUseCase, mockRepo);
 
-        // RED until RefreshIndicator wraps the list in list_screen.dart (Plan 03)
-        expect(find.byType(RefreshIndicator), findsOneWidget);
-      },
-    );
+      // RED until RefreshIndicator wraps the list in list_screen.dart (Plan 03)
+      expect(find.byType(RefreshIndicator), findsOneWidget);
+    });
 
     testWidgets(
       'LIST-04: pull-to-refresh invalidates listTransactionsProvider (use case called again)',
@@ -183,9 +217,9 @@ void main() {
         final mockUseCase = _MockGetListTransactionsUseCase();
         final mockRepo = _MockAnalyticsRepository();
 
-        when(() => mockUseCase.execute(any())).thenAnswer(
-          (_) async => Result.success(<Transaction>[]),
-        );
+        when(
+          () => mockUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.success(<Transaction>[]));
         when(
           () => mockRepo.getDailyTotals(
             bookId: any(named: 'bookId'),
@@ -197,7 +231,7 @@ void main() {
         await _pumpScreen(tester, mockUseCase, mockRepo);
 
         // Perform pull-to-refresh gesture.
-        // ListScreen now provides its own Scaffold+AppBar (Task 1 oqn-ui).
+        // ListScreen provides its own Scaffold and custom header.
         // Drag on the SingleChildScrollView inside RefreshIndicator to fire onRefresh.
         final refreshScrollable = find.descendant(
           of: find.byType(RefreshIndicator),
@@ -218,9 +252,9 @@ void main() {
         final mockUseCase = _MockGetListTransactionsUseCase();
         final mockRepo = _MockAnalyticsRepository();
 
-        when(() => mockUseCase.execute(any())).thenAnswer(
-          (_) async => Result.success(<Transaction>[]),
-        );
+        when(
+          () => mockUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.success(<Transaction>[]));
         when(
           () => mockRepo.getDailyTotals(
             bookId: any(named: 'bookId'),
@@ -236,7 +270,7 @@ void main() {
         await _pumpScreen(tester, mockUseCase, mockRepo);
 
         // Trigger pull-to-refresh.
-        // ListScreen now provides its own Scaffold+AppBar (Task 1 oqn-ui).
+        // ListScreen provides its own Scaffold and custom header.
         // onRefresh is triggered by the drag gesture on the first Scrollable
         // descendant inside the RefreshIndicator (the list's SingleChildScrollView).
         final refreshScrollable = find.descendant(
@@ -248,11 +282,13 @@ void main() {
 
         // After refresh, calendarDailyTotalsProvider is invalidated and
         // getDailyTotals is called at least twice (initial load + refresh).
-        verify(() => mockRepo.getDailyTotals(
-              bookId: any(named: 'bookId'),
-              startDate: any(named: 'startDate'),
-              endDate: any(named: 'endDate'),
-            )).called(greaterThan(1));
+        verify(
+          () => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).called(greaterThan(1));
       },
     );
   });

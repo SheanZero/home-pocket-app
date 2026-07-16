@@ -706,11 +706,11 @@
       }
     }
   },
-  "homePersonalMode": "Personal Mode",
+  "homePersonalMode": "Personal",
   "@homePersonalMode": {
     "description": "Mode badge for personal/solo mode"
   },
-  "homeFamilyMode": "Family Mode",
+  "homeFamilyMode": "Family",
   "@homeFamilyMode": {
     "description": "Mode badge for family/group mode"
   },
@@ -1935,6 +1935,10 @@
     "description": "Analytics screen time-window picker empty preset list message"
   },
   "analyticsKpiTotalLabel": "Total spending",
+  "analyticsTrendTabAll": "All",
+  "@analyticsTrendTabAll": {
+    "description": "Label for the aggregate option in the within-month trend segmented control"
+  },
   "analyticsKpiJoyLabel": "Avg satisfaction",
   "analyticsKpiJoySubMedianCoverage": "Median {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
@@ -2128,6 +2132,15 @@
     "description": "Histogram footer — count of joy expenses whose satisfaction is plotted (data-derived)",
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHistogramNarrative": "This month’s Joy-purchase satisfaction midpoint was {value}",
+  "@analyticsHistogramNarrative": {
+    "description": "Neutral V15 histogram footer with the data-derived weighted median satisfaction",
+    "placeholders": {
+      "value": {
         "type": "int"
       }
     }
@@ -2534,6 +2547,10 @@
   "shoppingEditItem": "Edit item",
   "@shoppingEditItem": {
     "description": "Semantics label for the edit chevron button on a shopping item tile (Phase 38)"
+  },
+  "shoppingActionEdit": "Edit",
+  "@shoppingActionEdit": {
+    "description": "Edit action in the shopping item long-press menu"
   },
   "shoppingReorderItem": "Reorder item",
   "@shoppingReorderItem": {

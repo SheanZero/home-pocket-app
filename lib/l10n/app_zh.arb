@@ -706,11 +706,11 @@
       }
     }
   },
-  "homePersonalMode": "个人模式",
+  "homePersonalMode": "个人",
   "@homePersonalMode": {
     "description": "Mode badge for personal/solo mode"
   },
-  "homeFamilyMode": "家庭模式",
+  "homeFamilyMode": "家庭",
   "@homeFamilyMode": {
     "description": "Mode badge for family/group mode"
   },
@@ -1949,6 +1949,10 @@
     "description": "Analytics screen time-window picker empty preset list message"
   },
   "analyticsKpiTotalLabel": "支出合计",
+  "analyticsTrendTabAll": "全部",
+  "@analyticsTrendTabAll": {
+    "description": "Label for the aggregate option in the within-month trend segmented control"
+  },
   "analyticsKpiJoyLabel": "平均满足度",
   "analyticsKpiJoySubMedianCoverage": "中位数 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
@@ -2142,6 +2146,15 @@
     "description": "Histogram footer — count of joy expenses whose satisfaction is plotted (data-derived)",
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHistogramNarrative": "本月悦己支出的满足度中位数为 {value} 分",
+  "@analyticsHistogramNarrative": {
+    "description": "Neutral V15 histogram footer with the data-derived weighted median satisfaction",
+    "placeholders": {
+      "value": {
         "type": "int"
       }
     }
@@ -2548,6 +2561,10 @@
   "shoppingEditItem": "编辑商品",
   "@shoppingEditItem": {
     "description": "Semantics label for the edit chevron button on a shopping item tile (Phase 38)"
+  },
+  "shoppingActionEdit": "修改",
+  "@shoppingActionEdit": {
+    "description": "Edit action in the shopping item long-press menu"
   },
   "shoppingReorderItem": "重新排序",
   "@shoppingReorderItem": {

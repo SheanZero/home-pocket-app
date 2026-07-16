@@ -318,7 +318,6 @@ class _WelcomePage extends StatelessWidget {
               l10n.onboardingWelcomeBrand,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Outfit',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 3.7,

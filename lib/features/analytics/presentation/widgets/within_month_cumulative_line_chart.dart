@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../domain/models/within_month_cumulative_trend.dart';
@@ -39,8 +40,10 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
     required this.seriesColor,
     required this.anchor,
     this.previousMonth,
-    this.height = 200,
+    this.height = defaultHeight,
   });
+
+  static const double defaultHeight = 205;
 
   /// Current-month running-cumulative points (1..n). Required, drawn as a SOLID
   /// 本月 line.
@@ -65,15 +68,14 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
   /// Plot-area insets used to map a (day, amount) spot to a pixel position for
   /// data-anchored endpoint labels (CONTEXT key_facts). These mirror the axis
   /// `reservedSize` values below.
-  static const double _leftReserved = 44;
-  static const double _bottomReserved = 22;
-  static const double _topPad = 12;
+  static const double _leftReserved = 50;
+  static const double _bottomReserved = 26;
+  static const double _topPad = 14;
 
   /// Vertical nudge (px) applied to an endpoint label above/below its point.
-  static const double _labelNudge = 14;
+  static const double _labelNudge = 16;
 
-  bool get _hasReference =>
-      previousMonth != null && previousMonth!.isNotEmpty;
+  bool get _hasReference => previousMonth != null && previousMonth!.isNotEmpty;
 
   /// The above/below decision (D-3): the 本月 label sits ABOVE its point when
   /// 本月 ≥ 上月 at the comparison day, BELOW otherwise. The 上月 label uses the
@@ -81,8 +83,7 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
   static bool labelAbove({
     required int currentEndAmount,
     required int prevAtComparisonAmount,
-  }) =>
-      currentEndAmount >= prevAtComparisonAmount;
+  }) => currentEndAmount >= prevAtComparisonAmount;
 
   /// Days in the displayed month, derived from [anchor] (D-1).
   int get _daysInMonth => DateTime(anchor.year, anchor.month + 1, 0).day;
@@ -111,19 +112,15 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (currentMonth.isEmpty) {
-      // Empty-safe placeholder — keeps the card height stable, no throw.
-      return SizedBox(height: height);
-    }
-
     final palette = context.palette;
     final locale = Localizations.localeOf(context);
     final daysInMonth = _daysInMonth;
-    final maxY = _maxY();
-    final yStep = _niceYStep(maxY);
+    final hasChartData = currentMonth.isNotEmpty || _hasReference;
+    final maxY = hasChartData ? _maxY() : 4.0;
+    final yStep = hasChartData ? _niceYStep(maxY) : 1.0;
     // Round the axis ceiling up to a whole number of steps so the top gridline
     // and the top tick coincide (no clipped top label).
-    var axisMaxY = (maxY / yStep).ceil() * yStep;
+    var axisMaxY = hasChartData ? (maxY / yStep).ceil() * yStep : 4.0;
     // Headroom guarantee (Part1② / 参考图 #6): the 本月 endpoint label is FORCE-
     // anchored ABOVE its marker. When the data max lands in the top ~20% of the
     // axis there is no room above the point, so the label would clip the top and
@@ -136,19 +133,22 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
     const minX = 1.0;
     final maxX = daysInMonth.toDouble();
 
-    final lastPoint = currentMonth.last;
-    final lastSpot = FlSpot(
-      lastPoint.day.toDouble(),
-      lastPoint.cumulativeAmount.toDouble(),
-    );
+    final lastPoint = currentMonth.isEmpty ? null : currentMonth.last;
+    final lastSpot = lastPoint == null
+        ? null
+        : FlSpot(
+            lastPoint.day.toDouble(),
+            lastPoint.cumulativeAmount.toDouble(),
+          );
 
     // Comparison day = the current line's endpoint day (the use case made this
     // = today/month-end). No clock read here (D-5). The 本月 label is now
     // force-anchored above its endpoint (Part1②), so the 本月/上月 comparison no
     // longer drives the 本月 side; [labelAbove] is retained as a pure helper and
     // still unit-tested (Test 12) for the documented comparison semantic.
-    final comparisonDay = lastPoint.day;
-    final prevPoint = _hasReference ? _prevAtComparison(comparisonDay) : null;
+    final prevPoint = lastPoint != null && _hasReference
+        ? _prevAtComparison(lastPoint.day)
+        : null;
 
     return SizedBox(
       height: height,
@@ -160,8 +160,7 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
           double px(num day) =>
               _leftReserved + (day - minX) / (maxX - minX) * plotW;
           double py(num amount) =>
-              _topPad +
-              (1 - (amount - 0) / (axisMaxY - 0)) * plotH;
+              _topPad + (1 - (amount - 0) / (axisMaxY - 0)) * plotH;
 
           final overlays = <Widget>[];
 
@@ -173,23 +172,25 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
           // keeps the opposite-position comparison rule (D-4) so the two labels
           // don't collide.
           const currentLabelAbove = true;
-          overlays.add(
-            _positionedLabel(
-              context: context,
-              constraints: constraints,
-              x: px(lastPoint.day),
-              y: py(lastPoint.cumulativeAmount),
-              above: currentLabelAbove,
-              child: WithinMonthEndpointAnnotation(
-                date: DateTime(anchor.year, anchor.month, lastPoint.day),
-                amount: lastPoint.cumulativeAmount,
-                locale: locale,
-                color: seriesColor,
-                isCurrent: true,
+          if (lastPoint != null) {
+            overlays.add(
+              _positionedLabel(
+                context: context,
+                constraints: constraints,
+                x: px(lastPoint.day),
+                y: py(lastPoint.cumulativeAmount),
                 above: currentLabelAbove,
+                child: WithinMonthEndpointAnnotation(
+                  date: DateTime(anchor.year, anchor.month, lastPoint.day),
+                  amount: lastPoint.cumulativeAmount,
+                  locale: locale,
+                  color: seriesColor,
+                  isCurrent: true,
+                  above: currentLabelAbove,
+                ),
               ),
-            ),
-          );
+            );
+          }
 
           // 上月 endpoint label (spend side only) — anchored at its
           // comparison-day point, placed OPPOSITE to the (now force-above) 本月
@@ -206,11 +207,7 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                 above: prevAbove,
                 child: WithinMonthEndpointAnnotation(
                   // 上月 date is the PREVIOUS month at the comparison day.
-                  date: DateTime(
-                    anchor.year,
-                    anchor.month - 1,
-                    prevPoint.day,
-                  ),
+                  date: DateTime(anchor.year, anchor.month - 1, prevPoint.day),
                   amount: prevPoint.cumulativeAmount,
                   locale: locale,
                   color: palette.textTertiary,
@@ -251,15 +248,22 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                         showTitles: true,
                         reservedSize: _leftReserved,
                         interval: yStep,
-                        getTitlesWidget: (value, meta) => SideTitleWidget(
-                          meta: meta,
-                          child: Text(
-                            NumberFormatter.formatCompact(value, locale),
-                            style: AppTextStyles.legendLabel.copyWith(
-                              color: palette.textSecondary,
+                        getTitlesWidget: (value, meta) {
+                          // Empty months keep the neutral grid/axis skeleton,
+                          // but do not invent a meaningful amount scale.
+                          if (!hasChartData && value != 0) {
+                            return const SizedBox.shrink();
+                          }
+                          return SideTitleWidget(
+                            meta: meta,
+                            child: Text(
+                              NumberFormatter.formatCompact(value, locale),
+                              style: AppTextStyles.compact.copyWith(
+                                color: palette.textSecondary,
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                     bottomTitles: AxisTitles(
@@ -279,7 +283,7 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                             meta: meta,
                             child: Text(
                               DateFormatter.formatDayOfMonthAxis(day, locale),
-                              style: AppTextStyles.legendLabel.copyWith(
+                              style: AppTextStyles.compact.copyWith(
                                 color: palette.textSecondary,
                               ),
                             ),
@@ -295,42 +299,43 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
                     // round, endpoint dot at the last spot only (no start dot —
                     // D-2). `preventCurveOverShooting` keeps the smoothed curve
                     // from dipping below the 0 baseline / overshooting points.
-                    LineChartBarData(
-                      spots: _spots(currentMonth),
-                      color: seriesColor,
-                      barWidth: 2.5,
-                      isCurved: true,
-                      curveSmoothness: 0.22,
-                      preventCurveOverShooting: true,
-                      isStrokeCapRound: true,
-                      dotData: FlDotData(
-                        show: true,
-                        checkToShowDot: (spot, bar) => spot == lastSpot,
-                        getDotPainter: (spot, pct, bar, idx) =>
-                            FlDotCirclePainter(
-                          radius: 3,
-                          color: seriesColor,
-                          strokeWidth: 1.5,
-                          strokeColor: palette.card,
+                    if (currentMonth.isNotEmpty)
+                      LineChartBarData(
+                        spots: _spots(currentMonth),
+                        color: seriesColor,
+                        barWidth: 2.5,
+                        isCurved: true,
+                        curveSmoothness: 0.22,
+                        preventCurveOverShooting: true,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(
+                          show: true,
+                          checkToShowDot: (spot, bar) => spot == lastSpot,
+                          getDotPainter: (spot, pct, bar, idx) =>
+                              FlDotCirclePainter(
+                                radius: 3,
+                                color: seriesColor,
+                                strokeWidth: 1.5,
+                                strokeColor: palette.card,
+                              ),
+                        ),
+                        // Part1③ (参考图 #8): below-line gradient shadow — series
+                        // colour → transparent (top→bottom). Colour is driven by
+                        // the passed `seriesColor` (ADR-019 palette, D1) — never a
+                        // hardcoded hex. Only the 本月 line fills (上月 stays
+                        // unfilled below) to avoid a muddy double fill.
+                        belowBarData: BarAreaData(
+                          show: true,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              seriesColor.withValues(alpha: 0.18),
+                              seriesColor.withValues(alpha: 0.0),
+                            ],
+                          ),
                         ),
                       ),
-                      // Part1③ (参考图 #8): below-line gradient shadow — series
-                      // colour → transparent (top→bottom). Colour is driven by
-                      // the passed `seriesColor` (ADR-019 palette, D1) — never a
-                      // hardcoded hex. Only the 本月 line fills (上月 stays
-                      // unfilled below) to avoid a muddy double fill.
-                      belowBarData: BarAreaData(
-                        show: true,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            seriesColor.withValues(alpha: 0.18),
-                            seriesColor.withValues(alpha: 0.0),
-                          ],
-                        ),
-                      ),
-                    ),
                     // 上月 — dashed muted-GRAY reference, ONLY on the spend side
                     // (never joy, D-E1). Same softened curve so both lines read
                     // visually consistent; no below-line fill.
@@ -358,12 +363,9 @@ class WithinMonthCumulativeLineChart extends StatelessWidget {
   }
 
   /// Positions an endpoint label near a plot pixel, nudged above/below, clamped
-  /// so it never overflows the card. The label is roughly [_labelW] × [_labelH].
-  // Wide enough that a 2-line endpoint label (date + ¥amount, incl. 7-digit
-  // JPY) fits the fixed-width box without wrapping; used for both centering and
-  // the on-card clamp.
-  static const double _labelW = 92;
-  static const double _labelH = 30;
+  /// so it never overflows the card. V15 uses one compact line per endpoint.
+  static const double _labelW = 128;
+  static const double _labelH = AppTypography.compactLineHeight;
 
   Widget _positionedLabel({
     required BuildContext context,
@@ -484,7 +486,7 @@ extension on double {
   }
 }
 
-/// A small date + amount label rendered at a line's endpoint (D-2/D-3/D-4).
+/// A compact, single-line endpoint label (D-2/D-3/D-4).
 ///
 /// Visible-for-testing: [isCurrent] distinguishes the 本月 (true) from the 上月
 /// (false) label; [above] records the placement so tests can assert the
@@ -514,26 +516,21 @@ class WithinMonthEndpointAnnotation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = DateFormatter.formatShortMonthDay(date, locale);
+    final dateLabel = isCurrent
+        ? DateFormatter.formatSlashMonthDay(date, locale)
+        : S.of(context).analyticsTrendSeriesLastMonth;
     final amountLabel = NumberFormatter.formatCurrency(amount, 'JPY', locale);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          dateLabel,
-          style: AppTextStyles.legendLabel.copyWith(
-            color: context.palette.textSecondary,
-          ),
-        ),
-        Text(
-          amountLabel,
-          style: AppTextStyles.amountSmall.copyWith(
-            fontSize: 10,
-            color: color,
-          ),
-        ),
-      ],
+    return Text(
+      '$dateLabel $amountLabel',
+      maxLines: 1,
+      overflow: TextOverflow.visible,
+      textAlign: TextAlign.center,
+      style: AppTextStyles.amountSmall.copyWith(
+        fontSize: AppTypography.compact,
+        height: AppTypography.compactLineHeight / AppTypography.compact,
+        fontWeight: FontWeight.w700,
+        color: color,
+      ),
     );
   }
 }

@@ -6,22 +6,28 @@ import 'app_text_styles.dart';
 abstract final class AppTheme {
   static ThemeData get light => ThemeData(
     useMaterial3: true,
-    colorSchemeSeed: const Color(0xFF6FA36F), // accentPrimary leaf green (ADR-019)
+    colorSchemeSeed: AppPalette.light.accentPrimary,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: AppPalette.light.background, // #FBF7F4 warm cream (ADR-019)
-    fontFamily: 'Outfit',
+    textTheme: AppTextStyles.buildTextTheme(
+      textPrimary: AppPalette.light.textPrimary,
+      textSecondary: AppPalette.light.textSecondary,
+    ),
+    scaffoldBackgroundColor: AppPalette.light.background,
     extensions: const [AppPalette.light],
     appBarTheme: AppBarTheme(
-      backgroundColor: AppPalette.light.background, // #FBF7F4 (ADR-019)
-      foregroundColor: AppPalette.light.textPrimary, // #20352B (ADR-019)
+      backgroundColor: AppPalette.light.background,
+      foregroundColor: AppPalette.light.textPrimary,
+      titleTextStyle: AppTextStyles.pageTitle.copyWith(
+        color: AppPalette.light.textPrimary,
+      ),
       elevation: 0,
     ),
     cardTheme: CardThemeData(
-      color: AppPalette.light.card, // #FFFFFF (unchanged)
+      color: AppPalette.light.card,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(14)),
-        side: BorderSide(color: AppPalette.light.borderDefault), // #E6DDD8 (ADR-019)
+        side: BorderSide(color: AppPalette.light.borderDefault),
       ),
     ),
     // Soft rounded warm dialog chrome — every AlertDialog (input/picker/info
@@ -46,14 +52,21 @@ abstract final class AppTheme {
 
   static ThemeData get dark => ThemeData(
     useMaterial3: true,
-    colorSchemeSeed: const Color(0xFF6FA36F), // same seed, brightness drives M3
+    colorSchemeSeed: AppPalette.dark.accentPrimary,
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: AppPalette.dark.background, // #171210 warm-dark (ADR-019)
-    fontFamily: 'Outfit',
+    textTheme: AppTextStyles.buildTextTheme(
+      textPrimary: AppPalette.dark.textPrimary,
+      textSecondary: AppPalette.dark.textSecondary,
+    ),
+    scaffoldBackgroundColor:
+        AppPalette.dark.background, // #171210 warm-dark (ADR-019)
     extensions: const [AppPalette.dark],
     appBarTheme: AppBarTheme(
       backgroundColor: AppPalette.dark.background, // #171210 (ADR-019)
       foregroundColor: AppPalette.dark.textPrimary, // #F0EBE6 (ADR-019)
+      titleTextStyle: AppTextStyles.pageTitle.copyWith(
+        color: AppPalette.dark.textPrimary,
+      ),
       elevation: 0,
     ),
     cardTheme: CardThemeData(
@@ -61,7 +74,9 @@ abstract final class AppTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(14)),
-        side: BorderSide(color: AppPalette.dark.borderDefault), // #2E2723 (ADR-019)
+        side: BorderSide(
+          color: AppPalette.dark.borderDefault,
+        ), // #2E2723 (ADR-019)
       ),
     ),
     dialogTheme: DialogThemeData(

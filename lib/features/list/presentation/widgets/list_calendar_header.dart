@@ -23,8 +23,8 @@ DateTime _dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
 /// Calendar header widget showing a full-month grid with per-day expense
 /// amounts and a summary row with month total + optional day subline.
 ///
-/// Month navigation and the month label have moved to the [ListScreen]
-/// AppBar (Task 1). This widget owns only the calendar grid and summary row.
+/// Month navigation and the month label live in the custom [ListScreen]
+/// header. This widget owns only the calendar grid and summary row.
 ///
 /// Reads [calendarDailyTotalsProvider] for per-day totals and
 /// [listFilterProvider] for month/day selection state.
@@ -50,7 +50,8 @@ class CalendarHeaderWidget extends ConsumerWidget {
     final filter = ref.watch(listFilterProvider);
     // Read weekStartDay from persisted settings (default: monday).
     final settingsAsync = ref.watch(appSettingsProvider);
-    final weekStartDay = settingsAsync.value?.weekStartDay ?? WeekStartDay.monday;
+    final weekStartDay =
+        settingsAsync.value?.weekStartDay ?? WeekStartDay.monday;
     final calendarAsync = ref.watch(
       calendarDailyTotalsProvider(
         bookId: bookId,
@@ -64,12 +65,22 @@ class CalendarHeaderWidget extends ConsumerWidget {
 
     // v15 `.list-calendar`: bordered, rounded card wrapping the grid + summary.
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      key: const Key('list-calendar-card'),
+      margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: palette.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: palette.borderDefault, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? palette.navShadow.withValues(alpha: 0.18)
+                : palette.navShadow.withValues(alpha: 0.07),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -83,45 +94,91 @@ class CalendarHeaderWidget extends ConsumerWidget {
               calendarFormat: CalendarFormat.month,
               availableCalendarFormats: const {CalendarFormat.month: ''},
               headerVisible: false,
-              rowHeight: 40,
-              daysOfWeekHeight: 16,
-          locale: locale.toLanguageTag(),
-          startingDayOfWeek: weekStartDay == WeekStartDay.monday
-              ? StartingDayOfWeek.monday
-              : StartingDayOfWeek.sunday,
-          selectedDayPredicate: (day) => isSameDay(day, filter.activeDayFilter),
-          onDaySelected: (selectedDay, focusedDay) =>
-              _onDayTapped(ref, selectedDay),
-          onPageChanged: (focusedDay) {
-            ref
-                .read(listFilterProvider.notifier)
-                .selectMonth(focusedDay.year, focusedDay.month);
-          },
-          calendarBuilders: CalendarBuilders(
-            // Color the day-of-week header labels to match the date numerals:
-            // weekends (Sat + Sun) blue, weekdays neutral (by true weekday).
-            dowBuilder: (context, day) {
-              final bool isWeekend = day.weekday == DateTime.saturday ||
-                  day.weekday == DateTime.sunday;
-              final Color color =
-                  isWeekend ? context.palette.info : context.palette.textSecondary;
-              return Center(
-                child: Text(
-                  DateFormatter.formatShortWeekday(day, locale),
-                  style: AppTextStyles.caption.copyWith(color: color),
+              rowHeight: 44,
+              daysOfWeekHeight: 20,
+              locale: locale.toLanguageTag(),
+              startingDayOfWeek: weekStartDay == WeekStartDay.monday
+                  ? StartingDayOfWeek.monday
+                  : StartingDayOfWeek.sunday,
+              selectedDayPredicate: (day) =>
+                  isSameDay(day, filter.activeDayFilter),
+              enabledDayPredicate: (day) =>
+                  day.year == filter.selectedYear &&
+                  day.month == filter.selectedMonth,
+              onDaySelected: (selectedDay, focusedDay) {
+                if (selectedDay.year != filter.selectedYear ||
+                    selectedDay.month != filter.selectedMonth) {
+                  return;
+                }
+                _onDayTapped(ref, selectedDay);
+              },
+              onPageChanged: (focusedDay) {
+                ref
+                    .read(listFilterProvider.notifier)
+                    .selectMonth(focusedDay.year, focusedDay.month);
+              },
+              calendarBuilders: CalendarBuilders(
+                // Color the day-of-week header labels to match the date numerals:
+                // weekends (Sat + Sun) blue, weekdays neutral (by true weekday).
+                dowBuilder: (context, day) {
+                  final bool isWeekend =
+                      day.weekday == DateTime.saturday ||
+                      day.weekday == DateTime.sunday;
+                  final Color color = isWeekend
+                      ? context.palette.info
+                      : context.palette.textSecondary;
+                  return Center(
+                    child: Text(
+                      DateFormatter.formatShortWeekday(day, locale),
+                      style: AppTextStyles.compact.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  );
+                },
+                defaultBuilder: (context, day, focusedDay) => _buildDayCell(
+                  palette,
+                  day,
+                  dailyMap,
+                  filter.activeDayFilter,
+                  false,
                 ),
-              );
-            },
-            defaultBuilder: (context, day, focusedDay) =>
-                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, false),
-            todayBuilder: (context, day, focusedDay) =>
-                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, false),
-            selectedBuilder: (context, day, focusedDay) =>
-                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, false),
-            outsideBuilder: (context, day, focusedDay) =>
-                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, true),
-          ),
-        ),
+                todayBuilder: (context, day, focusedDay) => _buildDayCell(
+                  palette,
+                  day,
+                  dailyMap,
+                  filter.activeDayFilter,
+                  false,
+                ),
+                selectedBuilder: (context, day, focusedDay) => _buildDayCell(
+                  palette,
+                  day,
+                  dailyMap,
+                  filter.activeDayFilter,
+                  false,
+                ),
+                // `table_calendar` resolves disabled cells before outside
+                // cells. Reuse our day cell here so non-current-month dates
+                // keep the same typography and geometry while remaining
+                // non-interactive through enabledDayPredicate.
+                disabledBuilder: (context, day, focusedDay) => _buildDayCell(
+                  palette,
+                  day,
+                  dailyMap,
+                  filter.activeDayFilter,
+                  day.year != filter.selectedYear ||
+                      day.month != filter.selectedMonth,
+                ),
+                outsideBuilder: (context, day, focusedDay) => _buildDayCell(
+                  palette,
+                  day,
+                  dailyMap,
+                  filter.activeDayFilter,
+                  true,
+                ),
+              ),
+            ),
           ),
           _SummaryRow(
             l10n: l10n,
@@ -162,8 +219,9 @@ class CalendarHeaderWidget extends ConsumerWidget {
     // Weekend (Sat + Sun) numerals use palette.info (Bucket F → D-07).
     final bool isWeekend =
         day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
-    final Color baseNumeralColor =
-        isWeekend ? palette.info : palette.textPrimary;
+    final Color baseNumeralColor = isWeekend
+        ? palette.info
+        : palette.textPrimary;
     // Precedence: selected chip > today (error/red) > weekend (info/blue) > default.
     final numeralColor = isSelected
         ? palette.card
@@ -182,7 +240,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
             Text(
               '${day.day}',
               // Today: marked by bold red numeral (no box, no dot).
-              style: AppTextStyles.bodySmall.copyWith(
+              style: AppTextStyles.compact.copyWith(
                 color: numeralColor,
                 fontWeight: isToday ? FontWeight.w700 : null,
               ),
@@ -190,13 +248,15 @@ class CalendarHeaderWidget extends ConsumerWidget {
             // Fixed-height sub-slot so numerals align across the row regardless
             // of whether a cell shows an amount.
             SizedBox(
-              height: 14, // matches AppTextStyles.micro line height
+              height: AppTypography.compactLineHeight,
               child: Center(
                 child: dayTotal > 0 && !isOutside
                     ? Text(
                         NumberFormatter.formatCompact(dayTotal, locale),
-                        style:
-                            AppTextStyles.micro.copyWith(color: amountColor),
+                        style: AppTextStyles.compact.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: amountColor,
+                        ),
                       )
                     : null,
               ),
@@ -252,12 +312,10 @@ class _SummaryRow extends StatelessWidget {
     final palette = context.palette;
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: palette.borderDivider, width: 1),
-        ),
+        border: Border(top: BorderSide(color: palette.borderDivider, width: 1)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -265,10 +323,7 @@ class _SummaryRow extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  _summaryLabel,
-                  style: AppTextStyles.caption,
-                ),
+                Text(_summaryLabel, style: AppTextStyles.supporting),
                 calendarAsync.when(
                   loading: () => SizedBox(
                     width: 60,
@@ -276,14 +331,14 @@ class _SummaryRow extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: palette.backgroundMuted,
-                        borderRadius: const BorderRadius.all(Radius.circular(4)),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(4),
+                        ),
                       ),
                     ),
                   ),
-                  error: (e, st) => Text(
-                    l10n.calLoadError,
-                    style: AppTextStyles.caption,
-                  ),
+                  error: (e, st) =>
+                      Text(l10n.calLoadError, style: AppTextStyles.caption),
                   data: (map) => Text(
                     NumberFormatter.formatCurrency(
                       map.values.fold(0, (a, b) => a + b),
@@ -310,7 +365,7 @@ class _SummaryRow extends StatelessWidget {
                               activeDayFilter!,
                               locale,
                             ),
-                            style: AppTextStyles.caption,
+                            style: AppTextStyles.compact,
                           ),
                           Text(
                             NumberFormatter.formatCurrency(
@@ -318,7 +373,7 @@ class _SummaryRow extends StatelessWidget {
                               currencyCode,
                               locale,
                             ),
-                            style: AppTextStyles.caption,
+                            style: AppTextStyles.compact,
                           ),
                         ],
                       ),

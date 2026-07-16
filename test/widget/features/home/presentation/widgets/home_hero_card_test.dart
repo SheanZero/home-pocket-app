@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
@@ -7,6 +8,8 @@ import 'package:home_pocket/features/analytics/domain/models/metric_result.dart'
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
+import 'package:home_pocket/features/home/presentation/widgets/home_metrics_region.dart';
+import 'package:home_pocket/shared/widgets/satisfaction_face_icon.dart';
 
 import '../../../../../helpers/happiness_test_fixtures.dart';
 import '../../helpers/test_localizations.dart';
@@ -135,9 +138,9 @@ void main() {
 
         expect(find.text('0'), findsWidgets);
         // Target reference now lives on the center value's Semantics label
-      // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
-      // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
-      expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
+        // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
+        // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
+        expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
         expect(find.textContaining('0%'), findsNothing);
       },
     );
@@ -178,9 +181,9 @@ void main() {
 
         expect(find.text('80'), findsWidgets);
         // Target reference now lives on the center value's Semantics label
-      // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
-      // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
-      expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
+        // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
+        // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
+        expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
         expect(find.textContaining('>100%'), findsNothing);
         expect(find.textContaining('160%'), findsNothing);
       },
@@ -216,6 +219,55 @@ void main() {
       expect(find.textContaining('小確幸'), findsWidgets);
     });
 
+    testWidgets('centers each support metric within its own vertical slot', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+      await tester.pumpAndSettle();
+
+      final topSlot = find.byKey(const Key('home-metrics-top-slot'));
+      final topContent = find.byKey(const Key('home-metrics-top-content'));
+      final bottomSlot = find.byKey(const Key('home-metrics-bottom-slot'));
+      final bottomContent = find.byKey(
+        const Key('home-metrics-bottom-content'),
+      );
+
+      expect(topSlot, findsOneWidget);
+      expect(topContent, findsOneWidget);
+      expect(bottomSlot, findsOneWidget);
+      expect(bottomContent, findsOneWidget);
+      expect(
+        tester.getCenter(topContent).dy,
+        closeTo(tester.getCenter(topSlot).dy, 0.01),
+      );
+      expect(
+        tester.getCenter(bottomContent).dy,
+        closeTo(tester.getCenter(bottomSlot).dy, 0.01),
+      );
+      expect(
+        tester.getSize(topSlot).height,
+        closeTo(tester.getSize(bottomSlot).height, 0.01),
+      );
+    });
+
+    testWidgets(
+      'right-aligns the monthly analysis link to the metrics region',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+        await tester.pumpAndSettle();
+
+        final linkChevron = find.byIcon(Icons.chevron_right);
+        final metricsRegion = find.byType(HomeMetricsRegion);
+
+        expect(linkChevron, findsOneWidget);
+        expect(metricsRegion, findsOneWidget);
+        expect(
+          tester.getTopRight(linkChevron).dx,
+          closeTo(tester.getTopRight(metricsRegion).dx, 0.01),
+        );
+      },
+    );
+
     testWidgets(
       'hero header renders total + +X% trend chip + previous-month sub-line',
       (tester) async {
@@ -231,25 +283,104 @@ void main() {
       },
     );
 
-    testWidgets('split bar renders ときめき帳 / 日々の帳 absolute amounts (no % glyph)', (
+    testWidgets('hero expense label uses the approved enlarged typography', (
       tester,
     ) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('40,600'), findsWidgets);
-      expect(find.textContaining('102,200'), findsWidgets);
-      // The trend chip is the only element with `%`; no `%` glyph appears in
-      // the joy / daily amount strings.
-      final joyText = find.textContaining('40,600');
-      expect(joyText, findsWidgets);
-      tester.widgetList<Text>(joyText).forEach((t) {
-        expect(t.data ?? '', isNot(contains('%')));
-      });
-      final survText = find.textContaining('102,200');
-      tester.widgetList<Text>(survText).forEach((t) {
-        expect(t.data ?? '', isNot(contains('%')));
-      });
+      final labelFinder = find.text('今月の支出');
+      final label = tester.widget<Text>(labelFinder);
+      final heroColumn = tester
+          .element(labelFinder)
+          .findAncestorWidgetOfExactType<Column>();
+
+      final style = label.style!;
+      expect(style.fontSize, AppTypography.label);
+      expect(
+        style.fontSize! * style.height!,
+        closeTo(AppTypography.labelLineHeight, 0.001),
+      );
+      expect(heroColumn, isNotNull);
+      expect((heroColumn!.children[1] as SizedBox).height, 6);
+    });
+
+    testWidgets(
+      'split bar renders ときめき帳 / 日々の帳 absolute amounts (no % glyph)',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('40,600'), findsWidgets);
+        expect(find.textContaining('102,200'), findsWidgets);
+        // The trend chip is the only element with `%`; no `%` glyph appears in
+        // the joy / daily amount strings.
+        final joyText = find.textContaining('40,600');
+        expect(joyText, findsWidgets);
+        tester.widgetList<Text>(joyText).forEach((t) {
+          expect(t.data ?? '', isNot(contains('%')));
+        });
+        final survText = find.textContaining('102,200');
+        tester.widgetList<Text>(survText).forEach((t) {
+          expect(t.data ?? '', isNot(contains('%')));
+        });
+      },
+    );
+
+    testWidgets('Best Joy ticket exposes both V15 tear notches', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('best-joy-notch-top')), findsOneWidget);
+      expect(find.byKey(const Key('best-joy-notch-bottom')), findsOneWidget);
+    });
+
+    testWidgets(
+      'Best Joy seal is wider and uses the enlarged satisfaction level face',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+        await tester.pumpAndSettle();
+
+        final sealPanel = find.byKey(const Key('best-joy-seal-panel'));
+        final faceFinder = find.byType(SatisfactionFaceIcon);
+
+        expect(sealPanel, findsOneWidget);
+        expect(tester.getSize(sealPanel).width, greaterThanOrEqualTo(72));
+        expect(faceFinder, findsOneWidget);
+
+        final face = tester.widget<SatisfactionFaceIcon>(faceFinder);
+        expect(face.value, 10);
+        expect(face.size, greaterThanOrEqualTo(30));
+
+        final tierLabel = tester.widget<Text>(find.text('至福'));
+        expect(tierLabel.style?.fontSize, greaterThanOrEqualTo(12));
+      },
+    );
+
+    testWidgets('Best Joy tear notches interrupt the outer horizontal border', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+      await tester.pumpAndSettle();
+
+      Border notchBorder(String key) {
+        final container = find.descendant(
+          of: find.byKey(Key(key)),
+          matching: find.byType(Container),
+        );
+        final decoration = tester.widget<Container>(container).decoration;
+        return (decoration! as BoxDecoration).border! as Border;
+      }
+
+      final topBorder = notchBorder('best-joy-notch-top');
+      final bottomBorder = notchBorder('best-joy-notch-bottom');
+
+      expect(topBorder.top.style, BorderStyle.none);
+      expect(topBorder.bottom.style, BorderStyle.solid);
+      expect(bottomBorder.top.style, BorderStyle.solid);
+      expect(bottomBorder.bottom.style, BorderStyle.none);
     });
   });
 
@@ -431,7 +562,7 @@ void main() {
     'HomeHeroCard — typography (CLAUDE.md Amount Display Style, Pitfall 10)',
     () {
       testWidgets(
-        'hero total uses AppTextStyles.amountLarge with tabular figures',
+        'hero total uses AppTextStyles.amountHero with tabular figures',
         (tester) async {
           await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
           await tester.pumpAndSettle();
@@ -443,7 +574,7 @@ void main() {
           );
           expect(heroFinder, findsWidgets);
           final heroTexts = tester.widgetList<Text>(heroFinder).toList();
-          // The largest font (amountLarge fontSize: 30) is the hero total.
+          // The largest semantic amount style is the hero total.
           Text? hero;
           double maxSize = 0;
           for (final t in heroTexts) {
@@ -503,6 +634,27 @@ void main() {
   });
 
   group('HomeHeroCard — i18n parity (CLAUDE.md i18n rules)', () {
+    testWidgets('keeps the marked zh layout intact at screenshot card width', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(400, 1000);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _singleRich(), locale: const Locale('zh')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SatisfactionFaceIcon), findsOneWidget);
+      expect(
+        tester.getTopRight(find.byIcon(Icons.chevron_right)).dx,
+        closeTo(tester.getTopRight(find.byType(HomeMetricsRegion)).dx, 0.01),
+      );
+    });
+
     testWidgets('renders correctly in ja locale', (tester) async {
       await tester.pumpWidget(
         _buildSubject(snapshot: _singleRich(), locale: const Locale('ja')),

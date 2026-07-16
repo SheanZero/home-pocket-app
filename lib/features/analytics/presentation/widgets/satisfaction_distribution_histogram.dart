@@ -31,7 +31,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
 
   /// Fixed height reserved for the count-label row above each bar so all bar tops
   /// share one baseline (placeholder height for count==0 columns).
-  static const double _countLabelHeight = 14;
+  static const double _countLabelHeight = AppTypography.compactLineHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -83,8 +83,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                   child: Text(
                     '${bucket.score}',
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 10.5,
+                    style: AppTextStyles.compact.copyWith(
                       fontWeight: FontWeight.w600,
                       color: palette.textSecondary,
                     ),
@@ -92,39 +91,22 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 14),
-          // round-5 r5 `.histo-foot`: left = data-derived count footer, right =
-          // data-derived median pill (Pitfall-7 / D4). Both come from `buckets`
-          // (no new provider) — descriptive, ADR-012-safe.
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.analyticsHistogramCountFooter(total),
-                  style: AppTextStyles.caption.copyWith(
-                    color: palette.textSecondary,
-                  ),
-                ),
+          Container(
+            constraints: const BoxConstraints(minHeight: 40),
+            margin: const EdgeInsets.only(top: 8),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              medianScore == null
+                  ? l10n.analyticsHistogramCountFooter(total)
+                  : l10n.analyticsHistogramNarrative(medianScore),
+              key: const ValueKey('analytics_histogram_narrative'),
+              style: AppTextStyles.supporting.copyWith(
+                fontWeight: FontWeight.w700,
+                color: palette.joyText,
               ),
-              if (medianScore != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: palette.joyLight,
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                  child: Text(
-                    l10n.analyticsHistogramMedianPill(medianScore),
-                    style: AppTextStyles.caption.copyWith(
-                      color: palette.joyText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-            ],
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -244,8 +226,7 @@ class _BarColumn extends StatelessWidget {
                 ? Center(
                     child: Text(
                       '$count',
-                      style: AppTextStyles.caption.copyWith(
-                        fontSize: 10,
+                      style: AppTextStyles.compact.copyWith(
                         fontWeight: FontWeight.w700,
                         color: palette.joyText,
                       ),

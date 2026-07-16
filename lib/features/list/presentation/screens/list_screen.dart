@@ -15,6 +15,7 @@ import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
 import '../../../../shared/constants/sort_config.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
+import '../../../../shared/widgets/main_surface_header.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/tagged_transaction.dart';
 import '../providers/state_calendar_totals.dart';
@@ -61,51 +62,59 @@ class ListScreen extends ConsumerWidget {
           .selectMonth(picked.year, picked.month);
     }
 
+    final l10n = S.of(context);
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: openMonthPicker,
-          child: Text(
-            DateFormatter.formatMonthYear(
-              DateTime(filter.selectedYear, filter.selectedMonth),
-              locale,
-            ),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined),
-            tooltip: S.of(context).listMonthPickerLabel,
-            onPressed: openMonthPicker,
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: S.of(context).settings,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => SettingsScreen(bookId: bookId),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: MainSurfaceHeader.screenPadding,
+              child: MainSurfaceHeader(
+                key: const Key('list-v15-header'),
+                title: DateFormatter.formatMonthYear(
+                  DateTime(filter.selectedYear, filter.selectedMonth),
+                  locale,
+                ),
+                titleKey: const Key('list-month-title'),
+                titleColor: context.palette.info,
+                onTitleTap: openMonthPicker,
+                titleTooltip: l10n.listMonthPickerLabel,
+                actions: [
+                  MainSurfaceHeaderAction(
+                    key: const Key('list-month-picker-button'),
+                    icon: Icons.calendar_month_outlined,
+                    tooltip: l10n.listMonthPickerLabel,
+                    onPressed: openMonthPicker,
+                  ),
+                  MainSurfaceHeaderAction(
+                    key: const Key('list-settings-button'),
+                    icon: Icons.settings_outlined,
+                    tooltip: l10n.settings,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SettingsScreen(bookId: bookId),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // v15 order: ledger segments → calendar → filter bar → list.
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: ListLedgerSegments(),
-          ),
-          CalendarHeaderWidget(
-            bookId: bookId,
-            currencyCode: currencyCode,
-            locale: locale,
-          ),
-          ListSortFilterBar(bookId: bookId),
-          Expanded(child: _buildList(context, ref, filter, locale)),
-        ],
+            const SizedBox(height: MainSurfaceHeader.contentSpacing),
+            // v15 order: ledger segments → calendar → filter bar → list.
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: ListLedgerSegments(),
+            ),
+            CalendarHeaderWidget(
+              bookId: bookId,
+              currencyCode: currencyCode,
+              locale: locale,
+            ),
+            ListSortFilterBar(bookId: bookId),
+            Expanded(child: _buildList(context, ref, filter, locale)),
+          ],
+        ),
       ),
     );
   }
@@ -199,7 +208,7 @@ class ListScreen extends ConsumerWidget {
           if (filter.sortConfig.sortField == SortField.amount) {
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
               children: [
                 _transactionCard(
                   context,
@@ -228,7 +237,9 @@ class ListScreen extends ConsumerWidget {
               children.add(
                 _transactionCard(context, ref, currentRows, filter, locale),
               );
-              children.add(const SizedBox(height: 6));
+              children.add(
+                const SizedBox(key: Key('list-day-group-gap'), height: 10),
+              );
             }
             currentRows = <TaggedTransaction>[];
           }
@@ -248,7 +259,7 @@ class ListScreen extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             // Clear the floating bottom navigation bar so the last row is not
             // obscured.
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
             children: children,
           );
         },
@@ -424,7 +435,6 @@ class ListScreen extends ConsumerWidget {
     // bare.
     return tile;
   }
-
 
   /// Resolves the L1 category icon from a category ID string.
   ///

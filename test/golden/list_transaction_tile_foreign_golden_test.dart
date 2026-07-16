@@ -100,7 +100,7 @@ Widget _wrap({
       home: Scaffold(
         body: SizedBox(
           width: 390,
-          height: 80,
+          height: 68,
           child: ListTransactionTile(
             taggedTx: tx,
             bookId: 'book_golden',
@@ -178,10 +178,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _wrap(
-          locale: const Locale('ja'),
-          tx: _makeJpyTx(),
-        ),
+        _wrap(locale: const Locale('ja'), tx: _makeJpyTx()),
       );
       await tester.pumpAndSettle();
       await expectLater(

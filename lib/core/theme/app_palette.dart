@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Semantic color token system for Home Pocket — ADR-019 Sakura Mochi × Wakaba palette.
+/// Semantic color token system for Home Pocket — V15 warm-Japanese palette.
 ///
 /// Use [AppPalette.light] and [AppPalette.dark] as the authoritative source
 /// for all color tokens. Access via [BuildContext.palette] in widget trees.
 ///
 /// Amount-text colors ([dailyText], [joyText], [sharedText]) are WCAG AA ≥4.5:1
-/// on [card] (#FFFFFF). NEVER use [daily], [joy], or [shared] directly for
+/// on [card]. NEVER use [daily], [joy], or [shared] directly for
 /// numeric amount text — use the *Text variants (CLAUDE.md Amount Display Style).
 ///
 /// Example:
@@ -220,29 +220,29 @@ final class AppPalette extends ThemeExtension<AppPalette> {
 
   // ── Static instances ──
 
-  /// ADR-019 Light palette — Sakura Mochi × Wakaba.
+  /// V15 Light palette — warm Japanese paper, deep green, and muted blue.
   static const light = AppPalette(
     // Backgrounds
-    background: Color(0xFFFBF7F4),
-    card: Color(0xFFFFFFFF),
-    backgroundMuted: Color(0xFFF3EDE8),
-    backgroundSubtle: Color(0xFFFBF7F4),
-    backgroundDivider: Color(0xFFEAE1DC),
+    background: Color(0xFFF5F0E7),
+    card: Color(0xFFFFFDF8),
+    backgroundMuted: Color(0xFFEEE7DB),
+    backgroundSubtle: Color(0xFFF5F0E7),
+    backgroundDivider: Color(0xFFE3DACB),
     // Text
-    textPrimary: Color(0xFF20352B),
-    textSecondary: Color(0xFF71877A),
-    textTertiary: Color(0xFFA8BCB2),
+    textPrimary: Color(0xFF27362F),
+    textSecondary: Color(0xFF637168),
+    textTertiary: Color(0xFF637168),
     // Borders
-    borderDefault: Color(0xFFE6DDD8),
-    borderDivider: Color(0xFFEAE1DC),
-    borderList: Color(0xFFDDD4CE),
-    borderInputActive: Color(0xFF6FA36F),
-    // Accent primary (leaf-green family)
-    accentPrimary: Color(0xFF6FA36F),
-    accentPrimaryLight: Color(0xFFEEF6EC),
+    borderDefault: Color(0xFFE3DACB),
+    borderDivider: Color(0xFFE3DACB),
+    borderList: Color(0xFFD3C7B5),
+    borderInputActive: Color(0xFF456B59),
+    // Accent primary (V15 deep-green family)
+    accentPrimary: Color(0xFF456B59),
+    accentPrimaryLight: Color(0xFFE2ECE4),
     accentPrimaryBorder: Color(0xFFCFE6CF),
-    fabGradientStart: Color(0xFFE09DB4),
-    fabGradientEnd: Color(0xFFD98CA0),
+    fabGradientStart: Color(0xFFD98CA0),
+    fabGradientEnd: Color(0xFFC77B8A),
     actionShadow: Color(0x33D98CA0),
     // Recording (error semantic family — red = live/active danger signal)
     recordingGradientStart: Color(0xFFE5484D),
@@ -255,36 +255,36 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     joy: Color(0xFFD98CA0),
     joyText: Color(0xFFA53D5E),
     joyLight: Color(0xFFFBEAEF),
-    // Ledger — Shared
-    shared: Color(0xFF5B8AC4),
-    sharedText: Color(0xFF3A6396),
-    sharedLight: Color(0xFFE8EFF7),
+    // Ledger — Shared / information blue
+    shared: Color(0xFF4F7186),
+    sharedText: Color(0xFF3F6078),
+    sharedLight: Color(0xFFE4EBF0),
     sharedBorder: Color(0xFFCBDBEC),
     sharedChevron: Color(0xFFA8C2DD),
     // Semantic
-    success: Color(0xFF2FA37A),
+    success: Color(0xFF4F826A),
     successLight: Color(0xFFE4F4EE),
-    warning: Color(0xFFC98A00),
-    error: Color(0xFFE5484D),
-    info: Color(0xFF2A8FB8),
+    warning: Color(0xFFA8733F),
+    error: Color(0xFFB64F4F),
+    info: Color(0xFF4F7186),
     // Error tints
     errorSurface: Color(0xFFFEF2F2),
     errorBorder: Color(0xFFFECACA),
     errorShadow: Color(0x15E5484D),
     // Shadows
-    fabShadow: Color(0x33D98CA0),
-    navShadow: Color(0x08000000),
-    navInactive: Color(0xFFBDBDBD),
+    fabShadow: Color(0x57D98CA0),
+    navShadow: Color(0x1C4B3928),
+    navInactive: Color(0xFF637168),
     // Joy card (sakura pink tints — joyRoi* stays green = success/ROI semantic)
     joyFullnessBg: Color(0xFFFBEAEF),
     joyFullnessBorder: Color(0xFFE7B9C6),
     joyRoiBg: Color(0xFFE4F4EE),
     joyRoiBorder: Color(0xFFB8E4D6),
     // Family
-    familyBadgeBg: Color(0xFFEEF6EC),
+    familyBadgeBg: Color(0xFFE2ECE4),
     // Best Joy strip (warm cream surface)
-    surfaceCream: Color(0xFFFFFAF6),
-    surfaceCreamBorder: Color(0xFFE6DDD8),
+    surfaceCream: Color(0xFFFFFDF8),
+    surfaceCreamBorder: Color(0xFFE3DACB),
     textMutedGold: Color(0xFFA53D5E),
     satisfactionPillBg: Color(0xFFFBEAEF),
     satisfactionPillRose: Color(0xFFD98CA0),
@@ -523,25 +523,43 @@ final class AppPalette extends ThemeExtension<AppPalette> {
       background: Color.lerp(background, other.background, t)!,
       card: Color.lerp(card, other.card, t)!,
       backgroundMuted: Color.lerp(backgroundMuted, other.backgroundMuted, t)!,
-      backgroundSubtle:
-          Color.lerp(backgroundSubtle, other.backgroundSubtle, t)!,
-      backgroundDivider:
-          Color.lerp(backgroundDivider, other.backgroundDivider, t)!,
+      backgroundSubtle: Color.lerp(
+        backgroundSubtle,
+        other.backgroundSubtle,
+        t,
+      )!,
+      backgroundDivider: Color.lerp(
+        backgroundDivider,
+        other.backgroundDivider,
+        t,
+      )!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textTertiary: Color.lerp(textTertiary, other.textTertiary, t)!,
       borderDefault: Color.lerp(borderDefault, other.borderDefault, t)!,
       borderDivider: Color.lerp(borderDivider, other.borderDivider, t)!,
       borderList: Color.lerp(borderList, other.borderList, t)!,
-      borderInputActive:
-          Color.lerp(borderInputActive, other.borderInputActive, t)!,
+      borderInputActive: Color.lerp(
+        borderInputActive,
+        other.borderInputActive,
+        t,
+      )!,
       accentPrimary: Color.lerp(accentPrimary, other.accentPrimary, t)!,
-      accentPrimaryLight:
-          Color.lerp(accentPrimaryLight, other.accentPrimaryLight, t)!,
-      accentPrimaryBorder:
-          Color.lerp(accentPrimaryBorder, other.accentPrimaryBorder, t)!,
-      fabGradientStart:
-          Color.lerp(fabGradientStart, other.fabGradientStart, t)!,
+      accentPrimaryLight: Color.lerp(
+        accentPrimaryLight,
+        other.accentPrimaryLight,
+        t,
+      )!,
+      accentPrimaryBorder: Color.lerp(
+        accentPrimaryBorder,
+        other.accentPrimaryBorder,
+        t,
+      )!,
+      fabGradientStart: Color.lerp(
+        fabGradientStart,
+        other.fabGradientStart,
+        t,
+      )!,
       fabGradientEnd: Color.lerp(fabGradientEnd, other.fabGradientEnd, t)!,
       actionShadow: Color.lerp(actionShadow, other.actionShadow, t)!,
       recordingGradientStart: Color.lerp(
@@ -577,37 +595,64 @@ final class AppPalette extends ThemeExtension<AppPalette> {
       navShadow: Color.lerp(navShadow, other.navShadow, t)!,
       navInactive: Color.lerp(navInactive, other.navInactive, t)!,
       joyFullnessBg: Color.lerp(joyFullnessBg, other.joyFullnessBg, t)!,
-      joyFullnessBorder:
-          Color.lerp(joyFullnessBorder, other.joyFullnessBorder, t)!,
+      joyFullnessBorder: Color.lerp(
+        joyFullnessBorder,
+        other.joyFullnessBorder,
+        t,
+      )!,
       joyRoiBg: Color.lerp(joyRoiBg, other.joyRoiBg, t)!,
       joyRoiBorder: Color.lerp(joyRoiBorder, other.joyRoiBorder, t)!,
       familyBadgeBg: Color.lerp(familyBadgeBg, other.familyBadgeBg, t)!,
       surfaceCream: Color.lerp(surfaceCream, other.surfaceCream, t)!,
-      surfaceCreamBorder:
-          Color.lerp(surfaceCreamBorder, other.surfaceCreamBorder, t)!,
+      surfaceCreamBorder: Color.lerp(
+        surfaceCreamBorder,
+        other.surfaceCreamBorder,
+        t,
+      )!,
       textMutedGold: Color.lerp(textMutedGold, other.textMutedGold, t)!,
-      satisfactionPillBg:
-          Color.lerp(satisfactionPillBg, other.satisfactionPillBg, t)!,
-      satisfactionPillRose:
-          Color.lerp(satisfactionPillRose, other.satisfactionPillRose, t)!,
-      avatarGradientStart:
-          Color.lerp(avatarGradientStart, other.avatarGradientStart, t)!,
-      avatarGradientMid:
-          Color.lerp(avatarGradientMid, other.avatarGradientMid, t)!,
-      avatarGradientEnd:
-          Color.lerp(avatarGradientEnd, other.avatarGradientEnd, t)!,
-      avatarBorderAlpha:
-          Color.lerp(avatarBorderAlpha, other.avatarBorderAlpha, t)!,
-      memberGradientA:
-          Color.lerp(memberGradientA, other.memberGradientA, t)!,
-      memberGradientB:
-          Color.lerp(memberGradientB, other.memberGradientB, t)!,
-      memberGradientC:
-          Color.lerp(memberGradientC, other.memberGradientC, t)!,
-      surfaceScrimLight:
-          Color.lerp(surfaceScrimLight, other.surfaceScrimLight, t)!,
-      surfaceScrimMedium:
-          Color.lerp(surfaceScrimMedium, other.surfaceScrimMedium, t)!,
+      satisfactionPillBg: Color.lerp(
+        satisfactionPillBg,
+        other.satisfactionPillBg,
+        t,
+      )!,
+      satisfactionPillRose: Color.lerp(
+        satisfactionPillRose,
+        other.satisfactionPillRose,
+        t,
+      )!,
+      avatarGradientStart: Color.lerp(
+        avatarGradientStart,
+        other.avatarGradientStart,
+        t,
+      )!,
+      avatarGradientMid: Color.lerp(
+        avatarGradientMid,
+        other.avatarGradientMid,
+        t,
+      )!,
+      avatarGradientEnd: Color.lerp(
+        avatarGradientEnd,
+        other.avatarGradientEnd,
+        t,
+      )!,
+      avatarBorderAlpha: Color.lerp(
+        avatarBorderAlpha,
+        other.avatarBorderAlpha,
+        t,
+      )!,
+      memberGradientA: Color.lerp(memberGradientA, other.memberGradientA, t)!,
+      memberGradientB: Color.lerp(memberGradientB, other.memberGradientB, t)!,
+      memberGradientC: Color.lerp(memberGradientC, other.memberGradientC, t)!,
+      surfaceScrimLight: Color.lerp(
+        surfaceScrimLight,
+        other.surfaceScrimLight,
+        t,
+      )!,
+      surfaceScrimMedium: Color.lerp(
+        surfaceScrimMedium,
+        other.surfaceScrimMedium,
+        t,
+      )!,
     );
   }
 }

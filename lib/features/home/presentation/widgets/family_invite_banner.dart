@@ -30,12 +30,25 @@ class FamilyInviteBanner extends StatelessWidget {
     final l10n = S.of(context);
     final palette = context.palette;
     return Container(
-      constraints: const BoxConstraints(minHeight: 112),
+      constraints: const BoxConstraints(minHeight: 124),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
         color: palette.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.borderDefault),
+        border: Border.all(
+          color: Color.lerp(
+            palette.borderDefault,
+            palette.accentPrimary,
+            0.18,
+          )!,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: palette.navShadow,
+            blurRadius: 30,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -94,18 +107,14 @@ class FamilyInviteBanner extends StatelessWidget {
           l10n.homeFamilyBannerTitle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.titleMedium.copyWith(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: palette.textPrimary,
-          ),
+          style: AppTextStyles.itemTitle.copyWith(color: palette.textPrimary),
         ),
         const SizedBox(height: 4),
         Text(
           l10n.homeFamilyBannerSubtitle,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.bodySmall.copyWith(
+          style: AppTextStyles.supporting.copyWith(
             color: palette.textSecondary,
           ),
         ),
@@ -120,8 +129,8 @@ class FamilyInviteBanner extends StatelessWidget {
               l10n.homeFamilyInviteSettingsPath,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.bodySmall.copyWith(
-                fontWeight: FontWeight.w800,
+              style: AppTextStyles.compact.copyWith(
+                fontWeight: FontWeight.w700,
                 color: palette.accentPrimary,
               ),
             ),
@@ -133,60 +142,65 @@ class FamilyInviteBanner extends StatelessWidget {
 
   // ── Column 3: dismiss (top) + CTA (bottom) ──
   Widget _actionsColumn(S l10n, AppPalette palette) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Semantics(
-          button: true,
-          label: l10n.homeFamilyInviteDismissLabel,
-          child: InkWell(
-            onTap: onDismiss,
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                Icons.close,
-                size: 18,
-                color: palette.textSecondary,
+    return SizedBox(
+      height: 96,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Semantics(
+            button: true,
+            label: l10n.homeFamilyInviteDismissLabel,
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: InkWell(
+                onTap: onDismiss,
+                borderRadius: BorderRadius.circular(20),
+                child: Center(
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: palette.textSecondary,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 92,
-            constraints: const BoxConstraints(minHeight: 40),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-            decoration: BoxDecoration(
-              // v15 `.faithful-invite-cta`: sakura-pink add-family action.
-              color: palette.joy,
-              borderRadius: BorderRadius.circular(11),
-            ),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.group_add, size: 14, color: Colors.white),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    l10n.homeFamilyInviteTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: 104,
+              constraints: const BoxConstraints(minHeight: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              decoration: BoxDecoration(
+                // v15 `.faithful-invite-cta`: sakura-pink add-family action.
+                color: palette.joy,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.group_add, size: 14, color: Colors.white),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      l10n.homeFamilyInviteTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.compact.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

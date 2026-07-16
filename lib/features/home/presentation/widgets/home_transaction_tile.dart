@@ -78,113 +78,124 @@ class HomeTransactionTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-        child: Row(
-          children: [
-            // Leading: enlarged, vertically-centered L1 category icon
-            Icon(l1Icon, size: 28, color: categoryColor),
-            const SizedBox(width: 12),
-            // Left info column (title + ledger badge aligned to title)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Primary: L2 category name + optional joy icon
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          category,
-                          style: AppTextStyles.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      if (satisfactionValue != null) ...[
-                        const SizedBox(width: 6),
-                        SatisfactionFaceIcon(
-                          value: satisfactionValue!,
-                          size: 14,
-                          color: palette.joy,
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  // Secondary: ledger badge (background pill) + optional merchant
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: tagBgColor,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1,
-                        ),
-                        child: Text(
-                          tagText,
-                          style: AppTextStyles.micro.copyWith(
-                            color: tagTextColor,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ),
-                      if (merchant != null) ...[
-                        const SizedBox(width: 6),
+      child: ConstrainedBox(
+        key: const Key('home-transaction-row-size'),
+        constraints: const BoxConstraints(minHeight: 68),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 28,
+                child: Center(
+                  child: Icon(l1Icon, size: 25, color: categoryColor),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Left info column (title + ledger badge aligned to title)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Primary: L2 category name + optional joy icon
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Flexible(
                           child: Text(
-                            merchant!,
-                            style: AppTextStyles.micro.copyWith(
-                              color: palette.textSecondary,
+                            category,
+                            style: AppTextStyles.itemTitle.copyWith(
+                              fontWeight: FontWeight.w700,
                             ),
-                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
+                        if (satisfactionValue != null) ...[
+                          const SizedBox(width: 6),
+                          SatisfactionFaceIcon(
+                            value: satisfactionValue!,
+                            size: 14,
+                            color: palette.joy,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Amount — amountSmall with tabular figures.
-            //
-            // Foreign rows show a small secondary original-currency annotation
-            // (labelMedium / textSecondary) under the JPY amount, mirroring
-            // ListTransactionTile (DISP-02). JPY/domestic rows render the bare
-            // Text unchanged.
-            if (foreignAnnotation == null)
-              Text(
-                formattedAmount,
-                style: AppTextStyles.amountSmall.copyWith(color: amountColor),
-              )
-            else
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    formattedAmount,
-                    style: AppTextStyles.amountSmall.copyWith(
-                      color: amountColor,
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    foreignAnnotation!,
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: palette.textSecondary,
+                    const SizedBox(height: 4),
+                    // Secondary: ledger badge (background pill) + optional merchant
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: tagBgColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          child: Text(
+                            tagText,
+                            style: AppTextStyles.compact.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: tagTextColor,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ),
+                        if (merchant != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              merchant!,
+                              style: AppTextStyles.supporting.copyWith(
+                                color: palette.textSecondary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-          ],
+              const SizedBox(width: 8),
+              // Amount — amountSmall with tabular figures.
+              //
+              // Foreign rows show a small secondary original-currency annotation
+              // (labelMedium / textSecondary) under the JPY amount, mirroring
+              // ListTransactionTile (DISP-02). JPY/domestic rows render the bare
+              // Text unchanged.
+              if (foreignAnnotation == null)
+                Text(
+                  formattedAmount,
+                  style: AppTextStyles.amountSmall.copyWith(color: amountColor),
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      formattedAmount,
+                      style: AppTextStyles.amountSmall.copyWith(
+                        color: amountColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      foreignAnnotation!,
+                      style: AppTextStyles.supporting.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );

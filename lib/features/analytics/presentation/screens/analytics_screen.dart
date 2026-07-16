@@ -8,6 +8,7 @@ import '../../../../features/home/presentation/widgets/month_picker_dialog.dart'
 import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
+import '../../../../shared/widgets/main_surface_header.dart';
 import '../../domain/models/time_window.dart';
 import '../analytics_card_registry.dart';
 import '../providers/state_time_window.dart';
@@ -38,17 +39,14 @@ class AnalyticsScreen extends ConsumerWidget {
     // and invalidation keys cannot drift (D-A1 / D-B2).
     final ctx = buildAnalyticsCardContext(context, ref, bookId: bookId);
 
-    // v15 header (260714): month-only. The AppBar title is the selected month
+    // v15 header (260714): month-only. The header title is the selected month
     // (joy-tinted per mock `.analytics-month-title`) and opens the same
     // month-grid picker the home/list headers use. The multi-granularity
     // TimeWindowChip + its sheet were removed — the UI exposes ONLY month
     // selection, though the underlying TimeWindow type is kept intact (the data
     // pipeline is month-keyed already).
     final window = ref.watch(selectedTimeWindowProvider);
-    final anchorMonth = DateTime(
-      window.range.end.year,
-      window.range.end.month,
-    );
+    final anchorMonth = DateTime(window.range.end.year, window.range.end.month);
 
     // Display-only home-feature read (NOT an invalidation target — never in the
     // `_refresh` union, D-B3). Resolved here and injected into the one
@@ -75,43 +73,59 @@ class AnalyticsScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: openMonthPicker,
-          child: Text(
-            DateFormatter.formatMonthYear(anchorMonth, ctx.locale),
-            style: TextStyle(color: context.palette.joyText),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined),
-            tooltip: l10n.analyticsTimeWindowChipTooltip,
-            onPressed: openMonthPicker,
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: l10n.settings,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => SettingsScreen(bookId: bookId),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: MainSurfaceHeader.screenPadding,
+              child: MainSurfaceHeader(
+                key: const Key('analytics-main-header'),
+                title: DateFormatter.formatMonthYear(anchorMonth, ctx.locale),
+                titleKey: const Key('analytics-main-title'),
+                titleColor: context.palette.joyText,
+                onTitleTap: openMonthPicker,
+                titleTooltip: l10n.listMonthPickerLabel,
+                actions: [
+                  MainSurfaceHeaderAction(
+                    key: const Key('analytics-month-picker-button'),
+                    icon: Icons.calendar_month_outlined,
+                    tooltip: l10n.listMonthPickerLabel,
+                    onPressed: openMonthPicker,
+                  ),
+                  MainSurfaceHeaderAction(
+                    key: const Key('analytics-settings-button'),
+                    icon: Icons.settings_outlined,
+                    tooltip: l10n.settings,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SettingsScreen(bookId: bookId),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => _refresh(ref, ctx),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          // v15 `.analytics-screen`: horizontal 20 (was 16).
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _buildCardChildren(l10n, ctx, shadowBooksAsync),
-          ),
+            const SizedBox(height: MainSurfaceHeader.contentSpacing),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async => _refresh(ref, ctx),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(
+                    MainSurfaceHeader.horizontalInset,
+                    0,
+                    MainSurfaceHeader.horizontalInset,
+                    24,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: _buildCardChildren(l10n, ctx, shadowBooksAsync),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -143,10 +157,7 @@ class AnalyticsScreen extends ConsumerWidget {
           children.add(const SizedBox(height: 26));
         }
         children.add(
-          AnalyticsSectionHeader(
-            title: header.title(l10n),
-            tone: header.tone,
-          ),
+          AnalyticsSectionHeader(title: header.title(l10n), tone: header.tone),
         );
         children.add(const SizedBox(height: 10));
       } else if (!isFirst) {

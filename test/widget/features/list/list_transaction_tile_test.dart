@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/application/accounting/delete_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -17,6 +18,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/list/domain/models/tagged_transaction.dart';
 import 'package:home_pocket/features/list/presentation/widgets/list_transaction_tile.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
+import 'package:home_pocket/shared/widgets/satisfaction_face_icon.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -50,6 +52,7 @@ Future<void> _pumpTile(
   TaggedTransaction tx, {
   VoidCallback? onTap,
   VoidCallback? onDeleted,
+  int? satisfactionValue,
 }) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -72,6 +75,7 @@ Future<void> _pumpTile(
             l1Icon: Icons.restaurant,
             locale: const Locale('ja'),
             merchant: null,
+            satisfactionValue: satisfactionValue,
           ),
         ),
       ),
@@ -82,6 +86,73 @@ Future<void> _pumpTile(
 
 void main() {
   group('ListTransactionTile', () {
+    testWidgets('uses the readable global row measurements', (tester) async {
+      final mockDelete = _MockDeleteTransactionUseCase();
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
+      final container = ProviderContainer.test(
+        overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ],
+      );
+
+      await _pumpTile(tester, container, _makeTx());
+
+      final content = tester.widget<Padding>(
+        find.byKey(const Key('list-transaction-content')),
+      );
+      expect(
+        content.padding,
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      );
+      expect(
+        tester
+            .widget<ConstrainedBox>(
+              find.byKey(const Key('list-transaction-row')),
+            )
+            .constraints
+            .minHeight,
+        68,
+      );
+      expect(
+        tester
+            .widget<Icon>(find.byKey(const Key('list-transaction-icon')))
+            .size,
+        25,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('list-transaction-title')))
+            .style
+            ?.fontSize,
+        AppTypography.itemTitle,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('list-transaction-amount')))
+            .style
+            ?.fontSize,
+        AppTypography.amountSmall,
+      );
+    });
+
+    testWidgets('keeps the satisfaction face on joy rows', (tester) async {
+      final mockDelete = _MockDeleteTransactionUseCase();
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
+      final container = ProviderContainer.test(
+        overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ],
+      );
+
+      await _pumpTile(tester, container, _makeTx(), satisfactionValue: 8);
+
+      expect(find.byType(SatisfactionFaceIcon), findsOneWidget);
+    });
+
     testWidgets('ROW-01: tapping tile invokes onTap callback', (tester) async {
       final mockDelete = _MockDeleteTransactionUseCase();
       when(

@@ -706,11 +706,11 @@
       }
     }
   },
-  "homePersonalMode": "個人モード",
+  "homePersonalMode": "個人",
   "@homePersonalMode": {
     "description": "Mode badge for personal/solo mode"
   },
-  "homeFamilyMode": "家族モード",
+  "homeFamilyMode": "家族",
   "@homeFamilyMode": {
     "description": "Mode badge for family/group mode"
   },
@@ -1949,6 +1949,10 @@
     "description": "Analytics screen time-window picker empty preset list message"
   },
   "analyticsKpiTotalLabel": "総支出",
+  "analyticsTrendTabAll": "すべて",
+  "@analyticsTrendTabAll": {
+    "description": "Label for the aggregate option in the within-month trend segmented control"
+  },
   "analyticsKpiJoyLabel": "平均満足度",
   "analyticsKpiJoySubMedianCoverage": "中央値 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
@@ -2142,6 +2146,15 @@
     "description": "Histogram footer — count of joy expenses whose satisfaction is plotted (data-derived)",
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHistogramNarrative": "今月のときめきの満足度は、まんなかが{value}点です",
+  "@analyticsHistogramNarrative": {
+    "description": "Neutral V15 histogram footer with the data-derived weighted median satisfaction",
+    "placeholders": {
+      "value": {
         "type": "int"
       }
     }
@@ -2548,6 +2561,10 @@
   "shoppingEditItem": "アイテムを編集",
   "@shoppingEditItem": {
     "description": "Semantics label for the edit chevron button on a shopping item tile (Phase 38)"
+  },
+  "shoppingActionEdit": "編集",
+  "@shoppingActionEdit": {
+    "description": "Edit action in the shopping item long-press menu"
   },
   "shoppingReorderItem": "アイテムを並べ替え",
   "@shoppingReorderItem": {

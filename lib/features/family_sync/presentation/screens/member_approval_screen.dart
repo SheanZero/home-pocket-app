@@ -192,7 +192,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
         Text(
           l10n.groupJoinRequest,
           style: TextStyle(
-            fontFamily: 'Outfit',
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: palette.textPrimary,
@@ -230,7 +229,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
               Text(
                 applicant.displayName,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: palette.textPrimary,
@@ -241,7 +239,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                 l10n.groupJoinRequestDesc(applicant.displayName),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                   color: palette.textSecondary,
@@ -266,7 +263,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                     Text(
                       group.groupName,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: palette.textPrimary,
@@ -314,7 +310,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                         Text(
                           l10n.groupReject,
                           style: TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: palette.textSecondary,
@@ -370,7 +365,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                         Text(
                           l10n.groupApprove,
                           style: const TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -398,11 +392,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
         Text(
           l10n.familySyncApprovalTip,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Outfit',
-            fontSize: 14,
-            color: palette.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: palette.textSecondary),
         ),
       ],
     );

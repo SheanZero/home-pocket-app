@@ -12,11 +12,8 @@ import 'shopping_segmented_control.dart';
 
 /// v15 warm-Japanese shopping filter card (D-02 visual port, ADR-019).
 ///
-/// Faithful port of the mockup `shoppingFilterCard()`:
-///   ┌───────────────────────────────────────────┐
-///   │ [全部|個人]   [すべて|日常|ときめき]          │  ← scope (family) + ledger
-///   │ ( 私有 ) ( カテゴリ )                         │  ← secondary chips
-///   └───────────────────────────────────────────┘
+/// Personal mode renders the ledger segmented control above the secondary
+/// private/category filters. Family mode adds the list-scope segment first.
 ///
 /// Data wiring is unchanged — the Material `SegmentedButton`/chip bar was
 /// swapped for the `.segmented-control` pill visual, but every control still
@@ -24,9 +21,8 @@ import 'shopping_segmented_control.dart';
 /// - scope segment  → [listTypeProvider] ('all' | 'private'), family only
 ///   (labelled 全部 / 個人).
 /// - ledger segment → [shoppingFilterProvider].ledgerType (null | daily | joy).
-/// - 私有 chip       → [shoppingFilterProvider].showPrivateOnly (G8Z).
-/// - カテゴリ chip    → [ShoppingCategoryFilterSheet] → setCategoryIds (D-3).
-///
+/// - 私有 chip       → [shoppingFilterProvider].showPrivateOnly.
+/// - カテゴリ chip    → [ShoppingCategoryFilterSheet] → setCategoryIds.
 /// The reorder (並べ替え) toggle now lives in the screen's 買うもの section
 /// header, matching the mockup — it is intentionally NOT rendered here.
 class ShoppingFilterBar extends ConsumerWidget {
@@ -86,7 +82,8 @@ class ShoppingFilterBar extends ConsumerWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      key: const Key('shopping_filter_surface'),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: palette.card,
@@ -96,19 +93,12 @@ class ShoppingFilterBar extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: scope (family only) + ledger segments.
-          if (isGroupMode)
-            Row(
-              children: [
-                Expanded(flex: 2, child: scopeSegment),
-                const SizedBox(width: 8),
-                Expanded(flex: 3, child: ledgerSegment),
-              ],
-            )
-          else
-            ledgerSegment,
+          if (isGroupMode) ...[
+            SizedBox(width: double.infinity, child: scopeSegment),
+            const SizedBox(height: 8),
+          ],
+          SizedBox(width: double.infinity, child: ledgerSegment),
           const SizedBox(height: 10),
-          // Row 2: 私有 + カテゴリ chips (left-aligned).
           Row(
             children: [
               _FilterChip(
@@ -125,6 +115,7 @@ class ShoppingFilterBar extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               _FilterChip(
+                key: const Key('shopping_filter_category_chip'),
                 label: l10n.shoppingFilterCategory,
                 icon: Icons.tune,
                 active: filter.categoryIds.isNotEmpty,
@@ -153,7 +144,7 @@ class ShoppingFilterBar extends ConsumerWidget {
   }
 }
 
-/// Pill chip used for the secondary 私有 / カテゴリ filters (mockup `.chip`).
+/// Pill chip used for the secondary private/category filters.
 class _FilterChip extends StatelessWidget {
   const _FilterChip({
     super.key,

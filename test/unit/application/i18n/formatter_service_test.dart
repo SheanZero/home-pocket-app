@@ -123,8 +123,7 @@ void main() {
 
       test('formatCompact delegates correctly for large numbers', () {
         final result = service.formatCompact(12000, const Locale('ja'));
-        // 12000 / 10000 = 1.2 万
-        expect(result, contains('万'));
+        expect(result, '12\u5343');
       });
     });
   });

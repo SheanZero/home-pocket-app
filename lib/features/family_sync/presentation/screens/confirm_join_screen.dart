@@ -92,7 +92,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                       Text(
                         l10n.groupBack,
                         style: TextStyle(
-                          fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: palette.textSecondary,
@@ -108,7 +107,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
               Text(
                 l10n.groupJoinTarget,
                 style: TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
@@ -126,7 +124,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                   Text(
                     r.groupName,
                     style: TextStyle(
-                      fontFamily: 'Outfit',
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: palette.textPrimary,
@@ -178,7 +175,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                           Text(
                             l10n.groupOwner,
                             style: TextStyle(
-                              fontFamily: 'Outfit',
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: palette.accentPrimary,
@@ -197,7 +193,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                     Text(
                       r.ownerDisplayName,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: palette.textPrimary,
@@ -252,7 +247,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                         Text(
                           l10n.groupConfirmJoin,
                           style: const TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -271,7 +265,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                 child: Text(
                   l10n.groupCancel,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: palette.textSecondary,

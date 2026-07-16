@@ -129,7 +129,6 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                       child: Text(
                         l10n.profileCancel,
                         style: TextStyle(
-                          fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: palette.textSecondary,
@@ -139,7 +138,6 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                     Text(
                       l10n.profileSelectAvatar,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: palette.textPrimary,
@@ -150,7 +148,6 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                       child: Text(
                         '${l10n.profileDone} ✓',
                         style: TextStyle(
-                          fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: palette.accentPrimary,
@@ -176,7 +173,6 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                           Text(
                             '✏️ ${l10n.profileChangeAvatar}',
                             style: TextStyle(
-                              fontFamily: 'Outfit',
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                               color: palette.textSecondary,
@@ -201,12 +197,10 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                           labelColor: palette.accentPrimary,
                           unselectedLabelColor: palette.textSecondary,
                           labelStyle: const TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
                           unselectedLabelStyle: const TextStyle(
-                            fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -344,7 +338,6 @@ class _PhotoTab extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -352,11 +345,7 @@ class _PhotoTab extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 hasSelectedImage ? 'JPG / PNG' : 'JPG / PNG · 512px',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 12,
-                  color: palette.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: palette.textSecondary),
               ),
             ],
           ),

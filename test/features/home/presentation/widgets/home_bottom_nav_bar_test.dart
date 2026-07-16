@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
@@ -77,9 +78,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    // Tab index 1 (list) is inactive when currentIndex is 0 — pure neutral grey
+    // Tab index 1 (list) is inactive when currentIndex is 0 — V15 text-faint.
     final listIcon = tester.widget<Icon>(find.byIcon(Icons.list));
-    expect(listIcon.color, const Color(0xFFBDBDBD));
+    expect(listIcon.color, const Color(0xFF637168));
   });
 
   testWidgets('renders all 4 tab labels', (tester) async {
@@ -94,6 +95,10 @@ void main() {
     expect(find.text('一覧'), findsOneWidget);
     expect(find.text('チャート'), findsOneWidget);
     expect(find.text('買い物'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('一覧')).style?.fontSize,
+      AppTypography.navigation,
+    );
   });
 
   testWidgets('pill container has white background and rounded corners', (
@@ -114,5 +119,49 @@ void main() {
         )
         .toList();
     expect(containers, isNotEmpty);
+  });
+
+  testWidgets('uses V15 fade, FAB gradient, and soft shadows', (tester) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        HomeBottomNavBar(currentIndex: 0, onTap: (_) {}, onFabTap: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final decorations = tester
+        .widgetList<Container>(find.byType(Container))
+        .where((container) => container.decoration is BoxDecoration)
+        .map((container) => container.decoration! as BoxDecoration)
+        .toList();
+
+    final fade = decorations.singleWhere(
+      (decoration) =>
+          decoration.gradient is LinearGradient &&
+          (decoration.gradient! as LinearGradient).stops?.last == 0.35,
+    );
+    expect(
+      (fade.gradient! as LinearGradient).colors.last,
+      AppPalette.light.background,
+    );
+
+    final fab = decorations.singleWhere(
+      (decoration) =>
+          decoration.gradient is LinearGradient &&
+          (decoration.gradient! as LinearGradient).colors.first ==
+              AppPalette.light.fabGradientStart,
+    );
+    expect(
+      (fab.gradient! as LinearGradient).colors.last,
+      AppPalette.light.fabGradientEnd,
+    );
+    expect(fab.boxShadow?.single.offset, const Offset(0, 8));
+    expect(fab.boxShadow?.single.blurRadius, 22);
+
+    final pill = decorations.singleWhere(
+      (decoration) => decoration.borderRadius == BorderRadius.circular(32),
+    );
+    expect(pill.boxShadow?.single.offset, const Offset(0, 8));
+    expect(pill.boxShadow?.single.blurRadius, 30);
   });
 }

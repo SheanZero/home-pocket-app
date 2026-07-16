@@ -135,7 +135,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                     Text(
                       widget.groupName,
                       style: TextStyle(
-                        fontFamily: 'Outfit',
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: palette.textPrimary,
@@ -162,7 +161,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                   l10n.groupWaitingApproval,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: palette.textPrimary,
@@ -175,7 +173,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                   l10n.groupWaitingDesc(widget.ownerDisplayName),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
                     color: palette.textSecondary,
@@ -187,7 +184,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 Text(
                   l10n.groupWaitingHint1,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: palette.textSecondary,
@@ -197,7 +193,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 Text(
                   l10n.groupWaitingHint2,
                   style: TextStyle(
-                    fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: palette.textSecondary,

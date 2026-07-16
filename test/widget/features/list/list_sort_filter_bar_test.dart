@@ -26,8 +26,9 @@ Future<ProviderContainer> _pumpBar(WidgetTester tester) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        locale_providers.currentLocaleProvider
-            .overrideWith((_) async => const Locale('ja')),
+        locale_providers.currentLocaleProvider.overrideWith(
+          (_) async => const Locale('ja'),
+        ),
       ],
       child: Builder(
         builder: (ctx) {
@@ -36,9 +37,7 @@ Future<ProviderContainer> _pumpBar(WidgetTester tester) async {
             localizationsDelegates: S.localizationsDelegates,
             supportedLocales: S.supportedLocales,
             locale: const Locale('ja'),
-            home: const Scaffold(
-              body: ListSortFilterBar(bookId: 'book1'),
-            ),
+            home: const Scaffold(body: ListSortFilterBar(bookId: 'book1')),
           );
         },
       ),
@@ -49,32 +48,50 @@ Future<ProviderContainer> _pumpBar(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('V15 filter bar spans the viewport with blurred material', (
+    tester,
+  ) async {
+    await _pumpBar(tester);
+
+    final glass = find.byKey(const Key('list-filter-glass'));
+    expect(glass, findsOneWidget);
+    expect(
+      find.descendant(of: glass, matching: find.byType(BackdropFilter)),
+      findsOneWidget,
+    );
+    expect(tester.getSize(glass).width, 800);
+  });
+
   group('ListSortFilterBar', () {
     testWidgets(
-        'SC#4: sort chip label reflects current field name (not generic Sort)',
-        (tester) async {
-      // Initial state: SortField.timestamp (updated from updatedAt in quick task 260531-oqn)
-      // — label should be '日付' (ja), NOT a generic 'Sort' string.
-      final container = await _pumpBar(tester);
+      'SC#4: sort chip label reflects current field name (not generic Sort)',
+      (tester) async {
+        // Initial state: SortField.timestamp (updated from updatedAt in quick task 260531-oqn)
+        // — label should be '日付' (ja), NOT a generic 'Sort' string.
+        final container = await _pumpBar(tester);
 
-      // Combined pill now shows field・direction (quick 260714-qit): the initial
-      // state is timestamp + desc → '日付・降順'. The field name must still be
-      // present (not a generic 'Sort').
-      expect(find.text('日付・降順'), findsOneWidget);
-      // Generic 'Sort' must not appear
-      expect(find.text('Sort'), findsNothing);
+        // Combined pill now shows field・direction (quick 260714-qit): the initial
+        // state is timestamp + desc → '日付・降順'. The field name must still be
+        // present (not a generic 'Sort').
+        expect(find.text('日付・降順'), findsOneWidget);
+        // Generic 'Sort' must not appear
+        expect(find.text('Sort'), findsNothing);
 
-      // Suppress unused variable warning
-      expect(container.read(listFilterProvider).sortConfig.sortField,
-          equals(SortField.timestamp));
-    });
+        // Suppress unused variable warning
+        expect(
+          container.read(listFilterProvider).sortConfig.sortField,
+          equals(SortField.timestamp),
+        );
+      },
+    );
 
     // FILTER-02 (tapping the ledger chip) moved to list_ledger_segments_test.dart
     // when the ledger filter graduated from inline chips to the full-width
     // ListLedgerSegments control (v15 A1/A3 port). The bar no longer owns it.
 
-    testWidgets('FILTER-04: clear chip appears only when filter active',
-        (tester) async {
+    testWidgets('FILTER-04: clear chip appears only when filter active', (
+      tester,
+    ) async {
       final container = await _pumpBar(tester);
 
       // Clear affordance is now icon-only (quick 260714-qit): assert on the

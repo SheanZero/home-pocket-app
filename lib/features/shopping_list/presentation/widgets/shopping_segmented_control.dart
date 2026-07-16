@@ -47,14 +47,26 @@ class ShoppingSegmentedControl<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final trackColor = Color.alphaBlend(
+      palette.backgroundMuted.withValues(alpha: 0.54),
+      palette.card,
+    );
 
     return Container(
+      constraints: const BoxConstraints(minHeight: 44),
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         // Muted track — mockup `color-mix(surface-muted 54%, surface)`.
-        color: palette.backgroundMuted,
+        color: trackColor,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: palette.borderDefault, width: 1),
+        boxShadow: [
+          BoxShadow(
+            offset: const Offset(0, 3),
+            blurRadius: 12,
+            color: palette.navShadow.withValues(alpha: 0.035),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -88,14 +100,22 @@ class _SegmentOption<T> extends StatelessWidget {
     final palette = context.palette;
 
     Color background = Colors.transparent;
-    Color foreground = palette.textSecondary;
+    Color foreground = palette.textPrimary;
     Color? ring;
+    List<BoxShadow> shadows = const [];
 
     if (isSelected) {
       switch (segment.tone) {
         case SegmentTone.accent:
           background = palette.accentPrimary;
           foreground = palette.card;
+          shadows = [
+            BoxShadow(
+              offset: const Offset(0, 3),
+              blurRadius: 10,
+              color: palette.accentPrimary.withValues(alpha: 0.22),
+            ),
+          ];
         case SegmentTone.daily:
           background = palette.dailyLight;
           foreground = palette.daily;
@@ -113,21 +133,22 @@ class _SegmentOption<T> extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
-        height: 36,
+        height: 40,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: background,
           borderRadius: BorderRadius.circular(999),
           border: ring != null ? Border.all(color: ring, width: 1.5) : null,
+          boxShadow: shadows,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Text(
           segment.label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.labelMedium.copyWith(
+          style: AppTextStyles.label.copyWith(
             color: foreground,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),

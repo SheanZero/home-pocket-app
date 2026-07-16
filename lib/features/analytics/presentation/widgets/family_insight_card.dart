@@ -32,7 +32,9 @@ class FamilyInsightCard extends StatelessWidget {
       color: context.palette.success.withValues(alpha: 0.10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: context.palette.success.withValues(alpha: 0.30)),
+        side: BorderSide(
+          color: context.palette.success.withValues(alpha: 0.30),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -41,19 +43,21 @@ class FamilyInsightCard extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsCardTitleFamilyInsight,
-              style: AppTextStyles.titleLarge.copyWith(color: context.palette.success),
+              style: AppTextStyles.itemTitle.copyWith(
+                color: context.palette.success,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               _highlightsText(l10n),
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: AppTextStyles.body.copyWith(
                 color: context.palette.textPrimary,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               _sharedJoyText(l10n),
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: AppTextStyles.body.copyWith(
                 color: context.palette.textPrimary,
               ),
             ),

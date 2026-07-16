@@ -97,8 +97,7 @@ class JoyCalendarHeatmap extends StatelessWidget {
                   child: Text(
                     label,
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 10,
+                    style: AppTextStyles.compact.copyWith(
                       fontWeight: FontWeight.w700,
                       color: palette.textTertiary,
                     ),
@@ -111,13 +110,13 @@ class JoyCalendarHeatmap extends StatelessWidget {
           crossAxisCount: 7,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          // §2c: square cells, gap 6.
+          // V15 packs the heatmap into a tight one-pixel grid.
           childAspectRatio: 1,
-          mainAxisSpacing: 6,
-          crossAxisSpacing: 6,
+          mainAxisSpacing: 1,
+          crossAxisSpacing: 1,
           children: cells,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
         _CalLegend(
           palette: palette,
           // v15 (260714 task #8): computed summary replaces the static note —
@@ -170,20 +169,34 @@ class _DayCell extends StatelessWidget {
               ? Border.all(color: palette.joyText, width: 2)
               : null,
         ),
-        // §2d: day number top-right (NOT centered).
-        child: Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 3, right: 4),
-            child: Text(
-              '$day',
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w700,
-                color: dayNumberColor,
+        child: Stack(
+          children: [
+            Positioned(
+              top: 5,
+              right: 6,
+              child: Text(
+                '$day',
+                style: AppTextStyles.compact.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: dayNumberColor,
+                ),
               ),
             ),
-          ),
+            if (count > 0)
+              Positioned(
+                key: ValueKey('joy_day_count_dot_$day'),
+                left: 6,
+                bottom: 6,
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: count >= 2 ? Colors.white : palette.joyText,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -215,41 +228,51 @@ class _CalLegend extends StatelessWidget {
     // §2e: discrete heat0..heat3 swatches (NOT a lerp).
     const swatches = AnalyticsCategoryPalette.heat;
 
-    return Row(
-      children: [
-        Text(
-          l10n.analyticsCalLegendLow,
-          style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
-        ),
-        const SizedBox(width: 7),
-        for (final color in swatches)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Container(
-              width: 13,
-              height: 13,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4),
-              ),
+    return Container(
+      constraints: const BoxConstraints(minHeight: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: Row(
+        children: [
+          Text(
+            l10n.analyticsCalLegendLow,
+            style: AppTextStyles.supporting.copyWith(
+              color: palette.textSecondary,
             ),
           ),
-        const SizedBox(width: 7),
-        Text(
-          l10n.analyticsCalLegendHigh,
-          style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            l10n.analyticsCalSummary(totalCount, daysWithRecord),
-            textAlign: TextAlign.end,
-            style: AppTextStyles.caption.copyWith(color: palette.textTertiary),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(width: 7),
+          for (final color in swatches)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Container(
+                width: 13,
+                height: 13,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          const SizedBox(width: 7),
+          Text(
+            l10n.analyticsCalLegendHigh,
+            style: AppTextStyles.supporting.copyWith(
+              color: palette.textSecondary,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              l10n.analyticsCalSummary(totalCount, daysWithRecord),
+              textAlign: TextAlign.end,
+              style: AppTextStyles.supporting.copyWith(
+                color: palette.textTertiary,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
