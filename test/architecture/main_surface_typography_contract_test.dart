@@ -81,6 +81,127 @@ void main() {
       );
     }
   });
+
+  test(
+    'canonical V16 shopping form mirrors the app fields and safe voice draft',
+    () {
+      final source = File(_mockupFiles.single).readAsStringSync();
+      const requiredFragments = <String>[
+        'data-shopping-input="name"',
+        'data-action="shopping-quantity-decrease"',
+        'data-action="shopping-quantity-increase"',
+        'data-shopping-form-ledger="daily"',
+        'data-shopping-form-list-type="public"',
+        'shopping-type-row',
+        'class="shopping-type-control">\${shoppingListTypeSelector()}\${typeHint}</div>',
+        'data-action="shopping-form-category"',
+        'data-shopping-input="price"',
+        'data-shopping-input="note"',
+        'data-action="save-shopping"',
+        'function shoppingVoicePanel()',
+        'data-action="shopping-voice-open"',
+        'data-action="shopping-voice-stop"',
+        'data-action="shopping-voice-rerecord"',
+        'function applyShoppingVoiceResult()',
+        'data-shopping-demo="manual"',
+        'data-shopping-demo="listening"',
+        'data-shopping-demo="review"',
+      ];
+
+      for (final fragment in requiredFragments) {
+        expect(
+          source,
+          contains(fragment),
+          reason:
+              '${_mockupFiles.single} is missing the shopping-form contract: '
+              '$fragment',
+        );
+      }
+    },
+  );
+
+  test('canonical V16 transaction edit reuses the unified entry language', () {
+    final source = File(_mockupFiles.single).readAsStringSync();
+    final editStart = source.indexOf('function edit()');
+    final editEnd = source.indexOf('\n  function ', editStart + 1);
+
+    expect(editStart, isNonNegative, reason: 'Missing edit() mockup route');
+    expect(editEnd, greaterThan(editStart), reason: 'Could not isolate edit()');
+
+    final editSource = source.substring(editStart, editEnd);
+    const requiredFragments = <String>[
+      'transaction-edit-screen',
+      'entry-header',
+      'entry-body',
+      'entry-amount',
+      'entry-form',
+      'entry-form-row',
+      'entry-purpose-card',
+      'entry-note-card',
+      'edit-action-dock',
+      'data-action="edit-amount"',
+      'data-action="edit-category"',
+      'data-action="edit-date"',
+      'data-edit-input="merchant"',
+      'data-edit-ledger="daily"',
+      'data-edit-ledger="joy"',
+      'data-edit-input="note"',
+      'data-action="save-edit"',
+      'data-action="edit-delete"',
+    ];
+
+    for (final fragment in requiredFragments) {
+      expect(
+        editSource,
+        contains(fragment),
+        reason:
+            '${_mockupFiles.single} edit() is missing the unified-entry '
+            'contract: $fragment',
+      );
+    }
+
+    const forbiddenFragments = <String>[
+      'class="amount-display"',
+      'class="flat-card"',
+      'class="form-row"',
+      'entry-keypad',
+      'entry-voice-dock',
+      'entry-continuous-row',
+      'この取引を削除',
+    ];
+    for (final fragment in forbiddenFragments) {
+      expect(
+        editSource,
+        isNot(contains(fragment)),
+        reason: '${_mockupFiles.single} edit() still uses stale UI: $fragment',
+      );
+    }
+
+    const interactionFragments = <String>[
+      'editAmount:',
+      'editCategory:',
+      'editDate:',
+      'editMerchant:',
+      'editLedger:',
+      'editNote:',
+      'editSatisfaction:',
+      "a==='edit-amount'",
+      "a==='save-edit'",
+      "a==='edit-delete'",
+      "a==='confirm-edit-delete'",
+      "editInput.dataset.editInput==='merchant'",
+      "editInput.dataset.editInput==='note'",
+    ];
+    for (final fragment in interactionFragments) {
+      expect(
+        source,
+        contains(fragment),
+        reason:
+            '${_mockupFiles.single} is missing the edit interaction contract: '
+            '$fragment',
+      );
+    }
+  });
 }
 
 String _cssNumber(double value) => value == value.roundToDouble()

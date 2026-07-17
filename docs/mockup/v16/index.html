@@ -221,7 +221,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   * { box-sizing: border-box; }
   html, body { min-height: 100%; }
   body { margin: 0; background: #ddd6cb; color: #28322d; font-family: var(--hp-font-body); transition: background .2s; }
-  button, input, select { font: inherit; }
+  button, input, select, textarea { font: inherit; }
   button { color: inherit; }
   .material-symbols-rounded { font-family: "Material Symbols Rounded"; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; direction: ltr; -webkit-font-feature-settings: "liga"; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; }
   [data-theme="dark"] body { background: #0f1311; color: #edf0eb; }
@@ -719,15 +719,81 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .shopping-item.dragging { opacity: .78; box-shadow: var(--hp-shadow-card); transform: scale(.99); }
   .shopping-action-delete, .shopping-action-delete strong { color: var(--hp-error) !important; }
 
+  /* Shopping item form — mirrors ShoppingItemFormScreen while keeping voice
+     as an optional draft-filling layer on this same route. */
+  .shopping-form-screen { padding: 6px 16px 30px; }
+  .shopping-form-screen .app-header { margin: 0 2px 14px; }
+  .shopping-form-save { min-width: 72px; min-height: 44px; padding: 8px 17px; border: 0; border-radius: var(--hp-radius-pill); background: var(--hp-primary); color: var(--hp-surface); font-size: var(--type-button); line-height: var(--line-button); font-weight: 850; cursor: pointer; box-shadow: 0 5px 13px color-mix(in srgb, var(--hp-primary) 20%, transparent); }
+  .shopping-form-save:disabled { opacity: .46; cursor: not-allowed; box-shadow: none; }
+  .shopping-name-card { min-height: 58px; padding: 6px 15px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-md); background: var(--hp-surface); display: flex; align-items: center; gap: 8px; box-shadow: var(--hp-shadow-card); }
+  .shopping-name-card.invalid { border-color: var(--hp-error); }
+  .shopping-name-input { min-width: 0; flex: 1; height: 44px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-weight: 650; }
+  .shopping-name-input::placeholder, .shopping-inline-input::placeholder, .shopping-note-input::placeholder { color: var(--hp-text-faint); }
+  .shopping-name-error { min-height: 18px; margin: 4px 3px 0; color: var(--hp-error); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .shopping-form-card { margin-top: 14px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-md); background: var(--hp-surface); overflow: hidden; box-shadow: var(--hp-shadow-card); }
+  .shopping-form-row { min-height: 62px; padding: 10px 14px; border-bottom: 1px solid var(--hp-border); display: flex; align-items: center; gap: 10px; }
+  .shopping-form-row:last-child { border-bottom: 0; }
+  .shopping-form-label { width: 68px; flex: 0 0 68px; color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .shopping-form-value { min-width: 0; flex: 1; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; text-align: right; }
+  .shopping-stepper { margin-left: auto; display: inline-flex; align-items: center; border: 1px solid var(--hp-border); border-radius: 12px; overflow: hidden; }
+  .shopping-stepper button { width: 44px; height: 44px; padding: 0; border: 0; background: var(--hp-surface-muted); color: var(--hp-primary-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); cursor: pointer; }
+  .shopping-stepper input { width: 50px; height: 44px; padding: 0; border: 0; outline: 0; background: var(--hp-surface); color: var(--hp-text); text-align: center; font-size: var(--type-item); line-height: var(--line-item); font-weight: 850; font-variant-numeric: tabular-nums; }
+  .shopping-form-segments { min-width: 178px; margin-left: auto; }
+  .shopping-form-segments .segmented-option { min-height: 40px; }
+  .shopping-form-segments .segmented-option.active.daily { background: var(--hp-daily-soft); color: var(--hp-daily-text); box-shadow: inset 0 0 0 1px var(--hp-daily); }
+  .shopping-form-segments .segmented-option.active.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); box-shadow: inset 0 0 0 1px var(--hp-joy); }
+  .shopping-form-segments.list-type .segmented-option.active { background: var(--hp-shared-soft); color: var(--hp-shared-text); box-shadow: inset 0 0 0 1px var(--hp-shared); }
+  .shopping-form-segments .segmented-option:disabled { opacity: .6; cursor: not-allowed; }
+  .shopping-type-row { align-items: flex-start; }
+  .shopping-type-row > .shopping-form-label { padding-top: 13px; }
+  .shopping-type-control { min-width: 178px; margin-left: auto; display: grid; justify-items: end; gap: 5px; }
+  .shopping-type-control .shopping-form-segments { width: 178px; margin-left: 0; }
+  .shopping-type-hint { min-height: 17px; padding: 0 2px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); text-align: right; }
+  .shopping-type-hint.locked { color: var(--hp-error); }
+  .shopping-type-hint .material-symbols-rounded { font-size: 15px; }
+  .shopping-category-row { width: 100%; border: 0; background: transparent; color: var(--hp-text); cursor: pointer; text-align: left; }
+  .shopping-category-row > .material-symbols-rounded { color: var(--hp-text-faint); font-size: 19px; }
+  .shopping-inline-input { min-width: 0; flex: 1; height: 40px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--hp-text); text-align: right; font-size: var(--type-item); line-height: var(--line-item); font-weight: 750; }
+  .shopping-price-prefix { color: var(--hp-text-muted); font-size: var(--type-item); line-height: var(--line-item); font-weight: 750; }
+  .shopping-note-row { align-items: flex-start; }
+  .shopping-note-row .shopping-form-label { padding-top: 8px; }
+  .shopping-note-input { min-width: 0; flex: 1; min-height: 78px; padding: 9px 10px; border: 0; outline: 0; border-radius: 11px; resize: vertical; background: var(--hp-surface-muted); color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+
+  .shopping-voice-launch { width: 100%; min-height: 56px; margin-top: 10px; padding: 8px 10px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-md); background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; }
+  .shopping-voice-launch > .material-symbols-rounded:first-child { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: grid; place-items: center; font-size: 21px; }
+  .shopping-voice-launch-copy { min-width: 0; flex: 1; }
+  .shopping-voice-launch-copy strong { display: block; font-size: var(--type-label); line-height: var(--line-label); }
+  .shopping-voice-launch-copy small { display: block; margin-top: 1px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .shopping-voice-launch > .material-symbols-rounded:last-child { color: var(--hp-text-faint); font-size: 18px; }
+  .shopping-voice-panel { min-height: 190px; margin-top: 10px; padding: 10px 13px 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); background: var(--hp-surface); box-shadow: var(--hp-shadow-card); }
+  .shopping-voice-head { min-height: 44px; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 6px; }
+  .shopping-voice-privacy { justify-self: start; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .shopping-voice-privacy .material-symbols-rounded { font-size: 14px; }
+  .shopping-voice-status { grid-column: 2; display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 850; white-space: nowrap; }
+  .shopping-voice-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hp-joy); }
+  .shopping-voice-panel.listening .shopping-voice-dot, .shopping-voice-panel.processing .shopping-voice-dot { animation: entry-pulse .8s ease-in-out infinite alternate; }
+  .shopping-voice-panel.unavailable .shopping-voice-dot { background: var(--hp-text-faint); }
+  .shopping-voice-keyboard { grid-column: 3; width: 44px; height: 44px; justify-self: end; padding: 0; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
+  .shopping-voice-keyboard .material-symbols-rounded { font-size: 22px; }
+  .shopping-voice-body { padding: 3px 0 0; text-align: center; }
+  .shopping-voice-transcript { min-height: 21px; margin: 0 0 2px; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .shopping-voice-wave { height: 30px; margin: 1px 0 3px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .shopping-voice-wave i { width: 3px; height: var(--voice-height, 12px); border-radius: var(--hp-radius-pill); background: var(--hp-joy); opacity: .72; }
+  .shopping-voice-panel.listening .shopping-voice-wave i { animation: entry-wave .8s ease-in-out infinite alternate; animation-delay: calc(var(--voice-index, 1) * -45ms); }
+  .shopping-voice-core { width: 58px; height: 58px; margin: 0 auto 4px; padding: 0; border: 0; border-radius: 19px; background: var(--hp-joy-soft); color: var(--hp-joy-text); display: grid; place-items: center; cursor: pointer; box-shadow: var(--hp-shadow-card); }
+  .shopping-voice-core.listening { background: var(--hp-joy); color: var(--hp-surface); box-shadow: 0 5px 14px color-mix(in srgb, var(--hp-joy) 22%, transparent); }
+  .shopping-voice-core:disabled { opacity: .62; cursor: wait; }
+  .shopping-voice-core .material-symbols-rounded { font-size: 29px; }
+  .shopping-voice-help { min-height: 17px; margin: 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .shopping-voice-settings { min-height: 40px; margin-top: 4px; padding: 7px 14px; border: 1px solid var(--hp-border-strong); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-primary-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; cursor: pointer; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shopping-voice-panel.listening .shopping-voice-dot,
+    .shopping-voice-panel.processing .shopping-voice-dot,
+    .shopping-voice-panel.listening .shopping-voice-wave i { animation: none; }
+  }
+
   /* Forms + keypad */
-  .amount-display { text-align: center; padding: 10px 0 14px; }
-  .amount-display span { display: block; color: var(--hp-text-muted); font-size: 9px; margin-bottom: 5px; }
-  .amount-display strong { font-size: 39px; color: var(--hp-text); }
-  .form-row { min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--hp-surface); border-bottom: 1px solid var(--hp-border); }
-  .form-row:first-child { border-radius: 15px 15px 0 0; }
-  .form-row:last-child { border-radius: 0 0 15px 15px; border-bottom: 0; }
-  .form-row label { width: 68px; color: var(--hp-text-muted); font-size: 9px; font-weight: 800; }
-  .form-row strong { flex: 1; font-size: 11px; }
   .numpad, .pinpad { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 12px; }
   .key { min-height: 52px; border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); font-size: 18px; font-weight: 750; box-shadow: var(--hp-shadow-card); }
   .key.save { background: var(--hp-joy); color: var(--hp-surface); font-size: 12px; }
@@ -737,56 +803,66 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .wave { height: 34px; display: flex; gap: 4px; align-items: center; justify-content: center; margin: 10px 0; }
   .wave i { width: 3px; border-radius: 99px; background: var(--hp-primary); }
 
-  /* Unified accounting entry — manual form stays mounted while the input dock
-     changes between keypad and voice. Scoped to avoid changing edit / lock. */
-  .accounting-screen { min-height: 100%; padding: 7px 0 0; display: flex; flex-direction: column; overflow: hidden; }
-  .accounting-screen .entry-header { min-height: 46px; margin: 0 20px 7px; display: flex; align-items: center; justify-content: center; position: relative; }
+  /* Selected unified-entry direction: the shared form stays mounted while one
+     persistent voice surface replaces only the keypad. */
+  .accounting-screen { height: 100%; min-height: 100%; padding: 6px 0 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
+  .accounting-screen .entry-header { min-height: 52px; margin: 0 18px 5px; display: flex; align-items: center; justify-content: center; position: relative; }
   .accounting-screen .entry-header .back-btn { position: absolute; left: 0; margin: 0; }
-  .accounting-screen .entry-header h1 { margin: 0; font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; }
-  .entry-method-switch { margin: 0 20px 9px; }
-  .entry-method-switch .segmented-control { min-height: 40px; }
-  .entry-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 20px 12px; scrollbar-width: none; }
+  .accounting-screen .entry-header .entry-header-action { position: absolute; right: 0; }
+  .accounting-screen .entry-header h1 { margin: 0; font-size: 21px; line-height: 28px; font-weight: 700; }
+  .entry-method-switch { display: none; }
+  .entry-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 18px 12px; scrollbar-width: none; }
   .entry-body::-webkit-scrollbar { display: none; }
-  .entry-amount { min-height: 74px; padding: 4px 2px 10px; display: grid; place-items: center; position: relative; text-align: center; }
-  .entry-amount-meta { display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
-  .entry-currency-chip { min-height: 26px; padding: 4px 8px; border-radius: var(--hp-radius-pill); background: var(--hp-daily-soft); color: var(--hp-daily-text); display: inline-flex; align-items: center; gap: 4px; }
-  .entry-currency-chip .material-symbols-rounded { font-size: 14px; }
-  .entry-amount strong { margin-top: 2px; color: var(--hp-text); font-size: 38px; line-height: 44px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
-  .entry-amount.voice-updated strong { color: var(--hp-primary-text); }
-  .entry-amount-voice { width: 48px; height: 48px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: grid; place-items: center; cursor: pointer; box-shadow: var(--hp-shadow-card); }
-  .entry-amount-voice .material-symbols-rounded { font-size: 23px; }
-  .entry-source-badge { min-height: 22px; padding: 3px 7px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 3px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; white-space: nowrap; }
+  .entry-amount { min-height: 88px; padding: 7px 2px 13px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .entry-currency-chip { min-width: 67px; min-height: 36px; padding: 7px 10px; border: 0; border-radius: var(--hp-radius-pill); background: var(--hp-daily-soft); color: var(--hp-daily-text); display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; cursor: pointer; }
+  .entry-currency-chip .material-symbols-rounded { font-size: 15px; }
+  .entry-amount strong { min-width: 0; color: var(--hp-text); font-size: 44px; line-height: 50px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+  .entry-amount.voice-updated strong { color: var(--hp-text); }
+  .entry-source-badge { min-height: 21px; padding: 2px 7px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 3px; font-size: 10px; line-height: 15px; font-weight: 800; white-space: nowrap; }
   .entry-source-badge .material-symbols-rounded { font-size: 13px; }
-  .entry-review-banner { margin: 1px 0 9px; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--hp-warning) 45%, var(--hp-border)); border-radius: 12px; background: color-mix(in srgb, var(--hp-warning) 10%, var(--hp-surface)); color: var(--hp-text-muted); display: flex; align-items: flex-start; gap: 8px; font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .entry-review-banner { margin: 1px 0 8px; padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--hp-warning) 45%, var(--hp-border)); border-radius: 12px; background: color-mix(in srgb, var(--hp-warning) 10%, var(--hp-surface)); color: var(--hp-text-muted); display: flex; align-items: flex-start; gap: 8px; font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .entry-review-banner .material-symbols-rounded { color: var(--hp-warning); font-size: 18px; flex: 0 0 auto; }
-  .entry-form { border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); overflow: hidden; }
-  .entry-form-row { width: 100%; min-height: 48px; padding: 8px 11px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 9px; text-align: left; }
+  .entry-form { border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); overflow: hidden; box-shadow: 0 2px 12px rgba(38,54,45,.035); }
+  .entry-form-row { width: 100%; min-height: 58px; padding: 7px 11px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 9px; text-align: left; }
   .entry-form-row:last-child { border-bottom: 0; }
   button.entry-form-row { cursor: pointer; }
-  .entry-form-row > .material-symbols-rounded:first-child { width: 18px; color: var(--hp-text-muted); font-size: 18px; }
-  .entry-form-label { width: 56px; flex: 0 0 auto; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
-  .entry-form-value, .entry-inline-input { min-width: 0; flex: 1; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
-  .entry-inline-input { height: 32px; padding: 0; border: 0; outline: 0; background: transparent; text-align: right; }
-  .entry-form-row > .material-symbols-rounded:last-child { color: var(--hp-text-faint); font-size: 18px; }
-  .entry-form-row.voice-updated { background: color-mix(in srgb, var(--hp-primary-soft) 54%, transparent); }
-  .entry-form-row.needs-confirmation { box-shadow: inset 3px 0 0 var(--hp-warning); background: color-mix(in srgb, var(--hp-warning) 9%, var(--hp-surface)); }
-  .entry-confirm-badge { min-height: 22px; padding: 3px 7px; border-radius: var(--hp-radius-pill); background: color-mix(in srgb, var(--hp-warning) 16%, var(--hp-surface)); color: var(--hp-warning); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; white-space: nowrap; }
-  .entry-purpose-card { margin-top: 8px; min-height: 54px; padding: 9px 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); display: flex; align-items: center; gap: 8px; }
-  .entry-purpose-card > span { margin-right: auto; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
-  .entry-ledger-option { min-height: 34px; padding: 6px 11px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface-muted); color: var(--hp-text-muted); display: inline-flex; align-items: center; gap: 5px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; cursor: pointer; }
+  .entry-form-row > .material-symbols-rounded:first-child { width: 20px; flex: 0 0 auto; color: var(--hp-text-muted); font-size: 20px; }
+  .entry-form-label { width: 48px; flex: 0 0 auto; color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .entry-form-result { min-width: 0; flex: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; }
+  .entry-form-mainline { width: 100%; max-width: 100%; display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+  .entry-form-value, .entry-inline-input { min-width: 0; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; }
+  .entry-form-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry-inline-input { width: 100%; height: 24px; padding: 0; border: 0; outline: 0; background: transparent; text-align: right; }
+  .entry-form-mainline > .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-text-faint); font-size: 18px; }
+  .entry-form-subline { min-height: 21px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+  .entry-form-row.needs-confirmation { box-shadow: inset 3px 0 0 var(--hp-warning); background: color-mix(in srgb, var(--hp-warning) 8%, var(--hp-surface)); }
+  .entry-confirm-badge { min-height: 21px; padding: 2px 7px; border-radius: var(--hp-radius-pill); background: color-mix(in srgb, var(--hp-warning) 16%, var(--hp-surface)); color: var(--hp-warning); font-size: 10px; line-height: 15px; font-weight: 900; white-space: nowrap; }
+  .entry-purpose-card { margin-top: 8px; min-height: 56px; padding: 9px 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); display: flex; align-items: center; gap: 8px; }
+  .entry-purpose-card > span { margin-right: auto; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; }
+  .entry-ledger-option { min-height: 36px; padding: 7px 11px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface-muted); color: var(--hp-text-muted); display: inline-flex; align-items: center; gap: 5px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; cursor: pointer; }
   .entry-ledger-option.active.daily { border-color: var(--hp-daily); background: var(--hp-daily-soft); color: var(--hp-daily-text); }
   .entry-ledger-option.active.joy { border-color: var(--hp-joy); background: var(--hp-joy-soft); color: var(--hp-joy-text); }
-  .entry-note-card { margin-top: 8px; padding: 9px 11px 10px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); }
-  .entry-note-card label { display: flex; align-items: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 700; }
-  .entry-note-card label .material-symbols-rounded { font-size: 17px; }
-  .entry-note-card input { width: 100%; height: 34px; margin-top: 3px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+  .entry-note-card { min-height: 52px; margin-top: 8px; padding: 8px 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); display: flex; align-items: center; gap: 8px; }
+  .entry-note-card > .material-symbols-rounded { width: 20px; color: var(--hp-text-muted); font-size: 20px; }
+  .entry-note-card label { width: 48px; flex: 0 0 auto; color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .entry-note-card input { min-width: 0; flex: 1; height: 30px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); text-align: right; }
+  .entry-note-card > .material-symbols-rounded:last-child { width: auto; color: var(--hp-text-faint); font-size: 18px; }
+  .entry-satisfaction-card { margin-top: 8px; padding: 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); }
+  .entry-satisfaction-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .entry-satisfaction-head strong { color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+  .entry-satisfaction-head span { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .entry-satisfaction-options { margin-top: 9px; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; }
+  .entry-satisfaction-option { min-width: 0; min-height: 42px; padding: 5px 2px; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: grid; place-items: center; gap: 1px; cursor: pointer; }
+  .entry-satisfaction-option .material-symbols-rounded { font-size: 21px; }
+  .entry-satisfaction-option small { font-size: var(--type-micro); line-height: var(--line-micro); font-weight: 750; }
+  .entry-satisfaction-option.active { border-color: var(--hp-joy); background: var(--hp-joy-soft); color: var(--hp-joy-text); }
   .entry-input-dock { flex: 0 0 auto; padding: 11px 14px 18px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-surface) 97%, transparent); box-shadow: 0 -8px 22px rgba(75,57,40,.05); }
-  .entry-voice-launch { width: min(100%, 304px); min-height: 46px; margin: 0 auto 10px; padding: 7px 12px; border: 1px solid color-mix(in srgb, var(--hp-primary) 34%, var(--hp-border)); border-radius: 15px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; }
-  .entry-voice-launch > .material-symbols-rounded:first-child { width: 32px; height: 32px; border-radius: 11px; background: var(--hp-primary); color: var(--hp-surface); display: grid; place-items: center; font-size: 19px; }
+  .entry-voice-launch { width: min(100%, 304px); min-height: 46px; margin: 0 auto 10px; padding: 7px 12px; border: 1px solid var(--hp-border); border-radius: 15px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; }
+  .entry-voice-launch > .material-symbols-rounded:first-child { width: 32px; height: 32px; border-radius: 11px; background: var(--hp-primary-soft); color: var(--hp-primary); display: grid; place-items: center; font-size: 19px; }
   .entry-voice-launch-copy { min-width: 0; flex: 1; }
   .entry-voice-launch-copy strong { display: block; font-size: var(--type-label); line-height: var(--line-label); }
   .entry-voice-launch-copy small { display: block; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
-  .entry-voice-launch > .material-symbols-rounded:last-child { font-size: 18px; }
+  .entry-voice-launch > .material-symbols-rounded:last-child { color: var(--hp-text-muted); font-size: 18px; }
   .entry-keypad { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; }
   .entry-key { min-height: 48px; border: 0; border-radius: 12px; background: var(--hp-surface-muted); color: var(--hp-text); display: grid; place-items: center; font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-weight: 650; cursor: pointer; }
   .entry-key .material-symbols-rounded { font-size: 21px; }
@@ -796,60 +872,77 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .entry-continuous-row { min-height: 27px; margin: 6px 2px -4px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
   .entry-continuous-row button { border: 0; background: transparent; color: var(--hp-primary-text); font-weight: 850; cursor: pointer; }
 
-  .entry-voice-dock { flex: 0 0 auto; min-height: 322px; padding: 12px 18px 20px; border-top: 1px solid var(--hp-border); background: var(--hp-surface); box-shadow: 0 -8px 22px rgba(75,57,40,.06); }
-  .entry-voice-status { min-height: 24px; display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
-  .entry-voice-status .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hp-error); }
+  .entry-voice-dock { flex: 0 0 336px; height: 336px; min-height: 336px; padding: 12px 18px 17px; border-top: 1px solid var(--hp-border); border-radius: 24px 24px 0 0; background: var(--hp-surface); box-shadow: 0 -8px 24px rgba(38,54,45,.07); display: flex; flex-direction: column; }
+  .entry-voice-status { flex: 0 0 44px; min-height: 44px; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .entry-voice-state-label { grid-column: 2; display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
+  .entry-voice-status .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--hp-joy); }
   .entry-voice-status.listening .status-dot { animation: entry-pulse 1s ease-in-out infinite alternate; }
-  .entry-voice-status.processing .status-dot { background: var(--hp-warning); animation: entry-pulse .7s ease-in-out infinite alternate; }
-  .entry-voice-status.review .status-dot { background: var(--hp-success); }
+  .entry-voice-status.processing .status-dot { background: var(--hp-joy); animation: entry-pulse .7s ease-in-out infinite alternate; }
+  .entry-voice-status.review .status-dot, .entry-voice-status.idle .status-dot { background: var(--hp-joy); }
   .entry-voice-status.unavailable .status-dot { background: var(--hp-text-faint); }
-  .entry-private-note { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; }
+  .entry-private-note { grid-column: 1; grid-row: 1; min-width: 0; justify-self: start; display: inline-flex; align-items: center; gap: 3px; overflow: hidden; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; white-space: nowrap; }
   .entry-private-note .material-symbols-rounded { font-size: 14px; }
-  .entry-voice-main { min-height: 189px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .entry-voice-keyboard { grid-column: 3; grid-row: 1; width: 44px; height: 44px; padding: 0; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text-muted); display: grid; place-items: center; justify-self: end; cursor: pointer; }
+  .entry-voice-keyboard .material-symbols-rounded { font-size: 22px; }
+  .entry-voice-main { min-height: 0; flex: 1; padding: 7px 0 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   .entry-voice-copy { width: 100%; }
-  .entry-voice-copy strong { display: block; color: var(--hp-text); font-size: var(--type-section); line-height: var(--line-section); }
-  .entry-transcript { min-height: 40px; margin: 7px auto 5px; color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); font-weight: 650; }
-  .entry-result-chips { min-height: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-  .entry-result-chip { padding: 4px 7px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
-  .entry-result-chip.warning { background: color-mix(in srgb, var(--hp-warning) 14%, var(--hp-surface)); color: var(--hp-warning); }
-  .entry-voice-wave { height: 30px; margin: 6px 0 8px; display: flex; align-items: center; justify-content: center; gap: 3px; }
-  .entry-voice-wave i { width: 3px; height: var(--voice-height, 14px); border-radius: var(--hp-radius-pill); background: var(--hp-daily); opacity: .72; }
-  .entry-voice-status.listening + .entry-voice-main .entry-voice-wave i { animation: entry-wave .8s ease-in-out infinite alternate; animation-delay: calc(var(--voice-index, 1) * -45ms); }
-  .entry-voice-core { width: 66px; height: 66px; margin: 4px auto 7px; border: 0; border-radius: 21px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; box-shadow: var(--hp-shadow-card); }
-  .entry-voice-core.listening { background: var(--hp-error); color: #fff; box-shadow: 0 7px 17px color-mix(in srgb, var(--hp-error) 26%, transparent); }
-  .entry-voice-core.review { background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .entry-transcript { min-height: 34px; margin: 4px auto; color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); font-weight: 650; }
+  .entry-voice-wave { height: 30px; margin: 4px 0 6px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .entry-voice-wave i { width: 3px; height: var(--voice-height, 14px); border-radius: var(--hp-radius-pill); background: var(--hp-joy); opacity: .72; }
+  .entry-voice-dock.is-listening .entry-voice-wave i { animation: entry-wave .8s ease-in-out infinite alternate; animation-delay: calc(var(--voice-index, 1) * -45ms); }
+  .entry-voice-core { width: 60px; height: 60px; margin: 2px auto 5px; border: 0; border-radius: 20px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; box-shadow: var(--hp-shadow-card); }
+  .entry-voice-core.listening { background: var(--hp-joy); color: var(--hp-surface); box-shadow: 0 5px 14px color-mix(in srgb, var(--hp-joy) 22%, transparent); }
+  .entry-voice-core.review { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .entry-voice-core.idle { background: var(--hp-joy); color: var(--hp-surface); }
   .entry-voice-core:disabled { opacity: .7; cursor: wait; }
   .entry-voice-core .material-symbols-rounded { font-size: 30px; }
   .entry-voice-help { min-height: 17px; margin: 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
-  .entry-voice-actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .entry-voice-actions { min-height: 46px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
   .entry-voice-actions.single { grid-template-columns: minmax(0,1fr); }
-  .entry-voice-actions .primary-btn, .entry-voice-actions .secondary-btn { min-height: 46px; }
+  .entry-voice-actions .primary-btn, .entry-voice-actions .secondary-btn { min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .entry-voice-actions .material-symbols-rounded { font-size: 19px; }
+  .entry-voice-actions.empty { pointer-events: none; }
+  .entry-voice-save { background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 5px 13px color-mix(in srgb, var(--hp-primary) 22%, transparent); }
+  .entry-voice-dock .entry-continuous-row { flex: 0 0 27px; margin-top: 5px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
   @keyframes entry-pulse { to { opacity: .32; transform: scale(.78); } }
   @keyframes entry-wave { to { transform: scaleY(.35); opacity: .38; } }
-
-  /* B makes the input method explicit for first-time learnability. */
-  .accounting-variant-b .entry-voice-launch { display: none; }
-  .accounting-variant-b .entry-voice-main { min-height: 185px; display: grid; grid-template-columns: minmax(0,1fr) 78px; gap: 8px; text-align: left; }
-  .accounting-variant-b .entry-voice-copy { min-width: 0; }
-  .accounting-variant-b .entry-transcript { margin-left: 0; }
-  .accounting-variant-b .entry-result-chips, .accounting-variant-b .entry-voice-wave { justify-content: flex-start; }
-
-  /* C moves the mic beside the amount and keeps a denser voice review dock. */
-  .accounting-variant-c .entry-amount { min-height: 74px; padding-right: 62px; place-items: start; text-align: left; }
-  .accounting-variant-c .entry-amount-meta { justify-content: flex-start; }
-  .accounting-variant-c .entry-amount-voice { position: absolute; right: 2px; top: 13px; }
-  .accounting-variant-c .entry-voice-launch { display: none; }
-  .accounting-variant-c .entry-voice-dock { min-height: 280px; }
-  .accounting-variant-c .entry-voice-main { min-height: 152px; display: grid; grid-template-columns: minmax(0,1fr) 76px; gap: 9px; text-align: left; }
-  .accounting-variant-c .entry-transcript { min-height: 28px; margin-left: 0; }
-  .accounting-variant-c .entry-result-chips, .accounting-variant-c .entry-voice-wave { justify-content: flex-start; }
 
   @container phone (max-width: 380px) {
     .entry-input-dock { padding-left: 11px; padding-right: 11px; }
     .entry-key { min-height: 46px; }
-    .entry-voice-dock { min-height: 304px; padding-left: 14px; padding-right: 14px; }
+    .entry-body { padding-left: 15px; padding-right: 15px; }
+    .entry-form-label, .entry-note-card label { width: 43px; }
+    .entry-voice-dock { min-height: 336px; padding-left: 14px; padding-right: 14px; }
     .entry-private-note { display: none; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .entry-voice-status.listening .status-dot,
+    .entry-voice-status.processing .status-dot,
+    .entry-voice-dock.is-listening .entry-voice-wave i { animation: none; }
+  }
+
+  /* Transaction edit reuses the unified-entry form while keeping edit-only
+     navigation, amount-sheet and save semantics. */
+  .transaction-edit-screen .entry-body { padding-bottom: 18px; }
+  .transaction-edit-screen .edit-header-delete { color: var(--hp-error); }
+  .edit-amount-trigger { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; }
+  .edit-amount-trigger:focus-visible { outline: 2px solid var(--hp-primary); outline-offset: -2px; border-radius: 14px; }
+  .edit-amount-tail { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; }
+  .edit-amount-tail .entry-currency-chip { pointer-events: none; cursor: inherit; }
+  .edit-amount-tail > .material-symbols-rounded { color: var(--hp-text-faint); font-size: 18px; }
+  .edit-exchange-card { margin-bottom: 8px; }
+  .edit-exchange-card .entry-form-row { cursor: default; }
+  .edit-exchange-card .entry-inline-input { max-width: 112px; font-variant-numeric: tabular-nums; }
+  .edit-action-dock { flex: 0 0 auto; padding: 10px 18px 18px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-surface) 97%, transparent); box-shadow: 0 -8px 22px rgba(75,57,40,.05); }
+  .edit-action-dock .primary-btn { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .edit-action-dock .primary-btn .material-symbols-rounded { font-size: 19px; }
+  .edit-action-dock .primary-btn:disabled { opacity: .58; cursor: wait; box-shadow: none; }
+  .edit-amount-sheet-display { min-height: 76px; margin: 7px 0 12px; padding: 13px 14px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface-muted); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .edit-amount-sheet-display strong { min-width: 0; font-size: var(--type-amount-large); line-height: var(--line-amount-large); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  .edit-amount-sheet-display span { color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
+  .edit-amount-sheet-actions { margin-top: 10px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+  .edit-delete-confirm { background: var(--hp-error); color: var(--hp-surface); box-shadow: none; }
   .camera { height: 390px; border-radius: 22px; background: #151a17; color: #fff; display: grid; place-items: center; position: relative; overflow: hidden; }
   .viewfinder { width: 78%; height: 66%; border: 2px solid rgba(255,255,255,.68); border-radius: 18px; display: grid; place-items: center; color: rgba(255,255,255,.72); }
   .viewfinder .material-symbols-rounded { font-size: 54px; }
@@ -966,8 +1059,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
         <button class="screen-link" data-screen="shopping-form"><span class="material-symbols-rounded">add_shopping_cart</span>购物项目</button>
       </div>
       <div class="catalog-group"><span>Entry</span>
-        <button class="screen-link" data-screen="entry"><span class="material-symbols-rounded">edit_note</span>统一记账 · 手动</button>
-        <button class="screen-link" data-screen="voice"><span class="material-symbols-rounded">mic</span>统一记账 · 语音</button>
+        <button class="screen-link" data-screen="entry"><span class="material-symbols-rounded">edit_note</span>统一记账</button>
         <button class="screen-link" data-screen="ocr"><span class="material-symbols-rounded">document_scanner</span>OCR 扫描</button>
         <button class="screen-link" data-screen="category"><span class="material-symbols-rounded">category</span>类目选择</button>
         <button class="screen-link" data-screen="edit"><span class="material-symbols-rounded">edit</span>编辑交易</button>
@@ -990,7 +1082,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     <div class="phone-wrap">
       <div class="phone" id="phone">
         <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
-        <main id="app-screen" aria-live="polite"></main>
+        <main id="app-screen" aria-label="应用内容"></main>
         <nav id="bottom-nav" class="bottom-nav"></nav>
         <div id="modal" class="modal-layer"><div class="modal-sheet"><div class="grabber"></div><div id="modal-content"></div></div></div>
         <div id="toast" class="toast"></div>
@@ -1012,15 +1104,36 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
       </div>
       <div id="entry-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">统一记账方案</span>
-        <div class="joy-variant-options" role="group" aria-label="统一记账设计方案">
-          <button class="joy-variant-option active" data-entry-variant="a"><strong>A · 原位替换（推荐）</strong><br>共享表单不动，语音面板替换数字键盘；最贴近当前实现。</button>
-          <button class="joy-variant-option" data-entry-variant="b"><strong>B · 双轨提示</strong><br>增加“键盘 / 语音”选择，首次使用更易理解，但实现改动较大。</button>
-          <button class="joy-variant-option" data-entry-variant="c"><strong>C · 金额旁快捷</strong><br>麦克风靠近金额，底部语音区更紧凑，表单可见面积最大。</button>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>方案 1 · 单页连续输入 ★ 已选</strong><br>共享表单和语音底板都不换页，只在原位置更新状态。</div>
         </div>
-        <p id="entry-variant-rationale">默认 A 保留现有状态机，只把隐藏的“点空白退出”改为明确按钮，并增加识别来源与待确认提示。</p>
+        <p id="entry-variant-rationale">聆听、解析和识别结果共用同一页面；停顿自动解析，中央麦克风复用为重新录音，连续记账状态始终保留。</p>
         <div class="coverage" style="margin-top:10px">
-          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="manual">手动</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="listening">聆听</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="review">识别结果</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="unavailable">麦克风不可用</button></span></div>
-          <div><strong>安全约束</strong><br>解析中不可保存；低置信度类别必须确认；重录恢复语音前内容；金额始终只有一个数据源。</div>
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="manual">手动</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="listening">聆听</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="review">识别结果</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="idle">下一笔待机</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-entry-demo="unavailable">麦克风不可用</button></span></div>
+          <div><strong>安全约束</strong><br>自动结束只触发解析，不自动保存；解析中不可记录；重录从语音前内容重新开始；金额始终只有一个数据源。</div>
+        </div>
+      </div>
+      <div id="shopping-form-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">购物项表单</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>与 App 对齐</strong><br>名称、数量、用途、类型、分类、预估价格和备注共用新增 / 编辑表单；右上保存是唯一落库动作。</div>
+          <div><strong>语音建议</strong><br>语音只填写一个购物草稿，不新开页面、不自动保存，也不会猜测或修改公开 / 私有。</div>
+        </div>
+        <p>复用设备语音识别、语言和权限能力；购物名称 / 数量 / 价格需要新的专用解析模型。</p>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="manual">手动</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="listening">聆听</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="review">识别回填</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="edit">编辑态</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="unavailable">麦克风不可用</button></span></div>
+          <div><strong>MVP 边界</strong><br>一次一个商品；3 秒停顿自动解析；中央按钮可提前结束 / 重新录音；识别结果仍需用户检查并点击保存。</div>
+        </div>
+      </div>
+      <div id="edit-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">编辑交易</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>与统一记账同源</strong><br>金额、分类、日期、商家、用途、满足度和备注沿用同一结构；编辑态不出现语音、常驻键盘或连续记账。</div>
+          <div><strong>编辑专属动作</strong><br>金额点按后在底部键盘修改；保存固定在底部，删除只保留右上入口并二次确认。</div>
+        </div>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-edit-demo="daily">JPY 日常</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-edit-demo="joy">JPY 悦己</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-edit-demo="foreign">USD 外币</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-edit-demo="submitting">保存中</button></span></div>
+          <div><strong>不可变信息</strong><br>编辑既有交易时不改变币种、账本归属、录入来源或隐私类型；外币金额仍单向换算为日元。</div>
         </div>
       </div>
     </aside>
@@ -1029,7 +1142,17 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   <div id="sketch-tools"><span>Mockup V16</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
 
 <script>
-  const state = { screen: 'home', theme: 'light', family: false, inviteDismissed: false, amount: '3480', entryVariant: 'a', entryVoiceState: 'review', entryVoiceApplied: false, entryNeedsReview: false, entryMerchant: 'ライフ', entryCategory: '食費 · スーパー', entryLedger: 'daily', entryNote: '', entryContinuous: false, entrySnapshot: null, pin: '', uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1', shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [], history: [] };
+  const state = {
+    screen: 'home', theme: 'light', family: false, inviteDismissed: false,
+    amount: '0', entryVariant: 'a', entryInputMode: 'keyboard', entryVoiceState: 'review', entryVoiceMode: 'replace', entryVoiceTranscript: '', entryVoiceApplied: false, entryReviewPending: false, entryNeedsReview: false, entryMerchant: '', entryCategory: '食费 > 外出就餐', entryLedger: 'daily', entryNote: '', entrySatisfaction: 8, entryContinuous: false, entrySnapshot: null,
+    pin: '', uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
+    analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
+    shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [],
+    shoppingFormMode: 'create', shoppingFormName: '', shoppingFormQuantity: 1, shoppingFormLedger: 'daily', shoppingFormListType: 'public', shoppingFormCategory: '', shoppingFormPrice: '', shoppingFormNote: '', shoppingFormSubmitting: false, shoppingFormError: '',
+    shoppingVoiceState: 'manual', shoppingVoiceTranscript: '', shoppingVoiceApplied: false, shoppingVoiceSnapshot: null,
+    editAmount: '3280', editAmountDraft: '3280', editCurrency: 'JPY', editJpyAmount: '3280', editRate: '1', editRateDate: '2026年7月10日', editCategory: '食费 > 超市', editDate: '2026年7月10日', editMerchant: 'Life 超市', editLedger: 'daily', editNote: '周末采购', editSatisfaction: 8, editSubmitting: false,
+    history: [],
+  };
   let shoppingCategoryDraft = new Set();
   const mainScreens = ['home','list','analytics','shopping'];
   const info = {
@@ -1039,12 +1162,11 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
     analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
-    'shopping-form': ['Main shell','购物项目','从购物页进入的单任务表单，名称、数量、公开范围和备注保持清楚。','项目表单 + 公开范围','新建 / 编辑 / 个人 / 共享','复用 ShoppingItemFormScreen'],
-    entry: ['Entry','统一记账 · 手动','金额、类目、日期、商家、用途与备注始终属于同一表单；语音只是底部输入工具，不再跳到第二套页面。','共享表单 + 语音入口 + 数字键盘','手动 / 语音已反映 / 待确认 / 连续记账','映射 ManualOneStepScreen、TransactionDetailsForm 与 SmartKeyboard'],
-    voice: ['Entry','统一记账 · 语音','语音面板原位替换数字键盘，表单持续可见；明确提供停止、恢复原内容与返回表单按钮，并阻止未确认的低置信度结果直接保存。','共享表单 + 状态转写 + 明确恢复 / 确认','聆听 / 解析 / 复核 / 权限不可用','复用 PTT session、快照恢复与同一表单状态'],
+    'shopping-form': ['Main shell','购物项目','严格映射现有新增 / 编辑共用表单；语音只在同页填写草稿，右上保存仍是唯一提交入口。','名称 + 数量 + 用途 + 类型 + 分类 + 价格 + 备注','手动 / 聆听 / 解析 / 回填 / 编辑 / 权限不可用','复用 ShoppingItemFormScreen；新增购物专用语音解析器'],
+    entry: ['Entry','统一记账','金额、类目、日期、商家、用途与备注始终属于同一表单；聆听、解析与识别结果只更新底部输入区，右上键盘入口全程固定。','共享表单 + 单一语音底板 + 数字键盘','手动 / 聆听 / 解析 / 识别结果 / 权限不可用','映射 ManualOneStepScreen、PTT session、快照恢复与 SmartKeyboard'],
     ocr: ['Entry','OCR 扫描','沉浸相机保持深色；拍摄完成后回到同一套详情确认语言。','取景框 + 拍摄控制','权限 / 拍摄 / 复核','复用 OCR scanner 与 review'],
     category: ['Entry','类目选择','搜索优先，L1 分组稳定，L2 使用轻量行而不是彩色 chip 墙。','搜索 + 分组 + 最近使用','搜索 / 展开 / 排序','复用类目树与学习逻辑'],
-    edit: ['Entry','编辑交易','编辑与新建共享表单，但危险操作退到页尾并保持明确确认。','金额 + 详情 + 保存 / 删除','外币联动 / 删除确认','复用 TransactionDetailsForm.edit'],
+    edit: ['Entry','编辑交易','编辑与新建共享金额、详情、用途、满意度和备注组件；编辑态仅增加返回、右上删除和底部保存。','共享表单 + 金额弹层 + 固定保存','日常 / 悦己 / 外币 / 删除确认','复用 TransactionDetailsForm.edit 与 AmountEditBottomSheet'],
     family: ['Family','家庭入口','创建与加入是两条清楚路径，E2EE 说明始终随入口出现。','家庭价值 + 两个动作','未加入 / 已加入','复用 GroupChoiceScreen'],
     join: ['Family','加入家庭','六位邀请码是一项单任务流程，避免同时展示不相关设置。','邀请码 + 隐私提示','输入 / 校验 / 等待批准','复用 join / confirm / waiting 流程'],
     group: ['Family','家庭管理','同步状态、待批准、成员与危险动作按重要性分层。','组信息 + 成员 + 同步','所有者 / 成员 / 待批准','复用现有 group 与 sync providers'],
@@ -1330,48 +1452,118 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     return `<section class="screen">${tabHeader('買い物リスト',settings)}${shoppingFilterCard()}<div class="section-title"><h2>買うもの</h2></div>${pendingContent}${completedContent}</section>`;
   }
   function shopItem(name,meta,done,ledger='daily',scope='shared',category='food'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}" data-shopping-scope="${scope}" data-shopping-category="${category}" data-shopping-actions data-shopping-name="${name}" data-shopping-completed="${done}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span><button class="shopping-drag-handle" data-shopping-drag-handle aria-label="${name}を長押しして並べ替え">${icon('drag_indicator')}</button></div>`; }
-  function shoppingForm() { return `<section class="screen">${backHeader('買うものを追加')}<div class="section-title"><h2>品名</h2></div><input class="search" value="オリーブオイル" aria-label="品名"><div class="flat-card"><div class="form-row"><label>数量</label><strong>1本</strong>${icon('chevron_right')}</div><div class="form-row"><label>カテゴリ</label><strong>食品</strong>${icon('chevron_right')}</div><div class="form-row"><label>リスト</label><strong>${state.family?'共有':'個人'}</strong>${icon('chevron_right')}</div><div class="form-row"><label>メモ</label><strong>エクストラバージン</strong>${icon('chevron_right')}</div></div><p class="hint">個人にした項目は家族同期へ送信されません。</p><button class="primary-btn" data-action="save-shopping">リストに追加</button></section>`; }
+  function shoppingLedgerSelector() {
+    return `<div class="segmented-control shopping-form-segments" style="--segmented-count:2" role="group" aria-label="用途"><button class="segmented-option daily ${state.shoppingFormLedger==='daily'?'active':''}" data-shopping-form-ledger="daily" aria-pressed="${state.shoppingFormLedger==='daily'}">日常</button><button class="segmented-option joy ${state.shoppingFormLedger==='joy'?'active':''}" data-shopping-form-ledger="joy" aria-pressed="${state.shoppingFormLedger==='joy'}">ときめき</button></div>`;
+  }
+  function shoppingListTypeSelector() {
+    const disabled = state.shoppingFormMode === 'edit';
+    return `<div class="segmented-control shopping-form-segments list-type" style="--segmented-count:2" role="group" aria-label="タイプ"><button class="segmented-option ${state.shoppingFormListType==='public'?'active':''}" data-shopping-form-list-type="public" aria-pressed="${state.shoppingFormListType==='public'}" ${disabled?'disabled':''}>公開</button><button class="segmented-option ${state.shoppingFormListType==='private'?'active':''}" data-shopping-form-list-type="private" aria-pressed="${state.shoppingFormListType==='private'}" ${disabled?'disabled':''}>私有</button></div>`;
+  }
+  function shoppingVoiceWave() {
+    return `<div class="shopping-voice-wave" aria-hidden="true">${[9,18,13,25,17,29,12,22,27,16,24,11,20,15].map((height,index)=>`<i style="--voice-height:${height}px;--voice-index:${index}"></i>`).join('')}</div>`;
+  }
+  function shoppingVoicePanel() {
+    const voiceState = state.shoppingVoiceState;
+    if (voiceState === 'manual') {
+      return `<button class="shopping-voice-launch" data-action="shopping-voice-open"><span class="material-symbols-rounded">mic_none</span><span class="shopping-voice-launch-copy"><strong>音声で入力</strong><small>品名・数量・用途・カテゴリ・参考価格をまとめて話す</small></span>${icon('chevron_right')}</button>`;
+    }
+    const status = {
+      listening: '聞いています',
+      processing: '解析しています',
+      review: 'フォームに入力しました',
+      unavailable: 'マイクを使えません',
+    }[voiceState] || '音声入力';
+    const transcript = voiceState === 'listening'
+      ? '「牛乳を2本、日常、参考価格500円……」'
+      : voiceState === 'processing'
+        ? '「牛乳を2本、日常、参考価格500円」'
+        : voiceState === 'review'
+          ? `「${escapeHtml(state.shoppingVoiceTranscript || '牛乳を2本、日常、参考価格500円')}」`
+          : 'マイクの利用を許可すると音声で入力できます';
+    const core = voiceState === 'listening'
+      ? `<button class="shopping-voice-core listening" data-action="shopping-voice-stop" aria-label="すぐに終了して解析">${icon('stop')}</button>`
+      : voiceState === 'processing'
+        ? `<button class="shopping-voice-core" disabled aria-label="解析中">${icon('progress_activity')}</button>`
+        : voiceState === 'review'
+          ? `<button class="shopping-voice-core" data-action="shopping-voice-rerecord" aria-label="もう一度録音">${icon('mic')}</button>`
+          : `<button class="shopping-voice-core" disabled aria-label="マイクを利用できません">${icon('mic_off')}</button>`;
+    const help = {
+      listening: '話し終えると約3秒で自動解析 · 四角で今すぐ終了',
+      processing: '入力内容をショッピング項目に整理しています',
+      review: '内容を確認し、右上の「保存」で追加',
+      unavailable: '手動入力はそのまま利用できます',
+    }[voiceState] || '';
+    const settings = voiceState === 'unavailable' ? `<button class="shopping-voice-settings" data-action="shopping-mic-settings">設定を開く</button>` : '';
+    return `<div class="shopping-voice-panel ${voiceState}" aria-live="polite"><div class="shopping-voice-head"><span class="shopping-voice-privacy">${icon('shield')}端末内認識を優先</span><span class="shopping-voice-status"><span class="shopping-voice-dot"></span>${status}</span><button class="shopping-voice-keyboard" data-action="shopping-voice-keyboard" aria-label="手動入力へ戻る">${icon('keyboard')}</button></div><div class="shopping-voice-body"><p class="shopping-voice-transcript">${transcript}</p>${shoppingVoiceWave()}${core}<p class="shopping-voice-help">${help}</p>${settings}</div></div>`;
+  }
+  function shoppingForm() {
+    const isEdit = state.shoppingFormMode === 'edit';
+    const voiceTransient = ['listening','processing'].includes(state.shoppingVoiceState);
+    const saveDisabled = state.shoppingFormSubmitting || voiceTransient;
+    const saveAction = `<button class="shopping-form-save" data-action="save-shopping" ${saveDisabled?'disabled':''}>${state.shoppingFormSubmitting?'保存中…':'保存'}</button>`;
+    const nameError = state.shoppingFormError === 'name';
+    const voiceEntry = isEdit ? '' : shoppingVoicePanel();
+    const category = state.shoppingFormCategory || 'カテゴリなし';
+    const typeHint = isEdit
+      ? `<div class="shopping-type-hint locked">${icon('lock_outline')}作成後のタイプは変更できません</div>`
+      : `<div class="shopping-type-hint">${icon('info')}保存後はタイプを変更できません</div>`;
+    return `<section class="screen shopping-form-screen">${backHeader(isEdit?'アイテムを編集':'アイテムを追加',saveAction)}<div class="shopping-name-card ${nameError?'invalid':''}"><input id="shopping-form-name" class="shopping-name-input" data-shopping-input="name" maxlength="200" value="${escapeHtml(state.shoppingFormName)}" placeholder="アイテム名" aria-label="アイテム名" aria-invalid="${nameError}"></div><p class="shopping-name-error" role="alert">${nameError?'名前を入力してください':''}</p>${voiceEntry}<div class="shopping-form-card"><div class="shopping-form-row"><span class="shopping-form-label">数量</span><span class="shopping-stepper"><button data-action="shopping-quantity-decrease" aria-label="数量を減らす">−</button><input data-shopping-input="quantity" inputmode="numeric" value="${state.shoppingFormQuantity}" aria-label="数量"><button data-action="shopping-quantity-increase" aria-label="数量を増やす">＋</button></span></div><div class="shopping-form-row"><span class="shopping-form-label">用途</span>${shoppingLedgerSelector()}</div><div class="shopping-form-row shopping-type-row"><span class="shopping-form-label">タイプ</span><div class="shopping-type-control">${shoppingListTypeSelector()}${typeHint}</div></div></div><div class="shopping-form-card"><button class="shopping-form-row shopping-category-row" data-action="shopping-form-category"><span class="shopping-form-label">カテゴリ</span><strong class="shopping-form-value">${escapeHtml(category)}</strong>${icon('chevron_right')}</button><div class="shopping-form-row"><label class="shopping-form-label" for="shopping-form-price">参考価格</label><span class="shopping-price-prefix">¥</span><input id="shopping-form-price" class="shopping-inline-input" data-shopping-input="price" inputmode="numeric" value="${escapeHtml(state.shoppingFormPrice)}" placeholder="未入力" aria-label="参考価格"></div><div class="shopping-form-row shopping-note-row"><label class="shopping-form-label" for="shopping-form-note">メモ</label><textarea id="shopping-form-note" class="shopping-note-input" data-shopping-input="note" rows="3" placeholder="必要なメモを入力">${escapeHtml(state.shoppingFormNote)}</textarea></div></div></section>`;
+  }
 
   function entryHeader() {
-    return `<header class="entry-header"><button class="back-btn" data-action="back" aria-label="記帳を閉じる">${icon('close')}</button><h1>取引を記録</h1></header>`;
+    return `<header class="entry-header"><button class="back-btn" data-action="back" aria-label="关闭记账">${icon('close')}</button><h1>添加账目</h1><button class="icon-btn entry-header-action" data-action="entry-history" aria-label="查看记账历史">${icon('history')}</button></header>`;
   }
 
   function entryMethodSwitch(mode) {
-    if (state.entryVariant !== 'b') return '';
-    return `<div class="entry-method-switch">${segmentedControl({ariaLabel:'入力方法',value:mode,dataAttribute:'data-entry-method',options:[{value:'manual',label:'キーボード'},{value:'voice',label:'音声'}],className:'entry-method-control'})}</div>`;
+    return '';
   }
 
   function entryVoiceMarker() {
-    return `<span class="entry-source-badge">${icon('mic')}音声</span>`;
+    return `<span class="entry-source-badge">${icon('graphic_eq')}语音填入</span>`;
   }
 
   function entryAmount(hasVoiceResult) {
     const amount = Number(state.amount || 0).toLocaleString('ja-JP');
-    const quickMic = state.entryVariant === 'c' ? `<button class="entry-amount-voice" data-action="entry-voice-open" aria-label="声で入力">${icon('mic_none')}</button>` : '';
-    return `<div class="entry-amount ${hasVoiceResult?'voice-updated':''}"><div class="entry-amount-meta"><span>支出金額</span><span class="entry-currency-chip">¥ JPY</span>${hasVoiceResult?entryVoiceMarker():''}</div><strong class="amount" id="amount-value">${amount}</strong>${quickMic}</div>`;
+    return `<div class="entry-amount ${hasVoiceResult?'voice-updated':''}"><strong class="amount" id="amount-value">¥ ${amount}</strong><button class="entry-currency-chip" data-action="entry-currency" aria-label="选择币种">JPY ${icon('arrow_drop_down')}</button></div>`;
+  }
+
+  function transactionSatisfactionCard({value,attribute}) {
+    const levels = [[2,'sentiment_very_dissatisfied','很低'],[4,'sentiment_dissatisfied','较低'],[6,'sentiment_neutral','一般'],[8,'sentiment_satisfied','满意'],[10,'sentiment_very_satisfied','很满意']];
+    const selected = levels.find(level=>level[0]===Number(value)) || levels[3];
+    return `<div class="entry-satisfaction-card"><div class="entry-satisfaction-head"><strong>满足度</strong><span>${selected[2]} · ${selected[0]}/10</span></div><div class="entry-satisfaction-options" role="radiogroup" aria-label="满足度">${levels.map(([score,face,label])=>`<button class="entry-satisfaction-option ${Number(value)===score?'active':''}" ${attribute}="${score}" role="radio" aria-checked="${Number(value)===score}" aria-label="${label}">${icon(face)}<small>${label}</small></button>`).join('')}</div></div>`;
   }
 
   function entryDetails(hasVoiceResult) {
     const categoryNeedsReview = hasVoiceResult && state.entryNeedsReview;
-    const voiceClass = hasVoiceResult ? 'voice-updated' : '';
+    const source = hasVoiceResult ? entryVoiceMarker() : '';
+    const categoryStatus = categoryNeedsReview
+      ? `<span class="entry-confirm-badge">需选择</span>`
+      : '';
+    const categoryMeta = source || categoryStatus ? `<span class="entry-form-subline">${source}${categoryStatus}</span>` : '';
+    const merchantMeta = hasVoiceResult ? `<span class="entry-form-subline">${source}</span>` : '';
     return `<div class="entry-form">
-      <button class="entry-form-row ${voiceClass} ${categoryNeedsReview?'needs-confirmation':''}" data-screen="category">${icon('category')}<span class="entry-form-label">カテゴリ</span><strong class="entry-form-value">${escapeHtml(state.entryCategory)}</strong>${categoryNeedsReview?'<span class="entry-confirm-badge">要確認</span>':hasVoiceResult?entryVoiceMarker():''}${icon('chevron_right')}</button>
-      <button class="entry-form-row ${voiceClass}" data-action="entry-date">${icon('calendar_today')}<span class="entry-form-label">日付</span><strong class="entry-form-value">2026年7月16日</strong>${hasVoiceResult?entryVoiceMarker():''}${icon('chevron_right')}</button>
-      <div class="entry-form-row ${voiceClass}">${icon('storefront')}<label class="entry-form-label" for="entry-merchant">店舗</label><input id="entry-merchant" class="entry-inline-input" data-entry-input="merchant" value="${escapeHtml(state.entryMerchant)}" aria-label="店舗">${hasVoiceResult?entryVoiceMarker():''}</div>
+      <button class="entry-form-row ${categoryNeedsReview?'needs-confirmation':''}" data-screen="category">${icon('restaurant')}<span class="entry-form-label">分类</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">${escapeHtml(state.entryCategory)}</strong>${icon('chevron_right')}</span>${categoryMeta}</span></button>
+      <button class="entry-form-row" data-action="entry-date">${icon('calendar_month')}<span class="entry-form-label">日期</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">2026年7月16日</strong>${icon('chevron_right')}</span></span></button>
+      <div class="entry-form-row">${icon('storefront')}<label class="entry-form-label" for="entry-merchant">商家</label><span class="entry-form-result"><span class="entry-form-mainline"><input id="entry-merchant" class="entry-inline-input" data-entry-input="merchant" value="${escapeHtml(state.entryMerchant)}" placeholder="输入店铺" aria-label="商家"></span>${merchantMeta}</span></div>
     </div>
-    <div class="entry-purpose-card"><span>用途</span><button class="entry-ledger-option daily ${state.entryLedger==='daily'?'active':''}" data-entry-ledger="daily">${icon('eco')}日常</button><button class="entry-ledger-option joy ${state.entryLedger==='joy'?'active':''}" data-entry-ledger="joy">${icon('favorite_border')}悦己</button></div>
-    <div class="entry-note-card"><label for="entry-note">${icon('edit_note')}メモ</label><input id="entry-note" data-entry-input="note" value="${escapeHtml(state.entryNote)}" placeholder="必要なときだけ追加" aria-label="メモ"></div>`;
+    <div class="entry-purpose-card"><span>用途</span><button class="entry-ledger-option daily ${state.entryLedger==='daily'?'active':''}" data-entry-ledger="daily" aria-pressed="${state.entryLedger==='daily'}">${icon('shield')}日常支出</button><button class="entry-ledger-option joy ${state.entryLedger==='joy'?'active':''}" data-entry-ledger="joy" aria-pressed="${state.entryLedger==='joy'}">${icon('auto_awesome')}悦己支出</button></div>
+    ${state.entryLedger==='joy'?transactionSatisfactionCard({value:state.entrySatisfaction,attribute:'data-entry-satisfaction'}):''}
+    <div class="entry-note-card">${icon('description')}<label for="entry-note">备注</label><input id="entry-note" data-entry-input="note" value="${escapeHtml(state.entryNote)}" placeholder="添加备注" aria-label="备注">${hasVoiceResult?source:''}${icon('chevron_right')}</div>`;
+  }
+
+  function entryContinuousControl() {
+    return `<div class="entry-continuous-row"><span>${state.entryContinuous?'记录后继续下一笔':'记录后返回主页'}</span><button data-action="entry-continuous" aria-pressed="${state.entryContinuous}">${state.entryContinuous?'关闭连续记账':'连续记账'}</button></div>`;
   }
 
   function entryManualDock() {
-    const voiceLaunch = `<button class="entry-voice-launch" data-action="entry-voice-open"><span class="material-symbols-rounded">mic_none</span><span class="entry-voice-launch-copy"><strong>声でまとめて入力</strong><small>金額・店舗・カテゴリ・日付を同じフォームへ</small></span>${icon('chevron_right')}</button>`;
+    const voiceLaunch = `<button class="entry-voice-launch" data-action="entry-voice-open"><span class="material-symbols-rounded">mic_none</span><span class="entry-voice-launch-copy"><strong>语音记录</strong><small>一次说出金额、商家、分类和日期</small></span>${icon('chevron_right')}</button>`;
     const decimalDisabled = true;
     const keys = ['1','2','3','4','5','6','7','8','9','00','0','.'];
-    const keypad = `${keys.map(key=>`<button class="entry-key" data-entry-key="${key}" ${key==='.'&&decimalDisabled?'disabled aria-label="JPY は小数入力できません"':''}>${key}</button>`).join('')}
-      <button class="entry-key" data-entry-key="backspace" aria-label="一文字削除">${icon('backspace')}</button>
+    const keypad = `${keys.map(key=>`<button class="entry-key" data-entry-key="${key}" ${key==='.'&&decimalDisabled?'disabled aria-label="JPY 不支持小数输入"':''}>${key}</button>`).join('')}
+      <button class="entry-key" data-entry-key="backspace" aria-label="删除一位">${icon('backspace')}</button>
       <button class="entry-key currency" data-action="entry-currency">¥&nbsp; JPY</button>
-      <button class="entry-key save" data-action="save-entry" ${state.entryVoiceApplied&&state.entryNeedsReview?'disabled aria-label="カテゴリを確認してから記録"':''}>記録</button>`;
-    return `<div class="entry-input-dock">${voiceLaunch}<div class="entry-keypad">${keypad}</div><div class="entry-continuous-row"><span>${state.entryContinuous?'保存後もこの画面を続けます':'1件保存するとホームへ戻ります'}</span><button data-action="entry-continuous">${state.entryContinuous?'連続を解除':'連続記帳'}</button></div></div>`;
+      <button class="entry-key save" data-action="save-entry" ${state.entryNeedsReview?'disabled aria-label="选择分类后才能记录"':''}>记录</button>`;
+    return `<div class="entry-input-dock">${voiceLaunch}<div class="entry-keypad">${keypad}</div>${entryContinuousControl()}</div>`;
   }
 
   function entryVoiceWave() {
@@ -1381,51 +1573,119 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   function entryVoiceDock() {
     const voiceState = state.entryVoiceState;
     const status = {
-      listening: ['聞いています','listening'],
-      processing: ['内容を整理しています','processing'],
-      review: ['聞き取り結果','review'],
-      unavailable: ['音声入力を利用できません','unavailable'],
-    }[voiceState] || ['聞いています','listening'];
-    const amount = Number(state.amount || 0).toLocaleString('ja-JP');
-    const transcript = voiceState === 'unavailable' ? 'マイクの利用が許可されていません' : voiceState === 'listening' ? '「松屋でランチ、1,200円…」' : voiceState === 'processing' ? '「松屋でランチ、1,200円」' : `「${escapeHtml(state.entryMerchant)}で ${amount}円」`;
-    const chips = voiceState === 'review' ? `<div class="entry-result-chips"><span class="entry-result-chip">¥${amount}</span><span class="entry-result-chip">${escapeHtml(state.entryMerchant)}</span><span class="entry-result-chip warning">${escapeHtml(state.entryCategory)} · 要確認</span><span class="entry-result-chip">${state.entryLedger==='joy'?'悦己':'日常'}</span></div>` : '<div class="entry-result-chips"></div>';
-    const core = voiceState === 'listening'
-      ? `<button class="entry-voice-core listening" data-action="entry-voice-stop" aria-label="音声入力を停止して解析">${icon('stop')}</button>`
+      idle: ['可以记录下一笔','idle'],
+      listening: ['正在聆听','listening'],
+      processing: ['正在整理内容','processing'],
+      review: ['已填入账目','review'],
+      unavailable: ['无法使用语音输入','unavailable'],
+    }[voiceState] || ['正在聆听','listening'];
+    const transcript = voiceState === 'idle'
+      ? '点按麦克风，说出下一笔账目'
+      : voiceState === 'review'
+      ? `“${escapeHtml(state.entryVoiceTranscript || `${state.entryMerchant}，午餐两千三百八十日元`)}”`
+      : voiceState === 'unavailable'
+        ? '尚未获得麦克风权限'
+        : (voiceState === 'listening' ? '“森林咖啡，午餐两千三百八十日元……”' : '“森林咖啡，午餐两千三百八十日元”');
+    const core = voiceState === 'idle'
+      ? `<button class="entry-voice-core idle" data-action="entry-voice-open" aria-label="录入下一笔">${icon('mic')}</button>`
+      : voiceState === 'listening'
+      ? `<button class="entry-voice-core listening" data-action="entry-voice-stop" aria-label="立即结束并解析">${icon('stop')}</button>`
       : voiceState === 'processing'
-        ? `<button class="entry-voice-core" disabled aria-label="解析中">${icon('progress_activity')}</button>`
+        ? `<button class="entry-voice-core" disabled aria-label="识别处理中">${icon('progress_activity')}</button>`
         : voiceState === 'review'
-          ? `<button class="entry-voice-core review" disabled aria-label="識別結果をフォームへ反映しました">${icon('task_alt')}</button>`
-          : `<button class="entry-voice-core" disabled aria-label="マイクを利用できません">${icon('mic_off')}</button>`;
+          ? `<button class="entry-voice-core review" data-action="entry-voice-rerecord" aria-label="重新录音">${icon('mic')}</button>`
+          : `<button class="entry-voice-core" disabled aria-label="无法使用麦克风">${icon('mic_off')}</button>`;
     const help = {
-      listening: '話し終えたら赤い停止ボタンを押してください',
-      processing: '金額とフォームの値を一つの状態へ反映しています',
-      review: 'フォームのオレンジ項目を確認すると記録できます',
-      unavailable: '設定で許可するか、キーボード入力を続けてください',
+      idle: '麦克风不会自动开启',
+      listening: '说完稍候将自动识别，也可点按立即完成',
+      processing: '正在把识别结果填入同一份表单',
+      review: '点按麦克风重新录音，也可修改后直接记录',
+      unavailable: '请前往设置授权，或点右上角切换键盘',
     }[voiceState];
     const actions = voiceState === 'review'
-      ? `<div class="entry-voice-actions"><button class="secondary-btn" data-action="entry-voice-rerecord">元に戻して録り直す</button><button class="primary-btn" data-action="entry-voice-keep">フォームで確認</button></div>`
+      ? `<div class="entry-voice-actions single"><button class="primary-btn entry-voice-save" data-action="save-entry">${icon('receipt_long')}记录</button></div>`
       : voiceState === 'unavailable'
-        ? `<div class="entry-voice-actions"><button class="secondary-btn" data-action="entry-mic-settings">設定を開く</button><button class="primary-btn" data-action="entry-voice-cancel">キーボードを使う</button></div>`
-        : `<div class="entry-voice-actions single"><button class="secondary-btn" data-action="entry-voice-cancel">中止して元の内容へ</button></div>`;
-    return `<div class="entry-voice-dock"><div class="entry-voice-status ${status[1]}" role="status" aria-live="polite"><span class="status-dot"></span><strong>${status[0]}</strong><span class="entry-private-note">${icon('shield')}端末内で処理</span></div><div class="entry-voice-main"><div class="entry-voice-copy"><strong>${voiceState==='review'?'この内容を同じフォームで確認':'声で取引を入力'}</strong><p class="entry-transcript">${transcript}</p>${chips}${entryVoiceWave()}</div><div>${core}<p class="entry-voice-help">${help}</p></div></div>${actions}</div>`;
+        ? `<div class="entry-voice-actions single"><button class="primary-btn" data-action="entry-mic-settings">前往设置</button></div>`
+        : `<div class="entry-voice-actions empty" aria-hidden="true"></div>`;
+    return `<div class="entry-voice-dock is-${status[1]}"><div class="entry-voice-status ${status[1]}" role="status" aria-live="polite"><span class="entry-private-note">${icon('shield')}仅在设备内处理</span><span class="entry-voice-state-label"><span class="status-dot"></span><strong>${status[0]}</strong></span><button class="entry-voice-keyboard" data-action="entry-voice-keyboard" aria-label="切换到键盘输入">${icon('keyboard')}</button></div><div class="entry-voice-main"><div class="entry-voice-copy"><span class="sr-only">用语音填写账目</span><p class="entry-transcript">${transcript}</p>${entryVoiceWave()}</div><div>${core}<p class="entry-voice-help">${help}</p></div></div>${actions}${entryContinuousControl()}</div>`;
   }
 
-  function accountingEntry(mode) {
-    const isVoice = mode === 'voice';
+  function accountingEntry() {
+    const isVoice = state.entryInputMode === 'voice';
     const hasVoiceResult = state.entryVoiceApplied || (isVoice && state.entryVoiceState === 'review');
-    const reviewBanner = !isVoice && state.entryVoiceApplied ? `<div class="entry-review-banner">${icon('fact_check')}<span>音声から内容を反映しました。<strong>カテゴリを確認</strong>すると記録できます。</span></div>` : '';
-    return `<section class="screen accounting-screen accounting-${mode} accounting-variant-${state.entryVariant}">${entryHeader()}${entryMethodSwitch(mode)}<div class="entry-body">${entryAmount(hasVoiceResult)}${reviewBanner}${entryDetails(hasVoiceResult)}</div>${isVoice?entryVoiceDock():entryManualDock()}</section>`;
+    const reviewBanner = !isVoice && state.entryVoiceApplied && state.entryNeedsReview ? `<div class="entry-review-banner">${icon('fact_check')}<span>语音内容已填入，请先选择<strong>分类</strong>再记录。</span></div>` : '';
+    return `<section class="screen accounting-screen accounting-${isVoice?'voice':'manual'} accounting-variant-a" lang="zh-CN">${entryHeader()}${entryMethodSwitch(isVoice?'voice':'manual')}<div class="entry-body">${entryAmount(hasVoiceResult)}${reviewBanner}${entryDetails(hasVoiceResult)}</div>${isVoice?entryVoiceDock():entryManualDock()}</section>`;
   }
 
-  function entry() { return accountingEntry('manual'); }
-
-  function voice() { return accountingEntry('voice'); }
+  function entry() { return accountingEntry(); }
 
   function ocr() { return `<section class="screen">${backHeader('レシート撮影')}<div class="camera"><div class="viewfinder">${icon('document_scanner')}<span style="position:absolute;bottom:34px;font-size:10px">レシート全体を枠内に</span></div></div><div class="camera-controls"><button class="icon-btn" data-action="toast" data-message="アルバムを開く">${icon('photo_library')}</button><button class="shutter" data-action="ocr-capture" aria-label="撮影"></button><button class="icon-btn" data-action="toast" data-message="フラッシュ切替">${icon('flash_off')}</button></div><p class="hint" style="text-align:center">画像は端末内で処理されます。</p></section>`; }
 
   function category() { const groups=[['restaurant','食費','スーパー、外食、カフェ'],['train','交通','電車、バス、タクシー'],['home','住居','家賃、光熱費'],['spa','趣味・悦己','趣味、旅行、学び'],['health_and_safety','健康','医療、運動']]; return `<section class="screen">${backHeader('カテゴリを選択')}<input class="search" placeholder="カテゴリを検索" aria-label="カテゴリを検索"><div class="section-title"><h2>最近使ったカテゴリ</h2></div><div class="filter-row"><button class="filter-chip active" data-action="pick-category">食費</button><button class="filter-chip" data-action="pick-category">交通</button><button class="filter-chip" data-action="pick-category">カフェ</button></div><div class="section-title"><h2>すべて</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div><div class="flat-card">${groups.map(([ico,n,m])=>`<button class="tap-row row-divider" data-action="pick-category"><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${n}</strong><small>${m}</small></span>${icon('expand_more')}</button>`).join('')}</div></section>`; }
 
-  function edit() { return `<section class="screen">${backHeader('取引を編集',`<button class="icon-btn" data-action="delete">${icon('delete')}</button>`)}<div class="amount-display"><span>支出金額</span><strong class="amount">¥3,280</strong></div><div class="flat-card"><div class="form-row"><label>カテゴリ</label><strong>食費 · スーパー</strong>${icon('chevron_right')}</div><div class="form-row"><label>日付</label><strong>2026年7月10日</strong>${icon('chevron_right')}</div><div class="form-row"><label>店舗</label><strong>ライフ</strong>${icon('chevron_right')}</div><div class="form-row"><label>メモ</label><strong>週末の買い出し</strong>${icon('chevron_right')}</div><div class="form-row"><label>帳本</label><strong style="color:var(--hp-daily-text)">日常</strong>${icon('chevron_right')}</div></div><div style="height:14px"></div><button class="primary-btn" data-action="toast" data-message="変更を保存しました">変更を保存</button><button class="ghost-btn" data-action="delete">この取引を削除</button></section>`; }
+  function editCurrencySymbol(currency=state.editCurrency) { return ({JPY:'¥',USD:'$',EUR:'€',CNY:'¥'})[currency] || currency; }
+
+  function formatEditAmount(value=state.editAmount,currency=state.editCurrency) {
+    const amount=Number(value||0);
+    return amount.toLocaleString(currency==='JPY'?'ja-JP':'en-US',currency==='JPY'?{maximumFractionDigits:0}:{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function updateEditJpyAmount() {
+    state.editJpyAmount=state.editCurrency==='JPY'
+      ? String(Math.round(Number(state.editAmount||0)))
+      : String(Math.round(Number(state.editAmount||0)*Number(state.editRate||0)));
+  }
+
+  function editExchangeCard() {
+    if(state.editCurrency==='JPY') return '';
+    return `<div class="entry-form edit-exchange-card" aria-label="外币换算">
+      <div class="entry-form-row">${icon('currency_exchange')}<label class="entry-form-label" for="edit-rate">汇率</label><span class="entry-form-result"><span class="entry-form-mainline"><span class="entry-form-value">1 ${state.editCurrency} = ¥</span><input id="edit-rate" class="entry-inline-input" data-edit-input="rate" inputmode="decimal" value="${escapeHtml(state.editRate)}" aria-label="适用汇率"></span></span></div>
+      <div class="entry-form-row">${icon('currency_yen')}<span class="entry-form-label">日元</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value" id="edit-jpy-value">¥ ${Number(state.editJpyAmount||0).toLocaleString('ja-JP')}</strong></span><span class="entry-form-subline"><span>根据原币金额换算</span></span></span></div>
+      <div class="entry-form-row">${icon('event_available')}<span class="entry-form-label">汇率日</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">${escapeHtml(state.editRateDate)}</strong></span></span></div>
+    </div>`;
+  }
+
+  function editAmountSheet() {
+    const keys=state.editCurrency==='JPY'?['1','2','3','4','5','6','7','8','9','00','0','backspace']:['1','2','3','4','5','6','7','8','9','0','.','backspace'];
+    return `<h3>编辑金额</h3><p class="hint">币种来自原交易，编辑时不会改变。</p><div class="edit-amount-sheet-display"><strong id="edit-amount-draft">${editCurrencySymbol()} ${formatEditAmount(state.editAmountDraft,state.editCurrency)}</strong><span>${state.editCurrency}</span></div><div class="entry-keypad">${keys.map(key=>`<button class="entry-key" data-edit-amount-key="${key}" aria-label="${key==='backspace'?'删除一位':key}">${key==='backspace'?icon('backspace'):key}</button>`).join('')}</div><div class="edit-amount-sheet-actions"><button class="secondary-btn" data-action="close-modal">取消</button><button class="primary-btn" data-action="edit-amount-confirm" ${Number(state.editAmountDraft)>0?'':'disabled'}>确定</button></div>`;
+  }
+
+  function resetEditTransaction(mode='daily') {
+    state.editAmount='3280'; state.editAmountDraft='3280'; state.editCurrency='JPY'; state.editJpyAmount='3280'; state.editRate='1'; state.editRateDate='2026年7月10日'; state.editCategory='食费 > 超市'; state.editDate='2026年7月10日'; state.editMerchant='Life 超市'; state.editLedger=mode==='joy'?'joy':'daily'; state.editNote='周末采购'; state.editSatisfaction=8; state.editSubmitting=false;
+    if(mode==='foreign'){ state.editCurrency='USD'; state.editAmount='24.80'; state.editAmountDraft='24.80'; state.editRate='148.52'; state.editRateDate='2026年7月10日'; updateEditJpyAmount(); }
+  }
+
+  function showEditDemo(demo) {
+    resetEditTransaction(demo);
+    if(demo==='submitting') state.editSubmitting=true;
+    state.screen='edit'; closeModal(); render(); document.getElementById('app-screen').scrollTop=0;
+  }
+
+  function exitEdit(message) {
+    const previous=state.history.pop()||'list';
+    state.editSubmitting=false; setScreen(previous,false); toast(message);
+  }
+
+  function edit() {
+    const amount=`${editCurrencySymbol()} ${formatEditAmount()}`;
+    const satisfaction=state.editLedger==='joy'?transactionSatisfactionCard({value:state.editSatisfaction,attribute:'data-edit-satisfaction'}):'';
+    return `<section class="screen accounting-screen transaction-edit-screen" lang="zh-CN">
+      <header class="entry-header"><button class="back-btn" data-action="back" aria-label="返回">${icon('chevron_left')}</button><h1>明细编辑</h1><button class="icon-btn entry-header-action edit-header-delete" data-action="edit-delete" aria-label="删除这笔交易">${icon('delete_outline')}</button></header>
+      <div class="entry-body">
+        <button class="entry-amount edit-amount-trigger" data-action="edit-amount" aria-label="编辑金额，当前 ${amount} ${state.editCurrency}"><strong class="amount" id="edit-amount-value">${amount}</strong><span class="edit-amount-tail"><span class="entry-currency-chip">${state.editCurrency}</span>${icon('edit')}</span></button>
+        ${editExchangeCard()}
+        <div class="entry-form">
+          <button class="entry-form-row" data-action="edit-category">${icon('restaurant')}<span class="entry-form-label">分类</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">${escapeHtml(state.editCategory)}</strong>${icon('chevron_right')}</span></span></button>
+          <button class="entry-form-row" data-action="edit-date">${icon('calendar_month')}<span class="entry-form-label">日期</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">${escapeHtml(state.editDate)}</strong>${icon('chevron_right')}</span></span></button>
+          <div class="entry-form-row">${icon('storefront')}<label class="entry-form-label" for="edit-merchant">商家</label><span class="entry-form-result"><span class="entry-form-mainline"><input id="edit-merchant" class="entry-inline-input" data-edit-input="merchant" value="${escapeHtml(state.editMerchant)}" placeholder="输入店铺" aria-label="商家"></span></span></div>
+        </div>
+        <div class="entry-purpose-card"><span>用途</span><button class="entry-ledger-option daily ${state.editLedger==='daily'?'active':''}" data-edit-ledger="daily" aria-pressed="${state.editLedger==='daily'}">${icon('shield')}日常支出</button><button class="entry-ledger-option joy ${state.editLedger==='joy'?'active':''}" data-edit-ledger="joy" aria-pressed="${state.editLedger==='joy'}">${icon('auto_awesome')}悦己支出</button></div>
+        ${satisfaction}
+        <div class="entry-note-card">${icon('description')}<label for="edit-note">备注</label><input id="edit-note" data-edit-input="note" value="${escapeHtml(state.editNote)}" placeholder="添加备注" aria-label="备注">${icon('chevron_right')}</div>
+      </div>
+      <div class="edit-action-dock"><button class="primary-btn" data-action="save-edit" ${state.editSubmitting?'disabled':''}>${state.editSubmitting?`${icon('progress_activity')}保存中…`:`${icon('check')}保存`}</button></div>
+    </section>`;
+  }
 
   function family() { return `<section class="screen">${backHeader('家族同期')}<div class="avatar-stack"><span class="avatar">私</span><span class="avatar">花</span><span class="avatar">太</span></div><div style="text-align:center"><h2 class="display" style="font-size:22px;margin:0">家族と家計を見守る</h2><p class="hint">必要な情報だけを、E2EE で安全に共有します。</p></div><button class="action-card" data-action="create-family"><span class="row-icon">${icon('add_circle')}</span><span class="row-copy"><strong>新しい家族を作る</strong><small>招待コードを発行します</small></span>${icon('chevron_right')}</button><button class="action-card" data-screen="join"><span class="row-icon shared">${icon('login')}</span><span class="row-copy"><strong>家族に参加する</strong><small>6桁の招待コードを入力</small></span>${icon('chevron_right')}</button><p class="hint" style="text-align:center;margin-top:24px">${icon('shield')} サーバーは内容を読むことができません。</p></section>`; }
 
@@ -1445,7 +1705,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
 
   function legal() { return `<section class="screen">${backHeader('法的情報・応援')}<div class="flat-card"><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('privacy_tip')}</span><span class="row-copy"><strong>プライバシーポリシー</strong><small>データの扱いについて</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('description')}</span><span class="row-copy"><strong>利用規約</strong><small>サービス利用条件</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('storefront')}</span><span class="row-copy"><strong>特定商取引法に基づく表記</strong><small>日本向け法定表示</small></span>${icon('chevron_right')}</button><button class="tap-row" data-action="legal-doc"><span class="row-icon">${icon('code')}</span><span class="row-copy"><strong>オープンソースライセンス</strong><small>使用ライブラリ</small></span>${icon('chevron_right')}</button></div><div class="section-title"><h2>開発を応援</h2></div><div class="card"><span class="row-icon joy">${icon('favorite')}</span><h2 class="display" style="font-size:18px">静かな家計簿を育てる</h2><p class="legal-copy">スポンサーリンクは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。</p><button class="secondary-btn" data-action="toast" data-message="外部スポンサーサイトを確認">スポンサーについて</button></div></section>`; }
 
-  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, voice, ocr, category, edit, family, join, group, onboarding, preferences, lock, settings, profile, legal };
+  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, join, group, onboarding, preferences, lock, settings, profile, legal };
 
   function render() {
     document.documentElement.dataset.theme = state.theme;
@@ -1459,43 +1719,185 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     const d=info[state.screen];
     ['inspect-kicker','inspect-title','inspect-copy','inspect-structure','inspect-states','inspect-build'].forEach((id,i)=>document.getElementById(id).textContent=d[i]);
     document.getElementById('home-design-note').hidden=state.screen!=='home';
-    const isEntryScreen=['entry','voice'].includes(state.screen);
+    const isEntryScreen=state.screen==='entry';
     const entryPanel=document.getElementById('entry-design-note');
     entryPanel.hidden=!isEntryScreen;
-    entryPanel.querySelectorAll('[data-entry-variant]').forEach(button=>button.classList.toggle('active',button.dataset.entryVariant===state.entryVariant));
-    const rationale={a:'默认 A 保留现有状态机，只把隐藏的“点空白退出”改为明确按钮，并增加识别来源与待确认提示。',b:'B 用显式输入方法切换降低首次学习成本；共享表单仍不切页，但 Flutter 需要恢复一个轻量模式控件。',c:'C 把麦克风放在金额旁，适合熟练用户；底部面板更紧凑，但金额区的信息密度更高。'};
-    document.getElementById('entry-variant-rationale').textContent=rationale[state.entryVariant];
-    entryPanel.querySelectorAll('[data-entry-demo]').forEach(button=>{ const demo=button.dataset.entryDemo; const active=(demo==='manual'&&state.screen==='entry')||(demo===state.entryVoiceState&&state.screen==='voice'); button.classList.toggle('active',active); });
+    document.getElementById('entry-variant-rationale').textContent='方案 1 已选：全部语音状态留在同一页面；停顿自动解析，中央麦克风复用为重新录音，连续记账状态始终保留。';
+    entryPanel.querySelectorAll('[data-entry-demo]').forEach(button=>{ const demo=button.dataset.entryDemo; const active=state.screen==='entry'&&((demo==='manual'&&state.entryInputMode==='keyboard')||(state.entryInputMode==='voice'&&demo===state.entryVoiceState)); button.classList.toggle('active',active); });
+    const isShoppingForm=state.screen==='shopping-form';
+    const shoppingFormPanel=document.getElementById('shopping-form-design-note');
+    shoppingFormPanel.hidden=!isShoppingForm;
+    shoppingFormPanel.querySelectorAll('[data-shopping-demo]').forEach(button=>{ const demo=button.dataset.shoppingDemo; const active=isShoppingForm&&((demo==='edit'&&state.shoppingFormMode==='edit')||(demo!=='edit'&&state.shoppingFormMode==='create'&&demo===state.shoppingVoiceState)); button.classList.toggle('active',active); });
+    const isEditScreen=state.screen==='edit';
+    const editPanel=document.getElementById('edit-design-note');
+    editPanel.hidden=!isEditScreen;
+    editPanel.querySelectorAll('[data-edit-demo]').forEach(button=>{ const demo=button.dataset.editDemo; const active=isEditScreen&&((demo==='foreign'&&state.editCurrency!=='JPY')||(demo==='submitting'&&state.editSubmitting)||(demo==='joy'&&state.editCurrency==='JPY'&&state.editLedger==='joy'&&!state.editSubmitting)||(demo==='daily'&&state.editCurrency==='JPY'&&state.editLedger==='daily'&&!state.editSubmitting)); button.classList.toggle('active',active); });
   }
-  function setScreen(id, push=true){ if(!renderers[id]) return; if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; }
+  function setScreen(id, push=true){ if(!renderers[id]) return; if(state.screen==='entry'&&state.entryInputMode==='voice'&&id!=='entry') normalizeEntryVoiceBeforeExit(); if(state.screen==='shopping-form'&&id!=='shopping-form') normalizeShoppingVoiceBeforeExit(); if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; }
   function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t.timer); t.timer=setTimeout(()=>t.classList.remove('show'),1500); }
   function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal').classList.add('open'); }
   function closeModal(){ document.getElementById('modal').classList.remove('open'); }
   function filterTransactions(q){ document.querySelectorAll('#transaction-list .list-transaction').forEach(x=>x.style.display=(x.dataset.search||x.textContent).toLowerCase().includes(q.toLowerCase())?'flex':'none'); }
   function resetShoppingFilters(){ state.shoppingLedger='all'; state.shoppingPrivateOnly=false; state.shoppingCategoryIds=[]; }
 
+  let shoppingVoiceSequence = 0;
+  let shoppingVoiceAutoFinishTimer = null;
+  let shoppingVoiceProcessingTimer = null;
+  const shoppingVoiceAutoFinishDelayMs = 3000;
+  function clearShoppingVoiceTimers(){
+    clearTimeout(shoppingVoiceAutoFinishTimer); clearTimeout(shoppingVoiceProcessingTimer);
+    shoppingVoiceAutoFinishTimer=null; shoppingVoiceProcessingTimer=null;
+  }
+  function invalidateShoppingVoiceSession(){ clearShoppingVoiceTimers(); shoppingVoiceSequence+=1; return shoppingVoiceSequence; }
+  function resetShoppingForm({mode='create'}={}){
+    invalidateShoppingVoiceSession();
+    state.shoppingFormMode=mode;
+    state.shoppingFormName=mode==='edit'?'コーヒー豆':'';
+    state.shoppingFormQuantity=mode==='edit'?2:1;
+    state.shoppingFormLedger=mode==='edit'?'joy':'daily';
+    state.shoppingFormListType=mode==='edit'?'private':'public';
+    state.shoppingFormCategory=mode==='edit'?'食費 > 嗜好品':'';
+    state.shoppingFormPrice=mode==='edit'?'1280':'';
+    state.shoppingFormNote=mode==='edit'?'中煎り・200g':'';
+    state.shoppingFormSubmitting=false; state.shoppingFormError='';
+    state.shoppingVoiceState='manual'; state.shoppingVoiceTranscript=''; state.shoppingVoiceApplied=false; state.shoppingVoiceSnapshot=null;
+  }
+  function captureShoppingVoiceSnapshot(){
+    state.shoppingVoiceSnapshot={ name:state.shoppingFormName, quantity:state.shoppingFormQuantity, ledger:state.shoppingFormLedger, listType:state.shoppingFormListType, category:state.shoppingFormCategory, price:state.shoppingFormPrice, note:state.shoppingFormNote };
+  }
+  function restoreShoppingVoiceSnapshot(){
+    const snapshot=state.shoppingVoiceSnapshot; if(!snapshot) return;
+    state.shoppingFormName=snapshot.name; state.shoppingFormQuantity=snapshot.quantity; state.shoppingFormLedger=snapshot.ledger; state.shoppingFormListType=snapshot.listType; state.shoppingFormCategory=snapshot.category; state.shoppingFormPrice=snapshot.price; state.shoppingFormNote=snapshot.note;
+  }
+  function normalizeShoppingVoiceBeforeExit(){
+    const transient=['listening','processing','unavailable'].includes(state.shoppingVoiceState);
+    invalidateShoppingVoiceSession();
+    if(transient) restoreShoppingVoiceSnapshot();
+    state.shoppingVoiceState='manual'; state.shoppingVoiceSnapshot=null; state.shoppingFormSubmitting=false;
+  }
+  function scheduleShoppingVoiceAutoFinish(){
+    clearTimeout(shoppingVoiceAutoFinishTimer);
+    const sequence=shoppingVoiceSequence;
+    shoppingVoiceAutoFinishTimer=setTimeout(()=>finishShoppingVoiceListening(sequence),shoppingVoiceAutoFinishDelayMs);
+  }
+  function beginShoppingVoice(){
+    if(state.shoppingFormMode==='edit') return;
+    invalidateShoppingVoiceSession(); captureShoppingVoiceSnapshot();
+    state.shoppingVoiceState='listening'; state.shoppingVoiceTranscript=''; state.shoppingVoiceApplied=false; state.shoppingFormError=''; state.screen='shopping-form'; closeModal(); render(); scheduleShoppingVoiceAutoFinish();
+  }
+  function finishShoppingVoiceListening(sequence=shoppingVoiceSequence){
+    if(sequence!==shoppingVoiceSequence||state.screen!=='shopping-form'||state.shoppingVoiceState!=='listening') return;
+    clearTimeout(shoppingVoiceAutoFinishTimer); shoppingVoiceAutoFinishTimer=null;
+    const processingSequence=++shoppingVoiceSequence;
+    state.shoppingVoiceState='processing'; render();
+    shoppingVoiceProcessingTimer=setTimeout(()=>{
+      if(processingSequence!==shoppingVoiceSequence||state.screen!=='shopping-form'||state.shoppingVoiceState!=='processing') return;
+      shoppingVoiceProcessingTimer=null; applyShoppingVoiceResult(); render();
+    },650);
+  }
+  function applyShoppingVoiceResult(){
+    const preservedListType=state.shoppingFormListType;
+    state.shoppingFormName='牛乳'; state.shoppingFormQuantity=2; state.shoppingFormLedger='daily'; state.shoppingFormCategory='食費 > 乳製品'; state.shoppingFormPrice='500';
+    state.shoppingFormListType=preservedListType;
+    state.shoppingVoiceTranscript='牛乳を2本、日常、参考価格500円'; state.shoppingVoiceApplied=true; state.shoppingVoiceState='review'; state.shoppingFormError='';
+  }
+  function switchShoppingVoiceToKeyboard(){
+    const keepParsed=state.shoppingVoiceState==='review';
+    invalidateShoppingVoiceSession();
+    if(!keepParsed) restoreShoppingVoiceSnapshot();
+    state.shoppingVoiceState='manual'; state.shoppingVoiceSnapshot=null; render();
+  }
+  function rerecordShoppingVoice(){
+    invalidateShoppingVoiceSession(); restoreShoppingVoiceSnapshot(); state.shoppingVoiceSnapshot=null; beginShoppingVoice();
+  }
+  function showShoppingVoiceDemo(demo){
+    if(demo==='edit') resetShoppingForm({mode:'edit'}); else resetShoppingForm();
+    state.screen='shopping-form';
+    let autoFinish=false;
+    if(demo==='listening'){ captureShoppingVoiceSnapshot(); state.shoppingVoiceState='listening'; autoFinish=true; }
+    else if(demo==='review'){ captureShoppingVoiceSnapshot(); applyShoppingVoiceResult(); }
+    else if(demo==='unavailable'){ captureShoppingVoiceSnapshot(); state.shoppingVoiceState='unavailable'; }
+    render(); document.getElementById('app-screen').scrollTop=0;
+    if(autoFinish) scheduleShoppingVoiceAutoFinish();
+  }
+  function shoppingFormCategoryPicker(){
+    const categories=['食費 > 乳製品','食費 > 食料品','日用品 > 消耗品','趣味 > コレクション'];
+    return `<h3>カテゴリを選ぶ</h3><p class="hint">ShoppingItemFormScreen と同じカテゴリ階層を表示します。</p><div class="flat-card">${categories.map((category,index)=>`<button class="tap-row ${index<categories.length-1?'row-divider':''}" data-action="shopping-form-category-select" data-category="${category}"><span class="row-copy"><strong>${category}</strong></span>${state.shoppingFormCategory===category?icon('check'):icon('chevron_right')}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`;
+  }
+
   let entryVoiceSequence = 0;
+  let entryVoiceAutoFinishTimer = null;
+  let entryVoiceProcessingTimer = null;
+  const entryVoiceAutoFinishDelayMs = 3000;
+  function clearEntryVoiceTimers(){
+    clearTimeout(entryVoiceAutoFinishTimer); clearTimeout(entryVoiceProcessingTimer);
+    entryVoiceAutoFinishTimer=null; entryVoiceProcessingTimer=null;
+  }
+  function invalidateEntryVoiceSession(){ clearEntryVoiceTimers(); entryVoiceSequence+=1; return entryVoiceSequence; }
+  function normalizeEntryVoiceBeforeExit(){
+    const transient=['listening','processing','unavailable'].includes(state.entryVoiceState);
+    const preservesRecognizedResult=transient&&state.entryVoiceMode==='append'&&state.entryVoiceApplied;
+    invalidateEntryVoiceSession();
+    if(!transient) return;
+    if(preservesRecognizedResult){ state.entryVoiceMode='replace'; state.entryVoiceState='review'; return; }
+    restoreEntrySnapshot(); state.entrySnapshot=null; state.entryReviewPending=false; state.entryVoiceMode='replace'; state.entryVoiceState='review'; state.entryInputMode='keyboard';
+  }
   function captureEntrySnapshot(){
-    state.entrySnapshot = { amount:state.amount, merchant:state.entryMerchant, category:state.entryCategory, ledger:state.entryLedger, note:state.entryNote, voiceApplied:state.entryVoiceApplied, needsReview:state.entryNeedsReview };
+    state.entrySnapshot = { amount:state.amount, merchant:state.entryMerchant, category:state.entryCategory, ledger:state.entryLedger, note:state.entryNote, voiceApplied:state.entryVoiceApplied, voiceTranscript:state.entryVoiceTranscript, reviewPending:state.entryReviewPending, needsReview:state.entryNeedsReview };
   }
   function restoreEntrySnapshot(){
     if(!state.entrySnapshot) return;
     const snapshot=state.entrySnapshot;
-    state.amount=snapshot.amount; state.entryMerchant=snapshot.merchant; state.entryCategory=snapshot.category; state.entryLedger=snapshot.ledger; state.entryNote=snapshot.note; state.entryVoiceApplied=snapshot.voiceApplied; state.entryNeedsReview=snapshot.needsReview;
+    state.amount=snapshot.amount; state.entryMerchant=snapshot.merchant; state.entryCategory=snapshot.category; state.entryLedger=snapshot.ledger; state.entryNote=snapshot.note; state.entryVoiceApplied=snapshot.voiceApplied; state.entryVoiceTranscript=snapshot.voiceTranscript||''; state.entryReviewPending=snapshot.reviewPending; state.entryNeedsReview=snapshot.needsReview;
   }
-  function beginEntryVoice(){
-    captureEntrySnapshot(); entryVoiceSequence+=1; state.entryVoiceState='listening'; state.entryVoiceApplied=false; state.entryNeedsReview=false; state.screen='voice'; closeModal(); render();
+  function scheduleEntryVoiceAutoFinish(){
+    clearTimeout(entryVoiceAutoFinishTimer);
+    const sequence=entryVoiceSequence;
+    entryVoiceAutoFinishTimer=setTimeout(()=>finishEntryVoiceListening(sequence),entryVoiceAutoFinishDelayMs);
+  }
+  function beginEntryVoice({append=false}={}){
+    invalidateEntryVoiceSession();
+    if(!append){ captureEntrySnapshot(); state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; }
+    else { state.entryVoiceMode='append'; state.entryReviewPending=true; }
+    state.entryInputMode='voice'; state.entryVoiceState='listening'; state.screen='entry'; closeModal(); render(); scheduleEntryVoiceAutoFinish();
+  }
+  function finishEntryVoiceListening(sequence=entryVoiceSequence){
+    if(sequence!==entryVoiceSequence||state.screen!=='entry'||state.entryInputMode!=='voice'||state.entryVoiceState!=='listening') return;
+    clearTimeout(entryVoiceAutoFinishTimer); entryVoiceAutoFinishTimer=null;
+    const processingSequence=++entryVoiceSequence;
+    state.entryVoiceState='processing'; render();
+    entryVoiceProcessingTimer=setTimeout(()=>{
+      if(processingSequence!==entryVoiceSequence||state.screen!=='entry'||state.entryInputMode!=='voice'||state.entryVoiceState!=='processing') return;
+      entryVoiceProcessingTimer=null; applyEntryVoiceResult(); render();
+    },650);
   }
   function applyEntryVoiceResult(){
-    state.amount='1200'; state.entryMerchant='松屋'; state.entryCategory='食費 · 外食'; state.entryLedger='daily'; state.entryVoiceState='review'; state.entryNeedsReview=true;
+    if(state.entryVoiceMode==='append'){
+      const addition=state.entryVoiceTranscript.includes('和同事一起')?'由我付款':'和同事一起';
+      state.entryNote=[state.entryNote,addition].filter(Boolean).join('，');
+      state.entryVoiceTranscript=[state.entryVoiceTranscript,addition].filter(Boolean).join('；');
+    } else {
+      state.amount='2380'; state.entryMerchant='森林咖啡'; state.entryCategory='食费 > 外出就餐'; state.entryLedger='daily'; state.entryNote='午餐和咖啡'; state.entryVoiceTranscript='森林咖啡，午餐两千三百八十日元';
+    }
+    state.entryVoiceMode='replace'; state.entryVoiceState='review'; state.entryVoiceApplied=true; state.entryReviewPending=true; state.entryNeedsReview=false;
+  }
+  function switchEntryVoiceToKeyboard(){
+    const keepParsed=state.entryVoiceState==='review'||(state.entryVoiceMode==='append'&&state.entryVoiceApplied);
+    invalidateEntryVoiceSession();
+    if(!keepParsed) restoreEntrySnapshot();
+    if(keepParsed) state.entryVoiceApplied=true;
+    state.entryReviewPending=false; state.entryVoiceMode='replace'; state.entryVoiceState='review'; state.entryInputMode='keyboard'; state.entrySnapshot=null; state.screen='entry'; render();
   }
   function showEntryDemo(demo){
-    entryVoiceSequence+=1;
-    if(demo==='manual'){ state.screen='entry'; state.entryVoiceApplied=false; state.entryNeedsReview=false; state.entryVoiceState='review'; state.entrySnapshot=null; }
-    else if(demo==='listening'){ captureEntrySnapshot(); state.screen='voice'; state.entryVoiceState='listening'; state.entryVoiceApplied=false; state.entryNeedsReview=false; }
-    else if(demo==='review'){ if(!state.entrySnapshot) captureEntrySnapshot(); applyEntryVoiceResult(); state.screen='voice'; }
-    else if(demo==='unavailable'){ captureEntrySnapshot(); state.screen='voice'; state.entryVoiceState='unavailable'; state.entryVoiceApplied=false; state.entryNeedsReview=false; }
+    invalidateEntryVoiceSession();
+    let autoFinish=false;
+    if(demo==='manual'){ state.screen='entry'; state.entryInputMode='keyboard'; state.amount='0'; state.entryMerchant=''; state.entryCategory='食费 > 外出就餐'; state.entryNote=''; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entryVoiceState='review'; state.entrySnapshot=null; }
+    else if(demo==='listening'){ captureEntrySnapshot(); state.screen='entry'; state.entryInputMode='voice'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceState='listening'; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; autoFinish=true; }
+    else if(demo==='review'){ if(!state.entrySnapshot) captureEntrySnapshot(); state.entryInputMode='voice'; state.entryVoiceMode='replace'; applyEntryVoiceResult(); state.screen='entry'; }
+    else if(demo==='idle'){ state.screen='entry'; state.entryInputMode='voice'; state.amount='0'; state.entryMerchant=''; state.entryNote=''; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceState='idle'; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryContinuous=true; }
+    else if(demo==='unavailable'){ captureEntrySnapshot(); state.screen='entry'; state.entryInputMode='voice'; state.entryVoiceMode='replace'; state.entryVoiceState='unavailable'; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; }
     render();
+    if(autoFinish) scheduleEntryVoiceAutoFinish();
   }
 
   let shoppingActionItem = null;
@@ -1526,27 +1928,65 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   document.addEventListener('pointercancel', finishShoppingPress);
   document.addEventListener('click', e=>{ if(Date.now()<shoppingPress.suppressClickUntil && e.target.closest?.('[data-shopping-actions]')){ e.preventDefault(); e.stopImmediatePropagation(); } },true);
   document.addEventListener('input', e=>{
-    const input=e.target.closest?.('[data-entry-input]'); if(!input) return;
-    if(input.dataset.entryInput==='merchant') state.entryMerchant=input.value;
-    if(input.dataset.entryInput==='note') state.entryNote=input.value;
+    const input=e.target.closest?.('[data-entry-input]');
+    if(input){
+      if(input.dataset.entryInput==='merchant') state.entryMerchant=input.value;
+      if(input.dataset.entryInput==='note') state.entryNote=input.value;
+      return;
+    }
+    const editInput=e.target.closest?.('[data-edit-input]');
+    if(editInput){
+      if(editInput.dataset.editInput==='merchant') state.editMerchant=editInput.value;
+      if(editInput.dataset.editInput==='note') state.editNote=editInput.value;
+      if(editInput.dataset.editInput==='rate'){
+        state.editRate=editInput.value.replace(/[^0-9.]/g,''); updateEditJpyAmount();
+        const jpyValue=document.getElementById('edit-jpy-value'); if(jpyValue) jpyValue.textContent=`¥ ${Number(state.editJpyAmount||0).toLocaleString('ja-JP')}`;
+      }
+      return;
+    }
+    const shoppingInput=e.target.closest?.('[data-shopping-input]'); if(!shoppingInput) return;
+    const field=shoppingInput.dataset.shoppingInput;
+    if(field==='name'){
+      state.shoppingFormName=shoppingInput.value;
+      if(state.shoppingFormError==='name'){
+        state.shoppingFormError='';
+        shoppingInput.setAttribute('aria-invalid','false');
+        shoppingInput.closest('.shopping-name-card')?.classList.remove('invalid');
+        const error=shoppingInput.closest('.shopping-form-screen')?.querySelector('.shopping-name-error'); if(error) error.textContent='';
+      }
+    }
+    else if(field==='quantity'){
+      const parsed=Number.parseInt(shoppingInput.value,10); state.shoppingFormQuantity=Number.isFinite(parsed)&&parsed>0?parsed:1;
+    }
+    else if(field==='price') state.shoppingFormPrice=shoppingInput.value.replace(/[^0-9]/g,'');
+    else if(field==='note') state.shoppingFormNote=shoppingInput.value;
   });
 
   document.addEventListener('click', e => {
-    const screen=e.target.closest('[data-screen]'); if(screen){ if(screen.dataset.screen==='voice'&&screen.matches('.screen-link')){ state.entryVoiceState='review'; state.entryNeedsReview=true; } setScreen(screen.dataset.screen); return; }
+    const screen=e.target.closest('[data-screen]'); if(screen){ if(screen.dataset.screen==='entry'&&screen.matches('.screen-link')){ showEntryDemo('manual'); return; } if(screen.dataset.screen==='shopping-form'&&screen.matches('.screen-link')){ resetShoppingForm(); setScreen('shopping-form'); return; } if(screen.dataset.screen==='edit'&&screen.matches('.screen-link')){ resetEditTransaction(); setScreen('edit'); return; } setScreen(screen.dataset.screen); return; }
     const navEl=e.target.closest('[data-nav]'); if(navEl){ setScreen(navEl.dataset.nav); return; }
     const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); return; }
     const entryVariant=e.target.closest('[data-entry-variant]'); if(entryVariant){ state.entryVariant=entryVariant.dataset.entryVariant; render(); return; }
     const entryDemo=e.target.closest('[data-entry-demo]'); if(entryDemo){ showEntryDemo(entryDemo.dataset.entryDemo); return; }
-    const entryMethod=e.target.closest('[data-entry-method]'); if(entryMethod){ if(entryMethod.dataset.entryMethod==='voice') beginEntryVoice(); else { if(state.entryVoiceState==='review'){ state.entryVoiceApplied=true; } else { restoreEntrySnapshot(); } entryVoiceSequence+=1; state.entrySnapshot=null; state.screen='entry'; render(); } return; }
+    const shoppingDemo=e.target.closest('[data-shopping-demo]'); if(shoppingDemo){ showShoppingVoiceDemo(shoppingDemo.dataset.shoppingDemo); return; }
+    const editDemo=e.target.closest('[data-edit-demo]'); if(editDemo){ showEditDemo(editDemo.dataset.editDemo); return; }
+    const entryMethod=e.target.closest('[data-entry-method]'); if(entryMethod){ if(entryMethod.dataset.entryMethod==='voice') beginEntryVoice(); else switchEntryVoiceToKeyboard(); return; }
     const entryLedger=e.target.closest('[data-entry-ledger]'); if(entryLedger){ state.entryLedger=entryLedger.dataset.entryLedger; render(); return; }
+    const entrySatisfaction=e.target.closest('[data-entry-satisfaction]'); if(entrySatisfaction){ state.entrySatisfaction=Number(entrySatisfaction.dataset.entrySatisfaction); render(); return; }
+    const editLedger=e.target.closest('[data-edit-ledger]'); if(editLedger){ state.editLedger=editLedger.dataset.editLedger; render(); return; }
+    const editSatisfaction=e.target.closest('[data-edit-satisfaction]'); if(editSatisfaction){ state.editSatisfaction=Number(editSatisfaction.dataset.editSatisfaction); render(); return; }
+    const editAmountKey=e.target.closest('[data-edit-amount-key]'); if(editAmountKey){ const key=editAmountKey.dataset.editAmountKey; if(key==='backspace') state.editAmountDraft=state.editAmountDraft.slice(0,-1)||'0'; else if(key==='.') { if(!state.editAmountDraft.includes('.')) state.editAmountDraft=(state.editAmountDraft||'0')+'.'; } else state.editAmountDraft=(state.editAmountDraft==='0'?'':state.editAmountDraft)+key; const draft=document.getElementById('edit-amount-draft'); if(draft) draft.textContent=`${editCurrencySymbol()} ${formatEditAmount(state.editAmountDraft,state.editCurrency)}`; const confirm=document.querySelector('[data-action="edit-amount-confirm"]'); if(confirm) confirm.disabled=!(Number(state.editAmountDraft)>0); return; }
+    const editDateValue=e.target.closest('[data-edit-date-value]'); if(editDateValue){ state.editDate=editDateValue.dataset.editDateValue; state.editRateDate=state.editDate; closeModal(); render(); return; }
     const entryKey=e.target.closest('[data-entry-key]'); if(entryKey){ const k=entryKey.dataset.entryKey; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='.') { if(!state.amount.includes('.')) state.amount=(state.amount||'0')+'.'; } else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
-    const key=e.target.closest('[data-key]'); if(key){ const k=key.dataset.key; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='mic') setScreen('voice'); else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
+    const key=e.target.closest('[data-key]'); if(key){ const k=key.dataset.key; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='mic') beginEntryVoice(); else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
     const lockKey=e.target.closest('[data-lock-key]'); if(lockKey){ const k=lockKey.dataset.lockKey; if(k==='backspace') state.pin=state.pin.slice(0,-1); else if(k==='fingerprint'){ toast('Face ID で認証しました'); setTimeout(()=>setScreen('home'),500); return; } else if(state.pin.length<4) state.pin+=k; if(state.pin.length===4){ toast('ロックを解除しました'); setTimeout(()=>{state.pin='';setScreen('home')},550); } else render(); return; }
     const uiState=e.target.closest('[data-ui-state]'); if(uiState){ state.uiState=uiState.dataset.uiState; render(); return; }
     const listDay=e.target.closest('[data-list-day]'); if(listDay){ const day=Number(listDay.dataset.listDay); state.listDay=state.listDay===day?null:day; render(); return; }
     const listLedger=e.target.closest('[data-list-ledger]'); if(listLedger){ state.listLedger=listLedger.dataset.listLedger; render(); return; }
     const shoppingScope=e.target.closest('[data-shopping-scope]'); if(shoppingScope && shoppingScope.matches('button')){ state.shoppingScope=shoppingScope.dataset.shoppingScope; resetShoppingFilters(); render(); return; }
     const shoppingLedger=e.target.closest('[data-shopping-ledger]'); if(shoppingLedger){ state.shoppingLedger=shoppingLedger.dataset.shoppingLedger; render(); return; }
+    const shoppingFormLedger=e.target.closest('[data-shopping-form-ledger]'); if(shoppingFormLedger){ state.shoppingFormLedger=shoppingFormLedger.dataset.shoppingFormLedger; render(); return; }
+    const shoppingFormListType=e.target.closest('[data-shopping-form-list-type]'); if(shoppingFormListType && state.shoppingFormMode!=='edit'){ state.shoppingFormListType=shoppingFormListType.dataset.shoppingFormListType; render(); return; }
     const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
     const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
     const analyticsDimension=e.target.closest('[data-analytics-dimension]'); if(analyticsDimension){ state.analyticsDimension=analyticsDimension.dataset.analyticsDimension; render(); return; }
@@ -1559,15 +1999,32 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
     else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); toast(state.family?'家庭モード':'個人モード'); }
     else if(a==='dismiss-invite'){ state.inviteDismissed=true; render(); }
+    else if(a==='entry-history') toast('打开最近记账记录');
     else if(a==='entry-voice-open') beginEntryVoice();
-    else if(a==='entry-voice-stop'){ const sequence=++entryVoiceSequence; state.entryVoiceState='processing'; render(); setTimeout(()=>{ if(sequence!==entryVoiceSequence||state.screen!=='voice') return; applyEntryVoiceResult(); render(); },650); }
-    else if(a==='entry-voice-cancel'){ entryVoiceSequence+=1; restoreEntrySnapshot(); state.entrySnapshot=null; state.entryVoiceState='review'; state.screen='entry'; render(); }
-    else if(a==='entry-voice-rerecord'){ entryVoiceSequence+=1; restoreEntrySnapshot(); state.entryVoiceApplied=false; state.entryNeedsReview=false; state.entryVoiceState='listening'; state.screen='voice'; render(); }
-    else if(a==='entry-voice-keep'){ state.entryVoiceApplied=state.entryVoiceState==='review'; state.entryNeedsReview=state.entryVoiceApplied; state.entrySnapshot=null; state.entryVoiceState='review'; state.screen='entry'; render(); }
-    else if(a==='entry-mic-settings') toast('マイク権限の設定を開きます');
-    else if(a==='entry-date') toast('日付を選択');
-    else if(a==='entry-currency') toast('通貨を選択');
+    else if(a==='entry-voice-stop') finishEntryVoiceListening();
+    else if(a==='entry-voice-cancel'||a==='entry-voice-restore'){ const cancelsAppend=state.entryVoiceMode==='append'; invalidateEntryVoiceSession(); if(cancelsAppend){ state.entryVoiceMode='replace'; state.entryVoiceState='review'; state.entryInputMode='voice'; } else { restoreEntrySnapshot(); state.entrySnapshot=null; state.entryReviewPending=false; state.entryVoiceMode='replace'; state.entryVoiceState='review'; state.entryInputMode='keyboard'; } state.screen='entry'; render(); }
+    else if(a==='entry-voice-rerecord'){ invalidateEntryVoiceSession(); restoreEntrySnapshot(); state.entrySnapshot=null; beginEntryVoice(); }
+    else if(a==='entry-voice-keyboard') switchEntryVoiceToKeyboard();
+    else if(a==='entry-mic-settings') toast('打开麦克风权限设置');
+    else if(a==='entry-date') toast('选择日期');
+    else if(a==='entry-currency') toast('选择币种');
     else if(a==='entry-continuous'){ state.entryContinuous=!state.entryContinuous; render(); }
+    else if(a==='edit-amount'){ state.editAmountDraft=state.editAmount; openModal(editAmountSheet()); }
+    else if(a==='edit-amount-confirm'){ if(!(Number(state.editAmountDraft)>0)){ toast('请输入有效金额'); return; } state.editAmount=state.editAmountDraft; updateEditJpyAmount(); closeModal(); render(); }
+    else if(a==='edit-category') setScreen('category');
+    else if(a==='edit-date') openModal(`<h3>选择日期</h3><p class="hint">可选择 2020 年至今天。</p><div class="flat-card">${['2026年7月10日','2026年7月9日','2026年7月8日'].map((date,index)=>`<button class="tap-row ${index<2?'row-divider':''}" data-edit-date-value="${date}"><span class="row-icon">${icon('calendar_month')}</span><span class="row-copy"><strong>${date}</strong></span>${state.editDate===date?icon('check'):icon('chevron_right')}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">取消</button>`);
+    else if(a==='save-edit'){ if(state.editSubmitting) return; state.editSubmitting=true; render(); setTimeout(()=>{ if(state.screen==='edit') exitEdit('修改已保存'); },550); }
+    else if(a==='edit-delete') openModal(`<h3>删除这笔交易？</h3><p class="hint">删除后无法恢复，请确认是否继续。</p><button class="primary-btn edit-delete-confirm" data-action="confirm-edit-delete">删除</button><button class="ghost-btn" data-action="close-modal">取消</button>`);
+    else if(a==='confirm-edit-delete') exitEdit('交易已删除');
+    else if(a==='shopping-voice-open') beginShoppingVoice();
+    else if(a==='shopping-voice-stop') finishShoppingVoiceListening();
+    else if(a==='shopping-voice-keyboard') switchShoppingVoiceToKeyboard();
+    else if(a==='shopping-voice-rerecord') rerecordShoppingVoice();
+    else if(a==='shopping-mic-settings') toast('マイクの権限設定を開きます');
+    else if(a==='shopping-quantity-decrease'){ state.shoppingFormQuantity=Math.max(1,Number(state.shoppingFormQuantity||1)-1); render(); }
+    else if(a==='shopping-quantity-increase'){ state.shoppingFormQuantity=Math.max(1,Number(state.shoppingFormQuantity||1)+1); render(); }
+    else if(a==='shopping-form-category') openModal(shoppingFormCategoryPicker());
+    else if(a==='shopping-form-category-select'){ state.shoppingFormCategory=action.dataset.category||''; closeModal(); render(); }
     else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='list-sort-option'){ state.listSort=action.dataset.sort; state.listDirection=action.dataset.direction; closeModal(); render(); }
     else if(a==='list-search'){ state.listSearchExpanded=true; render(); requestAnimationFrame(()=>document.querySelector('.list-filter-search input')?.focus()); }
@@ -1588,16 +2045,23 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     else if(a==='shopping-category-apply'){ state.shoppingCategoryIds=[...shoppingCategoryDraft]; closeModal(); render(); }
     else if(a==='close-modal') closeModal();
     else if(a==='back'){ const previous=state.history.pop()||'home'; setScreen(previous,false); }
-    else if(a==='fab'){ if(state.screen==='shopping') setScreen('shopping-form'); else { state.entryVoiceApplied=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); } }
+    else if(a==='fab'){ if(state.screen==='shopping'){ resetShoppingForm(); setScreen('shopping-form'); } else { invalidateEntryVoiceSession(); state.amount='0'; state.entryMerchant=''; state.entryCategory='食费 > 外出就餐'; state.entryNote=''; state.entryInputMode='keyboard'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); } }
     else if(a==='hero-analytics') setScreen('analytics');
     else if(a==='toast') toast(action.dataset.message||'操作を確認しました');
     else if(a==='filter'){ action.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
     else if(a==='check'){ const item=action.closest('.shopping-item'); item.classList.toggle('done'); action.innerHTML=item.classList.contains('done')?icon('check'):''; }
-    else if(a==='shopping-item-action'){ const operation=action.dataset.shoppingItemAction; const item=shoppingActionItem; closeModal(); if(!item) return; if(operation==='top') item.parentElement.prepend(item); else if(operation==='bottom') item.parentElement.append(item); else if(operation==='delete') item.remove(); toast(operation==='edit'?`${item.dataset.shoppingName}を編集`:(operation==='delete'?'削除しました':'順序を変更しました')); shoppingActionItem=null; }
-    else if(a==='save-entry'){ if(state.entryVoiceApplied&&state.entryNeedsReview){ toast('カテゴリを確認してください'); return; } toast('記録しました'); if(state.entryContinuous){ state.amount='0'; state.entryMerchant=''; state.entryNote=''; state.entryVoiceApplied=false; state.entryNeedsReview=false; render(); } else setTimeout(()=>setScreen('home'),550); }
-    else if(a==='save-shopping'){ toast('買い物リストに追加しました'); setTimeout(()=>setScreen('shopping'),550); }
-    else if(a==='ocr-capture'){ toast('レシートを読み取りました'); setTimeout(()=>setScreen('edit'),550); }
-    else if(a==='pick-category'){ state.entryCategory='食費 · カフェ'; state.entryNeedsReview=false; state.entryVoiceApplied=true; toast(action.textContent.trim()+'を選択'); setTimeout(()=>{ if(['entry','voice'].includes(state.history.at(-1))) state.history.pop(); setScreen('entry',false); },450); }
+    else if(a==='shopping-item-action'){ const operation=action.dataset.shoppingItemAction; const item=shoppingActionItem; closeModal(); if(!item) return; if(operation==='edit'){ resetShoppingForm({mode:'edit'}); state.shoppingFormName=item.dataset.shoppingName||state.shoppingFormName; shoppingActionItem=null; setScreen('shopping-form'); return; } if(operation==='top') item.parentElement.prepend(item); else if(operation==='bottom') item.parentElement.append(item); else if(operation==='delete') item.remove(); toast(operation==='delete'?'削除しました':'順序を変更しました'); shoppingActionItem=null; }
+    else if(a==='save-entry'){ const savesVoiceResult=state.screen==='entry'&&state.entryInputMode==='voice'&&state.entryVoiceState==='review'; if(state.entryReviewPending&&!savesVoiceResult){ toast('请先处理语音识别结果'); return; } if(state.entryNeedsReview){ toast('请先选择分类'); return; } if(savesVoiceResult){ invalidateEntryVoiceSession(); state.entryReviewPending=false; state.entryVoiceMode='replace'; state.entrySnapshot=null; } toast('记录成功'); if(state.entryContinuous){ state.amount='0'; state.entryMerchant=''; state.entryNote=''; state.entryInputMode=savesVoiceResult?'voice':'keyboard'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entryVoiceMode='replace'; state.entryVoiceState=savesVoiceResult?'idle':'review'; state.entrySnapshot=null; state.screen='entry'; render(); } else { state.entryInputMode='keyboard'; setTimeout(()=>setScreen('home'),550); } }
+    else if(a==='save-shopping'){
+      if(state.shoppingFormSubmitting||['listening','processing'].includes(state.shoppingVoiceState)) return;
+      state.shoppingFormName=state.shoppingFormName.trim();
+      if(!state.shoppingFormName){ state.shoppingFormError='name'; render(); requestAnimationFrame(()=>document.getElementById('shopping-form-name')?.focus()); return; }
+      state.shoppingFormSubmitting=true; state.shoppingFormError=''; render();
+      const message=state.shoppingFormMode==='edit'?'変更を保存しました':'買い物リストに追加しました';
+      setTimeout(()=>{ if(state.screen!=='shopping-form') return; toast(message); setScreen('shopping',false); },550);
+    }
+    else if(a==='ocr-capture'){ toast('レシートを読み取りました'); setTimeout(()=>{ resetEditTransaction(); setScreen('edit'); },550); }
+    else if(a==='pick-category'){ const returningToEdit=state.history.at(-1)==='edit'; if(returningToEdit){ state.editCategory='食费 > 咖啡'; toast('已选择'+action.textContent.trim()); setTimeout(()=>{ state.history.pop(); setScreen('edit',false); },450); return; } const fromVoice=state.entryInputMode==='voice'&&state.entryVoiceApplied; state.entryCategory='食费 > 咖啡'; state.entryNeedsReview=false; state.entryReviewPending=false; state.entryVoiceApplied=fromVoice; toast('已选择'+action.textContent.trim()); setTimeout(()=>{ if(state.history.at(-1)==='entry') state.history.pop(); setScreen('entry',false); },450); }
     else if(a==='create-family'){ state.family=true; toast('招待コードを作成しました'); setTimeout(()=>setScreen('group'),450); }
     else if(a==='join-family'){ toast('家族情報を確認しました'); setTimeout(()=>setScreen('group'),450); }
     else if(a==='switch') action.classList.toggle('on');

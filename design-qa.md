@@ -1,5 +1,156 @@
 # Home Pocket Design QA
 
+## 2026-07-16 — 编辑交易与统一记账视觉收敛
+
+**Comparison target**
+
+- Source visual truth: the shared Flutter form implemented by `TransactionDetailsForm.edit`, `AmountDisplay`, `DetailInfoCard`, `LedgerTypeSelector`, `SatisfactionEmojiPicker`, and the fixed save area in `lib/features/accounting/presentation/screens/transaction_edit_screen.dart`; the V16 unified-entry component language in `docs/mockup/v16/index.html` is the visual sibling to match.
+- Implementation: `docs/mockup/v16/index.html`, route `edit`, light theme, Chinese locale.
+- Intended viewport: 390×844 CSS px. Required states: JPY daily, JPY Joy, USD foreign-currency linkage, submitting, amount sheet, and delete confirmation.
+- Implementation screenshot path: unavailable. The in-app browser local `file://` page cannot be captured through the available browser automation because its URL safety policy rejects the local target.
+- Full-view comparison evidence: unavailable for the same blocker; no visual pass is inferred from source inspection or DOM tests.
+- Focused-region comparison evidence: unavailable. Header, amount, purpose, satisfaction, note, foreign linkage, save dock, amount sheet, and delete confirmation still require rendered crops.
+
+**Code-grounded findings and fixes**
+
+- [P1] The prior edit route used a separate 9/11px legacy form language (`amount-display`, `flat-card`, and `form-row`) while unified entry used semantic typography and `entry-*` components. The route now uses `accounting-screen`, the same 52px centered `entry-header`, 44px horizontal `entry-amount`, `entry-form`, `entry-purpose-card`, conditional satisfaction, and `entry-note-card`.
+- [P1] The previous screen showed two destructive actions: a header icon and a page-bottom delete button. The bottom duplicate is removed; the only delete control is the error-colored header icon, and its dedicated confirmation sheet must complete before navigation.
+- [P1] Merchant, purpose, and note were presented as static rows, and Joy satisfaction was absent. Merchant and note are now real editable fields, daily / Joy are accessible pressed-state controls, and Joy alone reveals five values mapped to 2 / 4 / 6 / 8 / 10.
+- [P2] The previous edit layout did not represent foreign transactions or the existing amount-sheet behavior. The inspector now exposes a USD state whose headline remains in original currency and whose separate linkage card contains editable rate, read-only derived JPY, and rate date. Tapping the headline opens a bottom keypad while keeping currency immutable.
+- [P2] Save previously scrolled with content and used the old page composition. It now sits in a fixed surface dock with the standard primary green, disables during submission, rejects duplicate saves, and returns to the actual home/list origin. Edit intentionally contains no voice entry, persistent keypad, or continuous-accounting control.
+
+**Static and interaction verification**
+
+- TDD contract first failed on the legacy `edit()` structure, then passed after the shared component rebuild: `flutter test test/architecture/main_surface_typography_contract_test.dart` — 5/5 passed.
+- Inline JavaScript compiles. `/private/tmp/v16_edit_contract_test.cjs` passes shared structure, independent edit draft, merchant/note editing, daily/Joy switching, satisfaction, foreign linkage, amount confirmation, save double-submit protection, delete confirmation, and source-aware return.
+- Existing `/private/tmp/v16_voice_contract_test.cjs` and `/private/tmp/v16_shopping_voice_contract_test.cjs` continue to pass; all 60 rendered `data-action` values have handlers.
+- A rendered 390×844 comparison is still required before this section can pass visual QA. The required next pass must capture all four inspector states plus the amount and deletion sheets, check typography, spacing/rhythm, colors/tokens, icon fidelity, and app-specific copy, then fix any visible P0/P1/P2 mismatch.
+
+final result: blocked
+
+---
+
+## 2026-07-16 — V16 统一记账、账目编辑与新增购物项实现验收
+
+本节记录三张生产 Flutter 页面完成后的最终验收，并覆盖本文中同日关于本地页面
+无法渲染、因而标记为 blocked 的历史结论。
+
+**Comparison target**
+
+- Source visual truth: `docs/mockup/v16/index.html`.
+- Implementation: `ManualOneStepScreen`, `TransactionEditScreen`, and
+  `ShoppingItemFormScreen`, together with their shared V16 amount, form,
+  keyboard, selector, and voice-draft widgets.
+- Viewport/state: 390×844 logical pixels, light theme; Chinese for unified
+  entry/edit and Japanese for shopping create. Each final comparison places the
+  source reference on the left and the rendered production Flutter widgets on
+  the right in the same image.
+- Unified entry reference / implementation / comparison:
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-entry-reference.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-entry-implementation.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-entry-comparison-final.png`
+- Transaction edit reference / implementation / comparison:
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-transaction-edit-reference.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-transaction-edit-implementation.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-transaction-edit-comparison-final.png`
+- Shopping create reference / implementation / comparison:
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-shopping-form-reference.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-shopping-form-implementation.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/16/019f6a6c-74de-7a63-a8bd-fa4d698b4b07/v16-shopping-form-comparison-final.png`
+
+**Visible findings and fixes**
+
+- Unified entry now matches the V16 amount hierarchy, compact information
+  cards, purpose and satisfaction controls, neutral voice launch, 48dp keypad,
+  primary record action, history action, and inline continuous-accounting row.
+- Transaction edit reuses the same amount and form language, keeps amount
+  editing explicit, presents a single destructive header action, and anchors
+  the checked save action above the system bottom inset.
+- Shopping create follows the source field order and card rhythm, with the
+  compact quantity stepper, shopping-only purpose/privacy selectors, category,
+  reference price, memo, right-side save action, and a single in-page voice
+  draft surface.
+- The first paired pass exposed amount-symbol/currency-chip scale, continuous
+  control composition, edit affordances, and shopping card-spacing differences.
+  Those were corrected before the final three paired captures above.
+- No actionable P0/P1/P2 visual mismatch remains. P3 accepted: the HTML source
+  includes a decorative phone frame, browser status bar, and home indicator,
+  while the Flutter harness renders the production content with real top/bottom
+  safe-area reservations. Native glyph antialiasing also differs slightly from
+  the browser capture.
+
+**Interaction and resilience checks**
+
+- Unified voice entry covers idle, listening, processing, review, and
+  unavailable states. Save stays disabled during recognition, parsing, and
+  re-record cancellation; delayed partial results cannot overwrite a newer
+  final result; weak/below-floor categories clear the default and require an
+  explicit choice; voice-filled fields expose localized provenance markers.
+- Snapshot restore keeps JPY and foreign-currency booked/original units
+  consistent, and continuous mode resets atomically for the next entry.
+- Shopping voice input recognizes Japanese, Chinese, and English name,
+  quantity, purpose, category, and JPY price phrasing without inferring
+  privacy. Unsupported foreign prices are ignored safely, re-record and
+  keyboard transitions invalidate stale callbacks, and no voice path auto-saves.
+
+**Verification**
+
+- Final 390×844 production-widget render: 3/3 passed and all three paired
+  comparisons inspected together.
+- Focused V16 accounting/shopping regression set: 108/108 passed.
+- ARB parity, hardcoded-CJK scan, and V16 typography/mockup contracts: 8/8
+  passed.
+- Full `flutter test`: 3,835 passed, 11 skipped.
+- `flutter analyze`: 0 issues.
+- `flutter gen-l10n` completed; final `git diff --check` passed.
+- Existing non-blocking tooling warning: `sqlcipher_flutter_libs` does not yet
+  advertise future Flutter Swift Package Manager support.
+
+final result: passed
+
+---
+
+## 2026-07-16 — 购物项表单同步与语音草稿提案
+
+**代码审查结论**
+
+- 当前 Flutter 新增 / 编辑共用 `ShoppingItemFormScreen`，真实顺序是名称、数量、用途（日常 / 悦己）、类型（公开 / 私有）、分类、参考价格和备注；新增默认数量 1、日常、公开，保存位于 AppBar 右侧。
+- 公开项目进入同步变更链，私有项目只在本机保存；类型创建后不可更改。购物 Tab 的 FAB 和空态入口目前都以 `public` 打开新增表单，不继承筛选值。
+- 原 V16 购物表单静态预填“オリーブオイル”，只展示数量、分类、列表和备注，并把家庭模式错误映射为共享 / 个人，遗漏用途、参考价格、数值步进器、编辑锁定和真实保存校验。
+- 现有代码仍有后续实现债务，本次只审查未改动 App：编辑时清空参考价格会被更新用例解释为“不修改”；分类没有清除入口；名称的 200 字数据库上限没有前端校验；现有 36px 保存与 38px 步进按钮小于推荐触控目标。
+
+**Mockup 调整**
+
+- `shopping-form` 已改为当前 App 的七字段结构，新增态为空名称、数量 1、日常、公开；数量使用不低于 1 的 44px 步进器，分类展示完整路径，参考价格直接输入，备注使用多行字段。
+- 保存移到右上角并使用普通主绿色；名称为空时留在当前页显示错误，聆听 / 解析和提交期间不可重复保存。公开 / 私有始终独立于家庭模式，新建可切换，编辑禁用。
+- “保存后不可更改”已收进公开 / 私有的类型控制区，并直接位于两个选项下方；它不再作为数量、用途和类型三行之后的整卡提示，因此数量与用途明确保持可编辑。新增态使用中性提示，编辑态才使用红色锁定提示。
+- Inspector 增加手动、聆听、识别回填、编辑态和麦克风不可用五个入口；长按购物项的编辑动作也进入同一编辑表单。
+
+**语音可行性与边界**
+
+- 结论：可添加。可以复用 `SpeechRecognitionService`、`StartSpeechRecognitionUseCase`、语音语言 / 权限 / 设备端优先设置和 3 秒静音自动结束能力。
+- 不可直接复用交易的 `ParseVoiceInputUseCase`、`VoiceParseResult` 或 `VoicePttSessionMixin`；它们绑定金额、商家、交易日期与 `TransactionDetailsFormState`，没有商品名称、数量或参考价格语义。
+- Mockup 采用同页草稿：名称下方的中性语音卡片是唯一入口，约 3 秒停顿自动解析，中央按钮可提前结束；解析后直接回填表单，中央麦克风复用为重新录音，右上保存仍是唯一持久化动作，没有取消、独立确认或新路由。
+- MVP 一次只处理一个商品。示例“牛乳を2本、日常、参考価格500円”填入名称、数量、用途、分类建议和参考价格；未口述备注保持原值，公开 / 私有始终保持录音前值，不由识别结果推断。
+- 录音或解析中切回键盘会恢复快照；回填后切回键盘会保留结果；离页、重录和取消中的旧回调由会话序号拒绝。隐私文案改为“端末内認識を優先”，准确反映当前可配置云端降级。
+
+**静态与交互验证**
+
+- TDD 合同先以缺少 `data-shopping-input="name"` 失败，再完成实现；`flutter test test/architecture/main_surface_typography_contract_test.dart`：4/4 通过。
+- 当前 App 的购物表单、新增用例和更新用例定向测试：34/34 通过；`flutter analyze test/architecture/main_surface_typography_contract_test.dart`：0 issues。
+- `/private/tmp/v16_shopping_voice_contract_test.cjs` 通过：覆盖七字段默认值与 DOM 顺序、3 秒自动端点、手动停止、同页回填、公开 / 私有保持、未口述字段保持、键盘恢复 / 保留、旧回调失效、重录快照、名称校验、数量下限、提交态和编辑锁定。
+- 既有 `/private/tmp/v16_voice_contract_test.cjs` 继续通过；内联 JavaScript 可编译，53 个渲染动作均有处理分支，范围内 `git diff --check` 通过。
+- 浏览器自动化仍被本地 `file://` URL 安全策略阻止，因此本节没有新的 390×844 完整截图，不能标记视觉 QA 已通过。
+
+**下一次视觉核验**
+
+- 在 390×844 下刷新购物项目页，分别截取手动、聆听、解析、识别回填、编辑和权限不可用状态。
+- 重点检查右上保存、名称与单一语音入口、44px 步进器、两组段控件、语音状态行、长文本换行、表单滚动和浅 / 深色对比度；修正所有 P0 / P1 / P2 后再将本节改为 passed。
+
+final result: blocked
+
+---
+
 ## 2026-07-15 — V16 整 App Mockup 同步与收口
 
 **结果**
@@ -24,6 +175,64 @@
 - 范围内 `git diff --check`：通过。
 
 final result: passed
+
+---
+
+## 2026-07-16 — 统一记账方案 1「单页连续输入」
+
+**Comparison target**
+
+- Implementation: `docs/mockup/v16/index.html`, the single unified-entry page across idle, listening, processing, recognized-result, and unavailable states.
+- Intended viewport: 390×844 CSS px, light theme, Chinese locale, listening → automatic processing → recognized result → optional continuous idle.
+- Earlier references:
+  - listening: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_Tm5WgM/截屏2026-07-16 13.20.36.png`
+  - parsed result: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_fhqPuc/截屏2026-07-16 13.20.45.png`
+- Latest user-supplied revision evidence:
+  - listening with redundant cancel action: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_pXZwLD/截屏2026-07-16 14.54.58.png`
+  - result with overlapping copy and duplicate rerecord action: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_QLjlcl/截屏2026-07-16 14.55.56.png`
+  - over-accented manual voice launch: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_ezFcuC/截屏2026-07-16 15.18.39.png`
+  - over-accented keyboard switch: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_lcBZoQ/截屏2026-07-16 15.18.53.png`
+  - over-accented record and continuous actions: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_UjwKrW/截屏2026-07-16 15.18.59.png`
+- Approved interaction direction: one page, automatic endpointing with optional immediate stop, a keyboard shortcut fixed at the top-right in every state, one central microphone control, one final record action, and continuous-accounting state inherited throughout the voice flow.
+- Cropped implementation evidence is available through the latest user captures, but no screenshot exists after the current palette correction and no complete 390×844 frame is available because the in-app browser refuses automated access to the local `file://` page under its URL safety policy.
+
+**Latest findings and fixes**
+
+- [P1] Result copy overlaps the top status
+  - Evidence: the latest result capture places “用语音填写账目” directly over “已填入账目”.
+  - Fix applied: the redundant visible title is now screen-reader-only; the empty result-chip row was removed; the dock is fixed at 336px; and the privacy note, centered status, and keyboard action now use a three-column grid instead of overlapping absolute positions.
+- [P1] Rerecord appears twice
+  - Evidence: the latest result capture shows a central microphone and a separate bottom “重新录音” button for the same action.
+  - Fix applied: the central microphone is the sole `entry-voice-rerecord` control. The result action slot contains only one full-width “记录” button, which confirms and saves in one step.
+- [P2] Listening cancel action dominates the bottom of the dock
+  - Evidence: the latest listening capture gives “取消本次语音” the largest visible footprint despite automatic endpointing and the persistent keyboard escape.
+  - Fix applied: no cancel button is rendered in listening or processing. Users can wait for the 3-second endpoint, tap the central stop control to finish immediately, or switch to keyboard from the fixed top-right action.
+- [P2] Joy color was applied to ordinary navigation and completion controls
+  - Evidence: the three 15:18 captures show the manual voice launch, keyboard switch, final record action, and continuous-accounting link all competing in the same Joy pink as active voice feedback.
+  - Impact: Joy reads as a ledger/voice-state accent instead of a focused state signal, while ordinary navigation and save controls drift away from the rest of the app.
+  - Fix applied: Joy remains only on status dots, waveform, and the central listening/idle/review control. The manual voice launch is now a neutral surface/border/text card with only its icon using existing primary-soft/primary tokens; the keyboard switch uses neutral surface/border/muted-text; record returns to the standard `--hp-primary` action; and the voice-source marker plus continuous accounting use the ordinary primary family. No token or hex value was added.
+- [P1] Continuous accounting was absent from voice entry
+  - Impact: the setting visibly changed between manual and voice input, and a continuous voice save returned to the keypad.
+  - Fix applied: manual and voice docks call the same continuous-accounting control. All five voice states preserve the same `aria-pressed` value. A continuous voice save clears the completed transaction and stays on the voice dock in a safe `idle` state; the microphone does not restart until the user taps the central control.
+
+**Static implementation checks completed**
+
+- Inline JavaScript compiles; all 44 rendered `data-action` values have handlers.
+- All five voice states render the same status, keyboard, transcript, waveform, central-control, action-slot, and continuous-accounting structure in the sole `entry` route.
+- Listening contains no rendered cancel action; review contains exactly one central rerecord action and one bottom record action. The visible duplicate voice title is absent.
+- Fake-timer state tests cover the exact `2999ms listening → 3000ms processing → 3650ms review` endpoint, immediate stop idempotency, keyboard escape, stale-callback rejection, rerecord restoration, regular save, continuous voice save, safe idle, and explicit next-recording start.
+- CSS contracts cover one fixed 336px dock, a 60px central control, a 44px keyboard target, the non-overlapping three-column status line, reduced motion, focused Joy feedback, neutral navigation, and standard primary actions.
+- `flutter test test/architecture/main_surface_typography_contract_test.dart`: 3/3 passed.
+- A rendered 390×844 same-state comparison is still required before marking visual QA passed.
+
+**Next visual QA pass**
+
+- Capture refreshed listening, review, and continuous-idle states at 390×844.
+- Include the manual voice launch plus focused crops of the neutral keyboard switch, standard record action, voice-source marker, and continuous-accounting link.
+- Compare the complete frames and verify the status line, transcript, waveform, central control, bottom action slot, keyboard target, and continuous row across states.
+- Fix any remaining P0/P1/P2 mismatch and repeat the comparison.
+
+final result: blocked
 
 ---
 
@@ -398,5 +607,23 @@ final result: passed
 - No actionable P0/P1/P2 mismatch remains for S1–S5.
 - P3 accepted: Flutter's headless golden renderer uses placeholder glyph boxes for the platform font stack and Material icons; geometry and colors are deterministic, while native builds resolve the system Japanese and Material glyphs.
 - Verification passed: 48 focused widget tests, 61 shopping golden tests, the new 390×844 personal-screen golden, `flutter analyze` with zero issues, and the complete Flutter test suite.
+
+final result: passed
+
+---
+
+## Current result — 2026-07-16 unified entry option 1
+
+The latest QA report is the 2026-07-16 “统一记账方案 1「单页连续输入」” section above. Its rendered same-state comparison remains blocked because the approved in-app browser surface cannot capture the local `file://` implementation.
+
+final result: blocked
+
+---
+
+## Current result — 2026-07-16 V16 Flutter implementation
+
+The completed production implementation and its final 390×844 paired visual
+evidence are recorded in “V16 统一记账、账目编辑与新增购物项实现验收” above.
+That rendered pass supersedes the earlier mockup-only blocked notes.
 
 final result: passed
