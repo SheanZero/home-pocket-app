@@ -10,9 +10,11 @@ part of 'state_calendar_totals.dart';
 // ignore_for_file: type=lint, type=warning
 /// Per-day expense totals for the calendar header.
 ///
-/// Watches only (bookId, year, month) — isolated from listFilterProvider
-/// filter state (D-09, Pitfall 3). Rebuilding on text search would
-/// re-render 31 day cells on every keystroke.
+/// Watches (bookId, year, month) AND the selected ledger from
+/// [listFilterProvider] via a narrow `.select`, so day-cell amounts and the
+/// month total reflect the active ledger. It still does NOT watch
+/// memberBookId/search — narrowing to `ledgerType` alone keeps the "31 cells
+/// re-render on every keystroke" hazard (Pitfall 3) away.
 ///
 /// Phase 29 seam: bookId is a single value (own-book only).
 
@@ -21,9 +23,11 @@ final calendarDailyTotalsProvider = CalendarDailyTotalsFamily._();
 
 /// Per-day expense totals for the calendar header.
 ///
-/// Watches only (bookId, year, month) — isolated from listFilterProvider
-/// filter state (D-09, Pitfall 3). Rebuilding on text search would
-/// re-render 31 day cells on every keystroke.
+/// Watches (bookId, year, month) AND the selected ledger from
+/// [listFilterProvider] via a narrow `.select`, so day-cell amounts and the
+/// month total reflect the active ledger. It still does NOT watch
+/// memberBookId/search — narrowing to `ledgerType` alone keeps the "31 cells
+/// re-render on every keystroke" hazard (Pitfall 3) away.
 ///
 /// Phase 29 seam: bookId is a single value (own-book only).
 
@@ -39,9 +43,11 @@ final class CalendarDailyTotalsProvider
         $FutureProvider<Map<DateTime, int>> {
   /// Per-day expense totals for the calendar header.
   ///
-  /// Watches only (bookId, year, month) — isolated from listFilterProvider
-  /// filter state (D-09, Pitfall 3). Rebuilding on text search would
-  /// re-render 31 day cells on every keystroke.
+  /// Watches (bookId, year, month) AND the selected ledger from
+  /// [listFilterProvider] via a narrow `.select`, so day-cell amounts and the
+  /// month total reflect the active ledger. It still does NOT watch
+  /// memberBookId/search — narrowing to `ledgerType` alone keeps the "31 cells
+  /// re-render on every keystroke" hazard (Pitfall 3) away.
   ///
   /// Phase 29 seam: bookId is a single value (own-book only).
   CalendarDailyTotalsProvider._({
@@ -94,13 +100,15 @@ final class CalendarDailyTotalsProvider
 }
 
 String _$calendarDailyTotalsHash() =>
-    r'064a979e1da1c779718ec9eba2ecb307e9f6f3a0';
+    r'86307fc71c34ad9a24cffafe4cac4b405ec9c3a2';
 
 /// Per-day expense totals for the calendar header.
 ///
-/// Watches only (bookId, year, month) — isolated from listFilterProvider
-/// filter state (D-09, Pitfall 3). Rebuilding on text search would
-/// re-render 31 day cells on every keystroke.
+/// Watches (bookId, year, month) AND the selected ledger from
+/// [listFilterProvider] via a narrow `.select`, so day-cell amounts and the
+/// month total reflect the active ledger. It still does NOT watch
+/// memberBookId/search — narrowing to `ledgerType` alone keeps the "31 cells
+/// re-render on every keystroke" hazard (Pitfall 3) away.
 ///
 /// Phase 29 seam: bookId is a single value (own-book only).
 
@@ -121,9 +129,11 @@ final class CalendarDailyTotalsFamily extends $Family
 
   /// Per-day expense totals for the calendar header.
   ///
-  /// Watches only (bookId, year, month) — isolated from listFilterProvider
-  /// filter state (D-09, Pitfall 3). Rebuilding on text search would
-  /// re-render 31 day cells on every keystroke.
+  /// Watches (bookId, year, month) AND the selected ledger from
+  /// [listFilterProvider] via a narrow `.select`, so day-cell amounts and the
+  /// month total reflect the active ledger. It still does NOT watch
+  /// memberBookId/search — narrowing to `ledgerType` alone keeps the "31 cells
+  /// re-render on every keystroke" hazard (Pitfall 3) away.
   ///
   /// Phase 29 seam: bookId is a single value (own-book only).
 

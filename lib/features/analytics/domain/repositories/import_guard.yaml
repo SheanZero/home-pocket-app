@@ -9,5 +9,6 @@ allow:
   - ../models/ledger_snapshot.dart            # analytics domain model (analytics_repository.dart)
   - ../models/per_category_joy_breakdown.dart # analytics domain model (analytics_repository.dart)
   - ../../../accounting/domain/models/entry_source.dart  # cross-feature domain model (domain→domain, no layer violation)
+  - ../../../accounting/domain/models/transaction.dart   # cross-feature domain model (LedgerType only)
 
 inherit: true
