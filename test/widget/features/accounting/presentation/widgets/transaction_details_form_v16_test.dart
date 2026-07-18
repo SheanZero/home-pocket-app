@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/update_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
@@ -137,11 +138,44 @@ void main() {
     await tester.pump();
 
     expect(formKey.currentState!.currentLedgerType, LedgerType.joy);
-    expect(find.byKey(const ValueKey('v16-satisfaction-card')), findsOneWidget);
+    final satisfactionCard = find.byKey(
+      const ValueKey('v16-satisfaction-card'),
+    );
+    final purposeCard = find.byKey(const ValueKey('v16-purpose-card'));
+    expect(satisfactionCard, findsOneWidget);
+    expect(
+      find.descendant(of: purposeCard, matching: satisfactionCard),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: satisfactionCard, matching: find.byType(SvgPicture)),
+      findsNWidgets(5),
+    );
+    expect(
+      find.descendant(of: satisfactionCard, matching: find.byType(Icon)),
+      findsNothing,
+    );
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey('ledger_type_daily_chip')))
+          .width,
+      lessThan(130),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('ledger_type_joy_chip'))).width,
+      lessThan(130),
+    );
+    final dailyOption = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byKey(const ValueKey('ledger_type_daily_chip')),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    expect(dailyOption.padding, const EdgeInsets.symmetric(horizontal: 12));
   });
 
   testWidgets(
-    'v16 new voice entry marks category merchant and note, with an explicit weak-category warning',
+    'v16 voice entry hides provenance badges but keeps weak-category warning',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -163,17 +197,14 @@ void main() {
 
       expect(
         find.byKey(const ValueKey('v16-voice-source-category')),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.byKey(const ValueKey('v16-voice-source-merchant')),
-        findsOneWidget,
+        findsNothing,
       );
-      expect(
-        find.byKey(const ValueKey('v16-voice-source-note')),
-        findsOneWidget,
-      );
-      expect(find.text('Voice filled'), findsNWidgets(3));
+      expect(find.byKey(const ValueKey('v16-voice-source-note')), findsNothing);
+      expect(find.text('Voice filled'), findsNothing);
       expect(
         find.byKey(const ValueKey('v16-category-select-required')),
         findsNothing,

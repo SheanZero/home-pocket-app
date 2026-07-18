@@ -286,9 +286,9 @@ class _VoiceDockMain extends StatelessWidget {
             soundLevel: soundLevel,
             isListening: state == UnifiedVoiceEntryState.listening,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           _VoiceCoreButton(state: state, copy: copy, onTap: onCore),
-          const SizedBox(height: 5),
+          const SizedBox(height: 12),
           SizedBox(
             height: 17,
             child: Text(
@@ -452,25 +452,26 @@ class _VoiceActionSlot extends StatelessWidget {
       key: const Key('unified-voice-action-slot'),
       height: 46,
       width: double.infinity,
-      child: switch (state) {
-        UnifiedVoiceEntryState.review => _FilledVoiceAction(
-          materialKey: const Key('unified-voice-primary-action'),
-          label: copy.primaryAction,
-          icon: isSubmitting
-              ? Icons.autorenew_rounded
-              : Icons.receipt_long_rounded,
-          enabled: !isSubmitting,
-          onTap: onPrimary,
-        ),
-        UnifiedVoiceEntryState.unavailable => _FilledVoiceAction(
-          materialKey: const Key('unified-voice-settings-action'),
-          label: copy.settingsAction,
-          icon: Icons.help_outline_rounded,
-          enabled: true,
-          onTap: onSettings,
-        ),
-        _ => const SizedBox.expand(),
-      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: switch (state) {
+          UnifiedVoiceEntryState.review => _FilledVoiceAction(
+            materialKey: const Key('unified-voice-primary-action'),
+            label: copy.primaryAction,
+            icon: Icons.receipt_long_rounded,
+            enabled: !isSubmitting,
+            onTap: onPrimary,
+          ),
+          UnifiedVoiceEntryState.unavailable => _FilledVoiceAction(
+            materialKey: const Key('unified-voice-settings-action'),
+            label: copy.settingsAction,
+            icon: Icons.help_outline_rounded,
+            enabled: true,
+            onTap: onSettings,
+          ),
+          _ => const SizedBox.expand(),
+        },
+      ),
     );
   }
 }
@@ -546,45 +547,58 @@ class _ContinuousControl extends StatelessWidget {
 
     return SizedBox(
       height: 27,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: Text(
-              copy.continuousSummary,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.compact.copyWith(
-                color: palette.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Semantics(
-              button: true,
-              toggled: continuousMode,
-              label: copy.continuousAction,
-              excludeSemantics: true,
-              child: GestureDetector(
-                key: const Key('unified-voice-continuous-action'),
-                behavior: HitTestBehavior.opaque,
-                onTap: onTap,
+      child: Center(
+        child: SizedBox(
+          width: 230,
+          height: 27,
+          child: Semantics(
+            key: const Key('unified-voice-continuous-action'),
+            button: true,
+            toggled: continuousMode,
+            label: '${copy.continuousSummary} ${copy.continuousAction}',
+            excludeSemantics: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Center(
-                  child: Text(
-                    copy.continuousAction,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.compact.copyWith(
-                      color: palette.accentPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            copy.continuousSummary,
+                            maxLines: 1,
+                            style: AppTextStyles.supporting.copyWith(
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            copy.continuousAction,
+                            maxLines: 1,
+                            style: AppTextStyles.compact.copyWith(
+                              color: palette.accentPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -370,6 +370,15 @@ void main() {
     await tester.pump();
   }
 
+  Future<void> openVoiceDockAndStart(WidgetTester tester) async {
+    await tester.tap(micBarFinder);
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+    await tester.pump();
+    await tester.pump();
+  }
+
   // ── keypad characterization ────────────────────────────────────────────────
 
   group('keypad characterization', () {
@@ -418,9 +427,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Voice fill flips provenance to voice and mirrors 500 into the keypad.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await openVoiceDockAndStart(tester);
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
@@ -607,9 +614,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(micBarFinder);
-    await tester.pump();
-    await tester.pump();
+    await openVoiceDockAndStart(tester);
     speech.emitFinal('500円');
     await tester.pump();
     await tester.pump();
@@ -666,9 +671,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap 语音记录 with a pure-manual slate → the snapshot is manual.
-      await tester.tap(micBarFinder);
-      await tester.pump();
-      await tester.pump();
+      await openVoiceDockAndStart(tester);
 
       // Voice fill flips provenance to voice.
       speech.emitFinal('500円');
@@ -758,9 +761,7 @@ void main() {
       expect(form.currentOriginalAmount, 1000);
       expect(form.currentAppliedRate, '150.0');
 
-      await tester.tap(micBarFinder);
-      await tester.pump();
-      await tester.pump();
+      await openVoiceDockAndStart(tester);
       speech.emitPartial('500円');
       await tester.pump(const Duration(milliseconds: 350));
       await tester.pump();
@@ -839,9 +840,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(micBarFinder);
-      await tester.pump();
-      await tester.pump();
+      await openVoiceDockAndStart(tester);
       speech.emitFinal('10 dollars coffee');
       await tester.pump();
       await tester.pump();

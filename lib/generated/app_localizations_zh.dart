@@ -2234,10 +2234,10 @@ class SZh extends S {
   String get entryVoiceLaunchHelp => '一次说出金额、商家、分类和日期';
 
   @override
-  String get entryVoicePrivacy => '按语音设置处理';
+  String get entryVoicePrivacy => '仅在设备内处理';
 
   @override
-  String get entryVoiceIdleStatus => '可以记录下一笔';
+  String get entryVoiceIdleStatus => '等待语音输入中';
 
   @override
   String get entryVoiceListeningStatus => '正在聆听';
@@ -2261,7 +2261,7 @@ class SZh extends S {
   String get entryVoiceProcessingPlaceholder => '“森林咖啡，午餐两千三百八十日元”';
 
   @override
-  String get entryVoiceIdleHelp => '点按麦克风开始下一笔';
+  String get entryVoiceIdleHelp => '点击麦克风开始语音记录';
 
   @override
   String get entryVoiceListeningHelp => '说完稍候将自动识别，也可点按立即完成';

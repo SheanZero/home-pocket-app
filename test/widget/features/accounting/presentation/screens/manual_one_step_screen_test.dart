@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -368,6 +369,15 @@ Future<void> _switchVoiceDockToKeyboard(WidgetTester tester) async {
   await tester.pump();
 }
 
+Future<void> _openVoiceDockAndStart(WidgetTester tester) async {
+  await tester.tap(find.byKey(const ValueKey('voice-record-bar')));
+  await tester.pump();
+  await tester.pump();
+  await tester.tap(find.byKey(const Key('unified-voice-core')));
+  await tester.pump();
+  await tester.pump();
+}
+
 // ── Test helpers ───────────────────────────────────────────────────────────────
 
 Widget _pumpScreen({
@@ -490,7 +500,7 @@ void main() {
         find.byType(AmountDisplay),
       );
       expect(amountDisplay.layout, AmountDisplayLayout.v16);
-      expect(tester.getSize(find.byType(AmountDisplay)).height, 88);
+      expect(tester.getSize(find.byType(AmountDisplay)).height, 72);
       expect(
         tester.getSize(find.byKey(const ValueKey('amount_currency_badge'))),
         const Size(67, 36),
@@ -500,13 +510,12 @@ void main() {
         matching: find.text('123'),
       );
       expect(
-        tester.getCenter(amountText).dx,
-        lessThan(
-          tester
-              .getCenter(find.byKey(const ValueKey('amount_currency_badge')))
-              .dx,
-        ),
-        reason: 'V16 places the amount before the trailing currency action',
+        tester
+            .getCenter(find.byKey(const ValueKey('amount_currency_badge')))
+            .dx,
+        lessThan(tester.getCenter(amountText).dx),
+        reason:
+            'V16 places the currency action before the right-aligned amount',
       );
 
       final keyboard = tester.widget<SmartKeyboard>(find.byType(SmartKeyboard));
@@ -527,6 +536,12 @@ void main() {
 
       final continuous = find.byKey(
         const ValueKey('manual-entry-continuous-control'),
+      );
+      expect(tester.getBottomRight(continuous).dy, 900);
+      expect(
+        tester.getSize(continuous).width,
+        230,
+        reason: 'only the centered red-box region is interactive',
       );
       final l10n = S.of(tester.element(continuous));
       final returnHome = find.descendant(
@@ -572,6 +587,14 @@ void main() {
           isToggled: false,
           hasTapAction: true,
         ),
+      );
+
+      await tester.tapAt(Offset(8, tester.getCenter(continuous).dy));
+      await tester.pump();
+      expect(
+        find.text(l10n.entryContinuousReturnHome),
+        findsOneWidget,
+        reason: 'a bottom-corner tap outside the centered target is ignored',
       );
 
       await tester.tap(continuous);
@@ -623,7 +646,7 @@ void main() {
     expect(scaffold.resizeToAvoidBottomInset, isFalse);
   });
 
-  testWidgets('390x844 bottom slot clears the 34dp home indicator inset', (
+  testWidgets('390x844 keypad surface extends through the bottom inset', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -657,11 +680,30 @@ void main() {
     expect(
       tester
           .getRect(
-            find.byKey(const ValueKey('manual-entry-continuous-control')),
+            find.byKey(const ValueKey('manual-entry-continuous-surface')),
           )
           .bottom,
-      closeTo(844 - 34, 0.5),
-      reason: 'the visible control ends above the home indicator',
+      closeTo(844, 0.5),
+      reason:
+          'the keypad surface reaches the screen bottom without a blank gap',
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey('manual-entry-continuous-surface')),
+          )
+          .height,
+      59,
+      reason: 'the visual surface keeps its compact 16dp bottom buffer',
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey('manual-entry-continuous-control')),
+          )
+          .height,
+      43,
+      reason: 'the bottom buffer is intentionally outside the tap target',
     );
   });
 
@@ -722,7 +764,7 @@ void main() {
   // ── KeyboardToolbar visibility + actions ───────────────────────────────────
 
   testWidgets(
-    'KeyboardToolbar: not visible initially, appears on TextField focus',
+    'KeyboardToolbar: note focus shows icon-labelled Done and green Record',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -741,12 +783,31 @@ void main() {
       // Initial: no KeyboardToolbar
       expect(find.byType(KeyboardToolbar), findsNothing);
 
-      // Tap merchant field to trigger text focus
-      await tester.tap(find.byKey(const ValueKey('merchant-textfield')));
+      // The screenshot case: editing the note raises the system keyboard.
+      await tester.tap(find.byKey(const ValueKey('note-textfield')));
       await tester.pumpAndSettle();
 
       // KeyboardToolbar should be visible
-      expect(find.byType(KeyboardToolbar), findsOneWidget);
+      final toolbar = find.byType(KeyboardToolbar);
+      expect(toolbar, findsOneWidget);
+      expect(
+        find.descendant(
+          of: toolbar,
+          matching: find.byIcon(Icons.keyboard_hide_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: toolbar,
+          matching: find.byIcon(Icons.receipt_long_rounded),
+        ),
+        findsOneWidget,
+      );
+      final recordAction = tester.widget<Material>(
+        find.byKey(const ValueKey('keyboard-toolbar-record-action')),
+      );
+      expect(recordAction.color, AppPalette.light.accentPrimary);
     },
   );
 
@@ -1525,6 +1586,36 @@ void main() {
       );
     });
 
+    testWidgets('voice entry opens idle and starts only from the center mic', (
+      tester,
+    ) async {
+      tall(tester);
+      final speech = _CapturingSpeechService();
+      await tester.pumpWidget(
+        pumpPtt(speech: speech, parse: _FakeParseVoiceInputUseCase(const {})),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(micBarFinder);
+      await tester.pump();
+      await tester.pump();
+
+      expect(_voiceDock(tester).state, UnifiedVoiceEntryState.idle);
+      expect(speech.startCount, 0);
+      expect(find.text('Waiting for voice input'), findsOneWidget);
+      expect(
+        find.text('Tap the microphone to start voice recording'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('unified-voice-core')));
+      await tester.pump();
+      await tester.pump();
+
+      expect(_voiceDock(tester).state, UnifiedVoiceEntryState.listening);
+      expect(speech.startCount, 1);
+    });
+
     testWidgets(
       'V16: merchant focus during listening exposes a disabled toolbar and cannot save',
       (tester) async {
@@ -1546,9 +1637,7 @@ void main() {
           await tester.pump();
         }
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.listening);
 
         await tester.tap(find.byKey(const ValueKey('merchant-textfield')));
@@ -1591,9 +1680,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 processing');
         await tester.pump();
         await tester.pump();
@@ -1621,6 +1708,10 @@ void main() {
       'V16: terminal status during delayed final parse remains processing and cannot save',
       (tester) async {
         tall(tester);
+        tester.view.padding = const FakeViewPadding(bottom: 34);
+        tester.view.viewPadding = const FakeViewPadding(bottom: 34);
+        addTearDown(tester.view.resetPadding);
+        addTearDown(tester.view.resetViewPadding);
         final speech = _CapturingSpeechService();
         final parse = _DelayedParseVoiceInputUseCase(
           const VoiceParseResult(rawText: '500円 delayed', amount: 500),
@@ -1637,9 +1728,7 @@ void main() {
           await tester.pump();
         }
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 delayed');
         await tester.pump();
         expect(parse.isWaiting, isTrue);
@@ -1691,9 +1780,7 @@ void main() {
 
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
 
         speech.emitPartial(parse.partialText);
         await tester.pump(const Duration(milliseconds: 301));
@@ -1757,9 +1844,7 @@ void main() {
         );
         expect(form.currentCategory?.id, _l2Category.id);
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 maybe cafe');
         await tester.pump();
         await tester.pump();
@@ -1776,15 +1861,15 @@ void main() {
         expect(find.text('Select required'), findsOneWidget);
         expect(
           find.byKey(const ValueKey('v16-voice-source-category')),
-          findsOneWidget,
+          findsNothing,
         );
         expect(
           find.byKey(const ValueKey('v16-voice-source-merchant')),
-          findsOneWidget,
+          findsNothing,
         );
         expect(
           find.byKey(const ValueKey('v16-voice-source-note')),
-          findsOneWidget,
+          findsNothing,
         );
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
         expect(
@@ -1840,9 +1925,7 @@ void main() {
 
         // Tap the bar → the inline panel REPLACES the keypad in place. No scrim,
         // no overlay; the keypad is gone while the panel shows.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         expect(
           find.byType(UnifiedVoiceEntryDock),
           findsOneWidget,
@@ -1852,12 +1935,20 @@ void main() {
         final voiceL10n = S.of(
           tester.element(find.byType(UnifiedVoiceEntryDock)),
         );
-        expect(
-          voiceL10n.entryVoicePrivacy,
-          'Processed using voice settings',
-          reason: 'voice copy must not promise device-only processing',
-        );
+        expect(voiceL10n.entryVoicePrivacy, 'Processed only on this device');
         expect(find.text(voiceL10n.entryVoicePrivacy), findsOneWidget);
+        expect(
+          find.text(voiceL10n.entryVoiceListeningPlaceholder),
+          findsNothing,
+          reason: 'the transcript line only shows recognized speech',
+        );
+        expect(
+          tester
+              .getRect(find.byKey(const Key('unified-voice-entry-dock')))
+              .bottom,
+          closeTo(1400, 0.5),
+          reason: 'the voice dock surface reaches the screen bottom',
+        );
         expect(
           find.byType(SmartKeyboard),
           findsNothing,
@@ -1942,9 +2033,7 @@ void main() {
           '300',
         );
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitPartial('500円 仮入力');
         await tester.pump(const Duration(milliseconds: 350));
         await tester.pump();
@@ -2023,9 +2112,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('700円 遅延カフェ');
         await tester.pump();
         await tester.pump();
@@ -2083,24 +2170,20 @@ void main() {
 
         // A resolved final can still be in the listening window. Keyboard exit
         // restores the pre-speech snapshot and must remove its confidence UI.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 weak');
         await tester.pump();
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsOneWidget);
+        expect(find.byType(ConfidenceBandIndicator), findsNothing);
         await _switchVoiceDockToKeyboard(tester);
         expect(find.byType(ConfidenceBandIndicator), findsNothing);
 
         // A review re-record uses the same restore contract and clears it too.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 weak');
         await tester.pump();
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsOneWidget);
+        expect(find.byType(ConfidenceBandIndicator), findsNothing);
         await _finishVoiceUtterance(tester, speech);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
@@ -2138,9 +2221,7 @@ void main() {
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('ラテ 1千');
         await tester.pump();
         await tester.pump();
@@ -2224,9 +2305,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('次の一件 100円');
         await tester.pump();
         await tester.pump();
@@ -2297,9 +2376,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('次の一件 100円');
         await tester.pump();
         await tester.pump();
@@ -2311,7 +2388,7 @@ void main() {
         form.updateLedgerType(LedgerType.joy);
         form.updateSatisfaction(10);
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsOneWidget);
+        expect(find.byType(ConfidenceBandIndicator), findsNothing);
 
         final resetGate = Completer<void>();
         repository.nextGate = resetGate;
@@ -2383,9 +2460,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap → modal; speak → auto-fill merchant 星巴克.
-      await tester.tap(micBarFinder);
-      await tester.pump();
-      await tester.pump();
+      await _openVoiceDockAndStart(tester);
       speech.emitFinal('1千8百4十元 星巴克');
       await tester.pump();
       await tester.pump();
@@ -2438,9 +2513,7 @@ void main() {
 
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
@@ -2504,9 +2577,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap the bar → panel opens, recognizer listening.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         expect(find.byType(UnifiedVoiceEntryDock), findsOneWidget);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.listening);
         expect(find.byType(SmartKeyboard), findsNothing);
@@ -2547,9 +2618,7 @@ void main() {
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
 
         // Recognizer self-terminates → panel stays (stopped).
         speech.startedLocaleId = null;
@@ -2584,9 +2653,7 @@ void main() {
         await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
 
         // Recognizer stops → stopped state, panel stays.
         speech.startedLocaleId = null;
@@ -2623,9 +2690,7 @@ void main() {
           pumpPtt(speech: speech, parse: _FakeParseVoiceInputUseCase(const {})),
         );
         await tester.pumpAndSettle();
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
 
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.unavailable);
         expect(find.text('Microphone help'), findsOneWidget);
@@ -2655,8 +2720,6 @@ void main() {
   // harness — no private-field poking.
 
   group('keypad mirror non-happy path (quick 260706-tm6)', () {
-    final micBarFinder = find.byKey(const ValueKey('voice-record-bar'));
-
     Widget pumpMirror({
       required _CapturingSpeechService speech,
       required _FakeParseVoiceInputUseCase parse,
@@ -2724,9 +2787,7 @@ void main() {
         expect(displayedAmount(tester), '250');
 
         // Speak an amount-less utterance — merchant fills, amount must not.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('午饭');
         await tester.pump();
         await tester.pump();
@@ -2764,9 +2825,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Session 1: fill 500.
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
@@ -2776,9 +2835,7 @@ void main() {
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
         await _switchVoiceDockToKeyboard(tester);
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('1200円');
         await tester.pump();
         await tester.pump();
@@ -2812,9 +2869,7 @@ void main() {
         await tapDigit(tester, '0');
         expect(displayedAmount(tester), '300');
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
@@ -2866,9 +2921,7 @@ void main() {
         await tester.pumpWidget(pumpMirror(speech: speech, parse: parse));
         await tester.pumpAndSettle();
 
-        await tester.tap(micBarFinder);
-        await tester.pump();
-        await tester.pump();
+        await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();

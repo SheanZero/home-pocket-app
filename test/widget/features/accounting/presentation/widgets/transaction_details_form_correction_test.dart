@@ -84,6 +84,7 @@ class _SpyMerchantCategoryPreferenceRepository
   Future<void> upsert(MerchantCategoryPreference preference) async {
     upsertCalls++;
   }
+
   @override
   Future<void> recordSelection({
     required String merchantKey,
@@ -91,6 +92,7 @@ class _SpyMerchantCategoryPreferenceRepository
   }) async {
     recordSelectionCalls++;
   }
+
   @override
   Future<String?> suggestCategoryId(String merchantKey) async => null;
 }
@@ -107,6 +109,7 @@ class _StubCategoryRepository implements CategoryRepository {
     }
     return null;
   }
+
   @override
   Future<List<Category>> findAll() async => _categories;
   @override
@@ -309,16 +312,13 @@ void main() {
         await tester.pumpAndSettle();
 
         // Push recognition → renders the alternate chips.
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         // Tap the alternate chip → category swaps (stash set), NO write yet.
@@ -329,7 +329,8 @@ void main() {
         expect(
           correctionSpy.calls,
           isEmpty,
-          reason: 'D-05: the write is DEFERRED to save — abandon writes nothing',
+          reason:
+              'D-05: the write is DEFERRED to save — abandon writes nothing',
         );
         verifyNever(() => createUseCase.execute(any()));
       },
@@ -366,16 +367,13 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(ValueKey('alt-chip-${_altCat.id}')));
@@ -390,12 +388,21 @@ void main() {
           isTrue,
         );
 
-        expect(correctionSpy.calls.length, 1,
-            reason: 'D-06: exactly one deferred correction at save');
-        expect(correctionSpy.calls.single.keyword, _kKeyword,
-            reason: 'D-07: write key == resolvedKeyword verbatim (260526-pg6)');
-        expect(correctionSpy.calls.single.correctedCategoryId, _altCat.id,
-            reason: 'D-06: write carries the corrected categoryId');
+        expect(
+          correctionSpy.calls.length,
+          1,
+          reason: 'D-06: exactly one deferred correction at save',
+        );
+        expect(
+          correctionSpy.calls.single.keyword,
+          _kKeyword,
+          reason: 'D-07: write key == resolvedKeyword verbatim (260526-pg6)',
+        );
+        expect(
+          correctionSpy.calls.single.correctedCategoryId,
+          _altCat.id,
+          reason: 'D-06: write carries the corrected categoryId',
+        );
       },
     );
 
@@ -431,16 +438,13 @@ void main() {
         await tester.pumpAndSettle();
 
         // Render chips so the trailing "more" exit chip → full selector exists.
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         // Open the full selector via the exit chip.
@@ -462,12 +466,21 @@ void main() {
           isTrue,
         );
 
-        expect(correctionSpy.calls.length, 1,
-            reason: 'D-06: full-selector change also records ONE correction');
-        expect(correctionSpy.calls.single.keyword, _kKeyword,
-            reason: 'D-07: write key == resolvedKeyword verbatim');
-        expect(correctionSpy.calls.single.correctedCategoryId, _selChildCat.id,
-            reason: 'selector path carries the corrected categoryId');
+        expect(
+          correctionSpy.calls.length,
+          1,
+          reason: 'D-06: full-selector change also records ONE correction',
+        );
+        expect(
+          correctionSpy.calls.single.keyword,
+          _kKeyword,
+          reason: 'D-07: write key == resolvedKeyword verbatim',
+        );
+        expect(
+          correctionSpy.calls.single.correctedCategoryId,
+          _selChildCat.id,
+          reason: 'selector path carries the corrected categoryId',
+        );
       },
     );
 
@@ -502,16 +515,13 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(ValueKey('alt-chip-${_altCat.id}')));
@@ -521,8 +531,11 @@ void main() {
         await tester.pump();
         await formKey.currentState!.submit();
 
-        expect(correctionSpy.calls, isEmpty,
-            reason: 'D-07: null/empty keyword writes NO learning row');
+        expect(
+          correctionSpy.calls,
+          isEmpty,
+          reason: 'D-07: null/empty keyword writes NO learning row',
+        );
       },
     );
 
@@ -558,16 +571,13 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(ValueKey('alt-chip-${_altCat.id}')));
@@ -576,12 +586,21 @@ void main() {
         await tester.pump();
         await formKey.currentState!.submit();
 
-        expect(correctionSpy.calls.length, 1,
-            reason: 'the KEYWORD correction still fires (sanity)');
-        expect(merchantSpy.recordSelectionCalls, 0,
-            reason: 'D-16: the merchant table is never written on this path');
-        expect(merchantSpy.upsertCalls, 0,
-            reason: 'D-07: no merchant_category_preferences upsert on correction');
+        expect(
+          correctionSpy.calls.length,
+          1,
+          reason: 'the KEYWORD correction still fires (sanity)',
+        );
+        expect(
+          merchantSpy.recordSelectionCalls,
+          0,
+          reason: 'D-16: the merchant table is never written on this path',
+        );
+        expect(
+          merchantSpy.upsertCalls,
+          0,
+          reason: 'D-07: no merchant_category_preferences upsert on correction',
+        );
       },
     );
 
@@ -616,21 +635,18 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-            CategoryMatchResult(
-              categoryId: _initialCat.id,
-              confidence: 0.3,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+          CategoryMatchResult(
+            categoryId: _initialCat.id,
+            confidence: 0.3,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         // Change to alt (stash set)… the first pick clears the band per D-09,
@@ -640,21 +656,18 @@ void main() {
 
         // Re-push recognition so the chips re-render, then change BACK to the
         // recognized original — which must DISCARD the pending stash.
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-            CategoryMatchResult(
-              categoryId: _initialCat.id,
-              confidence: 0.3,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+          CategoryMatchResult(
+            categoryId: _initialCat.id,
+            confidence: 0.3,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(ValueKey('alt-chip-${_initialCat.id}')));
         await tester.pumpAndSettle();
@@ -663,15 +676,18 @@ void main() {
         await tester.pump();
         await formKey.currentState!.submit();
 
-        expect(correctionSpy.calls, isEmpty,
-            reason: 'reverting to the recognized original discards the stash');
+        expect(
+          correctionSpy.calls,
+          isEmpty,
+          reason: 'reverting to the recognized original discards the stash',
+        );
       },
     );
   });
 
   group('Recognition surface visibility (52-UAT test 2)', () {
     testWidgets(
-      'recognition surface: confidence band renders by default, chip row stays hidden',
+      'recognition surface: confidence marker and chip row stay hidden',
       (tester) async {
         sizeView(tester);
         final correctionSpy = _SpyRecordCategoryCorrectionUseCase();
@@ -700,40 +716,31 @@ void main() {
         await tester.pumpAndSettle();
 
         // Push a recognition outcome with an alternate at resolve-on-final.
-        formKey.currentState!.updateRecognition(
-          ConfidenceBand.weak,
-          [
-            CategoryMatchResult(
-              categoryId: _altCat.id,
-              confidence: 0.4,
-              source: MatchSource.keyword,
-            ),
-          ],
-        );
+        formKey.currentState!.updateRecognition(ConfidenceBand.weak, [
+          CategoryMatchResult(
+            categoryId: _altCat.id,
+            confidence: 0.4,
+            source: MatchSource.keyword,
+          ),
+        ]);
         await tester.pumpAndSettle();
 
-        // The confidence band renders in production after a voice resolve-on-
-        // final (RECUX-01) — re-enabled by undoing the 52-UAT follow-up that had
-        // over-hidden it. Only the chip row stays hidden (test 2).
+        // Recognition confidence remains form state, but its decorative band
+        // is intentionally hidden from the production form.
         expect(
           find.byType(ConfidenceBandIndicator),
-          findsOneWidget,
-          reason: 'RECUX-01: the confidence band renders in production',
+          findsNothing,
+          reason: 'confidence band is no longer a visible form affordance',
         );
         // …but the whole chip row is gone: no alternate chips and no exit chip.
         expect(
           find.byType(AlternateCategoryChips),
           findsNothing,
-          reason: '52-UAT test 2: the alternate chip row is hidden in production',
+          reason:
+              '52-UAT test 2: the alternate chip row is hidden in production',
         );
-        expect(
-          find.byKey(ValueKey('alt-chip-${_altCat.id}')),
-          findsNothing,
-        );
-        expect(
-          find.byKey(const ValueKey('alt-chip-exit')),
-          findsNothing,
-        );
+        expect(find.byKey(ValueKey('alt-chip-${_altCat.id}')), findsNothing);
+        expect(find.byKey(const ValueKey('alt-chip-exit')), findsNothing);
       },
     );
   });

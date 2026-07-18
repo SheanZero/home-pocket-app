@@ -21,8 +21,9 @@ part of 'manual_one_step_screen.dart';
 extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
   // ── 260622-nhs R2: tap-modal voice-record lifecycle ───────────────────────
 
-  /// Tap 「语音记录」: snapshot the form (D-2 reset-restore), then start a
-  /// continuous auto-fill listening session and raise the modal.
+  /// Tap 「语音记录」: snapshot the form (D-2 reset-restore) and open the voice
+  /// dock in its explicit idle state. Recognition starts only when the user
+  /// taps the dock's central microphone.
   void _onVoiceRecordTap() {
     if (_voiceModalOpen || _isSubmitting) return;
     final form = _formKey.currentState;
@@ -35,15 +36,12 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
         form: form,
       );
     }
-    // 260622-nhs R6 (BUG 1): open the modal (panel visibility) independent of
-    // the recognizer lifecycle, then start the one-shot listening session.
+    // Panel visibility stays independent of the recognizer lifecycle. Entering
+    // voice mode never opens the microphone by itself.
     onPttSessionChanged(() {
       _voiceModalOpen = true;
-      _voiceIdleForNext = false;
+      _voiceIdleForNext = true;
     });
-    if (pttServiceInitialized && isLocaleReady) {
-      unawaited(startPttTapSession());
-    }
   }
 
   Future<void> _onVoiceKeyboard() async {
@@ -165,17 +163,9 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
       UnifiedVoiceEntryState.review => l10n.entryVoiceReviewStatus,
       UnifiedVoiceEntryState.unavailable => l10n.entryVoiceUnavailableStatus,
     };
-    final fallbackTranscript = switch (state) {
-      UnifiedVoiceEntryState.idle => l10n.entryVoiceIdleTranscript,
-      UnifiedVoiceEntryState.listening => l10n.entryVoiceListeningPlaceholder,
-      UnifiedVoiceEntryState.processing => l10n.entryVoiceProcessingPlaceholder,
-      UnifiedVoiceEntryState.review => l10n.entryVoiceProcessingPlaceholder,
-      UnifiedVoiceEntryState.unavailable =>
-        l10n.voiceMicrophonePermissionRequired,
-    };
-    final transcript = pttTranscript.trim().isEmpty
-        ? fallbackTranscript
-        : pttTranscript;
+    // The transcript line is reserved for actual recognizer output. Status,
+    // permission, and usage guidance already have dedicated header/help rows.
+    final transcript = pttTranscript.trim();
     final help = switch (state) {
       UnifiedVoiceEntryState.idle => l10n.entryVoiceIdleHelp,
       UnifiedVoiceEntryState.listening => l10n.entryVoiceListeningHelp,

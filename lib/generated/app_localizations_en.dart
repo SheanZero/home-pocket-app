@@ -2286,10 +2286,10 @@ class SEn extends S {
       'Say the amount, merchant, category, and date in one go';
 
   @override
-  String get entryVoicePrivacy => 'Processed using voice settings';
+  String get entryVoicePrivacy => 'Processed only on this device';
 
   @override
-  String get entryVoiceIdleStatus => 'Ready for the next entry';
+  String get entryVoiceIdleStatus => 'Waiting for voice input';
 
   @override
   String get entryVoiceListeningStatus => 'Listening';
@@ -2315,7 +2315,8 @@ class SEn extends S {
       '“Forest Café, lunch, 2,380 yen”';
 
   @override
-  String get entryVoiceIdleHelp => 'Tap the microphone to start the next entry';
+  String get entryVoiceIdleHelp =>
+      'Tap the microphone to start voice recording';
 
   @override
   String get entryVoiceListeningHelp =>

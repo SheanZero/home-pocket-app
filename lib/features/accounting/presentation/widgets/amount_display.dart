@@ -7,8 +7,8 @@ enum AmountDisplayLayout { legacy, v16 }
 
 /// Displays the current amount with currency label and clear button.
 ///
-/// Shows "¥ JPY" as plain text on the left, the formatted amount in the center,
-/// and an "x" clear button on the right when amount is non-empty.
+/// The V16 layout places the currency action on the left and keeps the amount
+/// right-aligned. Legacy review surfaces retain their original arrangement.
 class AmountDisplay extends StatelessWidget {
   const AmountDisplay({
     super.key,
@@ -32,7 +32,7 @@ class AmountDisplay extends StatelessWidget {
   /// Currency code label (e.g. "JPY", "USD", "CNY").
   final String currencyLabel;
 
-  /// v16 places the amount on the left and the compact currency action on the
+  /// V16 places the compact currency action on the left and the amount on the
   /// right. The legacy layout stays the default for OCR/voice review surfaces.
   final AmountDisplayLayout layout;
 
@@ -73,51 +73,11 @@ class AmountDisplay extends StatelessWidget {
 
     if (layout == AmountDisplayLayout.v16) {
       return SizedBox(
-        height: 88,
+        height: 72,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             children: [
-              Text(
-                currencySymbol,
-                style: AppTextStyles.amountHero.copyWith(
-                  color: palette.textPrimary,
-                  fontSize: 44,
-                  height: 1,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _formatted,
-                    style: AppTextStyles.amountHero.copyWith(
-                      color: palette.textPrimary,
-                      fontSize: 44,
-                      height: 1,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    maxLines: 1,
-                  ),
-                ),
-              ),
-              if (amount.isNotEmpty && onClear != null) ...[
-                const SizedBox(width: 8),
-                IconButton(
-                  key: const ValueKey('amount_clear_button'),
-                  onPressed: onClear,
-                  visualDensity: VisualDensity.compact,
-                  icon: Icon(
-                    Icons.close,
-                    size: 16,
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ],
-              const SizedBox(width: 10),
               Material(
                 key: const ValueKey('amount_currency_badge'),
                 color: palette.dailyLight,
@@ -149,6 +109,53 @@ class AmountDisplay extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      currencySymbol,
+                      style: AppTextStyles.amountHero.copyWith(
+                        color: palette.textPrimary,
+                        fontSize: 38,
+                        height: 1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          _formatted,
+                          style: AppTextStyles.amountHero.copyWith(
+                            color: palette.textPrimary,
+                            fontSize: 38,
+                            height: 1,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                    if (amount.isNotEmpty && onClear != null) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        key: const ValueKey('amount_clear_button'),
+                        onPressed: onClear,
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],

@@ -477,7 +477,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
               // Scrollable details section with smart bottom padding (D-13)
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollPaddingBottom),
+                  padding: EdgeInsets.fromLTRB(16, 2, 16, scrollPaddingBottom),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -554,12 +554,13 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
               // this NOT `pttIsRecording`, so the one-shot recognizer stopping
               // does NOT snap the keypad back) the inline VoiceRecordPanel
               // occupies the keypad's footprint; otherwise the 「语音记录」 strip +
-              // SmartKeyboard. The whole interchangeable slot shares the same
-              // system-bottom inset so keypad, voice dock, and continuous
-              // control all stay clear of the home indicator.
+              // SmartKeyboard. Both surfaces extend to the screen bottom: the
+              // keypad absorbs a compact inset in its continuous control, and
+              // the fixed voice dock keeps its own bottom padding.
               SafeArea(
                 key: const ValueKey('manual-entry-bottom-safe-area'),
                 top: false,
+                bottom: false,
                 child: AnimatedSlide(
                   offset: Offset(0, _showSmartKeypad ? 0 : 1),
                   duration: const Duration(milliseconds: 220),
@@ -634,6 +635,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   }
 
   Widget _buildContinuousControl(S l10n, AppPalette palette) {
+    final bottomInset = math.min(MediaQuery.paddingOf(context).bottom, 16.0);
     final summary = _continuousMode
         ? l10n.entryContinuousKeepNext
         : l10n.entryContinuousReturnHome;
@@ -646,42 +648,52 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
 
     return Material(
       color: palette.card,
-      child: Semantics(
-        key: const ValueKey('manual-entry-continuous-control'),
-        button: true,
-        toggled: _continuousMode,
-        label: '$summary $action',
-        onTap: toggleContinuousMode,
-        excludeSemantics: true,
-        child: InkWell(
-          onTap: toggleContinuousMode,
-          child: SizedBox(
-            height: 43,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        summary,
-                        maxLines: 1,
-                        style: AppTextStyles.supporting.copyWith(
-                          color: palette.textSecondary,
+      child: SizedBox(
+        key: const ValueKey('manual-entry-continuous-surface'),
+        height: 43 + bottomInset,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: Center(
+            child: Semantics(
+              key: const ValueKey('manual-entry-continuous-control'),
+              button: true,
+              toggled: _continuousMode,
+              label: '$summary $action',
+              onTap: toggleContinuousMode,
+              excludeSemantics: true,
+              child: SizedBox(
+                width: 230,
+                height: 43,
+                child: InkWell(
+                  onTap: toggleContinuousMode,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              summary,
+                              maxLines: 1,
+                              style: AppTextStyles.supporting.copyWith(
+                                color: palette.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              action,
+                              maxLines: 1,
+                              style: AppTextStyles.compact.copyWith(
+                                color: palette.accentPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        action,
-                        maxLines: 1,
-                        style: AppTextStyles.compact.copyWith(
-                          color: palette.accentPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -245,11 +245,11 @@ void main() {
       final editIcon = tester.widget<Icon>(editAffordance);
       expect(editIcon.icon, Icons.edit_outlined);
       expect(editIcon.size, 16);
-      final badge = find.byKey(const ValueKey('amount_currency_badge'));
+      final amount = find.text('1,500');
       expect(
-        tester.getRect(editAffordance).left - tester.getRect(badge).right,
+        tester.getRect(editAffordance).left - tester.getRect(amount).right,
         closeTo(6, 0.5),
-        reason: 'the 16dp edit affordance follows the JPY badge',
+        reason: 'the 16dp edit affordance follows the right-aligned amount',
       );
 
       final saveCheck = find.byKey(

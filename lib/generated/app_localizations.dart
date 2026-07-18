@@ -4198,13 +4198,13 @@ abstract class S {
   /// No description provided for @entryVoicePrivacy.
   ///
   /// In en, this message translates to:
-  /// **'Processed using voice settings'**
+  /// **'Processed only on this device'**
   String get entryVoicePrivacy;
 
   /// No description provided for @entryVoiceIdleStatus.
   ///
   /// In en, this message translates to:
-  /// **'Ready for the next entry'**
+  /// **'Waiting for voice input'**
   String get entryVoiceIdleStatus;
 
   /// No description provided for @entryVoiceListeningStatus.
@@ -4252,7 +4252,7 @@ abstract class S {
   /// No description provided for @entryVoiceIdleHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tap the microphone to start the next entry'**
+  /// **'Tap the microphone to start voice recording'**
   String get entryVoiceIdleHelp;
 
   /// No description provided for @entryVoiceListeningHelp.

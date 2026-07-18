@@ -37,7 +37,6 @@ import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/alternate_category_chips.dart';
-import '../widgets/confidence_band_indicator.dart';
 import '../../../voice/domain/models/recognition_outcome.dart'
     show ConfidenceBand;
 import '../../../voice/domain/models/voice_parse_result.dart'
@@ -77,10 +76,10 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
   final bool useV16Layout;
 
   /// Phase 52 / 52-UAT (test 2): whether the alternate-category chip row (≤3
-  /// suggested alternates + the trailing "more" exit chip) renders under the
-  /// recognition band. HIDDEN by default at the user's request — after a voice
-  /// recognition only the qualitative confidence band shows. This is a
-  /// reversible scope-cut: the [AlternateCategoryChips] widget, the chip-tap
+  /// suggested alternates + the trailing "more" exit chip) renders after a
+  /// voice recognition. HIDDEN by default at the user's request, together with
+  /// the former decorative confidence band. This is a reversible scope-cut:
+  /// the [AlternateCategoryChips] widget, the chip-tap
   /// handler ([_selectAlternateCategory]) and their tests are all kept intact;
   /// flip the default to `true` (or remove this flag) to restore the chips.
   /// Category correction is unaffected — it still flows through the category-card
@@ -192,11 +191,11 @@ class TransactionDetailsFormState
   int _joyFullness = 2;
   bool _isSubmitting = false;
 
-  // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): the recognition surface state.
-  // Pushed by the voice host at resolve-on-final via [updateRecognition] (D-08);
-  // null on manual/OCR entry → no band/chips affordance (D-10). Cleared the
-  // instant the user picks any category (chip or full selector) so the band
-  // stops marking a "guess" (D-09 → user-authoritative).
+  // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): recognition confidence state.
+  // Pushed by the voice host at resolve-on-final via [updateRecognition] (D-08)
+  // and retained for the weak-category save guard/correction path. The former
+  // decorative band is intentionally no longer rendered in the entry form.
+  // State clears as soon as the user makes an authoritative category choice.
   ConfidenceBand? _band;
   List<CategoryMatchResult> _alternates = const <CategoryMatchResult>[];
 
@@ -225,9 +224,9 @@ class TransactionDetailsFormState
   bool get _isEditMode =>
       widget.config.maybeWhen(edit: (_) => true, orElse: () => false);
 
-  /// The V16 provenance marker belongs only to a newly-created row whose live
-  /// config has been promoted to voice after a successful PTT fill. Edit mode
-  /// and pure manual entry intentionally stay visually quiet.
+  /// True for a newly-created row whose live config has been promoted to voice
+  /// after a successful PTT fill. Used by the weak-category save guard only;
+  /// voice provenance badges are intentionally not rendered in V16.
   bool get _isV16VoiceNewEntry =>
       widget.useV16Layout &&
       widget.config.maybeWhen(
@@ -611,8 +610,9 @@ class TransactionDetailsFormState
 
   /// Phase 52 (RECUX-01/02 / D-08): the voice host pushes the recognized
   /// confidence band + ranked alternates at resolve-on-final — the SAME fill
-  /// point that calls [updateCategory]. This drives the pure-visual band +
-  /// alternate-category chips on the form. Null band → no affordance (D-10).
+  /// point that calls [updateCategory]. This drives the weak-category save
+  /// guard and the test-gated alternate-category correction path. The former
+  /// decorative band is deliberately hidden. Null clears both behaviors.
   ///
   /// Idempotency: short-circuits when band + alternate ids are unchanged so
   /// repeated final-fills do not rebuild-storm.
@@ -1259,20 +1259,8 @@ class TransactionDetailsFormState
                 : Icons.shopping_bag_outlined,
             label: l10n.category,
             value: _categoryLabel(locale, l10n),
-            subline: _isV16VoiceNewEntry
-                ? Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: 4,
-                    runSpacing: 2,
-                    children: [
-                      _buildV16VoiceSourceBadge(
-                        l10n,
-                        key: const ValueKey('v16-voice-source-category'),
-                      ),
-                      if (_needsV16CategorySelection)
-                        _buildV16CategoryRequiredBadge(l10n),
-                    ],
-                  )
+            subline: _needsV16CategorySelection
+                ? _buildV16CategoryRequiredBadge(l10n)
                 : null,
             onTap: _editCategory,
           ),
@@ -1418,13 +1406,6 @@ class TransactionDetailsFormState
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (_isV16VoiceNewEntry) ...[
-                    const SizedBox(height: 2),
-                    _buildV16VoiceSourceBadge(
-                      l10n,
-                      key: const ValueKey('v16-voice-source-merchant'),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -1446,40 +1427,45 @@ class TransactionDetailsFormState
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: palette.borderDefault),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.expenseClassification,
-            style: AppTextStyles.label.copyWith(
-              color: palette.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: _buildV16LedgerOption(
-                    key: const ValueKey('ledger_type_daily_chip'),
-                    type: LedgerType.daily,
-                    icon: Icons.shield_outlined,
-                    label: l10n.dailyExpense,
-                  ),
+          Row(
+            children: [
+              Text(
+                l10n.expenseClassification,
+                style: AppTextStyles.label.copyWith(
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.w700,
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _buildV16LedgerOption(
-                    key: const ValueKey('ledger_type_joy_chip'),
-                    type: LedgerType.joy,
-                    icon: Icons.auto_awesome,
-                    label: l10n.joyExpense,
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _buildV16LedgerOption(
+                      key: const ValueKey('ledger_type_daily_chip'),
+                      type: LedgerType.daily,
+                      icon: Icons.shield_outlined,
+                      label: l10n.dailyExpense,
+                    ),
+                    const SizedBox(width: 6),
+                    _buildV16LedgerOption(
+                      key: const ValueKey('ledger_type_joy_chip'),
+                      type: LedgerType.joy,
+                      icon: Icons.auto_awesome,
+                      label: l10n.joyExpense,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          if (_ledgerType == LedgerType.joy) ...[
+            const SizedBox(height: 14),
+            _buildV16SatisfactionCard(l10n),
+          ],
         ],
       ),
     );
@@ -1513,15 +1499,16 @@ class TransactionDetailsFormState
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: selected ? activeBackground : palette.backgroundMuted,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: selected ? activeBorder : palette.borderDefault,
+                color: selected ? activeBorder : Colors.transparent,
               ),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
@@ -1550,126 +1537,30 @@ class TransactionDetailsFormState
   }
 
   Widget _buildV16SatisfactionCard(S l10n) {
-    const values = <int>[2, 4, 6, 8, 10];
-    const icons = <IconData>[
-      Icons.sentiment_very_dissatisfied_outlined,
-      Icons.sentiment_dissatisfied_outlined,
-      Icons.sentiment_neutral_outlined,
-      Icons.sentiment_satisfied_outlined,
-      Icons.sentiment_very_satisfied_outlined,
-    ];
-    final labels = <String>[
+    final levelLabels = <String>[
       l10n.satisfactionBad,
       l10n.satisfactionSlightlyBad,
       l10n.satisfactionNormal,
       l10n.satisfactionGood,
       l10n.satisfactionVeryGood,
     ];
-    final selectedIndex = _joyFullness <= 2
-        ? 0
-        : _joyFullness <= 4
-        ? 1
-        : _joyFullness <= 6
-        ? 2
-        : _joyFullness <= 8
-        ? 3
-        : 4;
-    final palette = context.palette;
+    if (_joyFullness.isOdd) {
+      for (var index = 0; index < levelLabels.length; index++) {
+        levelLabels[index] = '${levelLabels[index]} · $_joyFullness/10';
+      }
+    }
 
-    return Container(
+    return KeyedSubtree(
       key: const ValueKey('v16-satisfaction-card'),
-      padding: const EdgeInsets.all(11),
-      decoration: BoxDecoration(
-        color: palette.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.borderDefault),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Text(
-                l10n.satisfactionLevel,
-                style: AppTextStyles.label.copyWith(
-                  color: palette.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${labels[selectedIndex]} · $_joyFullness/10',
-                style: AppTextStyles.compact.copyWith(
-                  color: palette.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          Row(
-            children: List.generate(values.length, (index) {
-              final selected = index == selectedIndex;
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: index == 0 ? 0 : 5),
-                  child: Semantics(
-                    button: true,
-                    selected: selected,
-                    label: labels[index],
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        key: ValueKey('face_$index'),
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => updateSatisfaction(values[index]),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 160),
-                          height: 44,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? palette.joyLight
-                                : palette.backgroundMuted,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: selected
-                                  ? palette.joy
-                                  : palette.borderDefault,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                icons[index],
-                                size: 21,
-                                color: selected
-                                    ? palette.joyText
-                                    : palette.textSecondary,
-                              ),
-                              Text(
-                                labels[index],
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.micro.copyWith(
-                                  color: selected
-                                      ? palette.joyText
-                                      : palette.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
+      child: SatisfactionEmojiPicker(
+        value: _joyFullness,
+        onChanged: updateSatisfaction,
+        title: l10n.satisfactionLevel,
+        levelLabels: levelLabels,
+        bottomLabels: [
+          l10n.satisfactionBad,
+          l10n.satisfactionNormal,
+          l10n.satisfactionExcellent,
         ],
       ),
     );
@@ -1729,42 +1620,8 @@ class TransactionDetailsFormState
               style: AppTextStyles.label.copyWith(color: palette.textPrimary),
             ),
           ),
-          if (_isV16VoiceNewEntry) ...[
-            const SizedBox(width: 5),
-            _buildV16VoiceSourceBadge(
-              l10n,
-              key: const ValueKey('v16-voice-source-note'),
-            ),
-          ],
           const SizedBox(width: 5),
           Icon(Icons.chevron_right, size: 18, color: palette.textTertiary),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildV16VoiceSourceBadge(S l10n, {required Key key}) {
-    final palette = context.palette;
-    return Container(
-      key: key,
-      constraints: const BoxConstraints(minHeight: 21),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-      decoration: BoxDecoration(
-        color: palette.accentPrimaryLight,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.graphic_eq, size: 13, color: palette.accentPrimary),
-          const SizedBox(width: 3),
-          Text(
-            l10n.entryVoiceSourceBadge,
-            style: AppTextStyles.micro.copyWith(
-              color: palette.accentPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
         ],
       ),
     );
@@ -1907,31 +1764,19 @@ class TransactionDetailsFormState
                 trailing: _buildMerchantRow(l10n),
               ),
 
-            // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): the recognition surface —
-            // a pure-visual confidence band (RECUX-01) plus, behind the
-            // @visibleForTesting `showAlternateChips` flag, ≤3 alternate-category
-            // chips + an exit chip (RECUX-02). Gated on `_band != null`:
-            // manual/OCR entry has no band, so nothing renders (D-10,
-            // correct-by-construction). The band shows in production after a
-            // voice resolve-on-final; the chip row stays hidden (52-UAT test 2,
-            // user-directed) but is retained behind its flag for a reversible
-            // re-enable. Both clear the instant the user picks a category (D-09).
-            if (_band != null) ...[
+            // Phase 52 correction row, retained behind the @visibleForTesting
+            // `showAlternateChips` flag for a reversible re-enable. The former
+            // confidence-band decoration is intentionally hidden in production
+            // and tests. Recognition state still powers the weak-category save
+            // guard and clears when the user picks a category (D-09).
+            if (widget.showAlternateChips &&
+                _band != null &&
+                _alternates.isNotEmpty) ...[
               SizedBox(height: widget.useV16Layout ? 10 : 12),
-              Row(
-                children: [
-                  ConfidenceBandIndicator(band: _band, ledgerType: _ledgerType),
-                  if (widget.showAlternateChips) ...[
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: AlternateCategoryChips(
-                        alternates: _alternates,
-                        selectedCategoryId: _category?.id,
-                        onSelect: _selectAlternateCategory,
-                      ),
-                    ),
-                  ],
-                ],
+              AlternateCategoryChips(
+                alternates: _alternates,
+                selectedCategoryId: _category?.id,
+                onSelect: _selectAlternateCategory,
               ),
             ],
 
@@ -1940,10 +1785,6 @@ class TransactionDetailsFormState
             // Card B: 用途 (Purpose) header + ledger + (joy) satisfaction.
             if (widget.useV16Layout) ...[
               _buildV16PurposeCard(l10n),
-              if (_ledgerType == LedgerType.joy) ...[
-                const SizedBox(height: 10),
-                _buildV16SatisfactionCard(l10n),
-              ],
             ] else
               _formCard(
                 child: Padding(

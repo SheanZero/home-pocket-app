@@ -2241,10 +2241,10 @@ class SJa extends S {
   String get entryVoiceLaunchHelp => '金額・店名・カテゴリ・日付をまとめて話せます';
 
   @override
-  String get entryVoicePrivacy => '音声設定に沿って処理';
+  String get entryVoicePrivacy => 'デバイス内でのみ処理';
 
   @override
-  String get entryVoiceIdleStatus => '次の記録を待機中';
+  String get entryVoiceIdleStatus => '音声入力を待機中';
 
   @override
   String get entryVoiceListeningStatus => '聞いています';
@@ -2268,7 +2268,7 @@ class SJa extends S {
   String get entryVoiceProcessingPlaceholder => '“森のカフェ、ランチ、2,380円”';
 
   @override
-  String get entryVoiceIdleHelp => 'マイクをタップして次の記録を開始';
+  String get entryVoiceIdleHelp => 'マイクをタップして音声記録を開始';
 
   @override
   String get entryVoiceListeningHelp => '話し終えると自動認識。タップですぐ完了';

@@ -1,3 +1,77 @@
+# Continuous Accounting Hit Target QA — 2026-07-18
+
+- Source visual truth: `/Users/xinz/Downloads/截屏 2026-07-18 15.09.22.png`
+- Implementation screenshot: `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/continuous-hit-target-manual.png`
+- Focused paired comparison: `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/comparison-continuous-hit-target.png`
+- Viewport/state: source mobile frame normalized against a 390px-wide Flutter widget render; manual keypad idle state with continuous accounting disabled. Voice uses the same centered-target contract in every dock state.
+
+## Findings
+
+No actionable P0, P1, or P2 issue remains.
+
+- Fonts and typography: unchanged; the existing summary/action hierarchy and 6px inline spacing remain.
+- Spacing and layout rhythm: the manual visual surface still reaches the screen bottom, while its interactive region is centered at 230×43 and excludes the bottom safe-area buffer. Voice uses a centered 230×27 interactive region.
+- Colors and visual tokens: unchanged; the summary stays secondary and the mode action stays primary green.
+- Image and icon fidelity: no image or icon changes were required.
+- Copy and content: localized continuous/non-continuous wording is unchanged.
+- Interaction evidence: manual and voice corner taps outside the centered target are ignored; taps inside the padded target toggle once. Semantics remain button/toggled controls on the constrained target.
+
+## Comparison history
+
+1. Before the change, the manual control's full 390px footer toggled the mode, while voice only made the action text tappable.
+2. Both paths now use the same centered 230px-wide target. The surrounding footer, dock corners, and manual bottom buffer are non-interactive.
+3. Post-fix widget tests pass for both manual keypad and voice dock; the focused capture confirms there is no unintended visual change.
+
+final result: passed
+
+---
+
+# Manual Entry UI Design QA
+
+- Source visual truth:
+  - `/Users/xinz/Downloads/截屏 2026-07-18 13.55.24.png`
+  - `/Users/xinz/Downloads/截屏 2026-07-18 13.56.53.png`
+- Implementation captures:
+  - `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/amount-clear-after-digits.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/voice-review-record-action.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/note-keyboard-toolbar.png`
+- Viewport: 390 × 844 for the form captures; the voice dock is rendered at its exact 390 × 336 component contract inside the Flutter test surface.
+- States: non-empty JPY amount; voice review ready to record; note field focused with keyboard accessory toolbar.
+
+## Full-view comparison evidence
+
+The note-focus capture shows the full 390 × 844 entry form. Voice provenance badges and the confidence marker above the purpose card are absent, while the keyboard toolbar remains aligned to the bottom edge. The voice-review capture shows the complete dock and its inset primary action.
+
+## Focused comparison evidence
+
+- Amount: `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/comparison-amount.png`
+- Voice review action: `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/comparison-voice-action.png`
+- Note keyboard toolbar: `/Users/xinz/.codex/visualizations/2026/07/18/019f7320-13de-7752-a730-71b36a01a307/comparison-note-toolbar.png`
+
+## Findings
+
+No actionable P0, P1, or P2 differences remain for the requested changes.
+
+- Fonts and typography: existing `AppTextStyles` and the current amount size are preserved. Flutter widget captures use the deterministic test font, so production glyph shapes are verified by widget/icon identifiers rather than judged from the capture raster.
+- Spacing and layout rhythm: the clear action follows the amount; the voice record action has 16 px horizontal insets; both keyboard-toolbar actions keep balanced padding.
+- Colors and visual tokens: Record uses `accentPrimary`; Done retains the card/outline treatment; existing background and border tokens are unchanged.
+- Image and icon fidelity: no new raster assets are needed. The voice and keyboard actions use Material receipt/keyboard icons; the submitting state no longer substitutes the loop icon in the Record action.
+- Copy and content: all `Voice filled` provenance badges and the decorative confidence marker are absent. Existing localized Record and Done labels remain.
+
+## Comparison history
+
+1. Source screenshots showed the amount clear action before the amount, a full-width voice Record button with a loop icon, a pink text-only keyboard Record action, and visible voice-source/confidence decorations.
+2. Implementation moved the clear action after the amount, inset the voice action, fixed its icon, made the keyboard Record action green, added icons to Record and Done, and hid the two decoration types.
+3. Post-fix focused captures confirm the new geometry and visual tokens. Widget tests additionally assert exact icon data, color, width, ordering, and absence of the removed markers.
+
+## Follow-up polish
+
+- P3: a real-device screenshot can be used later for production-font raster comparison; no layout or behavior change depends on it.
+
+final result: passed
+
+---
+
 # Home Pocket Design QA
 
 ## 2026-07-16 — 编辑交易与统一记账视觉收敛

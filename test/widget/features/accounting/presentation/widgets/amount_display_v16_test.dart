@@ -5,7 +5,7 @@ import 'package:home_pocket/features/accounting/presentation/widgets/amount_disp
 import '../../../../../helpers/test_localizations.dart';
 
 void main() {
-  testWidgets('v16 amount layout keeps amount left and currency action right', (
+  testWidgets('v16 amount layout keeps currency left and amount right', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -14,6 +14,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     var currencyTapped = false;
+    var cleared = false;
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
@@ -23,6 +24,7 @@ void main() {
             currencyLabel: 'JPY',
             layout: AmountDisplayLayout.v16,
             onCurrencyTap: () => currencyTapped = true,
+            onClear: () => cleared = true,
           ),
         ),
       ),
@@ -31,19 +33,24 @@ void main() {
     final amount = find.text('3,280');
     final symbol = find.text('¥');
     final currency = find.byKey(const ValueKey('amount_currency_badge'));
+    final clear = find.byKey(const ValueKey('amount_clear_button'));
     expect(amount, findsOneWidget);
     expect(symbol, findsOneWidget);
     expect(currency, findsOneWidget);
+    expect(clear, findsOneWidget);
     expect(
-      tester.getTopLeft(amount).dx,
-      lessThan(tester.getTopLeft(currency).dx),
+      tester.getTopLeft(currency).dx,
+      lessThan(tester.getTopLeft(amount).dx),
     );
-    expect(tester.getSize(find.byType(AmountDisplay)).height, 88);
-    expect(tester.widget<Text>(symbol).style?.fontSize, 44);
+    expect(tester.getTopLeft(amount).dx, lessThan(tester.getTopLeft(clear).dx));
+    expect(tester.getSize(find.byType(AmountDisplay)).height, 72);
+    expect(tester.widget<Text>(symbol).style?.fontSize, 38);
     final currencyMaterial = tester.widget<Material>(currency);
     expect(currencyMaterial.shape, isA<StadiumBorder>());
 
     await tester.tap(currency);
     expect(currencyTapped, isTrue);
+    await tester.tap(clear);
+    expect(cleared, isTrue);
   });
 }

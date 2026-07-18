@@ -174,6 +174,8 @@ void main() {
     await tester.tap(find.byKey(const Key('unified-voice-primary-action')));
 
     expect(primaryTaps, 0);
+    expect(find.byIcon(Icons.receipt_long_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.autorenew_rounded), findsNothing);
   });
 
   testWidgets(
@@ -203,6 +205,12 @@ void main() {
             .height,
         46,
       );
+      expect(
+        tester
+            .getSize(find.byKey(const Key('unified-voice-primary-action')))
+            .width,
+        322,
+      );
     },
   );
 
@@ -215,5 +223,61 @@ void main() {
       find.byKey(const Key('unified-voice-primary-action')),
     );
     expect(material.color, AppPalette.light.accentPrimary);
+  });
+
+  testWidgets('continuous copy uses the same compact inline layout as keypad', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_testApp(state: UnifiedVoiceEntryState.idle));
+
+    final summary = find.text(_copy.continuousSummary);
+    final action = find.text(_copy.continuousAction);
+    final gap =
+        tester.getTopLeft(action).dx - tester.getBottomRight(summary).dx;
+    expect(gap, greaterThan(4.5));
+    expect(gap, lessThanOrEqualTo(6));
+  });
+
+  testWidgets(
+    'continuous toggle is limited to the centered target in voice mode',
+    (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _testApp(
+          state: UnifiedVoiceEntryState.idle,
+          onToggleContinuous: () => taps++,
+        ),
+      );
+
+      final target = find.byKey(const Key('unified-voice-continuous-action'));
+      expect(tester.getSize(target).width, 230);
+
+      final dock = find.byKey(const Key('unified-voice-entry-dock'));
+      await tester.tapAt(
+        Offset(tester.getRect(dock).left + 4, tester.getCenter(target).dy),
+      );
+      expect(taps, 0, reason: 'voice dock corners must not toggle the mode');
+
+      await tester.tapAt(
+        Offset(tester.getRect(target).left + 8, tester.getCenter(target).dy),
+      );
+      expect(
+        taps,
+        1,
+        reason: 'the padded area inside the centered target remains tappable',
+      );
+    },
+  );
+
+  testWidgets('idle microphone has comfortable spacing above and below', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_testApp(state: UnifiedVoiceEntryState.idle));
+
+    final waveform = find.byKey(const Key('unified-voice-waveform'));
+    final core = find.byKey(const Key('unified-voice-core'));
+    final help = find.text(_copy.help);
+    expect(tester.getTopLeft(core).dy - tester.getBottomLeft(waveform).dy, 16);
+    expect(tester.getTopLeft(help).dy - tester.getBottomLeft(core).dy, 12);
   });
 }

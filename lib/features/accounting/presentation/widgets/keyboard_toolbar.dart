@@ -16,7 +16,7 @@ const String kKeyboardToolbarTapRegionGroup = 'manual-entry-keyboard-toolbar';
 /// Mounted inside ManualOneStepScreen via `Stack + Positioned(bottom:
 /// MediaQuery.viewInsets.bottom)` — rides on top of the soft keyboard.
 /// Left button: "Done" — dismisses soft keyboard (restores SmartKeyboard).
-/// Right button: "Record" gradient — calls [onSave] (same handler as
+/// Right button: green "Record" action — calls [onSave] (same handler as
 /// SmartKeyboard's action-row Save key). See D-11/D-12/D-13.
 ///
 /// `isSubmitting` is `true` both while a save is in flight AND while
@@ -46,11 +46,7 @@ class KeyboardToolbar extends StatelessWidget {
         child: Container(
           height: 44,
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: palette.borderDefault,
-              ),
-            ),
+            border: Border(top: BorderSide(color: palette.borderDefault)),
           ),
           child: Row(
             children: [
@@ -71,17 +67,29 @@ class KeyboardToolbar extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Material(
+                      key: const ValueKey('keyboard-toolbar-done-action'),
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: onDone,
                         borderRadius: BorderRadius.circular(10),
                         child: Center(
-                          child: Text(
-                            S.of(context).keyboardToolbarDone,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: palette.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.keyboard_hide_rounded,
+                                size: 18,
+                                color: palette.textPrimary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                S.of(context).keyboardToolbarDone,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: palette.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -89,47 +97,39 @@ class KeyboardToolbar extends StatelessWidget {
                   ),
                 ),
               ),
-              // Right: Save/Record gradient button
+              // Right: Save/Record primary action
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 6,
                   ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          palette.fabGradientStart,
-                          palette.fabGradientEnd,
-                        ],
-                      ),
+                  child: Material(
+                    key: const ValueKey('keyboard-toolbar-record-action'),
+                    color: palette.accentPrimary,
+                    borderRadius: BorderRadius.circular(10),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: isSubmitting ? null : onSave,
                       borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: isSubmitting ? null : onSave,
-                        borderRadius: BorderRadius.circular(10),
-                        child: Center(
-                          child: isSubmitting
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  S.of(context).record,
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.receipt_long_rounded,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              S.of(context).record,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

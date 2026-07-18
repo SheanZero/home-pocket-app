@@ -368,7 +368,7 @@ void main() {
           'cat-b',
           reason: 'precondition: form is dirty',
         );
-        expect(find.byType(ConfidenceBandIndicator), findsOneWidget);
+        expect(find.byType(ConfidenceBandIndicator), findsNothing);
 
         snapshot.restoreForm(form);
         await tester.pumpAndSettle();
