@@ -8,6 +8,8 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/constants/avatar_icon_ids.dart';
+import '../../../../shared/widgets/avatar_glyph.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
@@ -536,7 +538,18 @@ class LegendRow extends StatelessWidget {
               child: leadingIcon != null
                   ? Icon(leadingIcon, size: 15, color: color)
                   : leadingEmoji != null && leadingEmoji!.isNotEmpty
-                  ? Text(leadingEmoji!, style: const TextStyle(fontSize: 14))
+                  ? isAvatarIconId(leadingEmoji!)
+                        ? AvatarGlyph(
+                            value: leadingEmoji!,
+                            size: 14,
+                            color: palette.textPrimary,
+                          )
+                        : Text(
+                            leadingEmoji!,
+                            style: const TextStyle(
+                              fontSize: AppTypography.body,
+                            ),
+                          )
                   : Container(
                       width: 11,
                       height: 11,

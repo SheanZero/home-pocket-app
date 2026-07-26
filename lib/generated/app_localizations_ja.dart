@@ -2619,10 +2619,13 @@ class SJa extends S {
   String get onboardingSetupEyebrow => '最後のステップ';
 
   @override
-  String get onboardingSetupTitle => 'はじめる前に、\nすこしだけ設定を。';
+  String get onboardingSetupTopbar => '初期設定';
 
   @override
-  String get onboardingRowName => 'お名前';
+  String get onboardingSetupTitle => '基本設定';
+
+  @override
+  String get onboardingRowName => 'お名前・必須';
 
   @override
   String get onboardingRowLanguage => '表示言語';
@@ -2641,6 +2644,78 @@ class SJa extends S {
 
   @override
   String get onboardingStart => 'この設定ではじめる';
+
+  @override
+  String get onboardingPrivacyTagLocal => 'LOCAL';
+
+  @override
+  String get onboardingPrivacyTagE2ee => 'E2EE';
+
+  @override
+  String get onboardingPrivacyTagSafe => 'SAFE';
+
+  @override
+  String get onboardingAvatarChange => '画像を変更';
+
+  @override
+  String get onboardingSecurityTitle => '家計簿を安全に保護';
+
+  @override
+  String get onboardingSecurityDescription => '有効にすると、アプリを開くたびに本人確認します。';
+
+  @override
+  String get onboardingSecurityEnable => '安全保護を有効にする';
+
+  @override
+  String get onboardingSecurityDeferTitle => '今は設定せず、あとで決める';
+
+  @override
+  String get onboardingSecurityDeferBody => '設定からいつでも有効にできます';
+
+  @override
+  String get onboardingSecurityMethodLabel => 'ロック解除方法';
+
+  @override
+  String get onboardingSecurityBiometric => '生体認証';
+
+  @override
+  String get onboardingSecurityBiometricDescription => 'Face ID または指紋ですばやく解除';
+
+  @override
+  String get onboardingSecurityRecommended => 'おすすめ';
+
+  @override
+  String get onboardingSecurityPin => 'アプリロック';
+
+  @override
+  String get onboardingSecurityPinDescription => '4桁のPINで解除';
+
+  @override
+  String get onboardingSecurityPinMissing => 'PINがまだ設定されていません';
+
+  @override
+  String get onboardingSecurityPinSetupHint => '2回入力すると有効になります';
+
+  @override
+  String get onboardingSecurityPinSetup => '4桁のPINを設定';
+
+  @override
+  String get onboardingSecurityPinComplete => 'PINを設定しました';
+
+  @override
+  String get onboardingSecurityPinCompleteDescription => '4桁のPINで保護されています';
+
+  @override
+  String get onboardingSecurityPinChange => 'PINを変更';
+
+  @override
+  String get onboardingSetupNameRequiredHint => 'お名前を入力すると開始できます';
+
+  @override
+  String get onboardingSetupPinRequiredHint => 'PINを設定すると開始できます';
+
+  @override
+  String get onboardingSetupChangeLaterHint => 'あとから設定でいつでも変更できます';
 
   @override
   String get onboardingLockTitle => 'アプリロックを設定しますか？';

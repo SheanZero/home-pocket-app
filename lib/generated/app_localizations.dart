@@ -4921,16 +4921,22 @@ abstract class S {
   /// **'Final step'**
   String get onboardingSetupEyebrow;
 
+  /// No description provided for @onboardingSetupTopbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial setup'**
+  String get onboardingSetupTopbar;
+
   /// Design-04 setup screen: two-line title
   ///
   /// In en, this message translates to:
-  /// **'Before you begin,\njust a few settings.'**
+  /// **'Basic setup'**
   String get onboardingSetupTitle;
 
   /// Design-04 setup screen: inline name field label
   ///
   /// In en, this message translates to:
-  /// **'Name'**
+  /// **'Name · Required'**
   String get onboardingRowName;
 
   /// Design-04 setup screen: display-language segment group label
@@ -4968,6 +4974,150 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Start with these settings'**
   String get onboardingStart;
+
+  /// No description provided for @onboardingPrivacyTagLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'LOCAL'**
+  String get onboardingPrivacyTagLocal;
+
+  /// No description provided for @onboardingPrivacyTagE2ee.
+  ///
+  /// In en, this message translates to:
+  /// **'E2EE'**
+  String get onboardingPrivacyTagE2ee;
+
+  /// No description provided for @onboardingPrivacyTagSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'SAFE'**
+  String get onboardingPrivacyTagSafe;
+
+  /// No description provided for @onboardingAvatarChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change image'**
+  String get onboardingAvatarChange;
+
+  /// No description provided for @onboardingSecurityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your ledger'**
+  String get onboardingSecurityTitle;
+
+  /// No description provided for @onboardingSecurityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, identity verification is required whenever you open the app.'**
+  String get onboardingSecurityDescription;
+
+  /// No description provided for @onboardingSecurityEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable security protection'**
+  String get onboardingSecurityEnable;
+
+  /// No description provided for @onboardingSecurityDeferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide later'**
+  String get onboardingSecurityDeferTitle;
+
+  /// No description provided for @onboardingSecurityDeferBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can enable it anytime in Settings'**
+  String get onboardingSecurityDeferBody;
+
+  /// No description provided for @onboardingSecurityMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock method'**
+  String get onboardingSecurityMethodLabel;
+
+  /// No description provided for @onboardingSecurityBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics'**
+  String get onboardingSecurityBiometric;
+
+  /// No description provided for @onboardingSecurityBiometricDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock quickly with Face ID or fingerprint'**
+  String get onboardingSecurityBiometricDescription;
+
+  /// No description provided for @onboardingSecurityRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get onboardingSecurityRecommended;
+
+  /// No description provided for @onboardingSecurityPin.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get onboardingSecurityPin;
+
+  /// No description provided for @onboardingSecurityPinDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with a 4-digit PIN'**
+  String get onboardingSecurityPinDescription;
+
+  /// No description provided for @onboardingSecurityPinMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN has not been set'**
+  String get onboardingSecurityPinMissing;
+
+  /// No description provided for @onboardingSecurityPinSetupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter it twice to enable'**
+  String get onboardingSecurityPinSetupHint;
+
+  /// No description provided for @onboardingSecurityPinSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a 4-digit PIN'**
+  String get onboardingSecurityPinSetup;
+
+  /// No description provided for @onboardingSecurityPinComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN is set'**
+  String get onboardingSecurityPinComplete;
+
+  /// No description provided for @onboardingSecurityPinCompleteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected by a 4-digit PIN'**
+  String get onboardingSecurityPinCompleteDescription;
+
+  /// No description provided for @onboardingSecurityPinChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get onboardingSecurityPinChange;
+
+  /// No description provided for @onboardingSetupNameRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name to continue'**
+  String get onboardingSetupNameRequiredHint;
+
+  /// No description provided for @onboardingSetupPinRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a PIN to continue'**
+  String get onboardingSetupPinRequiredHint;
+
+  /// No description provided for @onboardingSetupChangeLaterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change these anytime in Settings'**
+  String get onboardingSetupChangeLaterHint;
 
   /// Onboarding lock-entry screen: title (D-11)
   ///

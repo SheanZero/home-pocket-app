@@ -4,28 +4,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../settings/presentation/providers/repository_providers.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import 'onboarding_intro_screen.dart';
-import 'onboarding_lock_entry_screen.dart';
 import 'onboarding_settings_screen.dart';
 
 /// The first-boot onboarding flow host (ONBOARD-07 / D-11 / D-12 / D-13).
 ///
-/// Composes the three step screens — intro → settings → lock-entry — inside a
+/// Composes the two step screens — intro → settings — inside a
 /// nested [Navigator] (the app navigates with Navigator + MaterialPageRoute,
 /// with no routing package). Forward navigation is wired through each screen's
 /// callback:
 ///   - [OnboardingIntroScreen.onContinue]   → push the settings route
-///   - [OnboardingSettingsScreen.onConfirmed] → push the lock-entry route
-///   - [OnboardingLockEntryScreen.onComplete] → finish the flow
+///   - [OnboardingSettingsScreen.onConfirmed] → finish the flow
 ///
-/// Back navigation is re-entrant: the nested Navigator pops settings → intro
-/// and lock-entry → settings, while a root [PopScope] (`canPop: false`) guards
+/// Back navigation is re-entrant: the nested Navigator pops settings → intro,
+/// while a root [PopScope] (`canPop: false`) guards
 /// against popping out of onboarding on a fresh install — the flow can never
 /// dead-lock or be exited before completion (D-12). There is intentionally NO
 /// progress bar / step indicator (D-12); progress is conveyed only by the back
 /// gesture.
 ///
-/// `onboarding_complete` is written LAST — only on lock-entry completion (not
-/// at settings-confirm) — immediately before entering the shell, so a flow
+/// `onboarding_complete` is written LAST — only after settings has persisted
+/// the profile, preferences, and optional security — immediately before
+/// entering the shell, so a flow
 /// abandoned mid-way leaves the gate showing onboarding on the next boot.
 class OnboardingFlowScreen extends ConsumerStatefulWidget {
   const OnboardingFlowScreen({
@@ -40,8 +39,8 @@ class OnboardingFlowScreen extends ConsumerStatefulWidget {
   /// has been persisted). The gate owner (`_HomePocketAppState`) wires this to
   /// flip `_needsOnboarding=false` + `setState`, so the live `'/'` home Builder
   /// renders the shell itself — the flow host MUST NOT replace the gate route
-  /// (HI-01). `setupSecurity:true` requests the SecuritySection deep-link, which
-  /// the gate owner pushes on top of the now-rendered shell (D-13).
+  /// (HI-01). The V16 flow configures optional security before completion and
+  /// therefore completes with `setupSecurity:false`.
   final void Function({required bool setupSecurity}) onCompleted;
 
   @override
@@ -58,21 +57,13 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
       MaterialPageRoute<void>(
         builder: (_) => OnboardingSettingsScreen(
           bookId: widget.bookId,
-          onConfirmed: _pushLockEntry,
+          onConfirmed: () => _complete(setupSecurity: false),
         ),
       ),
     );
   }
 
-  void _pushLockEntry() {
-    _nestedNavigatorKey.currentState?.push(
-      MaterialPageRoute<void>(
-        builder: (_) => OnboardingLockEntryScreen(onComplete: _complete),
-      ),
-    );
-  }
-
-  /// Final step (both 跳过 and 现在设置 land here). Writes
+  /// Final step. Writes
   /// `onboarding_complete = true` LAST, then hands off to the gate-owned
   /// [OnboardingFlowScreen.onCompleted] callback instead of navigating itself.
   ///
@@ -80,9 +71,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
   /// `_HomePocketAppState`'s live `_buildHome` gate (rather than replacing it
   /// with a detached shell), so a same-session delete-all / import-backup reset
   /// can still re-render the gate via `_reinitializeAfterDataReset` without an
-  /// app restart (HI-01). On 现在设置 (`setupSecurity: true`) the gate owner
-  /// deep-links to the SecuritySection on top of the freshly-rendered shell
-  /// (D-13).
+  /// app restart (HI-01).
   Future<void> _complete({required bool setupSecurity}) async {
     await ref.read(settingsRepositoryProvider).setOnboardingComplete(true);
     ref.invalidate(appSettingsProvider);
@@ -103,8 +92,8 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
           return;
         }
         // Delegate the system back to the nested Navigator: pops settings →
-        // intro and lock-entry → settings. On the intro (root) route this is a
-        // no-op, so the flow stays mounted (re-entrant, cannot dead-lock).
+        // intro. On the intro (root) route this is a no-op, so the flow stays
+        // mounted (re-entrant, cannot dead-lock).
         _nestedNavigatorKey.currentState?.maybePop();
       },
       child: Navigator(

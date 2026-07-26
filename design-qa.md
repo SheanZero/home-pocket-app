@@ -1,3 +1,82 @@
+# V16 Initial Setup Title + Avatar Delta — Design QA (2026-07-26)
+
+## Scope and evidence
+
+- User reference: `/Users/xinz/Downloads/截屏 2026-07-26 16.33.16.png`.
+- Flutter simulator capture: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-setup-title-avatar-impl.png`.
+- Same-input focused comparison, reference left and implementation right:
+  `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-setup-title-avatar-comparison.png`.
+- State: Chinese, dark theme, security disabled. Both captures were normalized to 390px width and inspected through the common upper 560px region; the complete 390×844 Flutter capture was inspected separately.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- The redundant centered top-bar title is removed while the back action, “最后一步” eyebrow, and “基础设置” page heading retain the approved hierarchy.
+- The onboarding avatar is now a true circle. Each fresh setup instance randomly selects one of 14 warm Lucide icons rather than presenting a fixed raster or emoji.
+- The icon identifier persists through the existing profile string field without a database migration. Shared avatar rendering keeps the chosen icon coherent in profile, family, and analytics surfaces while preserving legacy emoji profiles.
+- Image selection remains available; a selected photo clips to the same circular frame. The existing change-image affordance remains visible.
+- The focused comparison intentionally omits the reference-only active keyboard state because the requested title/avatar delta is independent of focus; the page layout and avatar region are otherwise compared in the same locale/theme state.
+
+## Verification
+
+- `flutter analyze`: passed with 0 issues.
+- Updated V16 onboarding goldens: passed.
+- Targeted onboarding, profile-save, and analytics regression tests: 18 tests passed.
+- Full `flutter test`: 3,865 tests passed, 11 pre-existing skipped tests, 0 failures.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Flutter Onboarding + Initial Security — Design QA (2026-07-26)
+
+## Scope and evidence
+
+- Source visual truth: `docs/mockup/v16/index.html`, welcome 1/2, privacy 2/2, and initial setup + security states.
+- Browser-rendered source captures:
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-micro-botanical-welcome.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-micro-botanical-privacy.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-micro-botanical-setup.png`
+- iOS simulator implementation captures:
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-impl-welcome.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-impl-privacy.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-impl-setup.png`
+- Same-input paired comparison, source left and Flutter right:
+  `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-design-qa-combined.png`.
+- Viewport and density: source phone frame 390×844 CSS pixels. Flutter was captured on iPhone 16e at 390×844 logical pixels and 3× density (1170×2532), then normalized to 390px width for the paired comparison. The browser source viewport clipped the lower portion of the phone frame, so the paired comparison uses the common 390×626 visible region; the complete Flutter captures were inspected separately to verify the fixed docks and bottom safe area.
+- State: Japanese light theme, welcome page, privacy page, and initial setup with security disabled. Security disclosure, biometric-first selection, PIN setup, PIN-complete state, and persistence were additionally exercised in widget tests.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Layout and spacing: the two intro pages now use the mockup's top-led content rhythm, 172×150 hero slot, 390px phone insets, fixed page-dot/CTA dock, and 16–17px surfaces. The privacy page keeps its entire CTA inside the safe area for Japanese copy.
+- Typography and copy: hierarchy, wrapping, and ja/zh/en localization remain coherent. The headless golden renderer lacks production CJK fallbacks, so committed visual baselines use a stable English state while Japanese production captures were used for fidelity review.
+- Color and imagery: the warm paper background, leaf green, restrained rose accents, micro-botanical edge motifs, existing satisfaction faces, mockup avatar, and privacy artwork remain aligned with V16. No placeholder or approximate raster asset is present.
+- Icons: welcome and privacy heroes retain the existing Flutter source geometry and float/drift animation; setup and security use the shared Material icon family plus the approved warm raster assets.
+- Interaction and state: intro is exactly two pages; skip and continue both reach setup. Display language, currency, and voice share one row pattern and persist through existing providers/repositories.
+- Security behavior: the master switch owns disclosure. Off shows the quiet later-setup message; on reveals mutually exclusive biometrics first and PIN/app-lock second. PIN setup requires double entry and exposes a completed/change state. Biometrics provisions a fallback PIN before arming the master lock so the existing `AppLockService` invariant cannot strand the user after biometric lockout.
+- Accessibility and resilience: primary controls retain semantic button/switch/radio behavior, practical tap targets, localized labels, reduced-motion support, scroll fallback, and tight Stack constraints. The English badge now truncates safely instead of overflowing at 390px.
+
+## Comparison history
+
+1. The previous Flutter flow had three intro pages and a separate lock-entry step, while profile, preferences, and security did not match the approved integrated setup mockup.
+2. The first implementation pass consolidated the intro to two pages, rebuilt the selected heroes/background, folded security into setup, and wired the existing persistence and PIN flows.
+3. The first multilingual golden pass exposed a 120px English badge overflow; constraining the badge and ellipsizing only the longest locale fixed it without changing the Japanese mockup state.
+4. The first Japanese simulator comparison exposed loose Stack constraints that pushed the privacy CTA below the viewport. Tight Stack expansion fixed the dock, and the second paired comparison showed matching content order, scale, spacing, surfaces, icons, and safe-area behavior.
+
+## Verification
+
+- `flutter gen-l10n`: completed for ja/zh/en.
+- `flutter analyze`: passed with 0 issues.
+- Onboarding widget + V16 golden suite: 33 tests passed.
+- Full `flutter test`: 3,864 tests passed, 11 pre-existing skipped tests, 0 failures.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
 # Flutter App-Wide Numeral Typeface — Design QA (2026-07-25)
 
 ## Scope and evidence

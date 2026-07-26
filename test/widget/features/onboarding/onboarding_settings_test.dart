@@ -4,16 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/profile/save_user_profile_use_case.dart';
+import 'package:home_pocket/application/security/app_lock_service.dart';
 import 'package:home_pocket/data/repositories/settings_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_settings_screen.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/profile/presentation/widgets/avatar_display.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
+import 'package:home_pocket/infrastructure/security/biometric_service.dart';
+import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/shared/constants/avatar_icon_ids.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Records the currency written through on currency-row selection.
@@ -52,18 +60,22 @@ class _FakeUserProfileRepository implements UserProfileRepository {
   Future<void> delete(String id) async {}
 }
 
+class _MockAppLockService extends Mock implements AppLockService {}
+
 class _Harness {
   _Harness({
     required this.overrides,
     required this.prefs,
     required this.bookRepo,
     required this.profileRepo,
+    required this.appLockService,
   });
 
   final List<Override> overrides;
   final SharedPreferences prefs;
   final _FakeBookRepository bookRepo;
   final _FakeUserProfileRepository profileRepo;
+  final _MockAppLockService appLockService;
 }
 
 Book _testBook() => Book(
@@ -81,10 +93,14 @@ Future<_Harness> _buildHarness({
   final prefs = await SharedPreferences.getInstance();
   final bookRepo = _FakeBookRepository(_testBook());
   final profileRepo = _FakeUserProfileRepository();
+  final appLockService = _MockAppLockService();
+  when(() => appLockService.disableLock()).thenAnswer((_) async {});
+  when(() => appLockService.setPin(any())).thenAnswer((_) async {});
   return _Harness(
     prefs: prefs,
     bookRepo: bookRepo,
     profileRepo: profileRepo,
+    appLockService: appLockService,
     overrides: [
       sharedPreferencesProvider.overrideWith((_) => Future.value(prefs)),
       settingsRepositoryProvider.overrideWith(
@@ -94,13 +110,19 @@ Future<_Harness> _buildHarness({
       saveUserProfileUseCaseProvider.overrideWith(
         (_) => SaveUserProfileUseCase(profileRepo),
       ),
+      appLockServiceProvider.overrideWithValue(appLockService),
     ],
   );
 }
 
 Widget _host({List<Override> overrides = const [], VoidCallback? onConfirmed}) {
   return ProviderScope(
-    overrides: overrides,
+    overrides: [
+      biometricAvailabilityProvider.overrideWith(
+        (_) async => BiometricAvailability.faceId,
+      ),
+      ...overrides,
+    ],
     child: MaterialApp(
       locale: const Locale('ja'),
       localizationsDelegates: const [
@@ -126,50 +148,50 @@ Future<void> _setNickname(WidgetTester tester, String name) async {
 }
 
 void main() {
-  group('OnboardingSettingsScreen — design 04 re-skin (WELA-02)', () {
+  group('OnboardingSettingsScreen — V16 foundation layout', () {
     testWidgets(
-      'renders eyebrow, title, avatar block, inline name field, 4 language '
-      'segments with info note, currency + voice rows and confirm button',
+      'renders compact profile editor, unified preference card, security card '
+      'and confirm dock',
       (tester) async {
         await tester.pumpWidget(_host());
         await tester.pumpAndSettle();
 
+        expect(find.text('初期設定'), findsNothing);
         expect(find.text('最後のステップ'), findsOneWidget); // eyebrow
-        expect(find.text('はじめる前に、\nすこしだけ設定を。'), findsOneWidget);
+        expect(find.text('基本設定'), findsOneWidget);
         expect(
           find.byKey(const ValueKey('onboarding-avatar-block')),
           findsOneWidget,
         );
-        expect(find.text('お名前'), findsOneWidget);
+        final avatar = tester.widget<AvatarDisplay>(
+          find.descendant(
+            of: find.byKey(const ValueKey('onboarding-avatar-block')),
+            matching: find.byType(AvatarDisplay),
+          ),
+        );
+        expect(avatarIconIds, contains(avatar.emoji));
+        expect(find.byKey(ValueKey(avatar.emoji)), findsOneWidget);
+        expect(avatar.imagePath, isNull);
+        expect(find.text('画像を変更'), findsOneWidget);
+        expect(find.text('お名前・必須'), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget); // inline name field
-        expect(find.text('表示言語'), findsOneWidget);
-        // 4 language segments (the concrete labels can also appear as the
-        // voice-row value depending on the host device locale — find by key).
         expect(
-          find.byKey(const ValueKey('onboarding-lang-ja')),
+          find.byKey(const ValueKey('onboarding-language-row')),
           findsOneWidget,
         );
         expect(
-          find.byKey(const ValueKey('onboarding-lang-zh')),
+          find.byKey(const ValueKey('onboarding-currency-row')),
           findsOneWidget,
         );
         expect(
-          find.byKey(const ValueKey('onboarding-lang-en')),
+          find.byKey(const ValueKey('onboarding-voice-row')),
           findsOneWidget,
         );
         expect(
-          find.byKey(const ValueKey('onboarding-lang-system')),
+          find.byKey(const ValueKey('onboarding-security-card')),
           findsOneWidget,
         );
-        expect(find.text('自動'), findsOneWidget);
-        expect(find.text('「自動」でも対象外の言語のときは、日本語で表示します。'), findsOneWidget);
-        expect(find.text('通貨単位'), findsOneWidget);
-        expect(find.textContaining('JPY'), findsOneWidget);
-        expect(find.text('音声入力の言語'), findsOneWidget);
         expect(find.widgetWithText(TextButton, 'この設定ではじめる'), findsOneWidget);
-        // The old dialog-based rows are gone.
-        expect(find.text('未設定'), findsNothing);
-        expect(find.text('変更'), findsNothing);
       },
     );
   });
@@ -202,6 +224,149 @@ void main() {
     });
   });
 
+  group('OnboardingSettingsScreen — V16 security disclosure', () {
+    testWidgets(
+      'security off hides methods and shows the quiet later-setup message',
+      (tester) async {
+        await tester.pumpWidget(_host());
+        await tester.pumpAndSettle();
+
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
+
+        expect(find.text('今は設定せず、あとで決める'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('onboarding-security-biometric')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('onboarding-security-pin')),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      'enabling security hides the defer message and reveals biometric first',
+      (tester) async {
+        await tester.pumpWidget(_host());
+        await tester.pumpAndSettle();
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const ValueKey('onboarding-security-toggle')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('今は設定せず、あとで決める'), findsNothing);
+        expect(
+          find.byKey(const ValueKey('onboarding-security-biometric')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('onboarding-security-pin')),
+          findsOneWidget,
+        );
+        expect(find.text('おすすめ'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'PIN choice expands setup guidance and keeps start disabled until '
+      'double-entry completes',
+      (tester) async {
+        final harness = await _buildHarness();
+        await tester.pumpWidget(_host(overrides: harness.overrides));
+        await tester.pumpAndSettle();
+        await _setNickname(tester, 'たけし');
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('onboarding-security-toggle')),
+        );
+        await tester.pumpAndSettle();
+        final pinMethod = find.byKey(const ValueKey('onboarding-security-pin'));
+        await tester.ensureVisible(pinMethod);
+        await tester.pumpAndSettle();
+        await tester.tap(pinMethod);
+        await tester.pumpAndSettle();
+
+        expect(find.text('PINがまだ設定されていません'), findsOneWidget);
+        expect(
+          tester
+              .widget<TextButton>(find.widgetWithText(TextButton, 'この設定ではじめる'))
+              .onPressed,
+          isNull,
+        );
+
+        final setupPin = find.text('4桁のPINを設定');
+        await tester.ensureVisible(setupPin);
+        await tester.pumpAndSettle();
+        await tester.tap(setupPin);
+        await tester.pumpAndSettle();
+        expect(find.byType(SetPinScreen), findsOneWidget);
+
+        for (final pin in const ['1234', '1234']) {
+          for (final digit in pin.split('')) {
+            await tester.tap(find.text(digit));
+            await tester.pump();
+          }
+          await tester.pumpAndSettle();
+        }
+
+        expect(find.byType(SetPinScreen), findsNothing);
+        expect(find.text('PINを設定しました'), findsOneWidget);
+        expect(
+          tester
+              .widget<TextButton>(find.widgetWithText(TextButton, 'この設定ではじめる'))
+              .onPressed,
+          isNotNull,
+        );
+        verify(() => harness.appLockService.setPin('1234')).called(1);
+      },
+    );
+
+    testWidgets(
+      'biometric choice provisions a PIN fallback before arming the lock',
+      (tester) async {
+        final harness = await _buildHarness();
+        var confirmed = false;
+        await tester.pumpWidget(
+          _host(
+            overrides: harness.overrides,
+            onConfirmed: () => confirmed = true,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await _setNickname(tester, 'たけし');
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('onboarding-security-toggle')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
+        await tester.pumpAndSettle();
+        expect(find.byType(SetPinScreen), findsOneWidget);
+
+        for (final pin in const ['1234', '1234']) {
+          for (final digit in pin.split('')) {
+            await tester.tap(find.text(digit));
+            await tester.pump();
+          }
+          await tester.pumpAndSettle();
+        }
+
+        expect(confirmed, isTrue);
+        expect(harness.prefs.getBool('app_lock_enabled'), isTrue);
+        expect(harness.prefs.getBool('biometric_unlock_enabled'), isTrue);
+        verify(() => harness.appLockService.setPin('1234')).called(1);
+      },
+    );
+  });
+
   group('OnboardingSettingsScreen — write-through on confirm', () {
     testWidgets(
       'tapping the English segment persists the concrete code (setLocale)',
@@ -212,8 +377,9 @@ void main() {
         await tester.pumpWidget(_host(overrides: harness.overrides));
         await tester.pumpAndSettle();
 
-        // Tap the English language segment directly (no dialog).
-        await tester.tap(find.byKey(const ValueKey('onboarding-lang-en')));
+        await tester.tap(find.byKey(const ValueKey('onboarding-language-row')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('onboarding-language-en')));
         await tester.pumpAndSettle();
 
         // setLocale persisted 'en' — never the 'system' sentinel.
@@ -228,7 +394,11 @@ void main() {
       await tester.pumpWidget(_host(overrides: harness.overrides));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('onboarding-lang-system')));
+      await tester.tap(find.byKey(const ValueKey('onboarding-language-row')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('onboarding-language-system')),
+      );
       await tester.pumpAndSettle();
 
       expect(harness.prefs.getString('language'), 'system');
@@ -286,6 +456,7 @@ void main() {
         expect(voice, isNotNull);
         expect(voice, isNot('system'));
         expect(const {'ja', 'zh', 'en'}.contains(voice), isTrue);
+        verify(() => harness.appLockService.disableLock()).called(1);
       },
     );
   });

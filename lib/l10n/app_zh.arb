@@ -3374,11 +3374,12 @@
   "@onboardingSetupEyebrow": {
     "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
-  "onboardingSetupTitle": "开始之前，\n先做一点小设置。",
+  "onboardingSetupTopbar": "初始设置",
+  "onboardingSetupTitle": "基础设置",
   "@onboardingSetupTitle": {
     "description": "Design-04 setup screen: two-line title"
   },
-  "onboardingRowName": "姓名",
+  "onboardingRowName": "姓名・必填",
   "@onboardingRowName": {
     "description": "Design-04 setup screen: inline name field label"
   },
@@ -3406,6 +3407,30 @@
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
   },
+  "onboardingPrivacyTagLocal": "LOCAL",
+  "onboardingPrivacyTagE2ee": "E2EE",
+  "onboardingPrivacyTagSafe": "SAFE",
+  "onboardingAvatarChange": "更换图片",
+  "onboardingSecurityTitle": "安全保护家计簿",
+  "onboardingSecurityDescription": "启用后，每次打开应用都需要验证身份。",
+  "onboardingSecurityEnable": "启用安全保护",
+  "onboardingSecurityDeferTitle": "现在不设置，稍后再决定",
+  "onboardingSecurityDeferBody": "可随时在设置中启用",
+  "onboardingSecurityMethodLabel": "解锁方式",
+  "onboardingSecurityBiometric": "生物识别",
+  "onboardingSecurityBiometricDescription": "使用面容 ID 或指纹快速解锁",
+  "onboardingSecurityRecommended": "推荐",
+  "onboardingSecurityPin": "应用锁",
+  "onboardingSecurityPinDescription": "使用4位 PIN 解锁",
+  "onboardingSecurityPinMissing": "尚未设置 PIN",
+  "onboardingSecurityPinSetupHint": "输入两次后即可启用",
+  "onboardingSecurityPinSetup": "设置4位 PIN",
+  "onboardingSecurityPinComplete": "PIN 已设置",
+  "onboardingSecurityPinCompleteDescription": "当前由4位 PIN 保护",
+  "onboardingSecurityPinChange": "修改 PIN",
+  "onboardingSetupNameRequiredHint": "输入姓名后即可开始",
+  "onboardingSetupPinRequiredHint": "设置 PIN 后即可开始",
+  "onboardingSetupChangeLaterHint": "之后可随时在设置中更改",
   "onboardingLockTitle": "要设置应用锁吗？",
   "@onboardingLockTitle": {
     "description": "Onboarding lock-entry screen: title (D-11)"

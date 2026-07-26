@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../../shared/widgets/avatar_glyph.dart';
 
 class AvatarDisplay extends StatelessWidget {
   const AvatarDisplay({
@@ -23,11 +24,13 @@ class AvatarDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final colors = gradientColors ?? [
-      palette.avatarGradientStart,
-      palette.avatarGradientMid,
-      palette.avatarGradientEnd,
-    ];
+    final colors =
+        gradientColors ??
+        [
+          palette.avatarGradientStart,
+          palette.avatarGradientMid,
+          palette.avatarGradientEnd,
+        ];
 
     return GestureDetector(
       onTap: onTap,
@@ -56,25 +59,29 @@ class AvatarDisplay extends StatelessWidget {
                   File(imagePath!),
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
-                      _EmojiContent(emoji: emoji, size: size),
+                      _AvatarContent(value: emoji, size: size),
                 )
-              : _EmojiContent(emoji: emoji, size: size),
+              : _AvatarContent(value: emoji, size: size),
         ),
       ),
     );
   }
 }
 
-class _EmojiContent extends StatelessWidget {
-  const _EmojiContent({required this.emoji, required this.size});
+class _AvatarContent extends StatelessWidget {
+  const _AvatarContent({required this.value, required this.size});
 
-  final String emoji;
+  final String value;
   final double size;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(emoji, style: TextStyle(fontSize: size * 0.47, height: 1)),
+      child: AvatarGlyph(
+        value: value,
+        size: size * 0.47,
+        color: context.palette.accentPrimary,
+      ),
     );
   }
 }

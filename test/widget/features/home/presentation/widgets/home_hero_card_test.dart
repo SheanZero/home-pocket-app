@@ -331,13 +331,15 @@ void main() {
     );
 
     testWidgets(
-      'separates the favorite ticket from the main hero card and exposes edge tear notches',
+      'separates the favorite ticket and clips edge tear notches inside the card',
       (tester) async {
         await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
         await tester.pumpAndSettle();
 
         final mainSurface = find.byKey(const Key('home-hero-main-surface'));
         final favoriteSection = find.byKey(const Key('home-favorite-section'));
+        final leftNotch = find.byKey(const Key('home-hero-tear-notch-left'));
+        final rightNotch = find.byKey(const Key('home-hero-tear-notch-right'));
 
         expect(mainSurface, findsOneWidget);
         expect(favoriteSection, findsOneWidget);
@@ -349,14 +351,16 @@ void main() {
           tester.getTopLeft(favoriteSection).dy,
           greaterThan(tester.getBottomLeft(mainSurface).dy),
         );
-        expect(
-          find.byKey(const Key('home-hero-tear-notch-left')),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(const Key('home-hero-tear-notch-right')),
-          findsOneWidget,
-        );
+        expect(leftNotch, findsOneWidget);
+        expect(rightNotch, findsOneWidget);
+
+        final surfaceRect = tester.getRect(mainSurface);
+        final leftRect = tester.getRect(leftNotch);
+        final rightRect = tester.getRect(rightNotch);
+        expect(leftRect.size, const Size(10, 20));
+        expect(rightRect.size, const Size(10, 20));
+        expect(leftRect.left, closeTo(surfaceRect.left, 0.01));
+        expect(rightRect.right, closeTo(surfaceRect.right, 0.01));
       },
     );
 

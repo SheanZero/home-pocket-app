@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/profile/save_user_profile_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
-import '../../../../shared/constants/warm_emojis.dart';
+import '../../../../infrastructure/security/biometric_service.dart';
+import '../../../../infrastructure/security/providers.dart';
+import '../../../../shared/constants/avatar_icon_ids.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../accounting/presentation/widgets/currency_selector_sheet.dart';
+import '../../../applock/presentation/providers/repository_providers.dart';
+import '../../../applock/presentation/screens/set_pin_screen.dart';
 import '../../../profile/presentation/providers/repository_providers.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/screens/avatar_picker_screen.dart';
@@ -20,12 +23,14 @@ import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import '../utils/onboarding_locale_resolution.dart';
 
-/// The onboarding basic-settings page (D-01 / D-03 / D-10), re-skinned to the
-/// Welcome A design screen 04 (WELA-02).
+enum _OnboardingSecurityMethod { biometric, pin }
+
+/// The V16 onboarding settings page: profile, locale/currency/voice, and
+/// optional security protection in one final step.
 ///
-/// Eyebrow + title header, tappable avatar with a camera badge, inline name
-/// field, 4-segment display-language selector (日本語/中文/English/自動),
-/// currency + voice picker rows and the この設定ではじめる confirm button.
+/// The profile editor is compact, the three preferences share one row style,
+/// and security progressively discloses biometric/PIN choices under a master
+/// switch. PIN setup stays in context and reports its completion state.
 /// All persistence/provider/validation logic is unchanged from the D-10
 /// implementation: language writes through instantly, currency updates
 /// `Book.currency`, voice persists a concrete code, and the confirm button
@@ -39,12 +44,14 @@ class OnboardingSettingsScreen extends ConsumerStatefulWidget {
     super.key,
     required this.bookId,
     required this.onConfirmed,
+    this.initialAvatarId,
   });
 
   final String bookId;
+  final String? initialAvatarId;
 
-  /// Fired exactly once when the profile save succeeds; the flow host wires
-  /// this to advance to the lock-entry screen (54-07).
+  /// Fired exactly once when profile, preferences, and optional security have
+  /// all persisted; the flow host then marks onboarding complete.
   final VoidCallback onConfirmed;
 
   @override
@@ -70,6 +77,11 @@ class _OnboardingSettingsScreenState
   late String _voiceLanguageCode;
   bool _voiceExplicitlyPicked = false;
 
+  bool _securityEnabled = false;
+  _OnboardingSecurityMethod _securityMethod =
+      _OnboardingSecurityMethod.biometric;
+  bool _pinConfigured = false;
+
   bool _isSaving = false;
 
   String get _deviceLanguage => PlatformDispatcher.instance.locale.languageCode;
@@ -77,7 +89,7 @@ class _OnboardingSettingsScreenState
   @override
   void initState() {
     super.initState();
-    _selectedEmoji = randomWarmEmoji();
+    _selectedEmoji = widget.initialAvatarId ?? randomAvatarIconId();
     _nicknameController = TextEditingController();
     // Voice tracks the (untouched) UI-language preselect, always concrete.
     _voiceLanguageCode = resolveVoiceLanguageForOnboarding(
@@ -93,7 +105,12 @@ class _OnboardingSettingsScreenState
     super.dispose();
   }
 
-  bool get _canStart => _nickname.trim().isNotEmpty && !_isSaving;
+  bool get _canStart =>
+      _nickname.trim().isNotEmpty &&
+      !_isSaving &&
+      (!_securityEnabled ||
+          _securityMethod == _OnboardingSecurityMethod.biometric ||
+          _pinConfigured);
 
   /// Whether the user explicitly pinned a concrete UI language (vs accepting
   /// the system preselect). Drives voice-default tracking + confirm semantics.
@@ -123,6 +140,46 @@ class _OnboardingSettingsScreenState
       _selectedEmoji = result.emoji;
       _selectedImagePath = result.imagePath;
     });
+  }
+
+  Future<void> _openLanguagePicker() async {
+    final l10n = S.of(context);
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _OnboardingOptionSheet(
+        title: l10n.onboardingRowLanguage,
+        description: l10n.onboardingLanguageAutoNote,
+        selectedValue: _selectedLanguageSegment,
+        options: [
+          _OnboardingOption(
+            value: 'ja',
+            label: l10n.languageJapanese,
+            icon: Icons.language,
+          ),
+          _OnboardingOption(
+            value: 'zh',
+            label: l10n.languageChinese,
+            icon: Icons.language,
+          ),
+          _OnboardingOption(
+            value: 'en',
+            label: l10n.languageEnglish,
+            icon: Icons.language,
+          ),
+          _OnboardingOption(
+            value: 'system',
+            label: l10n.onboardingLanguageAuto,
+            icon: Icons.auto_awesome_outlined,
+          ),
+        ],
+        keyPrefix: 'onboarding-language',
+      ),
+    );
+    if (picked != null && mounted) {
+      await _applyLanguageSelection(picked);
+    }
   }
 
   Future<void> _applyLanguageSelection(String value) async {
@@ -182,29 +239,23 @@ class _OnboardingSettingsScreenState
 
   Future<void> _openVoicePicker() async {
     final l10n = S.of(context);
-    final picked = await showDialog<String>(
+    final picked = await showModalBottomSheet<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.onboardingRowVoice),
-        content: RadioGroup<String>(
-          groupValue: _voiceLanguageCode,
-          onChanged: (value) {
-            if (value != null) {
-              Navigator.pop(dialogContext, value);
-            }
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: _languageOptions(l10n).entries
-                .map(
-                  (entry) => RadioListTile<String>(
-                    title: Text(entry.value),
-                    value: entry.key,
-                  ),
-                )
-                .toList(),
-          ),
-        ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _OnboardingOptionSheet(
+        title: l10n.onboardingRowVoice,
+        selectedValue: _voiceLanguageCode,
+        options: _languageOptions(l10n).entries
+            .map(
+              (entry) => _OnboardingOption(
+                value: entry.key,
+                label: entry.value,
+                icon: Icons.mic_none,
+              ),
+            )
+            .toList(),
+        keyPrefix: 'onboarding-voice',
       ),
     );
     if (picked == null || !mounted) {
@@ -220,6 +271,32 @@ class _OnboardingSettingsScreenState
     });
   }
 
+  void _toggleSecurity(bool enabled, {required bool biometricAvailable}) {
+    setState(() {
+      _securityEnabled = enabled;
+      if (enabled &&
+          _securityMethod == _OnboardingSecurityMethod.biometric &&
+          !biometricAvailable) {
+        _securityMethod = _OnboardingSecurityMethod.pin;
+      }
+    });
+  }
+
+  void _selectSecurityMethod(_OnboardingSecurityMethod method) {
+    setState(() => _securityMethod = method);
+  }
+
+  Future<bool> _openSetPin() async {
+    final result = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()));
+    if (result != true || !mounted) {
+      return false;
+    }
+    setState(() => _pinConfigured = true);
+    return true;
+  }
+
   /// Confirm handler for `この設定ではじめる` (enabled only once a nickname is
   /// set, D-14). Persists the untouched defaults (system language + concrete
   /// voice language), saves the profile, and signals completion to the flow
@@ -229,6 +306,18 @@ class _OnboardingSettingsScreenState
     if (!_canStart) {
       return;
     }
+    // Biometrics remains the primary unlock method, while the app's existing
+    // security invariant still requires a PIN fallback so a biometric lockout
+    // can never strand the user.
+    if (_securityEnabled &&
+        _securityMethod == _OnboardingSecurityMethod.biometric &&
+        !_pinConfigured) {
+      final pinReady = await _openSetPin();
+      if (!pinReady || !mounted) {
+        return;
+      }
+    }
+
     final l10n = S.of(context);
     setState(() => _isSaving = true);
 
@@ -265,13 +354,34 @@ class _OnboardingSettingsScreenState
     }
 
     if (result.isSuccess) {
+      await _persistSecuritySelection();
+      if (!mounted) {
+        return;
+      }
       ref.invalidate(userProfileProvider);
+      ref.invalidate(appSettingsProvider);
       widget.onConfirmed();
       return;
     }
 
     setState(() => _isSaving = false);
     showErrorFeedback(context, _messageForError(l10n, result.error));
+  }
+
+  Future<void> _persistSecuritySelection() async {
+    final repository = ref.read(settingsRepositoryProvider);
+    if (!_securityEnabled) {
+      await ref.read(appLockServiceProvider).disableLock();
+      await repository.setBiometricUnlockEnabled(false);
+      return;
+    }
+
+    // Both methods reach this point only after SetPinScreen persisted a valid
+    // hash. Arm the master flag last so the app can never lock without a PIN.
+    final useBiometrics =
+        _securityMethod == _OnboardingSecurityMethod.biometric;
+    await repository.setBiometricUnlockEnabled(useBiometrics);
+    await repository.setAppLockEnabled(true);
   }
 
   // ── Labels ──────────────────────────────────────────────────────────────
@@ -291,169 +401,196 @@ class _OnboardingSettingsScreenState
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
+    final biometricAvailable = switch (ref
+        .watch(biometricAvailabilityProvider)
+        .value) {
+      BiometricAvailability.faceId ||
+      BiometricAvailability.fingerprint ||
+      BiometricAvailability.strongBiometric ||
+      BiometricAvailability.weakBiometric ||
+      BiometricAvailability.generic => true,
+      _ => false,
+    };
+    final languageValue = _selectedLanguageSegment == 'system'
+        ? l10n.onboardingLanguageAuto
+        : _languageName(l10n, _selectedLanguageSegment);
+    final requiredHint = _nickname.trim().isEmpty
+        ? l10n.onboardingSetupNameRequiredHint
+        : _securityEnabled &&
+              _securityMethod == _OnboardingSecurityMethod.pin &&
+              !_pinConfigured
+        ? l10n.onboardingSetupPinRequiredHint
+        : l10n.onboardingSetupChangeLaterHint;
 
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(26, 24, 26, 8),
-                children: [
-                  Text(
-                    l10n.onboardingSetupEyebrow,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2,
-                      color: palette.dailyText,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.onboardingSetupTitle,
-                    style: TextStyle(
-                      fontSize: 23,
-                      height: 1.3,
-                      fontWeight: FontWeight.w700,
-                      color: palette.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  Center(
-                    child: _AvatarBlock(
-                      emoji: _selectedEmoji,
-                      imagePath: _selectedImagePath,
-                      onTap: _openAvatarPicker,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  _FieldLabel(text: l10n.onboardingRowName),
-                  Container(
-                    height: 46,
+            const _SetupAmbience(),
+            Column(
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: _fieldBoxDecoration(palette),
-                    alignment: Alignment.centerLeft,
-                    child: TextField(
-                      controller: _nicknameController,
-                      onChanged: (value) => setState(() => _nickname = value),
-                      decoration: InputDecoration(
-                        isCollapsed: true,
-                        border: InputBorder.none,
-                        hintText: l10n.profileNicknamePlaceholder,
-                        hintStyle: TextStyle(
-                          fontSize: 14.5,
-                          color: palette.textTertiary,
-                        ),
-                      ),
-                      style: TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w500,
-                        color: palette.textPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _FieldLabel(text: l10n.onboardingRowLanguage),
-                  Row(
-                    children: [
-                      _LanguageSegment(
-                        key: const ValueKey('onboarding-lang-ja'),
-                        flex: 10,
-                        label: l10n.languageJapanese,
-                        selected: _selectedLanguageSegment == 'ja',
-                        onTap: () => _applyLanguageSelection('ja'),
-                      ),
-                      const SizedBox(width: 6),
-                      _LanguageSegment(
-                        key: const ValueKey('onboarding-lang-zh'),
-                        flex: 10,
-                        label: l10n.languageChinese,
-                        selected: _selectedLanguageSegment == 'zh',
-                        onTap: () => _applyLanguageSelection('zh'),
-                      ),
-                      const SizedBox(width: 6),
-                      _LanguageSegment(
-                        key: const ValueKey('onboarding-lang-en'),
-                        flex: 13,
-                        label: l10n.languageEnglish,
-                        selected: _selectedLanguageSegment == 'en',
-                        onTap: () => _applyLanguageSelection('en'),
-                      ),
-                      const SizedBox(width: 6),
-                      _LanguageSegment(
-                        key: const ValueKey('onboarding-lang-system'),
-                        flex: 10,
-                        label: l10n.onboardingLanguageAuto,
-                        selected: _selectedLanguageSegment == 'system',
-                        onTap: () => _applyLanguageSelection('system'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 7),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 1),
-                        child: Icon(
-                          Icons.info_outline,
-                          size: 13,
-                          color: palette.textTertiary,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          l10n.onboardingLanguageAutoNote,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            height: 1.5,
-                            fontWeight: FontWeight.w500,
-                            color: palette.textTertiary,
+                    child: Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          child: Text(
+                            MaterialLocalizations.of(context).backButtonTooltip,
                           ),
                         ),
+                        const Spacer(),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
+                    children: [
+                      Text(
+                        l10n.onboardingSetupEyebrow,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.8,
+                          color: palette.dailyText,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.onboardingSetupTitle,
+                        style: TextStyle(
+                          fontSize: 30,
+                          height: 1.25,
+                          fontWeight: FontWeight.w700,
+                          color: palette.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 19),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _AvatarBlock(
+                            emoji: _selectedEmoji,
+                            imagePath: _selectedImagePath,
+                            onTap: _openAvatarPicker,
+                          ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _FieldLabel(text: l10n.onboardingRowName),
+                                Container(
+                                  height: 54,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  decoration: _fieldBoxDecoration(palette),
+                                  alignment: Alignment.centerLeft,
+                                  child: TextField(
+                                    controller: _nicknameController,
+                                    onChanged: (value) =>
+                                        setState(() => _nickname = value),
+                                    decoration: InputDecoration(
+                                      isCollapsed: true,
+                                      border: InputBorder.none,
+                                      hintText: l10n.profileNicknamePlaceholder,
+                                      hintStyle: TextStyle(
+                                        fontSize: 14.5,
+                                        color: palette.textTertiary,
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: palette.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _PreferenceCard(
+                        children: [
+                          _PreferenceRow(
+                            key: const ValueKey('onboarding-language-row'),
+                            icon: Icons.language,
+                            label: l10n.onboardingRowLanguage,
+                            value: languageValue,
+                            onTap: _openLanguagePicker,
+                          ),
+                          _PreferenceRow(
+                            key: const ValueKey('onboarding-currency-row'),
+                            icon: Icons.account_balance_wallet_outlined,
+                            label: l10n.onboardingRowCurrency,
+                            value: _currencyCode,
+                            onTap: _openCurrencyPicker,
+                          ),
+                          _PreferenceRow(
+                            key: const ValueKey('onboarding-voice-row'),
+                            icon: Icons.mic_none,
+                            label: l10n.onboardingRowVoice,
+                            value: _languageName(l10n, _voiceLanguageCode),
+                            onTap: _openVoicePicker,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      _OnboardingSecurityCard(
+                        key: const ValueKey('onboarding-security-card'),
+                        enabled: _securityEnabled,
+                        method: _securityMethod,
+                        pinConfigured: _pinConfigured,
+                        biometricAvailable: biometricAvailable,
+                        onToggle: (enabled) => _toggleSecurity(
+                          enabled,
+                          biometricAvailable: biometricAvailable,
+                        ),
+                        onSelectMethod: _selectSecurityMethod,
+                        onSetPin: _openSetPin,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _FieldLabel(text: l10n.onboardingRowCurrency),
-                  _PickerRow(
-                    key: const ValueKey('onboarding-currency-row'),
-                    chip: Text(
-                      NumberFormatter.currencySymbol(_currencyCode),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: palette.dailyText,
+                ),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 9, 24, 16),
+                  decoration: BoxDecoration(
+                    color: palette.background.withValues(alpha: 0.96),
+                    border: Border(
+                      top: BorderSide(
+                        color: palette.borderDefault.withValues(alpha: 0.72),
                       ),
                     ),
-                    value: _currencyCode,
-                    onTap: _openCurrencyPicker,
                   ),
-                  const SizedBox(height: 12),
-                  _FieldLabel(text: l10n.onboardingRowVoice),
-                  _PickerRow(
-                    key: const ValueKey('onboarding-voice-row'),
-                    chip: Icon(
-                      Icons.mic_none,
-                      size: 14,
-                      color: palette.dailyText,
-                    ),
-                    value: _languageName(l10n, _voiceLanguageCode),
-                    onTap: _openVoicePicker,
+                  child: Column(
+                    children: [
+                      _ConfirmButton(
+                        label: l10n.onboardingStart,
+                        enabled: _canStart,
+                        onPressed: _confirm,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        requiredHint,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: palette.textTertiary,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(26, 6, 26, 16),
-              child: _ConfirmButton(
-                label: l10n.onboardingStart,
-                enabled: _canStart,
-                onPressed: _confirm,
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -505,8 +642,10 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-/// The tappable 88×88 avatar with a camera badge — a real affordance:
-/// `AvatarPickerScreen` already supports photos.
+/// Compact circular avatar for onboarding.
+///
+/// The initial emoji is randomized from the existing warm avatar library and
+/// the same production renderer is used before and after customization.
 class _AvatarBlock extends StatelessWidget {
   const _AvatarBlock({
     required this.emoji,
@@ -521,46 +660,95 @@ class _AvatarBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return GestureDetector(
-      key: const ValueKey('onboarding-avatar-block'),
-      onTap: onTap,
-      child: SizedBox(
-        width: 92,
-        height: 92,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                color: palette.accentPrimaryLight,
-                shape: BoxShape.circle,
-                border: Border.all(color: palette.accentPrimaryBorder),
+    final l10n = S.of(context);
+    return Semantics(
+      button: true,
+      label: l10n.onboardingAvatarChange,
+      child: GestureDetector(
+        key: const ValueKey('onboarding-avatar-block'),
+        onTap: onTap,
+        child: SizedBox(
+          width: 76,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AvatarDisplay(emoji: emoji, imagePath: imagePath, size: 76),
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.photo_camera_outlined,
+                    size: 14,
+                    color: palette.dailyText,
+                  ),
+                  const SizedBox(width: 3),
+                  Flexible(
+                    child: Text(
+                      l10n.onboardingAvatarChange,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        color: palette.dailyText,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              alignment: Alignment.center,
-              child: AvatarDisplay(
-                emoji: emoji,
-                imagePath: imagePath,
-                size: 84,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SetupAmbience extends StatelessWidget {
+  const _SetupAmbience();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final color = Color.alphaBlend(
+      palette.accentPrimary.withValues(alpha: 0.16),
+      palette.borderDefault,
+    );
+    return ExcludeSemantics(
+      child: IgnorePointer(
+        child: Stack(
+          children: [
+            Positioned(
+              top: 62,
+              left: 25,
+              child: Transform.rotate(
+                angle: -0.25,
+                child: Icon(Icons.eco_outlined, size: 13, color: color),
               ),
             ),
             Positioned(
-              bottom: -2,
-              right: -2,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: palette.accentPrimary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: palette.background, width: 3),
-                ),
-                child: const Icon(
-                  Icons.photo_camera_outlined,
-                  size: 14,
-                  color: Colors.white,
-                ),
+              top: 82,
+              right: 28,
+              child: Transform.rotate(
+                angle: 0.2,
+                child: Icon(Icons.spa_outlined, size: 16, color: color),
+              ),
+            ),
+            Positioned(
+              bottom: 172,
+              left: 31,
+              child: Transform.rotate(
+                angle: -0.18,
+                child: Icon(Icons.eco_outlined, size: 14, color: color),
+              ),
+            ),
+            Positioned(
+              bottom: 76,
+              right: 24,
+              child: Transform.rotate(
+                angle: 0.3,
+                child: Icon(Icons.spa_outlined, size: 11, color: color),
               ),
             ),
           ],
@@ -570,111 +758,617 @@ class _AvatarBlock extends StatelessWidget {
   }
 }
 
-/// One display-language segment (design 04: 42px, radius 12; selected =
-/// accent bg + white label, unselected = card bg + border).
-class _LanguageSegment extends StatelessWidget {
-  const _LanguageSegment({
-    super.key,
-    required this.flex,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+class _PreferenceCard extends StatelessWidget {
+  const _PreferenceCard({required this.children});
 
-  final int flex;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Expanded(
-      flex: flex,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 42,
-          decoration: BoxDecoration(
-            color: selected ? palette.accentPrimary : palette.card,
-            borderRadius: BorderRadius.circular(12),
-            border: selected ? null : Border.all(color: palette.borderDefault),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: palette.accentPrimary.withValues(alpha: 0.30),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-              color: selected ? Colors.white : palette.textSecondary,
-            ),
-          ),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var index = 0; index < children.length; index++) ...[
+            children[index],
+            if (index != children.length - 1)
+              Divider(height: 1, color: palette.borderDefault),
+          ],
+        ],
       ),
     );
   }
 }
 
-/// A 46px picker row (currency/voice): leading 26×26 chip + current value +
-/// trailing chevron; opens the existing sheet/dialog via [onTap].
-class _PickerRow extends StatelessWidget {
-  const _PickerRow({
+class _PreferenceRow extends StatelessWidget {
+  const _PreferenceRow({
     super.key,
-    required this.chip,
+    required this.icon,
+    required this.label,
     required this.value,
     required this.onTap,
   });
 
-  final Widget chip;
+  final IconData icon;
+  final String label;
   final String value;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: Container(
-        height: 46,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        decoration: _fieldBoxDecoration(palette),
-        child: Row(
-          children: [
-            Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                color: palette.accentPrimaryLight,
-                borderRadius: BorderRadius.circular(8),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 60),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 34,
+                height: 34,
+                child: Icon(icon, size: 26, color: palette.dailyText),
               ),
-              alignment: Alignment.center,
-              child: chip,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
+              const SizedBox(width: 11),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: palette.textPrimary,
+                  ),
+                ),
+              ),
+              Text(
                 value,
+                textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: palette.dailyText,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Icon(Icons.chevron_right, size: 20, color: palette.dailyText),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OnboardingOption {
+  const _OnboardingOption({
+    required this.value,
+    required this.label,
+    required this.icon,
+  });
+
+  final String value;
+  final String label;
+  final IconData icon;
+}
+
+class _OnboardingOptionSheet extends StatelessWidget {
+  const _OnboardingOptionSheet({
+    required this.title,
+    required this.selectedValue,
+    required this.options,
+    required this.keyPrefix,
+    this.description,
+  });
+
+  final String title;
+  final String? description;
+  final String selectedValue;
+  final List<_OnboardingOption> options;
+  final String keyPrefix;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
+          color: palette.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: palette.borderList,
+                  borderRadius: BorderRadius.circular(99),
                 ),
               ),
             ),
-            Icon(Icons.expand_more, size: 18, color: palette.textTertiary),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: palette.textPrimary,
+              ),
+            ),
+            if (description != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                description!,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.5,
+                  color: palette.textSecondary,
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
+            Container(
+              decoration: BoxDecoration(
+                color: palette.background,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: palette.borderDefault),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var index = 0; index < options.length; index++) ...[
+                    InkWell(
+                      key: ValueKey('$keyPrefix-${options[index].value}'),
+                      onTap: () =>
+                          Navigator.of(context).pop(options[index].value),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              options[index].icon,
+                              size: 22,
+                              color: palette.dailyText,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                options[index].label,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: palette.textPrimary,
+                                ),
+                              ),
+                            ),
+                            if (options[index].value == selectedValue)
+                              Icon(
+                                Icons.check_circle,
+                                size: 21,
+                                color: palette.accentPrimary,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (index != options.length - 1)
+                      Divider(height: 1, color: palette.borderDefault),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _OnboardingSecurityCard extends StatelessWidget {
+  const _OnboardingSecurityCard({
+    super.key,
+    required this.enabled,
+    required this.method,
+    required this.pinConfigured,
+    required this.biometricAvailable,
+    required this.onToggle,
+    required this.onSelectMethod,
+    required this.onSetPin,
+  });
+
+  final bool enabled;
+  final _OnboardingSecurityMethod method;
+  final bool pinConfigured;
+  final bool biometricAvailable;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<_OnboardingSecurityMethod> onSelectMethod;
+  final Future<bool> Function() onSetPin;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final l10n = S.of(context);
+    final asset = Theme.of(context).brightness == Brightness.dark
+        ? 'docs/mockup/v16/assets/onboarding-privacy-warm-v1-dark.png'
+        : 'docs/mockup/v16/assets/onboarding-privacy-warm-v1.png';
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(
+          palette.accentPrimaryLight.withValues(alpha: 0.42),
+          palette.card,
+        ),
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Image.asset(asset, width: 56, height: 56),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.onboardingSecurityTitle,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.onboardingSecurityDescription,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        height: 1.45,
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            key: const ValueKey('onboarding-security-toggle'),
+            onTap: () => onToggle(!enabled),
+            borderRadius: BorderRadius.circular(13),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 50),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: palette.card,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: palette.borderDefault),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.onboardingSecurityEnable,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Switch(value: enabled, onChanged: onToggle),
+                ],
+              ),
+            ),
+          ),
+          if (!enabled) ...[
+            const SizedBox(height: 15),
+            Text(
+              l10n.onboardingSecurityDeferTitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: palette.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              l10n.onboardingSecurityDeferBody,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 10.5, color: palette.textTertiary),
+            ),
+          ] else ...[
+            const SizedBox(height: 13),
+            Text(
+              l10n.onboardingSecurityMethodLabel,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: palette.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 7),
+            Container(
+              decoration: BoxDecoration(
+                color: palette.card,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: palette.borderDefault),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  _SecurityMethodRow(
+                    key: const ValueKey('onboarding-security-biometric'),
+                    icon: Icons.fingerprint,
+                    title: l10n.onboardingSecurityBiometric,
+                    description: l10n.onboardingSecurityBiometricDescription,
+                    badge: l10n.onboardingSecurityRecommended,
+                    selected: method == _OnboardingSecurityMethod.biometric,
+                    enabled: biometricAvailable,
+                    onTap: () =>
+                        onSelectMethod(_OnboardingSecurityMethod.biometric),
+                  ),
+                  Divider(height: 1, color: palette.borderDefault),
+                  _SecurityMethodRow(
+                    key: const ValueKey('onboarding-security-pin'),
+                    icon: Icons.password,
+                    title: l10n.onboardingSecurityPin,
+                    description: l10n.onboardingSecurityPinDescription,
+                    selected: method == _OnboardingSecurityMethod.pin,
+                    onTap: () => onSelectMethod(_OnboardingSecurityMethod.pin),
+                  ),
+                  if (method == _OnboardingSecurityMethod.pin) ...[
+                    Divider(height: 1, color: palette.borderDefault),
+                    if (pinConfigured)
+                      _PinCompletion(onSetPin: onSetPin)
+                    else
+                      _PinGuidance(onSetPin: onSetPin),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SecurityMethodRow extends StatelessWidget {
+  const _SecurityMethodRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+    this.badge,
+    this.enabled = true,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final String? badge;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Opacity(
+      opacity: enabled ? 1 : 0.46,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 62),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+          color: selected
+              ? Color.alphaBlend(
+                  palette.accentPrimaryLight.withValues(alpha: 0.72),
+                  palette.card,
+                )
+              : Colors.transparent,
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: palette.accentPrimaryLight,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                alignment: Alignment.center,
+                child: Icon(icon, size: 23, color: palette.dailyText),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 5,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                        if (badge != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: palette.accentPrimaryLight,
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            child: Text(
+                              badge!,
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: palette.dailyText,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                size: 21,
+                color: selected ? palette.accentPrimary : palette.borderList,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PinGuidance extends StatelessWidget {
+  const _PinGuidance({required this.onSetPin});
+
+  final Future<bool> Function() onSetPin;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final l10n = S.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(59, 11, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.onboardingSecurityPinMissing,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: palette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            l10n.onboardingSecurityPinSetupHint,
+            style: TextStyle(fontSize: 10.5, color: palette.textSecondary),
+          ),
+          const SizedBox(height: 9),
+          FilledButton.icon(
+            onPressed: onSetPin,
+            icon: const Icon(Icons.chevron_right, size: 18),
+            label: Text(l10n.onboardingSecurityPinSetup),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 42),
+              backgroundColor: palette.info,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PinCompletion extends StatelessWidget {
+  const _PinCompletion({required this.onSetPin});
+
+  final Future<bool> Function() onSetPin;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final l10n = S.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(59, 11, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.check_circle, size: 22, color: palette.dailyText),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.onboardingSecurityPinComplete,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      l10n.onboardingSecurityPinCompleteDescription,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          OutlinedButton(
+            onPressed: onSetPin,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 38),
+              foregroundColor: palette.dailyText,
+              side: BorderSide(color: palette.accentPrimary),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(11),
+              ),
+            ),
+            child: Text(l10n.onboardingSecurityPinChange),
+          ),
+        ],
       ),
     );
   }

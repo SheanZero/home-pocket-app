@@ -5,16 +5,17 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/save_user_profile_use_case.dart';
+import 'package:home_pocket/application/security/app_lock_service.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/repositories/settings_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
-import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_lock_entry_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_settings_screen.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
@@ -36,6 +37,17 @@ class _FakeSyncEngine implements SyncEngine {
 
   @override
   void dispose() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeAppLockService implements AppLockService {
+  @override
+  Future<void> disableLock() async {}
+
+  @override
+  Future<void> setPin(String pin) async {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -97,6 +109,7 @@ Future<({List<Override> overrides, SharedPreferences prefs})> _buildOverrides({
       settingsRepositoryProvider.overrideWith(
         (_) => SettingsRepositoryImpl(prefs: prefs),
       ),
+      appLockServiceProvider.overrideWithValue(_FakeAppLockService()),
       bookRepositoryProvider.overrideWith(
         (_) => _FakeBookRepository(_testBook()),
       ),
@@ -199,8 +212,8 @@ void main() {
     );
 
     testWidgets(
-      'completing lock-entry (skip) writes onboardingComplete=true LAST and '
-      'fires onCompleted(setupSecurity: false) without self-navigating',
+      'settings confirmation writes onboardingComplete=true LAST and fires '
+      'onCompleted(setupSecurity: false) without a separate lock-entry page',
       (tester) async {
         bool? recordedSetupSecurity;
         final h = await _buildOverrides();
@@ -213,28 +226,16 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // intro → settings via the full 3-page path: 次へ ×2, then page-3
-        // はじめる (exercises the real page-through contract).
-        await tester.tap(find.widgetWithText(TextButton, '次へ'));
-        await tester.pumpAndSettle();
+        // intro → settings via the full 2-page path.
         await tester.tap(find.widgetWithText(TextButton, '次へ'));
         await tester.pumpAndSettle();
         await tester.tap(find.widgetWithText(TextButton, 'はじめる'));
         await tester.pumpAndSettle();
 
-        // settings: nickname required, then confirm → lock-entry
+        // Settings: nickname required, security remains off, then confirm
+        // completes onboarding directly.
         await _setNickname(tester, 'たけし');
         await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
-        await tester.pumpAndSettle();
-        expect(find.byType(OnboardingLockEntryScreen), findsOneWidget);
-
-        // The flag is NOT set before lock-entry completion (lands LAST).
-        expect(h.prefs.getBool('onboarding_complete'), isNot(true));
-
-        // lock-entry skip → completion writes the flag LAST, then hands off to
-        // the gate-owned callback (the flow host no longer self-navigates, so
-        // the gate route stays live — HI-01). setupSecurity is false on skip.
-        await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
         await _pumpNoSettle(tester);
 
         expect(h.prefs.getBool('onboarding_complete'), true);

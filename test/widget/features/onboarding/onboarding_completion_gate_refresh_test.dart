@@ -6,8 +6,8 @@
 //
 // These tests boot the FULL `HomePocketApp` gate with a REAL
 // `SettingsRepositoryImpl` over mocked SharedPreferences (so completion can
-// actually flip `onboarding_complete`), drive the real intro → settings →
-// lock-entry flow to completion, then fire `dataResetSignalProvider` for both
+// actually flip `onboarding_complete`), drive the real intro → combined
+// settings flow to completion, then fire `dataResetSignalProvider` for both
 // reset shapes:
 //
 //   - import   (flag stays true)  → expect the shell re-points to the NEW
@@ -46,7 +46,6 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_no
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
-import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_lock_entry_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_settings_screen.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
@@ -132,6 +131,9 @@ class _FakeUserProfileRepository implements UserProfileRepository {
 class _FakeSecureStorageService extends Fake implements SecureStorageService {
   @override
   Future<String?> getPinHash() async => null;
+
+  @override
+  Future<void> deletePinHash() async {}
 }
 
 final _testProfile = UserProfile(
@@ -227,8 +229,8 @@ Future<void> _pumpBounded(WidgetTester tester) async {
 String _shellBookId(WidgetTester tester) =>
     tester.widget<MainShellScreen>(find.byType(MainShellScreen)).bookId;
 
-/// Drives the real intro → settings → (nickname) → confirm → lock-entry → skip
-/// path to completion. Returns the boot bookId captured from the gate.
+/// Drives the real intro → combined settings path to completion. Returns the
+/// boot bookId captured from the gate.
 Future<String> _completeOnboarding(WidgetTester tester) async {
   expect(find.byType(OnboardingFlowScreen), findsOneWidget);
   final bootBookId = tester
@@ -240,15 +242,11 @@ Future<String> _completeOnboarding(WidgetTester tester) async {
   await tester.pumpAndSettle();
   expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
 
-  // settings: nickname required (inline TextField), then confirm → lock-entry
+  // Settings: nickname required; security stays off, so confirmation completes
+  // onboarding directly.
   await tester.enterText(find.byType(TextField).first, 'たけし');
   await tester.pumpAndSettle();
   await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
-  await tester.pumpAndSettle();
-  expect(find.byType(OnboardingLockEntryScreen), findsOneWidget);
-
-  // lock-entry skip → completion (writes onboarding_complete LAST).
-  await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
   await _pumpBounded(tester);
 
   return bootBookId;

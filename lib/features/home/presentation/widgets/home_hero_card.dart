@@ -64,6 +64,8 @@ class HomeHeroCard extends StatelessWidget {
   final VoidCallback onTap;
 
   static const FormatterService _fmt = FormatterService();
+  // The stack starts after 18 px of padding and the 1 px decoration border.
+  static const double _heroSurfaceContentInset = 19;
 
   @override
   Widget build(BuildContext context) {
@@ -121,19 +123,21 @@ class HomeHeroCard extends StatelessWidget {
                       ],
                     ),
                     Positioned(
-                      left: -28,
+                      left: -_heroSurfaceContentInset,
                       top: -10,
                       child: _heroTearNotch(
                         palette,
                         const Key('home-hero-tear-notch-left'),
+                        Alignment.centerRight,
                       ),
                     ),
                     Positioned(
-                      right: -28,
+                      right: -_heroSurfaceContentInset,
                       top: -10,
                       child: _heroTearNotch(
                         palette,
                         const Key('home-hero-tear-notch-right'),
+                        Alignment.centerLeft,
                       ),
                     ),
                   ],
@@ -153,20 +157,26 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  Widget _heroTearNotch(AppPalette palette, Key key) {
-    return Container(
+  Widget _heroTearNotch(AppPalette palette, Key key, Alignment alignment) {
+    return ClipRect(
       key: key,
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        color: palette.background,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Color.lerp(
-            palette.borderDefault,
-            palette.accentPrimary,
-            0.12,
-          )!,
+      child: Align(
+        alignment: alignment,
+        widthFactor: 0.5,
+        child: Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: palette.background,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Color.lerp(
+                palette.borderDefault,
+                palette.accentPrimary,
+                0.12,
+              )!,
+            ),
+          ),
         ),
       ),
     );

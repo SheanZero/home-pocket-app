@@ -2678,10 +2678,13 @@ class SEn extends S {
   String get onboardingSetupEyebrow => 'Final step';
 
   @override
-  String get onboardingSetupTitle => 'Before you begin,\njust a few settings.';
+  String get onboardingSetupTopbar => 'Initial setup';
 
   @override
-  String get onboardingRowName => 'Name';
+  String get onboardingSetupTitle => 'Basic setup';
+
+  @override
+  String get onboardingRowName => 'Name · Required';
 
   @override
   String get onboardingRowLanguage => 'Display language';
@@ -2701,6 +2704,83 @@ class SEn extends S {
 
   @override
   String get onboardingStart => 'Start with these settings';
+
+  @override
+  String get onboardingPrivacyTagLocal => 'LOCAL';
+
+  @override
+  String get onboardingPrivacyTagE2ee => 'E2EE';
+
+  @override
+  String get onboardingPrivacyTagSafe => 'SAFE';
+
+  @override
+  String get onboardingAvatarChange => 'Change image';
+
+  @override
+  String get onboardingSecurityTitle => 'Protect your ledger';
+
+  @override
+  String get onboardingSecurityDescription =>
+      'When enabled, identity verification is required whenever you open the app.';
+
+  @override
+  String get onboardingSecurityEnable => 'Enable security protection';
+
+  @override
+  String get onboardingSecurityDeferTitle => 'Decide later';
+
+  @override
+  String get onboardingSecurityDeferBody =>
+      'You can enable it anytime in Settings';
+
+  @override
+  String get onboardingSecurityMethodLabel => 'Unlock method';
+
+  @override
+  String get onboardingSecurityBiometric => 'Biometrics';
+
+  @override
+  String get onboardingSecurityBiometricDescription =>
+      'Unlock quickly with Face ID or fingerprint';
+
+  @override
+  String get onboardingSecurityRecommended => 'Recommended';
+
+  @override
+  String get onboardingSecurityPin => 'App lock';
+
+  @override
+  String get onboardingSecurityPinDescription => 'Unlock with a 4-digit PIN';
+
+  @override
+  String get onboardingSecurityPinMissing => 'PIN has not been set';
+
+  @override
+  String get onboardingSecurityPinSetupHint => 'Enter it twice to enable';
+
+  @override
+  String get onboardingSecurityPinSetup => 'Set a 4-digit PIN';
+
+  @override
+  String get onboardingSecurityPinComplete => 'PIN is set';
+
+  @override
+  String get onboardingSecurityPinCompleteDescription =>
+      'Protected by a 4-digit PIN';
+
+  @override
+  String get onboardingSecurityPinChange => 'Change PIN';
+
+  @override
+  String get onboardingSetupNameRequiredHint => 'Enter your name to continue';
+
+  @override
+  String get onboardingSetupPinRequiredHint => 'Set a PIN to continue';
+
+  @override
+  String get onboardingSetupChangeLaterHint =>
+      'You can change these anytime in Settings';
 
   @override
   String get onboardingLockTitle => 'Set up an app lock?';

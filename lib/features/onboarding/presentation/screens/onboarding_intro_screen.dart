@@ -8,30 +8,44 @@ import '../widgets/onboarding_float_decor.dart';
 
 /// The skippable onboarding intro (D-02 / ONBOARD-02, Welcome A design).
 ///
-/// A 3-page horizontal PageView — ようこそ / プライバシー / 記録の悦び — with
-/// page dots, 次へ on pages 1-2, はじめる on page 3, and a top-right スキップ
-/// visible on all pages. The screen is purely presentational: both はじめる
-/// (page 3) and スキップ collapse to [onContinue] — advancing always lands on
+/// A 2-page horizontal PageView — ようこそ / プライバシー — with page dots,
+/// 次へ on page 1, はじめる on page 2, and a top-right スキップ visible on both
+/// pages. The screen is purely presentational: both はじめる (page 2) and
+/// スキップ collapse to [onContinue] — advancing always lands on
 /// the settings step (skip jumps past the remaining intro pages, D-02). The
 /// flow host (54-07) wires [onContinue] to push the settings route; this
 /// screen does NOT navigate.
 class OnboardingIntroScreen extends StatefulWidget {
-  const OnboardingIntroScreen({super.key, required this.onContinue});
+  const OnboardingIntroScreen({
+    super.key,
+    required this.onContinue,
+    this.initialPage = 0,
+  }) : assert(initialPage >= 0 && initialPage < 2);
 
-  /// Fired exactly once when the user advances past the intro (page-3
+  /// Fired exactly once when the user advances past the intro (page-2
   /// はじめる OR スキップ — both are equivalent because the intro is
   /// skippable, D-02). Never fired by 次へ (internal paging).
   final VoidCallback onContinue;
+
+  /// Supports deterministic visual capture without changing production flow.
+  final int initialPage;
 
   @override
   State<OnboardingIntroScreen> createState() => _OnboardingIntroScreenState();
 }
 
 class _OnboardingIntroScreenState extends State<OnboardingIntroScreen> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
+  late final PageController _pageController;
+  late int _currentPage;
 
-  static const int _pageCount = 3;
+  static const int _pageCount = 2;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = widget.initialPage;
+    _pageController = PageController(initialPage: widget.initialPage);
+  }
 
   @override
   void dispose() {
@@ -50,6 +64,16 @@ class _OnboardingIntroScreenState extends State<OnboardingIntroScreen> {
     );
   }
 
+  void _onBackPressed() {
+    if (_currentPage == 0) {
+      return;
+    }
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
@@ -60,7 +84,9 @@ class _OnboardingIntroScreenState extends State<OnboardingIntroScreen> {
       backgroundColor: palette.background,
       body: SafeArea(
         child: Stack(
+          fit: StackFit.expand,
           children: [
+            const _OnboardingAmbience(),
             Column(
               children: [
                 Expanded(
@@ -68,11 +94,7 @@ class _OnboardingIntroScreenState extends State<OnboardingIntroScreen> {
                     controller: _pageController,
                     onPageChanged: (page) =>
                         setState(() => _currentPage = page),
-                    children: const [
-                      _WelcomePage(),
-                      _PrivacyPage(),
-                      _JoyPage(),
-                    ],
+                    children: const [_WelcomePage(), _PrivacyPage()],
                   ),
                 ),
                 Padding(
@@ -94,20 +116,43 @@ class _OnboardingIntroScreenState extends State<OnboardingIntroScreen> {
             ),
             Positioned(
               top: 8,
+              left: 14,
               right: 14,
-              child: TextButton(
-                onPressed: widget.onContinue,
-                style: TextButton.styleFrom(
-                  foregroundColor: palette.textTertiary,
-                ),
-                child: Text(
-                  l10n.onboardingIntroSkip,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textTertiary,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (_currentPage == 0)
+                    const SizedBox(width: 56, height: 48)
+                  else
+                    TextButton(
+                      onPressed: _onBackPressed,
+                      style: TextButton.styleFrom(
+                        foregroundColor: palette.textTertiary,
+                      ),
+                      child: Text(
+                        MaterialLocalizations.of(context).backButtonTooltip,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: palette.textTertiary,
+                        ),
+                      ),
+                    ),
+                  TextButton(
+                    onPressed: widget.onContinue,
+                    style: TextButton.styleFrom(
+                      foregroundColor: palette.textTertiary,
+                    ),
+                    child: Text(
+                      l10n.onboardingIntroSkip,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: palette.textTertiary,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -125,8 +170,102 @@ String _svgHex(Color color) {
   return '#${(argb & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 }
 
+/// V16 option 2: tiny pressed botanical fragments around the screen edges.
+///
+/// They stay deliberately faint and outside the reading column, adding paper
+/// texture without turning into a large illustration or competing watermark.
+class _OnboardingAmbience extends StatelessWidget {
+  const _OnboardingAmbience();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final color = Color.alphaBlend(
+      palette.accentPrimary.withValues(alpha: 0.16),
+      palette.borderDefault,
+    );
+
+    return ExcludeSemantics(
+      child: IgnorePointer(
+        child: Stack(
+          children: [
+            _PressedMotif(
+              icon: Icons.eco_outlined,
+              top: 34,
+              left: 37,
+              size: 13,
+              turns: -0.05,
+              color: color,
+            ),
+            _PressedMotif(
+              icon: Icons.spa_outlined,
+              top: 248,
+              right: 28,
+              size: 16,
+              turns: 0.04,
+              color: color,
+            ),
+            _PressedMotif(
+              icon: Icons.eco_outlined,
+              bottom: 136,
+              left: 30,
+              size: 14,
+              turns: -0.03,
+              color: color,
+            ),
+            _PressedMotif(
+              icon: Icons.spa_outlined,
+              bottom: 62,
+              right: 36,
+              size: 11,
+              turns: 0.06,
+              color: color,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PressedMotif extends StatelessWidget {
+  const _PressedMotif({
+    required this.icon,
+    required this.size,
+    required this.turns,
+    required this.color,
+    this.top,
+    this.right,
+    this.bottom,
+    this.left,
+  });
+
+  final IconData icon;
+  final double size;
+  final double turns;
+  final Color color;
+  final double? top;
+  final double? right;
+  final double? bottom;
+  final double? left;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      right: right,
+      bottom: bottom,
+      left: left,
+      child: RotationTransition(
+        turns: AlwaysStoppedAnimation(turns),
+        child: Icon(icon, size: size, color: color),
+      ),
+    );
+  }
+}
+
 /// Wraps page content in a vertical scrollable so shorter test surfaces and
-/// small phones never overflow, while centering on tall screens.
+/// small phones never overflow, while retaining the mockup's top-led rhythm.
 class _PageScroll extends StatelessWidget {
   const _PageScroll({required this.child});
 
@@ -138,7 +277,7 @@ class _PageScroll extends StatelessWidget {
       builder: (context, constraints) => SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Center(child: child),
+          child: Align(alignment: Alignment.topCenter, child: child),
         ),
       ),
     );
@@ -168,7 +307,7 @@ class _WelcomePage extends StatelessWidget {
 
     return _PageScroll(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+        padding: const EdgeInsets.fromLTRB(40, 50, 40, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -274,35 +413,45 @@ class _WelcomePage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-              decoration: BoxDecoration(
-                color: palette.joyLight,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: palette.joyFullnessBorder),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SatisfactionFaceIcon(
-                    value: 7,
-                    size: 15,
-                    color: palette.joyText,
-                  ),
-                  const SizedBox(width: 7),
-                  Text(
-                    l10n.onboardingWelcomeBadge,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
+            const SizedBox(height: 22),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 278),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: palette.joyLight,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: palette.joyFullnessBorder),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SatisfactionFaceIcon(
+                      value: 7,
+                      size: 15,
                       color: palette.joyText,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 7),
+                    Flexible(
+                      child: Text(
+                        l10n.onboardingWelcomeBadge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: palette.joyText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 15),
             Text(
               l10n.onboardingIntroTitle,
               textAlign: TextAlign.center,
@@ -313,7 +462,7 @@ class _WelcomePage extends StatelessWidget {
                 color: palette.textPrimary,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             Text(
               l10n.onboardingWelcomeBrand,
               textAlign: TextAlign.center,
@@ -324,7 +473,7 @@ class _WelcomePage extends StatelessWidget {
                 color: palette.textTertiary,
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 16),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 300),
               child: Text(
@@ -332,13 +481,62 @@ class _WelcomePage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.5,
-                  height: 1.95,
+                  height: 1.8,
                   fontWeight: FontWeight.w500,
                   color: palette.textSecondary,
                 ),
               ),
             ),
+            const SizedBox(height: 23),
+            Row(
+              children: [
+                Expanded(child: _ValuePill(label: l10n.dailyLedger)),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _ValuePill(label: l10n.joyLedger, highlighted: true),
+                ),
+                const SizedBox(width: 7),
+                Expanded(child: _ValuePill(label: l10n.satisfactionLevel)),
+              ],
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ValuePill extends StatelessWidget {
+  const _ValuePill({required this.label, this.highlighted = false});
+
+  final String label;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 38),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      decoration: BoxDecoration(
+        color: highlighted ? palette.joyLight : palette.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: highlighted
+              ? palette.joyFullnessBorder
+              : palette.borderDefault,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: highlighted ? palette.joyText : palette.textSecondary,
         ),
       ),
     );
@@ -354,6 +552,7 @@ class _PrivacyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final l10n = S.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final shieldSvg =
         '''
@@ -365,25 +564,95 @@ class _PrivacyPage extends StatelessWidget {
 
     return _PageScroll(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
+        padding: const EdgeInsets.fromLTRB(28, 50, 28, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FloatyLoop(
-              period: const Duration(seconds: 6),
-              child: Container(
-                width: 108,
-                height: 108,
-                decoration: BoxDecoration(
-                  color: palette.accentPrimaryLight,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: palette.accentPrimaryBorder),
-                ),
-                alignment: Alignment.center,
-                child: SvgPicture.string(shieldSvg, width: 50, height: 50),
+            SizedBox(
+              width: 172,
+              height: 150,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    top: 18,
+                    right: 6,
+                    child: DriftPetal(
+                      size: 12,
+                      color: palette.joy,
+                      opacity: isDark ? 0.7 : 0.5,
+                      period: const Duration(seconds: 5),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 30,
+                    left: 0,
+                    child: DriftPetal(
+                      size: 9,
+                      color: palette.accentPrimary,
+                      opacity: isDark ? 0.55 : 0.4,
+                      period: const Duration(milliseconds: 6500),
+                      phase: const Duration(milliseconds: 600),
+                    ),
+                  ),
+                  Positioned(
+                    top: 18,
+                    left: 32,
+                    child: FloatyLoop(
+                      period: const Duration(seconds: 6),
+                      child: Container(
+                        width: 108,
+                        height: 108,
+                        decoration: BoxDecoration(
+                          color: palette.accentPrimaryLight,
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: palette.accentPrimaryBorder,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: SvgPicture.string(
+                          shieldSvg,
+                          width: 50,
+                          height: 50,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: -4,
+                    right: 8,
+                    child: FloatyLoop(
+                      period: const Duration(seconds: 5),
+                      phase: const Duration(milliseconds: 300),
+                      child: _PrivacySatellite(
+                        size: 52,
+                        icon: Icons.lock_outline,
+                        background: palette.joyLight,
+                        border: palette.joyFullnessBorder,
+                        foreground: palette.joyText,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 6,
+                    left: 6,
+                    child: FloatyLoop(
+                      period: const Duration(milliseconds: 6500),
+                      phase: const Duration(milliseconds: 500),
+                      child: _PrivacySatellite(
+                        size: 42,
+                        icon: Icons.smartphone_outlined,
+                        background: palette.card,
+                        border: palette.accentPrimaryBorder,
+                        foreground: palette.dailyText,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 26),
+            const SizedBox(height: 20),
             Text(
               l10n.onboardingPrivacyTitle,
               textAlign: TextAlign.center,
@@ -408,23 +677,17 @@ class _PrivacyPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
-            _FeatureCard(
-              icon: Icons.smartphone,
+            const SizedBox(height: 22),
+            _PrivacyPromiseList(
               title: l10n.onboardingPrivacyCardLocalTitle,
               body: l10n.onboardingPrivacyCardLocalBody,
-            ),
-            const SizedBox(height: 11),
-            _FeatureCard(
-              icon: Icons.lock_outline,
-              title: l10n.onboardingPrivacyCardE2eTitle,
-              body: l10n.onboardingPrivacyCardE2eBody,
-            ),
-            const SizedBox(height: 11),
-            _FeatureCard(
-              icon: Icons.verified_outlined,
-              title: l10n.onboardingPrivacyCardTamperTitle,
-              body: l10n.onboardingPrivacyCardTamperBody,
+              tag: l10n.onboardingPrivacyTagLocal,
+              secondTitle: l10n.onboardingPrivacyCardE2eTitle,
+              secondBody: l10n.onboardingPrivacyCardE2eBody,
+              secondTag: l10n.onboardingPrivacyTagE2ee,
+              thirdTitle: l10n.onboardingPrivacyCardTamperTitle,
+              thirdBody: l10n.onboardingPrivacyCardTamperBody,
+              thirdTag: l10n.onboardingPrivacyTagSafe,
             ),
           ],
         ),
@@ -433,42 +696,106 @@ class _PrivacyPage extends StatelessWidget {
   }
 }
 
-/// One full-width privacy feature card: icon chip + title + body.
-class _FeatureCard extends StatelessWidget {
-  const _FeatureCard({
+class _PrivacySatellite extends StatelessWidget {
+  const _PrivacySatellite({
+    required this.size,
     required this.icon,
-    required this.title,
-    required this.body,
+    required this.background,
+    required this.border,
+    required this.foreground,
   });
 
+  final double size;
   final IconData icon;
+  final Color background;
+  final Color border;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: background,
+        shape: BoxShape.circle,
+        border: Border.all(color: border),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, size: size * 0.52, color: foreground),
+    );
+  }
+}
+
+class _PrivacyPromiseList extends StatelessWidget {
+  const _PrivacyPromiseList({
+    required this.title,
+    required this.body,
+    required this.tag,
+    required this.secondTitle,
+    required this.secondBody,
+    required this.secondTag,
+    required this.thirdTitle,
+    required this.thirdBody,
+    required this.thirdTag,
+  });
+
   final String title;
   final String body;
+  final String tag;
+  final String secondTitle;
+  final String secondBody;
+  final String secondTag;
+  final String thirdTitle;
+  final String thirdBody;
+  final String thirdTag;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: palette.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(17),
         border: Border.all(color: palette.borderDefault),
       ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          _PrivacyPromiseRow(title: title, body: body, tag: tag),
+          Divider(height: 1, color: palette.borderDefault),
+          _PrivacyPromiseRow(
+            title: secondTitle,
+            body: secondBody,
+            tag: secondTag,
+          ),
+          Divider(height: 1, color: palette.borderDefault),
+          _PrivacyPromiseRow(title: thirdTitle, body: thirdBody, tag: thirdTag),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrivacyPromiseRow extends StatelessWidget {
+  const _PrivacyPromiseRow({
+    required this.title,
+    required this.body,
+    required this.tag,
+  });
+
+  final String title;
+  final String body;
+  final String tag;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: palette.accentPrimaryLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 20, color: palette.accentPrimary),
-          ),
-          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -476,7 +803,7 @@ class _FeatureCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: palette.textPrimary,
                   ),
@@ -485,7 +812,7 @@ class _FeatureCard extends StatelessWidget {
                 Text(
                   body,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: palette.textSecondary,
                   ),
@@ -493,168 +820,16 @@ class _FeatureCard extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 12),
+          Text(
+            tag,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: palette.dailyText,
+            ),
+          ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Page 3 記録の悦び (A-*-joy) ─────────────────────────────────────────────
-
-class _JoyPage extends StatelessWidget {
-  const _JoyPage();
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final l10n = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return _PageScroll(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 122,
-              height: 122,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    top: 2,
-                    right: 2,
-                    child: DriftPetal(
-                      size: 14,
-                      color: palette.joy,
-                      opacity: isDark ? 0.7 : 0.5,
-                      period: const Duration(seconds: 5),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 6,
-                    left: -2,
-                    child: DriftPetal(
-                      size: 10,
-                      color: palette.accentPrimary,
-                      opacity: isDark ? 0.55 : 0.4,
-                      period: const Duration(milliseconds: 6500),
-                      phase: const Duration(milliseconds: 600),
-                    ),
-                  ),
-                  Positioned.fill(
-                    left: 12,
-                    top: 12,
-                    right: 12,
-                    bottom: 12,
-                    child: FloatyLoop(
-                      period: const Duration(seconds: 6),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: palette.joyLight,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(color: palette.joyFullnessBorder),
-                        ),
-                        alignment: Alignment.center,
-                        child: SatisfactionFaceIcon(
-                          value: 7,
-                          size: 56,
-                          color: palette.joyText,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 30),
-            Text(
-              l10n.onboardingJoyTitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 23,
-                height: 1.45,
-                fontWeight: FontWeight.w700,
-                color: palette.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
-              child: Text(
-                l10n.onboardingJoySubtitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  height: 1.9,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textSecondary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (final value in const [1, 3, 5]) ...[
-                  Opacity(
-                    opacity: 0.45,
-                    child: SatisfactionFaceIcon(
-                      value: value,
-                      size: 27,
-                      color: palette.textTertiary,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                ],
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: palette.joyLight,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: palette.joy, width: 2),
-                  ),
-                  alignment: Alignment.center,
-                  child: SatisfactionFaceIcon(
-                    value: 7,
-                    size: 32,
-                    color: palette.joyText,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Opacity(
-                  opacity: 0.45,
-                  child: SatisfactionFaceIcon(
-                    value: 9,
-                    size: 27,
-                    color: palette.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.onboardingJoyCaption,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: palette.textTertiary,
-              ),
-            ),
-            const SizedBox(height: 26),
-            Text(
-              l10n.onboardingJoyAccent,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.7,
-                fontWeight: FontWeight.w600,
-                color: palette.dailyText,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

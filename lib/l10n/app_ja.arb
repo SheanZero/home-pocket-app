@@ -3374,11 +3374,12 @@
   "@onboardingSetupEyebrow": {
     "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
-  "onboardingSetupTitle": "はじめる前に、\nすこしだけ設定を。",
+  "onboardingSetupTopbar": "初期設定",
+  "onboardingSetupTitle": "基本設定",
   "@onboardingSetupTitle": {
     "description": "Design-04 setup screen: two-line title"
   },
-  "onboardingRowName": "お名前",
+  "onboardingRowName": "お名前・必須",
   "@onboardingRowName": {
     "description": "Design-04 setup screen: inline name field label"
   },
@@ -3406,6 +3407,30 @@
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
   },
+  "onboardingPrivacyTagLocal": "LOCAL",
+  "onboardingPrivacyTagE2ee": "E2EE",
+  "onboardingPrivacyTagSafe": "SAFE",
+  "onboardingAvatarChange": "画像を変更",
+  "onboardingSecurityTitle": "家計簿を安全に保護",
+  "onboardingSecurityDescription": "有効にすると、アプリを開くたびに本人確認します。",
+  "onboardingSecurityEnable": "安全保護を有効にする",
+  "onboardingSecurityDeferTitle": "今は設定せず、あとで決める",
+  "onboardingSecurityDeferBody": "設定からいつでも有効にできます",
+  "onboardingSecurityMethodLabel": "ロック解除方法",
+  "onboardingSecurityBiometric": "生体認証",
+  "onboardingSecurityBiometricDescription": "Face ID または指紋ですばやく解除",
+  "onboardingSecurityRecommended": "おすすめ",
+  "onboardingSecurityPin": "アプリロック",
+  "onboardingSecurityPinDescription": "4桁のPINで解除",
+  "onboardingSecurityPinMissing": "PINがまだ設定されていません",
+  "onboardingSecurityPinSetupHint": "2回入力すると有効になります",
+  "onboardingSecurityPinSetup": "4桁のPINを設定",
+  "onboardingSecurityPinComplete": "PINを設定しました",
+  "onboardingSecurityPinCompleteDescription": "4桁のPINで保護されています",
+  "onboardingSecurityPinChange": "PINを変更",
+  "onboardingSetupNameRequiredHint": "お名前を入力すると開始できます",
+  "onboardingSetupPinRequiredHint": "PINを設定すると開始できます",
+  "onboardingSetupChangeLaterHint": "あとから設定でいつでも変更できます",
   "onboardingLockTitle": "アプリロックを設定しますか？",
   "@onboardingLockTitle": {
     "description": "Onboarding lock-entry screen: title (D-11)"

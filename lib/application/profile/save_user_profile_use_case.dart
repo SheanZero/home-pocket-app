@@ -4,6 +4,7 @@ import 'package:ulid/ulid.dart';
 
 import '../../features/profile/domain/models/user_profile.dart';
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
+import '../../shared/constants/avatar_icon_ids.dart';
 import '../../shared/constants/warm_emojis.dart';
 
 enum SaveProfileError { nameRequired, nameTooLong, invalidEmoji }
@@ -41,7 +42,7 @@ class SaveUserProfileUseCase {
     if (trimmedDisplayName.length > 50) {
       return const SaveProfileResult.failure(SaveProfileError.nameTooLong);
     }
-    if (!warmEmojis.contains(avatarEmoji)) {
+    if (!warmEmojis.contains(avatarEmoji) && !isAvatarIconId(avatarEmoji)) {
       return const SaveProfileResult.failure(SaveProfileError.invalidEmoji);
     }
 

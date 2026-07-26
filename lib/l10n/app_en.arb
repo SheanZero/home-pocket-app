@@ -3360,11 +3360,12 @@
   "@onboardingSetupEyebrow": {
     "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
-  "onboardingSetupTitle": "Before you begin,\njust a few settings.",
+  "onboardingSetupTopbar": "Initial setup",
+  "onboardingSetupTitle": "Basic setup",
   "@onboardingSetupTitle": {
     "description": "Design-04 setup screen: two-line title"
   },
-  "onboardingRowName": "Name",
+  "onboardingRowName": "Name · Required",
   "@onboardingRowName": {
     "description": "Design-04 setup screen: inline name field label"
   },
@@ -3392,6 +3393,30 @@
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
   },
+  "onboardingPrivacyTagLocal": "LOCAL",
+  "onboardingPrivacyTagE2ee": "E2EE",
+  "onboardingPrivacyTagSafe": "SAFE",
+  "onboardingAvatarChange": "Change image",
+  "onboardingSecurityTitle": "Protect your ledger",
+  "onboardingSecurityDescription": "When enabled, identity verification is required whenever you open the app.",
+  "onboardingSecurityEnable": "Enable security protection",
+  "onboardingSecurityDeferTitle": "Decide later",
+  "onboardingSecurityDeferBody": "You can enable it anytime in Settings",
+  "onboardingSecurityMethodLabel": "Unlock method",
+  "onboardingSecurityBiometric": "Biometrics",
+  "onboardingSecurityBiometricDescription": "Unlock quickly with Face ID or fingerprint",
+  "onboardingSecurityRecommended": "Recommended",
+  "onboardingSecurityPin": "App lock",
+  "onboardingSecurityPinDescription": "Unlock with a 4-digit PIN",
+  "onboardingSecurityPinMissing": "PIN has not been set",
+  "onboardingSecurityPinSetupHint": "Enter it twice to enable",
+  "onboardingSecurityPinSetup": "Set a 4-digit PIN",
+  "onboardingSecurityPinComplete": "PIN is set",
+  "onboardingSecurityPinCompleteDescription": "Protected by a 4-digit PIN",
+  "onboardingSecurityPinChange": "Change PIN",
+  "onboardingSetupNameRequiredHint": "Enter your name to continue",
+  "onboardingSetupPinRequiredHint": "Set a PIN to continue",
+  "onboardingSetupChangeLaterHint": "You can change these anytime in Settings",
   "onboardingLockTitle": "Set up an app lock?",
   "@onboardingLockTitle": {
     "description": "Onboarding lock-entry screen: title (D-11)"

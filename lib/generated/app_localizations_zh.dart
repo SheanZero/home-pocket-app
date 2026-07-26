@@ -2611,10 +2611,13 @@ class SZh extends S {
   String get onboardingSetupEyebrow => '最后一步';
 
   @override
-  String get onboardingSetupTitle => '开始之前，\n先做一点小设置。';
+  String get onboardingSetupTopbar => '初始设置';
 
   @override
-  String get onboardingRowName => '姓名';
+  String get onboardingSetupTitle => '基础设置';
+
+  @override
+  String get onboardingRowName => '姓名・必填';
 
   @override
   String get onboardingRowLanguage => '显示语言';
@@ -2633,6 +2636,78 @@ class SZh extends S {
 
   @override
   String get onboardingStart => '用这些设置开始';
+
+  @override
+  String get onboardingPrivacyTagLocal => 'LOCAL';
+
+  @override
+  String get onboardingPrivacyTagE2ee => 'E2EE';
+
+  @override
+  String get onboardingPrivacyTagSafe => 'SAFE';
+
+  @override
+  String get onboardingAvatarChange => '更换图片';
+
+  @override
+  String get onboardingSecurityTitle => '安全保护家计簿';
+
+  @override
+  String get onboardingSecurityDescription => '启用后，每次打开应用都需要验证身份。';
+
+  @override
+  String get onboardingSecurityEnable => '启用安全保护';
+
+  @override
+  String get onboardingSecurityDeferTitle => '现在不设置，稍后再决定';
+
+  @override
+  String get onboardingSecurityDeferBody => '可随时在设置中启用';
+
+  @override
+  String get onboardingSecurityMethodLabel => '解锁方式';
+
+  @override
+  String get onboardingSecurityBiometric => '生物识别';
+
+  @override
+  String get onboardingSecurityBiometricDescription => '使用面容 ID 或指纹快速解锁';
+
+  @override
+  String get onboardingSecurityRecommended => '推荐';
+
+  @override
+  String get onboardingSecurityPin => '应用锁';
+
+  @override
+  String get onboardingSecurityPinDescription => '使用4位 PIN 解锁';
+
+  @override
+  String get onboardingSecurityPinMissing => '尚未设置 PIN';
+
+  @override
+  String get onboardingSecurityPinSetupHint => '输入两次后即可启用';
+
+  @override
+  String get onboardingSecurityPinSetup => '设置4位 PIN';
+
+  @override
+  String get onboardingSecurityPinComplete => 'PIN 已设置';
+
+  @override
+  String get onboardingSecurityPinCompleteDescription => '当前由4位 PIN 保护';
+
+  @override
+  String get onboardingSecurityPinChange => '修改 PIN';
+
+  @override
+  String get onboardingSetupNameRequiredHint => '输入姓名后即可开始';
+
+  @override
+  String get onboardingSetupPinRequiredHint => '设置 PIN 后即可开始';
+
+  @override
+  String get onboardingSetupChangeLaterHint => '之后可随时在设置中更改';
 
   @override
   String get onboardingLockTitle => '要设置应用锁吗？';

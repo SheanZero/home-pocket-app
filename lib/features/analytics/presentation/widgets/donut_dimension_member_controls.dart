@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/constants/avatar_icon_ids.dart';
+import '../../../../shared/widgets/avatar_glyph.dart';
 import '../../../family_sync/domain/models/group_member.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
@@ -270,7 +272,13 @@ class _MemberOptionTile extends StatelessWidget {
       selected: selected,
       selectedColor: palette.accentPrimary,
       leading: (emoji != null && emoji!.isNotEmpty)
-          ? Text(emoji!, style: const TextStyle(fontSize: 20))
+          ? isAvatarIconId(emoji!)
+                ? AvatarGlyph(
+                    value: emoji!,
+                    size: 20,
+                    color: palette.accentPrimary,
+                  )
+                : Text(emoji!, style: const TextStyle(fontSize: 20))
           : null,
       title: Text(
         title,

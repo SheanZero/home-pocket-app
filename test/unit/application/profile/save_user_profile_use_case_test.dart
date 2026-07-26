@@ -37,6 +37,20 @@ void main() {
       verify(() => repository.save(any())).called(1);
     });
 
+    test('saves a valid icon-library avatar', () async {
+      when(() => repository.save(any())).thenAnswer((_) async {});
+      when(() => repository.find()).thenAnswer((_) async => null);
+
+      final result = await useCase.execute(
+        displayName: 'たけし',
+        avatarEmoji: 'icon:cat',
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.profile?.avatarEmoji, 'icon:cat');
+      verify(() => repository.save(any())).called(1);
+    });
+
     test('rejects empty display name', () async {
       final result = await useCase.execute(
         displayName: '   ',
