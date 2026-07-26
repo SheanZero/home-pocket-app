@@ -66,14 +66,29 @@ abstract final class AppTypography {
   static const FontWeight microWeight = FontWeight.w600;
 }
 
-/// Color-neutral, platform-font text styles for Home Pocket.
+/// Color-neutral text styles for Home Pocket.
 ///
-/// Font families are intentionally omitted. Flutter resolves the native UI
-/// stack (San Francisco/Hiragino on iOS, Roboto/Noto on Android). New UI should
-/// use the semantic names at the top of this class; the Material-style names
-/// below remain compatibility aliases while existing screens migrate.
+/// Every style names a numeral-only Roboto Mono subset. That asset intentionally
+/// contains no alphabetic or CJK glyphs, so Flutter falls back to the native UI
+/// stack for prose while keeping numbers identical on iOS and Android. New UI
+/// should use the semantic names at the top of this class; the Material-style
+/// names below remain compatibility aliases while existing screens migrate.
 abstract final class AppTextStyles {
-  static const _tabularFigures = <FontFeature>[FontFeature.tabularFigures()];
+  static const String numeralFontFamily = 'RobotoMonoNumerals';
+  static const numeralFontFeatures = <FontFeature>[
+    FontFeature.tabularFigures(),
+    FontFeature('zero'),
+  ];
+
+  /// Applies the mockup's compact mono treatment to numeral-bearing UI.
+  ///
+  /// Roboto Mono is bundled under the SIL Open Font License so iOS and Android
+  /// render the same tabular, slashed-zero figures. Non-numeral glyphs continue
+  /// to fall back to the platform CJK font.
+  static TextStyle numerals(TextStyle base) => base.copyWith(
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
+  );
 
   // ── Semantic styles ──
 
@@ -81,82 +96,104 @@ abstract final class AppTextStyles {
     fontSize: AppTypography.pageTitle,
     height: AppTypography.pageTitleLineHeight / AppTypography.pageTitle,
     fontWeight: AppTypography.pageTitleWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const sectionTitle = TextStyle(
     fontSize: AppTypography.sectionTitle,
     height: AppTypography.sectionTitleLineHeight / AppTypography.sectionTitle,
     fontWeight: AppTypography.sectionTitleWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const itemTitle = TextStyle(
     fontSize: AppTypography.itemTitle,
     height: AppTypography.itemTitleLineHeight / AppTypography.itemTitle,
     fontWeight: AppTypography.itemTitleWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const body = TextStyle(
     fontSize: AppTypography.body,
     height: AppTypography.bodyLineHeight / AppTypography.body,
     fontWeight: AppTypography.bodyWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const label = TextStyle(
     fontSize: AppTypography.label,
     height: AppTypography.labelLineHeight / AppTypography.label,
     fontWeight: AppTypography.labelWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const supporting = TextStyle(
     fontSize: AppTypography.supporting,
     height: AppTypography.supportingLineHeight / AppTypography.supporting,
     fontWeight: AppTypography.supportingWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const compact = TextStyle(
     fontSize: AppTypography.compact,
     height: AppTypography.compactLineHeight / AppTypography.compact,
     fontWeight: AppTypography.compactWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const navigation = TextStyle(
     fontSize: AppTypography.navigation,
     height: AppTypography.navigationLineHeight / AppTypography.navigation,
     fontWeight: AppTypography.navigationWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const button = TextStyle(
     fontSize: AppTypography.button,
     height: AppTypography.buttonLineHeight / AppTypography.button,
     fontWeight: AppTypography.buttonWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const amountHero = TextStyle(
     fontSize: AppTypography.amountHero,
     height: AppTypography.amountHeroLineHeight / AppTypography.amountHero,
     fontWeight: AppTypography.amountHeroWeight,
-    fontFeatures: _tabularFigures,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const amountLarge = TextStyle(
     fontSize: AppTypography.amountLarge,
     height: AppTypography.amountLargeLineHeight / AppTypography.amountLarge,
     fontWeight: AppTypography.amountLargeWeight,
-    fontFeatures: _tabularFigures,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const amountMedium = TextStyle(
     fontSize: AppTypography.amountMedium,
     height: AppTypography.amountMediumLineHeight / AppTypography.amountMedium,
     fontWeight: AppTypography.amountMediumWeight,
-    fontFeatures: _tabularFigures,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const amountSmall = TextStyle(
     fontSize: AppTypography.amountSmall,
     height: AppTypography.amountSmallLineHeight / AppTypography.amountSmall,
     fontWeight: AppTypography.amountSmallWeight,
-    fontFeatures: _tabularFigures,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   // ── Compatibility aliases ──
@@ -179,6 +216,8 @@ abstract final class AppTextStyles {
     fontSize: AppTypography.micro,
     height: AppTypography.microLineHeight / AppTypography.micro,
     fontWeight: AppTypography.microWeight,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const dividerLabel = TextStyle(
@@ -186,6 +225,8 @@ abstract final class AppTextStyles {
     height: AppTypography.labelLineHeight / AppTypography.label,
     fontWeight: AppTypography.labelWeight,
     letterSpacing: 2,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const labelMedium = label;
@@ -199,12 +240,16 @@ abstract final class AppTextStyles {
     fontSize: AppTypography.supporting,
     height: AppTypography.supportingLineHeight / AppTypography.supporting,
     fontWeight: FontWeight.w700,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   static const legendLabel = TextStyle(
     fontSize: AppTypography.compact,
     height: AppTypography.compactLineHeight / AppTypography.compact,
     fontWeight: FontWeight.w500,
+    fontFamily: numeralFontFamily,
+    fontFeatures: numeralFontFeatures,
   );
 
   /// Builds a Material text theme for a concrete light or dark palette.

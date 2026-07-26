@@ -2,16 +2,20 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
+import 'package:home_pocket/features/analytics/domain/models/month_comparison.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
+import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
+import 'package:home_pocket/shared/widgets/main_surface_header.dart';
 
 import '../helpers/happiness_test_fixtures.dart';
 
@@ -63,6 +67,43 @@ _FixtureSnapshot _singleAllNeutral() => _FixtureSnapshot(
   monthlyReport: fixtureMonthlyReportRich(),
   happiness: fixtureHappinessReportRich(),
   bestJoy: fixtureBestJoyResultAllNeutral(),
+);
+
+_FixtureSnapshot _v16PhoneSnapshot() => _FixtureSnapshot(
+  monthlyReport: fixtureMonthlyReportRich().copyWith(
+    year: 2026,
+    month: 7,
+    totalExpenses: 186420,
+    savings: 113580,
+    savingsRate: 37.86,
+    dailyTotal: 132800,
+    joyTotal: 53620,
+    previousMonthComparison: const MonthComparison(
+      previousMonth: 6,
+      previousYear: 2026,
+      previousIncome: 300000,
+      previousExpenses: 202640,
+      incomeChange: 0,
+      expenseChange: -8,
+    ),
+  ),
+  happiness: fixtureHappinessReportRich().copyWith(
+    year: 2026,
+    month: 7,
+    avgSatisfaction: const Value(8.2, 23),
+    joyContribution: const Value(64, 23),
+    highlightsCount: const Value(12, 23),
+  ),
+  bestJoy: Value(
+    BestJoyMomentRow(
+      transactionId: 'tx_v16_favorite',
+      amount: 4800,
+      joyFullness: 10,
+      categoryId: 'cat_hobbies_oshikatsu',
+      timestamp: DateTime.utc(2026, 7, 6, 14, 30),
+    ),
+    23,
+  ),
 );
 
 _FixtureSnapshot _groupRich() => _FixtureSnapshot(
@@ -125,8 +166,88 @@ Widget _wrap({
   );
 }
 
+Widget _v16PhonePreview() {
+  const locale = Locale('ja');
+  final snapshot = _v16PhoneSnapshot();
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    locale: locale,
+    localizationsDelegates: const [
+      S.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: S.supportedLocales,
+    theme: ThemeData.light(),
+    home: Scaffold(
+      body: ColoredBox(
+        key: const Key('home-v16-phone-preview'),
+        color: const Color(0xFFF5EFE2),
+        child: SizedBox(
+          width: 390,
+          height: 600,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: MainSurfaceHeader.screenPadding,
+              child: Column(
+                children: [
+                  HeroHeader(
+                    year: 2026,
+                    month: 7,
+                    isGroupMode: false,
+                    onSettingsTap: () {},
+                    onMonthTap: () {},
+                  ),
+                  const SizedBox(height: MainSurfaceHeader.contentSpacing),
+                  HomeHeroCard(
+                    report: snapshot.monthlyReport,
+                    happiness: snapshot.happiness,
+                    bestJoy: snapshot.bestJoy,
+                    family: null,
+                    shadowBooks: null,
+                    shadowAggregate: null,
+                    currencyCode: 'JPY',
+                    locale: locale,
+                    isGroupMode: false,
+                    activeMonthlyJoyTarget: 80,
+                    recommendedMonthlyJoyTarget: 80,
+                    isMonthlyJoyTargetConfigured: true,
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
+  setUpAll(() async {
+    final loader = FontLoader(
+      'RobotoMonoNumerals',
+    )..addFont(rootBundle.load('assets/fonts/RobotoMonoNumerals-Variable.ttf'));
+    await loader.load();
+  });
+
   group('HomeHeroCard golden', () {
+    testWidgets('V16 phone composition light ja', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 600);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(_v16PhonePreview());
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byKey(const Key('home-v16-phone-preview')),
+        matchesGoldenFile('goldens/home_v16_phone_light_ja.png'),
+      );
+    });
+
     testWidgets('single mode light ja', (tester) async {
       await tester.pumpWidget(
         _wrap(locale: const Locale('ja'), snapshot: _singleRich()),

@@ -842,6 +842,10 @@
   "@homeViewMonthlyAnalysis": {
     "description": "Link in the ときめき section title row that opens the monthly analysis"
   },
+  "homeViewDetails": "詳しく見る",
+  "@homeViewDetails": {
+    "description": "Compact link in the monthly favorite section header"
+  },
   "homeMetricJoyUnit": "Joy",
   "@homeMetricJoyUnit": {
     "description": "Unit label under the goal ring value (Joy points)"
@@ -1049,6 +1053,63 @@
   "addCategory": "カテゴリを追加",
   "@addCategory": {
     "description": "Bottom action button label to add a category"
+  },
+  "noMatchingCategories": "一致する分類がありません",
+  "@noMatchingCategories": {
+    "description": "Empty state shown when category search has no matches"
+  },
+  "addL1CategoryTitle": "カテゴリを追加",
+  "@addL1CategoryTitle": {
+    "description": "Bottom sheet title for creating a top-level category"
+  },
+  "addL2CategoryTitle": "「{parentName}」に分類を追加",
+  "@addL2CategoryTitle": {
+    "description": "Bottom sheet title for creating a subcategory",
+    "placeholders": {
+      "parentName": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNameLabel": "分類名",
+  "@categoryNameLabel": {
+    "description": "Input label for a new custom category name"
+  },
+  "categoryNameHint": "例：週末のプロジェクト",
+  "@categoryNameHint": {
+    "description": "Input hint for a new custom category name"
+  },
+  "categoryNameRequired": "分類名を入力してください",
+  "@categoryNameRequired": {
+    "description": "Validation error for an empty custom category name"
+  },
+  "categoryNameTooLong": "50文字以内で入力してください",
+  "@categoryNameTooLong": {
+    "description": "Validation error for a custom category name over 50 characters"
+  },
+  "categoryNameExists": "同じ名前の分類があります",
+  "@categoryNameExists": {
+    "description": "Validation error for a duplicate sibling category name"
+  },
+  "categoryLedgerLabel": "帳簿",
+  "@categoryLedgerLabel": {
+    "description": "Label above the ledger choice when creating an L1 category"
+  },
+  "categoryLedgerDescription": "この分類の支出を記録する帳簿を選びます。",
+  "@categoryLedgerDescription": {
+    "description": "Helper copy for the L1 category ledger choice"
+  },
+  "createCategory": "追加",
+  "@createCategory": {
+    "description": "Submit button label in the custom category sheet"
+  },
+  "categoryAdded": "分類を追加しました",
+  "@categoryAdded": {
+    "description": "Success feedback after creating a custom category"
+  },
+  "categoryAddFailed": "追加に失敗しました。再試行してください",
+  "@categoryAddFailed": {
+    "description": "Error feedback after custom category persistence fails"
   },
   "editCategoryOrder": "順序を編集",
   "@editCategoryOrder": {

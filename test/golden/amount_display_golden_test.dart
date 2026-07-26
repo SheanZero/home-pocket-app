@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
+import '../helpers/load_numeral_font.dart';
+
 /// Wraps a widget for golden tests with a fixed-size SizedBox so that
 /// PNG goldens are stable across screen sizes.
 Widget _wrap({
@@ -34,6 +36,8 @@ Widget _wrap({
 }
 
 void main() {
+  setUpAll(loadNumeralFont);
+
   group('AmountDisplay golden tests', () {
     testWidgets('JPY ¥1,235 — locale ja', (tester) async {
       await tester.pumpWidget(
@@ -144,8 +148,9 @@ void main() {
     // comma grouping and does NO minor-unit conversion — callers must pass
     // the major-unit display string ('1235.00', not '123500'). This pins the
     // decimal rendering for 2-decimal currencies independent of pixels.
-    testWidgets('2-decimal currency renders grouped decimal text 1,235.00',
-        (tester) async {
+    testWidgets('2-decimal currency renders grouped decimal text 1,235.00', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('en'),

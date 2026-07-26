@@ -117,5 +117,11 @@ flutter:
   generate: true
 
   assets:
+    - assets/fonts/RobotoMono-OFL.txt
     - assets/satisfaction/
     - assets/legal/
+
+  fonts:
+    - family: RobotoMonoNumerals
+      fonts:
+        - asset: assets/fonts/RobotoMonoNumerals-Variable.ttf

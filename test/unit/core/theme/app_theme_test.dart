@@ -60,15 +60,52 @@ void main() {
       expect(darkTitle.color, AppPalette.dark.textPrimary);
     });
 
-    test('theme and app styles keep the platform Japanese font stack', () {
-      for (final theme in [AppTheme.light, AppTheme.dark]) {
-        expect(
-          theme.textTheme.bodyMedium?.fontFamily,
-          isNot(contains('Outfit')),
-        );
-      }
-      expect(AppTextStyles.body.fontFamily, isNull);
-      expect(AppTextStyles.body.fontFamilyFallback, isNull);
+    test(
+      'theme routes all text roles through the numeral-only font family',
+      () {
+        for (final theme in [AppTheme.light, AppTheme.dark]) {
+          for (final style in [
+            theme.textTheme.displayLarge,
+            theme.textTheme.headlineLarge,
+            theme.textTheme.titleMedium,
+            theme.textTheme.bodyMedium,
+            theme.textTheme.bodySmall,
+            theme.textTheme.labelLarge,
+            theme.primaryTextTheme.bodyMedium,
+          ]) {
+            expect(style?.fontFamily, AppTextStyles.numeralFontFamily);
+            expect(
+              style?.fontFeatures,
+              contains(const FontFeature.tabularFigures()),
+            );
+            expect(style?.fontFeatures, contains(const FontFeature('zero')));
+          }
+        }
+        expect(AppTextStyles.numeralFontFamily, 'RobotoMonoNumerals');
+        expect(AppTextStyles.body.fontFamily, AppTextStyles.numeralFontFamily);
+        expect(AppTextStyles.body.fontFamilyFallback, isNull);
+      },
+    );
+
+    testWidgets('unstyled Text inherits the app-wide numeral font family', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(body: Text('Version 2026年 · ¥1,234.50')),
+        ),
+      );
+
+      final text = find.text('Version 2026年 · ¥1,234.50');
+      final inherited = DefaultTextStyle.of(tester.element(text)).style;
+
+      expect(inherited.fontFamily, AppTextStyles.numeralFontFamily);
+      expect(
+        inherited.fontFeatures,
+        contains(const FontFeature.tabularFigures()),
+      );
+      expect(inherited.fontFeatures, contains(const FontFeature('zero')));
     });
   });
 }

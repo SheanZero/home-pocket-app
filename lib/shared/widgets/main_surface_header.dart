@@ -13,6 +13,7 @@ class MainSurfaceHeader extends StatelessWidget {
     required this.title,
     this.titleKey,
     this.titleColor,
+    this.titleStyle,
     this.onTitleTap,
     this.titleTooltip,
     this.trailing,
@@ -34,6 +35,7 @@ class MainSurfaceHeader extends StatelessWidget {
   final String title;
   final Key? titleKey;
   final Color? titleColor;
+  final TextStyle? titleStyle;
   final VoidCallback? onTitleTap;
   final String? titleTooltip;
   final Widget? trailing;
@@ -46,7 +48,7 @@ class MainSurfaceHeader extends StatelessWidget {
       key: titleKey,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: AppTextStyles.pageTitle.copyWith(
+      style: (titleStyle ?? AppTextStyles.pageTitle).copyWith(
         color: titleColor ?? context.palette.textPrimary,
       ),
     );

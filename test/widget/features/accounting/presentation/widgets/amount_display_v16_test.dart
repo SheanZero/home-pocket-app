@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -45,6 +46,14 @@ void main() {
     expect(tester.getTopLeft(amount).dx, lessThan(tester.getTopLeft(clear).dx));
     expect(tester.getSize(find.byType(AmountDisplay)).height, 72);
     expect(tester.widget<Text>(symbol).style?.fontSize, 38);
+    expect(
+      tester.widget<Text>(amount).style?.fontFamily,
+      AppTextStyles.numeralFontFamily,
+    );
+    expect(
+      tester.widget<Text>(symbol).style?.fontFamily,
+      AppTextStyles.numeralFontFamily,
+    );
     final currencyMaterial = tester.widget<Material>(currency);
     expect(currencyMaterial.shape, isA<StadiumBorder>());
 

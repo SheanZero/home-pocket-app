@@ -217,11 +217,15 @@ class HomeMetricsRegion extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: AppTextStyles.amountLarge.copyWith(color: roseValue),
+                  style: AppTextStyles.numerals(
+                    AppTextStyles.amountLarge.copyWith(color: roseValue),
+                  ),
                 ),
                 Text(
                   trailing,
-                  style: AppTextStyles.amountSmall.copyWith(color: roseValue),
+                  style: AppTextStyles.numerals(
+                    AppTextStyles.amountSmall.copyWith(color: roseValue),
+                  ),
                 ),
               ],
             ),
@@ -365,14 +369,16 @@ class HomeMetricsRegion extends StatelessWidget {
             const SizedBox(width: 7),
             Text(
               valueText,
-              style: AppTextStyles.amountMedium.copyWith(
-                color: colors.satisfactionText,
+              style: AppTextStyles.numerals(
+                AppTextStyles.amountMedium.copyWith(
+                  color: colors.satisfactionText,
+                ),
               ),
             ),
             Text(
               ' / 10',
-              style: AppTextStyles.compact.copyWith(
-                color: colors.satisfactionText,
+              style: AppTextStyles.numerals(
+                AppTextStyles.compact.copyWith(color: colors.satisfactionText),
               ),
             ),
           ],
@@ -424,8 +430,8 @@ class HomeMetricsRegion extends StatelessWidget {
           children: [
             Text(
               countText,
-              style: AppTextStyles.amountMedium.copyWith(
-                color: colors.smallWin,
+              style: AppTextStyles.numerals(
+                AppTextStyles.amountMedium.copyWith(color: colors.smallWin),
               ),
             ),
             if (unit.isNotEmpty)

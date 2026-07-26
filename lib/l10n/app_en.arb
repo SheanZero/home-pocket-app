@@ -842,6 +842,10 @@
   "@homeViewMonthlyAnalysis": {
     "description": "Link in the joy section title row that opens the monthly analysis"
   },
+  "homeViewDetails": "View details",
+  "@homeViewDetails": {
+    "description": "Compact link in the monthly favorite section header"
+  },
   "homeMetricJoyUnit": "Joy",
   "@homeMetricJoyUnit": {
     "description": "Unit label under the goal ring value (Joy points)"
@@ -1049,6 +1053,63 @@
   "addCategory": "Add category",
   "@addCategory": {
     "description": "Bottom action button label to add a category"
+  },
+  "noMatchingCategories": "No matching categories",
+  "@noMatchingCategories": {
+    "description": "Empty state shown when category search has no matches"
+  },
+  "addL1CategoryTitle": "Add category",
+  "@addL1CategoryTitle": {
+    "description": "Bottom sheet title for creating a top-level category"
+  },
+  "addL2CategoryTitle": "Add under {parentName}",
+  "@addL2CategoryTitle": {
+    "description": "Bottom sheet title for creating a subcategory",
+    "placeholders": {
+      "parentName": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNameLabel": "Category name",
+  "@categoryNameLabel": {
+    "description": "Input label for a new custom category name"
+  },
+  "categoryNameHint": "e.g. Weekend projects",
+  "@categoryNameHint": {
+    "description": "Input hint for a new custom category name"
+  },
+  "categoryNameRequired": "Enter a category name",
+  "@categoryNameRequired": {
+    "description": "Validation error for an empty custom category name"
+  },
+  "categoryNameTooLong": "Use 50 characters or fewer",
+  "@categoryNameTooLong": {
+    "description": "Validation error for a custom category name over 50 characters"
+  },
+  "categoryNameExists": "A category with this name already exists",
+  "@categoryNameExists": {
+    "description": "Validation error for a duplicate sibling category name"
+  },
+  "categoryLedgerLabel": "Ledger",
+  "@categoryLedgerLabel": {
+    "description": "Label above the ledger choice when creating an L1 category"
+  },
+  "categoryLedgerDescription": "Choose where expenses in this category are recorded.",
+  "@categoryLedgerDescription": {
+    "description": "Helper copy for the L1 category ledger choice"
+  },
+  "createCategory": "Add",
+  "@createCategory": {
+    "description": "Submit button label in the custom category sheet"
+  },
+  "categoryAdded": "Category added",
+  "@categoryAdded": {
+    "description": "Success feedback after creating a custom category"
+  },
+  "categoryAddFailed": "Couldn't add the category. Please retry.",
+  "@categoryAddFailed": {
+    "description": "Error feedback after custom category persistence fails"
   },
   "editCategoryOrder": "Edit category order",
   "@editCategoryOrder": {

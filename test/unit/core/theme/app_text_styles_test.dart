@@ -61,15 +61,33 @@ void main() {
   });
 
   group('AppTextStyles semantic styles', () {
-    test('use the platform Japanese font stack', () {
+    test('route every semantic style through the numeral-only font family', () {
       for (final style in [
         AppTextStyles.pageTitle,
+        AppTextStyles.sectionTitle,
+        AppTextStyles.itemTitle,
         AppTextStyles.body,
+        AppTextStyles.label,
+        AppTextStyles.supporting,
+        AppTextStyles.compact,
         AppTextStyles.navigation,
+        AppTextStyles.button,
         AppTextStyles.amountHero,
+        AppTextStyles.amountLarge,
+        AppTextStyles.amountMedium,
+        AppTextStyles.amountSmall,
+        AppTextStyles.micro,
+        AppTextStyles.dividerLabel,
+        AppTextStyles.comparisonDelta,
+        AppTextStyles.legendLabel,
       ]) {
-        expect(style.fontFamily, isNull);
+        expect(style.fontFamily, AppTextStyles.numeralFontFamily);
         expect(style.fontFamilyFallback, isNull);
+        expect(
+          style.fontFeatures,
+          contains(const FontFeature.tabularFigures()),
+        );
+        expect(style.fontFeatures, contains(const FontFeature('zero')));
       }
     });
 

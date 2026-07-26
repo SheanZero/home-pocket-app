@@ -6,6 +6,51 @@
   <title>Home Pocket — V16 Whole App Mockup</title>
 <style>/* Home Pocket V16 theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
    Mirrors the current lib/core/theme/app_palette.dart values. */
+@font-face {
+  font-family: "Home Pocket Numerals";
+  src:
+    local("SFMono-Regular"),
+    local("SF Mono Regular"),
+    local("Roboto Mono Regular"),
+    local("Roboto Mono"),
+    local("Noto Sans Mono Regular"),
+    local("Noto Sans Mono"),
+    local("Menlo Regular"),
+    local("Menlo"),
+    local("Consolas");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range:
+    U+0024-0025,
+    U+002B-003A,
+    U+00A5,
+    U+2212,
+    U+FF04-FF05,
+    U+FF0B-FF1A,
+    U+FFE5;
+}
+@font-face {
+  font-family: "Home Pocket Numerals";
+  src:
+    local("SFMono-Semibold"),
+    local("SF Mono Semibold"),
+    local("Roboto Mono Bold"),
+    local("Noto Sans Mono Bold"),
+    local("Menlo Bold"),
+    local("Consolas Bold");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  unicode-range:
+    U+0024-0025,
+    U+002B-003A,
+    U+00A5,
+    U+2212,
+    U+FF04-FF05,
+    U+FF0B-FF1A,
+    U+FFE5;
+}
 :root {
   /* Brand */
   --primary:        #6FA36F; /* 若叶绿 leaf green — nav/tab/CTA/active */
@@ -44,11 +89,18 @@
   --shadow-card: 0 2px 10px rgba(120,90,70,0.07);
   --gap: 16px;
 
-  --font: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "PingFang SC", system-ui, -apple-system, sans-serif;
+  --font: "Home Pocket Numerals", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "PingFang SC", system-ui, -apple-system, sans-serif;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--text); }
+body {
+  margin: 0;
+  background: #ece4df;
+  font-family: var(--font);
+  color: var(--text);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
 
 /* ---- Phone frame ---- */
 .phone-row { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; padding:88px 24px 48px; }
@@ -132,8 +184,9 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   --hp-info: #4f7186;
   --hp-shadow-soft: 0 8px 30px rgba(75, 57, 40, .11);
   --hp-shadow-card: 0 2px 12px rgba(75, 57, 40, .07);
-  --hp-font-body: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
-  --hp-font-display: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --hp-font-body: "Home Pocket Numerals", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --hp-font-display: "Home Pocket Numerals", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --hp-font-number: "SFMono-Regular", "SF Mono", "Roboto Mono", "Noto Sans Mono", ui-monospace, Menlo, Consolas, monospace;
   /* Semantic type scale — 1:1 with Flutter AppTypography. */
   --type-page-title: 20px;
   --line-page-title: 28px;
@@ -366,6 +419,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   /* Home — V16 synchronized with the shipped Flutter composition. */
   .home-faithful { padding-left: 20px; padding-right: 20px; }
   .home-faithful .app-header { min-height: 46px; margin-bottom: 13px; }
+  .home-faithful :where(.page-month-title, .faithful-goal-copy > strong, .faithful-satisfaction-head > strong, .faithful-small-win-value, .faithful-calendar, .faithful-ticket-copy > span, .faithful-member > strong, .faithful-tx-amount) { font-family: var(--hp-font-number); font-variant-numeric: tabular-nums slashed-zero; font-feature-settings: "tnum" 1, "zero" 1; }
   .home-mode-badge { min-height: 27px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px; border-radius: 8px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; white-space: nowrap; }
   .home-mode-badge.personal { background: var(--hp-daily-soft); color: var(--hp-daily); }
   .home-mode-badge.family { background: var(--hp-primary-soft); color: var(--hp-primary); }
@@ -375,9 +429,9 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .faithful-label { color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
   .faithful-amount-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
   .faithful-amount-row > strong { flex: 1; font-family: var(--hp-font-body); font-size: var(--type-amount-hero); line-height: var(--line-amount-hero); font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .faithful-trend { padding: 5px 9px; border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 3px; background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
+  .faithful-trend { padding: 5px 9px; border-radius: var(--hp-radius-pill); display: inline-flex; align-items: center; gap: 3px; background: var(--hp-primary-soft); color: var(--hp-primary-text); font-family: var(--hp-font-body); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
   .faithful-trend .material-symbols-rounded { font-size: 13px; }
-  .faithful-previous { margin: 7px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .faithful-previous { margin: 7px 0 0; color: var(--hp-text-muted); font-family: var(--hp-font-body); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .faithful-ledgers { margin-top: 16px; }
   .faithful-ledger-labels { display: flex; justify-content: space-between; gap: 10px; }
   .faithful-ledger-label { display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
@@ -387,7 +441,12 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .faithful-ledger-label.daily .faithful-dot { background: var(--hp-daily); order: 3; }
   .faithful-split { height: 6px; margin-top: 8px; border-radius: 4px; background: var(--hp-daily); overflow: hidden; }
   .faithful-split span { display: block; width: 29%; height: 100%; background: var(--hp-joy); }
-  .faithful-divider { height: 1px; margin: 12px 0; background: var(--hp-faithful-divider); }
+  .faithful-tear-divider { height: 0; margin: 16px -18px 0; position: relative; }
+  .faithful-tear-divider::before, .faithful-tear-divider::after { content: ""; position: absolute; z-index: 2; top: -10px; width: 20px; height: 20px; border-radius: 50%; background: var(--hp-bg); pointer-events: none; }
+  .faithful-tear-divider::before { left: -10px; box-shadow: inset -1px 0 0 var(--hp-border-strong); }
+  .faithful-tear-divider::after { right: -10px; box-shadow: inset 1px 0 0 var(--hp-border-strong); }
+  .faithful-joy-section { margin: 0 -18px -18px; padding: 17px 18px 18px; border-radius: 0 0 21px 21px; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); }
+  .faithful-divider { height: 1px; margin: 12px 0; border: 0; background: var(--hp-faithful-divider); }
   .faithful-region-title { display: flex; align-items: center; gap: 6px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
   .faithful-region-title > .material-symbols-rounded { color: var(--hp-faithful-accent); font-size: 16px; }
   .faithful-info { margin-left: 1px; color: var(--hp-text-muted) !important; font-size: 14px !important; }
@@ -416,6 +475,8 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .faithful-small-win-copy small { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .faithful-small-win-value { margin-left: auto; color: var(--hp-faithful-small-win); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .faithful-small-win-value small { margin-left: 2px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; }
+  .faithful-favorite-card { width: 100%; margin-top: 18px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--hp-text); cursor: pointer; }
+  .faithful-favorite-card:hover { transform: none; box-shadow: none; }
   .faithful-ticket { margin-top: 10px; display: grid; grid-template-columns: 6px 58px minmax(0,1fr) 58px; min-height: 82px; overflow: visible; border: 1px solid var(--hp-ticket-border); border-radius: 14px; background: var(--hp-ticket-surface); }
   .faithful-ticket-accent { border-radius: 13px 0 0 13px; background: var(--hp-ticket-accent); }
   .faithful-calendar { align-self: center; width: 48px; margin-left: 10px; overflow: hidden; border-radius: 10px; background: var(--hp-surface); box-shadow: 0 2px 7px color-mix(in srgb,var(--hp-joy) 18%,transparent); text-align: center; }
@@ -943,6 +1004,68 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .edit-amount-sheet-display span { color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
   .edit-amount-sheet-actions { margin-top: 10px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
   .edit-delete-confirm { background: var(--hp-error); color: var(--hp-surface); box-shadow: none; }
+
+  /* Category selection — mirrors CategorySelectionScreen browse and reorder
+     modes while using the V16 warm semantic tokens. */
+  .category-screen { height: 100%; min-height: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
+  .category-appbar { min-height: 56px; flex: 0 0 56px; padding: 0 8px; border-bottom: 1px solid var(--hp-border); background: var(--hp-surface); display: grid; grid-template-columns: 48px minmax(0,1fr) 72px; align-items: center; }
+  .category-appbar h1 { margin: 0; overflow: hidden; color: var(--hp-text); font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+  .category-appbar .category-close { width: 44px; height: 44px; margin: 0; color: var(--hp-text); }
+  .category-appbar-action { min-width: 44px; min-height: 44px; justify-self: end; border: 0; border-radius: 12px; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; transition: background .15s ease, transform .12s ease; }
+  .category-appbar-action:hover { background: var(--hp-surface-muted); }
+  .category-appbar-action:active { transform: scale(.96); }
+  .category-appbar-action.save { width: auto; padding: 0 10px; color: var(--hp-primary-text); font-size: var(--type-button); line-height: var(--line-button); font-weight: 800; }
+  .category-search-shell { flex: 0 0 auto; padding: 12px 20px; background: var(--hp-surface); }
+  .category-search { min-height: 48px; border-radius: 12px; background: var(--hp-surface-muted); color: var(--hp-text); display: grid; grid-template-columns: 22px minmax(0,1fr); align-items: center; gap: 9px; padding: 0 14px; }
+  .category-search .material-symbols-rounded { color: var(--hp-text-muted); font-size: 21px; }
+  .category-search input { width: 100%; min-width: 0; height: 46px; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); font-weight: 500; }
+  .category-search input::placeholder { color: var(--hp-text-muted); opacity: 1; }
+  .category-list { min-height: 0; flex: 1; overflow-y: auto; padding: 12px 16px 4px; scrollbar-width: none; }
+  .category-list::-webkit-scrollbar { display: none; }
+  .category-group { --category-color: var(--hp-primary); margin-bottom: 8px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); transition: border-color .16s ease, box-shadow .16s ease; }
+  .category-group.expanded { border: 1.5px solid var(--category-color); box-shadow: 0 3px 12px color-mix(in srgb, var(--category-color) 9%, transparent); }
+  .category-group-header { width: 100%; min-height: 64px; padding: 13px 16px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; transition: background .15s ease; }
+  .category-group-header:hover { background: color-mix(in srgb, var(--hp-surface-muted) 42%, transparent); }
+  .category-group-icon { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 10px; background: color-mix(in srgb, var(--category-color) 15%, transparent); color: var(--category-color); display: grid; place-items: center; }
+  .category-group-icon .material-symbols-rounded { font-size: 20px; }
+  .category-group-name { min-width: 0; flex: 1; overflow: hidden; font-size: var(--type-item); line-height: var(--line-item); font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+  .category-group-header > .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-text-muted); font-size: 20px; }
+  .category-children { padding: 0 16px 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .category-chip { min-height: 36px; padding: 7px 14px; border: 0; border-radius: 20px; background: color-mix(in srgb, var(--category-color) 10%, transparent); color: var(--category-color); font-size: var(--type-label); line-height: var(--line-label); font-weight: 650; cursor: pointer; transition: transform .12s ease, background .15s ease, color .15s ease; }
+  .category-chip:hover { background: color-mix(in srgb, var(--category-color) 18%, transparent); }
+  .category-chip:active { transform: scale(.97); }
+  .category-chip.selected { background: var(--category-color); color: #fff; box-shadow: 0 3px 9px color-mix(in srgb, var(--category-color) 22%, transparent); }
+  .category-chip.add { border: 1px solid var(--hp-border); background: transparent; color: var(--hp-text-muted); display: inline-flex; align-items: center; gap: 4px; }
+  .category-chip.add .material-symbols-rounded { font-size: 14px; }
+  .category-add-dock { flex: 0 0 auto; padding: 8px 16px 16px; background: linear-gradient(to bottom, color-mix(in srgb,var(--hp-bg) 65%,transparent), var(--hp-bg) 22%); }
+  .category-add-button { width: 100%; min-height: 48px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); color: var(--hp-text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 650; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .12s ease; }
+  .category-add-button:hover { border-color: var(--hp-primary); background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .category-add-button:active { transform: scale(.985); }
+  .category-add-button .material-symbols-rounded { font-size: 18px; }
+  .category-empty-search { min-height: 150px; color: var(--hp-text-muted); display: grid; place-items: center; align-content: center; gap: 8px; text-align: center; font-size: var(--type-body); line-height: var(--line-body); }
+  .category-empty-search .material-symbols-rounded { font-size: 30px; color: var(--hp-text-faint); }
+  .category-hint { min-height: 48px; flex: 0 0 auto; padding: 12px 20px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: flex; align-items: center; gap: 10px; font-size: var(--type-body); line-height: var(--line-body); font-weight: 500; }
+  .category-hint .material-symbols-rounded { color: var(--hp-primary); font-size: 18px; }
+  .category-reorder-list { min-height: 0; flex: 1; overflow-y: auto; padding: 10px 16px 18px; scrollbar-width: none; }
+  .category-reorder-list::-webkit-scrollbar { display: none; }
+  .category-reorder-group { --category-color: var(--hp-primary); margin-bottom: 5px; }
+  .category-reorder-row { width: 100%; height: 60px; padding: 0 14px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 10px; text-align: left; cursor: grab; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease; }
+  .category-reorder-row:hover { border-color: color-mix(in srgb, var(--category-color) 58%, var(--hp-border)); }
+  .category-reorder-row:active { cursor: grabbing; }
+  .category-reorder-row .drag-handle { color: var(--hp-text-muted); font-size: 22px; }
+  .category-reorder-row .category-group-icon { width: 32px; height: 32px; border-radius: 8px; }
+  .category-reorder-row .category-group-icon .material-symbols-rounded { font-size: 18px; }
+  .category-reorder-group.expanded > .category-reorder-row { border-color: var(--category-color); }
+  .category-reorder-group.dragging > .category-reorder-row, .category-reorder-child.dragging { opacity: .64; transform: scale(.985); box-shadow: var(--hp-shadow-soft); }
+  .category-reorder-children { padding: 4px 0 0 24px; }
+  .category-reorder-child { width: 100%; height: 46px; margin-bottom: 4px; padding: 0 14px; border: 1px solid var(--hp-border); border-radius: 10px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 10px; font-size: var(--type-body); line-height: var(--line-body); font-weight: 650; cursor: grab; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease; }
+  .category-reorder-child:hover { border-color: color-mix(in srgb, var(--category-color) 52%, var(--hp-border)); }
+  .category-reorder-child .material-symbols-rounded { color: var(--hp-text-muted); font-size: 22px; }
+  .category-confirm-icon { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 16px; background: color-mix(in srgb, var(--hp-warning) 13%, transparent); color: var(--hp-warning); display: grid; place-items: center; }
+  .category-confirm-icon .material-symbols-rounded { font-size: 27px; }
+  .category-dialog-copy { margin: 0 0 18px; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); text-align: center; }
+  .category-dialog-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+  .category-dialog-actions .danger { border-color: color-mix(in srgb,var(--hp-error) 48%,var(--hp-border)); color: var(--hp-error); }
   .camera { height: 390px; border-radius: 22px; background: #151a17; color: #fff; display: grid; place-items: center; position: relative; overflow: hidden; }
   .viewfinder { width: 78%; height: 66%; border: 2px solid rgba(255,255,255,.68); border-radius: 18px; display: grid; place-items: center; color: rgba(255,255,255,.72); }
   .viewfinder .material-symbols-rounded { font-size: 54px; }
@@ -959,12 +1082,260 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .member .avatar { width: 38px; height: 38px; margin: 0; border-width: 2px; font-size: 12px; }
   .code { display: flex; justify-content: center; gap: 8px; margin: 24px 0; }
   .digit { width: 42px; height: 52px; display: grid; place-items: center; border-radius: 12px; border: 1px solid var(--hp-border); background: var(--hp-surface); font-size: 18px; font-weight: 900; }
-  .intro-hero { padding: 24px 0 13px; text-align: center; }
-  .intro-mark { width: 86px; height: 86px; border-radius: 30px; margin: 0 auto 18px; background: var(--hp-primary-soft); color: var(--hp-primary); display: grid; place-items: center; }
-  .intro-mark .material-symbols-rounded { font-size: 46px; }
-  .intro-hero h1 { font-family: var(--hp-font-display); font-size: 25px; margin: 0 0 7px; }
-  .feature { display: flex; gap: 11px; align-items: flex-start; padding: 11px 2px; }
-  .feature .material-symbols-rounded { color: var(--hp-primary); font-size: 21px; }
+
+  /* Family flow — selected direction 2 / branch-specific guided setup */
+  .family-screen { padding-top: 7px; }
+  .family-appbar { min-height: 48px; display: grid; grid-template-columns: 46px minmax(0,1fr) 46px; align-items: center; margin-bottom: 9px; }
+  .family-appbar .back-btn { margin-left: -8px; }
+  .family-appbar h1 { margin: 0; color: var(--hp-text); font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; text-align: center; }
+  .family-appbar-tail { min-width: 44px; display: flex; justify-content: flex-end; align-items: center; }
+  .family-appbar-status { display: inline-flex; align-items: center; gap: 4px; color: var(--hp-success); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; white-space: nowrap; }
+  .family-appbar-status .material-symbols-rounded { font-size: 18px; }
+  .family-intro { margin: 31px 3px 22px; }
+  .family-intro h2 { margin: 0 0 7px; color: var(--hp-text); font-size: 24px; line-height: 32px; font-weight: 700; letter-spacing: -.02em; }
+  .family-intro p { margin: 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); }
+  .family-choice-list { display: grid; gap: 14px; }
+  .family-choice { width: 100%; min-height: 108px; padding: 16px; display: grid; grid-template-columns: 50px minmax(0,1fr) 24px; align-items: center; gap: 14px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); color: var(--hp-text); text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .12s ease; }
+  .family-choice:hover { border-color: color-mix(in srgb,var(--hp-primary) 58%,var(--hp-border)); background: color-mix(in srgb,var(--hp-primary-soft) 24%,var(--hp-surface)); }
+  .family-choice:active { transform: scale(.985); }
+  .family-icon-tile { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .family-icon-tile .material-symbols-rounded { font-size: 28px; }
+  .family-icon-tile img { width: 48px; height: 48px; display: block; object-fit: contain; }
+  [data-theme="dark"] .family-icon-create { content: url("assets/family-entry-create-warm-v1-dark.png"); }
+  [data-theme="dark"] .family-icon-join { content: url("assets/family-entry-join-warm-v1-dark.png"); }
+  .family-choice-copy { min-width: 0; }
+  .family-choice-copy strong { display: block; font-size: var(--type-section); line-height: var(--line-section); font-weight: 700; }
+  .family-choice-copy small { display: block; margin-top: 4px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .family-choice > .material-symbols-rounded { color: var(--hp-text-muted); font-size: 22px; }
+  .family-privacy-note { margin: 27px 5px 0; display: flex; align-items: flex-start; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .family-privacy-note .material-symbols-rounded { margin-top: 1px; flex: 0 0 auto; color: var(--hp-primary-text); font-size: 18px; }
+
+  .family-progress { display: grid; grid-template-columns: auto minmax(14px,1fr) auto minmax(14px,1fr) auto; align-items: center; column-gap: 8px; margin: 16px 0 27px; }
+  .family-progress-line { height: 1px; background: var(--hp-border-strong); }
+  .family-progress-step { display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 650; white-space: nowrap; }
+  .family-progress-step i { width: 24px; height: 24px; border: 1px solid var(--hp-border-strong); border-radius: 50%; display: grid; place-items: center; background: var(--hp-surface); color: var(--hp-text-muted); font-style: normal; font-weight: 800; }
+  .family-progress-step i .material-symbols-rounded { font-size: 16px; }
+  .family-progress-step.active { color: var(--hp-primary-text); font-weight: 800; }
+  .family-progress-step.active i, .family-progress-step.complete i { border-color: var(--hp-primary); background: var(--hp-primary); color: var(--hp-surface); }
+
+  .family-group-identity { display: grid; grid-template-columns: 54px minmax(0,1fr) auto; align-items: center; gap: 13px; margin-bottom: 22px; }
+  .family-group-identity.compact { grid-template-columns: 48px minmax(0,1fr) auto; margin-bottom: 13px; }
+  .family-house-mark { width: 54px; height: 54px; border-radius: 15px; display: grid; place-items: center; background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .family-group-identity.compact .family-house-mark { width: 48px; height: 48px; border-radius: 13px; }
+  .family-house-mark .material-symbols-rounded { font-size: 30px; }
+  .family-group-copy { min-width: 0; }
+  .family-group-copy h2 { margin: 0; color: var(--hp-text); font-size: 21px; line-height: 28px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .family-group-copy p { margin: 2px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .family-inline-action { min-height: 44px; padding: 7px; border: 0; background: transparent; color: var(--hp-primary-text); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; white-space: nowrap; }
+  .family-inline-action .material-symbols-rounded { font-size: 18px; }
+
+  .family-code-card { min-height: 70px; padding: 12px 14px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); display: flex; align-items: center; gap: 12px; }
+  .family-invite-code { color: var(--hp-text); font-size: 27px; line-height: 34px; font-weight: 760; letter-spacing: .12em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .family-code-meta { flex: 1; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); white-space: nowrap; }
+  .family-code-action { width: 40px; height: 40px; border: 0; border-radius: 12px; display: grid; place-items: center; background: transparent; color: var(--hp-text-muted); cursor: pointer; }
+  .family-code-action:hover { background: var(--hp-surface-muted); color: var(--hp-text); }
+  .family-code-action .material-symbols-rounded { font-size: 21px; }
+  .family-primary-action { width: 100%; min-height: 54px; margin-top: 18px; border: 0; border-radius: 15px; background: linear-gradient(135deg,var(--hp-joy),color-mix(in srgb,var(--hp-joy) 82%,var(--hp-faithful-accent))); color: var(--hp-surface); box-shadow: 0 7px 20px color-mix(in srgb,var(--hp-joy) 24%,transparent); cursor: pointer; font-size: var(--type-section); line-height: var(--line-section); font-weight: 750; }
+  .family-primary-action:active { transform: scale(.985); }
+  .family-flow-helper { margin: 20px 5px 0; display: flex; align-items: flex-start; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .family-flow-helper .material-symbols-rounded { flex: 0 0 auto; margin-top: 1px; font-size: 18px; }
+
+  .family-join-copy { margin: 4px 2px 18px; }
+  .family-join-copy h2 { margin: 0 0 6px; font-size: 23px; line-height: 30px; font-weight: 700; }
+  .family-join-copy p { margin: 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); }
+  .family-code-inputs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)) 12px repeat(3,minmax(0,1fr)); align-items: center; gap: 7px; margin: 22px 0 15px; }
+  .family-code-inputs::before { content: ""; display: none; }
+  .family-code-input { width: 100%; height: 62px; min-width: 0; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); text-align: center; font-size: 27px; line-height: 34px; font-weight: 750; font-variant-numeric: tabular-nums; outline: 0; }
+  .family-code-input:focus { border: 2px solid var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb,var(--hp-primary) 12%,transparent); }
+  .family-code-separator { width: 12px; height: 1px; background: var(--hp-border-strong); }
+  .family-primary-action:disabled { opacity: .48; cursor: default; box-shadow: none; }
+
+  .family-confirm-owner { padding: 20px; border: 1px solid var(--hp-border); border-radius: 18px; background: var(--hp-surface); text-align: center; }
+  .family-avatar-image { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; object-position: center 28%; border: 2px solid color-mix(in srgb,var(--hp-surface) 72%,var(--hp-border)); background: var(--hp-surface-muted); }
+  .family-confirm-owner .family-avatar-image { width: 72px; height: 72px; border-width: 3px; }
+  .family-confirm-owner h2 { margin: 10px 0 2px; font-size: 21px; line-height: 28px; }
+  .family-confirm-owner p { margin: 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); }
+  .family-verified { display: inline-flex; align-items: center; gap: 4px; margin-top: 11px; padding: 5px 9px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .family-verified .material-symbols-rounded { font-size: 15px; }
+  .family-waiting { min-height: 545px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .family-waiting-ring { width: 68px; height: 68px; border: 4px solid var(--hp-border); border-top-color: var(--hp-primary); border-radius: 50%; animation: family-spin 1.1s linear infinite; }
+  @keyframes family-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .family-waiting-ring { animation: none; border-color: var(--hp-primary); border-right-color: var(--hp-border); } }
+  .family-waiting h2 { margin: 27px 0 7px; font-size: 21px; line-height: 28px; }
+  .family-waiting p { margin: 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); }
+  .family-waiting small { margin-top: 20px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+
+  .family-approval-card { padding: 24px 20px; border: 1px solid var(--hp-border); border-radius: 18px; background: var(--hp-surface); text-align: center; }
+  .family-approval-card .family-avatar-image { width: 80px; height: 80px; border-width: 3px; }
+  .family-approval-card h2 { margin: 12px 0 4px; font-size: 21px; line-height: 28px; }
+  .family-approval-card p { margin: 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); }
+  .family-approval-actions { display: grid; grid-template-columns: 1fr 1.35fr; gap: 10px; margin-top: 18px; }
+  .family-approval-actions .secondary-btn, .family-approval-actions .family-primary-action { margin: 0; min-height: 52px; }
+
+  .family-pending { width: 100%; min-height: 56px; margin-bottom: 11px; padding: 10px 13px; border: 1px solid color-mix(in srgb,var(--hp-joy) 38%,var(--hp-border)); border-radius: 13px; background: color-mix(in srgb,var(--hp-joy-soft) 62%,var(--hp-surface)); color: var(--hp-text); display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left; }
+  .family-pending .material-symbols-rounded { color: var(--hp-faithful-accent); }
+  .family-pending strong { flex: 1; font-size: var(--type-label); line-height: var(--line-label); }
+  .family-pending span:not(.material-symbols-rounded) { color: var(--hp-faithful-accent); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .family-member-list { border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); overflow: hidden; }
+  .family-member-row { width: 100%; min-height: 58px; padding: 8px 12px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; }
+  .family-member-copy { min-width: 0; flex: 1; }
+  .family-member-copy strong { display: block; font-size: var(--type-item); line-height: var(--line-item); }
+  .family-role-badge { padding: 4px 8px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .family-member-role { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .family-member-row > .material-symbols-rounded { color: var(--hp-text-muted); font-size: 20px; }
+  .family-invite-row { width: 100%; min-height: 50px; padding: 10px 13px; border: 0; background: transparent; color: var(--hp-primary-text); display: flex; align-items: center; gap: 9px; cursor: pointer; text-align: left; font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; }
+  .family-invite-row .material-symbols-rounded { font-size: 21px; }
+  .family-management-code { min-height: 58px; margin-top: 10px; padding: 9px 11px; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); display: flex; align-items: center; gap: 8px; }
+  .family-management-code strong { font-size: var(--type-item); line-height: var(--line-item); letter-spacing: .08em; }
+  .family-management-code small { flex: 1; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); white-space: nowrap; }
+  .family-management-code .family-code-action { width: 36px; height: 36px; }
+  .family-settings-row { width: 100%; min-height: 52px; margin-top: 9px; padding: 8px 12px; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 9px; cursor: pointer; text-align: left; font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  .family-settings-row .material-symbols-rounded:last-child { margin-left: auto; color: var(--hp-text-muted); }
+  .family-danger { width: 100%; min-height: 46px; margin-top: 7px; border: 0; background: transparent; color: var(--hp-error); cursor: pointer; font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
+  /* First-run onboarding — two welcome pages + one implementation-faithful
+     setup form. The background uses the selected micro pressed-botanical
+     direction; hero clusters mirror the Flutter FloatyLoop / DriftPetal
+     composition and timing. */
+  .onboarding-screen { position: relative; height: 100%; min-height: 100%; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
+  .onboarding-topbar { min-height: 50px; padding: 2px 18px 0; display: flex; align-items: center; justify-content: space-between; }
+  .onboarding-text-action { min-width: 48px; min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: var(--hp-text-muted); cursor: pointer; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .onboarding-text-action:last-child { text-align: right; }
+  .onboarding-topbar-spacer { width: 48px; height: 44px; }
+  .onboarding-topbar, .onboarding-content, .onboarding-dock, .setup-scroll, .setup-dock { position: relative; z-index: 1; }
+  .onboarding-content { min-height: 0; flex: 1; padding: 1px 28px 8px; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .onboarding-content::-webkit-scrollbar, .setup-scroll::-webkit-scrollbar { display: none; }
+  .onboarding-ambience { position: absolute; z-index: 0; inset: 0; overflow: hidden; pointer-events: none; color: color-mix(in srgb,var(--hp-primary) 30%,var(--hp-border)); }
+  .onboarding-ambience .pressed-motif { position: absolute; font-variation-settings: 'FILL' 0, 'wght' 250, 'GRAD' 0, 'opsz' 20; color: currentColor; opacity: .22; }
+  .onboarding-ambience .pressed-motif:nth-child(1) { top: 34px; left: 37px; font-size: 13px; transform: rotate(-18deg); }
+  .onboarding-ambience .pressed-motif:nth-child(2) { top: 248px; right: 28px; font-size: 16px; transform: rotate(14deg); }
+  .onboarding-ambience .pressed-motif:nth-child(3) { bottom: 136px; left: 30px; font-size: 14px; transform: rotate(-12deg); }
+  .onboarding-ambience .pressed-motif:nth-child(4) { bottom: 62px; right: 36px; font-size: 11px; transform: rotate(20deg); }
+  .onboarding-ambience.privacy .pressed-motif:nth-child(1) { top: 90px; left: 27px; }
+  .onboarding-ambience.privacy .pressed-motif:nth-child(2) { top: 182px; right: 31px; }
+  .onboarding-ambience.privacy .pressed-motif:nth-child(3) { bottom: 150px; left: 42px; }
+  .onboarding-ambience.privacy .pressed-motif:nth-child(4) { bottom: 70px; right: 31px; }
+  .onboarding-ambience.setup .pressed-motif:nth-child(1) { top: 62px; left: 25px; }
+  .onboarding-ambience.setup .pressed-motif:nth-child(2) { top: 82px; right: 28px; }
+  .onboarding-ambience.setup .pressed-motif:nth-child(3) { bottom: 172px; left: 31px; }
+  .onboarding-ambience.setup .pressed-motif:nth-child(4) { bottom: 76px; right: 24px; }
+  [data-theme="dark"] .onboarding-ambience { color: color-mix(in srgb,var(--hp-primary) 44%,var(--hp-border)); }
+
+  .onboarding-hero-cluster { position: relative; width: 172px; height: 150px; flex: 0 0 auto; margin-top: 2px; }
+  .onboarding-hero-main { position: absolute; top: 18px; left: 28px; width: 116px; height: 116px; border: 1px solid color-mix(in srgb,var(--hp-primary) 24%,var(--hp-border)); border-radius: 30px; background: var(--hp-primary-soft); display: grid; place-items: center; box-shadow: 0 12px 30px color-mix(in srgb,var(--hp-primary) 8%,transparent); animation: onboarding-float 6s ease-in-out infinite; }
+  .onboarding-hero-main.privacy { width: 108px; height: 108px; left: 32px; border-radius: 30px; }
+  .onboarding-source-icon { width: 50px; height: 50px; display: block; object-fit: contain; }
+  [data-theme="dark"] .onboarding-source-icon.welcome { content: url("assets/onboarding-existing-house-dark.svg"); }
+  [data-theme="dark"] .onboarding-source-icon.privacy { content: url("assets/onboarding-existing-shield-dark.svg"); }
+  .onboarding-satellite { position: absolute; z-index: 2; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 5px 14px color-mix(in srgb,var(--hp-text) 8%,transparent); animation: onboarding-float var(--float-period,5s) ease-in-out infinite; animation-delay: var(--float-phase,0s); }
+  .onboarding-satellite.joy { top: -4px; right: 8px; width: 52px; height: 52px; border: 1px solid color-mix(in srgb,var(--hp-joy) 42%,var(--hp-border)); background: var(--hp-joy-soft); color: var(--hp-joy-text); --float-period: 5s; --float-phase: -.3s; }
+  .onboarding-satellite.daily { bottom: 6px; left: 6px; width: 42px; height: 42px; border: 1px solid color-mix(in srgb,var(--hp-primary) 24%,var(--hp-border)); background: var(--hp-surface); color: var(--hp-daily-text); --float-period: 6.5s; --float-phase: -.5s; }
+  .onboarding-satellite .material-symbols-rounded { font-size: 27px; font-variation-settings: 'FILL' 0, 'wght' 480, 'GRAD' 0, 'opsz' 28; }
+  .onboarding-face-icon { width: 32px; height: 32px; display: block; background: currentColor; -webkit-mask: var(--face-asset) center/contain no-repeat; mask: var(--face-asset) center/contain no-repeat; }
+  .onboarding-satellite.daily .onboarding-face-icon { width: 26px; height: 26px; }
+  .onboarding-petal { position: absolute; z-index: 1; color: var(--petal-color,var(--hp-joy)); opacity: var(--petal-opacity,.5); font-size: var(--petal-size,12px); line-height: 1; font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 20; animation: onboarding-drift var(--drift-period,5s) ease-in-out infinite; animation-delay: var(--drift-phase,0s); }
+  .onboarding-petal.one { top: 18px; right: 6px; --petal-size: 12px; --drift-period: 5s; }
+  .onboarding-petal.two { bottom: 30px; left: 0; --petal-size: 9px; --petal-color: var(--hp-primary); --petal-opacity: .4; --drift-period: 6.5s; --drift-phase: -.6s; }
+  @keyframes onboarding-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes onboarding-drift { 0%,100% { transform: translateY(0) rotate(45deg); } 50% { transform: translateY(-9px) rotate(60deg); } }
+  @media (prefers-reduced-motion: reduce) { .onboarding-hero-main, .onboarding-satellite, .onboarding-petal { animation: none; } }
+  [data-theme="dark"] .setup-avatar-asset { content: url("assets/onboarding-avatar-warm-v1-dark.png"); }
+  .onboarding-badge { min-height: 29px; margin-top: 22px; padding: 5px 13px; border: 1px solid color-mix(in srgb,var(--hp-joy) 42%,var(--hp-border)); border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); color: var(--hp-joy-text); display: inline-flex; align-items: center; gap: 7px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 800; }
+  .onboarding-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--hp-joy); }
+  .onboarding-content h1 { margin: 15px 0 0; color: var(--hp-text); font-family: var(--hp-font-display); font-size: 28px; line-height: 38px; font-weight: 700; letter-spacing: .01em; }
+  .onboarding-brand { margin-top: 6px; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; letter-spacing: .28em; }
+  .onboarding-lead { max-width: 304px; margin: 16px 0 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: 1.8; font-weight: 550; }
+  .onboarding-value-pills { width: 100%; margin-top: 23px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+  .onboarding-value-pills span { min-height: 38px; padding: 8px 5px; border-radius: 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); color: var(--hp-text-muted); display: grid; place-items: center; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .onboarding-value-pills span:nth-child(2) { border-color: color-mix(in srgb,var(--hp-joy) 38%,var(--hp-border)); background: color-mix(in srgb,var(--hp-joy-soft) 58%,var(--hp-surface)); color: var(--hp-joy-text); }
+  .onboarding-privacy-title { margin-top: 20px !important; font-family: var(--hp-font-body) !important; font-size: 23px !important; line-height: 31px !important; letter-spacing: -.01em !important; }
+  .onboarding-privacy-list { width: 100%; margin-top: 22px; border: 1px solid var(--hp-border); border-radius: 17px; background: var(--hp-surface); overflow: hidden; text-align: left; }
+  .onboarding-privacy-row { min-height: 58px; padding: 10px 14px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px; }
+  .onboarding-privacy-row + .onboarding-privacy-row { border-top: 1px solid var(--hp-border); }
+  .onboarding-privacy-row strong { color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; }
+  .onboarding-privacy-row small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .onboarding-privacy-row em { color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-style: normal; font-weight: 800; white-space: nowrap; }
+  .onboarding-dock { flex: 0 0 auto; padding: 10px 26px 20px; background: linear-gradient(to bottom,color-mix(in srgb,var(--hp-bg) 70%,transparent),var(--hp-bg) 18%); }
+  .onboarding-page-dots { min-height: 18px; margin-bottom: 13px; display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .onboarding-page-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--hp-border-strong); }
+  .onboarding-page-dots i.active { width: 22px; border-radius: var(--hp-radius-pill); background: var(--hp-primary); }
+  .onboarding-primary { width: 100%; min-height: 54px; border: 0; border-radius: 16px; background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 8px 22px color-mix(in srgb,var(--hp-primary) 24%,transparent); cursor: pointer; font-size: var(--type-section); line-height: var(--line-section); font-weight: 800; }
+  .onboarding-primary:active { transform: scale(.985); }
+
+  .setup-screen { position: relative; height: 100%; min-height: 100%; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
+  .setup-scroll { min-height: 0; flex: 1; padding: 14px 24px 8px; overflow-y: auto; scrollbar-width: none; }
+  .setup-eyebrow { color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; letter-spacing: .16em; }
+  .setup-title { margin: 6px 0 19px; color: var(--hp-text); font-family: var(--hp-font-display); font-size: 30px; line-height: 38px; font-weight: 750; letter-spacing: .01em; }
+  .setup-profile-editor { display: grid; grid-template-columns: 76px minmax(0,1fr); align-items: start; gap: 15px; }
+  .setup-avatar-column { min-width: 0; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+  .setup-avatar-button { width: 76px; height: 76px; border: 1px solid var(--hp-border); border-radius: 24px; background: color-mix(in srgb,var(--hp-primary-soft) 74%,var(--hp-surface)); display: grid; place-items: center; overflow: hidden; }
+  .setup-avatar-column:focus-visible { outline: 0; }
+  .setup-avatar-column:focus-visible .setup-avatar-button { border-color: var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb,var(--hp-primary) 14%,transparent); }
+  .setup-avatar-asset { width: 72px; height: 72px; object-fit: contain; display: block; }
+  .setup-avatar-hint { color: var(--hp-primary-text); display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: 10px; line-height: 16px; font-weight: 800; white-space: nowrap; }
+  .setup-avatar-hint .material-symbols-rounded { font-size: 14px; }
+  .setup-profile-name { min-width: 0; }
+  .setup-profile-name label { display: block; margin: 0 2px 7px; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
+  .setup-name-input { width: 100%; height: 54px; padding: 0 14px; border: 1px solid var(--hp-border); border-radius: 14px; outline: 0; background: var(--hp-surface); color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); font-weight: 650; }
+  .setup-name-input:focus { border-color: var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb,var(--hp-primary) 14%,transparent); }
+  .setup-name-input::placeholder { color: var(--hp-text-faint); opacity: 1; }
+  .setup-preference-card { margin-top: 20px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 17px; background: var(--hp-surface); }
+  .setup-preference-row { width: 100%; min-height: 60px; padding: 9px 13px; border: 0; background: transparent; color: var(--hp-text); display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 11px; cursor: pointer; text-align: left; }
+  .setup-preference-row + .setup-preference-row { border-top: 1px solid var(--hp-border); }
+  .setup-preference-icon { width: 34px; height: 34px; color: var(--hp-primary-text); display: grid; place-items: center; }
+  .setup-preference-icon .material-symbols-rounded { font-size: 26px; }
+  .setup-preference-label { min-width: 0; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
+  .setup-preference-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; color: var(--hp-primary-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; white-space: nowrap; }
+  .setup-preference-value .material-symbols-rounded { font-size: 20px; }
+  .setup-dock { flex: 0 0 auto; padding: 9px 24px 16px; border-top: 1px solid color-mix(in srgb,var(--hp-border) 72%,transparent); background: color-mix(in srgb,var(--hp-bg) 96%,transparent); }
+  .setup-submit { width: 100%; min-height: 54px; border: 0; border-radius: 16px; background: var(--hp-primary); color: var(--hp-surface); box-shadow: 0 8px 22px color-mix(in srgb,var(--hp-primary) 22%,transparent); cursor: pointer; font-size: var(--type-section); line-height: var(--line-section); font-weight: 800; }
+  .setup-submit:disabled { background: color-mix(in srgb,var(--hp-primary) 42%,var(--hp-bg)); color: color-mix(in srgb,var(--hp-surface) 74%,transparent); box-shadow: none; cursor: not-allowed; }
+  .setup-required-note { margin: 6px 0 0; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); text-align: center; }
+  .setup-security-card { margin-top: 18px; padding: 15px; border: 1px solid var(--hp-border); border-radius: 19px; background: color-mix(in srgb,var(--hp-primary-soft) 42%,var(--hp-surface)); }
+  .setup-security-intro { display: grid; grid-template-columns: 56px minmax(0,1fr); align-items: center; gap: 12px; }
+  .setup-security-mark { width: 56px; height: 56px; display: block; object-fit: contain; }
+  [data-theme="dark"] .setup-security-mark { content: url("assets/onboarding-privacy-warm-v1-dark.png"); }
+  .setup-security-copy { min-width: 0; }
+  .setup-security-copy h2 { margin: 0; color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); font-weight: 800; }
+  .setup-security-copy p { margin: 4px 0 0; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .setup-security-master { width: 100%; min-height: 50px; margin-top: 12px; padding: 8px 12px; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; text-align: left; font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
+  .setup-security-defer { margin: 15px 0 2px; color: var(--hp-text-muted); text-align: center; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .setup-security-defer small { display: block; margin-top: 3px; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 600; }
+  .setup-method-label { display: block; margin: 13px 2px 7px; color: var(--hp-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
+  .setup-method-list { overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); }
+  .setup-method-row { width: 100%; min-height: 62px; padding: 9px 11px; border: 0; background: transparent; color: var(--hp-text); display: grid; grid-template-columns: 38px minmax(0,1fr) 22px; align-items: center; gap: 10px; cursor: pointer; text-align: left; }
+  .setup-method-row + .setup-method-row { border-top: 1px solid var(--hp-border); }
+  .setup-method-row.selected { background: color-mix(in srgb,var(--hp-primary-soft) 72%,var(--hp-surface)); }
+  .setup-method-icon { width: 38px; height: 38px; border-radius: 11px; background: color-mix(in srgb,var(--hp-primary-soft) 78%,var(--hp-surface)); color: var(--hp-primary-text); display: grid; place-items: center; }
+  .setup-method-icon .material-symbols-rounded { font-size: 23px; }
+  .setup-method-copy { min-width: 0; }
+  .setup-method-copy strong { color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
+  .setup-method-copy small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .setup-method-badge { margin-left: 5px; padding: 2px 6px; border-radius: var(--hp-radius-pill); background: var(--hp-primary-soft); color: var(--hp-primary-text); font-size: 9px; line-height: 13px; font-style: normal; font-weight: 850; vertical-align: 1px; }
+  .setup-method-radio { width: 20px; height: 20px; border: 2px solid var(--hp-border-strong); border-radius: 50%; display: grid; place-items: center; }
+  .setup-method-row.selected .setup-method-radio { border-color: var(--hp-primary); }
+  .setup-method-row.selected .setup-method-radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--hp-primary); }
+  .setup-pin-guidance { padding: 11px 12px 12px 59px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb,var(--hp-primary-soft) 38%,var(--hp-surface)); }
+  .setup-pin-guidance strong { display: block; color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .setup-pin-guidance small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .setup-pin-action { min-height: 42px; margin-top: 9px; padding: 0 14px; border: 0; border-radius: 12px; background: #617f99; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 850; }
+  [data-theme="dark"] .setup-pin-action { background: #7898b4; color: #10202a; }
+  .setup-pin-complete { padding: 11px 12px 12px 59px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb,var(--hp-primary-soft) 38%,var(--hp-surface)); }
+  .setup-pin-complete-copy { display: grid; grid-template-columns: 24px minmax(0,1fr); align-items: center; gap: 8px; }
+  .setup-pin-complete-copy > .material-symbols-rounded { color: var(--hp-primary-text); font-size: 22px; }
+  .setup-pin-complete strong { display: block; color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .setup-pin-complete small { display: block; margin-top: 1px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .setup-pin-change { min-height: 38px; margin: 9px 0 0 32px; padding: 0 17px; border: 1px solid var(--hp-primary); border-radius: 11px; background: transparent; color: var(--hp-primary-text); cursor: pointer; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .setup-pin-screen { height: 100%; min-height: 100%; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
+  .setup-pin-body { min-height: 0; flex: 1; padding: 26px 34px 22px; display: flex; flex-direction: column; align-items: center; }
+  .setup-pin-mark { width: 72px; height: 72px; border: 1px solid var(--hp-border); border-radius: 23px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: grid; place-items: center; }
+  .setup-pin-mark .material-symbols-rounded { font-size: 35px; }
+  .setup-pin-body h1 { margin: 20px 0 0; color: var(--hp-text); font-size: 22px; line-height: 30px; font-weight: 800; }
+  .setup-pin-body > p { margin: 7px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); text-align: center; }
+  .setup-pin-body .pin-dots { margin-top: 24px; }
+  .setup-pin-error { min-height: 18px; margin-top: 5px; color: var(--hp-error); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .setup-pin-keypad { width: 100%; margin-top: auto; }
+  .setup-pin-keypad .key { min-height: 54px; }
+  .setup-pin-helper { margin: 11px 0 0; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); text-align: center; }
   .switch { width: 42px; height: 24px; border: 0; border-radius: 99px; background: var(--hp-surface-strong); padding: 3px; cursor: pointer; }
   .switch::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--hp-surface); box-shadow: var(--hp-shadow-card); transition: transform .15s; }
   .switch.on { background: var(--hp-primary); }
@@ -983,6 +1354,11 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   .modal-layer.open { opacity: 1; pointer-events: auto; }
   .modal-sheet { width: 100%; max-height: 78%; overflow: auto; background: var(--hp-surface); color: var(--hp-text); border-radius: 26px 26px 0 0; padding: 10px 20px 28px; transform: translateY(100%); transition: transform .22s ease; }
   .modal-layer.open .modal-sheet { transform: translateY(0); }
+  .modal-layer.dialog { align-items: center; padding: 24px; }
+  .modal-layer.dialog .modal-sheet { max-width: 320px; margin: auto; padding: 22px; border-radius: 22px; transform: translateY(8px) scale(.96); opacity: 0; }
+  .modal-layer.dialog.open .modal-sheet { transform: translateY(0) scale(1); opacity: 1; }
+  .modal-layer.dialog .grabber { display: none; }
+  .modal-layer.dialog .modal-sheet h3 { margin-bottom: 8px; font-family: var(--hp-font-body); font-size: var(--type-section); line-height: var(--line-section); text-align: center; }
   .grabber { width: 38px; height: 4px; border-radius: 99px; background: var(--hp-border-strong); margin: 0 auto 16px; }
   .modal-sheet h3 { font-family: var(--hp-font-display); margin: 0 0 12px; font-size: 17px; }
   .toast { position: absolute; z-index: 40; left: 50%; bottom: 94px; transform: translate(-50%,14px); opacity: 0; pointer-events: none; background: var(--hp-text); color: var(--hp-bg); border-radius: 99px; padding: 9px 13px; font-size: 10px; font-weight: 850; white-space: nowrap; transition: .18s; }
@@ -1066,12 +1442,14 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
       </div>
       <div class="catalog-group"><span>Family</span>
         <button class="screen-link" data-screen="family"><span class="material-symbols-rounded">diversity_3</span>家庭入口</button>
+        <button class="screen-link" data-screen="create"><span class="material-symbols-rounded">add_home</span>创建家庭</button>
         <button class="screen-link" data-screen="join"><span class="material-symbols-rounded">login</span>加入家庭</button>
         <button class="screen-link" data-screen="group"><span class="material-symbols-rounded">group</span>家庭管理</button>
       </div>
       <div class="catalog-group"><span>Setup & safety</span>
-        <button class="screen-link" data-screen="onboarding"><span class="material-symbols-rounded">waving_hand</span>欢迎引导</button>
-        <button class="screen-link" data-screen="preferences"><span class="material-symbols-rounded">tune</span>初始设置</button>
+        <button class="screen-link" data-screen="onboarding"><span class="material-symbols-rounded">looks_one</span>欢迎引导 · 1/2</button>
+        <button class="screen-link" data-screen="onboarding-privacy"><span class="material-symbols-rounded">looks_two</span>欢迎引导 · 2/2</button>
+        <button class="screen-link" data-screen="preferences"><span class="material-symbols-rounded">tune</span>初始设置＋安全保护</button>
         <button class="screen-link" data-screen="lock"><span class="material-symbols-rounded">lock</span>应用锁</button>
         <button class="screen-link" data-screen="settings"><span class="material-symbols-rounded">settings</span>设置</button>
         <button class="screen-link" data-screen="profile"><span class="material-symbols-rounded">account_circle</span>个人资料</button>
@@ -1084,7 +1462,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
         <div class="status"><span>9:41</span><span class="status-icons"><span class="material-symbols-rounded">signal_cellular_alt</span><span class="material-symbols-rounded">wifi</span><span class="material-symbols-rounded">battery_full</span></span></div>
         <main id="app-screen" aria-label="应用内容"></main>
         <nav id="bottom-nav" class="bottom-nav"></nav>
-        <div id="modal" class="modal-layer"><div class="modal-sheet"><div class="grabber"></div><div id="modal-content"></div></div></div>
+        <div id="modal" class="modal-layer" aria-hidden="true"><div class="modal-sheet" role="dialog" aria-modal="true"><div class="grabber"></div><div id="modal-content"></div></div></div>
         <div id="toast" class="toast"></div>
       </div>
     </div>
@@ -1100,7 +1478,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
         <div class="coverage" style="margin-top:9px">
           <div><strong>C · 层次纸面 ★ 已选</strong><br>V16 严格映射当前 Flutter 主页结构。</div>
         </div>
-        <p>HeroHeader → HomeHeroCard → FamilyInviteBanner → TransactionListCard → detached nav + FAB</p>
+        <p>HeroHeader → HomeHeroCard + Tear → FavoriteSection → FamilyInviteBanner → TransactionListCard → detached nav + FAB</p>
       </div>
       <div id="entry-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">统一记账方案</span>
@@ -1125,6 +1503,17 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
           <div><strong>MVP 边界</strong><br>一次一个商品；3 秒停顿自动解析；中央按钮可提前结束 / 重新录音；识别结果仍需用户检查并点击保存。</div>
         </div>
       </div>
+      <div id="category-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">类目选择状态</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>与 App 对齐</strong><br>阅读态保留搜索、预选展开、L1 色彩识别、L2 标签和两级添加入口；不再显示 mockup 旧有的“最近使用”。</div>
+          <div><strong>排序边界</strong><br>L1 可整体拖动；L2 只在同一父类目内拖动。编辑态隐藏搜索与添加，保存后才持久化顺序。</div>
+        </div>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-category-demo="browse">预选展开</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-category-demo="search">搜索</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-category-demo="reorder">重排</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-category-demo="dirty">未保存</button></span></div>
+          <div><strong>反馈</strong><br>保存使用轻量 Toast；有修改时关闭会显示居中确认对话框，提供继续编辑与放弃。</div>
+        </div>
+      </div>
       <div id="edit-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">编辑交易</span>
         <div class="coverage" style="margin-top:9px">
@@ -1136,6 +1525,29 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
           <div><strong>不可变信息</strong><br>编辑既有交易时不改变币种、账本归属、录入来源或隐私类型；外币金额仍单向换算为日元。</div>
         </div>
       </div>
+      <div id="family-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">家庭流程 · 方案 2</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>创建路径</strong><br>创建家庭 → 分享邀请 → 审批成员</div>
+          <div><strong>加入路径</strong><br>输入邀请码 → 确认家庭 → 等待批准</div>
+          <div><strong>共同终点</strong><br>审批完成后进入家庭管理；入口和管理页不显示引导步骤。</div>
+        </div>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="family">入口</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="create">分享邀请</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="approval">审批成员</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join">输入邀请码</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join-confirm">确认家庭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join-waiting">等待批准</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="group">家庭管理</button></span></div>
+          <div><strong>隐私边界</strong><br>所有加入动作都明确说明：审批前不发生同步，个人私密账目不会进入家庭账本。</div>
+        </div>
+      </div>
+      <div id="setup-security-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">初始设置 · 安全保护合并方案</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>交互原则</strong><br>关闭时隐藏解锁方式并显示稍后设置提示；开启时隐藏提示，只允许选择一种解锁方式。</div>
+          <div><strong>应用锁引导</strong><br>选中应用锁后原地提示设置 4 位 PIN；完成双次输入前，页面完成按钮保持禁用。</div>
+        </div>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="off">保护关闭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="biometric">生物识别</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="pin-pending">应用锁待设置</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="pin-complete">应用锁已设置</button></span></div>
+          <div><strong>完成条件</strong><br>姓名必填；关闭保护或选择生物识别可直接开始；选择应用锁时必须先完成 PIN 设置。</div>
+        </div>
+      </div>
     </aside>
   </div>
 
@@ -1143,35 +1555,85 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
 
 <script>
   const state = {
-    screen: 'home', theme: 'light', family: false, inviteDismissed: false,
+    screen: new URLSearchParams(location.search).get('screen') || 'home', theme: 'light', family: false, inviteDismissed: false,
+    familyInviteCode: '482169', familyRequestPending: true,
     amount: '0', entryVariant: 'a', entryInputMode: 'keyboard', entryVoiceState: 'review', entryVoiceMode: 'replace', entryVoiceTranscript: '', entryVoiceApplied: false, entryReviewPending: false, entryNeedsReview: false, entryMerchant: '', entryCategory: '食费 > 外出就餐', entryLedger: 'daily', entryNote: '', entrySatisfaction: 8, entryContinuous: false, entrySnapshot: null,
-    pin: '', uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
+    pin: '', onboardingName: '', onboardingLanguage: 'system', onboardingCurrency: 'JPY', onboardingVoice: 'ja', onboardingVoiceExplicit: false,
+    onboardingSecurityEnabled: false, onboardingUnlockMethod: 'biometric', onboardingPinConfigured: false, onboardingPinStage: 'create', onboardingPinFirst: '', onboardingPinDraft: '', onboardingPinError: '',
+    uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
     analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
     shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [],
     shoppingFormMode: 'create', shoppingFormName: '', shoppingFormQuantity: 1, shoppingFormLedger: 'daily', shoppingFormListType: 'public', shoppingFormCategory: '', shoppingFormPrice: '', shoppingFormNote: '', shoppingFormSubmitting: false, shoppingFormError: '',
     shoppingVoiceState: 'manual', shoppingVoiceTranscript: '', shoppingVoiceApplied: false, shoppingVoiceSnapshot: null,
     editAmount: '3280', editAmountDraft: '3280', editCurrency: 'JPY', editJpyAmount: '3280', editRate: '1', editRateDate: '2026年7月10日', editCategory: '食费 > 超市', editDate: '2026年7月10日', editMerchant: 'Life 超市', editLedger: 'daily', editNote: '周末采购', editSatisfaction: 8, editSubmitting: false,
+    categoryMode: 'browse', categoryQuery: '', categoryExpanded: 'cat_food', categoryEditExpanded: null, categorySelectedId: 'cat_food_dining_out', categoryDirty: false, categorySnapshot: null,
     history: [],
   };
+  let categoryGroups = [
+    {id:'cat_food',name:'食費',zh:'食费',icon:'restaurant',color:'#FF5722',children:[
+      {id:'cat_food_dining_out',name:'外食',zh:'外出就餐'},{id:'cat_food_groceries',name:'食料品',zh:'食材杂货'},{id:'cat_food_cafe',name:'カフェ',zh:'咖啡馆'},{id:'cat_food_other',name:'その他食費',zh:'其他食费'},{id:'cat_food_delivery',name:'デリバリー',zh:'外卖'},{id:'cat_food_drinks',name:'飲料・酒類',zh:'饮料酒水'}]},
+    {id:'cat_daily',name:'日用品',zh:'日用品',icon:'local_mall',color:'#00BCD4',children:[
+      {id:'cat_daily_household',name:'生活雑貨',zh:'生活杂货'},{id:'cat_daily_children',name:'子ども関連',zh:'儿童相关'},{id:'cat_daily_drugstore',name:'ドラッグストア',zh:'药妆店'},{id:'cat_daily_subscription',name:'サブスク雑貨',zh:'日用品订阅'},{id:'cat_daily_tobacco',name:'タバコ',zh:'烟草'},{id:'cat_daily_other',name:'その他日用品',zh:'其他日用品'}]},
+    {id:'cat_pet',name:'ペット',zh:'宠物',icon:'pets',color:'#7CB342',children:[
+      {id:'cat_pet_food',name:'ペットフード',zh:'宠物食品'},{id:'cat_pet_supplies',name:'ペット用品・おもちゃ',zh:'宠物用品玩具'},{id:'cat_pet_medical',name:'病院・医療費',zh:'宠物医疗'},{id:'cat_pet_grooming',name:'トリミング',zh:'宠物美容'},{id:'cat_pet_insurance',name:'ペット保険',zh:'宠物保险'}]},
+    {id:'cat_transport',name:'交通費',zh:'交通费',icon:'directions_bus',color:'#2196F3',children:[
+      {id:'cat_transport_train',name:'電車',zh:'电车'},{id:'cat_transport_bus',name:'バス',zh:'公交'},{id:'cat_transport_taxi',name:'タクシー',zh:'出租车'},{id:'cat_transport_flights',name:'飛行機',zh:'飞机'},{id:'cat_transport_shinkansen',name:'新幹線',zh:'新干线'},{id:'cat_transport_other',name:'その他交通',zh:'其他交通'}]},
+    {id:'cat_hobbies',name:'趣味・娯楽',zh:'兴趣娱乐',icon:'sports_esports',color:'#9C27B0',children:[
+      {id:'cat_hobbies_leisure',name:'レジャー・スポーツ',zh:'休闲运动'},{id:'cat_hobbies_events',name:'イベント',zh:'活动'},{id:'cat_hobbies_movies',name:'映画・動画',zh:'电影视频'},{id:'cat_hobbies_games',name:'音楽・ゲーム・漫画',zh:'音乐游戏漫画'},{id:'cat_hobbies_travel',name:'旅行',zh:'旅行'},{id:'cat_hobbies_oshikatsu',name:'推し活・グッズ',zh:'追星周边'}]},
+    {id:'cat_clothing',name:'衣服・美容',zh:'衣服美容',icon:'checkroom',color:'#E91E63',children:[
+      {id:'cat_clothing_clothes',name:'衣服',zh:'服装'},{id:'cat_clothing_shoes',name:'靴・履物',zh:'鞋履'},{id:'cat_clothing_bags',name:'カバン',zh:'箱包'},{id:'cat_clothing_hair',name:'美容院、理髪',zh:'美容美发'},{id:'cat_clothing_cosmetics',name:'化粧品',zh:'化妆品'}]},
+    {id:'cat_social',name:'交際費',zh:'交际费',icon:'people',color:'#FF9800',children:[
+      {id:'cat_social_drinks',name:'飲み会',zh:'聚会'},{id:'cat_social_gifts',name:'プレゼント',zh:'礼物'},{id:'cat_social_ceremonial',name:'冠婚葬祭・ご祝儀・香典',zh:'礼金丧葬'},{id:'cat_social_fees',name:'会費・組合費',zh:'会费'},{id:'cat_social_other',name:'その他交際費',zh:'其他交际'}]},
+    {id:'cat_health',name:'健康・医療',zh:'健康医疗',icon:'local_hospital',color:'#F44336',children:[
+      {id:'cat_health_fitness',name:'フィットネス',zh:'健身'},{id:'cat_health_hospital',name:'病院',zh:'医院'},{id:'cat_health_dental',name:'歯科',zh:'牙科'},{id:'cat_health_medicine',name:'薬代',zh:'药品'},{id:'cat_health_supplements',name:'サプリメント',zh:'营养补充剂'}]},
+    {id:'cat_education',name:'教育・教養',zh:'教育进修',icon:'school',color:'#3F51B5',children:[
+      {id:'cat_education_books',name:'書籍',zh:'书籍'},{id:'cat_education_classes',name:'習いごと',zh:'兴趣班'},{id:'cat_education_tuition',name:'学費',zh:'学费'},{id:'cat_education_cram_school',name:'塾',zh:'补习班'},{id:'cat_education_seminar',name:'セミナー・講座',zh:'课程讲座'}]},
+    {id:'cat_utilities',name:'水道・光熱費',zh:'水电燃气',icon:'flash_on',color:'#FFC107',children:[
+      {id:'cat_utilities_electricity',name:'電気代',zh:'电费'},{id:'cat_utilities_water',name:'水道代',zh:'水费'},{id:'cat_utilities_gas',name:'ガス・灯油代',zh:'燃气煤油'},{id:'cat_utilities_other',name:'その他水道・光熱費',zh:'其他水电燃气'}]},
+    {id:'cat_communication',name:'通信費',zh:'通讯费',icon:'phone_iphone',color:'#00ACC1',children:[
+      {id:'cat_communication_mobile',name:'携帯電話',zh:'手机话费'},{id:'cat_communication_internet',name:'インターネット',zh:'互联网'},{id:'cat_communication_nhk',name:'NHK受信料',zh:'电视收视费'},{id:'cat_communication_postage',name:'切手・はがき',zh:'邮票明信片'},{id:'cat_communication_other',name:'その他通信費',zh:'其他通讯'}]},
+    {id:'cat_housing',name:'住宅',zh:'住宅',icon:'home',color:'#795548',children:[
+      {id:'cat_housing_rent',name:'家賃',zh:'房租'},{id:'cat_housing_mortgage',name:'住宅ローン',zh:'住房贷款'},{id:'cat_housing_management',name:'管理費・積立金',zh:'物业管理'},{id:'cat_housing_furniture',name:'家具',zh:'家具'},{id:'cat_housing_appliances',name:'家電',zh:'家电'},{id:'cat_housing_renovation',name:'リフォーム',zh:'装修'},{id:'cat_housing_property_tax',name:'固定資産税',zh:'房产税'}]},
+    {id:'cat_car',name:'車・バイク',zh:'车与摩托',icon:'directions_car',color:'#455A64',children:[
+      {id:'cat_car_fuel',name:'ガソリン',zh:'燃油'},{id:'cat_car_parking',name:'駐車場',zh:'停车'},{id:'cat_car_toll',name:'道路料金',zh:'过路费'},{id:'cat_car_loan',name:'自動車ローン',zh:'车贷'},{id:'cat_car_insurance',name:'自動車保険',zh:'车险'},{id:'cat_car_tax',name:'自動車税',zh:'车辆税'},{id:'cat_car_maintenance',name:'車検・整備',zh:'保养年检'}]},
+    {id:'cat_tax',name:'税・社会保障',zh:'税费与社会保障',icon:'account_balance',color:'#5D4037',children:[
+      {id:'cat_tax_income',name:'所得税・住民税',zh:'所得税居民税'},{id:'cat_tax_pension',name:'年金',zh:'养老金'},{id:'cat_tax_health_insurance',name:'健康保険',zh:'健康保险'},{id:'cat_tax_furusato',name:'ふるさと納税',zh:'故乡税'},{id:'cat_tax_nursing_insurance',name:'介護保険',zh:'护理保险'},{id:'cat_tax_other',name:'その他税・社会保障',zh:'其他税费社保'}]},
+    {id:'cat_insurance',name:'保険',zh:'保险',icon:'security',color:'#827717',children:[
+      {id:'cat_insurance_life',name:'生命保険',zh:'寿险'},{id:'cat_insurance_medical',name:'医療保険',zh:'医疗保险'},{id:'cat_insurance_cancer',name:'がん保険',zh:'癌症保险'},{id:'cat_insurance_income',name:'所得補償保険',zh:'收入保障保险'},{id:'cat_insurance_other',name:'その他保険',zh:'其他保险'}]},
+    {id:'cat_special',name:'特別な支出',zh:'特别支出',icon:'star',color:'#AD1457',children:[
+      {id:'cat_special_wedding',name:'結婚',zh:'结婚'},{id:'cat_special_fertility',name:'妊活・出産',zh:'备孕生产'},{id:'cat_special_nursing',name:'介護',zh:'护理'},{id:'cat_special_funeral',name:'葬儀',zh:'葬礼'},{id:'cat_special_life_event',name:'成人式・七五三・入学式',zh:'人生礼仪'},{id:'cat_special_movement',name:'引越し',zh:'搬家'},{id:'cat_special_other',name:'その他特別な出費',zh:'其他特别支出'}]},
+    {id:'cat_allowance',name:'お小遣い',zh:'零花钱',icon:'wallet',color:'#8D6E63',children:[
+      {id:'cat_allowance_self',name:'本人お小遣い',zh:'本人零花钱'},{id:'cat_allowance_spouse',name:'配偶者お小遣い',zh:'配偶零花钱'},{id:'cat_allowance_kids',name:'子どもお小遣い',zh:'儿童零花钱'},{id:'cat_allowance_other',name:'その他お小遣い',zh:'其他零花钱'}]},
+    {id:'cat_asset',name:'資産形成',zh:'资产配置',icon:'savings',color:'#1B5E20',children:[
+      {id:'cat_asset_nisa',name:'NISA',zh:'NISA'},{id:'cat_asset_ideco',name:'iDeCo',zh:'iDeCo'},{id:'cat_asset_tsumitate',name:'積立投資',zh:'定投'},{id:'cat_asset_savings',name:'貯蓄・定期預金',zh:'储蓄定存'},{id:'cat_asset_stock',name:'株・投資信託',zh:'股票基金'},{id:'cat_asset_fx',name:'外貨預金',zh:'外币存款'},{id:'cat_asset_realestate',name:'不動産投資',zh:'房产投资'}]},
+    {id:'cat_other_expense',name:'その他',zh:'其他',icon:'more_horiz',color:'#607D8B',children:[
+      {id:'cat_other_remittance',name:'仕送り',zh:'汇款赡养'},{id:'cat_other_misc',name:'雑費',zh:'杂费'},{id:'cat_other_unclassified',name:'使途不明金',zh:'用途不明'},{id:'cat_other_other',name:'その他',zh:'其他'}]}
+  ];
   let shoppingCategoryDraft = new Set();
   const mainScreens = ['home','list','analytics','shopping'];
   const info = {
     foundation: ['Foundation','设计系统','色彩、字体、间距、组件与反馈都以生活手帐为同一来源。','令牌 + 原子组件','浅色 / 深色 / 可访问性','对应 AppPalette、AppTextStyles 与共享 widgets'],
     states: ['Foundation','系统状态','空、加载与错误状态共享同一套安静反馈语言；不使用插画占位或焦虑文案。','状态切换 + 恢复动作','空 / 加载 / 错误','对应 AsyncValue 与现有 EmptyState widgets'],
-    home: ['Main shell','主页','选定 C「层次纸面」已回写；主页严格保留现有 Flutter 组合，只更新视觉表面。','HeroHeader + HomeHeroCard + Invite + Recent','个人 / 家庭 / 明暗','直接映射现有 Home widgets 与 providers'],
+    home: ['Main shell','主页','主卡恢复原有支出与 Joy 设计，并以左右易撕口分区；今月の最愛使用无背景独立区块。','HeroHeader + HomeHero + Favorite + Invite + Recent','个人 / 家庭 / 明暗','首页视觉提案；数据与交互继续映射现有 Home widgets 与 providers'],
     list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
     analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
     'shopping-form': ['Main shell','购物项目','严格映射现有新增 / 编辑共用表单；语音只在同页填写草稿，右上保存仍是唯一提交入口。','名称 + 数量 + 用途 + 类型 + 分类 + 价格 + 备注','手动 / 聆听 / 解析 / 回填 / 编辑 / 权限不可用','复用 ShoppingItemFormScreen；新增购物专用语音解析器'],
     entry: ['Entry','统一记账','金额、类目、日期、商家、用途与备注始终属于同一表单；聆听、解析与识别结果只更新底部输入区，右上键盘入口全程固定。','共享表单 + 单一语音底板 + 数字键盘','手动 / 聆听 / 解析 / 识别结果 / 权限不可用','映射 ManualOneStepScreen、PTT session、快照恢复与 SmartKeyboard'],
     ocr: ['Entry','OCR 扫描','沉浸相机保持深色；拍摄完成后回到同一套详情确认语言。','取景框 + 拍摄控制','权限 / 拍摄 / 复核','复用 OCR scanner 与 review'],
-    category: ['Entry','类目选择','搜索优先，L1 分组稳定，L2 使用轻量行而不是彩色 chip 墙。','搜索 + 分组 + 最近使用','搜索 / 展开 / 排序','复用类目树与学习逻辑'],
+    category: ['Entry','类目选择','与当前 App 一致：L1 用带独立色的可展开卡片建立扫描层级，L2 用紧凑标签完成选择；排序是独立编辑态。','关闭 + 居中标题 + 搜索 + L1 卡片 + L2 标签 + 固定添加入口','预选展开 / 搜索 / L1·L2 重排 / 未保存确认','映射 CategorySelectionScreen、CategoryReorderRow 与 categoryReorderProvider'],
     edit: ['Entry','编辑交易','编辑与新建共享金额、详情、用途、满意度和备注组件；编辑态仅增加返回、右上删除和底部保存。','共享表单 + 金额弹层 + 固定保存','日常 / 悦己 / 外币 / 删除确认','复用 TransactionDetailsForm.edit 与 AmountEditBottomSheet'],
-    family: ['Family','家庭入口','创建与加入是两条清楚路径，E2EE 说明始终随入口出现。','家庭价值 + 两个动作','未加入 / 已加入','复用 GroupChoiceScreen'],
-    join: ['Family','加入家庭','六位邀请码是一项单任务流程，避免同时展示不相关设置。','邀请码 + 隐私提示','输入 / 校验 / 等待批准','复用 join / confirm / waiting 流程'],
-    group: ['Family','家庭管理','同步状态、待批准、成员与危险动作按重要性分层。','组信息 + 成员 + 同步','所有者 / 成员 / 待批准','复用现有 group 与 sync providers'],
-    onboarding: ['Setup','欢迎引导','一页说明本地优先、双账本与语音价值，保持温和但不使用装饰性 emoji。','价值说明 + 单一继续动作','首次启动 / 可跳过介绍','复用现有 onboarding gate'],
-    preferences: ['Setup','初始设置','昵称、头像、语言、币种与语音语言在一页完成，所有值之后都可修改。','身份 + 三项基础偏好','三语 / 多币种','复用现有 provider 写穿'],
+    family: ['Family','家庭入口','入口只负责分流，不显示任何一条路径的步骤；创建与加入直接进入各自流程。','路径选择 + 隐私边界','未加入 / 已加入','复用 GroupChoiceScreen'],
+    create: ['Family','创建家庭','创建完成后进入所有者专属流程：分享邀请码，再审批成员；不复用加入方的确认与等待步骤。','创建完成 + 邀请码 + 分享','邀请码有效 / 重新生成 / 等待申请','映射 CreateGroupScreen 与 WebSocket 加入请求'],
+    approval: ['Family','审批成员','所有者收到加入请求后验证成员与设备公钥，再批准或拒绝。','申请人 + 安全校验 + 审批','批准 / 拒绝 / 新请求','映射 MemberApprovalScreen'],
+    join: ['Family','加入家庭','加入方从输入六位邀请码开始，之后确认目标家庭并等待所有者批准。','邀请码 + 隐私提示','输入 / 校验 / 等待批准','复用 JoinGroupScreen'],
+    'join-confirm': ['Family','确认家庭','邀请码验证通过后明确展示目标家庭、所有者和公钥校验，再发送加入申请。','家庭身份 + 所有者 + 确认','已验证 / 提交中 / 错误','映射 ConfirmJoinScreen'],
+    'join-waiting': ['Family','等待批准','加入申请已提交；等待页通过事件与轮询进入家庭管理，关闭 App 也不影响审批。','家庭名 + 等待状态','轮询 / 推送 / 已批准','映射 WaitingApprovalScreen'],
+    group: ['Family','家庭管理','同步状态、待批准、成员、邀请与危险动作按重要性分层；不再展示 onboarding 步骤。','组信息 + 成员 + 邀请 + 同步','所有者 / 成员 / 待批准','复用 GroupManagementScreen 与 sync providers'],
+    onboarding: ['Setup','欢迎引导 · 1/2','第一页只建立产品情绪与核心价值：轻松记录、区分日常与悦己，并用同一套温馨复合图标作为视觉锚点。','品牌价值 + 双账本 + 满足感','第一页 / 可跳过','目标实现应将 Flutter 现有 3 页收敛为 2 页'],
+    'onboarding-privacy': ['Setup','欢迎引导 · 2/2','第二页集中说明本地保存、端到端加密和防篡改；不再单独占用第三页讲悦己。','本地优先 + 三项隐私承诺','第二页 / 返回 / 可跳过','复用现有隐私文案与 onboarding gate'],
+    preferences: ['Setup','初始设置＋安全保护','按确认稿统一整页：头像与必填姓名并排，语言、币种与语音使用同一三行选择卡，再衔接可渐进展开的安全保护。','基础设置 + 统一选择卡 + 安全开关 + 单选方式','保护关闭 / 生物识别 / PIN 待设置 / PIN 已设置','复用 OnboardingSettingsScreen、SetPinScreen 与安全设置状态'],
+    'setup-pin': ['Setup','设置应用锁 PIN','应用锁选择后进入专注的双次 4 位 PIN 输入；两次一致才返回初始设置并解锁最终开始按钮。','首次输入 + 再次确认 + 错误重试','创建 / 确认 / 不一致','复用 SetPinScreen 的双次输入与 AppLockService.setPin'],
     lock: ['Safety','应用锁','锁屏专注一个任务；生物识别优先，PIN 永远可回退。','生物识别 + PIN','冷启动 / 回前台 / 错误','复用 AppLockService 与 local_auth'],
     settings: ['Setup','设置','个人资料、常规、安全、数据、家庭与法务按稳定分组组织。','分组列表 + 明确层级','个人 / 家庭 / 明暗','复用现有 Settings sections'],
     profile: ['Setup','个人资料','身份编辑采用普通表单与真实头像槽位，不让装饰背景抢占任务。','头像 + 昵称 + 保存','空值 / 图片 / 文本','复用 profile providers'],
@@ -1181,6 +1643,11 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   const icon = (name, cls='') => `<span class="material-symbols-rounded ${cls}">${name}</span>`;
   const backHeader = (title, extra='') => `<header class="app-header"><button class="back-btn" data-action="back" aria-label="戻る">${icon('chevron_left')}</button><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
+  const familyHeader = (title, extra='') => `<header class="family-appbar"><button class="back-btn" data-action="back" aria-label="戻る">${icon('chevron_left')}</button><h1>${title}</h1><span class="family-appbar-tail">${extra}</span></header>`;
+  const familyProgress = (steps,activeIndex) => `<div class="family-progress" aria-label="${steps.map(step=>step.label).join('、')}">${steps.map((step,index)=>`${index?'<span class="family-progress-line"></span>':''}<span class="family-progress-step ${index<activeIndex?'complete':index===activeIndex?'active':''}"><i>${index<activeIndex?icon('check'):index+1}</i><span>${step.label}</span></span>`).join('')}</div>`;
+  const createProgress = activeIndex => familyProgress([{label:'家族作成'},{label:'招待共有'},{label:'メンバー承認'}],activeIndex);
+  const joinProgress = activeIndex => familyProgress([{label:'コード入力'},{label:'家族確認'},{label:'承認待ち'}],activeIndex);
+  const familyAvatar = (file,name) => `<img class="family-avatar-image" src="assets/${file}" alt="${name}のアバター">`;
   const tabHeader = (title, extra='') => `<header class="app-header"><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
   const monthTitle = tone => `<button class="page-month-title ${tone}-month-title" data-action="month" aria-label="${state.listYear}年${state.listMonth}月、月を選ぶ">${state.listYear}年${state.listMonth}月</button>`;
   const mainHeader = () => `<header class="app-header"><h1>${monthTitle('home')}</h1><span class="spacer"></span><span class="home-mode-badge ${state.family?'family':'personal'}">${icon(state.family?'group':'person')} ${state.family?'家族':'個人'}</span><span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span></header>`;
@@ -1209,7 +1676,11 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   }
 
   function faithfulHero() {
-    return `<div class="faithful-hero" data-token="HomeHeroCard · C" data-action="hero-analytics" role="button" tabindex="0"><div class="faithful-label">${state.family?'家族の支出':'今月の支出'}</div><div class="faithful-amount-row"><strong>${state.family?'¥227,620':'¥186,420'}</strong><span class="faithful-trend">${icon('trending_down')}−8%</span></div><p class="faithful-previous">先月同期 ${state.family?'¥246,900':'¥202,640'}</p><div class="faithful-ledgers"><div class="faithful-ledger-labels"><span class="faithful-ledger-label"><i class="faithful-dot"></i><span>ときめき帳</span><strong>¥53,620</strong></span><span class="faithful-ledger-label daily"><strong>${state.family?'¥174,000':'¥132,800'}</strong><span>日々の帳</span><i class="faithful-dot"></i></span></div><div class="faithful-split"><span></span></div></div><div class="faithful-divider"></div><div class="faithful-region-title">${icon('eco')}<span>${state.family?'家族のときめき':'ときめき度'}</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics()}<div class="faithful-divider"></div><div class="faithful-region-title">${icon('workspace_premium')}<span>今月の最愛</span></div><div class="faithful-ticket"><span class="faithful-ticket-accent"></span><span class="faithful-calendar"><b>JUL</b><strong>06</strong><small>MON</small></span><span class="faithful-ticket-copy"><strong>趣味・コレクション</strong><span>¥4,800</span></span><span class="faithful-seal">${icon('sentiment_very_satisfied')}<span>大満足</span></span></div>${faithfulMembers()}</div>`;
+    return `<div class="faithful-hero" data-token="HomeHeroCard · Original + Tear" data-action="hero-analytics" role="button" tabindex="0"><div class="faithful-label">${state.family?'家族の支出':'今月の支出'}</div><div class="faithful-amount-row"><strong>${state.family?'¥227,620':'¥186,420'}</strong><span class="faithful-trend">${icon('trending_down')}−8%</span></div><p class="faithful-previous">先月同期 ${state.family?'¥246,900':'¥202,640'}</p><div class="faithful-ledgers"><div class="faithful-ledger-labels"><span class="faithful-ledger-label"><i class="faithful-dot"></i><span>ときめき帳</span><strong>¥53,620</strong></span><span class="faithful-ledger-label daily"><strong>${state.family?'¥174,000':'¥132,800'}</strong><span>日々の帳</span><i class="faithful-dot"></i></span></div><div class="faithful-split"><span></span></div></div><div class="faithful-tear-divider" aria-hidden="true"></div><div class="faithful-joy-section"><div class="faithful-region-title">${icon('eco')}<span>${state.family?'家族のときめき':'ときめき度'}</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics()}${faithfulMembers()}</div></div>`;
+  }
+
+  function faithfulFavoriteCard() {
+    return `<section class="faithful-favorite-card" data-token="HomeFavoriteSection" data-action="hero-analytics" role="button" tabindex="0"><div class="faithful-region-title">${icon('workspace_premium')}<span>今月の最愛</span><span class="faithful-analysis-link">詳しく見る ${icon('chevron_right')}</span></div><div class="faithful-ticket"><span class="faithful-ticket-accent"></span><span class="faithful-calendar"><b>JUL</b><strong>06</strong><small>MON</small></span><span class="faithful-ticket-copy"><strong>趣味・コレクション</strong><span>¥4,800</span></span><span class="faithful-seal">${icon('sentiment_very_satisfied')}<span>大満足</span></span></div></section>`;
   }
 
   function faithfulInvite() {
@@ -1222,7 +1693,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   }
 
   function home() {
-    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulInvite()}<div class="faithful-recent"><h2>最近の取引</h2><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}</div></section>`;
+    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulFavoriteCard()}${faithfulInvite()}<div class="faithful-recent"><h2>最近の取引</h2><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}</div></section>`;
   }
 
   function listCalendarDays(year, month) {
@@ -1621,7 +2092,77 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
 
   function ocr() { return `<section class="screen">${backHeader('レシート撮影')}<div class="camera"><div class="viewfinder">${icon('document_scanner')}<span style="position:absolute;bottom:34px;font-size:10px">レシート全体を枠内に</span></div></div><div class="camera-controls"><button class="icon-btn" data-action="toast" data-message="アルバムを開く">${icon('photo_library')}</button><button class="shutter" data-action="ocr-capture" aria-label="撮影"></button><button class="icon-btn" data-action="toast" data-message="フラッシュ切替">${icon('flash_off')}</button></div><p class="hint" style="text-align:center">画像は端末内で処理されます。</p></section>`; }
 
-  function category() { const groups=[['restaurant','食費','スーパー、外食、カフェ'],['train','交通','電車、バス、タクシー'],['home','住居','家賃、光熱費'],['spa','趣味・悦己','趣味、旅行、学び'],['health_and_safety','健康','医療、運動']]; return `<section class="screen">${backHeader('カテゴリを選択')}<input class="search" placeholder="カテゴリを検索" aria-label="カテゴリを検索"><div class="section-title"><h2>最近使ったカテゴリ</h2></div><div class="filter-row"><button class="filter-chip active" data-action="pick-category">食費</button><button class="filter-chip" data-action="pick-category">交通</button><button class="filter-chip" data-action="pick-category">カフェ</button></div><div class="section-title"><h2>すべて</h2><button class="text-btn" data-action="toast" data-message="並べ替えモード">並べ替え</button></div><div class="flat-card">${groups.map(([ico,n,m])=>`<button class="tap-row row-divider" data-action="pick-category"><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${n}</strong><small>${m}</small></span>${icon('expand_more')}</button>`).join('')}</div></section>`; }
+  function categoryParentId(categoryId=state.categorySelectedId) {
+    return categoryGroups.find(group=>group.id===categoryId||group.children.some(child=>child.id===categoryId))?.id || null;
+  }
+
+  function prepareCategorySelection() {
+    state.categoryMode='browse'; state.categoryQuery=''; state.categoryDirty=false; state.categoryEditExpanded=null; state.categorySnapshot=null;
+    state.categoryExpanded=categoryParentId() || 'cat_food';
+  }
+
+  function enterCategoryReorder() {
+    if(state.categoryMode==='edit') return;
+    state.categorySnapshot=JSON.parse(JSON.stringify(categoryGroups)); state.categoryMode='edit'; state.categoryQuery=''; state.categoryDirty=false; state.categoryEditExpanded=null;
+  }
+
+  function categoryAppBar() {
+    const editing=state.categoryMode==='edit';
+    return `<header class="category-appbar" data-token="CategorySelectionScreen.appBar"><button class="back-btn category-close" data-action="category-close" aria-label="${editing?'並べ替えを閉じる':'分類選択を閉じる'}">${icon('close')}</button><h1>${editing?'順序を編集':'分類を選択'}</h1>${editing?`<button class="category-appbar-action save" data-action="category-save">保存</button>`:`<button class="category-appbar-action" data-action="category-reorder-enter" aria-label="分類の順序を編集">${icon('reorder')}</button>`}</header>`;
+  }
+
+  function filteredCategoryGroups() {
+    const query=state.categoryQuery.trim().toLowerCase();
+    if(!query) return categoryGroups.map(group=>({...group,visibleChildren:group.children}));
+    return categoryGroups.map(group=>{
+      const visibleChildren=group.children.filter(child=>child.name.toLowerCase().includes(query));
+      return {...group,visibleChildren};
+    }).filter(group=>group.name.toLowerCase().includes(query)||group.visibleChildren.length);
+  }
+
+  function categoryBrowseGroup(group) {
+    const expanded=state.categoryExpanded===group.id;
+    const children=group.visibleChildren || group.children;
+    const searchText=[group.name,...group.children.map(child=>child.name)].join(' ');
+    const chips=children.map(child=>`<button class="category-chip ${state.categorySelectedId===child.id?'selected':''}" data-action="category-select" data-category-group="${group.id}" data-category-id="${child.id}" aria-pressed="${state.categorySelectedId===child.id}">${escapeHtml(child.name)}</button>`).join('');
+    return `<article class="category-group ${expanded?'expanded':''}" style="--category-color:${group.color}" data-category-search="${escapeHtml(searchText)}"><button class="category-group-header" data-action="category-toggle" data-category-group="${group.id}" aria-expanded="${expanded}"><span class="category-group-icon">${icon(group.icon)}</span><span class="category-group-name">${escapeHtml(group.name)}</span>${icon(expanded?'expand_less':'chevron_right')}</button>${expanded?`<div class="category-children">${chips}<button class="category-chip add" data-action="category-add-sub" data-category-group="${group.id}">${icon('add')}追加</button></div>`:''}</article>`;
+  }
+
+  function categoryBrowse() {
+    const groups=filteredCategoryGroups();
+    const list=groups.length?groups.map(categoryBrowseGroup).join(''):`<div class="category-empty-search">${icon('search_off')}<span>一致する分類がありません</span></div>`;
+    return `${categoryAppBar()}<div class="category-search-shell"><label class="category-search">${icon('search')}<input data-category-search-input value="${escapeHtml(state.categoryQuery)}" placeholder="分類を検索..." aria-label="分類を検索"></label></div><div class="category-list" data-token="ExpandableCategoryGroups">${list}</div><div class="category-add-dock"><button class="category-add-button" data-action="category-add">${icon('add_circle_outline')}カテゴリを追加</button></div>`;
+  }
+
+  function categoryReorderGroup(group) {
+    const expanded=state.categoryEditExpanded===group.id;
+    const children=expanded?`<div class="category-reorder-children" data-category-child-list="${group.id}">${group.children.map(child=>`<div class="category-reorder-child" draggable="true" data-category-drag="child" data-category-group="${group.id}" data-category-id="${child.id}">${icon('drag_indicator')}<span>${escapeHtml(child.name)}</span></div>`).join('')}</div>`:'';
+    return `<article class="category-reorder-group ${expanded?'expanded':''}" style="--category-color:${group.color}" draggable="true" data-category-drag="group" data-category-group="${group.id}"><button class="category-reorder-row" data-action="category-edit-toggle" data-category-group="${group.id}" aria-expanded="${expanded}"><span class="material-symbols-rounded drag-handle">drag_indicator</span><span class="category-group-icon">${icon(group.icon)}</span><span class="category-group-name">${escapeHtml(group.name)}</span></button>${children}</article>`;
+  }
+
+  function categoryReorder() {
+    return `${categoryAppBar()}<div class="category-hint" data-token="CategoryReorderHint">${icon('drag_indicator')}<span>ドラッグして並べ替え</span></div><div class="category-reorder-list" data-category-group-list>${categoryGroups.map(categoryReorderGroup).join('')}</div>`;
+  }
+
+  function category() {
+    return `<section class="screen category-screen" lang="ja">${state.categoryMode==='edit'?categoryReorder():categoryBrowse()}</section>`;
+  }
+
+  function selectCategory(groupId,categoryId) {
+    const group=categoryGroups.find(item=>item.id===groupId); const child=group?.children.find(item=>item.id===categoryId); if(!group||!child) return;
+    state.categorySelectedId=child.id; state.categoryExpanded=group.id;
+    const previous=state.history.at(-1);
+    if(previous==='shopping-form') state.shoppingFormCategory=`${group.name} > ${child.name}`;
+    else if(previous==='edit') state.editCategory=`${group.zh} > ${child.zh}`;
+    else { state.entryCategory=`${group.zh} > ${child.zh}`; state.entryNeedsReview=false; state.entryReviewPending=false; }
+    toast(`${child.name}を選択しました`);
+    if(previous){ state.history.pop(); setTimeout(()=>setScreen(previous,false),260); }
+    else render();
+  }
+
+  function categoryDiscardDialog() {
+    openModal(`<div class="category-confirm-icon">${icon('warning')}</div><h3>未保存の変更を破棄しますか？</h3><p class="category-dialog-copy">並び替えた内容は保存されず、元に戻ります。</p><div class="category-dialog-actions"><button class="secondary-btn" data-action="category-keep-editing">編集を続ける</button><button class="secondary-btn danger" data-action="category-discard">破棄</button></div>`,'dialog');
+  }
 
   function editCurrencySymbol(currency=state.editCurrency) { return ({JPY:'¥',USD:'$',EUR:'€',CNY:'¥'})[currency] || currency; }
 
@@ -1687,15 +2228,97 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     </section>`;
   }
 
-  function family() { return `<section class="screen">${backHeader('家族同期')}<div class="avatar-stack"><span class="avatar">私</span><span class="avatar">花</span><span class="avatar">太</span></div><div style="text-align:center"><h2 class="display" style="font-size:22px;margin:0">家族と家計を見守る</h2><p class="hint">必要な情報だけを、E2EE で安全に共有します。</p></div><button class="action-card" data-action="create-family"><span class="row-icon">${icon('add_circle')}</span><span class="row-copy"><strong>新しい家族を作る</strong><small>招待コードを発行します</small></span>${icon('chevron_right')}</button><button class="action-card" data-screen="join"><span class="row-icon shared">${icon('login')}</span><span class="row-copy"><strong>家族に参加する</strong><small>6桁の招待コードを入力</small></span>${icon('chevron_right')}</button><p class="hint" style="text-align:center;margin-top:24px">${icon('shield')} サーバーは内容を読むことができません。</p></section>`; }
+  function family() {
+    return `<section class="screen family-screen" lang="ja">${familyHeader('家族同期')}<div class="family-intro"><h2>どう始めますか？</h2><p>参加できる家族は一度に1つです。</p></div><div class="family-choice-list"><button class="family-choice" data-action="family-create"><span class="family-icon-tile"><img class="family-icon-create" src="assets/family-entry-create-warm-v1.png" alt="" aria-hidden="true"></span><span class="family-choice-copy"><strong>新しい家族を作る</strong><small>招待コードを発行し、あなたがメンバーを承認</small></span>${icon('chevron_right')}</button><button class="family-choice" data-action="family-join"><span class="family-icon-tile"><img class="family-icon-join" src="assets/family-entry-join-warm-v1.png" alt="" aria-hidden="true"></span><span class="family-choice-copy"><strong>招待コードで参加する</strong><small>家族のオーナーによる承認が必要です</small></span>${icon('chevron_right')}</button></div><p class="family-privacy-note">${icon('shield')}<span>家族の公開帳簿は暗号化して同期。個人の非公開帳簿は、この端末だけに残ります。</span></p></section>`;
+  }
 
-  function join() { return `<section class="screen">${backHeader('家族に参加')}<div class="intro-mark" style="width:70px;height:70px;border-radius:24px">${icon('key')}</div><div style="text-align:center"><h2 class="display">招待コードを入力</h2><p class="hint">家族の管理者から受け取った6桁のコード</p></div><div class="code">${['4','8','2','1','6','9'].map(x=>`<span class="digit">${x}</span>`).join('')}</div><button class="primary-btn" data-action="join-family">内容を確認</button><p class="hint" style="text-align:center">参加後も個人の非公開データは共有されません。</p></section>`; }
+  function create() {
+    const code=`${state.familyInviteCode.slice(0,3)} ${state.familyInviteCode.slice(3)}`;
+    return `<section class="screen family-screen" lang="ja">${familyHeader('家族を作る')}${createProgress(1)}<div class="family-group-identity"><span class="family-house-mark">${icon('home')}</span><span class="family-group-copy"><h2>青木家の家計</h2><p>あおい · オーナー</p></span><button class="family-inline-action" data-action="family-edit-name">${icon('edit')}編集</button></div><div class="family-code-card"><strong class="family-invite-code">${code}</strong><span class="family-code-meta">14分間有効</span><button class="family-code-action" data-action="family-copy-code" aria-label="招待コードをコピー">${icon('content_copy')}</button><button class="family-inline-action" data-action="family-regenerate-code">再発行</button></div><button class="family-primary-action" data-action="family-share">招待コードを共有</button><p class="family-flow-helper">${icon('info')}<span>家族が参加申請を送ると、次のステップでメンバーを承認します。</span></p></section>`;
+  }
 
-  function group() { return `<section class="screen">${backHeader('家族管理',`<span class="chip">${icon('sync')} 同期済み</span>`)}<div class="card"><div class="eyebrow">GROUP</div><h2 class="display" style="font-size:22px;margin:7px 0">青木家の家計</h2><p class="hint">オーナー · 3人 · 最終同期 たった今</p></div><button class="action-card" data-action="toast" data-message="承認待ちメンバー"><span class="row-icon">${icon('notifications')}</span><span class="row-copy"><strong>1人が承認を待っています</strong><small>内容を確認してください</small></span>${icon('chevron_right')}</button><div class="section-title"><h2>メンバー</h2><button class="text-btn" data-action="toast" data-message="招待コードを発行">招待</button></div><div class="flat-card"><div class="member"><span class="avatar">私</span><span class="row-copy"><strong>あなた</strong><small>オーナー</small></span><span class="badge">管理者</span></div><div class="member"><span class="avatar">花</span><span class="row-copy"><strong>花子</strong><small>iPhone · 同期済み</small></span>${icon('more_horiz')}</div><div class="member"><span class="avatar">太</span><span class="row-copy"><strong>太郎</strong><small>Android · 2分前</small></span>${icon('more_horiz')}</div></div><div style="height:13px"></div><button class="secondary-btn" data-action="toast" data-message="手動同期を開始">${icon('sync')} 今すぐ同期</button><button class="ghost-btn" data-action="delete">家族を解散</button></section>`; }
+  function join() {
+    const digits=Array.from({length:6},(_,index)=>`<input class="family-code-input" data-family-code-index="${index}" inputmode="numeric" maxlength="1" value="${escapeHtml(state.familyInviteCode[index]||'')}" aria-label="招待コード ${index+1} 桁目">`);
+    digits.splice(3,0,'<span class="family-code-separator" aria-hidden="true"></span>');
+    const complete=/^\d{6}$/.test(state.familyInviteCode);
+    return `<section class="screen family-screen" lang="ja">${familyHeader('家族に参加')}${joinProgress(0)}<div class="family-join-copy"><h2>6桁の招待コードを入力</h2><p>家族のオーナーから受け取った数字を入力してください。</p></div><div class="family-code-inputs">${digits.join('')}</div><button class="family-primary-action" data-action="family-join-review" ${complete?'':'disabled'}>家族情報を確認</button><p class="family-flow-helper">${icon('shield')}<span>申請が承認されるまで、どの帳簿も同期されません。</span></p></section>`;
+  }
 
-  function onboarding() { return `<section class="screen"><div class="intro-hero"><div class="intro-mark">${icon('account_balance_wallet')}</div><h1>まもる家計簿</h1><p class="hint">家族のお金の話を、やさしく。</p></div><div class="feature">${icon('encrypted')}<span><strong>端末内で暗号化</strong><small class="hint" style="display:block">あなたのデータは、あなたのもの。</small></span></div><div class="feature">${icon('balance')}<span><strong>日常と悦己、ふたつの帳本</strong><small class="hint" style="display:block">必要な支出と、自分を満たす支出。</small></span></div><div class="feature">${icon('mic')}<span><strong>声ですばやく記録</strong><small class="hint" style="display:block">話した内容を確認してから保存。</small></span></div><div style="height:28px"></div><button class="primary-btn" data-screen="preferences">はじめる</button><button class="ghost-btn" data-screen="preferences">紹介をスキップ</button></section>`; }
+  function joinConfirm() {
+    return `<section class="screen family-screen" lang="ja">${familyHeader('家族を確認')}${joinProgress(1)}<div class="family-join-copy"><h2>参加する家族を確認</h2><p>この家族に参加申請を送ります。</p></div><div class="family-confirm-owner">${familyAvatar('family-avatar-owner.png','あおい')}<h2>青木家の家計</h2><p>オーナー · あおい</p><span class="family-verified">${icon('verified_user')}公開鍵を確認済み</span></div><button class="family-primary-action" data-action="family-send-request">参加を申請</button><p class="family-flow-helper">${icon('lock')}<span>個人の非公開帳簿は家族に共有されません。</span></p></section>`;
+  }
 
-  function preferences() { return `<section class="screen">${backHeader('基本設定')}<div class="section-title"><h2>あなたについて</h2></div><div class="card" style="display:flex;align-items:center;gap:12px"><span class="avatar" style="margin:0">私</span><span class="row-copy"><strong>あおい</strong><small>タップしてプロフィールを変更</small></span><button class="text-btn" data-screen="profile">変更</button></div><div class="section-title"><h2>おすすめの初期値</h2></div><div class="flat-card"><button class="tap-row row-divider" data-action="toast" data-message="表示言語を変更"><span class="row-icon">${icon('language')}</span><span class="row-copy"><strong>表示言語</strong><small>日本語</small></span><span class="text-btn">変更</span></button><button class="tap-row row-divider" data-action="toast" data-message="通貨を変更"><span class="row-icon">${icon('currency_yen')}</span><span class="row-copy"><strong>通貨</strong><small>日本円 · JPY</small></span><span class="text-btn">変更</span></button><button class="tap-row" data-action="toast" data-message="音声言語を変更"><span class="row-icon">${icon('mic')}</span><span class="row-copy"><strong>音声入力</strong><small>日本語</small></span><span class="text-btn">変更</span></button></div><p class="hint">これらは後から設定でいつでも変更できます。</p><button class="primary-btn" data-screen="lock">この設定で始める</button></section>`; }
+  function joinWaiting() {
+    return `<section class="screen family-screen" lang="ja">${familyHeader('承認を待っています')}${joinProgress(2)}<div class="family-waiting"><span class="family-waiting-ring" aria-label="承認待ち"></span><h2>オーナーの承認待ち</h2><p>あおいさんが参加申請を確認しています。</p><small>アプリを閉じても大丈夫です。<br>承認されたら自動で同期を始めます。</small></div></section>`;
+  }
+
+  function approval() {
+    if(!state.familyRequestPending) return `<section class="screen family-screen" lang="ja">${familyHeader('メンバー承認')}${createProgress(2)}<div class="family-waiting">${icon('task_alt')}<h2>未確認の申請はありません</h2><p>新しい申請が届くと、ここに表示されます。</p><button class="secondary-btn" style="margin-top:20px" data-screen="group">家族管理へ</button></div></section>`;
+    return `<section class="screen family-screen" lang="ja">${familyHeader('メンバー承認')}${createProgress(2)}<div class="family-join-copy"><h2>新しい参加申請</h2><p>本人と端末を確認してから承認してください。</p></div><div class="family-approval-card">${familyAvatar('family-avatar-hanako.png','花子')}<h2>花子</h2><p>花子の iPad から参加申請</p><span class="family-verified">${icon('verified_user')}端末の公開鍵を確認済み</span></div><div class="family-approval-actions"><button class="secondary-btn" data-action="family-reject">拒否</button><button class="family-primary-action" data-action="family-approve">承認する</button></div><p class="family-flow-helper">${icon('encrypted')}<span>承認後、この端末と家族の公開帳簿を暗号化して同期します。</span></p></section>`;
+  }
+
+  function group() {
+    const code=`${state.familyInviteCode.slice(0,3)} ${state.familyInviteCode.slice(3)}`;
+    const pending=state.familyRequestPending?`<button class="family-pending" data-action="family-pending">${icon('person_add')}<strong>新しい参加申請 · 1件</strong><span>申請を見る</span>${icon('chevron_right')}</button>`:'';
+    return `<section class="screen family-screen" lang="ja">${familyHeader('家族管理',`<span class="family-appbar-status">${icon('check_circle')}同期済み</span>`)}<div class="family-group-identity compact"><span class="family-house-mark">${icon('home')}</span><span class="family-group-copy"><h2>青木家の家計</h2><p>オーナー：あおい · 3人 · たった今同期</p></span><button class="family-inline-action" data-action="family-edit-name">${icon('edit')}編集</button></div>${pending}<div class="family-member-list"><button class="family-member-row" data-action="family-member" data-member="あおい">${familyAvatar('family-avatar-owner.png','あおい')}<span class="family-member-copy"><strong>あおい（あなた）</strong></span><span class="family-role-badge">オーナー</span>${icon('chevron_right')}</button><button class="family-member-row" data-action="family-member" data-member="花子">${familyAvatar('family-avatar-hanako.png','花子')}<span class="family-member-copy"><strong>花子</strong></span><span class="family-member-role">メンバー</span>${icon('chevron_right')}</button><button class="family-member-row" data-action="family-member" data-member="太郎">${familyAvatar('family-avatar-taro.png','太郎')}<span class="family-member-copy"><strong>太郎</strong></span><span class="family-member-role">メンバー</span>${icon('chevron_right')}</button><button class="family-invite-row" data-action="family-invite">${icon('add')}メンバーを招待</button></div><div class="family-management-code"><strong>${code}</strong><small>14分間有効</small><button class="family-code-action" data-action="family-copy-code" aria-label="招待コードをコピー">${icon('content_copy')}</button><button class="family-code-action" data-action="family-share" aria-label="招待コードを共有">${icon('ios_share')}</button><button class="family-inline-action" data-action="family-regenerate-code">再発行</button></div><button class="family-settings-row" data-action="family-sync-settings">${icon('sync')}同期設定${icon('chevron_right')}</button><button class="family-danger" data-action="family-disband">家族を解散</button></section>`;
+  }
+
+  const onboardingDots = active => `<div class="onboarding-page-dots" aria-label="紹介 ${active + 1} / 2"><i class="${active===0?'active':''}"></i><i class="${active===1?'active':''}"></i></div>`;
+  const onboardingAmbience = variant => `<div class="onboarding-ambience ${variant}" aria-hidden="true"><span class="material-symbols-rounded pressed-motif">eco</span><span class="material-symbols-rounded pressed-motif">spa</span><span class="material-symbols-rounded pressed-motif">eco</span><span class="material-symbols-rounded pressed-motif">spa</span></div>`;
+
+  function onboarding() {
+    return `<section class="onboarding-screen" lang="ja">${onboardingAmbience('welcome')}<div class="onboarding-topbar"><span class="onboarding-topbar-spacer"></span><button class="onboarding-text-action" data-screen="preferences">スキップ</button></div><div class="onboarding-content"><div class="onboarding-hero-cluster" role="img" aria-label="家と芽を囲む、日常と悦己の表情"><span class="material-symbols-rounded onboarding-petal one" aria-hidden="true">eco</span><span class="material-symbols-rounded onboarding-petal two" aria-hidden="true">eco</span><span class="onboarding-hero-main"><img class="onboarding-source-icon welcome" src="assets/onboarding-existing-house.svg" alt=""></span><span class="onboarding-satellite joy" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_04.svg')"></i></span><span class="onboarding-satellite daily" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_02.svg')"></i></span></div><span class="onboarding-badge">たのしく、つづく家計簿</span><h1>まもる家計簿</h1><span class="onboarding-brand">HOME POCKET</span><p class="onboarding-lead">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</p><div class="onboarding-value-pills"><span>日々の帳</span><span>ときめき帳</span><span>満足度</span></div></div><div class="onboarding-dock">${onboardingDots(0)}<button class="onboarding-primary" data-screen="onboarding-privacy">次へ</button></div></section>`;
+  }
+
+  function onboardingPrivacy() {
+    return `<section class="onboarding-screen" lang="ja">${onboardingAmbience('privacy')}<div class="onboarding-topbar"><button class="onboarding-text-action" data-screen="onboarding">戻る</button><button class="onboarding-text-action" data-screen="preferences">スキップ</button></div><div class="onboarding-content"><div class="onboarding-hero-cluster privacy" role="img" aria-label="盾を囲む、端末保存とロックの印"><span class="material-symbols-rounded onboarding-petal one" aria-hidden="true">eco</span><span class="material-symbols-rounded onboarding-petal two" aria-hidden="true">eco</span><span class="onboarding-hero-main privacy"><img class="onboarding-source-icon privacy" src="assets/onboarding-existing-shield.svg" alt=""></span><span class="onboarding-satellite joy" aria-hidden="true"><span class="material-symbols-rounded">lock</span></span><span class="onboarding-satellite daily" aria-hidden="true"><span class="material-symbols-rounded">smartphone</span></span></div><h1 class="onboarding-privacy-title">データは、<br>あなたの手の中に。</h1><p class="onboarding-lead">すべて端末の中だけで完結。<br>アカウントもサーバーも、いりません。</p><div class="onboarding-privacy-list"><div class="onboarding-privacy-row"><span><strong>端末内に保存</strong><small>クラウドには送信しません</small></span><em>LOCAL</em></div><div class="onboarding-privacy-row"><span><strong>エンドツーエンド暗号化</strong><small>鍵を持つのはあなただけ</small></span><em>E2EE</em></div><div class="onboarding-privacy-row"><span><strong>改ざん防止</strong><small>ハッシュチェーンで記録を守ります</small></span><em>SAFE</em></div></div></div><div class="onboarding-dock">${onboardingDots(1)}<button class="onboarding-primary" data-screen="preferences">はじめる</button></div></section>`;
+  }
+
+  function preferences() {
+    const languageLabels={ja:'日本語',zh:'中文',en:'English',system:'自動'};
+    const voiceLabels={ja:'日本語',zh:'中文',en:'English'};
+    const name=escapeHtml(state.onboardingName);
+    return `<section class="setup-screen" lang="ja">${onboardingAmbience('setup')}
+      <div class="onboarding-topbar"><button class="onboarding-text-action" data-action="back">戻る</button><span class="eyebrow">初期設定</span><span class="onboarding-topbar-spacer"></span></div>
+      <div class="setup-scroll">
+        <span class="setup-eyebrow">最後のステップ</span>
+        <h1 class="setup-title">基本設定</h1>
+        <div class="setup-profile-editor"><button class="setup-avatar-column" data-action="onboarding-avatar" aria-label="画像を変更"><span class="setup-avatar-button"><img class="setup-avatar-asset" src="assets/onboarding-avatar-warm-v1.png" alt="芽とハートのプロフィール"></span><span class="setup-avatar-hint" aria-hidden="true">${icon('photo_camera')}画像を変更</span></button><div class="setup-profile-name"><label for="onboarding-name">お名前 · 必須</label><input id="onboarding-name" class="setup-name-input" data-onboarding-name value="${name}" placeholder="名前を入力" autocomplete="name" maxlength="40" aria-required="true"></div></div>
+        <div class="setup-preference-card" aria-label="基本設定">
+          <button class="setup-preference-row" data-action="onboarding-language"><span class="setup-preference-icon">${icon('language')}</span><span class="setup-preference-label">表示言語</span><span class="setup-preference-value">${languageLabels[state.onboardingLanguage]||'自動'} ${icon('chevron_right')}</span></button>
+          <button class="setup-preference-row" data-action="onboarding-currency"><span class="setup-preference-icon">${icon('account_balance_wallet')}</span><span class="setup-preference-label">通貨単位</span><span class="setup-preference-value">${state.onboardingCurrency} ${icon('chevron_right')}</span></button>
+          <button class="setup-preference-row" data-action="onboarding-voice"><span class="setup-preference-icon">${icon('mic')}</span><span class="setup-preference-label">音声入力の言語</span><span class="setup-preference-value">${voiceLabels[state.onboardingVoice]||'日本語'} ${icon('chevron_right')}</span></button>
+        </div>
+        ${setupSecuritySection()}
+      </div>
+      <div class="setup-dock"><button class="setup-submit" data-action="onboarding-start" ${setupCanSubmit()?'':'disabled'}>この設定ではじめる</button><p class="setup-required-note">${setupRequiredNote()}</p></div>
+    </section>`;
+  }
+
+  function setupCanSubmit() {
+    if(!state.onboardingName.trim()) return false;
+    return !state.onboardingSecurityEnabled || state.onboardingUnlockMethod==='biometric' || state.onboardingPinConfigured;
+  }
+
+  function setupRequiredNote() {
+    if(!state.onboardingName.trim()) return 'お名前を入力すると開始できます';
+    if(state.onboardingSecurityEnabled && state.onboardingUnlockMethod==='pin' && !state.onboardingPinConfigured) return 'PINを設定すると開始できます';
+    return 'あとから設定でいつでも変更できます';
+  }
+
+  function setupSecuritySection() {
+    const securityMethods=state.onboardingSecurityEnabled ? `<span class="setup-method-label">ロック解除方法</span><div class="setup-method-list" role="radiogroup" aria-label="ロック解除方法">
+      <button class="setup-method-row ${state.onboardingUnlockMethod==='biometric'?'selected':''}" data-action="onboarding-security-method" data-method="biometric" role="radio" aria-checked="${state.onboardingUnlockMethod==='biometric'}"><span class="setup-method-icon">${icon('fingerprint')}</span><span class="setup-method-copy"><strong>生体認証 <em class="setup-method-badge">おすすめ</em></strong><small>Face ID または指紋ですばやく解除</small></span><span class="setup-method-radio" aria-hidden="true"></span></button>
+      <button class="setup-method-row ${state.onboardingUnlockMethod==='pin'?'selected':''}" data-action="onboarding-security-method" data-method="pin" role="radio" aria-checked="${state.onboardingUnlockMethod==='pin'}"><span class="setup-method-icon">${icon('password')}</span><span class="setup-method-copy"><strong>アプリロック</strong><small>4桁のPINで解除</small></span><span class="setup-method-radio" aria-hidden="true"></span></button>
+      ${state.onboardingUnlockMethod==='pin' ? (state.onboardingPinConfigured ? `<div class="setup-pin-complete"><span class="setup-pin-complete-copy">${icon('check_circle')}<span><strong>PINを設定しました</strong><small>4桁のPINで保護されています</small></span></span><button class="setup-pin-change" data-action="onboarding-pin-setup">PINを変更</button></div>` : `<div class="setup-pin-guidance"><strong>PINがまだ設定されていません</strong><small>2回入力すると有効になります</small><button class="setup-pin-action" data-action="onboarding-pin-setup">4桁のPINを設定 ${icon('chevron_right')}</button></div>`) : ''}
+    </div>` : `<p class="setup-security-defer">今は設定せず、あとで決める<small>設定からいつでも有効にできます</small></p>`;
+    return `<section class="setup-security-card" aria-label="安全保護"><div class="setup-security-intro"><img class="setup-security-mark" src="assets/onboarding-privacy-warm-v1.png" alt="家の中を守る鍵"><div class="setup-security-copy"><h2>家計簿を安全に保護</h2><p>有効にすると、アプリを開くたびに本人確認します。</p></div></div><button class="setup-security-master" data-action="onboarding-security-toggle" aria-pressed="${state.onboardingSecurityEnabled}"><span>安全保護を有効にする</span><span class="switch ${state.onboardingSecurityEnabled?'on':''}" aria-hidden="true"></span></button>${securityMethods}</section>`;
+  }
+
+  function setupPinScreen() {
+    const confirming=state.onboardingPinStage==='confirm';
+    return `<section class="setup-pin-screen" lang="ja"><div class="onboarding-topbar"><button class="onboarding-text-action" data-action="onboarding-pin-cancel">戻る</button><span class="eyebrow">安全保護</span><span class="onboarding-topbar-spacer"></span></div><div class="setup-pin-body"><div class="setup-pin-mark">${icon('password')}</div><h1>${confirming?'もう一度入力':'4桁のPINを設定'}</h1><p>${confirming?'確認のため、同じPINを入力してください。':'アプリを開くときに使うPINです。'}</p><div class="pin-dots" aria-label="${state.onboardingPinDraft.length}桁入力済み">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.onboardingPinDraft.length?'filled':''}"></i>`).join('')}</div><div class="setup-pin-error" role="alert">${escapeHtml(state.onboardingPinError)}</div><div class="setup-pin-keypad"><div class="pinpad">${['1','2','3','4','5','6','7','8','9','blank','0','backspace'].map(k=>k==='blank'?'<span></span>':`<button class="key" data-onboarding-pin-key="${k}" aria-label="${k==='backspace'?'1文字削除':k}">${k==='backspace'?icon('backspace'):k}</button>`).join('')}</div><p class="setup-pin-helper">推測されにくい4桁を選んでください</p></div></div></section>`;
+  }
 
   function lock() { return `<section class="screen"><div class="intro-hero" style="padding-top:46px"><div class="intro-mark" style="border-radius:50%">${icon('fingerprint')}</div><h1>おかえりなさい</h1><p class="hint">Face ID または PIN でロックを解除</p></div><div class="pin-dots">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.pin.length?'filled':''}"></i>`).join('')}</div><div class="pinpad">${['1','2','3','4','5','6','7','8','9','fingerprint','0','backspace'].map(k=>`<button class="key" data-lock-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}</div><button class="ghost-btn" data-action="forgot-pin">PINを忘れた場合</button></section>`; }
 
@@ -1705,7 +2328,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
 
   function legal() { return `<section class="screen">${backHeader('法的情報・応援')}<div class="flat-card"><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('privacy_tip')}</span><span class="row-copy"><strong>プライバシーポリシー</strong><small>データの扱いについて</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('description')}</span><span class="row-copy"><strong>利用規約</strong><small>サービス利用条件</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('storefront')}</span><span class="row-copy"><strong>特定商取引法に基づく表記</strong><small>日本向け法定表示</small></span>${icon('chevron_right')}</button><button class="tap-row" data-action="legal-doc"><span class="row-icon">${icon('code')}</span><span class="row-copy"><strong>オープンソースライセンス</strong><small>使用ライブラリ</small></span>${icon('chevron_right')}</button></div><div class="section-title"><h2>開発を応援</h2></div><div class="card"><span class="row-icon joy">${icon('favorite')}</span><h2 class="display" style="font-size:18px">静かな家計簿を育てる</h2><p class="legal-copy">スポンサーリンクは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。</p><button class="secondary-btn" data-action="toast" data-message="外部スポンサーサイトを確認">スポンサーについて</button></div></section>`; }
 
-  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, join, group, onboarding, preferences, lock, settings, profile, legal };
+  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, create, approval, join, 'join-confirm':joinConfirm, 'join-waiting':joinWaiting, group, onboarding, 'onboarding-privacy':onboardingPrivacy, preferences, 'setup-pin':setupPinScreen, lock, settings, profile, legal };
 
   function render() {
     document.documentElement.dataset.theme = state.theme;
@@ -1732,11 +2355,39 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     const editPanel=document.getElementById('edit-design-note');
     editPanel.hidden=!isEditScreen;
     editPanel.querySelectorAll('[data-edit-demo]').forEach(button=>{ const demo=button.dataset.editDemo; const active=isEditScreen&&((demo==='foreign'&&state.editCurrency!=='JPY')||(demo==='submitting'&&state.editSubmitting)||(demo==='joy'&&state.editCurrency==='JPY'&&state.editLedger==='joy'&&!state.editSubmitting)||(demo==='daily'&&state.editCurrency==='JPY'&&state.editLedger==='daily'&&!state.editSubmitting)); button.classList.toggle('active',active); });
+    const isCategoryScreen=state.screen==='category';
+    const categoryPanel=document.getElementById('category-design-note');
+    categoryPanel.hidden=!isCategoryScreen;
+    categoryPanel.querySelectorAll('[data-category-demo]').forEach(button=>{ const demo=button.dataset.categoryDemo; const active=isCategoryScreen&&((demo==='browse'&&state.categoryMode==='browse'&&!state.categoryQuery)||(demo==='search'&&state.categoryMode==='browse'&&!!state.categoryQuery)||(demo==='reorder'&&state.categoryMode==='edit'&&!state.categoryDirty)||(demo==='dirty'&&state.categoryMode==='edit'&&state.categoryDirty)); button.classList.toggle('active',active); });
+    const familyScreens=['family','create','approval','join','join-confirm','join-waiting','group'];
+    const isFamilyScreen=familyScreens.includes(state.screen);
+    const familyPanel=document.getElementById('family-design-note');
+    familyPanel.hidden=!isFamilyScreen;
+    familyPanel.querySelectorAll('[data-family-demo]').forEach(button=>button.classList.toggle('active',button.dataset.familyDemo===state.screen));
+    const isSetupSecurityScreen=state.screen==='preferences'||state.screen==='setup-pin';
+    const setupSecurityPanel=document.getElementById('setup-security-design-note');
+    setupSecurityPanel.hidden=!isSetupSecurityScreen;
+    const setupSecurityDemo=state.onboardingSecurityEnabled ? (state.onboardingUnlockMethod==='biometric'?'biometric':(state.onboardingPinConfigured?'pin-complete':'pin-pending')) : 'off';
+    setupSecurityPanel.querySelectorAll('[data-setup-security-demo]').forEach(button=>button.classList.toggle('active',button.dataset.setupSecurityDemo===setupSecurityDemo));
+    phone.scrollTop=0;
   }
-  function setScreen(id, push=true){ if(!renderers[id]) return; if(state.screen==='entry'&&state.entryInputMode==='voice'&&id!=='entry') normalizeEntryVoiceBeforeExit(); if(state.screen==='shopping-form'&&id!=='shopping-form') normalizeShoppingVoiceBeforeExit(); if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; }
+  function setScreen(id, push=true){ if(!renderers[id]) return; if(id==='category'&&state.screen!=='category') prepareCategorySelection(); if(state.screen==='entry'&&state.entryInputMode==='voice'&&id!=='entry') normalizeEntryVoiceBeforeExit(); if(state.screen==='shopping-form'&&id!=='shopping-form') normalizeShoppingVoiceBeforeExit(); if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; document.getElementById('phone').scrollTop=0; }
   function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t.timer); t.timer=setTimeout(()=>t.classList.remove('show'),1500); }
-  function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal').classList.add('open'); }
-  function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+  function openModal(html,kind='sheet'){ const modal=document.getElementById('modal'); document.getElementById('modal-content').innerHTML=html; modal.classList.toggle('dialog',kind==='dialog'); modal.setAttribute('aria-hidden','false'); modal.classList.add('open'); }
+  function closeModal(){ const modal=document.getElementById('modal'); modal.classList.remove('open'); modal.classList.remove('dialog'); modal.setAttribute('aria-hidden','true'); }
+  function showSetupSecurityDemo(demo){
+    if(!state.onboardingName.trim()) state.onboardingName='あおい';
+    state.onboardingSecurityEnabled=demo!=='off';
+    state.onboardingUnlockMethod=demo==='biometric'?'biometric':'pin';
+    state.onboardingPinConfigured=demo==='pin-complete';
+    state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError='';
+    setScreen('preferences',false);
+    requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'}));
+  }
+  function beginOnboardingPinSetup(){
+    state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError='';
+    setScreen('setup-pin');
+  }
   function filterTransactions(q){ document.querySelectorAll('#transaction-list .list-transaction').forEach(x=>x.style.display=(x.dataset.search||x.textContent).toLowerCase().includes(q.toLowerCase())?'flex':'none'); }
   function resetShoppingFilters(){ state.shoppingLedger='all'; state.shoppingPrivateOnly=false; state.shoppingCategoryIds=[]; }
 
@@ -1820,11 +2471,6 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     render(); document.getElementById('app-screen').scrollTop=0;
     if(autoFinish) scheduleShoppingVoiceAutoFinish();
   }
-  function shoppingFormCategoryPicker(){
-    const categories=['食費 > 乳製品','食費 > 食料品','日用品 > 消耗品','趣味 > コレクション'];
-    return `<h3>カテゴリを選ぶ</h3><p class="hint">ShoppingItemFormScreen と同じカテゴリ階層を表示します。</p><div class="flat-card">${categories.map((category,index)=>`<button class="tap-row ${index<categories.length-1?'row-divider':''}" data-action="shopping-form-category-select" data-category="${category}"><span class="row-copy"><strong>${category}</strong></span>${state.shoppingFormCategory===category?icon('check'):icon('chevron_right')}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`;
-  }
-
   let entryVoiceSequence = 0;
   let entryVoiceAutoFinishTimer = null;
   let entryVoiceProcessingTimer = null;
@@ -1900,6 +2546,76 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     if(autoFinish) scheduleEntryVoiceAutoFinish();
   }
 
+  function showCategoryDemo(demo) {
+    prepareCategorySelection(); state.screen='category';
+    if(demo==='search'){ state.categoryQuery='カフェ'; state.categoryExpanded='cat_food'; }
+    if(demo==='reorder'||demo==='dirty'){
+      enterCategoryReorder(); state.categoryEditExpanded=demo==='reorder'?'cat_food':null;
+      if(demo==='dirty'&&categoryGroups.length>1){ const moved=categoryGroups.splice(1,1)[0]; categoryGroups.unshift(moved); state.categoryDirty=true; }
+    }
+    closeModal(); render(); document.getElementById('app-screen').scrollTop=0;
+    if(demo==='search') requestAnimationFrame(()=>document.querySelector('[data-category-search-input]')?.focus());
+  }
+
+  let categoryDrag = null;
+  let categorySuppressClickUntil = 0;
+  document.addEventListener('dragstart', e=>{
+    const item=e.target.closest?.('[data-category-drag]'); if(!item||state.categoryMode!=='edit') return;
+    categoryDrag={type:item.dataset.categoryDrag,groupId:item.dataset.categoryGroup,categoryId:item.dataset.categoryId||null};
+    item.classList.add('dragging'); if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',categoryDrag.categoryId||categoryDrag.groupId); }
+  });
+  document.addEventListener('dragover', e=>{
+    if(!categoryDrag) return; const target=e.target.closest?.(`[data-category-drag="${categoryDrag.type}"]`); if(!target) return;
+    if(categoryDrag.type==='child'&&target.dataset.categoryGroup!==categoryDrag.groupId) return;
+    e.preventDefault(); if(e.dataTransfer) e.dataTransfer.dropEffect='move';
+  });
+  document.addEventListener('drop', e=>{
+    if(!categoryDrag) return; const target=e.target.closest?.(`[data-category-drag="${categoryDrag.type}"]`); if(!target) return;
+    if(categoryDrag.type==='child'&&target.dataset.categoryGroup!==categoryDrag.groupId) return;
+    e.preventDefault(); e.stopPropagation();
+    if(categoryDrag.type==='group'){
+      const from=categoryGroups.findIndex(group=>group.id===categoryDrag.groupId); const targetId=target.dataset.categoryGroup; if(from>=0&&targetId!==categoryDrag.groupId){ const moved=categoryGroups.splice(from,1)[0]; let to=categoryGroups.findIndex(group=>group.id===targetId); const rect=target.getBoundingClientRect(); if(e.clientY>rect.top+rect.height/2) to+=1; categoryGroups.splice(Math.max(0,to),0,moved); state.categoryDirty=true; }
+    } else {
+      const group=categoryGroups.find(item=>item.id===categoryDrag.groupId); const from=group?.children.findIndex(child=>child.id===categoryDrag.categoryId)??-1; const targetId=target.dataset.categoryId; if(group&&from>=0&&targetId!==categoryDrag.categoryId){ const moved=group.children.splice(from,1)[0]; let to=group.children.findIndex(child=>child.id===targetId); const rect=target.getBoundingClientRect(); if(e.clientY>rect.top+rect.height/2) to+=1; group.children.splice(Math.max(0,to),0,moved); state.categoryDirty=true; }
+    }
+    categorySuppressClickUntil=Date.now()+350; categoryDrag=null; render();
+  });
+  document.addEventListener('dragend', e=>{ e.target.closest?.('[data-category-drag]')?.classList.remove('dragging'); categoryDrag=null; });
+  document.addEventListener('click', e=>{ if(Date.now()<categorySuppressClickUntil&&e.target.closest?.('[data-category-drag]')){ e.preventDefault(); e.stopImmediatePropagation(); } },true);
+
+  const categoryPointerDrag={item:null,type:null,groupId:null,startX:0,startY:0,dragging:false};
+  function finishCategoryPointerDrag(){
+    const item=categoryPointerDrag.item; if(!item) return;
+    item.classList.remove('dragging');
+    if(categoryPointerDrag.dragging){
+      if(categoryPointerDrag.type==='group'){
+        const ids=[...document.querySelectorAll('[data-category-group-list] > [data-category-drag="group"]')].map(node=>node.dataset.categoryGroup);
+        const byId=new Map(categoryGroups.map(group=>[group.id,group])); categoryGroups=ids.map(id=>byId.get(id)).filter(Boolean);
+      } else {
+        const group=categoryGroups.find(entry=>entry.id===categoryPointerDrag.groupId); const list=document.querySelector(`[data-category-child-list="${categoryPointerDrag.groupId}"]`);
+        if(group&&list){ const ids=[...list.querySelectorAll(':scope > [data-category-drag="child"]')].map(node=>node.dataset.categoryId); const byId=new Map(group.children.map(child=>[child.id,child])); group.children=ids.map(id=>byId.get(id)).filter(Boolean); }
+      }
+      state.categoryDirty=true; categorySuppressClickUntil=Date.now()+400;
+    }
+    categoryPointerDrag.item=null; categoryPointerDrag.type=null; categoryPointerDrag.groupId=null; categoryPointerDrag.dragging=false;
+    if(state.categoryDirty) render();
+  }
+  document.addEventListener('pointerdown',e=>{
+    const item=e.target.closest?.('[data-category-drag]'); if(!item||state.categoryMode!=='edit') return;
+    const handle=e.target.closest?.('.drag-handle')||e.target.closest?.('.category-reorder-child > .material-symbols-rounded'); if(!handle) return;
+    e.preventDefault(); categoryPointerDrag.item=item; categoryPointerDrag.type=item.dataset.categoryDrag; categoryPointerDrag.groupId=item.dataset.categoryGroup; categoryPointerDrag.startX=e.clientX; categoryPointerDrag.startY=e.clientY; categoryPointerDrag.dragging=false;
+  });
+  document.addEventListener('pointermove',e=>{
+    const item=categoryPointerDrag.item; if(!item) return;
+    const moved=Math.hypot(e.clientX-categoryPointerDrag.startX,e.clientY-categoryPointerDrag.startY); if(!categoryPointerDrag.dragging&&moved<4) return;
+    e.preventDefault(); categoryPointerDrag.dragging=true; item.classList.add('dragging');
+    const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.(`[data-category-drag="${categoryPointerDrag.type}"]`); if(!target||target===item) return;
+    if(categoryPointerDrag.type==='child'&&target.dataset.categoryGroup!==categoryPointerDrag.groupId) return;
+    const parent=item.parentElement; if(target.parentElement!==parent) return; const rect=target.getBoundingClientRect(); parent.insertBefore(item,e.clientY<rect.top+rect.height/2?target:target.nextSibling);
+  },{passive:false});
+  document.addEventListener('pointerup',finishCategoryPointerDrag);
+  document.addEventListener('pointercancel',finishCategoryPointerDrag);
+
   let shoppingActionItem = null;
   const shoppingPress = { timer:null, item:null, list:null, startX:0, startY:0, dragging:false, suppressClickUntil:0 };
   function finishShoppingPress(){ clearTimeout(shoppingPress.timer); shoppingPress.item?.classList.remove('dragging'); shoppingPress.timer=null; shoppingPress.item=null; shoppingPress.list=null; shoppingPress.dragging=false; }
@@ -1928,6 +2644,28 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   document.addEventListener('pointercancel', finishShoppingPress);
   document.addEventListener('click', e=>{ if(Date.now()<shoppingPress.suppressClickUntil && e.target.closest?.('[data-shopping-actions]')){ e.preventDefault(); e.stopImmediatePropagation(); } },true);
   document.addEventListener('input', e=>{
+    const onboardingName=e.target.closest?.('[data-onboarding-name]');
+    if(onboardingName){
+      state.onboardingName=onboardingName.value;
+      const submit=document.querySelector('[data-action="onboarding-start"]');
+      if(submit) submit.disabled=!setupCanSubmit();
+      const note=document.querySelector('.setup-required-note');
+      if(note) note.textContent=setupRequiredNote();
+      return;
+    }
+    const categorySearch=e.target.closest?.('[data-category-search-input]');
+    if(categorySearch){ state.categoryQuery=categorySearch.value; render(); requestAnimationFrame(()=>{ const input=document.querySelector('[data-category-search-input]'); if(input){ input.focus(); input.setSelectionRange(input.value.length,input.value.length); } }); return; }
+    const familyCodeInput=e.target.closest?.('[data-family-code-index]');
+    if(familyCodeInput){
+      familyCodeInput.value=familyCodeInput.value.replace(/\D/g,'').slice(-1);
+      const inputs=[...document.querySelectorAll('[data-family-code-index]')];
+      state.familyInviteCode=inputs.map(input=>input.value).join('');
+      const index=Number(familyCodeInput.dataset.familyCodeIndex);
+      if(familyCodeInput.value&&index<5) inputs[index+1]?.focus();
+      const reviewButton=document.querySelector('[data-action="family-join-review"]');
+      if(reviewButton) reviewButton.disabled=!/^\d{6}$/.test(state.familyInviteCode);
+      return;
+    }
     const input=e.target.closest?.('[data-entry-input]');
     if(input){
       if(input.dataset.entryInput==='merchant') state.entryMerchant=input.value;
@@ -1965,11 +2703,17 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
   document.addEventListener('click', e => {
     const screen=e.target.closest('[data-screen]'); if(screen){ if(screen.dataset.screen==='entry'&&screen.matches('.screen-link')){ showEntryDemo('manual'); return; } if(screen.dataset.screen==='shopping-form'&&screen.matches('.screen-link')){ resetShoppingForm(); setScreen('shopping-form'); return; } if(screen.dataset.screen==='edit'&&screen.matches('.screen-link')){ resetEditTransaction(); setScreen('edit'); return; } setScreen(screen.dataset.screen); return; }
     const navEl=e.target.closest('[data-nav]'); if(navEl){ setScreen(navEl.dataset.nav); return; }
+    const onboardingLanguage=e.target.closest('[data-onboarding-language]'); if(onboardingLanguage){ state.onboardingLanguage=onboardingLanguage.dataset.onboardingLanguage; if(!state.onboardingVoiceExplicit) state.onboardingVoice=state.onboardingLanguage==='system'?'ja':state.onboardingLanguage; closeModal(); render(); toast(`${{ja:'日本語',zh:'中文',en:'English',system:'自動'}[state.onboardingLanguage]}を選びました`); return; }
+    const onboardingCurrencyChoice=e.target.closest('[data-onboarding-currency-choice]'); if(onboardingCurrencyChoice){ state.onboardingCurrency=onboardingCurrencyChoice.dataset.onboardingCurrencyChoice; closeModal(); render(); toast(`${state.onboardingCurrency}を選びました`); return; }
+    const onboardingVoiceChoice=e.target.closest('[data-onboarding-voice-choice]'); if(onboardingVoiceChoice){ state.onboardingVoice=onboardingVoiceChoice.dataset.onboardingVoiceChoice; state.onboardingVoiceExplicit=true; closeModal(); render(); return; }
     const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); return; }
     const entryVariant=e.target.closest('[data-entry-variant]'); if(entryVariant){ state.entryVariant=entryVariant.dataset.entryVariant; render(); return; }
     const entryDemo=e.target.closest('[data-entry-demo]'); if(entryDemo){ showEntryDemo(entryDemo.dataset.entryDemo); return; }
     const shoppingDemo=e.target.closest('[data-shopping-demo]'); if(shoppingDemo){ showShoppingVoiceDemo(shoppingDemo.dataset.shoppingDemo); return; }
     const editDemo=e.target.closest('[data-edit-demo]'); if(editDemo){ showEditDemo(editDemo.dataset.editDemo); return; }
+    const categoryDemo=e.target.closest('[data-category-demo]'); if(categoryDemo){ showCategoryDemo(categoryDemo.dataset.categoryDemo); return; }
+    const familyDemo=e.target.closest('[data-family-demo]'); if(familyDemo){ if(familyDemo.dataset.familyDemo==='approval') state.familyRequestPending=true; setScreen(familyDemo.dataset.familyDemo); return; }
+    const setupSecurityDemo=e.target.closest('[data-setup-security-demo]'); if(setupSecurityDemo){ showSetupSecurityDemo(setupSecurityDemo.dataset.setupSecurityDemo); return; }
     const entryMethod=e.target.closest('[data-entry-method]'); if(entryMethod){ if(entryMethod.dataset.entryMethod==='voice') beginEntryVoice(); else switchEntryVoiceToKeyboard(); return; }
     const entryLedger=e.target.closest('[data-entry-ledger]'); if(entryLedger){ state.entryLedger=entryLedger.dataset.entryLedger; render(); return; }
     const entrySatisfaction=e.target.closest('[data-entry-satisfaction]'); if(entrySatisfaction){ state.entrySatisfaction=Number(entrySatisfaction.dataset.entrySatisfaction); render(); return; }
@@ -1980,6 +2724,26 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     const entryKey=e.target.closest('[data-entry-key]'); if(entryKey){ const k=entryKey.dataset.entryKey; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='.') { if(!state.amount.includes('.')) state.amount=(state.amount||'0')+'.'; } else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
     const key=e.target.closest('[data-key]'); if(key){ const k=key.dataset.key; if(k==='backspace') state.amount=state.amount.slice(0,-1)||'0'; else if(k==='mic') beginEntryVoice(); else state.amount=(state.amount==='0'?'':state.amount)+k; render(); return; }
     const lockKey=e.target.closest('[data-lock-key]'); if(lockKey){ const k=lockKey.dataset.lockKey; if(k==='backspace') state.pin=state.pin.slice(0,-1); else if(k==='fingerprint'){ toast('Face ID で認証しました'); setTimeout(()=>setScreen('home'),500); return; } else if(state.pin.length<4) state.pin+=k; if(state.pin.length===4){ toast('ロックを解除しました'); setTimeout(()=>{state.pin='';setScreen('home')},550); } else render(); return; }
+    const onboardingPinKey=e.target.closest('[data-onboarding-pin-key]'); if(onboardingPinKey){
+      const k=onboardingPinKey.dataset.onboardingPinKey;
+      state.onboardingPinError='';
+      if(k==='backspace') state.onboardingPinDraft=state.onboardingPinDraft.slice(0,-1);
+      else if(state.onboardingPinDraft.length<4) state.onboardingPinDraft+=k;
+      if(state.onboardingPinDraft.length===4){
+        const entered=state.onboardingPinDraft;
+        if(state.onboardingPinStage==='create'){
+          state.onboardingPinFirst=entered; state.onboardingPinDraft=''; state.onboardingPinStage='confirm'; render();
+        } else if(entered===state.onboardingPinFirst){
+          state.onboardingPinConfigured=true; state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError='';
+          if(state.history.at(-1)==='preferences') state.history.pop();
+          setScreen('preferences',false); toast('4桁のPINを設定しました');
+          requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'}));
+        } else {
+          state.onboardingPinDraft=''; state.onboardingPinError='PINが一致しません。もう一度入力してください。'; render();
+        }
+      } else render();
+      return;
+    }
     const uiState=e.target.closest('[data-ui-state]'); if(uiState){ state.uiState=uiState.dataset.uiState; render(); return; }
     const listDay=e.target.closest('[data-list-day]'); if(listDay){ const day=Number(listDay.dataset.listDay); state.listDay=state.listDay===day?null:day; render(); return; }
     const listLedger=e.target.closest('[data-list-ledger]'); if(listLedger){ state.listLedger=listLedger.dataset.listLedger; render(); return; }
@@ -1998,6 +2762,45 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     const action=e.target.closest('[data-action]'); if(!action) return; const a=action.dataset.action;
     if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
     else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); toast(state.family?'家庭モード':'個人モード'); }
+    else if(a==='family-create') setScreen('create');
+    else if(a==='family-join') setScreen('join');
+    else if(a==='family-copy-code') toast('招待コードをコピーしました');
+    else if(a==='family-regenerate-code'){ state.familyInviteCode=state.familyInviteCode==='482169'?'735204':'482169'; render(); toast('招待コードを再発行しました'); }
+    else if(a==='family-share') toast('招待コードを共有しました');
+    else if(a==='family-edit-name') openModal(`<h3>家族名を編集</h3><p class="hint">この名前は参加メンバー全員に表示されます。</p><div class="flat-card"><div class="tap-row"><span class="row-icon">${icon('home')}</span><span class="row-copy"><strong>青木家の家計</strong><small>現在の家族名</small></span></div></div><button class="primary-btn" data-action="family-name-saved">保存</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='family-name-saved'){ closeModal(); toast('家族名を更新しました'); }
+    else if(a==='family-join-review'){ if(!/^\d{6}$/.test(state.familyInviteCode)){ toast('6桁の招待コードを入力してください'); return; } setScreen('join-confirm'); }
+    else if(a==='family-send-request'){ state.familyRequestPending=true; setScreen('join-waiting'); }
+    else if(a==='family-pending') setScreen('approval');
+    else if(a==='family-approve'){ state.family=true; state.familyRequestPending=false; toast('花子さんを承認しました'); setTimeout(()=>setScreen('group'),450); }
+    else if(a==='family-reject'){ state.familyRequestPending=false; toast('参加申請を拒否しました'); setTimeout(()=>setScreen('create'),450); }
+    else if(a==='family-invite') setScreen('create');
+    else if(a==='family-member') openModal(`<h3>${escapeHtml(action.dataset.member)}</h3><p class="hint">役割、端末と同期状態を確認します。</p><div class="flat-card"><div class="tap-row row-divider"><span class="row-copy"><strong>役割</strong><small>${action.dataset.member==='あおい'?'オーナー':'メンバー'}</small></span></div><div class="tap-row"><span class="row-copy"><strong>同期状態</strong><small>同期済み</small></span></div></div><button class="ghost-btn" data-action="close-modal">閉じる</button>`);
+    else if(a==='family-sync-settings') openModal(`<h3>同期設定</h3><div class="flat-card"><button class="tap-row row-divider" data-action="family-manual-sync"><span class="row-icon">${icon('sync')}</span><span class="row-copy"><strong>今すぐ同期</strong><small>前回の同期：たった今</small></span>${icon('chevron_right')}</button><div class="tap-row"><span class="row-icon">${icon('encrypted')}</span><span class="row-copy"><strong>暗号化状態</strong><small>すべての端末で確認済み</small></span></div></div><button class="ghost-btn" data-action="close-modal">閉じる</button>`);
+    else if(a==='family-manual-sync'){ closeModal(); toast('同期を開始しました'); }
+    else if(a==='family-disband') openModal(`<h3>家族を解散しますか？</h3><p class="hint">すべてのメンバーの同期が停止します。個人の端末内データは削除されません。</p><button class="primary-btn" style="background:var(--hp-error);box-shadow:none" data-action="family-disband-confirm">家族を解散</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`,'dialog');
+    else if(a==='family-disband-confirm'){ state.family=false; state.familyRequestPending=true; closeModal(); setScreen('family',false); toast('家族を解散しました'); }
+    else if(a==='onboarding-avatar') openModal(`<h3>アバターを選ぶ</h3><div style="display:grid;place-items:center;margin:4px 0 16px"><img class="setup-avatar-asset" src="assets/onboarding-avatar-warm-v1.png" alt="芽とハートのプロフィール" style="width:92px;height:92px;object-fit:contain"></div><div class="flat-card"><button class="tap-row row-divider" data-action="onboarding-avatar-default"><span class="row-copy"><strong>このアイコンを使う</strong><small>温かい芽とハートのプロフィール</small></span></button><button class="tap-row" data-action="onboarding-avatar-photo"><span class="row-copy"><strong>写真を選ぶ</strong><small>端末内の画像から選択</small></span></button></div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='onboarding-avatar-default'){ closeModal(); toast('アバターを選びました'); }
+    else if(a==='onboarding-avatar-photo'){ closeModal(); toast('写真ピッカーを開きます'); }
+    else if(a==='onboarding-language') openModal(`<h3>表示言語</h3><p class="hint">「自動」では端末の言語に合わせます。対象外の言語では日本語を表示します。</p><div class="flat-card">${[['ja','日本語'],['zh','中文'],['en','English'],['system','自動']].map(([code,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-onboarding-language="${code}"><span class="row-icon">${icon(code==='system'?'auto_awesome':'language')}</span><span class="row-copy"><strong>${label}</strong></span>${state.onboardingLanguage===code?'<span class="text-btn">選択中</span>':''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='onboarding-currency') openModal(`<h3>通貨単位</h3><p class="hint">この家計簿で記録する通貨を選びます。</p><div class="flat-card">${[['JPY','日本円'],['USD','米ドル'],['CNY','中国元'],['EUR','ユーロ']].map(([code,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-onboarding-currency-choice="${code}"><span class="row-copy"><strong>${code}</strong><small>${label}</small></span>${state.onboardingCurrency===code?'<span class="text-btn">選択中</span>':''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='onboarding-voice') openModal(`<h3>音声入力の言語</h3><div class="flat-card">${[['ja','日本語'],['zh','中文'],['en','English']].map(([code,label],index)=>`<button class="tap-row ${index<2?'row-divider':''}" data-onboarding-voice-choice="${code}"><span class="row-copy"><strong>${label}</strong></span>${state.onboardingVoice===code?'<span class="text-btn">選択中</span>':''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='onboarding-security-toggle'){ state.onboardingSecurityEnabled=!state.onboardingSecurityEnabled; if(state.onboardingSecurityEnabled&&!state.onboardingUnlockMethod) state.onboardingUnlockMethod='biometric'; render(); requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
+    else if(a==='onboarding-security-method'){ state.onboardingUnlockMethod=action.dataset.method; render(); requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
+    else if(a==='onboarding-pin-setup') beginOnboardingPinSetup();
+    else if(a==='onboarding-pin-cancel'){ state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError=''; if(state.history.at(-1)==='preferences') state.history.pop(); setScreen('preferences',false); requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
+    else if(a==='onboarding-start'){ if(!setupCanSubmit()) return; setScreen('home'); toast('初期設定が完了しました'); }
+    else if(a==='category-reorder-enter'){ enterCategoryReorder(); render(); }
+    else if(a==='category-toggle'){ state.categoryExpanded=state.categoryExpanded===action.dataset.categoryGroup?null:action.dataset.categoryGroup; render(); }
+    else if(a==='category-edit-toggle'){ state.categoryEditExpanded=state.categoryEditExpanded===action.dataset.categoryGroup?null:action.dataset.categoryGroup; render(); }
+    else if(a==='category-select') selectCategory(action.dataset.categoryGroup,action.dataset.categoryId);
+    else if(a==='category-add-sub') toast('「'+categoryGroups.find(group=>group.id===action.dataset.categoryGroup)?.name+'」に分類を追加');
+    else if(a==='category-add') toast('新しいカテゴリを追加');
+    else if(a==='category-save'){ state.categoryMode='browse'; state.categoryDirty=false; state.categorySnapshot=null; state.categoryEditExpanded=null; state.categoryExpanded=categoryParentId(); render(); toast('順序を更新しました'); }
+    else if(a==='category-close'){ if(state.categoryMode==='edit'){ if(state.categoryDirty) categoryDiscardDialog(); else { state.categoryMode='browse'; state.categorySnapshot=null; render(); } } else { const previous=state.history.pop()||'entry'; setScreen(previous,false); } }
+    else if(a==='category-keep-editing') closeModal();
+    else if(a==='category-discard'){ if(state.categorySnapshot) categoryGroups=JSON.parse(JSON.stringify(state.categorySnapshot)); state.categoryMode='browse'; state.categoryDirty=false; state.categorySnapshot=null; state.categoryEditExpanded=null; closeModal(); render(); }
     else if(a==='dismiss-invite'){ state.inviteDismissed=true; render(); }
     else if(a==='entry-history') toast('打开最近记账记录');
     else if(a==='entry-voice-open') beginEntryVoice();
@@ -2023,7 +2826,7 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
     else if(a==='shopping-mic-settings') toast('マイクの権限設定を開きます');
     else if(a==='shopping-quantity-decrease'){ state.shoppingFormQuantity=Math.max(1,Number(state.shoppingFormQuantity||1)-1); render(); }
     else if(a==='shopping-quantity-increase'){ state.shoppingFormQuantity=Math.max(1,Number(state.shoppingFormQuantity||1)+1); render(); }
-    else if(a==='shopping-form-category') openModal(shoppingFormCategoryPicker());
+    else if(a==='shopping-form-category') setScreen('category');
     else if(a==='shopping-form-category-select'){ state.shoppingFormCategory=action.dataset.category||''; closeModal(); render(); }
     else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='list-sort-option'){ state.listSort=action.dataset.sort; state.listDirection=action.dataset.direction; closeModal(); render(); }
@@ -2061,16 +2864,19 @@ body { margin: 0; background: #ece4df; font-family: var(--font); color: var(--te
       setTimeout(()=>{ if(state.screen!=='shopping-form') return; toast(message); setScreen('shopping',false); },550);
     }
     else if(a==='ocr-capture'){ toast('レシートを読み取りました'); setTimeout(()=>{ resetEditTransaction(); setScreen('edit'); },550); }
-    else if(a==='pick-category'){ const returningToEdit=state.history.at(-1)==='edit'; if(returningToEdit){ state.editCategory='食费 > 咖啡'; toast('已选择'+action.textContent.trim()); setTimeout(()=>{ state.history.pop(); setScreen('edit',false); },450); return; } const fromVoice=state.entryInputMode==='voice'&&state.entryVoiceApplied; state.entryCategory='食费 > 咖啡'; state.entryNeedsReview=false; state.entryReviewPending=false; state.entryVoiceApplied=fromVoice; toast('已选择'+action.textContent.trim()); setTimeout(()=>{ if(state.history.at(-1)==='entry') state.history.pop(); setScreen('entry',false); },450); }
-    else if(a==='create-family'){ state.family=true; toast('招待コードを作成しました'); setTimeout(()=>setScreen('group'),450); }
-    else if(a==='join-family'){ toast('家族情報を確認しました'); setTimeout(()=>setScreen('group'),450); }
     else if(a==='switch') action.classList.toggle('on');
     else if(a==='delete') openModal(`<h3>この操作を確認</h3><p class="hint">削除した内容は元に戻せません。</p><button class="primary-btn" style="background:var(--hp-error)" data-action="close-modal">削除する</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='forgot-pin') openModal(`<h3>PINを忘れた場合</h3><p class="legal-copy">PINを復元する仕組みはありません。再インストールすると、同期されていない端末内データは失われます。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
     else if(a==='legal-doc') openModal(`<h3>${action.innerText.trim()}</h3><p class="legal-copy">この文書は読みやすさを優先し、見出し・本文・更新日を一つの紙面として表示します。正式な内容は既存の法務文書を使用します。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
   });
   document.addEventListener('keydown', e => {
-    const hero=e.target.closest?.('.faithful-hero');
+    const familyCodeInput=e.target.closest?.('[data-family-code-index]');
+    if(familyCodeInput&&e.key==='Backspace'&&!familyCodeInput.value){
+      const index=Number(familyCodeInput.dataset.familyCodeIndex);
+      document.querySelector(`[data-family-code-index="${Math.max(0,index-1)}"]`)?.focus();
+      return;
+    }
+    const hero=e.target.closest?.('.faithful-hero, .faithful-favorite-card');
     if(hero && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); setScreen('analytics'); }
   });
   document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });

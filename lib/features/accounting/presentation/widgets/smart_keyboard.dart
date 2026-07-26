@@ -302,7 +302,7 @@ class _DigitKey extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.w500,
               // UI-SPEC Typography: tabular figures so digit glyphs align like AmountDisplay
-              fontFeatures: const [FontFeature.tabularFigures()],
+              fontFeatures: AppTextStyles.numeralFontFeatures,
               color: palette.textPrimary,
             ),
           ),

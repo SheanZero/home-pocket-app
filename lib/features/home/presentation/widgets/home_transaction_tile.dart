@@ -172,7 +172,9 @@ class HomeTransactionTile extends StatelessWidget {
               if (foreignAnnotation == null)
                 Text(
                   formattedAmount,
-                  style: AppTextStyles.amountSmall.copyWith(color: amountColor),
+                  style: AppTextStyles.numerals(
+                    AppTextStyles.amountSmall.copyWith(color: amountColor),
+                  ),
                 )
               else
                 Column(
@@ -181,15 +183,17 @@ class HomeTransactionTile extends StatelessWidget {
                   children: [
                     Text(
                       formattedAmount,
-                      style: AppTextStyles.amountSmall.copyWith(
-                        color: amountColor,
+                      style: AppTextStyles.numerals(
+                        AppTextStyles.amountSmall.copyWith(color: amountColor),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       foreignAnnotation!,
-                      style: AppTextStyles.supporting.copyWith(
-                        color: palette.textSecondary,
+                      style: AppTextStyles.numerals(
+                        AppTextStyles.supporting.copyWith(
+                          color: palette.textSecondary,
+                        ),
                       ),
                     ),
                   ],

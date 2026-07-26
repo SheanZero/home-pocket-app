@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/accounting/category_service.dart';
+import '../../../../application/accounting/create_category_use_case.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/delete_transaction_use_case.dart';
 import '../../../../application/accounting/update_transaction_use_case.dart';
@@ -35,6 +36,7 @@ import '../../../../data/repositories/device_identity_repository_impl.dart';
 import '../../../../data/repositories/merchant_category_preference_repository_impl.dart';
 import '../../../../data/repositories/merchant_repository_impl.dart';
 import '../../../../data/repositories/transaction_repository_impl.dart';
+import '../../../../data/repositories/unit_of_work_impl.dart';
 import '../../domain/models/book.dart';
 import '../../domain/repositories/book_repository.dart';
 import '../../domain/repositories/category_keyword_preference_repository.dart';
@@ -96,6 +98,19 @@ CategoryLedgerConfigRepository categoryLedgerConfigRepository(Ref ref) {
   final dao = CategoryLedgerConfigDao(database);
   return CategoryLedgerConfigRepositoryImpl(dao: dao);
 }
+
+/// Atomic custom-category creation provider.
+///
+/// The category and mandatory L1 ledger config share the same Drift database,
+/// so [UnitOfWorkImpl] can roll both writes back together on failure.
+final createCategoryUseCaseProvider = Provider<CreateCategoryUseCase>((ref) {
+  final database = ref.watch(app_accounting.appAppDatabaseProvider);
+  return CreateCategoryUseCase(
+    categoryRepository: ref.watch(categoryRepositoryProvider),
+    ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
+    unitOfWork: UnitOfWorkImpl(db: database),
+  );
+});
 
 /// TransactionRepository provider.
 @riverpod

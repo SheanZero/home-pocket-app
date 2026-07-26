@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/hold_to_talk_bar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 
@@ -52,6 +53,14 @@ void main() {
     final decoration = ink.decoration! as BoxDecoration;
     expect(decoration.color, isNotNull);
     expect(decoration.gradient, isNull);
+
+    final digit = tester.widget<Text>(find.text('1'));
+    expect(digit.style?.fontFamily, AppTextStyles.numeralFontFamily);
+    expect(
+      digit.style?.fontFeatures,
+      contains(const FontFeature.tabularFigures()),
+    );
+    expect(digit.style?.fontFeatures, contains(const FontFeature('zero')));
   });
 
   testWidgets('v16 voice launcher is a neutral 304 by 46 control', (

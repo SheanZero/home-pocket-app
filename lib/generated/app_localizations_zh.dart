@@ -648,6 +648,9 @@ class SZh extends S {
   String get homeViewMonthlyAnalysis => '查看本月分析';
 
   @override
+  String get homeViewDetails => '查看详情';
+
+  @override
   String get homeMetricJoyUnit => 'Joy';
 
   @override
@@ -798,6 +801,47 @@ class SZh extends S {
 
   @override
   String get addCategory => '添加分类';
+
+  @override
+  String get noMatchingCategories => '没有匹配的分类';
+
+  @override
+  String get addL1CategoryTitle => '添加分类';
+
+  @override
+  String addL2CategoryTitle(String parentName) {
+    return '添加到“$parentName”';
+  }
+
+  @override
+  String get categoryNameLabel => '分类名称';
+
+  @override
+  String get categoryNameHint => '例如：周末项目';
+
+  @override
+  String get categoryNameRequired => '请输入分类名称';
+
+  @override
+  String get categoryNameTooLong => '最多输入 50 个字符';
+
+  @override
+  String get categoryNameExists => '已存在同名分类';
+
+  @override
+  String get categoryLedgerLabel => '账本';
+
+  @override
+  String get categoryLedgerDescription => '选择此分类的支出记入哪个账本。';
+
+  @override
+  String get createCategory => '添加';
+
+  @override
+  String get categoryAdded => '分类已添加';
+
+  @override
+  String get categoryAddFailed => '添加失败，请重试';
 
   @override
   String get editCategoryOrder => '编辑分类顺序';

@@ -12,6 +12,8 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_joy_
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
+import '../helpers/load_numeral_font.dart';
+
 /// Golden tests for [WithinMonthTrendCard] (round-5 B card #1, Plan 47-05).
 ///
 /// Coverage (GUARD-04 / 47-UI-SPEC §Golden Visual-Contract Matrix):
@@ -102,13 +104,13 @@ Widget _wrap({
 }
 
 void main() {
+  setUpAll(loadNumeralFont);
+
   group('WithinMonthTrendCard golden', () {
     for (final locale in const [Locale('ja'), Locale('zh'), Locale('en')]) {
       final tag = locale.languageCode;
       testWidgets('value — light $tag', (tester) async {
-        await tester.pumpWidget(
-          _wrap(locale: locale, trend: _fixtureRich()),
-        );
+        await tester.pumpWidget(_wrap(locale: locale, trend: _fixtureRich()));
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(WithinMonthTrendCard),

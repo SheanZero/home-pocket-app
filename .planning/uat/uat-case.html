@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Home Pocket｜UAT 详情</title>
+  <style>
+    :root{--bg:#f7f4ee;--card:#fffdfa;--ink:#28231f;--muted:#756d65;--line:#e5ddd3;--brand:#2e8066;--brand2:#47b88a;--soft:#dcefe7;--joy:#d79742;--danger:#bd4f4a;--danger-soft:#f8e2df;--shadow:0 18px 50px rgba(68,51,35,.08)}
+    *{box-sizing:border-box}body{margin:0;color:var(--ink);background:radial-gradient(circle at 100% 0,rgba(71,184,138,.14),transparent 32rem),var(--bg);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Noto Sans CJK SC",sans-serif}button,input,select,textarea{font:inherit}a{color:var(--brand)}.shell{max-width:1160px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:18px}.back{text-decoration:none;font-weight:800}.nav{display:flex;gap:8px}.nav a,.nav button{min-height:38px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);text-decoration:none;cursor:pointer}.hero{padding:28px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#fffdfa,#f2faf6);box-shadow:var(--shadow)}.hero-row{display:flex;justify-content:space-between;gap:20px;align-items:start}.kicker{margin:0 0 7px;color:var(--brand);font-size:12px;font-weight:900;letter-spacing:.12em}.hero h1{margin:0;font-size:clamp(25px,4vw,40px);line-height:1.15;letter-spacing:-.03em}.criteria{max-width:760px;margin:12px 0 0;color:var(--muted)}.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.badge{padding:4px 9px;border-radius:999px;background:var(--soft);color:var(--brand);font-size:12px;font-weight:800}.badge.p0{background:var(--danger);color:white}.badge.p1{background:#f8ebcd;color:#9a6214}.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;margin-top:18px}.card{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:var(--shadow)}h2{margin:0 0 14px;font-size:18px}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field label{display:block;margin-bottom:5px;color:var(--muted);font-size:12px;font-weight:700}.field input,.field select,.field textarea{width:100%;min-height:40px;padding:8px 10px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px}.field textarea{min-height:92px;resize:vertical}.steps{display:grid;gap:12px}.step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding:15px;border:1px solid var(--line);border-radius:14px}.step.done{background:rgba(46,128,102,.05);border-color:rgba(46,128,102,.35)}.step input{width:20px;height:20px;margin:4px 0 0;accent-color:var(--brand)}.step h3{margin:0 0 5px;font-size:15px}.step p{margin:0}.expect{margin-top:7px!important;color:var(--muted);font-size:13px}.expect strong{color:var(--brand)}.side{display:grid;gap:18px;align-content:start}.side ul{margin:0;padding-left:20px}.side li+li{margin-top:7px}.callout{padding:13px;border-left:4px solid var(--joy);border-radius:8px;background:#fbf2e5;color:var(--muted)}.result{margin-top:12px;padding:12px;border-radius:10px;background:var(--soft);font-weight:800}.danger{border-left-color:var(--danger);background:var(--danger-soft)}.footer{padding:20px 0;color:var(--muted);font-size:12px;text-align:center}[hidden]{display:none!important}@media(max-width:820px){.grid{grid-template-columns:1fr}.hero-row{display:block}.meta{grid-template-columns:1fr}.shell{padding:12px}.top{align-items:start}.nav{flex-wrap:wrap;justify-content:flex-end}}@media(prefers-color-scheme:dark){:root{--bg:#171816;--card:#252723;--ink:#f4f0e9;--muted:#b1aaa1;--line:#3c3c37;--soft:#203d33;--danger-soft:#472827;--shadow:none}.hero{background:linear-gradient(135deg,#252823,#202922)}.callout{background:#413421}}@media print{body{background:white;color:#111}.shell{max-width:none;padding:0}.top,.footer{display:none}.hero,.card{box-shadow:none}.grid{grid-template-columns:1fr 260px}.step{break-inside:avoid}.field input,.field select,.field textarea{border:0;padding:0;appearance:none}}
+  </style>
+</head>
+<body>
+  <main class="shell" id="app" hidden>
+    <div class="top"><a class="back" href="pre-release-uat-progress.html">← 返回 UAT 总表</a><nav class="nav"><a id="prev">← 上一个</a><a id="next">下一个 →</a><button onclick="window.print()">打印 / PDF</button></nav></div>
+    <header class="hero">
+      <div class="hero-row"><div><p class="kicker" id="caseId"></p><h1 id="title"></h1><p class="criteria" id="criteria"></p></div><div class="badges" id="badges"></div></div>
+    </header>
+    <div class="grid">
+      <div>
+        <section class="card"><h2>执行信息</h2><div class="meta"><div class="field"><label for="owner">负责人</label><input id="owner" placeholder="姓名 / 角色"></div><div class="field"><label for="date">计划日期</label><input id="date" type="date"></div><div class="field"><label for="status">执行状态</label><select id="status"><option>未开始</option><option>进行中</option><option>通过</option><option>失败</option><option>阻塞</option><option>不适用</option></select></div><div class="field"><label for="build">测试构建</label><input id="build" placeholder="版本号 / Build / Commit"></div></div></section>
+        <section class="card" style="margin-top:18px"><h2>详细测试步骤</h2><div class="steps" id="steps"></div><div class="result" id="stepProgress"></div></section>
+        <section class="card" style="margin-top:18px"><h2>执行结论与缺陷</h2><div class="field"><label for="note">实际结果、证据路径、缺陷编号及风险说明</label><textarea id="note" placeholder="例：PASS；证据 /screenshots/UAT-001；或 BUG-123（P0）…"></textarea></div></section>
+      </div>
+      <aside class="side">
+        <section class="card"><h2>前置条件</h2><ul id="preconditions"></ul></section>
+        <section class="card"><h2>测试数据</h2><ul id="testData"></ul></section>
+        <section class="card"><h2>证据要求</h2><ul><li>首尾关键画面截图或录屏</li><li>设备型号、OS、App Build</li><li>涉及金额时记录输入与预期结果</li><li>失败时附最短复现步骤与日志时间点</li></ul></section>
+        <section class="callout"><strong>失败处理</strong><br>发现数据丢失、明文泄露、无法解锁、崩溃或核心金额错误时，立即标为“阻塞”，停止同构建后续发布验证并升级。</section>
+      </aside>
+    </div>
+    <div class="footer">步骤勾选、负责人、状态与备注均保存在本机浏览器，并与 UAT 总表共享。</div>
+  </main>
+  <section class="shell" id="notFound" hidden><div class="card"><h1>未找到 UAT 用例</h1><p>请从 <a href="pre-release-uat-progress.html">UAT 总表</a>重新进入。</p></div></section>
+  <script>
+    const CASES = [
+      ['UAT-001','安装与首启','P0','全新安装后首次启动','初始化完成，无崩溃；首启引导出现且不与加密数据库初始化竞态','iOS + Android'],
+      ['UAT-002','安装与首启','P0','完成三语、币种、语音语言首启设置','选择即时生效并持久化；重启不重复出现引导','iOS + Android'],
+      ['UAT-003','安装与首启','P1','首启返回、跳过介绍与跳过应用锁','流程无死路；跳过锁后应用锁保持关闭','iOS + Android'],
+      ['UAT-004','安装与首启','P1','升级安装与已有数据启动','原有加密数据可读，设置不丢失，不误触发首启','iOS + Android'],
+      ['UAT-005','核心账务','P0','新增日常账目','金额、日期、账本、分类、商家与备注正确保存并展示','iOS + Android'],
+      ['UAT-006','核心账务','P0','新增悦己账目并记录满足度','悦己贡献按 ADR-016 计算；无 Joy/¥、ROI 或密度文案','iOS + Android'],
+      ['UAT-007','核心账务','P0','编辑账目后跨首页/明细/统计刷新','所有页面即时一致，无重复项或旧缓存','iOS + Android'],
+      ['UAT-008','核心账务','P0','删除账目与撤销/确认路径','目标账目正确删除；汇总、趋势与分类同步更新','iOS + Android'],
+      ['UAT-009','核心账务','P1','未来日期、月末、闰日与跨月边界','日期归属和月度汇总正确，无时区偏移','iOS + Android'],
+      ['UAT-010','核心账务','P1','超长备注、零值、极大金额与小数币种','合法边界可保存；非法输入有三语友好提示且不污染数据','iOS + Android'],
+      ['UAT-011','首页体验','P0','首页当月支出与悦己 Hero','当前月累计值、目标与环形进度正确；达到 100% 无庆祝事件','iOS + Android'],
+      ['UAT-012','首页体验','P1','最近账目进入编辑并返回','正确定位记录，修改后首页即时刷新','iOS + Android'],
+      ['UAT-013','明细列表','P0','按账本、分类、成员、月份筛选','筛选结果与汇总一致，清除筛选可恢复完整结果','iOS + Android'],
+      ['UAT-014','明细列表','P1','排序、空状态与长列表滚动','排序稳定；空状态三语正确；长列表无掉帧或重复加载','iOS + Android'],
+      ['UAT-015','统计分析','P0','实用账本趋势、分类圆环与下钻','金额、坐标轴、整月范围、上月对比及分类明细一致','iOS + Android'],
+      ['UAT-016','统计分析','P0','悦己日历、满足度与分类分布','Σ joy_contribution 口径一致；悦己趋势无上月对比线','iOS + Android'],
+      ['UAT-017','统计分析','P1','成员维度与成员过滤','显示真实成员名；单设备“自己”可用；改名后同步更新','iOS + Android'],
+      ['UAT-018','统计分析','P1','无数据、单笔、超大数据集','图表不崩溃、不溢出，标签与图例可读','iOS + Android'],
+      ['UAT-019','购物清单','P0','新建、勾选、编辑、删除公开清单项','状态持久化，公开项正确进入家庭同步','iOS + Android'],
+      ['UAT-020','购物清单','P0','私密清单端到端隔离','私密项不进入同步 payload、远端或其他家庭成员设备','iOS + Android'],
+      ['UAT-021','购物清单','P1','离线编辑后恢复网络','本地立即可用；联网后合并正确，无重复/丢项','iOS + Android'],
+      ['UAT-022','家庭同步','P0','创建家庭、邀请、加入与成员展示','两台设备成功入组，成员身份和账本范围正确','iOS + Android 跨设备'],
+      ['UAT-023','家庭同步','P0','双端新增/编辑/删除账目同步','E2EE 同步后两端最终一致，无明文敏感 payload','iOS + Android 跨设备'],
+      ['UAT-024','家庭同步','P0','并发修改、断网重连与冲突处理','冲突按既定策略收敛；不重复、不静默丢数据','iOS + Android 跨设备'],
+      ['UAT-025','家庭同步','P1','推送唤醒与前后台同步','前台/后台恢复路径有效；失败可重试且不泄露详情','iOS + Android 跨设备'],
+      ['UAT-026','多币种','P0','JPY 与外币手动记账','JPY 整数路径不变；外币原金额/币种/汇率与 JPY 换算正确','iOS + Android'],
+      ['UAT-027','多币种','P0','历史日期汇率、主源失败与离线缓存','按账目日期取值；备用源/缓存降级明确且金额一致','iOS + Android'],
+      ['UAT-028','多币种','P1','外币编辑、整数显示与汇率过期提示','两输入一派生规则成立；整数无 .00；过期状态可理解','iOS + Android'],
+      ['UAT-029','语音输入','P0','中文、日文、英文一句话记账','金额、商家、L2 分类与日常/悦己账本识别正确','iOS + Android'],
+      ['UAT-030','语音输入','P0','低置信度、冲突与手动纠错','弱/冲突结果要求确认；纠错仅学习关键词，不污染商家库','iOS + Android'],
+      ['UAT-031','语音输入','P1','拒绝麦克风权限、无语音与中断','有可恢复提示并可切回手动输入，无崩溃/死锁','iOS + Android'],
+      ['UAT-032','语音输入','P1','口语外币与连续数字片段','币种正确切换；合并窗口内金额解析稳定','iOS + Android'],
+      ['UAT-033','安全隐私','P0','启用应用锁并设置 4 位 PIN','PIN 仅以 Argon2id PHC 保存；无明文、日志或半设置状态','iOS + Android'],
+      ['UAT-034','安全隐私','P0','冷启动和 paused→resumed 重锁','启用后必须重新认证；关闭后完全 no-op','iOS + Android'],
+      ['UAT-035','安全隐私','P0','任务切换器隐私遮罩','inactive 时快照完全遮挡账目和金额，不使用可透视模糊','iOS + Android'],
+      ['UAT-036','安全隐私','P0','生物识别各类失败回退 PIN','取消、未录入、锁定、不可用等均可进入 PIN，不锁死用户','iOS + Android'],
+      ['UAT-037','安全隐私','P0','错误 PIN、关闭锁与修改 PIN','错误后可重试；敏感设置变更要求重新认证；关闭清除 PHC','iOS + Android'],
+      ['UAT-038','安全隐私','P0','SQLCipher 与字段/文件加密实机验证','数据库非明文 SQLite；敏感字段、照片及同步内容不可明读','iOS + Android'],
+      ['UAT-039','安全隐私','P1','日志、崩溃与错误提示隐私扫描','金额、备注、商家、密钥、token、恢复材料均不进入生产日志','iOS + Android'],
+      ['UAT-040','备份恢复','P0','导出并在新安装中恢复完整数据','账目、设置、分类及关联数据完整；恢复后不重复首启','iOS + Android'],
+      ['UAT-041','备份恢复','P0','错误密码、损坏包与不兼容版本','安全拒绝且原数据不受损；提示不泄露加密细节','iOS + Android'],
+      ['UAT-042','备份恢复','P1','清除全部数据','加密数据、个人资料和首启标记按契约清除，重启进入引导','iOS + Android'],
+      ['UAT-043','i18n 与视觉','P0','ja / zh / en 全页面逐屏走查','无硬编码、缺键、截断、乱码或错误回退；产品词汇符合 ADR-015','iOS + Android'],
+      ['UAT-044','i18n 与视觉','P0','浅色 / 深色逐屏走查','主页、明细、统计、购物、录入、设置、引导、锁屏均可读','iOS + Android'],
+      ['UAT-045','i18n 与视觉','P1','动态字体 200%、小屏与横屏','关键流程可完成；无溢出、遮挡或不可滚动区域','iOS + Android'],
+      ['UAT-046','i18n 与视觉','P1','屏幕阅读器、焦点顺序与 48dp 触控','主要控件语义明确，顺序合理，触控区域达标','VoiceOver + TalkBack'],
+      ['UAT-047','性能稳定','P0','冷启动、前后台切换与连续录入 50 笔','无崩溃/ANR；锁与初始化状态稳定；数据全部落盘','iOS + Android'],
+      ['UAT-048','性能稳定','P1','大量账目下列表、筛选和统计','滚动与交互可接受，无明显内存增长或 UI 卡死','iOS + Android'],
+      ['UAT-049','性能稳定','P1','弱网、断网、请求超时与服务恢复','本地核心功能不受影响；外部能力可降级并恢复','iOS + Android'],
+      ['UAT-050','法务商店','P0','隐私政策、利用规约、特商法与 OSS','三语内容可打开；特商法经营者等占位符已替换为真实值','iOS + Android'],
+      ['UAT-051','法务商店','P0','赞助与全部外部链接','打开真实 HTTPS 目标；失败提示中立且不阻断设置页','iOS + Android'],
+      ['UAT-052','法务商店','P0','App Store / Google Play 隐私申报','数据收集、FCM token、汇率网络请求与实际行为完全一致','Store Console'],
+      ['UAT-053','法务商店','P0','权限文案、图标、截图、版本号与发布说明','双商店素材齐全、三语准确、无测试占位内容','Store Console'],
+      ['UAT-054','发布构建','P0','iOS Release 签名包实机安装','SQLCipher cipher_version 有效；无 sqlite3 冲突；启动与核心流程通过','iOS 真机'],
+      ['UAT-055','发布构建','P0','Android Release 签名包实机安装','Android 7+ 可安装升级；混淆后启动、加密与核心流程通过','Android 真机'],
+      ['UAT-056','发布构建','P0','最终回归与 Go / No-Go 评审','自动化门禁全绿；P0 100%；剩余风险有负责人、期限与书面接受','全平台']
+    ];
+    const STREAM_SETUP={
+      '安装与首启':['准备一台支持范围内的真机，并记录设备型号、OS 与 Build','根据用例准备全新安装或含历史数据的升级安装环境','开启屏幕录制，从点击 App 图标前开始取证'],
+      '核心账务':['创建专用 UAT 账本，确认时区为 Asia/Tokyo','记录测试前首页、明细和统计汇总值','准备日常与悦己二级分类及可辨识商家'],
+      '首页体验':['准备至少 3 笔覆盖日常/悦己的当月账目','记录当前月目标、累计金额和悦己贡献期望值','关闭动画缩放等非默认开发者选项'],
+      '明细列表':['准备跨两个月、两账本、两分类和两成员的数据','预先计算各筛选组合的笔数与金额','清除现有筛选并从默认列表开始'],
+      '统计分析':['准备上月和本月可人工复算的固定数据集','记录分类、成员、日期、金额和满足度期望矩阵','从统计页默认月份和默认维度开始'],
+      '购物清单':['两台已登录同一家庭的真机在线','分别准备公开与私密清单，名称加 UAT 时间戳','记录测试前两端项目数量'],
+      '家庭同步':['iOS 与 Android 各一台，加入同一测试家庭','两端时钟正确并均完成初次同步','使用不含真实财务信息的专用测试数据'],
+      '多币种':['账本基础币种为 JPY，准备 USD/CNY 等外币','记录指定日期的测试汇率和人工换算结果','准备在线、离线及缓存存在三种网络状态'],
+      '语音输入':['授予麦克风/语音权限并确认系统语言包可用','环境噪声可控，设备音量适中','使用固定中文、日文、英文语料并录屏'],
+      '安全隐私':['使用专用测试账号和无真实信息的数据','确认设备已配置生物识别与系统口令','准备可抓取日志/检查应用沙盒的测试环境'],
+      '备份恢复':['准备含账目、设置、分类、家庭数据的专用数据集','记录导出前各实体数量和关键汇总','保留一份正确包，并复制出损坏/错误密码样本'],
+      'i18n 与视觉':['准备 iOS 与 Android 的小屏和常规屏设备','建立全页面检查路径并开启截图编号','系统语言、深色模式、字体倍率从默认值开始'],
+      '性能稳定':['使用 Release/Profile 构建并关闭调试覆盖层','记录设备型号、可用空间、电量和初始内存','准备可重复的数据集与网络条件'],
+      '法务商店':['取得候选版真实 URL、法务文本与商店草稿权限','整理 ja/zh/en 对照清单和真实经营者信息','确保测试环境不使用 mock 或占位地址'],
+      '发布构建':['取得待提交的签名产物、版本号和 Commit SHA','准备最低支持版本与当前版本真机','确认自动化报告和发布说明可访问']
+    };
+    const DATA={
+      '安装与首启':['昵称：UAT Tester','UI：ja→zh→en；币种：JPY；语音：跟随 UI','全新安装与上一生产版本升级包'],
+      '核心账务':['日常：1,280 JPY / 超市 / 食费','悦己：3,500 JPY / 本 / 满足度 8','备注：UAT-日期-设备'],
+      '首页体验':['月目标：100；贡献合计：99→100→120','本月日常 2 笔、悦己 2 笔','跨月记录各 1 笔'],
+      '明细列表':['本月/上月各 6 笔','日常/悦己各 50%','成员 A/B、分类食费/交通'],
+      '统计分析':['本月：1/5 ¥1000、1/20 ¥2000','上月同日：¥800/¥1600','悦己满足度：3/7/9'],
+      '购物清单':['公开：牛奶-UAT；私密：礼物-UAT','数量/备注含中日英文','设备 A 创建、设备 B 验证'],
+      '家庭同步':['设备 A 新增 ¥1234；设备 B 修改 ¥2345','同一记录并发备注 A/B','离线窗口 60 秒'],
+      '多币种':['USD 12.50；CNY 100；JPY 1280','汇率示例 USD/JPY=150.00','历史日、今日与缓存日各一笔'],
+      '语音输入':['中：在星巴克花了五十元','日：コンビニで千二百円','英：Spent 12 dollars at Starbucks'],
+      '安全隐私':['PIN：仅测试用 2580（不得用于真实账号）','错误 PIN：1111','敏感样本：¥98,765 / 商家 TEST-SECRET'],
+      '备份恢复':['正确密码：仅测试环境临时密码','错误密码与截断 10% 的损坏包','账目 20、分类 4、设置 6 项'],
+      'i18n 与视觉':['语言：ja / zh / en','主题：浅色 / 深色','字体：100% / 200%；最小支持屏幕'],
+      '性能稳定':['连续新增 50 笔','历史账目目标 10,000 笔','网络：在线/离线/高延迟/丢包'],
+      '法务商店':['正式隐私政策、条款、特商法 URL','正式经营者/地址/电话/责任人','三语截图、说明与权限文案'],
+      '发布构建':['iOS IPA/Archive 与 Android AAB/APK','最低版本设备各 1 台','候选 Build 与升级来源 Build']
+    };
+    const SPECIAL={
+      'UAT-001':['卸载 App 并确认应用数据已清除；重新安装候选构建','冷启动并保持观察初始化、启动画面和首个可交互页面','连续强退并冷启动 3 次，记录每次结果'],
+      'UAT-002':['在引导中依次选择 ja、JPY、日语语音并完成','进入主界面确认语言/币种/语音设置已生效','强退重启，确认直接进入主界面；再到设置页复核三项值'],
+      'UAT-003':['在介绍页使用返回手势与页面返回按钮','选择跳过介绍，继续到设置确认页','在应用锁入口明确选择跳过；重启并前后台切换验证无锁屏'],
+      'UAT-004':['在上一版本创建账目、设置语言并启用锁后安装升级包','首次启动等待所有迁移完成，不中断进程','逐项复核历史账目、汇总、设置和锁状态；再次重启'],
+      'UAT-005':['从首页进入手动记账，选择日常账本','输入 ¥1,280、日期、食费 L2、商家和备注后保存','在首页最近项、明细列表和当月统计中逐项核对'],
+      'UAT-006':['新增 ¥3,500 悦己账目，选择分类并将满足度设为 8','保存后记录悦己贡献、Hero 和统计页变化','全局检查相关画面，不得出现 Joy/¥、ROI、密度或离散庆祝效果'],
+      'UAT-007':['打开既有账目，将金额、分类、日期和备注分别修改','保存并返回首页，核对最近项和汇总','切换明细与统计，不手动刷新，确认所有视图一致且仅一条记录'],
+      'UAT-008':['记录删除前首页/列表/统计金额，打开目标记录删除','分别执行取消删除与确认删除，核对两条路径','确认删除后重启 App，复核记录未复活且所有汇总减去正确金额'],
+      'UAT-009':['分别新增月末 23:59、次月 00:00、闰日及未来日期记录','在日历、列表月份和统计月份中核对归属','切换系统时区后再切回 Asia/Tokyo，确认已存日期未漂移'],
+      'UAT-010':['依次尝试 0、负值、超过上限、最长合法金额和小数外币','输入超长多语言备注及特殊字符并保存合法样本','确认非法值被阻止且无残留草稿；合法边界重启后完整显示'],
+      'UAT-011':['用固定数据人工计算本月支出、悦己贡献与目标比例','打开首页核对金额、环形进度、颜色渐变和月份锚点','将贡献从 99 调至 100 再到 120，确认颜色封顶且无 toast/震动/彩屑等事件'],
+      'UAT-012':['点击首页最近账目并记录打开的记录 ID/内容','修改金额与备注后保存返回','无需刷新核对最近项及首页汇总；再次打开确认编辑的是同一记录'],
+      'UAT-013':['逐一应用月份、账本、分类、成员筛选并记录结果','组合两个以上筛选，人工复算笔数与总额','清除全部筛选，确认列表与汇总恢复且无隐藏条件残留'],
+      'UAT-014':['在多笔数据下切换每个排序选项并检查首尾记录','切到无数据月份核对空状态与返回路径','导入长列表后快速滚动、反向滚动并返回，检查重复、跳动和卡顿'],
+      'UAT-015':['打开实用统计，人工核对本月累计曲线的每个数据点','核对 X 轴整月、Y 轴、网格、上月虚线与终点标签','点击分类圆环图例进入下钻，逐笔加总并与圆环/总额比对'],
+      'UAT-016':['打开悦己统计并核对日历热力分布日期','人工计算 Σ joy_contribution、满足度中位数与分类金额','确认悦己趋势只有当前数据线，无上月对比或已退休密度指标'],
+      'UAT-017':['切换分类/成员维度，核对成员名、头像和金额','选择单一成员过滤并与其账目逐笔比对','修改当前用户昵称后返回统计，确认“自己”名称即时更新；无家庭时仍可过滤自己'],
+      'UAT-018':['依次打开无数据、仅一笔及大量数据三个数据集','检查每张统计卡、坐标、标签、图例及下钻','旋转屏幕并切换月份，确认无异常、溢出、NaN 或不可返回状态'],
+      'UAT-019':['设备 A 新增公开清单项，编辑数量/备注并勾选完成','在设备 B 等待同步并逐字段核对','设备 B 取消勾选后删除，回到设备 A 确认最终状态一致'],
+      'UAT-020':['设备 A 新增带唯一敏感标记的私密清单项','在设备 B、同步日志和可检查的 payload 中搜索该标记','在设备 A 编辑、勾选、重启后确认仅本机持久化；删除后仍未产生同步事件'],
+      'UAT-021':['设备 A 断网后连续新增、编辑、勾选公开项目','保持离线重启，确认本地状态完整可用','恢复网络并等待收敛；两端核对无重复、丢失或旧值覆盖'],
+      'UAT-022':['设备 A 创建家庭并生成邀请；记录邀请有效期','设备 B 使用邀请加入，等待成员与密钥初始化完成','两端核对家庭名、成员身份和账本可见范围；重启复核'],
+      'UAT-023':['设备 A 新增带唯一标记账目，设备 B 等待接收','设备 B 修改金额/备注，再由设备 A 删除','每轮等待收敛并核对两端实体与汇总；检查传输记录无敏感明文'],
+      'UAT-024':['两端离线后同时修改同一记录的不同/相同字段','按 A→B 与 B→A 两种顺序恢复网络','等待最终一致，记录胜出值和冲突策略；确认无复制记录或静默消失'],
+      'UAT-025':['App 在前台、后台、被系统回收三种状态下由另一端产生变更','观察推送内容与唤醒后同步时机','模拟推送/网络失败再恢复，确认可重试且通知/日志不含金额或备注'],
+      'UAT-026':['新增 JPY ¥1,280 并确认不显示小数或外币字段','新增 USD 12.50，记录原金额、汇率与换算 JPY','编辑两笔并在列表、详情、统计中核对 JPY 汇总及原币展示'],
+      'UAT-027':['为指定历史日在线新增外币记录并记录汇率来源/日期','模拟主源失败，确认备用源返回且换算规则不变','预热缓存后断网重做，确认使用缓存并清楚提示过期/离线状态'],
+      'UAT-028':['打开外币记录，先改原金额并观察 JPY 派生值','再改汇率并观察 JPY，确认不存在三个字段互相回写','保存整数与小数样本，核对整数无 .00、真实小数保留且过期提示可理解'],
+      'UAT-029':['分别将语音语言设为中、日、英并朗读固定语料','每次等待识别完成，核对金额、商家、L2 分类和最终账本','确认结果后保存，在明细中核对实际记录；每种语言至少重复 3 次'],
+      'UAT-030':['朗读商家与关键词冲突语料，观察置信度与候选项','对低置信度结果不确认，手动选择正确 L2 分类后保存','再次朗读关键词验证学习生效；使用纯商家语料确认商家库未被错误改写'],
+      'UAT-031':['首次使用时拒绝麦克风/语音权限，观察提示与设置入口','授权后开始录音但保持静音，再测试来电/切后台中断','每次确认可结束录音、回到可操作状态并切换手动输入'],
+      'UAT-032':['用中文/日文/英文分别说出口语币种和整数/小数金额','在 2.5 秒合并窗口内分两段说出金额和商家','核对头部币种、原金额、汇率和最终记录；汇率不可用时确认仍保持 JPY'],
+      'UAT-033':['设置 4 位 PIN，第一次与确认输入故意不一致再重试','完成启用后重启并用正确 PIN 解锁','检查 secure storage/日志：只能见 Argon2id PHC，不得出现 PIN 明文；中断设置不得形成可用半状态'],
+      'UAT-034':['启用锁后冷启动，分别用生物识别和 PIN 解锁','进入账目页，依次触发 inactive、短暂控制中心、paused→resumed','确认 inactive 只遮罩；真正 paused 后 resumed 必须重锁；关闭锁后重复确认完全不触发'],
+      'UAT-035':['打开包含金额与商家信息的账目详情','进入系统任务切换器并截取 App 卡片','在 iOS/Android 浅深色各验证一次：快照必须为完全不透明遮罩，不能辨认底层内容'],
+      'UAT-036':['依次模拟取消、未录入、不可用、暂时锁定、永久锁定与无系统口令','每种情况触发生物识别并记录界面迁移','确认均出现可操作 PIN 入口；用正确 PIN 解锁且不会循环弹出生物识别'],
+      'UAT-037':['连续输入错误 PIN 3 次，确认每次清空/抖动且可立即重试','用正确 PIN 解锁，进入设置尝试关闭锁与修改 PIN','验证两项均要求重认证；关闭后 PHC 被清除且冷启动不再锁定'],
+      'UAT-038':['在 Release 真机创建含敏感金额、备注、商家及照片的数据','退出 App 后检查数据库头、字段存储、文件内容和同步载荷','搜索敏感明文与已知样本；验证 SQLCipher cipher_version 非空且任何层都无法直接读取'],
+      'UAT-039':['开启可用的 Release 日志采集并执行记账、同步、汇率失败和崩溃恢复','用金额、商家、备注、token 等唯一标记搜索全部输出','确认仅有中立错误上下文；发现任一敏感值即记录安全阻塞缺陷'],
+      'UAT-040':['记录导出前实体数、设置、汇总并用正确密码导出','在另一台全新安装设备选择导入并等待完整结束','逐项核对账目、设置、分类、关联和汇总；重启确认不出现首启且数据仍完整'],
+      'UAT-041':['保留原设备数据，分别导入错误密码、截断包和高版本包','记录每次错误提示、返回路径与是否写入临时数据','回到原账本核对实体数和汇总完全不变；重启确认仍可正常使用'],
+      'UAT-042':['先导出可恢复备份并记录所有数据/设置','执行清除全部数据，完成二次确认并等待 App 返回初始态','强退重启，确认进入首启；检查个人资料、锁设置、数据库和缓存均按契约清除'],
+      'UAT-043':['依次切换 ja、zh、en，按固定路径遍历所有主页面和弹窗','重点检查空状态、错误提示、引导、锁屏、法务及长文本','截图记录任何硬编码、缺键、截断和词汇偏差；确认日/悦己/Joy 词汇符合约定'],
+      'UAT-044':['浅色下遍历主页、明细、统计、购物、录入、设置、引导和锁屏','切换深色后沿同一路径复测并对比截图','检查文本/图标对比度、卡片层级、图表颜色、系统栏和弹窗可读性'],
+      'UAT-045':['将系统字体依次设为 100%、150%、200%，在最小屏执行核心流程','在 200% 下完成记账、筛选、解锁和设置保存','切换横屏/分屏（支持时），检查无溢出、遮挡、裁切或无法滚动控件'],
+      'UAT-046':['开启 VoiceOver/TalkBack，从冷启动开始只用辅助功能操作','遍历底部导航、记账、筛选、图表摘要、锁屏和设置','核对朗读名称/状态/顺序；用触控检查关键目标不小于 48dp 且无焦点陷阱'],
+      'UAT-047':['记录冷启动耗时并连续执行 10 次前后台切换','连续新增 50 笔，期间交替手动/语音并切换账本','重启后核对 50 笔及汇总；检查崩溃、ANR、重复保存、锁循环和内存异常'],
+      'UAT-048':['导入/生成 10,000 笔测试数据并记录初始内存','快速滚动明细、连续组合筛选、切换 12 个月统计并下钻','记录响应耗时和峰值内存；返回首页再重复一次，确认无持续增长或 UI 卡死'],
+      'UAT-049':['在线完成一次记账、同步和汇率请求作为基线','分别在离线、高延迟、丢包条件重复核心流程','恢复正常网络，确认本地数据始终可用、外部操作可重试并最终收敛'],
+      'UAT-050':['从设置依次打开隐私政策、利用规约、特商法和 OSS','在 ja/zh/en 下检查标题、正文、滚动、返回和链接','搜索“上线前填真实值”等占位符；逐项核对经营者、地址、电话、责任人与批准文本'],
+      'UAT-051':['点击赞助及所有外部链接，记录实际 URL 和打开方式','分别验证成功打开、无可用浏览器和网络失败','确认 URL 为正式 HTTPS；失败仅出现中立提示且关闭后仍可继续操作设置页'],
+      'UAT-052':['整理 App 实际访问的本地存储、推送、同步、汇率和诊断行为','逐字段对照 App Store Privacy 与 Play Data Safety 草稿','由产品/工程双人复核收集目的、共享、加密、删除说明并留存签署证据'],
+      'UAT-053':['核对名称、图标、版本号、Build、年龄分级、分类和发布说明','在双商店预览 ja/zh/en 截图与权限文案','搜索 mock、TODO、占位符和过期画面；在手机预览确认裁切与排序正确'],
+      'UAT-054':['用待提交 Archive/IPA 在最低支持 iOS 真机全新安装','冷启动并检查 cipher_version，然后完成首启、记账、锁屏、重启','从上一生产版升级并复核旧数据；记录签名、Entitlement、推送和无 sqlite3 冲突证据'],
+      'UAT-055':['用待提交签名 APK/AAB 在 Android 7 最低版本真机安装','完成首启、记账、锁屏、后台恢复、同步和重启','从上一生产版升级复核旧数据；检查混淆后无崩溃、SQLCipher 有效且权限正常'],
+      'UAT-056':['汇总自动化、56 条 UAT、商店、法务、安全与发布构建结果','逐项确认所有 P0 通过；审阅每个剩余 P1/P2 风险的负责人、期限和接受人','产品、QA、工程召开 Go/No-Go；记录决定、签署人、时间和允许提交的唯一 Build']
+    };
+    const STORE='home-pocket-pre-release-uat-v1', DETAIL_STORE='home-pocket-pre-release-uat-detail-v1';
+    const id=new URLSearchParams(location.search).get('id'), index=CASES.findIndex(x=>x[0]===id), item=CASES[index];
+    const esc=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+    const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
+    if(!item){document.getElementById('notFound').hidden=false}else{
+      const master=read(STORE,{tests:{}}), details=read(DETAIL_STORE,{}), state=master.tests[id]||{owner:'',date:'',status:'未开始',note:''}, extra=details[id]||{build:'',steps:[]};
+      document.title=`${id} ${item[3]}｜UAT 详情`; document.getElementById('app').hidden=false;
+      document.getElementById('caseId').textContent=`${id} · ${item[1]}`; document.getElementById('title').textContent=item[3]; document.getElementById('criteria').textContent=`验收标准：${item[4]}`;
+      document.getElementById('badges').innerHTML=`<span class="badge ${item[2].toLowerCase()}">${item[2]}</span><span class="badge">${esc(item[5])}</span><span class="badge">独立子页面</span>`;
+      document.getElementById('prev').href=`uat-case.html?id=${CASES[(index-1+CASES.length)%CASES.length][0]}`; document.getElementById('next').href=`uat-case.html?id=${CASES[(index+1)%CASES.length][0]}`;
+      document.getElementById('preconditions').innerHTML=(STREAM_SETUP[item[1]]||[]).map(x=>`<li>${esc(x)}</li>`).join(''); document.getElementById('testData').innerHTML=(DATA[item[1]]||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+      const actions=SPECIAL[id], steps=[
+        ['准备与基线',`完成“前置条件”和“测试数据”中的全部项目；记录执行前基线。`,`环境与数据状态可复现，设备/Build/基线证据齐全。`],
+        ['执行主路径',actions[0],`操作可完成且无崩溃、卡死、错误跳转或非预期数据变化。`],
+        ['执行关键验证',actions[1],item[4]],
+        ['持久化与交叉检查',actions[2],`结果在相关页面/设备间一致；需要持久化的状态在重启后保持。`],
+        ['收尾与证据',`保存关键截图/录屏，填写实际结果；若失败，记录最短复现路径、期望/实际、频率、设备与日志时间点。`,`证据足以由另一位测试者独立复现；测试数据已按需要保留或清理。`]
+      ];
+      document.getElementById('steps').innerHTML=steps.map((s,i)=>`<label class="step ${extra.steps[i]?'done':''}"><input type="checkbox" data-step="${i}" ${extra.steps[i]?'checked':''}><div><h3>Step ${i+1} · ${esc(s[0])}</h3><p>${esc(s[1])}</p><p class="expect"><strong>预期：</strong>${esc(s[2])}</p></div></label>`).join('');
+      ['owner','date','status','note'].forEach(k=>document.getElementById(k).value=state[k]||''); document.getElementById('build').value=extra.build||'';
+      const save=()=>{master.tests[id]={owner:owner.value,date:date.value,status:status.value,note:note.value};master.updated=new Date().toISOString().slice(0,10);details[id]={build:build.value,steps:[...document.querySelectorAll('[data-step]')].map(x=>x.checked)};localStorage.setItem(STORE,JSON.stringify(master));localStorage.setItem(DETAIL_STORE,JSON.stringify(details));updateSteps()};
+      const updateSteps=()=>{const boxes=[...document.querySelectorAll('[data-step]')],done=boxes.filter(x=>x.checked).length;boxes.forEach(x=>x.closest('.step').classList.toggle('done',x.checked));document.getElementById('stepProgress').textContent=`步骤完成度：${done} / ${boxes.length}${done===boxes.length?' · 可填写最终执行结论':''}`};
+      document.querySelectorAll('input,select,textarea').forEach(x=>x.addEventListener('change',save));document.getElementById('note').addEventListener('input',save);updateSteps();
+    }
+  </script>
+</body>
+</html>

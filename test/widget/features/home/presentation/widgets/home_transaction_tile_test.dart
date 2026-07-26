@@ -48,6 +48,10 @@ void main() {
         tester.widget<Text>(find.text('¥3,280')).style?.fontSize,
         AppTypography.amountSmall,
       );
+      expect(
+        tester.widget<Text>(find.text('¥3,280')).style?.fontFamily,
+        AppTextStyles.numeralFontFamily,
+      );
     });
 
     testWidgets('displays merchant, category, and formatted amount', (
@@ -147,6 +151,10 @@ void main() {
 
       expect(find.text('¥1,956,891'), findsOneWidget);
       expect(find.text(r'$12,211'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.text(r'$12,211')).style?.fontFamily,
+        AppTextStyles.numeralFontFamily,
+      );
     });
 
     testWidgets('domestic row (no annotation) shows only the JPY amount', (

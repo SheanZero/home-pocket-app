@@ -842,6 +842,10 @@
   "@homeViewMonthlyAnalysis": {
     "description": "Link in the ときめき section title row that opens the monthly analysis"
   },
+  "homeViewDetails": "查看详情",
+  "@homeViewDetails": {
+    "description": "Compact link in the monthly favorite section header"
+  },
   "homeMetricJoyUnit": "Joy",
   "@homeMetricJoyUnit": {
     "description": "Unit label under the goal ring value (Joy points)"
@@ -1049,6 +1053,63 @@
   "addCategory": "添加分类",
   "@addCategory": {
     "description": "Bottom action button label to add a category"
+  },
+  "noMatchingCategories": "没有匹配的分类",
+  "@noMatchingCategories": {
+    "description": "Empty state shown when category search has no matches"
+  },
+  "addL1CategoryTitle": "添加分类",
+  "@addL1CategoryTitle": {
+    "description": "Bottom sheet title for creating a top-level category"
+  },
+  "addL2CategoryTitle": "添加到“{parentName}”",
+  "@addL2CategoryTitle": {
+    "description": "Bottom sheet title for creating a subcategory",
+    "placeholders": {
+      "parentName": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNameLabel": "分类名称",
+  "@categoryNameLabel": {
+    "description": "Input label for a new custom category name"
+  },
+  "categoryNameHint": "例如：周末项目",
+  "@categoryNameHint": {
+    "description": "Input hint for a new custom category name"
+  },
+  "categoryNameRequired": "请输入分类名称",
+  "@categoryNameRequired": {
+    "description": "Validation error for an empty custom category name"
+  },
+  "categoryNameTooLong": "最多输入 50 个字符",
+  "@categoryNameTooLong": {
+    "description": "Validation error for a custom category name over 50 characters"
+  },
+  "categoryNameExists": "已存在同名分类",
+  "@categoryNameExists": {
+    "description": "Validation error for a duplicate sibling category name"
+  },
+  "categoryLedgerLabel": "账本",
+  "@categoryLedgerLabel": {
+    "description": "Label above the ledger choice when creating an L1 category"
+  },
+  "categoryLedgerDescription": "选择此分类的支出记入哪个账本。",
+  "@categoryLedgerDescription": {
+    "description": "Helper copy for the L1 category ledger choice"
+  },
+  "createCategory": "添加",
+  "@createCategory": {
+    "description": "Submit button label in the custom category sheet"
+  },
+  "categoryAdded": "分类已添加",
+  "@categoryAdded": {
+    "description": "Success feedback after creating a custom category"
+  },
+  "categoryAddFailed": "添加失败，请重试",
+  "@categoryAddFailed": {
+    "description": "Error feedback after custom category persistence fails"
   },
   "editCategoryOrder": "编辑分类顺序",
   "@editCategoryOrder": {

@@ -256,7 +256,10 @@ void main() {
         await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
         await tester.pumpAndSettle();
 
-        final linkChevron = find.byIcon(Icons.chevron_right);
+        final linkChevron = find.descendant(
+          of: find.byKey(const Key('home-hero-main-surface')),
+          matching: find.byIcon(Icons.chevron_right),
+        );
         final metricsRegion = find.byType(HomeMetricsRegion);
 
         expect(linkChevron, findsOneWidget);
@@ -327,6 +330,36 @@ void main() {
       },
     );
 
+    testWidgets(
+      'separates the favorite ticket from the main hero card and exposes edge tear notches',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+        await tester.pumpAndSettle();
+
+        final mainSurface = find.byKey(const Key('home-hero-main-surface'));
+        final favoriteSection = find.byKey(const Key('home-favorite-section'));
+
+        expect(mainSurface, findsOneWidget);
+        expect(favoriteSection, findsOneWidget);
+        expect(
+          find.descendant(of: mainSurface, matching: favoriteSection),
+          findsNothing,
+        );
+        expect(
+          tester.getTopLeft(favoriteSection).dy,
+          greaterThan(tester.getBottomLeft(mainSurface).dy),
+        );
+        expect(
+          find.byKey(const Key('home-hero-tear-notch-left')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('home-hero-tear-notch-right')),
+          findsOneWidget,
+        );
+      },
+    );
+
     testWidgets('Best Joy ticket exposes both V15 tear notches', (
       tester,
     ) async {
@@ -337,27 +370,37 @@ void main() {
       expect(find.byKey(const Key('best-joy-notch-bottom')), findsOneWidget);
     });
 
-    testWidgets(
-      'Best Joy seal is wider and uses the enlarged satisfaction level face',
-      (tester) async {
-        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
-        await tester.pumpAndSettle();
+    testWidgets('Best Joy calendar uses the V16 ticket abbreviations', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+      await tester.pumpAndSettle();
 
-        final sealPanel = find.byKey(const Key('best-joy-seal-panel'));
-        final faceFinder = find.byType(SatisfactionFaceIcon);
+      expect(find.text('APR'), findsOneWidget);
+      expect(find.text('15'), findsOneWidget);
+      expect(find.text('WED'), findsOneWidget);
+    });
 
-        expect(sealPanel, findsOneWidget);
-        expect(tester.getSize(sealPanel).width, greaterThanOrEqualTo(72));
-        expect(faceFinder, findsOneWidget);
+    testWidgets('Best Joy seal matches the compact V16 ticket geometry', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+      await tester.pumpAndSettle();
 
-        final face = tester.widget<SatisfactionFaceIcon>(faceFinder);
-        expect(face.value, 10);
-        expect(face.size, greaterThanOrEqualTo(30));
+      final sealPanel = find.byKey(const Key('best-joy-seal-panel'));
+      final faceFinder = find.byType(SatisfactionFaceIcon);
 
-        final tierLabel = tester.widget<Text>(find.text('至福'));
-        expect(tierLabel.style?.fontSize, greaterThanOrEqualTo(12));
-      },
-    );
+      expect(sealPanel, findsOneWidget);
+      expect(tester.getSize(sealPanel).width, 58);
+      expect(faceFinder, findsOneWidget);
+
+      final face = tester.widget<SatisfactionFaceIcon>(faceFinder);
+      expect(face.value, 10);
+      expect(face.size, 22);
+
+      final tierLabel = tester.widget<Text>(find.text('至福'));
+      expect(tierLabel.style?.fontSize, AppTypography.micro);
+    });
 
     testWidgets('Best Joy tear notches interrupt the outer horizontal border', (
       tester,
@@ -562,7 +605,7 @@ void main() {
     'HomeHeroCard — typography (CLAUDE.md Amount Display Style, Pitfall 10)',
     () {
       testWidgets(
-        'hero total uses AppTextStyles.amountHero with tabular figures',
+        'hero total uses Roboto Mono with tabular and slashed-zero figures',
         (tester) async {
           await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
           await tester.pumpAndSettle();
@@ -585,10 +628,12 @@ void main() {
             }
           }
           expect(hero, isNotNull);
+          expect(hero!.style?.fontFamily, AppTextStyles.numeralFontFamily);
           expect(
-            hero!.style?.fontFeatures,
+            hero.style?.fontFeatures,
             contains(const FontFeature.tabularFigures()),
           );
+          expect(hero.style?.fontFeatures, contains(const FontFeature('zero')));
         },
       );
 
@@ -649,8 +694,12 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(SatisfactionFaceIcon), findsOneWidget);
+      final metricsChevron = find.descendant(
+        of: find.byKey(const Key('home-hero-main-surface')),
+        matching: find.byIcon(Icons.chevron_right),
+      );
       expect(
-        tester.getTopRight(find.byIcon(Icons.chevron_right)).dx,
+        tester.getTopRight(metricsChevron).dx,
         closeTo(tester.getTopRight(find.byType(HomeMetricsRegion)).dx, 0.01),
       );
     });

@@ -1305,6 +1305,12 @@ abstract class S {
   /// **'View monthly analysis'**
   String get homeViewMonthlyAnalysis;
 
+  /// Compact link in the monthly favorite section header
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get homeViewDetails;
+
   /// Unit label under the goal ring value (Joy points)
   ///
   /// In en, this message translates to:
@@ -1604,6 +1610,84 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Add category'**
   String get addCategory;
+
+  /// Empty state shown when category search has no matches
+  ///
+  /// In en, this message translates to:
+  /// **'No matching categories'**
+  String get noMatchingCategories;
+
+  /// Bottom sheet title for creating a top-level category
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addL1CategoryTitle;
+
+  /// Bottom sheet title for creating a subcategory
+  ///
+  /// In en, this message translates to:
+  /// **'Add under {parentName}'**
+  String addL2CategoryTitle(String parentName);
+
+  /// Input label for a new custom category name
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryNameLabel;
+
+  /// Input hint for a new custom category name
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Weekend projects'**
+  String get categoryNameHint;
+
+  /// Validation error for an empty custom category name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a category name'**
+  String get categoryNameRequired;
+
+  /// Validation error for a custom category name over 50 characters
+  ///
+  /// In en, this message translates to:
+  /// **'Use 50 characters or fewer'**
+  String get categoryNameTooLong;
+
+  /// Validation error for a duplicate sibling category name
+  ///
+  /// In en, this message translates to:
+  /// **'A category with this name already exists'**
+  String get categoryNameExists;
+
+  /// Label above the ledger choice when creating an L1 category
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get categoryLedgerLabel;
+
+  /// Helper copy for the L1 category ledger choice
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where expenses in this category are recorded.'**
+  String get categoryLedgerDescription;
+
+  /// Submit button label in the custom category sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get createCategory;
+
+  /// Success feedback after creating a custom category
+  ///
+  /// In en, this message translates to:
+  /// **'Category added'**
+  String get categoryAdded;
+
+  /// Error feedback after custom category persistence fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add the category. Please retry.'**
+  String get categoryAddFailed;
 
   /// AppBar title during category reorder edit mode
   ///

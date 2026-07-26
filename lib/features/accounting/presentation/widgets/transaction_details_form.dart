@@ -732,8 +732,10 @@ class TransactionDetailsFormState
   Future<void> _editCategory() async {
     final result = await Navigator.of(context).push<Category>(
       MaterialPageRoute<Category>(
-        builder: (_) =>
-            CategorySelectionScreen(selectedCategoryId: _category?.id),
+        builder: (_) => CategorySelectionScreen(
+          selectedCategoryId: _category?.id,
+          suggestedLedgerType: _ledgerType,
+        ),
       ),
     );
     // Item 4: cancel path — picker dismissed without selection.

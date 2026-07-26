@@ -650,6 +650,9 @@ class SJa extends S {
   String get homeViewMonthlyAnalysis => '今月の分析を見る';
 
   @override
+  String get homeViewDetails => '詳しく見る';
+
+  @override
   String get homeMetricJoyUnit => 'Joy';
 
   @override
@@ -800,6 +803,47 @@ class SJa extends S {
 
   @override
   String get addCategory => 'カテゴリを追加';
+
+  @override
+  String get noMatchingCategories => '一致する分類がありません';
+
+  @override
+  String get addL1CategoryTitle => 'カテゴリを追加';
+
+  @override
+  String addL2CategoryTitle(String parentName) {
+    return '「$parentName」に分類を追加';
+  }
+
+  @override
+  String get categoryNameLabel => '分類名';
+
+  @override
+  String get categoryNameHint => '例：週末のプロジェクト';
+
+  @override
+  String get categoryNameRequired => '分類名を入力してください';
+
+  @override
+  String get categoryNameTooLong => '50文字以内で入力してください';
+
+  @override
+  String get categoryNameExists => '同じ名前の分類があります';
+
+  @override
+  String get categoryLedgerLabel => '帳簿';
+
+  @override
+  String get categoryLedgerDescription => 'この分類の支出を記録する帳簿を選びます。';
+
+  @override
+  String get createCategory => '追加';
+
+  @override
+  String get categoryAdded => '分類を追加しました';
+
+  @override
+  String get categoryAddFailed => '追加に失敗しました。再試行してください';
 
   @override
   String get editCategoryOrder => '順序を編集';

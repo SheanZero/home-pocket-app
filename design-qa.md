@@ -1,3 +1,219 @@
+# Flutter App-Wide Numeral Typeface — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-numerals-phone.jpg`.
+- Combined visual review board: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/app-wide-numeral-qa.png`.
+- Flutter captures on the board: Home, amount entry, numeric keypad, analytics trend, list calendar, and shopping list. Light-theme phone captures use 390px width where the production screen owns the viewport; focused component goldens retain their fixed test dimensions.
+- Reviewed numeric content includes currency signs, grouped/decimal amounts, percentages, dates, calendar days, chart axes/endpoints, Joy ratios, shopping quantities, and keypad digits.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Typography: every `AppTextStyles` semantic role and both Material text themes now use the `RobotoMonoNumerals` family with tabular (`tnum`) and slashed-zero (`zero`) features. Unstyled `Text` also inherits the same contract from `AppTheme`.
+- Glyph isolation: the bundled font is a 17KB numeric subset rather than the full Roboto Mono face. It contains numeric glyphs and numeric punctuation/symbols but omits alphabetic and CJK glyphs, so Japanese, Chinese, and English prose continue through the platform fallback instead of becoming monospaced.
+- Coverage: representative real-font goldens confirm the same numeral shape in Home, accounting, analytics, list/calendar, and shopping surfaces. The numeric keypad and calendar visibly retain the diagonal zero treatment.
+- Layout and visual tokens: no palette, spacing, radius, surface, icon, copy, or interaction changed. The reviewed captures showed no clipping or overflow caused by the new glyph widths.
+- Test-renderer note: Flutter host goldens do not provide production CJK system fonts, so nonnumeric copy may appear as placeholder boxes or blanks in diagnostic captures. The production family intentionally falls through for those missing glyphs.
+
+## Iteration history
+
+1. The initial implementation scoped Roboto Mono directly to selected Home widgets, leaving other app numbers on the platform font. This was a P1 coverage gap.
+2. Moving the full Roboto Mono font to the global theme would also have made Latin prose monospaced. The fix instead introduced a numeric-only subset and routed all semantic/theme text roles through it.
+3. Two explicit `IBM Plex Sans` toast overrides and the keypad's isolated font-feature declaration bypassed the shared contract. The overrides were removed and keypad features now use `AppTextStyles.numeralFontFeatures`.
+4. Initial non-Home golden runs still rendered Flutter's deterministic placeholder font because the production asset had not been explicitly loaded. A shared golden font loader now makes the visual baselines exercise the real bundled numeral face.
+5. The source/implementation review board was inspected after updating only the confirmed numeric diffs; no collateral P0/P1/P2 visual issue remained.
+
+## Verification
+
+- `flutter analyze`: passed with 0 issues.
+- App-wide theme and architecture contract tests: passed.
+- Representative real-font visual/behavior matrix: 34 tests passed,
+  including 30 updated golden baselines.
+- Full golden-tagged suite: 214 tests passed.
+- Full `flutter test`: 3,856 tests passed, 11 pre-existing skipped tests, 0 failures.
+
+final result: passed
+
+---
+
+# V16 Flutter Home + Numeral Typeface — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-numerals-phone.jpg`.
+- Flutter implementation screenshot: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/home_v16_phone_light_ja.png`.
+- Normalized source crop: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-home-reference-focus.png`.
+- Full-view, same-input comparison (source left, implementation right): `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-home-flutter-comparison-final.png`.
+- Viewport and density: 390px-wide light-theme phone. The 390×844 source was cropped by 39px at the top to remove source-only system status chrome, producing a 390×600 app-content reference. The Flutter golden is 390×600 at device-pixel ratio 1, so no scale or density conversion was required.
+- State: personal ledger, July 2026, `¥186,420` total, `¥53,620` Joy, `¥132,800` daily, `64 / 80` Joy target, `8.2 / 10` satisfaction, `12` small wins, and `¥4,800` monthly favorite.
+- Focused-region evidence: the implementation capture intentionally contains only the app-owned header, Hero card, and monthly-favorite section. At 1:1 scale all changed typography, ticket perforations, spacing, and values are readable, so a smaller secondary crop was not needed.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Fonts and typography: all numeral-bearing Home surfaces use the bundled `RobotoMono` family with tabular (`tnum`) and slashed-zero (`zero`) features. The amount, month title, comparison amount, trend, ledger totals, Joy target, satisfaction, count, favorite date/amount, member totals, and recent-transaction amounts share the same face. Non-numeric CJK text in Flutter host goldens uses the test renderer's placeholder glyphs; production CJK continues to fall back to the platform font.
+- Spacing and layout rhythm: the Hero and Favorite widths are both 350px inside the 20px phone inset. The Hero remains 22px-rounded with 18px padding, its 20px side notches replace the spending/Joy separator, and the Favorite starts 18px below as a transparent section with a 10px title-to-ticket gap.
+- Colors and visual tokens: the warm paper background, primary-tinted Hero surface, rose Joy accents, green daily accents, goal ring, mint favorite ticket, border, and shadow tokens remain aligned with the V16 source.
+- Image quality and assets: the screen uses the existing Material/shared icon system; no raster illustration was substituted. The only new asset is the official Roboto Mono variable TTF plus its OFL license.
+- Copy and content: `詳しく見る` was added to the Favorite header in Japanese, with Chinese and English parity. The calendar tile now uses the source's uppercase `JUL / 06 / MON` treatment. The satisfaction label remains `至福` rather than the mockup's `大満足` because ADR-015 locks the top-tier product lexicon to `至福`.
+- Interaction: the Hero and independent Favorite section each preserve the existing tap-to-analytics behavior; the info affordance still absorbs its tap and opens the explanatory dialog.
+
+## Comparison history
+
+1. Initial Flutter state had the monthly favorite nested inside the main Hero surface, horizontal dividers around the Joy region, no outer side tear notches, and platform-default numeral glyphs. These were P2 structural and typography mismatches.
+2. The first implementation pass split the Favorite into its own transparent tappable section, added the 20px page-colored Hero notches with no separator line, switched all Home numeral surfaces to the bundled mono face, added the Favorite detail link, and changed ticket cutouts to the page background.
+3. The first 390px comparison exposed two remaining P2 details: the calendar rendered localized `7 / 6` instead of `JUL / 06 / MON`, and the ticket seal was 72px with a 32px face rather than the source's 58px column and 22px icon.
+4. The second pass adopted the uppercase zero-padded calendar, 58px seal, 22px satisfaction face, 3px internal gap, and micro tier label. The final paired comparison shows matching major geometry and no remaining P0/P1/P2 difference.
+
+## Verification
+
+- `flutter analyze`: passed with 0 issues.
+- Targeted Home widget, screen, typography, localization, interaction, and golden suite: 74 tests passed.
+- Golden matrix: V16 390px composition plus solo/family, light/dark, target thresholds, thin-data, and all-neutral states passed.
+- `flutter gen-l10n`: completed after ja/zh/en copy parity updates.
+
+final result: passed
+
+---
+
+# V16 Whole-App Numeral Typeface — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_AwdqCY/截屏2026-07-25 16.14.25.png`.
+- Browser-rendered implementation: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-numerals-phone.jpg`.
+- Full-view combined comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-numerals-full-comparison.jpg`.
+- Focused numeral comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f981f-73e9-7f21-92b6-a4eee9452545/v16-numerals-focused-comparison.jpg`.
+- Browser viewport request: 1400×1050. The in-app browser exposed a 1385×1050 visual viewport and returned a 1385×1039 JPEG; the 386×835 phone crop was normalized back to its measured 390×844 CSS size. Browser `devicePixelRatio` was 2 and visual viewport scale was 1.
+- Source pixels: 738×1118. The source is a cropped typography reference rather than the same product screen; the full comparison preserves its aspect ratio at 557×844 beside the normalized 390×844 implementation. The focused comparison normalizes the two amount samples to the same glyph height and is the fidelity evidence for this scoped change.
+- State: A1 personal ledger, light theme, July 2026 home. Representative numeral surfaces were also checked on details, analytics, shopping-item form, unified entry, family join, and app-lock screens.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Fonts and typography: all numeric glyphs, currency signs, percentages, decimal/grouping punctuation, dates, counts, PIN digits, keypad digits, and chart labels now resolve through the screenshot-matched monospaced numeral face. Tabular and slashed-zero OpenType features are globally active. The focused comparison confirms the reference's monospaced proportions and diagonal zero treatment on `¥186,420`.
+- Spacing and layout rhythm: the numeral substitution does not change the existing V16 component structure. At 375px, 390px, and 430px phone widths, both the phone and app scroller had equal client and scroll widths.
+- Colors and visual tokens: no palette, surface, border, shadow, or semantic color changed.
+- Image quality and assets: no raster, SVG, icon, or illustration asset changed.
+- Copy and content: all app copy and numeric values remain unchanged.
+- The numeric face uses a Unicode-limited font alias, so Japanese, Chinese, English prose, and display headings continue to use their existing body or Mincho families rather than becoming monospaced.
+
+## Comparison and verification history
+
+1. Before this pass, the screenshot-matched monospaced/slashed-zero treatment was limited to selected home elements; many other numbers inherited body or display fonts.
+2. The implementation added one numeral-only face with regular and bold local fallbacks, placed it before both body and display stacks, and enabled tabular/slashed-zero features at the document level.
+3. Browser computed-style checks confirmed the numeral alias and `"tnum", "zero"` features across home amounts, dates, percentages, Joy values, details amounts, analytics axes/totals, shopping quantity, entry amount/keypad, family invite digits, and lock keypad.
+4. Catalog navigation through the representative screens remained functional. Browser console: 0 errors, 0 warnings.
+5. Scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Home Favorite Without Outer Card — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-tear-notches-no-divider-final.jpg`, plus the user delta to remove only the `今月の最愛` outer background card.
+- Browser-rendered implementation: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-favorite-no-background-final.png`.
+- Full-view same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-favorite-no-background-full-comparison-final.jpg`.
+- Focused changed-region comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-favorite-no-background-comparison-final.jpg`.
+- Browser viewport: 1400×1050; phone CSS size and implementation crop: 390×844; source and implementation pixels: 390×844; device pixel ratio: 1; no density normalization required.
+- State: A1 personal ledger, light theme, July 2026 home.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- The Favorite section now resolves to a transparent background, zero border, zero radius, zero shadow, and zero padding. The title and 350px-wide ticket remain intact.
+- Fonts and typography are unchanged; the numeric font treatment, title hierarchy, and ticket copy remain consistent with the approved home design.
+- Spacing and layout rhythm remain coherent: the section starts 18px below the Hero card and the title sits 10px above the ticket.
+- Existing color tokens remain in use. Only the outer surface treatment was removed; the ticket keeps its mint surface, rose accent, border, and perforation treatment.
+- No image assets or icons changed. Copy and ticket contents are unchanged.
+- The 375px, 390px, and 430px phone frames have no horizontal overflow; light and dark themes both keep the Favorite wrapper transparent.
+- The historic source capture contains a black lower-capture artifact below the changed region, so the readable 390×670 focused comparison is the fidelity source for this localized decision.
+
+## Interaction and comparison history
+
+1. Before, `今月の最愛` used a white rounded outer card around its title and ticket.
+2. This pass removes only that outer surface and updates its mockup token from `HomeFavoriteCard` to `HomeFavoriteSection`.
+3. Keyboard Enter on the section still opens the Statistics screen; no navigation behavior changed.
+4. Post-fix computed-style checks, responsive checks, focused comparison, and console inspection found no remaining blocker. Browser console: 0 errors, 0 warnings.
+
+final result: passed
+
+---
+
+# V16 Home Tear Notches Without Separator — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Previous approved state: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-original-style-tear-final.jpg`.
+- User delta: retain the left/right tear notches and remove the horizontal separator between them.
+- Browser-rendered implementation: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-tear-notches-no-divider-final.jpg`.
+- Focused same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-no-divider-comparison-final.jpg`.
+- Viewport/state: 390×844 phone frame, personal ledger, light theme.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- The separator resolves to `border-top: none` and zero height.
+- Both 20×20px page-colored tear notches remain visible at the card edges.
+- Typography, copy, colors, icons, spacing, card contents, and interactions are unchanged.
+- The 375px, 390px, and 430px phone frames have no horizontal overflow.
+- Light and dark themes both keep the divider at zero height with no border; the browser console reports no warnings or errors.
+
+## Comparison history
+
+1. The approved home card used tear notches plus a horizontal divider between the spending and Joy sections.
+2. This pass removes only that divider; the notches remain as the sole visual separation.
+3. The focused browser comparison confirms the requested localized change without collateral layout drift.
+
+final result: passed
+
+---
+
+# Welcome Onboarding Micro Botanical + Flutter Hero Motion — Design QA (2026-07-20)
+
+## Scope and evidence
+
+- Revised visual direction: `/Users/xinz/.codex/generated_images/019f7881-03db-72f2-a542-5b075d8e3a27/exec-0a08cf3c-c69b-4ecf-ac56-67761ada126a.png`.
+- Existing Flutter reference: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_yLeGfS/截屏2026-07-20 19.05.24.png`.
+- Flutter implementation inspected: `lib/features/onboarding/presentation/screens/onboarding_intro_screen.dart` and `lib/features/onboarding/presentation/widgets/onboarding_float_decor.dart`.
+- Browser-rendered welcome page: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-micro-botanical-welcome.png`.
+- Browser-rendered privacy page: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-micro-botanical-privacy.png`.
+- Browser-rendered initial setup: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-micro-botanical-setup.png`.
+- Viewport/state: 390×844 phone frame in the V16 catalog, light theme, both welcome pages and initial setup.
+- Full-view comparison opened the revised visual direction together with all three implementation captures; the focused comparison opened the supplied Flutter reference together with the first welcome-page capture.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Typography and copy remain aligned with the selected V16 design system and were not changed by this pass.
+- The first hero preserves the existing Flutter 172×150 cluster, 116px house tile, 52px pink satisfaction face, 42px green satisfaction face, and two-petal composition.
+- The second hero keeps the existing shield artwork and applies the same layered visual grammar using the product's lock and smartphone icon vocabulary.
+- The selected option-2 background uses only small, low-contrast botanical impressions at the screen edges; no large decorative pattern competes with the content.
+- Source-derived light/dark house and shield SVGs, real satisfaction assets, and the established Material icon library preserve icon fidelity across themes.
+- Motion matches the existing implementation: 7px main/satellite lift, 5–6.5 second staggered loops, and 9px/15° petal drift. `prefers-reduced-motion` disables decorative movement.
+
+## Comparison history
+
+1. Before, the V16 welcome mockup used raster-only hero tiles, omitted the Flutter implementation's layered satellites and animation, and left the background visually plain.
+2. The fix replaced both welcome heroes with layered, source-faithful constructions and applied the selected micro-botanical background direction across welcome and initial setup.
+3. Post-fix browser captures, focused comparisons, computed-transform checks, and the interaction pass found no visual or functional blocker.
+
+## Interaction, responsive, and code verification
+
+- `次へ` moves from the first welcome page to the privacy page; `はじめる` reaches initial setup.
+- Computed transforms changed after approximately 900ms for the main tile, both satellites, and both petals; animation durations resolve to 6s, 5s, and 6.5s as intended.
+- All four source-derived onboarding SVGs and both satisfaction SVG dependencies returned HTTP 200.
+- Browser console: 0 errors.
+- Scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
 # Continuous Accounting Hit Target QA — 2026-07-18
 
 - Source visual truth: `/Users/xinz/Downloads/截屏 2026-07-18 15.09.22.png`
@@ -21,6 +237,172 @@ No actionable P0, P1, or P2 issue remains.
 1. Before the change, the manual control's full 390px footer toggled the mode, while voice only made the action text tappable.
 2. Both paths now use the same centered 230px-wide target. The surrounding footer, dock corners, and manual bottom buffer are non-interactive.
 3. Post-fix widget tests pass for both manual keypad and voice dock; the focused capture confirms there is no unintended visual change.
+
+final result: passed
+
+---
+
+# Initial Setup Security + PIN Completion — Design QA (2026-07-20)
+
+## Scope and evidence
+
+- Selected completion-state visual: `docs/mockup/v16/assets/initial-setup-security-complete-zh.png`
+- Implementation: `docs/mockup/v16/index.html`, `初始设置＋安全保护` and `设置应用锁 PIN` states.
+- Viewport/state: 1400×1000 browser viewport, 390×844 phone frame, light theme, Japanese app copy, security enabled, app lock selected, PIN configured.
+- Browser-rendered implementation: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-security-pin-complete-final-phone.png`
+- Full-view same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-security-complete-comparison.png`
+- Focused security-section comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-security-complete-focus-comparison.png`
+
+## Findings
+
+- No actionable P0, P1, or P2 difference remains against the confirmed combined direction.
+- The master switch owns disclosure: when disabled, the unlock-method rows are absent and the quiet later-setup hint is visible; when enabled, the hint disappears and the two mutually exclusive choices are revealed.
+- Biometric authentication appears first and carries the restrained recommendation badge. App lock appears second and does not imply completion until a PIN exists.
+- The app-lock pending state keeps the user in context with `PINがまだ設定されていません`, explains the two-entry requirement, and disables the final setup action.
+- The dedicated PIN step uses a focused four-digit keypad, automatic transition to confirmation, mismatch feedback, and retry without losing the chosen unlock method.
+- The completion state adds a clear success mark, `PINを設定しました`, the protection summary, and `PINを変更`; only then is the final action enabled.
+- The selected reference is Chinese while the V16 app frame intentionally stays Japanese. Hierarchy, state disclosure, method order, completion affordance, warm paper palette, forest-green structure, and soft mint surfaces are preserved rather than copying localized strings.
+- The implementation is denser than the concept because it remains inside the existing scrollable V16 initial-setup form. The focused comparison confirms that the security card, radio hierarchy, completion block, and CTA remain legible and visually integrated.
+
+## Comparison history
+
+1. The completion reference was added after the flow direction was confirmed so the app-lock choice no longer ends in an ambiguous pending state.
+2. The browser pass verified all four inspector states and the complete create/confirm/return path. No visual blocker was found in the combined or focused comparison.
+
+## Interaction, responsive, and code verification
+
+- Security off: unlock choices hidden, later-setup hint visible, and setup can complete once the name is present.
+- Biometric: biometric selected, app lock unselected, no PIN detail shown, and final action enabled.
+- App lock pending: PIN prompt visible and final action disabled.
+- PIN success: matching `1234` entries return to setup with the success block and enabled final action.
+- PIN mismatch: `1234` then `1235` shows `PINが一致しません` and remains on the confirmation step for retry.
+- Final setup action reaches the home state and shows `初期設定が完了しました`.
+- At 375, 390, and 430 phone widths, the phone and setup scroller `clientWidth` equal `scrollWidth`; the final action stays inside the phone frame.
+- Browser console: 0 errors, 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Initial Setup Foundation Layout Correction — Design QA (2026-07-20)
+
+## Scope and evidence
+
+- Source visual truth: `docs/mockup/v16/assets/initial-setup-security-complete-zh.png`.
+- Reported pre-fix implementation: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_9OFhfr/截屏2026-07-20 16.20.09.png`.
+- Post-fix implementation: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-foundation-pin-complete-updated-phone.png`.
+- Viewport/state: 390×844 phone frame, light theme, Japanese app copy, security enabled, app lock selected, PIN configured.
+- Full-view same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-foundation-full-comparison.png`.
+- Focused source / pre-fix / post-fix comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-foundation-before-after-comparison.png`.
+
+## Findings and comparison history
+
+1. **Resolved P1 — the initial-setup foundation area still used the previous design.** The pre-fix page retained the long introductory headline, separate profile explanation, four-part language segmented control, and individually styled currency and voice pickers. This materially diverged from the confirmed full-page reference and made language inconsistent with currency and voice.
+2. The page now uses the compact `基本設定` hierarchy, places avatar and required name input in one row, and groups display language, currency, and voice language into a single three-row selection card with matching icons, values, chevrons, borders, radii, and interaction affordances.
+3. Display language now opens the same bottom-sheet selection pattern as currency and voice. Selecting a non-system language continues to update the default voice language until the user explicitly chooses a different voice language.
+4. The post-fix full and focused comparisons show no remaining actionable P0, P1, or P2 issue in the corrected region. The persistent V16 status/header chrome and Japanese localization are intentional product-shell adaptations.
+
+## Required fidelity surfaces
+
+- Fonts and typography: the long two-line heading was replaced with the reference's short display heading; label/value weights and line heights now match the compact list hierarchy.
+- Spacing and layout rhythm: avatar/name alignment and the single grouped preference card reproduce the reference's major proportions while retaining the 390×844 V16 shell.
+- Colors and tokens: warm paper, forest green, mint icon treatment, hairline borders, and restrained radii remain mapped to existing semantic tokens.
+- Image quality and assets: the existing generated warm avatar asset is reused at native quality; preference icons come from the existing Material Symbols family.
+- Copy and content: Japanese labels preserve the selected Chinese reference's information architecture without leaking design-instruction text into the app UI.
+
+## Interaction and responsive verification
+
+- Display language, currency, and voice language each open and close a working selector; selections are reflected in the grouped rows.
+- Language selection was exercised with `中文`, currency with `USD`, and voice with `日本語`; the modal closes after each selection.
+- Security-off and PIN-complete states still render after the foundation-layout replacement; the completed PIN state keeps the final action enabled.
+- At 375, 390, and 430 widths, the phone and setup scroller `clientWidth` equal `scrollWidth`; the profile editor and grouped preference card stay inside the phone frame.
+- Browser console: 0 errors, 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Initial Setup Avatar Change Hint — Design QA (2026-07-20)
+
+## Scope and evidence
+
+- Source region and requested change: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_ChrQ4h/截屏2026-07-20 17.37.50.png`, with an explicit affordance that the avatar can be replaced.
+- Implementation screenshot: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-avatar-change-hint-final-phone.png`.
+- Viewport/state: 390×844 phone frame, light theme, Japanese app copy, security disabled, empty required name.
+- Full-view same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-avatar-hint-full-comparison.png`.
+- Focused region same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/initial-setup-avatar-hint-focused-comparison.png`.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains in the avatar/name region.
+- A compact Material Symbols camera mark and `画像を変更` label now sit directly below the avatar tile. The hint avoids the illustration's lower-right heart detail and keeps the required-name label and input aligned.
+- The tile and hint form one semantic button rather than two competing controls. Its accessible name is `画像を変更`, and keyboard focus is drawn around the avatar tile using existing primary and focus tokens.
+- Fonts and typography: the 10px/16px hint is intentionally subordinate to the name label and input while remaining legible at mobile density.
+- Spacing and layout rhythm: the hint adds 21px to the avatar column without changing the 76px tile, 15px column gap, or input dimensions.
+- Colors and tokens: the hint reuses `--hp-primary-text`; no new palette or shadow is introduced.
+- Image quality and assets: the existing warm avatar raster remains unchanged and unobscured; the camera uses the project's Material Symbols icon family.
+- Copy and content: the Japanese label communicates replacement directly without restoring the removed profile-description block.
+
+## Interaction and responsive verification
+
+- Clicking either the avatar image or visible hint opens the existing avatar selector with current-icon and device-photo choices; cancel closes the sheet.
+- At 375, 390, and 430 widths, the avatar column and name field remain inside the phone frame, and both phone and setup scroller have equal `clientWidth` and `scrollWidth`.
+- Browser console: 0 errors, 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Welcome Onboarding & Initial Setup — V16 Design QA (2026-07-19)
+
+## Scope and evidence
+
+- Flutter source reviewed:
+  - `lib/features/onboarding/presentation/screens/onboarding_intro_screen.dart`
+  - `lib/features/onboarding/presentation/screens/onboarding_settings_screen.dart`
+  - `lib/features/onboarding/presentation/screens/onboarding_flow_screen.dart`
+  - `lib/features/onboarding/presentation/screens/onboarding_lock_entry_screen.dart`
+- Mockup implementation: `docs/mockup/v16/index.html`.
+- Source context: the previous V16 welcome and setup captures plus the selected warm family-entry icon language.
+- Viewport/state: 390×844 phone frame, Japanese app copy, light and dark themes.
+- Same-input full-view comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-comparison.png`.
+- Focused icon-language comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-icon-style-comparison.png`.
+- Final browser captures:
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-01-welcome-final.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-02-privacy-final.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-03-setup-empty-final.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-04-lock-final.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/onboarding-redesign-dark-final.png`
+
+## Review findings and redesign decisions
+
+- The current Flutter intro is a three-page `PageView` (`Welcome`, `Privacy`, `Joy`), while the requested product target is two welcome pages. V16 now expresses that target as brand/value on page 1 and privacy/local-first trust on page 2 without losing the third page's essential value message.
+- The previous V16 mockup had only one welcome page, so it could not demonstrate the intended paging, skip, back, or start behavior. It now has two page indicators and working navigation across both pages.
+- The Flutter settings implementation is otherwise complete: name is required, avatar is selectable, display language writes through immediately, currency updates the book, voice language always resolves to a concrete locale, and onboarding completes only after the lock decision.
+- The previous V16 setup screen was misleading because it was prefilled and always startable, omitted the real four-option display-language control, and simplified currency/voice behavior. The new setup starts with an empty required name and disabled CTA, then preserves name and selections while language, currency, and voice are changed.
+- The post-setup screen now mirrors `OnboardingLockEntryScreen`: it asks whether to enter security settings or skip. It no longer substitutes the unrelated PIN-unlock screen.
+- All content-specific onboarding imagery follows the selected option-3 icon language: rounded pine-green monoline, pale leaf green, and a single sakura-pink heart. Dedicated dark-theme assets preserve contrast.
+
+## Comparison history
+
+1. The initial V16 comparison exposed a one-page welcome flow and an implementation-inaccurate setup state. Both were replaced with a two-page welcome path and a faithful setup form.
+2. The first end-to-end setup exercise exposed the outer phone preview retaining a programmatic scroll offset after an input-focused setup screen. `render()` and screen navigation now reset the phone container, so the lock-decision hero and actions remain fully visible.
+3. The dark-theme pass confirmed that CSS swaps to the dedicated 256×256 dark PNG assets; no forest-green-on-dark contrast regression remains.
+
+## Responsive and interaction verification
+
+- 375, 390, and 430 widths: the phone and app screen report equal `clientWidth` and `scrollWidth`; no horizontal overflow.
+- The primary action remains inside the phone bounds on both welcome pages and setup at all three tested widths.
+- Empty name keeps the setup CTA disabled; entering `あおい` enables it.
+- Display language `中文` updates the still-unconfirmed voice language to `中文`; an explicit voice selection of `English` then remains independent.
+- Currency changed from `JPY` to `USD`, with the name, display language, and voice language preserved.
+- Setup continues to the lock decision. `スキップ` reaches home, while `今すぐ設定` reaches settings.
+- Browser console: 0 errors, 0 warnings.
+- Flutter onboarding widget tests: 16 passed.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
 
 final result: passed
 
@@ -701,3 +1083,245 @@ evidence are recorded in “V16 统一记账、账目编辑与新增购物项实
 That rendered pass supersedes the earlier mockup-only blocked notes.
 
 final result: passed
+
+---
+
+# Category Selection V16 — Design QA (2026-07-19)
+
+## Scope
+
+- Reference: `docs/mockup/v16/index.html` (`CategorySelectionScreen`, 390×844)
+- Flutter implementation: `lib/features/accounting/presentation/screens/category_selection_screen.dart`
+- Captured states:
+  - `test/golden/goldens/category_selection_v16_light_ja.png`
+  - `test/golden/goldens/category_creation_l1_v16_light_ja.png`
+
+## Visual contract check
+
+| Area | v16 contract | Flutter result |
+| --- | --- | --- |
+| Header | 56px paper surface, centered title, close and reorder actions, bottom divider | Pass |
+| Search | 20px horizontal shell padding, 48px muted input, 12px radius | Pass |
+| Category list | 16px horizontal / 12px top padding, 8px group gap | Pass |
+| L1 group | 14px radius, 36px icon tile, category-color expanded border and soft shadow | Pass |
+| L2 chips | Compact 36px minimum-height wrap, selected solid fill, 8px spacing | Pass |
+| Add dock | Fixed 48px action above the bottom safe area with warm fade | Pass |
+| Empty search | Quiet `search_off` icon and localized no-match copy | Pass |
+| Creation sheet | Existing paper palette, 24px top radius, 48px actions, keyboard-safe inset | Pass |
+| Dark mode | Uses `AppPalette.dark` through semantic tokens; no light-only literals in presentation | Pass |
+
+## Interaction and accessibility
+
+- L1 headers, L2 chips, add actions, reorder action, ledger choices, and sheet actions are tappable Material controls.
+- Existing preselection expansion and one-shot scroll behavior remains intact.
+- Search, reorder, discard confirmation, L1 creation, and L2 creation are covered by widget tests.
+- L1 ledger choices expose selected semantics; icon actions include tooltips.
+- All new user-facing copy is present in `ja`, `zh`, and `en` ARB files.
+
+## Defects found and resolved
+
+1. The original add controls had empty callbacks. Replaced with complete creation flows.
+2. The first visual capture exposed L2 chips expanding to the full row width. Removed the expanding alignment so chips match the compact v16 wrap geometry.
+3. New L1 creation could have violated the mandatory ledger-config invariant. Category and ledger config now write in one Drift transaction with rollback coverage.
+
+## Verification
+
+- `flutter analyze`: 0 issues
+- Targeted category/use-case/caller tests: passed
+- Golden tests at 390×844: 2 passed
+- Full `flutter test`: 3849 passed, 11 skipped
+- `git diff --check`: passed
+
+final result: passed
+
+---
+
+# Family Flow V16 — Design QA (2026-07-19)
+
+## Scope and evidence
+
+- Selected visual direction: `/Users/xinz/.codex/generated_images/019f7881-03db-72f2-a542-5b075d8e3a27/exec-b3e558ca-ede3-4de3-a938-04efa90bf57a.png`
+- Implementation: `docs/mockup/v16/index.html`
+- Viewport/state: 390×844 phone frame, light theme, Japanese app copy.
+- Same-input visual comparison board: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-implementation-board.png`
+- Full mockup captures:
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-entry-full.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-create-full.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-join-full.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-join-confirm-full.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-join-waiting-full.png`
+  - `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-group-full.png`
+
+## Visual and flow findings
+
+- No actionable P0, P1, or P2 difference remains against the selected option 2 direction.
+- Entry is a neutral branch selector and does not borrow either path's progress indicator.
+- Owner creation uses its own three steps: 家族作成 → 招待共有 → メンバー承認. The invite code, expiry, regenerate, share, and incoming-request approval states are interactive.
+- Invite-code joining uses a different three-step sequence: コード入力 → 家族確認 → 承認待ち. Six individual code inputs, target-family verification, request submission, and the waiting state are interactive.
+- The waiting state shows no syncing status; it explains that sync starts only after owner approval. Private-ledger copy stays visible throughout the join path.
+- Family management is the shared post-approval destination and deliberately has no onboarding stepper. It includes sync status, one pending request, real member avatars, invite-code actions, sync settings, and the destructive dissolve action.
+- The implementation keeps the selected warm paper palette, green structural accents, pink primary actions, compact outlined cards, modest radii, and restrained shadows while reusing the V16 mockup's existing shell and inspector.
+
+## Responsive and interaction verification
+
+- 375, 390, and 430 phone widths all report equal `clientWidth` and `scrollWidth` for the phone and family screen; no horizontal overflow remains.
+- At 375px, both progress rails fit their 335px content width and the six invite-code inputs fit the same width without scrolling.
+- Creation was exercised from entry through invite sharing, owner approval, and family management.
+- Joining was exercised from code input through family confirmation and approval waiting; owner approval was then simulated through the inspector to reach family management.
+- Entry and management contain zero progress rails; creation and joining activate only their own expected steps.
+- Browser console: 0 errors, 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check` pass.
+
+final result: passed
+
+---
+
+# Family Entry Icons — Option 3 Design QA (2026-07-19)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019f7881-03db-72f2-a542-5b075d8e3a27/exec-d52d6580-5428-42b0-99a6-da711ef58176.png`
+- Implementation: `docs/mockup/v16/index.html`, family entry state.
+- Viewport/state: 390×844 phone frame, Japanese copy, light and dark themes.
+- Browser-rendered implementation: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-icons-option3-final.png`
+- Full-view combined comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-icons-option3-full-comparison.png`
+- Focused icon comparison: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-icons-option3-focused-comparison.png`
+- Dark-theme evidence: `/Users/xinz/.codex/visualizations/2026/07/19/019f7881-03db-72f2-a542-5b075d8e3a27/family-icons-option3-dark.png`
+
+## Findings
+
+- No actionable P0, P1, or P2 difference remains against the selected icon concept.
+- Fonts and typography: unchanged from the existing V16 family entry; the icon replacement does not alter title wrapping, weights, or line heights.
+- Spacing and layout rhythm: the 50×50 tile, 14px radius, card padding, text column, and chevron alignment remain unchanged. Both transparent marks render at 48×48 with their own internal padding.
+- Colors and visual tokens: light assets use the selected forest green and rose heart on the existing mint tile. Theme-specific assets use light sage and rose on the dark mint tile instead of reducing contrast.
+- Image quality and asset fidelity: both marks are independent 128×128 transparent PNG assets with clean alpha edges. No inline SVG, CSS drawing, emoji, screenshot crop, or placeholder is used.
+- Copy and content: all Japanese labels and descriptions are unchanged. Decorative images remain hidden from accessibility APIs, so each card retains one concise button name.
+
+## Comparison history
+
+1. The first browser pass rendered the generated assets at 38×38, making both marks visibly smaller than the selected concept. The image slot was increased to 48×48 while preserving the 50×50 tile.
+2. The first dark-theme pass reused the light forest-green pixels and had insufficient contrast on the dark tile. Dedicated dark-theme PNG variants were added with semantic light-sage and rose colors.
+3. The final full-view, focused, and dark-theme captures show the selected open-door sprout and heart invitation-door concepts at the intended scale with no halo or clipping.
+
+## Verification
+
+- 375, 390, and 430 widths: phone and family screen `clientWidth` equal `scrollWidth`; no horizontal overflow.
+- Light and dark assets load successfully and stay 48×48 in the 50×50 tiles.
+- Family entry buttons still navigate through the existing create and join actions.
+- Browser console: 0 errors, 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+# V16 Home Original Summary Style + Tear Notches — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_w9uv2S/截屏2026-07-25 15.54.48.png`, with the explicit instruction to retain the tear notches.
+- Implementation: `docs/mockup/v16/index.html`, `主页`.
+- State: A1 personal light, 390×844 phone frame.
+- Source pixels: 756×732 at 144 dpi. Implementation phone capture: 390×844; focused hero comparison normalized to 680px panel width.
+- Final browser-rendered home: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-original-style-tear-final.jpg`.
+- Focused same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-original-style-tear-comparison-final.jpg`.
+- Dark-state capture: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-original-style-tear-dark.jpg`.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- The expense section now matches the supplied original Home style: Japanese section label, large system-sans amount, green trend capsule, Japanese previous-period copy, inline Joy/daily ledger values, colored endpoint dots, and the pink/green split bar.
+- The original Joy hierarchy remains directly below it, while the retained left/right 20px tear notches sit precisely on the section divider.
+- `今月の最愛` remains an independent card as established by the earlier approved Home structure.
+- Fonts and typography: the summary amount, trend, comparison, and ledger figures use the original body font and weights; Joy, favorite, member, and transaction number treatments remain unchanged.
+- Spacing and layout rhythm: the restored summary uses the original 18px card padding, 34px ledger area, and 22px outer radius. The notches add no vertical height.
+- Colors and tokens: the original blended Hero surface, green trend surface, Joy/daily colors, and split-bar proportions are restored in both light and dark themes.
+- Image quality: no raster assets changed, and all icons continue to use the existing Material Symbols library.
+- Copy and content: original Japanese Home labels and dynamic family values are restored without reintroducing the favorite section into the Hero.
+
+## Comparison history and verification
+
+1. The previous iteration used the English receipt header and two tinted ledger blocks.
+2. This iteration replaced that upper section with the supplied original Home summary while preserving the approved tear-notch divider and standalone favorite card.
+3. The post-fix focused comparison found no remaining P0/P1/P2 mismatch.
+- At 375, 390, and 430 widths, the phone and ledger row report no horizontal overflow.
+- A2 family mode updates the section label, total, and daily-ledger value while retaining one tear divider.
+- A3 dark mode preserves the Hero surface, trend capsule, notch contrast, and amount readability.
+- Enter on the Hero still opens the statistics view.
+- Browser console: 0 errors and 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Home Joy Restoration + Tear Notches — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_q9xzp5/截屏2026-07-25 15.47.05.png`, plus the explicit request to restore the original Joy design and add left/right tear notches.
+- Implementation: `docs/mockup/v16/index.html`, `主页`.
+- State: A1 personal light, 390×844 phone frame.
+- Source pixels: 718×886 at 144 dpi. Implementation phone capture: 390×844; focused hero crop normalized to the same 680px comparison width.
+- Final browser-rendered home: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-receipt-tear-notches-final.jpg`.
+- Focused same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-receipt-tear-notches-comparison-final.jpg`.
+- Dark-state capture: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-receipt-tear-notches-dark.jpg`.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- The upper expense receipt remains unchanged from the selected direction.
+- The lower Joy region restores the original subtly tinted card surface and the original ring interior treatment while preserving its established title, goal, satisfaction, and small-win layout.
+- A dashed perforation now spans the boundary, with matching 20px left and right inward semicircular notches cut in the page background color. The notches preserve the outer card border curve in both light and dark themes.
+- Fonts and typography: the existing receipt number stack and original Joy hierarchy remain unchanged.
+- Spacing and layout rhythm: the original 108px Joy metric grid and support stack are preserved; the new perforation does not add visible vertical bloat.
+- Colors and tokens: the restored Joy surface uses the pre-redesign `surface` / `primary-soft` blend, and the notch fill follows the page background token.
+- Image quality: no raster or icon assets were changed; the existing Material Symbols remain sharp.
+- Copy and content: all Japanese labels and values remain unchanged.
+
+## Comparison history and verification
+
+1. The prior combined card used a plain surface across both regions and only a dashed divider.
+2. The fix restored the Joy region's original tinted surface and ring interior, then added symmetric side notches aligned to the divider.
+3. The post-fix focused comparison found no remaining P0/P1/P2 mismatch.
+- At 375, 390, and 430 widths, the phone reports no horizontal overflow and the Joy region stays within the card.
+- A2 family mode keeps one perforation and updates its dynamic values correctly.
+- A3 dark mode maps the Joy surface, notch fill, and notch edge to dark semantic tokens.
+- Enter on the receipt card still opens the statistics view.
+- Browser console: 0 errors and 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Home Receipt Card Redesign — Design QA (2026-07-25)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/Desktop/截屏2026-07-25 15.34.43.png`.
+- Implementation: `docs/mockup/v16/index.html`, `主页`.
+- Viewport/state: 390×844 phone frame, A1 personal light preset.
+- Final browser-rendered home: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-receipt-redesign-final.jpg`.
+- Focused same-input comparison: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-receipt-comparison-final.jpg`.
+- Dark-state capture: `/Users/xinz/.codex/visualizations/2026/07/25/019f97e9-f261-7490-b09d-5384602cc7d7/home-receipt-dark-state.jpg`.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- The expense overview now follows the supplied receipt language: rounded paper card, restrained border and shadow, uppercase receipt metadata, dashed rules, large total, previous-month comparison, and two tinted ledger blocks.
+- `今月の最愛` is no longer embedded inside the overview. It is a separate bordered card with its own title row and retained ticket detail.
+- The Joy goal, average satisfaction, and small-win metrics remain inside the overview card below a second dashed separator, so the redesign preserves the existing Home information model.
+- All Home dates, amounts, percentages, Joy values, member values, and recent-transaction amounts use the same tabular monospaced number stack with slashed-zero support.
+- Warm light tokens and the existing dark semantic tokens both preserve readable borders, surfaces, and ledger contrast.
+
+## Interaction, responsive, and code verification
+
+- Clicking the standalone favorite card opens the statistics view.
+- Pressing Enter on the receipt overview card also opens the statistics view.
+- At 375, 390, and 430 phone widths, the phone, receipt card, ledger blocks, and favorite card report no horizontal overflow.
+- A2 family mode updates the total, previous value, and daily-ledger amount without changing the card hierarchy.
+- A3 dark mode preserves the receipt/favorite borders and the numeric font.
+- Browser console: 0 errors and 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---

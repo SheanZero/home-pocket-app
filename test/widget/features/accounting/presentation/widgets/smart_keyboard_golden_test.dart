@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
+import '../../../../../helpers/load_numeral_font.dart';
+
 /// Golden regression tests for SmartKeyboard — 6 baseline images.
 ///
 /// Matrix: {ja, zh, en} * {light, dark} = 6 PNG files.
@@ -59,42 +61,43 @@ Widget _wrap({
 }
 
 void main() {
+  setUpAll(loadNumeralFont);
+
   group('SmartKeyboard golden — 6-image regression matrix (SC-3 / D-09)', () {
     for (final locale in const [Locale('ja'), Locale('zh'), Locale('en')]) {
       for (final mode in const [ThemeMode.light, ThemeMode.dark]) {
-        testWidgets(
-          'SmartKeyboard — ${locale.languageCode} / ${mode.name}',
-          (tester) async {
-            // iPhone 14 surface size for stable golden output
-            await tester.binding.setSurfaceSize(const Size(390, 844));
-            addTearDown(() async => tester.binding.setSurfaceSize(null));
+        testWidgets('SmartKeyboard — ${locale.languageCode} / ${mode.name}', (
+          tester,
+        ) async {
+          // iPhone 14 surface size for stable golden output
+          await tester.binding.setSurfaceSize(const Size(390, 844));
+          addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-            await tester.pumpWidget(
-              _wrap(
-                locale: locale,
-                themeMode: mode,
-                child: SmartKeyboard(
-                  onDigit: (_) {},
-                  onDelete: () {},
-                  onNext: () {},
-                  onDoubleZero: () {},
-                  onDot: () {},
-                  // 'Record' is sufficient — exercises layout/typography/color.
-                  // Locale only affects CJK font fallback selection.
-                  actionLabel: 'Record',
-                ),
+          await tester.pumpWidget(
+            _wrap(
+              locale: locale,
+              themeMode: mode,
+              child: SmartKeyboard(
+                onDigit: (_) {},
+                onDelete: () {},
+                onNext: () {},
+                onDoubleZero: () {},
+                onDot: () {},
+                // 'Record' is sufficient — exercises layout/typography/color.
+                // Locale only affects CJK font fallback selection.
+                actionLabel: 'Record',
               ),
-            );
-            await tester.pumpAndSettle();
+            ),
+          );
+          await tester.pumpAndSettle();
 
-            await expectLater(
-              find.byType(SmartKeyboard),
-              matchesGoldenFile(
-                'goldens/smart_keyboard_${locale.languageCode}_${mode.name}.png',
-              ),
-            );
-          },
-        );
+          await expectLater(
+            find.byType(SmartKeyboard),
+            matchesGoldenFile(
+              'goldens/smart_keyboard_${locale.languageCode}_${mode.name}.png',
+            ),
+          );
+        });
       }
     }
   });

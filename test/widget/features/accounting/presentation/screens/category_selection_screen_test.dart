@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/accounting/create_category_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/state_category_reorder.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/category_selection_screen.dart';
+import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
 import '../../../../../helpers/test_localizations.dart';
 
 class FakeCategoryRepository implements CategoryRepository {
-  FakeCategoryRepository(this.categories);
+  FakeCategoryRepository(List<Category> categories)
+    : categories = [...categories];
 
   final List<Category> categories;
 
@@ -40,7 +46,7 @@ class FakeCategoryRepository implements CategoryRepository {
       categories.where((category) => category.parentId == parentId).toList();
 
   @override
-  Future<void> insert(Category category) async {}
+  Future<void> insert(Category category) async => categories.add(category);
 
   @override
   Future<void> insertBatch(List<Category> categories) async {}
@@ -63,6 +69,73 @@ class FakeCategoryRepository implements CategoryRepository {
   @override
   Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {
     lastSortOrders = Map.of(idToSortOrder);
+  }
+}
+
+class _FakeLedgerConfigRepository implements CategoryLedgerConfigRepository {
+  final List<CategoryLedgerConfig> configs = [];
+
+  @override
+  Future<void> upsert(CategoryLedgerConfig config) async => configs.add(config);
+
+  @override
+  Future<CategoryLedgerConfig?> findById(String categoryId) async => null;
+
+  @override
+  Future<List<CategoryLedgerConfig>> findAll() async => [...configs];
+
+  @override
+  Future<void> delete(String categoryId) async {}
+
+  @override
+  Future<void> deleteAll() async => configs.clear();
+
+  @override
+  Future<void> upsertBatch(List<CategoryLedgerConfig> configs) async =>
+      this.configs.addAll(configs);
+}
+
+class _ImmediateUnitOfWork implements UnitOfWork {
+  @override
+  Future<T> run<T>(Future<T> Function() action) => action();
+}
+
+class _CategoryPickerHarness extends StatefulWidget {
+  const _CategoryPickerHarness();
+
+  @override
+  State<_CategoryPickerHarness> createState() => _CategoryPickerHarnessState();
+}
+
+class _CategoryPickerHarnessState extends State<_CategoryPickerHarness> {
+  String? _selectedName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          TextButton(
+            key: const ValueKey('open-category-picker'),
+            onPressed: () async {
+              final selected = await Navigator.push<Category>(
+                context,
+                MaterialPageRoute<Category>(
+                  builder: (_) => const CategorySelectionScreen(
+                    selectedCategoryId: 'convenience',
+                  ),
+                ),
+              );
+              if (selected != null && mounted) {
+                setState(() => _selectedName = selected.name);
+              }
+            },
+            child: const Text('Open picker'),
+          ),
+          Text(_selectedName ?? 'Nothing selected'),
+        ],
+      ),
+    );
   }
 }
 
@@ -130,6 +203,149 @@ void main() {
     expect(find.text('食費'), findsOneWidget);
     expect(find.text('コンビニ'), findsOneWidget);
     expect(find.text('スーパー'), findsOneWidget);
+  });
+
+  testWidgets('shows the v16 empty state when search has no matches', (
+    tester,
+  ) async {
+    final repo = FakeCategoryRepository(categories);
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const CategorySelectionScreen(),
+        locale: const Locale('ja'),
+        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '一致しない検索');
+    await tester.pump();
+
+    expect(find.byIcon(Icons.search_off), findsOneWidget);
+    expect(find.text('一致する分類がありません'), findsOneWidget);
+  });
+
+  group('custom category creation', () {
+    testWidgets('adds an L1 with its chosen ledger and expands it', (
+      tester,
+    ) async {
+      final repo = FakeCategoryRepository(categories);
+      final configRepo = _FakeLedgerConfigRepository();
+      final useCase = CreateCategoryUseCase(
+        categoryRepository: repo,
+        ledgerConfigRepository: configRepo,
+        unitOfWork: _ImmediateUnitOfWork(),
+        idGenerator: () => 'custom-travel',
+        clock: () => DateTime(2026, 7, 19),
+      );
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(repo),
+            createCategoryUseCaseProvider.overrideWithValue(useCase),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('category-add-l1')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('category-create-name')),
+        'Travel plans',
+      );
+      await tester.tap(find.byKey(const ValueKey('category-ledger-joy')));
+      await tester.tap(find.byKey(const ValueKey('category-create-submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Travel plans'), findsOneWidget);
+      expect(
+        repo.categories.any((category) => category.id == 'custom-travel'),
+        isTrue,
+      );
+      expect(configRepo.configs.single.ledgerType, LedgerType.joy);
+      expect(
+        find.byKey(const ValueKey('category-add-l2-custom-travel')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('adds an L2 and returns it as the picker selection', (
+      tester,
+    ) async {
+      final repo = FakeCategoryRepository(categories);
+      final useCase = CreateCategoryUseCase(
+        categoryRepository: repo,
+        ledgerConfigRepository: _FakeLedgerConfigRepository(),
+        unitOfWork: _ImmediateUnitOfWork(),
+        idGenerator: () => 'custom-bakery',
+        clock: () => DateTime(2026, 7, 19),
+      );
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const _CategoryPickerHarness(),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(repo),
+            createCategoryUseCaseProvider.overrideWithValue(useCase),
+          ],
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('open-category-picker')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('category-add-l2-food')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('category-create-name')),
+        'Bakery',
+      );
+      await tester.tap(find.byKey(const ValueKey('category-create-submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bakery'), findsOneWidget);
+      expect(
+        repo.categories
+            .singleWhere((category) => category.id == 'custom-bakery')
+            .parentId,
+        'food',
+      );
+    });
+
+    testWidgets('rejects a name that duplicates a localized system category', (
+      tester,
+    ) async {
+      final repo = FakeCategoryRepository(categories);
+      final useCase = CreateCategoryUseCase(
+        categoryRepository: repo,
+        ledgerConfigRepository: _FakeLedgerConfigRepository(),
+        unitOfWork: _ImmediateUnitOfWork(),
+        idGenerator: () => 'unused',
+      );
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          locale: const Locale('ja'),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(repo),
+            createCategoryUseCaseProvider.overrideWithValue(useCase),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('category-add-l1')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('category-create-name')),
+        '食費',
+      );
+      await tester.tap(find.byKey(const ValueKey('category-create-submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('同じ名前の分類があります'), findsOneWidget);
+      expect(repo.categories, hasLength(categories.length));
+    });
   });
 
   group('reorder entry', () {

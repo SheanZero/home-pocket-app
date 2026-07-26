@@ -18,6 +18,8 @@ import 'package:home_pocket/features/shopping_list/presentation/screens/shopping
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../helpers/load_numeral_font.dart';
+
 class _MockDelete extends Mock implements DeleteShoppingItemUseCase {}
 
 class _MockToggle extends Mock implements ToggleItemCompletedUseCase {}
@@ -48,6 +50,8 @@ ShoppingItem _item(
 }
 
 void main() {
+  setUpAll(loadNumeralFont);
+
   testWidgets('V15 personal shopping screen — light ja', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;

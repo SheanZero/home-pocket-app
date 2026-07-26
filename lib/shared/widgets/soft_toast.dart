@@ -125,8 +125,9 @@ class _SoftToastState extends State<SoftToast>
     // [success] via alpha so no extra palette tokens are required; error keeps
     // its dedicated error* tints for pixel-stable existing call sites.
     final Color foreground = isSuccess ? palette.success : palette.error;
-    final Color surface =
-        isSuccess ? palette.successLight : palette.errorSurface;
+    final Color surface = isSuccess
+        ? palette.successLight
+        : palette.errorSurface;
     final Color border = isSuccess
         ? palette.success.withValues(alpha: 0.35)
         : palette.errorBorder;
@@ -136,7 +137,8 @@ class _SoftToastState extends State<SoftToast>
     final Color closeBg = isSuccess
         ? palette.success.withValues(alpha: 0.18)
         : palette.errorBorder;
-    final IconData leadingIcon = widget.icon ??
+    final IconData leadingIcon =
+        widget.icon ??
         (isSuccess ? Icons.check_circle_outline : Icons.error_outline);
 
     return SlideTransition(
@@ -167,7 +169,6 @@ class _SoftToastState extends State<SoftToast>
                   child: Text(
                     widget.message,
                     style: TextStyle(
-                      fontFamily: 'IBM Plex Sans',
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: foreground,
@@ -181,7 +182,6 @@ class _SoftToastState extends State<SoftToast>
                     child: Text(
                       widget.actionLabel!,
                       style: TextStyle(
-                        fontFamily: 'IBM Plex Sans',
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: foreground,
@@ -201,11 +201,7 @@ class _SoftToastState extends State<SoftToast>
                       color: closeBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(
-                      Icons.close,
-                      size: 12,
-                      color: foreground,
-                    ),
+                    child: Icon(Icons.close, size: 12, color: foreground),
                   ),
                 ),
               ],

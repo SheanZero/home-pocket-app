@@ -36,6 +36,7 @@ class HeroHeader extends StatelessWidget {
       title: l10n.homeMonthFormat(year, month),
       titleKey: const Key('home-main-title'),
       titleColor: context.palette.accentPrimary,
+      titleStyle: AppTextStyles.numerals(AppTextStyles.pageTitle),
       onTitleTap: onMonthTap,
       titleTooltip: l10n.listMonthPickerLabel,
       trailing: _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),

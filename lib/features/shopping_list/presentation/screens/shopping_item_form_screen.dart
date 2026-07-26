@@ -574,8 +574,10 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     final selected = await Navigator.push<Category>(
       context,
       MaterialPageRoute<Category>(
-        builder: (_) =>
-            CategorySelectionScreen(selectedCategoryId: _categoryId),
+        builder: (_) => CategorySelectionScreen(
+          selectedCategoryId: _categoryId,
+          suggestedLedgerType: _ledgerType,
+        ),
       ),
     );
     if (selected == null || !mounted) return;

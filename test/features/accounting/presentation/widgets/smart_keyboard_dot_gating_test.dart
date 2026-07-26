@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 
 import '../../../../helpers/test_localizations.dart';
+import '../../../../helpers/load_numeral_font.dart';
 
 /// Builds a SmartKeyboard with a fixed surface so key height is deterministic.
 Widget _wrap({
@@ -56,6 +57,8 @@ Widget _wrap({
 }
 
 void main() {
+  setUpAll(loadNumeralFont);
+
   group('SmartKeyboard — dot gating (D-06)', () {
     testWidgets('onDot null: no "." glyph, disabled tile present', (
       tester,

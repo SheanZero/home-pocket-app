@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart';
 
 import '../../helpers/test_localizations.dart';
@@ -36,6 +37,22 @@ void main() {
 
       // ja locale: homeMonthFormat = "{year}年{month}月"
       expect(find.text('2026年2月'), findsOneWidget);
+    });
+
+    testWidgets('uses the home numeral typeface for the month title', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(year: 2026, month: 2, onSettingsTap: () {}),
+      );
+
+      final title = tester.widget<Text>(find.text('2026年2月'));
+      expect(title.style?.fontFamily, AppTextStyles.numeralFontFamily);
+      expect(
+        title.style?.fontFeatures,
+        contains(const FontFeature.tabularFigures()),
+      );
+      expect(title.style?.fontFeatures, contains(const FontFeature('zero')));
     });
 
     testWidgets('settings icon triggers callback', (tester) async {

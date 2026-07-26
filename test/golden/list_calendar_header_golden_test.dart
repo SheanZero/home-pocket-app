@@ -26,6 +26,8 @@ import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
+import '../helpers/load_numeral_font.dart';
+
 // January 2025 is always in the past relative to CI (2026+).
 // No calendar cell will ever match DateTime.now() → deterministic render.
 const int _fixedYear = 2025;
@@ -37,15 +39,12 @@ const int _fixedMonth = 1;
 class _FixedListFilter extends ListFilter {
   @override
   ListFilterState build() => const ListFilterState(
-        selectedYear: _fixedYear,
-        selectedMonth: _fixedMonth,
-      );
+    selectedYear: _fixedYear,
+    selectedMonth: _fixedMonth,
+  );
 }
 
-Widget _wrap({
-  required Locale locale,
-  ThemeMode themeMode = ThemeMode.light,
-}) {
+Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
   return ProviderScope(
     overrides: [
       // REQUIRED: prevents DateTime.now() flake in _buildDayCell (line 142).
@@ -93,6 +92,8 @@ Widget _wrap({
 }
 
 void main() {
+  setUpAll(loadNumeralFont);
+
   group('CalendarHeaderWidget golden', () {
     testWidgets('locale ja — January 2025 (deterministic)', (tester) async {
       await tester.pumpWidget(_wrap(locale: const Locale('ja')));
@@ -103,7 +104,9 @@ void main() {
       );
     });
 
-    testWidgets('locale ja dark — January 2025 (deterministic)', (tester) async {
+    testWidgets('locale ja dark — January 2025 (deterministic)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(locale: const Locale('ja'), themeMode: ThemeMode.dark),
       );
@@ -123,7 +126,9 @@ void main() {
       );
     });
 
-    testWidgets('locale zh dark — January 2025 (deterministic)', (tester) async {
+    testWidgets('locale zh dark — January 2025 (deterministic)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(locale: const Locale('zh'), themeMode: ThemeMode.dark),
       );
@@ -143,7 +148,9 @@ void main() {
       );
     });
 
-    testWidgets('locale en dark — January 2025 (deterministic)', (tester) async {
+    testWidgets('locale en dark — January 2025 (deterministic)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(locale: const Locale('en'), themeMode: ThemeMode.dark),
       );

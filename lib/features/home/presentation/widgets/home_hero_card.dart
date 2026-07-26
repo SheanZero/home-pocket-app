@@ -7,7 +7,6 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/home_v15_visual_tokens.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
 import '../../../analytics/domain/models/family_happiness.dart';
@@ -30,9 +29,8 @@ import 'home_metrics_region.dart';
 /// - ときめき/日常 split bar shows ABSOLUTE amounts (D-02).
 /// - No gamification chips of any kind (ADR-012).
 ///
-/// Plans 10-07a + 10-07b deliver Regions 1-8 (hero header → split bar →
-/// divider → ring section → divider → Best Joy strip → optional divider →
-/// optional members section). Constructor signature is locked at 10-07a.
+/// V16 composition: the spending and Joy metrics share one ticket-like card,
+/// while the monthly favorite ticket is a separate transparent section below.
 class HomeHeroCard extends StatelessWidget {
   const HomeHeroCard({
     required this.report,
@@ -72,54 +70,103 @@ class HomeHeroCard extends StatelessWidget {
     final l10n = S.of(context);
     final palette = context.palette;
     final showMembers = isGroupMode && (shadowBooks?.isNotEmpty ?? false);
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          // v15 `.faithful-hero`: surface tinted ~10% toward primary-soft,
-          // radius 22, primary-tinted border, soft ambient shadow.
-          color: Color.lerp(palette.card, palette.accentPrimaryLight, 0.10),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: Color.lerp(
-              palette.borderDefault,
-              palette.accentPrimary,
-              0.18,
-            )!,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: palette.navShadow,
-              blurRadius: 30,
-              offset: const Offset(0, 8),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            key: const Key('home-hero-main-surface'),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Color.lerp(palette.card, palette.accentPrimaryLight, 0.10),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: Color.lerp(
+                  palette.borderDefault,
+                  palette.accentPrimary,
+                  0.18,
+                )!,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: palette.navShadow,
+                  blurRadius: 30,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _hero(context, l10n, palette),
+                const SizedBox(height: 16),
+                _splitBar(context, l10n, palette),
+                const SizedBox(height: 16),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 17),
+                        _ringSection(context, l10n, palette),
+                        if (showMembers) ...[
+                          const SizedBox(height: 12),
+                          _divider(context),
+                          const SizedBox(height: 12),
+                          _buildMembersSection(context, l10n, palette),
+                        ],
+                      ],
+                    ),
+                    Positioned(
+                      left: -28,
+                      top: -10,
+                      child: _heroTearNotch(
+                        palette,
+                        const Key('home-hero-tear-notch-left'),
+                      ),
+                    ),
+                    Positioned(
+                      right: -28,
+                      top: -10,
+                      child: _heroTearNotch(
+                        palette,
+                        const Key('home-hero-tear-notch-right'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _hero(context, l10n, palette),
-            const SizedBox(height: 16),
-            _splitBar(context, l10n, palette),
-            const SizedBox(height: 12),
-            _divider(context),
-            const SizedBox(height: 12),
-            _ringSection(context, l10n, palette),
-            const SizedBox(height: 12),
-            _divider(context),
-            const SizedBox(height: 12),
-            // Region 6: Best Joy strip.
-            _buildBestJoyStrip(context, l10n, palette),
-            if (showMembers) ...[
-              const SizedBox(height: 12),
-              _divider(context),
-              const SizedBox(height: 12),
-              // Region 8: Members section (group mode + non-empty shadowBooks).
-              _buildMembersSection(context, l10n, palette),
-            ],
-          ],
+        const SizedBox(height: 18),
+        GestureDetector(
+          key: const Key('home-favorite-section'),
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: _buildBestJoyStrip(context, l10n, palette),
+        ),
+      ],
+    );
+  }
+
+  Widget _heroTearNotch(AppPalette palette, Key key) {
+    return Container(
+      key: key,
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: palette.background,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Color.lerp(
+            palette.borderDefault,
+            palette.accentPrimary,
+            0.12,
+          )!,
         ),
       ),
     );
@@ -152,9 +199,11 @@ class HomeHeroCard extends StatelessWidget {
             Expanded(
               child: Text(
                 _fmt.formatCurrency(total, currencyCode, locale),
-                style: AppTextStyles.amountHero.copyWith(
-                  letterSpacing: -0.4,
-                  color: palette.textPrimary,
+                style: AppTextStyles.numerals(
+                  AppTextStyles.amountHero.copyWith(
+                    letterSpacing: -0.4,
+                    color: palette.textPrimary,
+                  ),
                 ),
               ),
             ),
@@ -166,8 +215,8 @@ class HomeHeroCard extends StatelessWidget {
           l10n.homeHeroPreviousMonthSubline(
             _fmt.formatCurrency(prev, currencyCode, locale),
           ),
-          style: AppTextStyles.supporting.copyWith(
-            color: palette.textSecondary,
+          style: AppTextStyles.numerals(
+            AppTextStyles.supporting.copyWith(color: palette.textSecondary),
           ),
         ),
       ],
@@ -197,9 +246,11 @@ class HomeHeroCard extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             text,
-            style: AppTextStyles.compact.copyWith(
-              fontWeight: FontWeight.w700,
-              color: contentColor,
+            style: AppTextStyles.numerals(
+              AppTextStyles.compact.copyWith(
+                fontWeight: FontWeight.w700,
+                color: contentColor,
+              ),
             ),
           ),
         ],
@@ -277,9 +328,11 @@ class HomeHeroCard extends StatelessWidget {
     );
     final amountText = Text(
       amount,
-      style: AppTextStyles.label.copyWith(
-        fontWeight: FontWeight.w700,
-        color: amountColor,
+      style: AppTextStyles.numerals(
+        AppTextStyles.label.copyWith(
+          fontWeight: FontWeight.w700,
+          color: amountColor,
+        ),
       ),
     );
     return Row(
@@ -343,7 +396,7 @@ class HomeHeroCard extends StatelessWidget {
             const SizedBox(width: 8),
             // "今月の分析を見る ›" — no own gesture; the tap falls through to the
             // whole-card onTap (hero → analytics), matching the mockup.
-            _analysisLink(l10n, palette),
+            _analysisLink(l10n.homeViewMonthlyAnalysis, palette),
           ],
         ),
         const SizedBox(height: 12),
@@ -360,12 +413,12 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  Widget _analysisLink(S l10n, AppPalette palette) {
+  Widget _analysisLink(String label, AppPalette palette) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          l10n.homeViewMonthlyAnalysis,
+          label,
           style: AppTextStyles.compact.copyWith(
             fontWeight: FontWeight.w700,
             color: palette.accentPrimary,
@@ -448,6 +501,8 @@ class HomeHeroCard extends StatelessWidget {
                 color: palette.textPrimary,
               ),
             ),
+            const Spacer(),
+            _analysisLink(S.of(context).homeViewDetails, palette),
           ],
         ),
         const SizedBox(height: 10),
@@ -472,11 +527,6 @@ class HomeHeroCard extends StatelessWidget {
     Widget? seal,
   }) {
     final colors = HomeV15VisualTokens.of(context);
-    final heroSurface = Color.lerp(
-      palette.card,
-      palette.accentPrimaryLight,
-      0.10,
-    )!;
     return Container(
       constraints: const BoxConstraints(minHeight: 82),
       decoration: BoxDecoration(
@@ -513,10 +563,10 @@ class HomeHeroCard extends StatelessWidget {
             if (seal != null)
               SizedBox(
                 key: const Key('best-joy-seal-panel'),
-                width: 72,
+                width: 58,
                 child: _TicketSealChrome(
                   borderColor: colors.ticketBorder,
-                  cutoutColor: heroSurface,
+                  cutoutColor: palette.background,
                   child: seal,
                 ),
               ),
@@ -588,10 +638,12 @@ class HomeHeroCard extends StatelessWidget {
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.visible,
-                      style: AppTextStyles.micro.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: monthBandText,
-                        letterSpacing: 0.3,
+                      style: AppTextStyles.numerals(
+                        AppTextStyles.micro.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: monthBandText,
+                          letterSpacing: 0.3,
+                        ),
                       ),
                     ),
                   ),
@@ -601,10 +653,11 @@ class HomeHeroCard extends StatelessWidget {
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.visible,
-                    style: AppTextStyles.itemTitle.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.ticketText,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                    style: AppTextStyles.numerals(
+                      AppTextStyles.itemTitle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colors.ticketText,
+                      ),
                     ),
                   ),
                   Text(
@@ -612,8 +665,10 @@ class HomeHeroCard extends StatelessWidget {
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.visible,
-                    style: AppTextStyles.micro.copyWith(
-                      color: palette.textSecondary,
+                    style: AppTextStyles.numerals(
+                      AppTextStyles.micro.copyWith(
+                        color: palette.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -664,9 +719,9 @@ class HomeHeroCard extends StatelessWidget {
       row.categoryId,
       locale,
     );
-    final month = DateFormatter.formatCalendarMonth(row.timestamp, locale);
-    final day = DateFormatter.formatCalendarDay(row.timestamp, locale);
-    final weekday = DateFormat('E', locale.toString()).format(row.timestamp);
+    final month = DateFormat('MMM', 'en').format(row.timestamp).toUpperCase();
+    final day = DateFormat('dd', 'en').format(row.timestamp);
+    final weekday = DateFormat('EEE', 'en').format(row.timestamp).toUpperCase();
     final amount = _fmt.formatCurrency(row.amount, currencyCode, locale);
 
     final calendar = _bestJoyCalendarTile(
@@ -692,7 +747,9 @@ class HomeHeroCard extends StatelessWidget {
         const SizedBox(height: 5),
         Text(
           amount,
-          style: AppTextStyles.amountSmall.copyWith(color: colors.ticketText),
+          style: AppTextStyles.numerals(
+            AppTextStyles.amountSmall.copyWith(color: colors.ticketText),
+          ),
         ),
       ],
     );
@@ -701,13 +758,13 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         SatisfactionFaceIcon(
           value: row.joyFullness,
-          size: 32,
+          size: 22,
           color: colors.ticketText,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         Text(
           _satisfactionPillLabel(l10n, row.joyFullness),
-          style: AppTextStyles.supporting.copyWith(
+          style: AppTextStyles.micro.copyWith(
             fontWeight: FontWeight.w700,
             color: colors.ticketText,
           ),
@@ -811,8 +868,8 @@ class HomeHeroCard extends StatelessWidget {
           ),
           Text(
             amountText,
-            style: AppTextStyles.amountSmall.copyWith(
-              color: palette.textPrimary,
+            style: AppTextStyles.numerals(
+              AppTextStyles.amountSmall.copyWith(color: palette.textPrimary),
             ),
           ),
         ],

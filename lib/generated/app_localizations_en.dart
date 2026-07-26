@@ -655,6 +655,9 @@ class SEn extends S {
   String get homeViewMonthlyAnalysis => 'View monthly analysis';
 
   @override
+  String get homeViewDetails => 'View details';
+
+  @override
   String get homeMetricJoyUnit => 'Joy';
 
   @override
@@ -806,6 +809,48 @@ class SEn extends S {
 
   @override
   String get addCategory => 'Add category';
+
+  @override
+  String get noMatchingCategories => 'No matching categories';
+
+  @override
+  String get addL1CategoryTitle => 'Add category';
+
+  @override
+  String addL2CategoryTitle(String parentName) {
+    return 'Add under $parentName';
+  }
+
+  @override
+  String get categoryNameLabel => 'Category name';
+
+  @override
+  String get categoryNameHint => 'e.g. Weekend projects';
+
+  @override
+  String get categoryNameRequired => 'Enter a category name';
+
+  @override
+  String get categoryNameTooLong => 'Use 50 characters or fewer';
+
+  @override
+  String get categoryNameExists => 'A category with this name already exists';
+
+  @override
+  String get categoryLedgerLabel => 'Ledger';
+
+  @override
+  String get categoryLedgerDescription =>
+      'Choose where expenses in this category are recorded.';
+
+  @override
+  String get createCategory => 'Add';
+
+  @override
+  String get categoryAdded => 'Category added';
+
+  @override
+  String get categoryAddFailed => 'Couldn\'t add the category. Please retry.';
 
   @override
   String get editCategoryOrder => 'Edit category order';
