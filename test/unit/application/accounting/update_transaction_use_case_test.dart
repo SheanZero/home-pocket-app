@@ -7,7 +7,8 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 class _MockSyncEngine extends Mock implements SyncEngine {}
 
@@ -37,6 +38,10 @@ void main() {
     EntrySource entrySource = EntrySource.manual,
     String prevHash = 'prev-hash-abc',
     String currentHash = 'current-hash-xyz',
+    bool isPrivate = false,
+    int syncRevision = 7,
+    FamilySyncVisibility familySyncVisibility = FamilySyncVisibility.localOnly,
+    int familySharedRevision = 0,
   }) {
     final now = DateTime(2026, 1, 1);
     return Transaction(
@@ -55,6 +60,11 @@ void main() {
       merchant: merchant,
       joyFullness: joyFullness,
       entrySource: entrySource,
+      isPrivate: isPrivate,
+      syncRevision: syncRevision,
+      syncOriginDeviceId: deviceId,
+      familySyncVisibility: familySyncVisibility,
+      familySharedRevision: familySharedRevision,
     );
   }
 
@@ -95,10 +105,17 @@ void main() {
         expect(result.isSuccess, isTrue);
         expect(result.data!.updatedAt, isNotNull);
         expect(
-          result.data!.updatedAt!.isAfter(before.subtract(const Duration(seconds: 1))),
+          result.data!.updatedAt!.isAfter(
+            before.subtract(const Duration(seconds: 1)),
+          ),
           isTrue,
         );
-        expect(result.data!.updatedAt!.isBefore(after.add(const Duration(seconds: 1))), isTrue);
+        expect(
+          result.data!.updatedAt!.isBefore(
+            after.add(const Duration(seconds: 1)),
+          ),
+          isTrue,
+        );
       });
 
       test('preserves entrySource verbatim from seed (SC-3)', () async {
@@ -112,71 +129,105 @@ void main() {
         expect(result.data!.entrySource, EntrySource.voice);
       });
 
-      test('preserves entrySource for all three literal values (SC-3)', () async {
-        for (final source in EntrySource.values) {
-          final seed = makeSeed(entrySource: source);
-          final result = await useCase.execute(
-            UpdateTransactionParams(seed: seed, amount: 500),
+      test(
+        'preserves entrySource for all three literal values (SC-3)',
+        () async {
+          for (final source in EntrySource.values) {
+            final seed = makeSeed(entrySource: source);
+            final result = await useCase.execute(
+              UpdateTransactionParams(seed: seed, amount: 500),
+            );
+            expect(
+              result.data!.entrySource,
+              source,
+              reason: 'entrySource must be preserved for $source',
+            );
+          }
+        },
+      );
+
+      test(
+        'does NOT recompute hash chain — prevHash and currentHash frozen (D-08)',
+        () async {
+          final seed = makeSeed(
+            prevHash: 'prev-hash-abc',
+            currentHash: 'current-hash-xyz',
           );
-          expect(result.data!.entrySource, source,
-              reason: 'entrySource must be preserved for $source');
-        }
-      });
 
-      test('does NOT recompute hash chain — prevHash and currentHash frozen (D-08)', () async {
-        final seed = makeSeed(prevHash: 'prev-hash-abc', currentHash: 'current-hash-xyz');
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 5000),
+          );
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 5000),
-        );
+          expect(result.isSuccess, isTrue);
+          expect(
+            result.data!.prevHash,
+            'prev-hash-abc',
+            reason: 'prevHash must not change on edit',
+          );
+          expect(
+            result.data!.currentHash,
+            'current-hash-xyz',
+            reason: 'currentHash must not change on edit',
+          );
+        },
+      );
 
-        expect(result.isSuccess, isTrue);
-        expect(result.data!.prevHash, 'prev-hash-abc',
-            reason: 'prevHash must not change on edit');
-        expect(result.data!.currentHash, 'current-hash-xyz',
-            reason: 'currentHash must not change on edit');
-      });
+      test(
+        'preserves immutable fields: id, bookId, deviceId, createdAt',
+        () async {
+          final seed = makeSeed(
+            id: 'tx-immutable',
+            bookId: 'book-immutable',
+            deviceId: 'device-immutable',
+          );
 
-      test('preserves immutable fields: id, bookId, deviceId, createdAt', () async {
-        final seed = makeSeed(
-          id: 'tx-immutable',
-          bookId: 'book-immutable',
-          deviceId: 'device-immutable',
-        );
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 9999),
+          );
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 9999),
-        );
+          expect(result.data!.id, 'tx-immutable');
+          expect(result.data!.bookId, 'book-immutable');
+          expect(result.data!.deviceId, 'device-immutable');
+          expect(result.data!.createdAt, seed.createdAt);
+        },
+      );
 
-        expect(result.data!.id, 'tx-immutable');
-        expect(result.data!.bookId, 'book-immutable');
-        expect(result.data!.deviceId, 'device-immutable');
-        expect(result.data!.createdAt, seed.createdAt);
-      });
+      test(
+        'pass-through semantics: null note clears previously-set note (B1/EDIT-02)',
+        () async {
+          final seed = makeSeed(note: 'old note');
 
-      test('pass-through semantics: null note clears previously-set note (B1/EDIT-02)', () async {
-        final seed = makeSeed(note: 'old note');
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 1000, note: null),
+          );
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 1000, note: null),
-        );
+          expect(result.isSuccess, isTrue);
+          expect(
+            result.data!.note,
+            isNull,
+            reason: 'null note must clear the field (pass-through semantics)',
+          );
+        },
+      );
 
-        expect(result.isSuccess, isTrue);
-        expect(result.data!.note, isNull,
-            reason: 'null note must clear the field (pass-through semantics)');
-      });
+      test(
+        'pass-through semantics: null merchant clears previously-set merchant (B1/EDIT-02)',
+        () async {
+          final seed = makeSeed(merchant: 'Old Store');
 
-      test('pass-through semantics: null merchant clears previously-set merchant (B1/EDIT-02)', () async {
-        final seed = makeSeed(merchant: 'Old Store');
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 1000, merchant: null),
+          );
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 1000, merchant: null),
-        );
-
-        expect(result.isSuccess, isTrue);
-        expect(result.data!.merchant, isNull,
-            reason: 'null merchant must clear the field (pass-through semantics)');
-      });
+          expect(result.isSuccess, isTrue);
+          expect(
+            result.data!.merchant,
+            isNull,
+            reason:
+                'null merchant must clear the field (pass-through semantics)',
+          );
+        },
+      );
 
       test('pass-through semantics: non-null note updates the field', () async {
         final seed = makeSeed(note: null);
@@ -195,41 +246,53 @@ void main() {
           UpdateTransactionParams(seed: seed),
         );
 
-        expect(result.data!.amount, 5000,
-            reason: 'null amount param must keep seed value');
-      });
-
-      test('coalesce semantics: null categoryId keeps seed.categoryId', () async {
-        final seed = makeSeed(categoryId: 'cat-original');
-
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 1000),
+        expect(
+          result.data!.amount,
+          5000,
+          reason: 'null amount param must keep seed value',
         );
-
-        expect(result.data!.categoryId, 'cat-original');
       });
 
-      test('coalesce semantics: null ledgerType keeps seed.ledgerType', () async {
-        final seed = makeSeed(ledgerType: LedgerType.joy);
+      test(
+        'coalesce semantics: null categoryId keeps seed.categoryId',
+        () async {
+          final seed = makeSeed(categoryId: 'cat-original');
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 1000),
-        );
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 1000),
+          );
 
-        expect(result.data!.ledgerType, LedgerType.joy);
-      });
+          expect(result.data!.categoryId, 'cat-original');
+        },
+      );
 
-      test('wires sync push when changeTracker and syncEngine are provided', () async {
-        // The mock tracker / engine interaction is implicit:
-        // If the use case calls _changeTracker?.trackUpdate correctly, no exception
-        // is thrown and the result is success. We verify the repo was called.
-        final seed = makeSeed();
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 2000),
-        );
-        expect(result.isSuccess, isTrue);
-        verify(() => mockTransactionRepo.update(any())).called(1);
-      });
+      test(
+        'coalesce semantics: null ledgerType keeps seed.ledgerType',
+        () async {
+          final seed = makeSeed(ledgerType: LedgerType.joy);
+
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 1000),
+          );
+
+          expect(result.data!.ledgerType, LedgerType.joy);
+        },
+      );
+
+      test(
+        'wires sync push when changeTracker and syncEngine are provided',
+        () async {
+          // The mock tracker / engine interaction is implicit:
+          // If the use case calls _changeTracker?.trackUpdate correctly, no exception
+          // is thrown and the result is success. We verify the repo was called.
+          final seed = makeSeed();
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 2000),
+          );
+          expect(result.isSuccess, isTrue);
+          verify(() => mockTransactionRepo.update(any())).called(1);
+        },
+      );
     });
 
     group('validation', () {
@@ -269,25 +332,31 @@ void main() {
         verifyNever(() => mockTransactionRepo.update(any()));
       });
 
-      test('null amount (no override) does NOT trigger validation error', () async {
-        final seed = makeSeed(amount: 1000);
+      test(
+        'null amount (no override) does NOT trigger validation error',
+        () async {
+          final seed = makeSeed(amount: 1000);
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed),
-        );
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed),
+          );
 
-        expect(result.isSuccess, isTrue);
-      });
+          expect(result.isSuccess, isTrue);
+        },
+      );
 
-      test('null categoryId (no override) does NOT trigger validation error', () async {
-        final seed = makeSeed(categoryId: 'cat-food');
+      test(
+        'null categoryId (no override) does NOT trigger validation error',
+        () async {
+          final seed = makeSeed(categoryId: 'cat-food');
 
-        final result = await useCase.execute(
-          UpdateTransactionParams(seed: seed, amount: 1000),
-        );
+          final result = await useCase.execute(
+            UpdateTransactionParams(seed: seed, amount: 1000),
+          );
 
-        expect(result.isSuccess, isTrue);
-      });
+          expect(result.isSuccess, isTrue);
+        },
+      );
     });
 
     group('UpdateTransactionParams', () {
@@ -321,33 +390,41 @@ void main() {
 
         when(() => mockSyncEngine.onTransactionChanged()).thenReturn(null);
         when(() => mockChangeTracker.trackUpdate(any())).thenReturn(null);
+        when(
+          () => mockChangeTracker.trackDelete(
+            transactionId: any(named: 'transactionId'),
+            bookId: any(named: 'bookId'),
+            operation: any(named: 'operation'),
+          ),
+        ).thenReturn(null);
+      });
+
+      test('execute calls trackUpdate with op=update payload (D-20)', () async {
+        final seed = makeSeed();
+        await useCaseWithSync.execute(
+          UpdateTransactionParams(seed: seed, amount: 2000),
+        );
+        verify(() => mockChangeTracker.trackUpdate(any())).called(1);
       });
 
       test(
-        'execute calls trackUpdate with op=update payload (D-20)',
+        'execute calls syncEngine.onTransactionChanged once (D-20)',
         () async {
           final seed = makeSeed();
           await useCaseWithSync.execute(
             UpdateTransactionParams(seed: seed, amount: 2000),
           );
-          verify(() => mockChangeTracker.trackUpdate(any())).called(1);
+          verify(() => mockSyncEngine.onTransactionChanged()).called(1);
         },
       );
-
-      test('execute calls syncEngine.onTransactionChanged once (D-20)', () async {
-        final seed = makeSeed();
-        await useCaseWithSync.execute(
-          UpdateTransactionParams(seed: seed, amount: 2000),
-        );
-        verify(() => mockSyncEngine.onTransactionChanged()).called(1);
-      });
 
       test(
         'trackUpdate payload has op=update and entityType=bill (D-20)',
         () async {
           Map<String, dynamic>? capturedPayload;
           when(() => mockChangeTracker.trackUpdate(any())).thenAnswer((inv) {
-            capturedPayload = inv.positionalArguments.first as Map<String, dynamic>;
+            capturedPayload =
+                inv.positionalArguments.first as Map<String, dynamic>;
           });
 
           final seed = makeSeed(id: 'tx-capture-test');
@@ -374,6 +451,93 @@ void main() {
           verifyNever(() => mockTransactionRepo.update(any()));
         },
       );
+
+      test('public to private emits only a withdrawal tombstone', () async {
+        final seed = makeSeed(
+          note: 'secret',
+          merchant: 'secret merchant',
+          familySyncVisibility: FamilySyncVisibility.shared,
+          familySharedRevision: 8000000000000000,
+        );
+
+        final result = await useCaseWithSync.execute(
+          UpdateTransactionParams(seed: seed, isPrivate: true),
+        );
+
+        expect(result.data!.isPrivate, isTrue);
+        expect(
+          result.data!.familySyncVisibility,
+          FamilySyncVisibility.withdrawalPending,
+        );
+        expect(result.data!.syncRevision, 8000000000000001);
+        final operation =
+            verify(
+                  () => mockChangeTracker.trackDelete(
+                    transactionId: seed.id,
+                    bookId: seed.bookId,
+                    operation: captureAny(named: 'operation'),
+                  ),
+                ).captured.single
+                as Map<String, dynamic>;
+        expect(operation['data'], {
+          'isDeleted': true,
+          'syncRevision': result.data!.syncRevision,
+          'syncOriginDeviceId': seed.deviceId,
+        });
+        expect(operation.toString(), isNot(contains('secret')));
+        verifyNever(() => mockChangeTracker.trackUpdate(any()));
+      });
+
+      test('private local-only update never enters the family lane', () async {
+        final seed = makeSeed(
+          isPrivate: true,
+          familySyncVisibility: FamilySyncVisibility.localOnly,
+        );
+
+        final result = await useCaseWithSync.execute(
+          UpdateTransactionParams(seed: seed, amount: 2000),
+        );
+
+        expect(
+          result.data!.familySyncVisibility,
+          FamilySyncVisibility.localOnly,
+        );
+        verifyNever(() => mockChangeTracker.trackUpdate(any()));
+        verifyNever(
+          () => mockChangeTracker.trackDelete(
+            transactionId: any(named: 'transactionId'),
+            bookId: any(named: 'bookId'),
+            operation: any(named: 'operation'),
+          ),
+        );
+        verifyNever(() => mockSyncEngine.onTransactionChanged());
+      });
+
+      test('private to public emits a new live snapshot', () async {
+        final seed = makeSeed(
+          isPrivate: true,
+          familySyncVisibility: FamilySyncVisibility.withdrawn,
+          familySharedRevision: 6,
+        );
+
+        final result = await useCaseWithSync.execute(
+          UpdateTransactionParams(seed: seed, isPrivate: false),
+        );
+
+        expect(result.data!.isPrivate, isFalse);
+        expect(result.data!.familySyncVisibility, FamilySyncVisibility.shared);
+        expect(result.data!.familySharedRevision, result.data!.syncRevision);
+        final operation =
+            verify(
+                  () => mockChangeTracker.trackUpdate(captureAny()),
+                ).captured.single
+                as Map<String, dynamic>;
+        expect(operation['op'], 'update');
+        expect(
+          operation['data'] as Map<String, dynamic>,
+          isNot(contains('isPrivate')),
+        );
+      });
     });
   });
 }

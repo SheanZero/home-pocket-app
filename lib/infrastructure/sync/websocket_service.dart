@@ -16,12 +16,17 @@ typedef SignMessageFn = Future<String> Function(String message);
 
 /// Known event types from the WebSocket relay server.
 enum WebSocketEventType {
+  authError,
   memberConfirmed,
   joinRequest,
+  joinRequestResolved,
   memberLeft,
   groupDissolved,
   groupStatus,
+  groupNameUpdated,
   syncAvailable,
+  groupKeyRequested,
+  ownerTransferred,
 }
 
 /// A parsed event received from the WebSocket relay server.
@@ -172,6 +177,11 @@ class WebSocketService with WidgetsBindingObserver {
 
     if (type == 'auth_error') {
       // Auth errors are non-recoverable — do not reconnect
+      if (!_eventController.isClosed) {
+        _eventController.add(
+          WebSocketEvent(type: WebSocketEventType.authError, groupId: _groupId),
+        );
+      }
       _reconnectAttempts = -1; // Sentinel to prevent reconnect
       disconnect();
       return;
@@ -195,10 +205,16 @@ class WebSocketService with WidgetsBindingObserver {
     final eventType = switch (type) {
       'member_confirmed' => WebSocketEventType.memberConfirmed,
       'join_request' => WebSocketEventType.joinRequest,
+      'join_request_rejected' ||
+      'join_request_cancelled' ||
+      'join_request_expired' => WebSocketEventType.joinRequestResolved,
       'member_left' => WebSocketEventType.memberLeft,
       'group_dissolved' => WebSocketEventType.groupDissolved,
       'group_status' => WebSocketEventType.groupStatus,
+      'group_name_updated' => WebSocketEventType.groupNameUpdated,
       'sync_available' => WebSocketEventType.syncAvailable,
+      'group_key_requested' => WebSocketEventType.groupKeyRequested,
+      'owner_transferred' => WebSocketEventType.ownerTransferred,
       _ => null,
     };
 
@@ -206,7 +222,32 @@ class WebSocketService with WidgetsBindingObserver {
       return null;
     }
 
-    return WebSocketEvent(type: eventType, groupId: groupId, data: eventData);
+    final mergedData = <String, dynamic>{...?eventData};
+    for (final key in const [
+      'eventId',
+      'revision',
+      'occurredAt',
+      'actorDeviceId',
+      'reason',
+      'requestId',
+    ]) {
+      final value = data[key];
+      if (value != null) mergedData[key] = value;
+    }
+    if (data['eventId'] != null) mergedData['controlEventType'] = type;
+    if (eventType == WebSocketEventType.memberLeft ||
+        eventType == WebSocketEventType.joinRequestResolved) {
+      final deviceId = data['deviceId'];
+      if (deviceId is String) {
+        mergedData['deviceId'] = deviceId;
+      }
+    }
+
+    return WebSocketEvent(
+      type: eventType,
+      groupId: groupId,
+      data: mergedData.isEmpty ? null : mergedData,
+    );
   }
 
   void _startHeartbeat() {

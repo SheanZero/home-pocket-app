@@ -12,7 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/list/get_list_transactions_use_case.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/core/theme/app_text_styles.dart';
+import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
+    show categoryByIdProvider;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
@@ -62,6 +66,7 @@ Future<ProviderContainer> _pumpScreen(
   _MockAnalyticsRepository mockRepo, {
   int year = 2026,
   int month = 5,
+  Category? resolvedCategory,
 }) async {
   late ProviderContainer container;
   await tester.pumpWidget(
@@ -78,6 +83,10 @@ Future<ProviderContainer> _pumpScreen(
         isGroupModeProvider.overrideWithValue(false),
         shadowBooksProvider.overrideWith((_) async => const []),
         getListTransactionsUseCaseProvider.overrideWithValue(mockUseCase),
+        if (resolvedCategory != null)
+          categoryByIdProvider(
+            resolvedCategory.id,
+          ).overrideWith((ref) async => resolvedCategory),
         analyticsRepositoryProvider.overrideWithValue(mockRepo),
         appSettingsProvider.overrideWith(
           (_) async => const AppSettings(weekStartDay: WeekStartDay.monday),
@@ -183,6 +192,59 @@ void main() {
         const Size(40, 40),
       );
     });
+  });
+
+  testWidgets('shows a custom L2 category name instead of its id', (
+    tester,
+  ) async {
+    final mockUseCase = _MockGetListTransactionsUseCase();
+    final mockRepo = _MockAnalyticsRepository();
+    final customCategory = Category(
+      id: 'custom-bakery',
+      name: 'Bakery',
+      icon: 'restaurant',
+      color: '#E85A4F',
+      parentId: 'cat_food',
+      level: 2,
+      sortOrder: 99,
+      createdAt: DateTime(2026, 7, 29),
+    );
+    final transaction = Transaction(
+      id: 'tx-custom-category',
+      bookId: 'book1',
+      deviceId: 'device-local',
+      amount: 1200,
+      type: TransactionType.expense,
+      categoryId: customCategory.id,
+      ledgerType: LedgerType.daily,
+      timestamp: DateTime(2026, 5, 10, 12),
+      merchant: 'Local Bakery',
+      prevHash: 'prev',
+      currentHash: 'current',
+      createdAt: DateTime(2026, 5, 10, 12),
+      entrySource: EntrySource.manual,
+    );
+
+    when(
+      () => mockUseCase.execute(any()),
+    ).thenAnswer((_) async => Result.success([transaction]));
+    when(
+      () => mockRepo.getDailyTotals(
+        bookId: any(named: 'bookId'),
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+      ),
+    ).thenAnswer((_) async => []);
+
+    await _pumpScreen(
+      tester,
+      mockUseCase,
+      mockRepo,
+      resolvedCategory: customCategory,
+    );
+
+    expect(find.text('Bakery'), findsOneWidget);
+    expect(find.text('custom-bakery'), findsNothing);
   });
 
   group('ListScreen pull-to-refresh (LIST-04)', () {

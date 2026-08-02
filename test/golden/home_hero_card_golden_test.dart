@@ -63,7 +63,7 @@ _FixtureSnapshot _singleWithJoy(double joyContribution) => _FixtureSnapshot(
   bestJoy: fixtureBestJoyResultRich(),
 );
 
-_FixtureSnapshot _singleAllNeutral() => _FixtureSnapshot(
+_FixtureSnapshot _singleScoreTwo() => _FixtureSnapshot(
   monthlyReport: fixtureMonthlyReportRich(),
   happiness: fixtureHappinessReportRich(),
   bestJoy: fixtureBestJoyResultAllNeutral(),
@@ -104,6 +104,28 @@ _FixtureSnapshot _v16PhoneSnapshot() => _FixtureSnapshot(
     ),
     23,
   ),
+);
+
+_FixtureSnapshot _v16NoJoySnapshot() => _FixtureSnapshot(
+  monthlyReport: fixtureMonthlyReportRich().copyWith(
+    year: 2026,
+    month: 7,
+    totalExpenses: 132800,
+    savings: 167200,
+    savingsRate: 55.73,
+    dailyTotal: 132800,
+    joyTotal: 0,
+    previousMonthComparison: const MonthComparison(
+      previousMonth: 6,
+      previousYear: 2026,
+      previousIncome: 300000,
+      previousExpenses: 146020,
+      incomeChange: 0,
+      expenseChange: -9,
+    ),
+  ),
+  happiness: fixtureHappinessReportEmpty().copyWith(year: 2026, month: 7),
+  bestJoy: fixtureBestJoyResultEmpty(),
 );
 
 _FixtureSnapshot _groupRich() => _FixtureSnapshot(
@@ -259,6 +281,39 @@ void main() {
       );
     });
 
+    testWidgets('no Joy C2 light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('ja'),
+          snapshot: _v16NoJoySnapshot(),
+          width: 350,
+          height: 420,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_no_joy_c2_light_ja.png'),
+      );
+    });
+
+    testWidgets('no Joy C2 dark ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('ja'),
+          snapshot: _v16NoJoySnapshot(),
+          themeMode: ThemeMode.dark,
+          width: 350,
+          height: 420,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_no_joy_c2_dark_ja.png'),
+      );
+    });
+
     testWidgets('single mode dark ja', (tester) async {
       await tester.pumpWidget(
         _wrap(
@@ -362,9 +417,9 @@ void main() {
       );
     });
 
-    testWidgets('all-neutral CTA light ja', (tester) async {
+    testWidgets('score-2 Joy entry light ja', (tester) async {
       await tester.pumpWidget(
-        _wrap(locale: const Locale('ja'), snapshot: _singleAllNeutral()),
+        _wrap(locale: const Locale('ja'), snapshot: _singleScoreTwo()),
       );
       await tester.pumpAndSettle();
       await expectLater(

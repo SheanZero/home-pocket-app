@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/repository_providers.dart';
+import 'package:home_pocket/application/family_sync/complete_member_activation_use_case.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -10,6 +12,22 @@ import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/test_localizations.dart';
 
 class MockRelayApiClient extends Mock implements RelayApiClient {}
+
+class _AllowPushAcceptancePolicy implements PushAcceptancePolicy {
+  const _AllowPushAcceptancePolicy();
+
+  @override
+  Future<bool> accepts(
+    Map<String, dynamic> data, {
+    required String? boundIdentityGeneration,
+  }) async => true;
+
+  @override
+  Future<String?> resolveIdentityGeneration() async => 'test-identity';
+}
+
+class MockCompleteMemberActivationUseCase extends Mock
+    implements CompleteMemberActivationUseCase {}
 
 class FakePushMessagingClient implements PushMessagingClient {
   @override
@@ -52,6 +70,7 @@ void main() {
   ) async {
     final service = PushNotificationService(
       apiClient: MockRelayApiClient(),
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
       messagingClient: FakePushMessagingClient(),
       localNotificationClient: FakeLocalNotificationClient(),
       firebaseInitializer: () async {},
@@ -87,6 +106,7 @@ void main() {
   ) async {
     final service = PushNotificationService(
       apiClient: MockRelayApiClient(),
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
       messagingClient: FakePushMessagingClient(),
       localNotificationClient: FakeLocalNotificationClient(),
       firebaseInitializer: () async {},
@@ -124,8 +144,15 @@ void main() {
   testWidgets('passes groupId from push intent to group management builder', (
     tester,
   ) async {
+    final memberActivation = MockCompleteMemberActivationUseCase();
+    when(
+      () => memberActivation.execute(expectedGroupId: 'group-456'),
+    ).thenAnswer(
+      (_) async => const MemberActivationReady(groupId: 'group-456'),
+    );
     final service = PushNotificationService(
       apiClient: MockRelayApiClient(),
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
       messagingClient: FakePushMessagingClient(),
       localNotificationClient: FakeLocalNotificationClient(),
       firebaseInitializer: () async {},
@@ -146,6 +173,9 @@ void main() {
         ),
         overrides: [
           appPushNotificationServiceProvider.overrideWithValue(service),
+          completeMemberActivationUseCaseProvider.overrideWithValue(
+            memberActivation,
+          ),
         ],
       ),
     );
@@ -160,11 +190,56 @@ void main() {
     expect(find.text('group-management-screen'), findsOneWidget);
   });
 
+  testWidgets('does not open group management before key bootstrap is ready', (
+    tester,
+  ) async {
+    final memberActivation = MockCompleteMemberActivationUseCase();
+    when(
+      () => memberActivation.execute(expectedGroupId: 'group-456'),
+    ).thenAnswer(
+      (_) async => const MemberActivationAwaitingKey(groupId: 'group-456'),
+    );
+    final service = PushNotificationService(
+      apiClient: MockRelayApiClient(),
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
+      messagingClient: FakePushMessagingClient(),
+      localNotificationClient: FakeLocalNotificationClient(),
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        FamilySyncNotificationRouteListener(
+          buildGroupManagementScreen: (context, groupId) =>
+              const Scaffold(body: Text('group-management-screen')),
+          child: const Scaffold(body: Text('home')),
+        ),
+        overrides: [
+          appPushNotificationServiceProvider.overrideWithValue(service),
+          completeMemberActivationUseCaseProvider.overrideWithValue(
+            memberActivation,
+          ),
+        ],
+      ),
+    );
+
+    await service.handleNotificationTap({
+      'type': 'member_confirmed',
+      'groupId': 'group-456',
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.text('home'), findsOneWidget);
+    expect(find.text('group-management-screen'), findsNothing);
+  });
+
   testWidgets('pops to root and resets status on groupDissolved intent', (
     tester,
   ) async {
     final service = PushNotificationService(
       apiClient: MockRelayApiClient(),
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
       messagingClient: FakePushMessagingClient(),
       localNotificationClient: FakeLocalNotificationClient(),
       firebaseInitializer: () async {},

@@ -122,6 +122,10 @@ flutter:
     - assets/legal/
     - docs/mockup/v16/assets/onboarding-privacy-warm-v1.png
     - docs/mockup/v16/assets/onboarding-privacy-warm-v1-dark.png
+    - docs/mockup/v16/assets/family-entry-create-warm-v1.png
+    - docs/mockup/v16/assets/family-entry-create-warm-v1-dark.png
+    - docs/mockup/v16/assets/family-entry-join-warm-v1.png
+    - docs/mockup/v16/assets/family-entry-join-warm-v1-dark.png
 
   fonts:
     - family: RobotoMonoNumerals

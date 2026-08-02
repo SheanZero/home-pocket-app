@@ -29,7 +29,9 @@ import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
 import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_filter.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart'
@@ -54,17 +56,16 @@ Future<bool> _waitForItemInStream(
   required String itemId,
 }) {
   final completer = Completer<bool>();
-  final sub = container.listen<AsyncValue<List<ShoppingItem>>>(
-    provider,
-    (_, next) {
-      if (!completer.isCompleted &&
-          next.hasValue &&
-          next.value!.any((i) => i.id == itemId)) {
-        completer.complete(true);
-      }
-    },
-    fireImmediately: true,
-  );
+  final sub = container.listen<AsyncValue<List<ShoppingItem>>>(provider, (
+    _,
+    next,
+  ) {
+    if (!completer.isCompleted &&
+        next.hasValue &&
+        next.value!.any((i) => i.id == itemId)) {
+      completer.complete(true);
+    }
+  }, fireImmediately: true);
   return completer.future.whenComplete(sub.close);
 }
 
@@ -98,8 +99,19 @@ void main() {
     when(() => mockEncryption.decryptField(any())).thenAnswer(
       (invocation) async => invocation.positionalArguments.first as String,
     );
-    when(() => mockGroupRepository.getPendingGroup())
-        .thenAnswer((_) async => null);
+    when(
+      () => mockGroupRepository.getPendingGroup(),
+    ).thenAnswer((_) async => null);
+    when(() => mockGroupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        status: GroupStatus.active,
+        groupName: 'Family',
+        role: 'member',
+        members: const [],
+        createdAt: DateTime.utc(2026),
+      ),
+    );
 
     final shoppingItemDao = ShoppingItemDao(db);
     shoppingItemRepo = ShoppingItemRepositoryImpl(
@@ -124,6 +136,7 @@ void main() {
       shoppingItemRepository: shoppingItemRepo,
       shadowBookService: shadowBookService,
       groupRepository: mockGroupRepository,
+      inboundRepository: MemoryInboundSyncOperationRepository(),
     );
 
     // Presentation-layer container: override root DB + encryption providers so
@@ -178,8 +191,7 @@ void main() {
           },
         ]);
 
-        final found = await resultFuture
-            .timeout(const Duration(seconds: 5));
+        final found = await resultFuture.timeout(const Duration(seconds: 5));
         expect(
           found,
           isTrue,
@@ -211,11 +223,16 @@ void main() {
         addTearDown(sub.close);
 
         // Step 2: await initial emission so the stream is settled (empty list).
-        final initial =
-            await waitForFirstValue(container, filteredShoppingItemsProvider);
+        final initial = await waitForFirstValue(
+          container,
+          filteredShoppingItemsProvider,
+        );
         expect(initial.hasValue, isTrue);
-        expect(initial.value, isEmpty,
-            reason: 'Initial state must be empty before any write');
+        expect(
+          initial.value,
+          isEmpty,
+          reason: 'Initial state must be empty before any write',
+        );
 
         // Step 3: apply inbound private op — dropped by the W2 receiver gate.
         await applyOps.execute([
@@ -238,8 +255,9 @@ void main() {
         // Step 4: the gate drops the op before any DB write, so no new stream
         // emission is expected. Assert no trace in either list, then confirm
         // the public provider state is still the settled empty list.
-        final privateItems =
-            await shoppingItemRepo.watchByListType('private').first;
+        final privateItems = await shoppingItemRepo
+            .watchByListType('private')
+            .first;
         expect(
           privateItems.any((i) => i.id == 'private-smoke'),
           isFalse,
@@ -248,10 +266,14 @@ void main() {
               'gate — not written to the private list (SYNC-02)',
         );
 
-        final publicItems =
-            await shoppingItemRepo.watchByListType('public').first;
-        expect(publicItems, isEmpty,
-            reason: 'Dropped op must not be coerced into the public list');
+        final publicItems = await shoppingItemRepo
+            .watchByListType('public')
+            .first;
+        expect(
+          publicItems,
+          isEmpty,
+          reason: 'Dropped op must not be coerced into the public list',
+        );
 
         final current = container.read(filteredShoppingItemsProvider);
         expect(current.hasValue, isTrue);

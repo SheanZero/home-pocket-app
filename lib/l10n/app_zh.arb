@@ -401,7 +401,7 @@
   "@selectTheme": {
     "description": "Theme dialog title"
   },
-  "themeSystem": "跟随系统",
+  "themeSystem": "跟随设备设置",
   "@themeSystem": {
     "description": "System theme"
   },
@@ -449,6 +449,31 @@
   "@dataManagement": {
     "description": "Data management section"
   },
+  "settingsGeneral": "通用",
+  "settingsFamily": "家庭",
+  "settingsData": "数据",
+  "settingsThisApp": "关于本应用",
+  "settingsAdditional": "其他设置",
+  "settingsAdditionalDescription": "每周起始日、语音识别与通知",
+  "settingsNotSet": "未设置",
+  "settingsJoyTargetValue": "{value} Joy",
+  "@settingsJoyTargetValue": {
+    "placeholders": {"value": {"type": "int"}}
+  },
+  "settingsLocalDataProtected": "数据已在设备内受到保护",
+  "backupAndRestore": "备份与恢复",
+  "backupAndRestoreDescription": "加密文件",
+  "backupHeroTitle": "把数据安全地保管在自己手中",
+  "backupHeroDescription": "使用密码加密记录与设置，并保存到设备或你选择的云盘位置。",
+  "backupEncryptionChip": "AES-256-GCM",
+  "backupCompressedChip": "已压缩",
+  "backupNoUploadChip": "不会自动上传",
+  "backupSectionTitle": "备份",
+  "restoreSectionTitle": "恢复",
+  "backupPasswordNotStored": "密码不会保存在本应用中。如果忘记密码，将无法恢复备份。",
+  "restoreReplacesData": "选择 .hpb 文件并替换当前数据",
+  "restoreWarningTitle": "当前数据将被替换",
+  "restoreWarningBody": "如果恢复失败，当前数据会保持不变。",
   "exportBackup": "导出备份",
   "@exportBackup": {
     "description": "Export backup action"
@@ -469,15 +494,15 @@
   "@deleteAllData": {
     "description": "Delete all data action"
   },
-  "deleteAllDataDescription": "永久删除所有记录",
+  "deleteAllDataDescription": "永久删除此设备上的数据",
   "@deleteAllDataDescription": {
     "description": "Delete all subtitle"
   },
-  "deleteAllDataConfirmation": "此操作无法撤销。您确定要删除所有数据吗？",
+  "deleteAllDataConfirmation": "这会永久删除此设备上的家庭口袋数据，但不会删除其他家庭成员设备上的数据，也不会向服务器发送删除请求。",
   "@deleteAllDataConfirmation": {
     "description": "Delete all confirmation"
   },
-  "allDataDeleted": "所有数据已删除",
+  "allDataDeleted": "本地数据已删除",
   "@allDataDeleted": {
     "description": "Delete all success"
   },
@@ -603,6 +628,8 @@
   "profileEmojiTab": "表情",
   "profilePhotoTab": "照片",
   "profileEdit": "编辑个人资料",
+  "profileEditPersonalInfo": "编辑个人信息",
+  "profileDisplayName": "显示名称",
   "profileCancel": "取消",
   "profileDone": "完成",
   "profilePreview": "预览",
@@ -830,6 +857,34 @@
       }
     }
   },
+  "homeJoyEmptyTitleSingle": "今天，什么让你开心？",
+  "@homeJoyEmptyTitleSingle": {
+    "description": "Personal-mode title for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptyTitleGroup": "家人今天有什么小确幸？",
+  "@homeJoyEmptyTitleGroup": {
+    "description": "Family-mode title for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptySubtitle": "从一件小享受开始记录",
+  "@homeJoyEmptySubtitle": {
+    "description": "Supporting copy for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptyFree": "自由记录",
+  "@homeJoyEmptyFree": {
+    "description": "Free-form Joy entry action"
+  },
+  "homeJoyEmptyCoffee": "喜欢的一杯",
+  "@homeJoyEmptyCoffee": {
+    "description": "Coffee Joy-entry inspiration prompt"
+  },
+  "homeJoyEmptyBook": "想读的书",
+  "@homeJoyEmptyBook": {
+    "description": "Book Joy-entry inspiration prompt"
+  },
+  "homeJoyEmptyRest": "放松片刻",
+  "@homeJoyEmptyRest": {
+    "description": "Rest Joy-entry inspiration prompt"
+  },
   "homeRingSectionTitleSingle": "悦己充盈",
   "@homeRingSectionTitleSingle": {
     "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
@@ -896,11 +951,11 @@
   },
   "homeBestJoyAllNeutralBig": "回去给最大那笔评个分",
   "@homeBestJoyAllNeutralBig": {
-    "description": "Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)"
+    "description": "Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data."
   },
   "homeBestJoyAllNeutralSmall": "让它变成你的本月最爱",
   "@homeBestJoyAllNeutralSmall": {
-    "description": "Best Joy small line — all-neutral state (D-09)"
+    "description": "Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data."
   },
   "homeAvgSatisfactionLegend": "满足度均值",
   "@homeAvgSatisfactionLegend": {
@@ -1079,6 +1134,26 @@
   "@categoryNameHint": {
     "description": "Input hint for a new custom category name"
   },
+  "categoryAppearanceLabel": "外观",
+  "@categoryAppearanceLabel": {
+    "description": "Section label for custom category icon and color choices"
+  },
+  "categoryAppearanceDescription": "便于在分类列表和图表中快速识别。",
+  "@categoryAppearanceDescription": {
+    "description": "Helper copy for custom category visual identity"
+  },
+  "categoryPreviewName": "新分类",
+  "@categoryPreviewName": {
+    "description": "Placeholder name in the custom category appearance preview"
+  },
+  "categoryIconLabel": "图标",
+  "@categoryIconLabel": {
+    "description": "Label above the custom category icon choices"
+  },
+  "categoryColorLabel": "颜色",
+  "@categoryColorLabel": {
+    "description": "Label above the custom category color choices"
+  },
   "categoryNameRequired": "请输入分类名称",
   "@categoryNameRequired": {
     "description": "Validation error for an empty custom category name"
@@ -1215,7 +1290,7 @@
   "@familySyncShowMyCode": {
     "description": "Tab label to show pairing code"
   },
-  "familySyncEnterPartnerCode": "加入分组",
+  "familySyncEnterPartnerCode": "使用邀请码加入",
   "@familySyncEnterPartnerCode": {
     "description": "Tab label to enter partner's pairing code"
   },
@@ -1418,6 +1493,46 @@
       }
     }
   },
+  "familySyncInviteTitle": "邀请家庭成员",
+  "@familySyncInviteTitle": {
+    "description": "Title of the owner-only invite management sheet"
+  },
+  "familySyncInviteDescription": "请将此邀请码分享给你想邀请的人。",
+  "@familySyncInviteDescription": {
+    "description": "Instructions shown above the owner invite code"
+  },
+  "familySyncInviteCopy": "复制邀请码",
+  "@familySyncInviteCopy": {
+    "description": "Button label for copying the group invite code"
+  },
+  "familySyncInviteCopied": "邀请码已复制",
+  "@familySyncInviteCopied": {
+    "description": "Success feedback after copying an invite code"
+  },
+  "familySyncInviteRefreshHint": "刷新后，之前的邀请码会立即失效。",
+  "@familySyncInviteRefreshHint": {
+    "description": "Warning shown beside the explicit invite refresh action"
+  },
+  "familySyncInviteApprovalWindowHint": "邀请码有效期仅限制发起新申请；提交申请后，家庭创建者有24小时进行审批。",
+  "@familySyncInviteApprovalWindowHint": {
+    "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
+  },
+  "familySyncInviteShareMessage": "使用邀请码 {inviteCode} 加入 Home Pocket 中的“{groupName}”。",
+  "@familySyncInviteShareMessage": {
+    "description": "Text sent through the system share sheet for a group invite",
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      },
+      "inviteCode": {
+        "type": "String"
+      }
+    }
+  },
+  "familySyncInviteOwnerOnly": "只有家庭创建者可以管理邀请码。",
+  "@familySyncInviteOwnerOnly": {
+    "description": "Feedback when invite management is attempted without owner permission"
+  },
   "familySyncMembers": "成员",
   "@familySyncMembers": {
     "description": "Section title for group members"
@@ -1575,7 +1690,7 @@
   "@familySyncApprovalTip": {
     "description": "Informational tip shown on the approval screen"
   },
-  "familySyncGroupManagement": "分组管理",
+  "familySyncGroupManagement": "家庭管理",
   "@familySyncGroupManagement": {
     "description": "Title for the group management screen"
   },
@@ -1617,7 +1732,25 @@
       }
     }
   },
-  "groupCreate": "创建群组",
+  "groupCreate": "创建新家庭",
+  "groupCreateConfirmationHint": "仅在确认后才会创建群组和邀请码。",
+  "groupCreateFailed": "无法创建群组：{message}",
+  "@groupCreateFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "familySyncSingleGroupConflict": "此设备已有家庭群组或待审批的加入申请。请先退出当前群组或取消申请，再创建或加入其他群组。",
+  "familySyncNetworkUnavailableTitle": "暂时无法连接网络",
+  "@familySyncNetworkUnavailableTitle": {
+    "description": "Title for the family-sync network unavailable dialog"
+  },
+  "familySyncNetworkUnavailableMessage": "家庭共享需要网络连接。请检查网络状态，并确认已允许本应用使用无线数据后重试。",
+  "@familySyncNetworkUnavailableMessage": {
+    "description": "Friendly guidance shown when a family-sync operation cannot reach the relay"
+  },
   "groupName": "群组名称",
   "groupOwner": "群主",
   "groupMember": "成员",
@@ -1633,10 +1766,10 @@
   "groupShareCode": "分享邀请码",
   "groupEnterCode": "输入邀请码",
   "groupVerify": "验证",
-  "groupConfirmJoin": "确认加入",
+  "groupConfirmJoin": "申请加入",
   "groupJoinTarget": "你要加入的群组",
-  "groupWaitingApproval": "等待群主审批...",
-  "groupWaitingDesc": "{name} 正在确认你的请求",
+  "groupWaitingApproval": "等待家庭所有者批准",
+  "groupWaitingDesc": "{name} 正在确认你的加入申请。",
   "@groupWaitingDesc": {
     "placeholders": {
       "name": {
@@ -1663,16 +1796,78 @@
   "groupCodeExpired": "邀请码已过期",
   "groupMyName": "我的名称",
   "groupEnterGroup": "进入群组",
-  "groupChoiceTitle": "与家人连接",
-  "groupChoiceSubtitle": "一起管理家庭账本",
-  "groupCreateDesc": "创建新的家庭群组，邀请家庭成员加入",
-  "groupJoinDesc": "输入邀请码，加入已有的家庭群组",
-  "groupE2eeHint": "端到端加密保护隐私",
+  "groupChoiceTitle": "想从哪里开始？",
+  "groupChoiceSubtitle": "同一时间只能加入一个家庭。",
+  "groupCreateDesc": "生成邀请码，由你审批每位成员",
+  "groupJoinDesc": "加入前需要家庭所有者批准",
+  "groupE2eeHint": "家庭公开账本会加密同步；个人私密账本只保留在本设备。",
+  "familyFlowCreateStepCreate": "创建家庭",
+  "familyFlowCreateHeader": "创建家庭",
+  "familyFlowJoinHeader": "加入家庭",
+  "familyFlowReviewFamily": "确认家庭信息",
+  "familyFlowCreateStepInvite": "分享邀请",
+  "familyFlowCreateStepApprove": "审批成员",
+  "familyFlowJoinStepCode": "输入邀请码",
+  "familyFlowJoinStepConfirm": "确认家庭",
+  "familyFlowJoinStepWait": "等待批准",
+  "familyFlowOwnerSummary": "{name} · 所有者",
+  "@familyFlowOwnerSummary": {"placeholders": {"name": {"type": "String"}}},
+  "familyFlowCreateTitle": "创建新家庭",
+  "familyFlowCreateSubtitle": "设置家庭名称后，将生成安全的邀请码。",
+  "familyFlowCreateInviteHelper": "家人提交加入申请后，你将在下一步审批成员。",
+  "familyFlowRegenerateInvite": "重新生成",
+  "familySyncInviteRegenerated": "邀请码已重新生成",
+  "familyFlowJoinCodeTitle": "输入 6 位邀请码",
+  "familyFlowJoinCodeSubtitle": "请输入家庭所有者发给你的数字。",
+  "familyFlowJoinBeforeApprovalHelper": "申请获批前，不会同步任何账本。",
+  "familyFlowJoinConfirmHeader": "确认家庭",
+  "familyFlowJoinConfirmTitle": "确认要加入的家庭",
+  "familyFlowJoinConfirmSubtitle": "加入申请将发送到这个家庭。",
+  "familyFlowPublicKeyVerified": "公开密钥已验证",
+  "familyFlowPrivateLedgerHelper": "个人私密账本不会分享给家庭。",
+  "familyFlowWaitingHeader": "正在等待批准",
+  "familyFlowWaitingFamily": "申请加入：{groupName}",
+  "@familyFlowWaitingFamily": {"placeholders": {"groupName": {"type": "String"}}},
+  "familyFlowApprovalTitle": "新的加入申请",
+  "familyFlowApprovalSubtitle": "批准前，请确认本人和设备。",
+  "familyFlowApprovalDevice": "来自 {deviceName} 的加入申请",
+  "@familyFlowApprovalDevice": {"placeholders": {"deviceName": {"type": "String"}}},
+  "familyFlowDeviceKeyVerified": "设备公开密钥已验证",
+  "familyFlowApprovalHelper": "批准后，此设备会与家庭公开账本进行加密同步。",
+  "familyFlowApprovalEmptyTitle": "没有待处理的申请",
+  "familyFlowPendingRequests": "新的加入申请 · {count} 条",
+  "@familyFlowPendingRequests": {"placeholders": {"count": {"type": "int"}}},
+  "familyFlowViewRequests": "查看申请",
+  "familyFlowSyncSettings": "同步设置",
+  "familyFlowManagementSummary": "所有者：{ownerName} · {count} 人 · {syncStatus}",
+  "@familyFlowManagementSummary": {"placeholders": {"ownerName": {"type": "String"}, "count": {"type": "int"}, "syncStatus": {"type": "String"}}},
   "groupInviteMembers": "邀请新成员",
-  "groupDisband": "解散群组",
+  "groupDisband": "解散家庭",
   "groupCancel": "取消",
-  "groupWaitingHint1": "请等待通知",
-  "groupWaitingHint2": "关闭应用也没有关系",
+  "groupCancelRequest": "撤回加入申请",
+  "groupRejectRequestFailed": "拒绝加入申请失败: {message}",
+  "@groupRejectRequestFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRequestRejectedTitle": "加入申请已被拒绝",
+  "groupRequestRejectedDescription": "群主拒绝了本次申请，你可以使用其他邀请码重新申请。",
+  "groupRequestCancelledTitle": "加入申请已撤回",
+  "groupRequestCancelledDescription": "申请已撤回，你可以随时重新提交新的申请。",
+  "groupRequestExpiredTitle": "加入申请已过期",
+  "groupRequestExpiredDescription": "申请在24小时内未被处理，请获取当前有效的邀请码后重新申请。",
+  "groupTryAnotherInvite": "输入其他邀请码",
+  "groupKeyRecoveryTitle": "正在恢复家庭密钥",
+  "groupKeyRecoveryWaiting": "成员资格已经生效，需要另一台仍持有密钥的家庭设备为本设备重新密封当前密钥。中继服务器无法读取或重新生成密钥。",
+  "groupKeyRecoveryUnavailable": "请求过期前没有任何有效设备提供当前密钥。由于采用零知识设计，中继服务器无法恢复密钥。你可以重试，或安全退出／解散该家庭后重新创建。",
+  "groupKeyRecoveryRateLimited": "刚刚已经发送过恢复请求，请稍后再通知其他设备。",
+  "groupKeyRecoveryRetry": "重试密钥恢复",
+  "groupKeyRecoveryRebuild": "退出并重新创建家庭",
+  "groupWaitingHint1": "关闭应用也没有关系。",
+  "groupWaitingHint2": "批准后将自动开始同步。",
   "groupCodeHint": "请向群组的群主索取邀请码",
   "groupBack": "返回",
   "syncInProgress": "同步中...",
@@ -3492,6 +3687,14 @@
     "description": "SecuritySection: app-lock master toggle title (D-11)"
   },
   "securityAppLockDescription": "在启动和返回前台时用密码保护应用。",
+  "securityAppLockOff": "关闭",
+  "securityAppLockPinOnly": "PIN 码",
+  "securityAppLockBiometricAndPin": "{biometric} + PIN 码",
+  "@securityAppLockBiometricAndPin": {
+    "placeholders": {"biometric": {"type": "String"}}
+  },
+  "securityFaceId": "Face ID",
+  "securityFingerprint": "指纹识别",
   "@securityAppLockDescription": {
     "description": "SecuritySection: app-lock master toggle description (D-11)"
   },
@@ -3535,6 +3738,15 @@
   "@sponsorLaunchError": {
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
+  "legalNavigationSubtitle": "隐私、条款、开源许可",
+  "privacyPolicyDescription": "了解数据如何处理",
+  "termsOfUseDescription": "服务使用条件",
+  "openSourceLicensesDescription": "使用的开源库",
+  "sponsorSectionTitle": "支持开发",
+  "sponsorCardTitle": "一起维护这本安静的家庭账本",
+  "sponsorCardBody": "支持与联系页面将在外部浏览器中打开，不会影响应用功能或数据访问权限。",
+  "sponsorButton": "了解支持方式",
+  "legalLinkLaunchError": "无法打开链接",
   "analyticsTrendInsightTotal": "本月 {amount}",
   "@analyticsTrendInsightTotal": {
     "description": "Trend card insight strip — total tab, no previous-month reference",
@@ -3645,5 +3857,69 @@
   "@analyticsJoyDrawerToggleCollapse": {
     "description": "A11y label for the collapsible joy-spend drawer toggle when expanded"
   },
+  "syncQueueNeedsAttentionBadge": "需要处理",
+  "syncQueueNeedsAttentionDescription": "部分变更需要你处理",
+  "syncQueueNeedsAttentionTitle": "同步需要处理",
+  "syncQueuePendingTitle": "等待同步的变更",
+  "syncQueueCounts": "{pendingCount} 条等待发送 · {deadLetterCount} 条需要处理",
+  "@syncQueueCounts": {
+    "placeholders": {
+      "pendingCount": { "type": "int" },
+      "deadLetterCount": { "type": "int" }
+    }
+  },
+  "syncQueueReconcileHint": "加密变更仍被安全保留。请先重试，之后仍建议执行一次完整对账。",
+  "syncQueueRetryAll": "全部重试",
+  "syncQueueDiscardAll": "丢弃",
+  "syncQueueRetryFailed": "仍有变更需要处理",
+  "syncQueueRetrySucceeded": "待发送变更已发送，仍建议进行完整对账。",
+  "syncQueueDiscardConfirmTitle": "丢弃未发送的变更？",
+  "syncQueueDiscardConfirmBody": "这会永久删除本设备上保留的未发送变更，且无法撤销。",
+  "syncQueueCancel": "取消",
+  "syncQueueDiscardConfirmAction": "永久丢弃",
+  "syncQueueDiscardFailed": "无法丢弃未发送的变更",
+  "inboundSyncSectionTitle": "待处理的接收变更",
+  "inboundSyncCount": "{count} 条接收变更已隔离",
+  "@inboundSyncCount": { "placeholders": { "count": { "type": "int" } } },
+  "inboundSyncErrorCode": "安全代码：{errorCode}",
+  "@inboundSyncErrorCode": { "placeholders": { "errorCode": { "type": "String" } } },
+  "inboundSyncRetryOne": "重试",
+  "inboundSyncDiscardOne": "丢弃接收变更",
+  "inboundSyncDiscardConfirmTitle": "丢弃这条接收变更？",
+  "inboundSyncDiscardConfirmBody": "这会从本设备永久删除已隔离的接收变更。中继服务器副本已确认，操作无法撤销。",
+  "syncAttentionDiscardConfirmTitle": "丢弃保留的同步变更？",
+  "syncAttentionDiscardConfirmBody": "这会从本设备永久删除所有保留的发送失败和已隔离的接收变更，且无法撤销。",
+  "familySyncTransferOwner": "转让家庭所有权",
+  "familySyncTransferOwnerSelect": "选择新的家庭所有者",
+  "familySyncTransferOwnerConfirmTitle": "转让家庭所有权？",
+  "familySyncTransferOwnerConfirmBody": "{memberName} 将负责成员、邀请和家庭管理。",
+  "@familySyncTransferOwnerConfirmBody": { "placeholders": { "memberName": { "type": "String" } } },
+  "familySyncTransferOwnerFinalTitle": "最终确认",
+  "familySyncTransferOwnerFinalBody": "系统会为每台活跃设备签发新的加密密钥。转让后，你将成为普通成员。确认转让给 {memberName}？",
+  "@familySyncTransferOwnerFinalBody": { "placeholders": { "memberName": { "type": "String" } } },
+  "familySyncTransferOwnerSuccess": "家庭所有权已安全转让",
+  "familySyncTransferOwnerNotReady": "当前加密密钥就绪前，无法执行家庭所有者操作",
+  "familySyncTransferOwnerInvalidTarget": "请选择其他活跃成员",
+  "familySyncTransferOwnerFailed": "无法转让家庭所有权：{message}",
+  "@familySyncTransferOwnerFailed": { "placeholders": { "message": { "type": "String" } } },
+  "transactionPhotoBoundaryTitle": "票据照片",
+  "transactionPhotoLocalOnlyBody": "这张票据照片仅保存在本设备，不会包含在家庭同步或备份中。",
+  "transactionPhotoUnavailableBody": "票据照片仅保存在录入这笔账目的设备上，未包含在家庭同步或备份中。",
+  "familySyncMemberHistory": "成员记录",
+  "familySyncRequestedAt": "申请于 {date}",
+  "@familySyncRequestedAt": { "placeholders": { "date": { "type": "String" } } },
+  "familySyncJoinedAt": "{role} · 加入于 {date}",
+  "@familySyncJoinedAt": { "placeholders": { "role": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncConfirmedAt": "{role} · 确认于 {date}",
+  "@familySyncConfirmedAt": { "placeholders": { "role": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncRemovedAtReason": "{reason} · {date}",
+  "@familySyncRemovedAtReason": { "placeholders": { "reason": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncRemovalReasonLeft": "主动退出家庭",
+  "familySyncRemovalReasonRemoved": "被家庭所有者移除",
+  "familySyncRemovalReasonDissolved": "家庭已解散",
+  "familySyncRemovalReasonRejected": "申请被拒绝",
+  "familySyncRemovalReasonCancelled": "申请已取消",
+  "familySyncRemovalReasonExpired": "申请已过期",
+  "familySyncRemovalReasonUnknown": "成员关系已结束",
   "@@locale": "zh"
 }

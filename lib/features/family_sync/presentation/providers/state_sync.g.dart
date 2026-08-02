@@ -184,7 +184,7 @@ final class SyncOrchestratorProvider
   }
 }
 
-String _$syncOrchestratorHash() => r'724e1396b840476444bb9d90ca9d6e2375216931';
+String _$syncOrchestratorHash() => r'9a0a605de4c9224511fa06b030e3495e718c48c9';
 
 /// SyncEngine provider — keepAlive because it manages timers and lifecycle.
 
@@ -230,7 +230,7 @@ final class SyncEngineProvider
   }
 }
 
-String _$syncEngineHash() => r'78d7b9c1ee757d6bf61b8cd98725b8de6185b1de';
+String _$syncEngineHash() => r'7c532f4563a96b5b29c777f16308f1cfc64fd2af';
 
 /// Reactive sync status stream from SyncEngine.
 
@@ -275,6 +275,129 @@ final class SyncStatusStreamProvider
 }
 
 String _$syncStatusStreamHash() => r'945e9929ecb8b7ec953a4d79382645a9b8a19e4a';
+
+@ProviderFor(syncQueueSummary)
+final syncQueueSummaryProvider = SyncQueueSummaryProvider._();
+
+final class SyncQueueSummaryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<SyncQueueSummary>,
+          SyncQueueSummary,
+          Stream<SyncQueueSummary>
+        >
+    with $FutureModifier<SyncQueueSummary>, $StreamProvider<SyncQueueSummary> {
+  SyncQueueSummaryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncQueueSummaryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncQueueSummaryHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<SyncQueueSummary> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<SyncQueueSummary> create(Ref ref) {
+    return syncQueueSummary(ref);
+  }
+}
+
+String _$syncQueueSummaryHash() => r'1fbe0be5c3cd7eb208c8ebb99569e5c821cd51fa';
+
+@ProviderFor(inboundSyncSummary)
+final inboundSyncSummaryProvider = InboundSyncSummaryProvider._();
+
+final class InboundSyncSummaryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<InboundSyncSummary>,
+          InboundSyncSummary,
+          Stream<InboundSyncSummary>
+        >
+    with
+        $FutureModifier<InboundSyncSummary>,
+        $StreamProvider<InboundSyncSummary> {
+  InboundSyncSummaryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'inboundSyncSummaryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$inboundSyncSummaryHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<InboundSyncSummary> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<InboundSyncSummary> create(Ref ref) {
+    return inboundSyncSummary(ref);
+  }
+}
+
+String _$inboundSyncSummaryHash() =>
+    r'aa7ff141bf221c384dbda4b6b1fa6942bb59ad54';
+
+@ProviderFor(inboundSyncQuarantined)
+final inboundSyncQuarantinedProvider = InboundSyncQuarantinedProvider._();
+
+final class InboundSyncQuarantinedProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<InboundSyncQuarantineEntry>>,
+          List<InboundSyncQuarantineEntry>,
+          Stream<List<InboundSyncQuarantineEntry>>
+        >
+    with
+        $FutureModifier<List<InboundSyncQuarantineEntry>>,
+        $StreamProvider<List<InboundSyncQuarantineEntry>> {
+  InboundSyncQuarantinedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'inboundSyncQuarantinedProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$inboundSyncQuarantinedHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<InboundSyncQuarantineEntry>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<InboundSyncQuarantineEntry>> create(Ref ref) {
+    return inboundSyncQuarantined(ref);
+  }
+}
+
+String _$inboundSyncQuarantinedHash() =>
+    r'35b5e78a88ac318891e3ee7c696c4cca7c272f6f';
 
 /// GroupMembers stream via Drift watch query, mapped to domain model.
 ///

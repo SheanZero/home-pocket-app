@@ -8,6 +8,7 @@ import 'package:home_pocket/features/analytics/domain/models/metric_result.dart'
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
+import 'package:home_pocket/features/home/presentation/widgets/home_joy_prompt.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_metrics_region.dart';
 import 'package:home_pocket/shared/widgets/satisfaction_face_icon.dart';
 
@@ -44,6 +45,16 @@ _FixtureSnapshot _singleRich() => _FixtureSnapshot(
 
 _FixtureSnapshot _singleEmpty() => _FixtureSnapshot(
   monthlyReport: fixtureMonthlyReportEmpty(),
+  happiness: fixtureHappinessReportEmpty(),
+  bestJoy: fixtureBestJoyResultEmpty(),
+);
+
+_FixtureSnapshot _singleNoJoyWithDailySpend() => _FixtureSnapshot(
+  monthlyReport: fixtureMonthlyReportRich().copyWith(
+    totalExpenses: 102200,
+    dailyTotal: 102200,
+    joyTotal: 0,
+  ),
   happiness: fixtureHappinessReportEmpty(),
   bestJoy: fixtureBestJoyResultEmpty(),
 );
@@ -86,6 +97,15 @@ _FixtureSnapshot _groupEmptyShadows() => _FixtureSnapshot(
   shadowAggregate: fixtureShadowAggregateThree(),
 );
 
+_FixtureSnapshot _groupNoJoy() => _FixtureSnapshot(
+  monthlyReport: _singleNoJoyWithDailySpend().monthlyReport,
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultEmpty(),
+  family: fixtureFamilyHappinessEmpty(),
+  shadowBooks: fixtureShadowBooksThree(),
+  shadowAggregate: fixtureShadowAggregateThree(),
+);
+
 Widget _buildSubject({
   Locale locale = const Locale('ja'),
   bool isGroupMode = false,
@@ -95,6 +115,7 @@ Widget _buildSubject({
   bool isMonthlyJoyTargetConfigured = false,
   required _FixtureSnapshot snapshot,
   VoidCallback? onTap,
+  ValueChanged<HomeJoyPrompt>? onAddJoy,
 }) {
   return testLocalizedApp(
     locale: locale,
@@ -114,6 +135,7 @@ Widget _buildSubject({
           recommendedMonthlyJoyTarget: recommendedMonthlyJoyTarget,
           isMonthlyJoyTargetConfigured: isMonthlyJoyTargetConfigured,
           onTap: onTap ?? () {},
+          onAddJoy: onAddJoy,
         ),
       ),
     ),
@@ -515,19 +537,83 @@ void main() {
     );
 
     testWidgets(
-      'totalJoyTx == 0: rings track-only, legend "No data yet", Best Joy CTA empty variant',
+      'totalJoyTx == 0: hides Joy metrics and favorite, then shows C2 prompts',
       (tester) async {
-        await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _singleNoJoyWithDailySpend()),
+        );
         await tester.pumpAndSettle();
 
-        // Empty metrics render an em-dash placeholder in the goal ring +
-        // support stack (legend "まだ記録なし" removed with the v15 rebuild).
-        expect(find.text('—'), findsWidgets);
-        // ja "今月の最愛がここに表示されます" — Best Joy Variant A empty Small.
-        // homeBestJoyEmptyBig was removed by 260518-v4v Variant A redesign.
-        expect(find.textContaining('今月の最愛がここに'), findsOneWidget);
+        expect(find.textContaining('102,200'), findsWidgets);
+        expect(find.byType(HomeMetricsRegion), findsNothing);
+        expect(find.byKey(const Key('home-favorite-section')), findsNothing);
+        expect(find.byKey(const Key('home-joy-empty-state')), findsOneWidget);
+        expect(find.byKey(const Key('home-joy-empty-free')), findsOneWidget);
+        expect(find.byKey(const Key('home-joy-empty-coffee')), findsOneWidget);
+        expect(find.byKey(const Key('home-joy-empty-book')), findsOneWidget);
+        expect(find.byKey(const Key('home-joy-empty-rest')), findsOneWidget);
       },
     );
+
+    testWidgets('C2 prompts forward the selected Joy-entry intent', (
+      tester,
+    ) async {
+      final prompts = <HomeJoyPrompt>[];
+      await tester.pumpWidget(
+        _buildSubject(
+          snapshot: _singleNoJoyWithDailySpend(),
+          onAddJoy: prompts.add,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('home-joy-empty-coffee')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('home-joy-empty-book')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('home-joy-empty-rest')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('home-joy-empty-free')));
+
+      expect(
+        prompts,
+        HomeJoyPrompt.values
+            .where((prompt) => prompt != HomeJoyPrompt.custom)
+            .followedBy(const [HomeJoyPrompt.custom]),
+      );
+    });
+
+    testWidgets('group mode uses the aggregate Joy count for its empty state', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _groupNoJoy(), isGroupMode: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('home-joy-empty-state')), findsOneWidget);
+      expect(find.text('家族の「うれしい」は？'), findsOneWidget);
+      expect(find.byType(HomeMetricsRegion), findsNothing);
+    });
+
+    for (final locale in const [Locale('ja'), Locale('zh'), Locale('en')]) {
+      testWidgets('C2 empty state fits ${locale.languageCode} at 390px', (
+        tester,
+      ) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(390, 844);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _singleNoJoyWithDailySpend(), locale: locale),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.byKey(const Key('home-joy-empty-state')), findsOneWidget);
+      });
+    }
 
     testWidgets('thin sample (n<5): rings render normally, no crash', (
       tester,
@@ -541,14 +627,13 @@ void main() {
     });
 
     testWidgets(
-      'all-neutral Best Joy (sat<=2): Best Joy strip renders all-neutral CTA variant',
+      'score-2 Joy is a valid positive record and renders in Best Joy',
       (tester) async {
         await tester.pumpWidget(_buildSubject(snapshot: _singleAllNeutral()));
         await tester.pumpAndSettle();
 
-        // ja: "あなたの今月の最愛にしよう" — Best Joy Variant A all-neutral Small.
-        // homeBestJoyAllNeutralBig was removed by 260518-v4v Variant A redesign.
-        expect(find.textContaining('あなたの今月の最愛にしよう'), findsOneWidget);
+        expect(find.textContaining('10,000'), findsOneWidget);
+        expect(find.textContaining('あなたの今月の最愛にしよう'), findsNothing);
       },
     );
   });

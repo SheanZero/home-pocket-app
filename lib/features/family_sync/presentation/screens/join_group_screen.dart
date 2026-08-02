@@ -5,13 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../../application/family_sync/group_operation_error.dart';
 import '../../../../application/family_sync/join_group_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
-import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart';
+import '../widgets/family_flow_components.dart';
 import 'confirm_join_screen.dart';
 
 class JoinGroupScreen extends ConsumerStatefulWidget {
@@ -32,12 +34,19 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   @override
   void initState() {
     super.initState();
-    _codeController.addListener(() => setState(() {}));
+    _codeController.addListener(_rebuild);
+    _codeFocusNode.addListener(_rebuild);
     unawaited(_loadProfile());
+  }
+
+  void _rebuild() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _codeController.removeListener(_rebuild);
+    _codeFocusNode.removeListener(_rebuild);
     _codeController.dispose();
     _codeFocusNode.dispose();
     super.dispose();
@@ -82,10 +91,12 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
             builder: (_) => ConfirmJoinScreen(result: result),
           ),
         );
-      case JoinGroupError(:final message):
+      case JoinGroupError(:final message, :final kind):
         setState(() {
           _isVerifying = false;
-          _errorMessage = message;
+          _errorMessage = kind == GroupOperationErrorKind.membershipConflict
+              ? S.of(context).familySyncSingleGroupConflict
+              : message;
         });
     }
   }
@@ -93,62 +104,44 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final profile = _profile;
-
     final palette = context.palette;
 
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 42),
+          padding: const EdgeInsets.symmetric(
+            horizontal: familyFlowHorizontalPadding,
+          ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
-              _Header(title: l10n.familySyncEnterPartnerCode),
-              const SizedBox(height: 36),
-
-              // Avatar section
-              if (profile != null) ...[
-                AvatarDisplay(
-                  emoji: profile.avatarEmoji,
-                  imagePath: profile.avatarImagePath,
-                  size: 90,
-                  gradientColors: [
-                    palette.memberGradientA,
-                    palette.memberGradientB,
-                    palette.memberGradientC,
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  profile.displayName,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.groupMyName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 32),
-
-              // Code input — single hidden TextField + visual digit boxes
+              const SizedBox(height: 7),
+              FamilyFlowHeader(
+                title: l10n.familyFlowJoinHeader,
+                onBack: () => Navigator.maybePop(context),
+              ),
+              const SizedBox(height: 16),
+              FamilyFlowProgress(
+                labels: [
+                  l10n.familyFlowJoinStepCode,
+                  l10n.familyFlowJoinStepConfirm,
+                  l10n.familyFlowJoinStepWait,
+                ],
+                currentStep: 0,
+              ),
+              const SizedBox(height: 27),
+              FamilyFlowIntro(
+                title: l10n.familyFlowJoinCodeTitle,
+                subtitle: l10n.familyFlowJoinCodeSubtitle,
+              ),
+              const SizedBox(height: 22),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => _codeFocusNode.requestFocus(),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Hidden TextField that captures all input
                     Opacity(
                       opacity: 0,
                       child: SizedBox(
@@ -167,37 +160,17 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                         ),
                       ),
                     ),
-                    // Visual digit boxes
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        for (int i = 0; i < 3; i++) ...[
-                          if (i > 0) const SizedBox(width: 8),
-                          _DigitDisplay(
-                            digit: i < _code.length ? _code[i] : '',
-                            isFocused:
-                                _codeFocusNode.hasFocus &&
-                                i == _code.length.clamp(0, 5),
-                          ),
-                        ],
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
-                            '\u{2022}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: palette.textTertiary,
+                        for (var index = 0; index < 6; index++) ...[
+                          if (index > 0) SizedBox(width: index == 3 ? 19 : 7),
+                          Expanded(
+                            child: _DigitDisplay(
+                              digit: index < _code.length ? _code[index] : '',
+                              isFocused:
+                                  _codeFocusNode.hasFocus &&
+                                  index == _code.length.clamp(0, 5),
                             ),
-                          ),
-                        ),
-                        for (int i = 3; i < 6; i++) ...[
-                          if (i > 3) const SizedBox(width: 8),
-                          _DigitDisplay(
-                            digit: i < _code.length ? _code[i] : '',
-                            isFocused:
-                                _codeFocusNode.hasFocus &&
-                                i == _code.length.clamp(0, 5),
                           ),
                         ],
                       ],
@@ -205,94 +178,31 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-
-              // Hint text
-              Text(
-                l10n.groupCodeHint,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: palette.textSecondary,
-                ),
-              ),
-
               if (_errorMessage != null) ...[
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: palette.accentPrimary,
-                  ),
+                  style: AppTextStyles.label.copyWith(color: palette.error),
                 ),
               ],
-              const SizedBox(height: 32),
-
-              // Verify button (CTA)
-              _GradientButton(
-                onTap: _isCodeComplete && !_isVerifying ? _handleVerify : null,
-                icon: LucideIcons.search,
-                label: l10n.groupVerify,
+              const SizedBox(height: 18),
+              FamilyPrimaryButton(
+                onPressed: _isCodeComplete && !_isVerifying
+                    ? _handleVerify
+                    : null,
+                label: l10n.familyFlowReviewFamily,
                 isLoading: _isVerifying,
+              ),
+              const SizedBox(height: 20),
+              FamilyHelperNote(
+                icon: LucideIcons.shieldCheck,
+                text: l10n.familyFlowJoinBeforeApprovalHelper,
               ),
               const SizedBox(height: 32),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    final palette = context.palette;
-
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () => Navigator.maybePop(context),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                LucideIcons.chevronLeft,
-                size: 20,
-                color: palette.textSecondary,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                l10n.groupBack,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Spacer(),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: palette.textPrimary,
-          ),
-        ),
-        const Spacer(),
-        const SizedBox(width: 60),
-      ],
     );
   }
 }
@@ -305,98 +215,37 @@ class _DigitDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasText = digit.isNotEmpty;
-
     final palette = context.palette;
-    return Container(
-      width: 44,
-      height: 56,
+    final highlighted = digit.isNotEmpty || isFocused;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      height: 62,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        color: palette.card,
+        borderRadius: BorderRadius.circular(13),
         border: Border.all(
-          color: hasText || isFocused
-              ? palette.accentPrimary
-              : palette.borderDefault,
+          color: highlighted ? palette.accentPrimary : palette.borderDefault,
           width: isFocused ? 2 : 1,
         ),
+        boxShadow: isFocused
+            ? [
+                BoxShadow(
+                  color: palette.accentPrimary.withValues(alpha: 0.12),
+                  blurRadius: 0,
+                  spreadRadius: 3,
+                ),
+              ]
+            : null,
       ),
       alignment: Alignment.center,
       child: Text(
         digit,
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          color: palette.textPrimary,
-        ),
-      ),
-    );
-  }
-}
-
-class _GradientButton extends StatelessWidget {
-  const _GradientButton({
-    required this.onTap,
-    required this.icon,
-    required this.label,
-    this.isLoading = false,
-  });
-
-  final VoidCallback? onTap;
-  final IconData icon;
-  final String label;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final isDisabled = onTap == null;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isDisabled ? 0.5 : 1.0,
-        child: Container(
-          width: double.infinity,
-          height: 52,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [palette.fabGradientEnd, palette.fabGradientStart],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: palette.actionShadow,
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isLoading)
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              else ...[
-                Icon(icon, size: 18, color: Colors.white),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ],
+        style: AppTextStyles.numerals(
+          TextStyle(
+            fontSize: 27,
+            height: 34 / 27,
+            fontWeight: FontWeight.w700,
+            color: palette.textPrimary,
           ),
         ),
       ),

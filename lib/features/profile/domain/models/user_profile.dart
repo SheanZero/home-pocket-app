@@ -12,6 +12,8 @@ abstract class UserProfile with _$UserProfile {
     String? avatarImagePath,
     required DateTime createdAt,
     required DateTime updatedAt,
+    @Default(0) int syncRevision,
+    @Default('') String syncOriginDeviceId,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>

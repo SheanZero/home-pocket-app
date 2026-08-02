@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
-import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/membership_rotation_coordinator.dart';
+import 'package:home_pocket/application/family_sync/rotate_group_key_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -10,57 +10,38 @@ class MockRelayApiClient extends Mock implements RelayApiClient {}
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
+class MockRotateGroupKeyUseCase extends Mock implements RotateGroupKeyUseCase {}
+
+class MockMembershipRotationCoordinator extends Mock
+    implements MembershipRotationCoordinator {}
+
 void main() {
   late MockRelayApiClient apiClient;
   late MockGroupRepository groupRepository;
+  late MockRotateGroupKeyUseCase rotateGroupKey;
+  late MockMembershipRotationCoordinator membershipRotation;
   late RemoveMemberUseCase useCase;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     groupRepository = MockGroupRepository();
+    rotateGroupKey = MockRotateGroupKeyUseCase();
+    membershipRotation = MockMembershipRotationCoordinator();
     useCase = RemoveMemberUseCase(
       apiClient: apiClient,
       groupRepository: groupRepository,
+      rotateGroupKey: rotateGroupKey,
+      membershipRotation: membershipRotation,
     );
   });
 
   test('removes a member from the local group after server success', () async {
     when(
-      () => apiClient.removeMember(groupId: 'group-1', deviceId: 'member-1'),
-    ).thenAnswer((_) async => {'status': 'ok'});
-    when(() => groupRepository.getGroupById('group-1')).thenAnswer(
-      (_) async => GroupInfo(
+      () => membershipRotation.removeMember(
         groupId: 'group-1',
-        groupName: 'Test Family',
-        status: GroupStatus.active,
-        role: 'owner',
-        groupKey: 'group-key',
-        members: const [
-          GroupMember(
-            deviceId: 'owner-1',
-            publicKey: 'pk-owner',
-            deviceName: 'Owner phone',
-            role: 'owner',
-            status: 'active',
-            displayName: 'Owner',
-            avatarEmoji: '🏠',
-          ),
-          GroupMember(
-            deviceId: 'member-1',
-            publicKey: 'pk-member',
-            deviceName: 'Kitchen tablet',
-            role: 'member',
-            status: 'active',
-            displayName: 'Member',
-            avatarEmoji: '🏠',
-          ),
-        ],
-        createdAt: DateTime(2026),
+        targetDeviceId: 'member-1',
       ),
-    );
-    when(
-      () => groupRepository.updateMembers(any(), any()),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => {'status': 'removed', 'keyEpoch': 2});
 
     final result = await useCase.execute(
       groupId: 'group-1',
@@ -69,17 +50,10 @@ void main() {
 
     expect(result, isA<RemoveMemberSuccess>());
     verify(
-      () => groupRepository.updateMembers('group-1', [
-        const GroupMember(
-          deviceId: 'owner-1',
-          publicKey: 'pk-owner',
-          deviceName: 'Owner phone',
-          role: 'owner',
-          status: 'active',
-          displayName: 'Owner',
-          avatarEmoji: '🏠',
-        ),
-      ]),
+      () => membershipRotation.removeMember(
+        groupId: 'group-1',
+        targetDeviceId: 'member-1',
+      ),
     ).called(1);
   });
 }

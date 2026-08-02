@@ -12,6 +12,7 @@ import 'package:home_pocket/features/family_sync/presentation/screens/group_choi
 import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/group_operation_error.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_settings_section.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -254,6 +255,61 @@ void main() {
       expect(find.byType(GroupChoiceScreen), findsOneWidget);
       expect(find.textContaining('Network error'), findsOneWidget);
       verify(() => checkGroupUseCase.execute()).called(1);
+    },
+  );
+
+  testWidgets(
+    'network failure shows a friendly dialog and stays on the current page',
+    (tester) async {
+      when(
+        () => groupRepository.watchActiveGroup(),
+      ).thenAnswer((_) => Stream.value(null));
+      when(() => checkGroupUseCase.execute()).thenAnswer(
+        (_) async => const CheckGroupError(
+          'ClientException: Failed host lookup: sync.happypocket.app',
+          kind: GroupOperationErrorKind.networkUnavailable,
+        ),
+      );
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const Scaffold(body: FamilySyncSettingsSection()),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
+            joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
+            syncStatusStreamProvider.overrideWith(
+              (ref) => Stream.value(
+                const model.SyncStatus(state: model.SyncState.noGroup),
+              ),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('family-network-unavailable-dialog')),
+        findsOneWidget,
+      );
+      expect(find.byType(GroupChoiceScreen), findsNothing);
+      expect(find.textContaining('ClientException'), findsNothing);
+      expect(find.textContaining('happypocket.app'), findsNothing);
+
+      await tester.tap(
+        find.byKey(const Key('family-network-unavailable-cancel')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('family-network-unavailable-dialog')),
+        findsNothing,
+      );
+      expect(find.byType(GroupChoiceScreen), findsNothing);
     },
   );
 }

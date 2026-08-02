@@ -300,7 +300,7 @@ class SJa extends S {
   String get selectTheme => 'テーマを選択';
 
   @override
-  String get themeSystem => 'システム';
+  String get themeSystem => '端末の設定に合わせる';
 
   @override
   String get themeLight => 'ライト';
@@ -336,6 +336,76 @@ class SJa extends S {
   String get dataManagement => 'データ管理';
 
   @override
+  String get settingsGeneral => '一般';
+
+  @override
+  String get settingsFamily => '家族';
+
+  @override
+  String get settingsData => 'データ';
+
+  @override
+  String get settingsThisApp => 'このアプリ';
+
+  @override
+  String get settingsAdditional => 'その他の設定';
+
+  @override
+  String get settingsAdditionalDescription => '週の開始日、音声認識、通知';
+
+  @override
+  String get settingsNotSet => '未設定';
+
+  @override
+  String settingsJoyTargetValue(int value) {
+    return '$value Joy';
+  }
+
+  @override
+  String get settingsLocalDataProtected => 'データは端末内で保護されています';
+
+  @override
+  String get backupAndRestore => 'バックアップと復元';
+
+  @override
+  String get backupAndRestoreDescription => '暗号化ファイル';
+
+  @override
+  String get backupHeroTitle => 'データを、自分で安全に保管';
+
+  @override
+  String get backupHeroDescription =>
+      '記録と設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。';
+
+  @override
+  String get backupEncryptionChip => 'AES-256-GCM';
+
+  @override
+  String get backupCompressedChip => '圧縮済み';
+
+  @override
+  String get backupNoUploadChip => '自動アップロードなし';
+
+  @override
+  String get backupSectionTitle => 'バックアップ';
+
+  @override
+  String get restoreSectionTitle => '復元';
+
+  @override
+  String get backupPasswordNotStored =>
+      'パスワードはこのアプリに保存されません。忘れた場合、バックアップを復元することはできません。';
+
+  @override
+  String get restoreReplacesData => '.hpb を選び、現在のデータを置き換え';
+
+  @override
+  String get restoreWarningTitle => '現在のデータは置き換えられます';
+
+  @override
+  String get restoreWarningBody => '復元に失敗した場合、今のデータはそのまま保持されます。';
+
+  @override
   String get exportBackup => 'バックアップをエクスポート';
 
   @override
@@ -351,13 +421,14 @@ class SJa extends S {
   String get deleteAllData => '全データを削除';
 
   @override
-  String get deleteAllDataDescription => 'すべての記録を完全に削除';
+  String get deleteAllDataDescription => 'この端末のデータを完全に削除';
 
   @override
-  String get deleteAllDataConfirmation => 'この操作は取り消せません。すべてのデータを削除してもよろしいですか？';
+  String get deleteAllDataConfirmation =>
+      'この端末のまもる家計簿データを完全に削除します。他の家族の端末上のデータは削除されず、サーバーへの削除要求も送信されません。';
 
   @override
-  String get allDataDeleted => '全データを削除しました';
+  String get allDataDeleted => '端末内のデータを削除しました';
 
   @override
   String get deleteFailed => '削除に失敗しました';
@@ -468,6 +539,12 @@ class SJa extends S {
 
   @override
   String get profileEdit => 'プロフィールを編集';
+
+  @override
+  String get profileEditPersonalInfo => '個人情報を編集';
+
+  @override
+  String get profileDisplayName => '表示名';
 
   @override
   String get profileCancel => 'キャンセル';
@@ -639,6 +716,27 @@ class SJa extends S {
   String homeHeroPreviousMonthSubline(String amount) {
     return '先月同期 $amount';
   }
+
+  @override
+  String get homeJoyEmptyTitleSingle => '今日の「うれしい」は？';
+
+  @override
+  String get homeJoyEmptyTitleGroup => '家族の「うれしい」は？';
+
+  @override
+  String get homeJoyEmptySubtitle => '小さな楽しみから選んで記録';
+
+  @override
+  String get homeJoyEmptyFree => '自由に記録';
+
+  @override
+  String get homeJoyEmptyCoffee => '好きな一杯';
+
+  @override
+  String get homeJoyEmptyBook => '読みたい本';
+
+  @override
+  String get homeJoyEmptyRest => 'ほっと一息';
 
   @override
   String get homeRingSectionTitleSingle => 'ときめき度';
@@ -822,6 +920,21 @@ class SJa extends S {
   String get categoryNameHint => '例：週末のプロジェクト';
 
   @override
+  String get categoryAppearanceLabel => '見た目';
+
+  @override
+  String get categoryAppearanceDescription => '一覧やグラフで見分けやすくなります。';
+
+  @override
+  String get categoryPreviewName => '新しい分類';
+
+  @override
+  String get categoryIconLabel => 'アイコン';
+
+  @override
+  String get categoryColorLabel => 'カラー';
+
+  @override
   String get categoryNameRequired => '分類名を入力してください';
 
   @override
@@ -919,13 +1032,13 @@ class SJa extends S {
       'オフにすると認識はデバイス内で完結し、失敗時はクラウド認識を使わずエラーを表示します。';
 
   @override
-  String get familySync => 'ファミリー同期';
+  String get familySync => '家族同期';
 
   @override
   String get familySyncShowMyCode => 'グループを作成';
 
   @override
-  String get familySyncEnterPartnerCode => 'グループに参加';
+  String get familySyncEnterPartnerCode => '招待コードで参加する';
 
   @override
   String get familySyncPairCode => '招待コード';
@@ -1065,6 +1178,33 @@ class SJa extends S {
   }
 
   @override
+  String get familySyncInviteTitle => '家族を招待';
+
+  @override
+  String get familySyncInviteDescription => '招待する相手にこのコードを共有してください。';
+
+  @override
+  String get familySyncInviteCopy => 'コードをコピー';
+
+  @override
+  String get familySyncInviteCopied => '招待コードをコピーしました';
+
+  @override
+  String get familySyncInviteRefreshHint => '再生成すると、以前のコードはすぐに無効になります。';
+
+  @override
+  String get familySyncInviteApprovalWindowHint =>
+      'コードの有効期限は新規申請にのみ適用されます。申請後、オーナーは24時間以内に承認できます。';
+
+  @override
+  String familySyncInviteShareMessage(String groupName, String inviteCode) {
+    return 'Home Pocketの「$groupName」に参加する招待コードは $inviteCode です。';
+  }
+
+  @override
+  String get familySyncInviteOwnerOnly => '招待コードを管理できるのはグループオーナーだけです。';
+
+  @override
   String get familySyncMembers => 'メンバー';
 
   @override
@@ -1174,7 +1314,7 @@ class SJa extends S {
   String get familySyncApprovalTip => '承認すると、このデバイスとデータが暗号化して同期されます。';
 
   @override
-  String get familySyncGroupManagement => 'グループ管理';
+  String get familySyncGroupManagement => '家族管理';
 
   @override
   String get familySyncSynced => '同期済';
@@ -1202,7 +1342,26 @@ class SJa extends S {
   }
 
   @override
-  String get groupCreate => 'グループを作成';
+  String get groupCreate => '新しい家族を作る';
+
+  @override
+  String get groupCreateConfirmationHint => '確認後にのみ、グループと招待コードが作成されます。';
+
+  @override
+  String groupCreateFailed(String message) {
+    return 'グループを作成できませんでした: $message';
+  }
+
+  @override
+  String get familySyncSingleGroupConflict =>
+      'この端末には参加中のグループ、または承認待ちの参加リクエストがあります。別のグループを作成・参加する前に、現在のグループから退出するかリクエストをキャンセルしてください。';
+
+  @override
+  String get familySyncNetworkUnavailableTitle => 'ネットワークに接続できません';
+
+  @override
+  String get familySyncNetworkUnavailableMessage =>
+      '家族共有にはネットワーク接続が必要です。通信状況と、まもる家計簿のモバイルデータ通信が許可されているかを確認して、もう一度お試しください。';
 
   @override
   String get groupName => 'グループ名';
@@ -1218,7 +1377,7 @@ class SJa extends S {
 
   @override
   String groupInviteExpiry(int minutes) {
-    return '$minutes分以内に有効';
+    return '$minutes分間有効';
   }
 
   @override
@@ -1231,17 +1390,17 @@ class SJa extends S {
   String get groupVerify => '検証';
 
   @override
-  String get groupConfirmJoin => '参加を確認';
+  String get groupConfirmJoin => '参加を申請';
 
   @override
   String get groupJoinTarget => '参加するグループ';
 
   @override
-  String get groupWaitingApproval => 'オーナーの承認を待っています...';
+  String get groupWaitingApproval => 'オーナーの承認待ち';
 
   @override
   String groupWaitingDesc(String name) {
-    return '$name があなたのリクエストを確認中';
+    return '$nameさんが参加申請を確認しています。';
   }
 
   @override
@@ -1283,34 +1442,206 @@ class SJa extends S {
   String get groupEnterGroup => 'グループへ';
 
   @override
-  String get groupChoiceTitle => '家族とつながろう';
+  String get groupChoiceTitle => 'どう始めますか？';
 
   @override
-  String get groupChoiceSubtitle => '家計簿を一緒に管理しましょう';
+  String get groupChoiceSubtitle => '参加できる家族は一度に1つです。';
 
   @override
-  String get groupCreateDesc => '新しい家族グループを作って、メンバーを招待しましょう';
+  String get groupCreateDesc => '招待コードを発行し、あなたがメンバーを承認';
 
   @override
-  String get groupJoinDesc => '招待コードを入力して、既存のグループに参加しましょう';
+  String get groupJoinDesc => '家族のオーナーによる承認が必要です';
 
   @override
-  String get groupE2eeHint => 'E2E暗号化でプライバシーを保護';
+  String get groupE2eeHint => '家族の公開帳簿は暗号化して同期。個人の非公開帳簿は、この端末だけに残ります。';
+
+  @override
+  String get familyFlowCreateStepCreate => '家族作成';
+
+  @override
+  String get familyFlowCreateHeader => '家族を作る';
+
+  @override
+  String get familyFlowJoinHeader => '家族に参加';
+
+  @override
+  String get familyFlowReviewFamily => '家族情報を確認';
+
+  @override
+  String get familyFlowCreateStepInvite => '招待共有';
+
+  @override
+  String get familyFlowCreateStepApprove => 'メンバー承認';
+
+  @override
+  String get familyFlowJoinStepCode => 'コード入力';
+
+  @override
+  String get familyFlowJoinStepConfirm => '家族確認';
+
+  @override
+  String get familyFlowJoinStepWait => '承認待ち';
+
+  @override
+  String familyFlowOwnerSummary(String name) {
+    return '$name · オーナー';
+  }
+
+  @override
+  String get familyFlowCreateTitle => '新しい家族を作る';
+
+  @override
+  String get familyFlowCreateSubtitle => '家族の名前を決めると、安全な招待コードを発行します。';
+
+  @override
+  String get familyFlowCreateInviteHelper => '家族が参加申請を送ると、次のステップでメンバーを承認します。';
+
+  @override
+  String get familyFlowRegenerateInvite => '再発行';
+
+  @override
+  String get familySyncInviteRegenerated => '招待コードを再発行しました';
+
+  @override
+  String get familyFlowJoinCodeTitle => '6桁の招待コードを入力';
+
+  @override
+  String get familyFlowJoinCodeSubtitle => '家族のオーナーから受け取った数字を入力してください。';
+
+  @override
+  String get familyFlowJoinBeforeApprovalHelper => '申請が承認されるまで、どの帳簿も同期されません。';
+
+  @override
+  String get familyFlowJoinConfirmHeader => '家族を確認';
+
+  @override
+  String get familyFlowJoinConfirmTitle => '参加する家族を確認';
+
+  @override
+  String get familyFlowJoinConfirmSubtitle => 'この家族に参加申請を送ります。';
+
+  @override
+  String get familyFlowPublicKeyVerified => '公開鍵を確認済み';
+
+  @override
+  String get familyFlowPrivateLedgerHelper => '個人の非公開帳簿は家族に共有されません。';
+
+  @override
+  String get familyFlowWaitingHeader => '承認を待っています';
+
+  @override
+  String familyFlowWaitingFamily(String groupName) {
+    return '参加先：$groupName';
+  }
+
+  @override
+  String get familyFlowApprovalTitle => '新しい参加申請';
+
+  @override
+  String get familyFlowApprovalSubtitle => '本人と端末を確認してから承認してください。';
+
+  @override
+  String familyFlowApprovalDevice(String deviceName) {
+    return '$deviceName から参加申請';
+  }
+
+  @override
+  String get familyFlowDeviceKeyVerified => '端末の公開鍵を確認済み';
+
+  @override
+  String get familyFlowApprovalHelper => '承認後、この端末と家族の公開帳簿を暗号化して同期します。';
+
+  @override
+  String get familyFlowApprovalEmptyTitle => '未確認の申請はありません';
+
+  @override
+  String familyFlowPendingRequests(int count) {
+    return '新しい参加申請 · $count件';
+  }
+
+  @override
+  String get familyFlowViewRequests => '申請を見る';
+
+  @override
+  String get familyFlowSyncSettings => '同期設定';
+
+  @override
+  String familyFlowManagementSummary(
+    String ownerName,
+    int count,
+    String syncStatus,
+  ) {
+    return 'オーナー：$ownerName · $count人 · $syncStatus';
+  }
 
   @override
   String get groupInviteMembers => '新しいメンバーを招待';
 
   @override
-  String get groupDisband => 'グループを解散';
+  String get groupDisband => '家族を解散';
 
   @override
   String get groupCancel => 'キャンセル';
 
   @override
-  String get groupWaitingHint1 => '通知が届くまでお待ちください';
+  String get groupCancelRequest => '参加リクエストを取り消す';
 
   @override
-  String get groupWaitingHint2 => 'アプリを閉じても大丈夫です';
+  String groupRejectRequestFailed(String message) {
+    return '参加リクエストの拒否に失敗しました: $message';
+  }
+
+  @override
+  String get groupRequestRejectedTitle => '参加リクエストが拒否されました';
+
+  @override
+  String get groupRequestRejectedDescription =>
+      'オーナーがリクエストを拒否しました。別の招待コードで再度お試しいただけます。';
+
+  @override
+  String get groupRequestCancelledTitle => '参加リクエストを取り消しました';
+
+  @override
+  String get groupRequestCancelledDescription =>
+      'リクエストを取り消しました。いつでも新しいリクエストを送信できます。';
+
+  @override
+  String get groupRequestExpiredTitle => '参加リクエストの期限が切れました';
+
+  @override
+  String get groupRequestExpiredDescription =>
+      '24時間以内に確認されませんでした。最新の招待コードを受け取り、もう一度お試しください。';
+
+  @override
+  String get groupTryAnotherInvite => '別の招待コードを入力';
+
+  @override
+  String get groupKeyRecoveryTitle => 'ファミリーキーを復元しています';
+
+  @override
+  String get groupKeyRecoveryWaiting =>
+      'メンバー承認は完了しています。別の有効なファミリーデバイスが、現在のキーをこの端末向けに安全に再暗号化する必要があります。リレーはキーを閲覧・再作成できません。';
+
+  @override
+  String get groupKeyRecoveryUnavailable =>
+      '期限内に有効なデバイスから現在のキーを受け取れませんでした。ゼロ知識設計のため、リレーでキーを復元することはできません。再試行するか、安全にファミリーを退出／解散して新しく作成してください。';
+
+  @override
+  String get groupKeyRecoveryRateLimited =>
+      '復元リクエストは直前に送信されています。ほかのデバイスへ再通知するまで少しお待ちください。';
+
+  @override
+  String get groupKeyRecoveryRetry => 'キーの復元を再試行';
+
+  @override
+  String get groupKeyRecoveryRebuild => '退出して新しいファミリーを設定';
+
+  @override
+  String get groupWaitingHint1 => 'アプリを閉じても大丈夫です。';
+
+  @override
+  String get groupWaitingHint2 => '承認されたら自動で同期を始めます。';
 
   @override
   String get groupCodeHint => '招待コードはグループのオーナーに聞いてください';
@@ -2767,6 +3098,23 @@ class SJa extends S {
   String get securityAppLockDescription => '起動時と再開時にパスコードでアプリを保護します。';
 
   @override
+  String get securityAppLockOff => 'オフ';
+
+  @override
+  String get securityAppLockPinOnly => 'PIN';
+
+  @override
+  String securityAppLockBiometricAndPin(String biometric) {
+    return '$biometric + PIN';
+  }
+
+  @override
+  String get securityFaceId => 'Face ID';
+
+  @override
+  String get securityFingerprint => '指紋認証';
+
+  @override
   String get securityBiometricUnlock => '生体認証で解除';
 
   @override
@@ -2796,6 +3144,34 @@ class SJa extends S {
 
   @override
   String get sponsorLaunchError => 'ブラウザを開けませんでした';
+
+  @override
+  String get legalNavigationSubtitle => 'プライバシー、規約、OSS';
+
+  @override
+  String get privacyPolicyDescription => 'データの扱いについて';
+
+  @override
+  String get termsOfUseDescription => 'サービス利用条件';
+
+  @override
+  String get openSourceLicensesDescription => '使用ライブラリ';
+
+  @override
+  String get sponsorSectionTitle => '開発を応援';
+
+  @override
+  String get sponsorCardTitle => '静かな家計簿を育てる';
+
+  @override
+  String get sponsorCardBody =>
+      '応援・お問い合わせページは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。';
+
+  @override
+  String get sponsorButton => 'スポンサーについて';
+
+  @override
+  String get legalLinkLaunchError => 'リンクを開けませんでした';
 
   @override
   String analyticsTrendInsightTotal(String amount) {
@@ -2865,4 +3241,177 @@ class SJa extends S {
 
   @override
   String get analyticsJoyDrawerToggleCollapse => 'ときめき支出の内訳を閉じる';
+
+  @override
+  String get syncQueueNeedsAttentionBadge => '確認が必要';
+
+  @override
+  String get syncQueueNeedsAttentionDescription => '確認が必要な変更があります';
+
+  @override
+  String get syncQueueNeedsAttentionTitle => '同期の確認が必要です';
+
+  @override
+  String get syncQueuePendingTitle => '同期を待っている変更';
+
+  @override
+  String syncQueueCounts(int pendingCount, int deadLetterCount) {
+    return '送信待ち $pendingCount件・確認が必要 $deadLetterCount件';
+  }
+
+  @override
+  String get syncQueueReconcileHint =>
+      '暗号化された変更は保持されています。先に再送し、その後に完全な整合確認を行うことをおすすめします。';
+
+  @override
+  String get syncQueueRetryAll => 'すべて再送';
+
+  @override
+  String get syncQueueDiscardAll => '破棄';
+
+  @override
+  String get syncQueueRetryFailed => '確認が必要な変更が残っています';
+
+  @override
+  String get syncQueueRetrySucceeded => '変更を送信しました。引き続き整合確認をおすすめします。';
+
+  @override
+  String get syncQueueDiscardConfirmTitle => '未送信の変更を破棄しますか？';
+
+  @override
+  String get syncQueueDiscardConfirmBody =>
+      'この端末に保持された未送信の変更を完全に削除します。この操作は元に戻せません。';
+
+  @override
+  String get syncQueueCancel => 'キャンセル';
+
+  @override
+  String get syncQueueDiscardConfirmAction => '完全に破棄';
+
+  @override
+  String get syncQueueDiscardFailed => '未送信の変更を破棄できませんでした';
+
+  @override
+  String get inboundSyncSectionTitle => '確認待ちの受信変更';
+
+  @override
+  String inboundSyncCount(int count) {
+    return '隔離された受信変更 $count件';
+  }
+
+  @override
+  String inboundSyncErrorCode(String errorCode) {
+    return '安全コード: $errorCode';
+  }
+
+  @override
+  String get inboundSyncRetryOne => '再試行';
+
+  @override
+  String get inboundSyncDiscardOne => '受信変更を破棄';
+
+  @override
+  String get inboundSyncDiscardConfirmTitle => 'この受信変更を破棄しますか？';
+
+  @override
+  String get inboundSyncDiscardConfirmBody =>
+      '隔離された受信変更をこの端末から完全に削除します。中継サーバー上のコピーは確認済みのため、元に戻せません。';
+
+  @override
+  String get syncAttentionDiscardConfirmTitle => '保持された同期変更を破棄しますか？';
+
+  @override
+  String get syncAttentionDiscardConfirmBody =>
+      '保持された送信失敗と隔離済みの受信変更を、この端末からすべて完全に削除します。この操作は元に戻せません。';
+
+  @override
+  String get familySyncTransferOwner => 'オーナーを引き継ぐ';
+
+  @override
+  String get familySyncTransferOwnerSelect => '新しいオーナーを選択';
+
+  @override
+  String get familySyncTransferOwnerConfirmTitle => 'オーナーを引き継ぎますか？';
+
+  @override
+  String familySyncTransferOwnerConfirmBody(String memberName) {
+    return '$memberNameさんがメンバー、招待、家族グループを管理します。';
+  }
+
+  @override
+  String get familySyncTransferOwnerFinalTitle => '最終確認';
+
+  @override
+  String familySyncTransferOwnerFinalBody(String memberName) {
+    return 'すべての利用中端末に新しい暗号鍵を発行します。引き継ぎ後、あなたは通常メンバーになります。$memberNameさんに引き継ぎますか？';
+  }
+
+  @override
+  String get familySyncTransferOwnerSuccess => '安全にオーナーを引き継ぎました';
+
+  @override
+  String get familySyncTransferOwnerNotReady => '現在の暗号鍵の準備が整うまで、オーナー操作は利用できません';
+
+  @override
+  String get familySyncTransferOwnerInvalidTarget => '別の利用中メンバーを選択してください';
+
+  @override
+  String familySyncTransferOwnerFailed(String message) {
+    return 'オーナーを引き継げませんでした: $message';
+  }
+
+  @override
+  String get transactionPhotoBoundaryTitle => 'レシート写真';
+
+  @override
+  String get transactionPhotoLocalOnlyBody =>
+      'このレシート写真はこの端末だけに保存され、家族同期やバックアップには含まれません。';
+
+  @override
+  String get transactionPhotoUnavailableBody =>
+      'レシート写真はこの取引を記録した端末だけにあり、家族同期やバックアップには含まれていません。';
+
+  @override
+  String get familySyncMemberHistory => 'メンバー履歴';
+
+  @override
+  String familySyncRequestedAt(String date) {
+    return '申請日 $date';
+  }
+
+  @override
+  String familySyncJoinedAt(String role, String date) {
+    return '$role · 参加日 $date';
+  }
+
+  @override
+  String familySyncConfirmedAt(String role, String date) {
+    return '$role · 承認日 $date';
+  }
+
+  @override
+  String familySyncRemovedAtReason(String reason, String date) {
+    return '$reason · $date';
+  }
+
+  @override
+  String get familySyncRemovalReasonLeft => 'ファミリーから退出';
+
+  @override
+  String get familySyncRemovalReasonRemoved => 'オーナーにより削除';
+
+  @override
+  String get familySyncRemovalReasonDissolved => 'ファミリーが解散';
+
+  @override
+  String get familySyncRemovalReasonRejected => '申請が拒否されました';
+
+  @override
+  String get familySyncRemovalReasonCancelled => '申請を取り消しました';
+
+  @override
+  String get familySyncRemovalReasonExpired => '申請の有効期限が切れました';
+
+  @override
+  String get familySyncRemovalReasonUnknown => 'メンバー関係が終了しました';
 }

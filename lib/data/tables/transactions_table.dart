@@ -31,6 +31,18 @@ class Transactions extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
+  // Family-sync Lamport version and stable writer tie-breaker (F-06).
+  IntColumn get syncRevision => integer().withDefault(const Constant(0))();
+  TextColumn get syncOriginDeviceId => text().withDefault(const Constant(''))();
+
+  // Local-only family visibility ledger. Never serialize these columns onto
+  // the relay wire; they exist to remember older public exposure even after
+  // is_private changes.
+  TextColumn get familySyncVisibility =>
+      text().withDefault(const Constant('localOnly'))();
+  IntColumn get familySharedRevision =>
+      integer().withDefault(const Constant(0))();
+
   // Soul ledger satisfaction (1-10, default 2; D-10 unipolar positive scale)
   IntColumn get joyFullness => integer().withDefault(const Constant(2))();
 
@@ -55,6 +67,7 @@ class Transactions extends Table {
   List<String> get customConstraints => [
     'CHECK(joy_fullness BETWEEN 1 AND 10)',
     "CHECK(entry_source IN ('manual', 'voice', 'ocr'))",
+    "CHECK(family_sync_visibility IN ('localOnly', 'shared', 'withdrawalPending', 'withdrawn'))",
   ];
 
   List<TableIndex> get customIndices => [

@@ -72,6 +72,7 @@ void main() {
     AppDatabaseFactory? databaseFactory,
     SeedRunner? seedRunner,
     EncryptedDatabaseExists? databaseExists,
+    PendingPrivacyWipeResumer? pendingPrivacyWipeResumer,
   }) {
     return AppInitializer(
       containerFactory: _makeContainerFactory(
@@ -81,6 +82,7 @@ void main() {
       databaseFactory: databaseFactory ?? _successDatabaseFactory(),
       databaseExists: databaseExists ?? (() async => false),
       seedRunner: seedRunner ?? _noopSeedRunner(),
+      pendingPrivacyWipeResumer: pendingPrivacyWipeResumer,
     );
   }
 
@@ -157,6 +159,52 @@ void main() {
       addTearDown(success.container.dispose);
       expect(captured, same(success.container));
     });
+
+    test(
+      'resumes pending wipe after database opens but before identity and seed',
+      () async {
+        final calls = <String>[];
+        when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async {
+          calls.add('identity');
+          return true;
+        });
+
+        final result = await makeInitializer(
+          databaseFactory: (_) async {
+            calls.add('database');
+            return AppDatabase.forTesting();
+          },
+          pendingPrivacyWipeResumer: (container) async {
+            expect(() => container.read(appDatabaseProvider), returnsNormally);
+            calls.add('resume');
+          },
+          seedRunner: (_) async => calls.add('seed'),
+        ).initialize();
+
+        expect(result, isA<InitSuccess>());
+        (result as InitSuccess).container.dispose();
+        expect(calls, ['database', 'resume', 'identity', 'seed']);
+      },
+    );
+
+    test(
+      'pending wipe failure stops identity generation and seeding',
+      () async {
+        var seeded = false;
+        final result = await makeInitializer(
+          pendingPrivacyWipeResumer: (_) async {
+            throw StateError('corrupt privacy wipe journal');
+          },
+          seedRunner: (_) async => seeded = true,
+        ).initialize();
+
+        expect(result, isA<InitFailure>());
+        expect((result as InitFailure).type, InitFailureType.privacyWipe);
+        verifyNever(() => fakeKeyRepo.hasKeyPair());
+        verifyNever(() => fakeKeyRepo.generateKeyPair());
+        expect(seeded, isFalse);
+      },
+    );
   });
 
   group('AppInitializer — missing key with existing data guard', () {

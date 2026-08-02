@@ -38,6 +38,7 @@ import '../../../../data/repositories/merchant_repository_impl.dart';
 import '../../../../data/repositories/transaction_repository_impl.dart';
 import '../../../../data/repositories/unit_of_work_impl.dart';
 import '../../domain/models/book.dart';
+import '../../domain/models/category.dart';
 import '../../domain/repositories/book_repository.dart';
 import '../../domain/repositories/category_keyword_preference_repository.dart';
 import '../../domain/repositories/category_ledger_config_repository.dart';
@@ -47,6 +48,8 @@ import '../../domain/repositories/merchant_category_preference_repository.dart';
 import '../../domain/repositories/merchant_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
+import '../../../../application/family_sync/category_reference_sync_service.dart';
+import '../../../../data/repositories/category_sync_repository_impl.dart';
 
 part 'repository_providers.g.dart';
 
@@ -79,6 +82,26 @@ CategoryRepository categoryRepository(Ref ref) {
   final dao = CategoryDao(database);
   return CategoryRepositoryImpl(dao: dao);
 }
+
+@Riverpod(keepAlive: true)
+CategoryReferenceSyncService categoryReferenceSyncService(Ref ref) {
+  final database = ref.watch(app_accounting.appAppDatabaseProvider);
+  return CategoryReferenceSyncService(
+    repository: CategorySyncRepositoryImpl(dao: CategoryDao(database)),
+  );
+}
+
+/// Resolves one category from encrypted local storage for presentation.
+///
+/// System categories are normally resolved synchronously from the bundled
+/// default catalog at the call site. This family covers custom categories
+/// without loading the entire catalog into Home or List.
+final categoryByIdProvider = FutureProvider.family<Category?, String>((
+  ref,
+  categoryId,
+) {
+  return ref.watch(categoryRepositoryProvider).findById(categoryId);
+});
 
 /// MerchantRepository provider.
 ///
@@ -167,6 +190,9 @@ CreateTransactionUseCase createTransactionUseCase(Ref ref) {
     categoryService: ref.watch(categoryServiceProvider),
     syncEngine: ref.watch(syncEngineProvider),
     changeTracker: ref.watch(transactionChangeTrackerProvider),
+    categoryReferenceSyncService: ref.watch(
+      categoryReferenceSyncServiceProvider,
+    ),
   );
 }
 
@@ -176,6 +202,9 @@ UpdateTransactionUseCase updateTransactionUseCase(Ref ref) {
     transactionRepository: ref.watch(transactionRepositoryProvider),
     syncEngine: ref.watch(syncEngineProvider),
     changeTracker: ref.watch(transactionChangeTrackerProvider),
+    categoryReferenceSyncService: ref.watch(
+      categoryReferenceSyncServiceProvider,
+    ),
   );
 }
 
@@ -192,6 +221,9 @@ DeleteTransactionUseCase deleteTransactionUseCase(Ref ref) {
     transactionRepository: ref.watch(transactionRepositoryProvider),
     syncEngine: ref.watch(syncEngineProvider),
     changeTracker: ref.watch(transactionChangeTrackerProvider),
+    categoryReferenceSyncService: ref.watch(
+      categoryReferenceSyncServiceProvider,
+    ),
   );
 }
 

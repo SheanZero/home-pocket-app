@@ -30,7 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// the real periodic status timer (mirrors main_characterization_smoke_test).
 class _FakeSyncEngine implements SyncEngine {
   @override
-  void initialize() {}
+  Future<void> initialize() async {}
 
   @override
   void connectPushNotifications(PushNotificationService pushService) {}

@@ -16,6 +16,7 @@ _GroupInfo _$GroupInfoFromJson(Map<String, dynamic> json) => _GroupInfo(
       : DateTime.parse(json['inviteExpiresAt'] as String),
   role: json['role'] as String,
   groupKey: json['groupKey'] as String?,
+  keyEpoch: (json['keyEpoch'] as num?)?.toInt() ?? 1,
   members: (json['members'] as List<dynamic>)
       .map((e) => GroupMember.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -26,6 +27,11 @@ _GroupInfo _$GroupInfoFromJson(Map<String, dynamic> json) => _GroupInfo(
   lastSyncAt: json['lastSyncAt'] == null
       ? null
       : DateTime.parse(json['lastSyncAt'] as String),
+  controlRevision: (json['controlRevision'] as num?)?.toInt() ?? 0,
+  controlUpdatedAt: json['controlUpdatedAt'] == null
+      ? null
+      : DateTime.parse(json['controlUpdatedAt'] as String),
+  controlSnapshotDigest: json['controlSnapshotDigest'] as String? ?? '',
 );
 
 Map<String, dynamic> _$GroupInfoToJson(_GroupInfo instance) =>
@@ -37,10 +43,14 @@ Map<String, dynamic> _$GroupInfoToJson(_GroupInfo instance) =>
       'inviteExpiresAt': instance.inviteExpiresAt?.toIso8601String(),
       'role': instance.role,
       'groupKey': instance.groupKey,
+      'keyEpoch': instance.keyEpoch,
       'members': instance.members.map((e) => e.toJson()).toList(),
       'createdAt': instance.createdAt.toIso8601String(),
       'confirmedAt': instance.confirmedAt?.toIso8601String(),
       'lastSyncAt': instance.lastSyncAt?.toIso8601String(),
+      'controlRevision': instance.controlRevision,
+      'controlUpdatedAt': instance.controlUpdatedAt?.toIso8601String(),
+      'controlSnapshotDigest': instance.controlSnapshotDigest,
     };
 
 const _$GroupStatusEnumMap = {

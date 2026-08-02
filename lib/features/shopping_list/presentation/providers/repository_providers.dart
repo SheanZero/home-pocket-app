@@ -45,6 +45,8 @@ CreateShoppingItemUseCase createShoppingItemUseCase(Ref ref) =>
       shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
       changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
       syncEngine: ref.watch(syncEngineProvider),
+      deviceIdResolver: () =>
+          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
     );
 
 /// [ToggleItemCompletedUseCase] provider wired with repo + sync deps.
@@ -54,6 +56,8 @@ ToggleItemCompletedUseCase toggleItemCompletedUseCase(Ref ref) =>
       shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
       changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
       syncEngine: ref.watch(syncEngineProvider),
+      deviceIdResolver: () =>
+          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
     );
 
 /// [DeleteShoppingItemUseCase] provider wired with repo + sync deps.
@@ -63,6 +67,8 @@ DeleteShoppingItemUseCase deleteShoppingItemUseCase(Ref ref) =>
       shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
       changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
       syncEngine: ref.watch(syncEngineProvider),
+      deviceIdResolver: () =>
+          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
     );
 
 /// [UpdateShoppingItemUseCase] provider wired with repo + sync deps.
@@ -72,6 +78,8 @@ UpdateShoppingItemUseCase updateShoppingItemUseCase(Ref ref) =>
       shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
       changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
       syncEngine: ref.watch(syncEngineProvider),
+      deviceIdResolver: () =>
+          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
     );
 
 /// [ReorderShoppingItemsUseCase] provider — repo only, no sync deps.
@@ -91,6 +99,8 @@ ClearCompletedItemsUseCase clearCompletedItemsUseCase(Ref ref) =>
       shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
       changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
       syncEngine: ref.watch(syncEngineProvider),
+      deviceIdResolver: () =>
+          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
     );
 
 /// Derived stream of filtered shopping items for the current segment.
@@ -117,27 +127,24 @@ Stream<List<ShoppingItem>> filteredShoppingItems(Ref ref) {
   final source = filter.showPrivateOnly
       ? repository.watchByListType('private')
       : (listType == 'all'
-          ? repository.watchAll()
-          : repository.watchByListType(listType));
-  return source
-      .map(
-        (items) =>
-            items.where((item) {
-              // Ledger filter
-              if (filter.ledgerType != null &&
-                  item.ledgerType != filter.ledgerType) {
-                return false;
-              }
-              // Category filter
-              if (filter.categoryIds.isNotEmpty &&
-                  !filter.categoryIds.contains(item.categoryId)) {
-                return false;
-              }
-              // Status filter: 'active' hides completed items
-              if (filter.statusFilter == 'active' && item.isCompleted) {
-                return false;
-              }
-              return true;
-            }).toList(),
-      );
+            ? repository.watchAll()
+            : repository.watchByListType(listType));
+  return source.map(
+    (items) => items.where((item) {
+      // Ledger filter
+      if (filter.ledgerType != null && item.ledgerType != filter.ledgerType) {
+        return false;
+      }
+      // Category filter
+      if (filter.categoryIds.isNotEmpty &&
+          !filter.categoryIds.contains(item.categoryId)) {
+        return false;
+      }
+      // Status filter: 'active' hides completed items
+      if (filter.statusFilter == 'active' && item.isCompleted) {
+        return false;
+      }
+      return true;
+    }).toList(),
+  );
 }

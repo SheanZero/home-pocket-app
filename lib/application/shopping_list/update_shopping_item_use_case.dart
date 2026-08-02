@@ -58,13 +58,16 @@ class UpdateShoppingItemUseCase {
     required ShoppingItemRepository shoppingItemRepository,
     ShoppingItemChangeTracker? changeTracker, // nullable — D37-06
     SyncEngine? syncEngine, // nullable — fire-and-forget
+    Future<String?> Function()? deviceIdResolver,
   }) : _repo = shoppingItemRepository,
        _changeTracker = changeTracker,
-       _syncEngine = syncEngine;
+       _syncEngine = syncEngine,
+       _deviceIdResolver = deviceIdResolver;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;
   final SyncEngine? _syncEngine;
+  final Future<String?> Function()? _deviceIdResolver;
 
   Future<Result<ShoppingItem>> execute(UpdateShoppingItemParams params) async {
     // 1. Verify item exists and is not already tombstoned (MGMT-02, WR-02).
@@ -104,11 +107,21 @@ class UpdateShoppingItemUseCase {
     );
 
     // 3. Persist (note encryption handled at repo boundary)
-    await _repo.update(updated);
+    final durable = _repo is DurableFamilySyncShoppingItemRepository
+        ? _repo
+        : null;
+    final originDeviceId = await _deviceIdResolver?.call() ?? existing.deviceId;
+    final persisted = durable != null
+        ? await durable.updateWithFamilySyncOutbox(
+            updated,
+            originDeviceId: originDeviceId,
+          )
+        : updated;
+    if (durable == null) await _repo.update(updated);
 
     // 4. Privacy gate (D37-06): listType is immutable (D37-04), so existing.listType
     //    is the authoritative source — no need to re-read.
-    if (existing.listType == 'public') {
+    if (existing.listType == 'public' && durable == null) {
       _changeTracker?.trackUpdate(
         ShoppingItemSyncMapper.toUpdateOperation(updated),
       );
@@ -117,6 +130,6 @@ class UpdateShoppingItemUseCase {
     // 5. Fire-and-forget sync trigger — SyncEngine handles debounce (D-20).
     _syncEngine?.onTransactionChanged();
 
-    return Result.success(updated);
+    return Result.success(persisted);
   }
 }

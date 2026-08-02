@@ -25,7 +25,8 @@ abstract class ShoppingItem with _$ShoppingItem {
     required String name,
     LedgerType? ledgerType,
     String? categoryId,
-    @Default(<String>[]) List<String> tags, // D-01: JSON-encoded at repo boundary
+    @Default(<String>[])
+    List<String> tags, // D-01: JSON-encoded at repo boundary
     String? note, // decrypted plaintext
     @Default(1) int quantity, // D-02
     int? estimatedPrice, // ITEM-05
@@ -37,5 +38,7 @@ abstract class ShoppingItem with _$ShoppingItem {
     String? addedByBookId,
     required DateTime createdAt,
     DateTime? updatedAt,
+    @Default(0) int syncRevision,
+    @Default('') String syncOriginDeviceId,
   }) = _ShoppingItem;
 }

@@ -106,6 +106,32 @@ void main() {
       expect(results.length, 0);
     });
 
+    test('full-sync query includes live rows and tombstones', () async {
+      final now = DateTime(2026, 2, 6);
+      for (final id in ['tx_live', 'tx_deleted']) {
+        await dao.insertTransaction(
+          id: id,
+          bookId: 'book_001',
+          deviceId: 'dev_001',
+          amount: 1000,
+          type: 'expense',
+          categoryId: 'cat_food',
+          ledgerType: 'daily',
+          timestamp: now,
+          currentHash: 'hash_$id',
+          createdAt: now,
+          entrySource: 'manual',
+        );
+      }
+      await dao.softDelete('tx_deleted');
+
+      final states = await dao.findAllByBookIncludingDeleted('book_001');
+
+      expect(states.map((row) => row.id), ['tx_deleted', 'tx_live']);
+      expect(states.first.isDeleted, isTrue);
+      expect(states.last.isDeleted, isFalse);
+    });
+
     test('findByBookId with filters', () async {
       final t1 = DateTime(2026, 2, 1);
       final t2 = DateTime(2026, 2, 15);

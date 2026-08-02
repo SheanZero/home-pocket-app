@@ -72,7 +72,14 @@ class _FakeDeviceIdentityRepository implements DeviceIdentityRepository {
 
 class _FakeSyncEngine extends Fake implements SyncEngine {
   @override
-  void initialize() {}
+  void configureLifecycleHandlers({
+    required JoinRequestLifecycleHandler onJoinRequest,
+    required MemberLeftLifecycleHandler onMemberLeft,
+    required GroupDissolvedLifecycleHandler onGroupDissolved,
+  }) {}
+
+  @override
+  Future<void> initialize() async {}
 
   @override
   void connectPushNotifications(PushNotificationService pushService) {}
@@ -84,6 +91,9 @@ class _FakeSyncEngine extends Fake implements SyncEngine {
 class _FakePushNotificationService extends Fake
     implements PushNotificationService {
   final _navController = StreamController<PushNavigationIntent>.broadcast();
+
+  @override
+  Future<String?> initialize() async => 'test-push-token';
 
   @override
   PushNavigationIntent? takePendingNavigationIntent() => null;

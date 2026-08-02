@@ -16,12 +16,19 @@ only — zero production Dart.
 - iOS system onboarding / Face ID lock conventions
 - Japanese store-compliance: 特定商取引法, 利用規約, プライバシーポリシー, OSS ライセンス
 
-## Current Whole-App Reference — 2026-07-15
+## Current Whole-App Reference — 2026-07-29
 
 The selected warm-Japanese whole-app design has graduated from planning sketches into the canonical
 interactive reference at [`docs/mockup/v16/index.html`](../../docs/mockup/v16/index.html). V16 is
-synchronized with the current Flutter main-surface headers and shopping filters. Do not keep a
-second whole-app HTML copy under `.planning/sketches`.
+synchronized with the current Flutter main-surface headers and shopping filters. The Home reference
+also includes a switchable no-Joy-transaction state: zero-value Joy metrics disappear while the
+existing monthly-spend region remains structurally unchanged. The user advanced the inspiration-tag
+direction into a second refinement round: C1 uses layered lifestyle stickers, C2 uses staggered
+journal notes, and C3 uses frameless organic icon islands. The copy and three entry meanings stay
+fixed so only button treatment is being evaluated. The user selected C2 as the winner on 2026-07-29;
+C1 and C3 remain preserved as comparisons. All variants open the
+unified entry flow with the Joy ledger selected. Do not keep a second whole-app HTML copy under
+`.planning/sketches`.
 
 This directory retains only the still-relevant pre-launch input sketches 001–003. Historical audits,
 quick experiments, and milestone archives remain in their own evidence directories and are not

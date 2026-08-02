@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,10 +12,11 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_clamp.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/repository_providers.dart'
-    show ensureDefaultBookUseCaseProvider, seedAllUseCaseProvider;
+    show
+        deviceIdentityRepositoryProvider,
+        ensureDefaultBookUseCaseProvider,
+        seedAllUseCaseProvider;
 import 'features/family_sync/presentation/providers/repository_providers.dart';
-import 'features/family_sync/presentation/providers/repository_providers.dart'
-    show pushNotificationServiceProvider;
 import 'features/family_sync/presentation/providers/state_sync.dart'
     show syncEngineProvider;
 import 'features/applock/presentation/screens/app_lock_screen.dart';
@@ -23,12 +25,16 @@ import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
 import 'features/settings/presentation/providers/repository_providers.dart'
-    show settingsRepositoryProvider, sharedPreferencesProvider;
+    show
+        clearAllDataUseCaseProvider,
+        settingsRepositoryProvider,
+        sharedPreferencesProvider;
 import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/settings/presentation/providers/state_locale.dart';
 import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
+import 'infrastructure/crypto/providers.dart' as crypto;
 import 'infrastructure/security/app_lock_lifecycle_observer.dart';
 import 'infrastructure/security/providers.dart'
     show secureStorageServiceProvider;
@@ -36,6 +42,20 @@ import 'shared/utils/invalidate_all_data_providers.dart';
 import 'shared/utils/result.dart';
 
 typedef AppRunner = void Function(Widget app);
+typedef InitFailureReporter = void Function(InitFailure failure);
+
+void _reportInitFailure(InitFailure failure) {
+  if (kDebugMode) {
+    debugPrint(
+      '[AppInitializer] ${failure.type.name} failed '
+      '(${failure.error.runtimeType})',
+    );
+    final stackTrace = failure.stackTrace;
+    if (stackTrace != null) {
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+}
 
 /// Set to `true` for in-memory database (dev/debugging, data lost on restart).
 /// Set to `false` (default) for persistent encrypted SQLCipher database.
@@ -71,6 +91,17 @@ AppInitializer _createAppInitializer() {
         _useInMemoryDatabase ? Future.value(false) : encryptedDatabaseExists(),
     // Seeding (categories, default book) runs inside HomePocketApp._initialize().
     seedRunner: (_) async {},
+    pendingPrivacyWipeResumer: (container) async {
+      // The settings repository synchronously requires the async preferences
+      // provider, so pre-warm it before constructing the wipe use case.
+      await container.read(sharedPreferencesProvider.future);
+      final result = await container
+          .read(clearAllDataUseCaseProvider)
+          .resumePending();
+      if (result.isError) {
+        throw StateError('Pending local privacy wipe could not be resumed.');
+      }
+    },
   );
 }
 // coverage:ignore-end
@@ -79,6 +110,7 @@ AppInitializer _createAppInitializer() {
 Future<void> bootWithInitializerForTesting(
   AppInitializer initializer, {
   AppRunner appRunner = runApp,
+  InitFailureReporter failureReporter = _reportInitFailure,
 }) async {
   final result = await initializer.initialize();
 
@@ -90,7 +122,8 @@ Future<void> bootWithInitializerForTesting(
           child: const HomePocketApp(),
         ),
       );
-    case InitFailure():
+    case final InitFailure failure:
+      failureReporter(failure);
       appRunner(InitFailureApp(onRetry: _boot));
   }
 }
@@ -176,9 +209,37 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       final bookIdResult = await _seedAndEnsureDefaultBook();
 
       if (bookIdResult.isSuccess && bookIdResult.data != null) {
-        // Initialize SyncEngine (lifecycle observer + status stream)
+        // Install every membership lifecycle callback before push bootstrap:
+        // initialize() consumes a possible cold-start message immediately.
         final syncEngine = ref.read(syncEngineProvider);
-        syncEngine.initialize();
+        syncEngine.configureLifecycleHandlers(
+          onJoinRequest: (_) async {
+            await ref.read(checkGroupUseCaseProvider).execute();
+          },
+          onMemberLeft: (groupId, deviceId, reason, keyEpoch) async {
+            await ref
+                .read(handleMemberLeftUseCaseProvider)
+                .execute(
+                  groupId: groupId,
+                  deviceId: deviceId,
+                  reason: reason,
+                  keyEpoch: keyEpoch,
+                );
+          },
+          onGroupDissolved: (groupId) async {
+            await ref
+                .read(handleGroupDissolvedUseCaseProvider)
+                .execute(groupId: groupId);
+          },
+        );
+
+        final pushService = ref.read(pushNotificationServiceProvider);
+        syncEngine.connectPushNotifications(pushService);
+
+        // Initialize SyncEngine (lifecycle observer + status stream), then start
+        // push delivery. Push initialization is concurrency-safe and idempotent.
+        await syncEngine.initialize();
+        await pushService.initialize();
 
         // Register the app-lock lifecycle observer alongside the sync engine's
         // own observer. `isLockEffective` reads the synchronous [_lockConfigured]
@@ -193,10 +254,6 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
           onMask: () => _maskVisible.value = true,
           onUnmask: () => _maskVisible.value = false,
         )..start();
-
-        // Wire push notifications → sync engine
-        final pushService = ref.read(pushNotificationServiceProvider);
-        syncEngine.connectPushNotifications(pushService);
 
         // Onboarding gate (ONBOARD-01 / D-04): read the persisted flag AFTER
         // init has settled. Captured into a field here — NEVER ref.watch in
@@ -255,6 +312,18 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     // Show the existing spinner while the database is re-bootstrapped.
     setState(() => _initialized = false);
     try {
+      // A local privacy wipe removes the old device identity. Import-backup
+      // leaves it intact, so this is an idempotent no-op on that path. Mint the
+      // fresh identity before ensuring a default book, whose ownership requires
+      // a device id; the wiped identity is never reused.
+      final identity = ref.read(deviceIdentityRepositoryProvider);
+      final currentDeviceId = await identity.getDeviceId();
+      if (currentDeviceId == null || currentDeviceId.isEmpty) {
+        final keyManager = ref.read(crypto.keyManagerProvider);
+        if (!await keyManager.hasKeyPair()) {
+          await keyManager.generateDeviceKeyPair();
+        }
+      }
       final bookIdResult = await _seedAndEnsureDefaultBook();
       if (!mounted) return;
 

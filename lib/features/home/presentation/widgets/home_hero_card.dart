@@ -15,6 +15,8 @@ import '../../../analytics/domain/models/metric_result.dart';
 import '../../../analytics/domain/models/monthly_report.dart';
 import '../providers/state_shadow_books.dart';
 import 'home_metrics_region.dart';
+import 'home_joy_empty_state.dart';
+import 'home_joy_prompt.dart';
 
 /// Integrated hero card (Phase 10) replacing the previous trio of legacy
 /// cards: month-overview, ledger-comparison, and joy-fullness. Pure
@@ -36,6 +38,7 @@ class HomeHeroCard extends StatelessWidget {
     required this.report,
     required this.happiness,
     required this.bestJoy,
+    this.bestJoyCategoryName,
     required this.family,
     required this.shadowBooks,
     required this.shadowAggregate,
@@ -46,12 +49,14 @@ class HomeHeroCard extends StatelessWidget {
     required this.recommendedMonthlyJoyTarget,
     required this.isMonthlyJoyTargetConfigured,
     required this.onTap,
+    this.onAddJoy,
     super.key,
   });
 
   final MonthlyReport report;
   final HappinessReport happiness;
   final MetricResult<BestJoyMomentRow> bestJoy;
+  final String? bestJoyCategoryName;
   final FamilyHappiness? family;
   final List<ShadowBookInfo>? shadowBooks;
   final ShadowAggregate? shadowAggregate;
@@ -62,6 +67,7 @@ class HomeHeroCard extends StatelessWidget {
   final int? recommendedMonthlyJoyTarget;
   final bool isMonthlyJoyTargetConfigured;
   final VoidCallback onTap;
+  final ValueChanged<HomeJoyPrompt>? onAddJoy;
 
   static const FormatterService _fmt = FormatterService();
   // The stack starts after 18 px of padding and the 1 px decoration border.
@@ -72,86 +78,153 @@ class HomeHeroCard extends StatelessWidget {
     final l10n = S.of(context);
     final palette = context.palette;
     final showMembers = isGroupMode && (shadowBooks?.isNotEmpty ?? false);
+    final hasJoyTransactions = isGroupMode
+        ? (family?.totalGroupJoyTx ?? 0) > 0
+        : happiness.totalJoyTx > 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            key: const Key('home-hero-main-surface'),
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Color.lerp(palette.card, palette.accentPrimaryLight, 0.10),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: Color.lerp(
-                  palette.borderDefault,
-                  palette.accentPrimary,
-                  0.18,
-                )!,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: palette.navShadow,
-                  blurRadius: 30,
-                  offset: const Offset(0, 8),
+        if (hasJoyTransactions)
+          _buildFilledSurface(context, l10n, palette, showMembers)
+        else
+          _buildEmptySurface(context, l10n, palette),
+        if (hasJoyTransactions) ...[
+          const SizedBox(height: 18),
+          GestureDetector(
+            key: const Key('home-favorite-section'),
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: _buildBestJoyStrip(context, l10n, palette),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFilledSurface(
+    BuildContext context,
+    S l10n,
+    AppPalette palette,
+    bool showMembers,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        key: const Key('home-hero-main-surface'),
+        padding: const EdgeInsets.all(18),
+        decoration: _surfaceDecoration(palette),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _hero(context, l10n, palette),
+            const SizedBox(height: 16),
+            _splitBar(context, l10n, palette),
+            const SizedBox(height: 16),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 17),
+                    _ringSection(context, l10n, palette),
+                    if (showMembers) ...[
+                      const SizedBox(height: 12),
+                      _divider(context),
+                      const SizedBox(height: 12),
+                      _buildMembersSection(context, l10n, palette),
+                    ],
+                  ],
+                ),
+                Positioned(
+                  left: -_heroSurfaceContentInset,
+                  top: -10,
+                  child: _heroTearNotch(
+                    palette,
+                    const Key('home-hero-tear-notch-left'),
+                    Alignment.centerRight,
+                  ),
+                ),
+                Positioned(
+                  right: -_heroSurfaceContentInset,
+                  top: -10,
+                  child: _heroTearNotch(
+                    palette,
+                    const Key('home-hero-tear-notch-right'),
+                    Alignment.centerLeft,
+                  ),
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptySurface(BuildContext context, S l10n, AppPalette palette) {
+    return Container(
+      key: const Key('home-hero-main-surface'),
+      decoration: _surfaceDecoration(palette),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _hero(context, l10n, palette),
                 const SizedBox(height: 16),
                 _splitBar(context, l10n, palette),
-                const SizedBox(height: 16),
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 17),
-                        _ringSection(context, l10n, palette),
-                        if (showMembers) ...[
-                          const SizedBox(height: 12),
-                          _divider(context),
-                          const SizedBox(height: 12),
-                          _buildMembersSection(context, l10n, palette),
-                        ],
-                      ],
-                    ),
-                    Positioned(
-                      left: -_heroSurfaceContentInset,
-                      top: -10,
-                      child: _heroTearNotch(
-                        palette,
-                        const Key('home-hero-tear-notch-left'),
-                        Alignment.centerRight,
-                      ),
-                    ),
-                    Positioned(
-                      right: -_heroSurfaceContentInset,
-                      top: -10,
-                      child: _heroTearNotch(
-                        palette,
-                        const Key('home-hero-tear-notch-right'),
-                        Alignment.centerLeft,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 18),
-        GestureDetector(
-          key: const Key('home-favorite-section'),
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: _buildBestJoyStrip(context, l10n, palette),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              HomeJoyEmptyState(
+                isGroupMode: isGroupMode,
+                onPromptTap: (prompt) => onAddJoy?.call(prompt),
+              ),
+              Positioned(
+                left: 0,
+                top: -10,
+                child: _heroTearNotch(
+                  palette,
+                  const Key('home-hero-tear-notch-left'),
+                  Alignment.centerRight,
+                ),
+              ),
+              Positioned(
+                right: 0,
+                top: -10,
+                child: _heroTearNotch(
+                  palette,
+                  const Key('home-hero-tear-notch-right'),
+                  Alignment.centerLeft,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  BoxDecoration _surfaceDecoration(AppPalette palette) {
+    return BoxDecoration(
+      color: Color.lerp(palette.card, palette.accentPrimaryLight, 0.10),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(
+        color: Color.lerp(palette.borderDefault, palette.accentPrimary, 0.18)!,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: palette.navShadow,
+          blurRadius: 30,
+          offset: const Offset(0, 8),
         ),
       ],
     );
@@ -448,8 +521,8 @@ class HomeHeroCard extends StatelessWidget {
   // weekday) as a visual anchor, a middle column with the parent (L1)
   // category-icon + L2 category name over the amount (joyText), and a right
   // frameless satisfaction seal (icon over tier word) separated by a dashed
-  // vertical perforation (撕口). Empty / all-neutral states reuse the same ticket
-  // chrome with a muted "—" calendar placeholder and no seal.
+  // vertical perforation (撕口). The genuinely empty state reuses the same
+  // ticket chrome with a muted "—" calendar placeholder and no seal.
   // ARCH-002: primary line is category name only — no merchant/note. ADR-014
   // tier mapping reused via _satisfactionPillIcon/_satisfactionPillLabel.
   // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused since Variant A.
@@ -463,12 +536,6 @@ class HomeHeroCard extends StatelessWidget {
         palette,
         titleText,
         l10n.homeBestJoyEmptySmall,
-      ),
-      Value(:final data) when data.joyFullness <= 2 => _bestJoyEmpty(
-        context,
-        palette,
-        titleText,
-        l10n.homeBestJoyAllNeutralSmall,
       ),
       Value(:final data) => _bestJoyValue(
         context,
@@ -725,10 +792,9 @@ class HomeHeroCard extends StatelessWidget {
     BestJoyMomentRow row,
   ) {
     final colors = HomeV15VisualTokens.of(context);
-    final category = CategoryLocalizationService.resolveFromId(
-      row.categoryId,
-      locale,
-    );
+    final category =
+        bestJoyCategoryName ??
+        CategoryLocalizationService.resolveFromId(row.categoryId, locale);
     final month = DateFormat('MMM', 'en').format(row.timestamp).toUpperCase();
     final day = DateFormat('dd', 'en').format(row.timestamp);
     final weekday = DateFormat('EEE', 'en').format(row.timestamp).toUpperCase();

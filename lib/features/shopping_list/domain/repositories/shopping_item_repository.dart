@@ -24,3 +24,32 @@ abstract class ShoppingItemRepository {
   /// the persisted order never goes non-contiguous (quick-260609-pmc-04).
   Future<void> reorderBatch(List<String> orderedIds);
 }
+
+/// Production write path for public shopping semantics. Implementations must
+/// commit the normalized business row and its coalescing outbox operation in
+/// one database transaction. Inbound [ShoppingItemRepository.upsert] is kept
+/// separate so applying remote state never echoes it back out.
+abstract class DurableFamilySyncShoppingItemRepository
+    implements ShoppingItemRepository {
+  Future<ShoppingItem> insertWithFamilySyncOutbox(
+    ShoppingItem item, {
+    required String originDeviceId,
+  });
+
+  Future<ShoppingItem> updateWithFamilySyncOutbox(
+    ShoppingItem item, {
+    required String originDeviceId,
+  });
+
+  Future<ShoppingItem?> softDeleteWithFamilySyncOutbox(
+    String id, {
+    required String originDeviceId,
+  });
+
+  Future<List<ShoppingItem>> softDeleteAllCompletedWithFamilySyncOutbox(
+    String listType, {
+    required String originDeviceId,
+  });
+
+  Future<List<ShoppingItem>> findPublicIncludingDeleted();
+}

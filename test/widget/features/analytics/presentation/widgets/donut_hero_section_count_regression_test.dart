@@ -107,4 +107,56 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('custom L1 category uses its stored name instead of its id', (
+    tester,
+  ) async {
+    final custom = Category(
+      id: '01CUSTOML1',
+      name: 'Weekend Fun',
+      icon: 'flight',
+      color: '#8B5CF6',
+      parentId: null,
+      level: 1,
+      createdAt: DateTime(2026),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(
+          body: SingleChildScrollView(
+            child: DonutHero(
+              breakdowns: const [
+                CategoryBreakdown(
+                  categoryId: '01CUSTOML1',
+                  categoryName: '01CUSTOML1',
+                  icon: 'flight',
+                  color: '#8B5CF6',
+                  amount: 1000,
+                  percentage: 100,
+                  transactionCount: 1,
+                ),
+              ],
+              total: 1000,
+              entryCount: 1,
+              month: 5,
+              joyL1Ids: const {'01CUSTOML1'},
+              categoryMap: {'01CUSTOML1': custom},
+              bookId: 'book_001',
+            ),
+          ),
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('en'),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Weekend Fun'), findsOneWidget);
+    expect(find.text('01CUSTOML1'), findsNothing);
+  });
 }

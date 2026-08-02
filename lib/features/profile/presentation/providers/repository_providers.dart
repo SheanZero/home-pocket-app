@@ -29,5 +29,12 @@ GetUserProfileUseCase getUserProfileUseCase(Ref ref) {
 
 @riverpod
 SaveUserProfileUseCase saveUserProfileUseCase(Ref ref) {
-  return SaveUserProfileUseCase(ref.watch(userProfileRepositoryProvider));
+  return SaveUserProfileUseCase(
+    ref.watch(userProfileRepositoryProvider),
+    deviceIdResolver: () =>
+        ref.read(app_profile.appKeyManagerProvider).getDeviceId(),
+    avatarStagingStore: ref.watch(
+      app_profile.appAvatarSemanticStagingStoreProvider,
+    ),
+  );
 }

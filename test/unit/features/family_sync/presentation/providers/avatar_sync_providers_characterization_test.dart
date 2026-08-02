@@ -1,44 +1,44 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/push_sync_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_avatar_use_case.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show userProfileRepositoryProvider;
-import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
-import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
-class _MockRelayApiClient extends Mock implements RelayApiClient {}
+class _MockPushSyncUseCase extends Mock implements PushSyncUseCase {}
 
 class _MockGroupRepository extends Mock implements GroupRepository {}
 
 class _MockUserProfileRepository extends Mock
     implements UserProfileRepository {}
 
-class _MockE2EEService extends Mock implements E2EEService {}
+class _MockKeyManager extends Mock implements KeyManager {}
 
 void main() {
-  late _MockRelayApiClient mockApiClient;
+  late _MockPushSyncUseCase mockPushSync;
   late _MockGroupRepository mockGroupRepo;
   late _MockUserProfileRepository mockUserProfileRepo;
-  late _MockE2EEService mockE2EEService;
+  late _MockKeyManager mockKeyManager;
   late ProviderContainer container;
 
   setUp(() {
-    mockApiClient = _MockRelayApiClient();
+    mockPushSync = _MockPushSyncUseCase();
     mockGroupRepo = _MockGroupRepository();
     mockUserProfileRepo = _MockUserProfileRepository();
-    mockE2EEService = _MockE2EEService();
+    mockKeyManager = _MockKeyManager();
 
     container = ProviderContainer(
       overrides: [
-        relayApiClientProvider.overrideWithValue(mockApiClient),
+        pushSyncUseCaseProvider.overrideWithValue(mockPushSync),
         groupRepositoryProvider.overrideWithValue(mockGroupRepo),
         userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
-        e2eeServiceProvider.overrideWithValue(mockE2EEService),
+        keyManagerProvider.overrideWithValue(mockKeyManager),
       ],
     );
   });

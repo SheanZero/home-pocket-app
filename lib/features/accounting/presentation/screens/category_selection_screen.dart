@@ -17,6 +17,31 @@ import '../providers/repository_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/category_reorder_row.dart';
 
+const _categoryIconChoices = <String>[
+  'category',
+  'restaurant',
+  'local_mall',
+  'home',
+  'directions_car',
+  'flight',
+  'sports_esports',
+  'pets',
+  'school',
+  'local_hospital',
+  'card_giftcard',
+  'savings',
+];
+
+const _categoryColorChoices = <String>[
+  '#47B88A',
+  '#E85A4F',
+  '#F59E0B',
+  '#22A6B3',
+  '#3B82F6',
+  '#8B5CF6',
+  '#EC4899',
+];
+
 /// Full-screen category picker with expandable L1 groups and L2 chip selection.
 ///
 /// Loads categories from [categoryRepositoryProvider], groups L2 under L1
@@ -279,6 +304,7 @@ class _CategorySelectionScreenState
         existingNames: _localizedSiblingNames(locale: locale),
         initialLedgerType: widget.suggestedLedgerType ?? LedgerType.daily,
         showLedgerChoice: true,
+        showAppearanceChoice: true,
       ),
     );
     if (draft == null || !mounted) return;
@@ -286,7 +312,12 @@ class _CategorySelectionScreenState
     final result = await ref
         .read(createCategoryUseCaseProvider)
         .execute(
-          CreateCategoryParams(name: draft.name, ledgerType: draft.ledgerType),
+          CreateCategoryParams(
+            name: draft.name,
+            ledgerType: draft.ledgerType,
+            icon: draft.icon,
+            color: draft.color,
+          ),
         );
     if (!mounted) return;
     if (result.isError || result.data == null) {
@@ -319,6 +350,7 @@ class _CategorySelectionScreenState
         ),
         initialLedgerType: widget.suggestedLedgerType ?? LedgerType.daily,
         showLedgerChoice: false,
+        showAppearanceChoice: false,
       ),
     );
     if (draft == null || !mounted) return;
@@ -870,10 +902,17 @@ class _CategoryGroup extends StatelessWidget {
 }
 
 class _AddCategoryDraft {
-  const _AddCategoryDraft({required this.name, required this.ledgerType});
+  const _AddCategoryDraft({
+    required this.name,
+    required this.ledgerType,
+    required this.icon,
+    required this.color,
+  });
 
   final String name;
   final LedgerType ledgerType;
+  final String icon;
+  final String color;
 }
 
 class _AddCategorySheet extends StatefulWidget {
@@ -882,12 +921,14 @@ class _AddCategorySheet extends StatefulWidget {
     required this.existingNames,
     required this.initialLedgerType,
     required this.showLedgerChoice,
+    required this.showAppearanceChoice,
   });
 
   final String title;
   final Set<String> existingNames;
   final LedgerType initialLedgerType;
   final bool showLedgerChoice;
+  final bool showAppearanceChoice;
 
   @override
   State<_AddCategorySheet> createState() => _AddCategorySheetState();
@@ -897,6 +938,8 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   late LedgerType _ledgerType;
+  String _icon = _categoryIconChoices.first;
+  String _color = _categoryColorChoices.first;
 
   @override
   void initState() {
@@ -924,7 +967,203 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
       _AddCategoryDraft(
         name: _nameController.text.trim(),
         ledgerType: _ledgerType,
+        icon: _icon,
+        color: _color,
       ),
+    );
+  }
+
+  Color get _selectedColor {
+    final hex = _color.substring(1);
+    return Color(int.parse('FF$hex', radix: 16));
+  }
+
+  Color _checkColor(Color color, AppPalette palette) =>
+      color.computeLuminance() > 0.55 ? palette.textPrimary : Colors.white;
+
+  Widget _buildAppearancePicker(S l10n, AppPalette palette) {
+    final selectedColor = _selectedColor;
+    final previewName = _nameController.text.trim().isEmpty
+        ? l10n.categoryPreviewName
+        : _nameController.text.trim();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.categoryAppearanceLabel,
+          style: AppTextStyles.label.copyWith(color: palette.textPrimary),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.categoryAppearanceDescription,
+          style: AppTextStyles.supporting.copyWith(
+            color: palette.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selectedColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: selectedColor.withValues(alpha: 0.34)),
+          ),
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: selectedColor.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  resolveCategoryIcon(_icon),
+                  color: selectedColor,
+                  size: 25,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  previewName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.itemTitle.copyWith(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          l10n.categoryIconLabel,
+          style: AppTextStyles.label.copyWith(color: palette.textPrimary),
+        ),
+        const SizedBox(height: 8),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 6,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: _categoryIconChoices.length,
+          itemBuilder: (context, index) {
+            final iconName = _categoryIconChoices[index];
+            final selected = iconName == _icon;
+            final semanticsLabel = '${l10n.categoryIconLabel} ${index + 1}';
+            return Semantics(
+              label: semanticsLabel,
+              button: true,
+              selected: selected,
+              child: Tooltip(
+                message: semanticsLabel,
+                child: Material(
+                  color: selected
+                      ? selectedColor.withValues(alpha: 0.14)
+                      : palette.backgroundMuted,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    key: ValueKey('category-icon-$iconName'),
+                    onTap: () => setState(() => _icon = iconName),
+                    borderRadius: BorderRadius.circular(12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selected
+                              ? selectedColor
+                              : palette.borderDefault,
+                          width: selected ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Icon(
+                        resolveCategoryIcon(iconName),
+                        size: 21,
+                        color: selected ? selectedColor : palette.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 14),
+        Text(
+          l10n.categoryColorLabel,
+          style: AppTextStyles.label.copyWith(color: palette.textPrimary),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (var index = 0; index < _categoryColorChoices.length; index++)
+              Builder(
+                builder: (context) {
+                  final colorHex = _categoryColorChoices[index];
+                  final color = Color(
+                    int.parse('FF${colorHex.substring(1)}', radix: 16),
+                  );
+                  final selected = colorHex == _color;
+                  final semanticsLabel =
+                      '${l10n.categoryColorLabel} ${index + 1}';
+                  return Semantics(
+                    label: semanticsLabel,
+                    button: true,
+                    selected: selected,
+                    child: Tooltip(
+                      message: semanticsLabel,
+                      child: InkResponse(
+                        key: ValueKey(
+                          'category-color-${colorHex.substring(1).toLowerCase()}',
+                        ),
+                        onTap: () => setState(() => _color = colorHex),
+                        radius: 24,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: color,
+                            border: Border.all(
+                              color: selected
+                                  ? palette.textPrimary
+                                  : palette.card,
+                              width: selected ? 2.5 : 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.18),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: selected
+                              ? Icon(
+                                  Icons.check,
+                                  size: 20,
+                                  color: _checkColor(color, palette),
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -942,163 +1181,199 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
         color: palette.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         clipBehavior: Clip.antiAlias,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        child: SizedBox(
+          height:
+              (MediaQuery.sizeOf(context).height - viewInsets.bottom) * 0.92,
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: palette.borderDefault,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.title,
-                        style: AppTextStyles.sectionTitle.copyWith(
-                          color: palette.textPrimary,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: palette.borderDefault,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).closeButtonTooltip,
-                      icon: Icon(Icons.close, color: palette.textSecondary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  key: const ValueKey('category-create-name'),
-                  controller: _nameController,
-                  autofocus: true,
-                  maxLength: CreateCategoryUseCase.maxNameLength,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
-                  validator: _validateName,
-                  style: AppTextStyles.body.copyWith(
-                    color: palette.textPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: l10n.categoryNameLabel,
-                    hintText: l10n.categoryNameHint,
-                    filled: true,
-                    fillColor: palette.backgroundMuted,
-                    counterStyle: AppTextStyles.compact.copyWith(
-                      color: palette.textTertiary,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: palette.borderDefault),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: palette.borderDefault),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: palette.borderInputActive,
-                        width: 1.5,
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.title,
+                              style: AppTextStyles.sectionTitle.copyWith(
+                                color: palette.textPrimary,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).closeButtonTooltip,
+                            icon: Icon(
+                              Icons.close,
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 14),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          key: const ValueKey('category-create-name'),
+                          controller: _nameController,
+                          autofocus: !widget.showAppearanceChoice,
+                          maxLength: CreateCategoryUseCase.maxNameLength,
+                          textInputAction: TextInputAction.done,
+                          onChanged: widget.showAppearanceChoice
+                              ? (_) => setState(() {})
+                              : null,
+                          onFieldSubmitted: (_) => _submit(),
+                          validator: _validateName,
+                          style: AppTextStyles.body.copyWith(
+                            color: palette.textPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: l10n.categoryNameLabel,
+                            hintText: l10n.categoryNameHint,
+                            filled: true,
+                            fillColor: palette.backgroundMuted,
+                            counterStyle: AppTextStyles.compact.copyWith(
+                              color: palette.textTertiary,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: palette.borderDefault,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: palette.borderDefault,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: palette.borderInputActive,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (widget.showAppearanceChoice) ...[
+                          const SizedBox(height: 16),
+                          _buildAppearancePicker(l10n, palette),
+                        ],
+                        if (widget.showLedgerChoice) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.categoryLedgerLabel,
+                            style: AppTextStyles.label.copyWith(
+                              color: palette.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.categoryLedgerDescription,
+                            style: AppTextStyles.supporting.copyWith(
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _LedgerChoice(
+                                  key: const ValueKey('category-ledger-daily'),
+                                  label: l10n.dailyLedger,
+                                  icon: Icons.wallet_outlined,
+                                  color: palette.daily,
+                                  background: palette.dailyLight,
+                                  selected: _ledgerType == LedgerType.daily,
+                                  onTap: () => setState(
+                                    () => _ledgerType = LedgerType.daily,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _LedgerChoice(
+                                  key: const ValueKey('category-ledger-joy'),
+                                  label: l10n.joyLedger,
+                                  icon: Icons.favorite_border,
+                                  color: palette.joy,
+                                  background: palette.joyLight,
+                                  selected: _ledgerType == LedgerType.joy,
+                                  onTap: () => setState(
+                                    () => _ledgerType = LedgerType.joy,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
-                if (widget.showLedgerChoice) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.categoryLedgerLabel,
-                    style: AppTextStyles.label.copyWith(
-                      color: palette.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.categoryLedgerDescription,
-                    style: AppTextStyles.supporting.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  child: Row(
                     children: [
                       Expanded(
-                        child: _LedgerChoice(
-                          key: const ValueKey('category-ledger-daily'),
-                          label: l10n.dailyLedger,
-                          icon: Icons.wallet_outlined,
-                          color: palette.daily,
-                          background: palette.dailyLight,
-                          selected: _ledgerType == LedgerType.daily,
-                          onTap: () =>
-                              setState(() => _ledgerType = LedgerType.daily),
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            side: BorderSide(color: palette.borderDefault),
+                            foregroundColor: palette.textSecondary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: AppTextStyles.button,
+                          ),
+                          child: Text(l10n.cancel),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: _LedgerChoice(
-                          key: const ValueKey('category-ledger-joy'),
-                          label: l10n.joyLedger,
-                          icon: Icons.favorite_border,
-                          color: palette.joy,
-                          background: palette.joyLight,
-                          selected: _ledgerType == LedgerType.joy,
-                          onTap: () =>
-                              setState(() => _ledgerType = LedgerType.joy),
+                        child: FilledButton(
+                          key: const ValueKey('category-create-submit'),
+                          onPressed: _submit,
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            backgroundColor: palette.accentPrimary,
+                            foregroundColor: palette.card,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: AppTextStyles.button,
+                          ),
+                          child: Text(l10n.createCategory),
                         ),
                       ),
                     ],
                   ),
-                ],
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          side: BorderSide(color: palette.borderDefault),
-                          foregroundColor: palette.textSecondary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          textStyle: AppTextStyles.button,
-                        ),
-                        child: Text(l10n.cancel),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: FilledButton(
-                        key: const ValueKey('category-create-submit'),
-                        onPressed: _submit,
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          backgroundColor: palette.accentPrimary,
-                          foregroundColor: palette.card,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          textStyle: AppTextStyles.button,
-                        ),
-                        child: Text(l10n.createCategory),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

@@ -110,6 +110,33 @@ void main() {
       expect(service.connectionState, WebSocketConnectionState.disconnected);
     });
 
+    test(
+      'auth error emits a reconciliation signal before disconnect',
+      () async {
+        final events = <WebSocketEvent>[];
+        service.eventStream.listen(events.add);
+        service.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (msg) async => 'mock-signature',
+        );
+
+        incomingController.add(jsonEncode({'type': 'auth_error'}));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          events,
+          contains(
+            const WebSocketEvent(
+              type: WebSocketEventType.authError,
+              groupId: 'group-1',
+            ),
+          ),
+        );
+        expect(service.connectionState, WebSocketConnectionState.disconnected);
+      },
+    );
+
     test('connect replaces an active connection', () async {
       service.connect(
         groupId: 'group-1',
@@ -181,6 +208,40 @@ void main() {
       expect(events, hasLength(1));
       expect(events.first.type, WebSocketEventType.joinRequest);
     });
+
+    test(
+      'parses terminal join request event with applicant and status',
+      () async {
+        final events = <WebSocketEvent>[];
+        service.eventStream.listen(events.add);
+
+        service.connect(
+          groupId: 'group-1',
+          deviceId: 'owner',
+          signMessage: (msg) async => 'mock-sig',
+        );
+        incomingController.add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        incomingController.add(
+          jsonEncode({
+            'type': 'join_request_cancelled',
+            'groupId': 'group-1',
+            'deviceId': 'applicant',
+            'data': {'status': 'cancelled'},
+          }),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(events.single.type, WebSocketEventType.joinRequestResolved);
+        expect(events.single.data, {
+          'status': 'cancelled',
+          'deviceId': 'applicant',
+        });
+      },
+    );
 
     test('ignores unknown event types', () async {
       final events = <WebSocketEvent>[];
@@ -255,6 +316,78 @@ void main() {
       expect(events.first.data!['groupName'], 'My Family');
     });
 
+    test('parses group_name_updated invalidation event', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(
+        jsonEncode({
+          'type': 'group_name_updated',
+          'groupId': 'group-1',
+          'data': {'groupName': 'New name'},
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events.single.type, WebSocketEventType.groupNameUpdated);
+      expect(events.single.groupId, 'group-1');
+      expect(events.single.data, {'groupName': 'New name'});
+    });
+
+    test('parses owner_transferred control-plane invalidation', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(
+        jsonEncode({
+          'type': 'owner_transferred',
+          'groupId': 'group-1',
+          'eventId': 'event-17',
+          'revision': 17,
+          'occurredAt': '2026-08-01T12:00:00Z',
+          'actorDeviceId': 'owner-a',
+          'reason': 'transferred',
+          'requestId': 'request-9',
+          'data': {
+            'previousOwnerDeviceId': 'owner-a',
+            'newOwnerDeviceId': 'member-b',
+            'keyEpoch': 5,
+          },
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events.single.type, WebSocketEventType.ownerTransferred);
+      expect(events.single.data?['newOwnerDeviceId'], 'member-b');
+      expect(events.single.data?['keyEpoch'], 5);
+      expect(events.single.data?['eventId'], 'event-17');
+      expect(events.single.data?['revision'], 17);
+      expect(events.single.data?['occurredAt'], '2026-08-01T12:00:00Z');
+      expect(events.single.data?['actorDeviceId'], 'owner-a');
+      expect(events.single.data?['reason'], 'transferred');
+      expect(events.single.data?['requestId'], 'request-9');
+      expect(events.single.data?['controlEventType'], 'owner_transferred');
+    });
+
     test(
       'existing events carry null data when no data field present',
       () async {
@@ -287,6 +420,39 @@ void main() {
       },
     );
 
+    test('member_left merges terminal device id with rotation data', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(
+        jsonEncode({
+          'type': 'member_left',
+          'groupId': 'group-1',
+          'deviceId': 'device-2',
+          'data': {'reason': 'removed', 'keyEpoch': 3},
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, hasLength(1));
+      expect(events.single.type, WebSocketEventType.memberLeft);
+      expect(events.single.data, {
+        'reason': 'removed',
+        'keyEpoch': 3,
+        'deviceId': 'device-2',
+      });
+    });
+
     test('parses sync_available event from WebSocket', () async {
       final events = <WebSocketEvent>[];
       service.eventStream.listen(events.add);
@@ -314,6 +480,39 @@ void main() {
       expect(events, hasLength(1));
       expect(events.first.type, WebSocketEventType.syncAvailable);
       expect(events.first.groupId, 'group-1');
+    });
+
+    test('parses authenticated group_key_requested invalidation', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(
+        jsonEncode({
+          'type': 'group_key_requested',
+          'groupId': 'group-1',
+          'data': {
+            'requestId': 'request-1',
+            'keyEpoch': 4,
+            'expiresAt': '2026-08-01T01:10:00Z',
+          },
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, hasLength(1));
+      expect(events.single.type, WebSocketEventType.groupKeyRequested);
+      expect(events.single.groupId, 'group-1');
+      expect(events.single.data?['requestId'], 'request-1');
     });
 
     test('auth_error disconnects without reconnect', () async {

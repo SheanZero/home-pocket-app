@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../accounting/domain/models/category.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../domain/models/family_happiness.dart';
 import '../../domain/models/metric_result.dart';
 
@@ -15,12 +16,14 @@ class FamilyInsightCard extends StatelessWidget {
     required this.isGroupMode,
     required this.shadowBooks,
     required this.locale,
+    this.sharedJoyCategory,
   });
 
   final FamilyHappiness? family;
   final bool isGroupMode;
   final List<Object>? shadowBooks;
   final Locale locale;
+  final Category? sharedJoyCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,11 @@ class FamilyInsightCard extends StatelessWidget {
     return switch (family?.sharedJoyInsight) {
       null || Empty() => l10n.analyticsFamilyEmpty,
       Value(:final data) => l10n.analyticsFamilySharedJoySentence(
-        CategoryLocalizationService.resolveFromId(data.categoryId, locale),
+        categoryNameForDisplay(
+          categoryId: data.categoryId,
+          category: sharedJoyCategory,
+          locale: locale,
+        ),
         data.totalCount,
         data.avgSatisfaction.toStringAsFixed(1),
       ),

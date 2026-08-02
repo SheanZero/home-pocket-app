@@ -13,6 +13,8 @@ class ShoppingItemDao {
 
   final AppDatabase _db;
 
+  AppDatabase get attachedDatabase => _db;
+
   /// Insert a new shopping item row.
   Future<void> insert(ShoppingItemsCompanion item) async {
     await _db.into(_db.shoppingItems).insert(item);
@@ -20,9 +22,9 @@ class ShoppingItemDao {
 
   /// Update an existing shopping item row (matched by id).
   Future<void> update(ShoppingItemsCompanion item) async {
-    await (_db.update(_db.shoppingItems)
-          ..where((t) => t.id.equals(item.id.value)))
-        .write(item);
+    await (_db.update(
+      _db.shoppingItems,
+    )..where((t) => t.id.equals(item.id.value))).write(item);
   }
 
   /// Soft-delete a shopping item by id.
@@ -47,18 +49,27 @@ class ShoppingItemDao {
           ..where((t) => t.isCompleted.equals(true))
           ..where((t) => t.isDeleted.equals(false)))
         .write(
-      ShoppingItemsCompanion(
-        isDeleted: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+          ShoppingItemsCompanion(
+            isDeleted: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
   }
 
   /// Return a single row by id, or null if not found (includes soft-deleted rows).
   Future<ShoppingItemRow?> findById(String id) async {
-    return (_db.select(_db.shoppingItems)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (_db.select(
+      _db.shoppingItems,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
+
+  Future<List<ShoppingItemRow>> findByListTypeIncludingDeleted(
+    String listType,
+  ) =>
+      (_db.select(_db.shoppingItems)
+            ..where((row) => row.listType.equals(listType))
+            ..orderBy([(row) => OrderingTerm.asc(row.createdAt)]))
+          .get();
 
   /// Reactive stream of active (non-deleted) items for [listType].
   ///
@@ -89,10 +100,7 @@ class ShoppingItemDao {
           readsFrom: {_db.shoppingItems},
         )
         .watch()
-        .map(
-          (rows) =>
-              rows.map((r) => _db.shoppingItems.map(r.data)).toList(),
-        );
+        .map((rows) => rows.map((r) => _db.shoppingItems.map(r.data)).toList());
   }
 
   /// Reactive stream of ALL non-deleted items, regardless of `list_type`.
@@ -113,10 +121,7 @@ class ShoppingItemDao {
           readsFrom: {_db.shoppingItems},
         )
         .watch()
-        .map(
-          (rows) =>
-              rows.map((r) => _db.shoppingItems.map(r.data)).toList(),
-        );
+        .map((rows) => rows.map((r) => _db.shoppingItems.map(r.data)).toList());
   }
 
   /// Insert or update a row by primary key conflict.
@@ -158,10 +163,7 @@ class ShoppingItemDao {
       for (var i = 0; i < orderedIds.length; i++) {
         batch.update(
           _db.shoppingItems,
-          ShoppingItemsCompanion(
-            sortOrder: Value(i),
-            updatedAt: Value(now),
-          ),
+          ShoppingItemsCompanion(sortOrder: Value(i), updatedAt: Value(now)),
           where: (t) => t.id.equals(orderedIds[i]),
         );
       }

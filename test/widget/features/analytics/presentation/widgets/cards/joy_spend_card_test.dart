@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/analytics/domain/models/joy_category_amount.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
@@ -26,6 +27,7 @@ List<JoyCategoryAmount> _amounts() => const [
 
 Widget _subject({
   AsyncValue<List<JoyCategoryAmount>>? override,
+  Map<String, Category> categoryMap = const {},
 }) {
   final value = override ?? AsyncValue.data(_amounts());
   return createLocalizedWidget(
@@ -40,6 +42,7 @@ Widget _subject({
       locale_providers.currentLocaleProvider.overrideWith(
         (_) async => const Locale('zh'),
       ),
+      analyticsCategoriesMapProvider.overrideWith((_) async => categoryMap),
       joyCategoryAmountsProvider(
         bookId: _bookId,
         startDate: _start,
@@ -90,6 +93,33 @@ void main() {
       expect(find.byKey(const ValueKey('joy_spend_legend_3')), findsNothing);
     },
   );
+
+  testWidgets('custom category segment renders stored name instead of id', (
+    tester,
+  ) async {
+    final custom = Category(
+      id: '01CUSTOMJOY',
+      name: '周末放松',
+      icon: 'flight',
+      color: '#8B5CF6',
+      parentId: null,
+      level: 1,
+      createdAt: DateTime(2026),
+    );
+
+    await tester.pumpWidget(
+      _subject(
+        override: const AsyncValue.data([
+          JoyCategoryAmount(categoryId: '01CUSTOMJOY', amount: 1200),
+        ]),
+        categoryMap: {'01CUSTOMJOY': custom},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('周末放松'), findsOneWidget);
+    expect(find.text('01CUSTOMJOY'), findsNothing);
+  });
 
   testWidgets(
     'Test 2: tap a segment → that segment + matching legend row highlight; '
@@ -166,9 +196,7 @@ void main() {
   testWidgets('Test 5: empty joy amounts → graceful empty copy, no throw', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      _subject(override: const AsyncValue.data([])),
-    );
+    await tester.pumpWidget(_subject(override: const AsyncValue.data([])));
     await tester.pumpAndSettle();
 
     expect(find.byType(JoySpendStackedBar), findsNothing);

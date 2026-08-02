@@ -61,6 +61,11 @@ class SyncStatusBadge extends StatelessWidget {
         color: palette.info,
         label: l10n.syncInitialProgress,
       ),
+      SyncState.awaitingKey => _StatusConfig(
+        icon: Icons.key,
+        color: palette.info,
+        label: l10n.syncInitialProgress,
+      ),
       SyncState.syncing => _StatusConfig(
         icon: Icons.sync,
         color: palette.info,
@@ -80,6 +85,11 @@ class SyncStatusBadge extends StatelessWidget {
         icon: Icons.cloud_off,
         color: palette.warning,
         label: l10n.familySyncBadgeOffline,
+      ),
+      SyncState.needsAttention => _StatusConfig(
+        icon: Icons.warning_amber_rounded,
+        color: palette.error,
+        label: l10n.syncQueueNeedsAttentionBadge,
       ),
     };
   }

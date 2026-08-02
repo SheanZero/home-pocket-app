@@ -10,17 +10,17 @@ import 'package:home_pocket/features/settings/presentation/widgets/voice_section
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Captures every [setVoiceAllowOnDeviceFallback] call while still persisting
-/// via the real SharedPreferences impl (so the round-trip is honest).
+/// Captures recognition-language updates while still persisting via the real
+/// SharedPreferences implementation.
 class _CapturingSettingsRepository extends SettingsRepositoryImpl {
   _CapturingSettingsRepository({required super.prefs});
 
-  final List<bool> allowFallbackCalls = [];
+  final List<String> voiceLanguageCalls = [];
 
   @override
-  Future<void> setVoiceAllowOnDeviceFallback(bool enabled) async {
-    allowFallbackCalls.add(enabled);
-    await super.setVoiceAllowOnDeviceFallback(enabled);
+  Future<void> setVoiceLanguage(String languageCode) async {
+    voiceLanguageCalls.add(languageCode);
+    await super.setVoiceLanguage(languageCode);
   }
 }
 
@@ -44,11 +44,8 @@ Widget _buildTestWidget({
   );
 }
 
-const _switchKey = ValueKey('voiceAllowCloudFallbackSwitch');
-const _statusSubtitleKey = ValueKey('voiceOnDeviceStatusSubtitle');
-
 void main() {
-  group('VoiceSection - on-device recognition control', () {
+  group('VoiceSection - recognition language only', () {
     late _CapturingSettingsRepository repo;
     late List<Override> overrides;
 
@@ -62,84 +59,49 @@ void main() {
       ];
     });
 
-    testWidgets('renders the auto-degradation SwitchListTile (default on)',
-        (tester) async {
+    testWidgets('renders only the recognition-language preference', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildTestWidget(
           overrides: overrides,
-          child: const VoiceSection(settings: AppSettings()),
+          child: const VoiceSection(settings: AppSettings(voiceLanguage: 'ja')),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(_switchKey), findsOneWidget);
-      final sw = tester.widget<SwitchListTile>(find.byKey(_switchKey));
-      expect(sw.value, isTrue, reason: 'default auto-degrade allowed');
-
-      // Strings resolve via S (English locale), not hardcoded.
-      expect(find.text('Allow cloud fallback'), findsWidgets);
-      expect(find.text('On-device recognition'), findsOneWidget);
-    });
-
-    testWidgets('status subtitle reflects the auto-fallback-allowed state',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildTestWidget(
-          overrides: overrides,
-          child: const VoiceSection(settings: AppSettings()),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final subtitle =
-          tester.widget<Text>(find.byKey(_statusSubtitleKey));
-      expect(subtitle.data, 'Allow cloud fallback');
-    });
-
-    testWidgets('status subtitle reflects the on-device-only state',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildTestWidget(
-          overrides: overrides,
-          child: const VoiceSection(
-            settings: AppSettings(voiceAllowOnDeviceFallback: false),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final sw = tester.widget<SwitchListTile>(find.byKey(_switchKey));
-      expect(sw.value, isFalse);
-
-      final subtitle =
-          tester.widget<Text>(find.byKey(_statusSubtitleKey));
       expect(
-        subtitle.data,
-        'When off, recognition stays on-device and a failure is shown '
-        'instead of using cloud recognition.',
-        reason: 'on-device-only status is a distinct string from the '
-            'fallback-allowed state',
+        find.byKey(const ValueKey('settings-voice-language')),
+        findsOneWidget,
       );
+      expect(find.text('Recognition Language'), findsOneWidget);
+      expect(find.text('日本語'), findsOneWidget);
+      expect(find.text('Allow cloud fallback'), findsNothing);
+      expect(find.text('On-device recognition'), findsNothing);
+      expect(find.byType(SwitchListTile), findsNothing);
     });
 
-    testWidgets('toggling the switch persists via setVoiceAllowOnDeviceFallback',
-        (tester) async {
+    testWidgets('selecting a language persists the new value', (tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           overrides: overrides,
-          child: const VoiceSection(settings: AppSettings()),
+          child: const VoiceSection(settings: AppSettings(voiceLanguage: 'ja')),
         ),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(_switchKey));
+      await tester.tap(find.byKey(const ValueKey('settings-voice-language')));
       await tester.pumpAndSettle();
 
-      expect(repo.allowFallbackCalls, [false],
-          reason: 'toggling off calls the setter with the new value');
-      // Honest round-trip: the value was persisted.
+      expect(find.text('日本語'), findsWidgets);
+      expect(find.text('中文'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+      await tester.tap(find.text('中文'));
+      await tester.pumpAndSettle();
+
+      expect(repo.voiceLanguageCalls, ['zh']);
       final persisted = await repo.getSettings();
-      expect(persisted.voiceAllowOnDeviceFallback, isFalse);
+      expect(persisted.voiceLanguage, 'zh');
     });
   });
 }

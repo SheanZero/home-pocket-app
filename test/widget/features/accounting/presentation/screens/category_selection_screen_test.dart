@@ -255,15 +255,27 @@ void main() {
         find.byKey(const ValueKey('category-create-name')),
         'Travel plans',
       );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('category-icon-flight')),
+      );
+      await tester.tap(find.byKey(const ValueKey('category-icon-flight')));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('category-color-8b5cf6')),
+      );
+      await tester.tap(find.byKey(const ValueKey('category-color-8b5cf6')));
       await tester.tap(find.byKey(const ValueKey('category-ledger-joy')));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('category-create-submit')),
+      );
       await tester.tap(find.byKey(const ValueKey('category-create-submit')));
       await tester.pumpAndSettle();
 
       expect(find.text('Travel plans'), findsOneWidget);
-      expect(
-        repo.categories.any((category) => category.id == 'custom-travel'),
-        isTrue,
+      final created = repo.categories.singleWhere(
+        (category) => category.id == 'custom-travel',
       );
+      expect(created.icon, 'flight');
+      expect(created.color, '#8B5CF6');
       expect(configRepo.configs.single.ledgerType, LedgerType.joy);
       expect(
         find.byKey(const ValueKey('category-add-l2-custom-travel')),
@@ -339,6 +351,9 @@ void main() {
       await tester.enterText(
         find.byKey(const ValueKey('category-create-name')),
         '食費',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('category-create-submit')),
       );
       await tester.tap(find.byKey(const ValueKey('category-create-submit')));
       await tester.pumpAndSettle();

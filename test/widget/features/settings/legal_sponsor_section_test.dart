@@ -10,8 +10,6 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 
 import '../../../helpers/test_localizations.dart';
 
-/// Mocks the url_launcher platform channel so no real browser is needed.
-/// Captures the launched URL + options for DONATE-02 assertions.
 class _MockLauncher extends Fake
     with MockPlatformInterfaceMixin
     implements UrlLauncherPlatform {
@@ -57,136 +55,143 @@ void main() {
   S l10nOf(WidgetTester tester) =>
       S.of(tester.element(find.byType(LegalSponsorSection)));
 
-  testWidgets('renders the section title and all 5 tone-C rows', (
-    tester,
-  ) async {
-    await pump(tester);
-    final l = l10nOf(tester);
+  test('production legal and support URLs are HTTPS and not placeholders', () {
+    final urls = [
+      LegalUrls.privacyPolicyFor('ja'),
+      LegalUrls.termsOfUseFor('ja'),
+      LegalUrls.tokushoFor('ja'),
+      LegalUrls.support,
+    ];
 
-    expect(find.text(l.legalSponsorSectionTitle), findsOneWidget);
-    expect(find.text(l.privacyPolicy), findsOneWidget);
-    expect(find.text(l.termsOfUse), findsOneWidget);
-    expect(find.text(l.tokushoNotice), findsOneWidget);
-    expect(find.text(l.openSourceLicenses), findsOneWidget);
-    expect(find.text(l.sponsorRow), findsOneWidget);
+    for (final url in urls) {
+      expect(Uri.parse(url).scheme, 'https');
+      expect(url, isNot(contains('example.com')));
+    }
   });
 
-  testWidgets(
-    'privacy/terms/tokusho rows push LegalDocScreen with matching doc',
-    (tester) async {
-      await pump(tester);
-      final l = l10nOf(tester);
+  testWidgets('renders legal links and the support card', (tester) async {
+    await pump(tester);
+    final l10n = l10nOf(tester);
 
-      await tester.tap(find.text(l.privacyPolicy));
-      await tester.pumpAndSettle();
-      expect(find.byType(LegalDocScreen), findsOneWidget);
-      expect(
-        tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
-        LegalDoc.privacy,
-      );
-      Navigator.of(tester.element(find.byType(LegalDocScreen))).pop();
-      await tester.pumpAndSettle();
+    expect(find.text(l10n.legalSponsorSectionTitle), findsOneWidget);
+    expect(find.text(l10n.privacyPolicy), findsOneWidget);
+    expect(find.text(l10n.termsOfUse), findsOneWidget);
+    expect(find.text(l10n.tokushoNotice), findsOneWidget);
+    expect(find.text(l10n.openSourceLicenses), findsOneWidget);
+    expect(find.text(l10n.sponsorCardTitle), findsOneWidget);
+    expect(find.text(l10n.sponsorButton), findsOneWidget);
+  });
 
-      await tester.tap(find.text(l.termsOfUse));
-      await tester.pumpAndSettle();
-      expect(
-        tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
-        LegalDoc.terms,
-      );
-      Navigator.of(tester.element(find.byType(LegalDocScreen))).pop();
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text(l.tokushoNotice));
-      await tester.pumpAndSettle();
-      expect(
-        tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
-        LegalDoc.tokusho,
-      );
-    },
-  );
-
-  testWidgets('OSS license row invokes showLicensePage (LEGAL-03)', (
+  testWidgets('privacy row opens the real localized URL externally', (
     tester,
   ) async {
     await pump(tester);
-    final l = l10nOf(tester);
+    final l10n = l10nOf(tester);
 
-    await tester.tap(find.text(l.openSourceLicenses));
+    await tester.tap(find.text(l10n.privacyPolicy));
+    await tester.pumpAndSettle();
+
+    expect(launcher.lastUrl, LegalUrls.privacyPolicyFor('ja'));
+    expect(launcher.lastOptions?.mode, PreferredLaunchMode.externalApplication);
+    expect(find.byType(LegalDocScreen), findsNothing);
+  });
+
+  testWidgets('terms and tokusho rows use their real localized URLs', (
+    tester,
+  ) async {
+    await pump(tester);
+    final l10n = l10nOf(tester);
+
+    await tester.tap(find.text(l10n.termsOfUse));
+    await tester.pumpAndSettle();
+    expect(launcher.lastUrl, LegalUrls.termsOfUseFor('ja'));
+
+    await tester.ensureVisible(find.text(l10n.tokushoNotice));
+    await tester.tap(find.text(l10n.tokushoNotice));
+    await tester.pumpAndSettle();
+    expect(launcher.lastUrl, LegalUrls.tokushoFor('ja'));
+  });
+
+  testWidgets('failed legal launch falls back to the bundled offline reader', (
+    tester,
+  ) async {
+    launcher.result = false;
+    await pump(tester);
+    final l10n = l10nOf(tester);
+
+    await tester.tap(find.text(l10n.privacyPolicy));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LegalDocScreen), findsOneWidget);
+    expect(
+      tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
+      LegalDoc.privacy,
+    );
+  });
+
+  testWidgets('OSS license row invokes showLicensePage', (tester) async {
+    await pump(tester);
+    final l10n = l10nOf(tester);
+
+    await tester.ensureVisible(find.text(l10n.openSourceLicenses));
+    await tester.tap(find.text(l10n.openSourceLicenses));
     await tester.pumpAndSettle();
 
     expect(find.byType(LicensePage), findsOneWidget);
   });
 
-  testWidgets(
-    'sponsor row launches the external browser at LegalUrls.donation (DONATE-02/04)',
-    (tester) async {
-      await pump(tester);
-      final l = l10nOf(tester);
-
-      await tester.tap(find.text(l.sponsorRow));
-      await tester.pumpAndSettle();
-
-      expect(launcher.lastUrl, LegalUrls.donation);
-      expect(
-        launcher.lastOptions?.mode,
-        PreferredLaunchMode.externalApplication,
-      );
-    },
-  );
-
-  testWidgets('tapping the sponsor row shows NO dialog/popup (DONATE-03)', (
+  testWidgets('support button opens the operator contact page externally', (
     tester,
   ) async {
     await pump(tester);
-    final l = l10nOf(tester);
+    final l10n = l10nOf(tester);
+    await tester.ensureVisible(find.text(l10n.sponsorButton));
 
-    await tester.tap(find.text(l.sponsorRow));
+    await tester.tap(find.text(l10n.sponsorButton));
     await tester.pumpAndSettle();
 
+    expect(launcher.lastUrl, LegalUrls.support);
+    expect(launcher.lastOptions?.mode, PreferredLaunchMode.externalApplication);
     expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets(
-    'sponsor launch failure shows a single neutral SnackBar (T-56-06)',
-    (tester) async {
-      launcher.result = false;
-      await pump(tester);
-      final l = l10nOf(tester);
+  testWidgets('support launch failure shows one neutral SnackBar', (
+    tester,
+  ) async {
+    launcher.result = false;
+    await pump(tester);
+    final l10n = l10nOf(tester);
+    await tester.ensureVisible(find.text(l10n.sponsorButton));
 
-      await tester.tap(find.text(l.sponsorRow));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sponsorButton));
+    await tester.pumpAndSettle();
 
-      expect(find.text(l.sponsorLaunchError), findsOneWidget);
-      expect(find.byType(AlertDialog), findsNothing);
-    },
-  );
+    expect(find.text(l10n.sponsorLaunchError), findsOneWidget);
+    expect(find.byType(AlertDialog), findsNothing);
+  });
 
-  testWidgets(
-    'sponsor launch that THROWS still shows the neutral SnackBar and does not crash (CR-01)',
-    (tester) async {
-      launcher.shouldThrow = true;
-      await pump(tester);
-      final l = l10nOf(tester);
+  testWidgets('a throwing support launch is handled without crashing', (
+    tester,
+  ) async {
+    launcher.shouldThrow = true;
+    await pump(tester);
+    final l10n = l10nOf(tester);
+    await tester.ensureVisible(find.text(l10n.sponsorButton));
 
-      await tester.tap(find.text(l.sponsorRow));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sponsorButton));
+    await tester.pumpAndSettle();
 
-      // The thrown PlatformException must be swallowed: neutral SnackBar shows,
-      // no exception escapes to tester.takeException().
-      expect(find.text(l.sponsorLaunchError), findsOneWidget);
-      expect(find.byType(AlertDialog), findsNothing);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.text(l10n.sponsorLaunchError), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
-  testWidgets(
-    'the sponsor external-link affordance is colored via palette.shared (tone-C)',
-    (tester) async {
-      await pump(tester);
+  testWidgets('external legal affordances use the shared-link palette', (
+    tester,
+  ) async {
+    await pump(tester);
 
-      final ext = tester.widget<Icon>(find.byIcon(Icons.open_in_new));
-      // V15 light information/shared blue.
-      expect(ext.color, const Color(0xFF4F7186));
-    },
-  );
+    final icons = tester.widgetList<Icon>(find.byIcon(Icons.open_in_new));
+    expect(icons, isNotEmpty);
+    expect(icons.first.color, const Color(0xFF4F7186));
+  });
 }

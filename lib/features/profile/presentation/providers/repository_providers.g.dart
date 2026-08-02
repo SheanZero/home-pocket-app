@@ -192,4 +192,4 @@ final class SaveUserProfileUseCaseProvider
 }
 
 String _$saveUserProfileUseCaseHash() =>
-    r'13e0a735aa3c0b7a9d908f5df9fbb22695713df2';
+    r'65bac6af08b741b806ae217a8a3bd6a640cde8e5';

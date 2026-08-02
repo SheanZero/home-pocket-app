@@ -1,14 +1,21 @@
 import 'package:flutter/foundation.dart';
 
+import '../../features/accounting/domain/models/transaction_family_sync_policy.dart';
 import 'push_sync_use_case.dart';
+import 'sync_vector_clock.dart';
 
 /// Callback to fetch all local transactions.
 typedef FetchAllTransactionsCallback =
     Future<List<Map<String, dynamic>>> Function();
 
-/// Callback to fetch all local PUBLIC shopping items as create operations.
+/// Callback to fetch versioned reconciliation operations for every local
+/// PUBLIC shopping item, including tombstones.
 typedef FetchAllShoppingOpsCallback =
     Future<List<Map<String, dynamic>>> Function();
+typedef FetchAdditionalFamilySyncOpsCallback =
+    Future<List<Map<String, dynamic>>> Function();
+typedef FullSyncOperationsAcceptedCallback =
+    Future<void> Function(List<Map<String, dynamic>> operations);
 
 /// Performs a full sync by pushing all local transactions and public
 /// shopping items to the partner.
@@ -20,13 +27,19 @@ class FullSyncUseCase {
     required PushSyncUseCase pushSync,
     required FetchAllTransactionsCallback fetchAllTransactions,
     required FetchAllShoppingOpsCallback fetchAllShoppingOps,
+    FetchAdditionalFamilySyncOpsCallback? fetchAdditionalOperations,
+    FullSyncOperationsAcceptedCallback? onOperationsAccepted,
   }) : _pushSync = pushSync,
        _fetchAllTransactions = fetchAllTransactions,
-       _fetchAllShoppingOps = fetchAllShoppingOps;
+       _fetchAllShoppingOps = fetchAllShoppingOps,
+       _fetchAdditionalOperations = fetchAdditionalOperations,
+       _onOperationsAccepted = onOperationsAccepted;
 
   final PushSyncUseCase _pushSync;
   final FetchAllTransactionsCallback _fetchAllTransactions;
   final FetchAllShoppingOpsCallback _fetchAllShoppingOps;
+  final FetchAdditionalFamilySyncOpsCallback? _fetchAdditionalOperations;
+  final FullSyncOperationsAcceptedCallback? _onOperationsAccepted;
 
   static const _chunkSize = 50;
 
@@ -36,11 +49,16 @@ class FullSyncUseCase {
   Future<int> execute() async {
     final allTransactions = await _fetchAllTransactions();
     final allShoppingOps = await _fetchAllShoppingOps();
+    final additionalOperations =
+        await _fetchAdditionalOperations?.call() ?? const [];
+    final safeTransactions = allTransactions
+        .where(TransactionFamilySyncPolicy.isSafeOutboundOperation)
+        .toList(growable: false);
 
     // W1 / D37-06 second safety net: the provider callback already fetches
     // only public items, but defensively re-filter here — a private item must
-    // never reach the push pipeline. Full sync emits create ops only, so
-    // every op carries data.listType.
+    // never reach the push pipeline. Both live snapshots and tombstones carry
+    // data.listType so the privacy gate applies uniformly.
     final publicShoppingOps = allShoppingOps
         .where(
           (op) =>
@@ -50,15 +68,19 @@ class FullSyncUseCase {
 
     if (kDebugMode) {
       debugPrint(
-        '[FullSync] Found ${allTransactions.length} transactions, '
+        '[FullSync] Found ${safeTransactions.length} safe transactions '
+        '(${allTransactions.length - safeTransactions.length} unsafe dropped), '
         '${publicShoppingOps.length} public shopping ops '
         '(${allShoppingOps.length - publicShoppingOps.length} non-public '
         'dropped)',
       );
     }
 
-    final allOperations = [...allTransactions, ...publicShoppingOps];
-
+    final allOperations = [
+      ...safeTransactions,
+      ...publicShoppingOps,
+      ...additionalOperations,
+    ];
     if (allOperations.isEmpty) {
       if (kDebugMode) {
         debugPrint('[FullSync] No operations to push');
@@ -85,12 +107,13 @@ class FullSyncUseCase {
 
       final result = await _pushSync.execute(
         operations: chunk,
-        vectorClock: {'full_sync': i ~/ _chunkSize},
+        vectorClock: buildSyncVectorClock(chunk),
         syncType: 'full',
       );
 
       if (result is PushSyncSuccess) {
         totalPushed += result.operationCount;
+        await _onOperationsAccepted?.call(chunk);
       } else if (result is PushSyncQueued) {
         totalPushed += result.operationCount;
       }

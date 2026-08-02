@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/analytics/domain/models/category_drill_down.dart';
 import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
@@ -44,10 +45,7 @@ CategoryDrillDown _drill({List<Transaction>? txns}) => CategoryDrillDown(
 
 Widget _subject({Object? error}) {
   return createLocalizedWidget(
-    const CategoryDrillDownScreen(
-      bookId: _bookId,
-      l1CategoryId: _l1CategoryId,
-    ),
+    const CategoryDrillDownScreen(bookId: _bookId, l1CategoryId: _l1CategoryId),
     locale: const Locale('en'),
     overrides: [
       selectedTimeWindowProvider.overrideWith(_TestSelectedTimeWindow.new),
@@ -160,5 +158,76 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(ListTransactionTile), findsNothing);
+  });
+
+  testWidgets('custom L1 title and custom L2 row render stored names', (
+    tester,
+  ) async {
+    final parent = Category(
+      id: '01CUSTOMPARENT',
+      name: '周末活动',
+      icon: 'flight',
+      color: '#8B5CF6',
+      parentId: null,
+      level: 1,
+      createdAt: DateTime(2026),
+    );
+    final child = Category(
+      id: '01CUSTOMCHILD',
+      name: '露营',
+      icon: 'flight',
+      color: '#8B5CF6',
+      parentId: parent.id,
+      level: 2,
+      createdAt: DateTime(2026),
+    );
+    final tx = Transaction(
+      id: 'custom_tx',
+      bookId: _bookId,
+      deviceId: 'dev_1',
+      amount: 1200,
+      type: TransactionType.expense,
+      ledgerType: LedgerType.joy,
+      categoryId: child.id,
+      timestamp: DateTime(2026, 5, 10),
+      currentHash: 'hash_custom',
+      createdAt: DateTime(2026, 5, 10),
+      joyFullness: 2,
+    );
+
+    await _pump(
+      tester,
+      createLocalizedWidget(
+        CategoryDrillDownScreen(bookId: _bookId, l1CategoryId: parent.id),
+        locale: const Locale('zh'),
+        overrides: [
+          selectedTimeWindowProvider.overrideWith(_TestSelectedTimeWindow.new),
+          locale_providers.currentLocaleProvider.overrideWith(
+            (_) async => const Locale('zh'),
+          ),
+          analyticsCategoriesMapProvider.overrideWith(
+            (_) async => {parent.id: parent, child.id: child},
+          ),
+          categoryDrillDownProvider(
+            bookId: _bookId,
+            startDate: _windowStart,
+            endDate: _windowEnd,
+            l1CategoryId: parent.id,
+          ).overrideWith(
+            (_) async => CategoryDrillDown(
+              transactions: [tx],
+              subtotal: 1200,
+              count: 1,
+              avgPerDay: 38,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('周末活动'), findsOneWidget);
+    expect(find.textContaining('露营'), findsOneWidget);
+    expect(find.text(parent.id), findsNothing);
+    expect(find.text(child.id), findsNothing);
   });
 }

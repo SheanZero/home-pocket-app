@@ -8,8 +8,8 @@ import '_time_window_validation.dart';
 ///
 /// Returns Empty when no joy tx exists in the window OR (defensively) when
 /// the argmax query returns null. Returns Value(row, totalJoyTx) otherwise.
-/// Phase 10 UI inspects `topJoy.data.joyFullness <= 2` for the
-/// "all neutral / go rate one" CTA — Phase 9 does not encode that logic.
+/// Satisfaction is unipolar-positive: a score-2 Joy row is valid data and must
+/// not be converted into an empty state by presentation consumers.
 class GetBestJoyMomentUseCase {
   GetBestJoyMomentUseCase({required AnalyticsRepository analyticsRepository})
     : _repo = analyticsRepository;

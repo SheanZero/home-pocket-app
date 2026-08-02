@@ -1,3 +1,308 @@
+# V16 Family Entry to Management — Design QA (2026-08-02)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/Development/home-pocket-app/docs/mockup/v16/index.html`, using the task-oriented family entry and the create, join, approval, waiting, and management states defined by the V16 mockup.
+- Flutter golden coverage: `/Users/xinz/Development/home-pocket-app/test/golden/family_flow_v16_golden_test.dart`, rendered in Japanese light mode at 390×810 logical px with realistic group, invite, owner, applicant, and member data.
+- Same-input comparison board: `/Users/xinz/.codex/visualizations/2026/08/02/019fbfcf-9e3e-7803-a031-6c9525f40eb7/family-flow-v16-qa-board.png`. Each row places the Mockup on the left and Flutter on the right at the same 390×810 viewport.
+- Compared states: family entry, created-family invite, invite-code entry, join confirmation, member approval, applicant waiting, and family management.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Information architecture: the entry is now task-oriented with two direct paths and no shared onboarding stepper. Create follows create → invite → approve; join follows code → confirm → wait. Management intentionally omits onboarding progress.
+- Spacing and layout rhythm: the implementation matches the 20 px page inset, centered 44 pt navigation header, compact three-step progress, paper background, 14–18 px radii, card spacing, and first-viewport content density of the Mockup. The management transfer action remains available below the first viewport without leaking into the reference composition.
+- Typography and color: hierarchy, muted helper copy, leaf-green states, sakura primary actions, pale verification surfaces, borders, and destructive actions use the existing app tokens while following the V16 visual target.
+- Assets and avatars: family-entry illustrations use the four V16 light/dark raster assets. Production member and applicant rows use `AvatarDisplay` with real image paths and emoji fallback. The golden test runner does not decode the fixture `FileImage` paths, so the comparison board shows pale avatar circles in two Flutter states; this is a test-rendering limitation, not the production UI behavior.
+- Interaction coverage: create confirmation remains explicit before group creation; invite copy, share, and force-refresh work; join review precedes submission; owners can approve or reject; applicants can cancel; sync settings open a dedicated sheet; ownership transfer, leave, and disband paths remain available.
+- Accessibility and responsiveness: primary controls preserve 44–54 pt touch areas and semantic labels. Entry/create/join were exercised at 320×640 and 430×932, and family management at 320×640, with no overflow.
+- Localization and privacy: Japanese, Chinese, and English ARB files remain valid and generated output was refreshed. The private-ledger and zero-knowledge helper copy remains visible throughout the flow.
+
+## Verification
+
+- Family-sync presentation widget suite: 55 tests passed.
+- V16 family-flow golden suite: 7 tests passed after updating the intentional baselines.
+- Full Flutter suite: 4,314 tests passed, 11 skipped.
+- `flutter analyze`: 0 issues.
+- ARB JSON validation, Dart formatting, and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Settings Item Height Correction — Design QA (2026-08-01)
+
+## Audit scope and evidence
+
+- User-reported before state: `/Users/xinz/Downloads/截屏 2026-08-01 14.39.43.png` (1320×2868 px), showing the first-level Chinese settings screen with visibly compressed General and Security rows.
+- Source visual truth after the audit: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-mockup-72dp-390.png`.
+- iOS Simulator implementation: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-app-72dp.png`.
+- Same-input comparison, updated Mockup left and Flutter right: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-row-height-qa-comparison.png`.
+- Viewport and normalization: source is 390×844 CSS px at DPR 1. Flutter was rendered on an iPhone simulator at 390×844 logical px, captured at 1170×2532 px (DPR 3), and downsampled to 390×844 for equal-size comparison.
+- State: Japanese, personal light, profile `あおい`, family unconfigured, app lock off, Monday week start, Japanese recognition language, and monthly target 80.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Audit finding: the previous `VisualDensity(vertical: -4)` forced General action rows to 48 logical px and Security switch rows to 60 logical px. Although the smaller action rows narrowly met common minimum touch-target guidance, the title/subtitle pair, icon, and divider had insufficient breathing room and looked materially more compressed than standard mobile settings lists.
+- Spacing and layout rhythm: all shared settings actions, security switches, biometric switches, notifications, and backup/restore actions now have a 72 logical px minimum height, 8 px minimum vertical content padding, standard visual density, and 42 px icon surfaces. Dividers, 20 px page inset, 18 px card radii, and section spacing remain unchanged.
+- Fonts and typography: the existing system-font title/supporting hierarchy, line heights, weights, truncation, and locale behavior are unchanged. The additional height creates separation around the two lines without enlarging text.
+- Colors and visual tokens: paper background, card, pine-green foreground, muted supporting copy, border, and switch colors are unchanged. The correction is dimensional, not a new visual theme.
+- Image quality and asset fidelity: the real profile avatar renderer and Material icon set remain intact and sharp. No placeholder or approximate asset was introduced.
+- Copy and content: the Mockup now uses the app's current `ときめき目標` label and the comparison fixture uses Japanese recognition language so source and implementation represent the same state.
+- Accessibility and responsiveness: 375, 390, and 430 px Mockup widths all keep a 72 px minimum row height with `scrollWidth == clientWidth`. The iOS app keeps the whole row tappable, exceeding Apple's 44 pt default control-size baseline and matching Flutter's standard 72 px two-line ListTile contract.
+- Focused comparison was not necessary: the full 390×844 comparison keeps every General row, icon, divider, title, and subtitle legible at 1:1 pixels, which is the entire changed region.
+
+## Comparison history and verification
+
+1. The before implementation measured 48 px for General actions and 60 px for Security switches; new regression assertions failed at those exact values.
+2. The shared row contract was restored to standard density with a 72 px minimum and 42 px icons. The first simulator comparison found two state/copy drifts unrelated to geometry: recognition language was Chinese and the Mockup retained the older monthly-target label.
+3. The deterministic simulator fixture was aligned to Japanese recognition language and the Mockup was aligned to the current product copy. The second equal-viewport comparison found no remaining P0/P1/P2 mismatch in the changed surface.
+- Settings widget suite: 51 tests passed.
+- V16 settings/profile/backup/legal golden suite: 4 tests passed after updating the intentional settings and backup row-height baselines.
+- iOS integration visual capture: passed.
+- Browser responsiveness: 375/390/430 px, no horizontal overflow; all 11 Mockup settings actions measured at least 72 px.
+- Browser console: 0 errors and 0 warnings.
+- `flutter analyze`: 0 issues.
+
+final result: passed
+
+---
+
+# V16 Settings Flutter Implementation — Design QA (2026-08-01)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-language-order-final.png`, using the V16 phone content crop at `(436, 82, 826, 926)` for a 390×844 px source viewport.
+- iOS Simulator implementation: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-flutter-v16-final.png`.
+- Same-input comparisons, Mockup left and Flutter right:
+  - full 390×844 surface: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-mockup-vs-flutter-final.png`
+  - focused top hierarchy: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-mockup-vs-flutter-focused.png`
+- Viewport and normalization: source content is 390×844 px at DPR 1. The implementation was rendered on an iPhone 16e Simulator at 390×844 logical px and captured at 946×2048 px, then downsampled to 390×844 for comparison. Device status-bar rendering is platform-owned and was not treated as app-content drift.
+- State: Japanese, personal light, profile `あおい`, family unconfigured, app lock off, Monday week start, Japanese recognition language, monthly target 80, and notifications on.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Information architecture: the main page order is profile, General, Family, Security, Notifications, Data, This App, Data Management, and footer. The former Other Settings navigation is absent. General is exactly `外観 → 言語 → 認識言語 → ときめき目標 → 週の開始日`; recognition language directly follows display language.
+- Fonts and typography: the simulator uses the native Japanese system font with the same bold title, item-title, supporting-copy, and section-heading hierarchy as the Mockup. The Flutter copy retains `ときめき目標` as an intentional ADR-015 product-language constraint instead of the Mockup's older `月間 Joy 目標` wording.
+- Spacing and layout rhythm: the final 38 px soft icon tiles, compact ListTile density, 20 px page inset, 18 px card radius, 72 px divider inset, section gaps, and profile-card proportions closely match the source. App-owned content reaches the Security row within the same first viewport.
+- Colors and visual tokens: paper background, white cards, pine-green text/icons, pale icon surfaces, borders, switches, and muted supporting text map to the existing app palette and remain visually aligned with the Mockup.
+- Image quality and asset fidelity: the profile surface uses the real user avatar renderer rather than a placeholder. The leaf avatar in the verification fixture intentionally represents user data; all functional icons use Flutter's Material icon set and remain sharp at simulator density.
+- Copy and affordances: device-theme copy now matches `端末の設定に合わせる`; family sync uses `家族同期`; the unconfigured compact family row no longer shows a redundant sync-status badge. All tappable preference rows retain chevrons, and switches retain native iOS affordances.
+- Interaction and hierarchy coverage: recognition-language selection persists Japanese/Chinese/English; application-lock deep linking, security states, backup/legal navigation, and destructive-data placement remain covered. The main hierarchy test verifies Notifications, Backup, Legal, and Delete All Data remain first-level even when below the captured fold.
+
+## Comparison history and verification
+
+1. The first Flutter comparison had a P2 density mismatch: two-line rows were roughly 20 px taller than the Mockup, so the app-lock control fell below the first viewport. The compact family row also displayed an extra no-group status badge.
+2. Shared settings rows were tightened with compact visual density and 38 px icon tiles; compact family sync now shows only its disclosure chevron. A new same-size simulator capture confirmed the General, Family, Security, and Notifications sequence aligns with the Mockup without cramped text or horizontal overflow.
+- Settings widget suite: 51 tests passed.
+- V16 settings/profile/backup/legal golden suite: 4 tests passed after updating the settings and backup baselines for the intentional compact row geometry.
+- Recognition-language interaction: Japanese, Chinese, and English selector tested; persistence assertion passed.
+- `flutter analyze`: 0 issues.
+- ARB files regenerated for Japanese, Chinese, and English; scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Settings Recognition Language Row Order — Design QA (2026-08-01)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-voice-language-general-final.png`, the immediately preceding V16 settings state.
+- Browser-rendered implementation: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-language-order-final.png`.
+- Same-input comparisons, source left and implementation right:
+  - full board: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-language-order-comparison-full.png`
+  - focused phone frame: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-language-order-comparison-phone.png`
+- Viewport and normalization: browser viewport 1400×1200 CSS px at DPR 1; both board captures are 1385×1187 px, and the focused comparison uses equal 424×872 px crops.
+- State: Japanese, A1 personal light, family unconfigured, app lock off, Monday week start, Japanese recognition language, and notifications on.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Information architecture: the General card order is exactly `外観 → 言語 → 認識言語 → 月間 Joy 目標 → 週の開始日`; recognition language now follows display language directly.
+- Typography, spacing, color, icon, imagery, and copy are unchanged; only the existing row order moved.
+- Interaction remains intact: the recognition-language selector still offers Japanese, Chinese, and English, and selecting English updates the row value to `English`.
+- Responsive behavior: 375, 390, and 430 px phone widths have no horizontal overflow; `appScrollWidth` equals `appClientWidth` at every checked width.
+
+## Comparison history and verification
+
+1. The source placed recognition language after monthly Joy target and week start.
+2. The implementation moved the existing recognition-language row directly below display language. The first same-viewport comparison found no visual regression, so no corrective QA iteration was required.
+- Browser runtime log: no messages.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Settings Recognition Language Simplification — Design QA (2026-08-01)
+
+## Scope and evidence
+
+- User removal reference: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_3jCeqe/截屏2026-08-01 13.35.24.png`, identifying the on-device recognition and cloud fallback rows to remove.
+- Pre-edit visual source: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-final-top.png`.
+- Browser-rendered implementation:
+  - top: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-voice-language-general-final.png`
+  - lower sections: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-voice-language-general-lower.png`
+- Same-input comparisons, source left and final implementation right:
+  - full board: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-voice-language-general-comparison-full.png`
+  - focused phone frame: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-voice-language-general-comparison-phone.png`
+- Viewport and normalization: browser viewport 1400×1200 CSS px at DPR 1; source and implementation board captures are both 1385×1187 px. The phone is 390×844 CSS px in both states, and the focused comparison uses equal 424×872 px crops. No density normalization was required.
+- State: Japanese, A1 personal light, family unconfigured, app lock off, Monday week start, Japanese recognition language, and notifications on.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Information architecture and copy: the separate `音声認識` section is removed. `認識言語` is now the fifth row inside `一般`, directly after week start. `オンデバイス認識` and `クラウドへのフォールバック` are absent from the settings screen, state model, and interaction handlers.
+- Fonts and typography: the moved row retains the same Japanese system-font hierarchy, label weight, subtitle size, line height, and truncation behavior as the surrounding General rows.
+- Spacing and layout rhythm: the General card expands by one established row without introducing a new component or compressed spacing. The overall settings scroll height decreases from 1462 px to 1286 px, while all later sections preserve their existing order and vertical rhythm.
+- Colors and visual tokens: the retained microphone row reuses the established daily-soft icon tile, paper card, border, text, and chevron tokens. No new semantic color was introduced.
+- Image quality and asset fidelity: the existing profile avatar is unchanged and the microphone remains from Material Symbols Rounded. No generated, placeholder, CSS-drawn, SVG, or emoji asset was added.
+- Copy and affordance: `認識言語 / 日本語` remains a standard navigation row and opens the three-language selector. Removed implementation-policy details are no longer presented as user-facing preferences.
+- Responsive behavior: 375, 390, and 430 px phone widths have no horizontal overflow; `appScrollWidth` equals `appClientWidth` at each checked width.
+
+## Comparison history and verification
+
+1. The pre-edit source showed recognition language inside a separate three-row Voice Recognition section together with on-device status and a cloud fallback switch.
+2. The requested implementation moved only recognition language into General and removed the other two rows. The first same-viewport comparison found no actionable P0/P1/P2 visual or usability issue.
+- Primary interaction tested: recognition language opens Japanese, Chinese, and English choices; selecting English updates the row to `English`.
+- Browser console: 0 errors and 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Settings First-Level Information Architecture — Design QA (2026-08-01)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-source-before.png`, captured from the pre-edit V16 settings screen.
+- Browser-rendered implementation:
+  - top: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-final-top.png`
+  - lower first-level sections: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-final-middle.png`
+  - destructive confirmation: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-delete-dialog.png`
+  - dark theme: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-dark.png`
+- Same-input comparisons, source left and final implementation right:
+  - full board: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-comparison-full.png`
+  - focused phone frame: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-first-level-comparison-phone.png`
+- Viewport and normalization: the browser viewport was 1400×1200 CSS px at DPR 1. Source and implementation board captures were both 1385×1187 px; the phone measured 390×844 CSS px in both states. No density normalization was required. The focused comparison uses equal 424×872 px crops including the same phone frame.
+- State: Japanese, A1 personal light, profile `あおい`, family unconfigured, application lock off, Monday week start, Japanese recognition language, cloud fallback on, and notifications on. A2 family light and A3 personal dark were also checked.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Information architecture and copy: the former “その他の設定” destination is absent. Week start is grouped with General; Voice Recognition, Notifications, Data, This App, and Data Management are directly available in the main settings scroll. The irreversible delete action is isolated at the bottom and explicitly warns that unbacked-up records will be permanently removed.
+- Fonts and typography: the existing Japanese system-font stack, weights, line heights, and truncation behavior are unchanged. New headings, labels, subtitles, and switch rows reuse the established V16 type hierarchy without cramped wrapping at 375, 390, or 430 px.
+- Spacing and layout rhythm: the 390×844 phone frame, 20 px page inset, section spacing, row height, icon slots, card radii, dividers, and profile header are retained. The intentional extra rows extend the page to a 1462 px scroll height instead of compressing controls.
+- Colors and visual tokens: new rows use existing paper, pine-green, border, muted-text, switch, and error tokens. Destructive data deletion is the only red semantic treatment; light and dark themes retain adequate separation between cards and background.
+- Image quality and asset fidelity: the existing profile avatar asset is preserved. All new functional icons come from the same Material Symbols Rounded family; no placeholder, handcrafted SVG, CSS illustration, emoji, or raster substitute was introduced.
+- Icons and affordances: navigation rows retain chevrons, switches expose `aria-pressed`, the on-device recognition status is non-interactive, and the danger row opens a two-action confirmation dialog.
+- Interaction and accessibility: week start and recognition language selectors update their row values; cloud fallback and notification switches update state while preserving scroll position; delete requires explicit confirmation. Existing minimum row and control sizes remain practical for touch.
+- Responsive behavior: at 375, 390, and 430 phone widths, `appScrollWidth` equals `appClientWidth` with no horizontal overflow. A2 family copy and A3 dark tokens remain intact.
+
+## Comparison history
+
+1. The source settings screen preserved the V16 visual system but kept week start, voice recognition, notifications, and delete-all behind a separate Other Settings destination in the Flutter information model.
+2. The first redesign surfaced those controls in seven regular groups plus a bottom danger group and preserved the original component language. The first QA pass found a P2 inspector-copy mismatch: it described “8 groups plus a danger area” although the visible structure was seven regular groups plus one danger area.
+3. The inspector copy was corrected to `7 个常规分组 + 1 个独立危险区`. The final same-viewport, same-state comparison found no remaining P0/P1/P2 issue.
+
+## Verification
+
+- Primary interactions tested: week start Monday/Sunday, recognition language Japanese/Chinese/English, cloud fallback on/off, notifications on/off, delete confirmation/cancel, A2 family light, and A3 personal dark.
+- Responsive checks: 375, 390, and 430 px phone widths; no horizontal overflow.
+- Browser console: 0 errors and 0 warnings.
+- Inline JavaScript syntax and scoped `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Home No-Joy C2 Flutter — Design QA (2026-07-29)
+
+## Scope and evidence
+
+- Selected source of visual truth:
+  - `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/home-joy-empty-2026-07-29/refine-c2-light.png`
+  - `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/home-joy-empty-2026-07-29/refine-c2-dark.png`
+- Flutter iOS simulator captures:
+  - `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/home-joy-empty-2026-07-29/flutter-c2-ios.png`
+  - `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/home-joy-empty-2026-07-29/flutter-c2-ios-dark.png`
+- Same-input focused comparisons, source left and Flutter right:
+  - `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/home-joy-empty-2026-07-29/c2-mockup-vs-flutter.png`
+  - `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/home-joy-empty-2026-07-29/c2-mockup-vs-flutter-dark.png`
+- Viewport and density: the source is 390×844 px. Flutter was captured on an iPhone 16e simulator at 390×844 logical px and 3× density (1170×2532), then the common 350×337 HomeHero region was normalized to the same pixel size for direct comparison.
+- State: July 2026, Japanese, personal mode, ¥132,800 current spending, ¥146,020 previous spending, ¥132,800 daily spending, and zero Joy-ledger transactions. The focused comparison isolates the user-scoped HomeHero card; complete simulator captures were inspected separately.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Layout and spacing: the implementation matches the 350×337 card crop, 22 px outer radius, 18 px spending-region inset, ticket tear notches, compact 166 px empty-Joy region, and the mockup's staggered journal-note row.
+- Monthly spending: the existing amount, comparison, and split bar implementation is reused without content or layout modification, as requested.
+- Empty state: Joy rings, Joy metrics, and the monthly favorite are hidden when the current scope has no Joy transactions. The replacement prompt keeps the selected C2 heart marker, short invitation, free-entry action, and three distinct note-style actions.
+- Typography and copy: the Japanese source wording is matched, with equivalent ja/zh/en localization and a family-mode title that follows the accepted ADR-015 lexical hierarchy. All three locales fit at 390 logical px without overflow.
+- Color and imagery: the C2 region uses existing semantic Joy, accent, and daily palette tokens in light and dark modes. It requires no raster placeholder, custom SVG, ASCII, or emoji; the closest matching Material icon set is used for the heart, drink, book, and rest concepts.
+- Dark theme: the C2 empty region remains aligned. The upper monthly-spending surface retains the app's existing dark token rather than adopting the mockup's slightly greener reference color because that region was explicitly out of scope.
+- Interaction: all four actions are semantic, tappable controls. Each suggestion opens the existing one-step entry flow in the Joy ledger and preselects the corresponding coffee, book, leisure, or general Joy category without changing later category-ledger inference.
+- Accessibility and resilience: controls use `InkWell` and button semantics, labels ellipsize safely, dark mode is covered, and ja/zh/en widget tests confirm no Flutter layout exception at 390 logical px.
+
+## Comparison history
+
+1. The previous empty state still rendered zero-value Joy rings and an empty favorite section, consuming excess space and implying unavailable metrics.
+2. The first Flutter pass hid those regions and introduced the selected C2 journal-note invitation while preserving the monthly-spending region.
+3. The first same-size paired review showed the note row sitting about 8 px too high. Increasing the header-to-note gap from 12 px to 20 px aligned the row with the mockup; the second light comparison passed.
+4. The dark comparison confirmed the new C2 region geometry and hierarchy. The inherited upper-surface dark color difference was retained as an explicit product-token and scope constraint.
+
+## Verification
+
+- `flutter gen-l10n`: completed for ja/zh/en.
+- `flutter analyze`: passed with 0 issues.
+- Focused HomeHero, entry-form, and golden suite: 59 tests passed.
+- Full `flutter test`: 3,873 tests passed, 11 pre-existing skipped tests, 0 failures.
+- Light and dark HomeHero C2 goldens regenerated and passed.
+- Direct same-state, same-size source-versus-Flutter comparisons: passed.
+
+final result: passed
+
+---
+
+# V16 Settings Surfaces — Design QA (2026-08-01)
+
+## Scope and evidence
+
+- Source visual truth: `docs/mockup/v16/index.html` screens `設定`, `個人資料`, `バックアップと復元`, and `法務与赞助`, plus the user-supplied settings screenshots from 2026-08-01.
+- Flutter implementation: settings, profile edit, backup/restore, and legal/support presentation surfaces under `lib/features/`.
+- Viewport/state: 390×844 logical pixels, DPR 1, Japanese, A1 personal light, profile `あおい`, monthly Joy target `80`, family unconfigured, and app lock off.
+- Golden captures: `test/golden/goldens/settings_v16_light_ja.png`, `profile_edit_v16_light_ja.png`, `backup_restore_v16_light_ja.png`, and `legal_sponsor_v16_light_ja.png`.
+- Same-input comparisons: `/Users/xinz/.codex/visualizations/2026/08/01/019fbb2d-1f5d-77c0-b91d-720468b55c19/settings-mockup-flutter-comparison.png`, `profile-mockup-flutter-comparison.png`, `backup-mockup-flutter-comparison.png`, and `legal-mockup-flutter-comparison.png`.
+- Full-view evidence was used for all four surfaces; focused crops were unnecessary because every target fits within one 390×844 screen.
+
+## Findings and fixes
+
+- No actionable P0, P1, or P2 issue remains.
+- Settings now preserves the mockup hierarchy: profile header, General, Family, Security, Data, and This App. Week start, voice recognition, notifications, and destructive data deletion remain reachable under Other settings without crowding the primary path.
+- App-lock copy reflects stored initial state. Enabling requires PIN setup first; after activation, Face ID/fingerprint and PIN controls are available and can be changed independently within the established re-authentication rules.
+- Profile edit contains only avatar and display name; the family-display field is absent. The final pass corrected avatar scale, field width, and the solid primary save button against the source.
+- Backup and restore exposes only encrypted `.hpb` export/import in the primary flow. CSV and destructive deletion are absent from this destination, and restore warns that current data will be replaced.
+- Legal rows open real locale-specific public repository URLs, with bundled offline documents as fallback. The support card opens the operator's real contact page; no unverified donation destination was introduced.
+- The headless golden runner does not bundle Japanese glyph outlines, so its screenshots show fallback boxes; layout metrics, spacing, color, borders, radii, and interaction structure remain deterministic. Production uses the platform CJK fonts.
+
+## Comparison history and verification
+
+1. Initial comparison found the Joy target and app-lock rows too verbose, destructive deletion incorrectly attached to backup, and the profile CTA/avatar visually divergent.
+2. The primary settings rows were compacted, destructive deletion moved to Other settings, and the profile controls were aligned to the source.
+3. Final same-state comparisons found no remaining P0/P1/P2 mismatch.
+- `flutter analyze`: 0 issues.
+- Targeted settings/profile/backup/legal/family tests: 45 passed.
+- Golden suite: 4 passed at 390×844.
+- Full `flutter test`: 3,896 passed, 11 skipped.
+
+final result: passed
+
+---
+
 # V16 Initial Setup Title + Avatar Delta — Design QA (2026-07-26)
 
 ## Scope and evidence

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
 import '../../../../infrastructure/security/providers.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 import '../../../applock/presentation/providers/repository_providers.dart';
 import '../../../applock/presentation/screens/set_pin_screen.dart';
 import '../../../applock/presentation/widgets/pin_dots.dart';
@@ -30,9 +31,16 @@ import '../providers/state_settings.dart';
 /// so the Settings surface can never diverge from the cold-start gate. Plaintext
 /// PINs are never stored or logged; strings via [S]; theme via [context.palette].
 class SecuritySection extends ConsumerWidget {
-  const SecuritySection({super.key, required this.settings});
+  const SecuritySection({
+    super.key,
+    required this.settings,
+    this.showNotifications = true,
+    this.compact = false,
+  });
 
   final AppSettings settings;
+  final bool showNotifications;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,21 +55,31 @@ class SecuritySection extends ConsumerWidget {
       BiometricAvailability.generic => true,
       _ => false,
     };
+    final biometricAvailability = ref
+        .watch(biometricAvailabilityProvider)
+        .value;
+    final biometricLabel = switch (biometricAvailability) {
+      BiometricAvailability.faceId => l.securityFaceId,
+      BiometricAvailability.fingerprint => l.securityFingerprint,
+      _ => l.securityBiometricUnlock,
+    };
+    final lockStatus = !settings.appLockEnabled
+        ? l.securityAppLockOff
+        : settings.biometricUnlockEnabled
+        ? l.securityAppLockBiometricAndPin(biometricLabel)
+        : l.securityAppLockPinOnly;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SettingsSectionCard(
+      title: l.security,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            l.security,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
         SwitchListTile(
-          secondary: const Icon(Icons.lock_outline),
+          minTileHeight: kSettingsItemMinHeight,
+          minVerticalPadding: 8,
+          visualDensity: VisualDensity.standard,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          secondary: const SettingsTileIcon(icon: Icons.lock_outline),
           title: Text(l.securityAppLock),
-          subtitle: Text(l.securityAppLockDescription),
+          subtitle: Text(compact ? lockStatus : l.securityAppLockDescription),
           value: settings.appLockEnabled,
           onChanged: (value) =>
               value ? _enableLock(context, ref) : _disableLock(context, ref),
@@ -69,8 +87,16 @@ class SecuritySection extends ConsumerWidget {
         if (settings.appLockEnabled) ...[
           if (biometricAvailable)
             SwitchListTile(
-              secondary: const Icon(Icons.fingerprint),
-              title: Text(l.securityBiometricUnlock),
+              minTileHeight: kSettingsItemMinHeight,
+              minVerticalPadding: 8,
+              visualDensity: VisualDensity.standard,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              secondary: SettingsTileIcon(
+                icon: biometricAvailability == BiometricAvailability.faceId
+                    ? Icons.face_outlined
+                    : Icons.fingerprint,
+              ),
+              title: Text(compact ? biometricLabel : l.securityBiometricUnlock),
               subtitle: Text(l.securityBiometricUnlockDescription),
               value: settings.biometricUnlockEnabled,
               onChanged: (value) async {
@@ -80,24 +106,13 @@ class SecuritySection extends ConsumerWidget {
                 ref.invalidate(appSettingsProvider);
               },
             ),
-          ListTile(
-            leading: const Icon(Icons.password),
-            title: Text(l.securityChangePin),
+          SettingsActionTile(
+            icon: Icons.password,
+            title: l.securityChangePin,
             onTap: () => _changePin(context, ref),
           ),
         ],
-        SwitchListTile(
-          secondary: const Icon(Icons.notifications),
-          title: Text(S.of(context).notifications),
-          subtitle: Text(S.of(context).notificationsDescription),
-          value: settings.notificationsEnabled,
-          onChanged: (value) async {
-            await ref
-                .read(settingsRepositoryProvider)
-                .setNotificationsEnabled(value);
-            ref.invalidate(appSettingsProvider);
-          },
-        ),
+        if (showNotifications) NotificationsSettingTile(settings: settings),
       ],
     );
   }
@@ -146,6 +161,33 @@ class SecuritySection extends ConsumerWidget {
       builder: (_) => _PinReauthDialog(service: service),
     );
     return ok ?? false;
+  }
+}
+
+/// Notification preference row shown on the secondary settings screen.
+class NotificationsSettingTile extends ConsumerWidget {
+  const NotificationsSettingTile({super.key, required this.settings});
+
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SwitchListTile(
+      minTileHeight: kSettingsItemMinHeight,
+      minVerticalPadding: 8,
+      visualDensity: VisualDensity.standard,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      secondary: const SettingsTileIcon(icon: Icons.notifications_outlined),
+      title: Text(S.of(context).notifications),
+      subtitle: Text(S.of(context).notificationsDescription),
+      value: settings.notificationsEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(settingsRepositoryProvider)
+            .setNotificationsEnabled(value);
+        ref.invalidate(appSettingsProvider);
+      },
+    );
   }
 }
 

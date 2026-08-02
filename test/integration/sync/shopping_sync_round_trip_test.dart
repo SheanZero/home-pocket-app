@@ -10,7 +10,9 @@ import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
 import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -41,6 +43,16 @@ void main() {
     when(
       () => mockGroupRepository.getPendingGroup(),
     ).thenAnswer((_) async => null);
+    when(() => mockGroupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        groupName: 'Family',
+        status: GroupStatus.active,
+        role: 'member',
+        members: const [],
+        createdAt: DateTime.utc(2026),
+      ),
+    );
 
     shoppingItemDao = ShoppingItemDao(db);
     shoppingItemRepo = ShoppingItemRepositoryImpl(
@@ -66,6 +78,7 @@ void main() {
       shoppingItemRepository: shoppingItemRepo,
       shadowBookService: shadowBookService,
       groupRepository: mockGroupRepository,
+      inboundRepository: MemoryInboundSyncOperationRepository(),
     );
   });
 
@@ -336,6 +349,7 @@ void main() {
             transactionRepository: receiverTxRepo,
           ),
           groupRepository: mockGroupRepository,
+          inboundRepository: MemoryInboundSyncOperationRepository(),
         );
 
         await receiverApply.execute(ops);

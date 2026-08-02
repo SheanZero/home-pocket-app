@@ -38,7 +38,15 @@ mixin _$Transaction {
   DateTime? get updatedAt; // Flags
   bool get isPrivate;
   bool get isSynced;
-  bool get isDeleted; // Joy ledger fullness score (1-10, default 2)
+  bool
+  get isDeleted; // Deterministic family-sync version. Local mutations advance this Lamport
+  // value monotonically; remote peers compare it before applying state.
+  int get syncRevision;
+  String
+  get syncOriginDeviceId; // Local privacy ledger. These fields are persisted in the encrypted app
+  // database, but are never serialized into the family wire payload.
+  FamilySyncVisibility get familySyncVisibility;
+  int get familySharedRevision; // Joy ledger fullness score (1-10, default 2)
   int
   get joyFullness; // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
   // sync payloads / DB rows where the column DEFAULT triggered.
@@ -98,6 +106,14 @@ mixin _$Transaction {
                 other.isSynced == isSynced) &&
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
+            (identical(other.syncRevision, syncRevision) ||
+                other.syncRevision == syncRevision) &&
+            (identical(other.syncOriginDeviceId, syncOriginDeviceId) ||
+                other.syncOriginDeviceId == syncOriginDeviceId) &&
+            (identical(other.familySyncVisibility, familySyncVisibility) ||
+                other.familySyncVisibility == familySyncVisibility) &&
+            (identical(other.familySharedRevision, familySharedRevision) ||
+                other.familySharedRevision == familySharedRevision) &&
             (identical(other.joyFullness, joyFullness) ||
                 other.joyFullness == joyFullness) &&
             (identical(other.entrySource, entrySource) ||
@@ -130,13 +146,17 @@ mixin _$Transaction {
     isPrivate,
     isSynced,
     isDeleted,
+    syncRevision,
+    syncOriginDeviceId,
+    familySyncVisibility,
+    familySharedRevision,
     joyFullness,
     entrySource,
   ]);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, originalCurrency: $originalCurrency, originalAmount: $originalAmount, appliedRate: $appliedRate, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, joyFullness: $joyFullness, entrySource: $entrySource)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, originalCurrency: $originalCurrency, originalAmount: $originalAmount, appliedRate: $appliedRate, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId, familySyncVisibility: $familySyncVisibility, familySharedRevision: $familySharedRevision, joyFullness: $joyFullness, entrySource: $entrySource)';
   }
 }
 
@@ -170,6 +190,10 @@ abstract mixin class $TransactionCopyWith<$Res> {
     bool isPrivate,
     bool isSynced,
     bool isDeleted,
+    int syncRevision,
+    String syncOriginDeviceId,
+    FamilySyncVisibility familySyncVisibility,
+    int familySharedRevision,
     int joyFullness,
     EntrySource entrySource,
   });
@@ -209,6 +233,10 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
     Object? isPrivate = null,
     Object? isSynced = null,
     Object? isDeleted = null,
+    Object? syncRevision = null,
+    Object? syncOriginDeviceId = null,
+    Object? familySyncVisibility = null,
+    Object? familySharedRevision = null,
     Object? joyFullness = null,
     Object? entrySource = null,
   }) {
@@ -302,6 +330,22 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
             ? _self.isDeleted
             : isDeleted // ignore: cast_nullable_to_non_nullable
                   as bool,
+        syncRevision: null == syncRevision
+            ? _self.syncRevision
+            : syncRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        syncOriginDeviceId: null == syncOriginDeviceId
+            ? _self.syncOriginDeviceId
+            : syncOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        familySyncVisibility: null == familySyncVisibility
+            ? _self.familySyncVisibility
+            : familySyncVisibility // ignore: cast_nullable_to_non_nullable
+                  as FamilySyncVisibility,
+        familySharedRevision: null == familySharedRevision
+            ? _self.familySharedRevision
+            : familySharedRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
         joyFullness: null == joyFullness
             ? _self.joyFullness
             : joyFullness // ignore: cast_nullable_to_non_nullable
@@ -431,6 +475,10 @@ extension TransactionPatterns on Transaction {
       bool isPrivate,
       bool isSynced,
       bool isDeleted,
+      int syncRevision,
+      String syncOriginDeviceId,
+      FamilySyncVisibility familySyncVisibility,
+      int familySharedRevision,
       int joyFullness,
       EntrySource entrySource,
     )?
@@ -463,6 +511,10 @@ extension TransactionPatterns on Transaction {
           _that.isPrivate,
           _that.isSynced,
           _that.isDeleted,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
+          _that.familySyncVisibility,
+          _that.familySharedRevision,
           _that.joyFullness,
           _that.entrySource,
         );
@@ -509,6 +561,10 @@ extension TransactionPatterns on Transaction {
       bool isPrivate,
       bool isSynced,
       bool isDeleted,
+      int syncRevision,
+      String syncOriginDeviceId,
+      FamilySyncVisibility familySyncVisibility,
+      int familySharedRevision,
       int joyFullness,
       EntrySource entrySource,
     )
@@ -540,6 +596,10 @@ extension TransactionPatterns on Transaction {
           _that.isPrivate,
           _that.isSynced,
           _that.isDeleted,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
+          _that.familySyncVisibility,
+          _that.familySharedRevision,
           _that.joyFullness,
           _that.entrySource,
         );
@@ -585,6 +645,10 @@ extension TransactionPatterns on Transaction {
       bool isPrivate,
       bool isSynced,
       bool isDeleted,
+      int syncRevision,
+      String syncOriginDeviceId,
+      FamilySyncVisibility familySyncVisibility,
+      int familySharedRevision,
       int joyFullness,
       EntrySource entrySource,
     )?
@@ -616,6 +680,10 @@ extension TransactionPatterns on Transaction {
           _that.isPrivate,
           _that.isSynced,
           _that.isDeleted,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
+          _that.familySyncVisibility,
+          _that.familySharedRevision,
           _that.joyFullness,
           _that.entrySource,
         );
@@ -651,6 +719,10 @@ class _Transaction implements Transaction {
     this.isPrivate = false,
     this.isSynced = false,
     this.isDeleted = false,
+    this.syncRevision = 0,
+    this.syncOriginDeviceId = '',
+    this.familySyncVisibility = FamilySyncVisibility.localOnly,
+    this.familySharedRevision = 0,
     this.joyFullness = 2,
     this.entrySource = EntrySource.manual,
   }) : _metadata = metadata;
@@ -720,6 +792,22 @@ class _Transaction implements Transaction {
   @override
   @JsonKey()
   final bool isDeleted;
+  // Deterministic family-sync version. Local mutations advance this Lamport
+  // value monotonically; remote peers compare it before applying state.
+  @override
+  @JsonKey()
+  final int syncRevision;
+  @override
+  @JsonKey()
+  final String syncOriginDeviceId;
+  // Local privacy ledger. These fields are persisted in the encrypted app
+  // database, but are never serialized into the family wire payload.
+  @override
+  @JsonKey()
+  final FamilySyncVisibility familySyncVisibility;
+  @override
+  @JsonKey()
+  final int familySharedRevision;
   // Joy ledger fullness score (1-10, default 2)
   @override
   @JsonKey()
@@ -787,6 +875,14 @@ class _Transaction implements Transaction {
                 other.isSynced == isSynced) &&
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
+            (identical(other.syncRevision, syncRevision) ||
+                other.syncRevision == syncRevision) &&
+            (identical(other.syncOriginDeviceId, syncOriginDeviceId) ||
+                other.syncOriginDeviceId == syncOriginDeviceId) &&
+            (identical(other.familySyncVisibility, familySyncVisibility) ||
+                other.familySyncVisibility == familySyncVisibility) &&
+            (identical(other.familySharedRevision, familySharedRevision) ||
+                other.familySharedRevision == familySharedRevision) &&
             (identical(other.joyFullness, joyFullness) ||
                 other.joyFullness == joyFullness) &&
             (identical(other.entrySource, entrySource) ||
@@ -819,13 +915,17 @@ class _Transaction implements Transaction {
     isPrivate,
     isSynced,
     isDeleted,
+    syncRevision,
+    syncOriginDeviceId,
+    familySyncVisibility,
+    familySharedRevision,
     joyFullness,
     entrySource,
   ]);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, originalCurrency: $originalCurrency, originalAmount: $originalAmount, appliedRate: $appliedRate, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, joyFullness: $joyFullness, entrySource: $entrySource)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, originalCurrency: $originalCurrency, originalAmount: $originalAmount, appliedRate: $appliedRate, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId, familySyncVisibility: $familySyncVisibility, familySharedRevision: $familySharedRevision, joyFullness: $joyFullness, entrySource: $entrySource)';
   }
 }
 
@@ -861,6 +961,10 @@ abstract mixin class _$TransactionCopyWith<$Res>
     bool isPrivate,
     bool isSynced,
     bool isDeleted,
+    int syncRevision,
+    String syncOriginDeviceId,
+    FamilySyncVisibility familySyncVisibility,
+    int familySharedRevision,
     int joyFullness,
     EntrySource entrySource,
   });
@@ -900,6 +1004,10 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
     Object? isPrivate = null,
     Object? isSynced = null,
     Object? isDeleted = null,
+    Object? syncRevision = null,
+    Object? syncOriginDeviceId = null,
+    Object? familySyncVisibility = null,
+    Object? familySharedRevision = null,
     Object? joyFullness = null,
     Object? entrySource = null,
   }) {
@@ -993,6 +1101,22 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
             ? _self.isDeleted
             : isDeleted // ignore: cast_nullable_to_non_nullable
                   as bool,
+        syncRevision: null == syncRevision
+            ? _self.syncRevision
+            : syncRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        syncOriginDeviceId: null == syncOriginDeviceId
+            ? _self.syncOriginDeviceId
+            : syncOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        familySyncVisibility: null == familySyncVisibility
+            ? _self.familySyncVisibility
+            : familySyncVisibility // ignore: cast_nullable_to_non_nullable
+                  as FamilySyncVisibility,
+        familySharedRevision: null == familySharedRevision
+            ? _self.familySharedRevision
+            : familySharedRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
         joyFullness: null == joyFullness
             ? _self.joyFullness
             : joyFullness // ignore: cast_nullable_to_non_nullable

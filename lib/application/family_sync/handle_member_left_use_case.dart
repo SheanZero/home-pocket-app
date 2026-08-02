@@ -1,6 +1,7 @@
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
+import 'rotate_group_key_use_case.dart';
 import 'shadow_book_service.dart';
 
 /// Handles member_left push notification.
@@ -13,6 +14,7 @@ class HandleMemberLeftUseCase {
     required SyncQueueManager queueManager,
     required ShadowBookService shadowBookService,
     required KeyManager keyManager,
+    required RotateGroupKeyUseCase rotateGroupKey,
   }) : _groupRepo = groupRepo,
        _queueManager = queueManager,
        _shadowBookService = shadowBookService,
@@ -27,6 +29,7 @@ class HandleMemberLeftUseCase {
     required String groupId,
     required String deviceId,
     String? reason,
+    int? keyEpoch,
   }) async {
     final localDeviceId = await _keyManager.getDeviceId();
     if (localDeviceId != null &&
@@ -45,5 +48,10 @@ class HandleMemberLeftUseCase {
         .where((m) => m.deviceId != deviceId)
         .toList();
     await _groupRepo.updateMembers(groupId, updatedMembers);
+
+    // The relay now commits a server-backed, per-device rotation envelope in
+    // the same transaction as removal.  Generating another local key here can
+    // diverge from that durable epoch. SyncEngine refreshes the authoritative
+    // snapshot and pulls the targeted envelope instead.
   }
 }

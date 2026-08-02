@@ -31,6 +31,35 @@ Category? resolveParentCategory(
   return categoryById[parentId];
 }
 
+/// Returns a system category from the bundled catalog, or `null` for custom
+/// and unknown IDs.
+Category? defaultCategoryFromId(String categoryId) {
+  for (final category in DefaultCategories.all) {
+    if (category.id == categoryId) return category;
+  }
+  return null;
+}
+
+/// Resolves a transaction category label without ever exposing a valid custom
+/// category's storage ID while it is being loaded.
+String categoryNameForDisplay({
+  required String categoryId,
+  required Locale locale,
+  Category? category,
+  bool isLoading = false,
+}) {
+  // The bundled catalog is authoritative for system categories: it carries
+  // stable icon/name keys that must be localized for the active locale. The
+  // concrete database row is used only for custom categories, whose user-
+  // supplied name must never fall back to the storage id.
+  final resolvedCategory = defaultCategoryFromId(categoryId) ?? category;
+  if (resolvedCategory != null) {
+    return CategoryLocalizationService.resolve(resolvedCategory.name, locale);
+  }
+  if (isLoading) return '…';
+  return CategoryLocalizationService.resolveFromId(categoryId, locale);
+}
+
 /// Pure, provider-free resolver from a category id to a Material [IconData].
 ///
 /// Looks the id up in [DefaultCategories.all] (both L1 and L2) and feeds the
@@ -41,9 +70,9 @@ Category? resolveParentCategory(
 ///
 /// Safe by construction: never throws on an unknown id.
 IconData categoryIconFromId(String categoryId) {
-  final matches = DefaultCategories.all.where((c) => c.id == categoryId);
-  if (matches.isEmpty) return Icons.favorite_border;
-  return resolveCategoryIcon(matches.first.icon);
+  final category = defaultCategoryFromId(categoryId);
+  if (category == null) return Icons.favorite_border;
+  return resolveCategoryIcon(category.icon);
 }
 
 /// Parent-aware sibling of [categoryIconFromId] used by the home Best Joy
@@ -57,9 +86,9 @@ IconData categoryIconFromId(String categoryId) {
 /// 3. Matched L2 with a parentId → the parent's icon when the parent exists
 ///    in defaults; otherwise the category's OWN icon (graceful fallback).
 IconData parentCategoryIconFromId(String categoryId) {
-  final matches = DefaultCategories.all.where((c) => c.id == categoryId);
-  if (matches.isEmpty) return Icons.favorite_border;
-  return parentCategoryIconForCategory(matches.first);
+  final category = defaultCategoryFromId(categoryId);
+  if (category == null) return Icons.favorite_border;
+  return parentCategoryIconForCategory(category);
 }
 
 /// Resolves the parent-aware leading icon for a concrete [Category].

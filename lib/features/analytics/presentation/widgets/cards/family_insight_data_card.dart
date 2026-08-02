@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 
+import '../../../domain/models/metric_result.dart';
 import '../../analytics_card_registry.dart';
+import '../../providers/state_analytics.dart';
 import '../../providers/state_happiness.dart';
 import '../../providers/state_joy_metric_variant.dart';
 import '../analytics_card_error_state.dart';
@@ -56,13 +58,22 @@ class FamilyInsightDataCard extends ConsumerWidget {
         joyMetricVariant: joyMetricVariant,
       ),
     );
+    final categoryMap =
+        ref.watch(analyticsCategoriesMapProvider).value ?? const {};
     return familyAsync.when(
-      data: (family) => FamilyInsightCard(
-        family: family,
-        isGroupMode: isGroupMode,
-        shadowBooks: shadowBooksAsync.value,
-        locale: locale,
-      ),
+      data: (family) {
+        final sharedJoyCategory = switch (family.sharedJoyInsight) {
+          Value(:final data) => categoryMap[data.categoryId],
+          _ => null,
+        };
+        return FamilyInsightCard(
+          family: family,
+          isGroupMode: isGroupMode,
+          shadowBooks: shadowBooksAsync.value,
+          locale: locale,
+          sharedJoyCategory: sharedJoyCategory,
+        );
+      },
       loading: () => const SizedBox(height: 110),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(targets.single),

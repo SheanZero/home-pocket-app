@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 
 class MemberListTile extends StatelessWidget {
@@ -28,52 +30,91 @@ class MemberListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final name = isCurrentUser ? '$displayName$youSuffix' : displayName;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          AvatarDisplay(
-            emoji: avatarEmoji,
-            imagePath: avatarImagePath,
-            size: 44,
-            gradientColors: isOwner
-                ? null
-                : [
-                    palette.memberGradientA,
-                    palette.memberGradientB,
-                    palette.memberGradientC,
-                  ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onRemove,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 58),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
               children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textPrimary,
+                AvatarDisplay(
+                  emoji: avatarEmoji,
+                  imagePath: avatarImagePath,
+                  size: 42,
+                  gradientColors: isOwner
+                      ? null
+                      : [
+                          palette.memberGradientA,
+                          palette.memberGradientB,
+                          palette.memberGradientC,
+                        ],
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.itemTitle.copyWith(
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (isCurrentUser)
+                        Text(
+                          youSuffix,
+                          style: AppTextStyles.itemTitle.copyWith(
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  roleLabel,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isOwner ? FontWeight.w500 : FontWeight.w400,
-                    color: isOwner
-                        ? palette.accentPrimary
-                        : palette.textSecondary,
+                const SizedBox(width: 8),
+                if (isOwner)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: palette.accentPrimaryLight,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      roleLabel,
+                      style: AppTextStyles.compact.copyWith(
+                        color: palette.accentPrimary,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    roleLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.supporting.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
-                ),
+                if (onRemove != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 19,
+                    color: palette.textSecondary,
+                  ),
+                ],
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

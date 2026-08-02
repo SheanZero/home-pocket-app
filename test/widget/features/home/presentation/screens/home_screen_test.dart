@@ -12,6 +12,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_led
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_edit_screen.dart';
+import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
+import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -116,6 +118,8 @@ void main() {
     Widget buildSubject({
       Locale locale = const Locale('ja'),
       List<Transaction> transactions = const [],
+      Category? resolvedCategory,
+      MetricResult<BestJoyMomentRow>? bestJoy,
     }) {
       return ProviderScope(
         overrides: [
@@ -134,13 +138,17 @@ void main() {
             bookId: 'book_001',
             startDate: currentMonthStart,
             endDate: currentMonthEnd,
-          ).overrideWith((ref) async => fixtureBestJoyResultRich()),
+          ).overrideWith((ref) async => bestJoy ?? fixtureBestJoyResultRich()),
           bookByIdProvider(
             bookId: 'book_001',
           ).overrideWith((ref) async => _mockBook),
           todayTransactionsProvider(
             bookId: 'book_001',
           ).overrideWith((ref) async => transactions),
+          if (resolvedCategory != null)
+            categoryByIdProvider(
+              resolvedCategory.id,
+            ).overrideWith((ref) async => resolvedCategory),
           groupRepositoryProvider.overrideWithValue(groupRepository),
         ],
         child: testLocalizedApp(
@@ -293,6 +301,67 @@ void main() {
       expect(find.text('Cinema'), findsOneWidget);
     });
 
+    testWidgets('shows a custom L2 category name instead of its id', (
+      tester,
+    ) async {
+      final customCategory = Category(
+        id: 'custom-bakery',
+        name: 'Bakery',
+        icon: 'restaurant',
+        color: '#E85A4F',
+        parentId: 'cat_food',
+        level: 2,
+        sortOrder: 99,
+        createdAt: DateTime(2026, 7, 29),
+      );
+
+      await tester.pumpWidget(
+        buildSubject(
+          transactions: [
+            _buildTx(daily: true).copyWith(categoryId: customCategory.id),
+          ],
+          resolvedCategory: customCategory,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bakery'), findsOneWidget);
+      expect(find.text('custom-bakery'), findsNothing);
+    });
+
+    testWidgets('shows a custom category name in the monthly favorite', (
+      tester,
+    ) async {
+      final customCategory = Category(
+        id: 'custom-craft',
+        name: 'Craft supplies',
+        icon: 'sports_esports',
+        color: '#8B5CF6',
+        parentId: 'cat_hobbies',
+        level: 2,
+        sortOrder: 99,
+        createdAt: DateTime(2026, 7, 29),
+      );
+      final bestJoy = Value(
+        BestJoyMomentRow(
+          transactionId: 'tx-custom-favorite',
+          amount: 4800,
+          joyFullness: 9,
+          categoryId: customCategory.id,
+          timestamp: DateTime(2026, 7, 6),
+        ),
+        1,
+      );
+
+      await tester.pumpWidget(
+        buildSubject(resolvedCategory: customCategory, bestJoy: bestJoy),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Craft supplies'), findsOneWidget);
+      expect(find.text('custom-craft'), findsNothing);
+    });
+
     testWidgets('group mode tags tiles with member initial from device id', (
       tester,
     ) async {
@@ -438,7 +507,7 @@ Transaction _buildTx({bool daily = false}) {
     deviceId: 'device_local',
     amount: daily ? 1200 : 3400,
     type: TransactionType.expense,
-    categoryId: daily ? 'cat-food' : 'cat-hobby',
+    categoryId: daily ? 'cat_food_groceries' : 'cat_hobbies_movies',
     ledgerType: daily ? LedgerType.daily : LedgerType.joy,
     timestamp: DateTime(2026, 6, 10, 12),
     merchant: daily ? 'Supermarket' : 'Cinema',

@@ -9,6 +9,8 @@ class TransactionDao {
 
   final AppDatabase _db;
 
+  AppDatabase get attachedDatabase => _db;
+
   Future<void> insertTransaction({
     required String id,
     required String bookId,
@@ -27,6 +29,11 @@ class TransactionDao {
     String? prevHash,
     bool isPrivate = false,
     bool isSynced = false,
+    bool isDeleted = false,
+    int? syncRevision,
+    String? syncOriginDeviceId,
+    String familySyncVisibility = 'localOnly',
+    int familySharedRevision = 0,
     int joyFullness = 2,
     required String entrySource,
     String? originalCurrency,
@@ -54,6 +61,13 @@ class TransactionDao {
             prevHash: Value(prevHash),
             isPrivate: Value(isPrivate),
             isSynced: Value(isSynced),
+            isDeleted: Value(isDeleted),
+            syncRevision: Value(
+              syncRevision ?? createdAt.toUtc().microsecondsSinceEpoch,
+            ),
+            syncOriginDeviceId: Value(syncOriginDeviceId ?? deviceId),
+            familySyncVisibility: Value(familySyncVisibility),
+            familySharedRevision: Value(familySharedRevision),
             joyFullness: Value(joyFullness),
             entrySource: Value(entrySource),
             // Phase 42 multi-currency triple (P40 columns; null = JPY-native).
@@ -140,6 +154,11 @@ class TransactionDao {
     String? prevHash,
     bool isPrivate = false,
     bool isSynced = false,
+    bool isDeleted = false,
+    int? syncRevision,
+    String? syncOriginDeviceId,
+    String? familySyncVisibility,
+    int? familySharedRevision,
     int joyFullness = 2,
     String? entrySource,
     DateTime? updatedAt,
@@ -165,6 +184,19 @@ class TransactionDao {
         prevHash: Value(prevHash),
         isPrivate: Value(isPrivate),
         isSynced: Value(isSynced),
+        isDeleted: Value(isDeleted),
+        syncRevision: syncRevision != null
+            ? Value(syncRevision)
+            : const Value.absent(),
+        syncOriginDeviceId: syncOriginDeviceId != null
+            ? Value(syncOriginDeviceId)
+            : const Value.absent(),
+        familySyncVisibility: familySyncVisibility != null
+            ? Value(familySyncVisibility)
+            : const Value.absent(),
+        familySharedRevision: familySharedRevision != null
+            ? Value(familySharedRevision)
+            : const Value.absent(),
         joyFullness: Value(joyFullness),
         entrySource: entrySource != null
             ? Value(entrySource)
@@ -174,7 +206,6 @@ class TransactionDao {
         originalAmount: Value(originalAmount),
         appliedRate: Value(appliedRate),
         updatedAt: Value(updatedAt ?? DateTime.now()),
-        isDeleted: const Value(false),
       ),
     );
   }
@@ -195,6 +226,14 @@ class TransactionDao {
       ..where((t) => t.bookId.equals(bookId))
       ..where((t) => t.isDeleted.equals(false))
       ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]);
+    return query.get();
+  }
+
+  /// Complete state for family reconciliation, including tombstones.
+  Future<List<TransactionRow>> findAllByBookIncludingDeleted(String bookId) {
+    final query = _db.select(_db.transactions)
+      ..where((t) => t.bookId.equals(bookId))
+      ..orderBy([(t) => OrderingTerm.asc(t.id)]);
     return query.get();
   }
 
@@ -220,8 +259,7 @@ class TransactionDao {
   // ── Private helper: build ORDER BY clause string ────────────────────────
 
   String _orderByClause(SortField sortField, SortDirection sortDirection) {
-    final direction =
-        sortDirection == SortDirection.asc ? 'ASC' : 'DESC';
+    final direction = sortDirection == SortDirection.asc ? 'ASC' : 'DESC';
     final col = switch (sortField) {
       SortField.timestamp => 'timestamp',
       SortField.amount => 'amount',
@@ -258,10 +296,8 @@ class TransactionDao {
     if (bookIds.isEmpty) return const [];
 
     final placeholders = List.filled(bookIds.length, '?').join(', ');
-    final ledgerClause =
-        ledgerType != null ? ' AND ledger_type = ?' : '';
-    final categoryClause =
-        categoryId != null ? ' AND category_id = ?' : '';
+    final ledgerClause = ledgerType != null ? ' AND ledger_type = ?' : '';
+    final categoryClause = categoryId != null ? ' AND category_id = ?' : '';
     final orderBy = _orderByClause(sortField, sortDirection);
 
     final results = await _db
@@ -308,10 +344,8 @@ class TransactionDao {
     if (bookIds.isEmpty) return const Stream.empty();
 
     final placeholders = List.filled(bookIds.length, '?').join(', ');
-    final ledgerClause =
-        ledgerType != null ? ' AND ledger_type = ?' : '';
-    final categoryClause =
-        categoryId != null ? ' AND category_id = ?' : '';
+    final ledgerClause = ledgerType != null ? ' AND ledger_type = ?' : '';
+    final categoryClause = categoryId != null ? ' AND category_id = ?' : '';
     final orderBy = _orderByClause(sortField, sortDirection);
 
     return _db

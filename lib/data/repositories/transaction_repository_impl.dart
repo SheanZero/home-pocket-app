@@ -2,32 +2,40 @@ import 'dart:convert';
 
 import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/accounting/domain/models/transaction_family_sync_policy.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/field_encryption_service.dart';
 import '../../shared/constants/sort_config.dart';
 import '../app_database.dart';
+import '../daos/family_sync_outbox_dao.dart';
 import '../daos/transaction_dao.dart';
 
 /// Concrete implementation of [TransactionRepository].
 ///
 /// Handles encrypting/decrypting the `note` field via [FieldEncryptionService].
-class TransactionRepositoryImpl implements TransactionRepository {
+class TransactionRepositoryImpl
+    implements TransactionRepository, DurableFamilySyncTransactionRepository {
   TransactionRepositoryImpl({
     required TransactionDao dao,
     required FieldEncryptionService encryptionService,
   }) : _dao = dao,
+       _outboxDao = FamilySyncOutboxDao(dao.attachedDatabase),
        _encryptionService = encryptionService;
 
   final TransactionDao _dao;
+  final FamilySyncOutboxDao _outboxDao;
   final FieldEncryptionService _encryptionService;
 
   @override
   Future<void> insert(Transaction transaction) async {
-    String? encryptedNote;
-    if (transaction.note != null && transaction.note!.isNotEmpty) {
-      encryptedNote = await _encryptionService.encryptField(transaction.note!);
-    }
+    final encryptedNote = await _encryptNote(transaction.note);
+    await _insertPersisted(transaction, encryptedNote: encryptedNote);
+  }
 
+  Future<void> _insertPersisted(
+    Transaction transaction, {
+    required String? encryptedNote,
+  }) async {
     await _dao.insertTransaction(
       id: transaction.id,
       bookId: transaction.bookId,
@@ -48,6 +56,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
       prevHash: transaction.prevHash,
       isPrivate: transaction.isPrivate,
       isSynced: transaction.isSynced,
+      isDeleted: transaction.isDeleted,
+      syncRevision: _effectiveSyncRevision(transaction),
+      syncOriginDeviceId: _effectiveSyncOriginDeviceId(transaction),
+      familySyncVisibility: transaction.familySyncVisibility.name,
+      familySharedRevision: transaction.familySharedRevision,
       joyFullness: transaction.joyFullness,
       entrySource: transaction.entrySource.name,
       // Phase 42 multi-currency triple — persist so foreign rows round-trip.
@@ -89,11 +102,14 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<void> update(Transaction transaction) async {
-    String? encryptedNote;
-    if (transaction.note != null && transaction.note!.isNotEmpty) {
-      encryptedNote = await _encryptionService.encryptField(transaction.note!);
-    }
+    final encryptedNote = await _encryptNote(transaction.note);
+    await _updatePersisted(transaction, encryptedNote: encryptedNote);
+  }
 
+  Future<void> _updatePersisted(
+    Transaction transaction, {
+    required String? encryptedNote,
+  }) async {
     await _dao.updateTransaction(
       id: transaction.id,
       bookId: transaction.bookId,
@@ -114,6 +130,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
       prevHash: transaction.prevHash,
       isPrivate: transaction.isPrivate,
       isSynced: transaction.isSynced,
+      isDeleted: transaction.isDeleted,
+      syncRevision: _effectiveSyncRevision(transaction),
+      syncOriginDeviceId: _effectiveSyncOriginDeviceId(transaction),
+      familySyncVisibility: transaction.familySyncVisibility.name,
+      familySharedRevision: transaction.familySharedRevision,
       joyFullness: transaction.joyFullness,
       entrySource: transaction.entrySource.name,
       updatedAt: transaction.updatedAt,
@@ -122,6 +143,62 @@ class TransactionRepositoryImpl implements TransactionRepository {
       originalAmount: transaction.originalAmount,
       appliedRate: transaction.appliedRate,
     );
+  }
+
+  @override
+  Future<bool> insertWithFamilySyncOutbox(
+    Transaction transaction, {
+    Map<String, dynamic>? operation,
+  }) async {
+    final encryptedNote = await _encryptNote(transaction.note);
+    return _dao.attachedDatabase.transaction(() async {
+      await _insertPersisted(transaction, encryptedNote: encryptedNote);
+      return _enqueueForCurrentGroup(operation);
+    });
+  }
+
+  @override
+  Future<bool> updateWithFamilySyncOutbox(
+    Transaction transaction, {
+    Map<String, dynamic>? operation,
+  }) async {
+    final encryptedNote = await _encryptNote(transaction.note);
+    return _dao.attachedDatabase.transaction(() async {
+      await _updatePersisted(transaction, encryptedNote: encryptedNote);
+      return _enqueueForCurrentGroup(operation);
+    });
+  }
+
+  Future<bool> _enqueueForCurrentGroup(Map<String, dynamic>? operation) async {
+    if (operation == null) return false;
+    if (!TransactionFamilySyncPolicy.isSafeOutboundOperation(operation)) {
+      throw const FormatException('Unsafe family sync operation');
+    }
+    final group = await _dao.attachedDatabase
+        .customSelect(
+          "SELECT group_id FROM groups WHERE status = 'active' "
+          'ORDER BY group_id LIMIT 2',
+        )
+        .get();
+    if (group.isEmpty) return false;
+    if (group.length != 1) {
+      throw StateError('Multiple active family groups found');
+    }
+    final groupId = group.single.read<String>('group_id');
+    final entityType = operation['entityType'] as String;
+    final entityId = operation['entityId'] as String;
+    final revision = (operation['revision'] as num).toInt();
+    final durableOperation = Map<String, dynamic>.of(operation)
+      ..['operationId'] = 'outbox:$groupId:$entityType:$entityId:$revision';
+    return _outboxDao.upsertOperation(
+      groupId: groupId,
+      operation: durableOperation,
+    );
+  }
+
+  Future<String?> _encryptNote(String? note) async {
+    if (note == null || note.isEmpty) return null;
+    return _encryptionService.encryptField(note);
   }
 
   @override
@@ -222,6 +299,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isPrivate: row.isPrivate,
       isSynced: row.isSynced,
       isDeleted: row.isDeleted,
+      syncRevision: row.syncRevision,
+      syncOriginDeviceId: row.syncOriginDeviceId,
+      familySyncVisibility: FamilySyncVisibility.values.byName(
+        row.familySyncVisibility,
+      ),
+      familySharedRevision: row.familySharedRevision,
       joyFullness: row.joyFullness,
       entrySource: EntrySource.values.byName(row.entrySource),
       // Phase 42 multi-currency triple — map DB columns back so foreign rows
@@ -230,5 +313,18 @@ class TransactionRepositoryImpl implements TransactionRepository {
       originalAmount: row.originalAmount,
       appliedRate: row.appliedRate,
     );
+  }
+
+  int _effectiveSyncRevision(Transaction transaction) {
+    if (transaction.syncRevision > 0) return transaction.syncRevision;
+    return (transaction.updatedAt ?? transaction.createdAt)
+        .toUtc()
+        .microsecondsSinceEpoch;
+  }
+
+  String _effectiveSyncOriginDeviceId(Transaction transaction) {
+    return transaction.syncOriginDeviceId.isNotEmpty
+        ? transaction.syncOriginDeviceId
+        : transaction.deviceId;
   }
 }

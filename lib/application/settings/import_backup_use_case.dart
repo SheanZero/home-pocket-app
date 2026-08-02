@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/models/category.dart';
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
@@ -129,7 +130,15 @@ class ImportBackupUseCase {
 
       // Import transactions
       for (final txJson in backupData.transactions) {
-        final transaction = Transaction.fromJson(txJson);
+        final transaction =
+            Transaction.fromJson(
+              TransactionPhotoSyncPolicy.sanitizeBackupJson(txJson),
+            ).copyWith(
+              // A restore is a local recovery action, not consent to publish old
+              // financial history into the currently active family group.
+              familySyncVisibility: FamilySyncVisibility.localOnly,
+              familySharedRevision: 0,
+            );
         await _transactionRepo.insert(transaction);
       }
 

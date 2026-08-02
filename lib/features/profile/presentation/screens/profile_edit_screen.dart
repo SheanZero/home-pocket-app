@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/profile/save_user_profile_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../domain/models/user_profile.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_user_profile.dart';
 import '../widgets/avatar_display.dart';
-import '../widgets/scattered_emoji_background.dart';
 import 'avatar_picker_screen.dart';
 
 class ProfileEditScreen extends ConsumerStatefulWidget {
@@ -81,6 +81,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           avatarEmoji: _selectedEmoji,
           avatarImagePath: _selectedImagePath,
           oldAvatarImagePath: widget.profile.avatarImagePath,
+          onSaved: () => ref.read(syncEngineProvider).onProfileChanged(),
         );
 
     if (!mounted) {
@@ -106,148 +107,87 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
     return Scaffold(
       backgroundColor: palette.background,
-      body: ScatteredEmojiBackground(
-        pattern: ScatteredEmojiPattern.profileEdit,
-        child: SafeArea(
+      appBar: AppBar(centerTitle: true, title: Text(l10n.profileEdit)),
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 8,
-                ),
-                child: Row(
+              GestureDetector(
+                onTap: _openAvatarPicker,
+                child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Icon(
-                        Icons.chevron_left,
-                        size: 22,
-                        color: palette.textPrimary,
-                      ),
+                    AvatarDisplay(
+                      emoji: _selectedEmoji,
+                      imagePath: _selectedImagePath,
+                      size: 88,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      l10n.profileEdit,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: palette.textPrimary,
-                      ),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: _openAvatarPicker,
+                      child: Text(l10n.profileChangeAvatar),
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 40, 28, 28),
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: _openAvatarPicker,
-                        child: Column(
-                          children: [
-                            AvatarDisplay(
-                              emoji: _selectedEmoji,
-                              imagePath: _selectedImagePath,
-                              size: 110,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              '✏️ ${l10n.profileChangeAvatar}',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: palette.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          l10n.profileNickname,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _nicknameController,
-                        onChanged: (_) => setState(() {}),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: palette.textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: l10n.profileNicknamePlaceholder,
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: palette.textSecondary,
-                          ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              start: 16,
-                              end: 10,
-                            ),
-                            child: Center(
-                              widthFactor: 1,
-                              child: Text(
-                                '📝',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: palette.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                          prefixIconConstraints: const BoxConstraints(
-                            minWidth: 0,
-                            minHeight: 0,
-                          ),
-                          filled: true,
-                          fillColor: palette.backgroundMuted,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 14,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: palette.borderDefault,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: palette.borderDefault,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: palette.accentPrimary,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _ProfileEditButton(
-                        label: l10n.profileSave,
-                        enabled: _canSave,
-                        onPressed: _save,
-                      ),
-                    ],
+              const SizedBox(height: 32),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.profileDisplayName,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                    color: palette.textSecondary,
                   ),
                 ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _nicknameController,
+                onChanged: (_) => setState(() {}),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: palette.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: l10n.profileNicknamePlaceholder,
+                  hintStyle: TextStyle(
+                    fontSize: 14,
+                    color: palette.textSecondary,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.badge_outlined,
+                    color: palette.textSecondary,
+                  ),
+                  filled: true,
+                  fillColor: palette.card,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: palette.borderDefault),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: palette.borderDefault),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: palette.accentPrimary,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _ProfileEditButton(
+                label: l10n.profileSave,
+                enabled: _canSave,
+                onPressed: _save,
               ),
             ],
           ),
@@ -286,14 +226,7 @@ class _ProfileEditButton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: enabled
-              ? [palette.accentPrimary, palette.fabGradientStart]
-              : [
-                  palette.accentPrimary.withValues(alpha: 0.45),
-                  palette.fabGradientStart.withValues(alpha: 0.45),
-                ],
-        ),
+        color: palette.accentPrimary.withValues(alpha: enabled ? 1 : 0.45),
         boxShadow: [
           BoxShadow(
             color: palette.accentPrimary.withValues(

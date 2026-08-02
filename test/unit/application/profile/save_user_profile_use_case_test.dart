@@ -37,6 +37,40 @@ void main() {
       verify(() => repository.save(any())).called(1);
     });
 
+    test('triggers profile sync only after the local save succeeds', () async {
+      final events = <String>[];
+      when(() => repository.save(any())).thenAnswer((_) async {
+        events.add('saved');
+      });
+      when(() => repository.find()).thenAnswer((_) async => null);
+
+      final result = await useCase.execute(
+        displayName: 'たけし',
+        avatarEmoji: '🐱',
+        onSaved: () => events.add('sync'),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(events, ['saved', 'sync']);
+    });
+
+    test(
+      'sync trigger failure never rolls back the saved local profile',
+      () async {
+        when(() => repository.save(any())).thenAnswer((_) async {});
+        when(() => repository.find()).thenAnswer((_) async => null);
+
+        final result = await useCase.execute(
+          displayName: 'たけし',
+          avatarEmoji: '🐱',
+          onSaved: () => throw StateError('scheduler unavailable'),
+        );
+
+        expect(result.isSuccess, isTrue);
+        verify(() => repository.save(any())).called(1);
+      },
+    );
+
     test('saves a valid icon-library avatar', () async {
       when(() => repository.save(any())).thenAnswer((_) async {});
       when(() => repository.find()).thenAnswer((_) async => null);

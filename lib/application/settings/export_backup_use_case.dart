@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
+import '../../features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -69,7 +70,9 @@ class ExportBackupUseCase {
           deviceId: deviceId ?? 'unknown',
           appVersion: appVersion ?? '0.1.0',
         ),
-        transactions: transactions.map((tx) => tx.toJson()).toList(),
+        transactions: transactions
+            .map(TransactionPhotoSyncPolicy.toBackupJson)
+            .toList(),
         categories: categories.map((cat) => cat.toJson()).toList(),
         books: books.map((book) => book.toJson()).toList(),
         settings: settings.toJson(),

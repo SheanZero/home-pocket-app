@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../features/accounting/presentation/providers/repository_providers.dart'
+    show categoryByIdProvider;
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
+import '../../../../features/accounting/presentation/utils/category_display_utils.dart';
 import '../../../../features/home/presentation/widgets/month_picker_dialog.dart';
 import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../features/settings/presentation/screens/settings_screen.dart';
@@ -335,10 +337,20 @@ class ListScreen extends ConsumerWidget {
     // Leading category icon uses the same ledger-text colour as the tag (v15).
     final categoryColor = tagTextColor;
 
-    // Locale-resolved category name (FILTER-01 / D-04 — NEVER raw categoryId)
-    final category = CategoryLocalizationService.resolveFromId(
-      transaction.categoryId,
-      locale,
+    final defaultCategory = defaultCategoryFromId(transaction.categoryId);
+    final customCategoryAsync = defaultCategory == null
+        ? ref.watch(categoryByIdProvider(transaction.categoryId))
+        : null;
+    final displayCategory = defaultCategory ?? customCategoryAsync?.value;
+
+    // Locale-resolved category name. Custom categories come from encrypted
+    // local storage; an ellipsis is shown during the short lookup rather than
+    // leaking the opaque storage ID into the row.
+    final category = categoryNameForDisplay(
+      categoryId: transaction.categoryId,
+      category: displayCategory,
+      locale: locale,
+      isLoading: customCategoryAsync?.isLoading ?? false,
     );
 
     // Formatted amount with currency symbol (SC#1 — amountSmall tabular figures applied by tile)
@@ -371,8 +383,9 @@ class ListScreen extends ConsumerWidget {
           )
         : null;
 
-    // L1 icon resolved from category ID
-    final l1Icon = _resolveL1IconForCategory(transaction.categoryId);
+    final l1Icon = displayCategory == null
+        ? Icons.category
+        : parentCategoryIconForCategory(displayCategory);
 
     // Satisfaction face: joy transactions only (ADR-014 mapping)
     final satisfactionValue = transaction.ledgerType == LedgerType.joy
@@ -434,40 +447,5 @@ class ListScreen extends ConsumerWidget {
     // Dividers between rows are owned by [_transactionCard]; the tile renders
     // bare.
     return tile;
-  }
-
-  /// Resolves the L1 category icon from a category ID string.
-  ///
-  /// Category IDs follow the pattern 'cat_{l1key}' (L1) or
-  /// 'cat_{l1key}_{l2key}' (L2). For L2 IDs the last segment is stripped
-  /// to get the L1 prefix, which is then looked up in the static icon map.
-  static IconData _resolveL1IconForCategory(String categoryId) {
-    const iconMap = <String, IconData>{
-      'cat_food': Icons.restaurant,
-      'cat_daily': Icons.local_mall,
-      'cat_transport': Icons.directions_bus,
-      'cat_hobbies': Icons.sports_esports,
-      'cat_clothing': Icons.checkroom,
-      'cat_social': Icons.people,
-      'cat_health': Icons.local_hospital,
-      'cat_education': Icons.school,
-      'cat_utilities': Icons.flash_on,
-      'cat_communication': Icons.phone_iphone,
-      'cat_housing': Icons.home,
-      'cat_car': Icons.directions_car,
-      'cat_tax': Icons.account_balance,
-      'cat_insurance': Icons.security,
-      'cat_special': Icons.star,
-      'cat_savings': Icons.savings,
-      'cat_other': Icons.more_horiz,
-    };
-
-    if (!categoryId.startsWith('cat_')) return Icons.category;
-
-    // Strip 'cat_' prefix, split remainder on '_', take first segment
-    final withoutPrefix = categoryId.substring(4); // remove 'cat_'
-    final parts = withoutPrefix.split('_');
-    final l1Key = 'cat_${parts.first}';
-    return iconMap[l1Key] ?? Icons.category;
   }
 }

@@ -6,10 +6,12 @@ import 'package:mocktail/mocktail.dart';
 class MockPushSyncUseCase extends Mock implements PushSyncUseCase {}
 
 Map<String, dynamic> _txnOp(String id) => {
-  'op': 'create',
+  'op': 'reconcile',
   'entityType': 'bill',
   'entityId': id,
-  'data': {'id': id},
+  'revision': 100,
+  'originDeviceId': 'device-a',
+  'data': {'id': id, 'syncRevision': 100},
   'timestamp': 123,
 };
 
@@ -69,11 +71,60 @@ void main() {
     verify(
       () => pushSync.execute(
         operations: any(named: 'operations'),
-        vectorClock: {'full_sync': 0},
+        vectorClock: {'device-a': 100},
         syncType: 'full',
       ),
     ).called(1);
   });
+
+  test('full sync keeps live state and only minimal tombstones', () async {
+    final tombstone = {
+      'op': 'delete',
+      'entityType': 'bill',
+      'entityId': 'tx-deleted',
+      'data': {
+        'isDeleted': true,
+        'syncRevision': 200,
+        'syncOriginDeviceId': 'device-a',
+      },
+      'revision': 200,
+      'originDeviceId': 'device-a',
+      'timestamp': 123,
+    };
+    final useCase = buildUseCase(transactions: [_txnOp('tx-live'), tombstone]);
+
+    expect(await useCase.execute(), 2);
+
+    final pushed = capturedPushedOps();
+    expect(pushed.map((op) => op['op']), containsAll({'reconcile', 'delete'}));
+    final deletedData =
+        pushed.singleWhere((op) => op['entityId'] == 'tx-deleted')['data']
+            as Map<String, dynamic>;
+    expect(
+      deletedData.keys,
+      unorderedEquals({'isDeleted', 'syncRevision', 'syncOriginDeviceId'}),
+    );
+  });
+
+  test(
+    'full sync carries explicit local-only photo availability without a hash',
+    () async {
+      final photo = {
+        ..._txnOp('tx-photo'),
+        'data': {
+          'id': 'tx-photo',
+          'syncRevision': 100,
+          'photoAvailability': 'local_only',
+        },
+      };
+      final useCase = buildUseCase(transactions: [photo]);
+
+      expect(await useCase.execute(), 1);
+      final data = capturedPushedOps().single['data'] as Map<String, dynamic>;
+      expect(data['photoAvailability'], 'local_only');
+      expect(data, isNot(contains('photoHash')));
+    },
+  );
 
   test(
     'pushes transactions and public shopping ops in the same stream (W1)',
@@ -165,6 +216,34 @@ void main() {
     ).called(3); // 120 ops → chunks of 50, 50, 20
   });
 
+  test(
+    'each queued chunk carries the vector clock for its own operations',
+    () async {
+      final firstChunk = List.generate(50, (i) => _txnOp('tx-a-$i'));
+      final secondChunk = {
+        ..._txnOp('tx-z'),
+        'revision': 900,
+        'originDeviceId': 'device-z',
+        'data': {'id': 'tx-z', 'syncRevision': 900},
+      };
+      final useCase = buildUseCase(transactions: [...firstChunk, secondChunk]);
+
+      await useCase.execute();
+
+      final clocks = verify(
+        () => pushSync.execute(
+          operations: any(named: 'operations'),
+          vectorClock: captureAny(named: 'vectorClock'),
+          syncType: 'full',
+        ),
+      ).captured.cast<Map<String, int>>();
+      expect(clocks, [
+        {'device-a': 100},
+        {'device-z': 900},
+      ]);
+    },
+  );
+
   test('returns 0 and never pushes when both sources are empty', () async {
     final useCase = buildUseCase();
 
@@ -179,4 +258,64 @@ void main() {
       ),
     );
   });
+
+  test('settles only chunks explicitly accepted by relay', () async {
+    final accepted = <Map<String, dynamic>>[];
+    final useCase = FullSyncUseCase(
+      pushSync: pushSync,
+      fetchAllTransactions: () async => [_txnOp('tx-covered')],
+      fetchAllShoppingOps: () async => const [],
+      onOperationsAccepted: (operations) async => accepted.addAll(operations),
+    );
+
+    expect(await useCase.execute(), 1);
+    expect(accepted.single['entityId'], 'tx-covered');
+
+    accepted.clear();
+    when(
+      () => pushSync.execute(
+        operations: any(named: 'operations'),
+        vectorClock: any(named: 'vectorClock'),
+        syncType: any(named: 'syncType'),
+      ),
+    ).thenAnswer((_) async => const PushSyncResult.error('offline'));
+    expect(await useCase.execute(), 0);
+    expect(accepted, isEmpty);
+  });
+
+  test(
+    'durably queued withdrawal retains the tombstone until relay ACK',
+    () async {
+      when(
+        () => pushSync.execute(
+          operations: any(named: 'operations'),
+          vectorClock: any(named: 'vectorClock'),
+          syncType: any(named: 'syncType'),
+        ),
+      ).thenAnswer((_) async => const PushSyncResult.queued(1));
+      final accepted = <Map<String, dynamic>>[];
+      final tombstone = {
+        'op': 'delete',
+        'entityType': 'bill',
+        'entityId': 'tx-archived-withdrawal',
+        'revision': 300,
+        'originDeviceId': 'device-a',
+        'data': {
+          'isDeleted': true,
+          'syncRevision': 300,
+          'syncOriginDeviceId': 'device-a',
+        },
+        'timestamp': 123,
+      };
+      final useCase = FullSyncUseCase(
+        pushSync: pushSync,
+        fetchAllTransactions: () async => [tombstone],
+        fetchAllShoppingOps: () async => const [],
+        onOperationsAccepted: (operations) async => accepted.addAll(operations),
+      );
+
+      expect(await useCase.execute(), 1);
+      expect(accepted, isEmpty);
+    },
+  );
 }

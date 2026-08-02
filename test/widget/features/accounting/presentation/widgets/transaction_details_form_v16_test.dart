@@ -7,6 +7,7 @@ import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_details_form_config.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/detail_info_card.dart';
@@ -68,6 +69,7 @@ void main() {
   Widget buildForm({
     required GlobalKey<TransactionDetailsFormState> formKey,
     bool useV16Layout = false,
+    LedgerType? initialLedgerType,
     TransactionDetailsFormConfig? config,
     List<Override> overrides = const [],
   }) {
@@ -82,6 +84,7 @@ void main() {
                 entrySource: EntrySource.manual,
               ),
           useV16Layout: useV16Layout,
+          initialLedgerType: initialLedgerType,
         ),
       ),
       overrides: [
@@ -119,6 +122,85 @@ void main() {
       10,
     );
     expect(tester.getTopLeft(note).dy - tester.getBottomLeft(purpose).dy, 10);
+  });
+
+  testWidgets('edit form explains local-only and unavailable receipt photos', (
+    tester,
+  ) async {
+    final category = Category(
+      id: 'cat-food',
+      name: 'Food',
+      icon: 'restaurant',
+      color: '#000000',
+      level: 1,
+      createdAt: DateTime.utc(2026),
+    );
+    Transaction seed({String? photoHash, Map<String, dynamic>? metadata}) {
+      return Transaction(
+        id: 'tx-photo',
+        bookId: 'book-1',
+        deviceId: 'device-a',
+        amount: 1000,
+        type: TransactionType.expense,
+        categoryId: category.id,
+        ledgerType: LedgerType.daily,
+        timestamp: DateTime.utc(2026, 8, 1),
+        photoHash: photoHash,
+        metadata: metadata,
+        currentHash: 'hash',
+        createdAt: DateTime.utc(2026, 8, 1),
+      );
+    }
+
+    final formKey = GlobalKey<TransactionDetailsFormState>();
+    await tester.pumpWidget(
+      buildForm(
+        formKey: formKey,
+        useV16Layout: true,
+        config: TransactionDetailsFormConfig.edit(
+          seed: seed(photoHash: 'local-hash'),
+        ),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            _SingleCategoryRepository(category),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('transaction-photo-local-only')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('this device'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    final remoteKey = GlobalKey<TransactionDetailsFormState>();
+    await tester.pumpWidget(
+      buildForm(
+        formKey: remoteKey,
+        useV16Layout: true,
+        config: TransactionDetailsFormConfig.edit(
+          seed: seed(
+            metadata: const {
+              TransactionPhotoSyncPolicy.metadataAvailabilityKey:
+                  TransactionPhotoSyncPolicy.localOnly,
+            },
+          ),
+        ),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            _SingleCategoryRepository(category),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('transaction-photo-unavailable')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('recorded this transaction'), findsOneWidget);
   });
 
   testWidgets('v16 ledger API restores joy state and compact satisfaction', (
@@ -172,6 +254,44 @@ void main() {
       ),
     );
     expect(dailyOption.padding, const EdgeInsets.symmetric(horizontal: 12));
+  });
+
+  testWidgets('v16 new entry can start with the Joy ledger selected', (
+    tester,
+  ) async {
+    final category = Category(
+      id: 'cat_food_cafe',
+      name: 'category_food_cafe',
+      icon: 'local_cafe',
+      color: '#795548',
+      parentId: 'cat_food',
+      level: 2,
+      isSystem: true,
+      createdAt: DateTime.utc(2026),
+    );
+    final formKey = GlobalKey<TransactionDetailsFormState>();
+
+    await tester.pumpWidget(
+      buildForm(
+        formKey: formKey,
+        useV16Layout: true,
+        initialLedgerType: LedgerType.joy,
+        config: TransactionDetailsFormConfig.$new(
+          bookId: 'book-1',
+          initialCategory: category,
+          entrySource: EntrySource.manual,
+        ),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            _SingleCategoryRepository(category),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(formKey.currentState!.currentLedgerType, LedgerType.joy);
+    expect(find.byKey(const ValueKey('v16-satisfaction-card')), findsOneWidget);
   });
 
   testWidgets(

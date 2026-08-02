@@ -9,6 +9,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
+import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 
 class _MockTransactionRepository extends Mock
     implements TransactionRepository {}
@@ -111,8 +112,55 @@ void main() {
       expect(result.data!.deviceId, 'device_test_001');
       expect(result.data!.currentHash, 'computed_hash_xyz');
       expect(result.data!.prevHash, 'prev_hash_abc');
+      expect(result.data!.familySyncVisibility, FamilySyncVisibility.shared);
       verify(() => mockTransactionRepo.insert(any())).called(1);
     });
+
+    test(
+      'new private transaction persists locally without family op',
+      () async {
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => testCategory);
+        when(
+          () => mockHashChainService.calculateTransactionHash(
+            transactionId: any(named: 'transactionId'),
+            amount: any(named: 'amount'),
+            timestamp: any(named: 'timestamp'),
+            previousHash: any(named: 'previousHash'),
+          ),
+        ).thenReturn('private-hash');
+        when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+        final tracker = TransactionChangeTracker();
+        final privateUseCase = CreateTransactionUseCase(
+          transactionRepository: mockTransactionRepo,
+          categoryRepository: mockCategoryRepo,
+          deviceIdentityRepository: mockDeviceIdentityRepo,
+          hashChainService: mockHashChainService,
+          categoryService: mockCategoryService,
+          changeTracker: tracker,
+        );
+
+        final result = await privateUseCase.execute(
+          const CreateTransactionParams(
+            bookId: 'book_001',
+            amount: 1500,
+            type: TransactionType.expense,
+            categoryId: 'cat_food',
+            entrySource: EntrySource.manual,
+            isPrivate: true,
+          ),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.data!.isPrivate, isTrue);
+        expect(
+          result.data!.familySyncVisibility,
+          FamilySyncVisibility.localOnly,
+        );
+        expect(tracker.pendingCount, 0);
+      },
+    );
 
     test('uses genesis hash when no previous transactions', () async {
       when(
@@ -321,37 +369,40 @@ void main() {
       },
     );
 
-    test('user-supplied ledgerType overrides CategoryService derivation', () async {
-      // When params.ledgerType is non-null, the use case must NOT call
-      // resolveLedgerType — the form/user override wins.
-      when(
-        () => mockCategoryRepo.findById('cat_food'),
-      ).thenAnswer((_) async => testCategory);
-      when(
-        () => mockHashChainService.calculateTransactionHash(
-          transactionId: any(named: 'transactionId'),
-          amount: any(named: 'amount'),
-          timestamp: any(named: 'timestamp'),
-          previousHash: any(named: 'previousHash'),
-        ),
-      ).thenReturn('hash_override');
-      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+    test(
+      'user-supplied ledgerType overrides CategoryService derivation',
+      () async {
+        // When params.ledgerType is non-null, the use case must NOT call
+        // resolveLedgerType — the form/user override wins.
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => testCategory);
+        when(
+          () => mockHashChainService.calculateTransactionHash(
+            transactionId: any(named: 'transactionId'),
+            amount: any(named: 'amount'),
+            timestamp: any(named: 'timestamp'),
+            previousHash: any(named: 'previousHash'),
+          ),
+        ).thenReturn('hash_override');
+        when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
-      final result = await useCase.execute(
-        CreateTransactionParams(
-          bookId: 'book_001',
-          amount: 2000,
-          type: TransactionType.expense,
-          categoryId: 'cat_food',
-          ledgerType: LedgerType.joy,
-          entrySource: EntrySource.manual,
-        ),
-      );
+        final result = await useCase.execute(
+          CreateTransactionParams(
+            bookId: 'book_001',
+            amount: 2000,
+            type: TransactionType.expense,
+            categoryId: 'cat_food',
+            ledgerType: LedgerType.joy,
+            entrySource: EntrySource.manual,
+          ),
+        );
 
-      expect(result.isSuccess, isTrue);
-      expect(result.data!.ledgerType, LedgerType.joy);
-      verifyNever(() => mockCategoryService.resolveLedgerType(any()));
-    });
+        expect(result.isSuccess, isTrue);
+        expect(result.data!.ledgerType, LedgerType.joy);
+        verifyNever(() => mockCategoryService.resolveLedgerType(any()));
+      },
+    );
 
     test('uses default joy satisfaction 2 for joy transactions', () async {
       when(
@@ -385,40 +436,43 @@ void main() {
       expect(result.data!.joyFullness, 2);
     });
 
-    test('derives ledger from the final category id (passes categoryId)', () async {
-      when(
-        () => mockCategoryRepo.findById('cat_food'),
-      ).thenAnswer((_) async => testCategory);
-      when(
-        () => mockTransactionRepo.getLatestHash('book_001'),
-      ).thenAnswer((_) async => null);
-      when(
-        () => mockHashChainService.calculateTransactionHash(
-          transactionId: any(named: 'transactionId'),
-          amount: any(named: 'amount'),
-          timestamp: any(named: 'timestamp'),
-          previousHash: any(named: 'previousHash'),
-        ),
-      ).thenReturn('hash_123');
-      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+    test(
+      'derives ledger from the final category id (passes categoryId)',
+      () async {
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => testCategory);
+        when(
+          () => mockTransactionRepo.getLatestHash('book_001'),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockHashChainService.calculateTransactionHash(
+            transactionId: any(named: 'transactionId'),
+            amount: any(named: 'amount'),
+            timestamp: any(named: 'timestamp'),
+            previousHash: any(named: 'previousHash'),
+          ),
+        ).thenReturn('hash_123');
+        when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
-      await useCase.execute(
-        CreateTransactionParams(
-          bookId: 'book_001',
-          amount: 500,
-          type: TransactionType.expense,
-          categoryId: 'cat_food',
-          merchant: 'Lawson',
-          note: 'Quick lunch',
+        await useCase.execute(
+          CreateTransactionParams(
+            bookId: 'book_001',
+            amount: 500,
+            type: TransactionType.expense,
+            categoryId: 'cat_food',
+            merchant: 'Lawson',
+            note: 'Quick lunch',
 
-          entrySource: EntrySource.manual,
-        ),
-      );
+            entrySource: EntrySource.manual,
+          ),
+        );
 
-      verify(
-        () => mockCategoryService.resolveLedgerType('cat_food'),
-      ).called(1);
-    });
+        verify(
+          () => mockCategoryService.resolveLedgerType('cat_food'),
+        ).called(1);
+      },
+    );
   });
 
   // Helper to build base params without currency fields
@@ -441,158 +495,169 @@ void main() {
 
   group('partial-triple invariant', () {
     test('only originalCurrency set → Result.error', () async {
-      final result = await useCase.execute(
-        makeParams(originalCurrency: 'USD'),
-      );
+      final result = await useCase.execute(makeParams(originalCurrency: 'USD'));
       expect(result.isError, isTrue);
       expect(result.error, contains('partial foreign-currency data'));
       verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
     test('only originalAmount set → Result.error', () async {
-      final result = await useCase.execute(
-        makeParams(originalAmount: 5000),
-      );
+      final result = await useCase.execute(makeParams(originalAmount: 5000));
       expect(result.isError, isTrue);
       expect(result.error, contains('partial foreign-currency data'));
       verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
     test('only appliedRate set → Result.error', () async {
-      final result = await useCase.execute(
-        makeParams(appliedRate: '149.30'),
-      );
+      final result = await useCase.execute(makeParams(appliedRate: '149.30'));
       expect(result.isError, isTrue);
       expect(result.error, contains('partial foreign-currency data'));
       verifyNever(() => mockTransactionRepo.insert(any()));
-    });
-
-    test('originalCurrency + originalAmount set, appliedRate null → Result.error',
-        () async {
-      final result = await useCase.execute(
-        makeParams(originalCurrency: 'USD', originalAmount: 5000),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('partial foreign-currency data'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
-
-    test('originalCurrency + appliedRate set, originalAmount null → Result.error',
-        () async {
-      final result = await useCase.execute(
-        makeParams(originalCurrency: 'USD', appliedRate: '149.30'),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('partial foreign-currency data'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
-
-    test('all three null → no error from partial-triple check (JPY-native)',
-        () async {
-      // No error from partial-triple; proceed to category lookup
-      when(() => mockCategoryRepo.findById('cat_food'))
-          .thenAnswer((_) async => null); // category not found — expected
-      final result = await useCase.execute(makeParams());
-      // Should reach category check (error is 'category not found', not partial-triple)
-      expect(result.isError, isTrue);
-      expect(result.error, contains('category'));
     });
 
     test(
-        'all three non-null with valid appliedRate → no error from partial-triple or appliedRate check',
-        () async {
-      // No error from partial-triple or appliedRate; proceed to category lookup
-      when(() => mockCategoryRepo.findById('cat_food'))
-          .thenAnswer((_) async => null); // category not found — expected
-      final result = await useCase.execute(
-        // WR-04: amount (1000) must equal convertToJpy of the triple —
-        // 5000 cents / 100 × 20.00 = 1000 JPY.
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: '20.00',
-        ),
-      );
-      // Should reach category check (error is 'category not found', not validation)
-      expect(result.isError, isTrue);
-      expect(result.error, contains('category'));
-    });
+      'originalCurrency + originalAmount set, appliedRate null → Result.error',
+      () async {
+        final result = await useCase.execute(
+          makeParams(originalCurrency: 'USD', originalAmount: 5000),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('partial foreign-currency data'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
+
+    test(
+      'originalCurrency + appliedRate set, originalAmount null → Result.error',
+      () async {
+        final result = await useCase.execute(
+          makeParams(originalCurrency: 'USD', appliedRate: '149.30'),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('partial foreign-currency data'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
+
+    test(
+      'all three null → no error from partial-triple check (JPY-native)',
+      () async {
+        // No error from partial-triple; proceed to category lookup
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => null); // category not found — expected
+        final result = await useCase.execute(makeParams());
+        // Should reach category check (error is 'category not found', not partial-triple)
+        expect(result.isError, isTrue);
+        expect(result.error, contains('category'));
+      },
+    );
+
+    test(
+      'all three non-null with valid appliedRate → no error from partial-triple or appliedRate check',
+      () async {
+        // No error from partial-triple or appliedRate; proceed to category lookup
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => null); // category not found — expected
+        final result = await useCase.execute(
+          // WR-04: amount (1000) must equal convertToJpy of the triple —
+          // 5000 cents / 100 × 20.00 = 1000 JPY.
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: '20.00',
+          ),
+        );
+        // Should reach category check (error is 'category not found', not validation)
+        expect(result.isError, isTrue);
+        expect(result.error, contains('category'));
+      },
+    );
   });
 
   group('appliedRate validity (D-05)', () {
-    test("all three non-null, appliedRate='NaN' → Result.error (isNaN path)",
-        () async {
-      // 'NaN' is not a plain decimal literal — rejected by the D-05 shape
-      // check in validateAppliedRate (currency_conversion.dart).
-      final result = await useCase.execute(
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: 'NaN',
-        ),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('positive number'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
-
-    test("all three non-null, appliedRate='-1.5' → Result.error (rate <= 0)",
-        () async {
-      final result = await useCase.execute(
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: '-1.5',
-        ),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('positive number'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
-
-    test("all three non-null, appliedRate='0' → Result.error (rate <= 0)",
-        () async {
-      final result = await useCase.execute(
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: '0',
-        ),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('positive number'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
+    test(
+      "all three non-null, appliedRate='NaN' → Result.error (isNaN path)",
+      () async {
+        // 'NaN' is not a plain decimal literal — rejected by the D-05 shape
+        // check in validateAppliedRate (currency_conversion.dart).
+        final result = await useCase.execute(
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: 'NaN',
+          ),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('positive number'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
 
     test(
-        "appliedRate='1.493e2' (scientific notation) → Result.error (D-05 shape check)",
-        () async {
-      final result = await useCase.execute(
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: '1.493e2',
-        ),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('plain decimal'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
+      "all three non-null, appliedRate='-1.5' → Result.error (rate <= 0)",
+      () async {
+        final result = await useCase.execute(
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: '-1.5',
+          ),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('positive number'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
 
     test(
-        "appliedRate=' 149.30 ' (untrimmed) → Result.error (D-05 trim requirement)",
-        () async {
-      final result = await useCase.execute(
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: ' 149.30 ',
-        ),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('plain decimal'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
+      "all three non-null, appliedRate='0' → Result.error (rate <= 0)",
+      () async {
+        final result = await useCase.execute(
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: '0',
+          ),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('positive number'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
+
+    test(
+      "appliedRate='1.493e2' (scientific notation) → Result.error (D-05 shape check)",
+      () async {
+        final result = await useCase.execute(
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: '1.493e2',
+          ),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('plain decimal'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
+
+    test(
+      "appliedRate=' 149.30 ' (untrimmed) → Result.error (D-05 trim requirement)",
+      () async {
+        final result = await useCase.execute(
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: ' 149.30 ',
+          ),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('plain decimal'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
 
     test("appliedRate='abc' → Result.error (non-numeric)", () async {
       final result = await useCase.execute(
@@ -621,40 +686,43 @@ void main() {
     });
 
     test(
-        "all three non-null, appliedRate='0.001' → passes validity check (small positive rate)",
-        () async {
-      // Passes validation; proceeds to category lookup
-      when(() => mockCategoryRepo.findById('cat_food'))
-          .thenAnswer((_) async => null); // category not found — expected
-      final result = await useCase.execute(
-        // WR-04: amount (1000) must equal convertToJpy of the triple —
-        // 1000000 × 0.001 = 1000 JPY (JPY subunitToUnit = 1).
-        makeParams(
-          originalCurrency: 'JPY',
-          originalAmount: 1000000,
-          appliedRate: '0.001',
-        ),
-      );
-      // Should reach category check (not a validation error)
-      expect(result.isError, isTrue);
-      expect(result.error, contains('category'));
-    });
+      "all three non-null, appliedRate='0.001' → passes validity check (small positive rate)",
+      () async {
+        // Passes validation; proceeds to category lookup
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => null); // category not found — expected
+        final result = await useCase.execute(
+          // WR-04: amount (1000) must equal convertToJpy of the triple —
+          // 1000000 × 0.001 = 1000 JPY (JPY subunitToUnit = 1).
+          makeParams(
+            originalCurrency: 'JPY',
+            originalAmount: 1000000,
+            appliedRate: '0.001',
+          ),
+        );
+        // Should reach category check (not a validation error)
+        expect(result.isError, isTrue);
+        expect(result.error, contains('category'));
+      },
+    );
 
     test(
-        'amount inconsistent with foreign-currency triple → Result.error (WR-04)',
-        () async {
-      final result = await useCase.execute(
-        // makeParams amount is 1000, but USD 5000 cents at 149.30 = 7465 JPY.
-        makeParams(
-          originalCurrency: 'USD',
-          originalAmount: 5000,
-          appliedRate: '149.30',
-        ),
-      );
-      expect(result.isError, isTrue);
-      expect(result.error, contains('does not match convertToJpy'));
-      verifyNever(() => mockTransactionRepo.insert(any()));
-    });
+      'amount inconsistent with foreign-currency triple → Result.error (WR-04)',
+      () async {
+        final result = await useCase.execute(
+          // makeParams amount is 1000, but USD 5000 cents at 149.30 = 7465 JPY.
+          makeParams(
+            originalCurrency: 'USD',
+            originalAmount: 5000,
+            appliedRate: '149.30',
+          ),
+        );
+        expect(result.isError, isTrue);
+        expect(result.error, contains('does not match convertToJpy'));
+        verifyNever(() => mockTransactionRepo.insert(any()));
+      },
+    );
   });
 
   group('originalAmount / originalCurrency validity (WR-03)', () {

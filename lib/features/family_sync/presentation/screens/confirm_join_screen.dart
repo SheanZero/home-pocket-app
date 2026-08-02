@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -7,11 +5,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../application/family_sync/confirm_join_use_case.dart';
 import '../../../../application/family_sync/join_group_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
-import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/repository_providers.dart';
+import '../widgets/family_flow_components.dart';
 import 'waiting_approval_screen.dart';
 
 class ConfirmJoinScreen extends ConsumerStatefulWidget {
@@ -65,211 +65,83 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
-    final r = widget.result;
+    final result = widget.result;
 
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 42),
+          padding: const EdgeInsets.symmetric(
+            horizontal: familyFlowHorizontalPadding,
+          ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
-              // Back button only (no title)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  onTap: () => Navigator.maybePop(context),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        LucideIcons.chevronLeft,
-                        size: 20,
-                        color: palette.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.groupBack,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: palette.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              const SizedBox(height: 7),
+              FamilyFlowHeader(
+                title: l10n.familyFlowJoinConfirmHeader,
+                onBack: () => Navigator.maybePop(context),
               ),
-              const SizedBox(height: 48),
-
-              // Group info label
-              Text(
-                l10n.groupJoinTarget,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  color: palette.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Group name row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('\u{1F3E0}', style: TextStyle(fontSize: 20)),
-                  const SizedBox(width: 8),
-                  Text(
-                    r.groupName,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: palette.textPrimary,
-                    ),
-                  ),
+              const SizedBox(height: 16),
+              FamilyFlowProgress(
+                labels: [
+                  l10n.familyFlowJoinStepCode,
+                  l10n.familyFlowJoinStepConfirm,
+                  l10n.familyFlowJoinStepWait,
                 ],
+                currentStep: 1,
               ),
-              const SizedBox(height: 32),
-
-              // Owner card
+              const SizedBox(height: 27),
+              FamilyFlowIntro(
+                title: l10n.familyFlowJoinConfirmTitle,
+                subtitle: l10n.familyFlowJoinConfirmSubtitle,
+              ),
+              const SizedBox(height: 18),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 28,
-                  horizontal: 24,
-                ),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: palette.surfaceScrimMedium,
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  color: palette.card,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: palette.borderDefault),
                 ),
                 child: Column(
                   children: [
-                    // Owner badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: palette.accentPrimaryLight,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            LucideIcons.crown,
-                            size: 14,
-                            color: palette.accentPrimary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            l10n.groupOwner,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: palette.accentPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Owner avatar
-                    AvatarDisplay(emoji: r.ownerAvatarEmoji, size: 80),
-                    const SizedBox(height: 12),
-
-                    // Owner name
+                    AvatarDisplay(emoji: result.ownerAvatarEmoji, size: 72),
+                    const SizedBox(height: 10),
                     Text(
-                      r.ownerDisplayName,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                      result.groupName,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.pageTitle.copyWith(
+                        fontSize: 21,
                         color: palette.textPrimary,
                       ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.familyFlowOwnerSummary(result.ownerDisplayName),
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.body.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 11),
+                    FamilyVerifiedBadge(
+                      label: l10n.familyFlowPublicKeyVerified,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
-
-              // Confirm button (CTA)
-              GestureDetector(
-                onTap: _isConfirming ? null : _handleConfirm,
-                child: Container(
-                  width: double.infinity,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [
-                        palette.fabGradientEnd,
-                        palette.fabGradientStart,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: palette.actionShadow,
-                        blurRadius: 20,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (_isConfirming)
-                        const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      else ...[
-                        Icon(
-                          LucideIcons.checkCircle2,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.groupConfirmJoin,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+              const SizedBox(height: 18),
+              FamilyPrimaryButton(
+                onPressed: _isConfirming ? null : _handleConfirm,
+                label: l10n.groupConfirmJoin,
+                isLoading: _isConfirming,
               ),
-              const SizedBox(height: 16),
-
-              // Cancel text link
-              GestureDetector(
-                onTap: () => Navigator.maybePop(context),
-                child: Text(
-                  l10n.groupCancel,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: palette.textSecondary,
-                  ),
-                ),
+              const SizedBox(height: 20),
+              FamilyHelperNote(
+                icon: LucideIcons.lockKeyhole,
+                text: l10n.familyFlowPrivateLedgerHelper,
               ),
               const SizedBox(height: 32),
             ],

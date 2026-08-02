@@ -12,6 +12,18 @@ class GroupMembers extends Table {
   TextColumn get avatarEmoji => text().withDefault(const Constant('🏠'))();
   TextColumn get avatarImagePath => text().nullable()();
   TextColumn get avatarImageHash => text().nullable()();
+  IntColumn get profileRevision => integer().withDefault(const Constant(0))();
+  TextColumn get profileOriginDeviceId =>
+      text().withDefault(const Constant(''))();
+  TextColumn get profileDigest => text().withDefault(const Constant(''))();
+  IntColumn get avatarRevision => integer().withDefault(const Constant(0))();
+  TextColumn get avatarOriginDeviceId =>
+      text().withDefault(const Constant(''))();
+  TextColumn get avatarContentHash => text().withDefault(const Constant(''))();
+  IntColumn get joinedAt => integer().nullable()();
+  IntColumn get confirmedAt => integer().nullable()();
+  IntColumn get removedAt => integer().nullable()();
+  TextColumn get removalReason => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {groupId, deviceId};

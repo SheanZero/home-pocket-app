@@ -18,6 +18,16 @@ class GroupMemberDao extends DatabaseAccessor<AppDatabase>
     groupMembers,
   )..where((table) => table.groupId.equals(groupId))).get();
 
+  Future<GroupMemberData?> findByGroupAndDevice(
+    String groupId,
+    String deviceId,
+  ) =>
+      (select(groupMembers)..where(
+            (table) =>
+                table.groupId.equals(groupId) & table.deviceId.equals(deviceId),
+          ))
+          .getSingleOrNull();
+
   Stream<List<GroupMemberData>> watchByGroupId(String groupId) => (select(
     groupMembers,
   )..where((table) => table.groupId.equals(groupId))).watch();
@@ -61,6 +71,73 @@ class GroupMemberDao extends DatabaseAccessor<AppDatabase>
               avatarEmoji: Value(avatarEmoji),
               avatarImagePath: Value(avatarImagePath),
               avatarImageHash: Value(avatarImageHash),
+            ),
+          );
+
+  Future<void> updateMemberIdentity({
+    required String groupId,
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+  }) =>
+      (update(groupMembers)..where(
+            (table) =>
+                table.groupId.equals(groupId) & table.deviceId.equals(deviceId),
+          ))
+          .write(
+            GroupMembersCompanion(
+              displayName: Value(displayName),
+              avatarEmoji: Value(avatarEmoji),
+            ),
+          );
+
+  Future<int> updateMemberIdentityVersioned({
+    required String groupId,
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+    required int revision,
+    required String originDeviceId,
+    required String digest,
+  }) =>
+      (update(groupMembers)..where(
+            (table) =>
+                table.groupId.equals(groupId) &
+                table.deviceId.equals(deviceId) &
+                table.status.equals('active'),
+          ))
+          .write(
+            GroupMembersCompanion(
+              displayName: Value(displayName),
+              avatarEmoji: Value(avatarEmoji),
+              profileRevision: Value(revision),
+              profileOriginDeviceId: Value(originDeviceId),
+              profileDigest: Value(digest),
+            ),
+          );
+
+  Future<int> updateMemberAvatarVersioned({
+    required String groupId,
+    required String deviceId,
+    required String? avatarImagePath,
+    required String? avatarImageHash,
+    required int revision,
+    required String originDeviceId,
+    required String contentHash,
+  }) =>
+      (update(groupMembers)..where(
+            (table) =>
+                table.groupId.equals(groupId) &
+                table.deviceId.equals(deviceId) &
+                table.status.equals('active'),
+          ))
+          .write(
+            GroupMembersCompanion(
+              avatarImagePath: Value(avatarImagePath),
+              avatarImageHash: Value(avatarImageHash),
+              avatarRevision: Value(revision),
+              avatarOriginDeviceId: Value(originDeviceId),
+              avatarContentHash: Value(contentHash),
             ),
           );
 }

@@ -13,6 +13,11 @@ class Categories extends Table {
   BoolColumn get isSystem => boolean().withDefault(const Constant(false))();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get sharedRevision => integer().withDefault(const Constant(0))();
+  TextColumn get sharedOriginDeviceId =>
+      text().withDefault(const Constant(''))();
+  BoolColumn get sharedIsDeleted =>
+      boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
 

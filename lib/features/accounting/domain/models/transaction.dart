@@ -9,6 +9,26 @@ enum TransactionType { expense, income, transfer }
 
 enum LedgerType { daily, joy }
 
+/// Local-only ledger of a transaction's family-sync exposure.
+///
+/// This must never be inferred from the current [Transaction.isPrivate]
+/// value: a private transaction may still need a withdrawal for an older
+/// public revision.
+enum FamilySyncVisibility {
+  /// Never eligible for automatic family sync (new private / backup restore /
+  /// inbound shadow copy).
+  localOnly,
+
+  /// A public revision has been staged or delivered and must be reconciled.
+  shared,
+
+  /// A minimal tombstone must be delivered (and retried) before settling.
+  withdrawalPending,
+
+  /// Relay accepted the withdrawal. Repeated full sync no longer needs it.
+  withdrawn,
+}
+
 @freezed
 abstract class Transaction with _$Transaction {
   const factory Transaction({
@@ -29,9 +49,10 @@ abstract class Transaction with _$Transaction {
 
     // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
     String? originalCurrency, // ISO 4217 code, e.g. 'USD'; null = native JPY
-    int? originalAmount, // minor units (cents for USD: $12.50 → 1250); null = native JPY
-    String? appliedRate, // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
-
+    int?
+    originalAmount, // minor units (cents for USD: $12.50 → 1250); null = native JPY
+    String?
+    appliedRate, // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
     // Hash chain
     String? prevHash,
     required String currentHash,
@@ -44,6 +65,17 @@ abstract class Transaction with _$Transaction {
     @Default(false) bool isPrivate,
     @Default(false) bool isSynced,
     @Default(false) bool isDeleted,
+
+    // Deterministic family-sync version. Local mutations advance this Lamport
+    // value monotonically; remote peers compare it before applying state.
+    @Default(0) int syncRevision,
+    @Default('') String syncOriginDeviceId,
+
+    // Local privacy ledger. These fields are persisted in the encrypted app
+    // database, but are never serialized into the family wire payload.
+    @Default(FamilySyncVisibility.localOnly)
+    FamilySyncVisibility familySyncVisibility,
+    @Default(0) int familySharedRevision,
 
     // Joy ledger fullness score (1-10, default 2)
     @Default(2) int joyFullness,

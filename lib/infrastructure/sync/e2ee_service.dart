@@ -97,6 +97,7 @@ class E2EEService {
   String encryptForGroup({
     required String plaintext,
     required String groupKeyBase64,
+    int keyEpoch = 1,
   }) {
     final groupKey = base64Decode(groupKeyBase64);
     final box = SecretBox(Uint8List.fromList(groupKey));
@@ -106,7 +107,12 @@ class E2EEService {
           ..setAll(0, encrypted.nonce)
           ..setAll(encrypted.nonce.length, encrypted.cipherText);
 
-    return jsonEncode({'v': 2, 't': 'D', 'p': base64Encode(combined)});
+    return jsonEncode({
+      'v': 2,
+      't': 'D',
+      'e': keyEpoch,
+      'p': base64Encode(combined),
+    });
   }
 
   String decryptFromGroup({
@@ -127,6 +133,9 @@ class E2EEService {
     required String groupKeyBase64,
     required String memberDeviceId,
     required String memberPublicKey,
+    int keyEpoch = 1,
+    String? requestId,
+    String? purpose,
   }) async {
     final encrypted = await encrypt(
       plaintext: groupKeyBase64,
@@ -135,7 +144,10 @@ class E2EEService {
     return jsonEncode({
       'v': 2,
       't': 'K',
+      'e': keyEpoch,
       'toDeviceId': memberDeviceId,
+      'requestId': ?requestId,
+      'purpose': ?purpose,
       'p': encrypted,
     });
   }

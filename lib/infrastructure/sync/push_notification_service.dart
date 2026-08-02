@@ -103,6 +103,11 @@ abstract class LocalNotificationClient {
   });
 }
 
+abstract interface class IdentityBoundLocalNotificationCleaner {
+  /// Removes notifications whose payload belongs to the revoked identity.
+  Future<void> cancelAll();
+}
+
 class FirebasePushMessagingClient implements PushMessagingClient {
   FirebasePushMessagingClient({FirebaseMessaging? messaging})
     : _messaging = messaging;
@@ -137,7 +142,8 @@ class FirebasePushMessagingClient implements PushMessagingClient {
   }
 }
 
-class FlutterLocalNotificationClient implements LocalNotificationClient {
+class FlutterLocalNotificationClient
+    implements LocalNotificationClient, IdentityBoundLocalNotificationCleaner {
   FlutterLocalNotificationClient({FlutterLocalNotificationsPlugin? plugin})
     : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
@@ -189,6 +195,177 @@ class FlutterLocalNotificationClient implements LocalNotificationClient {
       payload: jsonEncode(payload),
     );
   }
+
+  @override
+  Future<void> cancelAll() => _plugin.cancelAll();
+}
+
+/// Minimal local state required to authorize an identity-bound family push.
+///
+/// The infrastructure layer intentionally receives this projection through a
+/// callback so it does not depend on feature/domain models.
+class FamilyPushAcceptanceContext {
+  const FamilyPushAcceptanceContext({
+    required this.deviceId,
+    required this.groupId,
+    required this.groupStatus,
+    required this.groupRole,
+    required this.memberStatus,
+    this.controlRevision = 0,
+  });
+
+  final String deviceId;
+  final String groupId;
+  final String groupStatus;
+  final String groupRole;
+  final String memberStatus;
+  final int controlRevision;
+}
+
+abstract interface class PushAcceptancePolicy {
+  /// Stable local identity marker captured by installed subscriptions.
+  Future<String?> resolveIdentityGeneration();
+
+  /// Revalidates a message against live local identity/family state.
+  Future<bool> accepts(
+    Map<String, dynamic> data, {
+    required String? boundIdentityGeneration,
+  });
+}
+
+/// Safe default used until the feature layer supplies its live repository
+/// backed policy. Non-family messages remain outside this family gate.
+class RejectIdentityBoundFamilyPushAcceptancePolicy
+    implements PushAcceptancePolicy {
+  const RejectIdentityBoundFamilyPushAcceptancePolicy();
+
+  @override
+  Future<String?> resolveIdentityGeneration() async => null;
+
+  @override
+  Future<bool> accepts(
+    Map<String, dynamic> data, {
+    required String? boundIdentityGeneration,
+  }) async {
+    final type = data['type'];
+    return type is String &&
+        type.isNotEmpty &&
+        !IdentityBoundFamilyPushAcceptancePolicy.isFamilyType(type);
+  }
+}
+
+class IdentityBoundFamilyPushAcceptancePolicy implements PushAcceptancePolicy {
+  IdentityBoundFamilyPushAcceptancePolicy({
+    required Future<String?> Function() identityGenerationResolver,
+    required Future<FamilyPushAcceptanceContext?> Function() contextResolver,
+  }) : _identityGenerationResolver = identityGenerationResolver,
+       _contextResolver = contextResolver;
+
+  static const _familyTypes = <String>{
+    'member_confirmed',
+    'pair_confirmed',
+    'sync_available',
+    'join_request',
+    'pair_request',
+    'join_request_rejected',
+    'join_request_cancelled',
+    'join_request_expired',
+    'member_left',
+    'group_dissolved',
+    'group_name_updated',
+    'owner_transferred',
+    'group_key_requested',
+  };
+
+  static const _approvalTypes = <String>{'join_request', 'pair_request'};
+  static const _preActivationLifecycleTypes = <String>{
+    'member_confirmed',
+    'pair_confirmed',
+    'join_request_rejected',
+    'join_request_cancelled',
+    'join_request_expired',
+  };
+
+  final Future<String?> Function() _identityGenerationResolver;
+  final Future<FamilyPushAcceptanceContext?> Function() _contextResolver;
+
+  static bool isFamilyType(String type) => _familyTypes.contains(type);
+
+  @override
+  Future<String?> resolveIdentityGeneration() async {
+    final identity = await _identityGenerationResolver();
+    if (identity == null || identity.trim().isEmpty) return null;
+    return identity;
+  }
+
+  @override
+  Future<bool> accepts(
+    Map<String, dynamic> data, {
+    required String? boundIdentityGeneration,
+  }) async {
+    final typeValue = data['type'];
+    if (typeValue is! String || typeValue.isEmpty) return false;
+    if (!isFamilyType(typeValue)) return true;
+
+    final currentIdentity = await resolveIdentityGeneration();
+    if (currentIdentity == null) return false;
+    if (boundIdentityGeneration != null &&
+        currentIdentity != boundIdentityGeneration) {
+      return false;
+    }
+
+    final payloadIdentity = data['identityGeneration'];
+    if (payloadIdentity != null &&
+        (payloadIdentity is! String || payloadIdentity != currentIdentity)) {
+      return false;
+    }
+    final targetDeviceId = data['targetDeviceId'];
+    if (targetDeviceId != null &&
+        (targetDeviceId is! String || targetDeviceId != currentIdentity)) {
+      return false;
+    }
+
+    // This event is deliberately metadata-free in the relay contract: it only
+    // wakes an authenticated durable-ledger fetch. Identity generation is the
+    // complete local authorization boundary; no navigation or payload state is
+    // consumed from the notification itself.
+    if (typeValue == 'group_key_requested') return true;
+
+    final groupIdValue = data['groupId'];
+    if (groupIdValue is! String || groupIdValue.trim().isEmpty) return false;
+
+    final context = await _contextResolver();
+    if (context == null ||
+        context.deviceId != currentIdentity ||
+        context.groupId != groupIdValue) {
+      return false;
+    }
+
+    final revisionValue = data['controlRevision'];
+    if (revisionValue != null) {
+      final revision = switch (revisionValue) {
+        int value => value,
+        String value => int.tryParse(value),
+        _ => null,
+      };
+      if (revision == null || revision < context.controlRevision) return false;
+    }
+
+    if (_approvalTypes.contains(typeValue)) {
+      final isPrivileged =
+          context.groupRole == 'owner' || context.groupRole == 'admin';
+      return context.groupStatus == 'active' &&
+          context.memberStatus == 'active' &&
+          isPrivileged;
+    }
+
+    if (_preActivationLifecycleTypes.contains(typeValue)) {
+      return context.groupStatus != 'inactive' &&
+          context.memberStatus != 'removed';
+    }
+
+    return context.groupStatus == 'active' && context.memberStatus == 'active';
+  }
 }
 
 enum _PushMessageSource { direct, foreground, appOpened, initialMessage }
@@ -201,6 +378,8 @@ class PushNotificationService {
     FirebaseInitializer? firebaseInitializer,
     Locale Function()? localeProvider,
     String? pushPlatform,
+    PushAcceptancePolicy acceptancePolicy =
+        const RejectIdentityBoundFamilyPushAcceptancePolicy(),
   }) : _apiClient = apiClient,
        _messagingClient = messagingClient ?? FirebasePushMessagingClient(),
        _localNotificationClient =
@@ -211,7 +390,8 @@ class PushNotificationService {
        _localeProvider =
            localeProvider ??
            (() => WidgetsBinding.instance.platformDispatcher.locale),
-       _pushPlatform = pushPlatform;
+       _pushPlatform = pushPlatform,
+       _acceptancePolicy = acceptancePolicy;
 
   final RelayApiClient _apiClient;
   final PushMessagingClient _messagingClient;
@@ -219,25 +399,51 @@ class PushNotificationService {
   final FirebaseInitializer? _firebaseInitializer;
   final Locale Function() _localeProvider;
   final String? _pushPlatform;
+  PushAcceptancePolicy _acceptancePolicy;
 
   final _navigationController =
       StreamController<PushNavigationIntent>.broadcast();
+
+  final _joinRequestLifecycleController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   PushMessageHandler? _onMemberConfirmed;
   PushMessageHandler? _onSyncAvailable;
   PushMessageHandler? _onJoinRequest;
   PushMessageHandler? _onMemberLeft;
   PushMessageHandler? _onGroupDissolved;
+  PushMessageHandler? _onGroupSnapshotInvalidated;
+  PushMessageHandler? _onGroupKeyRequested;
 
   StreamSubscription<String>? _tokenRefreshSubscription;
   StreamSubscription<Map<String, dynamic>>? _foregroundSubscription;
   StreamSubscription<Map<String, dynamic>>? _openedAppSubscription;
 
   PushNavigationIntent? _pendingNavigationIntent;
+  int? _pendingNavigationGeneration;
   bool _initialized = false;
+  Future<String?>? _initializationFuture;
+  int _identityGeneration = 0;
+  bool _identityRevoked = false;
+  String? _boundIdentityGeneration;
 
   Stream<PushNavigationIntent> get navigationIntents =>
       _navigationController.stream;
+
+  /// Terminal join-request events are exposed independently from the
+  /// application handler callbacks. Pending applicants are not authorized for
+  /// the group WebSocket, so the waiting screen consumes this direct stream
+  /// and keeps REST polling as its fallback.
+  Stream<Map<String, dynamic>> get joinRequestLifecycleEvents =>
+      _joinRequestLifecycleController.stream;
+
+  /// Installs the live, repository-backed policy before initialization.
+  ///
+  /// Tests may replace it between deliveries to model an identity transition;
+  /// production configures it once through the feature provider.
+  void configureAcceptancePolicy(PushAcceptancePolicy policy) {
+    _acceptancePolicy = policy;
+  }
 
   void registerHandlers({
     PushMessageHandler? onMemberConfirmed,
@@ -245,69 +451,118 @@ class PushNotificationService {
     PushMessageHandler? onJoinRequest,
     PushMessageHandler? onMemberLeft,
     PushMessageHandler? onGroupDissolved,
+    PushMessageHandler? onGroupSnapshotInvalidated,
+    PushMessageHandler? onGroupKeyRequested,
   }) {
     _onMemberConfirmed = onMemberConfirmed;
     _onSyncAvailable = onSyncAvailable;
     _onJoinRequest = onJoinRequest;
     _onMemberLeft = onMemberLeft;
     _onGroupDissolved = onGroupDissolved;
+    _onGroupSnapshotInvalidated = onGroupSnapshotInvalidated;
+    _onGroupKeyRequested = onGroupKeyRequested;
   }
 
-  Future<String?> initialize() async {
+  Future<String?> initialize() {
     if (_initialized) {
       return _messagingClient.getToken();
     }
+    return _initializationFuture ??= _runInitialization();
+  }
 
+  Future<String?> _runInitialization() async {
     try {
+      return await _initializeOnce();
+    } finally {
+      _initializationFuture = null;
+    }
+  }
+
+  Future<String?> _initializeOnce() async {
+    final generation = ++_identityGeneration;
+    _identityRevoked = true;
+    _boundIdentityGeneration = null;
+    try {
+      final identity = await _acceptancePolicy.resolveIdentityGeneration();
+      if (generation != _identityGeneration || identity == null) return null;
+      _boundIdentityGeneration = identity;
+      _identityRevoked = false;
+
       if (kDebugMode) {
         debugPrint('PushNotificationService: initializing');
       }
       if (_firebaseInitializer != null) {
         await _firebaseInitializer();
       }
-      await _localNotificationClient.initialize(handleNotificationTap);
+      if (!_isGenerationCurrent(generation)) return null;
+      await _localNotificationClient.initialize(
+        (data) => _handleNotificationTap(data, generation: generation),
+      );
+      if (!_isGenerationCurrent(generation)) return null;
       await _messagingClient.requestPermission();
+      if (!_isGenerationCurrent(generation)) return null;
 
       final token = await _messagingClient.getToken();
-      if (token != null && token.isNotEmpty) {
-        await registerToken(token);
+      if (_isGenerationCurrent(generation) &&
+          token != null &&
+          token.isNotEmpty) {
+        await _registerTokenBestEffort(token);
       }
+      if (!_isGenerationCurrent(generation)) return null;
 
       _tokenRefreshSubscription = _messagingClient.onTokenRefresh.listen((
         token,
       ) {
+        if (!_isGenerationCurrent(generation)) return;
         if (kDebugMode) {
           debugPrint(
             'PushNotificationService: registration credential refreshed',
           );
         }
-        unawaited(registerToken(token));
+        unawaited(_registerTokenBestEffort(token));
       });
 
       _foregroundSubscription = _messagingClient.onForegroundMessage.listen((
         data,
       ) {
+        if (!_isGenerationCurrent(generation)) return;
         if (kDebugMode) {
           debugPrint(
             'PushNotificationService: foreground notification received',
           );
         }
         unawaited(
-          _handleIncomingMessage(data, source: _PushMessageSource.foreground),
+          // Every installed callback is permanently bound to this local
+          // identity generation. A wipe invalidates it synchronously.
+          _handleIncomingMessage(
+            data,
+            source: _PushMessageSource.foreground,
+            generation: generation,
+          ),
         );
       });
 
       _openedAppSubscription = _messagingClient.onMessageOpenedApp.listen((
         data,
       ) {
+        if (!_isGenerationCurrent(generation)) return;
         if (kDebugMode) {
           debugPrint('PushNotificationService: notification opened app');
         }
         unawaited(
-          _handleIncomingMessage(data, source: _PushMessageSource.appOpened),
+          _handleIncomingMessage(
+            data,
+            source: _PushMessageSource.appOpened,
+            generation: generation,
+          ),
         );
       });
 
+      // The delivery pipeline is live from this point. Mark initialized before
+      // consuming the cold-start message so a handler failure cannot cause a
+      // later retry to install duplicate stream subscriptions.
+      if (!_isGenerationCurrent(generation)) return null;
+      _initialized = true;
       final initialMessage = await _messagingClient.getInitialMessage();
       if (kDebugMode) {
         debugPrint('PushNotificationService: launch notification checked');
@@ -316,10 +571,10 @@ class PushNotificationService {
         await _handleIncomingMessage(
           initialMessage,
           source: _PushMessageSource.initialMessage,
+          generation: generation,
         );
       }
 
-      _initialized = true;
       return token;
     } catch (e) {
       if (kDebugMode) {
@@ -330,6 +585,44 @@ class PushNotificationService {
   }
 
   Future<String?> getToken() => _messagingClient.getToken();
+
+  /// Replays the current registration credential after `/device/register`.
+  ///
+  /// App bootstrap can run before the relay knows this device. Group entry
+  /// flows call this once registration succeeds so the token is not stranded.
+  Future<void> registerCurrentToken() async {
+    if (!_initialized || _identityRevoked || _boundIdentityGeneration == null) {
+      await initialize();
+    }
+    final generation = _identityGeneration;
+    if (!_isGenerationCurrent(generation)) return;
+    try {
+      final token = await _messagingClient.getToken();
+      if (_isGenerationCurrent(generation) &&
+          token != null &&
+          token.isNotEmpty) {
+        await _registerTokenBestEffort(token);
+      }
+    } catch (_) {
+      if (kDebugMode) {
+        debugPrint(
+          'PushNotificationService: current credential replay deferred',
+        );
+      }
+    }
+  }
+
+  Future<void> _registerTokenBestEffort(String token) async {
+    try {
+      await registerToken(token);
+    } catch (_) {
+      if (kDebugMode) {
+        debugPrint(
+          'PushNotificationService: push endpoint registration deferred',
+        );
+      }
+    }
+  }
 
   Future<void> registerToken(String token) async {
     final platform = _pushPlatform ?? (Platform.isIOS ? 'apns' : 'fcm');
@@ -345,36 +638,81 @@ class PushNotificationService {
   }
 
   Future<void> handleMessage(Map<String, dynamic> data) async {
-    await _handleIncomingMessage(data, source: _PushMessageSource.direct);
+    final generation = _identityGeneration;
+    await _handleIncomingMessage(
+      data,
+      source: _PushMessageSource.direct,
+      generation: generation,
+    );
   }
 
   Future<void> handleNotificationTap(Map<String, dynamic> data) async {
+    await _handleNotificationTap(data, generation: _identityGeneration);
+  }
+
+  Future<void> _handleNotificationTap(
+    Map<String, dynamic> data, {
+    required int generation,
+  }) async {
+    if (!await _accepts(data, generation: generation)) return;
     final intent = _intentForMessage(data);
     if (intent == null) return;
 
     _pendingNavigationIntent = intent;
+    _pendingNavigationGeneration = generation;
     if (!_navigationController.isClosed) {
       _navigationController.add(intent);
     }
   }
 
   PushNavigationIntent? takePendingNavigationIntent() {
+    if (_pendingNavigationGeneration != _identityGeneration ||
+        _identityRevoked) {
+      _pendingNavigationIntent = null;
+      _pendingNavigationGeneration = null;
+      return null;
+    }
     final intent = _pendingNavigationIntent;
     _pendingNavigationIntent = null;
+    _pendingNavigationGeneration = null;
     return intent;
   }
 
+  /// Discards navigation state derived from the identity/group that has just
+  /// been erased locally.
+  ///
+  /// Revocation happens synchronously before the first cancellation await, so
+  /// already queued callbacks cannot mutate state for the erased identity.
+  /// This performs no relay call, keeping the wipe strictly local/offline.
+  Future<void> clearIdentityBoundState() {
+    _identityRevoked = true;
+    _identityGeneration++;
+    _boundIdentityGeneration = null;
+    _initialized = false;
+    _pendingNavigationIntent = null;
+    _pendingNavigationGeneration = null;
+    final cancellation = _cancelPipelineSubscriptions();
+    return Future.wait<void>([
+      cancellation,
+      _cancelIdentityBoundLocalNotifications(),
+    ]);
+  }
+
   Future<void> dispose() async {
-    await _tokenRefreshSubscription?.cancel();
-    await _foregroundSubscription?.cancel();
-    await _openedAppSubscription?.cancel();
+    _identityRevoked = true;
+    _identityGeneration++;
+    await _cancelPipelineSubscriptions();
     await _navigationController.close();
+    await _joinRequestLifecycleController.close();
   }
 
   Future<void> _handleIncomingMessage(
     Map<String, dynamic> data, {
     required _PushMessageSource source,
+    int? generation,
   }) async {
+    final messageGeneration = generation ?? _identityGeneration;
+    if (!await _accepts(data, generation: messageGeneration)) return;
     final type = data['type'] as String?;
     if (kDebugMode) {
       debugPrint(
@@ -386,10 +724,14 @@ class PushNotificationService {
       case 'member_confirmed':
       case 'pair_confirmed':
         await _onMemberConfirmed?.call(data);
+        if (!_isGenerationCurrent(messageGeneration)) return;
         if (source == _PushMessageSource.foreground) {
-          await _showForegroundNotification(data);
+          await _showForegroundNotification(
+            data,
+            generation: messageGeneration,
+          );
         } else if (source != _PushMessageSource.direct) {
-          await handleNotificationTap(data);
+          await _handleNotificationTap(data, generation: messageGeneration);
         }
         break;
       case 'sync_available':
@@ -398,8 +740,17 @@ class PushNotificationService {
       case 'join_request':
       case 'pair_request':
         await _onJoinRequest?.call(data);
+        if (!_isGenerationCurrent(messageGeneration)) return;
         if (source != _PushMessageSource.direct) {
-          await handleNotificationTap(data);
+          await _handleNotificationTap(data, generation: messageGeneration);
+        }
+        break;
+      case 'join_request_rejected':
+      case 'join_request_cancelled':
+      case 'join_request_expired':
+        if (_isGenerationCurrent(messageGeneration) &&
+            !_joinRequestLifecycleController.isClosed) {
+          _joinRequestLifecycleController.add(data);
         }
         break;
       case 'member_left':
@@ -407,9 +758,17 @@ class PushNotificationService {
         break;
       case 'group_dissolved':
         await _onGroupDissolved?.call(data);
+        if (!_isGenerationCurrent(messageGeneration)) return;
         if (source != _PushMessageSource.direct) {
-          await handleNotificationTap(data);
+          await _handleNotificationTap(data, generation: messageGeneration);
         }
+        break;
+      case 'group_name_updated':
+      case 'owner_transferred':
+        await _onGroupSnapshotInvalidated?.call(data);
+        break;
+      case 'group_key_requested':
+        await _onGroupKeyRequested?.call(data);
         break;
       default:
         if (kDebugMode) {
@@ -420,7 +779,11 @@ class PushNotificationService {
     }
   }
 
-  Future<void> _showForegroundNotification(Map<String, dynamic> data) async {
+  Future<void> _showForegroundNotification(
+    Map<String, dynamic> data, {
+    required int generation,
+  }) async {
+    if (!_isGenerationCurrent(generation)) return;
     final l10n = lookupS(_localeProvider());
     final type = data['type'] as String?;
 
@@ -433,6 +796,9 @@ class PushNotificationService {
           body: l10n.familySyncJoinRequestNotificationBody,
           payload: data,
         );
+        if (!_isGenerationCurrent(generation)) {
+          await _cancelIdentityBoundLocalNotifications();
+        }
         break;
       case 'member_confirmed':
       case 'pair_confirmed':
@@ -442,6 +808,9 @@ class PushNotificationService {
           body: l10n.familySyncMemberConfirmedNotificationBody,
           payload: data,
         );
+        if (!_isGenerationCurrent(generation)) {
+          await _cancelIdentityBoundLocalNotifications();
+        }
         break;
     }
   }
@@ -460,5 +829,46 @@ class PushNotificationService {
       ),
       _ => null,
     };
+  }
+
+  bool _isGenerationCurrent(int generation) {
+    return !_identityRevoked && generation == _identityGeneration;
+  }
+
+  Future<bool> _accepts(
+    Map<String, dynamic> data, {
+    required int generation,
+  }) async {
+    if (!_isGenerationCurrent(generation)) return false;
+    try {
+      final accepted = await _acceptancePolicy.accepts(
+        data,
+        boundIdentityGeneration: _boundIdentityGeneration,
+      );
+      return accepted && _isGenerationCurrent(generation);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _cancelPipelineSubscriptions() async {
+    final tokenSubscription = _tokenRefreshSubscription;
+    final foregroundSubscription = _foregroundSubscription;
+    final openedSubscription = _openedAppSubscription;
+    _tokenRefreshSubscription = null;
+    _foregroundSubscription = null;
+    _openedAppSubscription = null;
+    await Future.wait<void>([
+      if (tokenSubscription != null) tokenSubscription.cancel(),
+      if (foregroundSubscription != null) foregroundSubscription.cancel(),
+      if (openedSubscription != null) openedSubscription.cancel(),
+    ]);
+  }
+
+  Future<void> _cancelIdentityBoundLocalNotifications() async {
+    final client = _localNotificationClient;
+    if (client is IdentityBoundLocalNotificationCleaner) {
+      await (client as IdentityBoundLocalNotificationCleaner).cancelAll();
+    }
   }
 }

@@ -9,6 +9,19 @@ import 'package:mocktail/mocktail.dart';
 
 class MockRelayApiClient extends Mock implements RelayApiClient {}
 
+class _AllowPushAcceptancePolicy implements PushAcceptancePolicy {
+  const _AllowPushAcceptancePolicy();
+
+  @override
+  Future<bool> accepts(
+    Map<String, dynamic> data, {
+    required String? boundIdentityGeneration,
+  }) async => true;
+
+  @override
+  Future<String?> resolveIdentityGeneration() async => 'test-identity';
+}
+
 class FakePushMessagingClient implements PushMessagingClient {
   FakePushMessagingClient({this.initialToken, this.initialMessage});
 
@@ -143,6 +156,8 @@ void main() {
   late int joinRequestCalls;
   late int memberLeftCalls;
   late int groupDissolvedCalls;
+  late int groupSnapshotInvalidatedCalls;
+  late int groupKeyRequestedCalls;
 
   setUp(() {
     apiClient = MockRelayApiClient();
@@ -153,6 +168,8 @@ void main() {
     joinRequestCalls = 0;
     memberLeftCalls = 0;
     groupDissolvedCalls = 0;
+    groupSnapshotInvalidatedCalls = 0;
+    groupKeyRequestedCalls = 0;
 
     when(
       () => apiClient.updatePushToken(
@@ -163,6 +180,7 @@ void main() {
 
     service = PushNotificationService(
       apiClient: apiClient,
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
       messagingClient: messagingClient,
       localNotificationClient: localNotificationClient,
       firebaseInitializer: () async {},
@@ -184,7 +202,23 @@ void main() {
       onGroupDissolved: (_) async {
         groupDissolvedCalls++;
       },
+      onGroupSnapshotInvalidated: (_) async {
+        groupSnapshotInvalidatedCalls++;
+      },
+      onGroupKeyRequested: (_) async {
+        groupKeyRequestedCalls++;
+      },
     );
+  });
+
+  test('opaque group key request wakes the recovery responder', () async {
+    await service.initialize();
+
+    await messagingClient.emitForegroundMessage({
+      'type': 'group_key_requested',
+    });
+
+    expect(groupKeyRequestedCalls, 1);
   });
 
   tearDown(() async {
@@ -257,6 +291,7 @@ void main() {
       );
       service = PushNotificationService(
         apiClient: apiClient,
+        acceptancePolicy: const _AllowPushAcceptancePolicy(),
         messagingClient: messagingClient,
         localNotificationClient: localNotificationClient,
         firebaseInitializer: () async {},
@@ -296,6 +331,7 @@ void main() {
       final bridge = FakeApnsPushBridge(initialToken: 'apns-token-1');
       service = PushNotificationService(
         apiClient: apiClient,
+        acceptancePolicy: const _AllowPushAcceptancePolicy(),
         messagingClient: ApnsPushMessagingClient(bridge: bridge),
         localNotificationClient: localNotificationClient,
         firebaseInitializer: null,
@@ -338,6 +374,62 @@ void main() {
   });
 
   test(
+    'group_name_updated invokes authoritative snapshot refresh handler',
+    () async {
+      await service.initialize();
+
+      await messagingClient.emitForegroundMessage({
+        'type': 'group_name_updated',
+        'groupId': 'group-1',
+        'groupName': 'New name',
+      });
+
+      expect(groupSnapshotInvalidatedCalls, 1);
+    },
+  );
+
+  test(
+    'owner_transferred invokes authoritative snapshot refresh handler',
+    () async {
+      await service.initialize();
+
+      await messagingClient.emitForegroundMessage({
+        'type': 'owner_transferred',
+        'groupId': 'group-1',
+        'newOwnerDeviceId': 'member-b',
+        'keyEpoch': '5',
+      });
+
+      expect(groupSnapshotInvalidatedCalls, 1);
+    },
+  );
+
+  test(
+    'terminal join request push is emitted to the lifecycle stream',
+    () async {
+      await service.initialize();
+      final events = <Map<String, dynamic>>[];
+      service.joinRequestLifecycleEvents.listen(events.add);
+
+      await messagingClient.emitForegroundMessage({
+        'type': 'join_request_rejected',
+        'groupId': 'group-1',
+        'deviceId': 'applicant',
+        'status': 'rejected',
+      });
+
+      expect(events, [
+        {
+          'type': 'join_request_rejected',
+          'groupId': 'group-1',
+          'deviceId': 'applicant',
+          'status': 'rejected',
+        },
+      ]);
+    },
+  );
+
+  test(
     'foreground group_dissolved message invokes handler and emits navigation intent',
     () async {
       await service.initialize();
@@ -373,9 +465,27 @@ void main() {
     },
   );
 
+  test(
+    'concurrent initialize calls install only one message pipeline',
+    () async {
+      await Future.wait([service.initialize(), service.initialize()]);
+
+      await messagingClient.emitForegroundMessage({'type': 'sync_available'});
+
+      expect(syncAvailableCalls, 1);
+      verify(
+        () => apiClient.updatePushToken(
+          pushToken: 'token-1',
+          pushPlatform: any(named: 'pushPlatform'),
+        ),
+      ).called(1);
+    },
+  );
+
   test('initialize returns null when firebase bootstrap fails', () async {
     service = PushNotificationService(
       apiClient: apiClient,
+      acceptancePolicy: const _AllowPushAcceptancePolicy(),
       messagingClient: messagingClient,
       localNotificationClient: localNotificationClient,
       firebaseInitializer: () async => throw StateError('firebase failed'),
@@ -383,6 +493,82 @@ void main() {
     );
 
     expect(await service.initialize(), isNull);
+  });
+
+  test(
+    'failed initialization can be retried without restarting the app',
+    () async {
+      var bootstrapAttempts = 0;
+      service = PushNotificationService(
+        apiClient: apiClient,
+        acceptancePolicy: const _AllowPushAcceptancePolicy(),
+        messagingClient: messagingClient,
+        localNotificationClient: localNotificationClient,
+        firebaseInitializer: () async {
+          bootstrapAttempts++;
+          if (bootstrapAttempts == 1) {
+            throw StateError('firebase temporarily unavailable');
+          }
+        },
+        localeProvider: () => const Locale('en'),
+      );
+      service.registerHandlers(
+        onMemberConfirmed: (_) async => memberConfirmedCalls++,
+        onSyncAvailable: (_) async => syncAvailableCalls++,
+        onJoinRequest: (_) async => joinRequestCalls++,
+        onMemberLeft: (_) async => memberLeftCalls++,
+        onGroupDissolved: (_) async => groupDissolvedCalls++,
+      );
+
+      expect(await service.initialize(), isNull);
+      expect(await service.initialize(), 'token-1');
+      await messagingClient.emitForegroundMessage({'type': 'sync_available'});
+
+      expect(bootstrapAttempts, 2);
+      expect(syncAvailableCalls, 1);
+    },
+  );
+
+  test(
+    'token registration failure does not disable message delivery',
+    () async {
+      when(
+        () => apiClient.updatePushToken(
+          pushToken: any(named: 'pushToken'),
+          pushPlatform: any(named: 'pushPlatform'),
+        ),
+      ).thenThrow(StateError('device is not registered yet'));
+
+      expect(await service.initialize(), 'token-1');
+      await messagingClient.emitForegroundMessage({'type': 'sync_available'});
+
+      expect(syncAvailableCalls, 1);
+    },
+  );
+
+  test('current token can be replayed after device registration', () async {
+    when(
+      () => apiClient.updatePushToken(
+        pushToken: any(named: 'pushToken'),
+        pushPlatform: any(named: 'pushPlatform'),
+      ),
+    ).thenThrow(StateError('device is not registered yet'));
+    await service.initialize();
+
+    when(
+      () => apiClient.updatePushToken(
+        pushToken: any(named: 'pushToken'),
+        pushPlatform: any(named: 'pushPlatform'),
+      ),
+    ).thenAnswer((_) async {});
+    await service.registerCurrentToken();
+
+    verify(
+      () => apiClient.updatePushToken(
+        pushToken: 'token-1',
+        pushPlatform: any(named: 'pushPlatform'),
+      ),
+    ).called(2);
   });
 
   test(
@@ -452,6 +638,17 @@ void main() {
     },
   );
 
+  test('local wipe discards navigation from the erased group', () async {
+    await service.handleNotificationTap({
+      'type': 'group_dissolved',
+      'groupId': 'erased-group',
+    });
+
+    service.clearIdentityBoundState();
+
+    expect(service.takePendingNavigationIntent(), isNull);
+  });
+
   test('foreground join request notification can be tapped', () async {
     await service.initialize();
 
@@ -462,7 +659,9 @@ void main() {
       'type': 'pair_confirmed',
       'groupId': 'group-1',
     });
+    await Future<void>.delayed(Duration.zero);
     await localNotificationClient.tapLastNotification();
+    await Future<void>.delayed(Duration.zero);
 
     expect(intents, [
       const PushNavigationIntent.groupManagement(groupId: 'group-1'),

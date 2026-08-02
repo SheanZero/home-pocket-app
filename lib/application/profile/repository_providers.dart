@@ -1,9 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:path/path.dart' as path_lib;
+import 'package:path_provider/path_provider.dart';
 
 import '../../data/app_database.dart';
 import '../../infrastructure/crypto/providers.dart' as crypto;
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/security/providers.dart' as security;
+import '../../infrastructure/sync/avatar_semantic_staging_store.dart';
 
 part 'repository_providers.g.dart';
 
@@ -26,4 +29,19 @@ AppDatabase appAppDatabase(Ref ref) {
 @riverpod
 KeyManager appKeyManager(Ref ref) {
   return ref.watch(crypto.keyManagerProvider);
+}
+
+/// App-owned content-addressed storage for outbound Avatar semantics.
+@Riverpod(keepAlive: true)
+AvatarSemanticStagingStore appAvatarSemanticStagingStore(Ref ref) {
+  return AvatarSemanticStagingStore(
+    rootDirectoryResolver: () async {
+      final support = await getApplicationSupportDirectory();
+      return path_lib.join(
+        support.path,
+        'family_sync',
+        'avatar_semantic_staging',
+      );
+    },
+  );
 }

@@ -1,10 +1,13 @@
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
+import '../../features/accounting/domain/models/transaction_family_sync_policy.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 import '../family_sync/sync_engine.dart';
+import '../family_sync/category_reference_sync_service.dart';
 import '../family_sync/transaction_change_tracker.dart';
+import '../family_sync/transaction_sync_version.dart';
 
 /// Parameters for updating an existing transaction.
 ///
@@ -38,6 +41,7 @@ class UpdateTransactionParams {
 
   final LedgerType? ledgerType;
   final int? joyFullness;
+  final bool? isPrivate;
 
   /// Foreign-currency provenance triple (originalCurrency / originalAmount /
   /// appliedRate). Coalesce semantics (EDIT-02): `null` means "form did not
@@ -60,6 +64,7 @@ class UpdateTransactionParams {
     this.merchant,
     this.ledgerType,
     this.joyFullness,
+    this.isPrivate,
     this.originalCurrency,
     this.originalAmount,
     this.appliedRate,
@@ -85,13 +90,16 @@ class UpdateTransactionUseCase {
     required TransactionRepository transactionRepository,
     SyncEngine? syncEngine,
     TransactionChangeTracker? changeTracker,
+    CategoryReferenceSyncService? categoryReferenceSyncService,
   }) : _transactionRepo = transactionRepository,
        _syncEngine = syncEngine,
-       _changeTracker = changeTracker;
+       _changeTracker = changeTracker,
+       _categoryReferenceSyncService = categoryReferenceSyncService;
 
   final TransactionRepository _transactionRepo;
   final SyncEngine? _syncEngine;
   final TransactionChangeTracker? _changeTracker;
+  final CategoryReferenceSyncService? _categoryReferenceSyncService;
 
   Future<Result<Transaction>> execute(UpdateTransactionParams params) async {
     // 1. Validate overrides (only when non-null — null means "no change")
@@ -140,6 +148,17 @@ class UpdateTransactionUseCase {
     //    Currency fields are EXCLUDED from the hash chain (ADR-021): editing
     //    them recomputes `amount` but the row's prevHash/currentHash flow
     //    through copyWith UNCHANGED — there is NO rehash on this path.
+    final now = DateTime.now();
+    final resolvedIsPrivate = params.isPrivate ?? params.seed.isPrivate;
+    final logicalRevision = nextSyncRevision(params.seed, now);
+    final nextRevision = logicalRevision > params.seed.familySharedRevision
+        ? logicalRevision
+        : params.seed.familySharedRevision + 1;
+    final familySyncVisibility =
+        TransactionFamilySyncPolicy.visibilityForUpdate(
+          before: params.seed,
+          isPrivate: resolvedIsPrivate,
+        );
     final updated = params.seed.copyWith(
       amount: resolvedAmount,
       categoryId: params.categoryId ?? params.seed.categoryId,
@@ -153,29 +172,73 @@ class UpdateTransactionUseCase {
       originalCurrency: originalCurrency,
       originalAmount: originalAmount,
       appliedRate: appliedRate,
-      updatedAt: DateTime.now(), // D-07: stamp on every save
+      updatedAt: now, // D-07: stamp on every save
+      isPrivate: resolvedIsPrivate,
+      syncRevision: nextRevision,
+      syncOriginDeviceId: params.seed.deviceId,
+      familySyncVisibility: familySyncVisibility,
+      familySharedRevision: familySyncVisibility == FamilySyncVisibility.shared
+          ? nextRevision
+          : params.seed.familySharedRevision,
       // entrySource, id, bookId, deviceId, prevHash, currentHash, createdAt
       // are preserved by copyWith default (D-07/D-08/SC-3).
     );
 
-    // 3. Persist — repo impl handles note encryption (TransactionRepositoryImpl.update
-    //    lines 85-116). No try/catch: let exceptions propagate so the form widget
-    //    surfaces a persistError (consistent with CreateTransactionUseCase convention).
-    await _transactionRepo.update(updated);
-
-    // 4. Track for incremental sync push (D-20)
-    _changeTracker?.trackUpdate(
-      TransactionSyncMapper.toUpdateOperation(
+    // 3. Build the operation before persistence so the production repository
+    // can atomically commit the business mutation and durable outbox row.
+    Map<String, dynamic>? syncOperation;
+    if (TransactionFamilySyncPolicy.shouldSendWithdrawal(updated)) {
+      syncOperation = TransactionSyncMapper.toWithdrawalOperation(updated);
+    } else if (TransactionFamilySyncPolicy.shouldSendLive(updated)) {
+      syncOperation = TransactionSyncMapper.toUpdateOperation(
         updated,
         sourceBookId: updated.bookId,
         sourceBookName: updated.bookId,
         sourceBookType: 'remote_book:${updated.bookId}',
-      ),
-    );
+      );
+      final categorySync = _categoryReferenceSyncService;
+      if (categorySync != null) {
+        syncOperation = await categorySync.attachToBillOperation(
+          transaction: updated,
+          operation: syncOperation,
+        );
+      }
+    }
 
-    // Fire-and-forget sync trigger — SyncEngine handles debounce (D-20).
-    _syncEngine?.onTransactionChanged();
+    final durableRepository =
+        _transactionRepo is DurableFamilySyncTransactionRepository
+        ? _transactionRepo as DurableFamilySyncTransactionRepository
+        : null;
+    final usesDurableOutbox = durableRepository != null;
+    final outboxEnqueued = durableRepository != null
+        ? await durableRepository.updateWithFamilySyncOutbox(
+            updated,
+            operation: syncOperation,
+          )
+        : await _updateLegacy(updated);
+
+    if (syncOperation != null && !usesDurableOutbox) {
+      if (syncOperation['op'] == 'delete') {
+        _changeTracker?.trackDelete(
+          transactionId: updated.id,
+          bookId: updated.bookId,
+          operation: syncOperation,
+        );
+      } else {
+        _changeTracker?.trackUpdate(syncOperation);
+      }
+    }
+
+    if (syncOperation != null && (outboxEnqueued || !usesDurableOutbox)) {
+      // Fire-and-forget sync trigger — SyncEngine handles debounce (D-20).
+      _syncEngine?.onTransactionChanged();
+    }
 
     return Result.success(updated);
+  }
+
+  Future<bool> _updateLegacy(Transaction transaction) async {
+    await _transactionRepo.update(transaction);
+    return false;
   }
 }

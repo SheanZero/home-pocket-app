@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../../application/family_sync/group_operation_error.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 import '../../domain/models/sync_status_model.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
 import '../providers/repository_providers.dart';
@@ -10,13 +12,16 @@ import '../providers/state_active_group.dart';
 import '../providers/state_sync.dart';
 import '../screens/group_management_screen.dart';
 import '../screens/group_choice_screen.dart';
+import 'family_network_unavailable_dialog.dart';
 import 'sync_status_badge.dart';
 
 /// Settings section for Family Sync.
 ///
 /// Shows current sync status and navigates to pairing or management screens.
 class FamilySyncSettingsSection extends ConsumerWidget {
-  const FamilySyncSettingsSection({super.key});
+  const FamilySyncSettingsSection({super.key, this.compact = false});
+
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,50 +31,29 @@ class FamilySyncSettingsSection extends ConsumerWidget {
     final activeGroup = ref.watch(activeGroupProvider).value;
     final subtitle = activeGroup != null
         ? l10n.familySyncMemberCount(activeGroup.members.length)
+        : compact && syncState == SyncState.noGroup
+        ? l10n.settingsNotSet
         : _stateDescription(l10n, syncState);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SettingsSectionCard(
+      title: l10n.settingsFamily,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            l10n.familySync,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.sync),
-          title: Text(l10n.familySync),
-          subtitle: Text(subtitle),
+        SettingsActionTile(
+          icon: Icons.group_outlined,
+          title: l10n.familySync,
+          subtitle: subtitle,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SyncStatusBadge(state: syncState, compact: true),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right),
+              if (!compact) ...[
+                SyncStatusBadge(state: syncState, compact: true),
+                const SizedBox(width: 8),
+              ],
+              const SettingsChevron(),
             ],
           ),
           onTap: () => _navigate(context, ref, syncState),
         ),
-        if (activeGroup != null)
-          ListTile(
-            leading: const Icon(Icons.cloud_sync),
-            title: Text(l10n.familySyncManualSync),
-            subtitle: Text(l10n.familySyncManualSyncDesc),
-            trailing:
-                syncState == SyncState.syncing ||
-                    syncState == SyncState.initialSyncing
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.chevron_right),
-            onTap: () => ref.read(syncEngineProvider).onManualSync(),
-          ),
       ],
     );
   }
@@ -125,7 +109,17 @@ class FamilySyncSettingsSection extends ConsumerWidget {
         await Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
         );
-      case CheckGroupError(:final message):
+      case CheckGroupPendingApproval():
+      case CheckGroupAwaitingKey():
+        break;
+      case CheckGroupError(:final message, :final kind):
+        if (kind == GroupOperationErrorKind.networkUnavailable) {
+          final retry = await showFamilyNetworkUnavailableDialog(context);
+          if (retry && context.mounted) {
+            await _navigate(context, ref, state);
+          }
+          return;
+        }
         showErrorFeedback(context, l10n.familySyncCheckFailed(message));
         await Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
@@ -138,7 +132,9 @@ class FamilySyncSettingsSection extends ConsumerWidget {
       SyncState.synced => l10n.familySyncStatusSynced,
       SyncState.syncing => l10n.familySyncStatusSyncing,
       SyncState.initialSyncing => l10n.syncInitialProgress,
+      SyncState.awaitingKey => l10n.syncInitialProgress,
       SyncState.queuedOffline => l10n.familySyncStatusOffline,
+      SyncState.needsAttention => l10n.syncQueueNeedsAttentionDescription,
       SyncState.error => l10n.familySyncStatusError,
       SyncState.idle => l10n.familySyncStatusSynced,
       SyncState.noGroup => l10n.familySyncStatusUnpaired,

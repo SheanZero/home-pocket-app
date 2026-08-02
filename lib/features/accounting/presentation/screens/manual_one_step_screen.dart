@@ -14,6 +14,7 @@ import '../../../../shared/utils/currency_conversion.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';
+import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/state_recent_currency.dart';
 import '../providers/repository_providers.dart';
@@ -89,6 +90,7 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
     this.initialDate,
     this.initialMerchant,
     this.initialSatisfaction,
+    this.initialLedgerType,
     this.voiceKeyword,
     this.entrySource = EntrySource.manual,
     this.continuousMode = false,
@@ -103,6 +105,7 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
   final DateTime? initialDate;
   final String? initialMerchant;
   final int? initialSatisfaction;
+  final LedgerType? initialLedgerType;
   final String? voiceKeyword;
   final EntrySource entrySource;
 
@@ -515,6 +518,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                       TransactionDetailsForm(
                         key: _formKey,
                         useV16Layout: true,
+                        initialLedgerType: widget.initialLedgerType,
                         config: TransactionDetailsFormConfig.$new(
                           bookId: widget.bookId,
                           initialAmount: widget.initialAmount,

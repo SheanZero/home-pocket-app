@@ -8,8 +8,7 @@ class ShoppingItems extends Table {
   TextColumn get deviceId => text()();
 
   // Visibility (D1): 'public' syncs via family_sync; 'private' is local-only
-  TextColumn get listType =>
-      text().withDefault(const Constant('private'))();
+  TextColumn get listType => text().withDefault(const Constant('private'))();
 
   // Required content
   TextColumn get name => text().withLength(min: 1, max: 200)();
@@ -26,8 +25,7 @@ class ShoppingItems extends Table {
   TextColumn get note => text().nullable()();
 
   // D-02: whole-count; UI defaults blank to 1
-  IntColumn get quantity =>
-      integer().withDefault(const Constant(1))();
+  IntColumn get quantity => integer().withDefault(const Constant(1))();
 
   // ITEM-05: integer yen, rendered via NumberFormatter
   IntColumn get estimatedPrice => integer().nullable()();
@@ -36,13 +34,10 @@ class ShoppingItems extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
 
   // State flags
-  BoolColumn get isCompleted =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
-  BoolColumn get isSynced =>
-      boolean().withDefault(const Constant(false))();
-  BoolColumn get isDeleted =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
   // nullable TEXT, no FK — shadow book may not be local yet
   TextColumn get addedByBookId => text().nullable()();
@@ -50,6 +45,12 @@ class ShoppingItems extends Table {
   // Timestamps
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  // v36: persisted semantic merge tuple. Every local public mutation advances
+  // the revision before its outbox row is committed; inbound reconciliation
+  // compares the same tuple so restart/order cannot change the winner.
+  IntColumn get syncRevision => integer().withDefault(const Constant(0))();
+  TextColumn get syncOriginDeviceId => text().withDefault(const Constant(''))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -74,9 +75,6 @@ class ShoppingItems extends Table {
     ),
     TableIndex(name: 'idx_shopping_completed', columns: {#isCompleted}),
     TableIndex(name: 'idx_shopping_sort_order', columns: {#sortOrder}),
-    TableIndex(
-      name: 'idx_shopping_added_by_book',
-      columns: {#addedByBookId},
-    ),
+    TableIndex(name: 'idx_shopping_added_by_book', columns: {#addedByBookId}),
   ];
 }

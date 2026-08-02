@@ -9,16 +9,20 @@ import '../../../applock/presentation/screens/set_pin_screen.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../features/analytics/domain/models/metric_result.dart';
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
+import '../../../../core/constants/app_info.dart';
+import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 import '../../../family_sync/presentation/widgets/family_sync_settings_section.dart';
 import '../../../profile/presentation/widgets/profile_section_card.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_settings.dart';
-import '../widgets/about_section.dart';
 import '../widgets/appearance_section.dart';
-import '../widgets/data_management_section.dart';
+import '../widgets/backup_restore_navigation_section.dart';
+import '../widgets/delete_all_data_section.dart';
 import '../widgets/joy_target_section.dart';
-import '../widgets/legal_sponsor_section.dart';
+import '../widgets/legal_sponsor_navigation_section.dart';
 import '../widgets/security_section.dart';
 import '../widgets/voice_section.dart';
 
@@ -117,7 +121,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         GetMonthlyJoyTargetRecommendationUseCase.fallbackBaseline;
 
     return Scaffold(
-      appBar: AppBar(title: Text(S.of(context).settings)),
+      backgroundColor: context.palette.background,
+      appBar: AppBar(centerTitle: true, title: Text(S.of(context).settings)),
       body: settingsAsync.when(
         data: (settings) {
           WidgetsBinding.instance.addPostFrameCallback(
@@ -127,35 +132,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             controller: _scrollController,
             children: [
               const ProfileSectionCard(),
-              const Divider(),
-              AppearanceSection(settings: settings),
-              const Divider(),
-              VoiceSection(settings: settings),
-              const Divider(),
-              JoyTargetSection(
-                configuredTarget: settings.monthlyJoyTarget,
-                recommendedTarget: recommendedTarget,
-                fallbackTarget: fallbackTarget,
-                onSave: (value) async {
-                  await ref
-                      .read(settingsRepositoryProvider)
-                      .setMonthlyJoyTarget(value);
-                  ref.invalidate(appSettingsProvider);
-                },
+              SettingsSectionCard(
+                key: const ValueKey('settings-general-section'),
+                title: S.of(context).settingsGeneral,
+                children: [
+                  ThemeSettingTile(settings: settings),
+                  const LanguageSettingTile(),
+                  VoiceLanguageSettingTile(settings: settings),
+                  JoyTargetTile(
+                    configuredTarget: settings.monthlyJoyTarget,
+                    recommendedTarget: recommendedTarget,
+                    fallbackTarget: fallbackTarget,
+                    onSave: (value) async {
+                      await ref
+                          .read(settingsRepositoryProvider)
+                          .setMonthlyJoyTarget(value);
+                      ref.invalidate(appSettingsProvider);
+                    },
+                    compact: true,
+                  ),
+                  WeekStartSettingTile(settings: settings),
+                ],
               ),
-              const Divider(),
-              DataManagementSection(bookId: widget.bookId),
-              const Divider(),
-              const FamilySyncSettingsSection(),
-              const Divider(),
+              const FamilySyncSettingsSection(compact: true),
               KeyedSubtree(
                 key: _securitySectionKey,
-                child: SecuritySection(settings: settings),
+                child: SecuritySection(
+                  settings: settings,
+                  showNotifications: false,
+                  compact: true,
+                ),
               ),
-              const Divider(),
-              const LegalSponsorSection(),
-              const Divider(),
-              const AboutSection(),
+              SettingsSectionCard(
+                key: const ValueKey('settings-notifications-section'),
+                title: S.of(context).notifications,
+                children: [NotificationsSettingTile(settings: settings)],
+              ),
+              BackupRestoreNavigationSection(bookId: widget.bookId),
+              const LegalSponsorNavigationSection(),
+              const DeleteAllDataSection(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 22, 24, 32),
+                child: Text(
+                  '${S.of(context).appName} $appVersion · '
+                  '${S.of(context).settingsLocalDataProtected}',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.supporting.copyWith(
+                    color: context.palette.textTertiary,
+                  ),
+                ),
+              ),
             ],
           );
         },

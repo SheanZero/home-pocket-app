@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../generated/app_localizations.dart';
 
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -32,6 +31,7 @@ import '../../../../shared/widgets/main_surface_header.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
+import '../widgets/home_joy_prompt.dart';
 import '../widgets/month_picker_dialog.dart';
 import '../widgets/home_transaction_tile.dart';
 import '../widgets/transaction_list_card.dart';
@@ -41,10 +41,16 @@ import '../widgets/transaction_list_card.dart';
 /// Flat vertical scroll layout with section dividers.
 /// Wires providers to pure UI widgets. No Scaffold, no bottom nav.
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key, required this.bookId, this.onSettingsTap});
+  const HomeScreen({
+    super.key,
+    required this.bookId,
+    this.onSettingsTap,
+    this.onAddJoyTap,
+  });
 
   final String bookId;
   final VoidCallback? onSettingsTap;
+  final ValueChanged<HomeJoyPrompt>? onAddJoyTap;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -140,6 +146,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       endDate: currentMonthEnd,
                     ),
                   );
+                  final bestJoyRow = switch (bestJoyAsync.value) {
+                    Value(:final data) => data,
+                    _ => null,
+                  };
+                  final defaultBestJoyCategory = bestJoyRow == null
+                      ? null
+                      : defaultCategoryFromId(bestJoyRow.categoryId);
+                  final customBestJoyCategoryAsync =
+                      bestJoyRow != null && defaultBestJoyCategory == null
+                      ? ref.watch(categoryByIdProvider(bestJoyRow.categoryId))
+                      : null;
+                  final bestJoyCategory =
+                      defaultBestJoyCategory ??
+                      customBestJoyCategoryAsync?.value;
+                  final bestJoyCategoryName = bestJoyRow == null
+                      ? null
+                      : categoryNameForDisplay(
+                          categoryId: bestJoyRow.categoryId,
+                          category: bestJoyCategory,
+                          locale: locale,
+                          isLoading:
+                              customBestJoyCategoryAsync?.isLoading ?? false,
+                        );
                   final settingsAsync = ref.watch(appSettingsProvider);
                   final targetRecommendationAsync = ref.watch(
                     monthlyJoyTargetRecommendationProvider(
@@ -219,6 +248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 report: report,
                                 happiness: happiness,
                                 bestJoy: bestJoy,
+                                bestJoyCategoryName: bestJoyCategoryName,
                                 family: family,
                                 shadowBooks: shadowBooks,
                                 shadowAggregate: shadowAggregate,
@@ -235,6 +265,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         AnalyticsScreen(bookId: bookId),
                                   ),
                                 ),
+                                onAddJoy: widget.onAddJoyTap,
                               ),
                             ),
                           ),
@@ -315,9 +346,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return TransactionListCard(
                     children: transactions.map((tx) {
                       final isSoul = tx.ledgerType == LedgerType.joy;
+                      final defaultCategory = defaultCategoryFromId(
+                        tx.categoryId,
+                      );
+                      final customCategoryAsync = defaultCategory == null
+                          ? ref.watch(categoryByIdProvider(tx.categoryId))
+                          : null;
+                      final displayCategory =
+                          defaultCategory ?? customCategoryAsync?.value;
                       return HomeTransactionTile(
                         foreignAnnotation: _foreignAnnotation(tx, locale),
-                        l1Icon: parentCategoryIconFromId(tx.categoryId),
+                        l1Icon: displayCategory == null
+                            ? Icons.category
+                            : parentCategoryIconForCategory(displayCategory),
                         tagText: isGroupMode
                             ? _memberInitial(tx)
                             : (isSoul
@@ -332,9 +373,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ? context.palette.joyText
                             : context.palette.dailyText,
                         merchant: tx.merchant,
-                        category: CategoryLocalizationService.resolveFromId(
-                          tx.categoryId,
-                          locale,
+                        category: categoryNameForDisplay(
+                          categoryId: tx.categoryId,
+                          category: displayCategory,
+                          locale: locale,
+                          isLoading: customCategoryAsync?.isLoading ?? false,
                         ),
                         // v15 `.faithful-tx-icon`: leading L1 icon tinted by
                         // ledger *Text tone — joy→joyText, daily→dailyText.

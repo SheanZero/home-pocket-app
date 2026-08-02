@@ -446,6 +446,86 @@ body {
   .faithful-tear-divider::before { left: -10px; box-shadow: inset -1px 0 0 var(--hp-border-strong); }
   .faithful-tear-divider::after { right: -10px; box-shadow: inset 1px 0 0 var(--hp-border-strong); }
   .faithful-joy-section { margin: 0 -18px -18px; padding: 17px 18px 18px; border-radius: 0 0 21px 21px; background: color-mix(in srgb, var(--hp-surface) 90%, var(--hp-primary-soft)); }
+  .faithful-joy-empty { position: relative; margin: 0 -18px -18px; overflow: hidden; border-radius: 0 0 21px 21px; color: var(--hp-text); }
+  .faithful-joy-empty :where(button) { font-family: var(--hp-font-body); cursor: pointer; transition: transform .15s ease, background .15s ease, box-shadow .15s ease; }
+  .faithful-joy-empty :where(button):active { transform: scale(.98); }
+  .joy-empty-title { margin: 0; font-family: var(--hp-font-display); font-size: 17px; line-height: 1.45; }
+  .joy-empty-copy { margin: 4px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: 1.55; }
+
+  /* Joy empty A — compact horizontal invitation card. */
+  .joy-empty-a { min-height: 138px; padding: 18px 15px; display: grid; grid-template-columns: 52px minmax(0,1fr) auto; gap: 12px; align-items: center; background:
+    radial-gradient(circle at 4% 18%, color-mix(in srgb, var(--hp-joy) 25%, transparent) 0 7px, transparent 8px),
+    linear-gradient(135deg, color-mix(in srgb, var(--hp-joy-soft) 82%, var(--hp-surface)), color-mix(in srgb, var(--hp-surface) 82%, var(--hp-primary-soft)));
+  }
+  .joy-empty-a-art { width: 52px; height: 58px; position: relative; display: grid; place-items: center; border-radius: 20px 24px 18px 23px; background: color-mix(in srgb, var(--hp-surface) 88%, var(--hp-joy-soft)); color: var(--hp-joy-text); box-shadow: 0 8px 18px color-mix(in srgb, var(--hp-joy) 17%, transparent); transform: rotate(-3deg); }
+  .joy-empty-a-art > .material-symbols-rounded { font-size: 28px; transform: rotate(3deg); }
+  .joy-empty-a-art small { position: absolute; right: -5px; top: -7px; width: 23px; height: 23px; border-radius: 50%; background: var(--hp-joy-soft); display: grid; place-items: center; }
+  .joy-empty-a-art small .material-symbols-rounded { font-size: 13px; }
+  .joy-empty-a-copy { min-width: 0; }
+  .joy-empty-a-copy > span { display: block; margin-bottom: 3px; color: var(--hp-joy-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; letter-spacing: .04em; }
+  .joy-empty-a .joy-empty-copy { max-width: 190px; }
+  .joy-empty-a-cta { min-width: 70px; min-height: 42px; padding: 0 11px; border: 0; border-radius: 13px; background: var(--hp-joy); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 7px 16px color-mix(in srgb, var(--hp-joy) 24%, transparent); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; white-space: nowrap; }
+  .joy-empty-a-cta:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--hp-joy) 88%, var(--hp-text)); }
+  .joy-empty-a-cta .material-symbols-rounded { font-size: 16px; }
+
+  /* Joy empty B — quiet editorial strip with the smallest footprint. */
+  .joy-empty-b { min-height: 104px; padding: 17px 15px; display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 12px; align-items: center; background: color-mix(in srgb, var(--hp-surface) 88%, var(--hp-joy-soft)); }
+  .joy-empty-b::before { content: ""; position: absolute; left: 15px; top: 17px; width: 7px; height: 15px; border-radius: 100% 0 100% 0; background: color-mix(in srgb, var(--hp-joy) 64%, transparent); transform: rotate(24deg); }
+  .joy-empty-b-copy { min-width: 0; padding-left: 17px; }
+  .joy-empty-b .joy-empty-title { font-size: 16px; }
+  .joy-empty-b .joy-empty-copy { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .joy-empty-b-cta { width: 44px; height: 44px; border: 1px solid color-mix(in srgb, var(--hp-joy) 34%, var(--hp-border)); border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 82%, var(--hp-joy-soft)); color: var(--hp-joy-text); display: grid; place-items: center; box-shadow: 0 5px 13px color-mix(in srgb, var(--hp-joy) 15%, transparent); }
+  .joy-empty-b-cta:hover { transform: translateX(2px); background: var(--hp-joy-soft); }
+  .joy-empty-b-cta .material-symbols-rounded { font-size: 21px; }
+
+  /* Joy empty C — shared header for the three button-style refinement rounds. */
+  .joy-empty-c { min-height: 154px; padding: 16px 15px 17px; background:
+    radial-gradient(circle at 94% 16%, color-mix(in srgb, var(--hp-joy) 20%, transparent) 0 17px, transparent 18px),
+    color-mix(in srgb, var(--hp-surface) 82%, var(--hp-joy-soft));
+  }
+  .joy-empty-c-head { position: relative; display: flex; align-items: center; gap: 8px; }
+  .joy-empty-c-mark { width: 30px; height: 30px; flex: 0 0 auto; border-radius: 12px 14px 11px 13px; background: var(--hp-joy-soft); color: var(--hp-joy-text); display: grid; place-items: center; transform: rotate(-4deg); }
+  .joy-empty-c-mark .material-symbols-rounded { font-size: 18px; transform: rotate(4deg); }
+  .joy-empty-c-title { min-width: 0; flex: 1; }
+  .joy-empty-c-title .joy-empty-title { font-size: 16px; }
+  .joy-empty-c-title .joy-empty-copy { margin-top: 1px; }
+  .joy-empty-c-free { min-height: 36px; padding: 0 8px; border: 0; border-radius: 10px; background: transparent; color: var(--hp-joy-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; white-space: nowrap; }
+  .joy-empty-c-free:hover { background: var(--hp-joy-soft); }
+  .joy-empty-prompts { margin-top: 12px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .joy-empty-prompt { --prompt-ink: var(--hp-joy-text); --prompt-soft: var(--hp-joy-soft); min-width: 0; border: 0; color: var(--prompt-ink); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; white-space: nowrap; }
+  .joy-empty-prompt.coffee { --prompt-ink: var(--hp-joy-text); --prompt-soft: color-mix(in srgb, var(--hp-joy-soft) 76%, var(--hp-surface)); }
+  .joy-empty-prompt.book { --prompt-ink: var(--hp-primary-text); --prompt-soft: color-mix(in srgb, var(--hp-primary-soft) 78%, var(--hp-surface)); }
+  .joy-empty-prompt.rest { --prompt-ink: var(--hp-daily-text); --prompt-soft: color-mix(in srgb, var(--hp-daily-soft) 78%, var(--hp-surface)); }
+  .joy-prompt-icon { display: grid; place-items: center; color: var(--prompt-ink); }
+  .joy-prompt-icon .material-symbols-rounded { font-size: inherit; }
+
+  /* C1 — 生活贴纸: layered colored stickers, clear and implementation-friendly. */
+  .joy-empty-c1 { min-height: 162px; }
+  .joy-empty-c1 .joy-empty-prompts { gap: 7px; }
+  .joy-empty-c1 .joy-empty-prompt { min-height: 56px; padding: 6px 5px; border: 1px solid color-mix(in srgb, var(--prompt-ink) 14%, var(--hp-border)); border-radius: 16px; background: var(--prompt-soft); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: inset 0 1px 0 color-mix(in srgb, var(--hp-surface) 78%, transparent); }
+  .joy-empty-c1 .joy-empty-prompt:hover { transform: translateY(-2px); box-shadow: 0 7px 14px color-mix(in srgb, var(--prompt-ink) 13%, transparent); }
+  .joy-empty-c1 .joy-prompt-icon { width: 25px; height: 25px; border-radius: 50%; background: color-mix(in srgb, var(--hp-surface) 76%, transparent); font-size: 16px; box-shadow: 0 3px 8px color-mix(in srgb, var(--prompt-ink) 10%, transparent); }
+
+  /* C2 — 手账便签: lightly staggered paper notes with taped edges. */
+  .joy-empty-c2 { min-height: 166px; }
+  .joy-empty-c2 .joy-empty-prompts { gap: 7px; padding: 3px 1px 2px; align-items: center; }
+  .joy-empty-c2 .joy-empty-prompt { position: relative; min-height: 55px; padding: 12px 4px 6px; border: 1px solid color-mix(in srgb, var(--prompt-ink) 16%, var(--hp-border)); border-radius: 10px 15px 11px 14px; background: color-mix(in srgb, var(--hp-surface) 91%, var(--prompt-soft)); display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 6px 13px color-mix(in srgb, var(--hp-text) 8%, transparent); }
+  .joy-empty-c2 .joy-empty-prompt::before { content: ""; position: absolute; top: 5px; left: 50%; width: 23px; height: 5px; border-radius: 2px; background: color-mix(in srgb, var(--prompt-ink) 24%, transparent); transform: translateX(-50%) rotate(-2deg); opacity: .72; }
+  .joy-empty-c2 .joy-empty-prompt:nth-child(1) { transform: rotate(-2deg) translateY(2px); }
+  .joy-empty-c2 .joy-empty-prompt:nth-child(2) { border-radius: 14px 9px 15px 10px; transform: rotate(1.5deg) translateY(-2px); }
+  .joy-empty-c2 .joy-empty-prompt:nth-child(3) { border-radius: 9px 15px 12px 16px; transform: rotate(-1deg) translateY(1px); }
+  .joy-empty-c2 .joy-empty-prompt:hover { transform: translateY(-3px) rotate(0); box-shadow: 0 9px 17px color-mix(in srgb, var(--prompt-ink) 15%, transparent); }
+  .joy-empty-c2 .joy-prompt-icon { font-size: 16px; }
+
+  /* C3 — 图标浮岛: no boxes, organic icon islands on the warm paper. */
+  .joy-empty-c3 { min-height: 158px; }
+  .joy-empty-c3 .joy-empty-prompts { margin-top: 9px; gap: 3px; padding: 6px 8px 1px; border-radius: 18px; background: color-mix(in srgb, var(--hp-surface) 50%, transparent); }
+  .joy-empty-c3 .joy-empty-prompt { min-height: 55px; padding: 3px 1px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .joy-empty-c3 .joy-empty-prompt:hover { transform: translateY(-2px); }
+  .joy-empty-c3 .joy-prompt-icon { width: 34px; height: 31px; border-radius: 55% 45% 58% 42%; background: var(--prompt-soft); font-size: 18px; box-shadow: 0 5px 11px color-mix(in srgb, var(--prompt-ink) 11%, transparent); transform: rotate(-3deg); }
+  .joy-empty-c3 .joy-empty-prompt:nth-child(2) .joy-prompt-icon { border-radius: 42% 58% 44% 56%; transform: rotate(3deg); }
+  .joy-empty-c3 .joy-empty-prompt:nth-child(3) .joy-prompt-icon { border-radius: 60% 40% 47% 53%; transform: rotate(-1deg); }
+  .joy-empty-c3 .joy-empty-prompt:hover .joy-prompt-icon { box-shadow: 0 8px 15px color-mix(in srgb, var(--prompt-ink) 18%, transparent); }
   .faithful-divider { height: 1px; margin: 12px 0; border: 0; background: var(--hp-faithful-divider); }
   .faithful-region-title { display: flex; align-items: center; gap: 6px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; }
   .faithful-region-title > .material-symbols-rounded { color: var(--hp-faithful-accent); font-size: 16px; }
@@ -1073,6 +1153,70 @@ body {
   .shutter { width: 66px; height: 66px; border-radius: 50%; border: 5px solid var(--hp-surface); background: var(--hp-primary); box-shadow: 0 0 0 2px var(--hp-border-strong); cursor: pointer; }
 
   /* Family / onboarding / settings */
+  .settings-profile-card { width: 100%; min-height: 92px; margin: 8px 0 25px; padding: 15px 16px; border: 1px solid var(--hp-border); border-radius: 18px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 13px; text-align: left; cursor: pointer; box-shadow: var(--hp-shadow-card); transition: transform .12s ease, border-color .15s ease, background .15s ease; }
+  .settings-profile-card:hover { border-color: color-mix(in srgb,var(--hp-primary) 42%,var(--hp-border)); background: color-mix(in srgb,var(--hp-primary-soft) 18%,var(--hp-surface)); }
+  .settings-profile-card:active { transform: scale(.985); }
+  .settings-profile-avatar { width: 56px; height: 56px; flex: 0 0 56px; border: 2px solid color-mix(in srgb,var(--hp-surface) 76%,var(--hp-border)); border-radius: 50%; background: color-mix(in srgb,var(--hp-primary-soft) 72%,var(--hp-surface)); display: grid; place-items: center; overflow: hidden; box-shadow: 0 4px 12px color-mix(in srgb,var(--hp-primary) 10%,transparent); }
+  .settings-profile-avatar img { width: 53px; height: 53px; display: block; object-fit: contain; }
+  [data-theme="dark"] .settings-profile-avatar img { content: url("assets/onboarding-avatar-warm-v1-dark.png"); }
+  .settings-profile-copy { min-width: 0; flex: 1; }
+  .settings-profile-copy strong { display: block; overflow: hidden; color: var(--hp-text); font-size: var(--type-section); line-height: var(--line-section); font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+  .settings-profile-copy small { display: block; margin-top: 3px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .settings-profile-card > .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-text-faint); font-size: 21px; }
+  .settings-screen .tap-row { min-height: 72px; gap: 12px; padding: 12px 14px; }
+  .settings-screen .row-icon { width: 42px; height: 42px; border-radius: 14px; }
+  .settings-screen .row-icon .material-symbols-rounded { font-size: 23px; }
+  .settings-danger-card { border-color: color-mix(in srgb,var(--hp-error) 28%,var(--hp-border)); }
+  .settings-danger-row { color: var(--hp-error); }
+  .settings-danger-row .row-icon { background: color-mix(in srgb,var(--hp-error) 10%,var(--hp-surface)); color: var(--hp-error); }
+  .settings-danger-row .row-copy small { color: color-mix(in srgb,var(--hp-error) 66%,var(--hp-text-muted)); }
+  .settings-footer { margin: 24px 0 2px; text-align: center; }
+  .backup-hero { position: relative; overflow: hidden; padding: 18px; background: linear-gradient(145deg,color-mix(in srgb,var(--hp-primary-soft) 70%,var(--hp-surface)),var(--hp-surface)); box-shadow: none; }
+  .backup-hero::after { content: ""; position: absolute; width: 118px; height: 118px; right: -50px; top: -54px; border: 18px solid color-mix(in srgb,var(--hp-primary) 8%,transparent); border-radius: 50%; }
+  .backup-hero-mark { width: 48px; height: 48px; margin-bottom: 13px; border-radius: 15px; display: grid; place-items: center; background: var(--hp-surface); color: var(--hp-primary-text); box-shadow: var(--hp-shadow-card); }
+  .backup-hero-mark .material-symbols-rounded { font-size: 26px; }
+  .backup-hero h2 { position: relative; margin: 0 0 5px; font-family: var(--hp-font-display); font-size: 19px; line-height: 27px; }
+  .backup-hero p { position: relative; max-width: 285px; margin: 0; }
+  .backup-trust-row { position: relative; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .backup-trust-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 25px; padding: 4px 8px; border: 1px solid color-mix(in srgb,var(--hp-primary) 18%,var(--hp-border)); border-radius: 99px; background: color-mix(in srgb,var(--hp-surface) 78%,transparent); color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
+  .backup-trust-chip .material-symbols-rounded { font-size: 14px; }
+  .backup-action-card { width: 100%; min-height: 84px; padding: 14px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-card); background: var(--hp-surface); color: var(--hp-text); display: grid; grid-template-columns: 44px minmax(0,1fr) 22px; align-items: center; gap: 12px; text-align: left; cursor: pointer; box-shadow: var(--hp-shadow-card); transition: transform .12s ease,border-color .15s ease,background .15s ease; }
+  .backup-action-card:hover { border-color: color-mix(in srgb,var(--hp-primary) 46%,var(--hp-border)); background: color-mix(in srgb,var(--hp-primary-soft) 16%,var(--hp-surface)); }
+  .backup-action-card:active { transform: scale(.985); }
+  .backup-action-card.restore { box-shadow: none; }
+  .backup-action-icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .backup-action-card.restore .backup-action-icon { background: color-mix(in srgb,var(--hp-warning) 12%,var(--hp-surface)); color: var(--hp-warning); }
+  .backup-action-icon .material-symbols-rounded { font-size: 23px; }
+  .backup-action-copy { min-width: 0; }
+  .backup-action-copy strong { display: block; font-size: var(--type-item); line-height: var(--line-item); font-weight: 800; }
+  .backup-action-copy small { display: block; margin-top: 3px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .backup-action-card > .material-symbols-rounded { color: var(--hp-text-faint); font-size: 21px; }
+  .backup-status { margin-top: 9px; padding: 12px 13px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); display: flex; align-items: flex-start; gap: 10px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .backup-status .material-symbols-rounded { flex: 0 0 auto; margin-top: 1px; color: var(--hp-primary-text); font-size: 19px; }
+  .backup-status strong { display: block; margin-bottom: 1px; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+  .backup-status.error { border-color: color-mix(in srgb,var(--hp-error) 35%,var(--hp-border)); background: color-mix(in srgb,var(--hp-error) 6%,var(--hp-surface)); }
+  .backup-status.error .material-symbols-rounded,.backup-status.error strong { color: var(--hp-error); }
+  .backup-status.success .material-symbols-rounded { color: var(--hp-success); }
+  .backup-spinner { width: 18px; height: 18px; margin-top: 1px; flex: 0 0 auto; border: 2px solid var(--hp-border-strong); border-top-color: var(--hp-primary); border-radius: 50%; animation: backup-spin .8s linear infinite; }
+  @keyframes backup-spin { to { transform: rotate(360deg); } }
+  .backup-privacy-note { margin: 24px 4px 0; display: flex; align-items: flex-start; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .backup-privacy-note .material-symbols-rounded { flex: 0 0 auto; margin-top: 1px; color: var(--hp-primary-text); font-size: 17px; }
+  .backup-dialog-copy { margin: 0 0 15px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); text-align: center; }
+  .backup-field { display: block; margin: 11px 0 0; color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .backup-field input { width: 100%; height: 46px; margin-top: 6px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: 12px; outline: 0; background: var(--hp-surface); color: var(--hp-text); font: 650 var(--type-body)/var(--line-body) var(--hp-font-body); }
+  .backup-field input:focus { border-color: var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb,var(--hp-primary) 13%,transparent); }
+  .backup-field input[aria-invalid="true"] { border-color: var(--hp-error); }
+  .backup-dialog-error { min-height: 18px; margin: 7px 2px 5px; color: var(--hp-error); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .backup-dialog-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.35fr); gap: 8px; margin-top: 8px; }
+  .backup-dialog-actions .primary-btn,.backup-dialog-actions .secondary-btn { min-height: 46px; }
+  .backup-warning { margin: 12px 0 14px; padding: 11px; border-radius: 12px; background: color-mix(in srgb,var(--hp-warning) 10%,var(--hp-surface)); color: var(--hp-text-muted); display: flex; align-items: flex-start; gap: 8px; font-size: var(--type-supporting); line-height: var(--line-supporting); text-align: left; }
+  .backup-warning .material-symbols-rounded { flex: 0 0 auto; margin-top: 1px; color: var(--hp-warning); font-size: 18px; }
+  .backup-file-summary { margin: 0 0 12px; padding: 11px 12px; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface-muted); display: flex; align-items: center; gap: 9px; text-align: left; }
+  .backup-file-summary .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-primary-text); font-size: 21px; }
+  .backup-file-summary span { min-width: 0; }
+  .backup-file-summary strong,.backup-file-summary small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .backup-file-summary strong { color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .backup-file-summary small { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
   .avatar-stack { display: flex; justify-content: center; margin: 20px 0; }
   .avatar { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--hp-bg); display: grid; place-items: center; background: linear-gradient(145deg,var(--hp-primary-soft),var(--hp-surface)); color: var(--hp-primary-text); font-family: var(--hp-font-display); font-weight: 900; margin-left: -9px; }
   .avatar:first-child { margin-left: 0; }
@@ -1409,6 +1553,10 @@ body {
     .screen-link { width: auto; min-width: max-content; padding: 8px 10px; }
     .inspector { position: static; max-width: 390px; max-height: none; margin: 18px auto 0; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .faithful-joy-empty button { transition: none; }
+    .faithful-joy-empty button:hover { transform: none; }
+  }
 </style>
 </head>
 <body>
@@ -1453,6 +1601,7 @@ body {
         <button class="screen-link" data-screen="lock"><span class="material-symbols-rounded">lock</span>应用锁</button>
         <button class="screen-link" data-screen="settings"><span class="material-symbols-rounded">settings</span>设置</button>
         <button class="screen-link" data-screen="profile"><span class="material-symbols-rounded">account_circle</span>个人资料</button>
+        <button class="screen-link" data-screen="backup"><span class="material-symbols-rounded">encrypted</span>备份与恢复</button>
         <button class="screen-link" data-screen="legal"><span class="material-symbols-rounded">policy</span>法务与赞助</button>
       </div>
     </aside>
@@ -1477,8 +1626,10 @@ body {
         <span class="screen-name">Home 方案</span>
         <div class="coverage" style="margin-top:9px">
           <div><strong>C · 层次纸面 ★ 已选</strong><br>V16 严格映射当前 Flutter 主页结构。</div>
+          <div><strong>悦己内容状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-demo="filled">有悦己记录</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-demo="empty">无悦己记录</button></span></div>
+          <div><strong>C2 · 手账便签 ★ 已选</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-variant="c1">C1 生活贴纸</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-variant="c2">C2 手账便签 ★ 已选</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-variant="c3">C3 图标浮岛</button></span></div>
         </div>
-        <p>HeroHeader → HomeHeroCard + Tear → FavoriteSection → FamilyInviteBanner → TransactionListCard → detached nav + FAB</p>
+        <p>已选 C2：保留三个入口含义，以错落纸片、胶带与轻阴影强化生活手账感；C1 / C3 保留为对照。</p>
       </div>
       <div id="entry-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">统一记账方案</span>
@@ -1540,12 +1691,34 @@ body {
       <div id="setup-security-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">初始设置 · 安全保护合并方案</span>
         <div class="coverage" style="margin-top:9px">
-          <div><strong>交互原则</strong><br>关闭时隐藏解锁方式并显示稍后设置提示；开启时隐藏提示，只允许选择一种解锁方式。</div>
-          <div><strong>应用锁引导</strong><br>选中应用锁后原地提示设置 4 位 PIN；完成双次输入前，页面完成按钮保持禁用。</div>
+          <div><strong>交互原则</strong><br>初始设置选择的是优先解锁方式，不改变 PIN 作为应用锁兜底凭证的安全约束。</div>
+          <div><strong>Face ID 路径</strong><br>最终确认时若尚未设置 PIN，先完成双次 PIN 输入，再同时启用应用锁与 Face ID。</div>
         </div>
         <div class="coverage" style="margin-top:10px">
           <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="off">保护关闭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="biometric">生物识别</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="pin-pending">应用锁待设置</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-setup-security-demo="pin-complete">应用锁已设置</button></span></div>
-          <div><strong>完成条件</strong><br>姓名必填；关闭保护或选择生物识别可直接开始；选择应用锁时必须先完成 PIN 设置。</div>
+          <div><strong>完成条件</strong><br>姓名必填；关闭保护可直接开始；任何应用锁方式都必须先有有效 PIN，生物识别只是可选快捷解锁。</div>
+        </div>
+      </div>
+      <div id="settings-security-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">设置 · 一级信息架构</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>一级直达</strong><br>移除“其他设置”二级入口；识别语言紧接显示语言，周起始日同属“一般”，通知与全数据删除直接放在设置主列表。</div>
+          <div><strong>安全排序</strong><br>高频偏好在前，数据任务与法务在后；不可撤销的全数据删除独立放在页面最底部，避免与备份混淆。</div>
+        </div>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-settings-security-demo="off">应用锁关闭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-settings-security-demo="pin">仅 PIN</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-settings-security-demo="face-id">Face ID + PIN</button></span></div>
+          <div><strong>交互覆盖</strong><br>周起始日与识别语言可选择；通知可直接切换。关闭 Face ID 回到“仅 PIN”，不会删除 PIN。</div>
+        </div>
+      </div>
+      <div id="backup-design-note" class="joy-variant-panel" hidden>
+        <span class="screen-name">设置 · 备份与恢复</span>
+        <div class="coverage" style="margin-top:9px">
+          <div><strong>现有实现</strong><br>导出将当前账簿交易、全部账簿与分类、设置和汇率缓存压缩后，以 Argon2id + AES-256-GCM 写入 `.hpb`，再打开系统分享。</div>
+          <div><strong>恢复边界</strong><br>仅允许选择 `.hpb`；正确密码后整体替换本地账簿数据。数据库写入在同一事务内，失败时保留恢复前的数据。</div>
+        </div>
+        <div class="coverage" style="margin-top:10px">
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-backup-demo="overview">概览</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-backup-demo="exporting">导出中</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-backup-demo="export-success">导出成功</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-backup-demo="restoring">恢复中</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-backup-demo="restore-success">恢复成功</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-backup-demo="error">安全拒绝</button></span></div>
+          <div><strong>Mockup 补强</strong><br>当前 App 在选文件、输密码后直接恢复；本稿增加“现有数据将被替换”的显式确认，并把错误反馈落在任务上下文中。</div>
         </div>
       </div>
     </aside>
@@ -1556,15 +1729,19 @@ body {
 <script>
   const state = {
     screen: new URLSearchParams(location.search).get('screen') || 'home', theme: 'light', family: false, inviteDismissed: false,
+    homeJoyEmpty: new URLSearchParams(location.search).get('home-joy-empty') === '1',
+    homeJoyVariant: new URLSearchParams(location.search).get('home-joy-variant') || 'c2',
     familyInviteCode: '482169', familyRequestPending: true,
     amount: '0', entryVariant: 'a', entryInputMode: 'keyboard', entryVoiceState: 'review', entryVoiceMode: 'replace', entryVoiceTranscript: '', entryVoiceApplied: false, entryReviewPending: false, entryNeedsReview: false, entryMerchant: '', entryCategory: '食费 > 外出就餐', entryLedger: 'daily', entryNote: '', entrySatisfaction: 8, entryContinuous: false, entrySnapshot: null,
     pin: '', onboardingName: '', onboardingLanguage: 'system', onboardingCurrency: 'JPY', onboardingVoice: 'ja', onboardingVoiceExplicit: false,
-    onboardingSecurityEnabled: false, onboardingUnlockMethod: 'biometric', onboardingPinConfigured: false, onboardingPinStage: 'create', onboardingPinFirst: '', onboardingPinDraft: '', onboardingPinError: '',
+    onboardingSecurityEnabled: false, onboardingUnlockMethod: 'biometric', onboardingPinConfigured: false, onboardingPinStage: 'create', onboardingPinFirst: '', onboardingPinDraft: '', onboardingPinError: '', onboardingPinReturn: 'preferences', onboardingPinIntent: 'onboarding',
+    settingsWeekStart: 'monday', settingsNotificationsEnabled: true,
     uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
     analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
     shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [],
     shoppingFormMode: 'create', shoppingFormName: '', shoppingFormQuantity: 1, shoppingFormLedger: 'daily', shoppingFormListType: 'public', shoppingFormCategory: '', shoppingFormPrice: '', shoppingFormNote: '', shoppingFormSubmitting: false, shoppingFormError: '',
     shoppingVoiceState: 'manual', shoppingVoiceTranscript: '', shoppingVoiceApplied: false, shoppingVoiceSnapshot: null,
+    backupStatus: 'overview', backupExportPassword: '', backupExportConfirm: '', backupRestorePassword: '', backupPasswordError: '', backupSelectedFile: '', backupSelectedFileKind: 'valid',
     editAmount: '3280', editAmountDraft: '3280', editCurrency: 'JPY', editJpyAmount: '3280', editRate: '1', editRateDate: '2026年7月10日', editCategory: '食费 > 超市', editDate: '2026年7月10日', editMerchant: 'Life 超市', editLedger: 'daily', editNote: '周末采购', editSatisfaction: 8, editSubmitting: false,
     categoryMode: 'browse', categoryQuery: '', categoryExpanded: 'cat_food', categoryEditExpanded: null, categorySelectedId: 'cat_food_dining_out', categoryDirty: false, categorySnapshot: null,
     history: [],
@@ -1614,7 +1791,7 @@ body {
   const info = {
     foundation: ['Foundation','设计系统','色彩、字体、间距、组件与反馈都以生活手帐为同一来源。','令牌 + 原子组件','浅色 / 深色 / 可访问性','对应 AppPalette、AppTextStyles 与共享 widgets'],
     states: ['Foundation','系统状态','空、加载与错误状态共享同一套安静反馈语言；不使用插画占位或焦虑文案。','状态切换 + 恢复动作','空 / 加载 / 错误','对应 AsyncValue 与现有 EmptyState widgets'],
-    home: ['Main shell','主页','主卡恢复原有支出与 Joy 设计，并以左右易撕口分区；今月の最愛使用无背景独立区块。','HeroHeader + HomeHero + Favorite + Invite + Recent','个人 / 家庭 / 明暗','首页视觉提案；数据与交互继续映射现有 Home widgets 与 providers'],
+    home: ['Main shell','主页','有记录时呈现悦己累计；无悦己账单时隐藏所有零值指标，以柔和邀请引导用户记录花钱换来的享受。','HeroHeader + conditional HomeHero / Joy invitation + Invite + Recent','有悦己 / 无悦己 / 个人 / 家庭 / 明暗','首页视觉提案；空态由 joy transaction presence 驱动，CTA 预选悦己账本'],
     list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
     analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
@@ -1633,10 +1810,11 @@ body {
     onboarding: ['Setup','欢迎引导 · 1/2','第一页只建立产品情绪与核心价值：轻松记录、区分日常与悦己，并用同一套温馨复合图标作为视觉锚点。','品牌价值 + 双账本 + 满足感','第一页 / 可跳过','目标实现应将 Flutter 现有 3 页收敛为 2 页'],
     'onboarding-privacy': ['Setup','欢迎引导 · 2/2','第二页集中说明本地保存、端到端加密和防篡改；不再单独占用第三页讲悦己。','本地优先 + 三项隐私承诺','第二页 / 返回 / 可跳过','复用现有隐私文案与 onboarding gate'],
     preferences: ['Setup','初始设置＋安全保护','按确认稿统一整页：头像与必填姓名并排，语言、币种与语音使用同一三行选择卡，再衔接可渐进展开的安全保护。','基础设置 + 统一选择卡 + 安全开关 + 单选方式','保护关闭 / 生物识别 / PIN 待设置 / PIN 已设置','复用 OnboardingSettingsScreen、SetPinScreen 与安全设置状态'],
-    'setup-pin': ['Setup','设置应用锁 PIN','应用锁选择后进入专注的双次 4 位 PIN 输入；两次一致才返回初始设置并解锁最终开始按钮。','首次输入 + 再次确认 + 错误重试','创建 / 确认 / 不一致','复用 SetPinScreen 的双次输入与 AppLockService.setPin'],
+    'setup-pin': ['Setup','设置应用锁 PIN','进入专注的双次 4 位 PIN 输入；两次一致才返回初始设置或设置页，并同步更新应用锁状态。','首次输入 + 再次确认 + 错误重试','首次开启 / 修改 PIN / 不一致','复用 SetPinScreen 的双次输入与 AppLockService.setPin'],
     lock: ['Safety','应用锁','锁屏专注一个任务；生物识别优先，PIN 永远可回退。','生物识别 + PIN','冷启动 / 回前台 / 错误','复用 AppLockService 与 local_auth'],
-    settings: ['Setup','设置','个人资料、常规、安全、数据、家庭与法务按稳定分组组织。','分组列表 + 明确层级','个人 / 家庭 / 明暗','复用现有 Settings sections'],
+    settings: ['Setup','设置','移除“其他设置”二级入口，把识别语言放在显示语言之后，并将周起始日收进“一般”；危险操作固定在最底部。','页头资料卡 + 6 个常规分组 + 1 个独立危险区','锁关闭 / 仅 PIN / Face ID + PIN / 周起始日 / 识别语言 / 通知 / 明暗','映射现有 SettingsScreen、AdditionalSettingsScreen 与各设置组件'],
     profile: ['Setup','个人资料','身份编辑采用普通表单与真实头像槽位，不让装饰背景抢占任务。','头像 + 昵称 + 保存','空值 / 图片 / 文本','复用 profile providers'],
+    backup: ['Safety','备份与恢复','把本地加密备份拆成清楚的“写出”和“替换恢复”两条任务；密码由用户保管，恢复前明确告知现有数据会被替换。','安全说明 + 写出 + 文件选择 + 替换确认','密码校验 / 处理中 / 成功 / 错误安全拒绝','映射 DataManagementSection、ExportBackupUseCase、ImportBackupUseCase 与 BackupCryptoService'],
     legal: ['Safety','法务与赞助','合规信息保持阅读优先；赞助作为外部支持入口，不与核心功能竞争。','文档列表 + 长文阅读','日本合规 / 外链','复用 LegalSponsorSection 与 LegalDocScreen']
   };
 
@@ -1675,11 +1853,36 @@ body {
     return `<div class="faithful-divider"></div><div class="faithful-region-title">メンバー</div><div class="faithful-members"><div class="faithful-member"><span class="faithful-member-avatar">私</span><span>あおい</span><strong>¥84,200</strong></div><div class="faithful-member"><span class="faithful-member-avatar">花</span><span>花子</span><strong>¥62,600</strong></div><div class="faithful-member"><span class="faithful-member-avatar">太</span><span>太郎</span><strong>¥80,820</strong></div></div>`;
   }
 
+  function faithfulSpendingSummary() {
+    const total = state.homeJoyEmpty ? (state.family ? '¥174,000' : '¥132,800') : (state.family ? '¥227,620' : '¥186,420');
+    const previous = state.homeJoyEmpty ? (state.family ? '¥192,000' : '¥146,020') : (state.family ? '¥246,900' : '¥202,640');
+    const joy = state.homeJoyEmpty ? '¥0' : '¥53,620';
+    const daily = state.family ? '¥174,000' : '¥132,800';
+    const trend = state.homeJoyEmpty ? '−9%' : '−8%';
+    return `<div class="faithful-label">${state.family?'家族の支出':'今月の支出'}</div><div class="faithful-amount-row"><strong>${total}</strong><span class="faithful-trend">${icon('trending_down')}${trend}</span></div><p class="faithful-previous">先月同期 ${previous}</p><div class="faithful-ledgers"><div class="faithful-ledger-labels"><span class="faithful-ledger-label"><i class="faithful-dot"></i><span>ときめき帳</span><strong>${joy}</strong></span><span class="faithful-ledger-label daily"><strong>${daily}</strong><span>日々の帳</span><i class="faithful-dot"></i></span></div><div class="faithful-split"><span${state.homeJoyEmpty?' style="width:0"':''}></span></div></div>`;
+  }
+
+  function faithfulJoyEmpty() {
+    const personal = !state.family;
+    if (state.homeJoyVariant === 'b') {
+      return `<section class="faithful-joy-empty joy-empty-b" aria-labelledby="home-joy-empty-title"><span class="joy-empty-b-copy"><h2 class="joy-empty-title" id="home-joy-empty-title">${personal?'自分のために使ったお金も、大切な記録。':'家族それぞれの「うれしい」も、大切な記録。'}</h2><p class="joy-empty-copy">楽しんだ時間を、ときめき帳へ。</p></span><button class="joy-empty-b-cta" data-action="home-add-joy" aria-label="ときめきを記録">${icon('arrow_forward')}</button></section>`;
+    }
+    if (['c','c1','c2','c3'].includes(state.homeJoyVariant)) {
+      const cVariant = state.homeJoyVariant === 'c' ? 'c2' : state.homeJoyVariant;
+      return `<section class="faithful-joy-empty joy-empty-c joy-empty-${cVariant}" aria-labelledby="home-joy-empty-title"><div class="joy-empty-c-head"><span class="joy-empty-c-mark" aria-hidden="true">${icon('favorite')}</span><span class="joy-empty-c-title"><h2 class="joy-empty-title" id="home-joy-empty-title">${personal?'今日の「うれしい」は？':'家族の「うれしい」は？'}</h2><p class="joy-empty-copy">小さな楽しみから選んで記録</p></span><button class="joy-empty-c-free" data-action="home-add-joy">自由に記録</button></div><div class="joy-empty-prompts"><button class="joy-empty-prompt coffee" data-action="home-add-joy" data-joy-category="食费 > 咖啡馆"><span class="joy-prompt-icon">${icon('local_cafe')}</span><span>好きな一杯</span></button><button class="joy-empty-prompt book" data-action="home-add-joy" data-joy-category="教育进修 > 书籍"><span class="joy-prompt-icon">${icon('menu_book')}</span><span>読みたい本</span></button><button class="joy-empty-prompt rest" data-action="home-add-joy" data-joy-category="兴趣娱乐 > 休闲运动"><span class="joy-prompt-icon">${icon('spa')}</span><span>ほっと一息</span></button></div></section>`;
+    }
+    return `<section class="faithful-joy-empty joy-empty-a" aria-labelledby="home-joy-empty-title"><span class="joy-empty-a-art" aria-hidden="true">${icon('local_cafe')}<small>${icon('local_florist')}</small></span><span class="joy-empty-a-copy"><span>自分をよろこばせる記録</span><h2 class="joy-empty-title" id="home-joy-empty-title">${personal?'今日の「うれしい」を残そう':'家族の「うれしい」を残そう'}</h2><p class="joy-empty-copy">好きな一杯も、読みたかった本も。</p></span><button class="joy-empty-a-cta" data-action="home-add-joy">${icon('favorite')}記録する</button></section>`;
+  }
+
   function faithfulHero() {
-    return `<div class="faithful-hero" data-token="HomeHeroCard · Original + Tear" data-action="hero-analytics" role="button" tabindex="0"><div class="faithful-label">${state.family?'家族の支出':'今月の支出'}</div><div class="faithful-amount-row"><strong>${state.family?'¥227,620':'¥186,420'}</strong><span class="faithful-trend">${icon('trending_down')}−8%</span></div><p class="faithful-previous">先月同期 ${state.family?'¥246,900':'¥202,640'}</p><div class="faithful-ledgers"><div class="faithful-ledger-labels"><span class="faithful-ledger-label"><i class="faithful-dot"></i><span>ときめき帳</span><strong>¥53,620</strong></span><span class="faithful-ledger-label daily"><strong>${state.family?'¥174,000':'¥132,800'}</strong><span>日々の帳</span><i class="faithful-dot"></i></span></div><div class="faithful-split"><span></span></div></div><div class="faithful-tear-divider" aria-hidden="true"></div><div class="faithful-joy-section"><div class="faithful-region-title">${icon('eco')}<span>${state.family?'家族のときめき':'ときめき度'}</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics()}${faithfulMembers()}</div></div>`;
+    if (state.homeJoyEmpty) {
+      return `<div class="faithful-hero home-joy-empty-state" data-token="HomeHeroCard · Joy empty · Variant ${state.homeJoyVariant.toUpperCase()}">${faithfulSpendingSummary()}<div class="faithful-tear-divider" aria-hidden="true"></div>${faithfulJoyEmpty()}</div>`;
+    }
+    return `<div class="faithful-hero" data-token="HomeHeroCard · Original + Tear" data-action="hero-analytics" role="button" tabindex="0">${faithfulSpendingSummary()}<div class="faithful-tear-divider" aria-hidden="true"></div><div class="faithful-joy-section"><div class="faithful-region-title">${icon('eco')}<span>${state.family?'家族のときめき':'ときめき度'}</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics()}${faithfulMembers()}</div></div>`;
   }
 
   function faithfulFavoriteCard() {
+    if (state.homeJoyEmpty) return '';
     return `<section class="faithful-favorite-card" data-token="HomeFavoriteSection" data-action="hero-analytics" role="button" tabindex="0"><div class="faithful-region-title">${icon('workspace_premium')}<span>今月の最愛</span><span class="faithful-analysis-link">詳しく見る ${icon('chevron_right')}</span></div><div class="faithful-ticket"><span class="faithful-ticket-accent"></span><span class="faithful-calendar"><b>JUL</b><strong>06</strong><small>MON</small></span><span class="faithful-ticket-copy"><strong>趣味・コレクション</strong><span>¥4,800</span></span><span class="faithful-seal">${icon('sentiment_very_satisfied')}<span>大満足</span></span></div></section>`;
   }
 
@@ -1693,7 +1896,10 @@ body {
   }
 
   function home() {
-    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulFavoriteCard()}${faithfulInvite()}<div class="faithful-recent"><h2>最近の取引</h2><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}</div></section>`;
+    const recent = state.homeJoyEmpty
+      ? `${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}`
+      : `${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}`;
+    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulFavoriteCard()}${faithfulInvite()}<div class="faithful-recent"><h2>最近の取引</h2><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${recent}</div></section>`;
   }
 
   function listCalendarDays(year, month) {
@@ -2322,13 +2528,83 @@ body {
 
   function lock() { return `<section class="screen"><div class="intro-hero" style="padding-top:46px"><div class="intro-mark" style="border-radius:50%">${icon('fingerprint')}</div><h1>おかえりなさい</h1><p class="hint">Face ID または PIN でロックを解除</p></div><div class="pin-dots">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.pin.length?'filled':''}"></i>`).join('')}</div><div class="pinpad">${['1','2','3','4','5','6','7','8','9','fingerprint','0','backspace'].map(k=>`<button class="key" data-lock-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}</div><button class="ghost-btn" data-action="forgot-pin">PINを忘れた場合</button></section>`; }
 
-  function settings() { const section=(title,rows)=>`<div class="section-title"><h2>${title}</h2></div><div class="flat-card">${rows}</div>`; const row=(ico,title,sub,go='',toggle=false)=>`<button class="tap-row row-divider" ${go?`data-screen="${go}"`:'data-action="toast" data-message="設定を開く"'}><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${title}</strong><small>${sub}</small></span>${toggle?`<span class="switch on" data-action="switch"></span>`:icon('chevron_right')}</button>`; return `<section class="screen">${backHeader('設定')}${section('プロフィール',row('account_circle','あおい','個人情報とアバター','profile'))}${section('一般',row('contrast','外観','端末の設定に合わせる')+row('language','言語','日本語')+row('spa','月間 Joy 目標','80 Joy'))}${section('セキュリティ',row('lock','アプリロック','Face ID + PIN','lock',true))}${section('データ',row('database','バックアップと復元','暗号化ファイル')+row('download','CSV エクスポート','ローカル保存'))}${section('家族',row('group','家族同期',state.family?'青木家の家計':'未設定',state.family?'group':'family'))}${section('このアプリ',row('policy','法的情報・応援','プライバシー、規約、OSS','legal'))}<p class="hint" style="text-align:center">Home Pocket 2.0.0 · データは端末内で保護</p></section>`; }
+  function settings() {
+    const section=(title,rows,{danger=false}={})=>`<div class="section-title"><h2>${title}</h2></div><div class="flat-card ${danger?'settings-danger-card':''}">${rows}</div>`;
+    const row=(ico,title,sub,{screen='',action='toast',message='設定を開く',toggle=false,toggleOn=false,danger=false}={})=>`<button class="tap-row row-divider ${danger?'settings-danger-row':''}" ${screen?`data-screen="${screen}"`:`data-action="${action}" data-message="${message}"`} ${toggle?`aria-pressed="${toggleOn}"`:''}><span class="row-icon">${icon(ico)}</span><span class="row-copy"><strong>${title}</strong><small>${sub}</small></span>${toggle?`<span class="switch ${toggleOn?'on':''}" aria-hidden="true"></span>`:icon('chevron_right')}</button>`;
+    const profileName=escapeHtml(state.onboardingName.trim()||'あおい');
+    const appLockOn=state.onboardingSecurityEnabled&&state.onboardingPinConfigured;
+    const faceIdOn=appLockOn&&state.onboardingUnlockMethod==='biometric';
+    const profileCard=`<button class="settings-profile-card" data-screen="profile"><span class="settings-profile-avatar"><img src="assets/onboarding-avatar-warm-v1.png" alt=""></span><span class="settings-profile-copy"><strong>${profileName}</strong><small>個人情報を編集</small></span>${icon('chevron_right')}</button>`;
+    const general=section('一般',
+      row('contrast','外観','端末の設定に合わせる')+
+      row('language','言語','日本語')+
+      row('mic','認識言語',({ja:'日本語',zh:'中文',en:'English'})[state.onboardingVoice]||'日本語',{action:'settings-voice-language'})+
+      row('spa','ときめき目標','80 Joy')+
+      row('calendar_month','週の開始日',state.settingsWeekStart==='monday'?'月曜日':'日曜日',{action:'settings-week-start'}));
+    const familySync=section('家族',row('group','家族同期',state.family?'青木家の家計':'未設定',{screen:state.family?'group':'family'}));
+    const securityChildren=appLockOn
+      ? row('face','Face IDで解除','PINの代わりにすばやく解除',{action:'settings-faceid-toggle',toggle:true,toggleOn:faceIdOn})+
+        row('password','PINを変更','4桁のPINを設定済み',{action:'settings-pin-setup'})
+      : '';
+    const security=section('セキュリティ',
+      row('lock','アプリロック',appLockOn?'オン · PINで保護':'オフ',{action:'settings-app-lock-toggle',toggle:true,toggleOn:appLockOn})+
+      securityChildren);
+    const notifications=section('通知',
+      row('notifications','通知','予算アラートと同期通知',{action:'settings-notifications-toggle',toggle:true,toggleOn:state.settingsNotificationsEnabled}));
+    const data=section('データ',
+      row('database','バックアップと復元','暗号化ファイル',{screen:'backup'}));
+    const about=section('このアプリ',row('policy','法的情報・応援','プライバシー、規約、OSS',{screen:'legal'}));
+    const danger=section('データ管理',row('delete_forever','全データを削除','すべての記録を完全に削除',{action:'settings-delete-all',danger:true}),{danger:true});
+    return `<section class="screen settings-screen">${backHeader('設定')}${profileCard}${general}${familySync}${security}${notifications}${data}${about}${danger}<p class="hint settings-footer">Home Pocket 2.0.0 · データは端末内で保護</p></section>`;
+  }
 
-  function profile() { return `<section class="screen">${backHeader('プロフィール')}<div class="avatar-stack" style="margin-top:8px"><span class="avatar" style="width:82px;height:82px;margin:0;font-size:20px">私</span></div><button class="text-btn" style="display:block;margin:0 auto" data-action="toast" data-message="写真を選択">写真を変更</button><div class="section-title"><h2>表示名</h2></div><input class="search" value="あおい" aria-label="表示名"><div class="section-title"><h2>家族での表示</h2></div><div class="card"><p class="hint" style="margin:0">この名前とアバターは、参加している家族のメンバーに表示されます。</p></div><div style="height:18px"></div><button class="primary-btn" data-action="toast" data-message="プロフィールを保存しました">保存</button></section>`; }
+  function backupStatusCard(){
+    if(state.backupStatus==='exporting') return `<div class="backup-status" role="status"><span class="backup-spinner" aria-hidden="true"></span><span><strong>バックアップを暗号化中</strong>ファイルを作成しています。この画面を閉じないでください。</span></div>`;
+    if(state.backupStatus==='export-success') return `<div class="backup-status success"><span class="material-symbols-rounded">check_circle</span><span><strong>バックアップを作成しました</strong>homepocket_backup_2026-08-01.hpb</span></div>`;
+    if(state.backupStatus==='restoring') return `<div class="backup-status" role="status"><span class="backup-spinner" aria-hidden="true"></span><span><strong>バックアップを復元中</strong>既存データを安全に置き換えています。</span></div>`;
+    if(state.backupStatus==='restore-success') return `<div class="backup-status success"><span class="material-symbols-rounded">check_circle</span><span><strong>復元が完了しました</strong>ホーム、明細、分析にも再起動なしで反映されました。</span></div>`;
+    if(state.backupStatus==='error') return `<div class="backup-status error" role="alert"><span class="material-symbols-rounded">error</span><span><strong>バックアップを復元できません</strong>パスワードまたはファイルを確認してください。現在のデータは変更されていません。</span></div>`;
+    return '';
+  }
+
+  function backup() {
+    const busy=['exporting','restoring'].includes(state.backupStatus);
+    return `<section class="screen backup-screen" lang="ja">${backHeader('バックアップと復元')}
+      <div class="card backup-hero"><span class="backup-hero-mark">${icon('encrypted')}</span><h2>データを、自分で安全に保管</h2><p class="hint">記録と設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。</p><div class="backup-trust-row"><span class="backup-trust-chip">${icon('lock')}AES-256-GCM</span><span class="backup-trust-chip">${icon('folder_zip')}圧縮済み</span><span class="backup-trust-chip">${icon('cloud_off')}自動アップロードなし</span></div></div>
+      <div class="section-title"><h2>バックアップ</h2></div>
+      <button class="backup-action-card" data-action="backup-export-open" ${busy?'disabled':''}><span class="backup-action-icon">${icon('backup')}</span><span class="backup-action-copy"><strong>バックアップを書き出す</strong><small>8文字以上のパスワードで暗号化</small></span>${icon('chevron_right')}</button>
+      ${['exporting','export-success'].includes(state.backupStatus)?backupStatusCard():''}
+      <div class="section-title"><h2>復元</h2></div>
+      <button class="backup-action-card restore" data-action="backup-restore-open" ${busy?'disabled':''}><span class="backup-action-icon">${icon('restore')}</span><span class="backup-action-copy"><strong>バックアップから復元</strong><small>.hpb を選び、現在のデータを置き換え</small></span>${icon('chevron_right')}</button>
+      ${['restoring','restore-success','error'].includes(state.backupStatus)?backupStatusCard():''}
+      <p class="backup-privacy-note">${icon('info')}パスワードはこのアプリに保存されません。忘れた場合、バックアップを復元することはできません。</p>
+    </section>`;
+  }
+
+  function backupExportDialog(){
+    const error=escapeHtml(state.backupPasswordError);
+    return `<h3>バックアップパスワード</h3><p class="backup-dialog-copy">復元するときに必要です。忘れないパスワードを設定してください。</p><label class="backup-field">パスワード<input type="password" data-backup-password="export" value="${escapeHtml(state.backupExportPassword)}" autocomplete="new-password" placeholder="8文字以上" aria-invalid="${!!error}"></label><label class="backup-field">パスワードを確認<input type="password" data-backup-password="confirm" value="${escapeHtml(state.backupExportConfirm)}" autocomplete="new-password" placeholder="もう一度入力" aria-invalid="${!!error}"></label><div class="backup-dialog-error" role="alert">${error}</div><div class="backup-dialog-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="primary-btn" data-action="backup-export-submit">暗号化して作成</button></div>`;
+  }
+
+  function backupFilePicker(){
+    const files=[
+      ['homepocket_backup_2026-07-28.hpb','7月28日 · 1.8 MB','valid'],
+      ['homepocket_backup_2026-05-10.hpb','5月10日 · 1.6 MB','legacy'],
+      ['homepocket_backup_broken.hpb','読み取りテスト用 · 24 KB','broken'],
+    ];
+    return `<h3>バックアップを選択</h3><p class="hint">Home Pocket の .hpb ファイルだけを表示しています。</p><div class="flat-card">${files.map(([name,meta,kind],index)=>`<button class="tap-row ${index<files.length-1?'row-divider':''}" data-backup-file="${name}" data-backup-file-kind="${kind}"><span class="row-icon">${icon('draft')}</span><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span>${icon('chevron_right')}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`;
+  }
+
+  function backupRestoreDialog(){
+    const error=escapeHtml(state.backupPasswordError);
+    return `<h3>このバックアップから復元？</h3><p class="backup-dialog-copy">パスワードを入力して内容を復号します。</p><div class="backup-file-summary">${icon('encrypted')}<span><strong>${escapeHtml(state.backupSelectedFile)}</strong><small>暗号化バックアップ · .hpb</small></span></div><div class="backup-warning">${icon('warning')}<span><strong>現在のデータは置き換えられます。</strong><br>失敗した場合は変更を取り消し、今のデータを保持します。</span></div><label class="backup-field">バックアップパスワード<input type="password" data-backup-password="restore" value="${escapeHtml(state.backupRestorePassword)}" autocomplete="current-password" placeholder="8文字以上" aria-invalid="${!!error}"></label><div class="backup-dialog-error" role="alert">${error}</div><div class="backup-dialog-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="primary-btn" data-action="backup-restore-submit">置き換えて復元</button></div>`;
+  }
+
+  function profile() { const profileName=escapeHtml(state.onboardingName.trim()||'あおい'); return `<section class="screen">${backHeader('プロフィール')}<div class="avatar-stack" style="margin-top:8px"><span class="settings-profile-avatar" style="width:82px;height:82px;flex-basis:82px"><img src="assets/onboarding-avatar-warm-v1.png" alt="" style="width:78px;height:78px"></span></div><button class="text-btn" style="display:block;margin:0 auto" data-action="toast" data-message="写真を選択">写真を変更</button><div class="section-title"><h2>表示名</h2></div><input class="search" data-profile-name value="${profileName}" aria-label="表示名"><div style="height:18px"></div><button class="primary-btn" data-action="toast" data-message="プロフィールを保存しました">保存</button></section>`; }
 
   function legal() { return `<section class="screen">${backHeader('法的情報・応援')}<div class="flat-card"><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('privacy_tip')}</span><span class="row-copy"><strong>プライバシーポリシー</strong><small>データの扱いについて</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('description')}</span><span class="row-copy"><strong>利用規約</strong><small>サービス利用条件</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('storefront')}</span><span class="row-copy"><strong>特定商取引法に基づく表記</strong><small>日本向け法定表示</small></span>${icon('chevron_right')}</button><button class="tap-row" data-action="legal-doc"><span class="row-icon">${icon('code')}</span><span class="row-copy"><strong>オープンソースライセンス</strong><small>使用ライブラリ</small></span>${icon('chevron_right')}</button></div><div class="section-title"><h2>開発を応援</h2></div><div class="card"><span class="row-icon joy">${icon('favorite')}</span><h2 class="display" style="font-size:18px">静かな家計簿を育てる</h2><p class="legal-copy">スポンサーリンクは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。</p><button class="secondary-btn" data-action="toast" data-message="外部スポンサーサイトを確認">スポンサーについて</button></div></section>`; }
 
-  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, create, approval, join, 'join-confirm':joinConfirm, 'join-waiting':joinWaiting, group, onboarding, 'onboarding-privacy':onboardingPrivacy, preferences, 'setup-pin':setupPinScreen, lock, settings, profile, legal };
+  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, create, approval, join, 'join-confirm':joinConfirm, 'join-waiting':joinWaiting, group, onboarding, 'onboarding-privacy':onboardingPrivacy, preferences, 'setup-pin':setupPinScreen, lock, settings, profile, backup, legal };
 
   function render() {
     document.documentElement.dataset.theme = state.theme;
@@ -2342,6 +2618,8 @@ body {
     const d=info[state.screen];
     ['inspect-kicker','inspect-title','inspect-copy','inspect-structure','inspect-states','inspect-build'].forEach((id,i)=>document.getElementById(id).textContent=d[i]);
     document.getElementById('home-design-note').hidden=state.screen!=='home';
+    document.querySelectorAll('[data-home-joy-demo]').forEach(button=>button.classList.toggle('active',button.dataset.homeJoyDemo===(state.homeJoyEmpty?'empty':'filled')));
+    document.querySelectorAll('[data-home-joy-variant]').forEach(button=>button.classList.toggle('active',button.dataset.homeJoyVariant===state.homeJoyVariant));
     const isEntryScreen=state.screen==='entry';
     const entryPanel=document.getElementById('entry-design-note');
     entryPanel.hidden=!isEntryScreen;
@@ -2369,7 +2647,20 @@ body {
     setupSecurityPanel.hidden=!isSetupSecurityScreen;
     const setupSecurityDemo=state.onboardingSecurityEnabled ? (state.onboardingUnlockMethod==='biometric'?'biometric':(state.onboardingPinConfigured?'pin-complete':'pin-pending')) : 'off';
     setupSecurityPanel.querySelectorAll('[data-setup-security-demo]').forEach(button=>button.classList.toggle('active',button.dataset.setupSecurityDemo===setupSecurityDemo));
+    const settingsSecurityPanel=document.getElementById('settings-security-design-note');
+    settingsSecurityPanel.hidden=state.screen!=='settings';
+    const settingsSecurityDemo=!state.onboardingSecurityEnabled||!state.onboardingPinConfigured?'off':(state.onboardingUnlockMethod==='biometric'?'face-id':'pin');
+    settingsSecurityPanel.querySelectorAll('[data-settings-security-demo]').forEach(button=>button.classList.toggle('active',button.dataset.settingsSecurityDemo===settingsSecurityDemo));
+    const backupPanel=document.getElementById('backup-design-note');
+    backupPanel.hidden=state.screen!=='backup';
+    backupPanel.querySelectorAll('[data-backup-demo]').forEach(button=>button.classList.toggle('active',button.dataset.backupDemo===state.backupStatus));
     phone.scrollTop=0;
+  }
+  function renderPreservingAppScroll(){
+    const appScreen=document.getElementById('app-screen');
+    const scrollTop=appScreen?.scrollTop||0;
+    render();
+    requestAnimationFrame(()=>{ document.getElementById('app-screen').scrollTop=scrollTop; });
   }
   function setScreen(id, push=true){ if(!renderers[id]) return; if(id==='category'&&state.screen!=='category') prepareCategorySelection(); if(state.screen==='entry'&&state.entryInputMode==='voice'&&id!=='entry') normalizeEntryVoiceBeforeExit(); if(state.screen==='shopping-form'&&id!=='shopping-form') normalizeShoppingVoiceBeforeExit(); if(push && id!==state.screen) state.history.push(state.screen); state.screen=id; closeModal(); render(); document.getElementById('app-screen').scrollTop=0; document.getElementById('phone').scrollTop=0; }
   function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t.timer); t.timer=setTimeout(()=>t.classList.remove('show'),1500); }
@@ -2384,7 +2675,23 @@ body {
     setScreen('preferences',false);
     requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'}));
   }
-  function beginOnboardingPinSetup(){
+  function showSettingsSecurityDemo(demo){
+    if(!state.onboardingName.trim()) state.onboardingName='あおい';
+    state.onboardingSecurityEnabled=demo!=='off';
+    state.onboardingPinConfigured=demo!=='off';
+    state.onboardingUnlockMethod=demo==='face-id'?'biometric':'pin';
+    state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError='';
+    setScreen('settings',false);
+  }
+  function showBackupDemo(demo){
+    state.backupStatus=demo;
+    state.backupPasswordError='';
+    state.backupSelectedFile=demo==='error'?'homepocket_backup_broken.hpb':'';
+    setScreen('backup',false);
+  }
+  function beginOnboardingPinSetup(returnScreen='preferences',intent='onboarding'){
+    state.onboardingPinReturn=returnScreen;
+    state.onboardingPinIntent=intent;
     state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError='';
     setScreen('setup-pin');
   }
@@ -2653,6 +2960,21 @@ body {
       if(note) note.textContent=setupRequiredNote();
       return;
     }
+    const profileName=e.target.closest?.('[data-profile-name]');
+    if(profileName){ state.onboardingName=profileName.value; return; }
+    const backupPassword=e.target.closest?.('[data-backup-password]');
+    if(backupPassword){
+      const field=backupPassword.dataset.backupPassword;
+      if(field==='export') state.backupExportPassword=backupPassword.value;
+      else if(field==='confirm') state.backupExportConfirm=backupPassword.value;
+      else state.backupRestorePassword=backupPassword.value;
+      if(state.backupPasswordError){
+        state.backupPasswordError='';
+        document.querySelectorAll('[data-backup-password]').forEach(input=>input.setAttribute('aria-invalid','false'));
+        const message=document.querySelector('.backup-dialog-error'); if(message) message.textContent='';
+      }
+      return;
+    }
     const categorySearch=e.target.closest?.('[data-category-search-input]');
     if(categorySearch){ state.categoryQuery=categorySearch.value; render(); requestAnimationFrame(()=>{ const input=document.querySelector('[data-category-search-input]'); if(input){ input.focus(); input.setSelectionRange(input.value.length,input.value.length); } }); return; }
     const familyCodeInput=e.target.closest?.('[data-family-code-index]');
@@ -2706,7 +3028,11 @@ body {
     const onboardingLanguage=e.target.closest('[data-onboarding-language]'); if(onboardingLanguage){ state.onboardingLanguage=onboardingLanguage.dataset.onboardingLanguage; if(!state.onboardingVoiceExplicit) state.onboardingVoice=state.onboardingLanguage==='system'?'ja':state.onboardingLanguage; closeModal(); render(); toast(`${{ja:'日本語',zh:'中文',en:'English',system:'自動'}[state.onboardingLanguage]}を選びました`); return; }
     const onboardingCurrencyChoice=e.target.closest('[data-onboarding-currency-choice]'); if(onboardingCurrencyChoice){ state.onboardingCurrency=onboardingCurrencyChoice.dataset.onboardingCurrencyChoice; closeModal(); render(); toast(`${state.onboardingCurrency}を選びました`); return; }
     const onboardingVoiceChoice=e.target.closest('[data-onboarding-voice-choice]'); if(onboardingVoiceChoice){ state.onboardingVoice=onboardingVoiceChoice.dataset.onboardingVoiceChoice; state.onboardingVoiceExplicit=true; closeModal(); render(); return; }
+    const settingsWeekStartChoice=e.target.closest('[data-settings-week-start-choice]'); if(settingsWeekStartChoice){ state.settingsWeekStart=settingsWeekStartChoice.dataset.settingsWeekStartChoice; closeModal(); renderPreservingAppScroll(); toast(`${state.settingsWeekStart==='monday'?'月曜日':'日曜日'}始まりに変更しました`); return; }
+    const settingsVoiceLanguageChoice=e.target.closest('[data-settings-voice-language-choice]'); if(settingsVoiceLanguageChoice){ state.onboardingVoice=settingsVoiceLanguageChoice.dataset.settingsVoiceLanguageChoice; closeModal(); renderPreservingAppScroll(); toast('認識言語を変更しました'); return; }
     const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); return; }
+    const homeJoyDemo=e.target.closest('[data-home-joy-demo]'); if(homeJoyDemo){ state.homeJoyEmpty=homeJoyDemo.dataset.homeJoyDemo==='empty'; render(); return; }
+    const homeJoyVariant=e.target.closest('[data-home-joy-variant]'); if(homeJoyVariant){ state.homeJoyVariant=homeJoyVariant.dataset.homeJoyVariant; state.homeJoyEmpty=true; render(); return; }
     const entryVariant=e.target.closest('[data-entry-variant]'); if(entryVariant){ state.entryVariant=entryVariant.dataset.entryVariant; render(); return; }
     const entryDemo=e.target.closest('[data-entry-demo]'); if(entryDemo){ showEntryDemo(entryDemo.dataset.entryDemo); return; }
     const shoppingDemo=e.target.closest('[data-shopping-demo]'); if(shoppingDemo){ showShoppingVoiceDemo(shoppingDemo.dataset.shoppingDemo); return; }
@@ -2714,6 +3040,9 @@ body {
     const categoryDemo=e.target.closest('[data-category-demo]'); if(categoryDemo){ showCategoryDemo(categoryDemo.dataset.categoryDemo); return; }
     const familyDemo=e.target.closest('[data-family-demo]'); if(familyDemo){ if(familyDemo.dataset.familyDemo==='approval') state.familyRequestPending=true; setScreen(familyDemo.dataset.familyDemo); return; }
     const setupSecurityDemo=e.target.closest('[data-setup-security-demo]'); if(setupSecurityDemo){ showSetupSecurityDemo(setupSecurityDemo.dataset.setupSecurityDemo); return; }
+    const settingsSecurityDemo=e.target.closest('[data-settings-security-demo]'); if(settingsSecurityDemo){ showSettingsSecurityDemo(settingsSecurityDemo.dataset.settingsSecurityDemo); return; }
+    const backupDemo=e.target.closest('[data-backup-demo]'); if(backupDemo){ showBackupDemo(backupDemo.dataset.backupDemo); return; }
+    const backupFile=e.target.closest('[data-backup-file]'); if(backupFile){ state.backupSelectedFile=backupFile.dataset.backupFile; state.backupSelectedFileKind=backupFile.dataset.backupFileKind||'valid'; state.backupRestorePassword=''; state.backupPasswordError=''; openModal(backupRestoreDialog(),'dialog'); requestAnimationFrame(()=>document.querySelector('[data-backup-password="restore"]')?.focus()); return; }
     const entryMethod=e.target.closest('[data-entry-method]'); if(entryMethod){ if(entryMethod.dataset.entryMethod==='voice') beginEntryVoice(); else switchEntryVoiceToKeyboard(); return; }
     const entryLedger=e.target.closest('[data-entry-ledger]'); if(entryLedger){ state.entryLedger=entryLedger.dataset.entryLedger; render(); return; }
     const entrySatisfaction=e.target.closest('[data-entry-satisfaction]'); if(entrySatisfaction){ state.entrySatisfaction=Number(entrySatisfaction.dataset.entrySatisfaction); render(); return; }
@@ -2734,10 +3063,14 @@ body {
         if(state.onboardingPinStage==='create'){
           state.onboardingPinFirst=entered; state.onboardingPinDraft=''; state.onboardingPinStage='confirm'; render();
         } else if(entered===state.onboardingPinFirst){
-          state.onboardingPinConfigured=true; state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError='';
-          if(state.history.at(-1)==='preferences') state.history.pop();
-          setScreen('preferences',false); toast('4桁のPINを設定しました');
-          requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'}));
+          const returnScreen=state.onboardingPinReturn==='settings'?'settings':'preferences';
+          const pinIntent=state.onboardingPinIntent;
+          state.onboardingPinConfigured=true; state.onboardingSecurityEnabled=true;
+          if(pinIntent==='enable-lock') state.onboardingUnlockMethod='pin';
+          state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError=''; state.onboardingPinIntent='onboarding';
+          if(state.history.at(-1)===returnScreen) state.history.pop();
+          setScreen(returnScreen,false); toast(pinIntent==='change-pin'?'PINを変更しました':'4桁のPINを設定しました');
+          if(returnScreen==='preferences') requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'}));
         } else {
           state.onboardingPinDraft=''; state.onboardingPinError='PINが一致しません。もう一度入力してください。'; render();
         }
@@ -2789,8 +3122,45 @@ body {
     else if(a==='onboarding-security-toggle'){ state.onboardingSecurityEnabled=!state.onboardingSecurityEnabled; if(state.onboardingSecurityEnabled&&!state.onboardingUnlockMethod) state.onboardingUnlockMethod='biometric'; render(); requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
     else if(a==='onboarding-security-method'){ state.onboardingUnlockMethod=action.dataset.method; render(); requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
     else if(a==='onboarding-pin-setup') beginOnboardingPinSetup();
-    else if(a==='onboarding-pin-cancel'){ state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError=''; if(state.history.at(-1)==='preferences') state.history.pop(); setScreen('preferences',false); requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
-    else if(a==='onboarding-start'){ if(!setupCanSubmit()) return; setScreen('home'); toast('初期設定が完了しました'); }
+    else if(a==='onboarding-pin-cancel'){ const returnScreen=state.onboardingPinReturn==='settings'?'settings':'preferences'; state.onboardingPinStage='create'; state.onboardingPinFirst=''; state.onboardingPinDraft=''; state.onboardingPinError=''; state.onboardingPinIntent='onboarding'; if(state.history.at(-1)===returnScreen) state.history.pop(); setScreen(returnScreen,false); if(returnScreen==='preferences') requestAnimationFrame(()=>document.querySelector('.setup-security-card')?.scrollIntoView({block:'center'})); }
+    else if(a==='settings-app-lock-toggle'){
+      if(!state.onboardingSecurityEnabled||!state.onboardingPinConfigured){ beginOnboardingPinSetup('settings','enable-lock'); }
+      else { const method=state.onboardingUnlockMethod==='biometric'?'Face ID':'現在のPIN'; openModal(`<h3>アプリロックをオフにしますか？</h3><p class="hint">${method}で本人確認したあと、保存済みのPINとFace ID設定を削除します。</p><button class="primary-btn" data-action="settings-app-lock-disable-confirm">${method}で確認してオフ</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`,'dialog'); }
+    }
+    else if(a==='settings-app-lock-disable-confirm'){ state.onboardingSecurityEnabled=false; state.onboardingPinConfigured=false; state.onboardingUnlockMethod='pin'; closeModal(); renderPreservingAppScroll(); toast('アプリロックをオフにしました'); }
+    else if(a==='settings-faceid-toggle'){ if(!state.onboardingSecurityEnabled||!state.onboardingPinConfigured) return; const turningOn=state.onboardingUnlockMethod!=='biometric'; state.onboardingUnlockMethod=turningOn?'biometric':'pin'; renderPreservingAppScroll(); toast(turningOn?'Face ID をオンにしました':'PINのみの解除に戻しました'); }
+    else if(a==='settings-pin-setup'){ const method=state.onboardingUnlockMethod==='biometric'?'Face ID':'現在のPIN'; openModal(`<h3>PINを変更しますか？</h3><p class="hint">安全のため、${method}で本人確認してから新しい4桁のPINを設定します。</p><button class="primary-btn" data-action="settings-pin-reauth-confirm">${method}で確認して変更</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`,'dialog'); }
+    else if(a==='settings-pin-reauth-confirm'){ closeModal(); beginOnboardingPinSetup('settings','change-pin'); }
+    else if(a==='settings-week-start') openModal(`<h3>週の開始日</h3><div class="flat-card"><button class="tap-row row-divider" data-settings-week-start-choice="monday"><span class="row-copy"><strong>月曜日</strong></span>${state.settingsWeekStart==='monday'?icon('check'):''}</button><button class="tap-row" data-settings-week-start-choice="sunday"><span class="row-copy"><strong>日曜日</strong></span>${state.settingsWeekStart==='sunday'?icon('check'):''}</button></div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='settings-voice-language') openModal(`<h3>認識言語</h3><div class="flat-card">${[['ja','日本語'],['zh','中文'],['en','English']].map(([code,label],index)=>`<button class="tap-row ${index<2?'row-divider':''}" data-settings-voice-language-choice="${code}"><span class="row-copy"><strong>${label}</strong></span>${state.onboardingVoice===code?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
+    else if(a==='settings-notifications-toggle'){ state.settingsNotificationsEnabled=!state.settingsNotificationsEnabled; renderPreservingAppScroll(); toast(state.settingsNotificationsEnabled?'通知をオンにしました':'通知をオフにしました'); }
+    else if(a==='settings-delete-all') openModal(`<div class="category-confirm-icon">${icon('delete_forever')}</div><h3>全データを削除しますか？</h3><p class="category-dialog-copy">この操作は取り消せません。バックアップしていない記録も完全に削除されます。</p><div class="category-dialog-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="secondary-btn danger" data-action="settings-delete-all-confirm">削除</button></div>`,'dialog');
+    else if(a==='settings-delete-all-confirm'){ closeModal(); toast('全データを削除しました'); }
+    else if(a==='backup-export-open'){ state.backupExportPassword=''; state.backupExportConfirm=''; state.backupPasswordError=''; openModal(backupExportDialog(),'dialog'); requestAnimationFrame(()=>document.querySelector('[data-backup-password="export"]')?.focus()); }
+    else if(a==='backup-export-submit'){
+      if(state.backupExportPassword.length<8) state.backupPasswordError='パスワードは8文字以上にしてください。';
+      else if(state.backupExportPassword!==state.backupExportConfirm) state.backupPasswordError='パスワードが一致しません。';
+      else {
+        state.backupPasswordError=''; closeModal(); state.backupStatus='exporting'; render();
+        setTimeout(()=>{ if(state.screen!=='backup'||state.backupStatus!=='exporting') return; state.backupStatus='export-success'; render(); openModal(`<h3>バックアップを作成しました</h3><p class="backup-dialog-copy">保存先を選んでください。</p><div class="backup-file-summary">${icon('encrypted')}<span><strong>homepocket_backup_2026-08-01.hpb</strong><small>暗号化済み · システム共有</small></span></div><button class="primary-btn" data-action="backup-share">共有シートを開く</button><button class="ghost-btn" data-action="close-modal">あとで</button>`,'dialog'); },700);
+        return;
+      }
+      document.getElementById('modal-content').innerHTML=backupExportDialog(); requestAnimationFrame(()=>document.querySelector('[data-backup-password="export"]')?.focus());
+    }
+    else if(a==='backup-share'){ closeModal(); toast('共有先を選択します'); }
+    else if(a==='backup-restore-open'){ state.backupPasswordError=''; openModal(backupFilePicker()); }
+    else if(a==='backup-restore-submit'){
+      if(state.backupRestorePassword.length<8){ state.backupPasswordError='パスワードは8文字以上にしてください。'; document.getElementById('modal-content').innerHTML=backupRestoreDialog(); requestAnimationFrame(()=>document.querySelector('[data-backup-password="restore"]')?.focus()); return; }
+      const restoreFails=state.backupSelectedFileKind==='broken'||state.backupRestorePassword==='incorrect';
+      closeModal(); state.backupPasswordError=''; state.backupStatus='restoring'; render();
+      setTimeout(()=>{
+        if(state.screen!=='backup'||state.backupStatus!=='restoring') return;
+        if(restoreFails){ state.backupStatus='error'; render(); toast('現在のデータは変更されていません'); return; }
+        state.backupStatus='restore-success'; render(); openModal(`<h3>復元が完了しました</h3><p class="backup-dialog-copy">バックアップの記録と設定を読み直しました。アプリの再起動は不要です。</p><div class="backup-file-summary">${icon('check_circle')}<span><strong>${escapeHtml(state.backupSelectedFile)}</strong><small>データを安全に置き換えました</small></span></div><button class="primary-btn" data-action="backup-restore-finish">完了</button>`,'dialog');
+      },850);
+    }
+    else if(a==='backup-restore-finish'){ closeModal(); toast('復元したデータを反映しました'); }
+    else if(a==='onboarding-start'){ if(!setupCanSubmit()) return; if(state.onboardingSecurityEnabled&&state.onboardingUnlockMethod==='biometric'&&!state.onboardingPinConfigured){ beginOnboardingPinSetup('preferences','onboarding'); toast('Face IDの予備としてPINを設定します'); return; } setScreen('home'); toast('初期設定が完了しました'); }
     else if(a==='category-reorder-enter'){ enterCategoryReorder(); render(); }
     else if(a==='category-toggle'){ state.categoryExpanded=state.categoryExpanded===action.dataset.categoryGroup?null:action.dataset.categoryGroup; render(); }
     else if(a==='category-edit-toggle'){ state.categoryEditExpanded=state.categoryEditExpanded===action.dataset.categoryGroup?null:action.dataset.categoryGroup; render(); }
@@ -2849,6 +3219,7 @@ body {
     else if(a==='close-modal') closeModal();
     else if(a==='back'){ const previous=state.history.pop()||'home'; setScreen(previous,false); }
     else if(a==='fab'){ if(state.screen==='shopping'){ resetShoppingForm(); setScreen('shopping-form'); } else { invalidateEntryVoiceSession(); state.amount='0'; state.entryMerchant=''; state.entryCategory='食费 > 外出就餐'; state.entryNote=''; state.entryInputMode='keyboard'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); } }
+    else if(a==='home-add-joy'){ invalidateEntryVoiceSession(); state.amount='0'; state.entryMerchant=''; state.entryCategory=action.dataset.joyCategory||'兴趣娱乐 > 其他兴趣娱乐'; state.entryLedger='joy'; state.entryNote=''; state.entrySatisfaction=8; state.entryInputMode='keyboard'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); }
     else if(a==='hero-analytics') setScreen('analytics');
     else if(a==='toast') toast(action.dataset.message||'操作を確認しました');
     else if(a==='filter'){ action.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }

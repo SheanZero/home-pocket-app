@@ -8,6 +8,7 @@ import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/shared/widgets/settings_section_card.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../helpers/test_localizations.dart';
@@ -157,6 +158,20 @@ void main() {
     final l = l10nOf(tester);
     expect(find.text(l.securityChangePin), findsOneWidget);
     expect(find.text(l.securityBiometricUnlock), findsOneWidget);
+
+    final switchTiles = find.byType(SwitchListTile);
+    for (var index = 0; index < switchTiles.evaluate().length; index++) {
+      expect(
+        tester.getSize(switchTiles.at(index)).height,
+        greaterThanOrEqualTo(72.0),
+        reason: 'Security switches must use the shared settings row height',
+      );
+    }
+    expect(
+      tester.getSize(find.byType(SettingsActionTile)).height,
+      greaterThanOrEqualTo(72.0),
+      reason: 'The PIN action must align with adjacent security rows',
+    );
   });
 
   testWidgets('biometric sub-toggle hidden when biometrics unavailable',

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
 import '../../../accounting/domain/models/transaction.dart';
+import '../../../accounting/domain/models/category.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../list/domain/models/tagged_transaction.dart';
 import '../../../list/presentation/widgets/list_transaction_tile.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
@@ -43,8 +44,9 @@ class CategoryDrillDownScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
     final palette = context.palette;
-    final locale =
-        ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final categoryMapAsync = ref.watch(analyticsCategoriesMapProvider);
+    final categoryMap = categoryMapAsync.value ?? const <String, Category>{};
 
     // Window from keepAlive session state (D-C1) — never threaded via route.
     final window = ref.watch(selectedTimeWindowProvider);
@@ -59,9 +61,11 @@ class CategoryDrillDownScreen extends ConsumerWidget {
       ),
     );
 
-    final title = CategoryLocalizationService.resolveFromId(
-      l1CategoryId,
-      locale,
+    final title = categoryNameForDisplay(
+      categoryId: l1CategoryId,
+      category: categoryMap[l1CategoryId],
+      locale: locale,
+      isLoading: categoryMapAsync.isLoading,
     );
 
     return Scaffold(
@@ -73,6 +77,7 @@ class CategoryDrillDownScreen extends ConsumerWidget {
           bookId: bookId,
           locale: locale,
           palette: palette,
+          categoryMap: categoryMap,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -94,12 +99,14 @@ class _DrillBody extends StatelessWidget {
     required this.bookId,
     required this.locale,
     required this.palette,
+    required this.categoryMap,
   });
 
   final CategoryDrillDown drill;
   final String bookId;
   final Locale locale;
   final AppPalette palette;
+  final Map<String, Category> categoryMap;
 
   @override
   Widget build(BuildContext context) {
@@ -121,12 +128,13 @@ class _DrillBody extends StatelessWidget {
                 )
               : ListView.separated(
                   itemCount: drill.transactions.length,
-                  separatorBuilder: (_, _) =>
-                      Divider(height: 1, thickness: 1, color: palette.borderList),
-                  itemBuilder: (context, index) => _readOnlyTile(
-                    context,
-                    drill.transactions[index],
+                  separatorBuilder: (_, _) => Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: palette.borderList,
                   ),
+                  itemBuilder: (context, index) =>
+                      _readOnlyTile(context, drill.transactions[index]),
                 ),
         ),
       ],
@@ -151,9 +159,14 @@ class _DrillBody extends StatelessWidget {
         : palette.joy;
     final categoryColor = tagTextColor;
 
-    final category = CategoryLocalizationService.resolveFromId(
-      transaction.categoryId,
-      locale,
+    final categoryModel = categoryMap[transaction.categoryId];
+    final parentCategory = categoryModel?.parentId == null
+        ? null
+        : categoryMap[categoryModel!.parentId];
+    final category = categoryNameForDisplay(
+      categoryId: transaction.categoryId,
+      category: categoryModel,
+      locale: locale,
     );
 
     final formattedAmount = NumberFormatter.formatCurrency(
@@ -176,7 +189,11 @@ class _DrillBody extends StatelessWidget {
           )
         : null;
 
-    final l1Icon = _resolveL1IconForCategory(transaction.categoryId);
+    final l1Icon = parentCategory != null
+        ? resolveCategoryIcon(parentCategory.icon)
+        : categoryModel != null
+        ? parentCategoryIconForCategory(categoryModel)
+        : parentCategoryIconFromId(transaction.categoryId);
 
     final satisfactionValue = transaction.ledgerType == LedgerType.joy
         ? transaction.joyFullness
@@ -204,35 +221,6 @@ class _DrillBody extends StatelessWidget {
   }
 
   static void _noop() {}
-
-  /// Mirrors `list_screen.dart`'s static icon map (L1 icon from category id).
-  static IconData _resolveL1IconForCategory(String categoryId) {
-    const iconMap = <String, IconData>{
-      'cat_food': Icons.restaurant,
-      'cat_daily': Icons.local_mall,
-      'cat_transport': Icons.directions_bus,
-      'cat_hobbies': Icons.sports_esports,
-      'cat_clothing': Icons.checkroom,
-      'cat_social': Icons.people,
-      'cat_health': Icons.local_hospital,
-      'cat_education': Icons.school,
-      'cat_utilities': Icons.flash_on,
-      'cat_communication': Icons.phone_iphone,
-      'cat_housing': Icons.home,
-      'cat_car': Icons.directions_car,
-      'cat_tax': Icons.account_balance,
-      'cat_insurance': Icons.security,
-      'cat_special': Icons.star,
-      'cat_savings': Icons.savings,
-      'cat_other': Icons.more_horiz,
-    };
-
-    if (!categoryId.startsWith('cat_')) return Icons.category;
-    final withoutPrefix = categoryId.substring(4);
-    final parts = withoutPrefix.split('_');
-    final l1Key = 'cat_${parts.first}';
-    return iconMap[l1Key] ?? Icons.category;
-  }
 }
 
 /// Neutral subtotal + count + 日均 strip (D-B2). All three are plain descriptive
@@ -309,9 +297,7 @@ class _HeaderCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppTextStyles.caption.copyWith(
-              color: palette.textSecondary,
-            ),
+            style: AppTextStyles.caption.copyWith(color: palette.textSecondary),
           ),
           const SizedBox(height: 4),
           Text(

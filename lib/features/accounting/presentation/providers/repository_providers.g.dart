@@ -210,6 +210,55 @@ final class CategoryRepositoryProvider
 String _$categoryRepositoryHash() =>
     r'0efc054c1cb685a355e020bea93a3dbb90250e96';
 
+@ProviderFor(categoryReferenceSyncService)
+final categoryReferenceSyncServiceProvider =
+    CategoryReferenceSyncServiceProvider._();
+
+final class CategoryReferenceSyncServiceProvider
+    extends
+        $FunctionalProvider<
+          CategoryReferenceSyncService,
+          CategoryReferenceSyncService,
+          CategoryReferenceSyncService
+        >
+    with $Provider<CategoryReferenceSyncService> {
+  CategoryReferenceSyncServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryReferenceSyncServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryReferenceSyncServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoryReferenceSyncService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CategoryReferenceSyncService create(Ref ref) {
+    return categoryReferenceSyncService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoryReferenceSyncService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoryReferenceSyncService>(value),
+    );
+  }
+}
+
+String _$categoryReferenceSyncServiceHash() =>
+    r'6391474c36320fd435bbeb5b2e5edbcf2281f757';
+
 /// MerchantRepository provider.
 ///
 /// Phase 49 wires the interface only — no consumer reads it yet (the
@@ -540,7 +589,7 @@ final class CreateTransactionUseCaseProvider
 }
 
 String _$createTransactionUseCaseHash() =>
-    r'7b348e60ef0e21d753786ad4af39e9cf9b2b7442';
+    r'cb2dfe2956c9a44a2c9697e2d2224de63b1ab8a7';
 
 @ProviderFor(updateTransactionUseCase)
 final updateTransactionUseCaseProvider = UpdateTransactionUseCaseProvider._();
@@ -588,7 +637,7 @@ final class UpdateTransactionUseCaseProvider
 }
 
 String _$updateTransactionUseCaseHash() =>
-    r'2d93a1870453f403a491cbb6b1e125f621fe76e0';
+    r'd54a6052bd4552685ebb675e4c877653a64c6e85';
 
 @ProviderFor(getTransactionsUseCase)
 final getTransactionsUseCaseProvider = GetTransactionsUseCaseProvider._();
@@ -684,7 +733,7 @@ final class DeleteTransactionUseCaseProvider
 }
 
 String _$deleteTransactionUseCaseHash() =>
-    r'4a3f0ac07e4bb9b95de0de888aa1f930cefc371c';
+    r'2915d3930a25157776a3b9b64f3d5b9b7eec5bf1';
 
 @ProviderFor(seedCategoriesUseCase)
 final seedCategoriesUseCaseProvider = SeedCategoriesUseCaseProvider._();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../../../application/i18n/locale_settings_view.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 import '../../domain/models/app_settings.dart';
 import '../providers/state_locale.dart';
 import '../providers/repository_providers.dart';
@@ -15,30 +16,30 @@ class AppearanceSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SettingsSectionCard(
+      title: S.of(context).settingsGeneral,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            S.of(context).appearance,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.palette),
-          title: Text(S.of(context).theme),
-          subtitle: Text(_getThemeModeLabel(settings.themeMode, context)),
-          onTap: () => _showThemeModeDialog(context, ref),
-        ),
-        _LanguageTile(settings: settings),
-        ListTile(
-          leading: const Icon(Icons.calendar_today),
-          title: Text(S.of(context).settingsWeekStart),
-          subtitle: Text(_weekStartLabel(settings.weekStartDay, context)),
-          onTap: () => _showWeekStartDialog(context, ref, settings.weekStartDay),
-        ),
+        ThemeSettingTile(settings: settings),
+        const LanguageSettingTile(),
+        WeekStartSettingTile(settings: settings),
       ],
+    );
+  }
+}
+
+/// Theme row reused by the compact General section on [SettingsScreen].
+class ThemeSettingTile extends ConsumerWidget {
+  const ThemeSettingTile({super.key, required this.settings});
+
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsActionTile(
+      icon: Icons.contrast,
+      title: S.of(context).appearance,
+      subtitle: _getThemeModeLabel(settings.themeMode, context),
+      onTap: () => _showThemeModeDialog(context, ref),
     );
   }
 
@@ -67,6 +68,23 @@ class AppearanceSection extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Week-start row shown in the main General settings card.
+class WeekStartSettingTile extends ConsumerWidget {
+  const WeekStartSettingTile({super.key, required this.settings});
+
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsActionTile(
+      icon: Icons.calendar_month_outlined,
+      title: S.of(context).settingsWeekStart,
+      subtitle: _weekStartLabel(settings.weekStartDay, context),
+      onTap: () => _showWeekStartDialog(context, ref, settings.weekStartDay),
     );
   }
 
@@ -101,43 +119,21 @@ class AppearanceSection extends ConsumerWidget {
       ),
     );
   }
-
-  String _getThemeModeLabel(AppThemeMode mode, BuildContext context) {
-    switch (mode) {
-      case AppThemeMode.system:
-        return S.of(context).themeSystem;
-      case AppThemeMode.light:
-        return S.of(context).themeLight;
-      case AppThemeMode.dark:
-        return S.of(context).themeDark;
-    }
-  }
-
-  String _weekStartLabel(WeekStartDay day, BuildContext context) {
-    switch (day) {
-      case WeekStartDay.monday:
-        return S.of(context).settingsWeekStartMonday;
-      case WeekStartDay.sunday:
-        return S.of(context).settingsWeekStartSunday;
-    }
-  }
 }
 
 /// Language picker tile that reads locale state from [localeProvider].
-class _LanguageTile extends ConsumerWidget {
-  const _LanguageTile({required this.settings});
-
-  final AppSettings settings;
+class LanguageSettingTile extends ConsumerWidget {
+  const LanguageSettingTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localeAsync = ref.watch(localeProvider);
     final localeSettings = localeAsync.value;
 
-    return ListTile(
-      leading: const Icon(Icons.language),
-      title: Text(S.of(context).language),
-      subtitle: Text(_buildSubtitle(localeSettings, context)),
+    return SettingsActionTile(
+      icon: Icons.language,
+      title: S.of(context).language,
+      subtitle: _buildSubtitle(localeSettings, context),
       onTap: () => _showLanguageDialog(context, ref, localeSettings),
     );
   }
@@ -202,6 +198,26 @@ class _LanguageTile extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+String _getThemeModeLabel(AppThemeMode mode, BuildContext context) {
+  switch (mode) {
+    case AppThemeMode.system:
+      return S.of(context).themeSystem;
+    case AppThemeMode.light:
+      return S.of(context).themeLight;
+    case AppThemeMode.dark:
+      return S.of(context).themeDark;
+  }
+}
+
+String _weekStartLabel(WeekStartDay day, BuildContext context) {
+  switch (day) {
+    case WeekStartDay.monday:
+      return S.of(context).settingsWeekStartMonday;
+    case WeekStartDay.sunday:
+      return S.of(context).settingsWeekStartSunday;
   }
 }
 

@@ -401,7 +401,7 @@
   "@selectTheme": {
     "description": "Theme dialog title"
   },
-  "themeSystem": "システム",
+  "themeSystem": "端末の設定に合わせる",
   "@themeSystem": {
     "description": "System theme"
   },
@@ -449,6 +449,31 @@
   "@dataManagement": {
     "description": "Data management section"
   },
+  "settingsGeneral": "一般",
+  "settingsFamily": "家族",
+  "settingsData": "データ",
+  "settingsThisApp": "このアプリ",
+  "settingsAdditional": "その他の設定",
+  "settingsAdditionalDescription": "週の開始日、音声認識、通知",
+  "settingsNotSet": "未設定",
+  "settingsJoyTargetValue": "{value} Joy",
+  "@settingsJoyTargetValue": {
+    "placeholders": {"value": {"type": "int"}}
+  },
+  "settingsLocalDataProtected": "データは端末内で保護されています",
+  "backupAndRestore": "バックアップと復元",
+  "backupAndRestoreDescription": "暗号化ファイル",
+  "backupHeroTitle": "データを、自分で安全に保管",
+  "backupHeroDescription": "記録と設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。",
+  "backupEncryptionChip": "AES-256-GCM",
+  "backupCompressedChip": "圧縮済み",
+  "backupNoUploadChip": "自動アップロードなし",
+  "backupSectionTitle": "バックアップ",
+  "restoreSectionTitle": "復元",
+  "backupPasswordNotStored": "パスワードはこのアプリに保存されません。忘れた場合、バックアップを復元することはできません。",
+  "restoreReplacesData": ".hpb を選び、現在のデータを置き換え",
+  "restoreWarningTitle": "現在のデータは置き換えられます",
+  "restoreWarningBody": "復元に失敗した場合、今のデータはそのまま保持されます。",
   "exportBackup": "バックアップをエクスポート",
   "@exportBackup": {
     "description": "Export backup action"
@@ -469,15 +494,15 @@
   "@deleteAllData": {
     "description": "Delete all data action"
   },
-  "deleteAllDataDescription": "すべての記録を完全に削除",
+  "deleteAllDataDescription": "この端末のデータを完全に削除",
   "@deleteAllDataDescription": {
     "description": "Delete all subtitle"
   },
-  "deleteAllDataConfirmation": "この操作は取り消せません。すべてのデータを削除してもよろしいですか？",
+  "deleteAllDataConfirmation": "この端末のまもる家計簿データを完全に削除します。他の家族の端末上のデータは削除されず、サーバーへの削除要求も送信されません。",
   "@deleteAllDataConfirmation": {
     "description": "Delete all confirmation"
   },
-  "allDataDeleted": "全データを削除しました",
+  "allDataDeleted": "端末内のデータを削除しました",
   "@allDataDeleted": {
     "description": "Delete all success"
   },
@@ -603,6 +628,8 @@
   "profileEmojiTab": "Emoji",
   "profilePhotoTab": "写真",
   "profileEdit": "プロフィールを編集",
+  "profileEditPersonalInfo": "個人情報を編集",
+  "profileDisplayName": "表示名",
   "profileCancel": "キャンセル",
   "profileDone": "完了",
   "profilePreview": "プレビュー",
@@ -830,6 +857,34 @@
       }
     }
   },
+  "homeJoyEmptyTitleSingle": "今日の「うれしい」は？",
+  "@homeJoyEmptyTitleSingle": {
+    "description": "Personal-mode title for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptyTitleGroup": "家族の「うれしい」は？",
+  "@homeJoyEmptyTitleGroup": {
+    "description": "Family-mode title for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptySubtitle": "小さな楽しみから選んで記録",
+  "@homeJoyEmptySubtitle": {
+    "description": "Supporting copy for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptyFree": "自由に記録",
+  "@homeJoyEmptyFree": {
+    "description": "Free-form Joy entry action"
+  },
+  "homeJoyEmptyCoffee": "好きな一杯",
+  "@homeJoyEmptyCoffee": {
+    "description": "Coffee Joy-entry inspiration prompt"
+  },
+  "homeJoyEmptyBook": "読みたい本",
+  "@homeJoyEmptyBook": {
+    "description": "Book Joy-entry inspiration prompt"
+  },
+  "homeJoyEmptyRest": "ほっと一息",
+  "@homeJoyEmptyRest": {
+    "description": "Rest Joy-entry inspiration prompt"
+  },
   "homeRingSectionTitleSingle": "ときめき度",
   "@homeRingSectionTitleSingle": {
     "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
@@ -896,11 +951,11 @@
   },
   "homeBestJoyAllNeutralBig": "一番大きな支出を評価して",
   "@homeBestJoyAllNeutralBig": {
-    "description": "Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)"
+    "description": "Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data."
   },
   "homeBestJoyAllNeutralSmall": "あなたの今月の最愛にしよう",
   "@homeBestJoyAllNeutralSmall": {
-    "description": "Best Joy small line — all-neutral state (D-09)"
+    "description": "Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data."
   },
   "homeAvgSatisfactionLegend": "満足度の平均",
   "@homeAvgSatisfactionLegend": {
@@ -1079,6 +1134,26 @@
   "@categoryNameHint": {
     "description": "Input hint for a new custom category name"
   },
+  "categoryAppearanceLabel": "見た目",
+  "@categoryAppearanceLabel": {
+    "description": "Section label for custom category icon and color choices"
+  },
+  "categoryAppearanceDescription": "一覧やグラフで見分けやすくなります。",
+  "@categoryAppearanceDescription": {
+    "description": "Helper copy for custom category visual identity"
+  },
+  "categoryPreviewName": "新しい分類",
+  "@categoryPreviewName": {
+    "description": "Placeholder name in the custom category appearance preview"
+  },
+  "categoryIconLabel": "アイコン",
+  "@categoryIconLabel": {
+    "description": "Label above the custom category icon choices"
+  },
+  "categoryColorLabel": "カラー",
+  "@categoryColorLabel": {
+    "description": "Label above the custom category color choices"
+  },
   "categoryNameRequired": "分類名を入力してください",
   "@categoryNameRequired": {
     "description": "Validation error for an empty custom category name"
@@ -1207,7 +1282,7 @@
   "@voiceAllowCloudFallbackSubtitle": {
     "description": "Subtitle explaining that disabling cloud fallback keeps recognition on-device and surfaces failures"
   },
-  "familySync": "ファミリー同期",
+  "familySync": "家族同期",
   "@familySync": {
     "description": "Title for the family sync feature"
   },
@@ -1215,7 +1290,7 @@
   "@familySyncShowMyCode": {
     "description": "Tab label to show pairing code"
   },
-  "familySyncEnterPartnerCode": "グループに参加",
+  "familySyncEnterPartnerCode": "招待コードで参加する",
   "@familySyncEnterPartnerCode": {
     "description": "Tab label to enter partner's pairing code"
   },
@@ -1418,6 +1493,46 @@
       }
     }
   },
+  "familySyncInviteTitle": "家族を招待",
+  "@familySyncInviteTitle": {
+    "description": "Title of the owner-only invite management sheet"
+  },
+  "familySyncInviteDescription": "招待する相手にこのコードを共有してください。",
+  "@familySyncInviteDescription": {
+    "description": "Instructions shown above the owner invite code"
+  },
+  "familySyncInviteCopy": "コードをコピー",
+  "@familySyncInviteCopy": {
+    "description": "Button label for copying the group invite code"
+  },
+  "familySyncInviteCopied": "招待コードをコピーしました",
+  "@familySyncInviteCopied": {
+    "description": "Success feedback after copying an invite code"
+  },
+  "familySyncInviteRefreshHint": "再生成すると、以前のコードはすぐに無効になります。",
+  "@familySyncInviteRefreshHint": {
+    "description": "Warning shown beside the explicit invite refresh action"
+  },
+  "familySyncInviteApprovalWindowHint": "コードの有効期限は新規申請にのみ適用されます。申請後、オーナーは24時間以内に承認できます。",
+  "@familySyncInviteApprovalWindowHint": {
+    "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
+  },
+  "familySyncInviteShareMessage": "Home Pocketの「{groupName}」に参加する招待コードは {inviteCode} です。",
+  "@familySyncInviteShareMessage": {
+    "description": "Text sent through the system share sheet for a group invite",
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      },
+      "inviteCode": {
+        "type": "String"
+      }
+    }
+  },
+  "familySyncInviteOwnerOnly": "招待コードを管理できるのはグループオーナーだけです。",
+  "@familySyncInviteOwnerOnly": {
+    "description": "Feedback when invite management is attempted without owner permission"
+  },
   "familySyncMembers": "メンバー",
   "@familySyncMembers": {
     "description": "Section title for group members"
@@ -1575,7 +1690,7 @@
   "@familySyncApprovalTip": {
     "description": "Informational tip shown on the approval screen"
   },
-  "familySyncGroupManagement": "グループ管理",
+  "familySyncGroupManagement": "家族管理",
   "@familySyncGroupManagement": {
     "description": "Title for the group management screen"
   },
@@ -1617,12 +1732,30 @@
       }
     }
   },
-  "groupCreate": "グループを作成",
+  "groupCreate": "新しい家族を作る",
+  "groupCreateConfirmationHint": "確認後にのみ、グループと招待コードが作成されます。",
+  "groupCreateFailed": "グループを作成できませんでした: {message}",
+  "@groupCreateFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "familySyncSingleGroupConflict": "この端末には参加中のグループ、または承認待ちの参加リクエストがあります。別のグループを作成・参加する前に、現在のグループから退出するかリクエストをキャンセルしてください。",
+  "familySyncNetworkUnavailableTitle": "ネットワークに接続できません",
+  "@familySyncNetworkUnavailableTitle": {
+    "description": "Title for the family-sync network unavailable dialog"
+  },
+  "familySyncNetworkUnavailableMessage": "家族共有にはネットワーク接続が必要です。通信状況と、まもる家計簿のモバイルデータ通信が許可されているかを確認して、もう一度お試しください。",
+  "@familySyncNetworkUnavailableMessage": {
+    "description": "Friendly guidance shown when a family-sync operation cannot reach the relay"
+  },
   "groupName": "グループ名",
   "groupOwner": "オーナー",
   "groupMember": "メンバー",
   "groupInviteCode": "招待コード",
-  "groupInviteExpiry": "{minutes}分以内に有効",
+  "groupInviteExpiry": "{minutes}分間有効",
   "@groupInviteExpiry": {
     "placeholders": {
       "minutes": {
@@ -1633,10 +1766,10 @@
   "groupShareCode": "招待コードを共有",
   "groupEnterCode": "招待コードを入力",
   "groupVerify": "検証",
-  "groupConfirmJoin": "参加を確認",
+  "groupConfirmJoin": "参加を申請",
   "groupJoinTarget": "参加するグループ",
-  "groupWaitingApproval": "オーナーの承認を待っています...",
-  "groupWaitingDesc": "{name} があなたのリクエストを確認中",
+  "groupWaitingApproval": "オーナーの承認待ち",
+  "groupWaitingDesc": "{name}さんが参加申請を確認しています。",
   "@groupWaitingDesc": {
     "placeholders": {
       "name": {
@@ -1663,16 +1796,78 @@
   "groupCodeExpired": "招待コードの有効期限が切れました",
   "groupMyName": "自分の名前",
   "groupEnterGroup": "グループへ",
-  "groupChoiceTitle": "家族とつながろう",
-  "groupChoiceSubtitle": "家計簿を一緒に管理しましょう",
-  "groupCreateDesc": "新しい家族グループを作って、メンバーを招待しましょう",
-  "groupJoinDesc": "招待コードを入力して、既存のグループに参加しましょう",
-  "groupE2eeHint": "E2E暗号化でプライバシーを保護",
+  "groupChoiceTitle": "どう始めますか？",
+  "groupChoiceSubtitle": "参加できる家族は一度に1つです。",
+  "groupCreateDesc": "招待コードを発行し、あなたがメンバーを承認",
+  "groupJoinDesc": "家族のオーナーによる承認が必要です",
+  "groupE2eeHint": "家族の公開帳簿は暗号化して同期。個人の非公開帳簿は、この端末だけに残ります。",
+  "familyFlowCreateStepCreate": "家族作成",
+  "familyFlowCreateHeader": "家族を作る",
+  "familyFlowJoinHeader": "家族に参加",
+  "familyFlowReviewFamily": "家族情報を確認",
+  "familyFlowCreateStepInvite": "招待共有",
+  "familyFlowCreateStepApprove": "メンバー承認",
+  "familyFlowJoinStepCode": "コード入力",
+  "familyFlowJoinStepConfirm": "家族確認",
+  "familyFlowJoinStepWait": "承認待ち",
+  "familyFlowOwnerSummary": "{name} · オーナー",
+  "@familyFlowOwnerSummary": {"placeholders": {"name": {"type": "String"}}},
+  "familyFlowCreateTitle": "新しい家族を作る",
+  "familyFlowCreateSubtitle": "家族の名前を決めると、安全な招待コードを発行します。",
+  "familyFlowCreateInviteHelper": "家族が参加申請を送ると、次のステップでメンバーを承認します。",
+  "familyFlowRegenerateInvite": "再発行",
+  "familySyncInviteRegenerated": "招待コードを再発行しました",
+  "familyFlowJoinCodeTitle": "6桁の招待コードを入力",
+  "familyFlowJoinCodeSubtitle": "家族のオーナーから受け取った数字を入力してください。",
+  "familyFlowJoinBeforeApprovalHelper": "申請が承認されるまで、どの帳簿も同期されません。",
+  "familyFlowJoinConfirmHeader": "家族を確認",
+  "familyFlowJoinConfirmTitle": "参加する家族を確認",
+  "familyFlowJoinConfirmSubtitle": "この家族に参加申請を送ります。",
+  "familyFlowPublicKeyVerified": "公開鍵を確認済み",
+  "familyFlowPrivateLedgerHelper": "個人の非公開帳簿は家族に共有されません。",
+  "familyFlowWaitingHeader": "承認を待っています",
+  "familyFlowWaitingFamily": "参加先：{groupName}",
+  "@familyFlowWaitingFamily": {"placeholders": {"groupName": {"type": "String"}}},
+  "familyFlowApprovalTitle": "新しい参加申請",
+  "familyFlowApprovalSubtitle": "本人と端末を確認してから承認してください。",
+  "familyFlowApprovalDevice": "{deviceName} から参加申請",
+  "@familyFlowApprovalDevice": {"placeholders": {"deviceName": {"type": "String"}}},
+  "familyFlowDeviceKeyVerified": "端末の公開鍵を確認済み",
+  "familyFlowApprovalHelper": "承認後、この端末と家族の公開帳簿を暗号化して同期します。",
+  "familyFlowApprovalEmptyTitle": "未確認の申請はありません",
+  "familyFlowPendingRequests": "新しい参加申請 · {count}件",
+  "@familyFlowPendingRequests": {"placeholders": {"count": {"type": "int"}}},
+  "familyFlowViewRequests": "申請を見る",
+  "familyFlowSyncSettings": "同期設定",
+  "familyFlowManagementSummary": "オーナー：{ownerName} · {count}人 · {syncStatus}",
+  "@familyFlowManagementSummary": {"placeholders": {"ownerName": {"type": "String"}, "count": {"type": "int"}, "syncStatus": {"type": "String"}}},
   "groupInviteMembers": "新しいメンバーを招待",
-  "groupDisband": "グループを解散",
+  "groupDisband": "家族を解散",
   "groupCancel": "キャンセル",
-  "groupWaitingHint1": "通知が届くまでお待ちください",
-  "groupWaitingHint2": "アプリを閉じても大丈夫です",
+  "groupCancelRequest": "参加リクエストを取り消す",
+  "groupRejectRequestFailed": "参加リクエストの拒否に失敗しました: {message}",
+  "@groupRejectRequestFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRequestRejectedTitle": "参加リクエストが拒否されました",
+  "groupRequestRejectedDescription": "オーナーがリクエストを拒否しました。別の招待コードで再度お試しいただけます。",
+  "groupRequestCancelledTitle": "参加リクエストを取り消しました",
+  "groupRequestCancelledDescription": "リクエストを取り消しました。いつでも新しいリクエストを送信できます。",
+  "groupRequestExpiredTitle": "参加リクエストの期限が切れました",
+  "groupRequestExpiredDescription": "24時間以内に確認されませんでした。最新の招待コードを受け取り、もう一度お試しください。",
+  "groupTryAnotherInvite": "別の招待コードを入力",
+  "groupKeyRecoveryTitle": "ファミリーキーを復元しています",
+  "groupKeyRecoveryWaiting": "メンバー承認は完了しています。別の有効なファミリーデバイスが、現在のキーをこの端末向けに安全に再暗号化する必要があります。リレーはキーを閲覧・再作成できません。",
+  "groupKeyRecoveryUnavailable": "期限内に有効なデバイスから現在のキーを受け取れませんでした。ゼロ知識設計のため、リレーでキーを復元することはできません。再試行するか、安全にファミリーを退出／解散して新しく作成してください。",
+  "groupKeyRecoveryRateLimited": "復元リクエストは直前に送信されています。ほかのデバイスへ再通知するまで少しお待ちください。",
+  "groupKeyRecoveryRetry": "キーの復元を再試行",
+  "groupKeyRecoveryRebuild": "退出して新しいファミリーを設定",
+  "groupWaitingHint1": "アプリを閉じても大丈夫です。",
+  "groupWaitingHint2": "承認されたら自動で同期を始めます。",
   "groupCodeHint": "招待コードはグループのオーナーに聞いてください",
   "groupBack": "戻る",
   "syncInProgress": "同期中...",
@@ -3492,6 +3687,14 @@
     "description": "SecuritySection: app-lock master toggle title (D-11)"
   },
   "securityAppLockDescription": "起動時と再開時にパスコードでアプリを保護します。",
+  "securityAppLockOff": "オフ",
+  "securityAppLockPinOnly": "PIN",
+  "securityAppLockBiometricAndPin": "{biometric} + PIN",
+  "@securityAppLockBiometricAndPin": {
+    "placeholders": {"biometric": {"type": "String"}}
+  },
+  "securityFaceId": "Face ID",
+  "securityFingerprint": "指紋認証",
   "@securityAppLockDescription": {
     "description": "SecuritySection: app-lock master toggle description (D-11)"
   },
@@ -3535,6 +3738,15 @@
   "@sponsorLaunchError": {
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
+  "legalNavigationSubtitle": "プライバシー、規約、OSS",
+  "privacyPolicyDescription": "データの扱いについて",
+  "termsOfUseDescription": "サービス利用条件",
+  "openSourceLicensesDescription": "使用ライブラリ",
+  "sponsorSectionTitle": "開発を応援",
+  "sponsorCardTitle": "静かな家計簿を育てる",
+  "sponsorCardBody": "応援・お問い合わせページは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。",
+  "sponsorButton": "スポンサーについて",
+  "legalLinkLaunchError": "リンクを開けませんでした",
   "analyticsTrendInsightTotal": "今月は {amount}",
   "@analyticsTrendInsightTotal": {
     "description": "Trend card insight strip — total tab, no previous-month reference",
@@ -3645,5 +3857,69 @@
   "@analyticsJoyDrawerToggleCollapse": {
     "description": "A11y label for the collapsible joy-spend drawer toggle when expanded"
   },
+  "syncQueueNeedsAttentionBadge": "確認が必要",
+  "syncQueueNeedsAttentionDescription": "確認が必要な変更があります",
+  "syncQueueNeedsAttentionTitle": "同期の確認が必要です",
+  "syncQueuePendingTitle": "同期を待っている変更",
+  "syncQueueCounts": "送信待ち {pendingCount}件・確認が必要 {deadLetterCount}件",
+  "@syncQueueCounts": {
+    "placeholders": {
+      "pendingCount": { "type": "int" },
+      "deadLetterCount": { "type": "int" }
+    }
+  },
+  "syncQueueReconcileHint": "暗号化された変更は保持されています。先に再送し、その後に完全な整合確認を行うことをおすすめします。",
+  "syncQueueRetryAll": "すべて再送",
+  "syncQueueDiscardAll": "破棄",
+  "syncQueueRetryFailed": "確認が必要な変更が残っています",
+  "syncQueueRetrySucceeded": "変更を送信しました。引き続き整合確認をおすすめします。",
+  "syncQueueDiscardConfirmTitle": "未送信の変更を破棄しますか？",
+  "syncQueueDiscardConfirmBody": "この端末に保持された未送信の変更を完全に削除します。この操作は元に戻せません。",
+  "syncQueueCancel": "キャンセル",
+  "syncQueueDiscardConfirmAction": "完全に破棄",
+  "syncQueueDiscardFailed": "未送信の変更を破棄できませんでした",
+  "inboundSyncSectionTitle": "確認待ちの受信変更",
+  "inboundSyncCount": "隔離された受信変更 {count}件",
+  "@inboundSyncCount": { "placeholders": { "count": { "type": "int" } } },
+  "inboundSyncErrorCode": "安全コード: {errorCode}",
+  "@inboundSyncErrorCode": { "placeholders": { "errorCode": { "type": "String" } } },
+  "inboundSyncRetryOne": "再試行",
+  "inboundSyncDiscardOne": "受信変更を破棄",
+  "inboundSyncDiscardConfirmTitle": "この受信変更を破棄しますか？",
+  "inboundSyncDiscardConfirmBody": "隔離された受信変更をこの端末から完全に削除します。中継サーバー上のコピーは確認済みのため、元に戻せません。",
+  "syncAttentionDiscardConfirmTitle": "保持された同期変更を破棄しますか？",
+  "syncAttentionDiscardConfirmBody": "保持された送信失敗と隔離済みの受信変更を、この端末からすべて完全に削除します。この操作は元に戻せません。",
+  "familySyncTransferOwner": "オーナーを引き継ぐ",
+  "familySyncTransferOwnerSelect": "新しいオーナーを選択",
+  "familySyncTransferOwnerConfirmTitle": "オーナーを引き継ぎますか？",
+  "familySyncTransferOwnerConfirmBody": "{memberName}さんがメンバー、招待、家族グループを管理します。",
+  "@familySyncTransferOwnerConfirmBody": { "placeholders": { "memberName": { "type": "String" } } },
+  "familySyncTransferOwnerFinalTitle": "最終確認",
+  "familySyncTransferOwnerFinalBody": "すべての利用中端末に新しい暗号鍵を発行します。引き継ぎ後、あなたは通常メンバーになります。{memberName}さんに引き継ぎますか？",
+  "@familySyncTransferOwnerFinalBody": { "placeholders": { "memberName": { "type": "String" } } },
+  "familySyncTransferOwnerSuccess": "安全にオーナーを引き継ぎました",
+  "familySyncTransferOwnerNotReady": "現在の暗号鍵の準備が整うまで、オーナー操作は利用できません",
+  "familySyncTransferOwnerInvalidTarget": "別の利用中メンバーを選択してください",
+  "familySyncTransferOwnerFailed": "オーナーを引き継げませんでした: {message}",
+  "@familySyncTransferOwnerFailed": { "placeholders": { "message": { "type": "String" } } },
+  "transactionPhotoBoundaryTitle": "レシート写真",
+  "transactionPhotoLocalOnlyBody": "このレシート写真はこの端末だけに保存され、家族同期やバックアップには含まれません。",
+  "transactionPhotoUnavailableBody": "レシート写真はこの取引を記録した端末だけにあり、家族同期やバックアップには含まれていません。",
+  "familySyncMemberHistory": "メンバー履歴",
+  "familySyncRequestedAt": "申請日 {date}",
+  "@familySyncRequestedAt": { "placeholders": { "date": { "type": "String" } } },
+  "familySyncJoinedAt": "{role} · 参加日 {date}",
+  "@familySyncJoinedAt": { "placeholders": { "role": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncConfirmedAt": "{role} · 承認日 {date}",
+  "@familySyncConfirmedAt": { "placeholders": { "role": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncRemovedAtReason": "{reason} · {date}",
+  "@familySyncRemovedAtReason": { "placeholders": { "reason": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncRemovalReasonLeft": "ファミリーから退出",
+  "familySyncRemovalReasonRemoved": "オーナーにより削除",
+  "familySyncRemovalReasonDissolved": "ファミリーが解散",
+  "familySyncRemovalReasonRejected": "申請が拒否されました",
+  "familySyncRemovalReasonCancelled": "申請を取り消しました",
+  "familySyncRemovalReasonExpired": "申請の有効期限が切れました",
+  "familySyncRemovalReasonUnknown": "メンバー関係が終了しました",
   "@@locale": "ja"
 }

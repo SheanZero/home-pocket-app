@@ -12,13 +12,16 @@ class DeleteShoppingItemUseCase {
     required ShoppingItemRepository shoppingItemRepository,
     ShoppingItemChangeTracker? changeTracker, // nullable — D37-06
     SyncEngine? syncEngine, // nullable — fire-and-forget
+    Future<String?> Function()? deviceIdResolver,
   }) : _repo = shoppingItemRepository,
        _changeTracker = changeTracker,
-       _syncEngine = syncEngine;
+       _syncEngine = syncEngine,
+       _deviceIdResolver = deviceIdResolver;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;
   final SyncEngine? _syncEngine;
+  final Future<String?> Function()? _deviceIdResolver;
 
   Future<Result<void>> execute(String itemId) async {
     // 1. Validate input (MGMT-01)
@@ -35,11 +38,22 @@ class DeleteShoppingItemUseCase {
     }
 
     // 3. Soft-delete (tombstone) — NEVER hard-delete; tombstone survives full-sync
-    await _repo.softDelete(itemId);
+    final durable = _repo is DurableFamilySyncShoppingItemRepository
+        ? _repo
+        : null;
+    final originDeviceId = await _deviceIdResolver?.call() ?? existing.deviceId;
+    if (durable != null) {
+      await durable.softDeleteWithFamilySyncOutbox(
+        itemId,
+        originDeviceId: originDeviceId,
+      );
+    } else {
+      await _repo.softDelete(itemId);
+    }
 
     // 4. Privacy gate (D37-06): existing.listType is authoritative (D37-04: immutable).
     //    Private items do not enqueue a tracker op.
-    if (existing.listType == 'public') {
+    if (existing.listType == 'public' && durable == null) {
       _changeTracker?.trackDelete(itemId: itemId);
     }
 

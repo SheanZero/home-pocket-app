@@ -12,6 +12,7 @@ import 'package:home_pocket/application/accounting/seed_categories_use_case.dart
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/application/voice/record_category_correction_use_case.dart';
+import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
@@ -22,6 +23,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/security/providers.dart'
+    show appDatabaseProvider;
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
@@ -62,9 +65,11 @@ void main() {
   late _MockHashChainService mockHashChainService;
   late _MockSyncEngine mockSyncEngine;
   late _MockTransactionChangeTracker mockChangeTracker;
+  late AppDatabase db;
   late ProviderContainer container;
 
   setUp(() {
+    db = AppDatabase.forTesting();
     mockCategoryRepo = _MockCategoryRepository();
     mockLedgerConfigRepo = _MockCategoryLedgerConfigRepository();
     mockTransactionRepo = _MockTransactionRepository();
@@ -78,6 +83,7 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
+        appDatabaseProvider.overrideWithValue(db),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         categoryLedgerConfigRepositoryProvider.overrideWithValue(
           mockLedgerConfigRepo,
@@ -103,7 +109,10 @@ void main() {
     );
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() async {
+    container.dispose();
+    await db.close();
+  });
 
   group(
     'accounting/repository_providers use case characterization tests (post-refactor: folded from use_case_providers)',

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 
@@ -7,9 +10,12 @@ import 'tables/books_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/category_keyword_preferences_table.dart';
 import 'tables/category_ledger_configs_table.dart';
+import 'tables/control_events_table.dart';
 import 'tables/exchange_rates_table.dart';
+import 'tables/family_sync_outbox_table.dart';
 import 'tables/group_members_table.dart';
 import 'tables/groups_table.dart';
+import 'tables/inbound_sync_operations_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
 import 'tables/merchant_match_keys_table.dart';
 import 'tables/merchants_table.dart';
@@ -31,9 +37,12 @@ part 'app_database.g.dart';
     Categories,
     CategoryKeywordPreferences,
     CategoryLedgerConfigs,
+    ControlEvents,
     ExchangeRates,
+    FamilySyncOutbox,
     GroupMembers,
     Groups,
+    InboundSyncOperations,
     MerchantCategoryPreferences,
     MerchantMatchKeys,
     Merchants,
@@ -50,13 +59,109 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 36;
+
+  /// Tables containing user, household, security-audit, or sync state.
+  ///
+  /// Keep this classification exhaustive. [wipeLocalUserData] compares it
+  /// against sqlite_master and fails closed when a future schema table has not
+  /// been deliberately classified.
+  static const Set<String> localUserDataTableNames = {
+    'audit_logs',
+    'books',
+    'categories',
+    'category_keyword_preferences',
+    'category_ledger_configs',
+    'control_events',
+    'family_sync_outbox',
+    'group_members',
+    'groups',
+    'inbound_sync_operations',
+    'membership_rotation_intents',
+    'merchant_category_preferences',
+    'shopping_items',
+    'sync_queue',
+    'transactions',
+    'user_profiles',
+  };
+
+  /// Re-downloadable or bundled reference data that contains no user or
+  /// household identity. These rows remain so the open database stays usable
+  /// after a local wipe; categories are intentionally not in this set because
+  /// that table mixes system and user-created rows and is re-seeded afterward.
+  static const Set<String> preservedReferenceTableNames = {
+    'exchange_rates',
+    'merchant_match_keys',
+    'merchants',
+  };
+
+  /// Atomically deletes every row classified as local user data.
+  ///
+  /// This deliberately retains the SQLCipher database and its installation
+  /// master key. Dropping that key while the live encrypted database file
+  /// remains would make the next launch unrecoverable. Identity, family keys,
+  /// records, learned preferences, audit data, and all sync recovery state are
+  /// erased here; app-owned files and secure-storage identity are separate,
+  /// restart-safe stages in ClearAllDataUseCase.
+  Future<void> wipeLocalUserData() async {
+    // Deleted plaintext must not remain recoverable from free database pages
+    // while the installation master key is intentionally retained.
+    await customStatement('PRAGMA secure_delete = ON');
+    await transaction(() async {
+      final rows = await customSelect(
+        'SELECT name FROM sqlite_master '
+        'WHERE type = \'table\' AND name NOT LIKE \'sqlite_%\'',
+      ).get();
+      final actual = rows.map((row) => row.read<String>('name')).toSet();
+      final classified = {
+        ...localUserDataTableNames,
+        ...preservedReferenceTableNames,
+      };
+      final unknown = actual.difference(classified);
+      final missing = classified.difference(actual);
+      if (unknown.isNotEmpty || missing.isNotEmpty) {
+        throw StateError(
+          'Local-data wipe schema classification mismatch: '
+          'unknown=${unknown.toList()..sort()}, '
+          'missing=${missing.toList()..sort()}',
+        );
+      }
+
+      // Dependents first. The complete sequence is one Drift transaction, so
+      // any constraint, storage, or injected failure rolls back every delete.
+      for (final table in const [
+        'family_sync_outbox',
+        'inbound_sync_operations',
+        'control_events',
+        'sync_queue',
+        'membership_rotation_intents',
+        'group_members',
+        'shopping_items',
+        'transactions',
+        'category_keyword_preferences',
+        'merchant_category_preferences',
+        'category_ledger_configs',
+        'audit_logs',
+        'user_profiles',
+        'books',
+        'categories',
+        'groups',
+      ]) {
+        await customStatement('DELETE FROM "$table"');
+      }
+    });
+    // Remove committed pre-wipe pages from a WAL sidecar before reporting
+    // success. A checkpoint failure is surfaced; the whole wipe remains safe
+    // to retry because all deletion statements are idempotent.
+    await customStatement('PRAGMA wal_checkpoint(TRUNCATE)');
+  }
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (migrator) async {
         await migrator.createAll();
+        await _createMembershipRotationIntentsTable();
         // createAll() does not emit the customIndices getter (not a real Drift
         // API), so EVERY declared index must be created explicitly on fresh
         // installs (CR-01 Phase 36; extended to all tables in v23).
@@ -492,24 +597,506 @@ class AppDatabase extends _$AppDatabase {
           // upgraded devices (from<15), never on fresh installs. Backfill
           // every declared index; IF NOT EXISTS makes this idempotent for
           // whichever subset a given device already has.
-          await _createAllDeclaredIndexes();
+          // The retry-recovery index belongs to v26 because its state and
+          // next_retry_at columns do not exist in a real v8-v22 database yet.
+          // Excluding it here keeps the v23 backfill schema-correct; the v26
+          // rung creates it immediately after adding both columns.
+          await _createAllDeclaredIndexes(includeSyncQueueRecoveryIndex: false);
+        }
+        if (from < 24) {
+          // F-05: bind encrypted group data and offline queue entries to an
+          // explicit key generation. Existing data predates rotation and is
+          // therefore epoch 1. Some seam tests (and historical repair paths)
+          // stamp the current table shape with an older user_version, so guard
+          // each ALTER independently instead of assuming both columns are
+          // absent.
+          await transaction(() async {
+            if (!await _tableHasColumn('groups', 'key_epoch')) {
+              await migrator.addColumn(groups, groups.keyEpoch);
+            }
+            if (!await _tableHasColumn('sync_queue', 'key_epoch')) {
+              await migrator.addColumn(syncQueue, syncQueue.keyEpoch);
+            }
+          });
+        }
+        if (from < 25) {
+          // F-06: persist the bill reconciliation version. Historical rows
+          // use their last mutation time as the initial Lamport value, while
+          // device_id supplies the deterministic writer tie-breaker.
+          await transaction(() async {
+            if (!await _tableHasColumn('transactions', 'sync_revision')) {
+              await migrator.addColumn(transactions, transactions.syncRevision);
+            }
+            if (!await _tableHasColumn(
+              'transactions',
+              'sync_origin_device_id',
+            )) {
+              await migrator.addColumn(
+                transactions,
+                transactions.syncOriginDeviceId,
+              );
+            }
+            final revisionTimestamp =
+                await _tableHasColumn('transactions', 'updated_at')
+                ? 'COALESCE(updated_at, created_at)'
+                : 'created_at';
+            await customStatement('''
+              UPDATE transactions
+              SET sync_revision = $revisionTimestamp * 1000000
+              WHERE sync_revision = 0
+            ''');
+            await customStatement('''
+              UPDATE transactions
+              SET sync_origin_device_id = device_id
+              WHERE sync_origin_device_id = ''
+            ''');
+          });
+        }
+        if (from < 26) {
+          // F-15: outbound sync failures must remain durable. Existing queued
+          // envelopes are safe to retry and therefore start in `pending`.
+          await transaction(() async {
+            if (!await _tableHasColumn('sync_queue', 'state')) {
+              await migrator.addColumn(syncQueue, syncQueue.state);
+            }
+            if (!await _tableHasColumn('sync_queue', 'last_error_code')) {
+              await migrator.addColumn(syncQueue, syncQueue.lastErrorCode);
+            }
+            if (!await _tableHasColumn('sync_queue', 'next_retry_at')) {
+              await migrator.addColumn(syncQueue, syncQueue.nextRetryAt);
+            }
+            if (!await _tableHasColumn('sync_queue', 'failed_at')) {
+              await migrator.addColumn(syncQueue, syncQueue.failedAt);
+            }
+            await _createSyncQueueRecoveryIndex();
+          });
+        }
+        if (from < 27) {
+          // F-16: persist inbound operation idempotency and deterministic
+          // quarantine before relay ACK. The table contains decrypted JSON only
+          // inside the SQLCipher database; UI/logs expose safe error codes.
+          await migrator.createTable(inboundSyncOperations);
+          await _createInboundSyncOperationIndexes();
+        }
+        if (from < 28) {
+          // F-20: custom category shared semantics use an independent version
+          // and tombstone. Personal is_archived/sort_order/ledger config stay
+          // local and therefore need no migration/backfill.
+          await transaction(() async {
+            if (!await _tableHasColumn('categories', 'shared_revision')) {
+              await migrator.addColumn(categories, categories.sharedRevision);
+            }
+            if (!await _tableHasColumn(
+              'categories',
+              'shared_origin_device_id',
+            )) {
+              await migrator.addColumn(
+                categories,
+                categories.sharedOriginDeviceId,
+              );
+            }
+            if (!await _tableHasColumn('categories', 'shared_is_deleted')) {
+              await migrator.addColumn(categories, categories.sharedIsDeleted);
+            }
+            await customStatement('''
+              UPDATE categories
+              SET shared_revision = COALESCE(updated_at, created_at) * 1000000
+              WHERE is_system = 0 AND shared_revision = 0
+            ''');
+          });
+        }
+        if (from < 29) {
+          await transaction(() async {
+            if (!await _tableHasColumn('groups', 'control_revision')) {
+              await migrator.addColumn(groups, groups.controlRevision);
+            }
+            if (!await _tableHasColumn('groups', 'control_updated_at')) {
+              await migrator.addColumn(groups, groups.controlUpdatedAt);
+            }
+            if (!await _tableHasColumn('groups', 'control_snapshot_digest')) {
+              await migrator.addColumn(groups, groups.controlSnapshotDigest);
+            }
+            if (!await _tableHasColumn('group_members', 'joined_at')) {
+              await migrator.addColumn(groupMembers, groupMembers.joinedAt);
+            }
+            if (!await _tableHasColumn('group_members', 'confirmed_at')) {
+              await migrator.addColumn(groupMembers, groupMembers.confirmedAt);
+            }
+            if (!await _tableHasColumn('group_members', 'removed_at')) {
+              await migrator.addColumn(groupMembers, groupMembers.removedAt);
+            }
+            if (!await _tableHasColumn('group_members', 'removal_reason')) {
+              await migrator.addColumn(
+                groupMembers,
+                groupMembers.removalReason,
+              );
+            }
+            await migrator.createTable(controlEvents);
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS idx_control_events_group_revision '
+              'ON control_events (group_id, revision)',
+            );
+          });
+        }
+        if (from < 30) {
+          // F23: persist family visibility independently of the current
+          // is_private flag, plus durable receipts for offline withdrawals.
+          // Historical public rows retain their old full-sync semantics;
+          // historical private rows fail closed as local-only.
+          await transaction(() async {
+            if (!await _tableHasColumn(
+              'transactions',
+              'family_sync_visibility',
+            )) {
+              await migrator.addColumn(
+                transactions,
+                transactions.familySyncVisibility,
+              );
+            }
+            if (!await _tableHasColumn(
+              'transactions',
+              'family_shared_revision',
+            )) {
+              await migrator.addColumn(
+                transactions,
+                transactions.familySharedRevision,
+              );
+            }
+            if (!await _tableHasColumn('sync_queue', 'withdrawal_receipts')) {
+              await migrator.addColumn(syncQueue, syncQueue.withdrawalReceipts);
+            }
+            final privateColumn = await _tableHasColumn(
+              'transactions',
+              'is_private',
+            );
+            final privateExpression = privateColumn ? 'is_private' : '0';
+            await customStatement('''
+              UPDATE transactions
+              SET family_sync_visibility = CASE
+                    WHEN $privateExpression = 1 THEN 'localOnly'
+                    ELSE 'shared'
+                  END,
+                  family_shared_revision = CASE
+                    WHEN $privateExpression = 1 THEN 0
+                    ELSE sync_revision
+                  END
+            ''');
+          });
+        }
+        if (from < 31) {
+          // C1: encrypted local write-ahead intent for membership rotations.
+          // The next group key and per-device envelopes must survive process
+          // death and ambiguous HTTP outcomes before any server mutation.
+          await _createMembershipRotationIntentsTable();
+        }
+        if (from < 32) {
+          // C3: transaction mutations and their pending family operations now
+          // share one SQLCipher transaction. Historical rows are intentionally
+          // not backfilled: when there is no active group, the existing initial
+          // full sync remains the source for sharing public history.
+          await migrator.createTable(familySyncOutbox);
+          await _createFamilySyncOutboxIndexes();
+        }
+        if (from < 33) {
+          // W2: profile identity and avatar content merge independently using
+          // persisted revision/origin/digest tuples. Existing server basics
+          // remain revision-zero fallbacks; a legacy verified avatar hash is
+          // retained as its deterministic content identity.
+          if (await _tableExists('group_members')) {
+            await transaction(() async {
+              if (!await _tableHasColumn('group_members', 'profile_revision')) {
+                await migrator.addColumn(
+                  groupMembers,
+                  groupMembers.profileRevision,
+                );
+              }
+              if (!await _tableHasColumn(
+                'group_members',
+                'profile_origin_device_id',
+              )) {
+                await migrator.addColumn(
+                  groupMembers,
+                  groupMembers.profileOriginDeviceId,
+                );
+              }
+              if (!await _tableHasColumn('group_members', 'profile_digest')) {
+                await migrator.addColumn(
+                  groupMembers,
+                  groupMembers.profileDigest,
+                );
+              }
+              if (!await _tableHasColumn('group_members', 'avatar_revision')) {
+                await migrator.addColumn(
+                  groupMembers,
+                  groupMembers.avatarRevision,
+                );
+              }
+              if (!await _tableHasColumn(
+                'group_members',
+                'avatar_origin_device_id',
+              )) {
+                await migrator.addColumn(
+                  groupMembers,
+                  groupMembers.avatarOriginDeviceId,
+                );
+              }
+              if (!await _tableHasColumn(
+                'group_members',
+                'avatar_content_hash',
+              )) {
+                await migrator.addColumn(
+                  groupMembers,
+                  groupMembers.avatarContentHash,
+                );
+                if (await _tableHasColumn(
+                  'group_members',
+                  'avatar_image_hash',
+                )) {
+                  await customStatement('''
+                  UPDATE group_members
+                  SET avatar_content_hash = COALESCE(avatar_image_hash, '')
+                ''');
+                }
+              }
+              if (await _tableHasColumn('group_members', 'display_name') &&
+                  await _tableHasColumn('group_members', 'avatar_emoji') &&
+                  await _tableHasColumn('group_members', 'device_id')) {
+                final legacyMembers = await customSelect('''
+                SELECT group_id, device_id, display_name, avatar_emoji
+                FROM group_members
+                WHERE profile_digest = ''
+              ''').get();
+                for (final member in legacyMembers) {
+                  final deviceId = member.read<String>('device_id');
+                  final profileDigest = sha256
+                      .convert(
+                        utf8.encode(
+                          jsonEncode([
+                            member.read<String>('display_name'),
+                            member.read<String>('avatar_emoji'),
+                          ]),
+                        ),
+                      )
+                      .toString();
+                  await customStatement(
+                    '''UPDATE group_members
+                     SET profile_origin_device_id = ?, profile_digest = ?,
+                         avatar_origin_device_id = CASE
+                           WHEN avatar_origin_device_id = '' THEN ?
+                           ELSE avatar_origin_device_id
+                         END
+                     WHERE group_id = ? AND device_id = ?''',
+                    [
+                      deviceId,
+                      profileDigest,
+                      deviceId,
+                      member.read<String>('group_id'),
+                      deviceId,
+                    ],
+                  );
+                }
+              }
+            });
+          }
+        }
+        if (from < 34 && await _tableExists('inbound_sync_operations')) {
+          // W3: operation ids are only unique inside one authoritative family.
+          // Rebuild instead of ALTER so existing rows retain every recovery
+          // field while the complete primary key becomes (group, operation).
+          await transaction(() async {
+            await customStatement('''
+              CREATE TABLE inbound_sync_operations_v34 (
+                group_id TEXT NOT NULL,
+                operation_id TEXT NOT NULL,
+                message_id TEXT NOT NULL,
+                state TEXT NOT NULL,
+                operation_json TEXT,
+                error_code TEXT,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (group_id, operation_id)
+              )
+            ''');
+            await customStatement('''
+              INSERT INTO inbound_sync_operations_v34 (
+                group_id, operation_id, message_id, state, operation_json,
+                error_code, created_at, updated_at
+              )
+              SELECT group_id, operation_id, message_id, state,
+                     operation_json, error_code, created_at, updated_at
+              FROM inbound_sync_operations
+            ''');
+            await customStatement('DROP TABLE inbound_sync_operations');
+            await customStatement(
+              'ALTER TABLE inbound_sync_operations_v34 '
+              'RENAME TO inbound_sync_operations',
+            );
+            await _createInboundSyncOperationIndexes();
+          });
+        }
+        if (from < 35 && await _tableExists('inbound_sync_operations')) {
+          // W4: bound decrypted quarantine storage without altering the
+          // crash-before-ACK applied ledger. Existing complete payloads remain
+          // retryable and receive their exact persisted UTF-8 byte count;
+          // corrupt quarantine rows without payload fail closed.
+          await transaction(() async {
+            if (!await _tableHasColumn(
+              'inbound_sync_operations',
+              'retryable',
+            )) {
+              await migrator.addColumn(
+                inboundSyncOperations,
+                inboundSyncOperations.retryable,
+              );
+            }
+            if (!await _tableHasColumn(
+              'inbound_sync_operations',
+              'payload_bytes',
+            )) {
+              await migrator.addColumn(
+                inboundSyncOperations,
+                inboundSyncOperations.payloadBytes,
+              );
+            }
+            await customStatement('''
+              UPDATE inbound_sync_operations
+              SET retryable = CASE
+                    WHEN state = 'quarantined' AND operation_json IS NULL
+                      THEN 0
+                    ELSE retryable
+                  END,
+                  payload_bytes = CASE
+                    WHEN operation_json IS NULL THEN 0
+                    ELSE length(CAST(operation_json AS BLOB))
+                  END
+            ''');
+          });
+        }
+        if (from < 36) {
+          // P0-01: semantic sources must retain their merge version across
+          // restart and key rotation. The columns are deliberately added to
+          // the business rows; the existing generic outbox schema already
+          // stores the complete operation snapshot.
+          await transaction(() async {
+            if (await _tableExists('shopping_items')) {
+              if (!await _tableHasColumn('shopping_items', 'sync_revision')) {
+                await migrator.addColumn(
+                  shoppingItems,
+                  shoppingItems.syncRevision,
+                );
+              }
+              if (!await _tableHasColumn(
+                'shopping_items',
+                'sync_origin_device_id',
+              )) {
+                await migrator.addColumn(
+                  shoppingItems,
+                  shoppingItems.syncOriginDeviceId,
+                );
+              }
+              await customStatement('''
+                UPDATE shopping_items
+                SET sync_revision = CASE
+                      WHEN list_type = 'public' THEN
+                        COALESCE(updated_at, created_at, 0) * 1000
+                      ELSE 0
+                    END,
+                    sync_origin_device_id = CASE
+                      WHEN list_type = 'public' THEN device_id
+                      ELSE ''
+                    END
+                WHERE sync_revision = 0
+              ''');
+            }
+            if (await _tableExists('user_profiles')) {
+              if (!await _tableHasColumn('user_profiles', 'sync_revision')) {
+                await migrator.addColumn(
+                  userProfiles,
+                  userProfiles.syncRevision,
+                );
+              }
+              if (!await _tableHasColumn(
+                'user_profiles',
+                'sync_origin_device_id',
+              )) {
+                await migrator.addColumn(
+                  userProfiles,
+                  userProfiles.syncOriginDeviceId,
+                );
+              }
+              await customStatement('''
+                UPDATE user_profiles
+                SET sync_revision = updated_at * 1000
+                WHERE sync_revision = 0
+              ''');
+            }
+          });
         }
       },
     );
   }
 
+  Future<bool> _tableHasColumn(String tableName, String columnName) async {
+    final columns = await customSelect('PRAGMA table_info("$tableName")').get();
+    return columns.any((row) => row.read<String>('name') == columnName);
+  }
+
+  Future<bool> _tableExists(String tableName) async {
+    final row = await customSelect(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+      variables: [Variable<String>(tableName)],
+    ).getSingleOrNull();
+    return row != null;
+  }
+
+  Future<void> _createMembershipRotationIntentsTable() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS membership_rotation_intents (
+        group_id TEXT NOT NULL PRIMARY KEY,
+        request_id TEXT NOT NULL,
+        operation TEXT NOT NULL
+          CHECK (operation IN ('remove', 'leave', 'complete_leave')),
+        target_device_id TEXT NOT NULL,
+        expected_key_epoch INTEGER NOT NULL CHECK (expected_key_epoch >= 1),
+        new_key_epoch INTEGER NOT NULL CHECK (new_key_epoch = expected_key_epoch + 1),
+        group_key TEXT,
+        envelopes_json TEXT NOT NULL DEFAULT '[]',
+        created_at INTEGER NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(group_id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
   /// Creates EVERY index declared via a `customIndices` getter across all
   /// tables. Drift's migrator does not consume that getter, so this is the
   /// single physical source of truth — called from onCreate (fresh installs)
-  /// and the v23 backfill step. All statements are idempotent
-  /// (IF NOT EXISTS). Guarded by
+  /// and the v23 backfill step. The v23 caller excludes indexes whose columns
+  /// belong to later schema rungs; those rungs create them after their columns.
+  /// All statements are idempotent (IF NOT EXISTS). Guarded by
   /// test/unit/data/migrations/index_v23_migration_test.dart, which parses
   /// the declarations from source and fails on any index missing here.
-  Future<void> _createAllDeclaredIndexes() async {
-    await _createLegacyTableIndexes();
+  Future<void> _createAllDeclaredIndexes({
+    bool includeSyncQueueRecoveryIndex = true,
+  }) async {
+    await _createLegacyTableIndexes(
+      includeSyncQueueRecoveryIndex: includeSyncQueueRecoveryIndex,
+    );
     await _createShoppingItemIndexes();
     await _createExchangeRateIndexes();
     await _createMerchantIndexes();
+    await _createInboundSyncOperationIndexes();
+    await _createControlEventIndexes();
+    await _createFamilySyncOutboxIndexes();
+  }
+
+  Future<void> _createFamilySyncOutboxIndexes() async {
+    // `_createAllDeclaredIndexes` also runs at the historical v23 rung, before
+    // a pre-v23 upgrade has reached the v32 table-creation step.
+    if (!await _tableHasColumn('family_sync_outbox', 'group_id')) return;
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_family_sync_outbox_group_created '
+      'ON family_sync_outbox (group_id, created_at)',
+    );
   }
 
   /// Indices for the pre-Phase-36 tables that never had explicit CREATE
@@ -517,7 +1104,9 @@ class AppDatabase extends _$AppDatabase {
   /// sync_queue, preference tables) plus the from<15 trio that was missing
   /// from the onCreate path (audit_logs, user_profiles,
   /// category_ledger_configs).
-  Future<void> _createLegacyTableIndexes() async {
+  Future<void> _createLegacyTableIndexes({
+    required bool includeSyncQueueRecoveryIndex,
+  }) async {
     // transactions — hottest table: list, calendar and analytics queries all
     // filter on book_id/timestamp/ledger_type.
     await customStatement(
@@ -584,6 +1173,9 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_sync_queue_created '
       'ON sync_queue (created_at)',
     );
+    if (includeSyncQueueRecoveryIndex) {
+      await _createSyncQueueRecoveryIndex();
+    }
     // preference tables
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_keyword_prefs_keyword '
@@ -616,6 +1208,38 @@ class AppDatabase extends _$AppDatabase {
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_updated_at '
       'ON category_ledger_configs (updated_at)',
+    );
+  }
+
+  Future<void> _createSyncQueueRecoveryIndex() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_sync_queue_state_retry '
+      'ON sync_queue (state, next_retry_at)',
+    );
+  }
+
+  Future<void> _createInboundSyncOperationIndexes() async {
+    // `_createAllDeclaredIndexes` also runs mid-ladder for pre-v23 upgrades,
+    // before the v27 table exists. The dedicated from<27 step calls this again
+    // after createTable, so skipping here is safe and keeps old ladders valid.
+    if (!await _tableHasColumn('inbound_sync_operations', 'operation_id')) {
+      return;
+    }
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_inbound_sync_state_updated '
+      'ON inbound_sync_operations (group_id, state, updated_at)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_inbound_sync_group '
+      'ON inbound_sync_operations (group_id)',
+    );
+  }
+
+  Future<void> _createControlEventIndexes() async {
+    if (!await _tableHasColumn('control_events', 'event_id')) return;
+    await customStatement(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_control_events_group_revision '
+      'ON control_events (group_id, revision)',
     );
   }
 

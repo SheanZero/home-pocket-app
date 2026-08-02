@@ -7,6 +7,8 @@ class UserProfileDao {
 
   final AppDatabase _db;
 
+  AppDatabase get attachedDatabase => _db;
+
   Future<UserProfileRow?> find() async {
     final query = _db.select(_db.userProfiles)..limit(1);
     final results = await query.get();
@@ -20,6 +22,8 @@ class UserProfileDao {
     required String? avatarImagePath,
     required DateTime createdAt,
     required DateTime updatedAt,
+    int syncRevision = 0,
+    String syncOriginDeviceId = '',
   }) async {
     await _db
         .into(_db.userProfiles)
@@ -31,6 +35,8 @@ class UserProfileDao {
             avatarImagePath: Value(avatarImagePath),
             createdAt: createdAt,
             updatedAt: updatedAt,
+            syncRevision: Value(syncRevision),
+            syncOriginDeviceId: Value(syncOriginDeviceId),
           ),
         );
   }

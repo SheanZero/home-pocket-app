@@ -20,21 +20,29 @@ typedef EncryptedDatabaseExists = Future<bool> Function();
 
 typedef SeedRunner = Future<void> Function(ProviderContainer container);
 
+/// Cold-start hook that resumes a pending local privacy wipe using the final
+/// database-backed container, before device identity and normal bootstrap.
+typedef PendingPrivacyWipeResumer =
+    Future<void> Function(ProviderContainer container);
+
 class AppInitializer {
   AppInitializer({
     required ProviderContainerFactory containerFactory,
     required AppDatabaseFactory databaseFactory,
     required EncryptedDatabaseExists databaseExists,
     required SeedRunner seedRunner,
+    PendingPrivacyWipeResumer? pendingPrivacyWipeResumer,
   }) : _containerFactory = containerFactory,
        _databaseFactory = databaseFactory,
        _databaseExists = databaseExists,
-       _seedRunner = seedRunner;
+       _seedRunner = seedRunner,
+       _pendingPrivacyWipeResumer = pendingPrivacyWipeResumer;
 
   final ProviderContainerFactory _containerFactory;
   final AppDatabaseFactory _databaseFactory;
   final EncryptedDatabaseExists _databaseExists;
   final SeedRunner _seedRunner;
+  final PendingPrivacyWipeResumer? _pendingPrivacyWipeResumer;
 
   Future<InitResult> initialize() async {
     // Initialize intl date formatting data for all locales so that
@@ -44,7 +52,8 @@ class AppInitializer {
 
     ProviderContainer? initContainer;
     try {
-      // Stage 1: Master key + device key pair
+      // Stage 1: Master key. Device identity is intentionally deferred until
+      // a pending privacy wipe has resumed and deleted its durable journal.
       initContainer = _containerFactory();
       final masterKeyRepo = initContainer.read(masterKeyRepositoryProvider);
 
@@ -63,18 +72,6 @@ class AppInitializer {
             );
           }
           await masterKeyRepo.initializeMasterKey();
-        }
-
-        final keyManager = initContainer.read(keyManagerProvider);
-        if (!await keyManager.hasKeyPair()) {
-          await keyManager.generateDeviceKeyPair();
-        }
-
-        final deviceId = await keyManager.getDeviceId();
-        if (deviceId == null || deviceId.isEmpty) {
-          throw StateError(
-            'Device ID is not available after key initialization.',
-          );
         }
       } catch (e, st) {
         return InitResult.failure(
@@ -96,7 +93,9 @@ class AppInitializer {
         );
       }
 
-      // Stage 3: Final container + seeding
+      // Stage 3: Final container + pending privacy-wipe recovery. Nothing in
+      // normal bootstrap may recreate identity, seed data, start sync/push, or
+      // expose routes until this hook succeeds.
       initContainer.dispose();
       initContainer = null;
 
@@ -104,9 +103,50 @@ class AppInitializer {
         overrides: [appDatabaseProvider.overrideWithValue(database)],
       );
 
+      final resumePendingPrivacyWipe = _pendingPrivacyWipeResumer;
+      if (resumePendingPrivacyWipe != null) {
+        try {
+          await resumePendingPrivacyWipe(container);
+        } catch (e, st) {
+          container.dispose();
+          await database.close();
+          return InitResult.failure(
+            type: InitFailureType.privacyWipe,
+            error: e,
+            stackTrace: st,
+          );
+        }
+      }
+
+      // Stage 4: Fresh/current device identity, only after wipe recovery.
+      try {
+        final keyManager = container.read(keyManagerProvider);
+        if (!await keyManager.hasKeyPair()) {
+          await keyManager.generateDeviceKeyPair();
+        }
+
+        final deviceId = await keyManager.getDeviceId();
+        if (deviceId == null || deviceId.isEmpty) {
+          throw StateError(
+            'Device ID is not available after key initialization.',
+          );
+        }
+      } catch (e, st) {
+        container.dispose();
+        await database.close();
+        return InitResult.failure(
+          type: InitFailureType.masterKey,
+          error: e,
+          stackTrace: st,
+        );
+      }
+
+      // Stage 5: Normal seeding.
       try {
         await _seedRunner(container);
       } catch (e, st) {
+        container.dispose();
+        await database.close();
         return InitResult.failure(
           type: InitFailureType.seed,
           error: e,

@@ -22,7 +22,8 @@ class ShoppingItemSyncMapper {
       'id': item.id,
       'listType': item.listType,
       'name': item.name,
-      'ledgerType': item.ledgerType?.name, // nullable enum → string ('daily'/'joy'/null)
+      'ledgerType':
+          item.ledgerType?.name, // nullable enum → string ('daily'/'joy'/null)
       'categoryId': item.categoryId,
       'tags': jsonEncode(item.tags), // JSON string; empty list → '[]'
       // WR-06: note is emitted as PLAINTEXT on the sync wire. The field-level
@@ -40,16 +41,23 @@ class ShoppingItemSyncMapper {
       'updatedAt': item.updatedAt?.toUtc().toIso8601String(),
       'deviceId': item.deviceId,
       'addedByBookId': item.addedByBookId,
+      'syncRevision': _revision(item),
+      'syncOriginDeviceId': _origin(item),
       // D37-01: sortOrder is local-per-device, NOT synced — intentionally absent
     };
   }
 
   /// Build a create operation envelope for the sync protocol.
   static Map<String, dynamic> toCreateOperation(ShoppingItem item) {
+    final revision = _revision(item);
+    final origin = _origin(item);
     return {
       'op': 'create',
       'entityType': kShoppingItemEntityType,
       'entityId': item.id,
+      'operationId': 'shopping_item:${item.id}:$revision:$origin:create',
+      'revision': revision,
+      'originDeviceId': origin,
       'data': toSyncMap(item),
       'timestamp': item.createdAt.toUtc().toIso8601String(),
     };
@@ -59,11 +67,47 @@ class ShoppingItemSyncMapper {
   ///
   /// Uses [item.updatedAt] when available, falling back to [item.createdAt].
   static Map<String, dynamic> toUpdateOperation(ShoppingItem item) {
+    final revision = _revision(item);
+    final origin = _origin(item);
     return {
       'op': 'update',
       'entityType': kShoppingItemEntityType,
       'entityId': item.id,
+      'operationId': 'shopping_item:${item.id}:$revision:$origin:update',
+      'revision': revision,
+      'originDeviceId': origin,
       'data': toSyncMap(item),
+      'timestamp': (item.updatedAt ?? item.createdAt).toUtc().toIso8601String(),
+    };
+  }
+
+  /// Full sync is a versioned state reconciliation, not a create-only replay.
+  static Map<String, dynamic> toFullSyncOperation(ShoppingItem item) =>
+      item.isDeleted ? toDeleteOperation(item) : toUpdateOperation(item);
+
+  /// Minimal tombstone: no name, note, tags, price or category crosses the
+  /// privacy boundary after deletion. The version tuple is sufficient to
+  /// defeat stale updates and to create an unknown-id tombstone on receivers.
+  static Map<String, dynamic> toDeleteOperation(ShoppingItem item) {
+    final revision = _revision(item);
+    final origin = _origin(item);
+    return {
+      'op': 'delete',
+      'entityType': kShoppingItemEntityType,
+      'entityId': item.id,
+      'operationId': 'shopping_item:${item.id}:$revision:$origin:delete',
+      'revision': revision,
+      'originDeviceId': origin,
+      'data': {
+        'id': item.id,
+        'listType': 'public',
+        'createdAt': item.createdAt.toUtc().toIso8601String(),
+        'updatedAt': (item.updatedAt ?? item.createdAt)
+            .toUtc()
+            .toIso8601String(),
+        'syncRevision': revision,
+        'syncOriginDeviceId': origin,
+      },
       'timestamp': (item.updatedAt ?? item.createdAt).toUtc().toIso8601String(),
     };
   }
@@ -75,6 +119,9 @@ class ShoppingItemSyncMapper {
   static ShoppingItem fromSyncMap(
     Map<String, dynamic> data, {
     String? fromDeviceId,
+    int? revision,
+    String? originDeviceId,
+    bool isDeleted = false,
   }) {
     // WR-05: coerce tags field-by-field. A malformed tags payload (non-JSON
     // string, or JSON that is not a list) must NOT throw and discard the entire
@@ -115,8 +162,21 @@ class ShoppingItemSyncMapper {
           : null,
       addedByBookId: data['addedByBookId'] as String?,
       isSynced: true, // always true when coming from sync pipeline
+      isDeleted: isDeleted,
+      syncRevision: revision ?? (data['syncRevision'] as num?)?.toInt() ?? 0,
+      syncOriginDeviceId:
+          originDeviceId ?? data['syncOriginDeviceId'] as String? ?? '',
     );
   }
+
+  static int _revision(ShoppingItem item) {
+    if (item.syncRevision > 0) return item.syncRevision;
+    return (item.updatedAt ?? item.createdAt).toUtc().microsecondsSinceEpoch;
+  }
+
+  static String _origin(ShoppingItem item) => item.syncOriginDeviceId.isNotEmpty
+      ? item.syncOriginDeviceId
+      : item.deviceId;
 
   /// Parse a [LedgerType] from a wire string value.
   ///

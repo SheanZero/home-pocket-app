@@ -10,18 +10,32 @@ Future<String?> showPasswordDialog(
   BuildContext context, {
   required String title,
   bool isExport = false,
+  String? description,
+  bool isDestructive = false,
 }) async {
   return showDialog<String>(
     context: context,
-    builder: (context) => _PasswordDialog(title: title, isExport: isExport),
+    builder: (context) => _PasswordDialog(
+      title: title,
+      isExport: isExport,
+      description: description,
+      isDestructive: isDestructive,
+    ),
   );
 }
 
 class _PasswordDialog extends StatefulWidget {
-  const _PasswordDialog({required this.title, required this.isExport});
+  const _PasswordDialog({
+    required this.title,
+    required this.isExport,
+    required this.description,
+    required this.isDestructive,
+  });
 
   final String title;
   final bool isExport;
+  final String? description;
+  final bool isDestructive;
 
   @override
   State<_PasswordDialog> createState() => _PasswordDialogState();
@@ -62,6 +76,20 @@ class _PasswordDialogState extends State<_PasswordDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (widget.description != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: widget.isDestructive
+                    ? Theme.of(context).colorScheme.errorContainer
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(widget.description!),
+            ),
+            const SizedBox(height: 16),
+          ],
           TextField(
             controller: _passwordController,
             obscureText: true,

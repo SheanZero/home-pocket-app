@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 import '../../domain/models/app_settings.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_settings.dart';
@@ -14,55 +15,27 @@ class VoiceSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            S.of(context).voiceInputSettings,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.mic),
-          title: Text(S.of(context).voiceLanguage),
-          subtitle: Text(_getLanguageLabel(settings.voiceLanguage, context)),
-          onTap: () => _showLanguageDialog(context, ref),
-        ),
-        // KFB C3 (T-kfb-01): on-device recognition status + auto-degradation
-        // control. The status reflects the effective POLICY derived from
-        // [settings.voiceAllowOnDeviceFallback] — NOT a hardware-capability
-        // probe (speech_to_text 7.x exposes no synchronous "on-device
-        // supported" query).
-        ListTile(
-          leading: Icon(
-            settings.voiceAllowOnDeviceFallback
-                ? Icons.cloud_queue
-                : Icons.phonelink_lock,
-          ),
-          title: Text(S.of(context).voiceOnDeviceRecognitionTitle),
-          subtitle: Text(
-            key: const ValueKey('voiceOnDeviceStatusSubtitle'),
-            settings.voiceAllowOnDeviceFallback
-                ? S.of(context).voiceAllowCloudFallbackTitle
-                : S.of(context).voiceAllowCloudFallbackSubtitle,
-          ),
-        ),
-        SwitchListTile(
-          key: const ValueKey('voiceAllowCloudFallbackSwitch'),
-          secondary: const Icon(Icons.cloud_sync),
-          title: Text(S.of(context).voiceAllowCloudFallbackTitle),
-          subtitle: Text(S.of(context).voiceAllowCloudFallbackSubtitle),
-          value: settings.voiceAllowOnDeviceFallback,
-          onChanged: (value) async {
-            await ref
-                .read(settingsRepositoryProvider)
-                .setVoiceAllowOnDeviceFallback(value);
-            ref.invalidate(appSettingsProvider);
-          },
-        ),
-      ],
+    return SettingsSectionCard(
+      title: S.of(context).voiceInputSettings,
+      children: [VoiceLanguageSettingTile(settings: settings)],
+    );
+  }
+}
+
+/// Recognition-language row reused by the main General settings card.
+class VoiceLanguageSettingTile extends ConsumerWidget {
+  const VoiceLanguageSettingTile({super.key, required this.settings});
+
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsActionTile(
+      key: const ValueKey('settings-voice-language'),
+      icon: Icons.mic_none_outlined,
+      title: S.of(context).voiceLanguage,
+      subtitle: _getLanguageLabel(settings.voiceLanguage, context),
+      onTap: () => _showLanguageDialog(context, ref),
     );
   }
 
@@ -86,12 +59,12 @@ class VoiceSection extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               RadioListTile<String>(
-                title: Text(S.of(context).languageChinese),
-                value: 'zh',
-              ),
-              RadioListTile<String>(
                 title: Text(S.of(context).languageJapanese),
                 value: 'ja',
+              ),
+              RadioListTile<String>(
+                title: Text(S.of(context).languageChinese),
+                value: 'zh',
               ),
               RadioListTile<String>(
                 title: Text(S.of(context).languageEnglish),

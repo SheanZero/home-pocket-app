@@ -5,21 +5,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../application/family_sync/confirm_member_use_case.dart';
+import '../../../../application/family_sync/join_request_lifecycle_use_cases.dart';
 import '../../../../application/family_sync/notify_member_approval_use_case.dart';
-import '../../../../application/family_sync/remove_member_use_case.dart';
 import '../../../../application/family_sync/repository_providers.dart'
     show WebSocketEventType, notifyMemberApprovalUseCaseProvider;
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../domain/models/group_info.dart';
-import '../../domain/models/group_member.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
+import '../../domain/models/group_info.dart';
+import '../../domain/models/group_member.dart';
 import '../providers/repository_providers.dart'
     show
-        groupRepositoryProvider,
         confirmMemberUseCaseProvider,
-        removeMemberUseCaseProvider;
+        groupRepositoryProvider,
+        rejectJoinRequestUseCaseProvider;
+import '../widgets/family_flow_components.dart';
 import 'group_management_screen.dart';
 
 class MemberApprovalScreen extends ConsumerStatefulWidget {
@@ -43,30 +45,28 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   @override
   void initState() {
     super.initState();
-    _loadGroup();
-    _connectWebSocket();
+    unawaited(_loadGroup());
+    unawaited(_connectWebSocket());
   }
 
   Future<void> _connectWebSocket() async {
     final useCase = ref.read(notifyMemberApprovalUseCaseProvider);
     _notifyUseCase = useCase;
 
-    // Listen for join_request events to refresh the pending list
     _wsEventSubscription = useCase.listenForJoinRequests().listen((event) {
       if (!mounted) return;
-      if (event.type == WebSocketEventType.joinRequest) {
-        _loadGroup(); // Reload to pick up new pending member
+      if (event.type == WebSocketEventType.joinRequest ||
+          event.type == WebSocketEventType.joinRequestResolved) {
+        unawaited(_loadGroup());
       }
     });
 
-    // Determine groupId for WebSocket connection
-    String? wsGroupId = widget.groupId;
+    var wsGroupId = widget.groupId;
     if (wsGroupId == null) {
       final group = await ref.read(groupRepositoryProvider).getActiveGroup();
       wsGroupId = group?.groupId;
     }
     if (!mounted || wsGroupId == null) return;
-
     await useCase.connectWebSocket(groupId: wsGroupId);
   }
 
@@ -82,7 +82,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
         ? await ref.read(groupRepositoryProvider).getGroupById(widget.groupId!)
         : await ref.read(groupRepositoryProvider).getActiveGroup();
     if (!mounted) return;
-
     setState(() {
       _group = group;
       _isLoading = false;
@@ -97,9 +96,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     final result = await ref
         .read(confirmMemberUseCaseProvider)
         .execute(groupId: group.groupId, deviceId: member.deviceId);
-
     if (!mounted) return;
-
     setState(() => _approvingMemberId = null);
 
     if (result is ConfirmMemberSuccess) {
@@ -110,7 +107,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
       );
       return;
     }
-
     if (result is ConfirmMemberError) {
       showErrorFeedback(context, result.message);
     }
@@ -122,22 +118,19 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
 
     setState(() => _rejectingMemberId = member.deviceId);
     final result = await ref
-        .read(removeMemberUseCaseProvider)
+        .read(rejectJoinRequestUseCaseProvider)
         .execute(groupId: group.groupId, deviceId: member.deviceId);
-
     if (!mounted) return;
-
     setState(() => _rejectingMemberId = null);
 
-    if (result is RemoveMemberSuccess) {
-      Navigator.of(context).pop();
+    if (result is JoinRequestLifecycleSuccess) {
+      await _loadGroup();
       return;
     }
-
-    if (result is RemoveMemberError) {
+    if (result is JoinRequestLifecycleError) {
       showErrorFeedback(
         context,
-        S.of(context).familySyncRemoveMemberFailed(result.message),
+        S.of(context).groupRejectRequestFailed(result.message),
       );
     }
   }
@@ -156,68 +149,72 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
 
     final group = _group;
     final pendingMembers =
-        group?.members.where((m) => m.status == 'pending').toList() ??
+        group?.members.where((member) => member.status == 'pending').toList() ??
         const <GroupMember>[];
-
-    // Show the first pending member in the new centered design
-    final applicant = pendingMembers.isNotEmpty ? pendingMembers.first : null;
+    final applicant = pendingMembers.isEmpty ? null : pendingMembers.first;
 
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 42),
-            child: applicant != null
-                ? _buildApplicantView(l10n, applicant, group!)
-                : _buildEmptyView(l10n),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: familyFlowHorizontalPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 7),
+              FamilyFlowHeader(
+                title: l10n.familySyncApprovalTitle,
+                onBack: () => Navigator.maybePop(context),
+              ),
+              const SizedBox(height: 16),
+              FamilyFlowProgress(
+                labels: [
+                  l10n.familyFlowCreateStepCreate,
+                  l10n.familyFlowCreateStepInvite,
+                  l10n.familyFlowCreateStepApprove,
+                ],
+                currentStep: 2,
+              ),
+              const SizedBox(height: 27),
+              if (applicant != null && group != null)
+                _buildApplicantView(l10n, applicant)
+              else
+                _buildEmptyView(l10n),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildApplicantView(S l10n, GroupMember applicant, GroupInfo group) {
+  Widget _buildApplicantView(S l10n, GroupMember applicant) {
     final palette = context.palette;
     final isBusy = _approvingMemberId != null || _rejectingMemberId != null;
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Bell icon
-        Icon(LucideIcons.bellRing, size: 32, color: palette.accentPrimary),
-        const SizedBox(height: 16),
-
-        // Title
-        Text(
-          l10n.groupJoinRequest,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: palette.textPrimary,
-          ),
+        FamilyFlowIntro(
+          title: l10n.familyFlowApprovalTitle,
+          subtitle: l10n.familyFlowApprovalSubtitle,
         ),
-        const SizedBox(height: 24),
-
-        // Applicant card
+        const SizedBox(height: 18),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: palette.surfaceScrimLight,
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            color: palette.card,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: palette.borderDefault),
           ),
           child: Column(
             children: [
               AvatarDisplay(
                 emoji: applicant.avatarEmoji,
+                imagePath: applicant.avatarImagePath,
                 size: 80,
                 gradientColors: [
                   palette.memberGradientA,
@@ -225,158 +222,66 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                   palette.memberGradientC,
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               Text(
                 applicant.displayName,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyles.pageTitle.copyWith(
+                  fontSize: 21,
                   color: palette.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                l10n.groupJoinRequestDesc(applicant.displayName),
+                l10n.familyFlowApprovalDevice(applicant.deviceName),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
+                style: AppTextStyles.body.copyWith(
                   color: palette.textSecondary,
                 ),
               ),
-              const SizedBox(height: 8),
-              // Group name tag
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+              if (applicant.joinedAt != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  l10n.familySyncRequestedAt(
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatShortDate(applicant.joinedAt!.toLocal()),
+                  ),
+                  style: AppTextStyles.supporting.copyWith(
+                    color: palette.textTertiary,
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: palette.background,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('\u{1F3E0}', style: TextStyle(fontSize: 12)),
-                    const SizedBox(width: 4),
-                    Text(
-                      group.groupName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: palette.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              ],
+              const SizedBox(height: 11),
+              FamilyVerifiedBadge(label: l10n.familyFlowDeviceKeyVerified),
             ],
           ),
         ),
-        const SizedBox(height: 28),
-
-        // Button row: Reject + Approve
+        const SizedBox(height: 18),
         Row(
           children: [
             Expanded(
-              child: GestureDetector(
-                onTap: isBusy ? null : () => _reject(applicant),
-                child: Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: palette.borderDefault),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (_rejectingMemberId == applicant.deviceId)
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: palette.textSecondary,
-                          ),
-                        )
-                      else ...[
-                        Icon(
-                          LucideIcons.x,
-                          size: 16,
-                          color: palette.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.groupReject,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+              flex: 100,
+              child: FamilySecondaryButton(
+                onPressed: isBusy ? null : () => _reject(applicant),
+                label: l10n.groupReject,
+                isLoading: _rejectingMemberId == applicant.deviceId,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
-              child: GestureDetector(
-                onTap: isBusy ? null : () => _approve(applicant),
-                child: Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [
-                        palette.fabGradientEnd,
-                        palette.fabGradientStart,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: palette.actionShadow,
-                        blurRadius: 20,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (_approvingMemberId == applicant.deviceId)
-                        const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      else ...[
-                        const Icon(
-                          LucideIcons.check,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.groupApprove,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+              flex: 135,
+              child: FamilyPrimaryButton(
+                onPressed: isBusy ? null : () => _approve(applicant),
+                label: l10n.groupApprove,
+                isLoading: _approvingMemberId == applicant.deviceId,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 20),
+        FamilyHelperNote(
+          icon: LucideIcons.lockKeyhole,
+          text: l10n.familyFlowApprovalHelper,
         ),
       ],
     );
@@ -385,14 +290,20 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   Widget _buildEmptyView(S l10n) {
     final palette = context.palette;
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(LucideIcons.bellRing, size: 32, color: palette.textTertiary),
-        const SizedBox(height: 16),
+        const SizedBox(height: 100),
+        Icon(LucideIcons.circleCheck, size: 52, color: palette.accentPrimary),
+        const SizedBox(height: 18),
+        Text(
+          l10n.familyFlowApprovalEmptyTitle,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.pageTitle.copyWith(color: palette.textPrimary),
+        ),
+        const SizedBox(height: 7),
         Text(
           l10n.familySyncApprovalTip,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: palette.textSecondary),
+          style: AppTextStyles.body.copyWith(color: palette.textSecondary),
         ),
       ],
     );

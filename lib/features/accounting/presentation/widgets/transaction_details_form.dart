@@ -33,6 +33,7 @@ import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_details_form_config.dart';
+import '../../domain/models/transaction_photo_sync_policy.dart';
 import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
@@ -66,6 +67,7 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.onDateChanged,
     this.showAlternateChips = false,
     this.useV16Layout = false,
+    this.initialLedgerType,
   });
 
   final TransactionDetailsFormConfig config;
@@ -74,6 +76,11 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
   /// edit surfaces in the v16 mockup. The legacy layout remains the default so
   /// voice/OCR and other existing hosts keep their current geometry.
   final bool useV16Layout;
+
+  /// Optional new-entry override used by intentful entry points such as the
+  /// Home Joy invitation. Category inference resumes after the user changes
+  /// the seeded category.
+  final LedgerType? initialLedgerType;
 
   /// Phase 52 / 52-UAT (test 2): whether the alternate-category chip row (≤3
   /// suggested alternates + the trailing "more" exit chip) renders after a
@@ -224,6 +231,9 @@ class TransactionDetailsFormState
   bool get _isEditMode =>
       widget.config.maybeWhen(edit: (_) => true, orElse: () => false);
 
+  Transaction? get _editSeed =>
+      widget.config.maybeWhen(edit: (seed) => seed, orElse: () => null);
+
   /// True for a newly-created row whose live config has been promoted to voice
   /// after a successful PTT fill. Used by the weak-category save guard only;
   /// voice provenance badges are intentionally not rendered in V16.
@@ -267,8 +277,11 @@ class TransactionDetailsFormState
             if (initialSatisfaction != null) {
               _joyFullness = initialSatisfaction.clamp(1, 10);
             }
+            if (widget.initialLedgerType != null) {
+              _ledgerType = widget.initialLedgerType!;
+            }
             // Resolve ledger type from category if one was pre-seeded.
-            if (_category != null) {
+            if (_category != null && widget.initialLedgerType == null) {
               WidgetsBinding.instance.addPostFrameCallback(
                 (_) => _resolveLedgerType(_category!.id),
               );
@@ -1664,6 +1677,59 @@ class TransactionDetailsFormState
     );
   }
 
+  Widget _buildPhotoBoundaryCard(S l10n, Transaction transaction) {
+    final palette = context.palette;
+    final availableHere =
+        TransactionPhotoSyncPolicy.isAvailableOnlyOnThisDevice(transaction);
+    return Container(
+      key: ValueKey(
+        availableHere
+            ? 'transaction-photo-local-only'
+            : 'transaction-photo-unavailable',
+      ),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            availableHere ? Icons.photo_outlined : Icons.hide_image_outlined,
+            size: 20,
+            color: palette.textSecondary,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.transactionPhotoBoundaryTitle,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  availableHere
+                      ? l10n.transactionPhotoLocalOnlyBody
+                      : l10n.transactionPhotoUnavailableBody,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
@@ -1672,6 +1738,7 @@ class TransactionDetailsFormState
     final palette = context.palette;
     final displayCategory = _parentCategory ?? _category;
     final sectionGap = widget.useV16Layout ? 10.0 : 16.0;
+    final editSeed = _editSeed;
 
     // AbsorbPointer prevents field interaction while submit is in progress.
     final formBody = AbsorbPointer(
@@ -1765,6 +1832,17 @@ class TransactionDetailsFormState
                 ],
                 trailing: _buildMerchantRow(l10n),
               ),
+
+            if (editSeed != null &&
+                (TransactionPhotoSyncPolicy.isAvailableOnlyOnThisDevice(
+                      editSeed,
+                    ) ||
+                    TransactionPhotoSyncPolicy.isUnavailableRemotePhoto(
+                      editSeed,
+                    ))) ...[
+              SizedBox(height: sectionGap),
+              _buildPhotoBoundaryCard(l10n, editSeed),
+            ],
 
             // Phase 52 correction row, retained behind the @visibleForTesting
             // `showAlternateChips` flag for a reversible re-enable. The former

@@ -13,6 +13,8 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   avatarImagePath: json['avatarImagePath'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
+  syncRevision: (json['syncRevision'] as num?)?.toInt() ?? 0,
+  syncOriginDeviceId: json['syncOriginDeviceId'] as String? ?? '',
 );
 
 Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
@@ -23,4 +25,6 @@ Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
       'avatarImagePath': instance.avatarImagePath,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
+      'syncRevision': instance.syncRevision,
+      'syncOriginDeviceId': instance.syncOriginDeviceId,
     };

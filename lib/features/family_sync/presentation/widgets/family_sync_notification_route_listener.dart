@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
+import '../../../../application/family_sync/complete_member_activation_use_case.dart';
 import '../providers/state_notification_navigation.dart';
+import '../providers/state_sync.dart';
 import '../screens/group_management_screen.dart';
 import '../screens/member_approval_screen.dart';
 
@@ -46,7 +48,7 @@ class _FamilySyncNotificationRouteListenerState
   }
 
   void _scheduleNavigation(PushNavigationIntent intent) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!context.mounted) return;
       ref.read(familySyncNotificationNavigationProvider.notifier).clear();
       switch (intent.destination) {
@@ -61,12 +63,18 @@ class _FamilySyncNotificationRouteListenerState
           );
           break;
         case PushNavigationDestination.groupManagement:
+          final result = await ref
+              .read(completeMemberActivationUseCaseProvider)
+              .execute(expectedGroupId: intent.groupId);
+          if (!mounted || result is! MemberActivationReady) {
+            return;
+          }
           final builder =
               widget.buildGroupManagementScreen ??
               (context, groupId) => GroupManagementScreen(groupId: groupId);
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (context) => builder(context, intent.groupId),
+              builder: (context) => builder(context, result.groupId),
             ),
           );
           break;

@@ -17,10 +17,14 @@ abstract class GroupInfo with _$GroupInfo {
     DateTime? inviteExpiresAt,
     required String role,
     String? groupKey,
+    @Default(1) int keyEpoch,
     required List<GroupMember> members,
     required DateTime createdAt,
     DateTime? confirmedAt,
     DateTime? lastSyncAt,
+    @Default(0) int controlRevision,
+    DateTime? controlUpdatedAt,
+    @Default('') String controlSnapshotDigest,
   }) = _GroupInfo;
 
   factory GroupInfo.fromJson(Map<String, dynamic> json) =>

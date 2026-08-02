@@ -22,61 +22,66 @@ class ProfileSectionCard extends ConsumerWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.all(16),
-          child: GestureDetector(
-            onTap: () async {
-              final changed = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => ProfileEditScreen(profile: profile),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              key: const ValueKey('settings-profile-card'),
+              borderRadius: BorderRadius.circular(18),
+              onTap: () async {
+                final changed = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => ProfileEditScreen(profile: profile),
+                  ),
+                );
+                if (changed == true) {
+                  ref.invalidate(userProfileProvider);
+                }
+              },
+              child: Ink(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: palette.card,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: palette.borderDefault),
                 ),
-              );
-              if (changed == true) {
-                ref.invalidate(userProfileProvider);
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: palette.card,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: palette.borderDefault),
-              ),
-              child: Row(
-                children: [
-                  AvatarDisplay(
-                    emoji: profile.avatarEmoji,
-                    imagePath: profile.avatarImagePath,
-                    size: 48,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          profile.displayName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          S.of(context).profileEdit,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      ],
+                child: Row(
+                  children: [
+                    AvatarDisplay(
+                      emoji: profile.avatarEmoji,
+                      imagePath: profile.avatarImagePath,
+                      size: 58,
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: palette.textTertiary,
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            profile.displayName,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            S.of(context).profileEditPersonalInfo,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 22,
+                      color: palette.textTertiary,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

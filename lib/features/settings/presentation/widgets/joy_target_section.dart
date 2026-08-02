@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 
 class JoyTargetSection extends StatelessWidget {
   const JoyTargetSection({
@@ -16,36 +17,60 @@ class JoyTargetSection extends StatelessWidget {
   final int fallbackTarget;
   final Future<void> Function(int? value) onSave;
 
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return SettingsSectionCard(
+      title: l10n.settingsJoyTargetTitle,
+      children: [
+        JoyTargetTile(
+          configuredTarget: configuredTarget,
+          recommendedTarget: recommendedTarget,
+          fallbackTarget: fallbackTarget,
+          onSave: onSave,
+        ),
+      ],
+    );
+  }
+}
+
+/// Monthly Joy-target row reused by the compact General section.
+class JoyTargetTile extends StatelessWidget {
+  const JoyTargetTile({
+    required this.configuredTarget,
+    required this.recommendedTarget,
+    required this.fallbackTarget,
+    required this.onSave,
+    this.compact = false,
+    super.key,
+  });
+
+  final int? configuredTarget;
+  final int? recommendedTarget;
+  final int fallbackTarget;
+  final Future<void> Function(int? value) onSave;
+  final bool compact;
+
   int get _activeTarget =>
       configuredTarget ?? recommendedTarget ?? fallbackTarget;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final recommendationLine = recommendedTarget == null
-        ? l10n.settingsJoyTargetFallback
-        : l10n.settingsJoyTargetRecommendation(recommendedTarget!);
     final currentLine = configuredTarget == null
         ? l10n.settingsJoyTargetCurrentRecommended(_activeTarget)
         : l10n.settingsJoyTargetCurrentConfigured(configuredTarget!);
+    final recommendationLine = recommendedTarget == null
+        ? l10n.settingsJoyTargetFallback
+        : l10n.settingsJoyTargetRecommendation(recommendedTarget!);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            l10n.settingsJoyTargetTitle,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.track_changes),
-          title: Text(currentLine),
-          subtitle: Text(recommendationLine),
-          onTap: () => _showDialog(context),
-        ),
-      ],
+    return SettingsActionTile(
+      icon: Icons.spa_outlined,
+      title: compact ? l10n.settingsJoyTargetTitle : currentLine,
+      subtitle: compact
+          ? l10n.settingsJoyTargetValue(_activeTarget)
+          : recommendationLine,
+      onTap: () => _showDialog(context),
     );
   }
 

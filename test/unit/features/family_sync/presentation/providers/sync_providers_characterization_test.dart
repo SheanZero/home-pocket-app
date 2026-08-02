@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/accounting/repository_providers.dart'
+    as app_accounting;
 import 'package:home_pocket/application/family_sync/apply_sync_operations_use_case.dart';
 import 'package:home_pocket/application/family_sync/check_group_validity_use_case.dart';
 import 'package:home_pocket/application/family_sync/full_sync_use_case.dart';
@@ -9,6 +11,7 @@ import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
+import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
@@ -17,6 +20,7 @@ import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart'
     show shoppingItemRepositoryProvider;
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart'
     show
@@ -24,7 +28,9 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_sy
         syncEngineProvider,
         syncOrchestratorProvider,
         transactionChangeTrackerProvider,
-        activeGroupMembersProvider;
+        activeGroupMembersProvider,
+        inboundSyncSummaryProvider,
+        inboundSyncQuarantinedProvider;
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show userProfileRepositoryProvider;
@@ -34,6 +40,8 @@ import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../../../../helpers/test_provider_scope.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
 class _MockRelayApiClient extends Mock implements RelayApiClient {}
@@ -70,6 +78,7 @@ void main() {
   late _MockBookRepository mockBookRepo;
   late _MockUserProfileRepository mockUserProfileRepo;
   late _MockShoppingItemRepository mockShoppingItemRepo;
+  late AppDatabase testDatabase;
   late ProviderContainer container;
 
   setUp(() {
@@ -83,6 +92,7 @@ void main() {
     mockBookRepo = _MockBookRepository();
     mockUserProfileRepo = _MockUserProfileRepository();
     mockShoppingItemRepo = _MockShoppingItemRepository();
+    testDatabase = AppDatabase.forTesting();
 
     // groupMembers stream needs activeGroupProvider to return null (no active group)
     when(
@@ -93,6 +103,7 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
+        app_accounting.appAppDatabaseProvider.overrideWithValue(testDatabase),
         relayApiClientProvider.overrideWithValue(mockApiClient),
         keyManagerProvider.overrideWithValue(mockKeyManager),
         groupRepositoryProvider.overrideWithValue(mockGroupRepo),
@@ -107,7 +118,10 @@ void main() {
     );
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() async {
+    container.dispose();
+    await testDatabase.close();
+  });
 
   group('family_sync/sync_providers characterization tests (pre-refactor behavior)', () {
     // HIGH-05 keepAlive lock: transactionChangeTrackerProvider
@@ -227,6 +241,24 @@ void main() {
         );
         // Also verify the provider constructed without throwing
         expect(value, isA<AsyncValue<List<GroupMember>>>());
+      },
+    );
+
+    test(
+      'inbound recovery providers are empty without an active group',
+      () async {
+        final summary = await waitForFirstValue<InboundSyncSummary>(
+          container,
+          inboundSyncSummaryProvider,
+        );
+        final quarantined =
+            await waitForFirstValue<List<InboundSyncQuarantineEntry>>(
+              container,
+              inboundSyncQuarantinedProvider,
+            );
+
+        expect(summary.requireValue, const InboundSyncSummary());
+        expect(quarantined.requireValue, isEmpty);
       },
     );
   });

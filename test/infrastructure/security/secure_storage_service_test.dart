@@ -144,6 +144,38 @@ void main() {
         ),
       );
     });
+
+    test(
+      'clearUserData deletes identity and lock material but preserves master key',
+      () async {
+        when(
+          () => mockStorage.delete(
+            key: any(named: 'key'),
+            iOptions: any(named: 'iOptions'),
+            aOptions: any(named: 'aOptions'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await service.clearUserData();
+
+        for (final key in StorageKeys.userDataKeys) {
+          verify(
+            () => mockStorage.delete(
+              key: key,
+              iOptions: any(named: 'iOptions'),
+              aOptions: any(named: 'aOptions'),
+            ),
+          ).called(1);
+        }
+        verifyNever(
+          () => mockStorage.delete(
+            key: StorageKeys.masterKey,
+            iOptions: any(named: 'iOptions'),
+            aOptions: any(named: 'aOptions'),
+          ),
+        );
+      },
+    );
   });
 
   group('typed convenience methods', () {

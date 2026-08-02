@@ -3,6 +3,8 @@ import 'dart:io';
 import '../../infrastructure/crypto/models/device_key_pair.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
+import 'group_operation_error.dart';
 
 sealed class JoinGroupResult {
   const JoinGroupResult();
@@ -16,7 +18,10 @@ sealed class JoinGroupResult {
     String? ownerAvatarImageHash,
   }) = JoinGroupVerified;
 
-  const factory JoinGroupResult.error(String message) = JoinGroupError;
+  const factory JoinGroupResult.error(
+    String message, {
+    GroupOperationErrorKind kind,
+  }) = JoinGroupError;
 }
 
 class JoinGroupVerified extends JoinGroupResult {
@@ -38,9 +43,13 @@ class JoinGroupVerified extends JoinGroupResult {
 }
 
 class JoinGroupError extends JoinGroupResult {
-  const JoinGroupError(this.message);
+  const JoinGroupError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
   final String message;
+  final GroupOperationErrorKind kind;
 }
 
 /// Verifies a group invite and returns group info for preview.
@@ -54,11 +63,17 @@ class JoinGroupUseCase {
   JoinGroupUseCase({
     required RelayApiClient apiClient,
     required KeyManager keyManager,
+    required GroupRepository groupRepository,
+    Future<void> Function()? onDeviceRegistered,
   }) : _apiClient = apiClient,
-       _keyManager = keyManager;
+       _keyManager = keyManager,
+       _groupRepository = groupRepository,
+       _onDeviceRegistered = onDeviceRegistered;
 
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;
+  final GroupRepository _groupRepository;
+  final Future<void> Function()? _onDeviceRegistered;
 
   Future<JoinGroupResult> execute({
     required String inviteCode,
@@ -67,6 +82,20 @@ class JoinGroupUseCase {
     String? avatarImageHash,
   }) async {
     try {
+      try {
+        if (await _groupRepository.getCurrentGroup() != null) {
+          return const JoinGroupResult.error(
+            'A family group is already active or awaiting confirmation',
+            kind: GroupOperationErrorKind.membershipConflict,
+          );
+        }
+      } on StateError {
+        return const JoinGroupResult.error(
+          'Conflicting local family groups require recovery',
+          kind: GroupOperationErrorKind.membershipConflict,
+        );
+      }
+
       final identity = await _ensureDeviceIdentity();
       if (identity == null) {
         return const JoinGroupResult.error('Device key not initialized');
@@ -78,6 +107,7 @@ class JoinGroupUseCase {
         deviceName: Platform.localHostname,
         platform: Platform.isIOS ? 'ios' : 'android',
       );
+      await _onDeviceRegistered?.call();
 
       final response = await _apiClient.joinGroup(
         inviteCode: inviteCode,
@@ -109,6 +139,12 @@ class JoinGroupUseCase {
         return const JoinGroupResult.error('Invite code not found or expired');
       }
       if (error.isConflict) {
+        if (isSingleGroupConflict(error)) {
+          return JoinGroupResult.error(
+            error.message,
+            kind: GroupOperationErrorKind.membershipConflict,
+          );
+        }
         return const JoinGroupResult.error('Already a member of this group');
       }
       return JoinGroupResult.error(error.message);

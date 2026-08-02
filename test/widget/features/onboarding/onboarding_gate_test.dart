@@ -57,7 +57,14 @@ class _FakeEnsureDefaultBookUseCase extends Fake
 
 class _FakeSyncEngine implements SyncEngine {
   @override
-  void initialize() {}
+  void configureLifecycleHandlers({
+    required JoinRequestLifecycleHandler onJoinRequest,
+    required MemberLeftLifecycleHandler onMemberLeft,
+    required GroupDissolvedLifecycleHandler onGroupDissolved,
+  }) {}
+
+  @override
+  Future<void> initialize() async {}
 
   @override
   void connectPushNotifications(PushNotificationService pushService) {}
@@ -71,6 +78,9 @@ class _FakeSyncEngine implements SyncEngine {
 
 class _FakePushNotificationService implements PushNotificationService {
   final _navController = StreamController<PushNavigationIntent>.broadcast();
+
+  @override
+  Future<String?> initialize() async => 'test-push-token';
 
   @override
   PushNavigationIntent? takePendingNavigationIntent() => null;

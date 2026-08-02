@@ -51,7 +51,9 @@ void main() {
       expect(map.containsKey('currentHash'), false);
       expect(map.containsKey('prevHash'), false);
       expect(map.containsKey('isSynced'), false);
-      expect(map.containsKey('isDeleted'), false);
+      expect(map['isDeleted'], isFalse);
+      expect(map['syncRevision'], greaterThan(0));
+      expect(map['syncOriginDeviceId'], 'device-a');
     });
 
     test('fromSyncMap creates synced transaction with metadata', () {
@@ -180,16 +182,34 @@ void main() {
       expect(op['timestamp'], isNotNull);
     });
 
+    test('deleted transaction uses a minimal versioned tombstone', () {
+      final tombstone = sampleTransaction.copyWith(
+        isDeleted: true,
+        updatedAt: DateTime.utc(2026, 3, 16),
+        syncRevision: 42,
+        syncOriginDeviceId: 'device-a',
+      );
+
+      final op = TransactionSyncMapper.toWithdrawalOperation(tombstone);
+
+      expect(op['op'], 'delete');
+      expect(op['revision'], 42);
+      expect(op['originDeviceId'], 'device-a');
+      expect(op['data'], {
+        'isDeleted': true,
+        'syncRevision': 42,
+        'syncOriginDeviceId': 'device-a',
+      });
+    });
+
     // STORE-03: backward-compat and round-trip tests.
     // RED in Wave 0 because Transaction does not yet have
     // originalCurrency / originalAmount / appliedRate fields.
     // These fields are added in Wave 1 (Plan 40-02).
     group('STORE-03 backward-compat and round-trip', () {
-      test(
-          'fromSyncMap with v1.6 payload (no currency fields) → '
+      test('fromSyncMap with v1.6 payload (no currency fields) → '
           'originalCurrency null, originalAmount null, appliedRate null, '
-          'no exception',
-          () {
+          'no exception', () {
         // A v1.6 sync payload lacks the three new currency fields entirely.
         final payload = TransactionSyncMapper.toSyncMap(
           sampleTransaction,
@@ -214,10 +234,8 @@ void main() {
         expect(transaction.appliedRate, isNull);
       });
 
-      test(
-          'fromSyncMap with v1.7 payload containing all three fields → '
-          'all three fields preserved',
-          () {
+      test('fromSyncMap with v1.7 payload containing all three fields → '
+          'all three fields preserved', () {
         // A v1.7 sync payload includes the three new currency fields.
         final payload = <String, dynamic>{
           'id': 'tx-456',
@@ -253,10 +271,8 @@ void main() {
         expect(transaction.appliedRate, equals('149.30'));
       });
 
-      test(
-          'toSyncMap omits currency keys when all three are null '
-          '(JPY-native row)',
-          () {
+      test('toSyncMap omits currency keys when all three are null '
+          '(JPY-native row)', () {
         // A JPY-native transaction has all three currency fields null.
         // toSyncMap must NOT emit these keys so v1.6 peers can parse the payload.
         final jpyTransaction = sampleTransaction.copyWith(
@@ -278,10 +294,8 @@ void main() {
         expect(map.containsKey('appliedRate'), isFalse);
       });
 
-      test(
-          'toSyncMap includes all three currency keys when non-null '
-          '(foreign-currency row)',
-          () {
+      test('toSyncMap includes all three currency keys when non-null '
+          '(foreign-currency row)', () {
         // A foreign-currency transaction has all three fields non-null.
         final usdTransaction = sampleTransaction.copyWith(
           originalCurrency: 'USD',
@@ -302,11 +316,9 @@ void main() {
         expect(map['appliedRate'], equals('149.30'));
       });
 
-      test(
-          "round-trip: Transaction with originalCurrency='USD', "
+      test("round-trip: Transaction with originalCurrency='USD', "
           "originalAmount=5000, appliedRate='149.30' → "
-          'toSyncMap → fromSyncMap preserves all three values',
-          () {
+          'toSyncMap → fromSyncMap preserves all three values', () {
         // RED: Transaction.originalCurrency/originalAmount/appliedRate do not exist.
         final usdTransaction = sampleTransaction.copyWith(
           originalCurrency: 'USD',
@@ -339,17 +351,17 @@ void main() {
     // JPY-native (all three null) without throwing.
     group('CR-01 sync-boundary partial-triple enforcement', () {
       Map<String, dynamic> basePayload() => <String, dynamic>{
-            'id': 'tx-cr01',
-            'amount': 7465,
-            'type': 'expense',
-            'categoryId': 'cat-food',
-            'ledgerType': 'daily',
-            'timestamp': DateTime.utc(2026, 6, 12).toIso8601String(),
-            'createdAt': DateTime.utc(2026, 6, 12).toIso8601String(),
-            'joyFullness': 5,
-            'entrySource': 'manual',
-            'isPrivate': false,
-          };
+        'id': 'tx-cr01',
+        'amount': 7465,
+        'type': 'expense',
+        'categoryId': 'cat-food',
+        'ledgerType': 'daily',
+        'timestamp': DateTime.utc(2026, 6, 12).toIso8601String(),
+        'createdAt': DateTime.utc(2026, 6, 12).toIso8601String(),
+        'joyFullness': 5,
+        'entrySource': 'manual',
+        'isPrivate': false,
+      };
 
       Transaction restore(Map<String, dynamic> payload) =>
           TransactionSyncMapper.fromSyncMap(
@@ -364,22 +376,23 @@ void main() {
         expect(t.appliedRate, isNull);
       }
 
-      test('partial triple (only originalCurrency) degrades to JPY-native',
-          () {
+      test('partial triple (only originalCurrency) degrades to JPY-native', () {
         final t = restore(basePayload()..['originalCurrency'] = 'USD');
         expectJpyNative(t);
         expect(t.amount, 7465); // hashed JPY amount preserved
       });
 
-      test('partial triple (currency + amount, no rate) degrades to JPY-native',
-          () {
-        final t = restore(
-          basePayload()
-            ..['originalCurrency'] = 'USD'
-            ..['originalAmount'] = 5000,
-        );
-        expectJpyNative(t);
-      });
+      test(
+        'partial triple (currency + amount, no rate) degrades to JPY-native',
+        () {
+          final t = restore(
+            basePayload()
+              ..['originalCurrency'] = 'USD'
+              ..['originalAmount'] = 5000,
+          );
+          expectJpyNative(t);
+        },
+      );
 
       for (final badRate in ['0', '-1', 'abc', 'NaN', '1.493e2', ' 149.30 ']) {
         test("invalid appliedRate '$badRate' degrades to JPY-native", () {

@@ -5,15 +5,18 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/family_sync/domain/models/sync_status_model.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../../features/family_sync/domain/repositories/sync_repository.dart';
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
 import 'check_group_validity_use_case.dart';
+import 'drain_family_sync_outbox_use_case.dart';
 import 'full_sync_use_case.dart';
 import 'pull_sync_use_case.dart';
 import 'push_sync_use_case.dart';
 import 'shadow_book_service.dart';
 import 'sync_avatar_use_case.dart';
+import 'sync_vector_clock.dart';
 import 'shopping_item_change_tracker.dart';
 import 'transaction_change_tracker.dart';
 
@@ -23,8 +26,15 @@ sealed class SyncOrchestratorResult {
 }
 
 class SyncOrchestratorSuccess extends SyncOrchestratorResult {
-  const SyncOrchestratorSuccess({this.appliedCount = 0, this.pushedCount = 0});
+  const SyncOrchestratorSuccess({
+    this.appliedCount = 0,
+    this.ackedCount = 0,
+    this.pageCount = 0,
+    this.pushedCount = 0,
+  });
   final int appliedCount;
+  final int ackedCount;
+  final int pageCount;
   final int pushedCount;
 }
 
@@ -33,8 +43,20 @@ class SyncOrchestratorNoGroup extends SyncOrchestratorResult {
 }
 
 class SyncOrchestratorError extends SyncOrchestratorResult {
-  const SyncOrchestratorError(this.message);
+  const SyncOrchestratorError(
+    this.message, {
+    this.statusCode,
+    this.isDeferred = false,
+    this.appliedCount = 0,
+    this.ackedCount = 0,
+    this.pageCount = 0,
+  });
   final String message;
+  final int? statusCode;
+  final bool isDeferred;
+  final int appliedCount;
+  final int ackedCount;
+  final int pageCount;
 }
 
 /// Orchestration layer: sequences Use Cases into sync modes.
@@ -54,6 +76,7 @@ class SyncOrchestrator {
     required KeyManager keyManager,
     required TransactionChangeTracker changeTracker,
     required ShoppingItemChangeTracker shoppingChangeTracker,
+    DrainFamilySyncOutboxUseCase? outboxDrainer,
   }) : _pullSync = pullSync,
        _pushSync = pushSync,
        _fullSync = fullSync,
@@ -64,7 +87,8 @@ class SyncOrchestrator {
        _queueManager = queueManager,
        _keyManager = keyManager,
        _changeTracker = changeTracker,
-       _shoppingChangeTracker = shoppingChangeTracker;
+       _shoppingChangeTracker = shoppingChangeTracker,
+       _outboxDrainer = outboxDrainer;
 
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;
@@ -77,6 +101,7 @@ class SyncOrchestrator {
   final KeyManager _keyManager;
   final TransactionChangeTracker _changeTracker;
   final ShoppingItemChangeTracker _shoppingChangeTracker;
+  final DrainFamilySyncOutboxUseCase? _outboxDrainer;
 
   /// Tracks last pushed profile hash to avoid redundant profile operations.
   String? _lastPushedProfileHash;
@@ -114,6 +139,14 @@ class SyncOrchestrator {
   /// Get pending queue count for SyncStatus.
   Future<int> getPendingQueueCount() => _queueManager.getPendingCount();
 
+  Future<SyncQueueSummary> getQueueSummary() => _queueManager.getSummary();
+
+  /// Startup/resume recovery hook. Safe to call repeatedly because accepted
+  /// rows are deleted by exact stable operation id and revision.
+  Future<int> recoverDurableOutbox() async {
+    return await _outboxDrainer?.execute() ?? 0;
+  }
+
   // --- Private orchestration flows ---
 
   Future<SyncOrchestratorResult> _executeInitialSync() async {
@@ -124,19 +157,41 @@ class SyncOrchestrator {
       debugPrint('[SyncOrchestrator] initialSync started');
     }
 
+    // Persisted mutations must leave the outbox before any pull/full snapshot.
+    final recovered = await recoverDurableOutbox();
+
     // Always: push all → push avatar → pull
     final pushed = await _fullSync.execute();
-    await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
+    Map<String, dynamic>? profileOperation;
+    if (_profileRepo is! DurableFamilySyncUserProfileRepository) {
+      profileOperation = await _buildCurrentProfileOperation(group.groupId);
+      if (profileOperation != null) {
+        await _pushSync.execute(
+          operations: [profileOperation],
+          vectorClock: const {},
+          expectedGroupId: group.groupId,
+        );
+        _lastPushedProfileHash = profileOperation['profileDigest'] as String?;
+      }
+      await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
+    }
     final pullResult = await _pullSync.execute();
-    final applied = pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+    final pullOutcome = await _completePull(
+      groupId: group.groupId,
+      result: pullResult,
+      pushedCount: pushed + recovered + (profileOperation == null ? 0 : 1),
+    );
+    if (pullOutcome is! SyncOrchestratorSuccess) {
+      return pullOutcome;
+    }
 
     if (kDebugMode) {
       debugPrint(
-        '[SyncOrchestrator] initialSync complete: pushed=$pushed, applied=$applied',
+        '[SyncOrchestrator] initialSync complete: pushed=$pushed, applied=${pullOutcome.appliedCount}',
       );
     }
 
-    return SyncOrchestratorSuccess(pushedCount: pushed, appliedCount: applied);
+    return pullOutcome;
   }
 
   Future<SyncOrchestratorResult> _executeIncrementalPush() async {
@@ -146,11 +201,13 @@ class SyncOrchestrator {
     // Check group validity (5-min cache)
     final validity = await _checkValidity.execute();
     if (validity is GroupInvalid) {
-      return SyncOrchestratorError('Group invalid: ${validity.reason}');
+      return const SyncOrchestratorNoGroup();
     }
     if (validity is GroupNoGroup) {
       return const SyncOrchestratorNoGroup();
     }
+
+    final recovered = await recoverDurableOutbox();
 
     // Flush pending transaction changes
     final txnOps = _changeTracker.flush();
@@ -160,7 +217,10 @@ class SyncOrchestrator {
           '[SyncOrchestrator] incrementalPush: pushing ${txnOps.length} transaction ops',
         );
       }
-      await _pushSync.execute(operations: txnOps, vectorClock: const {});
+      await _pushSync.execute(
+        operations: txnOps,
+        vectorClock: buildSyncVectorClock(txnOps),
+      );
     }
 
     // Flush pending shopping item changes (SC-3, SYNC-01)
@@ -175,7 +235,9 @@ class SyncOrchestrator {
     }
 
     // Build profile operation if changed
-    final profileOps = await _buildProfileOperationsIfChanged();
+    final profileOps = _profileRepo is DurableFamilySyncUserProfileRepository
+        ? const <Map<String, dynamic>>[]
+        : await _buildProfileOperationsIfChanged(group.groupId);
 
     if (profileOps.isNotEmpty) {
       await _pushSync.execute(operations: profileOps, vectorClock: const {});
@@ -192,7 +254,8 @@ class SyncOrchestrator {
     // pushed this round, not just transactions (a shopping/profile-only round
     // previously reported 0).
     return SyncOrchestratorSuccess(
-      pushedCount: txnOps.length + shoppingOps.length + profileOps.length,
+      pushedCount:
+          recovered + txnOps.length + shoppingOps.length + profileOps.length,
     );
   }
 
@@ -200,50 +263,53 @@ class SyncOrchestrator {
     final group = await _groupRepo.getActiveGroup();
     if (group == null) return const SyncOrchestratorNoGroup();
 
+    await recoverDurableOutbox();
     final pullResult = await _pullSync.execute();
-    final applied = pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+    if (pullResult is PullSyncSuccess || pullResult is PullSyncNoNewData) {
+      // A control/key envelope in this pull may have installed the current
+      // epoch. Retry the durable semantic source immediately with that key.
+      await recoverDurableOutbox();
+    }
+    final outcome = await _completePull(
+      groupId: group.groupId,
+      result: pullResult,
+    );
 
     if (kDebugMode) {
+      final applied = outcome is SyncOrchestratorSuccess
+          ? outcome.appliedCount
+          : 0;
       debugPrint('[SyncOrchestrator] incrementalPull: applied=$applied');
     }
 
-    return SyncOrchestratorSuccess(appliedCount: applied);
+    return outcome;
   }
 
   Future<SyncOrchestratorResult> _executeProfileSync() async {
     final group = await _groupRepo.getActiveGroup();
     if (group == null) return const SyncOrchestratorNoGroup();
 
-    final profile = await _profileRepo.find();
-    if (profile == null) return const SyncOrchestratorSuccess();
+    if (_profileRepo is DurableFamilySyncUserProfileRepository) {
+      final recovered = await recoverDurableOutbox();
+      return SyncOrchestratorSuccess(pushedCount: recovered);
+    }
 
-    final deviceId = await _keyManager.getDeviceId() ?? '';
+    final operation = await _buildCurrentProfileOperation(group.groupId);
+    if (operation == null) {
+      return const SyncOrchestratorSuccess();
+    }
 
-    // Always push profile on explicit profile sync
-    final ops = <Map<String, dynamic>>[
-      {
-        'op': 'update',
-        'entityType': 'profile',
-        'entityId': deviceId,
-        'data': {
-          'displayName': profile.displayName,
-          'avatarEmoji': profile.avatarEmoji,
-        },
-        'fromDeviceId': deviceId,
-        'timestamp': DateTime.now().toUtc().toIso8601String(),
-      },
-    ];
-
-    await _pushSync.execute(operations: ops, vectorClock: const {});
+    await _pushSync.execute(
+      operations: [operation],
+      vectorClock: const {},
+      expectedGroupId: group.groupId,
+    );
 
     // Push avatar if available
     await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
 
     // Update last pushed hash
-    _lastPushedProfileHash = _computeProfileHash(
-      profile.displayName,
-      profile.avatarEmoji,
-    );
+    _lastPushedProfileHash = operation['profileDigest'] as String?;
 
     return const SyncOrchestratorSuccess(pushedCount: 1);
   }
@@ -252,19 +318,88 @@ class SyncOrchestrator {
     final group = await _groupRepo.getActiveGroup();
     if (group == null) return const SyncOrchestratorNoGroup();
 
+    await recoverDurableOutbox();
     final pullResult = await _pullSync.execute();
-    final applied = pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+    if (pullResult is PullSyncSuccess || pullResult is PullSyncNoNewData) {
+      await recoverDurableOutbox();
+    }
+    return _completePull(groupId: group.groupId, result: pullResult);
+  }
 
-    return SyncOrchestratorSuccess(appliedCount: applied);
+  Future<SyncOrchestratorResult> _completePull({
+    required String groupId,
+    required PullSyncResult result,
+    int pushedCount = 0,
+  }) async {
+    final outcome = _mapPullResult(result, pushedCount: pushedCount);
+    if (result is PullSyncSuccess || result is PullSyncNoNewData) {
+      final recorded = await _groupRepo.updateLastSyncTime(
+        DateTime.now().toUtc(),
+        expectedGroupId: groupId,
+      );
+      if (!recorded) return const SyncOrchestratorNoGroup();
+    }
+    return outcome;
+  }
+
+  SyncOrchestratorResult _mapPullResult(
+    PullSyncResult result, {
+    int pushedCount = 0,
+  }) {
+    return switch (result) {
+      PullSyncSuccess(
+        :final appliedCount,
+        :final ackedCount,
+        :final pageCount,
+      ) =>
+        SyncOrchestratorSuccess(
+          appliedCount: appliedCount,
+          ackedCount: ackedCount,
+          pageCount: pageCount,
+          pushedCount: pushedCount,
+        ),
+      PullSyncNoNewData() => SyncOrchestratorSuccess(pushedCount: pushedCount),
+      PullSyncNoPair() => const SyncOrchestratorNoGroup(),
+      PullSyncDeferred(
+        :final message,
+        :final appliedCount,
+        :final ackedCount,
+        :final pageCount,
+      ) =>
+        SyncOrchestratorError(
+          message,
+          isDeferred: true,
+          appliedCount: appliedCount,
+          ackedCount: ackedCount,
+          pageCount: pageCount,
+        ),
+      PullSyncError(
+        :final message,
+        :final statusCode,
+        :final appliedCount,
+        :final ackedCount,
+        :final pageCount,
+      ) =>
+        SyncOrchestratorError(
+          message,
+          statusCode: statusCode,
+          appliedCount: appliedCount,
+          ackedCount: ackedCount,
+          pageCount: pageCount,
+        ),
+    };
   }
 
   // --- Profile change detection ---
 
-  Future<List<Map<String, dynamic>>> _buildProfileOperationsIfChanged() async {
+  Future<List<Map<String, dynamic>>> _buildProfileOperationsIfChanged(
+    String groupId,
+  ) async {
     final profile = await _profileRepo.find();
     if (profile == null) return const [];
 
     final deviceId = await _keyManager.getDeviceId() ?? '';
+    if (deviceId.isEmpty) return const [];
     final currentHash = _computeProfileHash(
       profile.displayName,
       profile.avatarEmoji,
@@ -272,24 +407,66 @@ class SyncOrchestrator {
 
     if (currentHash == _lastPushedProfileHash) return const [];
 
+    final operation = await _buildCurrentProfileOperation(groupId);
+    if (operation == null) return const [];
     _lastPushedProfileHash = currentHash;
-    return [
-      {
-        'op': 'update',
-        'entityType': 'profile',
-        'entityId': deviceId,
-        'data': {
-          'displayName': profile.displayName,
-          'avatarEmoji': profile.avatarEmoji,
-        },
-        'fromDeviceId': deviceId,
-        'timestamp': DateTime.now().toUtc().toIso8601String(),
+    return [operation];
+  }
+
+  Future<Map<String, dynamic>?> _buildCurrentProfileOperation(
+    String groupId,
+  ) async {
+    final profile = await _profileRepo.find();
+    if (profile == null) return null;
+    final deviceId = await _keyManager.getDeviceId() ?? '';
+    if (deviceId.isEmpty) return null;
+    final digest = _computeProfileHash(
+      profile.displayName,
+      profile.avatarEmoji,
+    );
+    final versionedRepository = _groupRepo is VersionedGroupMemberRepository
+        ? _groupRepo as VersionedGroupMemberRepository
+        : null;
+    final prepared = versionedRepository != null
+        ? await versionedRepository.prepareLocalProfileVersion(
+            groupId: groupId,
+            deviceId: deviceId,
+            displayName: profile.displayName,
+            avatarEmoji: profile.avatarEmoji,
+            contentDigest: digest,
+            now: DateTime.now(),
+          )
+        : null;
+    if (versionedRepository != null && prepared == null) {
+      return null;
+    }
+    final revision =
+        prepared?.revision ?? profile.updatedAt.toUtc().microsecondsSinceEpoch;
+    final originDeviceId = prepared?.originDeviceId ?? deviceId;
+    return {
+      'op': 'update',
+      'entityType': 'profile',
+      'entityId': deviceId,
+      'operationId': 'profile:$deviceId:$revision:$digest',
+      'profileDigest': digest,
+      'revision': revision,
+      'originDeviceId': originDeviceId,
+      'data': {
+        'schemaVersion': 1,
+        'ownerDeviceId': deviceId,
+        'revision': revision,
+        'profileDigest': digest,
+        'displayName': profile.displayName,
+        'avatarEmoji': profile.avatarEmoji,
       },
-    ];
+      'fromDeviceId': deviceId,
+      'timestamp': profile.updatedAt.toUtc().toIso8601String(),
+    };
   }
 
   String _computeProfileHash(String displayName, String avatarEmoji) {
-    final input = '$displayName|$avatarEmoji';
-    return hash_lib.sha256.convert(utf8.encode(input)).toString();
+    return hash_lib.sha256
+        .convert(utf8.encode(jsonEncode([displayName, avatarEmoji])))
+        .toString();
   }
 }

@@ -1,22 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../application/family_sync/create_group_use_case.dart';
+import '../../../../application/family_sync/group_operation_error.dart';
+import '../../../../application/family_sync/manage_group_invite_use_case.dart';
 import '../../../../application/family_sync/notify_member_approval_use_case.dart';
 import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../../../application/family_sync/repository_providers.dart'
     show WebSocketEventType, notifyMemberApprovalUseCaseProvider;
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
-import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/repository_providers.dart';
+import '../widgets/family_flow_components.dart';
+import '../widgets/family_network_unavailable_dialog.dart';
 import '../widgets/group_rename_dialog.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
 import 'member_approval_screen.dart';
@@ -29,12 +34,15 @@ class CreateGroupScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
+  final TextEditingController _groupNameController = TextEditingController();
   UserProfile? _profile;
   String _groupName = '';
   String? _groupId;
   String? _inviteCode;
   int? _expiresAt;
-  bool _isLoading = true;
+  bool _isLoadingProfile = true;
+  bool _isCreating = false;
+  bool _isRefreshingInvite = false;
   String? _errorMessage;
   bool _hasNavigated = false;
   StreamSubscription<dynamic>? _wsEventSubscription;
@@ -52,7 +60,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
 
     if (profile == null) {
       setState(() {
-        _isLoading = false;
+        _isLoadingProfile = false;
         _errorMessage = 'Profile not found';
       });
       return;
@@ -64,15 +72,22 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
     setState(() {
       _profile = profile;
       _groupName = defaultGroupName;
+      _groupNameController.text = defaultGroupName;
+      _isLoadingProfile = false;
     });
-
-    await _createGroup(profile, defaultGroupName);
   }
 
-  Future<void> _createGroup(UserProfile profile, String groupName) async {
+  Future<void> _submitCreate() async {
+    if (_isCreating || _groupId != null) return;
+
+    final profile = _profile;
+    final groupName = _groupNameController.text.trim();
+    if (profile == null || groupName.isEmpty) return;
+
     setState(() {
-      _isLoading = true;
+      _isCreating = true;
       _errorMessage = null;
+      _groupName = groupName;
     });
 
     final result = await ref
@@ -81,6 +96,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           displayName: profile.displayName,
           avatarEmoji: profile.avatarEmoji,
           groupName: groupName,
+          avatarImageHash: null,
         );
 
     if (!mounted) return;
@@ -95,13 +111,28 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           _groupId = groupId;
           _inviteCode = inviteCode;
           _expiresAt = expiresAt;
-          _isLoading = false;
+          _groupName = result.groupName ?? groupName;
+          _groupNameController.text = _groupName;
+          _isCreating = false;
         });
         unawaited(_connectWebSocket(groupId));
-      case CreateGroupError(:final message):
+      case CreateGroupError(:final message, :final kind):
+        if (kind == GroupOperationErrorKind.networkUnavailable) {
+          setState(() {
+            _isCreating = false;
+            _errorMessage = null;
+          });
+          final retry = await showFamilyNetworkUnavailableDialog(context);
+          if (retry && mounted) {
+            await _submitCreate();
+          }
+          return;
+        }
         setState(() {
-          _isLoading = false;
-          _errorMessage = message;
+          _isCreating = false;
+          _errorMessage = kind == GroupOperationErrorKind.membershipConflict
+              ? S.of(context).familySyncSingleGroupConflict
+              : message;
         });
     }
   }
@@ -110,6 +141,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   void dispose() {
     unawaited(_wsEventSubscription?.cancel());
     _notifyUseCase?.disconnectWebSocket();
+    _groupNameController.dispose();
     super.dispose();
   }
 
@@ -145,6 +177,8 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           ),
         );
       case CheckGroupNotInGroup():
+      case CheckGroupPendingApproval():
+      case CheckGroupAwaitingKey():
       case CheckGroupError():
         break;
     }
@@ -177,19 +211,61 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
     await SharePlus.instance.share(ShareParams(text: code));
   }
 
+  Future<void> _handleCopy() async {
+    final code = _inviteCode;
+    if (code == null) return;
+    await Clipboard.setData(ClipboardData(text: code));
+    if (mounted) {
+      showSuccessFeedback(context, S.of(context).familySyncInviteCopied);
+    }
+  }
+
+  Future<void> _handleRegenerate() async {
+    final groupId = _groupId;
+    if (groupId == null || _isRefreshingInvite) return;
+
+    setState(() => _isRefreshingInvite = true);
+    final result = await ref
+        .read(manageGroupInviteUseCaseProvider)
+        .execute(groupId: groupId, forceRefresh: true);
+    if (!mounted) return;
+
+    switch (result) {
+      case ManageGroupInviteSuccess(:final inviteCode, :final expiresAt):
+        setState(() {
+          _inviteCode = inviteCode;
+          _expiresAt = expiresAt.millisecondsSinceEpoch ~/ 1000;
+          _isRefreshingInvite = false;
+        });
+        showSuccessFeedback(context, S.of(context).familySyncInviteRegenerated);
+      case ManageGroupInviteForbidden():
+        setState(() => _isRefreshingInvite = false);
+        showErrorFeedback(context, S.of(context).familySyncInviteOwnerOnly);
+      case ManageGroupInviteError(:final message):
+        setState(() => _isRefreshingInvite = false);
+        showErrorFeedback(
+          context,
+          S.of(context).familySyncRegenerateInviteFailed(message),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
 
-    return Scaffold(
-      backgroundColor: palette.background,
-      body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
-            ? _buildError(l10n)
-            : _buildContent(l10n),
+    return PopScope(
+      canPop: !_isCreating,
+      child: Scaffold(
+        backgroundColor: palette.background,
+        body: SafeArea(
+          child: _isLoadingProfile
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+              ? _buildError(l10n)
+              : _buildContent(l10n),
+        ),
       ),
     );
   }
@@ -198,7 +274,9 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
     final palette = context.palette;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 42),
+        padding: const EdgeInsets.symmetric(
+          horizontal: familyFlowHorizontalPadding,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -209,10 +287,19 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ?? '',
+              l10n.groupCreateFailed(_errorMessage ?? ''),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: palette.textSecondary),
             ),
+            if (_profile != null) ...[
+              const SizedBox(height: 20),
+              FamilyPrimaryButton(
+                controlKey: const Key('create-group-retry'),
+                onPressed: _submitCreate,
+                label: l10n.retry,
+                isLoading: _isCreating,
+              ),
+            ],
           ],
         ),
       ),
@@ -220,142 +307,146 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   }
 
   Widget _buildContent(S l10n) {
-    final palette = context.palette;
     final profile = _profile;
     if (profile == null) return const SizedBox.shrink();
+    if (_groupId == null) return _buildDraft(l10n, profile);
 
     final code = _inviteCode ?? '';
     final firstHalf = code.length >= 3 ? code.substring(0, 3) : code;
     final secondHalf = code.length >= 6 ? code.substring(3, 6) : '';
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 42),
+      padding: const EdgeInsets.symmetric(
+        horizontal: familyFlowHorizontalPadding,
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
-          _Header(title: l10n.groupCreate),
-          const SizedBox(height: 36),
+          const SizedBox(height: 7),
+          FamilyFlowHeader(
+            title: l10n.familyFlowCreateHeader,
+            backKey: const Key('create-group-back'),
+            onBack: _isCreating ? null : () => Navigator.maybePop(context),
+          ),
+          const SizedBox(height: 16),
+          FamilyFlowProgress(
+            labels: [
+              l10n.familyFlowCreateStepCreate,
+              l10n.familyFlowCreateStepInvite,
+              l10n.familyFlowCreateStepApprove,
+            ],
+            currentStep: 1,
+          ),
+          const SizedBox(height: 27),
+          FamilyHouseIdentity(
+            name: _groupName,
+            subtitle: l10n.familyFlowOwnerSummary(profile.displayName),
+            onEdit: _handleRename,
+            editLabel: l10n.edit,
+          ),
+          const SizedBox(height: 22),
+          _InviteCodeCard(
+            code: '$firstHalf $secondHalf'.trim(),
+            expiresAt: _expiresAt,
+            onCopy: _handleCopy,
+            onRegenerate: _isRefreshingInvite ? null : _handleRegenerate,
+            isRefreshing: _isRefreshingInvite,
+          ),
+          const SizedBox(height: 18),
+          FamilyPrimaryButton(
+            onPressed: _handleShare,
+            label: l10n.groupShareCode,
+          ),
+          const SizedBox(height: 20),
+          FamilyHelperNote(text: l10n.familyFlowCreateInviteHelper),
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
 
-          // Avatar section
-          AvatarDisplay(
-            emoji: profile.avatarEmoji,
-            imagePath: profile.avatarImagePath,
-            size: 90,
+  Widget _buildDraft(S l10n, UserProfile profile) {
+    final palette = context.palette;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: familyFlowHorizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 7),
+          FamilyFlowHeader(
+            title: l10n.familyFlowCreateHeader,
+            backKey: const Key('create-group-back'),
+            onBack: _isCreating ? null : () => Navigator.maybePop(context),
           ),
-          const SizedBox(height: 12),
-          Text(
-            profile.displayName,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: palette.textPrimary,
-            ),
+          const SizedBox(height: 16),
+          FamilyFlowProgress(
+            labels: [
+              l10n.familyFlowCreateStepCreate,
+              l10n.familyFlowCreateStepInvite,
+              l10n.familyFlowCreateStepApprove,
+            ],
+            currentStep: 0,
           ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.groupOwner,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-              color: palette.accentPrimary,
-            ),
+          const SizedBox(height: 27),
+          FamilyFlowIntro(
+            title: l10n.familyFlowCreateTitle,
+            subtitle: l10n.familyFlowCreateSubtitle,
           ),
-          const SizedBox(height: 28),
-
-          // Group name row
-          GestureDetector(
-            onTap: _handleRename,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('\u{1F3E0}', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 8),
-                Text(
-                  _groupName,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textPrimary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  LucideIcons.pencil,
-                  size: 16,
-                  color: palette.textSecondary,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 28),
-
-          // Invite code card
+          const SizedBox(height: 20),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              color: palette.card,
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: palette.borderDefault),
-              boxShadow: [
-                BoxShadow(
-                  color: palette.surfaceScrimMedium,
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.groupInviteCode,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                  l10n.familyFlowOwnerSummary(profile.displayName),
+                  style: AppTextStyles.supporting.copyWith(
                     color: palette.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      firstHalf,
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w700,
-                        color: palette.accentPrimary,
-                        letterSpacing: 6,
-                      ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('create-group-name-field'),
+                  controller: _groupNameController,
+                  enabled: !_isCreating,
+                  maxLength: 50,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _submitCreate(),
+                  decoration: InputDecoration(
+                    labelText: l10n.groupName,
+                    filled: true,
+                    fillColor: palette.backgroundSubtle,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(13),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      secondHalf,
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w700,
-                        color: palette.accentPrimary,
-                        letterSpacing: 6,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                if (_expiresAt != null) ...[
-                  const SizedBox(height: 12),
-                  _TimerRow(expiresAt: _expiresAt!),
-                ],
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.groupCreateConfirmationHint,
+            style: AppTextStyles.supporting.copyWith(
+              color: palette.textSecondary,
+            ),
+          ),
           const SizedBox(height: 24),
-
-          // Share button (CTA)
-          _GradientButton(
-            onTap: _handleShare,
-            icon: LucideIcons.share2,
-            label: l10n.groupShareCode,
+          FamilyPrimaryButton(
+            controlKey: const Key('create-group-submit'),
+            onPressed: _isCreating ? null : _submitCreate,
+            label: _isCreating
+                ? l10n.familySyncCreatingGroup
+                : l10n.groupCreate,
+            isLoading: _isCreating,
           ),
           const SizedBox(height: 32),
         ],
@@ -364,52 +455,93 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.title});
+class _InviteCodeCard extends StatelessWidget {
+  const _InviteCodeCard({
+    required this.code,
+    required this.expiresAt,
+    required this.onCopy,
+    required this.onRegenerate,
+    required this.isRefreshing,
+  });
 
-  final String title;
+  final String code;
+  final int? expiresAt;
+  final VoidCallback onCopy;
+  final VoidCallback? onRegenerate;
+  final bool isRefreshing;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
-
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () => Navigator.maybePop(context),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                LucideIcons.chevronLeft,
-                size: 20,
-                color: palette.textSecondary,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                l10n.groupBack,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textSecondary,
+    return Container(
+      constraints: const BoxConstraints(minHeight: 70),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    code,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.numerals(
+                      TextStyle(
+                        fontSize: 27,
+                        height: 34 / 27,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2.5,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                if (expiresAt != null) ...[
+                  const SizedBox(width: 8),
+                  _TimerRow(expiresAt: expiresAt!),
+                ],
+              ],
+            ),
           ),
-        ),
-        const Spacer(),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: palette.textPrimary,
+          IconButton(
+            key: const Key('create-group-copy-code'),
+            onPressed: onCopy,
+            tooltip: l10n.familySyncInviteCopy,
+            icon: Icon(
+              LucideIcons.copy,
+              size: 20,
+              color: palette.textSecondary,
+            ),
           ),
-        ),
-        const Spacer(),
-        const SizedBox(width: 60),
-      ],
+          TextButton(
+            key: const Key('create-group-regenerate-code'),
+            onPressed: onRegenerate,
+            style: TextButton.styleFrom(
+              foregroundColor: palette.accentPrimary,
+              minimumSize: const Size(44, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              textStyle: AppTextStyles.label,
+            ),
+            child: isRefreshing
+                ? SizedBox(
+                    width: 17,
+                    height: 17,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: palette.accentPrimary,
+                    ),
+                  )
+                : Text(l10n.familyFlowRegenerateInvite),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -430,71 +562,18 @@ class _TimerRow extends StatelessWidget {
     final minutes = remaining.inMinutes.clamp(0, 999);
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(LucideIcons.clock, size: 14, color: palette.textSecondary),
         const SizedBox(width: 6),
         Text(
           l10n.groupInviteExpiry(minutes),
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
+          maxLines: 1,
+          style: AppTextStyles.supporting.copyWith(
             color: palette.textSecondary,
           ),
         ),
       ],
-    );
-  }
-}
-
-class _GradientButton extends StatelessWidget {
-  const _GradientButton({
-    required this.onTap,
-    required this.icon,
-    required this.label,
-  });
-
-  final VoidCallback onTap;
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [palette.fabGradientEnd, palette.fabGradientStart],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: palette.actionShadow,
-              blurRadius: 20,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

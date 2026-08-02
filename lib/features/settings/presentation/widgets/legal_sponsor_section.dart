@@ -5,57 +5,50 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/config/legal_urls.dart';
 import '../../../../core/constants/app_info.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/settings_section_card.dart';
 import '../screens/legal_doc_screen.dart';
 
-/// The `法的情報・応援` settings group (tone-C, sketch 003).
-///
-/// Renders 5 rows: privacy policy / 利用規約 / 特商法 / OSS ライセンス /
-/// 開発を応援する. The privacy/terms/tokusho rows push the offline
-/// [LegalDocScreen] (LEGAL-01/02/04); the OSS row reuses the framework
-/// [showLicensePage] (LEGAL-03); the sponsor row hands [LegalUrls.donation] to
-/// the OS browser via `url_launcher` (DONATE-02/04) — non-transactional, no
-/// dialog, no in-app WebView/IAP (DONATE-01/03).
-///
-/// Inserted into `settings_screen.dart` by plan 56-06.
 class LegalSponsorSection extends StatelessWidget {
-  const LegalSponsorSection({super.key});
+  const LegalSponsorSection({super.key, this.showTitle = true});
 
-  void _pushDoc(BuildContext context, LegalDoc doc) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => LegalDocScreen(doc: doc)),
-    );
+  final bool showTitle;
+
+  Future<void> _openLegalDocument(
+    BuildContext context,
+    LegalDoc doc,
+    String url,
+  ) async {
+    final opened = await _launchExternal(url);
+    if (!context.mounted || opened) return;
+
+    // Legal text remains available offline if the browser cannot be opened.
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => LegalDocScreen(doc: doc)));
   }
 
-  /// Launches the sponsor URL in the external browser (DONATE-02).
-  ///
-  /// Launches directly rather than pre-checking launchability, since that check
-  /// returns a false-negative on Android 11+ for https without a `<queries>`
-  /// entry. On failure shows one neutral SnackBar — never crashes, never
-  /// retries (T-56-06).
-  Future<void> _openSponsor(BuildContext context) async {
-    final l10n = S.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    var ok = false;
+  Future<void> _openSupport(BuildContext context) async {
+    final opened = await _launchExternal(LegalUrls.support);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.of(context).sponsorLaunchError)));
+    }
+  }
+
+  Future<bool> _launchExternal(String url) async {
     try {
-      ok = await launchUrl(
-        Uri.parse(LegalUrls.donation),
+      return await launchUrl(
+        Uri.parse(url),
         mode: LaunchMode.externalApplication,
       );
-    } catch (e) {
-      // launchUrl can throw (e.g. Android ActivityNotFoundException) and
-      // Uri.parse can throw FormatException — treat any failure as !ok so the
-      // handler shows one neutral SnackBar and never crashes (T-56-06).
-      // Capture the error for diagnostics rather than swallowing it silently.
-      ok = false;
+    } catch (error) {
       if (kDebugMode) {
-        debugPrint('sponsor launch failed: $e');
+        debugPrint('external link launch failed: $error');
       }
-    }
-    if (!ok && context.mounted) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.sponsorLaunchError)),
-      );
+      return false;
     }
   }
 
@@ -63,54 +56,163 @@ class LegalSponsorSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
+    final languageCode = Localizations.localeOf(context).languageCode;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final legalRows = SettingsSectionCard(
+      title: showTitle ? l10n.legalSponsorSectionTitle : null,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            l10n.legalSponsorSectionTitle,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        _LegalLinkTile(
+          icon: Icons.privacy_tip_outlined,
+          title: l10n.privacyPolicy,
+          subtitle: l10n.privacyPolicyDescription,
+          onTap: () => _openLegalDocument(
+            context,
+            LegalDoc.privacy,
+            LegalUrls.privacyPolicyFor(languageCode),
           ),
         ),
-        ListTile(
-          leading: const Icon(Icons.privacy_tip),
-          title: Text(l10n.privacyPolicy),
-          onTap: () => _pushDoc(context, LegalDoc.privacy),
+        _LegalLinkTile(
+          icon: Icons.description_outlined,
+          title: l10n.termsOfUse,
+          subtitle: l10n.termsOfUseDescription,
+          onTap: () => _openLegalDocument(
+            context,
+            LegalDoc.terms,
+            LegalUrls.termsOfUseFor(languageCode),
+          ),
         ),
-        ListTile(
-          leading: const Icon(Icons.gavel),
-          title: Text(l10n.termsOfUse),
-          onTap: () => _pushDoc(context, LegalDoc.terms),
+        _LegalLinkTile(
+          icon: Icons.storefront_outlined,
+          title: l10n.tokushoNotice,
+          subtitle: l10n.tokushoNoticeSubtitle,
+          onTap: () => _openLegalDocument(
+            context,
+            LegalDoc.tokusho,
+            LegalUrls.tokushoFor(languageCode),
+          ),
         ),
-        ListTile(
-          leading: const Icon(Icons.receipt_long),
-          title: Text(l10n.tokushoNotice),
-          subtitle: Text(l10n.tokushoNoticeSubtitle),
-          onTap: () => _pushDoc(context, LegalDoc.tokusho),
-        ),
-        ListTile(
-          leading: const Icon(Icons.description),
-          title: Text(l10n.openSourceLicenses),
-          onTap: () {
-            showLicensePage(
-              context: context,
-              applicationName: S.of(context).appName,
-              applicationVersion: appVersion,
-            );
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.favorite),
-          title: Text(l10n.sponsorRow),
-          subtitle: Text(l10n.sponsorRowSubtitle),
-          // tone-C external-link affordance — ADR-019 `shared` steel-blue
-          // resolved via context.palette (never a hardcoded literal).
-          trailing: Icon(Icons.open_in_new, size: 18, color: palette.shared),
-          onTap: () => _openSponsor(context),
+        _LegalLinkTile(
+          icon: Icons.code_outlined,
+          title: l10n.openSourceLicenses,
+          subtitle: l10n.openSourceLicensesDescription,
+          trailingExternal: false,
+          onTap: () => showLicensePage(
+            context: context,
+            applicationName: l10n.appName,
+            applicationVersion: appVersion,
+          ),
         ),
       ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        legalRows,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+          child: Text(
+            l10n.sponsorSectionTitle,
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: palette.textPrimary,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: palette.card,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: palette.borderDefault),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: palette.joyLight,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(Icons.favorite_outline, color: palette.joyText),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  l10n.sponsorCardTitle,
+                  style: AppTextStyles.sectionTitle.copyWith(
+                    color: palette.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.sponsorCardBody,
+                  style: AppTextStyles.body.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  key: const ValueKey('legal-support-link'),
+                  onPressed: () => _openSupport(context),
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  label: Text(l10n.sponsorButton),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LegalLinkTile extends StatelessWidget {
+  const _LegalLinkTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.trailingExternal = true,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool trailingExternal;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return ListTile(
+      minVerticalPadding: 14,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: palette.accentPrimaryLight,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, color: palette.accentPrimary, size: 22),
+      ),
+      title: Text(
+        title,
+        style: AppTextStyles.itemTitle.copyWith(color: palette.textPrimary),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: AppTextStyles.supporting.copyWith(color: palette.textSecondary),
+      ),
+      trailing: Icon(
+        trailingExternal ? Icons.open_in_new : Icons.chevron_right,
+        color: trailingExternal ? palette.shared : palette.textTertiary,
+        size: 20,
+      ),
+      onTap: onTap,
     );
   }
 }

@@ -20,10 +20,14 @@ mixin _$GroupInfo {
   DateTime? get inviteExpiresAt;
   String get role;
   String? get groupKey;
+  int get keyEpoch;
   List<GroupMember> get members;
   DateTime get createdAt;
   DateTime? get confirmedAt;
   DateTime? get lastSyncAt;
+  int get controlRevision;
+  DateTime? get controlUpdatedAt;
+  String get controlSnapshotDigest;
 
   /// Create a copy of GroupInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -51,13 +55,21 @@ mixin _$GroupInfo {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.groupKey, groupKey) ||
                 other.groupKey == groupKey) &&
+            (identical(other.keyEpoch, keyEpoch) ||
+                other.keyEpoch == keyEpoch) &&
             const DeepCollectionEquality().equals(other.members, members) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.confirmedAt, confirmedAt) ||
                 other.confirmedAt == confirmedAt) &&
             (identical(other.lastSyncAt, lastSyncAt) ||
-                other.lastSyncAt == lastSyncAt));
+                other.lastSyncAt == lastSyncAt) &&
+            (identical(other.controlRevision, controlRevision) ||
+                other.controlRevision == controlRevision) &&
+            (identical(other.controlUpdatedAt, controlUpdatedAt) ||
+                other.controlUpdatedAt == controlUpdatedAt) &&
+            (identical(other.controlSnapshotDigest, controlSnapshotDigest) ||
+                other.controlSnapshotDigest == controlSnapshotDigest));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -71,15 +83,19 @@ mixin _$GroupInfo {
     inviteExpiresAt,
     role,
     groupKey,
+    keyEpoch,
     const DeepCollectionEquality().hash(members),
     createdAt,
     confirmedAt,
     lastSyncAt,
+    controlRevision,
+    controlUpdatedAt,
+    controlSnapshotDigest,
   );
 
   @override
   String toString() {
-    return 'GroupInfo(groupId: $groupId, status: $status, groupName: $groupName, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt)';
+    return 'GroupInfo(groupId: $groupId, status: $status, groupName: $groupName, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, keyEpoch: $keyEpoch, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt, controlRevision: $controlRevision, controlUpdatedAt: $controlUpdatedAt, controlSnapshotDigest: $controlSnapshotDigest)';
   }
 }
 
@@ -96,10 +112,14 @@ abstract mixin class $GroupInfoCopyWith<$Res> {
     DateTime? inviteExpiresAt,
     String role,
     String? groupKey,
+    int keyEpoch,
     List<GroupMember> members,
     DateTime createdAt,
     DateTime? confirmedAt,
     DateTime? lastSyncAt,
+    int controlRevision,
+    DateTime? controlUpdatedAt,
+    String controlSnapshotDigest,
   });
 }
 
@@ -122,10 +142,14 @@ class _$GroupInfoCopyWithImpl<$Res> implements $GroupInfoCopyWith<$Res> {
     Object? inviteExpiresAt = freezed,
     Object? role = null,
     Object? groupKey = freezed,
+    Object? keyEpoch = null,
     Object? members = null,
     Object? createdAt = null,
     Object? confirmedAt = freezed,
     Object? lastSyncAt = freezed,
+    Object? controlRevision = null,
+    Object? controlUpdatedAt = freezed,
+    Object? controlSnapshotDigest = null,
   }) {
     return _then(
       _self.copyWith(
@@ -157,6 +181,10 @@ class _$GroupInfoCopyWithImpl<$Res> implements $GroupInfoCopyWith<$Res> {
             ? _self.groupKey
             : groupKey // ignore: cast_nullable_to_non_nullable
                   as String?,
+        keyEpoch: null == keyEpoch
+            ? _self.keyEpoch
+            : keyEpoch // ignore: cast_nullable_to_non_nullable
+                  as int,
         members: null == members
             ? _self.members
             : members // ignore: cast_nullable_to_non_nullable
@@ -173,6 +201,18 @@ class _$GroupInfoCopyWithImpl<$Res> implements $GroupInfoCopyWith<$Res> {
             ? _self.lastSyncAt
             : lastSyncAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        controlRevision: null == controlRevision
+            ? _self.controlRevision
+            : controlRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        controlUpdatedAt: freezed == controlUpdatedAt
+            ? _self.controlUpdatedAt
+            : controlUpdatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        controlSnapshotDigest: null == controlSnapshotDigest
+            ? _self.controlSnapshotDigest
+            : controlSnapshotDigest // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -279,10 +319,14 @@ extension GroupInfoPatterns on GroupInfo {
       DateTime? inviteExpiresAt,
       String role,
       String? groupKey,
+      int keyEpoch,
       List<GroupMember> members,
       DateTime createdAt,
       DateTime? confirmedAt,
       DateTime? lastSyncAt,
+      int controlRevision,
+      DateTime? controlUpdatedAt,
+      String controlSnapshotDigest,
     )?
     $default, {
     required TResult orElse(),
@@ -298,10 +342,14 @@ extension GroupInfoPatterns on GroupInfo {
           _that.inviteExpiresAt,
           _that.role,
           _that.groupKey,
+          _that.keyEpoch,
           _that.members,
           _that.createdAt,
           _that.confirmedAt,
           _that.lastSyncAt,
+          _that.controlRevision,
+          _that.controlUpdatedAt,
+          _that.controlSnapshotDigest,
         );
       case _:
         return orElse();
@@ -331,10 +379,14 @@ extension GroupInfoPatterns on GroupInfo {
       DateTime? inviteExpiresAt,
       String role,
       String? groupKey,
+      int keyEpoch,
       List<GroupMember> members,
       DateTime createdAt,
       DateTime? confirmedAt,
       DateTime? lastSyncAt,
+      int controlRevision,
+      DateTime? controlUpdatedAt,
+      String controlSnapshotDigest,
     )
     $default,
   ) {
@@ -349,10 +401,14 @@ extension GroupInfoPatterns on GroupInfo {
           _that.inviteExpiresAt,
           _that.role,
           _that.groupKey,
+          _that.keyEpoch,
           _that.members,
           _that.createdAt,
           _that.confirmedAt,
           _that.lastSyncAt,
+          _that.controlRevision,
+          _that.controlUpdatedAt,
+          _that.controlSnapshotDigest,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -381,10 +437,14 @@ extension GroupInfoPatterns on GroupInfo {
       DateTime? inviteExpiresAt,
       String role,
       String? groupKey,
+      int keyEpoch,
       List<GroupMember> members,
       DateTime createdAt,
       DateTime? confirmedAt,
       DateTime? lastSyncAt,
+      int controlRevision,
+      DateTime? controlUpdatedAt,
+      String controlSnapshotDigest,
     )?
     $default,
   ) {
@@ -399,10 +459,14 @@ extension GroupInfoPatterns on GroupInfo {
           _that.inviteExpiresAt,
           _that.role,
           _that.groupKey,
+          _that.keyEpoch,
           _that.members,
           _that.createdAt,
           _that.confirmedAt,
           _that.lastSyncAt,
+          _that.controlRevision,
+          _that.controlUpdatedAt,
+          _that.controlSnapshotDigest,
         );
       case _:
         return null;
@@ -421,10 +485,14 @@ class _GroupInfo implements GroupInfo {
     this.inviteExpiresAt,
     required this.role,
     this.groupKey,
+    this.keyEpoch = 1,
     required final List<GroupMember> members,
     required this.createdAt,
     this.confirmedAt,
     this.lastSyncAt,
+    this.controlRevision = 0,
+    this.controlUpdatedAt,
+    this.controlSnapshotDigest = '',
   }) : _members = members;
   factory _GroupInfo.fromJson(Map<String, dynamic> json) =>
       _$GroupInfoFromJson(json);
@@ -443,6 +511,9 @@ class _GroupInfo implements GroupInfo {
   final String role;
   @override
   final String? groupKey;
+  @override
+  @JsonKey()
+  final int keyEpoch;
   final List<GroupMember> _members;
   @override
   List<GroupMember> get members {
@@ -457,6 +528,14 @@ class _GroupInfo implements GroupInfo {
   final DateTime? confirmedAt;
   @override
   final DateTime? lastSyncAt;
+  @override
+  @JsonKey()
+  final int controlRevision;
+  @override
+  final DateTime? controlUpdatedAt;
+  @override
+  @JsonKey()
+  final String controlSnapshotDigest;
 
   /// Create a copy of GroupInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -487,13 +566,21 @@ class _GroupInfo implements GroupInfo {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.groupKey, groupKey) ||
                 other.groupKey == groupKey) &&
+            (identical(other.keyEpoch, keyEpoch) ||
+                other.keyEpoch == keyEpoch) &&
             const DeepCollectionEquality().equals(other._members, _members) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.confirmedAt, confirmedAt) ||
                 other.confirmedAt == confirmedAt) &&
             (identical(other.lastSyncAt, lastSyncAt) ||
-                other.lastSyncAt == lastSyncAt));
+                other.lastSyncAt == lastSyncAt) &&
+            (identical(other.controlRevision, controlRevision) ||
+                other.controlRevision == controlRevision) &&
+            (identical(other.controlUpdatedAt, controlUpdatedAt) ||
+                other.controlUpdatedAt == controlUpdatedAt) &&
+            (identical(other.controlSnapshotDigest, controlSnapshotDigest) ||
+                other.controlSnapshotDigest == controlSnapshotDigest));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -507,15 +594,19 @@ class _GroupInfo implements GroupInfo {
     inviteExpiresAt,
     role,
     groupKey,
+    keyEpoch,
     const DeepCollectionEquality().hash(_members),
     createdAt,
     confirmedAt,
     lastSyncAt,
+    controlRevision,
+    controlUpdatedAt,
+    controlSnapshotDigest,
   );
 
   @override
   String toString() {
-    return 'GroupInfo(groupId: $groupId, status: $status, groupName: $groupName, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt)';
+    return 'GroupInfo(groupId: $groupId, status: $status, groupName: $groupName, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, keyEpoch: $keyEpoch, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt, controlRevision: $controlRevision, controlUpdatedAt: $controlUpdatedAt, controlSnapshotDigest: $controlSnapshotDigest)';
   }
 }
 
@@ -536,10 +627,14 @@ abstract mixin class _$GroupInfoCopyWith<$Res>
     DateTime? inviteExpiresAt,
     String role,
     String? groupKey,
+    int keyEpoch,
     List<GroupMember> members,
     DateTime createdAt,
     DateTime? confirmedAt,
     DateTime? lastSyncAt,
+    int controlRevision,
+    DateTime? controlUpdatedAt,
+    String controlSnapshotDigest,
   });
 }
 
@@ -562,10 +657,14 @@ class __$GroupInfoCopyWithImpl<$Res> implements _$GroupInfoCopyWith<$Res> {
     Object? inviteExpiresAt = freezed,
     Object? role = null,
     Object? groupKey = freezed,
+    Object? keyEpoch = null,
     Object? members = null,
     Object? createdAt = null,
     Object? confirmedAt = freezed,
     Object? lastSyncAt = freezed,
+    Object? controlRevision = null,
+    Object? controlUpdatedAt = freezed,
+    Object? controlSnapshotDigest = null,
   }) {
     return _then(
       _GroupInfo(
@@ -597,6 +696,10 @@ class __$GroupInfoCopyWithImpl<$Res> implements _$GroupInfoCopyWith<$Res> {
             ? _self.groupKey
             : groupKey // ignore: cast_nullable_to_non_nullable
                   as String?,
+        keyEpoch: null == keyEpoch
+            ? _self.keyEpoch
+            : keyEpoch // ignore: cast_nullable_to_non_nullable
+                  as int,
         members: null == members
             ? _self._members
             : members // ignore: cast_nullable_to_non_nullable
@@ -613,6 +716,18 @@ class __$GroupInfoCopyWithImpl<$Res> implements _$GroupInfoCopyWith<$Res> {
             ? _self.lastSyncAt
             : lastSyncAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        controlRevision: null == controlRevision
+            ? _self.controlRevision
+            : controlRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        controlUpdatedAt: freezed == controlUpdatedAt
+            ? _self.controlUpdatedAt
+            : controlUpdatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        controlSnapshotDigest: null == controlSnapshotDigest
+            ? _self.controlSnapshotDigest
+            : controlSnapshotDigest // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }

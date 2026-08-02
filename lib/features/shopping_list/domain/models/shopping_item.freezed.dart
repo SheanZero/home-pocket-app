@@ -31,6 +31,8 @@ mixin _$ShoppingItem {
   String? get addedByBookId;
   DateTime get createdAt;
   DateTime? get updatedAt;
+  int get syncRevision;
+  String get syncOriginDeviceId;
 
   /// Create a copy of ShoppingItem
   /// with the given fields replaced by the non-null parameter values.
@@ -78,11 +80,15 @@ mixin _$ShoppingItem {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.syncRevision, syncRevision) ||
+                other.syncRevision == syncRevision) &&
+            (identical(other.syncOriginDeviceId, syncOriginDeviceId) ||
+                other.syncOriginDeviceId == syncOriginDeviceId));
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     deviceId,
@@ -102,11 +108,13 @@ mixin _$ShoppingItem {
     addedByBookId,
     createdAt,
     updatedAt,
-  );
+    syncRevision,
+    syncOriginDeviceId,
+  ]);
 
   @override
   String toString() {
-    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
   }
 }
 
@@ -136,6 +144,8 @@ abstract mixin class $ShoppingItemCopyWith<$Res> {
     String? addedByBookId,
     DateTime createdAt,
     DateTime? updatedAt,
+    int syncRevision,
+    String syncOriginDeviceId,
   });
 }
 
@@ -169,6 +179,8 @@ class _$ShoppingItemCopyWithImpl<$Res> implements $ShoppingItemCopyWith<$Res> {
     Object? addedByBookId = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
+    Object? syncRevision = null,
+    Object? syncOriginDeviceId = null,
   }) {
     return _then(
       _self.copyWith(
@@ -244,6 +256,14 @@ class _$ShoppingItemCopyWithImpl<$Res> implements $ShoppingItemCopyWith<$Res> {
             ? _self.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        syncRevision: null == syncRevision
+            ? _self.syncRevision
+            : syncRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        syncOriginDeviceId: null == syncOriginDeviceId
+            ? _self.syncOriginDeviceId
+            : syncOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -361,6 +381,8 @@ extension ShoppingItemPatterns on ShoppingItem {
       String? addedByBookId,
       DateTime createdAt,
       DateTime? updatedAt,
+      int syncRevision,
+      String syncOriginDeviceId,
     )?
     $default, {
     required TResult orElse(),
@@ -387,6 +409,8 @@ extension ShoppingItemPatterns on ShoppingItem {
           _that.addedByBookId,
           _that.createdAt,
           _that.updatedAt,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
         );
       case _:
         return orElse();
@@ -427,6 +451,8 @@ extension ShoppingItemPatterns on ShoppingItem {
       String? addedByBookId,
       DateTime createdAt,
       DateTime? updatedAt,
+      int syncRevision,
+      String syncOriginDeviceId,
     )
     $default,
   ) {
@@ -452,6 +478,8 @@ extension ShoppingItemPatterns on ShoppingItem {
           _that.addedByBookId,
           _that.createdAt,
           _that.updatedAt,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -491,6 +519,8 @@ extension ShoppingItemPatterns on ShoppingItem {
       String? addedByBookId,
       DateTime createdAt,
       DateTime? updatedAt,
+      int syncRevision,
+      String syncOriginDeviceId,
     )?
     $default,
   ) {
@@ -516,6 +546,8 @@ extension ShoppingItemPatterns on ShoppingItem {
           _that.addedByBookId,
           _that.createdAt,
           _that.updatedAt,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
         );
       case _:
         return null;
@@ -545,6 +577,8 @@ class _ShoppingItem extends ShoppingItem {
     this.addedByBookId,
     required this.createdAt,
     this.updatedAt,
+    this.syncRevision = 0,
+    this.syncOriginDeviceId = '',
   }) : _tags = tags,
        super._();
 
@@ -602,6 +636,12 @@ class _ShoppingItem extends ShoppingItem {
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
+  @override
+  @JsonKey()
+  final int syncRevision;
+  @override
+  @JsonKey()
+  final String syncOriginDeviceId;
 
   /// Create a copy of ShoppingItem
   /// with the given fields replaced by the non-null parameter values.
@@ -647,11 +687,15 @@ class _ShoppingItem extends ShoppingItem {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.syncRevision, syncRevision) ||
+                other.syncRevision == syncRevision) &&
+            (identical(other.syncOriginDeviceId, syncOriginDeviceId) ||
+                other.syncOriginDeviceId == syncOriginDeviceId));
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     deviceId,
@@ -671,11 +715,13 @@ class _ShoppingItem extends ShoppingItem {
     addedByBookId,
     createdAt,
     updatedAt,
-  );
+    syncRevision,
+    syncOriginDeviceId,
+  ]);
 
   @override
   String toString() {
-    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
   }
 }
 
@@ -707,6 +753,8 @@ abstract mixin class _$ShoppingItemCopyWith<$Res>
     String? addedByBookId,
     DateTime createdAt,
     DateTime? updatedAt,
+    int syncRevision,
+    String syncOriginDeviceId,
   });
 }
 
@@ -741,6 +789,8 @@ class __$ShoppingItemCopyWithImpl<$Res>
     Object? addedByBookId = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
+    Object? syncRevision = null,
+    Object? syncOriginDeviceId = null,
   }) {
     return _then(
       _ShoppingItem(
@@ -816,6 +866,14 @@ class __$ShoppingItemCopyWithImpl<$Res>
             ? _self.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        syncRevision: null == syncRevision
+            ? _self.syncRevision
+            : syncRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        syncOriginDeviceId: null == syncOriginDeviceId
+            ? _self.syncOriginDeviceId
+            : syncOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }

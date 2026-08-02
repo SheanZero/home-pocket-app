@@ -303,7 +303,7 @@ class SEn extends S {
   String get selectTheme => 'Select Theme';
 
   @override
-  String get themeSystem => 'System';
+  String get themeSystem => 'Follow device settings';
 
   @override
   String get themeLight => 'Light';
@@ -339,6 +339,80 @@ class SEn extends S {
   String get dataManagement => 'Data Management';
 
   @override
+  String get settingsGeneral => 'General';
+
+  @override
+  String get settingsFamily => 'Family';
+
+  @override
+  String get settingsData => 'Data';
+
+  @override
+  String get settingsThisApp => 'This App';
+
+  @override
+  String get settingsAdditional => 'Other settings';
+
+  @override
+  String get settingsAdditionalDescription =>
+      'Week start, voice recognition, and notifications';
+
+  @override
+  String get settingsNotSet => 'Not set';
+
+  @override
+  String settingsJoyTargetValue(int value) {
+    return '$value Joy';
+  }
+
+  @override
+  String get settingsLocalDataProtected =>
+      'Your data is protected on this device';
+
+  @override
+  String get backupAndRestore => 'Backup & Restore';
+
+  @override
+  String get backupAndRestoreDescription => 'Encrypted file';
+
+  @override
+  String get backupHeroTitle => 'Keep your data safely in your hands';
+
+  @override
+  String get backupHeroDescription =>
+      'Encrypt your records and settings with a password, then save them on your device or in a cloud drive you choose.';
+
+  @override
+  String get backupEncryptionChip => 'AES-256-GCM';
+
+  @override
+  String get backupCompressedChip => 'Compressed';
+
+  @override
+  String get backupNoUploadChip => 'No automatic upload';
+
+  @override
+  String get backupSectionTitle => 'Backup';
+
+  @override
+  String get restoreSectionTitle => 'Restore';
+
+  @override
+  String get backupPasswordNotStored =>
+      'The password is not stored in this app. If you forget it, the backup cannot be restored.';
+
+  @override
+  String get restoreReplacesData =>
+      'Choose an .hpb file and replace current data';
+
+  @override
+  String get restoreWarningTitle => 'Your current data will be replaced';
+
+  @override
+  String get restoreWarningBody =>
+      'If restoration fails, your current data will remain unchanged.';
+
+  @override
   String get exportBackup => 'Export Backup';
 
   @override
@@ -354,14 +428,15 @@ class SEn extends S {
   String get deleteAllData => 'Delete All Data';
 
   @override
-  String get deleteAllDataDescription => 'Permanently delete all records';
+  String get deleteAllDataDescription =>
+      'Permanently delete data on this device';
 
   @override
   String get deleteAllDataConfirmation =>
-      'This action cannot be undone. Are you sure you want to delete all data?';
+      'This permanently deletes Home Pocket data on this device. It does not delete family data from other devices or send a server deletion request.';
 
   @override
-  String get allDataDeleted => 'All data deleted';
+  String get allDataDeleted => 'Local data deleted';
 
   @override
   String get deleteFailed => 'Delete failed';
@@ -473,6 +548,12 @@ class SEn extends S {
 
   @override
   String get profileEdit => 'Edit Profile';
+
+  @override
+  String get profileEditPersonalInfo => 'Edit personal information';
+
+  @override
+  String get profileDisplayName => 'Display name';
 
   @override
   String get profileCancel => 'Cancel';
@@ -644,6 +725,27 @@ class SEn extends S {
   String homeHeroPreviousMonthSubline(String amount) {
     return 'Last month (same period) $amount';
   }
+
+  @override
+  String get homeJoyEmptyTitleSingle => 'What made you smile today?';
+
+  @override
+  String get homeJoyEmptyTitleGroup => 'Family joy today?';
+
+  @override
+  String get homeJoyEmptySubtitle => 'Start with one small pleasure';
+
+  @override
+  String get homeJoyEmptyFree => 'Add your own';
+
+  @override
+  String get homeJoyEmptyCoffee => 'A drink';
+
+  @override
+  String get homeJoyEmptyBook => 'A book';
+
+  @override
+  String get homeJoyEmptyRest => 'A breather';
 
   @override
   String get homeRingSectionTitleSingle => 'Joy Index';
@@ -828,6 +930,22 @@ class SEn extends S {
   String get categoryNameHint => 'e.g. Weekend projects';
 
   @override
+  String get categoryAppearanceLabel => 'Appearance';
+
+  @override
+  String get categoryAppearanceDescription =>
+      'Makes it easy to spot in lists and charts.';
+
+  @override
+  String get categoryPreviewName => 'New category';
+
+  @override
+  String get categoryIconLabel => 'Icon';
+
+  @override
+  String get categoryColorLabel => 'Color';
+
+  @override
   String get categoryNameRequired => 'Enter a category name';
 
   @override
@@ -933,7 +1051,7 @@ class SEn extends S {
   String get familySyncShowMyCode => 'Create Group';
 
   @override
-  String get familySyncEnterPartnerCode => 'Join Group';
+  String get familySyncEnterPartnerCode => 'Join with an invite code';
 
   @override
   String get familySyncPairCode => 'Invite Code';
@@ -1076,6 +1194,36 @@ class SEn extends S {
   }
 
   @override
+  String get familySyncInviteTitle => 'Invite a family member';
+
+  @override
+  String get familySyncInviteDescription =>
+      'Share this code with the person you want to invite.';
+
+  @override
+  String get familySyncInviteCopy => 'Copy code';
+
+  @override
+  String get familySyncInviteCopied => 'Invite code copied';
+
+  @override
+  String get familySyncInviteRefreshHint =>
+      'Refreshing invalidates the previous code immediately.';
+
+  @override
+  String get familySyncInviteApprovalWindowHint =>
+      'Code expiry only controls new applications. After applying, the owner has 24 hours to approve the request.';
+
+  @override
+  String familySyncInviteShareMessage(String groupName, String inviteCode) {
+    return 'Join $groupName in Home Pocket with invite code $inviteCode.';
+  }
+
+  @override
+  String get familySyncInviteOwnerOnly =>
+      'Only the group owner can manage invite codes.';
+
+  @override
   String get familySyncMembers => 'Members';
 
   @override
@@ -1188,7 +1336,7 @@ class SEn extends S {
       'Approving this request will sync the device and data with encryption enabled.';
 
   @override
-  String get familySyncGroupManagement => 'Group Management';
+  String get familySyncGroupManagement => 'Family Management';
 
   @override
   String get familySyncSynced => 'Synced';
@@ -1216,7 +1364,27 @@ class SEn extends S {
   }
 
   @override
-  String get groupCreate => 'Create Group';
+  String get groupCreate => 'Create a new family';
+
+  @override
+  String get groupCreateConfirmationHint =>
+      'Your group and invite code are created only after you confirm.';
+
+  @override
+  String groupCreateFailed(String message) {
+    return 'Could not create the group: $message';
+  }
+
+  @override
+  String get familySyncSingleGroupConflict =>
+      'This device already has a family group or a pending join request. Leave or cancel it before creating or joining another group.';
+
+  @override
+  String get familySyncNetworkUnavailableTitle => 'No internet connection';
+
+  @override
+  String get familySyncNetworkUnavailableMessage =>
+      'Family sharing needs an internet connection. Check your connection and make sure Home Pocket can use mobile data, then try again.';
 
   @override
   String get groupName => 'Group Name';
@@ -1245,17 +1413,17 @@ class SEn extends S {
   String get groupVerify => 'Verify';
 
   @override
-  String get groupConfirmJoin => 'Confirm Join';
+  String get groupConfirmJoin => 'Request to join';
 
   @override
   String get groupJoinTarget => 'Group to Join';
 
   @override
-  String get groupWaitingApproval => 'Waiting for Owner approval...';
+  String get groupWaitingApproval => 'Waiting for owner approval';
 
   @override
   String groupWaitingDesc(String name) {
-    return '$name is reviewing your request';
+    return '$name is reviewing your join request.';
   }
 
   @override
@@ -1297,34 +1465,215 @@ class SEn extends S {
   String get groupEnterGroup => 'Enter Group';
 
   @override
-  String get groupChoiceTitle => 'Connect with family';
+  String get groupChoiceTitle => 'How would you like to start?';
 
   @override
-  String get groupChoiceSubtitle => 'Manage your household budget together';
+  String get groupChoiceSubtitle => 'You can join one family at a time.';
 
   @override
-  String get groupCreateDesc => 'Create a new family group and invite members';
+  String get groupCreateDesc => 'Issue an invite code and approve each member';
 
   @override
-  String get groupJoinDesc => 'Enter an invite code to join an existing group';
+  String get groupJoinDesc => 'Approval from the family owner is required';
 
   @override
-  String get groupE2eeHint => 'Privacy protected with E2E encryption';
+  String get groupE2eeHint =>
+      'Shared family ledgers sync with encryption. Private ledgers stay on this device.';
+
+  @override
+  String get familyFlowCreateStepCreate => 'Create';
+
+  @override
+  String get familyFlowCreateHeader => 'Create family';
+
+  @override
+  String get familyFlowJoinHeader => 'Join family';
+
+  @override
+  String get familyFlowReviewFamily => 'Review family details';
+
+  @override
+  String get familyFlowCreateStepInvite => 'Invite';
+
+  @override
+  String get familyFlowCreateStepApprove => 'Approval';
+
+  @override
+  String get familyFlowJoinStepCode => 'Code';
+
+  @override
+  String get familyFlowJoinStepConfirm => 'Confirm';
+
+  @override
+  String get familyFlowJoinStepWait => 'Wait';
+
+  @override
+  String familyFlowOwnerSummary(String name) {
+    return '$name · Owner';
+  }
+
+  @override
+  String get familyFlowCreateTitle => 'Create a new family';
+
+  @override
+  String get familyFlowCreateSubtitle =>
+      'Name your family to issue a secure invite code.';
+
+  @override
+  String get familyFlowCreateInviteHelper =>
+      'When someone requests to join, you will approve them in the next step.';
+
+  @override
+  String get familyFlowRegenerateInvite => 'Reissue';
+
+  @override
+  String get familySyncInviteRegenerated => 'Invite code reissued';
+
+  @override
+  String get familyFlowJoinCodeTitle => 'Enter the 6-digit invite code';
+
+  @override
+  String get familyFlowJoinCodeSubtitle =>
+      'Enter the digits you received from the family owner.';
+
+  @override
+  String get familyFlowJoinBeforeApprovalHelper =>
+      'No ledgers sync until your request is approved.';
+
+  @override
+  String get familyFlowJoinConfirmHeader => 'Confirm family';
+
+  @override
+  String get familyFlowJoinConfirmTitle => 'Confirm the family you are joining';
+
+  @override
+  String get familyFlowJoinConfirmSubtitle =>
+      'Your join request will be sent to this family.';
+
+  @override
+  String get familyFlowPublicKeyVerified => 'Public key verified';
+
+  @override
+  String get familyFlowPrivateLedgerHelper =>
+      'Your private ledgers are never shared with the family.';
+
+  @override
+  String get familyFlowWaitingHeader => 'Waiting for approval';
+
+  @override
+  String familyFlowWaitingFamily(String groupName) {
+    return 'Joining: $groupName';
+  }
+
+  @override
+  String get familyFlowApprovalTitle => 'New join request';
+
+  @override
+  String get familyFlowApprovalSubtitle =>
+      'Confirm the person and device before approving.';
+
+  @override
+  String familyFlowApprovalDevice(String deviceName) {
+    return 'Request from $deviceName';
+  }
+
+  @override
+  String get familyFlowDeviceKeyVerified => 'Device public key verified';
+
+  @override
+  String get familyFlowApprovalHelper =>
+      'After approval, this device securely syncs the family\'s shared ledgers.';
+
+  @override
+  String get familyFlowApprovalEmptyTitle => 'No requests to review';
+
+  @override
+  String familyFlowPendingRequests(int count) {
+    return 'New join requests · $count';
+  }
+
+  @override
+  String get familyFlowViewRequests => 'Review requests';
+
+  @override
+  String get familyFlowSyncSettings => 'Sync settings';
+
+  @override
+  String familyFlowManagementSummary(
+    String ownerName,
+    int count,
+    String syncStatus,
+  ) {
+    return 'Owner: $ownerName · $count members · $syncStatus';
+  }
 
   @override
   String get groupInviteMembers => 'Invite new member';
 
   @override
-  String get groupDisband => 'Disband Group';
+  String get groupDisband => 'Disband Family';
 
   @override
   String get groupCancel => 'Cancel';
 
   @override
-  String get groupWaitingHint1 => 'Please wait for the notification';
+  String get groupCancelRequest => 'Cancel join request';
 
   @override
-  String get groupWaitingHint2 => 'It\'s safe to close the app';
+  String groupRejectRequestFailed(String message) {
+    return 'Failed to reject join request: $message';
+  }
+
+  @override
+  String get groupRequestRejectedTitle => 'Join request declined';
+
+  @override
+  String get groupRequestRejectedDescription =>
+      'The group owner declined this request. You can try another invite code.';
+
+  @override
+  String get groupRequestCancelledTitle => 'Join request cancelled';
+
+  @override
+  String get groupRequestCancelledDescription =>
+      'Your request was cancelled. You can submit a new request at any time.';
+
+  @override
+  String get groupRequestExpiredTitle => 'Join request expired';
+
+  @override
+  String get groupRequestExpiredDescription =>
+      'The request was not reviewed within 24 hours. Ask for a current invite code and try again.';
+
+  @override
+  String get groupTryAnotherInvite => 'Enter another invite code';
+
+  @override
+  String get groupKeyRecoveryTitle => 'Restoring the family key';
+
+  @override
+  String get groupKeyRecoveryWaiting =>
+      'Your membership is active. Another active family device must securely re-seal the current key for this device. The relay cannot read or recreate it.';
+
+  @override
+  String get groupKeyRecoveryUnavailable =>
+      'No active device supplied the current key before the request expired. Because the relay is zero-knowledge, it cannot recover the key. You can retry or safely leave/dissolve this family and create a new one.';
+
+  @override
+  String get groupKeyRecoveryRateLimited =>
+      'A recovery request was sent recently. Wait a moment before notifying the other devices again.';
+
+  @override
+  String get groupKeyRecoveryRetry => 'Retry key recovery';
+
+  @override
+  String get groupKeyRecoveryRebuild => 'Leave and set up a new family';
+
+  @override
+  String get groupWaitingHint1 => 'It\'s safe to close the app.';
+
+  @override
+  String get groupWaitingHint2 => 'Sync starts automatically after approval.';
 
   @override
   String get groupCodeHint => 'Ask the group owner for the invite code';
@@ -2834,6 +3183,23 @@ class SEn extends S {
       'Protect the app with a passcode on launch and when returning to the foreground.';
 
   @override
+  String get securityAppLockOff => 'Off';
+
+  @override
+  String get securityAppLockPinOnly => 'PIN';
+
+  @override
+  String securityAppLockBiometricAndPin(String biometric) {
+    return '$biometric + PIN';
+  }
+
+  @override
+  String get securityFaceId => 'Face ID';
+
+  @override
+  String get securityFingerprint => 'Fingerprint';
+
+  @override
   String get securityBiometricUnlock => 'Unlock with biometrics';
 
   @override
@@ -2864,6 +3230,35 @@ class SEn extends S {
 
   @override
   String get sponsorLaunchError => 'Couldn\'t open the browser';
+
+  @override
+  String get legalNavigationSubtitle =>
+      'Privacy, terms, and open-source licenses';
+
+  @override
+  String get privacyPolicyDescription => 'How your data is handled';
+
+  @override
+  String get termsOfUseDescription => 'Service terms and conditions';
+
+  @override
+  String get openSourceLicensesDescription => 'Libraries used by the app';
+
+  @override
+  String get sponsorSectionTitle => 'Support Development';
+
+  @override
+  String get sponsorCardTitle => 'Help this quiet household ledger grow';
+
+  @override
+  String get sponsorCardBody =>
+      'The support and contact page opens in your external browser. It does not affect app features or access to your data.';
+
+  @override
+  String get sponsorButton => 'About supporting us';
+
+  @override
+  String get legalLinkLaunchError => 'Couldn\'t open the link';
 
   @override
   String analyticsTrendInsightTotal(String amount) {
@@ -2934,4 +3329,183 @@ class SEn extends S {
   @override
   String get analyticsJoyDrawerToggleCollapse =>
       'Collapse joy spending breakdown';
+
+  @override
+  String get syncQueueNeedsAttentionBadge => 'Needs attention';
+
+  @override
+  String get syncQueueNeedsAttentionDescription =>
+      'Some changes need your attention';
+
+  @override
+  String get syncQueueNeedsAttentionTitle => 'Sync needs attention';
+
+  @override
+  String get syncQueuePendingTitle => 'Changes waiting to sync';
+
+  @override
+  String syncQueueCounts(int pendingCount, int deadLetterCount) {
+    return '$pendingCount waiting · $deadLetterCount need attention';
+  }
+
+  @override
+  String get syncQueueReconcileHint =>
+      'The encrypted changes are preserved. Retry them first; a full reconciliation is still recommended afterward.';
+
+  @override
+  String get syncQueueRetryAll => 'Retry all';
+
+  @override
+  String get syncQueueDiscardAll => 'Discard';
+
+  @override
+  String get syncQueueRetryFailed => 'Some changes still need attention';
+
+  @override
+  String get syncQueueRetrySucceeded =>
+      'Queued changes sent. Reconciliation is still recommended.';
+
+  @override
+  String get syncQueueDiscardConfirmTitle => 'Discard unsent changes?';
+
+  @override
+  String get syncQueueDiscardConfirmBody =>
+      'This permanently removes the preserved outbound changes from this device. This cannot be undone.';
+
+  @override
+  String get syncQueueCancel => 'Cancel';
+
+  @override
+  String get syncQueueDiscardConfirmAction => 'Discard permanently';
+
+  @override
+  String get syncQueueDiscardFailed =>
+      'The unsent changes could not be discarded';
+
+  @override
+  String get inboundSyncSectionTitle => 'Received changes held for review';
+
+  @override
+  String inboundSyncCount(int count) {
+    return '$count received changes quarantined';
+  }
+
+  @override
+  String inboundSyncErrorCode(String errorCode) {
+    return 'Safe code: $errorCode';
+  }
+
+  @override
+  String get inboundSyncRetryOne => 'Retry';
+
+  @override
+  String get inboundSyncDiscardOne => 'Discard received change';
+
+  @override
+  String get inboundSyncDiscardConfirmTitle => 'Discard this received change?';
+
+  @override
+  String get inboundSyncDiscardConfirmBody =>
+      'This permanently removes the quarantined received change from this device. The relay copy was already acknowledged and this cannot be undone.';
+
+  @override
+  String get syncAttentionDiscardConfirmTitle =>
+      'Discard preserved sync changes?';
+
+  @override
+  String get syncAttentionDiscardConfirmBody =>
+      'This permanently removes all preserved outbound failures and quarantined received changes from this device. This cannot be undone.';
+
+  @override
+  String get familySyncTransferOwner => 'Transfer ownership';
+
+  @override
+  String get familySyncTransferOwnerSelect => 'Choose the new owner';
+
+  @override
+  String get familySyncTransferOwnerConfirmTitle => 'Transfer ownership?';
+
+  @override
+  String familySyncTransferOwnerConfirmBody(String memberName) {
+    return '$memberName will manage members, invitations, and the family group.';
+  }
+
+  @override
+  String get familySyncTransferOwnerFinalTitle => 'Final confirmation';
+
+  @override
+  String familySyncTransferOwnerFinalBody(String memberName) {
+    return 'A new encryption key will be issued to every active device. After transfer, you become a regular member. Transfer ownership to $memberName?';
+  }
+
+  @override
+  String get familySyncTransferOwnerSuccess => 'Ownership transferred securely';
+
+  @override
+  String get familySyncTransferOwnerNotReady =>
+      'Ownership actions are unavailable until the current encryption key is ready';
+
+  @override
+  String get familySyncTransferOwnerInvalidTarget =>
+      'Choose a different active member';
+
+  @override
+  String familySyncTransferOwnerFailed(String message) {
+    return 'Could not transfer ownership: $message';
+  }
+
+  @override
+  String get transactionPhotoBoundaryTitle => 'Receipt photo';
+
+  @override
+  String get transactionPhotoLocalOnlyBody =>
+      'This receipt photo stays on this device and is not included in family sync or backups.';
+
+  @override
+  String get transactionPhotoUnavailableBody =>
+      'The receipt photo is available only on the device that recorded this transaction and is not included in family sync or backups.';
+
+  @override
+  String get familySyncMemberHistory => 'MEMBER HISTORY';
+
+  @override
+  String familySyncRequestedAt(String date) {
+    return 'Requested $date';
+  }
+
+  @override
+  String familySyncJoinedAt(String role, String date) {
+    return '$role · Joined $date';
+  }
+
+  @override
+  String familySyncConfirmedAt(String role, String date) {
+    return '$role · Confirmed $date';
+  }
+
+  @override
+  String familySyncRemovedAtReason(String reason, String date) {
+    return '$reason · $date';
+  }
+
+  @override
+  String get familySyncRemovalReasonLeft => 'Left the family';
+
+  @override
+  String get familySyncRemovalReasonRemoved => 'Removed by owner';
+
+  @override
+  String get familySyncRemovalReasonDissolved => 'Family dissolved';
+
+  @override
+  String get familySyncRemovalReasonRejected => 'Request rejected';
+
+  @override
+  String get familySyncRemovalReasonCancelled => 'Request cancelled';
+
+  @override
+  String get familySyncRemovalReasonExpired => 'Request expired';
+
+  @override
+  String get familySyncRemovalReasonUnknown => 'Membership ended';
 }

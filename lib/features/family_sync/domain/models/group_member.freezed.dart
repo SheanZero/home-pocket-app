@@ -22,6 +22,16 @@ mixin _$GroupMember {
   String get avatarEmoji;
   String? get avatarImagePath;
   String? get avatarImageHash;
+  int get profileRevision;
+  String get profileOriginDeviceId;
+  String get profileDigest;
+  int get avatarRevision;
+  String get avatarOriginDeviceId;
+  String get avatarContentHash;
+  DateTime? get joinedAt;
+  DateTime? get confirmedAt;
+  DateTime? get removedAt;
+  String? get removalReason;
 
   /// Create a copy of GroupMember
   /// with the given fields replaced by the non-null parameter values.
@@ -53,12 +63,32 @@ mixin _$GroupMember {
             (identical(other.avatarImagePath, avatarImagePath) ||
                 other.avatarImagePath == avatarImagePath) &&
             (identical(other.avatarImageHash, avatarImageHash) ||
-                other.avatarImageHash == avatarImageHash));
+                other.avatarImageHash == avatarImageHash) &&
+            (identical(other.profileRevision, profileRevision) ||
+                other.profileRevision == profileRevision) &&
+            (identical(other.profileOriginDeviceId, profileOriginDeviceId) ||
+                other.profileOriginDeviceId == profileOriginDeviceId) &&
+            (identical(other.profileDigest, profileDigest) ||
+                other.profileDigest == profileDigest) &&
+            (identical(other.avatarRevision, avatarRevision) ||
+                other.avatarRevision == avatarRevision) &&
+            (identical(other.avatarOriginDeviceId, avatarOriginDeviceId) ||
+                other.avatarOriginDeviceId == avatarOriginDeviceId) &&
+            (identical(other.avatarContentHash, avatarContentHash) ||
+                other.avatarContentHash == avatarContentHash) &&
+            (identical(other.joinedAt, joinedAt) ||
+                other.joinedAt == joinedAt) &&
+            (identical(other.confirmedAt, confirmedAt) ||
+                other.confirmedAt == confirmedAt) &&
+            (identical(other.removedAt, removedAt) ||
+                other.removedAt == removedAt) &&
+            (identical(other.removalReason, removalReason) ||
+                other.removalReason == removalReason));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     deviceId,
     publicKey,
@@ -69,11 +99,21 @@ mixin _$GroupMember {
     avatarEmoji,
     avatarImagePath,
     avatarImageHash,
-  );
+    profileRevision,
+    profileOriginDeviceId,
+    profileDigest,
+    avatarRevision,
+    avatarOriginDeviceId,
+    avatarContentHash,
+    joinedAt,
+    confirmedAt,
+    removedAt,
+    removalReason,
+  ]);
 
   @override
   String toString() {
-    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, avatarImageHash: $avatarImageHash)';
+    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, avatarImageHash: $avatarImageHash, profileRevision: $profileRevision, profileOriginDeviceId: $profileOriginDeviceId, profileDigest: $profileDigest, avatarRevision: $avatarRevision, avatarOriginDeviceId: $avatarOriginDeviceId, avatarContentHash: $avatarContentHash, joinedAt: $joinedAt, confirmedAt: $confirmedAt, removedAt: $removedAt, removalReason: $removalReason)';
   }
 }
 
@@ -94,6 +134,16 @@ abstract mixin class $GroupMemberCopyWith<$Res> {
     String avatarEmoji,
     String? avatarImagePath,
     String? avatarImageHash,
+    int profileRevision,
+    String profileOriginDeviceId,
+    String profileDigest,
+    int avatarRevision,
+    String avatarOriginDeviceId,
+    String avatarContentHash,
+    DateTime? joinedAt,
+    DateTime? confirmedAt,
+    DateTime? removedAt,
+    String? removalReason,
   });
 }
 
@@ -118,6 +168,16 @@ class _$GroupMemberCopyWithImpl<$Res> implements $GroupMemberCopyWith<$Res> {
     Object? avatarEmoji = null,
     Object? avatarImagePath = freezed,
     Object? avatarImageHash = freezed,
+    Object? profileRevision = null,
+    Object? profileOriginDeviceId = null,
+    Object? profileDigest = null,
+    Object? avatarRevision = null,
+    Object? avatarOriginDeviceId = null,
+    Object? avatarContentHash = null,
+    Object? joinedAt = freezed,
+    Object? confirmedAt = freezed,
+    Object? removedAt = freezed,
+    Object? removalReason = freezed,
   }) {
     return _then(
       _self.copyWith(
@@ -156,6 +216,46 @@ class _$GroupMemberCopyWithImpl<$Res> implements $GroupMemberCopyWith<$Res> {
         avatarImageHash: freezed == avatarImageHash
             ? _self.avatarImageHash
             : avatarImageHash // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        profileRevision: null == profileRevision
+            ? _self.profileRevision
+            : profileRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        profileOriginDeviceId: null == profileOriginDeviceId
+            ? _self.profileOriginDeviceId
+            : profileOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        profileDigest: null == profileDigest
+            ? _self.profileDigest
+            : profileDigest // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarRevision: null == avatarRevision
+            ? _self.avatarRevision
+            : avatarRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        avatarOriginDeviceId: null == avatarOriginDeviceId
+            ? _self.avatarOriginDeviceId
+            : avatarOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarContentHash: null == avatarContentHash
+            ? _self.avatarContentHash
+            : avatarContentHash // ignore: cast_nullable_to_non_nullable
+                  as String,
+        joinedAt: freezed == joinedAt
+            ? _self.joinedAt
+            : joinedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        confirmedAt: freezed == confirmedAt
+            ? _self.confirmedAt
+            : confirmedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        removedAt: freezed == removedAt
+            ? _self.removedAt
+            : removedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        removalReason: freezed == removalReason
+            ? _self.removalReason
+            : removalReason // ignore: cast_nullable_to_non_nullable
                   as String?,
       ),
     );
@@ -265,6 +365,16 @@ extension GroupMemberPatterns on GroupMember {
       String avatarEmoji,
       String? avatarImagePath,
       String? avatarImageHash,
+      int profileRevision,
+      String profileOriginDeviceId,
+      String profileDigest,
+      int avatarRevision,
+      String avatarOriginDeviceId,
+      String avatarContentHash,
+      DateTime? joinedAt,
+      DateTime? confirmedAt,
+      DateTime? removedAt,
+      String? removalReason,
     )?
     $default, {
     required TResult orElse(),
@@ -282,6 +392,16 @@ extension GroupMemberPatterns on GroupMember {
           _that.avatarEmoji,
           _that.avatarImagePath,
           _that.avatarImageHash,
+          _that.profileRevision,
+          _that.profileOriginDeviceId,
+          _that.profileDigest,
+          _that.avatarRevision,
+          _that.avatarOriginDeviceId,
+          _that.avatarContentHash,
+          _that.joinedAt,
+          _that.confirmedAt,
+          _that.removedAt,
+          _that.removalReason,
         );
       case _:
         return orElse();
@@ -313,6 +433,16 @@ extension GroupMemberPatterns on GroupMember {
       String avatarEmoji,
       String? avatarImagePath,
       String? avatarImageHash,
+      int profileRevision,
+      String profileOriginDeviceId,
+      String profileDigest,
+      int avatarRevision,
+      String avatarOriginDeviceId,
+      String avatarContentHash,
+      DateTime? joinedAt,
+      DateTime? confirmedAt,
+      DateTime? removedAt,
+      String? removalReason,
     )
     $default,
   ) {
@@ -329,6 +459,16 @@ extension GroupMemberPatterns on GroupMember {
           _that.avatarEmoji,
           _that.avatarImagePath,
           _that.avatarImageHash,
+          _that.profileRevision,
+          _that.profileOriginDeviceId,
+          _that.profileDigest,
+          _that.avatarRevision,
+          _that.avatarOriginDeviceId,
+          _that.avatarContentHash,
+          _that.joinedAt,
+          _that.confirmedAt,
+          _that.removedAt,
+          _that.removalReason,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -359,6 +499,16 @@ extension GroupMemberPatterns on GroupMember {
       String avatarEmoji,
       String? avatarImagePath,
       String? avatarImageHash,
+      int profileRevision,
+      String profileOriginDeviceId,
+      String profileDigest,
+      int avatarRevision,
+      String avatarOriginDeviceId,
+      String avatarContentHash,
+      DateTime? joinedAt,
+      DateTime? confirmedAt,
+      DateTime? removedAt,
+      String? removalReason,
     )?
     $default,
   ) {
@@ -375,6 +525,16 @@ extension GroupMemberPatterns on GroupMember {
           _that.avatarEmoji,
           _that.avatarImagePath,
           _that.avatarImageHash,
+          _that.profileRevision,
+          _that.profileOriginDeviceId,
+          _that.profileDigest,
+          _that.avatarRevision,
+          _that.avatarOriginDeviceId,
+          _that.avatarContentHash,
+          _that.joinedAt,
+          _that.confirmedAt,
+          _that.removedAt,
+          _that.removalReason,
         );
       case _:
         return null;
@@ -395,6 +555,16 @@ class _GroupMember implements GroupMember {
     required this.avatarEmoji,
     this.avatarImagePath,
     this.avatarImageHash,
+    this.profileRevision = 0,
+    this.profileOriginDeviceId = '',
+    this.profileDigest = '',
+    this.avatarRevision = 0,
+    this.avatarOriginDeviceId = '',
+    this.avatarContentHash = '',
+    this.joinedAt,
+    this.confirmedAt,
+    this.removedAt,
+    this.removalReason,
   });
   factory _GroupMember.fromJson(Map<String, dynamic> json) =>
       _$GroupMemberFromJson(json);
@@ -417,6 +587,32 @@ class _GroupMember implements GroupMember {
   final String? avatarImagePath;
   @override
   final String? avatarImageHash;
+  @override
+  @JsonKey()
+  final int profileRevision;
+  @override
+  @JsonKey()
+  final String profileOriginDeviceId;
+  @override
+  @JsonKey()
+  final String profileDigest;
+  @override
+  @JsonKey()
+  final int avatarRevision;
+  @override
+  @JsonKey()
+  final String avatarOriginDeviceId;
+  @override
+  @JsonKey()
+  final String avatarContentHash;
+  @override
+  final DateTime? joinedAt;
+  @override
+  final DateTime? confirmedAt;
+  @override
+  final DateTime? removedAt;
+  @override
+  final String? removalReason;
 
   /// Create a copy of GroupMember
   /// with the given fields replaced by the non-null parameter values.
@@ -451,12 +647,32 @@ class _GroupMember implements GroupMember {
             (identical(other.avatarImagePath, avatarImagePath) ||
                 other.avatarImagePath == avatarImagePath) &&
             (identical(other.avatarImageHash, avatarImageHash) ||
-                other.avatarImageHash == avatarImageHash));
+                other.avatarImageHash == avatarImageHash) &&
+            (identical(other.profileRevision, profileRevision) ||
+                other.profileRevision == profileRevision) &&
+            (identical(other.profileOriginDeviceId, profileOriginDeviceId) ||
+                other.profileOriginDeviceId == profileOriginDeviceId) &&
+            (identical(other.profileDigest, profileDigest) ||
+                other.profileDigest == profileDigest) &&
+            (identical(other.avatarRevision, avatarRevision) ||
+                other.avatarRevision == avatarRevision) &&
+            (identical(other.avatarOriginDeviceId, avatarOriginDeviceId) ||
+                other.avatarOriginDeviceId == avatarOriginDeviceId) &&
+            (identical(other.avatarContentHash, avatarContentHash) ||
+                other.avatarContentHash == avatarContentHash) &&
+            (identical(other.joinedAt, joinedAt) ||
+                other.joinedAt == joinedAt) &&
+            (identical(other.confirmedAt, confirmedAt) ||
+                other.confirmedAt == confirmedAt) &&
+            (identical(other.removedAt, removedAt) ||
+                other.removedAt == removedAt) &&
+            (identical(other.removalReason, removalReason) ||
+                other.removalReason == removalReason));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     deviceId,
     publicKey,
@@ -467,11 +683,21 @@ class _GroupMember implements GroupMember {
     avatarEmoji,
     avatarImagePath,
     avatarImageHash,
-  );
+    profileRevision,
+    profileOriginDeviceId,
+    profileDigest,
+    avatarRevision,
+    avatarOriginDeviceId,
+    avatarContentHash,
+    joinedAt,
+    confirmedAt,
+    removedAt,
+    removalReason,
+  ]);
 
   @override
   String toString() {
-    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, avatarImageHash: $avatarImageHash)';
+    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, avatarImageHash: $avatarImageHash, profileRevision: $profileRevision, profileOriginDeviceId: $profileOriginDeviceId, profileDigest: $profileDigest, avatarRevision: $avatarRevision, avatarOriginDeviceId: $avatarOriginDeviceId, avatarContentHash: $avatarContentHash, joinedAt: $joinedAt, confirmedAt: $confirmedAt, removedAt: $removedAt, removalReason: $removalReason)';
   }
 }
 
@@ -494,6 +720,16 @@ abstract mixin class _$GroupMemberCopyWith<$Res>
     String avatarEmoji,
     String? avatarImagePath,
     String? avatarImageHash,
+    int profileRevision,
+    String profileOriginDeviceId,
+    String profileDigest,
+    int avatarRevision,
+    String avatarOriginDeviceId,
+    String avatarContentHash,
+    DateTime? joinedAt,
+    DateTime? confirmedAt,
+    DateTime? removedAt,
+    String? removalReason,
   });
 }
 
@@ -518,6 +754,16 @@ class __$GroupMemberCopyWithImpl<$Res> implements _$GroupMemberCopyWith<$Res> {
     Object? avatarEmoji = null,
     Object? avatarImagePath = freezed,
     Object? avatarImageHash = freezed,
+    Object? profileRevision = null,
+    Object? profileOriginDeviceId = null,
+    Object? profileDigest = null,
+    Object? avatarRevision = null,
+    Object? avatarOriginDeviceId = null,
+    Object? avatarContentHash = null,
+    Object? joinedAt = freezed,
+    Object? confirmedAt = freezed,
+    Object? removedAt = freezed,
+    Object? removalReason = freezed,
   }) {
     return _then(
       _GroupMember(
@@ -556,6 +802,46 @@ class __$GroupMemberCopyWithImpl<$Res> implements _$GroupMemberCopyWith<$Res> {
         avatarImageHash: freezed == avatarImageHash
             ? _self.avatarImageHash
             : avatarImageHash // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        profileRevision: null == profileRevision
+            ? _self.profileRevision
+            : profileRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        profileOriginDeviceId: null == profileOriginDeviceId
+            ? _self.profileOriginDeviceId
+            : profileOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        profileDigest: null == profileDigest
+            ? _self.profileDigest
+            : profileDigest // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarRevision: null == avatarRevision
+            ? _self.avatarRevision
+            : avatarRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        avatarOriginDeviceId: null == avatarOriginDeviceId
+            ? _self.avatarOriginDeviceId
+            : avatarOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarContentHash: null == avatarContentHash
+            ? _self.avatarContentHash
+            : avatarContentHash // ignore: cast_nullable_to_non_nullable
+                  as String,
+        joinedAt: freezed == joinedAt
+            ? _self.joinedAt
+            : joinedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        confirmedAt: freezed == confirmedAt
+            ? _self.confirmedAt
+            : confirmedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        removedAt: freezed == removedAt
+            ? _self.removedAt
+            : removedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        removalReason: freezed == removalReason
+            ? _self.removalReason
+            : removalReason // ignore: cast_nullable_to_non_nullable
                   as String?,
       ),
     );

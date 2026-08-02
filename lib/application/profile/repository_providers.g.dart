@@ -117,3 +117,57 @@ final class AppKeyManagerProvider
 }
 
 String _$appKeyManagerHash() => r'7b966b214841d1660d895e3b0836417191a65671';
+
+/// App-owned content-addressed storage for outbound Avatar semantics.
+
+@ProviderFor(appAvatarSemanticStagingStore)
+final appAvatarSemanticStagingStoreProvider =
+    AppAvatarSemanticStagingStoreProvider._();
+
+/// App-owned content-addressed storage for outbound Avatar semantics.
+
+final class AppAvatarSemanticStagingStoreProvider
+    extends
+        $FunctionalProvider<
+          AvatarSemanticStagingStore,
+          AvatarSemanticStagingStore,
+          AvatarSemanticStagingStore
+        >
+    with $Provider<AvatarSemanticStagingStore> {
+  /// App-owned content-addressed storage for outbound Avatar semantics.
+  AppAvatarSemanticStagingStoreProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appAvatarSemanticStagingStoreProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appAvatarSemanticStagingStoreHash();
+
+  @$internal
+  @override
+  $ProviderElement<AvatarSemanticStagingStore> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AvatarSemanticStagingStore create(Ref ref) {
+    return appAvatarSemanticStagingStore(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AvatarSemanticStagingStore value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AvatarSemanticStagingStore>(value),
+    );
+  }
+}
+
+String _$appAvatarSemanticStagingStoreHash() =>
+    r'1133194a35f6f7d7d88f2b253878f3460602d18f';

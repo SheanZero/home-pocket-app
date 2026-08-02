@@ -17,20 +17,36 @@ class ClearCompletedItemsUseCase {
     required ShoppingItemRepository shoppingItemRepository,
     ShoppingItemChangeTracker? changeTracker, // nullable — D37-06
     SyncEngine? syncEngine, // nullable — fire-and-forget
+    Future<String?> Function()? deviceIdResolver,
   }) : _repo = shoppingItemRepository,
        _changeTracker = changeTracker,
-       _syncEngine = syncEngine;
+       _syncEngine = syncEngine,
+       _deviceIdResolver = deviceIdResolver;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;
   final SyncEngine? _syncEngine;
+  final Future<String?> Function()? _deviceIdResolver;
 
   Future<Result<void>> execute(String listType) async {
+    final durable = _repo is DurableFamilySyncShoppingItemRepository
+        ? _repo
+        : null;
+    if (durable != null) {
+      final originDeviceId = await _deviceIdResolver?.call() ?? '';
+      await durable.softDeleteAllCompletedWithFamilySyncOutbox(
+        listType,
+        originDeviceId: originDeviceId,
+      );
+      _syncEngine?.onTransactionChanged();
+      return Result.success(null);
+    }
     if (listType == 'public') {
       // Read IDs before bulk-delete so we can emit per-item tracker ops (D37-06, DONE-03)
       final items = await _repo.watchByListType(listType).first;
-      final completed =
-          items.where((i) => i.isCompleted && !i.isDeleted).toList();
+      final completed = items
+          .where((i) => i.isCompleted && !i.isDeleted)
+          .toList();
 
       // Bulk soft-delete in one DB write — no N+1 (DONE-03)
       await _repo.softDeleteAllCompleted(listType);

@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>家庭管理 · 完整真机与真实 PostgreSQL 验收流程</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f5f7fb, #101319);
+      --surface: light-dark(#ffffff, #181d25);
+      --surface-2: light-dark(#f0f3f8, #202733);
+      --text: light-dark(#19202b, #f2f5f9);
+      --muted: light-dark(#657184, #9ea9b8);
+      --line: light-dark(#dce2ea, #303947);
+      --brand: light-dark(#1769e0, #75aaff);
+      --p0: #d9363e;
+      --p1: #d97706;
+      --p2: #3578d4;
+      --pass: #18864b;
+      --fail: #c72f39;
+      --blocked: #8556c9;
+      --radius: 14px;
+      --shadow: 0 10px 28px rgb(0 0 0 / 8%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.62; }
+    a { color: var(--brand); }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    code { overflow-wrap: anywhere; }
+    pre {
+      margin: 12px 0 0;
+      padding: 14px 16px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: light-dark(#111827, #090c10);
+      color: #e5edf8;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .hero {
+      padding: 54px 24px 38px;
+      color: white;
+      background:
+        radial-gradient(circle at 85% 10%, rgb(117 170 255 / 35%), transparent 28%),
+        linear-gradient(130deg, #122b50, #18243a 58%, #2a1739);
+    }
+    .hero-inner, main, .footer-inner { width: min(1240px, 100%); margin: 0 auto; }
+    .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; opacity: .78; }
+    h1 { margin: 8px 0 12px; max-width: 940px; font-size: clamp(30px, 5vw, 52px); line-height: 1.12; }
+    .subtitle { max-width: 900px; margin: 0; color: #d9e5f7; font-size: 16px; }
+    .hero-meta, .priority-legend, .summary-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .hero-meta { margin-top: 22px; }
+    .chip, .priority {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+    .chip { color: #eaf2ff; border: 1px solid rgb(255 255 255 / 22%); background: rgb(255 255 255 / 8%); }
+    .priority { color: white; }
+    .priority.p0 { background: var(--p0); }
+    .priority.p1 { background: var(--p1); }
+    .priority.p2 { background: var(--p2); }
+
+    .sticky-tools {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(16px);
+    }
+    .toolbar {
+      width: min(1240px, 100%);
+      min-height: 58px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .toolbar strong { margin-right: auto; }
+    button, select, input, textarea {
+      font: inherit;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+    }
+    button { padding: 7px 11px; cursor: pointer; }
+    button:hover { border-color: var(--brand); }
+    select { min-width: 105px; padding: 6px 28px 6px 9px; }
+
+    main { padding: 28px 24px 72px; }
+    section { scroll-margin-top: 78px; margin: 0 0 28px; }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-body { padding: 22px; }
+    .section-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px 18px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .section-title h2 { margin: 0; font-size: 21px; }
+    .section-title p { margin: 0; color: var(--muted); font-size: 13px; }
+    h3 { margin: 20px 0 8px; font-size: 16px; }
+    p { margin: 8px 0; }
+    ul, ol { margin: 8px 0; padding-left: 22px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .callout {
+      margin: 14px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--brand);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+    }
+    .callout.danger { border-left-color: var(--p0); background: color-mix(in srgb, var(--p0) 9%, var(--surface)); }
+    .callout.warning { border-left-color: var(--p1); background: color-mix(in srgb, var(--p1) 9%, var(--surface)); }
+
+    .summary-grid { margin-top: 16px; }
+    .summary-card {
+      min-width: 155px;
+      flex: 1 1 180px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .summary-card span { display: block; color: var(--muted); font-size: 12px; }
+    .summary-card strong { display: block; margin-top: 3px; font-size: 25px; }
+    .progress-track { height: 8px; margin-top: 9px; overflow: hidden; border-radius: 99px; background: var(--surface-2); }
+    .progress-bar { width: 0; height: 100%; background: var(--pass); transition: width .2s ease; }
+
+    .gate-flow { display: grid; grid-template-columns: repeat(6, minmax(130px, 1fr)); gap: 8px; }
+    .gate {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+    }
+    .gate b { display: block; }
+    .gate span { color: var(--muted); font-size: 12px; }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+    th, td { padding: 13px 12px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    /*
+     * Keep table headers in normal document flow. A sticky <th> is displaced
+     * from its table when the report scrolls inside the Codex preview iframe;
+     * the displaced header then overlays the first test case in every section.
+     */
+    th { position: static; color: var(--muted); background: var(--surface-2); font-size: 12px; }
+    tbody tr:hover { background: color-mix(in srgb, var(--brand) 4%, transparent); }
+    tr.case-row.is-hidden { display: none; }
+    td.case-id { width: 88px; font-weight: 800; white-space: nowrap; }
+    td.case-priority { width: 62px; }
+    td.case-action { min-width: 270px; }
+    td.case-expected { min-width: 280px; }
+    td.case-result { width: 205px; }
+    .trace { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; }
+    .result-note { width: 100%; min-height: 44px; margin-top: 7px; padding: 7px 8px; resize: vertical; font-size: 12px; }
+    select[data-status="pass"] { border-color: var(--pass); color: var(--pass); }
+    select[data-status="fail"] { border-color: var(--fail); color: var(--fail); }
+    select[data-status="blocked"] { border-color: var(--blocked); color: var(--blocked); }
+
+    .matrix { min-width: 860px; }
+    .matrix td, .matrix th { text-align: center; }
+    .matrix td:first-child, .matrix th:first-child { text-align: left; }
+    .check { color: var(--pass); font-weight: 800; }
+    .dash { color: var(--muted); }
+    details {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+    summary { padding: 12px 14px; cursor: pointer; font-weight: 750; }
+    details > div { padding: 0 14px 14px; }
+
+    .sign-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .sign-box { padding: 14px; border: 1px solid var(--line); border-radius: 10px; }
+    .sign-box input, .sign-box textarea { width: 100%; margin-top: 8px; padding: 8px 10px; }
+    .sign-box textarea { min-height: 82px; resize: vertical; }
+    footer { padding: 28px 24px 50px; color: var(--muted); border-top: 1px solid var(--line); background: var(--surface); }
+
+    @media (max-width: 900px) {
+      .gate-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sign-grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      :root { color-scheme: light; }
+      .sticky-tools, .no-print { display: none !important; }
+      body { background: white; font-size: 10px; }
+      .hero { padding: 25px; background: #172b4d !important; print-color-adjust: exact; }
+      main { width: 100%; padding: 14px; }
+      section { break-inside: avoid; }
+      .panel { box-shadow: none; }
+      th { position: static; }
+      table { min-width: 0; }
+      td, th { padding: 6px; }
+      .priority { print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Home Pocket · Release UAT</div>
+      <h1>家庭管理完整真机与真实 PostgreSQL 验收流程</h1>
+      <p class="subtitle">覆盖创建、邀请、审批、密钥激活、双向同步、离线恢复、成员移除、Owner transfer、自助离场、Push 生命周期、隐私擦除、客户端升级与 Server 000016 回滚。本文档是执行手册，不代表测试已经执行。</p>
+      <div class="hero-meta">
+        <span class="chip">生成日期 · 2026-08-02</span>
+        <span class="chip">App · Drift schema v36</span>
+        <span class="chip">Server · migration 000016</span>
+        <span class="chip">基线 · P0–P2 code review CLEAN</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="sticky-tools no-print">
+    <div class="toolbar">
+      <strong>执行记录会自动保存在当前浏览器本地</strong>
+      <select id="priorityFilter" aria-label="按重要程度过滤">
+        <option value="all">全部重要程度</option>
+        <option value="p0">仅 P0</option>
+        <option value="p1">仅 P1</option>
+        <option value="p2">仅 P2</option>
+      </select>
+      <select id="statusFilter" aria-label="按状态过滤">
+        <option value="all">全部状态</option>
+        <option value="todo">未执行</option>
+        <option value="pass">通过</option>
+        <option value="fail">失败</option>
+        <option value="blocked">阻塞</option>
+        <option value="na">不适用</option>
+      </select>
+      <button id="exportButton" type="button">导出 JSON</button>
+      <button id="printButton" type="button">打印 / PDF</button>
+      <button id="resetButton" type="button">清空记录</button>
+    </div>
+  </div>
+
+  <main>
+    <section id="rules" class="panel">
+      <div class="section-title">
+        <h2>1 · 验收规则与发布门禁</h2>
+        <p>先统一“什么算通过”，再开始操作</p>
+      </div>
+      <div class="panel-body">
+        <div class="priority-legend">
+          <span class="priority p0">P0 · 发布阻断</span>
+          <span>安全边界、数据不丢、成员资格、密钥和迁移。必须 100% 通过；不可带病发布。</span>
+        </div>
+        <div class="priority-legend">
+          <span class="priority p1">P1 · 高重要</span>
+          <span>主要流程可靠性、恢复性和跨平台体验。原则上全部通过；豁免必须有负责人、期限和降级方案。</span>
+        </div>
+        <div class="priority-legend">
+          <span class="priority p2">P2 · 中重要</span>
+          <span>兼容性、性能、可访问性和体验。失败可评估延期，但必须登记问题并给出影响范围。</span>
+        </div>
+
+        <div class="summary-grid" aria-label="测试进度">
+          <div class="summary-card"><span>总用例</span><strong id="totalCount">0</strong></div>
+          <div class="summary-card"><span>已通过</span><strong id="passCount">0</strong></div>
+          <div class="summary-card"><span>失败 / 阻塞</span><strong id="riskCount">0</strong></div>
+          <div class="summary-card"><span>完成率</span><strong id="completionCount">0%</strong><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div></div>
+        </div>
+
+        <div class="callout danger">
+          <strong>硬门禁：</strong>任一 P0 为“失败 / 阻塞 / 未执行”，结论只能是 <b>NO-GO</b>。真实 PostgreSQL 与真机 Push 不能用 sqlmock、Widget Test、模拟器或 Server 日志“尝试发送”代替。
+        </div>
+
+        <h3>统一通过口径</h3>
+        <ul>
+          <li>结果必须同时满足：设备 UI 正确、两端最终数据一致、Server 权威状态正确、无敏感日志、重启后仍正确。</li>
+          <li>所有并发用例至少重复 10 轮；P0 离线/杀进程用例至少在 iOS、Android 各执行 3 轮。</li>
+          <li>“最终一致”默认等待上限 60 秒；Push 不可靠时允许 WebSocket、轮询或 resume fallback，但不得越过权限或密钥门禁。</li>
+          <li>每条失败都记录：App/Server commit、build number、设备/OS、时间、groupId 的脱敏尾 6 位、操作视频、客户端日志和 Server request/correlation ID。禁止记录邀请完整码、Push token、密钥、明文账单或完整 deviceId。</li>
+        </ul>
+
+        <div class="gate-flow" aria-label="执行顺序">
+          <div class="gate"><b>A · 环境门禁</b><span>真实 PG、TLS、APNs/FCM</span></div>
+          <div class="gate"><b>B · 真机冒烟</b><span>双平台安装与冷启动</span></div>
+          <div class="gate"><b>C · 家庭主链</b><span>创建至 active</span></div>
+          <div class="gate"><b>D · 数据与故障</b><span>同步、离线、重启</span></div>
+          <div class="gate"><b>E · 安全终态</b><span>移除、转让、擦除</span></div>
+          <div class="gate"><b>F · 升级签署</b><span>兼容、回归、GO/NO-GO</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="setup" class="panel">
+      <div class="section-title">
+        <h2>2 · 环境、设备与证据准备</h2>
+        <p>建议 3 台设备；最低 2 台跨平台设备</p>
+      </div>
+      <div class="panel-body">
+        <h3>推荐角色矩阵</h3>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead><tr><th>角色</th><th>设备</th><th>系统</th><th>初始身份</th><th>主要用途</th></tr></thead>
+            <tbody>
+              <tr><td>A · Owner</td><td>真实 iPhone / iPad</td><td>iOS 14 基线或当前最低支持</td><td>全新安装</td><td>创建、审批、移除、转让、APNs</td></tr>
+              <tr><td>B · Member</td><td>真实 Android</td><td>Android 7 基线或当前最低支持</td><td>全新安装</td><td>加入、离线变更、自助离场、FCM</td></tr>
+              <tr><td>C · Member</td><td>较新 iOS/Android</td><td>当前主流版本</td><td>全新安装</td><td>三成员轮换、剩余收件集、并发</td></tr>
+              <tr><td>D · Old identity</td><td>可复用 B</td><td>卸载重装 / 清空数据</td><td>旧身份撤销后新身份</td><td>迟到 Push、旧 epoch、key recovery</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>构建与服务命令</h3>
+        <pre># App 静态基线
+cd /Users/xinz/Development/home-pocket-app
+flutter analyze
+flutter test --concurrency=1 -r compact
+flutter devices
+
+# 真机构建：测试地址必须是可被手机访问且证书可信的 HTTPS 地址
+flutter run -d &lt;IOS_DEVICE_ID&gt; \
+  --dart-define=SYNC_SERVER_URL=https://&lt;UAT_HOST&gt;/api/v1
+flutter run -d &lt;ANDROID_DEVICE_ID&gt; \
+  --dart-define=SYNC_SERVER_URL=https://&lt;UAT_HOST&gt;/api/v1
+
+# Server 基线
+cd /Users/xinz/Development/home-pocket-server
+go test ./... -count=1
+go test -race ./internal/service ./internal/repository ./internal/scheduler \
+  ./internal/middleware ./internal/config ./migrations -count=1
+
+# 真实 PostgreSQL 000016 round-trip；仅使用一次性测试库
+TEST_DATABASE_URL='postgres://&lt;user&gt;:&lt;password&gt;@&lt;host&gt;:&lt;port&gt;/&lt;disposable_db&gt;?sslmode=require' \
+  go test ./migrations \
+  -run '^TestMembershipRotationMigrationRoundTripPostgres$' -count=1 -v</pre>
+
+        <div class="callout warning">
+          <strong>APNs Topic 必查：</strong>当前 App iOS/Android 包标识为 <code>com.sheanzero.happypocket.app</code>。UAT Server 必须显式设置同值的 <code>APNS_BUNDLE_ID</code>；不要依赖 Server 默认值 <code>com.homepocket.app</code>。Xcode Debug 安装对应 <code>APNS_SANDBOX=true</code>，TestFlight 对应 <code>false</code>。
+        </div>
+
+        <h3>真实 PostgreSQL 多连接交错方法</h3>
+        <ol>
+          <li>只在一次性数据库建立 3 成员测试家庭，保存脱敏 group/member 标识与当前 <code>key_epoch</code>。</li>
+          <li>连接 G（barrier）执行 <code>BEGIN; LOCK TABLE groups IN ACCESS EXCLUSIVE MODE;</code>，暂不提交。</li>
+          <li>按用例指定顺序，从两台真机或两个带真实 Ed25519 签名的客户端同时发起操作；确认两个 API 请求均在 PostgreSQL 等待。</li>
+          <li>用独立观察连接查询 <code>pg_stat_activity</code>，记录等待事件与 query start；然后在 G 执行 <code>COMMIT;</code>。</li>
+          <li>核对 HTTP 结果、<code>groups.key_epoch/key_rotation_state/revision</code>、<code>group_members.status/role/removal_reason</code>、目标密钥信封和 control event。交换请求入队顺序重复。</li>
+          <li>每种交错至少 10 轮；允许两种合法串行顺序，不允许部分提交、重复 fan-out、epoch 倒退、收件集错误、悬挂 pending 或死锁。</li>
+        </ol>
+        <div class="callout danger"><strong>禁止：</strong>不要在生产库执行 down migration、表锁、故障注入或明文 SQL 取证；不要把数据库 URL、Push token、p8/FCM 凭据放进截图或导出的 JSON。</div>
+      </div>
+    </section>
+
+    <section id="environment" class="panel test-section">
+      <div class="section-title"><h2>3 · Gate A：环境与真实 PostgreSQL</h2><p>通过后才能开始家庭主链</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead>
+        <tbody>
+          <tr class="case-row" data-id="ENV-01" data-priority="p0"><td class="case-id">ENV-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>冻结待测版本</b><br>记录 App/Server commit、Flutter/Go 版本、build number、数据库版本；确认整个周期不换包。</td><td class="case-expected">所有设备 About/build 信息一致；Server 健康端点和迁移版本可追溯；任何变更都重启受影响 Gate。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="ENV-02" data-priority="p0"><td class="case-id">ENV-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>隔离 UAT</b><br>一次性 PG 数据库、独立 Relay、独立测试家庭、非生产 Push 凭据/应用环境。</td><td class="case-expected">测试数据不会进入生产；有可恢复快照；测试结束可完整销毁；执行账号具备迁移但非超管的最小权限。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="ENV-03" data-priority="p0"><td class="case-id">ENV-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>网络与时钟</b><br>两台真机通过 HTTPS/WSS 访问 UAT；校验证书链、DNS、Server/PG/NTP 时间。</td><td class="case-expected">无明文 HTTP、证书警告或明显时钟偏差；REST 与 WSS 均连通；设备不需安装不可信根证书。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="ENV-04" data-priority="p0"><td class="case-id">ENV-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>真实 APNs/FCM 配置</b><br>核对 iOS entitlement、Android google-services、Server APNs/FCM notifier 非 Noop；显式检查 APNs Topic。</td><td class="case-expected"><code>APNS_BUNDLE_ID=com.sheanzero.happypocket.app</code>；Debug/TestFlight 环境匹配；两端取得并成功注册真实 token。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="ENV-05" data-priority="p1"><td class="case-id">ENV-05</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>取证通道</b><br>准备屏幕录制、设备日志、Server 结构化日志、PG 只读查询窗口与统一时间线。</td><td class="case-expected">能用 request/correlation ID 串联端到端；日志不输出 token、密钥、完整身份、邀请完整码或明文业务数据。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PG-01" data-priority="p0"><td class="case-id">PG-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>000016 up → insert → down</b><br>运行文首真实 PG 测试；确认不是 SKIP。<span class="trace">覆盖：R2-W1</span></td><td class="case-expected">up 成功；<code>member_rotation_key</code> 可插入；down 后 active=0、archive 全字段等值=1、rotation 表/列移除、旧 CHECK 恢复并拒绝新类型。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PG-02" data-priority="p0"><td class="case-id">PG-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>回滚归档冲突 fail closed</b><br>在副本中预置同 message_id 但字段不同的 archive，再执行 down。</td><td class="case-expected">down 整体回滚并报 archive verification failed；原 active envelope、约束和 000016 schema 都不被部分删除。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PG-03" data-priority="p0"><td class="case-id">PG-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>移除 vs push/pull/ack</b><br>用表锁 barrier 交错 Owner 移除 B 与 B push、pull、ACK；交换入队顺序各 10 轮。<span class="trace">覆盖：F05、R1-C1、R1-C2</span></td><td class="case-expected">结果可串行化：移除提交后 B 全部被拒绝；无新 epoch envelope 给 B；旧 epoch queue 被清理；剩余成员不丢语义变更；无部分提交/死锁。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PG-04" data-priority="p0"><td class="case-id">PG-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Owner transfer vs 普通 push</b><br>交错 A→B 转让与 A/C 同步，交换顺序各 10 轮。<span class="trace">覆盖：F19、R1-C2、R2-C1</span></td><td class="case-expected">角色互换、epoch+1、精确 active recipient envelopes 与 control event 同事务；旧 epoch push 只可能先提交或被拒绝，不可夹在半完成状态。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PG-05" data-priority="p0"><td class="case-id">PG-05</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>并发 rotation / 重放</b><br>同 requestId 同 payload 并发两次；再用同 requestId 不同 payload；再并发两个不同 rotation。<span class="trace">覆盖：F13、F19</span></td><td class="case-expected">同 payload 幂等返回同结果；不同 payload 明确冲突；不同 rotation 仅一个基于当前 epoch 成功，另一个 stale/conflict；epoch 只增 1。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PG-06" data-priority="p1"><td class="case-id">PG-06</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>锁等待与连接恢复</b><br>持锁 15–30 秒，制造 API timeout；释放后重试并观察连接池。</td><td class="case-expected">客户端显示可重试错误；Server 不泄漏连接/事务；重试最终收敛；无永久 spinner、重复控制事件或残留 idle in transaction。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="device" class="panel test-section">
+      <div class="section-title"><h2>4 · Gate B：真机安装与基础冒烟</h2><p>模拟器结果不能替代本节</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="DEV-01" data-priority="p0"><td class="case-id">DEV-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>iOS 全新安装/冷启动</b><br>卸载旧包、重启设备、安装待测包；完成 onboarding，前后台切换并强杀重开。</td><td class="case-expected">SQLCipher 初始化成功；不闪现家庭页/敏感内容；device identity 稳定；重开不重复 seed、不崩溃。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="DEV-02" data-priority="p0"><td class="case-id">DEV-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Android 全新安装/冷启动</b><br>清应用数据并卸载，重启设备、安装；完成同样生命周期。</td><td class="case-expected">与 iOS 一致；Android 7 基线无 API/SQLCipher/Firebase 崩溃；后台恢复后同步服务可用。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="DEV-03" data-priority="p1"><td class="case-id">DEV-03</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>通知权限三态</b><br>分别允许、拒绝、系统设置中撤销后恢复；每次重启 App。</td><td class="case-expected">拒绝不阻止建组/同步；允许后 token 正常注册；撤销无错误循环；恢复后无需重建家庭即可接收。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="DEV-04" data-priority="p1"><td class="case-id">DEV-04</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>网络基础矩阵</b><br>Wi‑Fi、蜂窝、飞行模式、弱网/高延迟、VPN（若支持）切换。</td><td class="case-expected">无崩溃；离线操作可保存；恢复后 60 秒内收敛；WSS 断线可重连且不创建重复监听。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="DEV-05" data-priority="p2"><td class="case-id">DEV-05</td><td class="case-priority"><span class="priority p2">P2</span></td><td class="case-action"><b>三语言/显示</b><br>切换 ja/zh/en、深浅色、系统字体 200%、竖屏/横屏。</td><td class="case-expected">家庭状态、确认弹窗、错误和恢复文案无截断/硬编码；危险动作语义清楚；数据不因 locale 改变。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="lifecycle" class="panel test-section">
+      <div class="section-title"><h2>5 · Gate C：家庭创建、邀请与成员激活</h2><p>严格验证 pending → confirming → awaiting key → active</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="FM-01" data-priority="p0"><td class="case-id">FM-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>A 创建家庭</b><br>输入家庭名并确认；随后强杀重开。<span class="trace">覆盖：F10</span></td><td class="case-expected">Server 与本地仅一个 active group；A 为 active owner；group key/epoch/revision 保存；重启仍为同一家庭。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-02" data-priority="p1"><td class="case-id">FM-02</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>创建超时/响应丢失</b><br>提交后立刻断网或强杀；恢复网络重试。</td><td class="case-expected">App 从 Server 恢复获胜 group，不创建孤儿/第二家庭；重复请求幂等；UI 不永久 loading。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-03" data-priority="p1"><td class="case-id">FM-03</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>邀请复制/分享/刷新</b><br>A 复制、系统分享；刷新 invite 后分别用新旧码加入。<span class="trace">覆盖：F09</span></td><td class="case-expected">分享内容含正确家庭名/邀请码；新码可用；旧码被拒；非 Owner 不出现或不能调用刷新。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-04" data-priority="p0"><td class="case-id">FM-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>B 加入并确认申请</b><br>输入邀请码、核对 preview、确认；在未审批时尝试返回/重启/打开家庭管理。<span class="trace">覆盖：F01</span></td><td class="case-expected">B 只能处于 pending/confirming 等待页；无 active group 能力、无 group key、无家庭密文 pull、不能进入管理页。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-05" data-priority="p0"><td class="case-id">FM-05</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>A 实时收到申请</b><br>A 分别在前台、后台、审批页开启时接收 B 申请。<span class="trace">覆盖：F02、F04</span></td><td class="case-expected">Push/WS 任一路可刷新 pending 列表；同一申请不重复；A 可看到正确申请者；非本家庭/未认证 WS 不能注入。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-06" data-priority="p1"><td class="case-id">FM-06</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>B 取消并重新申请</b><br>等待页取消；确认两端终态后再次用有效码加入。<span class="trace">覆盖：F08</span></td><td class="case-expected">双方显示 cancelled；pending 清理；B 可 reapply；旧 lifecycle Push 不复活旧申请。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-07" data-priority="p1"><td class="case-id">FM-07</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>A 拒绝并允许重申</b><br>A 拒绝 B；B 前台/后台各验证一次，再重新申请。</td><td class="case-expected">B 进入 rejected 终态且可换码/重试；A pending 消失；同一 request 不可随后 approve。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-08" data-priority="p1"><td class="case-id">FM-08</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>申请过期</b><br>在 UAT 缩短 TTL 或等待 scheduler；覆盖 App 前台、后台和被杀。</td><td class="case-expected">双方最终为 expired；轮询/Push 均可恢复终态；B 可重新申请；过期记录不会占用 single-live-group。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-09" data-priority="p0"><td class="case-id">FM-09</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>A 审批 B 完整 bootstrap</b><br>A 批准；观察 B 的 snapshot → targeted key pull → membership revalidate → initial reconcile。<span class="trace">覆盖：F07</span></td><td class="case-expected">B 只有安装当前 epoch key 后才 active/进管理页；初始账单/分类/清单/资料收敛；Server 永不持有明文 key。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-10" data-priority="p0"><td class="case-id">FM-10</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>激活中杀进程</b><br>分别在批准刚发生、awaiting key、initial sync 中强杀 B，再冷启动。</td><td class="case-expected">从 durable state 恢复；不会无 key 激活；不会重复家庭/成员；成功后数据完整且 sync 状态稳定。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-11" data-priority="p0"><td class="case-id">FM-11</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>单设备单 live 家庭</b><br>B active 后尝试创建/加入第二家庭；并发提交两次 create/join。<span class="trace">覆盖：F18</span></td><td class="case-expected">UI 前置阻止；绕过 UI 时 Server/DB 唯一约束拒绝并映射明确冲突；本地仍指向唯一权威家庭。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-12" data-priority="p1"><td class="case-id">FM-12</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>家庭改名传播</b><br>A 改名；B 分别前台、离线、被杀后恢复。<span class="trace">覆盖：F11、F22</span></td><td class="case-expected">B 最终显示同名；revision/eventId/occurredAt 单调一致；旧 control Push 不覆盖新 snapshot。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="FM-13" data-priority="p1"><td class="case-id">FM-13</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>控制面断档恢复</b><br>B 离线期间连续改名、加人/移人；清除 Push 后冷启动 B。<span class="trace">覆盖：R1-W1、F22</span></td><td class="case-expected">启动顺序 events → authoritative snapshot → recovery → outbox → pull → WS；digest/revision 收敛，无旧状态闪回。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="sync" class="panel test-section">
+      <div class="section-title"><h2>6 · Gate D：数据面同步、冲突与故障恢复</h2><p>默认 A/B active；需要轮换的用例加入 C</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="SYNC-01" data-priority="p0"><td class="case-id">SYNC-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>账单创建双向同步</b><br>A、B 各创建带金额/备注/分类的 public 账单，等待同步并重启两端。</td><td class="case-expected">双方各仅一条、字段一致、可解密；Relay 只见密文；重启后仍存在。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-02" data-priority="p0"><td class="case-id">SYNC-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>并发 update 决胜</b><br>A/B 离线编辑同一账单不同字段/相同字段，再同时上线；重复相反时间顺序。<span class="trace">覆盖：F06</span></td><td class="case-expected">revision/writer/content 规则确定性收敛；两端最终完全一致；无重复、丢失非冲突字段或来回振荡。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-03" data-priority="p0"><td class="case-id">SYNC-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>update vs delete / tombstone</b><br>A 离线删除，B 离线更新同一账单；交换先上线顺序。</td><td class="case-expected">按版本规则唯一收敛；已决胜 tombstone 不被旧 live update 复活；FullSync 后仍一致。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-04" data-priority="p0"><td class="case-id">SYNC-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Private 三层门禁</b><br>A 创建 private 账单，再从 private→public→private，穿插离线与 FullSync。<span class="trace">覆盖：F23</span></td><td class="case-expected">private 从 producer/full-sync/receiver 均不外发；曾公开后转私有能向家庭撤回；B 不残留可见副本；Relay 无伪 public payload。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-05" data-priority="p0"><td class="case-id">SYNC-05</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>响应丢失与稳定 syncId</b><br>让 Server 提交成功但客户端收不到响应；恢复后重试同 mutation。<span class="trace">覆盖：F13</span></td><td class="case-expected">同 syncId 幂等；每个 recipient 仅一份；不同 payload 复用 syncId 被拒；本地只在 Relay success 后 settle。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-06" data-priority="p0"><td class="case-id">SYNC-06</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>离线 outbox + 杀进程</b><br>A 飞行模式连续增删改 10 笔，强杀；联网冷启动。</td><td class="case-expected">所有语义 mutation 持久化并按当前 epoch 重放；无永久 pending、无丢单/重复；B 60 秒内收敛。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-07" data-priority="p1"><td class="case-id">SYNC-07</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>Dead letter UI</b><br>通过 UAT fault proxy 连续返回可重试/永久错误，直到进入 attention；分别 Retry 与 Discard。<span class="trace">覆盖：F15</span></td><td class="case-expected">失败不静默删除；显示可理解的 attention 卡；Retry 可恢复；Discard 有确认且只删指定项；重启状态不丢。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-08" data-priority="p0"><td class="case-id">SYNC-08</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>坏入站消息/quarantine</b><br>用测试客户端注入合法签名但解密失败、schema 非法、超限和暂时失败消息。<span class="trace">覆盖：F16</span></td><td class="case-expected">永久坏消息隔离并可人工处理；暂时错误不 ACK；redelivery 幂等；好消息继续处理；资源上限生效且 App 不 OOM。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-09" data-priority="p1"><td class="case-id">SYNC-09</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>分页与 FullSync</b><br>A 准备 121+ 条变更，B 清空本地后重新拉取；中途断网再恢复。<span class="trace">覆盖：F14</span></td><td class="case-expected"><code>hasMore</code> 拉到尽；无空页/no-progress 死循环；group-scoped lastSyncAt 仅成功后推进；总数/内容一致。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-10" data-priority="p1"><td class="case-id">SYNC-10</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>自定义分类语义</b><br>A 创建/改名/删除共享分类并记账；B 调整个人排序/归档；双向同步。<span class="trace">覆盖：F20</span></td><td class="case-expected">共享 snapshot/tombstone 收敛；B 的个人 archive/order/config 不被 A 覆盖；账单分类引用不悬空。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-11" data-priority="p1"><td class="case-id">SYNC-11</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>购物清单</b><br>双端并发新增、编辑、完成、删除与清除已完成；离线重放。</td><td class="case-expected">双方最终项目集合与状态一致；删除不复活；清除已完成不误删未完成。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-12" data-priority="p1"><td class="case-id">SYNC-12</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>Profile + Avatar</b><br>A/B 连续修改昵称、emoji、头像；同图重复选择，改图后杀进程。<span class="trace">覆盖：F12、R4-P1-01</span></td><td class="case-expected">版本高者收敛；同 hash 复用不误删当前 blob；重启后 semantic outbox 可继续；无 staging 泄漏。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-13" data-priority="p1"><td class="case-id">SYNC-13</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>单个坏 Avatar 隔离</b><br>制造一个缺失/损坏 staging blob，同时队列中存在正常头像和账单。<span class="trace">覆盖：R3-P1-01、R4-P2-01</span></td><td class="case-expected">坏 entry 被隔离/补偿，不阻断 drain、Initial/Full Sync；正常项继续；GC 不删仍被 Profile/outbox 引用的 blob。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-14" data-priority="p1"><td class="case-id">SYNC-14</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>账单照片 local-only</b><br>A 创建带照片账单并同步到 B；A 删除/替换照片。<span class="trace">覆盖：F21</span></td><td class="case-expected">B 收到账单但不出现伪可恢复照片/hash；UI 清楚表达照片不可用；Relay 不承诺或存储明文照片。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="SYNC-15" data-priority="p1"><td class="case-id">SYNC-15</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>后台/恢复触发</b><br>记账后立即后台、强杀、隔 20 分钟恢复；另做 24 小时 Full Pull 条件。</td><td class="case-expected">未完成 debounce 不丢；resume 触发 push+pull；轮询/Full Pull 不并发重入；状态 badge 最终 synced。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="membership" class="panel test-section">
+      <div class="section-title"><h2>7 · Gate E1：成员资格、密钥轮换与终态</h2><p>三设备场景是验证精确收件集的核心</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="MEM-01" data-priority="p0"><td class="case-id">MEM-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>普通成员权限边界</b><br>B 尝试审批、刷新邀请、改名、移除、转让、解散；必要时绕过 UI 调 API。</td><td class="case-expected">UI 不暴露 Owner 动作；Server 全部拒绝；group/revision/epoch 不变化；无越权 Push。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-02" data-priority="p0"><td class="case-id">MEM-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>A 移除 B</b><br>A/B/C active；B 离线制造 mutation；A 移除 B，覆盖操作中强杀 A 后恢复。<span class="trace">覆盖：F05、F19、R1-C1、R2-C1</span></td><td class="case-expected">rotation intent 先持久化；Server 在同事务移除 B、epoch+1、写 A/C envelope+event；A 恢复可续作；B 不在 recipient set。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-03" data-priority="p0"><td class="case-id">MEM-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>被移除设备封锁</b><br>B 在线/后台/被杀三态接收 member_left；随后尝试 check、WS、events、push/pull/ack/key request。</td><td class="case-expected">本地清家庭并停 transport；Server active membership gate 全拒绝；无新 epoch key/密文；旧 Push 不导航回家庭。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-04" data-priority="p0"><td class="case-id">MEM-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>剩余成员新 epoch 收敛</b><br>C 离线经历 B 被移除，随后上线；A/C 各创建新数据。</td><td class="case-expected">C 安装精确 envelope 和新 epoch；旧 ciphertext queue 清理后从 semantic outbox 重加密；A/C 新数据双向可见，B 不可见。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-05" data-priority="p0"><td class="case-id">MEM-05</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>A → B 转让 Owner</b><br>三成员 active，执行双确认转让；网络中断后重试同 request。<span class="trace">覆盖：F19</span></td><td class="case-expected">B 成唯一 owner，A/C member；epoch+1；所有 active recipient 有且仅有一个新 envelope；幂等重试不二次增 epoch。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-06" data-priority="p0"><td class="case-id">MEM-06</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>转让后权限即时更新</b><br>A/B 前台、后台、冷启动分别检查 UI 与 API。</td><td class="case-expected">B 获得 Owner 控制；A 立即失去；旧 role Push/revision 不反转；Server 以权威 role 拒绝旧 Owner 越权。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-07" data-priority="p0"><td class="case-id">MEM-07</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>成员自助离场</b><br>C 离线存变更后 leave；强杀 C；Owner B 暂时离线。<span class="trace">覆盖：F19</span></td><td class="case-expected">C 进入 removed/left；group 为 rotation pending 且 epoch 未提前推进；requestId/target 持久；C 本地安全离场。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-08" data-priority="p0"><td class="case-id">MEM-08</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>rotation pending fail closed</b><br>在 B 完成轮换前，A/B 尝试普通 push，C 尝试 pull/key。</td><td class="case-expected">普通 push 明确失败/排队，不以旧 key 继续；C 无访问；控制面仍可恢复；UI 可提示同步待恢复而非假 synced。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-09" data-priority="p0"><td class="case-id">MEM-09</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Owner 完成 pending rotation</b><br>B 上线完成；在提交/响应边界断网并重启。</td><td class="case-expected">B/A 收到新 epoch；state 回 ready；语义 outbox 重放；重复 completion 幂等；无 C envelope；同步恢复。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-10" data-priority="p0"><td class="case-id">MEM-10</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>解散家庭</b><br>当前 Owner 解散；其他成员分别在线、后台、被杀。</td><td class="case-expected">所有设备最终清 active group、key 和 transport；旧 group check 无效；可创建/加入新家庭；旧数据不误并入新 group namespace。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-11" data-priority="p0"><td class="case-id">MEM-11</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Group key recovery</b><br>让 active B 丢失当前 group key（测试构建/fault injection），由 active A 响应 key request；覆盖 kill/retry。<span class="trace">覆盖：F17</span></td><td class="case-expected">Relay 只转发目标密封 key；epoch 匹配；B 恢复后 revalidate membership 再 active；removed/pending responder 被拒。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="MEM-12" data-priority="p1"><td class="case-id">MEM-12</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>Key recovery 不可用</b><br>所有能提供当前 key 的设备离线直至 request 过期。</td><td class="case-expected">明确说明 zero-knowledge 无法由 Server 恢复；可重试或安全离开/解散；不自动生成错误 key、不越过 awaiting-key。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="push" class="panel test-section">
+      <div class="section-title"><h2>8 · Gate E2：APNs / FCM 与 App 生命周期</h2><p>每个 P0 事件至少做 iOS↔Android 双向一次</p></div>
+      <div class="panel-body">
+        <div class="table-wrap"><table class="matrix">
+          <thead><tr><th>事件</th><th>前台</th><th>后台</th><th>强杀后 initial</th><th>点击 opened</th><th>通知拒绝 fallback</th><th>级别</th></tr></thead>
+          <tbody>
+            <tr><td>join_request</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td><span class="priority p0">P0</span></td></tr>
+            <tr><td>member_confirmed</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="dash">静默</td><td class="check">必测</td><td><span class="priority p0">P0</span></td></tr>
+            <tr><td>join_request_resolved</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="dash">按 payload</td><td class="check">必测</td><td><span class="priority p1">P1</span></td></tr>
+            <tr><td>sync_available</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="dash">静默</td><td class="check">必测</td><td><span class="priority p0">P0</span></td></tr>
+            <tr><td>group_name_updated</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="dash">静默</td><td class="check">必测</td><td><span class="priority p1">P1</span></td></tr>
+            <tr><td>member_left / group_dissolved</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="check">若可见</td><td class="check">必测</td><td><span class="priority p0">P0</span></td></tr>
+            <tr><td>group_key_requested</td><td class="check">必测</td><td class="check">必测</td><td class="check">必测</td><td class="dash">不导航</td><td class="check">resume</td><td><span class="priority p0">P0</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="PUSH-01" data-priority="p0"><td class="case-id">PUSH-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>真实 token 注册</b><br>安装后取得 token；FCM/APNs 刷新 token；查询脱敏 Server 记录。</td><td class="case-expected">platform/token 归属正确；刷新覆盖旧 token；Server notifier 实际成功，不以“异步已尝试”当送达。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-02" data-priority="p0"><td class="case-id">PUSH-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>前台投递</b><br>按上方事件矩阵触发；同时保持 WS 在线。</td><td class="case-expected">同一事件只执行一次语义动作；无重复导航/重复 pull；current group/member/role/revision policy 生效。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-03" data-priority="p0"><td class="case-id">PUSH-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>后台投递</b><br>App 退后台 2 分钟后触发 silent/visible Push；iOS 开启低电量模式另测一轮。</td><td class="case-expected">OS 允许时处理；若静默 Push 被节流，resume/poll 仍收敛；不在后台越权导航；本地通知内容不泄密。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-04" data-priority="p0"><td class="case-id">PUSH-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>强杀后的 initial message</b><br>从系统任务列表杀掉 App，触发 Push，再从通知/图标分别冷启动。<span class="trace">覆盖：F02</span></td><td class="case-expected">初始化完成且身份/家庭策略通过后才处理；不丢合法动作；不闪现旧家庭；重复 initial 不重复导航。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-05" data-priority="p0"><td class="case-id">PUSH-05</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>通知点击 opened-app</b><br>App 在后台点击 join request / member-left 等可见通知；快速连点。</td><td class="case-expected">只导航到当前合法目标一次；角色不足、group 不匹配、成员已移除时拒绝；返回栈合理。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-06" data-priority="p0"><td class="case-id">PUSH-06</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>通知拒绝/丢失 fallback</b><br>系统拒绝通知并阻断 Push，完成申请审批、改名、同步、移除。</td><td class="case-expected">WS、adaptive poll、resume/reconcile 仍最终完成；通知权限不是成员状态机的正确性依赖。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-07" data-priority="p0"><td class="case-id">PUSH-07</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>过期身份/错误家庭 Push</b><br>保存旧家庭通知；移除/解散/转让/加入新家庭后再点击或重放。</td><td class="case-expected">targetDeviceId、identityGeneration、groupId、local member/role、controlRevision 任一不符即 fail closed；无导航/同步副作用。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-08" data-priority="p0"><td class="case-id">PUSH-08</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Push callback vs 擦除竞态</b><br>Push handler 已开始读取 context 时执行删除全部本地数据；覆盖 foreground/opened/initial/local tap。<span class="trace">覆盖：R5-P2-01</span></td><td class="case-expected">wipe 首个 await 前撤销 generation；旧 callback 前后双检失败；无旧通知、pending navigation、DB 写入或家庭恢复。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-09" data-priority="p1"><td class="case-id">PUSH-09</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>Push burst / 去重</b><br>10 秒内触发 20 个 sync_available/control invalidation，前后台各一轮。</td><td class="case-expected">SyncEngine 跟踪并合并重复工作；无并发 reentry、通知风暴、重复 ACK；最终状态正确。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-10" data-priority="p1"><td class="case-id">PUSH-10</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>token 轮换/重装</b><br>清应用数据或重装形成新 identity/token；旧 token 再收到通知。</td><td class="case-expected">新 token/identity 正确绑定；旧 callback generation 无效；旧身份不可触发新 App 的家庭行为。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PUSH-11" data-priority="p1"><td class="case-id">PUSH-11</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>投递中切网</b><br>Push 到达/点击时 Wi‑Fi↔蜂窝↔飞行模式切换，并前后台切换。</td><td class="case-expected">pending intent 可在恢复后合法执行一次；过期 intent 被丢弃；WSS 重连不影响 Push policy。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="privacy" class="panel test-section">
+      <div class="section-title"><h2>9 · Gate E3：隐私擦除、文件保护与日志</h2><p>破坏性用例放在业务主链之后</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="PRIV-01" data-priority="p0"><td class="case-id">PRIV-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>离线删除全部本地数据</b><br>设备 B 飞行模式，执行删除并确认；不要让 Owner 解散家庭。<span class="trace">覆盖：R4-P1-02</span></td><td class="case-expected">DB user tables、outbox/inbound/control/queue、家庭/资料/清单、app-owned files、secure user data、prefs、memory、WS/Push 全清；安装 master key 仅按恢复协议保留至完成。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-02" data-priority="p0"><td class="case-id">PRIV-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>逐阶段杀进程</b><br>用 fault-injection build 在 database/files/secure/settings/memory 完成前后分别杀进程。<span class="trace">覆盖：R5-P1-01</span></td><td class="case-expected">journal 保留上一个安全 pending boundary；新进程幂等重放；任何中断都不进入普通 App 或半擦除家庭。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-03" data-priority="p0"><td class="case-id">PRIV-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>冷启动 resume wipe</b><br>留下 pending journal 后重启；另测试 journal 损坏、超 4 KiB、symlink/异常类型。</td><td class="case-expected">正常 journal 完成后才生成新身份/进入 App；腐坏或异常路径 fail closed，保留证据并显示可重试初始化失败。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-04" data-priority="p1"><td class="case-id">PRIV-04</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>本地擦除不等于家庭解散</b><br>B 擦除后检查 A/C 和 Server；B 重新安装以新身份尝试访问旧家庭。</td><td class="case-expected">A/C 家庭和数据不受影响；Server 旧成员记录仍按权威生命周期处理，但 B 新身份无权自动继承或解密。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-05" data-priority="p0"><td class="case-id">PRIV-05</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>擦除后旧 Push/通知</b><br>在系统通知中心保留旧通知，擦除后点击；同时让迟到 callback 返回。</td><td class="case-expected">全部被 generation/policy 拒绝；identity-bound 本地通知被取消；无旧家庭导航、重注册或 DB 写入。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-06" data-priority="p0"><td class="case-id">PRIV-06</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>新身份干净启动</b><br>擦除成功后完成 onboarding，创建新家庭；查询脱敏 device identity。</td><td class="case-expected">新 identity/keypair 与旧值不同；无旧 group/outbox/pending nav；新家庭同步正常；旧 Server 消息不可应用到新 namespace。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-07" data-priority="p0"><td class="case-id">PRIV-07</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>SQLCipher 与文件保护</b><br>真机锁屏、重启未首次解锁、后台快照；通过受控调试确认 DB 非明文 SQLite，检查 iOS data protection/Android 私有目录。</td><td class="case-expected">无 key 不能打开 DB；锁屏/任务切换不泄露敏感画面；头像/staging/backup 不在公共目录；无系统 libsqlite3 回退。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="PRIV-08" data-priority="p0"><td class="case-id">PRIV-08</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>生产日志隐私</b><br>贯穿创建、同步、轮换、失败、擦除，收集 App/Server/系统日志并扫描。</td><td class="case-expected">无金额、备注、商家、token、邀请码、完整 ID、key/recovery material、payload/ciphertext；错误仅泛化上下文。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="upgrade" class="panel test-section">
+      <div class="section-title"><h2>10 · Gate F：升级、回滚与非功能验收</h2><p>验证“老用户升级”而非只测全新安装</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>ID</th><th>级别</th><th>场景 / 操作</th><th>通过标准</th><th>执行结果 / 证据</th></tr></thead><tbody>
+          <tr class="case-row" data-id="UP-01" data-priority="p0"><td class="case-id">UP-01</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>老 App 数据库跨版本升级</b><br>在真机准备 v8、v22、v23、v25 数据样本，覆盖安装当前 v36 包。<span class="trace">覆盖：R2-C2</span></td><td class="case-expected">每个样本一次启动成功；v26 相关列先于索引；账单/家庭/密钥/队列保留；无重复迁移或数据重置。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="UP-02" data-priority="p0"><td class="case-id">UP-02</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>v35 → v36 有 pending outbox</b><br>旧包离线制造账单/Avatar/控制变更，直接覆盖升级并联网。</td><td class="case-expected">semantic outbox v36 迁移正确；未发送变更不丢；当前 epoch 重放；同步完成后队列干净。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="UP-03" data-priority="p0"><td class="case-id">UP-03</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>Server 顺序升级 000009→000016</b><br>从脱敏 v8 schema/data 副本按生产方式启动 Relay 自动迁移。</td><td class="case-expected">全部迁移一次通过；000013 前无 single-live-group 冲突数据；服务启动后旧家庭可 check/sync；版本准确为 16。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="UP-04" data-priority="p0"><td class="case-id">UP-04</td><td class="case-priority"><span class="priority p0">P0</span></td><td class="case-action"><b>000016 回滚运行态</b><br>先产生真实 member_rotation_key，再停新 Server、执行 down、启动 v15 兼容 Server；只在一次性环境。</td><td class="case-expected">新 envelope 仅在 recovery archive；v15 active queue 不含未知类型；旧 CHECK 有效；Server 可启动；明确记录回滚会冻结/丢失哪些新版本业务能力。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="NF-01" data-priority="p1"><td class="case-id">NF-01</td><td class="case-priority"><span class="priority p1">P1</span></td><td class="case-action"><b>容量与性能</b><br>5,000 账单、500 清单项、100 分类、10 个 200KB 头像；执行 Initial/Full Sync。</td><td class="case-expected">无 OOM/ANR/watchdog；UI 可操作；同步有进度并最终完成；Server payload/rate limit 行为可解释。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="NF-02" data-priority="p2"><td class="case-id">NF-02</td><td class="case-priority"><span class="priority p2">P2</span></td><td class="case-action"><b>电量与后台资源</b><br>家庭 active 后待机 2 小时，记录电量、网络请求、WSS 重连和后台唤醒。</td><td class="case-expected">无快速轮询/重连风暴；15 分钟 fallback 与 OS 限制相容；电量/流量在团队阈值内。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="NF-03" data-priority="p2"><td class="case-id">NF-03</td><td class="case-priority"><span class="priority p2">P2</span></td><td class="case-action"><b>可访问性</b><br>VoiceOver/TalkBack 走完建组、审批、转让、移除、错误恢复。</td><td class="case-expected">按钮有语义标签；焦点顺序合理；危险确认可读；颜色不是唯一状态表达；动态字体仍可完成操作。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="NF-04" data-priority="p2"><td class="case-id">NF-04</td><td class="case-priority"><span class="priority p2">P2</span></td><td class="case-action"><b>日期/时区/系统时钟</b><br>JST/UTC/中国时区切换，跨午夜触发邀请 expiry、control occurredAt、账单同步。</td><td class="case-expected">Server 权威时间不受设备篡改；显示按 locale；过期/排序/revision 不倒退；无重复当天数据。</td><td class="case-result"></td></tr>
+          <tr class="case-row" data-id="NF-05" data-priority="p2"><td class="case-id">NF-05</td><td class="case-priority"><span class="priority p2">P2</span></td><td class="case-action"><b>分享与系统集成</b><br>从邀请 sheet 调系统分享/复制，切换目标 App、取消分享、返回。</td><td class="case-expected">取消不改变 invite；恢复 UI 稳定；剪贴板/分享只含所需邀请文本，不附带 deviceId/key/token。</td><td class="case-result"></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="traceability" class="panel">
+      <div class="section-title"><h2>11 · 历史缺口覆盖映射</h2><p>用于确认本轮真机验收没有漏掉修复点</p></div>
+      <div class="table-wrap"><table class="matrix">
+        <thead><tr><th>历史项</th><th>主要真机/PG 用例</th><th>历史项</th><th>主要真机/PG 用例</th></tr></thead>
+        <tbody>
+          <tr><td>F01 pending 提前激活</td><td>FM-04 / FM-09 / FM-10</td><td>F13 syncId 去重</td><td>SYNC-05 / PG-05</td></tr>
+          <tr><td>F02 Push 初始化</td><td>ENV-04 / PUSH-01～06</td><td>F14 分页/lastSyncAt</td><td>SYNC-09</td></tr>
+          <tr><td>F03 group validity</td><td>MEM-03 / MEM-10 / FM-13</td><td>F15 dead letter</td><td>SYNC-07</td></tr>
+          <tr><td>F04 WS 成员资格</td><td>FM-05 / MEM-03</td><td>F16 坏消息 ACK</td><td>SYNC-08</td></tr>
+          <tr><td>F05 移除后密钥</td><td>PG-03 / MEM-02～04</td><td>F17 key recovery</td><td>MEM-11 / MEM-12</td></tr>
+          <tr><td>F06 update/delete 收敛</td><td>SYNC-02 / SYNC-03</td><td>F18 单 live 家庭</td><td>FM-11</td></tr>
+          <tr><td>F07 confirmed bootstrap</td><td>FM-09 / FM-10</td><td>F19 transfer/rotation/leave</td><td>PG-04～05 / MEM-02～09</td></tr>
+          <tr><td>F08 申请生命周期</td><td>FM-06～08</td><td>F20 分类同步</td><td>SYNC-10</td></tr>
+          <tr><td>F09 邀请管理</td><td>FM-03</td><td>F21 照片 local-only</td><td>SYNC-14</td></tr>
+          <tr><td>F10 创建孤儿家庭</td><td>FM-01 / FM-02</td><td>F22 control revision</td><td>FM-12 / FM-13</td></tr>
+          <tr><td>F11 家庭改名</td><td>FM-12 / PUSH-02～04</td><td>F23 private gate</td><td>SYNC-04</td></tr>
+          <tr><td>F12 Profile/Avatar</td><td>SYNC-12 / SYNC-13</td><td>R1～R5 复审项</td><td>PG-01～05 / PRIV-01～08 / UP-01</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="signoff" class="panel">
+      <div class="section-title"><h2>12 · 发布签署</h2><p>最后执行，不得预先填写</p></div>
+      <div class="panel-body">
+        <h3>GO 条件</h3>
+        <ul>
+          <li>所有 P0 均为通过，且真实 PostgreSQL PG-01～05、iOS APNs、Android FCM、强杀 initial/opened 都有原始证据。</li>
+          <li>P1 无未解释失败；若有豁免，包含用户影响、临时降级、负责人、截止日期和回归用例。</li>
+          <li>App/Server 自动测试仍为绿色；测试结束重新执行 <code>flutter analyze</code>、全量 <code>flutter test</code>、<code>go test ./...</code> 与关键 race。</li>
+          <li>一次性数据库和测试身份安全销毁；归档报告不得包含凭据、完整 token/ID、密钥或明文财务数据。</li>
+        </ul>
+        <div class="callout danger"><strong>自动结论：</strong><span id="autoVerdict">NO-GO — 尚有 P0 未执行。</span></div>
+
+        <div class="sign-grid">
+          <div class="sign-box"><b>待测版本</b><input data-meta="build" placeholder="App commit/build · Server commit · DB migration"></div>
+          <div class="sign-box"><b>执行环境</b><input data-meta="environment" placeholder="UAT host · PostgreSQL version · APNs/FCM environment"></div>
+          <div class="sign-box"><b>测试负责人</b><input data-meta="tester" placeholder="姓名 / 日期 / 时区"></div>
+          <div class="sign-box"><b>发布负责人</b><input data-meta="releaseOwner" placeholder="姓名 / GO 或 NO-GO / 日期"></div>
+          <div class="sign-box"><b>P1/P2 豁免与问题链接</b><textarea data-meta="waivers" placeholder="每项写明 ID、影响、负责人、期限、降级方案"></textarea></div>
+          <div class="sign-box"><b>最终备注</b><textarea data-meta="finalNotes" placeholder="残余风险、复测范围、证据归档位置"></textarea></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p><strong>来源：</strong><code>family-management-code-audit.html</code>、<code>family-management-remediation-REVIEW.md</code>、App v36 家庭同步代码，以及 Server migrations 000009–000016 / Go 服务测试。</p>
+      <p>该文件为本地、无外部依赖的执行模板。结果默认仅保存在浏览器 localStorage；使用“导出 JSON”后再进入受控测试证据系统。</p>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const storageKey = 'home-pocket-family-management-device-uat-v1';
+      const rows = [...document.querySelectorAll('.case-row')];
+      const priorityFilter = document.getElementById('priorityFilter');
+      const statusFilter = document.getElementById('statusFilter');
+      const resultTemplate = `
+        <select class="status-select" aria-label="执行状态">
+          <option value="todo">未执行</option>
+          <option value="pass">通过</option>
+          <option value="fail">失败</option>
+          <option value="blocked">阻塞</option>
+          <option value="na">不适用</option>
+        </select>
+        <textarea class="result-note" aria-label="证据与备注" placeholder="证据编号 / 问题链接 / 简短备注"></textarea>`;
+
+      for (const row of rows) {
+        const cell = row.querySelector('.case-result');
+        cell.innerHTML = resultTemplate;
+        const select = cell.querySelector('.status-select');
+        select.setAttribute('aria-label', `${row.dataset.id} 执行状态`);
+        cell.querySelector('.result-note').setAttribute('aria-label', `${row.dataset.id} 证据与备注`);
+      }
+
+      const readState = () => {
+        try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
+        catch (_) { return {}; }
+      };
+
+      const collectState = () => {
+        const cases = {};
+        for (const row of rows) {
+          cases[row.dataset.id] = {
+            priority: row.dataset.priority.toUpperCase(),
+            status: row.querySelector('.status-select').value,
+            note: row.querySelector('.result-note').value
+          };
+        }
+        const meta = {};
+        for (const input of document.querySelectorAll('[data-meta]')) meta[input.dataset.meta] = input.value;
+        return { version: 1, updatedAt: new Date().toISOString(), cases, meta };
+      };
+
+      const save = () => {
+        localStorage.setItem(storageKey, JSON.stringify(collectState()));
+        updateSummary();
+        applyFilters();
+      };
+
+      const restore = () => {
+        const state = readState();
+        for (const row of rows) {
+          const saved = state.cases?.[row.dataset.id];
+          if (!saved) continue;
+          row.querySelector('.status-select').value = saved.status || 'todo';
+          row.querySelector('.result-note').value = saved.note || '';
+        }
+        for (const input of document.querySelectorAll('[data-meta]')) input.value = state.meta?.[input.dataset.meta] || '';
+      };
+
+      const updateSummary = () => {
+        let pass = 0, risk = 0, complete = 0, p0Ready = true;
+        for (const row of rows) {
+          const select = row.querySelector('.status-select');
+          const status = select.value;
+          select.dataset.status = status;
+          if (status === 'pass') pass++;
+          if (status === 'fail' || status === 'blocked') risk++;
+          if (status !== 'todo') complete++;
+          if (row.dataset.priority === 'p0' && status !== 'pass') p0Ready = false;
+        }
+        const percent = rows.length ? Math.round(complete / rows.length * 100) : 0;
+        document.getElementById('totalCount').textContent = rows.length;
+        document.getElementById('passCount').textContent = pass;
+        document.getElementById('riskCount').textContent = risk;
+        document.getElementById('completionCount').textContent = `${percent}%`;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        const verdict = document.getElementById('autoVerdict');
+        verdict.textContent = p0Ready
+          ? 'P0 READY — 所有 P0 已通过；仍需评审 P1/P2 与签署信息后决定 GO。'
+          : 'NO-GO — 尚有 P0 未通过、被阻塞或未执行。';
+      };
+
+      const applyFilters = () => {
+        const p = priorityFilter.value;
+        const s = statusFilter.value;
+        for (const row of rows) {
+          const priorityMatch = p === 'all' || row.dataset.priority === p;
+          const status = row.querySelector('.status-select').value;
+          const statusMatch = s === 'all' || status === s;
+          row.classList.toggle('is-hidden', !(priorityMatch && statusMatch));
+        }
+      };
+
+      document.addEventListener('change', (event) => {
+        if (event.target.matches('.status-select, [data-meta]')) save();
+      });
+      document.addEventListener('input', (event) => {
+        if (event.target.matches('.result-note, [data-meta]')) save();
+      });
+      priorityFilter.addEventListener('change', applyFilters);
+      statusFilter.addEventListener('change', applyFilters);
+      document.getElementById('printButton').addEventListener('click', () => window.print());
+      document.getElementById('exportButton').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(collectState(), null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `family-management-device-uat-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+      document.getElementById('resetButton').addEventListener('click', () => {
+        if (!confirm('确认清空当前浏览器保存的全部执行结果和签署信息？')) return;
+        localStorage.removeItem(storageKey);
+        for (const row of rows) {
+          row.querySelector('.status-select').value = 'todo';
+          row.querySelector('.result-note').value = '';
+        }
+        for (const input of document.querySelectorAll('[data-meta]')) input.value = '';
+        updateSummary();
+        applyFilters();
+      });
+
+      restore();
+      updateSummary();
+      applyFilters();
+    })();
+  </script>
+</body>
+</html>

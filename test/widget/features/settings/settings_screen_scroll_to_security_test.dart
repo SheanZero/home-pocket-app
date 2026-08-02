@@ -26,13 +26,20 @@ import 'package:home_pocket/features/analytics/domain/models/metric_result.dart'
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
+import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_settings_section.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
 import 'package:home_pocket/features/settings/presentation/screens/settings_screen.dart';
+import 'package:home_pocket/features/settings/presentation/widgets/additional_settings_navigation_section.dart';
+import 'package:home_pocket/features/settings/presentation/widgets/backup_restore_navigation_section.dart';
+import 'package:home_pocket/features/settings/presentation/widgets/delete_all_data_section.dart';
+import 'package:home_pocket/features/settings/presentation/widgets/legal_sponsor_navigation_section.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/security_section.dart';
+import 'package:home_pocket/features/settings/presentation/widgets/joy_target_section.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/shared/widgets/settings_section_card.dart';
 
 const _testBookId = 'book_settings_test';
 
@@ -89,6 +96,98 @@ Widget _pumpScreen({
 }
 
 void main() {
+  testWidgets('settings follows the V16 first-level hierarchy', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final db = AppDatabase.forTesting();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(_pumpScreen(scrollToSecurity: false, db: db));
+    await _pumpBounded(tester);
+
+    final context = tester.element(find.byType(SettingsScreen));
+    final l10n = S.of(context);
+    final generalCard = find.byKey(const ValueKey('settings-general-section'));
+    final family = find.text(l10n.settingsFamily);
+
+    expect(generalCard, findsOneWidget);
+    expect(family, findsOneWidget);
+    final generalRows = <String>[
+      l10n.appearance,
+      l10n.language,
+      l10n.voiceLanguage,
+      l10n.settingsJoyTargetTitle,
+      l10n.settingsWeekStart,
+    ];
+    for (final label in generalRows) {
+      expect(
+        find.descendant(of: generalCard, matching: find.text(label)),
+        findsOneWidget,
+      );
+    }
+    final generalTiles = find.descendant(
+      of: generalCard,
+      matching: find.byType(SettingsActionTile),
+    );
+    expect(generalTiles, findsNWidgets(generalRows.length));
+    for (var index = 0; index < generalRows.length; index++) {
+      expect(
+        tester.getSize(generalTiles.at(index)).height,
+        greaterThanOrEqualTo(72.0),
+        reason: 'Settings rows must keep a comfortable mobile tap height',
+      );
+    }
+    final rowTops = generalRows
+        .map(
+          (label) => tester
+              .getTopLeft(
+                find.descendant(of: generalCard, matching: find.text(label)),
+              )
+              .dy,
+        )
+        .toList();
+    expect(rowTops, orderedEquals(rowTops.toList()..sort()));
+    expect(find.byType(JoyTargetTile), findsOneWidget);
+
+    final listView = tester.widget<ListView>(find.byType(ListView).first);
+    final children =
+        (listView.childrenDelegate as SliverChildListDelegate).children;
+    int indexForKey(Key key) =>
+        children.indexWhere((child) => child.key == key);
+    int indexForType<T extends Widget>() =>
+        children.indexWhere((child) => child is T);
+
+    expect(children.whereType<AdditionalSettingsNavigationSection>(), isEmpty);
+    expect(indexForType<FamilySyncSettingsSection>(), greaterThan(0));
+    expect(
+      indexForKey(const ValueKey('settings-notifications-section')),
+      greaterThan(indexForType<FamilySyncSettingsSection>()),
+    );
+    expect(
+      indexForType<BackupRestoreNavigationSection>(),
+      greaterThan(
+        indexForKey(const ValueKey('settings-notifications-section')),
+      ),
+    );
+    expect(
+      indexForType<LegalSponsorNavigationSection>(),
+      greaterThan(indexForType<BackupRestoreNavigationSection>()),
+    );
+    expect(
+      indexForType<DeleteAllDataSection>(),
+      greaterThan(indexForType<LegalSponsorNavigationSection>()),
+    );
+    expect(
+      children.whereType<SettingsSectionCard>().where(
+        (section) => section.key == const ValueKey('settings-general-section'),
+      ),
+      hasLength(1),
+    );
+  });
+
   testWidgets(
     'scrollToSecurity: true brings SecuritySection into view after first frame',
     (tester) async {

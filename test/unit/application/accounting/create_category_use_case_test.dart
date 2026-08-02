@@ -145,6 +145,8 @@ void main() {
         const CreateCategoryParams(
           name: '  Travel plans  ',
           ledgerType: LedgerType.joy,
+          icon: 'flight',
+          color: '#8B5CF6',
         ),
       );
 
@@ -155,6 +157,8 @@ void main() {
       expect(result.data?.parentId, isNull);
       expect(result.data?.sortOrder, 5);
       expect(result.data?.isSystem, isFalse);
+      expect(result.data?.icon, 'flight');
+      expect(result.data?.color, '#8B5CF6');
       expect(configRepo.configs, hasLength(1));
       expect(configRepo.configs.single.categoryId, 'custom-l1');
       expect(configRepo.configs.single.ledgerType, LedgerType.joy);

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/analytics/domain/models/per_day_joy_count.dart';
@@ -47,6 +48,7 @@ Transaction _tx(String id, DateTime ts) => Transaction(
 Widget _subject({
   AsyncValue<List<PerDayJoyCount>>? override,
   List<Transaction>? dayTxns,
+  Map<String, Category> categoryMap = const {},
 }) {
   final value = override ?? AsyncValue.data(_counts());
   return createLocalizedWidget(
@@ -63,6 +65,7 @@ Widget _subject({
       locale_providers.currentLocaleProvider.overrideWith(
         (_) async => const Locale('zh'),
       ),
+      analyticsCategoriesMapProvider.overrideWith((_) async => categoryMap),
       perDayJoyCountsProvider(
         bookId: _bookId,
         anchor: _anchor,
@@ -227,6 +230,42 @@ void main() {
           .height,
       JoyCalendarCompactTransactionRow.rowHeight,
     );
+  });
+
+  testWidgets('expanded row resolves a custom category name', (tester) async {
+    final category = Category(
+      id: '01CUSTOMCALENDAR',
+      name: '夜间散步',
+      icon: 'pets',
+      color: '#47B88A',
+      parentId: null,
+      level: 1,
+      createdAt: DateTime(2026),
+    );
+    final transaction = Transaction(
+      id: 'custom_calendar_tx',
+      bookId: _bookId,
+      deviceId: 'dev',
+      amount: 800,
+      type: TransactionType.expense,
+      categoryId: category.id,
+      ledgerType: LedgerType.joy,
+      timestamp: DateTime(2026, 5, 12, 20),
+      currentHash: 'custom_hash',
+      createdAt: DateTime(2026, 5, 12, 20),
+      joyFullness: 2,
+      entrySource: EntrySource.manual,
+    );
+
+    await tester.pumpWidget(
+      _subject(dayTxns: [transaction], categoryMap: {category.id: category}),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('joy_day_12')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('夜间散步'), findsOneWidget);
+    expect(find.text(category.id), findsNothing);
   });
 
   testWidgets('Test 4: ADR-016 §5 ambient — no streak/target/ranking copy '

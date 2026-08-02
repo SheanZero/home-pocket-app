@@ -12,10 +12,10 @@
 // behavior preservation).
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
-import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/membership_rotation_coordinator.dart';
+import 'package:home_pocket/application/family_sync/rotate_group_key_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -23,48 +23,39 @@ class _FakeRelayApiClient extends Mock implements RelayApiClient {}
 
 class _FakeGroupRepository extends Mock implements GroupRepository {}
 
-const _owner = GroupMember(
-  deviceId: 'owner-1',
-  publicKey: 'pk-owner',
-  deviceName: 'Owner Phone',
-  role: 'owner',
-  status: 'active',
-  displayName: 'Owner',
-  avatarEmoji: '🏠',
-);
+class _FakeRotateGroupKeyUseCase extends Mock
+    implements RotateGroupKeyUseCase {}
 
-const _memberToRemove = GroupMember(
-  deviceId: 'member-1',
-  publicKey: 'pk-member',
-  deviceName: 'Member Tablet',
-  role: 'member',
-  status: 'active',
-  displayName: 'Member',
-  avatarEmoji: '👤',
-);
-
-GroupInfo _buildGroupInfo({List<GroupMember>? members}) => GroupInfo(
-  groupId: 'group-1',
-  groupName: 'Test Family',
-  status: GroupStatus.active,
-  role: 'owner',
-  members: members ?? const [_owner, _memberToRemove],
-  createdAt: DateTime(2026, 1, 1),
-);
+class _FakeMembershipRotationCoordinator extends Mock
+    implements MembershipRotationCoordinator {}
 
 void main() {
   group('RemoveMemberUseCase characterization', () {
     late _FakeRelayApiClient fakeApiClient;
     late _FakeGroupRepository fakeGroupRepository;
+    late _FakeRotateGroupKeyUseCase fakeRotateGroupKey;
+    late _FakeMembershipRotationCoordinator membershipRotation;
     late RemoveMemberUseCase useCase;
 
     setUp(() {
       fakeApiClient = _FakeRelayApiClient();
       fakeGroupRepository = _FakeGroupRepository();
+      fakeRotateGroupKey = _FakeRotateGroupKeyUseCase();
+      membershipRotation = _FakeMembershipRotationCoordinator();
+
+      when(
+        () => fakeRotateGroupKey.execute(
+          groupId: any(named: 'groupId'),
+          authoritativeEpoch: any(named: 'authoritativeEpoch'),
+          removedDeviceId: any(named: 'removedDeviceId'),
+        ),
+      ).thenAnswer((_) async {});
 
       useCase = RemoveMemberUseCase(
         apiClient: fakeApiClient,
         groupRepository: fakeGroupRepository,
+        rotateGroupKey: fakeRotateGroupKey,
+        membershipRotation: membershipRotation,
       );
     });
 
@@ -72,17 +63,11 @@ void main() {
       'returns success when member removed from server and local repo updated',
       () async {
         when(
-          () => fakeApiClient.removeMember(
+          () => membershipRotation.removeMember(
             groupId: 'group-1',
-            deviceId: 'member-1',
+            targetDeviceId: 'member-1',
           ),
-        ).thenAnswer((_) async => {'status': 'ok'});
-        when(
-          () => fakeGroupRepository.getGroupById('group-1'),
-        ).thenAnswer((_) async => _buildGroupInfo());
-        when(
-          () => fakeGroupRepository.updateMembers(any(), any()),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async => {'status': 'ok', 'keyEpoch': 2});
 
         final result = await useCase.execute(
           groupId: 'group-1',
@@ -97,52 +82,45 @@ void main() {
       'calls updateMembers with remaining members only (target member excluded)',
       () async {
         when(
-          () => fakeApiClient.removeMember(
+          () => membershipRotation.removeMember(
             groupId: 'group-1',
-            deviceId: 'member-1',
+            targetDeviceId: 'member-1',
           ),
-        ).thenAnswer((_) async => {'status': 'ok'});
-        when(
-          () => fakeGroupRepository.getGroupById('group-1'),
-        ).thenAnswer((_) async => _buildGroupInfo());
-        when(
-          () => fakeGroupRepository.updateMembers(any(), any()),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async => {'status': 'ok', 'keyEpoch': 2});
 
         await useCase.execute(groupId: 'group-1', deviceId: 'member-1');
 
         verify(
-          () => fakeGroupRepository.updateMembers('group-1', [_owner]),
+          () => membershipRotation.removeMember(
+            groupId: 'group-1',
+            targetDeviceId: 'member-1',
+          ),
         ).called(1);
       },
     );
 
     test('skips updateMembers when group not found in repository', () async {
       when(
-        () => fakeApiClient.removeMember(
+        () => membershipRotation.removeMember(
           groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
+          targetDeviceId: any(named: 'targetDeviceId'),
         ),
-      ).thenAnswer((_) async => {'status': 'ok'});
-      when(
-        () => fakeGroupRepository.getGroupById(any()),
-      ).thenAnswer((_) async => null);
+      ).thenThrow(StateError('active family not found'));
 
       final result = await useCase.execute(
         groupId: 'group-1',
         deviceId: 'member-1',
       );
 
-      // Still succeeds — API call succeeded; null group means local state doesn't need updating
-      expect(result, isA<RemoveMemberSuccess>());
+      expect(result, isA<RemoveMemberError>());
       verifyNever(() => fakeGroupRepository.updateMembers(any(), any()));
     });
 
     test('returns error when RelayApiException is thrown', () async {
       when(
-        () => fakeApiClient.removeMember(
+        () => membershipRotation.removeMember(
           groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
+          targetDeviceId: any(named: 'targetDeviceId'),
         ),
       ).thenThrow(
         const RelayApiException(statusCode: 403, message: 'not authorized'),
@@ -162,9 +140,9 @@ void main() {
       'returns error with prefixed message when generic exception is thrown',
       () async {
         when(
-          () => fakeApiClient.removeMember(
+          () => membershipRotation.removeMember(
             groupId: any(named: 'groupId'),
-            deviceId: any(named: 'deviceId'),
+            targetDeviceId: any(named: 'targetDeviceId'),
           ),
         ).thenThrow(Exception('network timeout'));
 

@@ -53,3 +53,19 @@ abstract class TransactionRepository {
     SortDirection sortDirection,
   });
 }
+
+/// Optional production capability that durably records the outbound family
+/// operation in the same SQLCipher transaction as the business-row mutation.
+/// Test repositories that only exercise local accounting can keep implementing
+/// [TransactionRepository] without knowing about family sync.
+abstract interface class DurableFamilySyncTransactionRepository {
+  Future<bool> insertWithFamilySyncOutbox(
+    Transaction transaction, {
+    Map<String, dynamic>? operation,
+  });
+
+  Future<bool> updateWithFamilySyncOutbox(
+    Transaction transaction, {
+    Map<String, dynamic>? operation,
+  });
+}

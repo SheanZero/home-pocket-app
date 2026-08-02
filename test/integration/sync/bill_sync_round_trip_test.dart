@@ -9,9 +9,11 @@ import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_sync_mapper.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -31,6 +33,7 @@ void main() {
   late ShadowBookService shadowBookService;
   late ApplySyncOperationsUseCase applyOps;
   late BookRepositoryImpl bookRepo;
+  late TransactionRepositoryImpl txRepo;
   late _MockFieldEncryptionService mockEncryption;
   late _MockGroupRepository mockGroupRepository;
   late _MockShoppingItemRepository mockShoppingItemRepository;
@@ -74,7 +77,7 @@ void main() {
     ).thenAnswer((_) async => null);
 
     bookRepo = BookRepositoryImpl(dao: bookDao);
-    final txRepo = TransactionRepositoryImpl(
+    txRepo = TransactionRepositoryImpl(
       dao: txDao,
       encryptionService: mockEncryption,
     );
@@ -89,6 +92,7 @@ void main() {
       shoppingItemRepository: mockShoppingItemRepository,
       shadowBookService: shadowBookService,
       groupRepository: mockGroupRepository,
+      inboundRepository: MemoryInboundSyncOperationRepository(),
     );
   });
 
@@ -231,6 +235,70 @@ void main() {
       final tx1After = await txDao.findById('tx-1');
       expect(tx1After, isNull);
     });
+
+    test(
+      'local-only photo state is idempotent and tombstone clears the marker',
+      () async {
+        final source = Transaction(
+          id: 'tx-photo',
+          bookId: 'partner-main',
+          deviceId: 'partner-device',
+          amount: 1000,
+          type: TransactionType.expense,
+          categoryId: 'cat-food',
+          ledgerType: LedgerType.daily,
+          timestamp: DateTime.utc(2026, 8, 1),
+          photoHash: 'partner-local-hash',
+          currentHash: 'chain',
+          createdAt: DateTime.utc(2026, 8, 1),
+          syncRevision: 10,
+          syncOriginDeviceId: 'partner-device',
+        );
+        final create =
+            TransactionSyncMapper.toCreateOperation(
+                source,
+                sourceBookId: source.bookId,
+                sourceBookName: 'Partner',
+                sourceBookType: 'local',
+              )
+              ..['operationId'] = 'photo-create-10'
+              ..['fromDeviceId'] = 'partner-device';
+
+        await applyOps.execute([create]);
+        await applyOps.execute([create]);
+
+        final received = await txRepo.findById(source.id);
+        expect(received, isNotNull);
+        expect(received!.photoHash, isNull);
+        expect(
+          TransactionPhotoSyncPolicy.isUnavailableRemotePhoto(received),
+          isTrue,
+        );
+
+        final tombstone = source.copyWith(
+          isDeleted: true,
+          updatedAt: DateTime.utc(2026, 8, 2),
+          syncRevision: 11,
+        );
+        final delete =
+            TransactionSyncMapper.toDeleteOperation(
+                tombstone,
+                sourceBookId: source.bookId,
+                sourceBookName: 'Partner',
+                sourceBookType: 'local',
+              )
+              ..['operationId'] = 'photo-delete-11'
+              ..['fromDeviceId'] = 'partner-device';
+        await applyOps.execute([delete]);
+
+        final deleted = await txRepo.findById(source.id);
+        expect(deleted!.isDeleted, isTrue);
+        expect(
+          TransactionPhotoSyncPolicy.isUnavailableRemotePhoto(deleted),
+          isFalse,
+        );
+      },
+    );
 
     test('lazy shadow book creation on unknown sender', () async {
       // No pre-created shadow book — apply ops from partner

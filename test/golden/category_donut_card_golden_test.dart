@@ -38,15 +38,16 @@ const _bookId = 'book_a';
 final _startDate = DateTime(2026, 5, 1);
 final _endDate = DateTime(2026, 5, 31, 23, 59, 59);
 
-Category _cat(String id, {String? parent, int level = 1}) => Category(
-  id: id,
-  name: id,
-  icon: 'icon',
-  color: '#000000',
-  parentId: parent,
-  level: level,
-  createdAt: DateTime(2026),
-);
+Category _cat(String id, {String? name, String? parent, int level = 1}) =>
+    Category(
+      id: id,
+      name: name ?? id,
+      icon: 'favorite_border',
+      color: '#000000',
+      parentId: parent,
+      level: level,
+      createdAt: DateTime(2026),
+    );
 
 CategoryBreakdown _bd(String id, int amount, double pct) => CategoryBreakdown(
   categoryId: id,
@@ -93,7 +94,7 @@ MonthlyReport _reportFour() => _report(_breakdownsFour, 120000);
 /// top 10 (¥30,000), residual long-tail ¥6,000 surfaces as the neutral "Other"
 /// slice/row; TRUE total ¥36,000.
 final _categoryMapMany = <String, Category>{
-  for (var i = 0; i < 12; i++) 'cat_$i': _cat('cat_$i'),
+  for (var i = 0; i < 12; i++) 'cat_$i': _cat('cat_$i', name: 'category_$i'),
 };
 
 final _breakdownsMany = [for (var i = 0; i < 12; i++) _bd('cat_$i', 3000, 0)];
@@ -179,13 +180,29 @@ final _membersMulti = [
 final _membersSolo = [_member('dev-a', 'Aoi', '🌸')];
 
 final _memberBreakdownMulti = [
-  const MemberSpendBreakdown(deviceId: 'dev-a', amount: 70000, transactionCount: 8),
-  const MemberSpendBreakdown(deviceId: 'dev-b', amount: 38000, transactionCount: 5),
-  const MemberSpendBreakdown(deviceId: 'dev-c', amount: 12000, transactionCount: 2),
+  const MemberSpendBreakdown(
+    deviceId: 'dev-a',
+    amount: 70000,
+    transactionCount: 8,
+  ),
+  const MemberSpendBreakdown(
+    deviceId: 'dev-b',
+    amount: 38000,
+    transactionCount: 5,
+  ),
+  const MemberSpendBreakdown(
+    deviceId: 'dev-c',
+    amount: 12000,
+    transactionCount: 2,
+  ),
 ];
 
 final _memberBreakdownSolo = [
-  const MemberSpendBreakdown(deviceId: 'dev-a', amount: 84000, transactionCount: 11),
+  const MemberSpendBreakdown(
+    deviceId: 'dev-a',
+    amount: 84000,
+    transactionCount: 11,
+  ),
 ];
 
 Widget _wrapMember({
@@ -203,8 +220,9 @@ Widget _wrapMember({
         endDate: _endDate,
         joyMetricVariant: JoyMetricVariant.all,
       ).overrideWith((_) async => _reportFour()),
-      analyticsCategoriesMapProvider
-          .overrideWith((_) async => _categoryMapFour),
+      analyticsCategoriesMapProvider.overrideWith(
+        (_) async => _categoryMapFour,
+      ),
       donutDimensionStateProvider.overrideWith(_MemberDimensionState.new),
       activeGroupMembersProvider.overrideWith((_) => Stream.value(members)),
       memberSpendBreakdownProvider(
@@ -363,7 +381,9 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(CategoryDonutCard),
-        matchesGoldenFile('goldens/category_donut_card_member_multi_light_ja.png'),
+        matchesGoldenFile(
+          'goldens/category_donut_card_member_multi_light_ja.png',
+        ),
       );
     });
 
@@ -379,7 +399,9 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(CategoryDonutCard),
-        matchesGoldenFile('goldens/category_donut_card_member_multi_dark_en.png'),
+        matchesGoldenFile(
+          'goldens/category_donut_card_member_multi_dark_en.png',
+        ),
       );
     });
 
@@ -396,7 +418,9 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(CategoryDonutCard),
-        matchesGoldenFile('goldens/category_donut_card_member_solo_light_ja.png'),
+        matchesGoldenFile(
+          'goldens/category_donut_card_member_solo_light_ja.png',
+        ),
       );
     });
   });

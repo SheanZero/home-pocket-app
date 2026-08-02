@@ -9,11 +9,19 @@ part of 'repository_providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// SharedPreferences instance provider.
+///
+/// This is an application-wide platform singleton. It must outlive an isolated
+/// `.future` read so synchronous dependents never observe a fresh AsyncLoading
+/// state during cold-start initialization.
 
 @ProviderFor(sharedPreferences)
 final sharedPreferencesProvider = SharedPreferencesProvider._();
 
 /// SharedPreferences instance provider.
+///
+/// This is an application-wide platform singleton. It must outlive an isolated
+/// `.future` read so synchronous dependents never observe a fresh AsyncLoading
+/// state during cold-start initialization.
 
 final class SharedPreferencesProvider
     extends
@@ -26,13 +34,17 @@ final class SharedPreferencesProvider
         $FutureModifier<SharedPreferences>,
         $FutureProvider<SharedPreferences> {
   /// SharedPreferences instance provider.
+  ///
+  /// This is an application-wide platform singleton. It must outlive an isolated
+  /// `.future` read so synchronous dependents never observe a fresh AsyncLoading
+  /// state during cold-start initialization.
   SharedPreferencesProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'sharedPreferencesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -52,7 +64,7 @@ final class SharedPreferencesProvider
   }
 }
 
-String _$sharedPreferencesHash() => r'dc403fbb1d968c7d5ab4ae1721a29ffe173701c7';
+String _$sharedPreferencesHash() => r'd22b545aefe95500327f9dce52c645d746349271';
 
 /// SettingsRepository provider (single source of truth).
 
@@ -275,7 +287,7 @@ final class ClearAllDataUseCaseProvider
         argument: null,
         retry: null,
         name: r'clearAllDataUseCaseProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -304,4 +316,4 @@ final class ClearAllDataUseCaseProvider
 }
 
 String _$clearAllDataUseCaseHash() =>
-    r'6c1d297811f80ff311d62b023e2476d6828dacb1';
+    r'6a72216b15cf0de50fdf0d39e5e1b009468c315b';

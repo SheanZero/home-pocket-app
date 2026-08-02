@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
@@ -24,9 +26,9 @@ class ConfirmMemberError extends ConfirmMemberResult {
 
 /// Confirms a pending member in the group and exchanges the group key.
 ///
-/// Migrated from `features/family_sync/use_cases/` with optional avatar sync.
-/// After confirming and running full sync, triggers a non-blocking avatar push
-/// so the new member receives the owner's avatar.
+/// Migrated from `features/family_sync/use_cases/`. Production full sync now
+/// includes the versioned profile/avatar bootstrap; the direct avatar seam is
+/// retained only for legacy/test compositions that do not provide full sync.
 class ConfirmMemberUseCase {
   ConfirmMemberUseCase({
     required RelayApiClient apiClient,
@@ -45,6 +47,7 @@ class ConfirmMemberUseCase {
   final E2EEService _e2eeService;
   final FullSyncUseCase? _fullSync;
   final SyncAvatarUseCase? _syncAvatar;
+  static const _uuid = Uuid();
 
   Future<ConfirmMemberResult> execute({
     required String groupId,
@@ -64,20 +67,24 @@ class ConfirmMemberUseCase {
           groupKeyBase64: group.groupKey!,
           memberDeviceId: member.deviceId,
           memberPublicKey: member.publicKey,
+          keyEpoch: group.keyEpoch,
         );
 
         await _apiClient.pushSync(
           groupId: groupId,
+          syncId: _uuid.v4(),
           payload: keyExchangePayload,
           vectorClock: const {},
           operationCount: 0,
+          keyEpoch: group.keyEpoch,
         );
       }
 
       await _fullSync?.execute();
 
-      // Non-blocking avatar push to share profile with new member
-      _syncAvatar?.pushAvatarToMembers(groupId: groupId).ignore();
+      if (_fullSync == null) {
+        _syncAvatar?.pushAvatarToMembers(groupId: groupId).ignore();
+      }
 
       return const ConfirmMemberResult.success();
     } on RelayApiException catch (error) {

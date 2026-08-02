@@ -53,6 +53,7 @@ void main() {
     when(
       () => apiClient.pushSync(
         groupId: any(named: 'groupId'),
+        syncId: any(named: 'syncId'),
         payload: any(named: 'payload'),
         vectorClock: any(named: 'vectorClock'),
         operationCount: any(named: 'operationCount'),
@@ -62,11 +63,11 @@ void main() {
     when(
       () =>
           syncAvatarUseCase.pushAvatarToMembers(groupId: any(named: 'groupId')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => null);
   });
 
   test(
-    'confirms member, exchanges key, triggers sync and avatar push',
+    'confirms member and bootstraps profile/avatar through full sync',
     () async {
       when(() => groupRepository.getGroupById(any())).thenAnswer(
         (_) async => GroupInfo(
@@ -109,15 +110,16 @@ void main() {
       verify(
         () => apiClient.pushSync(
           groupId: 'group-1',
+          syncId: any(named: 'syncId'),
           payload: 'encrypted-key',
           vectorClock: const {},
           operationCount: 0,
         ),
       ).called(1);
       verify(() => fullSyncUseCase.execute()).called(1);
-      verify(
+      verifyNever(
         () => syncAvatarUseCase.pushAvatarToMembers(groupId: 'group-1'),
-      ).called(1);
+      );
     },
   );
 
@@ -143,6 +145,7 @@ void main() {
     verifyNever(
       () => apiClient.pushSync(
         groupId: any(named: 'groupId'),
+        syncId: any(named: 'syncId'),
         payload: any(named: 'payload'),
         vectorClock: any(named: 'vectorClock'),
         operationCount: any(named: 'operationCount'),

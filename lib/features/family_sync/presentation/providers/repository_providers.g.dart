@@ -69,7 +69,7 @@ final class SyncQueueManagerProvider
   }
 }
 
-String _$syncQueueManagerHash() => r'11b36bb04566f9cf578bb344c8ed7d2e5d50bee7';
+String _$syncQueueManagerHash() => r'8a82d380236b0912939501299201d827811b70e2';
 
 /// GroupMemberDao provider (for watch queries).
 
@@ -210,6 +210,213 @@ final class SyncRepositoryProvider
 
 String _$syncRepositoryHash() => r'8e6fb815dcb2d21942af3d5b83169966d52f85ef';
 
+@ProviderFor(inboundSyncOperationRepository)
+final inboundSyncOperationRepositoryProvider =
+    InboundSyncOperationRepositoryProvider._();
+
+final class InboundSyncOperationRepositoryProvider
+    extends
+        $FunctionalProvider<
+          InboundSyncOperationRepository,
+          InboundSyncOperationRepository,
+          InboundSyncOperationRepository
+        >
+    with $Provider<InboundSyncOperationRepository> {
+  InboundSyncOperationRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'inboundSyncOperationRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$inboundSyncOperationRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<InboundSyncOperationRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  InboundSyncOperationRepository create(Ref ref) {
+    return inboundSyncOperationRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(InboundSyncOperationRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<InboundSyncOperationRepository>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$inboundSyncOperationRepositoryHash() =>
+    r'fb3701c133f54137678e1408792202eb07f5cb1e';
+
+@ProviderFor(familySyncOutboxRepository)
+final familySyncOutboxRepositoryProvider =
+    FamilySyncOutboxRepositoryProvider._();
+
+final class FamilySyncOutboxRepositoryProvider
+    extends
+        $FunctionalProvider<
+          FamilySyncOutboxRepository,
+          FamilySyncOutboxRepository,
+          FamilySyncOutboxRepository
+        >
+    with $Provider<FamilySyncOutboxRepository> {
+  FamilySyncOutboxRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'familySyncOutboxRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$familySyncOutboxRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<FamilySyncOutboxRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  FamilySyncOutboxRepository create(Ref ref) {
+    return familySyncOutboxRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FamilySyncOutboxRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FamilySyncOutboxRepository>(value),
+    );
+  }
+}
+
+String _$familySyncOutboxRepositoryHash() =>
+    r'8f7cbc69b4f0ed3123b3b406976b816a19ce1129';
+
+/// Durable outbound queue recovery actions.
+
+@ProviderFor(syncQueueRecoveryUseCase)
+final syncQueueRecoveryUseCaseProvider = SyncQueueRecoveryUseCaseProvider._();
+
+/// Durable outbound queue recovery actions.
+
+final class SyncQueueRecoveryUseCaseProvider
+    extends
+        $FunctionalProvider<
+          SyncQueueRecoveryUseCase,
+          SyncQueueRecoveryUseCase,
+          SyncQueueRecoveryUseCase
+        >
+    with $Provider<SyncQueueRecoveryUseCase> {
+  /// Durable outbound queue recovery actions.
+  SyncQueueRecoveryUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncQueueRecoveryUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncQueueRecoveryUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<SyncQueueRecoveryUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SyncQueueRecoveryUseCase create(Ref ref) {
+    return syncQueueRecoveryUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SyncQueueRecoveryUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SyncQueueRecoveryUseCase>(value),
+    );
+  }
+}
+
+String _$syncQueueRecoveryUseCaseHash() =>
+    r'2788128000229df88a7268b40f91ddb4d07a47bc';
+
+/// Deterministic inbound quarantine recovery actions.
+
+@ProviderFor(inboundSyncRecoveryUseCase)
+final inboundSyncRecoveryUseCaseProvider =
+    InboundSyncRecoveryUseCaseProvider._();
+
+/// Deterministic inbound quarantine recovery actions.
+
+final class InboundSyncRecoveryUseCaseProvider
+    extends
+        $FunctionalProvider<
+          InboundSyncRecoveryUseCase,
+          InboundSyncRecoveryUseCase,
+          InboundSyncRecoveryUseCase
+        >
+    with $Provider<InboundSyncRecoveryUseCase> {
+  /// Deterministic inbound quarantine recovery actions.
+  InboundSyncRecoveryUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'inboundSyncRecoveryUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$inboundSyncRecoveryUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<InboundSyncRecoveryUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  InboundSyncRecoveryUseCase create(Ref ref) {
+    return inboundSyncRecoveryUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(InboundSyncRecoveryUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<InboundSyncRecoveryUseCase>(value),
+    );
+  }
+}
+
+String _$inboundSyncRecoveryUseCaseHash() =>
+    r'13c1d1a52b65b6ac9d1d07b410a8d3c2ae799d58';
+
 /// ShadowBookService provider.
 
 @ProviderFor(shadowBookService)
@@ -314,7 +521,7 @@ final class ApplySyncOperationsUseCaseProvider
 }
 
 String _$applySyncOperationsUseCaseHash() =>
-    r'0ceec58a183d481cf3d103b1f7986fb57da20daf';
+    r'eec85b4135e998ef18e50cbf75a2ca3da765e6a0';
 
 /// PushSyncUseCase provider.
 
@@ -363,6 +570,55 @@ final class PushSyncUseCaseProvider
 
 String _$pushSyncUseCaseHash() => r'c3687aa735b9f850948af61f5615365e2832041d';
 
+@ProviderFor(drainFamilySyncOutboxUseCase)
+final drainFamilySyncOutboxUseCaseProvider =
+    DrainFamilySyncOutboxUseCaseProvider._();
+
+final class DrainFamilySyncOutboxUseCaseProvider
+    extends
+        $FunctionalProvider<
+          DrainFamilySyncOutboxUseCase,
+          DrainFamilySyncOutboxUseCase,
+          DrainFamilySyncOutboxUseCase
+        >
+    with $Provider<DrainFamilySyncOutboxUseCase> {
+  DrainFamilySyncOutboxUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'drainFamilySyncOutboxUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$drainFamilySyncOutboxUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<DrainFamilySyncOutboxUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DrainFamilySyncOutboxUseCase create(Ref ref) {
+    return drainFamilySyncOutboxUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DrainFamilySyncOutboxUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DrainFamilySyncOutboxUseCase>(value),
+    );
+  }
+}
+
+String _$drainFamilySyncOutboxUseCaseHash() =>
+    r'b6c1a391cc0127817fbc6cf035425107d508fac2';
+
 /// PullSyncUseCase provider.
 
 @ProviderFor(pullSyncUseCase)
@@ -408,7 +664,7 @@ final class PullSyncUseCaseProvider
   }
 }
 
-String _$pullSyncUseCaseHash() => r'340b68e055287df5a271a943bb2d722077e76769';
+String _$pullSyncUseCaseHash() => r'cb2c3940ced106c45b537f2c6a37f2872742804c';
 
 /// CheckGroupValidityUseCase provider.
 
@@ -461,7 +717,7 @@ final class CheckGroupValidityUseCaseProvider
 }
 
 String _$checkGroupValidityUseCaseHash() =>
-    r'32e79f4bdac976f47d84c288953ae3d3e2f145df';
+    r'fa84f7086682e44fbef98e42fa5872bf4b44d73e';
 
 /// FullSyncUseCase provider.
 
@@ -508,7 +764,60 @@ final class FullSyncUseCaseProvider
   }
 }
 
-String _$fullSyncUseCaseHash() => r'5f7eb3a8f9f4badb4148f5902f4b4b03184ab22c';
+String _$fullSyncUseCaseHash() => r'9ebd1350c9efab4d75112d1180ea2857dcb77992';
+
+/// HandleMemberLeftUseCase provider.
+
+@ProviderFor(rotateGroupKeyUseCase)
+final rotateGroupKeyUseCaseProvider = RotateGroupKeyUseCaseProvider._();
+
+/// HandleMemberLeftUseCase provider.
+
+final class RotateGroupKeyUseCaseProvider
+    extends
+        $FunctionalProvider<
+          RotateGroupKeyUseCase,
+          RotateGroupKeyUseCase,
+          RotateGroupKeyUseCase
+        >
+    with $Provider<RotateGroupKeyUseCase> {
+  /// HandleMemberLeftUseCase provider.
+  RotateGroupKeyUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rotateGroupKeyUseCaseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rotateGroupKeyUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<RotateGroupKeyUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  RotateGroupKeyUseCase create(Ref ref) {
+    return rotateGroupKeyUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RotateGroupKeyUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RotateGroupKeyUseCase>(value),
+    );
+  }
+}
+
+String _$rotateGroupKeyUseCaseHash() =>
+    r'40261534b3fcec449e9a680a90d6f4a14ae4c6a9';
 
 /// HandleMemberLeftUseCase provider.
 
@@ -561,7 +870,7 @@ final class HandleMemberLeftUseCaseProvider
 }
 
 String _$handleMemberLeftUseCaseHash() =>
-    r'f505f07a7e915fbac6cbabe178b71e7527147c58';
+    r'e2c1798f10265d37ef451c06a76c99340f06b682';
 
 /// HandleGroupDissolvedUseCase provider.
 

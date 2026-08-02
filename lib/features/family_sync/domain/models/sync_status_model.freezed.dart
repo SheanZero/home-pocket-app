@@ -16,6 +16,7 @@ mixin _$SyncStatus {
   SyncState get state;
   DateTime? get lastSyncAt;
   int? get pendingQueueCount;
+  int get deadLetterCount;
   String? get errorMessage;
 
   /// Create a copy of SyncStatus
@@ -35,6 +36,8 @@ mixin _$SyncStatus {
                 other.lastSyncAt == lastSyncAt) &&
             (identical(other.pendingQueueCount, pendingQueueCount) ||
                 other.pendingQueueCount == pendingQueueCount) &&
+            (identical(other.deadLetterCount, deadLetterCount) ||
+                other.deadLetterCount == deadLetterCount) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -45,12 +48,13 @@ mixin _$SyncStatus {
     state,
     lastSyncAt,
     pendingQueueCount,
+    deadLetterCount,
     errorMessage,
   );
 
   @override
   String toString() {
-    return 'SyncStatus(state: $state, lastSyncAt: $lastSyncAt, pendingQueueCount: $pendingQueueCount, errorMessage: $errorMessage)';
+    return 'SyncStatus(state: $state, lastSyncAt: $lastSyncAt, pendingQueueCount: $pendingQueueCount, deadLetterCount: $deadLetterCount, errorMessage: $errorMessage)';
   }
 }
 
@@ -65,6 +69,7 @@ abstract mixin class $SyncStatusCopyWith<$Res> {
     SyncState state,
     DateTime? lastSyncAt,
     int? pendingQueueCount,
+    int deadLetterCount,
     String? errorMessage,
   });
 }
@@ -84,6 +89,7 @@ class _$SyncStatusCopyWithImpl<$Res> implements $SyncStatusCopyWith<$Res> {
     Object? state = null,
     Object? lastSyncAt = freezed,
     Object? pendingQueueCount = freezed,
+    Object? deadLetterCount = null,
     Object? errorMessage = freezed,
   }) {
     return _then(
@@ -100,6 +106,10 @@ class _$SyncStatusCopyWithImpl<$Res> implements $SyncStatusCopyWith<$Res> {
             ? _self.pendingQueueCount
             : pendingQueueCount // ignore: cast_nullable_to_non_nullable
                   as int?,
+        deadLetterCount: null == deadLetterCount
+            ? _self.deadLetterCount
+            : deadLetterCount // ignore: cast_nullable_to_non_nullable
+                  as int,
         errorMessage: freezed == errorMessage
             ? _self.errorMessage
             : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -206,6 +216,7 @@ extension SyncStatusPatterns on SyncStatus {
       SyncState state,
       DateTime? lastSyncAt,
       int? pendingQueueCount,
+      int deadLetterCount,
       String? errorMessage,
     )?
     $default, {
@@ -218,6 +229,7 @@ extension SyncStatusPatterns on SyncStatus {
           _that.state,
           _that.lastSyncAt,
           _that.pendingQueueCount,
+          _that.deadLetterCount,
           _that.errorMessage,
         );
       case _:
@@ -244,6 +256,7 @@ extension SyncStatusPatterns on SyncStatus {
       SyncState state,
       DateTime? lastSyncAt,
       int? pendingQueueCount,
+      int deadLetterCount,
       String? errorMessage,
     )
     $default,
@@ -255,6 +268,7 @@ extension SyncStatusPatterns on SyncStatus {
           _that.state,
           _that.lastSyncAt,
           _that.pendingQueueCount,
+          _that.deadLetterCount,
           _that.errorMessage,
         );
       case _:
@@ -280,6 +294,7 @@ extension SyncStatusPatterns on SyncStatus {
       SyncState state,
       DateTime? lastSyncAt,
       int? pendingQueueCount,
+      int deadLetterCount,
       String? errorMessage,
     )?
     $default,
@@ -291,6 +306,7 @@ extension SyncStatusPatterns on SyncStatus {
           _that.state,
           _that.lastSyncAt,
           _that.pendingQueueCount,
+          _that.deadLetterCount,
           _that.errorMessage,
         );
       case _:
@@ -306,6 +322,7 @@ class _SyncStatus implements SyncStatus {
     required this.state,
     this.lastSyncAt,
     this.pendingQueueCount,
+    this.deadLetterCount = 0,
     this.errorMessage,
   });
 
@@ -315,6 +332,9 @@ class _SyncStatus implements SyncStatus {
   final DateTime? lastSyncAt;
   @override
   final int? pendingQueueCount;
+  @override
+  @JsonKey()
+  final int deadLetterCount;
   @override
   final String? errorMessage;
 
@@ -336,6 +356,8 @@ class _SyncStatus implements SyncStatus {
                 other.lastSyncAt == lastSyncAt) &&
             (identical(other.pendingQueueCount, pendingQueueCount) ||
                 other.pendingQueueCount == pendingQueueCount) &&
+            (identical(other.deadLetterCount, deadLetterCount) ||
+                other.deadLetterCount == deadLetterCount) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -346,12 +368,13 @@ class _SyncStatus implements SyncStatus {
     state,
     lastSyncAt,
     pendingQueueCount,
+    deadLetterCount,
     errorMessage,
   );
 
   @override
   String toString() {
-    return 'SyncStatus(state: $state, lastSyncAt: $lastSyncAt, pendingQueueCount: $pendingQueueCount, errorMessage: $errorMessage)';
+    return 'SyncStatus(state: $state, lastSyncAt: $lastSyncAt, pendingQueueCount: $pendingQueueCount, deadLetterCount: $deadLetterCount, errorMessage: $errorMessage)';
   }
 }
 
@@ -368,6 +391,7 @@ abstract mixin class _$SyncStatusCopyWith<$Res>
     SyncState state,
     DateTime? lastSyncAt,
     int? pendingQueueCount,
+    int deadLetterCount,
     String? errorMessage,
   });
 }
@@ -387,6 +411,7 @@ class __$SyncStatusCopyWithImpl<$Res> implements _$SyncStatusCopyWith<$Res> {
     Object? state = null,
     Object? lastSyncAt = freezed,
     Object? pendingQueueCount = freezed,
+    Object? deadLetterCount = null,
     Object? errorMessage = freezed,
   }) {
     return _then(
@@ -403,6 +428,10 @@ class __$SyncStatusCopyWithImpl<$Res> implements _$SyncStatusCopyWith<$Res> {
             ? _self.pendingQueueCount
             : pendingQueueCount // ignore: cast_nullable_to_non_nullable
                   as int?,
+        deadLetterCount: null == deadLetterCount
+            ? _self.deadLetterCount
+            : deadLetterCount // ignore: cast_nullable_to_non_nullable
+                  as int,
         errorMessage: freezed == errorMessage
             ? _self.errorMessage
             : errorMessage // ignore: cast_nullable_to_non_nullable

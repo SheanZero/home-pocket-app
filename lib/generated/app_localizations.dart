@@ -660,7 +660,7 @@ abstract class S {
   /// System theme
   ///
   /// In en, this message translates to:
-  /// **'System'**
+  /// **'Follow device settings'**
   String get themeSystem;
 
   /// Light theme
@@ -729,6 +729,138 @@ abstract class S {
   /// **'Data Management'**
   String get dataManagement;
 
+  /// No description provided for @settingsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGeneral;
+
+  /// No description provided for @settingsFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get settingsFamily;
+
+  /// No description provided for @settingsData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get settingsData;
+
+  /// No description provided for @settingsThisApp.
+  ///
+  /// In en, this message translates to:
+  /// **'This App'**
+  String get settingsThisApp;
+
+  /// No description provided for @settingsAdditional.
+  ///
+  /// In en, this message translates to:
+  /// **'Other settings'**
+  String get settingsAdditional;
+
+  /// No description provided for @settingsAdditionalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Week start, voice recognition, and notifications'**
+  String get settingsAdditionalDescription;
+
+  /// No description provided for @settingsNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get settingsNotSet;
+
+  /// No description provided for @settingsJoyTargetValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} Joy'**
+  String settingsJoyTargetValue(int value);
+
+  /// No description provided for @settingsLocalDataProtected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is protected on this device'**
+  String get settingsLocalDataProtected;
+
+  /// No description provided for @backupAndRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & Restore'**
+  String get backupAndRestore;
+
+  /// No description provided for @backupAndRestoreDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted file'**
+  String get backupAndRestoreDescription;
+
+  /// No description provided for @backupHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your data safely in your hands'**
+  String get backupHeroTitle;
+
+  /// No description provided for @backupHeroDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt your records and settings with a password, then save them on your device or in a cloud drive you choose.'**
+  String get backupHeroDescription;
+
+  /// No description provided for @backupEncryptionChip.
+  ///
+  /// In en, this message translates to:
+  /// **'AES-256-GCM'**
+  String get backupEncryptionChip;
+
+  /// No description provided for @backupCompressedChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Compressed'**
+  String get backupCompressedChip;
+
+  /// No description provided for @backupNoUploadChip.
+  ///
+  /// In en, this message translates to:
+  /// **'No automatic upload'**
+  String get backupNoUploadChip;
+
+  /// No description provided for @backupSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get backupSectionTitle;
+
+  /// No description provided for @restoreSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restoreSectionTitle;
+
+  /// No description provided for @backupPasswordNotStored.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is not stored in this app. If you forget it, the backup cannot be restored.'**
+  String get backupPasswordNotStored;
+
+  /// No description provided for @restoreReplacesData.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an .hpb file and replace current data'**
+  String get restoreReplacesData;
+
+  /// No description provided for @restoreWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current data will be replaced'**
+  String get restoreWarningTitle;
+
+  /// No description provided for @restoreWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If restoration fails, your current data will remain unchanged.'**
+  String get restoreWarningBody;
+
   /// Export backup action
   ///
   /// In en, this message translates to:
@@ -762,19 +894,19 @@ abstract class S {
   /// Delete all subtitle
   ///
   /// In en, this message translates to:
-  /// **'Permanently delete all records'**
+  /// **'Permanently delete data on this device'**
   String get deleteAllDataDescription;
 
   /// Delete all confirmation
   ///
   /// In en, this message translates to:
-  /// **'This action cannot be undone. Are you sure you want to delete all data?'**
+  /// **'This permanently deletes Home Pocket data on this device. It does not delete family data from other devices or send a server deletion request.'**
   String get deleteAllDataConfirmation;
 
   /// Delete all success
   ///
   /// In en, this message translates to:
-  /// **'All data deleted'**
+  /// **'Local data deleted'**
   String get allDataDeleted;
 
   /// Delete failure
@@ -992,6 +1124,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Edit Profile'**
   String get profileEdit;
+
+  /// No description provided for @profileEditPersonalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit personal information'**
+  String get profileEditPersonalInfo;
+
+  /// No description provided for @profileDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get profileDisplayName;
 
   /// No description provided for @profileCancel.
   ///
@@ -1287,6 +1431,48 @@ abstract class S {
   /// **'Last month (same period) {amount}'**
   String homeHeroPreviousMonthSubline(String amount);
 
+  /// Personal-mode title for the no-Joy-transactions Home invitation
+  ///
+  /// In en, this message translates to:
+  /// **'What made you smile today?'**
+  String get homeJoyEmptyTitleSingle;
+
+  /// Family-mode title for the no-Joy-transactions Home invitation
+  ///
+  /// In en, this message translates to:
+  /// **'Family joy today?'**
+  String get homeJoyEmptyTitleGroup;
+
+  /// Supporting copy for the no-Joy-transactions Home invitation
+  ///
+  /// In en, this message translates to:
+  /// **'Start with one small pleasure'**
+  String get homeJoyEmptySubtitle;
+
+  /// Free-form Joy entry action
+  ///
+  /// In en, this message translates to:
+  /// **'Add your own'**
+  String get homeJoyEmptyFree;
+
+  /// Coffee Joy-entry inspiration prompt
+  ///
+  /// In en, this message translates to:
+  /// **'A drink'**
+  String get homeJoyEmptyCoffee;
+
+  /// Book Joy-entry inspiration prompt
+  ///
+  /// In en, this message translates to:
+  /// **'A book'**
+  String get homeJoyEmptyBook;
+
+  /// Rest Joy-entry inspiration prompt
+  ///
+  /// In en, this message translates to:
+  /// **'A breather'**
+  String get homeJoyEmptyRest;
+
   /// Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)
   ///
   /// In en, this message translates to:
@@ -1371,13 +1557,13 @@ abstract class S {
   /// **'Your monthly favorite will appear here →'**
   String get homeBestJoyEmptySmall;
 
-  /// Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)
+  /// Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data.
   ///
   /// In en, this message translates to:
   /// **'Rate your biggest spend'**
   String get homeBestJoyAllNeutralBig;
 
-  /// Best Joy small line — all-neutral state (D-09)
+  /// Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data.
   ///
   /// In en, this message translates to:
   /// **'Make it your monthly favorite'**
@@ -1641,6 +1827,36 @@ abstract class S {
   /// **'e.g. Weekend projects'**
   String get categoryNameHint;
 
+  /// Section label for custom category icon and color choices
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get categoryAppearanceLabel;
+
+  /// Helper copy for custom category visual identity
+  ///
+  /// In en, this message translates to:
+  /// **'Makes it easy to spot in lists and charts.'**
+  String get categoryAppearanceDescription;
+
+  /// Placeholder name in the custom category appearance preview
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get categoryPreviewName;
+
+  /// Label above the custom category icon choices
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get categoryIconLabel;
+
+  /// Label above the custom category color choices
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get categoryColorLabel;
+
   /// Validation error for an empty custom category name
   ///
   /// In en, this message translates to:
@@ -1848,7 +2064,7 @@ abstract class S {
   /// Tab label to enter partner's pairing code
   ///
   /// In en, this message translates to:
-  /// **'Join Group'**
+  /// **'Join with an invite code'**
   String get familySyncEnterPartnerCode;
 
   /// Label for the pairing code
@@ -2097,6 +2313,54 @@ abstract class S {
   /// **'Regenerate invite failed: {message}'**
   String familySyncRegenerateInviteFailed(String message);
 
+  /// Title of the owner-only invite management sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a family member'**
+  String get familySyncInviteTitle;
+
+  /// Instructions shown above the owner invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with the person you want to invite.'**
+  String get familySyncInviteDescription;
+
+  /// Button label for copying the group invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get familySyncInviteCopy;
+
+  /// Success feedback after copying an invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code copied'**
+  String get familySyncInviteCopied;
+
+  /// Warning shown beside the explicit invite refresh action
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing invalidates the previous code immediately.'**
+  String get familySyncInviteRefreshHint;
+
+  /// Clarifies that invite-code expiry and join-request approval TTL are separate
+  ///
+  /// In en, this message translates to:
+  /// **'Code expiry only controls new applications. After applying, the owner has 24 hours to approve the request.'**
+  String get familySyncInviteApprovalWindowHint;
+
+  /// Text sent through the system share sheet for a group invite
+  ///
+  /// In en, this message translates to:
+  /// **'Join {groupName} in Home Pocket with invite code {inviteCode}.'**
+  String familySyncInviteShareMessage(String groupName, String inviteCode);
+
+  /// Feedback when invite management is attempted without owner permission
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group owner can manage invite codes.'**
+  String get familySyncInviteOwnerOnly;
+
   /// Section title for group members
   ///
   /// In en, this message translates to:
@@ -2292,7 +2556,7 @@ abstract class S {
   /// Title for the group management screen
   ///
   /// In en, this message translates to:
-  /// **'Group Management'**
+  /// **'Family Management'**
   String get familySyncGroupManagement;
 
   /// Short status label indicating the group is synced
@@ -2340,8 +2604,38 @@ abstract class S {
   /// No description provided for @groupCreate.
   ///
   /// In en, this message translates to:
-  /// **'Create Group'**
+  /// **'Create a new family'**
   String get groupCreate;
+
+  /// No description provided for @groupCreateConfirmationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your group and invite code are created only after you confirm.'**
+  String get groupCreateConfirmationHint;
+
+  /// No description provided for @groupCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the group: {message}'**
+  String groupCreateFailed(String message);
+
+  /// No description provided for @familySyncSingleGroupConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This device already has a family group or a pending join request. Leave or cancel it before creating or joining another group.'**
+  String get familySyncSingleGroupConflict;
+
+  /// Title for the family-sync network unavailable dialog
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get familySyncNetworkUnavailableTitle;
+
+  /// Friendly guidance shown when a family-sync operation cannot reach the relay
+  ///
+  /// In en, this message translates to:
+  /// **'Family sharing needs an internet connection. Check your connection and make sure Home Pocket can use mobile data, then try again.'**
+  String get familySyncNetworkUnavailableMessage;
 
   /// No description provided for @groupName.
   ///
@@ -2394,7 +2688,7 @@ abstract class S {
   /// No description provided for @groupConfirmJoin.
   ///
   /// In en, this message translates to:
-  /// **'Confirm Join'**
+  /// **'Request to join'**
   String get groupConfirmJoin;
 
   /// No description provided for @groupJoinTarget.
@@ -2406,13 +2700,13 @@ abstract class S {
   /// No description provided for @groupWaitingApproval.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for Owner approval...'**
+  /// **'Waiting for owner approval'**
   String get groupWaitingApproval;
 
   /// No description provided for @groupWaitingDesc.
   ///
   /// In en, this message translates to:
-  /// **'{name} is reviewing your request'**
+  /// **'{name} is reviewing your join request.'**
   String groupWaitingDesc(String name);
 
   /// No description provided for @groupJoinRequest.
@@ -2490,32 +2784,246 @@ abstract class S {
   /// No description provided for @groupChoiceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Connect with family'**
+  /// **'How would you like to start?'**
   String get groupChoiceTitle;
 
   /// No description provided for @groupChoiceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Manage your household budget together'**
+  /// **'You can join one family at a time.'**
   String get groupChoiceSubtitle;
 
   /// No description provided for @groupCreateDesc.
   ///
   /// In en, this message translates to:
-  /// **'Create a new family group and invite members'**
+  /// **'Issue an invite code and approve each member'**
   String get groupCreateDesc;
 
   /// No description provided for @groupJoinDesc.
   ///
   /// In en, this message translates to:
-  /// **'Enter an invite code to join an existing group'**
+  /// **'Approval from the family owner is required'**
   String get groupJoinDesc;
 
   /// No description provided for @groupE2eeHint.
   ///
   /// In en, this message translates to:
-  /// **'Privacy protected with E2E encryption'**
+  /// **'Shared family ledgers sync with encryption. Private ledgers stay on this device.'**
   String get groupE2eeHint;
+
+  /// No description provided for @familyFlowCreateStepCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get familyFlowCreateStepCreate;
+
+  /// No description provided for @familyFlowCreateHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Create family'**
+  String get familyFlowCreateHeader;
+
+  /// No description provided for @familyFlowJoinHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Join family'**
+  String get familyFlowJoinHeader;
+
+  /// No description provided for @familyFlowReviewFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Review family details'**
+  String get familyFlowReviewFamily;
+
+  /// No description provided for @familyFlowCreateStepInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get familyFlowCreateStepInvite;
+
+  /// No description provided for @familyFlowCreateStepApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval'**
+  String get familyFlowCreateStepApprove;
+
+  /// No description provided for @familyFlowJoinStepCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get familyFlowJoinStepCode;
+
+  /// No description provided for @familyFlowJoinStepConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get familyFlowJoinStepConfirm;
+
+  /// No description provided for @familyFlowJoinStepWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait'**
+  String get familyFlowJoinStepWait;
+
+  /// No description provided for @familyFlowOwnerSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Owner'**
+  String familyFlowOwnerSummary(String name);
+
+  /// No description provided for @familyFlowCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new family'**
+  String get familyFlowCreateTitle;
+
+  /// No description provided for @familyFlowCreateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your family to issue a secure invite code.'**
+  String get familyFlowCreateSubtitle;
+
+  /// No description provided for @familyFlowCreateInviteHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone requests to join, you will approve them in the next step.'**
+  String get familyFlowCreateInviteHelper;
+
+  /// No description provided for @familyFlowRegenerateInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Reissue'**
+  String get familyFlowRegenerateInvite;
+
+  /// No description provided for @familySyncInviteRegenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code reissued'**
+  String get familySyncInviteRegenerated;
+
+  /// No description provided for @familyFlowJoinCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit invite code'**
+  String get familyFlowJoinCodeTitle;
+
+  /// No description provided for @familyFlowJoinCodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the digits you received from the family owner.'**
+  String get familyFlowJoinCodeSubtitle;
+
+  /// No description provided for @familyFlowJoinBeforeApprovalHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'No ledgers sync until your request is approved.'**
+  String get familyFlowJoinBeforeApprovalHelper;
+
+  /// No description provided for @familyFlowJoinConfirmHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm family'**
+  String get familyFlowJoinConfirmHeader;
+
+  /// No description provided for @familyFlowJoinConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the family you are joining'**
+  String get familyFlowJoinConfirmTitle;
+
+  /// No description provided for @familyFlowJoinConfirmSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your join request will be sent to this family.'**
+  String get familyFlowJoinConfirmSubtitle;
+
+  /// No description provided for @familyFlowPublicKeyVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Public key verified'**
+  String get familyFlowPublicKeyVerified;
+
+  /// No description provided for @familyFlowPrivateLedgerHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Your private ledgers are never shared with the family.'**
+  String get familyFlowPrivateLedgerHelper;
+
+  /// No description provided for @familyFlowWaitingHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get familyFlowWaitingHeader;
+
+  /// No description provided for @familyFlowWaitingFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining: {groupName}'**
+  String familyFlowWaitingFamily(String groupName);
+
+  /// No description provided for @familyFlowApprovalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New join request'**
+  String get familyFlowApprovalTitle;
+
+  /// No description provided for @familyFlowApprovalSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the person and device before approving.'**
+  String get familyFlowApprovalSubtitle;
+
+  /// No description provided for @familyFlowApprovalDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Request from {deviceName}'**
+  String familyFlowApprovalDevice(String deviceName);
+
+  /// No description provided for @familyFlowDeviceKeyVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Device public key verified'**
+  String get familyFlowDeviceKeyVerified;
+
+  /// No description provided for @familyFlowApprovalHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'After approval, this device securely syncs the family\'s shared ledgers.'**
+  String get familyFlowApprovalHelper;
+
+  /// No description provided for @familyFlowApprovalEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests to review'**
+  String get familyFlowApprovalEmptyTitle;
+
+  /// No description provided for @familyFlowPendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'New join requests · {count}'**
+  String familyFlowPendingRequests(int count);
+
+  /// No description provided for @familyFlowViewRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Review requests'**
+  String get familyFlowViewRequests;
+
+  /// No description provided for @familyFlowSyncSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync settings'**
+  String get familyFlowSyncSettings;
+
+  /// No description provided for @familyFlowManagementSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner: {ownerName} · {count} members · {syncStatus}'**
+  String familyFlowManagementSummary(
+    String ownerName,
+    int count,
+    String syncStatus,
+  );
 
   /// No description provided for @groupInviteMembers.
   ///
@@ -2526,7 +3034,7 @@ abstract class S {
   /// No description provided for @groupDisband.
   ///
   /// In en, this message translates to:
-  /// **'Disband Group'**
+  /// **'Disband Family'**
   String get groupDisband;
 
   /// No description provided for @groupCancel.
@@ -2535,16 +3043,106 @@ abstract class S {
   /// **'Cancel'**
   String get groupCancel;
 
+  /// No description provided for @groupCancelRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel join request'**
+  String get groupCancelRequest;
+
+  /// No description provided for @groupRejectRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to reject join request: {message}'**
+  String groupRejectRequestFailed(String message);
+
+  /// No description provided for @groupRequestRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request declined'**
+  String get groupRequestRejectedTitle;
+
+  /// No description provided for @groupRequestRejectedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The group owner declined this request. You can try another invite code.'**
+  String get groupRequestRejectedDescription;
+
+  /// No description provided for @groupRequestCancelledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request cancelled'**
+  String get groupRequestCancelledTitle;
+
+  /// No description provided for @groupRequestCancelledDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request was cancelled. You can submit a new request at any time.'**
+  String get groupRequestCancelledDescription;
+
+  /// No description provided for @groupRequestExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request expired'**
+  String get groupRequestExpiredTitle;
+
+  /// No description provided for @groupRequestExpiredDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was not reviewed within 24 hours. Ask for a current invite code and try again.'**
+  String get groupRequestExpiredDescription;
+
+  /// No description provided for @groupTryAnotherInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter another invite code'**
+  String get groupTryAnotherInvite;
+
+  /// No description provided for @groupKeyRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring the family key'**
+  String get groupKeyRecoveryTitle;
+
+  /// No description provided for @groupKeyRecoveryWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership is active. Another active family device must securely re-seal the current key for this device. The relay cannot read or recreate it.'**
+  String get groupKeyRecoveryWaiting;
+
+  /// No description provided for @groupKeyRecoveryUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No active device supplied the current key before the request expired. Because the relay is zero-knowledge, it cannot recover the key. You can retry or safely leave/dissolve this family and create a new one.'**
+  String get groupKeyRecoveryUnavailable;
+
+  /// No description provided for @groupKeyRecoveryRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'A recovery request was sent recently. Wait a moment before notifying the other devices again.'**
+  String get groupKeyRecoveryRateLimited;
+
+  /// No description provided for @groupKeyRecoveryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry key recovery'**
+  String get groupKeyRecoveryRetry;
+
+  /// No description provided for @groupKeyRecoveryRebuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave and set up a new family'**
+  String get groupKeyRecoveryRebuild;
+
   /// No description provided for @groupWaitingHint1.
   ///
   /// In en, this message translates to:
-  /// **'Please wait for the notification'**
+  /// **'It\'s safe to close the app.'**
   String get groupWaitingHint1;
 
   /// No description provided for @groupWaitingHint2.
   ///
   /// In en, this message translates to:
-  /// **'It\'s safe to close the app'**
+  /// **'Sync starts automatically after approval.'**
   String get groupWaitingHint2;
 
   /// No description provided for @groupCodeHint.
@@ -5215,6 +5813,36 @@ abstract class S {
   /// **'Protect the app with a passcode on launch and when returning to the foreground.'**
   String get securityAppLockDescription;
 
+  /// No description provided for @securityAppLockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get securityAppLockOff;
+
+  /// No description provided for @securityAppLockPinOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN'**
+  String get securityAppLockPinOnly;
+
+  /// No description provided for @securityAppLockBiometricAndPin.
+  ///
+  /// In en, this message translates to:
+  /// **'{biometric} + PIN'**
+  String securityAppLockBiometricAndPin(String biometric);
+
+  /// No description provided for @securityFaceId.
+  ///
+  /// In en, this message translates to:
+  /// **'Face ID'**
+  String get securityFaceId;
+
+  /// No description provided for @securityFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint'**
+  String get securityFingerprint;
+
   /// SecuritySection: biometric-unlock sub-toggle title, shown when app lock is on (D-11)
   ///
   /// In en, this message translates to:
@@ -5274,6 +5902,60 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Couldn\'t open the browser'**
   String get sponsorLaunchError;
+
+  /// No description provided for @legalNavigationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy, terms, and open-source licenses'**
+  String get legalNavigationSubtitle;
+
+  /// No description provided for @privacyPolicyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How your data is handled'**
+  String get privacyPolicyDescription;
+
+  /// No description provided for @termsOfUseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Service terms and conditions'**
+  String get termsOfUseDescription;
+
+  /// No description provided for @openSourceLicensesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Libraries used by the app'**
+  String get openSourceLicensesDescription;
+
+  /// No description provided for @sponsorSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Development'**
+  String get sponsorSectionTitle;
+
+  /// No description provided for @sponsorCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help this quiet household ledger grow'**
+  String get sponsorCardTitle;
+
+  /// No description provided for @sponsorCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The support and contact page opens in your external browser. It does not affect app features or access to your data.'**
+  String get sponsorCardBody;
+
+  /// No description provided for @sponsorButton.
+  ///
+  /// In en, this message translates to:
+  /// **'About supporting us'**
+  String get sponsorButton;
+
+  /// No description provided for @legalLinkLaunchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the link'**
+  String get legalLinkLaunchError;
 
   /// Trend card insight strip — total tab, no previous-month reference
   ///
@@ -5348,6 +6030,300 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Collapse joy spending breakdown'**
   String get analyticsJoyDrawerToggleCollapse;
+
+  /// No description provided for @syncQueueNeedsAttentionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get syncQueueNeedsAttentionBadge;
+
+  /// No description provided for @syncQueueNeedsAttentionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Some changes need your attention'**
+  String get syncQueueNeedsAttentionDescription;
+
+  /// No description provided for @syncQueueNeedsAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync needs attention'**
+  String get syncQueueNeedsAttentionTitle;
+
+  /// No description provided for @syncQueuePendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes waiting to sync'**
+  String get syncQueuePendingTitle;
+
+  /// No description provided for @syncQueueCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{pendingCount} waiting · {deadLetterCount} need attention'**
+  String syncQueueCounts(int pendingCount, int deadLetterCount);
+
+  /// No description provided for @syncQueueReconcileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The encrypted changes are preserved. Retry them first; a full reconciliation is still recommended afterward.'**
+  String get syncQueueReconcileHint;
+
+  /// No description provided for @syncQueueRetryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry all'**
+  String get syncQueueRetryAll;
+
+  /// No description provided for @syncQueueDiscardAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get syncQueueDiscardAll;
+
+  /// No description provided for @syncQueueRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Some changes still need attention'**
+  String get syncQueueRetryFailed;
+
+  /// No description provided for @syncQueueRetrySucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued changes sent. Reconciliation is still recommended.'**
+  String get syncQueueRetrySucceeded;
+
+  /// No description provided for @syncQueueDiscardConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsent changes?'**
+  String get syncQueueDiscardConfirmTitle;
+
+  /// No description provided for @syncQueueDiscardConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently removes the preserved outbound changes from this device. This cannot be undone.'**
+  String get syncQueueDiscardConfirmBody;
+
+  /// No description provided for @syncQueueCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get syncQueueCancel;
+
+  /// No description provided for @syncQueueDiscardConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard permanently'**
+  String get syncQueueDiscardConfirmAction;
+
+  /// No description provided for @syncQueueDiscardFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The unsent changes could not be discarded'**
+  String get syncQueueDiscardFailed;
+
+  /// No description provided for @inboundSyncSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Received changes held for review'**
+  String get inboundSyncSectionTitle;
+
+  /// No description provided for @inboundSyncCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} received changes quarantined'**
+  String inboundSyncCount(int count);
+
+  /// No description provided for @inboundSyncErrorCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe code: {errorCode}'**
+  String inboundSyncErrorCode(String errorCode);
+
+  /// No description provided for @inboundSyncRetryOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get inboundSyncRetryOne;
+
+  /// No description provided for @inboundSyncDiscardOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard received change'**
+  String get inboundSyncDiscardOne;
+
+  /// No description provided for @inboundSyncDiscardConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this received change?'**
+  String get inboundSyncDiscardConfirmTitle;
+
+  /// No description provided for @inboundSyncDiscardConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently removes the quarantined received change from this device. The relay copy was already acknowledged and this cannot be undone.'**
+  String get inboundSyncDiscardConfirmBody;
+
+  /// No description provided for @syncAttentionDiscardConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard preserved sync changes?'**
+  String get syncAttentionDiscardConfirmTitle;
+
+  /// No description provided for @syncAttentionDiscardConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently removes all preserved outbound failures and quarantined received changes from this device. This cannot be undone.'**
+  String get syncAttentionDiscardConfirmBody;
+
+  /// No description provided for @familySyncTransferOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer ownership'**
+  String get familySyncTransferOwner;
+
+  /// No description provided for @familySyncTransferOwnerSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the new owner'**
+  String get familySyncTransferOwnerSelect;
+
+  /// No description provided for @familySyncTransferOwnerConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer ownership?'**
+  String get familySyncTransferOwnerConfirmTitle;
+
+  /// No description provided for @familySyncTransferOwnerConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{memberName} will manage members, invitations, and the family group.'**
+  String familySyncTransferOwnerConfirmBody(String memberName);
+
+  /// No description provided for @familySyncTransferOwnerFinalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Final confirmation'**
+  String get familySyncTransferOwnerFinalTitle;
+
+  /// No description provided for @familySyncTransferOwnerFinalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A new encryption key will be issued to every active device. After transfer, you become a regular member. Transfer ownership to {memberName}?'**
+  String familySyncTransferOwnerFinalBody(String memberName);
+
+  /// No description provided for @familySyncTransferOwnerSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Ownership transferred securely'**
+  String get familySyncTransferOwnerSuccess;
+
+  /// No description provided for @familySyncTransferOwnerNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ownership actions are unavailable until the current encryption key is ready'**
+  String get familySyncTransferOwnerNotReady;
+
+  /// No description provided for @familySyncTransferOwnerInvalidTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different active member'**
+  String get familySyncTransferOwnerInvalidTarget;
+
+  /// No description provided for @familySyncTransferOwnerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not transfer ownership: {message}'**
+  String familySyncTransferOwnerFailed(String message);
+
+  /// No description provided for @transactionPhotoBoundaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt photo'**
+  String get transactionPhotoBoundaryTitle;
+
+  /// No description provided for @transactionPhotoLocalOnlyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This receipt photo stays on this device and is not included in family sync or backups.'**
+  String get transactionPhotoLocalOnlyBody;
+
+  /// No description provided for @transactionPhotoUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt photo is available only on the device that recorded this transaction and is not included in family sync or backups.'**
+  String get transactionPhotoUnavailableBody;
+
+  /// No description provided for @familySyncMemberHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'MEMBER HISTORY'**
+  String get familySyncMemberHistory;
+
+  /// No description provided for @familySyncRequestedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested {date}'**
+  String familySyncRequestedAt(String date);
+
+  /// No description provided for @familySyncJoinedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{role} · Joined {date}'**
+  String familySyncJoinedAt(String role, String date);
+
+  /// No description provided for @familySyncConfirmedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{role} · Confirmed {date}'**
+  String familySyncConfirmedAt(String role, String date);
+
+  /// No description provided for @familySyncRemovedAtReason.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} · {date}'**
+  String familySyncRemovedAtReason(String reason, String date);
+
+  /// No description provided for @familySyncRemovalReasonLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left the family'**
+  String get familySyncRemovalReasonLeft;
+
+  /// No description provided for @familySyncRemovalReasonRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed by owner'**
+  String get familySyncRemovalReasonRemoved;
+
+  /// No description provided for @familySyncRemovalReasonDissolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Family dissolved'**
+  String get familySyncRemovalReasonDissolved;
+
+  /// No description provided for @familySyncRemovalReasonRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Request rejected'**
+  String get familySyncRemovalReasonRejected;
+
+  /// No description provided for @familySyncRemovalReasonCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled'**
+  String get familySyncRemovalReasonCancelled;
+
+  /// No description provided for @familySyncRemovalReasonExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Request expired'**
+  String get familySyncRemovalReasonExpired;
+
+  /// No description provided for @familySyncRemovalReasonUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership ended'**
+  String get familySyncRemovalReasonUnknown;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

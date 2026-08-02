@@ -22,18 +22,24 @@ class CreateCategoryParams {
     required this.name,
     this.parentId,
     this.ledgerType,
+    this.icon,
+    this.color,
   });
 
   final String name;
   final String? parentId;
   final LedgerType? ledgerType;
+  final String? icon;
+  final String? color;
 }
 
 /// Creates custom L1/L2 categories while preserving the ledger invariant.
 ///
 /// Every L1 is written together with its mandatory ledger configuration in a
-/// single [UnitOfWork]. L2 categories inherit the parent L1's ledger and visual
-/// identity, so they do not create a redundant config row.
+/// single [UnitOfWork]. Its visual identity uses the caller's icon and color
+/// when supplied, with safe defaults for non-UI callers. L2 categories inherit
+/// the parent L1's ledger and visual identity, so they do not create a
+/// redundant config row.
 class CreateCategoryUseCase {
   CreateCategoryUseCase({
     required CategoryRepository categoryRepository,
@@ -103,11 +109,21 @@ class CreateCategoryUseCase {
               category.sortOrder > current ? category.sortOrder : current,
         ) +
         1;
+    final requestedIcon = params.icon?.trim();
+    final requestedColor = params.color?.trim().toUpperCase();
+    final l1Icon = requestedIcon == null || requestedIcon.isEmpty
+        ? _defaultL1Icon
+        : requestedIcon;
+    final l1Color =
+        requestedColor != null &&
+            RegExp(r'^#[0-9A-F]{6}$').hasMatch(requestedColor)
+        ? requestedColor
+        : _defaultL1Color;
     final category = Category(
       id: _idGenerator(),
       name: name,
-      icon: parent?.icon ?? _defaultL1Icon,
-      color: parent?.color ?? _defaultL1Color,
+      icon: parent?.icon ?? l1Icon,
+      color: parent?.color ?? l1Color,
       parentId: parentId,
       level: parent == null ? 1 : 2,
       isSystem: false,

@@ -19,6 +19,8 @@ mixin _$UserProfile {
   String? get avatarImagePath;
   DateTime get createdAt;
   DateTime get updatedAt;
+  int get syncRevision;
+  String get syncOriginDeviceId;
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.
@@ -45,7 +47,11 @@ mixin _$UserProfile {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.syncRevision, syncRevision) ||
+                other.syncRevision == syncRevision) &&
+            (identical(other.syncOriginDeviceId, syncOriginDeviceId) ||
+                other.syncOriginDeviceId == syncOriginDeviceId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -58,11 +64,13 @@ mixin _$UserProfile {
     avatarImagePath,
     createdAt,
     updatedAt,
+    syncRevision,
+    syncOriginDeviceId,
   );
 
   @override
   String toString() {
-    return 'UserProfile(id: $id, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserProfile(id: $id, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
   }
 }
 
@@ -80,6 +88,8 @@ abstract mixin class $UserProfileCopyWith<$Res> {
     String? avatarImagePath,
     DateTime createdAt,
     DateTime updatedAt,
+    int syncRevision,
+    String syncOriginDeviceId,
   });
 }
 
@@ -101,6 +111,8 @@ class _$UserProfileCopyWithImpl<$Res> implements $UserProfileCopyWith<$Res> {
     Object? avatarImagePath = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? syncRevision = null,
+    Object? syncOriginDeviceId = null,
   }) {
     return _then(
       _self.copyWith(
@@ -128,6 +140,14 @@ class _$UserProfileCopyWithImpl<$Res> implements $UserProfileCopyWith<$Res> {
             ? _self.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        syncRevision: null == syncRevision
+            ? _self.syncRevision
+            : syncRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        syncOriginDeviceId: null == syncOriginDeviceId
+            ? _self.syncOriginDeviceId
+            : syncOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -233,6 +253,8 @@ extension UserProfilePatterns on UserProfile {
       String? avatarImagePath,
       DateTime createdAt,
       DateTime updatedAt,
+      int syncRevision,
+      String syncOriginDeviceId,
     )?
     $default, {
     required TResult orElse(),
@@ -247,6 +269,8 @@ extension UserProfilePatterns on UserProfile {
           _that.avatarImagePath,
           _that.createdAt,
           _that.updatedAt,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
         );
       case _:
         return orElse();
@@ -275,6 +299,8 @@ extension UserProfilePatterns on UserProfile {
       String? avatarImagePath,
       DateTime createdAt,
       DateTime updatedAt,
+      int syncRevision,
+      String syncOriginDeviceId,
     )
     $default,
   ) {
@@ -288,6 +314,8 @@ extension UserProfilePatterns on UserProfile {
           _that.avatarImagePath,
           _that.createdAt,
           _that.updatedAt,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -315,6 +343,8 @@ extension UserProfilePatterns on UserProfile {
       String? avatarImagePath,
       DateTime createdAt,
       DateTime updatedAt,
+      int syncRevision,
+      String syncOriginDeviceId,
     )?
     $default,
   ) {
@@ -328,6 +358,8 @@ extension UserProfilePatterns on UserProfile {
           _that.avatarImagePath,
           _that.createdAt,
           _that.updatedAt,
+          _that.syncRevision,
+          _that.syncOriginDeviceId,
         );
       case _:
         return null;
@@ -345,6 +377,8 @@ class _UserProfile implements UserProfile {
     this.avatarImagePath,
     required this.createdAt,
     required this.updatedAt,
+    this.syncRevision = 0,
+    this.syncOriginDeviceId = '',
   });
   factory _UserProfile.fromJson(Map<String, dynamic> json) =>
       _$UserProfileFromJson(json);
@@ -361,6 +395,12 @@ class _UserProfile implements UserProfile {
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
+  @override
+  @JsonKey()
+  final int syncRevision;
+  @override
+  @JsonKey()
+  final String syncOriginDeviceId;
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.
@@ -390,7 +430,11 @@ class _UserProfile implements UserProfile {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.syncRevision, syncRevision) ||
+                other.syncRevision == syncRevision) &&
+            (identical(other.syncOriginDeviceId, syncOriginDeviceId) ||
+                other.syncOriginDeviceId == syncOriginDeviceId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -403,11 +447,13 @@ class _UserProfile implements UserProfile {
     avatarImagePath,
     createdAt,
     updatedAt,
+    syncRevision,
+    syncOriginDeviceId,
   );
 
   @override
   String toString() {
-    return 'UserProfile(id: $id, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserProfile(id: $id, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
   }
 }
 
@@ -427,6 +473,8 @@ abstract mixin class _$UserProfileCopyWith<$Res>
     String? avatarImagePath,
     DateTime createdAt,
     DateTime updatedAt,
+    int syncRevision,
+    String syncOriginDeviceId,
   });
 }
 
@@ -448,6 +496,8 @@ class __$UserProfileCopyWithImpl<$Res> implements _$UserProfileCopyWith<$Res> {
     Object? avatarImagePath = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? syncRevision = null,
+    Object? syncOriginDeviceId = null,
   }) {
     return _then(
       _UserProfile(
@@ -475,6 +525,14 @@ class __$UserProfileCopyWithImpl<$Res> implements _$UserProfileCopyWith<$Res> {
             ? _self.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        syncRevision: null == syncRevision
+            ? _self.syncRevision
+            : syncRevision // ignore: cast_nullable_to_non_nullable
+                  as int,
+        syncOriginDeviceId: null == syncOriginDeviceId
+            ? _self.syncOriginDeviceId
+            : syncOriginDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }

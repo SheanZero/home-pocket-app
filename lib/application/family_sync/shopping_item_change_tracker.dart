@@ -10,12 +10,10 @@ import '../../features/shopping_list/domain/models/shopping_item.dart';
 /// is recorded here. On incrementalPush, all pending operations are flushed
 /// and pushed.
 ///
-/// In-memory only. The loss window is a hard kill INSIDE the 10s debounce:
-/// onAppPaused already flushes pending ops via incrementalPush, so normal
-/// backgrounding is safe. Ops lost to a hard kill are reconciled at the next
-/// FULL SYNC (pairing-time initialSync, or any future full-sync trigger),
-/// which pushes all local PUBLIC shopping items as idempotent create ops —
-/// full sync does NOT run on app launch.
+/// This in-memory tracker is retained for non-durable repository adapters and
+/// tests. Production Drift mutations use the semantic family-sync outbox in
+/// the same transaction as the business row; full sync remains a versioned
+/// reconciliation fallback for all PUBLIC rows, including tombstones.
 ///
 /// Privacy gate (D37-06): This tracker enforces a SECOND safety net —
 /// trackCreate and trackUpdate silently drop private items. The primary
@@ -72,6 +70,9 @@ class ShoppingItemChangeTracker {
     }
     return ops;
   }
+
+  /// Discards identity-bound transient operations during a local privacy wipe.
+  void clear() => _pendingOps.clear();
 
   /// Number of pending operations.
   int get pendingCount => _pendingOps.length;

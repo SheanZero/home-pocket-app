@@ -2,7 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/analytics_category_palette.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -116,6 +115,25 @@ class DonutHero extends ConsumerWidget {
 
   bool get _memberMode => members != null;
 
+  IconData _categoryIcon(String categoryId) {
+    final systemCategory = defaultCategoryFromId(categoryId);
+    if (systemCategory != null) {
+      return parentCategoryIconForCategory(systemCategory);
+    }
+    final category = categoryMap[categoryId];
+    return category == null
+        ? parentCategoryIconFromId(categoryId)
+        : parentCategoryIconForCategory(category);
+  }
+
+  String _categoryName(String categoryId, Locale locale) {
+    return categoryNameForDisplay(
+      categoryId: categoryId,
+      category: categoryMap[categoryId],
+      locale: locale,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
@@ -198,9 +216,7 @@ class DonutHero extends ConsumerWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    parentCategoryIconFromId(
-                                      entry.value.categoryId,
-                                    ),
+                                    _categoryIcon(entry.value.categoryId),
                                     size: 15,
                                     color: palette.card,
                                   ),
@@ -300,11 +316,8 @@ class DonutHero extends ConsumerWidget {
             key: ValueKey('donut_legend_row_${entry.value.categoryId}'),
             color: rowColors[entry.key],
             // TI1-ICON-01: L1 (top-level) category icon before the name.
-            leadingIcon: parentCategoryIconFromId(entry.value.categoryId),
-            name: CategoryLocalizationService.resolveFromId(
-              entry.value.categoryId,
-              locale,
-            ),
+            leadingIcon: _categoryIcon(entry.value.categoryId),
+            name: _categoryName(entry.value.categoryId, locale),
             amount: NumberFormatter.formatCurrency(
               entry.value.amount,
               'JPY',

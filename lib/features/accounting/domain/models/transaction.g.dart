@@ -31,6 +31,15 @@ _Transaction _$TransactionFromJson(Map<String, dynamic> json) => _Transaction(
   isPrivate: json['isPrivate'] as bool? ?? false,
   isSynced: json['isSynced'] as bool? ?? false,
   isDeleted: json['isDeleted'] as bool? ?? false,
+  syncRevision: (json['syncRevision'] as num?)?.toInt() ?? 0,
+  syncOriginDeviceId: json['syncOriginDeviceId'] as String? ?? '',
+  familySyncVisibility:
+      $enumDecodeNullable(
+        _$FamilySyncVisibilityEnumMap,
+        json['familySyncVisibility'],
+      ) ??
+      FamilySyncVisibility.localOnly,
+  familySharedRevision: (json['familySharedRevision'] as num?)?.toInt() ?? 0,
   joyFullness: (json['joyFullness'] as num?)?.toInt() ?? 2,
   entrySource:
       $enumDecodeNullable(_$EntrySourceEnumMap, json['entrySource']) ??
@@ -61,6 +70,11 @@ Map<String, dynamic> _$TransactionToJson(_Transaction instance) =>
       'isPrivate': instance.isPrivate,
       'isSynced': instance.isSynced,
       'isDeleted': instance.isDeleted,
+      'syncRevision': instance.syncRevision,
+      'syncOriginDeviceId': instance.syncOriginDeviceId,
+      'familySyncVisibility':
+          _$FamilySyncVisibilityEnumMap[instance.familySyncVisibility]!,
+      'familySharedRevision': instance.familySharedRevision,
       'joyFullness': instance.joyFullness,
       'entrySource': _$EntrySourceEnumMap[instance.entrySource]!,
     };
@@ -72,6 +86,13 @@ const _$TransactionTypeEnumMap = {
 };
 
 const _$LedgerTypeEnumMap = {LedgerType.daily: 'daily', LedgerType.joy: 'joy'};
+
+const _$FamilySyncVisibilityEnumMap = {
+  FamilySyncVisibility.localOnly: 'localOnly',
+  FamilySyncVisibility.shared: 'shared',
+  FamilySyncVisibility.withdrawalPending: 'withdrawalPending',
+  FamilySyncVisibility.withdrawn: 'withdrawn',
+};
 
 const _$EntrySourceEnumMap = {
   EntrySource.manual: 'manual',

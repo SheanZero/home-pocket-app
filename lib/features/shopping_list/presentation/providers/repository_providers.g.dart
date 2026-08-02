@@ -130,7 +130,7 @@ final class CreateShoppingItemUseCaseProvider
 }
 
 String _$createShoppingItemUseCaseHash() =>
-    r'ba9abda10af0bd2a4ad8d5e1f2bc3f20f9deb0a9';
+    r'80e5582438b7fc3073c40b7de0a92499f75ebb87';
 
 /// [ToggleItemCompletedUseCase] provider wired with repo + sync deps.
 
@@ -184,7 +184,7 @@ final class ToggleItemCompletedUseCaseProvider
 }
 
 String _$toggleItemCompletedUseCaseHash() =>
-    r'3dcb5ae0a44bcb4677d4eaa3b3673c3464826407';
+    r'6833b8a4b128b416533c93bb954b669da4a7b9fe';
 
 /// [DeleteShoppingItemUseCase] provider wired with repo + sync deps.
 
@@ -237,7 +237,7 @@ final class DeleteShoppingItemUseCaseProvider
 }
 
 String _$deleteShoppingItemUseCaseHash() =>
-    r'1af571467047be7810f518919f2fe36af85b4917';
+    r'2bfd83076822b59b2dc38c6bbee1e2ee5609217e';
 
 /// [UpdateShoppingItemUseCase] provider wired with repo + sync deps.
 
@@ -290,7 +290,7 @@ final class UpdateShoppingItemUseCaseProvider
 }
 
 String _$updateShoppingItemUseCaseHash() =>
-    r'c0d100c9d2a03b8f332929c1dd11580e9243377a';
+    r'c4e40d9a158ac092841dd28ec6aa37316c649a6f';
 
 /// [ReorderShoppingItemsUseCase] provider — repo only, no sync deps.
 ///
@@ -407,7 +407,7 @@ final class ClearCompletedItemsUseCaseProvider
 }
 
 String _$clearCompletedItemsUseCaseHash() =>
-    r'2c9c325560e5e577f42ccc1462742afe722a026b';
+    r'5b5f42eee206bfd8bd890e9d9e8ab36845698f88';
 
 /// Derived stream of filtered shopping items for the current segment.
 ///

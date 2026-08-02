@@ -52,6 +52,38 @@ void main() {
   }
 
   group('_joyOnly filter / daily rows excluded', () {
+    test('score-2 Joy is included by every core happiness query', () async {
+      await seedTx(id: 'score_2', amount: 500, joyFullness: 2);
+
+      final overview = await dao.getJoyFullnessOverview(
+        bookId: 'book_joy',
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
+      final rows = await dao.getJoyRowsForJoyContribution(
+        bookId: 'book_joy',
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
+      final distribution = await dao.getSatisfactionDistribution(
+        bookId: 'book_joy',
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
+      final best = await dao.getBestJoyMoment(
+        bookId: 'book_joy',
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
+
+      expect(overview.count, 1);
+      expect(overview.avgSatisfaction, 2);
+      expect(rows.single.joyFullness, 2);
+      expect(distribution.single.score, 2);
+      expect(distribution.single.count, 1);
+      expect(best?.joyFullness, 2);
+    });
+
     test('overview counts only active joy expenses', () async {
       await seedTx(id: 'joy_1', amount: 1000, joyFullness: 4);
       await seedTx(id: 'joy_2', amount: 2000, joyFullness: 8);

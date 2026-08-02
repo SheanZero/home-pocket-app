@@ -6,6 +6,51 @@ import 'package:http/http.dart' as http;
 
 import '../crypto/services/key_manager.dart';
 
+/// A bounded page returned by the relay pull endpoint.
+///
+/// The HTTP client intentionally continues to expose JSON maps for backwards
+/// compatibility with existing callers. Pull consumers should parse through
+/// this model so the server's pagination contract is validated in one place.
+class RelayPullResponse {
+  RelayPullResponse({required this.messages, required this.hasMore});
+
+  static const int maxMessagesPerPage = 100;
+
+  final List<Map<String, dynamic>> messages;
+  final bool hasMore;
+
+  factory RelayPullResponse.fromJson(Map<String, dynamic> json) {
+    final rawMessages = json['messages'];
+    if (rawMessages is! List) {
+      throw const FormatException('Relay pull response is missing messages');
+    }
+    if (rawMessages.length > maxMessagesPerPage) {
+      throw const FormatException(
+        'Relay pull response exceeds the 100-message page limit',
+      );
+    }
+
+    final messages = <Map<String, dynamic>>[];
+    for (final rawMessage in rawMessages) {
+      if (rawMessage is! Map) {
+        throw const FormatException('Relay pull message must be an object');
+      }
+      messages.add(Map<String, dynamic>.from(rawMessage));
+    }
+
+    final rawHasMore = json['hasMore'];
+    if (rawHasMore != null && rawHasMore is! bool) {
+      throw const FormatException('Relay pull hasMore must be a boolean');
+    }
+    return RelayPullResponse(
+      messages: List.unmodifiable(messages),
+      // Older relay fixtures predate pagination. A missing flag represents a
+      // complete single page so those responses remain safely consumable.
+      hasMore: rawHasMore as bool? ?? false,
+    );
+  }
+}
+
 /// Signs HTTP requests with Ed25519 device key for server authentication.
 ///
 /// Authorization header format:
@@ -173,6 +218,27 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
+  Future<Map<String, dynamic>> getJoinRequestStatus(String groupId) async {
+    final response = await _get('/group/$groupId/join-request');
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> rejectJoinRequest({
+    required String groupId,
+    required String deviceId,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/reject-join',
+      jsonEncode({'deviceId': deviceId}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> cancelJoinRequest(String groupId) async {
+    final response = await _post('/group/$groupId/cancel-join', '{}');
+    return _parseResponse(response);
+  }
+
   /// Owner renames group. Only owner-authenticated requests succeed.
   Future<Map<String, dynamic>> renameGroup({
     required String groupId,
@@ -206,6 +272,37 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
+  Future<Map<String, dynamic>> getGroupControlEvents({
+    required String groupId,
+    required int afterRevision,
+    int limit = 100,
+  }) async {
+    final boundedLimit = limit.clamp(1, 100);
+    final response = await _get(
+      '/group/$groupId/events?afterRevision=$afterRevision&limit=$boundedLimit',
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> requestGroupKey({
+    required String groupId,
+    required int keyEpoch,
+    bool forceNotify = false,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/request-key',
+      jsonEncode({'keyEpoch': keyEpoch, 'forceNotify': forceNotify}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getPendingGroupKeyRequests(
+    String groupId,
+  ) async {
+    final response = await _get('/group/$groupId/key-requests');
+    return _parseResponse(response);
+  }
+
   Future<void> deactivateGroup(String groupId) async {
     final response = await _delete('/group/$groupId');
     _parseResponse(response);
@@ -216,6 +313,21 @@ class RelayApiClient {
     _parseResponse(response);
   }
 
+  Future<Map<String, dynamic>> leaveGroupWithRotation(
+    String groupId, {
+    required String requestId,
+    required int expectedKeyEpoch,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/leave',
+      jsonEncode({
+        'requestId': requestId,
+        'expectedKeyEpoch': expectedKeyEpoch,
+      }),
+    );
+    return _parseResponse(response);
+  }
+
   Future<Map<String, dynamic>> removeMember({
     required String groupId,
     required String deviceId,
@@ -223,6 +335,67 @@ class RelayApiClient {
     final response = await _post(
       '/group/$groupId/remove',
       jsonEncode({'deviceId': deviceId}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> removeMemberWithPreparedRotation({
+    required String groupId,
+    required String deviceId,
+    required String requestId,
+    required int expectedKeyEpoch,
+    required int newKeyEpoch,
+    required List<Map<String, dynamic>> envelopes,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/remove',
+      jsonEncode({
+        'deviceId': deviceId,
+        'requestId': requestId,
+        'expectedKeyEpoch': expectedKeyEpoch,
+        'newKeyEpoch': newKeyEpoch,
+        'envelopes': envelopes,
+      }),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> completeMembershipRotation({
+    required String groupId,
+    required String requestId,
+    required int expectedKeyEpoch,
+    required int newKeyEpoch,
+    required List<Map<String, dynamic>> envelopes,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/complete-rotation',
+      jsonEncode({
+        'requestId': requestId,
+        'expectedKeyEpoch': expectedKeyEpoch,
+        'newKeyEpoch': newKeyEpoch,
+        'envelopes': envelopes,
+      }),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> transferOwner({
+    required String groupId,
+    required String requestId,
+    required String targetDeviceId,
+    required int expectedKeyEpoch,
+    required int newKeyEpoch,
+    required List<Map<String, dynamic>> envelopes,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/transfer-owner',
+      jsonEncode({
+        'requestId': requestId,
+        'targetDeviceId': targetDeviceId,
+        'expectedKeyEpoch': expectedKeyEpoch,
+        'newKeyEpoch': newKeyEpoch,
+        'envelopes': envelopes,
+      }),
     );
     return _parseResponse(response);
   }
@@ -239,22 +412,48 @@ class RelayApiClient {
   /// Returns: {recipientCount}
   Future<Map<String, dynamic>> pushSync({
     required String groupId,
+    required String syncId,
     required String payload,
     required Map<String, int> vectorClock,
     required int operationCount,
+    int keyEpoch = 1,
     int chunkIndex = 0,
     int totalChunks = 1,
   }) async {
     final body = jsonEncode({
       'groupId': groupId,
+      'syncId': syncId,
       'payload': payload,
       'vectorClock': vectorClock,
       'operationCount': operationCount,
+      'keyEpoch': keyEpoch,
       'chunkIndex': chunkIndex,
       'totalChunks': totalChunks,
     });
 
     final response = await _post('/sync/push', body);
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> pushGroupKeyResponse({
+    required String groupId,
+    required String requestId,
+    required String targetDeviceId,
+    required String payload,
+    required int keyEpoch,
+    required String syncId,
+  }) async {
+    final response = await _post(
+      '/sync/push-key',
+      jsonEncode({
+        'groupId': groupId,
+        'requestId': requestId,
+        'targetDeviceId': targetDeviceId,
+        'payload': payload,
+        'keyEpoch': keyEpoch,
+        'syncId': syncId,
+      }),
+    );
     return _parseResponse(response);
   }
 

@@ -21,6 +21,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
       isSystem: category.isSystem,
       isArchived: category.isArchived,
       sortOrder: category.sortOrder,
+      sharedRevision: category.isSystem
+          ? 0
+          : (category.updatedAt ?? category.createdAt)
+                .toUtc()
+                .microsecondsSinceEpoch,
       createdAt: category.createdAt,
       updatedAt: category.updatedAt,
     );

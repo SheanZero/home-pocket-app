@@ -126,6 +126,11 @@ void main() {
 
     await migrationDb.customSelect('SELECT 1').get();
 
+    final schemaVersion = await migrationDb
+        .customSelect('PRAGMA user_version')
+        .getSingle();
+    expect(schemaVersion.read<int>('user_version'), 36);
+
     expect(await _hasColumn(migrationDb, 'groups', 'book_id'), isFalse);
     expect(await _hasColumn(migrationDb, 'groups', 'group_name'), isTrue);
     expect(
@@ -150,6 +155,16 @@ void main() {
         )
         .getSingle();
     expect(displayName.data['display_name'], 'Phone');
+
+    final queue = await migrationDb.customSelect('''
+          SELECT encrypted_payload, retry_count, state, next_retry_at
+          FROM sync_queue WHERE id = 'legacy-v8-queue'
+        ''').getSingle();
+    expect(queue.read<String>('encrypted_payload'), 'legacy-v8-ciphertext');
+    expect(queue.read<int>('retry_count'), 3);
+    expect(queue.read<String>('state'), 'pending');
+    expect(queue.readNullable<int>('next_retry_at'), isNull);
+    expect(await _hasIndex(migrationDb, 'idx_sync_queue_state_retry'), isTrue);
   });
 }
 
@@ -166,6 +181,16 @@ Future<bool> _hasTable(AppDatabase db, String table) async {
 Future<bool> _hasColumn(AppDatabase db, String table, String column) async {
   final rows = await db.customSelect('PRAGMA table_info($table)').get();
   return rows.any((row) => row.data['name'] == column);
+}
+
+Future<bool> _hasIndex(AppDatabase db, String index) async {
+  final row = await db
+      .customSelect(
+        "SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = ?",
+        variables: [Variable(index)],
+      )
+      .getSingleOrNull();
+  return row != null;
 }
 
 void _createV4Schema(Database db) {
@@ -282,6 +307,14 @@ void _createV8Schema(Database db) {
       operation_count INTEGER NOT NULL,
       retry_count INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL
+    )
+  ''');
+  db.execute('''
+    INSERT INTO sync_queue (
+      id, group_id, encrypted_payload, vector_clock,
+      operation_count, retry_count, created_at
+    ) VALUES (
+      'legacy-v8-queue', 'group-1', 'legacy-v8-ciphertext', '{}', 2, 3, 100
     )
   ''');
   db.execute('''

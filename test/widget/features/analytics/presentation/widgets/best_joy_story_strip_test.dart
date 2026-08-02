@@ -25,7 +25,7 @@ void main() {
     expect(find.text('最大ハイライトはまだ見つからない'), findsOneWidget);
   });
 
-  testWidgets('renders empty state when satisfaction is two or lower', (
+  testWidgets('renders a score-2 Joy record instead of treating it as empty', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -39,8 +39,9 @@ void main() {
       ),
     );
 
-    expect(find.text('最大ハイライトはまだ見つからない'), findsOneWidget);
-    expect(find.textContaining('¥10'), findsNothing);
+    expect(find.text('最大ハイライトはまだ見つからない'), findsNothing);
+    expect(find.text('食費 · 5月15日'), findsOneWidget);
+    expect(find.text('¥10 · 満足 2/10 ✨'), findsOneWidget);
   });
 
   testWidgets(

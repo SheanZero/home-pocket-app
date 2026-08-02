@@ -1434,6 +1434,45 @@ class $CategoriesTable extends Categories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _sharedRevisionMeta = const VerificationMeta(
+    'sharedRevision',
+  );
+  @override
+  late final GeneratedColumn<int> sharedRevision = GeneratedColumn<int>(
+    'shared_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _sharedOriginDeviceIdMeta =
+      const VerificationMeta('sharedOriginDeviceId');
+  @override
+  late final GeneratedColumn<String> sharedOriginDeviceId =
+      GeneratedColumn<String>(
+        'shared_origin_device_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _sharedIsDeletedMeta = const VerificationMeta(
+    'sharedIsDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> sharedIsDeleted = GeneratedColumn<bool>(
+    'shared_is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("shared_is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1467,6 +1506,9 @@ class $CategoriesTable extends Categories
     isSystem,
     isArchived,
     sortOrder,
+    sharedRevision,
+    sharedOriginDeviceId,
+    sharedIsDeleted,
     createdAt,
     updatedAt,
   ];
@@ -1543,6 +1585,33 @@ class $CategoriesTable extends Categories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('shared_revision')) {
+      context.handle(
+        _sharedRevisionMeta,
+        sharedRevision.isAcceptableOrUnknown(
+          data['shared_revision']!,
+          _sharedRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shared_origin_device_id')) {
+      context.handle(
+        _sharedOriginDeviceIdMeta,
+        sharedOriginDeviceId.isAcceptableOrUnknown(
+          data['shared_origin_device_id']!,
+          _sharedOriginDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shared_is_deleted')) {
+      context.handle(
+        _sharedIsDeletedMeta,
+        sharedIsDeleted.isAcceptableOrUnknown(
+          data['shared_is_deleted']!,
+          _sharedIsDeletedMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1602,6 +1671,18 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      sharedRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}shared_revision'],
+      )!,
+      sharedOriginDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shared_origin_device_id'],
+      )!,
+      sharedIsDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}shared_is_deleted'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1629,6 +1710,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final bool isSystem;
   final bool isArchived;
   final int sortOrder;
+  final int sharedRevision;
+  final String sharedOriginDeviceId;
+  final bool sharedIsDeleted;
   final DateTime createdAt;
   final DateTime? updatedAt;
   const CategoryRow({
@@ -1641,6 +1725,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     required this.isSystem,
     required this.isArchived,
     required this.sortOrder,
+    required this.sharedRevision,
+    required this.sharedOriginDeviceId,
+    required this.sharedIsDeleted,
     required this.createdAt,
     this.updatedAt,
   });
@@ -1658,6 +1745,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     map['is_system'] = Variable<bool>(isSystem);
     map['is_archived'] = Variable<bool>(isArchived);
     map['sort_order'] = Variable<int>(sortOrder);
+    map['shared_revision'] = Variable<int>(sharedRevision);
+    map['shared_origin_device_id'] = Variable<String>(sharedOriginDeviceId);
+    map['shared_is_deleted'] = Variable<bool>(sharedIsDeleted);
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1678,6 +1768,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       isSystem: Value(isSystem),
       isArchived: Value(isArchived),
       sortOrder: Value(sortOrder),
+      sharedRevision: Value(sharedRevision),
+      sharedOriginDeviceId: Value(sharedOriginDeviceId),
+      sharedIsDeleted: Value(sharedIsDeleted),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1700,6 +1793,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       isSystem: serializer.fromJson<bool>(json['isSystem']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      sharedRevision: serializer.fromJson<int>(json['sharedRevision']),
+      sharedOriginDeviceId: serializer.fromJson<String>(
+        json['sharedOriginDeviceId'],
+      ),
+      sharedIsDeleted: serializer.fromJson<bool>(json['sharedIsDeleted']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
@@ -1717,6 +1815,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       'isSystem': serializer.toJson<bool>(isSystem),
       'isArchived': serializer.toJson<bool>(isArchived),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'sharedRevision': serializer.toJson<int>(sharedRevision),
+      'sharedOriginDeviceId': serializer.toJson<String>(sharedOriginDeviceId),
+      'sharedIsDeleted': serializer.toJson<bool>(sharedIsDeleted),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
@@ -1732,6 +1833,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     bool? isSystem,
     bool? isArchived,
     int? sortOrder,
+    int? sharedRevision,
+    String? sharedOriginDeviceId,
+    bool? sharedIsDeleted,
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
   }) => CategoryRow(
@@ -1744,6 +1848,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     isSystem: isSystem ?? this.isSystem,
     isArchived: isArchived ?? this.isArchived,
     sortOrder: sortOrder ?? this.sortOrder,
+    sharedRevision: sharedRevision ?? this.sharedRevision,
+    sharedOriginDeviceId: sharedOriginDeviceId ?? this.sharedOriginDeviceId,
+    sharedIsDeleted: sharedIsDeleted ?? this.sharedIsDeleted,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
@@ -1760,6 +1867,15 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ? data.isArchived.value
           : this.isArchived,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      sharedRevision: data.sharedRevision.present
+          ? data.sharedRevision.value
+          : this.sharedRevision,
+      sharedOriginDeviceId: data.sharedOriginDeviceId.present
+          ? data.sharedOriginDeviceId.value
+          : this.sharedOriginDeviceId,
+      sharedIsDeleted: data.sharedIsDeleted.present
+          ? data.sharedIsDeleted.value
+          : this.sharedIsDeleted,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1777,6 +1893,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('isSystem: $isSystem, ')
           ..write('isArchived: $isArchived, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('sharedRevision: $sharedRevision, ')
+          ..write('sharedOriginDeviceId: $sharedOriginDeviceId, ')
+          ..write('sharedIsDeleted: $sharedIsDeleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1794,6 +1913,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     isSystem,
     isArchived,
     sortOrder,
+    sharedRevision,
+    sharedOriginDeviceId,
+    sharedIsDeleted,
     createdAt,
     updatedAt,
   );
@@ -1810,6 +1932,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.isSystem == this.isSystem &&
           other.isArchived == this.isArchived &&
           other.sortOrder == this.sortOrder &&
+          other.sharedRevision == this.sharedRevision &&
+          other.sharedOriginDeviceId == this.sharedOriginDeviceId &&
+          other.sharedIsDeleted == this.sharedIsDeleted &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -1824,6 +1949,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<bool> isSystem;
   final Value<bool> isArchived;
   final Value<int> sortOrder;
+  final Value<int> sharedRevision;
+  final Value<String> sharedOriginDeviceId;
+  final Value<bool> sharedIsDeleted;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<int> rowid;
@@ -1837,6 +1965,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.isSystem = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.sharedRevision = const Value.absent(),
+    this.sharedOriginDeviceId = const Value.absent(),
+    this.sharedIsDeleted = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1851,6 +1982,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.isSystem = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.sharedRevision = const Value.absent(),
+    this.sharedOriginDeviceId = const Value.absent(),
+    this.sharedIsDeleted = const Value.absent(),
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1870,6 +2004,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<bool>? isSystem,
     Expression<bool>? isArchived,
     Expression<int>? sortOrder,
+    Expression<int>? sharedRevision,
+    Expression<String>? sharedOriginDeviceId,
+    Expression<bool>? sharedIsDeleted,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -1884,6 +2021,10 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (isSystem != null) 'is_system': isSystem,
       if (isArchived != null) 'is_archived': isArchived,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (sharedRevision != null) 'shared_revision': sharedRevision,
+      if (sharedOriginDeviceId != null)
+        'shared_origin_device_id': sharedOriginDeviceId,
+      if (sharedIsDeleted != null) 'shared_is_deleted': sharedIsDeleted,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -1900,6 +2041,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<bool>? isSystem,
     Value<bool>? isArchived,
     Value<int>? sortOrder,
+    Value<int>? sharedRevision,
+    Value<String>? sharedOriginDeviceId,
+    Value<bool>? sharedIsDeleted,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<int>? rowid,
@@ -1914,6 +2058,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       isSystem: isSystem ?? this.isSystem,
       isArchived: isArchived ?? this.isArchived,
       sortOrder: sortOrder ?? this.sortOrder,
+      sharedRevision: sharedRevision ?? this.sharedRevision,
+      sharedOriginDeviceId: sharedOriginDeviceId ?? this.sharedOriginDeviceId,
+      sharedIsDeleted: sharedIsDeleted ?? this.sharedIsDeleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -1950,6 +2097,17 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (sharedRevision.present) {
+      map['shared_revision'] = Variable<int>(sharedRevision.value);
+    }
+    if (sharedOriginDeviceId.present) {
+      map['shared_origin_device_id'] = Variable<String>(
+        sharedOriginDeviceId.value,
+      );
+    }
+    if (sharedIsDeleted.present) {
+      map['shared_is_deleted'] = Variable<bool>(sharedIsDeleted.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1974,6 +2132,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('isSystem: $isSystem, ')
           ..write('isArchived: $isArchived, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('sharedRevision: $sharedRevision, ')
+          ..write('sharedOriginDeviceId: $sharedOriginDeviceId, ')
+          ..write('sharedIsDeleted: $sharedIsDeleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -2604,6 +2765,435 @@ class CategoryLedgerConfigsCompanion
   }
 }
 
+class $ControlEventsTable extends ControlEvents
+    with TableInfo<$ControlEventsTable, ControlEventData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ControlEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _eventIdMeta = const VerificationMeta(
+    'eventId',
+  );
+  @override
+  late final GeneratedColumn<String> eventId = GeneratedColumn<String>(
+    'event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventTypeMeta = const VerificationMeta(
+    'eventType',
+  );
+  @override
+  late final GeneratedColumn<String> eventType = GeneratedColumn<String>(
+    'event_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<int> occurredAt = GeneratedColumn<int>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _processedAtMeta = const VerificationMeta(
+    'processedAt',
+  );
+  @override
+  late final GeneratedColumn<int> processedAt = GeneratedColumn<int>(
+    'processed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    eventId,
+    groupId,
+    revision,
+    eventType,
+    occurredAt,
+    processedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'control_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ControlEventData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _eventIdMeta,
+        eventId.isAcceptableOrUnknown(data['event_id']!, _eventIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_revisionMeta);
+    }
+    if (data.containsKey('event_type')) {
+      context.handle(
+        _eventTypeMeta,
+        eventType.isAcceptableOrUnknown(data['event_type']!, _eventTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventTypeMeta);
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('processed_at')) {
+      context.handle(
+        _processedAtMeta,
+        processedAt.isAcceptableOrUnknown(
+          data['processed_at']!,
+          _processedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_processedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {eventId};
+  @override
+  ControlEventData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ControlEventData(
+      eventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      eventType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_type'],
+      )!,
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+      processedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}processed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ControlEventsTable createAlias(String alias) {
+    return $ControlEventsTable(attachedDatabase, alias);
+  }
+}
+
+class ControlEventData extends DataClass
+    implements Insertable<ControlEventData> {
+  final String eventId;
+  final String groupId;
+  final int revision;
+  final String eventType;
+  final int occurredAt;
+  final int processedAt;
+  const ControlEventData({
+    required this.eventId,
+    required this.groupId,
+    required this.revision,
+    required this.eventType,
+    required this.occurredAt,
+    required this.processedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['event_id'] = Variable<String>(eventId);
+    map['group_id'] = Variable<String>(groupId);
+    map['revision'] = Variable<int>(revision);
+    map['event_type'] = Variable<String>(eventType);
+    map['occurred_at'] = Variable<int>(occurredAt);
+    map['processed_at'] = Variable<int>(processedAt);
+    return map;
+  }
+
+  ControlEventsCompanion toCompanion(bool nullToAbsent) {
+    return ControlEventsCompanion(
+      eventId: Value(eventId),
+      groupId: Value(groupId),
+      revision: Value(revision),
+      eventType: Value(eventType),
+      occurredAt: Value(occurredAt),
+      processedAt: Value(processedAt),
+    );
+  }
+
+  factory ControlEventData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ControlEventData(
+      eventId: serializer.fromJson<String>(json['eventId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      revision: serializer.fromJson<int>(json['revision']),
+      eventType: serializer.fromJson<String>(json['eventType']),
+      occurredAt: serializer.fromJson<int>(json['occurredAt']),
+      processedAt: serializer.fromJson<int>(json['processedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'eventId': serializer.toJson<String>(eventId),
+      'groupId': serializer.toJson<String>(groupId),
+      'revision': serializer.toJson<int>(revision),
+      'eventType': serializer.toJson<String>(eventType),
+      'occurredAt': serializer.toJson<int>(occurredAt),
+      'processedAt': serializer.toJson<int>(processedAt),
+    };
+  }
+
+  ControlEventData copyWith({
+    String? eventId,
+    String? groupId,
+    int? revision,
+    String? eventType,
+    int? occurredAt,
+    int? processedAt,
+  }) => ControlEventData(
+    eventId: eventId ?? this.eventId,
+    groupId: groupId ?? this.groupId,
+    revision: revision ?? this.revision,
+    eventType: eventType ?? this.eventType,
+    occurredAt: occurredAt ?? this.occurredAt,
+    processedAt: processedAt ?? this.processedAt,
+  );
+  ControlEventData copyWithCompanion(ControlEventsCompanion data) {
+    return ControlEventData(
+      eventId: data.eventId.present ? data.eventId.value : this.eventId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+      processedAt: data.processedAt.present
+          ? data.processedAt.value
+          : this.processedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ControlEventData(')
+          ..write('eventId: $eventId, ')
+          ..write('groupId: $groupId, ')
+          ..write('revision: $revision, ')
+          ..write('eventType: $eventType, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('processedAt: $processedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    eventId,
+    groupId,
+    revision,
+    eventType,
+    occurredAt,
+    processedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ControlEventData &&
+          other.eventId == this.eventId &&
+          other.groupId == this.groupId &&
+          other.revision == this.revision &&
+          other.eventType == this.eventType &&
+          other.occurredAt == this.occurredAt &&
+          other.processedAt == this.processedAt);
+}
+
+class ControlEventsCompanion extends UpdateCompanion<ControlEventData> {
+  final Value<String> eventId;
+  final Value<String> groupId;
+  final Value<int> revision;
+  final Value<String> eventType;
+  final Value<int> occurredAt;
+  final Value<int> processedAt;
+  final Value<int> rowid;
+  const ControlEventsCompanion({
+    this.eventId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.processedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ControlEventsCompanion.insert({
+    required String eventId,
+    required String groupId,
+    required int revision,
+    required String eventType,
+    required int occurredAt,
+    required int processedAt,
+    this.rowid = const Value.absent(),
+  }) : eventId = Value(eventId),
+       groupId = Value(groupId),
+       revision = Value(revision),
+       eventType = Value(eventType),
+       occurredAt = Value(occurredAt),
+       processedAt = Value(processedAt);
+  static Insertable<ControlEventData> custom({
+    Expression<String>? eventId,
+    Expression<String>? groupId,
+    Expression<int>? revision,
+    Expression<String>? eventType,
+    Expression<int>? occurredAt,
+    Expression<int>? processedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (eventId != null) 'event_id': eventId,
+      if (groupId != null) 'group_id': groupId,
+      if (revision != null) 'revision': revision,
+      if (eventType != null) 'event_type': eventType,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (processedAt != null) 'processed_at': processedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ControlEventsCompanion copyWith({
+    Value<String>? eventId,
+    Value<String>? groupId,
+    Value<int>? revision,
+    Value<String>? eventType,
+    Value<int>? occurredAt,
+    Value<int>? processedAt,
+    Value<int>? rowid,
+  }) {
+    return ControlEventsCompanion(
+      eventId: eventId ?? this.eventId,
+      groupId: groupId ?? this.groupId,
+      revision: revision ?? this.revision,
+      eventType: eventType ?? this.eventType,
+      occurredAt: occurredAt ?? this.occurredAt,
+      processedAt: processedAt ?? this.processedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (eventId.present) {
+      map['event_id'] = Variable<String>(eventId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(eventType.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<int>(occurredAt.value);
+    }
+    if (processedAt.present) {
+      map['processed_at'] = Variable<int>(processedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ControlEventsCompanion(')
+          ..write('eventId: $eventId, ')
+          ..write('groupId: $groupId, ')
+          ..write('revision: $revision, ')
+          ..write('eventType: $eventType, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('processedAt: $processedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ExchangeRatesTable extends ExchangeRates
     with TableInfo<$ExchangeRatesTable, ExchangeRateRow> {
   @override
@@ -3048,6 +3638,653 @@ class ExchangeRatesCompanion extends UpdateCompanion<ExchangeRateRow> {
   }
 }
 
+class $FamilySyncOutboxTable extends FamilySyncOutbox
+    with TableInfo<$FamilySyncOutboxTable, FamilySyncOutboxData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FamilySyncOutboxTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _operationIdMeta = const VerificationMeta(
+    'operationId',
+  );
+  @override
+  late final GeneratedColumn<String> operationId = GeneratedColumn<String>(
+    'operation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _operationJsonMeta = const VerificationMeta(
+    'operationJson',
+  );
+  @override
+  late final GeneratedColumn<String> operationJson = GeneratedColumn<String>(
+    'operation_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isTombstoneMeta = const VerificationMeta(
+    'isTombstone',
+  );
+  @override
+  late final GeneratedColumn<bool> isTombstone = GeneratedColumn<bool>(
+    'is_tombstone',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_tombstone" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _attemptCountMeta = const VerificationMeta(
+    'attemptCount',
+  );
+  @override
+  late final GeneratedColumn<int> attemptCount = GeneratedColumn<int>(
+    'attempt_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastAttemptAtMeta = const VerificationMeta(
+    'lastAttemptAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastAttemptAt = GeneratedColumn<int>(
+    'last_attempt_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    operationId,
+    groupId,
+    entityType,
+    entityId,
+    revision,
+    operationJson,
+    isTombstone,
+    attemptCount,
+    lastAttemptAt,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'family_sync_outbox';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FamilySyncOutboxData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('operation_id')) {
+      context.handle(
+        _operationIdMeta,
+        operationId.isAcceptableOrUnknown(
+          data['operation_id']!,
+          _operationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_revisionMeta);
+    }
+    if (data.containsKey('operation_json')) {
+      context.handle(
+        _operationJsonMeta,
+        operationJson.isAcceptableOrUnknown(
+          data['operation_json']!,
+          _operationJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationJsonMeta);
+    }
+    if (data.containsKey('is_tombstone')) {
+      context.handle(
+        _isTombstoneMeta,
+        isTombstone.isAcceptableOrUnknown(
+          data['is_tombstone']!,
+          _isTombstoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('attempt_count')) {
+      context.handle(
+        _attemptCountMeta,
+        attemptCount.isAcceptableOrUnknown(
+          data['attempt_count']!,
+          _attemptCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_attempt_at')) {
+      context.handle(
+        _lastAttemptAtMeta,
+        lastAttemptAt.isAcceptableOrUnknown(
+          data['last_attempt_at']!,
+          _lastAttemptAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {operationId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {groupId, entityType, entityId},
+  ];
+  @override
+  FamilySyncOutboxData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FamilySyncOutboxData(
+      operationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      operationJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_json'],
+      )!,
+      isTombstone: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_tombstone'],
+      )!,
+      attemptCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempt_count'],
+      )!,
+      lastAttemptAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_attempt_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FamilySyncOutboxTable createAlias(String alias) {
+    return $FamilySyncOutboxTable(attachedDatabase, alias);
+  }
+}
+
+class FamilySyncOutboxData extends DataClass
+    implements Insertable<FamilySyncOutboxData> {
+  final String operationId;
+  final String groupId;
+  final String entityType;
+  final String entityId;
+  final int revision;
+  final String operationJson;
+  final bool isTombstone;
+  final int attemptCount;
+  final int? lastAttemptAt;
+  final int createdAt;
+  const FamilySyncOutboxData({
+    required this.operationId,
+    required this.groupId,
+    required this.entityType,
+    required this.entityId,
+    required this.revision,
+    required this.operationJson,
+    required this.isTombstone,
+    required this.attemptCount,
+    this.lastAttemptAt,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['operation_id'] = Variable<String>(operationId);
+    map['group_id'] = Variable<String>(groupId);
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['revision'] = Variable<int>(revision);
+    map['operation_json'] = Variable<String>(operationJson);
+    map['is_tombstone'] = Variable<bool>(isTombstone);
+    map['attempt_count'] = Variable<int>(attemptCount);
+    if (!nullToAbsent || lastAttemptAt != null) {
+      map['last_attempt_at'] = Variable<int>(lastAttemptAt);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  FamilySyncOutboxCompanion toCompanion(bool nullToAbsent) {
+    return FamilySyncOutboxCompanion(
+      operationId: Value(operationId),
+      groupId: Value(groupId),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      revision: Value(revision),
+      operationJson: Value(operationJson),
+      isTombstone: Value(isTombstone),
+      attemptCount: Value(attemptCount),
+      lastAttemptAt: lastAttemptAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAttemptAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FamilySyncOutboxData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FamilySyncOutboxData(
+      operationId: serializer.fromJson<String>(json['operationId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      revision: serializer.fromJson<int>(json['revision']),
+      operationJson: serializer.fromJson<String>(json['operationJson']),
+      isTombstone: serializer.fromJson<bool>(json['isTombstone']),
+      attemptCount: serializer.fromJson<int>(json['attemptCount']),
+      lastAttemptAt: serializer.fromJson<int?>(json['lastAttemptAt']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'operationId': serializer.toJson<String>(operationId),
+      'groupId': serializer.toJson<String>(groupId),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'revision': serializer.toJson<int>(revision),
+      'operationJson': serializer.toJson<String>(operationJson),
+      'isTombstone': serializer.toJson<bool>(isTombstone),
+      'attemptCount': serializer.toJson<int>(attemptCount),
+      'lastAttemptAt': serializer.toJson<int?>(lastAttemptAt),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  FamilySyncOutboxData copyWith({
+    String? operationId,
+    String? groupId,
+    String? entityType,
+    String? entityId,
+    int? revision,
+    String? operationJson,
+    bool? isTombstone,
+    int? attemptCount,
+    Value<int?> lastAttemptAt = const Value.absent(),
+    int? createdAt,
+  }) => FamilySyncOutboxData(
+    operationId: operationId ?? this.operationId,
+    groupId: groupId ?? this.groupId,
+    entityType: entityType ?? this.entityType,
+    entityId: entityId ?? this.entityId,
+    revision: revision ?? this.revision,
+    operationJson: operationJson ?? this.operationJson,
+    isTombstone: isTombstone ?? this.isTombstone,
+    attemptCount: attemptCount ?? this.attemptCount,
+    lastAttemptAt: lastAttemptAt.present
+        ? lastAttemptAt.value
+        : this.lastAttemptAt,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  FamilySyncOutboxData copyWithCompanion(FamilySyncOutboxCompanion data) {
+    return FamilySyncOutboxData(
+      operationId: data.operationId.present
+          ? data.operationId.value
+          : this.operationId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      operationJson: data.operationJson.present
+          ? data.operationJson.value
+          : this.operationJson,
+      isTombstone: data.isTombstone.present
+          ? data.isTombstone.value
+          : this.isTombstone,
+      attemptCount: data.attemptCount.present
+          ? data.attemptCount.value
+          : this.attemptCount,
+      lastAttemptAt: data.lastAttemptAt.present
+          ? data.lastAttemptAt.value
+          : this.lastAttemptAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FamilySyncOutboxData(')
+          ..write('operationId: $operationId, ')
+          ..write('groupId: $groupId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('revision: $revision, ')
+          ..write('operationJson: $operationJson, ')
+          ..write('isTombstone: $isTombstone, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('lastAttemptAt: $lastAttemptAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    operationId,
+    groupId,
+    entityType,
+    entityId,
+    revision,
+    operationJson,
+    isTombstone,
+    attemptCount,
+    lastAttemptAt,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FamilySyncOutboxData &&
+          other.operationId == this.operationId &&
+          other.groupId == this.groupId &&
+          other.entityType == this.entityType &&
+          other.entityId == this.entityId &&
+          other.revision == this.revision &&
+          other.operationJson == this.operationJson &&
+          other.isTombstone == this.isTombstone &&
+          other.attemptCount == this.attemptCount &&
+          other.lastAttemptAt == this.lastAttemptAt &&
+          other.createdAt == this.createdAt);
+}
+
+class FamilySyncOutboxCompanion extends UpdateCompanion<FamilySyncOutboxData> {
+  final Value<String> operationId;
+  final Value<String> groupId;
+  final Value<String> entityType;
+  final Value<String> entityId;
+  final Value<int> revision;
+  final Value<String> operationJson;
+  final Value<bool> isTombstone;
+  final Value<int> attemptCount;
+  final Value<int?> lastAttemptAt;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const FamilySyncOutboxCompanion({
+    this.operationId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.operationJson = const Value.absent(),
+    this.isTombstone = const Value.absent(),
+    this.attemptCount = const Value.absent(),
+    this.lastAttemptAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FamilySyncOutboxCompanion.insert({
+    required String operationId,
+    required String groupId,
+    required String entityType,
+    required String entityId,
+    required int revision,
+    required String operationJson,
+    this.isTombstone = const Value.absent(),
+    this.attemptCount = const Value.absent(),
+    this.lastAttemptAt = const Value.absent(),
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : operationId = Value(operationId),
+       groupId = Value(groupId),
+       entityType = Value(entityType),
+       entityId = Value(entityId),
+       revision = Value(revision),
+       operationJson = Value(operationJson),
+       createdAt = Value(createdAt);
+  static Insertable<FamilySyncOutboxData> custom({
+    Expression<String>? operationId,
+    Expression<String>? groupId,
+    Expression<String>? entityType,
+    Expression<String>? entityId,
+    Expression<int>? revision,
+    Expression<String>? operationJson,
+    Expression<bool>? isTombstone,
+    Expression<int>? attemptCount,
+    Expression<int>? lastAttemptAt,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (operationId != null) 'operation_id': operationId,
+      if (groupId != null) 'group_id': groupId,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityId != null) 'entity_id': entityId,
+      if (revision != null) 'revision': revision,
+      if (operationJson != null) 'operation_json': operationJson,
+      if (isTombstone != null) 'is_tombstone': isTombstone,
+      if (attemptCount != null) 'attempt_count': attemptCount,
+      if (lastAttemptAt != null) 'last_attempt_at': lastAttemptAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FamilySyncOutboxCompanion copyWith({
+    Value<String>? operationId,
+    Value<String>? groupId,
+    Value<String>? entityType,
+    Value<String>? entityId,
+    Value<int>? revision,
+    Value<String>? operationJson,
+    Value<bool>? isTombstone,
+    Value<int>? attemptCount,
+    Value<int?>? lastAttemptAt,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return FamilySyncOutboxCompanion(
+      operationId: operationId ?? this.operationId,
+      groupId: groupId ?? this.groupId,
+      entityType: entityType ?? this.entityType,
+      entityId: entityId ?? this.entityId,
+      revision: revision ?? this.revision,
+      operationJson: operationJson ?? this.operationJson,
+      isTombstone: isTombstone ?? this.isTombstone,
+      attemptCount: attemptCount ?? this.attemptCount,
+      lastAttemptAt: lastAttemptAt ?? this.lastAttemptAt,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (operationId.present) {
+      map['operation_id'] = Variable<String>(operationId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (operationJson.present) {
+      map['operation_json'] = Variable<String>(operationJson.value);
+    }
+    if (isTombstone.present) {
+      map['is_tombstone'] = Variable<bool>(isTombstone.value);
+    }
+    if (attemptCount.present) {
+      map['attempt_count'] = Variable<int>(attemptCount.value);
+    }
+    if (lastAttemptAt.present) {
+      map['last_attempt_at'] = Variable<int>(lastAttemptAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FamilySyncOutboxCompanion(')
+          ..write('operationId: $operationId, ')
+          ..write('groupId: $groupId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('revision: $revision, ')
+          ..write('operationJson: $operationJson, ')
+          ..write('isTombstone: $isTombstone, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('lastAttemptAt: $lastAttemptAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $GroupMembersTable extends GroupMembers
     with TableInfo<$GroupMembersTable, GroupMemberData> {
   @override
@@ -3162,6 +4399,123 @@ class $GroupMembersTable extends GroupMembers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _profileRevisionMeta = const VerificationMeta(
+    'profileRevision',
+  );
+  @override
+  late final GeneratedColumn<int> profileRevision = GeneratedColumn<int>(
+    'profile_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _profileOriginDeviceIdMeta =
+      const VerificationMeta('profileOriginDeviceId');
+  @override
+  late final GeneratedColumn<String> profileOriginDeviceId =
+      GeneratedColumn<String>(
+        'profile_origin_device_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _profileDigestMeta = const VerificationMeta(
+    'profileDigest',
+  );
+  @override
+  late final GeneratedColumn<String> profileDigest = GeneratedColumn<String>(
+    'profile_digest',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _avatarRevisionMeta = const VerificationMeta(
+    'avatarRevision',
+  );
+  @override
+  late final GeneratedColumn<int> avatarRevision = GeneratedColumn<int>(
+    'avatar_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _avatarOriginDeviceIdMeta =
+      const VerificationMeta('avatarOriginDeviceId');
+  @override
+  late final GeneratedColumn<String> avatarOriginDeviceId =
+      GeneratedColumn<String>(
+        'avatar_origin_device_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _avatarContentHashMeta = const VerificationMeta(
+    'avatarContentHash',
+  );
+  @override
+  late final GeneratedColumn<String> avatarContentHash =
+      GeneratedColumn<String>(
+        'avatar_content_hash',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _joinedAtMeta = const VerificationMeta(
+    'joinedAt',
+  );
+  @override
+  late final GeneratedColumn<int> joinedAt = GeneratedColumn<int>(
+    'joined_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _confirmedAtMeta = const VerificationMeta(
+    'confirmedAt',
+  );
+  @override
+  late final GeneratedColumn<int> confirmedAt = GeneratedColumn<int>(
+    'confirmed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _removedAtMeta = const VerificationMeta(
+    'removedAt',
+  );
+  @override
+  late final GeneratedColumn<int> removedAt = GeneratedColumn<int>(
+    'removed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _removalReasonMeta = const VerificationMeta(
+    'removalReason',
+  );
+  @override
+  late final GeneratedColumn<String> removalReason = GeneratedColumn<String>(
+    'removal_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     groupId,
@@ -3174,6 +4528,16 @@ class $GroupMembersTable extends GroupMembers
     avatarEmoji,
     avatarImagePath,
     avatarImageHash,
+    profileRevision,
+    profileOriginDeviceId,
+    profileDigest,
+    avatarRevision,
+    avatarOriginDeviceId,
+    avatarContentHash,
+    joinedAt,
+    confirmedAt,
+    removedAt,
+    removalReason,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3271,6 +4635,90 @@ class $GroupMembersTable extends GroupMembers
         ),
       );
     }
+    if (data.containsKey('profile_revision')) {
+      context.handle(
+        _profileRevisionMeta,
+        profileRevision.isAcceptableOrUnknown(
+          data['profile_revision']!,
+          _profileRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('profile_origin_device_id')) {
+      context.handle(
+        _profileOriginDeviceIdMeta,
+        profileOriginDeviceId.isAcceptableOrUnknown(
+          data['profile_origin_device_id']!,
+          _profileOriginDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('profile_digest')) {
+      context.handle(
+        _profileDigestMeta,
+        profileDigest.isAcceptableOrUnknown(
+          data['profile_digest']!,
+          _profileDigestMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_revision')) {
+      context.handle(
+        _avatarRevisionMeta,
+        avatarRevision.isAcceptableOrUnknown(
+          data['avatar_revision']!,
+          _avatarRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_origin_device_id')) {
+      context.handle(
+        _avatarOriginDeviceIdMeta,
+        avatarOriginDeviceId.isAcceptableOrUnknown(
+          data['avatar_origin_device_id']!,
+          _avatarOriginDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_content_hash')) {
+      context.handle(
+        _avatarContentHashMeta,
+        avatarContentHash.isAcceptableOrUnknown(
+          data['avatar_content_hash']!,
+          _avatarContentHashMeta,
+        ),
+      );
+    }
+    if (data.containsKey('joined_at')) {
+      context.handle(
+        _joinedAtMeta,
+        joinedAt.isAcceptableOrUnknown(data['joined_at']!, _joinedAtMeta),
+      );
+    }
+    if (data.containsKey('confirmed_at')) {
+      context.handle(
+        _confirmedAtMeta,
+        confirmedAt.isAcceptableOrUnknown(
+          data['confirmed_at']!,
+          _confirmedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('removed_at')) {
+      context.handle(
+        _removedAtMeta,
+        removedAt.isAcceptableOrUnknown(data['removed_at']!, _removedAtMeta),
+      );
+    }
+    if (data.containsKey('removal_reason')) {
+      context.handle(
+        _removalReasonMeta,
+        removalReason.isAcceptableOrUnknown(
+          data['removal_reason']!,
+          _removalReasonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3320,6 +4768,46 @@ class $GroupMembersTable extends GroupMembers
         DriftSqlType.string,
         data['${effectivePrefix}avatar_image_hash'],
       ),
+      profileRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}profile_revision'],
+      )!,
+      profileOriginDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_origin_device_id'],
+      )!,
+      profileDigest: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_digest'],
+      )!,
+      avatarRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}avatar_revision'],
+      )!,
+      avatarOriginDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_origin_device_id'],
+      )!,
+      avatarContentHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_content_hash'],
+      )!,
+      joinedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}joined_at'],
+      ),
+      confirmedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confirmed_at'],
+      ),
+      removedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}removed_at'],
+      ),
+      removalReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}removal_reason'],
+      ),
     );
   }
 
@@ -3340,6 +4828,16 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
   final String avatarEmoji;
   final String? avatarImagePath;
   final String? avatarImageHash;
+  final int profileRevision;
+  final String profileOriginDeviceId;
+  final String profileDigest;
+  final int avatarRevision;
+  final String avatarOriginDeviceId;
+  final String avatarContentHash;
+  final int? joinedAt;
+  final int? confirmedAt;
+  final int? removedAt;
+  final String? removalReason;
   const GroupMemberData({
     required this.groupId,
     required this.deviceId,
@@ -3351,6 +4849,16 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     required this.avatarEmoji,
     this.avatarImagePath,
     this.avatarImageHash,
+    required this.profileRevision,
+    required this.profileOriginDeviceId,
+    required this.profileDigest,
+    required this.avatarRevision,
+    required this.avatarOriginDeviceId,
+    required this.avatarContentHash,
+    this.joinedAt,
+    this.confirmedAt,
+    this.removedAt,
+    this.removalReason,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3368,6 +4876,24 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     }
     if (!nullToAbsent || avatarImageHash != null) {
       map['avatar_image_hash'] = Variable<String>(avatarImageHash);
+    }
+    map['profile_revision'] = Variable<int>(profileRevision);
+    map['profile_origin_device_id'] = Variable<String>(profileOriginDeviceId);
+    map['profile_digest'] = Variable<String>(profileDigest);
+    map['avatar_revision'] = Variable<int>(avatarRevision);
+    map['avatar_origin_device_id'] = Variable<String>(avatarOriginDeviceId);
+    map['avatar_content_hash'] = Variable<String>(avatarContentHash);
+    if (!nullToAbsent || joinedAt != null) {
+      map['joined_at'] = Variable<int>(joinedAt);
+    }
+    if (!nullToAbsent || confirmedAt != null) {
+      map['confirmed_at'] = Variable<int>(confirmedAt);
+    }
+    if (!nullToAbsent || removedAt != null) {
+      map['removed_at'] = Variable<int>(removedAt);
+    }
+    if (!nullToAbsent || removalReason != null) {
+      map['removal_reason'] = Variable<String>(removalReason);
     }
     return map;
   }
@@ -3388,6 +4914,24 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       avatarImageHash: avatarImageHash == null && nullToAbsent
           ? const Value.absent()
           : Value(avatarImageHash),
+      profileRevision: Value(profileRevision),
+      profileOriginDeviceId: Value(profileOriginDeviceId),
+      profileDigest: Value(profileDigest),
+      avatarRevision: Value(avatarRevision),
+      avatarOriginDeviceId: Value(avatarOriginDeviceId),
+      avatarContentHash: Value(avatarContentHash),
+      joinedAt: joinedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(joinedAt),
+      confirmedAt: confirmedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmedAt),
+      removedAt: removedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(removedAt),
+      removalReason: removalReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(removalReason),
     );
   }
 
@@ -3407,6 +4951,20 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       avatarEmoji: serializer.fromJson<String>(json['avatarEmoji']),
       avatarImagePath: serializer.fromJson<String?>(json['avatarImagePath']),
       avatarImageHash: serializer.fromJson<String?>(json['avatarImageHash']),
+      profileRevision: serializer.fromJson<int>(json['profileRevision']),
+      profileOriginDeviceId: serializer.fromJson<String>(
+        json['profileOriginDeviceId'],
+      ),
+      profileDigest: serializer.fromJson<String>(json['profileDigest']),
+      avatarRevision: serializer.fromJson<int>(json['avatarRevision']),
+      avatarOriginDeviceId: serializer.fromJson<String>(
+        json['avatarOriginDeviceId'],
+      ),
+      avatarContentHash: serializer.fromJson<String>(json['avatarContentHash']),
+      joinedAt: serializer.fromJson<int?>(json['joinedAt']),
+      confirmedAt: serializer.fromJson<int?>(json['confirmedAt']),
+      removedAt: serializer.fromJson<int?>(json['removedAt']),
+      removalReason: serializer.fromJson<String?>(json['removalReason']),
     );
   }
   @override
@@ -3423,6 +4981,16 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       'avatarEmoji': serializer.toJson<String>(avatarEmoji),
       'avatarImagePath': serializer.toJson<String?>(avatarImagePath),
       'avatarImageHash': serializer.toJson<String?>(avatarImageHash),
+      'profileRevision': serializer.toJson<int>(profileRevision),
+      'profileOriginDeviceId': serializer.toJson<String>(profileOriginDeviceId),
+      'profileDigest': serializer.toJson<String>(profileDigest),
+      'avatarRevision': serializer.toJson<int>(avatarRevision),
+      'avatarOriginDeviceId': serializer.toJson<String>(avatarOriginDeviceId),
+      'avatarContentHash': serializer.toJson<String>(avatarContentHash),
+      'joinedAt': serializer.toJson<int?>(joinedAt),
+      'confirmedAt': serializer.toJson<int?>(confirmedAt),
+      'removedAt': serializer.toJson<int?>(removedAt),
+      'removalReason': serializer.toJson<String?>(removalReason),
     };
   }
 
@@ -3437,6 +5005,16 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     String? avatarEmoji,
     Value<String?> avatarImagePath = const Value.absent(),
     Value<String?> avatarImageHash = const Value.absent(),
+    int? profileRevision,
+    String? profileOriginDeviceId,
+    String? profileDigest,
+    int? avatarRevision,
+    String? avatarOriginDeviceId,
+    String? avatarContentHash,
+    Value<int?> joinedAt = const Value.absent(),
+    Value<int?> confirmedAt = const Value.absent(),
+    Value<int?> removedAt = const Value.absent(),
+    Value<String?> removalReason = const Value.absent(),
   }) => GroupMemberData(
     groupId: groupId ?? this.groupId,
     deviceId: deviceId ?? this.deviceId,
@@ -3452,6 +5030,18 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     avatarImageHash: avatarImageHash.present
         ? avatarImageHash.value
         : this.avatarImageHash,
+    profileRevision: profileRevision ?? this.profileRevision,
+    profileOriginDeviceId: profileOriginDeviceId ?? this.profileOriginDeviceId,
+    profileDigest: profileDigest ?? this.profileDigest,
+    avatarRevision: avatarRevision ?? this.avatarRevision,
+    avatarOriginDeviceId: avatarOriginDeviceId ?? this.avatarOriginDeviceId,
+    avatarContentHash: avatarContentHash ?? this.avatarContentHash,
+    joinedAt: joinedAt.present ? joinedAt.value : this.joinedAt,
+    confirmedAt: confirmedAt.present ? confirmedAt.value : this.confirmedAt,
+    removedAt: removedAt.present ? removedAt.value : this.removedAt,
+    removalReason: removalReason.present
+        ? removalReason.value
+        : this.removalReason,
   );
   GroupMemberData copyWithCompanion(GroupMembersCompanion data) {
     return GroupMemberData(
@@ -3475,6 +5065,32 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       avatarImageHash: data.avatarImageHash.present
           ? data.avatarImageHash.value
           : this.avatarImageHash,
+      profileRevision: data.profileRevision.present
+          ? data.profileRevision.value
+          : this.profileRevision,
+      profileOriginDeviceId: data.profileOriginDeviceId.present
+          ? data.profileOriginDeviceId.value
+          : this.profileOriginDeviceId,
+      profileDigest: data.profileDigest.present
+          ? data.profileDigest.value
+          : this.profileDigest,
+      avatarRevision: data.avatarRevision.present
+          ? data.avatarRevision.value
+          : this.avatarRevision,
+      avatarOriginDeviceId: data.avatarOriginDeviceId.present
+          ? data.avatarOriginDeviceId.value
+          : this.avatarOriginDeviceId,
+      avatarContentHash: data.avatarContentHash.present
+          ? data.avatarContentHash.value
+          : this.avatarContentHash,
+      joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
+      confirmedAt: data.confirmedAt.present
+          ? data.confirmedAt.value
+          : this.confirmedAt,
+      removedAt: data.removedAt.present ? data.removedAt.value : this.removedAt,
+      removalReason: data.removalReason.present
+          ? data.removalReason.value
+          : this.removalReason,
     );
   }
 
@@ -3490,7 +5106,17 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
           ..write('displayName: $displayName, ')
           ..write('avatarEmoji: $avatarEmoji, ')
           ..write('avatarImagePath: $avatarImagePath, ')
-          ..write('avatarImageHash: $avatarImageHash')
+          ..write('avatarImageHash: $avatarImageHash, ')
+          ..write('profileRevision: $profileRevision, ')
+          ..write('profileOriginDeviceId: $profileOriginDeviceId, ')
+          ..write('profileDigest: $profileDigest, ')
+          ..write('avatarRevision: $avatarRevision, ')
+          ..write('avatarOriginDeviceId: $avatarOriginDeviceId, ')
+          ..write('avatarContentHash: $avatarContentHash, ')
+          ..write('joinedAt: $joinedAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('removedAt: $removedAt, ')
+          ..write('removalReason: $removalReason')
           ..write(')'))
         .toString();
   }
@@ -3507,6 +5133,16 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     avatarEmoji,
     avatarImagePath,
     avatarImageHash,
+    profileRevision,
+    profileOriginDeviceId,
+    profileDigest,
+    avatarRevision,
+    avatarOriginDeviceId,
+    avatarContentHash,
+    joinedAt,
+    confirmedAt,
+    removedAt,
+    removalReason,
   );
   @override
   bool operator ==(Object other) =>
@@ -3521,7 +5157,17 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
           other.displayName == this.displayName &&
           other.avatarEmoji == this.avatarEmoji &&
           other.avatarImagePath == this.avatarImagePath &&
-          other.avatarImageHash == this.avatarImageHash);
+          other.avatarImageHash == this.avatarImageHash &&
+          other.profileRevision == this.profileRevision &&
+          other.profileOriginDeviceId == this.profileOriginDeviceId &&
+          other.profileDigest == this.profileDigest &&
+          other.avatarRevision == this.avatarRevision &&
+          other.avatarOriginDeviceId == this.avatarOriginDeviceId &&
+          other.avatarContentHash == this.avatarContentHash &&
+          other.joinedAt == this.joinedAt &&
+          other.confirmedAt == this.confirmedAt &&
+          other.removedAt == this.removedAt &&
+          other.removalReason == this.removalReason);
 }
 
 class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
@@ -3535,6 +5181,16 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
   final Value<String> avatarEmoji;
   final Value<String?> avatarImagePath;
   final Value<String?> avatarImageHash;
+  final Value<int> profileRevision;
+  final Value<String> profileOriginDeviceId;
+  final Value<String> profileDigest;
+  final Value<int> avatarRevision;
+  final Value<String> avatarOriginDeviceId;
+  final Value<String> avatarContentHash;
+  final Value<int?> joinedAt;
+  final Value<int?> confirmedAt;
+  final Value<int?> removedAt;
+  final Value<String?> removalReason;
   final Value<int> rowid;
   const GroupMembersCompanion({
     this.groupId = const Value.absent(),
@@ -3547,6 +5203,16 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     this.avatarEmoji = const Value.absent(),
     this.avatarImagePath = const Value.absent(),
     this.avatarImageHash = const Value.absent(),
+    this.profileRevision = const Value.absent(),
+    this.profileOriginDeviceId = const Value.absent(),
+    this.profileDigest = const Value.absent(),
+    this.avatarRevision = const Value.absent(),
+    this.avatarOriginDeviceId = const Value.absent(),
+    this.avatarContentHash = const Value.absent(),
+    this.joinedAt = const Value.absent(),
+    this.confirmedAt = const Value.absent(),
+    this.removedAt = const Value.absent(),
+    this.removalReason = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GroupMembersCompanion.insert({
@@ -3560,6 +5226,16 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     this.avatarEmoji = const Value.absent(),
     this.avatarImagePath = const Value.absent(),
     this.avatarImageHash = const Value.absent(),
+    this.profileRevision = const Value.absent(),
+    this.profileOriginDeviceId = const Value.absent(),
+    this.profileDigest = const Value.absent(),
+    this.avatarRevision = const Value.absent(),
+    this.avatarOriginDeviceId = const Value.absent(),
+    this.avatarContentHash = const Value.absent(),
+    this.joinedAt = const Value.absent(),
+    this.confirmedAt = const Value.absent(),
+    this.removedAt = const Value.absent(),
+    this.removalReason = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : groupId = Value(groupId),
        deviceId = Value(deviceId),
@@ -3578,6 +5254,16 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     Expression<String>? avatarEmoji,
     Expression<String>? avatarImagePath,
     Expression<String>? avatarImageHash,
+    Expression<int>? profileRevision,
+    Expression<String>? profileOriginDeviceId,
+    Expression<String>? profileDigest,
+    Expression<int>? avatarRevision,
+    Expression<String>? avatarOriginDeviceId,
+    Expression<String>? avatarContentHash,
+    Expression<int>? joinedAt,
+    Expression<int>? confirmedAt,
+    Expression<int>? removedAt,
+    Expression<String>? removalReason,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3591,6 +5277,18 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
       if (avatarEmoji != null) 'avatar_emoji': avatarEmoji,
       if (avatarImagePath != null) 'avatar_image_path': avatarImagePath,
       if (avatarImageHash != null) 'avatar_image_hash': avatarImageHash,
+      if (profileRevision != null) 'profile_revision': profileRevision,
+      if (profileOriginDeviceId != null)
+        'profile_origin_device_id': profileOriginDeviceId,
+      if (profileDigest != null) 'profile_digest': profileDigest,
+      if (avatarRevision != null) 'avatar_revision': avatarRevision,
+      if (avatarOriginDeviceId != null)
+        'avatar_origin_device_id': avatarOriginDeviceId,
+      if (avatarContentHash != null) 'avatar_content_hash': avatarContentHash,
+      if (joinedAt != null) 'joined_at': joinedAt,
+      if (confirmedAt != null) 'confirmed_at': confirmedAt,
+      if (removedAt != null) 'removed_at': removedAt,
+      if (removalReason != null) 'removal_reason': removalReason,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3606,6 +5304,16 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     Value<String>? avatarEmoji,
     Value<String?>? avatarImagePath,
     Value<String?>? avatarImageHash,
+    Value<int>? profileRevision,
+    Value<String>? profileOriginDeviceId,
+    Value<String>? profileDigest,
+    Value<int>? avatarRevision,
+    Value<String>? avatarOriginDeviceId,
+    Value<String>? avatarContentHash,
+    Value<int?>? joinedAt,
+    Value<int?>? confirmedAt,
+    Value<int?>? removedAt,
+    Value<String?>? removalReason,
     Value<int>? rowid,
   }) {
     return GroupMembersCompanion(
@@ -3619,6 +5327,17 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
       avatarEmoji: avatarEmoji ?? this.avatarEmoji,
       avatarImagePath: avatarImagePath ?? this.avatarImagePath,
       avatarImageHash: avatarImageHash ?? this.avatarImageHash,
+      profileRevision: profileRevision ?? this.profileRevision,
+      profileOriginDeviceId:
+          profileOriginDeviceId ?? this.profileOriginDeviceId,
+      profileDigest: profileDigest ?? this.profileDigest,
+      avatarRevision: avatarRevision ?? this.avatarRevision,
+      avatarOriginDeviceId: avatarOriginDeviceId ?? this.avatarOriginDeviceId,
+      avatarContentHash: avatarContentHash ?? this.avatarContentHash,
+      joinedAt: joinedAt ?? this.joinedAt,
+      confirmedAt: confirmedAt ?? this.confirmedAt,
+      removedAt: removedAt ?? this.removedAt,
+      removalReason: removalReason ?? this.removalReason,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3656,6 +5375,40 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     if (avatarImageHash.present) {
       map['avatar_image_hash'] = Variable<String>(avatarImageHash.value);
     }
+    if (profileRevision.present) {
+      map['profile_revision'] = Variable<int>(profileRevision.value);
+    }
+    if (profileOriginDeviceId.present) {
+      map['profile_origin_device_id'] = Variable<String>(
+        profileOriginDeviceId.value,
+      );
+    }
+    if (profileDigest.present) {
+      map['profile_digest'] = Variable<String>(profileDigest.value);
+    }
+    if (avatarRevision.present) {
+      map['avatar_revision'] = Variable<int>(avatarRevision.value);
+    }
+    if (avatarOriginDeviceId.present) {
+      map['avatar_origin_device_id'] = Variable<String>(
+        avatarOriginDeviceId.value,
+      );
+    }
+    if (avatarContentHash.present) {
+      map['avatar_content_hash'] = Variable<String>(avatarContentHash.value);
+    }
+    if (joinedAt.present) {
+      map['joined_at'] = Variable<int>(joinedAt.value);
+    }
+    if (confirmedAt.present) {
+      map['confirmed_at'] = Variable<int>(confirmedAt.value);
+    }
+    if (removedAt.present) {
+      map['removed_at'] = Variable<int>(removedAt.value);
+    }
+    if (removalReason.present) {
+      map['removal_reason'] = Variable<String>(removalReason.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3675,6 +5428,16 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
           ..write('avatarEmoji: $avatarEmoji, ')
           ..write('avatarImagePath: $avatarImagePath, ')
           ..write('avatarImageHash: $avatarImageHash, ')
+          ..write('profileRevision: $profileRevision, ')
+          ..write('profileOriginDeviceId: $profileOriginDeviceId, ')
+          ..write('profileDigest: $profileDigest, ')
+          ..write('avatarRevision: $avatarRevision, ')
+          ..write('avatarOriginDeviceId: $avatarOriginDeviceId, ')
+          ..write('avatarContentHash: $avatarContentHash, ')
+          ..write('joinedAt: $joinedAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('removedAt: $removedAt, ')
+          ..write('removalReason: $removalReason, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3760,6 +5523,18 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _keyEpochMeta = const VerificationMeta(
+    'keyEpoch',
+  );
+  @override
+  late final GeneratedColumn<int> keyEpoch = GeneratedColumn<int>(
+    'key_epoch',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3793,6 +5568,41 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _controlRevisionMeta = const VerificationMeta(
+    'controlRevision',
+  );
+  @override
+  late final GeneratedColumn<int> controlRevision = GeneratedColumn<int>(
+    'control_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _controlUpdatedAtMeta = const VerificationMeta(
+    'controlUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> controlUpdatedAt = GeneratedColumn<int>(
+    'control_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _controlSnapshotDigestMeta =
+      const VerificationMeta('controlSnapshotDigest');
+  @override
+  late final GeneratedColumn<String> controlSnapshotDigest =
+      GeneratedColumn<String>(
+        'control_snapshot_digest',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     groupId,
@@ -3802,9 +5612,13 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
     inviteCode,
     inviteExpiresAt,
     groupKey,
+    keyEpoch,
     createdAt,
     confirmedAt,
     lastSyncAt,
+    controlRevision,
+    controlUpdatedAt,
+    controlSnapshotDigest,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3869,6 +5683,12 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
         groupKey.isAcceptableOrUnknown(data['group_key']!, _groupKeyMeta),
       );
     }
+    if (data.containsKey('key_epoch')) {
+      context.handle(
+        _keyEpochMeta,
+        keyEpoch.isAcceptableOrUnknown(data['key_epoch']!, _keyEpochMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3892,6 +5712,33 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
         lastSyncAt.isAcceptableOrUnknown(
           data['last_sync_at']!,
           _lastSyncAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('control_revision')) {
+      context.handle(
+        _controlRevisionMeta,
+        controlRevision.isAcceptableOrUnknown(
+          data['control_revision']!,
+          _controlRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('control_updated_at')) {
+      context.handle(
+        _controlUpdatedAtMeta,
+        controlUpdatedAt.isAcceptableOrUnknown(
+          data['control_updated_at']!,
+          _controlUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('control_snapshot_digest')) {
+      context.handle(
+        _controlSnapshotDigestMeta,
+        controlSnapshotDigest.isAcceptableOrUnknown(
+          data['control_snapshot_digest']!,
+          _controlSnapshotDigestMeta,
         ),
       );
     }
@@ -3932,6 +5779,10 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
         DriftSqlType.string,
         data['${effectivePrefix}group_key'],
       ),
+      keyEpoch: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}key_epoch'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
@@ -3944,6 +5795,18 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
         DriftSqlType.int,
         data['${effectivePrefix}last_sync_at'],
       ),
+      controlRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}control_revision'],
+      )!,
+      controlUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}control_updated_at'],
+      ),
+      controlSnapshotDigest: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}control_snapshot_digest'],
+      )!,
     );
   }
 
@@ -3961,9 +5824,15 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   final String? inviteCode;
   final int? inviteExpiresAt;
   final String? groupKey;
+  final int keyEpoch;
   final int createdAt;
   final int? confirmedAt;
   final int? lastSyncAt;
+
+  /// Monotonic server control-plane revision (unrelated to data sync clocks).
+  final int controlRevision;
+  final int? controlUpdatedAt;
+  final String controlSnapshotDigest;
   const GroupData({
     required this.groupId,
     required this.status,
@@ -3972,9 +5841,13 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     this.inviteCode,
     this.inviteExpiresAt,
     this.groupKey,
+    required this.keyEpoch,
     required this.createdAt,
     this.confirmedAt,
     this.lastSyncAt,
+    required this.controlRevision,
+    this.controlUpdatedAt,
+    required this.controlSnapshotDigest,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3992,6 +5865,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     if (!nullToAbsent || groupKey != null) {
       map['group_key'] = Variable<String>(groupKey);
     }
+    map['key_epoch'] = Variable<int>(keyEpoch);
     map['created_at'] = Variable<int>(createdAt);
     if (!nullToAbsent || confirmedAt != null) {
       map['confirmed_at'] = Variable<int>(confirmedAt);
@@ -3999,6 +5873,11 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     if (!nullToAbsent || lastSyncAt != null) {
       map['last_sync_at'] = Variable<int>(lastSyncAt);
     }
+    map['control_revision'] = Variable<int>(controlRevision);
+    if (!nullToAbsent || controlUpdatedAt != null) {
+      map['control_updated_at'] = Variable<int>(controlUpdatedAt);
+    }
+    map['control_snapshot_digest'] = Variable<String>(controlSnapshotDigest);
     return map;
   }
 
@@ -4017,6 +5896,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       groupKey: groupKey == null && nullToAbsent
           ? const Value.absent()
           : Value(groupKey),
+      keyEpoch: Value(keyEpoch),
       createdAt: Value(createdAt),
       confirmedAt: confirmedAt == null && nullToAbsent
           ? const Value.absent()
@@ -4024,6 +5904,11 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       lastSyncAt: lastSyncAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncAt),
+      controlRevision: Value(controlRevision),
+      controlUpdatedAt: controlUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(controlUpdatedAt),
+      controlSnapshotDigest: Value(controlSnapshotDigest),
     );
   }
 
@@ -4040,9 +5925,15 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       inviteCode: serializer.fromJson<String?>(json['inviteCode']),
       inviteExpiresAt: serializer.fromJson<int?>(json['inviteExpiresAt']),
       groupKey: serializer.fromJson<String?>(json['groupKey']),
+      keyEpoch: serializer.fromJson<int>(json['keyEpoch']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       confirmedAt: serializer.fromJson<int?>(json['confirmedAt']),
       lastSyncAt: serializer.fromJson<int?>(json['lastSyncAt']),
+      controlRevision: serializer.fromJson<int>(json['controlRevision']),
+      controlUpdatedAt: serializer.fromJson<int?>(json['controlUpdatedAt']),
+      controlSnapshotDigest: serializer.fromJson<String>(
+        json['controlSnapshotDigest'],
+      ),
     );
   }
   @override
@@ -4056,9 +5947,13 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       'inviteCode': serializer.toJson<String?>(inviteCode),
       'inviteExpiresAt': serializer.toJson<int?>(inviteExpiresAt),
       'groupKey': serializer.toJson<String?>(groupKey),
+      'keyEpoch': serializer.toJson<int>(keyEpoch),
       'createdAt': serializer.toJson<int>(createdAt),
       'confirmedAt': serializer.toJson<int?>(confirmedAt),
       'lastSyncAt': serializer.toJson<int?>(lastSyncAt),
+      'controlRevision': serializer.toJson<int>(controlRevision),
+      'controlUpdatedAt': serializer.toJson<int?>(controlUpdatedAt),
+      'controlSnapshotDigest': serializer.toJson<String>(controlSnapshotDigest),
     };
   }
 
@@ -4070,9 +5965,13 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     Value<String?> inviteCode = const Value.absent(),
     Value<int?> inviteExpiresAt = const Value.absent(),
     Value<String?> groupKey = const Value.absent(),
+    int? keyEpoch,
     int? createdAt,
     Value<int?> confirmedAt = const Value.absent(),
     Value<int?> lastSyncAt = const Value.absent(),
+    int? controlRevision,
+    Value<int?> controlUpdatedAt = const Value.absent(),
+    String? controlSnapshotDigest,
   }) => GroupData(
     groupId: groupId ?? this.groupId,
     status: status ?? this.status,
@@ -4083,9 +5982,15 @@ class GroupData extends DataClass implements Insertable<GroupData> {
         ? inviteExpiresAt.value
         : this.inviteExpiresAt,
     groupKey: groupKey.present ? groupKey.value : this.groupKey,
+    keyEpoch: keyEpoch ?? this.keyEpoch,
     createdAt: createdAt ?? this.createdAt,
     confirmedAt: confirmedAt.present ? confirmedAt.value : this.confirmedAt,
     lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
+    controlRevision: controlRevision ?? this.controlRevision,
+    controlUpdatedAt: controlUpdatedAt.present
+        ? controlUpdatedAt.value
+        : this.controlUpdatedAt,
+    controlSnapshotDigest: controlSnapshotDigest ?? this.controlSnapshotDigest,
   );
   GroupData copyWithCompanion(GroupsCompanion data) {
     return GroupData(
@@ -4100,6 +6005,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
           ? data.inviteExpiresAt.value
           : this.inviteExpiresAt,
       groupKey: data.groupKey.present ? data.groupKey.value : this.groupKey,
+      keyEpoch: data.keyEpoch.present ? data.keyEpoch.value : this.keyEpoch,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       confirmedAt: data.confirmedAt.present
           ? data.confirmedAt.value
@@ -4107,6 +6013,15 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       lastSyncAt: data.lastSyncAt.present
           ? data.lastSyncAt.value
           : this.lastSyncAt,
+      controlRevision: data.controlRevision.present
+          ? data.controlRevision.value
+          : this.controlRevision,
+      controlUpdatedAt: data.controlUpdatedAt.present
+          ? data.controlUpdatedAt.value
+          : this.controlUpdatedAt,
+      controlSnapshotDigest: data.controlSnapshotDigest.present
+          ? data.controlSnapshotDigest.value
+          : this.controlSnapshotDigest,
     );
   }
 
@@ -4120,9 +6035,13 @@ class GroupData extends DataClass implements Insertable<GroupData> {
           ..write('inviteCode: $inviteCode, ')
           ..write('inviteExpiresAt: $inviteExpiresAt, ')
           ..write('groupKey: $groupKey, ')
+          ..write('keyEpoch: $keyEpoch, ')
           ..write('createdAt: $createdAt, ')
           ..write('confirmedAt: $confirmedAt, ')
-          ..write('lastSyncAt: $lastSyncAt')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('controlRevision: $controlRevision, ')
+          ..write('controlUpdatedAt: $controlUpdatedAt, ')
+          ..write('controlSnapshotDigest: $controlSnapshotDigest')
           ..write(')'))
         .toString();
   }
@@ -4136,9 +6055,13 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     inviteCode,
     inviteExpiresAt,
     groupKey,
+    keyEpoch,
     createdAt,
     confirmedAt,
     lastSyncAt,
+    controlRevision,
+    controlUpdatedAt,
+    controlSnapshotDigest,
   );
   @override
   bool operator ==(Object other) =>
@@ -4151,9 +6074,13 @@ class GroupData extends DataClass implements Insertable<GroupData> {
           other.inviteCode == this.inviteCode &&
           other.inviteExpiresAt == this.inviteExpiresAt &&
           other.groupKey == this.groupKey &&
+          other.keyEpoch == this.keyEpoch &&
           other.createdAt == this.createdAt &&
           other.confirmedAt == this.confirmedAt &&
-          other.lastSyncAt == this.lastSyncAt);
+          other.lastSyncAt == this.lastSyncAt &&
+          other.controlRevision == this.controlRevision &&
+          other.controlUpdatedAt == this.controlUpdatedAt &&
+          other.controlSnapshotDigest == this.controlSnapshotDigest);
 }
 
 class GroupsCompanion extends UpdateCompanion<GroupData> {
@@ -4164,9 +6091,13 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   final Value<String?> inviteCode;
   final Value<int?> inviteExpiresAt;
   final Value<String?> groupKey;
+  final Value<int> keyEpoch;
   final Value<int> createdAt;
   final Value<int?> confirmedAt;
   final Value<int?> lastSyncAt;
+  final Value<int> controlRevision;
+  final Value<int?> controlUpdatedAt;
+  final Value<String> controlSnapshotDigest;
   final Value<int> rowid;
   const GroupsCompanion({
     this.groupId = const Value.absent(),
@@ -4176,9 +6107,13 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     this.inviteCode = const Value.absent(),
     this.inviteExpiresAt = const Value.absent(),
     this.groupKey = const Value.absent(),
+    this.keyEpoch = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.confirmedAt = const Value.absent(),
     this.lastSyncAt = const Value.absent(),
+    this.controlRevision = const Value.absent(),
+    this.controlUpdatedAt = const Value.absent(),
+    this.controlSnapshotDigest = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GroupsCompanion.insert({
@@ -4189,9 +6124,13 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     this.inviteCode = const Value.absent(),
     this.inviteExpiresAt = const Value.absent(),
     this.groupKey = const Value.absent(),
+    this.keyEpoch = const Value.absent(),
     required int createdAt,
     this.confirmedAt = const Value.absent(),
     this.lastSyncAt = const Value.absent(),
+    this.controlRevision = const Value.absent(),
+    this.controlUpdatedAt = const Value.absent(),
+    this.controlSnapshotDigest = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : groupId = Value(groupId),
        status = Value(status),
@@ -4205,9 +6144,13 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     Expression<String>? inviteCode,
     Expression<int>? inviteExpiresAt,
     Expression<String>? groupKey,
+    Expression<int>? keyEpoch,
     Expression<int>? createdAt,
     Expression<int>? confirmedAt,
     Expression<int>? lastSyncAt,
+    Expression<int>? controlRevision,
+    Expression<int>? controlUpdatedAt,
+    Expression<String>? controlSnapshotDigest,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4218,9 +6161,14 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
       if (inviteCode != null) 'invite_code': inviteCode,
       if (inviteExpiresAt != null) 'invite_expires_at': inviteExpiresAt,
       if (groupKey != null) 'group_key': groupKey,
+      if (keyEpoch != null) 'key_epoch': keyEpoch,
       if (createdAt != null) 'created_at': createdAt,
       if (confirmedAt != null) 'confirmed_at': confirmedAt,
       if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (controlRevision != null) 'control_revision': controlRevision,
+      if (controlUpdatedAt != null) 'control_updated_at': controlUpdatedAt,
+      if (controlSnapshotDigest != null)
+        'control_snapshot_digest': controlSnapshotDigest,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4233,9 +6181,13 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     Value<String?>? inviteCode,
     Value<int?>? inviteExpiresAt,
     Value<String?>? groupKey,
+    Value<int>? keyEpoch,
     Value<int>? createdAt,
     Value<int?>? confirmedAt,
     Value<int?>? lastSyncAt,
+    Value<int>? controlRevision,
+    Value<int?>? controlUpdatedAt,
+    Value<String>? controlSnapshotDigest,
     Value<int>? rowid,
   }) {
     return GroupsCompanion(
@@ -4246,9 +6198,14 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
       inviteCode: inviteCode ?? this.inviteCode,
       inviteExpiresAt: inviteExpiresAt ?? this.inviteExpiresAt,
       groupKey: groupKey ?? this.groupKey,
+      keyEpoch: keyEpoch ?? this.keyEpoch,
       createdAt: createdAt ?? this.createdAt,
       confirmedAt: confirmedAt ?? this.confirmedAt,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      controlRevision: controlRevision ?? this.controlRevision,
+      controlUpdatedAt: controlUpdatedAt ?? this.controlUpdatedAt,
+      controlSnapshotDigest:
+          controlSnapshotDigest ?? this.controlSnapshotDigest,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4277,6 +6234,9 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     if (groupKey.present) {
       map['group_key'] = Variable<String>(groupKey.value);
     }
+    if (keyEpoch.present) {
+      map['key_epoch'] = Variable<int>(keyEpoch.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -4285,6 +6245,17 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     }
     if (lastSyncAt.present) {
       map['last_sync_at'] = Variable<int>(lastSyncAt.value);
+    }
+    if (controlRevision.present) {
+      map['control_revision'] = Variable<int>(controlRevision.value);
+    }
+    if (controlUpdatedAt.present) {
+      map['control_updated_at'] = Variable<int>(controlUpdatedAt.value);
+    }
+    if (controlSnapshotDigest.present) {
+      map['control_snapshot_digest'] = Variable<String>(
+        controlSnapshotDigest.value,
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -4302,9 +6273,649 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
           ..write('inviteCode: $inviteCode, ')
           ..write('inviteExpiresAt: $inviteExpiresAt, ')
           ..write('groupKey: $groupKey, ')
+          ..write('keyEpoch: $keyEpoch, ')
           ..write('createdAt: $createdAt, ')
           ..write('confirmedAt: $confirmedAt, ')
           ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('controlRevision: $controlRevision, ')
+          ..write('controlUpdatedAt: $controlUpdatedAt, ')
+          ..write('controlSnapshotDigest: $controlSnapshotDigest, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InboundSyncOperationsTable extends InboundSyncOperations
+    with TableInfo<$InboundSyncOperationsTable, InboundSyncOperationData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InboundSyncOperationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _operationIdMeta = const VerificationMeta(
+    'operationId',
+  );
+  @override
+  late final GeneratedColumn<String> operationId = GeneratedColumn<String>(
+    'operation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageIdMeta = const VerificationMeta(
+    'messageId',
+  );
+  @override
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+    'message_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _operationJsonMeta = const VerificationMeta(
+    'operationJson',
+  );
+  @override
+  late final GeneratedColumn<String> operationJson = GeneratedColumn<String>(
+    'operation_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _errorCodeMeta = const VerificationMeta(
+    'errorCode',
+  );
+  @override
+  late final GeneratedColumn<String> errorCode = GeneratedColumn<String>(
+    'error_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _retryableMeta = const VerificationMeta(
+    'retryable',
+  );
+  @override
+  late final GeneratedColumn<bool> retryable = GeneratedColumn<bool>(
+    'retryable',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("retryable" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _payloadBytesMeta = const VerificationMeta(
+    'payloadBytes',
+  );
+  @override
+  late final GeneratedColumn<int> payloadBytes = GeneratedColumn<int>(
+    'payload_bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    operationId,
+    groupId,
+    messageId,
+    state,
+    operationJson,
+    errorCode,
+    retryable,
+    payloadBytes,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inbound_sync_operations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InboundSyncOperationData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('operation_id')) {
+      context.handle(
+        _operationIdMeta,
+        operationId.isAcceptableOrUnknown(
+          data['operation_id']!,
+          _operationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(
+        _messageIdMeta,
+        messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('operation_json')) {
+      context.handle(
+        _operationJsonMeta,
+        operationJson.isAcceptableOrUnknown(
+          data['operation_json']!,
+          _operationJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('error_code')) {
+      context.handle(
+        _errorCodeMeta,
+        errorCode.isAcceptableOrUnknown(data['error_code']!, _errorCodeMeta),
+      );
+    }
+    if (data.containsKey('retryable')) {
+      context.handle(
+        _retryableMeta,
+        retryable.isAcceptableOrUnknown(data['retryable']!, _retryableMeta),
+      );
+    }
+    if (data.containsKey('payload_bytes')) {
+      context.handle(
+        _payloadBytesMeta,
+        payloadBytes.isAcceptableOrUnknown(
+          data['payload_bytes']!,
+          _payloadBytesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {groupId, operationId};
+  @override
+  InboundSyncOperationData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InboundSyncOperationData(
+      operationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      operationJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_json'],
+      ),
+      errorCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_code'],
+      ),
+      retryable: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}retryable'],
+      )!,
+      payloadBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}payload_bytes'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $InboundSyncOperationsTable createAlias(String alias) {
+    return $InboundSyncOperationsTable(attachedDatabase, alias);
+  }
+}
+
+class InboundSyncOperationData extends DataClass
+    implements Insertable<InboundSyncOperationData> {
+  final String operationId;
+  final String groupId;
+  final String messageId;
+  final String state;
+  final String? operationJson;
+  final String? errorCode;
+  final bool retryable;
+  final int payloadBytes;
+  final int createdAt;
+  final int updatedAt;
+  const InboundSyncOperationData({
+    required this.operationId,
+    required this.groupId,
+    required this.messageId,
+    required this.state,
+    this.operationJson,
+    this.errorCode,
+    required this.retryable,
+    required this.payloadBytes,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['operation_id'] = Variable<String>(operationId);
+    map['group_id'] = Variable<String>(groupId);
+    map['message_id'] = Variable<String>(messageId);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || operationJson != null) {
+      map['operation_json'] = Variable<String>(operationJson);
+    }
+    if (!nullToAbsent || errorCode != null) {
+      map['error_code'] = Variable<String>(errorCode);
+    }
+    map['retryable'] = Variable<bool>(retryable);
+    map['payload_bytes'] = Variable<int>(payloadBytes);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    return map;
+  }
+
+  InboundSyncOperationsCompanion toCompanion(bool nullToAbsent) {
+    return InboundSyncOperationsCompanion(
+      operationId: Value(operationId),
+      groupId: Value(groupId),
+      messageId: Value(messageId),
+      state: Value(state),
+      operationJson: operationJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(operationJson),
+      errorCode: errorCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorCode),
+      retryable: Value(retryable),
+      payloadBytes: Value(payloadBytes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory InboundSyncOperationData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InboundSyncOperationData(
+      operationId: serializer.fromJson<String>(json['operationId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      messageId: serializer.fromJson<String>(json['messageId']),
+      state: serializer.fromJson<String>(json['state']),
+      operationJson: serializer.fromJson<String?>(json['operationJson']),
+      errorCode: serializer.fromJson<String?>(json['errorCode']),
+      retryable: serializer.fromJson<bool>(json['retryable']),
+      payloadBytes: serializer.fromJson<int>(json['payloadBytes']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'operationId': serializer.toJson<String>(operationId),
+      'groupId': serializer.toJson<String>(groupId),
+      'messageId': serializer.toJson<String>(messageId),
+      'state': serializer.toJson<String>(state),
+      'operationJson': serializer.toJson<String?>(operationJson),
+      'errorCode': serializer.toJson<String?>(errorCode),
+      'retryable': serializer.toJson<bool>(retryable),
+      'payloadBytes': serializer.toJson<int>(payloadBytes),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+    };
+  }
+
+  InboundSyncOperationData copyWith({
+    String? operationId,
+    String? groupId,
+    String? messageId,
+    String? state,
+    Value<String?> operationJson = const Value.absent(),
+    Value<String?> errorCode = const Value.absent(),
+    bool? retryable,
+    int? payloadBytes,
+    int? createdAt,
+    int? updatedAt,
+  }) => InboundSyncOperationData(
+    operationId: operationId ?? this.operationId,
+    groupId: groupId ?? this.groupId,
+    messageId: messageId ?? this.messageId,
+    state: state ?? this.state,
+    operationJson: operationJson.present
+        ? operationJson.value
+        : this.operationJson,
+    errorCode: errorCode.present ? errorCode.value : this.errorCode,
+    retryable: retryable ?? this.retryable,
+    payloadBytes: payloadBytes ?? this.payloadBytes,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  InboundSyncOperationData copyWithCompanion(
+    InboundSyncOperationsCompanion data,
+  ) {
+    return InboundSyncOperationData(
+      operationId: data.operationId.present
+          ? data.operationId.value
+          : this.operationId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      state: data.state.present ? data.state.value : this.state,
+      operationJson: data.operationJson.present
+          ? data.operationJson.value
+          : this.operationJson,
+      errorCode: data.errorCode.present ? data.errorCode.value : this.errorCode,
+      retryable: data.retryable.present ? data.retryable.value : this.retryable,
+      payloadBytes: data.payloadBytes.present
+          ? data.payloadBytes.value
+          : this.payloadBytes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InboundSyncOperationData(')
+          ..write('operationId: $operationId, ')
+          ..write('groupId: $groupId, ')
+          ..write('messageId: $messageId, ')
+          ..write('state: $state, ')
+          ..write('operationJson: $operationJson, ')
+          ..write('errorCode: $errorCode, ')
+          ..write('retryable: $retryable, ')
+          ..write('payloadBytes: $payloadBytes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    operationId,
+    groupId,
+    messageId,
+    state,
+    operationJson,
+    errorCode,
+    retryable,
+    payloadBytes,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InboundSyncOperationData &&
+          other.operationId == this.operationId &&
+          other.groupId == this.groupId &&
+          other.messageId == this.messageId &&
+          other.state == this.state &&
+          other.operationJson == this.operationJson &&
+          other.errorCode == this.errorCode &&
+          other.retryable == this.retryable &&
+          other.payloadBytes == this.payloadBytes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class InboundSyncOperationsCompanion
+    extends UpdateCompanion<InboundSyncOperationData> {
+  final Value<String> operationId;
+  final Value<String> groupId;
+  final Value<String> messageId;
+  final Value<String> state;
+  final Value<String?> operationJson;
+  final Value<String?> errorCode;
+  final Value<bool> retryable;
+  final Value<int> payloadBytes;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowid;
+  const InboundSyncOperationsCompanion({
+    this.operationId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.operationJson = const Value.absent(),
+    this.errorCode = const Value.absent(),
+    this.retryable = const Value.absent(),
+    this.payloadBytes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InboundSyncOperationsCompanion.insert({
+    required String operationId,
+    required String groupId,
+    required String messageId,
+    required String state,
+    this.operationJson = const Value.absent(),
+    this.errorCode = const Value.absent(),
+    this.retryable = const Value.absent(),
+    this.payloadBytes = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    this.rowid = const Value.absent(),
+  }) : operationId = Value(operationId),
+       groupId = Value(groupId),
+       messageId = Value(messageId),
+       state = Value(state),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<InboundSyncOperationData> custom({
+    Expression<String>? operationId,
+    Expression<String>? groupId,
+    Expression<String>? messageId,
+    Expression<String>? state,
+    Expression<String>? operationJson,
+    Expression<String>? errorCode,
+    Expression<bool>? retryable,
+    Expression<int>? payloadBytes,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (operationId != null) 'operation_id': operationId,
+      if (groupId != null) 'group_id': groupId,
+      if (messageId != null) 'message_id': messageId,
+      if (state != null) 'state': state,
+      if (operationJson != null) 'operation_json': operationJson,
+      if (errorCode != null) 'error_code': errorCode,
+      if (retryable != null) 'retryable': retryable,
+      if (payloadBytes != null) 'payload_bytes': payloadBytes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InboundSyncOperationsCompanion copyWith({
+    Value<String>? operationId,
+    Value<String>? groupId,
+    Value<String>? messageId,
+    Value<String>? state,
+    Value<String?>? operationJson,
+    Value<String?>? errorCode,
+    Value<bool>? retryable,
+    Value<int>? payloadBytes,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return InboundSyncOperationsCompanion(
+      operationId: operationId ?? this.operationId,
+      groupId: groupId ?? this.groupId,
+      messageId: messageId ?? this.messageId,
+      state: state ?? this.state,
+      operationJson: operationJson ?? this.operationJson,
+      errorCode: errorCode ?? this.errorCode,
+      retryable: retryable ?? this.retryable,
+      payloadBytes: payloadBytes ?? this.payloadBytes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (operationId.present) {
+      map['operation_id'] = Variable<String>(operationId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (operationJson.present) {
+      map['operation_json'] = Variable<String>(operationJson.value);
+    }
+    if (errorCode.present) {
+      map['error_code'] = Variable<String>(errorCode.value);
+    }
+    if (retryable.present) {
+      map['retryable'] = Variable<bool>(retryable.value);
+    }
+    if (payloadBytes.present) {
+      map['payload_bytes'] = Variable<int>(payloadBytes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InboundSyncOperationsCompanion(')
+          ..write('operationId: $operationId, ')
+          ..write('groupId: $groupId, ')
+          ..write('messageId: $messageId, ')
+          ..write('state: $state, ')
+          ..write('operationJson: $operationJson, ')
+          ..write('errorCode: $errorCode, ')
+          ..write('retryable: $retryable, ')
+          ..write('payloadBytes: $payloadBytes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5790,6 +8401,30 @@ class $ShoppingItemsTable extends ShoppingItems
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _syncRevisionMeta = const VerificationMeta(
+    'syncRevision',
+  );
+  @override
+  late final GeneratedColumn<int> syncRevision = GeneratedColumn<int>(
+    'sync_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _syncOriginDeviceIdMeta =
+      const VerificationMeta('syncOriginDeviceId');
+  @override
+  late final GeneratedColumn<String> syncOriginDeviceId =
+      GeneratedColumn<String>(
+        'sync_origin_device_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5810,6 +8445,8 @@ class $ShoppingItemsTable extends ShoppingItems
     addedByBookId,
     createdAt,
     updatedAt,
+    syncRevision,
+    syncOriginDeviceId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5948,6 +8585,24 @@ class $ShoppingItemsTable extends ShoppingItems
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('sync_revision')) {
+      context.handle(
+        _syncRevisionMeta,
+        syncRevision.isAcceptableOrUnknown(
+          data['sync_revision']!,
+          _syncRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sync_origin_device_id')) {
+      context.handle(
+        _syncOriginDeviceIdMeta,
+        syncOriginDeviceId.isAcceptableOrUnknown(
+          data['sync_origin_device_id']!,
+          _syncOriginDeviceIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6029,6 +8684,14 @@ class $ShoppingItemsTable extends ShoppingItems
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       ),
+      syncRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_revision'],
+      )!,
+      syncOriginDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_origin_device_id'],
+      )!,
     );
   }
 
@@ -6057,6 +8720,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
   final String? addedByBookId;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final int syncRevision;
+  final String syncOriginDeviceId;
   const ShoppingItemRow({
     required this.id,
     required this.deviceId,
@@ -6076,6 +8741,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     this.addedByBookId,
     required this.createdAt,
     this.updatedAt,
+    required this.syncRevision,
+    required this.syncOriginDeviceId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6114,6 +8781,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
+    map['sync_revision'] = Variable<int>(syncRevision);
+    map['sync_origin_device_id'] = Variable<String>(syncOriginDeviceId);
     return map;
   }
 
@@ -6149,6 +8818,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      syncRevision: Value(syncRevision),
+      syncOriginDeviceId: Value(syncOriginDeviceId),
     );
   }
 
@@ -6176,6 +8847,10 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       addedByBookId: serializer.fromJson<String?>(json['addedByBookId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      syncRevision: serializer.fromJson<int>(json['syncRevision']),
+      syncOriginDeviceId: serializer.fromJson<String>(
+        json['syncOriginDeviceId'],
+      ),
     );
   }
   @override
@@ -6200,6 +8875,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       'addedByBookId': serializer.toJson<String?>(addedByBookId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'syncRevision': serializer.toJson<int>(syncRevision),
+      'syncOriginDeviceId': serializer.toJson<String>(syncOriginDeviceId),
     };
   }
 
@@ -6222,6 +8899,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     Value<String?> addedByBookId = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
+    int? syncRevision,
+    String? syncOriginDeviceId,
   }) => ShoppingItemRow(
     id: id ?? this.id,
     deviceId: deviceId ?? this.deviceId,
@@ -6245,6 +8924,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
         : this.addedByBookId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    syncRevision: syncRevision ?? this.syncRevision,
+    syncOriginDeviceId: syncOriginDeviceId ?? this.syncOriginDeviceId,
   );
   ShoppingItemRow copyWithCompanion(ShoppingItemsCompanion data) {
     return ShoppingItemRow(
@@ -6278,6 +8959,12 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
           : this.addedByBookId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncRevision: data.syncRevision.present
+          ? data.syncRevision.value
+          : this.syncRevision,
+      syncOriginDeviceId: data.syncOriginDeviceId.present
+          ? data.syncOriginDeviceId.value
+          : this.syncOriginDeviceId,
     );
   }
 
@@ -6301,7 +8988,9 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
           ..write('isDeleted: $isDeleted, ')
           ..write('addedByBookId: $addedByBookId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncRevision: $syncRevision, ')
+          ..write('syncOriginDeviceId: $syncOriginDeviceId')
           ..write(')'))
         .toString();
   }
@@ -6326,6 +9015,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     addedByBookId,
     createdAt,
     updatedAt,
+    syncRevision,
+    syncOriginDeviceId,
   );
   @override
   bool operator ==(Object other) =>
@@ -6348,7 +9039,9 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
           other.isDeleted == this.isDeleted &&
           other.addedByBookId == this.addedByBookId &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.syncRevision == this.syncRevision &&
+          other.syncOriginDeviceId == this.syncOriginDeviceId);
 }
 
 class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
@@ -6370,6 +9063,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
   final Value<String?> addedByBookId;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
+  final Value<int> syncRevision;
+  final Value<String> syncOriginDeviceId;
   final Value<int> rowid;
   const ShoppingItemsCompanion({
     this.id = const Value.absent(),
@@ -6390,6 +9085,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     this.addedByBookId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
+    this.syncOriginDeviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ShoppingItemsCompanion.insert({
@@ -6411,6 +9108,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     this.addedByBookId = const Value.absent(),
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
+    this.syncOriginDeviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        deviceId = Value(deviceId),
@@ -6435,6 +9134,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     Expression<String>? addedByBookId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? syncRevision,
+    Expression<String>? syncOriginDeviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6456,6 +9157,9 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
       if (addedByBookId != null) 'added_by_book_id': addedByBookId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncRevision != null) 'sync_revision': syncRevision,
+      if (syncOriginDeviceId != null)
+        'sync_origin_device_id': syncOriginDeviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6479,6 +9183,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     Value<String?>? addedByBookId,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
+    Value<int>? syncRevision,
+    Value<String>? syncOriginDeviceId,
     Value<int>? rowid,
   }) {
     return ShoppingItemsCompanion(
@@ -6500,6 +9206,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
       addedByBookId: addedByBookId ?? this.addedByBookId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      syncRevision: syncRevision ?? this.syncRevision,
+      syncOriginDeviceId: syncOriginDeviceId ?? this.syncOriginDeviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6561,6 +9269,12 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (syncRevision.present) {
+      map['sync_revision'] = Variable<int>(syncRevision.value);
+    }
+    if (syncOriginDeviceId.present) {
+      map['sync_origin_device_id'] = Variable<String>(syncOriginDeviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6588,6 +9302,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
           ..write('addedByBookId: $addedByBookId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('syncRevision: $syncRevision, ')
+          ..write('syncOriginDeviceId: $syncOriginDeviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6631,6 +9347,18 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _keyEpochMeta = const VerificationMeta(
+    'keyEpoch',
+  );
+  @override
+  late final GeneratedColumn<int> keyEpoch = GeneratedColumn<int>(
+    'key_epoch',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   static const VerificationMeta _vectorClockMeta = const VerificationMeta(
     'vectorClock',
   );
@@ -6653,6 +9381,17 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _withdrawalReceiptsMeta =
+      const VerificationMeta('withdrawalReceipts');
+  @override
+  late final GeneratedColumn<String> withdrawalReceipts =
+      GeneratedColumn<String>(
+        'withdrawal_receipts',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _retryCountMeta = const VerificationMeta(
     'retryCount',
   );
@@ -6664,6 +9403,49 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _lastErrorCodeMeta = const VerificationMeta(
+    'lastErrorCode',
+  );
+  @override
+  late final GeneratedColumn<String> lastErrorCode = GeneratedColumn<String>(
+    'last_error_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nextRetryAtMeta = const VerificationMeta(
+    'nextRetryAt',
+  );
+  @override
+  late final GeneratedColumn<int> nextRetryAt = GeneratedColumn<int>(
+    'next_retry_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _failedAtMeta = const VerificationMeta(
+    'failedAt',
+  );
+  @override
+  late final GeneratedColumn<int> failedAt = GeneratedColumn<int>(
+    'failed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -6681,9 +9463,15 @@ class $SyncQueueTable extends SyncQueue
     id,
     groupId,
     encryptedPayload,
+    keyEpoch,
     vectorClock,
     operationCount,
+    withdrawalReceipts,
     retryCount,
+    state,
+    lastErrorCode,
+    nextRetryAt,
+    failedAt,
     createdAt,
   ];
   @override
@@ -6722,6 +9510,12 @@ class $SyncQueueTable extends SyncQueue
     } else if (isInserting) {
       context.missing(_encryptedPayloadMeta);
     }
+    if (data.containsKey('key_epoch')) {
+      context.handle(
+        _keyEpochMeta,
+        keyEpoch.isAcceptableOrUnknown(data['key_epoch']!, _keyEpochMeta),
+      );
+    }
     if (data.containsKey('vector_clock')) {
       context.handle(
         _vectorClockMeta,
@@ -6744,10 +9538,49 @@ class $SyncQueueTable extends SyncQueue
     } else if (isInserting) {
       context.missing(_operationCountMeta);
     }
+    if (data.containsKey('withdrawal_receipts')) {
+      context.handle(
+        _withdrawalReceiptsMeta,
+        withdrawalReceipts.isAcceptableOrUnknown(
+          data['withdrawal_receipts']!,
+          _withdrawalReceiptsMeta,
+        ),
+      );
+    }
     if (data.containsKey('retry_count')) {
       context.handle(
         _retryCountMeta,
         retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('last_error_code')) {
+      context.handle(
+        _lastErrorCodeMeta,
+        lastErrorCode.isAcceptableOrUnknown(
+          data['last_error_code']!,
+          _lastErrorCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_retry_at')) {
+      context.handle(
+        _nextRetryAtMeta,
+        nextRetryAt.isAcceptableOrUnknown(
+          data['next_retry_at']!,
+          _nextRetryAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('failed_at')) {
+      context.handle(
+        _failedAtMeta,
+        failedAt.isAcceptableOrUnknown(data['failed_at']!, _failedAtMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -6779,6 +9612,10 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.string,
         data['${effectivePrefix}encrypted_payload'],
       )!,
+      keyEpoch: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}key_epoch'],
+      )!,
       vectorClock: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}vector_clock'],
@@ -6787,10 +9624,30 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.int,
         data['${effectivePrefix}operation_count'],
       )!,
+      withdrawalReceipts: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}withdrawal_receipts'],
+      ),
       retryCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}retry_count'],
       )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      lastErrorCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error_code'],
+      ),
+      nextRetryAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}next_retry_at'],
+      ),
+      failedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}failed_at'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
@@ -6808,17 +9665,29 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   final String id;
   final String groupId;
   final String encryptedPayload;
+  final int keyEpoch;
   final String vectorClock;
   final int operationCount;
+  final String? withdrawalReceipts;
   final int retryCount;
+  final String state;
+  final String? lastErrorCode;
+  final int? nextRetryAt;
+  final int? failedAt;
   final int createdAt;
   const SyncQueueData({
     required this.id,
     required this.groupId,
     required this.encryptedPayload,
+    required this.keyEpoch,
     required this.vectorClock,
     required this.operationCount,
+    this.withdrawalReceipts,
     required this.retryCount,
+    required this.state,
+    this.lastErrorCode,
+    this.nextRetryAt,
+    this.failedAt,
     required this.createdAt,
   });
   @override
@@ -6827,9 +9696,23 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     map['id'] = Variable<String>(id);
     map['group_id'] = Variable<String>(groupId);
     map['encrypted_payload'] = Variable<String>(encryptedPayload);
+    map['key_epoch'] = Variable<int>(keyEpoch);
     map['vector_clock'] = Variable<String>(vectorClock);
     map['operation_count'] = Variable<int>(operationCount);
+    if (!nullToAbsent || withdrawalReceipts != null) {
+      map['withdrawal_receipts'] = Variable<String>(withdrawalReceipts);
+    }
     map['retry_count'] = Variable<int>(retryCount);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || lastErrorCode != null) {
+      map['last_error_code'] = Variable<String>(lastErrorCode);
+    }
+    if (!nullToAbsent || nextRetryAt != null) {
+      map['next_retry_at'] = Variable<int>(nextRetryAt);
+    }
+    if (!nullToAbsent || failedAt != null) {
+      map['failed_at'] = Variable<int>(failedAt);
+    }
     map['created_at'] = Variable<int>(createdAt);
     return map;
   }
@@ -6839,9 +9722,23 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       id: Value(id),
       groupId: Value(groupId),
       encryptedPayload: Value(encryptedPayload),
+      keyEpoch: Value(keyEpoch),
       vectorClock: Value(vectorClock),
       operationCount: Value(operationCount),
+      withdrawalReceipts: withdrawalReceipts == null && nullToAbsent
+          ? const Value.absent()
+          : Value(withdrawalReceipts),
       retryCount: Value(retryCount),
+      state: Value(state),
+      lastErrorCode: lastErrorCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastErrorCode),
+      nextRetryAt: nextRetryAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextRetryAt),
+      failedAt: failedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(failedAt),
       createdAt: Value(createdAt),
     );
   }
@@ -6855,9 +9752,17 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       id: serializer.fromJson<String>(json['id']),
       groupId: serializer.fromJson<String>(json['groupId']),
       encryptedPayload: serializer.fromJson<String>(json['encryptedPayload']),
+      keyEpoch: serializer.fromJson<int>(json['keyEpoch']),
       vectorClock: serializer.fromJson<String>(json['vectorClock']),
       operationCount: serializer.fromJson<int>(json['operationCount']),
+      withdrawalReceipts: serializer.fromJson<String?>(
+        json['withdrawalReceipts'],
+      ),
       retryCount: serializer.fromJson<int>(json['retryCount']),
+      state: serializer.fromJson<String>(json['state']),
+      lastErrorCode: serializer.fromJson<String?>(json['lastErrorCode']),
+      nextRetryAt: serializer.fromJson<int?>(json['nextRetryAt']),
+      failedAt: serializer.fromJson<int?>(json['failedAt']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
     );
   }
@@ -6868,9 +9773,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       'id': serializer.toJson<String>(id),
       'groupId': serializer.toJson<String>(groupId),
       'encryptedPayload': serializer.toJson<String>(encryptedPayload),
+      'keyEpoch': serializer.toJson<int>(keyEpoch),
       'vectorClock': serializer.toJson<String>(vectorClock),
       'operationCount': serializer.toJson<int>(operationCount),
+      'withdrawalReceipts': serializer.toJson<String?>(withdrawalReceipts),
       'retryCount': serializer.toJson<int>(retryCount),
+      'state': serializer.toJson<String>(state),
+      'lastErrorCode': serializer.toJson<String?>(lastErrorCode),
+      'nextRetryAt': serializer.toJson<int?>(nextRetryAt),
+      'failedAt': serializer.toJson<int?>(failedAt),
       'createdAt': serializer.toJson<int>(createdAt),
     };
   }
@@ -6879,17 +9790,33 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     String? id,
     String? groupId,
     String? encryptedPayload,
+    int? keyEpoch,
     String? vectorClock,
     int? operationCount,
+    Value<String?> withdrawalReceipts = const Value.absent(),
     int? retryCount,
+    String? state,
+    Value<String?> lastErrorCode = const Value.absent(),
+    Value<int?> nextRetryAt = const Value.absent(),
+    Value<int?> failedAt = const Value.absent(),
     int? createdAt,
   }) => SyncQueueData(
     id: id ?? this.id,
     groupId: groupId ?? this.groupId,
     encryptedPayload: encryptedPayload ?? this.encryptedPayload,
+    keyEpoch: keyEpoch ?? this.keyEpoch,
     vectorClock: vectorClock ?? this.vectorClock,
     operationCount: operationCount ?? this.operationCount,
+    withdrawalReceipts: withdrawalReceipts.present
+        ? withdrawalReceipts.value
+        : this.withdrawalReceipts,
     retryCount: retryCount ?? this.retryCount,
+    state: state ?? this.state,
+    lastErrorCode: lastErrorCode.present
+        ? lastErrorCode.value
+        : this.lastErrorCode,
+    nextRetryAt: nextRetryAt.present ? nextRetryAt.value : this.nextRetryAt,
+    failedAt: failedAt.present ? failedAt.value : this.failedAt,
     createdAt: createdAt ?? this.createdAt,
   );
   SyncQueueData copyWithCompanion(SyncQueueCompanion data) {
@@ -6899,15 +9826,27 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       encryptedPayload: data.encryptedPayload.present
           ? data.encryptedPayload.value
           : this.encryptedPayload,
+      keyEpoch: data.keyEpoch.present ? data.keyEpoch.value : this.keyEpoch,
       vectorClock: data.vectorClock.present
           ? data.vectorClock.value
           : this.vectorClock,
       operationCount: data.operationCount.present
           ? data.operationCount.value
           : this.operationCount,
+      withdrawalReceipts: data.withdrawalReceipts.present
+          ? data.withdrawalReceipts.value
+          : this.withdrawalReceipts,
       retryCount: data.retryCount.present
           ? data.retryCount.value
           : this.retryCount,
+      state: data.state.present ? data.state.value : this.state,
+      lastErrorCode: data.lastErrorCode.present
+          ? data.lastErrorCode.value
+          : this.lastErrorCode,
+      nextRetryAt: data.nextRetryAt.present
+          ? data.nextRetryAt.value
+          : this.nextRetryAt,
+      failedAt: data.failedAt.present ? data.failedAt.value : this.failedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -6918,9 +9857,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
           ..write('id: $id, ')
           ..write('groupId: $groupId, ')
           ..write('encryptedPayload: $encryptedPayload, ')
+          ..write('keyEpoch: $keyEpoch, ')
           ..write('vectorClock: $vectorClock, ')
           ..write('operationCount: $operationCount, ')
+          ..write('withdrawalReceipts: $withdrawalReceipts, ')
           ..write('retryCount: $retryCount, ')
+          ..write('state: $state, ')
+          ..write('lastErrorCode: $lastErrorCode, ')
+          ..write('nextRetryAt: $nextRetryAt, ')
+          ..write('failedAt: $failedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -6931,9 +9876,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     id,
     groupId,
     encryptedPayload,
+    keyEpoch,
     vectorClock,
     operationCount,
+    withdrawalReceipts,
     retryCount,
+    state,
+    lastErrorCode,
+    nextRetryAt,
+    failedAt,
     createdAt,
   );
   @override
@@ -6943,9 +9894,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
           other.id == this.id &&
           other.groupId == this.groupId &&
           other.encryptedPayload == this.encryptedPayload &&
+          other.keyEpoch == this.keyEpoch &&
           other.vectorClock == this.vectorClock &&
           other.operationCount == this.operationCount &&
+          other.withdrawalReceipts == this.withdrawalReceipts &&
           other.retryCount == this.retryCount &&
+          other.state == this.state &&
+          other.lastErrorCode == this.lastErrorCode &&
+          other.nextRetryAt == this.nextRetryAt &&
+          other.failedAt == this.failedAt &&
           other.createdAt == this.createdAt);
 }
 
@@ -6953,18 +9910,30 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   final Value<String> id;
   final Value<String> groupId;
   final Value<String> encryptedPayload;
+  final Value<int> keyEpoch;
   final Value<String> vectorClock;
   final Value<int> operationCount;
+  final Value<String?> withdrawalReceipts;
   final Value<int> retryCount;
+  final Value<String> state;
+  final Value<String?> lastErrorCode;
+  final Value<int?> nextRetryAt;
+  final Value<int?> failedAt;
   final Value<int> createdAt;
   final Value<int> rowid;
   const SyncQueueCompanion({
     this.id = const Value.absent(),
     this.groupId = const Value.absent(),
     this.encryptedPayload = const Value.absent(),
+    this.keyEpoch = const Value.absent(),
     this.vectorClock = const Value.absent(),
     this.operationCount = const Value.absent(),
+    this.withdrawalReceipts = const Value.absent(),
     this.retryCount = const Value.absent(),
+    this.state = const Value.absent(),
+    this.lastErrorCode = const Value.absent(),
+    this.nextRetryAt = const Value.absent(),
+    this.failedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -6972,9 +9941,15 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     required String id,
     required String groupId,
     required String encryptedPayload,
+    this.keyEpoch = const Value.absent(),
     required String vectorClock,
     required int operationCount,
+    this.withdrawalReceipts = const Value.absent(),
     this.retryCount = const Value.absent(),
+    this.state = const Value.absent(),
+    this.lastErrorCode = const Value.absent(),
+    this.nextRetryAt = const Value.absent(),
+    this.failedAt = const Value.absent(),
     required int createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -6987,9 +9962,15 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     Expression<String>? id,
     Expression<String>? groupId,
     Expression<String>? encryptedPayload,
+    Expression<int>? keyEpoch,
     Expression<String>? vectorClock,
     Expression<int>? operationCount,
+    Expression<String>? withdrawalReceipts,
     Expression<int>? retryCount,
+    Expression<String>? state,
+    Expression<String>? lastErrorCode,
+    Expression<int>? nextRetryAt,
+    Expression<int>? failedAt,
     Expression<int>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -6997,9 +9978,15 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
       if (id != null) 'id': id,
       if (groupId != null) 'group_id': groupId,
       if (encryptedPayload != null) 'encrypted_payload': encryptedPayload,
+      if (keyEpoch != null) 'key_epoch': keyEpoch,
       if (vectorClock != null) 'vector_clock': vectorClock,
       if (operationCount != null) 'operation_count': operationCount,
+      if (withdrawalReceipts != null) 'withdrawal_receipts': withdrawalReceipts,
       if (retryCount != null) 'retry_count': retryCount,
+      if (state != null) 'state': state,
+      if (lastErrorCode != null) 'last_error_code': lastErrorCode,
+      if (nextRetryAt != null) 'next_retry_at': nextRetryAt,
+      if (failedAt != null) 'failed_at': failedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -7009,9 +9996,15 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     Value<String>? id,
     Value<String>? groupId,
     Value<String>? encryptedPayload,
+    Value<int>? keyEpoch,
     Value<String>? vectorClock,
     Value<int>? operationCount,
+    Value<String?>? withdrawalReceipts,
     Value<int>? retryCount,
+    Value<String>? state,
+    Value<String?>? lastErrorCode,
+    Value<int?>? nextRetryAt,
+    Value<int?>? failedAt,
     Value<int>? createdAt,
     Value<int>? rowid,
   }) {
@@ -7019,9 +10012,15 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
       id: id ?? this.id,
       groupId: groupId ?? this.groupId,
       encryptedPayload: encryptedPayload ?? this.encryptedPayload,
+      keyEpoch: keyEpoch ?? this.keyEpoch,
       vectorClock: vectorClock ?? this.vectorClock,
       operationCount: operationCount ?? this.operationCount,
+      withdrawalReceipts: withdrawalReceipts ?? this.withdrawalReceipts,
       retryCount: retryCount ?? this.retryCount,
+      state: state ?? this.state,
+      lastErrorCode: lastErrorCode ?? this.lastErrorCode,
+      nextRetryAt: nextRetryAt ?? this.nextRetryAt,
+      failedAt: failedAt ?? this.failedAt,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -7039,14 +10038,32 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     if (encryptedPayload.present) {
       map['encrypted_payload'] = Variable<String>(encryptedPayload.value);
     }
+    if (keyEpoch.present) {
+      map['key_epoch'] = Variable<int>(keyEpoch.value);
+    }
     if (vectorClock.present) {
       map['vector_clock'] = Variable<String>(vectorClock.value);
     }
     if (operationCount.present) {
       map['operation_count'] = Variable<int>(operationCount.value);
     }
+    if (withdrawalReceipts.present) {
+      map['withdrawal_receipts'] = Variable<String>(withdrawalReceipts.value);
+    }
     if (retryCount.present) {
       map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (lastErrorCode.present) {
+      map['last_error_code'] = Variable<String>(lastErrorCode.value);
+    }
+    if (nextRetryAt.present) {
+      map['next_retry_at'] = Variable<int>(nextRetryAt.value);
+    }
+    if (failedAt.present) {
+      map['failed_at'] = Variable<int>(failedAt.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
@@ -7063,9 +10080,15 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
           ..write('id: $id, ')
           ..write('groupId: $groupId, ')
           ..write('encryptedPayload: $encryptedPayload, ')
+          ..write('keyEpoch: $keyEpoch, ')
           ..write('vectorClock: $vectorClock, ')
           ..write('operationCount: $operationCount, ')
+          ..write('withdrawalReceipts: $withdrawalReceipts, ')
           ..write('retryCount: $retryCount, ')
+          ..write('state: $state, ')
+          ..write('lastErrorCode: $lastErrorCode, ')
+          ..write('nextRetryAt: $nextRetryAt, ')
+          ..write('failedAt: $failedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -7290,6 +10313,53 @@ class $TransactionsTable extends Transactions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _syncRevisionMeta = const VerificationMeta(
+    'syncRevision',
+  );
+  @override
+  late final GeneratedColumn<int> syncRevision = GeneratedColumn<int>(
+    'sync_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _syncOriginDeviceIdMeta =
+      const VerificationMeta('syncOriginDeviceId');
+  @override
+  late final GeneratedColumn<String> syncOriginDeviceId =
+      GeneratedColumn<String>(
+        'sync_origin_device_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _familySyncVisibilityMeta =
+      const VerificationMeta('familySyncVisibility');
+  @override
+  late final GeneratedColumn<String> familySyncVisibility =
+      GeneratedColumn<String>(
+        'family_sync_visibility',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('localOnly'),
+      );
+  static const VerificationMeta _familySharedRevisionMeta =
+      const VerificationMeta('familySharedRevision');
+  @override
+  late final GeneratedColumn<int> familySharedRevision = GeneratedColumn<int>(
+    'family_shared_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _joyFullnessMeta = const VerificationMeta(
     'joyFullness',
   );
@@ -7368,6 +10438,10 @@ class $TransactionsTable extends Transactions
     isPrivate,
     isSynced,
     isDeleted,
+    syncRevision,
+    syncOriginDeviceId,
+    familySyncVisibility,
+    familySharedRevision,
     joyFullness,
     entrySource,
     originalCurrency,
@@ -7520,6 +10594,42 @@ class $TransactionsTable extends Transactions
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
+    if (data.containsKey('sync_revision')) {
+      context.handle(
+        _syncRevisionMeta,
+        syncRevision.isAcceptableOrUnknown(
+          data['sync_revision']!,
+          _syncRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sync_origin_device_id')) {
+      context.handle(
+        _syncOriginDeviceIdMeta,
+        syncOriginDeviceId.isAcceptableOrUnknown(
+          data['sync_origin_device_id']!,
+          _syncOriginDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('family_sync_visibility')) {
+      context.handle(
+        _familySyncVisibilityMeta,
+        familySyncVisibility.isAcceptableOrUnknown(
+          data['family_sync_visibility']!,
+          _familySyncVisibilityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('family_shared_revision')) {
+      context.handle(
+        _familySharedRevisionMeta,
+        familySharedRevision.isAcceptableOrUnknown(
+          data['family_shared_revision']!,
+          _familySharedRevisionMeta,
+        ),
+      );
+    }
     if (data.containsKey('joy_fullness')) {
       context.handle(
         _joyFullnessMeta,
@@ -7650,6 +10760,22 @@ class $TransactionsTable extends Transactions
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
       )!,
+      syncRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_revision'],
+      )!,
+      syncOriginDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_origin_device_id'],
+      )!,
+      familySyncVisibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}family_sync_visibility'],
+      )!,
+      familySharedRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}family_shared_revision'],
+      )!,
       joyFullness: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}joy_fullness'],
@@ -7699,6 +10825,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
   final bool isPrivate;
   final bool isSynced;
   final bool isDeleted;
+  final int syncRevision;
+  final String syncOriginDeviceId;
+  final String familySyncVisibility;
+  final int familySharedRevision;
   final int joyFullness;
   final String entrySource;
   final String? originalCurrency;
@@ -7724,6 +10854,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     required this.isPrivate,
     required this.isSynced,
     required this.isDeleted,
+    required this.syncRevision,
+    required this.syncOriginDeviceId,
+    required this.familySyncVisibility,
+    required this.familySharedRevision,
     required this.joyFullness,
     required this.entrySource,
     this.originalCurrency,
@@ -7764,6 +10898,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     map['is_private'] = Variable<bool>(isPrivate);
     map['is_synced'] = Variable<bool>(isSynced);
     map['is_deleted'] = Variable<bool>(isDeleted);
+    map['sync_revision'] = Variable<int>(syncRevision);
+    map['sync_origin_device_id'] = Variable<String>(syncOriginDeviceId);
+    map['family_sync_visibility'] = Variable<String>(familySyncVisibility);
+    map['family_shared_revision'] = Variable<int>(familySharedRevision);
     map['joy_fullness'] = Variable<int>(joyFullness);
     map['entry_source'] = Variable<String>(entrySource);
     if (!nullToAbsent || originalCurrency != null) {
@@ -7809,6 +10947,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isPrivate: Value(isPrivate),
       isSynced: Value(isSynced),
       isDeleted: Value(isDeleted),
+      syncRevision: Value(syncRevision),
+      syncOriginDeviceId: Value(syncOriginDeviceId),
+      familySyncVisibility: Value(familySyncVisibility),
+      familySharedRevision: Value(familySharedRevision),
       joyFullness: Value(joyFullness),
       entrySource: Value(entrySource),
       originalCurrency: originalCurrency == null && nullToAbsent
@@ -7848,6 +10990,16 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isPrivate: serializer.fromJson<bool>(json['isPrivate']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      syncRevision: serializer.fromJson<int>(json['syncRevision']),
+      syncOriginDeviceId: serializer.fromJson<String>(
+        json['syncOriginDeviceId'],
+      ),
+      familySyncVisibility: serializer.fromJson<String>(
+        json['familySyncVisibility'],
+      ),
+      familySharedRevision: serializer.fromJson<int>(
+        json['familySharedRevision'],
+      ),
       joyFullness: serializer.fromJson<int>(json['joyFullness']),
       entrySource: serializer.fromJson<String>(json['entrySource']),
       originalCurrency: serializer.fromJson<String?>(json['originalCurrency']),
@@ -7878,6 +11030,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       'isPrivate': serializer.toJson<bool>(isPrivate),
       'isSynced': serializer.toJson<bool>(isSynced),
       'isDeleted': serializer.toJson<bool>(isDeleted),
+      'syncRevision': serializer.toJson<int>(syncRevision),
+      'syncOriginDeviceId': serializer.toJson<String>(syncOriginDeviceId),
+      'familySyncVisibility': serializer.toJson<String>(familySyncVisibility),
+      'familySharedRevision': serializer.toJson<int>(familySharedRevision),
       'joyFullness': serializer.toJson<int>(joyFullness),
       'entrySource': serializer.toJson<String>(entrySource),
       'originalCurrency': serializer.toJson<String?>(originalCurrency),
@@ -7906,6 +11062,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     bool? isPrivate,
     bool? isSynced,
     bool? isDeleted,
+    int? syncRevision,
+    String? syncOriginDeviceId,
+    String? familySyncVisibility,
+    int? familySharedRevision,
     int? joyFullness,
     String? entrySource,
     Value<String?> originalCurrency = const Value.absent(),
@@ -7931,6 +11091,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     isPrivate: isPrivate ?? this.isPrivate,
     isSynced: isSynced ?? this.isSynced,
     isDeleted: isDeleted ?? this.isDeleted,
+    syncRevision: syncRevision ?? this.syncRevision,
+    syncOriginDeviceId: syncOriginDeviceId ?? this.syncOriginDeviceId,
+    familySyncVisibility: familySyncVisibility ?? this.familySyncVisibility,
+    familySharedRevision: familySharedRevision ?? this.familySharedRevision,
     joyFullness: joyFullness ?? this.joyFullness,
     entrySource: entrySource ?? this.entrySource,
     originalCurrency: originalCurrency.present
@@ -7968,6 +11132,18 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isPrivate: data.isPrivate.present ? data.isPrivate.value : this.isPrivate,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      syncRevision: data.syncRevision.present
+          ? data.syncRevision.value
+          : this.syncRevision,
+      syncOriginDeviceId: data.syncOriginDeviceId.present
+          ? data.syncOriginDeviceId.value
+          : this.syncOriginDeviceId,
+      familySyncVisibility: data.familySyncVisibility.present
+          ? data.familySyncVisibility.value
+          : this.familySyncVisibility,
+      familySharedRevision: data.familySharedRevision.present
+          ? data.familySharedRevision.value
+          : this.familySharedRevision,
       joyFullness: data.joyFullness.present
           ? data.joyFullness.value
           : this.joyFullness,
@@ -8008,6 +11184,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           ..write('isPrivate: $isPrivate, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
+          ..write('syncRevision: $syncRevision, ')
+          ..write('syncOriginDeviceId: $syncOriginDeviceId, ')
+          ..write('familySyncVisibility: $familySyncVisibility, ')
+          ..write('familySharedRevision: $familySharedRevision, ')
           ..write('joyFullness: $joyFullness, ')
           ..write('entrySource: $entrySource, ')
           ..write('originalCurrency: $originalCurrency, ')
@@ -8038,6 +11218,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     isPrivate,
     isSynced,
     isDeleted,
+    syncRevision,
+    syncOriginDeviceId,
+    familySyncVisibility,
+    familySharedRevision,
     joyFullness,
     entrySource,
     originalCurrency,
@@ -8067,6 +11251,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           other.isPrivate == this.isPrivate &&
           other.isSynced == this.isSynced &&
           other.isDeleted == this.isDeleted &&
+          other.syncRevision == this.syncRevision &&
+          other.syncOriginDeviceId == this.syncOriginDeviceId &&
+          other.familySyncVisibility == this.familySyncVisibility &&
+          other.familySharedRevision == this.familySharedRevision &&
           other.joyFullness == this.joyFullness &&
           other.entrySource == this.entrySource &&
           other.originalCurrency == this.originalCurrency &&
@@ -8094,6 +11282,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
   final Value<bool> isPrivate;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
+  final Value<int> syncRevision;
+  final Value<String> syncOriginDeviceId;
+  final Value<String> familySyncVisibility;
+  final Value<int> familySharedRevision;
   final Value<int> joyFullness;
   final Value<String> entrySource;
   final Value<String?> originalCurrency;
@@ -8120,6 +11312,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.isPrivate = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.syncRevision = const Value.absent(),
+    this.syncOriginDeviceId = const Value.absent(),
+    this.familySyncVisibility = const Value.absent(),
+    this.familySharedRevision = const Value.absent(),
     this.joyFullness = const Value.absent(),
     this.entrySource = const Value.absent(),
     this.originalCurrency = const Value.absent(),
@@ -8147,6 +11343,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.isPrivate = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.syncRevision = const Value.absent(),
+    this.syncOriginDeviceId = const Value.absent(),
+    this.familySyncVisibility = const Value.absent(),
+    this.familySharedRevision = const Value.absent(),
     this.joyFullness = const Value.absent(),
     this.entrySource = const Value.absent(),
     this.originalCurrency = const Value.absent(),
@@ -8183,6 +11383,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Expression<bool>? isPrivate,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
+    Expression<int>? syncRevision,
+    Expression<String>? syncOriginDeviceId,
+    Expression<String>? familySyncVisibility,
+    Expression<int>? familySharedRevision,
     Expression<int>? joyFullness,
     Expression<String>? entrySource,
     Expression<String>? originalCurrency,
@@ -8210,6 +11414,13 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       if (isPrivate != null) 'is_private': isPrivate,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
+      if (syncRevision != null) 'sync_revision': syncRevision,
+      if (syncOriginDeviceId != null)
+        'sync_origin_device_id': syncOriginDeviceId,
+      if (familySyncVisibility != null)
+        'family_sync_visibility': familySyncVisibility,
+      if (familySharedRevision != null)
+        'family_shared_revision': familySharedRevision,
       if (joyFullness != null) 'joy_fullness': joyFullness,
       if (entrySource != null) 'entry_source': entrySource,
       if (originalCurrency != null) 'original_currency': originalCurrency,
@@ -8239,6 +11450,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Value<bool>? isPrivate,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
+    Value<int>? syncRevision,
+    Value<String>? syncOriginDeviceId,
+    Value<String>? familySyncVisibility,
+    Value<int>? familySharedRevision,
     Value<int>? joyFullness,
     Value<String>? entrySource,
     Value<String?>? originalCurrency,
@@ -8266,6 +11481,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       isPrivate: isPrivate ?? this.isPrivate,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
+      syncRevision: syncRevision ?? this.syncRevision,
+      syncOriginDeviceId: syncOriginDeviceId ?? this.syncOriginDeviceId,
+      familySyncVisibility: familySyncVisibility ?? this.familySyncVisibility,
+      familySharedRevision: familySharedRevision ?? this.familySharedRevision,
       joyFullness: joyFullness ?? this.joyFullness,
       entrySource: entrySource ?? this.entrySource,
       originalCurrency: originalCurrency ?? this.originalCurrency,
@@ -8335,6 +11554,20 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
+    if (syncRevision.present) {
+      map['sync_revision'] = Variable<int>(syncRevision.value);
+    }
+    if (syncOriginDeviceId.present) {
+      map['sync_origin_device_id'] = Variable<String>(syncOriginDeviceId.value);
+    }
+    if (familySyncVisibility.present) {
+      map['family_sync_visibility'] = Variable<String>(
+        familySyncVisibility.value,
+      );
+    }
+    if (familySharedRevision.present) {
+      map['family_shared_revision'] = Variable<int>(familySharedRevision.value);
+    }
     if (joyFullness.present) {
       map['joy_fullness'] = Variable<int>(joyFullness.value);
     }
@@ -8378,6 +11611,10 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
           ..write('isPrivate: $isPrivate, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
+          ..write('syncRevision: $syncRevision, ')
+          ..write('syncOriginDeviceId: $syncOriginDeviceId, ')
+          ..write('familySyncVisibility: $familySyncVisibility, ')
+          ..write('familySharedRevision: $familySharedRevision, ')
           ..write('joyFullness: $joyFullness, ')
           ..write('entrySource: $entrySource, ')
           ..write('originalCurrency: $originalCurrency, ')
@@ -8463,6 +11700,30 @@ class $UserProfilesTable extends UserProfiles
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _syncRevisionMeta = const VerificationMeta(
+    'syncRevision',
+  );
+  @override
+  late final GeneratedColumn<int> syncRevision = GeneratedColumn<int>(
+    'sync_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _syncOriginDeviceIdMeta =
+      const VerificationMeta('syncOriginDeviceId');
+  @override
+  late final GeneratedColumn<String> syncOriginDeviceId =
+      GeneratedColumn<String>(
+        'sync_origin_device_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -8471,6 +11732,8 @@ class $UserProfilesTable extends UserProfiles
     avatarImagePath,
     createdAt,
     updatedAt,
+    syncRevision,
+    syncOriginDeviceId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8536,6 +11799,24 @@ class $UserProfilesTable extends UserProfiles
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('sync_revision')) {
+      context.handle(
+        _syncRevisionMeta,
+        syncRevision.isAcceptableOrUnknown(
+          data['sync_revision']!,
+          _syncRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sync_origin_device_id')) {
+      context.handle(
+        _syncOriginDeviceIdMeta,
+        syncOriginDeviceId.isAcceptableOrUnknown(
+          data['sync_origin_device_id']!,
+          _syncOriginDeviceIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -8569,6 +11850,14 @@ class $UserProfilesTable extends UserProfiles
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      syncRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_revision'],
+      )!,
+      syncOriginDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_origin_device_id'],
+      )!,
     );
   }
 
@@ -8585,6 +11874,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
   final String? avatarImagePath;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int syncRevision;
+  final String syncOriginDeviceId;
   const UserProfileRow({
     required this.id,
     required this.displayName,
@@ -8592,6 +11883,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
     this.avatarImagePath,
     required this.createdAt,
     required this.updatedAt,
+    required this.syncRevision,
+    required this.syncOriginDeviceId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -8604,6 +11897,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sync_revision'] = Variable<int>(syncRevision);
+    map['sync_origin_device_id'] = Variable<String>(syncOriginDeviceId);
     return map;
   }
 
@@ -8617,6 +11912,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
           : Value(avatarImagePath),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      syncRevision: Value(syncRevision),
+      syncOriginDeviceId: Value(syncOriginDeviceId),
     );
   }
 
@@ -8632,6 +11929,10 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
       avatarImagePath: serializer.fromJson<String?>(json['avatarImagePath']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      syncRevision: serializer.fromJson<int>(json['syncRevision']),
+      syncOriginDeviceId: serializer.fromJson<String>(
+        json['syncOriginDeviceId'],
+      ),
     );
   }
   @override
@@ -8644,6 +11945,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
       'avatarImagePath': serializer.toJson<String?>(avatarImagePath),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'syncRevision': serializer.toJson<int>(syncRevision),
+      'syncOriginDeviceId': serializer.toJson<String>(syncOriginDeviceId),
     };
   }
 
@@ -8654,6 +11957,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
     Value<String?> avatarImagePath = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? syncRevision,
+    String? syncOriginDeviceId,
   }) => UserProfileRow(
     id: id ?? this.id,
     displayName: displayName ?? this.displayName,
@@ -8663,6 +11968,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
         : this.avatarImagePath,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    syncRevision: syncRevision ?? this.syncRevision,
+    syncOriginDeviceId: syncOriginDeviceId ?? this.syncOriginDeviceId,
   );
   UserProfileRow copyWithCompanion(UserProfilesCompanion data) {
     return UserProfileRow(
@@ -8678,6 +11985,12 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
           : this.avatarImagePath,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncRevision: data.syncRevision.present
+          ? data.syncRevision.value
+          : this.syncRevision,
+      syncOriginDeviceId: data.syncOriginDeviceId.present
+          ? data.syncOriginDeviceId.value
+          : this.syncOriginDeviceId,
     );
   }
 
@@ -8689,7 +12002,9 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
           ..write('avatarEmoji: $avatarEmoji, ')
           ..write('avatarImagePath: $avatarImagePath, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncRevision: $syncRevision, ')
+          ..write('syncOriginDeviceId: $syncOriginDeviceId')
           ..write(')'))
         .toString();
   }
@@ -8702,6 +12017,8 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
     avatarImagePath,
     createdAt,
     updatedAt,
+    syncRevision,
+    syncOriginDeviceId,
   );
   @override
   bool operator ==(Object other) =>
@@ -8712,7 +12029,9 @@ class UserProfileRow extends DataClass implements Insertable<UserProfileRow> {
           other.avatarEmoji == this.avatarEmoji &&
           other.avatarImagePath == this.avatarImagePath &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.syncRevision == this.syncRevision &&
+          other.syncOriginDeviceId == this.syncOriginDeviceId);
 }
 
 class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
@@ -8722,6 +12041,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
   final Value<String?> avatarImagePath;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<int> syncRevision;
+  final Value<String> syncOriginDeviceId;
   final Value<int> rowid;
   const UserProfilesCompanion({
     this.id = const Value.absent(),
@@ -8730,6 +12051,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
     this.avatarImagePath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.syncRevision = const Value.absent(),
+    this.syncOriginDeviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserProfilesCompanion.insert({
@@ -8739,6 +12062,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
     this.avatarImagePath = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.syncRevision = const Value.absent(),
+    this.syncOriginDeviceId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        displayName = Value(displayName),
@@ -8752,6 +12077,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
     Expression<String>? avatarImagePath,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? syncRevision,
+    Expression<String>? syncOriginDeviceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -8761,6 +12088,9 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
       if (avatarImagePath != null) 'avatar_image_path': avatarImagePath,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncRevision != null) 'sync_revision': syncRevision,
+      if (syncOriginDeviceId != null)
+        'sync_origin_device_id': syncOriginDeviceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -8772,6 +12102,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
     Value<String?>? avatarImagePath,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<int>? syncRevision,
+    Value<String>? syncOriginDeviceId,
     Value<int>? rowid,
   }) {
     return UserProfilesCompanion(
@@ -8781,6 +12113,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
       avatarImagePath: avatarImagePath ?? this.avatarImagePath,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      syncRevision: syncRevision ?? this.syncRevision,
+      syncOriginDeviceId: syncOriginDeviceId ?? this.syncOriginDeviceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8806,6 +12140,12 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (syncRevision.present) {
+      map['sync_revision'] = Variable<int>(syncRevision.value);
+    }
+    if (syncOriginDeviceId.present) {
+      map['sync_origin_device_id'] = Variable<String>(syncOriginDeviceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8821,6 +12161,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfileRow> {
           ..write('avatarImagePath: $avatarImagePath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('syncRevision: $syncRevision, ')
+          ..write('syncOriginDeviceId: $syncOriginDeviceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8837,9 +12179,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CategoryKeywordPreferencesTable(this);
   late final $CategoryLedgerConfigsTable categoryLedgerConfigs =
       $CategoryLedgerConfigsTable(this);
+  late final $ControlEventsTable controlEvents = $ControlEventsTable(this);
   late final $ExchangeRatesTable exchangeRates = $ExchangeRatesTable(this);
+  late final $FamilySyncOutboxTable familySyncOutbox = $FamilySyncOutboxTable(
+    this,
+  );
   late final $GroupMembersTable groupMembers = $GroupMembersTable(this);
   late final $GroupsTable groups = $GroupsTable(this);
+  late final $InboundSyncOperationsTable inboundSyncOperations =
+      $InboundSyncOperationsTable(this);
   late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
       $MerchantCategoryPreferencesTable(this);
   late final $MerchantMatchKeysTable merchantMatchKeys =
@@ -8859,9 +12207,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     categoryKeywordPreferences,
     categoryLedgerConfigs,
+    controlEvents,
     exchangeRates,
+    familySyncOutbox,
     groupMembers,
     groups,
+    inboundSyncOperations,
     merchantCategoryPreferences,
     merchantMatchKeys,
     merchants,
@@ -9493,6 +12844,9 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       Value<bool> isSystem,
       Value<bool> isArchived,
       Value<int> sortOrder,
+      Value<int> sharedRevision,
+      Value<String> sharedOriginDeviceId,
+      Value<bool> sharedIsDeleted,
       required DateTime createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -9508,6 +12862,9 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<bool> isSystem,
       Value<bool> isArchived,
       Value<int> sortOrder,
+      Value<int> sharedRevision,
+      Value<String> sharedOriginDeviceId,
+      Value<bool> sharedIsDeleted,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -9611,6 +12968,21 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sharedRevision => $composableBuilder(
+    column: $table.sharedRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sharedOriginDeviceId => $composableBuilder(
+    column: $table.sharedOriginDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sharedIsDeleted => $composableBuilder(
+    column: $table.sharedIsDeleted,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9723,6 +13095,21 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sharedRevision => $composableBuilder(
+    column: $table.sharedRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sharedOriginDeviceId => $composableBuilder(
+    column: $table.sharedOriginDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sharedIsDeleted => $composableBuilder(
+    column: $table.sharedIsDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9791,6 +13178,21 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get sharedRevision => $composableBuilder(
+    column: $table.sharedRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sharedOriginDeviceId => $composableBuilder(
+    column: $table.sharedOriginDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get sharedIsDeleted => $composableBuilder(
+    column: $table.sharedIsDeleted,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -9888,6 +13290,9 @@ class $$CategoriesTableTableManager
                 Value<bool> isSystem = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<int> sharedRevision = const Value.absent(),
+                Value<String> sharedOriginDeviceId = const Value.absent(),
+                Value<bool> sharedIsDeleted = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -9901,6 +13306,9 @@ class $$CategoriesTableTableManager
                 isSystem: isSystem,
                 isArchived: isArchived,
                 sortOrder: sortOrder,
+                sharedRevision: sharedRevision,
+                sharedOriginDeviceId: sharedOriginDeviceId,
+                sharedIsDeleted: sharedIsDeleted,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -9916,6 +13324,9 @@ class $$CategoriesTableTableManager
                 Value<bool> isSystem = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<int> sharedRevision = const Value.absent(),
+                Value<String> sharedOriginDeviceId = const Value.absent(),
+                Value<bool> sharedIsDeleted = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -9929,6 +13340,9 @@ class $$CategoriesTableTableManager
                 isSystem: isSystem,
                 isArchived: isArchived,
                 sortOrder: sortOrder,
+                sharedRevision: sharedRevision,
+                sharedOriginDeviceId: sharedOriginDeviceId,
+                sharedIsDeleted: sharedIsDeleted,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -10536,6 +13950,233 @@ typedef $$CategoryLedgerConfigsTableProcessedTableManager =
       CategoryLedgerConfigRow,
       PrefetchHooks Function({bool categoryId})
     >;
+typedef $$ControlEventsTableCreateCompanionBuilder =
+    ControlEventsCompanion Function({
+      required String eventId,
+      required String groupId,
+      required int revision,
+      required String eventType,
+      required int occurredAt,
+      required int processedAt,
+      Value<int> rowid,
+    });
+typedef $$ControlEventsTableUpdateCompanionBuilder =
+    ControlEventsCompanion Function({
+      Value<String> eventId,
+      Value<String> groupId,
+      Value<int> revision,
+      Value<String> eventType,
+      Value<int> occurredAt,
+      Value<int> processedAt,
+      Value<int> rowid,
+    });
+
+class $$ControlEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $ControlEventsTable> {
+  $$ControlEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get processedAt => $composableBuilder(
+    column: $table.processedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ControlEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ControlEventsTable> {
+  $$ControlEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get processedAt => $composableBuilder(
+    column: $table.processedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ControlEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ControlEventsTable> {
+  $$ControlEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get eventId =>
+      $composableBuilder(column: $table.eventId, builder: (column) => column);
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<int> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get processedAt => $composableBuilder(
+    column: $table.processedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ControlEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ControlEventsTable,
+          ControlEventData,
+          $$ControlEventsTableFilterComposer,
+          $$ControlEventsTableOrderingComposer,
+          $$ControlEventsTableAnnotationComposer,
+          $$ControlEventsTableCreateCompanionBuilder,
+          $$ControlEventsTableUpdateCompanionBuilder,
+          (
+            ControlEventData,
+            BaseReferences<
+              _$AppDatabase,
+              $ControlEventsTable,
+              ControlEventData
+            >,
+          ),
+          ControlEventData,
+          PrefetchHooks Function()
+        > {
+  $$ControlEventsTableTableManager(_$AppDatabase db, $ControlEventsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ControlEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ControlEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ControlEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> eventId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> eventType = const Value.absent(),
+                Value<int> occurredAt = const Value.absent(),
+                Value<int> processedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ControlEventsCompanion(
+                eventId: eventId,
+                groupId: groupId,
+                revision: revision,
+                eventType: eventType,
+                occurredAt: occurredAt,
+                processedAt: processedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String eventId,
+                required String groupId,
+                required int revision,
+                required String eventType,
+                required int occurredAt,
+                required int processedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ControlEventsCompanion.insert(
+                eventId: eventId,
+                groupId: groupId,
+                revision: revision,
+                eventType: eventType,
+                occurredAt: occurredAt,
+                processedAt: processedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ControlEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ControlEventsTable,
+      ControlEventData,
+      $$ControlEventsTableFilterComposer,
+      $$ControlEventsTableOrderingComposer,
+      $$ControlEventsTableAnnotationComposer,
+      $$ControlEventsTableCreateCompanionBuilder,
+      $$ControlEventsTableUpdateCompanionBuilder,
+      (
+        ControlEventData,
+        BaseReferences<_$AppDatabase, $ControlEventsTable, ControlEventData>,
+      ),
+      ControlEventData,
+      PrefetchHooks Function()
+    >;
 typedef $$ExchangeRatesTableCreateCompanionBuilder =
     ExchangeRatesCompanion Function({
       required String currency,
@@ -10761,6 +14402,323 @@ typedef $$ExchangeRatesTableProcessedTableManager =
       ExchangeRateRow,
       PrefetchHooks Function()
     >;
+typedef $$FamilySyncOutboxTableCreateCompanionBuilder =
+    FamilySyncOutboxCompanion Function({
+      required String operationId,
+      required String groupId,
+      required String entityType,
+      required String entityId,
+      required int revision,
+      required String operationJson,
+      Value<bool> isTombstone,
+      Value<int> attemptCount,
+      Value<int?> lastAttemptAt,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$FamilySyncOutboxTableUpdateCompanionBuilder =
+    FamilySyncOutboxCompanion Function({
+      Value<String> operationId,
+      Value<String> groupId,
+      Value<String> entityType,
+      Value<String> entityId,
+      Value<int> revision,
+      Value<String> operationJson,
+      Value<bool> isTombstone,
+      Value<int> attemptCount,
+      Value<int?> lastAttemptAt,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+class $$FamilySyncOutboxTableFilterComposer
+    extends Composer<_$AppDatabase, $FamilySyncOutboxTable> {
+  $$FamilySyncOutboxTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get operationJson => $composableBuilder(
+    column: $table.operationJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isTombstone => $composableBuilder(
+    column: $table.isTombstone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastAttemptAt => $composableBuilder(
+    column: $table.lastAttemptAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FamilySyncOutboxTableOrderingComposer
+    extends Composer<_$AppDatabase, $FamilySyncOutboxTable> {
+  $$FamilySyncOutboxTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get operationJson => $composableBuilder(
+    column: $table.operationJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isTombstone => $composableBuilder(
+    column: $table.isTombstone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastAttemptAt => $composableBuilder(
+    column: $table.lastAttemptAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FamilySyncOutboxTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FamilySyncOutboxTable> {
+  $$FamilySyncOutboxTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get operationJson => $composableBuilder(
+    column: $table.operationJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isTombstone => $composableBuilder(
+    column: $table.isTombstone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastAttemptAt => $composableBuilder(
+    column: $table.lastAttemptAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$FamilySyncOutboxTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FamilySyncOutboxTable,
+          FamilySyncOutboxData,
+          $$FamilySyncOutboxTableFilterComposer,
+          $$FamilySyncOutboxTableOrderingComposer,
+          $$FamilySyncOutboxTableAnnotationComposer,
+          $$FamilySyncOutboxTableCreateCompanionBuilder,
+          $$FamilySyncOutboxTableUpdateCompanionBuilder,
+          (
+            FamilySyncOutboxData,
+            BaseReferences<
+              _$AppDatabase,
+              $FamilySyncOutboxTable,
+              FamilySyncOutboxData
+            >,
+          ),
+          FamilySyncOutboxData,
+          PrefetchHooks Function()
+        > {
+  $$FamilySyncOutboxTableTableManager(
+    _$AppDatabase db,
+    $FamilySyncOutboxTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FamilySyncOutboxTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FamilySyncOutboxTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FamilySyncOutboxTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> operationId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> operationJson = const Value.absent(),
+                Value<bool> isTombstone = const Value.absent(),
+                Value<int> attemptCount = const Value.absent(),
+                Value<int?> lastAttemptAt = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FamilySyncOutboxCompanion(
+                operationId: operationId,
+                groupId: groupId,
+                entityType: entityType,
+                entityId: entityId,
+                revision: revision,
+                operationJson: operationJson,
+                isTombstone: isTombstone,
+                attemptCount: attemptCount,
+                lastAttemptAt: lastAttemptAt,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String operationId,
+                required String groupId,
+                required String entityType,
+                required String entityId,
+                required int revision,
+                required String operationJson,
+                Value<bool> isTombstone = const Value.absent(),
+                Value<int> attemptCount = const Value.absent(),
+                Value<int?> lastAttemptAt = const Value.absent(),
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => FamilySyncOutboxCompanion.insert(
+                operationId: operationId,
+                groupId: groupId,
+                entityType: entityType,
+                entityId: entityId,
+                revision: revision,
+                operationJson: operationJson,
+                isTombstone: isTombstone,
+                attemptCount: attemptCount,
+                lastAttemptAt: lastAttemptAt,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FamilySyncOutboxTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FamilySyncOutboxTable,
+      FamilySyncOutboxData,
+      $$FamilySyncOutboxTableFilterComposer,
+      $$FamilySyncOutboxTableOrderingComposer,
+      $$FamilySyncOutboxTableAnnotationComposer,
+      $$FamilySyncOutboxTableCreateCompanionBuilder,
+      $$FamilySyncOutboxTableUpdateCompanionBuilder,
+      (
+        FamilySyncOutboxData,
+        BaseReferences<
+          _$AppDatabase,
+          $FamilySyncOutboxTable,
+          FamilySyncOutboxData
+        >,
+      ),
+      FamilySyncOutboxData,
+      PrefetchHooks Function()
+    >;
 typedef $$GroupMembersTableCreateCompanionBuilder =
     GroupMembersCompanion Function({
       required String groupId,
@@ -10773,6 +14731,16 @@ typedef $$GroupMembersTableCreateCompanionBuilder =
       Value<String> avatarEmoji,
       Value<String?> avatarImagePath,
       Value<String?> avatarImageHash,
+      Value<int> profileRevision,
+      Value<String> profileOriginDeviceId,
+      Value<String> profileDigest,
+      Value<int> avatarRevision,
+      Value<String> avatarOriginDeviceId,
+      Value<String> avatarContentHash,
+      Value<int?> joinedAt,
+      Value<int?> confirmedAt,
+      Value<int?> removedAt,
+      Value<String?> removalReason,
       Value<int> rowid,
     });
 typedef $$GroupMembersTableUpdateCompanionBuilder =
@@ -10787,6 +14755,16 @@ typedef $$GroupMembersTableUpdateCompanionBuilder =
       Value<String> avatarEmoji,
       Value<String?> avatarImagePath,
       Value<String?> avatarImageHash,
+      Value<int> profileRevision,
+      Value<String> profileOriginDeviceId,
+      Value<String> profileDigest,
+      Value<int> avatarRevision,
+      Value<String> avatarOriginDeviceId,
+      Value<String> avatarContentHash,
+      Value<int?> joinedAt,
+      Value<int?> confirmedAt,
+      Value<int?> removedAt,
+      Value<String?> removalReason,
       Value<int> rowid,
     });
 
@@ -10846,6 +14824,56 @@ class $$GroupMembersTableFilterComposer
 
   ColumnFilters<String> get avatarImageHash => $composableBuilder(
     column: $table.avatarImageHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get profileRevision => $composableBuilder(
+    column: $table.profileRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileOriginDeviceId => $composableBuilder(
+    column: $table.profileOriginDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileDigest => $composableBuilder(
+    column: $table.profileDigest,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get avatarRevision => $composableBuilder(
+    column: $table.avatarRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarOriginDeviceId => $composableBuilder(
+    column: $table.avatarOriginDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarContentHash => $composableBuilder(
+    column: $table.avatarContentHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get joinedAt => $composableBuilder(
+    column: $table.joinedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get removedAt => $composableBuilder(
+    column: $table.removedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get removalReason => $composableBuilder(
+    column: $table.removalReason,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10908,6 +14936,56 @@ class $$GroupMembersTableOrderingComposer
     column: $table.avatarImageHash,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get profileRevision => $composableBuilder(
+    column: $table.profileRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileOriginDeviceId => $composableBuilder(
+    column: $table.profileOriginDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileDigest => $composableBuilder(
+    column: $table.profileDigest,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get avatarRevision => $composableBuilder(
+    column: $table.avatarRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarOriginDeviceId => $composableBuilder(
+    column: $table.avatarOriginDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarContentHash => $composableBuilder(
+    column: $table.avatarContentHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get joinedAt => $composableBuilder(
+    column: $table.joinedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get removedAt => $composableBuilder(
+    column: $table.removedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get removalReason => $composableBuilder(
+    column: $table.removalReason,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GroupMembersTableAnnotationComposer
@@ -10958,6 +15036,52 @@ class $$GroupMembersTableAnnotationComposer
     column: $table.avatarImageHash,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get profileRevision => $composableBuilder(
+    column: $table.profileRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profileOriginDeviceId => $composableBuilder(
+    column: $table.profileOriginDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profileDigest => $composableBuilder(
+    column: $table.profileDigest,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get avatarRevision => $composableBuilder(
+    column: $table.avatarRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get avatarOriginDeviceId => $composableBuilder(
+    column: $table.avatarOriginDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get avatarContentHash => $composableBuilder(
+    column: $table.avatarContentHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get joinedAt =>
+      $composableBuilder(column: $table.joinedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get removedAt =>
+      $composableBuilder(column: $table.removedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get removalReason => $composableBuilder(
+    column: $table.removalReason,
+    builder: (column) => column,
+  );
 }
 
 class $$GroupMembersTableTableManager
@@ -11001,6 +15125,16 @@ class $$GroupMembersTableTableManager
                 Value<String> avatarEmoji = const Value.absent(),
                 Value<String?> avatarImagePath = const Value.absent(),
                 Value<String?> avatarImageHash = const Value.absent(),
+                Value<int> profileRevision = const Value.absent(),
+                Value<String> profileOriginDeviceId = const Value.absent(),
+                Value<String> profileDigest = const Value.absent(),
+                Value<int> avatarRevision = const Value.absent(),
+                Value<String> avatarOriginDeviceId = const Value.absent(),
+                Value<String> avatarContentHash = const Value.absent(),
+                Value<int?> joinedAt = const Value.absent(),
+                Value<int?> confirmedAt = const Value.absent(),
+                Value<int?> removedAt = const Value.absent(),
+                Value<String?> removalReason = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GroupMembersCompanion(
                 groupId: groupId,
@@ -11013,6 +15147,16 @@ class $$GroupMembersTableTableManager
                 avatarEmoji: avatarEmoji,
                 avatarImagePath: avatarImagePath,
                 avatarImageHash: avatarImageHash,
+                profileRevision: profileRevision,
+                profileOriginDeviceId: profileOriginDeviceId,
+                profileDigest: profileDigest,
+                avatarRevision: avatarRevision,
+                avatarOriginDeviceId: avatarOriginDeviceId,
+                avatarContentHash: avatarContentHash,
+                joinedAt: joinedAt,
+                confirmedAt: confirmedAt,
+                removedAt: removedAt,
+                removalReason: removalReason,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11027,6 +15171,16 @@ class $$GroupMembersTableTableManager
                 Value<String> avatarEmoji = const Value.absent(),
                 Value<String?> avatarImagePath = const Value.absent(),
                 Value<String?> avatarImageHash = const Value.absent(),
+                Value<int> profileRevision = const Value.absent(),
+                Value<String> profileOriginDeviceId = const Value.absent(),
+                Value<String> profileDigest = const Value.absent(),
+                Value<int> avatarRevision = const Value.absent(),
+                Value<String> avatarOriginDeviceId = const Value.absent(),
+                Value<String> avatarContentHash = const Value.absent(),
+                Value<int?> joinedAt = const Value.absent(),
+                Value<int?> confirmedAt = const Value.absent(),
+                Value<int?> removedAt = const Value.absent(),
+                Value<String?> removalReason = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GroupMembersCompanion.insert(
                 groupId: groupId,
@@ -11039,6 +15193,16 @@ class $$GroupMembersTableTableManager
                 avatarEmoji: avatarEmoji,
                 avatarImagePath: avatarImagePath,
                 avatarImageHash: avatarImageHash,
+                profileRevision: profileRevision,
+                profileOriginDeviceId: profileOriginDeviceId,
+                profileDigest: profileDigest,
+                avatarRevision: avatarRevision,
+                avatarOriginDeviceId: avatarOriginDeviceId,
+                avatarContentHash: avatarContentHash,
+                joinedAt: joinedAt,
+                confirmedAt: confirmedAt,
+                removedAt: removedAt,
+                removalReason: removalReason,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -11075,9 +15239,13 @@ typedef $$GroupsTableCreateCompanionBuilder =
       Value<String?> inviteCode,
       Value<int?> inviteExpiresAt,
       Value<String?> groupKey,
+      Value<int> keyEpoch,
       required int createdAt,
       Value<int?> confirmedAt,
       Value<int?> lastSyncAt,
+      Value<int> controlRevision,
+      Value<int?> controlUpdatedAt,
+      Value<String> controlSnapshotDigest,
       Value<int> rowid,
     });
 typedef $$GroupsTableUpdateCompanionBuilder =
@@ -11089,9 +15257,13 @@ typedef $$GroupsTableUpdateCompanionBuilder =
       Value<String?> inviteCode,
       Value<int?> inviteExpiresAt,
       Value<String?> groupKey,
+      Value<int> keyEpoch,
       Value<int> createdAt,
       Value<int?> confirmedAt,
       Value<int?> lastSyncAt,
+      Value<int> controlRevision,
+      Value<int?> controlUpdatedAt,
+      Value<String> controlSnapshotDigest,
       Value<int> rowid,
     });
 
@@ -11139,6 +15311,11 @@ class $$GroupsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get keyEpoch => $composableBuilder(
+    column: $table.keyEpoch,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -11151,6 +15328,21 @@ class $$GroupsTableFilterComposer
 
   ColumnFilters<int> get lastSyncAt => $composableBuilder(
     column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get controlRevision => $composableBuilder(
+    column: $table.controlRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get controlUpdatedAt => $composableBuilder(
+    column: $table.controlUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get controlSnapshotDigest => $composableBuilder(
+    column: $table.controlSnapshotDigest,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -11199,6 +15391,11 @@ class $$GroupsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get keyEpoch => $composableBuilder(
+    column: $table.keyEpoch,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -11211,6 +15408,21 @@ class $$GroupsTableOrderingComposer
 
   ColumnOrderings<int> get lastSyncAt => $composableBuilder(
     column: $table.lastSyncAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get controlRevision => $composableBuilder(
+    column: $table.controlRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get controlUpdatedAt => $composableBuilder(
+    column: $table.controlUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get controlSnapshotDigest => $composableBuilder(
+    column: $table.controlSnapshotDigest,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -11249,6 +15461,9 @@ class $$GroupsTableAnnotationComposer
   GeneratedColumn<String> get groupKey =>
       $composableBuilder(column: $table.groupKey, builder: (column) => column);
 
+  GeneratedColumn<int> get keyEpoch =>
+      $composableBuilder(column: $table.keyEpoch, builder: (column) => column);
+
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -11259,6 +15474,21 @@ class $$GroupsTableAnnotationComposer
 
   GeneratedColumn<int> get lastSyncAt => $composableBuilder(
     column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get controlRevision => $composableBuilder(
+    column: $table.controlRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get controlUpdatedAt => $composableBuilder(
+    column: $table.controlUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get controlSnapshotDigest => $composableBuilder(
+    column: $table.controlSnapshotDigest,
     builder: (column) => column,
   );
 }
@@ -11298,9 +15528,13 @@ class $$GroupsTableTableManager
                 Value<String?> inviteCode = const Value.absent(),
                 Value<int?> inviteExpiresAt = const Value.absent(),
                 Value<String?> groupKey = const Value.absent(),
+                Value<int> keyEpoch = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int?> confirmedAt = const Value.absent(),
                 Value<int?> lastSyncAt = const Value.absent(),
+                Value<int> controlRevision = const Value.absent(),
+                Value<int?> controlUpdatedAt = const Value.absent(),
+                Value<String> controlSnapshotDigest = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GroupsCompanion(
                 groupId: groupId,
@@ -11310,9 +15544,13 @@ class $$GroupsTableTableManager
                 inviteCode: inviteCode,
                 inviteExpiresAt: inviteExpiresAt,
                 groupKey: groupKey,
+                keyEpoch: keyEpoch,
                 createdAt: createdAt,
                 confirmedAt: confirmedAt,
                 lastSyncAt: lastSyncAt,
+                controlRevision: controlRevision,
+                controlUpdatedAt: controlUpdatedAt,
+                controlSnapshotDigest: controlSnapshotDigest,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11324,9 +15562,13 @@ class $$GroupsTableTableManager
                 Value<String?> inviteCode = const Value.absent(),
                 Value<int?> inviteExpiresAt = const Value.absent(),
                 Value<String?> groupKey = const Value.absent(),
+                Value<int> keyEpoch = const Value.absent(),
                 required int createdAt,
                 Value<int?> confirmedAt = const Value.absent(),
                 Value<int?> lastSyncAt = const Value.absent(),
+                Value<int> controlRevision = const Value.absent(),
+                Value<int?> controlUpdatedAt = const Value.absent(),
+                Value<String> controlSnapshotDigest = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GroupsCompanion.insert(
                 groupId: groupId,
@@ -11336,9 +15578,13 @@ class $$GroupsTableTableManager
                 inviteCode: inviteCode,
                 inviteExpiresAt: inviteExpiresAt,
                 groupKey: groupKey,
+                keyEpoch: keyEpoch,
                 createdAt: createdAt,
                 confirmedAt: confirmedAt,
                 lastSyncAt: lastSyncAt,
+                controlRevision: controlRevision,
+                controlUpdatedAt: controlUpdatedAt,
+                controlSnapshotDigest: controlSnapshotDigest,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -11361,6 +15607,326 @@ typedef $$GroupsTableProcessedTableManager =
       $$GroupsTableUpdateCompanionBuilder,
       (GroupData, BaseReferences<_$AppDatabase, $GroupsTable, GroupData>),
       GroupData,
+      PrefetchHooks Function()
+    >;
+typedef $$InboundSyncOperationsTableCreateCompanionBuilder =
+    InboundSyncOperationsCompanion Function({
+      required String operationId,
+      required String groupId,
+      required String messageId,
+      required String state,
+      Value<String?> operationJson,
+      Value<String?> errorCode,
+      Value<bool> retryable,
+      Value<int> payloadBytes,
+      required int createdAt,
+      required int updatedAt,
+      Value<int> rowid,
+    });
+typedef $$InboundSyncOperationsTableUpdateCompanionBuilder =
+    InboundSyncOperationsCompanion Function({
+      Value<String> operationId,
+      Value<String> groupId,
+      Value<String> messageId,
+      Value<String> state,
+      Value<String?> operationJson,
+      Value<String?> errorCode,
+      Value<bool> retryable,
+      Value<int> payloadBytes,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$InboundSyncOperationsTableFilterComposer
+    extends Composer<_$AppDatabase, $InboundSyncOperationsTable> {
+  $$InboundSyncOperationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get messageId => $composableBuilder(
+    column: $table.messageId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get operationJson => $composableBuilder(
+    column: $table.operationJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorCode => $composableBuilder(
+    column: $table.errorCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get retryable => $composableBuilder(
+    column: $table.retryable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get payloadBytes => $composableBuilder(
+    column: $table.payloadBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$InboundSyncOperationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InboundSyncOperationsTable> {
+  $$InboundSyncOperationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get messageId => $composableBuilder(
+    column: $table.messageId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get operationJson => $composableBuilder(
+    column: $table.operationJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorCode => $composableBuilder(
+    column: $table.errorCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get retryable => $composableBuilder(
+    column: $table.retryable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get payloadBytes => $composableBuilder(
+    column: $table.payloadBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$InboundSyncOperationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InboundSyncOperationsTable> {
+  $$InboundSyncOperationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get messageId =>
+      $composableBuilder(column: $table.messageId, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get operationJson => $composableBuilder(
+    column: $table.operationJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get errorCode =>
+      $composableBuilder(column: $table.errorCode, builder: (column) => column);
+
+  GeneratedColumn<bool> get retryable =>
+      $composableBuilder(column: $table.retryable, builder: (column) => column);
+
+  GeneratedColumn<int> get payloadBytes => $composableBuilder(
+    column: $table.payloadBytes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$InboundSyncOperationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InboundSyncOperationsTable,
+          InboundSyncOperationData,
+          $$InboundSyncOperationsTableFilterComposer,
+          $$InboundSyncOperationsTableOrderingComposer,
+          $$InboundSyncOperationsTableAnnotationComposer,
+          $$InboundSyncOperationsTableCreateCompanionBuilder,
+          $$InboundSyncOperationsTableUpdateCompanionBuilder,
+          (
+            InboundSyncOperationData,
+            BaseReferences<
+              _$AppDatabase,
+              $InboundSyncOperationsTable,
+              InboundSyncOperationData
+            >,
+          ),
+          InboundSyncOperationData,
+          PrefetchHooks Function()
+        > {
+  $$InboundSyncOperationsTableTableManager(
+    _$AppDatabase db,
+    $InboundSyncOperationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InboundSyncOperationsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$InboundSyncOperationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$InboundSyncOperationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> operationId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<String> messageId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> operationJson = const Value.absent(),
+                Value<String?> errorCode = const Value.absent(),
+                Value<bool> retryable = const Value.absent(),
+                Value<int> payloadBytes = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InboundSyncOperationsCompanion(
+                operationId: operationId,
+                groupId: groupId,
+                messageId: messageId,
+                state: state,
+                operationJson: operationJson,
+                errorCode: errorCode,
+                retryable: retryable,
+                payloadBytes: payloadBytes,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String operationId,
+                required String groupId,
+                required String messageId,
+                required String state,
+                Value<String?> operationJson = const Value.absent(),
+                Value<String?> errorCode = const Value.absent(),
+                Value<bool> retryable = const Value.absent(),
+                Value<int> payloadBytes = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => InboundSyncOperationsCompanion.insert(
+                operationId: operationId,
+                groupId: groupId,
+                messageId: messageId,
+                state: state,
+                operationJson: operationJson,
+                errorCode: errorCode,
+                retryable: retryable,
+                payloadBytes: payloadBytes,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$InboundSyncOperationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InboundSyncOperationsTable,
+      InboundSyncOperationData,
+      $$InboundSyncOperationsTableFilterComposer,
+      $$InboundSyncOperationsTableOrderingComposer,
+      $$InboundSyncOperationsTableAnnotationComposer,
+      $$InboundSyncOperationsTableCreateCompanionBuilder,
+      $$InboundSyncOperationsTableUpdateCompanionBuilder,
+      (
+        InboundSyncOperationData,
+        BaseReferences<
+          _$AppDatabase,
+          $InboundSyncOperationsTable,
+          InboundSyncOperationData
+        >,
+      ),
+      InboundSyncOperationData,
       PrefetchHooks Function()
     >;
 typedef $$MerchantCategoryPreferencesTableCreateCompanionBuilder =
@@ -12067,6 +16633,8 @@ typedef $$ShoppingItemsTableCreateCompanionBuilder =
       Value<String?> addedByBookId,
       required DateTime createdAt,
       Value<DateTime?> updatedAt,
+      Value<int> syncRevision,
+      Value<String> syncOriginDeviceId,
       Value<int> rowid,
     });
 typedef $$ShoppingItemsTableUpdateCompanionBuilder =
@@ -12089,6 +16657,8 @@ typedef $$ShoppingItemsTableUpdateCompanionBuilder =
       Value<String?> addedByBookId,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
+      Value<int> syncRevision,
+      Value<String> syncOriginDeviceId,
       Value<int> rowid,
     });
 
@@ -12188,6 +16758,16 @@ class $$ShoppingItemsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -12290,6 +16870,16 @@ class $$ShoppingItemsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ShoppingItemsTableAnnotationComposer
@@ -12366,6 +16956,16 @@ class $$ShoppingItemsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => column,
+  );
 }
 
 class $$ShoppingItemsTableTableManager
@@ -12417,6 +17017,8 @@ class $$ShoppingItemsTableTableManager
                 Value<String?> addedByBookId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
+                Value<String> syncOriginDeviceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ShoppingItemsCompanion(
                 id: id,
@@ -12437,6 +17039,8 @@ class $$ShoppingItemsTableTableManager
                 addedByBookId: addedByBookId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                syncRevision: syncRevision,
+                syncOriginDeviceId: syncOriginDeviceId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -12459,6 +17063,8 @@ class $$ShoppingItemsTableTableManager
                 Value<String?> addedByBookId = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
+                Value<String> syncOriginDeviceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ShoppingItemsCompanion.insert(
                 id: id,
@@ -12479,6 +17085,8 @@ class $$ShoppingItemsTableTableManager
                 addedByBookId: addedByBookId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                syncRevision: syncRevision,
+                syncOriginDeviceId: syncOriginDeviceId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -12511,9 +17119,15 @@ typedef $$SyncQueueTableCreateCompanionBuilder =
       required String id,
       required String groupId,
       required String encryptedPayload,
+      Value<int> keyEpoch,
       required String vectorClock,
       required int operationCount,
+      Value<String?> withdrawalReceipts,
       Value<int> retryCount,
+      Value<String> state,
+      Value<String?> lastErrorCode,
+      Value<int?> nextRetryAt,
+      Value<int?> failedAt,
       required int createdAt,
       Value<int> rowid,
     });
@@ -12522,9 +17136,15 @@ typedef $$SyncQueueTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> groupId,
       Value<String> encryptedPayload,
+      Value<int> keyEpoch,
       Value<String> vectorClock,
       Value<int> operationCount,
+      Value<String?> withdrawalReceipts,
       Value<int> retryCount,
+      Value<String> state,
+      Value<String?> lastErrorCode,
+      Value<int?> nextRetryAt,
+      Value<int?> failedAt,
       Value<int> createdAt,
       Value<int> rowid,
     });
@@ -12553,6 +17173,11 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get keyEpoch => $composableBuilder(
+    column: $table.keyEpoch,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get vectorClock => $composableBuilder(
     column: $table.vectorClock,
     builder: (column) => ColumnFilters(column),
@@ -12563,8 +17188,33 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get withdrawalReceipts => $composableBuilder(
+    column: $table.withdrawalReceipts,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get retryCount => $composableBuilder(
     column: $table.retryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastErrorCode => $composableBuilder(
+    column: $table.lastErrorCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nextRetryAt => $composableBuilder(
+    column: $table.nextRetryAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get failedAt => $composableBuilder(
+    column: $table.failedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12598,6 +17248,11 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get keyEpoch => $composableBuilder(
+    column: $table.keyEpoch,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get vectorClock => $composableBuilder(
     column: $table.vectorClock,
     builder: (column) => ColumnOrderings(column),
@@ -12608,8 +17263,33 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get withdrawalReceipts => $composableBuilder(
+    column: $table.withdrawalReceipts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get retryCount => $composableBuilder(
     column: $table.retryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastErrorCode => $composableBuilder(
+    column: $table.lastErrorCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get nextRetryAt => $composableBuilder(
+    column: $table.nextRetryAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get failedAt => $composableBuilder(
+    column: $table.failedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -12639,6 +17319,9 @@ class $$SyncQueueTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get keyEpoch =>
+      $composableBuilder(column: $table.keyEpoch, builder: (column) => column);
+
   GeneratedColumn<String> get vectorClock => $composableBuilder(
     column: $table.vectorClock,
     builder: (column) => column,
@@ -12649,10 +17332,31 @@ class $$SyncQueueTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get withdrawalReceipts => $composableBuilder(
+    column: $table.withdrawalReceipts,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get retryCount => $composableBuilder(
     column: $table.retryCount,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get lastErrorCode => $composableBuilder(
+    column: $table.lastErrorCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get nextRetryAt => $composableBuilder(
+    column: $table.nextRetryAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get failedAt =>
+      $composableBuilder(column: $table.failedAt, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -12692,18 +17396,30 @@ class $$SyncQueueTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> groupId = const Value.absent(),
                 Value<String> encryptedPayload = const Value.absent(),
+                Value<int> keyEpoch = const Value.absent(),
                 Value<String> vectorClock = const Value.absent(),
                 Value<int> operationCount = const Value.absent(),
+                Value<String?> withdrawalReceipts = const Value.absent(),
                 Value<int> retryCount = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> lastErrorCode = const Value.absent(),
+                Value<int?> nextRetryAt = const Value.absent(),
+                Value<int?> failedAt = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncQueueCompanion(
                 id: id,
                 groupId: groupId,
                 encryptedPayload: encryptedPayload,
+                keyEpoch: keyEpoch,
                 vectorClock: vectorClock,
                 operationCount: operationCount,
+                withdrawalReceipts: withdrawalReceipts,
                 retryCount: retryCount,
+                state: state,
+                lastErrorCode: lastErrorCode,
+                nextRetryAt: nextRetryAt,
+                failedAt: failedAt,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -12712,18 +17428,30 @@ class $$SyncQueueTableTableManager
                 required String id,
                 required String groupId,
                 required String encryptedPayload,
+                Value<int> keyEpoch = const Value.absent(),
                 required String vectorClock,
                 required int operationCount,
+                Value<String?> withdrawalReceipts = const Value.absent(),
                 Value<int> retryCount = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> lastErrorCode = const Value.absent(),
+                Value<int?> nextRetryAt = const Value.absent(),
+                Value<int?> failedAt = const Value.absent(),
                 required int createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => SyncQueueCompanion.insert(
                 id: id,
                 groupId: groupId,
                 encryptedPayload: encryptedPayload,
+                keyEpoch: keyEpoch,
                 vectorClock: vectorClock,
                 operationCount: operationCount,
+                withdrawalReceipts: withdrawalReceipts,
                 retryCount: retryCount,
+                state: state,
+                lastErrorCode: lastErrorCode,
+                nextRetryAt: nextRetryAt,
+                failedAt: failedAt,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -12773,6 +17501,10 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<bool> isPrivate,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<int> syncRevision,
+      Value<String> syncOriginDeviceId,
+      Value<String> familySyncVisibility,
+      Value<int> familySharedRevision,
       Value<int> joyFullness,
       Value<String> entrySource,
       Value<String?> originalCurrency,
@@ -12801,6 +17533,10 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<bool> isPrivate,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<int> syncRevision,
+      Value<String> syncOriginDeviceId,
+      Value<String> familySyncVisibility,
+      Value<int> familySharedRevision,
       Value<int> joyFullness,
       Value<String> entrySource,
       Value<String?> originalCurrency,
@@ -12910,6 +17646,26 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get familySyncVisibility => $composableBuilder(
+    column: $table.familySyncVisibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get familySharedRevision => $composableBuilder(
+    column: $table.familySharedRevision,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -13043,6 +17799,26 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get familySyncVisibility => $composableBuilder(
+    column: $table.familySyncVisibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get familySharedRevision => $composableBuilder(
+    column: $table.familySharedRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get joyFullness => $composableBuilder(
     column: $table.joyFullness,
     builder: (column) => ColumnOrderings(column),
@@ -13141,6 +17917,26 @@ class $$TransactionsTableAnnotationComposer
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
+  GeneratedColumn<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get familySyncVisibility => $composableBuilder(
+    column: $table.familySyncVisibility,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get familySharedRevision => $composableBuilder(
+    column: $table.familySharedRevision,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get joyFullness => $composableBuilder(
     column: $table.joyFullness,
     builder: (column) => column,
@@ -13217,6 +18013,10 @@ class $$TransactionsTableTableManager
                 Value<bool> isPrivate = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
+                Value<String> syncOriginDeviceId = const Value.absent(),
+                Value<String> familySyncVisibility = const Value.absent(),
+                Value<int> familySharedRevision = const Value.absent(),
                 Value<int> joyFullness = const Value.absent(),
                 Value<String> entrySource = const Value.absent(),
                 Value<String?> originalCurrency = const Value.absent(),
@@ -13243,6 +18043,10 @@ class $$TransactionsTableTableManager
                 isPrivate: isPrivate,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                syncRevision: syncRevision,
+                syncOriginDeviceId: syncOriginDeviceId,
+                familySyncVisibility: familySyncVisibility,
+                familySharedRevision: familySharedRevision,
                 joyFullness: joyFullness,
                 entrySource: entrySource,
                 originalCurrency: originalCurrency,
@@ -13271,6 +18075,10 @@ class $$TransactionsTableTableManager
                 Value<bool> isPrivate = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
+                Value<String> syncOriginDeviceId = const Value.absent(),
+                Value<String> familySyncVisibility = const Value.absent(),
+                Value<int> familySharedRevision = const Value.absent(),
                 Value<int> joyFullness = const Value.absent(),
                 Value<String> entrySource = const Value.absent(),
                 Value<String?> originalCurrency = const Value.absent(),
@@ -13297,6 +18105,10 @@ class $$TransactionsTableTableManager
                 isPrivate: isPrivate,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                syncRevision: syncRevision,
+                syncOriginDeviceId: syncOriginDeviceId,
+                familySyncVisibility: familySyncVisibility,
+                familySharedRevision: familySharedRevision,
                 joyFullness: joyFullness,
                 entrySource: entrySource,
                 originalCurrency: originalCurrency,
@@ -13337,6 +18149,8 @@ typedef $$UserProfilesTableCreateCompanionBuilder =
       Value<String?> avatarImagePath,
       required DateTime createdAt,
       required DateTime updatedAt,
+      Value<int> syncRevision,
+      Value<String> syncOriginDeviceId,
       Value<int> rowid,
     });
 typedef $$UserProfilesTableUpdateCompanionBuilder =
@@ -13347,6 +18161,8 @@ typedef $$UserProfilesTableUpdateCompanionBuilder =
       Value<String?> avatarImagePath,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<int> syncRevision,
+      Value<String> syncOriginDeviceId,
       Value<int> rowid,
     });
 
@@ -13386,6 +18202,16 @@ class $$UserProfilesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -13428,6 +18254,16 @@ class $$UserProfilesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserProfilesTableAnnotationComposer
@@ -13462,6 +18298,16 @@ class $$UserProfilesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get syncRevision => $composableBuilder(
+    column: $table.syncRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncOriginDeviceId => $composableBuilder(
+    column: $table.syncOriginDeviceId,
+    builder: (column) => column,
+  );
 }
 
 class $$UserProfilesTableTableManager
@@ -13501,6 +18347,8 @@ class $$UserProfilesTableTableManager
                 Value<String?> avatarImagePath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> syncRevision = const Value.absent(),
+                Value<String> syncOriginDeviceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserProfilesCompanion(
                 id: id,
@@ -13509,6 +18357,8 @@ class $$UserProfilesTableTableManager
                 avatarImagePath: avatarImagePath,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                syncRevision: syncRevision,
+                syncOriginDeviceId: syncOriginDeviceId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -13519,6 +18369,8 @@ class $$UserProfilesTableTableManager
                 Value<String?> avatarImagePath = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<int> syncRevision = const Value.absent(),
+                Value<String> syncOriginDeviceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserProfilesCompanion.insert(
                 id: id,
@@ -13527,6 +18379,8 @@ class $$UserProfilesTableTableManager
                 avatarImagePath: avatarImagePath,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                syncRevision: syncRevision,
+                syncOriginDeviceId: syncOriginDeviceId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -13572,12 +18426,18 @@ class $AppDatabaseManager {
       );
   $$CategoryLedgerConfigsTableTableManager get categoryLedgerConfigs =>
       $$CategoryLedgerConfigsTableTableManager(_db, _db.categoryLedgerConfigs);
+  $$ControlEventsTableTableManager get controlEvents =>
+      $$ControlEventsTableTableManager(_db, _db.controlEvents);
   $$ExchangeRatesTableTableManager get exchangeRates =>
       $$ExchangeRatesTableTableManager(_db, _db.exchangeRates);
+  $$FamilySyncOutboxTableTableManager get familySyncOutbox =>
+      $$FamilySyncOutboxTableTableManager(_db, _db.familySyncOutbox);
   $$GroupMembersTableTableManager get groupMembers =>
       $$GroupMembersTableTableManager(_db, _db.groupMembers);
   $$GroupsTableTableManager get groups =>
       $$GroupsTableTableManager(_db, _db.groups);
+  $$InboundSyncOperationsTableTableManager get inboundSyncOperations =>
+      $$InboundSyncOperationsTableTableManager(_db, _db.inboundSyncOperations);
   $$MerchantCategoryPreferencesTableTableManager
   get merchantCategoryPreferences =>
       $$MerchantCategoryPreferencesTableTableManager(

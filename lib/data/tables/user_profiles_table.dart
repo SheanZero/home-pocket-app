@@ -11,6 +11,8 @@ class UserProfiles extends Table {
   TextColumn get avatarImagePath => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+  IntColumn get syncRevision => integer().withDefault(const Constant(0))();
+  TextColumn get syncOriginDeviceId => text().withDefault(const Constant(''))();
 
   @override
   Set<Column> get primaryKey => {id};

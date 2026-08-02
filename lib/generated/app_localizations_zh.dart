@@ -300,7 +300,7 @@ class SZh extends S {
   String get selectTheme => '选择主题';
 
   @override
-  String get themeSystem => '跟随系统';
+  String get themeSystem => '跟随设备设置';
 
   @override
   String get themeLight => '浅色';
@@ -336,6 +336,74 @@ class SZh extends S {
   String get dataManagement => '数据管理';
 
   @override
+  String get settingsGeneral => '通用';
+
+  @override
+  String get settingsFamily => '家庭';
+
+  @override
+  String get settingsData => '数据';
+
+  @override
+  String get settingsThisApp => '关于本应用';
+
+  @override
+  String get settingsAdditional => '其他设置';
+
+  @override
+  String get settingsAdditionalDescription => '每周起始日、语音识别与通知';
+
+  @override
+  String get settingsNotSet => '未设置';
+
+  @override
+  String settingsJoyTargetValue(int value) {
+    return '$value Joy';
+  }
+
+  @override
+  String get settingsLocalDataProtected => '数据已在设备内受到保护';
+
+  @override
+  String get backupAndRestore => '备份与恢复';
+
+  @override
+  String get backupAndRestoreDescription => '加密文件';
+
+  @override
+  String get backupHeroTitle => '把数据安全地保管在自己手中';
+
+  @override
+  String get backupHeroDescription => '使用密码加密记录与设置，并保存到设备或你选择的云盘位置。';
+
+  @override
+  String get backupEncryptionChip => 'AES-256-GCM';
+
+  @override
+  String get backupCompressedChip => '已压缩';
+
+  @override
+  String get backupNoUploadChip => '不会自动上传';
+
+  @override
+  String get backupSectionTitle => '备份';
+
+  @override
+  String get restoreSectionTitle => '恢复';
+
+  @override
+  String get backupPasswordNotStored => '密码不会保存在本应用中。如果忘记密码，将无法恢复备份。';
+
+  @override
+  String get restoreReplacesData => '选择 .hpb 文件并替换当前数据';
+
+  @override
+  String get restoreWarningTitle => '当前数据将被替换';
+
+  @override
+  String get restoreWarningBody => '如果恢复失败，当前数据会保持不变。';
+
+  @override
   String get exportBackup => '导出备份';
 
   @override
@@ -351,13 +419,14 @@ class SZh extends S {
   String get deleteAllData => '删除所有数据';
 
   @override
-  String get deleteAllDataDescription => '永久删除所有记录';
+  String get deleteAllDataDescription => '永久删除此设备上的数据';
 
   @override
-  String get deleteAllDataConfirmation => '此操作无法撤销。您确定要删除所有数据吗？';
+  String get deleteAllDataConfirmation =>
+      '这会永久删除此设备上的家庭口袋数据，但不会删除其他家庭成员设备上的数据，也不会向服务器发送删除请求。';
 
   @override
-  String get allDataDeleted => '所有数据已删除';
+  String get allDataDeleted => '本地数据已删除';
 
   @override
   String get deleteFailed => '删除失败';
@@ -468,6 +537,12 @@ class SZh extends S {
 
   @override
   String get profileEdit => '编辑个人资料';
+
+  @override
+  String get profileEditPersonalInfo => '编辑个人信息';
+
+  @override
+  String get profileDisplayName => '显示名称';
 
   @override
   String get profileCancel => '取消';
@@ -637,6 +712,27 @@ class SZh extends S {
   String homeHeroPreviousMonthSubline(String amount) {
     return '上月同期 $amount';
   }
+
+  @override
+  String get homeJoyEmptyTitleSingle => '今天，什么让你开心？';
+
+  @override
+  String get homeJoyEmptyTitleGroup => '家人今天有什么小确幸？';
+
+  @override
+  String get homeJoyEmptySubtitle => '从一件小享受开始记录';
+
+  @override
+  String get homeJoyEmptyFree => '自由记录';
+
+  @override
+  String get homeJoyEmptyCoffee => '喜欢的一杯';
+
+  @override
+  String get homeJoyEmptyBook => '想读的书';
+
+  @override
+  String get homeJoyEmptyRest => '放松片刻';
 
   @override
   String get homeRingSectionTitleSingle => '悦己充盈';
@@ -820,6 +916,21 @@ class SZh extends S {
   String get categoryNameHint => '例如：周末项目';
 
   @override
+  String get categoryAppearanceLabel => '外观';
+
+  @override
+  String get categoryAppearanceDescription => '便于在分类列表和图表中快速识别。';
+
+  @override
+  String get categoryPreviewName => '新分类';
+
+  @override
+  String get categoryIconLabel => '图标';
+
+  @override
+  String get categoryColorLabel => '颜色';
+
+  @override
   String get categoryNameRequired => '请输入分类名称';
 
   @override
@@ -923,7 +1034,7 @@ class SZh extends S {
   String get familySyncShowMyCode => '创建分组';
 
   @override
-  String get familySyncEnterPartnerCode => '加入分组';
+  String get familySyncEnterPartnerCode => '使用邀请码加入';
 
   @override
   String get familySyncPairCode => '邀请码';
@@ -1062,6 +1173,33 @@ class SZh extends S {
   }
 
   @override
+  String get familySyncInviteTitle => '邀请家庭成员';
+
+  @override
+  String get familySyncInviteDescription => '请将此邀请码分享给你想邀请的人。';
+
+  @override
+  String get familySyncInviteCopy => '复制邀请码';
+
+  @override
+  String get familySyncInviteCopied => '邀请码已复制';
+
+  @override
+  String get familySyncInviteRefreshHint => '刷新后，之前的邀请码会立即失效。';
+
+  @override
+  String get familySyncInviteApprovalWindowHint =>
+      '邀请码有效期仅限制发起新申请；提交申请后，家庭创建者有24小时进行审批。';
+
+  @override
+  String familySyncInviteShareMessage(String groupName, String inviteCode) {
+    return '使用邀请码 $inviteCode 加入 Home Pocket 中的“$groupName”。';
+  }
+
+  @override
+  String get familySyncInviteOwnerOnly => '只有家庭创建者可以管理邀请码。';
+
+  @override
   String get familySyncMembers => '成员';
 
   @override
@@ -1169,7 +1307,7 @@ class SZh extends S {
   String get familySyncApprovalTip => '批准后，这台设备与相关数据将以加密方式同步。';
 
   @override
-  String get familySyncGroupManagement => '分组管理';
+  String get familySyncGroupManagement => '家庭管理';
 
   @override
   String get familySyncSynced => '已同步';
@@ -1197,7 +1335,26 @@ class SZh extends S {
   }
 
   @override
-  String get groupCreate => '创建群组';
+  String get groupCreate => '创建新家庭';
+
+  @override
+  String get groupCreateConfirmationHint => '仅在确认后才会创建群组和邀请码。';
+
+  @override
+  String groupCreateFailed(String message) {
+    return '无法创建群组：$message';
+  }
+
+  @override
+  String get familySyncSingleGroupConflict =>
+      '此设备已有家庭群组或待审批的加入申请。请先退出当前群组或取消申请，再创建或加入其他群组。';
+
+  @override
+  String get familySyncNetworkUnavailableTitle => '暂时无法连接网络';
+
+  @override
+  String get familySyncNetworkUnavailableMessage =>
+      '家庭共享需要网络连接。请检查网络状态，并确认已允许本应用使用无线数据后重试。';
 
   @override
   String get groupName => '群组名称';
@@ -1226,17 +1383,17 @@ class SZh extends S {
   String get groupVerify => '验证';
 
   @override
-  String get groupConfirmJoin => '确认加入';
+  String get groupConfirmJoin => '申请加入';
 
   @override
   String get groupJoinTarget => '你要加入的群组';
 
   @override
-  String get groupWaitingApproval => '等待群主审批...';
+  String get groupWaitingApproval => '等待家庭所有者批准';
 
   @override
   String groupWaitingDesc(String name) {
-    return '$name 正在确认你的请求';
+    return '$name 正在确认你的加入申请。';
   }
 
   @override
@@ -1278,34 +1435,202 @@ class SZh extends S {
   String get groupEnterGroup => '进入群组';
 
   @override
-  String get groupChoiceTitle => '与家人连接';
+  String get groupChoiceTitle => '想从哪里开始？';
 
   @override
-  String get groupChoiceSubtitle => '一起管理家庭账本';
+  String get groupChoiceSubtitle => '同一时间只能加入一个家庭。';
 
   @override
-  String get groupCreateDesc => '创建新的家庭群组，邀请家庭成员加入';
+  String get groupCreateDesc => '生成邀请码，由你审批每位成员';
 
   @override
-  String get groupJoinDesc => '输入邀请码，加入已有的家庭群组';
+  String get groupJoinDesc => '加入前需要家庭所有者批准';
 
   @override
-  String get groupE2eeHint => '端到端加密保护隐私';
+  String get groupE2eeHint => '家庭公开账本会加密同步；个人私密账本只保留在本设备。';
+
+  @override
+  String get familyFlowCreateStepCreate => '创建家庭';
+
+  @override
+  String get familyFlowCreateHeader => '创建家庭';
+
+  @override
+  String get familyFlowJoinHeader => '加入家庭';
+
+  @override
+  String get familyFlowReviewFamily => '确认家庭信息';
+
+  @override
+  String get familyFlowCreateStepInvite => '分享邀请';
+
+  @override
+  String get familyFlowCreateStepApprove => '审批成员';
+
+  @override
+  String get familyFlowJoinStepCode => '输入邀请码';
+
+  @override
+  String get familyFlowJoinStepConfirm => '确认家庭';
+
+  @override
+  String get familyFlowJoinStepWait => '等待批准';
+
+  @override
+  String familyFlowOwnerSummary(String name) {
+    return '$name · 所有者';
+  }
+
+  @override
+  String get familyFlowCreateTitle => '创建新家庭';
+
+  @override
+  String get familyFlowCreateSubtitle => '设置家庭名称后，将生成安全的邀请码。';
+
+  @override
+  String get familyFlowCreateInviteHelper => '家人提交加入申请后，你将在下一步审批成员。';
+
+  @override
+  String get familyFlowRegenerateInvite => '重新生成';
+
+  @override
+  String get familySyncInviteRegenerated => '邀请码已重新生成';
+
+  @override
+  String get familyFlowJoinCodeTitle => '输入 6 位邀请码';
+
+  @override
+  String get familyFlowJoinCodeSubtitle => '请输入家庭所有者发给你的数字。';
+
+  @override
+  String get familyFlowJoinBeforeApprovalHelper => '申请获批前，不会同步任何账本。';
+
+  @override
+  String get familyFlowJoinConfirmHeader => '确认家庭';
+
+  @override
+  String get familyFlowJoinConfirmTitle => '确认要加入的家庭';
+
+  @override
+  String get familyFlowJoinConfirmSubtitle => '加入申请将发送到这个家庭。';
+
+  @override
+  String get familyFlowPublicKeyVerified => '公开密钥已验证';
+
+  @override
+  String get familyFlowPrivateLedgerHelper => '个人私密账本不会分享给家庭。';
+
+  @override
+  String get familyFlowWaitingHeader => '正在等待批准';
+
+  @override
+  String familyFlowWaitingFamily(String groupName) {
+    return '申请加入：$groupName';
+  }
+
+  @override
+  String get familyFlowApprovalTitle => '新的加入申请';
+
+  @override
+  String get familyFlowApprovalSubtitle => '批准前，请确认本人和设备。';
+
+  @override
+  String familyFlowApprovalDevice(String deviceName) {
+    return '来自 $deviceName 的加入申请';
+  }
+
+  @override
+  String get familyFlowDeviceKeyVerified => '设备公开密钥已验证';
+
+  @override
+  String get familyFlowApprovalHelper => '批准后，此设备会与家庭公开账本进行加密同步。';
+
+  @override
+  String get familyFlowApprovalEmptyTitle => '没有待处理的申请';
+
+  @override
+  String familyFlowPendingRequests(int count) {
+    return '新的加入申请 · $count 条';
+  }
+
+  @override
+  String get familyFlowViewRequests => '查看申请';
+
+  @override
+  String get familyFlowSyncSettings => '同步设置';
+
+  @override
+  String familyFlowManagementSummary(
+    String ownerName,
+    int count,
+    String syncStatus,
+  ) {
+    return '所有者：$ownerName · $count 人 · $syncStatus';
+  }
 
   @override
   String get groupInviteMembers => '邀请新成员';
 
   @override
-  String get groupDisband => '解散群组';
+  String get groupDisband => '解散家庭';
 
   @override
   String get groupCancel => '取消';
 
   @override
-  String get groupWaitingHint1 => '请等待通知';
+  String get groupCancelRequest => '撤回加入申请';
 
   @override
-  String get groupWaitingHint2 => '关闭应用也没有关系';
+  String groupRejectRequestFailed(String message) {
+    return '拒绝加入申请失败: $message';
+  }
+
+  @override
+  String get groupRequestRejectedTitle => '加入申请已被拒绝';
+
+  @override
+  String get groupRequestRejectedDescription => '群主拒绝了本次申请，你可以使用其他邀请码重新申请。';
+
+  @override
+  String get groupRequestCancelledTitle => '加入申请已撤回';
+
+  @override
+  String get groupRequestCancelledDescription => '申请已撤回，你可以随时重新提交新的申请。';
+
+  @override
+  String get groupRequestExpiredTitle => '加入申请已过期';
+
+  @override
+  String get groupRequestExpiredDescription => '申请在24小时内未被处理，请获取当前有效的邀请码后重新申请。';
+
+  @override
+  String get groupTryAnotherInvite => '输入其他邀请码';
+
+  @override
+  String get groupKeyRecoveryTitle => '正在恢复家庭密钥';
+
+  @override
+  String get groupKeyRecoveryWaiting =>
+      '成员资格已经生效，需要另一台仍持有密钥的家庭设备为本设备重新密封当前密钥。中继服务器无法读取或重新生成密钥。';
+
+  @override
+  String get groupKeyRecoveryUnavailable =>
+      '请求过期前没有任何有效设备提供当前密钥。由于采用零知识设计，中继服务器无法恢复密钥。你可以重试，或安全退出／解散该家庭后重新创建。';
+
+  @override
+  String get groupKeyRecoveryRateLimited => '刚刚已经发送过恢复请求，请稍后再通知其他设备。';
+
+  @override
+  String get groupKeyRecoveryRetry => '重试密钥恢复';
+
+  @override
+  String get groupKeyRecoveryRebuild => '退出并重新创建家庭';
+
+  @override
+  String get groupWaitingHint1 => '关闭应用也没有关系。';
+
+  @override
+  String get groupWaitingHint2 => '批准后将自动开始同步。';
 
   @override
   String get groupCodeHint => '请向群组的群主索取邀请码';
@@ -2759,6 +3084,23 @@ class SZh extends S {
   String get securityAppLockDescription => '在启动和返回前台时用密码保护应用。';
 
   @override
+  String get securityAppLockOff => '关闭';
+
+  @override
+  String get securityAppLockPinOnly => 'PIN 码';
+
+  @override
+  String securityAppLockBiometricAndPin(String biometric) {
+    return '$biometric + PIN 码';
+  }
+
+  @override
+  String get securityFaceId => 'Face ID';
+
+  @override
+  String get securityFingerprint => '指纹识别';
+
+  @override
   String get securityBiometricUnlock => '生物识别解锁';
 
   @override
@@ -2787,6 +3129,33 @@ class SZh extends S {
 
   @override
   String get sponsorLaunchError => '无法打开浏览器';
+
+  @override
+  String get legalNavigationSubtitle => '隐私、条款、开源许可';
+
+  @override
+  String get privacyPolicyDescription => '了解数据如何处理';
+
+  @override
+  String get termsOfUseDescription => '服务使用条件';
+
+  @override
+  String get openSourceLicensesDescription => '使用的开源库';
+
+  @override
+  String get sponsorSectionTitle => '支持开发';
+
+  @override
+  String get sponsorCardTitle => '一起维护这本安静的家庭账本';
+
+  @override
+  String get sponsorCardBody => '支持与联系页面将在外部浏览器中打开，不会影响应用功能或数据访问权限。';
+
+  @override
+  String get sponsorButton => '了解支持方式';
+
+  @override
+  String get legalLinkLaunchError => '无法打开链接';
 
   @override
   String analyticsTrendInsightTotal(String amount) {
@@ -2856,4 +3225,174 @@ class SZh extends S {
 
   @override
   String get analyticsJoyDrawerToggleCollapse => '收起悦己花销明细';
+
+  @override
+  String get syncQueueNeedsAttentionBadge => '需要处理';
+
+  @override
+  String get syncQueueNeedsAttentionDescription => '部分变更需要你处理';
+
+  @override
+  String get syncQueueNeedsAttentionTitle => '同步需要处理';
+
+  @override
+  String get syncQueuePendingTitle => '等待同步的变更';
+
+  @override
+  String syncQueueCounts(int pendingCount, int deadLetterCount) {
+    return '$pendingCount 条等待发送 · $deadLetterCount 条需要处理';
+  }
+
+  @override
+  String get syncQueueReconcileHint => '加密变更仍被安全保留。请先重试，之后仍建议执行一次完整对账。';
+
+  @override
+  String get syncQueueRetryAll => '全部重试';
+
+  @override
+  String get syncQueueDiscardAll => '丢弃';
+
+  @override
+  String get syncQueueRetryFailed => '仍有变更需要处理';
+
+  @override
+  String get syncQueueRetrySucceeded => '待发送变更已发送，仍建议进行完整对账。';
+
+  @override
+  String get syncQueueDiscardConfirmTitle => '丢弃未发送的变更？';
+
+  @override
+  String get syncQueueDiscardConfirmBody => '这会永久删除本设备上保留的未发送变更，且无法撤销。';
+
+  @override
+  String get syncQueueCancel => '取消';
+
+  @override
+  String get syncQueueDiscardConfirmAction => '永久丢弃';
+
+  @override
+  String get syncQueueDiscardFailed => '无法丢弃未发送的变更';
+
+  @override
+  String get inboundSyncSectionTitle => '待处理的接收变更';
+
+  @override
+  String inboundSyncCount(int count) {
+    return '$count 条接收变更已隔离';
+  }
+
+  @override
+  String inboundSyncErrorCode(String errorCode) {
+    return '安全代码：$errorCode';
+  }
+
+  @override
+  String get inboundSyncRetryOne => '重试';
+
+  @override
+  String get inboundSyncDiscardOne => '丢弃接收变更';
+
+  @override
+  String get inboundSyncDiscardConfirmTitle => '丢弃这条接收变更？';
+
+  @override
+  String get inboundSyncDiscardConfirmBody =>
+      '这会从本设备永久删除已隔离的接收变更。中继服务器副本已确认，操作无法撤销。';
+
+  @override
+  String get syncAttentionDiscardConfirmTitle => '丢弃保留的同步变更？';
+
+  @override
+  String get syncAttentionDiscardConfirmBody =>
+      '这会从本设备永久删除所有保留的发送失败和已隔离的接收变更，且无法撤销。';
+
+  @override
+  String get familySyncTransferOwner => '转让家庭所有权';
+
+  @override
+  String get familySyncTransferOwnerSelect => '选择新的家庭所有者';
+
+  @override
+  String get familySyncTransferOwnerConfirmTitle => '转让家庭所有权？';
+
+  @override
+  String familySyncTransferOwnerConfirmBody(String memberName) {
+    return '$memberName 将负责成员、邀请和家庭管理。';
+  }
+
+  @override
+  String get familySyncTransferOwnerFinalTitle => '最终确认';
+
+  @override
+  String familySyncTransferOwnerFinalBody(String memberName) {
+    return '系统会为每台活跃设备签发新的加密密钥。转让后，你将成为普通成员。确认转让给 $memberName？';
+  }
+
+  @override
+  String get familySyncTransferOwnerSuccess => '家庭所有权已安全转让';
+
+  @override
+  String get familySyncTransferOwnerNotReady => '当前加密密钥就绪前，无法执行家庭所有者操作';
+
+  @override
+  String get familySyncTransferOwnerInvalidTarget => '请选择其他活跃成员';
+
+  @override
+  String familySyncTransferOwnerFailed(String message) {
+    return '无法转让家庭所有权：$message';
+  }
+
+  @override
+  String get transactionPhotoBoundaryTitle => '票据照片';
+
+  @override
+  String get transactionPhotoLocalOnlyBody => '这张票据照片仅保存在本设备，不会包含在家庭同步或备份中。';
+
+  @override
+  String get transactionPhotoUnavailableBody =>
+      '票据照片仅保存在录入这笔账目的设备上，未包含在家庭同步或备份中。';
+
+  @override
+  String get familySyncMemberHistory => '成员记录';
+
+  @override
+  String familySyncRequestedAt(String date) {
+    return '申请于 $date';
+  }
+
+  @override
+  String familySyncJoinedAt(String role, String date) {
+    return '$role · 加入于 $date';
+  }
+
+  @override
+  String familySyncConfirmedAt(String role, String date) {
+    return '$role · 确认于 $date';
+  }
+
+  @override
+  String familySyncRemovedAtReason(String reason, String date) {
+    return '$reason · $date';
+  }
+
+  @override
+  String get familySyncRemovalReasonLeft => '主动退出家庭';
+
+  @override
+  String get familySyncRemovalReasonRemoved => '被家庭所有者移除';
+
+  @override
+  String get familySyncRemovalReasonDissolved => '家庭已解散';
+
+  @override
+  String get familySyncRemovalReasonRejected => '申请被拒绝';
+
+  @override
+  String get familySyncRemovalReasonCancelled => '申请已取消';
+
+  @override
+  String get familySyncRemovalReasonExpired => '申请已过期';
+
+  @override
+  String get familySyncRemovalReasonUnknown => '成员关系已结束';
 }

@@ -2,7 +2,7 @@
 
 **Home Pocket (まもる家計簿)**
 
-Last updated: July 1, 2026 (Draft)
+Last updated: August 1, 2026 (Draft)
 
 > **IMPORTANT / DRAFT:** This policy is a draft to be reviewed by Japanese legal counsel before launch. Its content may be updated when the official version is published.
 
@@ -40,6 +40,8 @@ Only if you enable push notifications, a push token used for delivering notifica
 ## 4. Family Sync
 
 The family data-sync feature is an end-to-end encrypted communication that takes place directly between devices. Synced data is never stored on the developer's servers.
+
+Receipt photos are currently local-only. They are not included in family sync or encrypted backup files; only a non-sensitive availability marker may be synchronized so another device can explain that the photo remains on the device where the transaction was recorded.
 
 ## 5. Advertising and Tracking
 

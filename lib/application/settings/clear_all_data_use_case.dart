@@ -1,71 +1,137 @@
-import '../../features/settings/domain/models/app_settings.dart';
-import '../../features/accounting/domain/repositories/book_repository.dart';
-import '../../features/accounting/domain/repositories/category_repository.dart';
-import '../../features/accounting/domain/repositories/transaction_repository.dart';
-import '../../features/profile/domain/repositories/user_profile_repository.dart';
-import '../../features/settings/domain/repositories/settings_repository.dart';
-import '../../features/settings/domain/repositories/unit_of_work.dart';
 import '../../shared/utils/result.dart';
+import '../../infrastructure/storage/privacy_wipe_journal.dart';
 
-/// Deletes all user data and resets settings to defaults.
+typedef ClearAllDataStep = Future<void> Function();
+
+/// Observable stages of the local-only privacy wipe.
+///
+/// Database deletion is atomic. Files, secure storage, and preferences cannot
+/// share that transaction, so every later stage is idempotent and the entire
+/// state machine can be retried after [failed]. Success is returned only after
+/// all stages complete.
+enum ClearAllDataStage {
+  idle,
+  suspendingSync,
+  clearingDatabase,
+  clearingAppOwnedFiles,
+  clearingSecureUserData,
+  resettingSettings,
+  resettingInMemoryState,
+  completed,
+  failed,
+}
+
+/// Erases all local Home Pocket user data without sending a server operation.
 class ClearAllDataUseCase {
   ClearAllDataUseCase({
-    required TransactionRepository transactionRepo,
-    required CategoryRepository categoryRepo,
-    required BookRepository bookRepo,
-    required SettingsRepository settingsRepo,
-    required UserProfileRepository userProfileRepo,
-    required UnitOfWork unitOfWork,
-  }) : _transactionRepo = transactionRepo,
-       _categoryRepo = categoryRepo,
-       _bookRepo = bookRepo,
-       _settingsRepo = settingsRepo,
-       _userProfileRepo = userProfileRepo,
-       _unitOfWork = unitOfWork;
+    required ClearAllDataStep suspendSync,
+    required PrivacyWipeJournalStore journalStore,
+    required ClearAllDataStep wipeDatabase,
+    required ClearAllDataStep wipeAppOwnedFiles,
+    required ClearAllDataStep clearSecureUserData,
+    required ClearAllDataStep resetSettings,
+    required ClearAllDataStep resetInMemoryState,
+  }) : _journalStore = journalStore,
+       _suspendSync = suspendSync,
+       _wipeDatabase = wipeDatabase,
+       _wipeAppOwnedFiles = wipeAppOwnedFiles,
+       _clearSecureUserData = clearSecureUserData,
+       _resetSettings = resetSettings,
+       _resetInMemoryState = resetInMemoryState;
 
-  final TransactionRepository _transactionRepo;
-  final CategoryRepository _categoryRepo;
-  final BookRepository _bookRepo;
-  final SettingsRepository _settingsRepo;
-  final UserProfileRepository _userProfileRepo;
-  final UnitOfWork _unitOfWork;
+  final PrivacyWipeJournalStore _journalStore;
+  final ClearAllDataStep _suspendSync;
+  final ClearAllDataStep _wipeDatabase;
+  final ClearAllDataStep _wipeAppOwnedFiles;
+  final ClearAllDataStep _clearSecureUserData;
+  final ClearAllDataStep _resetSettings;
+  final ClearAllDataStep _resetInMemoryState;
 
-  Future<Result<void>> execute() async {
+  ClearAllDataStage _stage = ClearAllDataStage.idle;
+  static final Map<String, Future<Result<void>>> _globalInFlight = {};
+
+  ClearAllDataStage get stage => _stage;
+
+  Future<Result<void>> execute() => _coordinate(startIfAbsent: true);
+
+  /// Resumes a durable wipe during cold start, or returns success without
+  /// touching sync/data when no journal exists.
+  Future<Result<void>> resumePending() => _coordinate(startIfAbsent: false);
+
+  Future<Result<void>> _coordinate({required bool startIfAbsent}) {
+    final key = _journalStore.coordinationKey;
+    final active = _globalInFlight[key];
+    if (active != null) return active;
+
+    late final Future<Result<void>> tracked;
+    tracked = _executeOnce(startIfAbsent: startIfAbsent).whenComplete(() {
+      if (identical(_globalInFlight[key], tracked)) {
+        _globalInFlight.remove(key);
+      }
+    });
+    _globalInFlight[key] = tracked;
+    return tracked;
+  }
+
+  Future<Result<void>> _executeOnce({required bool startIfAbsent}) async {
     try {
-      // Atomicity: the whole wipe runs inside one database transaction — a
-      // failure mid-wipe rolls back instead of leaving a half-cleared state.
-      await _unitOfWork.run(() async {
-        // Delete all transactions for all books
-        final books = await _bookRepo.findAll(
-          includeArchived: true,
-          includeShadow: true,
+      var journal = await _journalStore.read();
+      if (journal == null) {
+        if (!startIfAbsent) return Result.success(null);
+        journal = _journalStore.newEntry(
+          PrivacyWipeJournalStage.databasePending,
         );
-        for (final book in books) {
-          await _transactionRepo.deleteAllByBook(book.id);
-        }
+        await _journalStore.write(journal);
+      }
 
-        // Delete all categories and books
-        await _categoryRepo.deleteAll();
-        await _bookRepo.deleteAll();
+      _stage = ClearAllDataStage.suspendingSync;
+      await _suspendSync();
 
-        // Wipe identity (D-05): delete the UserProfile so nickname/avatar do
-        // not survive "delete all data" — re-onboarding rebuilds them from
-        // blank (mitigates T-54-05 identity-disclosure-after-wipe).
-        final profile = await _userProfileRepo.find();
-        if (profile != null) {
-          await _userProfileRepo.delete(profile.id);
-        }
+      if (journal.stage == PrivacyWipeJournalStage.databasePending) {
+        _stage = ClearAllDataStage.clearingDatabase;
+        await _wipeDatabase();
+        journal = _journalStore.newEntry(PrivacyWipeJournalStage.filesPending);
+        await _journalStore.write(journal);
+      }
 
-        // Reset settings to defaults — onboardingComplete returns to false so
-        // a wipe behaves like a fresh install and re-triggers onboarding
-        // (D-05). Runs LAST inside the transaction because a
-        // SharedPreferences write cannot be rolled back.
-        await _settingsRepo.updateSettings(const AppSettings());
-      });
+      if (journal.stage == PrivacyWipeJournalStage.filesPending) {
+        _stage = ClearAllDataStage.clearingAppOwnedFiles;
+        await _wipeAppOwnedFiles();
+        journal = _journalStore.newEntry(
+          PrivacyWipeJournalStage.secureUserDataPending,
+        );
+        await _journalStore.write(journal);
+      }
 
+      if (journal.stage == PrivacyWipeJournalStage.secureUserDataPending) {
+        _stage = ClearAllDataStage.clearingSecureUserData;
+        await _clearSecureUserData();
+        journal = _journalStore.newEntry(
+          PrivacyWipeJournalStage.settingsPending,
+        );
+        await _journalStore.write(journal);
+      }
+
+      if (journal.stage == PrivacyWipeJournalStage.settingsPending) {
+        _stage = ClearAllDataStage.resettingSettings;
+        await _resetSettings();
+        journal = _journalStore.newEntry(PrivacyWipeJournalStage.memoryPending);
+        await _journalStore.write(journal);
+      }
+
+      if (journal.stage == PrivacyWipeJournalStage.memoryPending) {
+        _stage = ClearAllDataStage.resettingInMemoryState;
+        await _resetInMemoryState();
+      }
+
+      // Last durable operation: a remaining journal always means startup must
+      // fail closed and replay its pending boundary before identity/bootstrap.
+      await _journalStore.delete();
+      _stage = ClearAllDataStage.completed;
       return Result.success(null);
-    } catch (e) {
-      return Result.error('Failed to clear data: $e');
+    } catch (error) {
+      _stage = ClearAllDataStage.failed;
+      return Result.error('Failed to clear local data: $error');
     }
   }
 }

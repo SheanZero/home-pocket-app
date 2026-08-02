@@ -2,6 +2,7 @@ import 'package:ulid/ulid.dart';
 
 import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/accounting/domain/models/transaction_family_sync_policy.dart';
 import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/device_identity_repository.dart';
@@ -11,6 +12,7 @@ import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 import 'category_service.dart';
 import '../family_sync/sync_engine.dart';
+import '../family_sync/category_reference_sync_service.dart';
 import '../family_sync/transaction_change_tracker.dart';
 
 /// Parameters for creating a new transaction.
@@ -25,6 +27,7 @@ class CreateTransactionParams {
   final int? joyFullness; // null = use default 2
   final LedgerType? ledgerType; // null = auto-classify
   final EntrySource entrySource;
+  final bool isPrivate;
 
   // Foreign-currency provenance (partial-triple invariant: all three or none)
   final String? originalCurrency;
@@ -43,6 +46,7 @@ class CreateTransactionParams {
     this.ledgerType,
     // D-06: required, no default — every push site MUST specify.
     required this.entrySource,
+    this.isPrivate = false,
     this.originalCurrency,
     this.originalAmount,
     this.appliedRate,
@@ -62,13 +66,15 @@ class CreateTransactionUseCase {
     required CategoryService categoryService,
     SyncEngine? syncEngine,
     TransactionChangeTracker? changeTracker,
+    CategoryReferenceSyncService? categoryReferenceSyncService,
   }) : _transactionRepo = transactionRepository,
        _categoryRepo = categoryRepository,
        _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
        _categoryService = categoryService,
        _syncEngine = syncEngine,
-       _changeTracker = changeTracker;
+       _changeTracker = changeTracker,
+       _categoryReferenceSyncService = categoryReferenceSyncService;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
@@ -77,6 +83,7 @@ class CreateTransactionUseCase {
   final CategoryService _categoryService;
   final SyncEngine? _syncEngine;
   final TransactionChangeTracker? _changeTracker;
+  final CategoryReferenceSyncService? _categoryReferenceSyncService;
 
   /// Genesis hash: 64 zero characters (no previous transaction).
   static const _genesisHash =
@@ -201,24 +208,62 @@ class CreateTransactionUseCase {
       originalCurrency: params.originalCurrency,
       originalAmount: params.originalAmount,
       appliedRate: params.appliedRate,
+      syncRevision: now.toUtc().microsecondsSinceEpoch,
+      syncOriginDeviceId: deviceId,
+      isPrivate: params.isPrivate,
+      familySyncVisibility: TransactionFamilySyncPolicy.visibilityForCreate(
+        isPrivate: params.isPrivate,
+      ),
+      familySharedRevision: params.isPrivate
+          ? 0
+          : now.toUtc().microsecondsSinceEpoch,
     );
 
-    // 9. Persist
-    await _transactionRepo.insert(transaction);
-
-    // Track for incremental sync push
-    _changeTracker?.trackCreate(
-      TransactionSyncMapper.toCreateOperation(
+    // 9. Build the outbound operation before persistence so production can
+    // commit it atomically with the business row in the SQLCipher outbox.
+    Map<String, dynamic>? syncOperation;
+    if (TransactionFamilySyncPolicy.shouldSendLive(transaction)) {
+      syncOperation = TransactionSyncMapper.toCreateOperation(
         transaction,
         sourceBookId: params.bookId,
         sourceBookName: params.bookId,
         sourceBookType: 'remote_book:${params.bookId}',
-      ),
-    );
+      );
+      final categorySync = _categoryReferenceSyncService;
+      if (categorySync != null) {
+        syncOperation = await categorySync.attachToBillOperation(
+          transaction: transaction,
+          operation: syncOperation,
+        );
+      }
+    }
 
-    // Fire-and-forget sync trigger — SyncEngine handles debounce and validity.
-    _syncEngine?.onTransactionChanged();
+    final durableRepository =
+        _transactionRepo is DurableFamilySyncTransactionRepository
+        ? _transactionRepo as DurableFamilySyncTransactionRepository
+        : null;
+    final usesDurableOutbox = durableRepository != null;
+    final outboxEnqueued = durableRepository != null
+        ? await durableRepository.insertWithFamilySyncOutbox(
+            transaction,
+            operation: syncOperation,
+          )
+        : await _insertLegacy(transaction);
+
+    if (syncOperation != null && !usesDurableOutbox) {
+      _changeTracker?.trackCreate(syncOperation);
+    }
+
+    if (syncOperation != null && (outboxEnqueued || !usesDurableOutbox)) {
+      // Fire-and-forget sync trigger — SyncEngine handles debounce/validity.
+      _syncEngine?.onTransactionChanged();
+    }
 
     return Result.success(transaction);
+  }
+
+  Future<bool> _insertLegacy(Transaction transaction) async {
+    await _transactionRepo.insert(transaction);
+    return false;
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 
 /// Readable compact transaction row for the expanded Joy calendar day.
 class JoyCalendarCompactTransactionRow extends StatelessWidget {
@@ -12,19 +13,24 @@ class JoyCalendarCompactTransactionRow extends StatelessWidget {
     super.key,
     required this.transaction,
     required this.locale,
+    this.category,
+    this.parentCategory,
   });
 
   final Transaction transaction;
   final Locale locale;
+  final Category? category;
+  final Category? parentCategory;
 
   static const double rowHeight = 52;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final category = CategoryLocalizationService.resolveFromId(
-      transaction.categoryId,
-      locale,
+    final categoryName = categoryNameForDisplay(
+      categoryId: transaction.categoryId,
+      category: category,
+      locale: locale,
     );
     final merchant = transaction.merchant?.trim();
     return SizedBox(
@@ -34,7 +40,11 @@ class JoyCalendarCompactTransactionRow extends StatelessWidget {
           SizedBox(
             width: 24,
             child: Icon(
-              _resolveL1IconForCategory(transaction.categoryId),
+              parentCategory != null
+                  ? resolveCategoryIcon(parentCategory!.icon)
+                  : category != null
+                  ? parentCategoryIconForCategory(category!)
+                  : parentCategoryIconFromId(transaction.categoryId),
               size: 18,
               color: palette.joyText,
             ),
@@ -46,7 +56,7 @@ class JoyCalendarCompactTransactionRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  category,
+                  categoryName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.label.copyWith(
@@ -79,31 +89,5 @@ class JoyCalendarCompactTransactionRow extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static IconData _resolveL1IconForCategory(String categoryId) {
-    const iconMap = <String, IconData>{
-      'cat_food': Icons.restaurant,
-      'cat_daily': Icons.local_mall,
-      'cat_transport': Icons.directions_bus,
-      'cat_hobbies': Icons.sports_esports,
-      'cat_clothing': Icons.checkroom,
-      'cat_social': Icons.people,
-      'cat_health': Icons.local_hospital,
-      'cat_education': Icons.school,
-      'cat_utilities': Icons.flash_on,
-      'cat_communication': Icons.phone_iphone,
-      'cat_housing': Icons.home,
-      'cat_car': Icons.directions_car,
-      'cat_tax': Icons.account_balance,
-      'cat_insurance': Icons.security,
-      'cat_special': Icons.star,
-      'cat_savings': Icons.savings,
-      'cat_other': Icons.more_horiz,
-    };
-    if (!categoryId.startsWith('cat_')) return Icons.category;
-    final withoutPrefix = categoryId.substring(4);
-    final parts = withoutPrefix.split('_');
-    return iconMap['cat_${parts.first}'] ?? Icons.category;
   }
 }

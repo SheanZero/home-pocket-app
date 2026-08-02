@@ -43,14 +43,13 @@ class BestJoyStoryStrip extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsCardTitleBestJoy,
-              style: AppTextStyles.titleLarge.copyWith(color: context.palette.joy),
+              style: AppTextStyles.titleLarge.copyWith(
+                color: context.palette.joy,
+              ),
             ),
             const SizedBox(height: 8),
             switch (bestJoy) {
               Empty<BestJoyMomentRow>() => _buildEmpty(context, l10n),
-              Value<BestJoyMomentRow>(:final data)
-                  when data.joyFullness <= 2 =>
-                _buildEmpty(context, l10n),
               Value<BestJoyMomentRow>(:final data) => _BestJoyValue(
                 row: data,
                 currencyCode: currencyCode,
@@ -67,7 +66,9 @@ class BestJoyStoryStrip extends StatelessWidget {
   Widget _buildEmpty(BuildContext context, S l10n) {
     return Text(
       l10n.analyticsCardEmptyBestJoy,
-      style: AppTextStyles.bodyMedium.copyWith(color: context.palette.textSecondary),
+      style: AppTextStyles.bodyMedium.copyWith(
+        color: context.palette.textSecondary,
+      ),
     );
   }
 }
@@ -117,10 +118,7 @@ class _BestJoyValue extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                l10n.analyticsCardSmallBestJoy(
-                  amountText,
-                  row.joyFullness,
-                ),
+                l10n.analyticsCardSmallBestJoy(amountText, row.joyFullness),
                 style: AppTextStyles.caption.copyWith(
                   color: context.palette.textSecondary,
                 ),

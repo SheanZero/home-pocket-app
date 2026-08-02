@@ -5,14 +5,17 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
+import 'package:home_pocket/application/family_sync/complete_member_activation_use_case.dart';
+import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
 import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
-import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
+import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -20,7 +23,8 @@ import '../../../../../helpers/test_localizations.dart';
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
-class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
+class MockCompleteMemberActivationUseCase extends Mock
+    implements CompleteMemberActivationUseCase {}
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
 
@@ -28,35 +32,60 @@ class MockWebSocketService extends Mock implements WebSocketService {}
 
 class MockKeyManager extends Mock implements KeyManager {}
 
+class MockGetJoinRequestStatusUseCase extends Mock
+    implements GetJoinRequestStatusUseCase {}
+
+class MockCancelJoinRequestUseCase extends Mock
+    implements CancelJoinRequestUseCase {}
+
+class MockPushNotificationService extends Mock
+    implements PushNotificationService {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(SyncMode.initialSync);
   });
 
   late MockGroupRepository groupRepository;
-  late MockCheckGroupUseCase checkGroupUseCase;
+  late MockCompleteMemberActivationUseCase memberActivationUseCase;
   late SyncEngine syncEngine;
   late MockSyncOrchestrator mockOrchestrator;
   late MockWebSocketService webSocketService;
   late MockKeyManager keyManager;
+  late MockGetJoinRequestStatusUseCase getJoinRequestStatusUseCase;
+  late MockCancelJoinRequestUseCase cancelJoinRequestUseCase;
+  late MockPushNotificationService pushNotificationService;
   late StreamController<WebSocketConnectionState> wsStateController;
+  late StreamController<Map<String, dynamic>> joinRequestEvents;
 
   setUp(() {
     groupRepository = MockGroupRepository();
-    checkGroupUseCase = MockCheckGroupUseCase();
+    memberActivationUseCase = MockCompleteMemberActivationUseCase();
     mockOrchestrator = MockSyncOrchestrator();
     webSocketService = MockWebSocketService();
     keyManager = MockKeyManager();
+    getJoinRequestStatusUseCase = MockGetJoinRequestStatusUseCase();
+    cancelJoinRequestUseCase = MockCancelJoinRequestUseCase();
+    pushNotificationService = MockPushNotificationService();
     wsStateController = StreamController<WebSocketConnectionState>.broadcast();
+    joinRequestEvents = StreamController<Map<String, dynamic>>.broadcast();
 
     when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
     when(
-      () => mockOrchestrator.getPendingQueueCount(),
-    ).thenAnswer((_) async => 0);
+      () => mockOrchestrator.getQueueSummary(),
+    ).thenAnswer((_) async => const SyncQueueSummary());
     when(
       () => mockOrchestrator.execute(any()),
     ).thenAnswer((_) async => const SyncOrchestratorSuccess());
     when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);
+    when(
+      () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+    ).thenAnswer(
+      (_) async => const JoinRequestLifecycleSuccess(JoinRequestStatus.pending),
+    );
+    when(
+      () => pushNotificationService.joinRequestLifecycleEvents,
+    ).thenAnswer((_) => joinRequestEvents.stream);
 
     syncEngine = SyncEngine(
       orchestrator: mockOrchestrator,
@@ -66,8 +95,8 @@ void main() {
     );
 
     when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationNotInGroup());
 
     // WebSocket mocks
     when(
@@ -105,22 +134,32 @@ void main() {
   tearDown(() async {
     syncEngine.dispose();
     await wsStateController.close();
+    await joinRequestEvents.close();
   });
 
   List<Override> buildOverrides() => [
     groupRepositoryProvider.overrideWithValue(groupRepository),
-    checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+    completeMemberActivationUseCaseProvider.overrideWithValue(
+      memberActivationUseCase,
+    ),
     syncEngineProvider.overrideWithValue(syncEngine),
     webSocketServiceProvider.overrideWithValue(webSocketService),
     keyManagerProvider.overrideWithValue(keyManager),
+    getJoinRequestStatusUseCaseProvider.overrideWithValue(
+      getJoinRequestStatusUseCase,
+    ),
+    cancelJoinRequestUseCaseProvider.overrideWithValue(
+      cancelJoinRequestUseCase,
+    ),
+    pushNotificationServiceProvider.overrideWithValue(pushNotificationService),
   ];
 
   testWidgets('always polls regardless of WebSocket connection state', (
     tester,
   ) async {
     when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationNotInGroup());
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -145,13 +184,15 @@ void main() {
     });
 
     // Polling fires after 5s regardless of WebSocket state
-    verify(() => checkGroupUseCase.execute()).called(greaterThanOrEqualTo(1));
+    verify(
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).called(greaterThanOrEqualTo(1));
   });
 
   testWidgets('continues polling after WebSocket disconnects', (tester) async {
     when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationNotInGroup());
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -175,6 +216,8 @@ void main() {
       await tester.pump();
     });
 
-    verify(() => checkGroupUseCase.execute()).called(greaterThanOrEqualTo(1));
+    verify(
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).called(greaterThanOrEqualTo(1));
   });
 }

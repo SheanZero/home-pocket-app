@@ -1,5 +1,7 @@
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
+import 'rotate_group_key_use_case.dart';
+import 'membership_rotation_coordinator.dart';
 
 sealed class RemoveMemberResult {
   const RemoveMemberResult();
@@ -22,25 +24,25 @@ class RemoveMemberUseCase {
   RemoveMemberUseCase({
     required RelayApiClient apiClient,
     required GroupRepository groupRepository,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository;
+    required RotateGroupKeyUseCase rotateGroupKey,
+    MembershipRotationCoordinator? membershipRotation,
+  }) : _membershipRotation = membershipRotation;
 
-  final RelayApiClient _apiClient;
-  final GroupRepository _groupRepository;
+  final MembershipRotationCoordinator? _membershipRotation;
 
   Future<RemoveMemberResult> execute({
     required String groupId,
     required String deviceId,
   }) async {
     try {
-      await _apiClient.removeMember(groupId: groupId, deviceId: deviceId);
-      final group = await _groupRepository.getGroupById(groupId);
-      if (group != null) {
-        final remainingMembers = group.members
-            .where((member) => member.deviceId != deviceId)
-            .toList();
-        await _groupRepository.updateMembers(groupId, remainingMembers);
+      final coordinator = _membershipRotation;
+      if (coordinator == null) {
+        throw StateError('Crash-safe membership rotation is unavailable');
       }
+      await coordinator.removeMember(
+        groupId: groupId,
+        targetDeviceId: deviceId,
+      );
       return const RemoveMemberResult.success();
     } on RelayApiException catch (error) {
       return RemoveMemberResult.error(error.message);

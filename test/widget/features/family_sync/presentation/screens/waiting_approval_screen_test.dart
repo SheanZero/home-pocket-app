@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
@@ -6,10 +8,14 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
-import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/complete_member_activation_use_case.dart';
+import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
+import 'package:home_pocket/application/family_sync/group_key_recovery_use_case.dart';
+import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
@@ -19,7 +25,8 @@ import '../../../../../helpers/test_localizations.dart';
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
-class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
+class MockCompleteMemberActivationUseCase extends Mock
+    implements CompleteMemberActivationUseCase {}
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
 
@@ -27,16 +34,32 @@ class MockWebSocketService extends Mock implements WebSocketService {}
 
 class MockKeyManager extends Mock implements KeyManager {}
 
+class MockGetJoinRequestStatusUseCase extends Mock
+    implements GetJoinRequestStatusUseCase {}
+
+class MockCancelJoinRequestUseCase extends Mock
+    implements CancelJoinRequestUseCase {}
+
+class MockPushNotificationService extends Mock
+    implements PushNotificationService {}
+
+class MockGroupKeyRecoveryCoordinator extends Mock
+    implements GroupKeyRecoveryCoordinator {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(SyncMode.initialSync);
   });
   late MockGroupRepository groupRepository;
-  late MockCheckGroupUseCase checkGroupUseCase;
+  late MockCompleteMemberActivationUseCase memberActivationUseCase;
   late SyncEngine syncEngine;
   late MockSyncOrchestrator mockOrchestrator;
   late MockWebSocketService webSocketService;
   late MockKeyManager keyManager;
+  late MockGetJoinRequestStatusUseCase getJoinRequestStatusUseCase;
+  late MockCancelJoinRequestUseCase cancelJoinRequestUseCase;
+  late MockPushNotificationService pushNotificationService;
+  late StreamController<Map<String, dynamic>> joinRequestEvents;
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
     groupId: 'group-1',
@@ -96,18 +119,23 @@ void main() {
 
   setUp(() {
     groupRepository = MockGroupRepository();
-    checkGroupUseCase = MockCheckGroupUseCase();
+    memberActivationUseCase = MockCompleteMemberActivationUseCase();
     mockOrchestrator = MockSyncOrchestrator();
     when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
     when(
-      () => mockOrchestrator.getPendingQueueCount(),
-    ).thenAnswer((_) async => 0);
+      () => mockOrchestrator.getQueueSummary(),
+    ).thenAnswer((_) async => const SyncQueueSummary());
     when(
       () => mockOrchestrator.execute(any()),
     ).thenAnswer((_) async => const SyncOrchestratorSuccess());
     when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);
+    when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
     webSocketService = MockWebSocketService();
     keyManager = MockKeyManager();
+    getJoinRequestStatusUseCase = MockGetJoinRequestStatusUseCase();
+    cancelJoinRequestUseCase = MockCancelJoinRequestUseCase();
+    pushNotificationService = MockPushNotificationService();
+    joinRequestEvents = StreamController<Map<String, dynamic>>.broadcast();
 
     when(
       () => webSocketService.connectionStateStream,
@@ -135,6 +163,18 @@ void main() {
         publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
       ),
     );
+    when(
+      () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+    ).thenAnswer(
+      (_) async => const JoinRequestLifecycleSuccess(JoinRequestStatus.pending),
+    );
+    when(() => cancelJoinRequestUseCase.execute(groupId: 'group-1')).thenAnswer(
+      (_) async =>
+          const JoinRequestLifecycleSuccess(JoinRequestStatus.cancelled),
+    );
+    when(
+      () => pushNotificationService.joinRequestLifecycleEvents,
+    ).thenAnswer((_) => joinRequestEvents.stream);
 
     syncEngine = SyncEngine(
       orchestrator: mockOrchestrator,
@@ -144,12 +184,13 @@ void main() {
     );
     // Default: still waiting
     when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationNotInGroup());
   });
 
   tearDown(() {
     syncEngine.dispose();
+    joinRequestEvents.close();
   });
 
   testWidgets('shows waiting approval state using repository group data', (
@@ -171,10 +212,21 @@ void main() {
         ),
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
-          checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+          completeMemberActivationUseCaseProvider.overrideWithValue(
+            memberActivationUseCase,
+          ),
           syncEngineProvider.overrideWithValue(syncEngine),
           webSocketServiceProvider.overrideWithValue(webSocketService),
           keyManagerProvider.overrideWithValue(keyManager),
+          getJoinRequestStatusUseCaseProvider.overrideWithValue(
+            getJoinRequestStatusUseCase,
+          ),
+          cancelJoinRequestUseCaseProvider.overrideWithValue(
+            cancelJoinRequestUseCase,
+          ),
+          pushNotificationServiceProvider.overrideWithValue(
+            pushNotificationService,
+          ),
         ],
       ),
     );
@@ -182,13 +234,73 @@ void main() {
     // caused by the indefinitely-animating CircularProgressIndicator
     await tester.pump(const Duration(milliseconds: 100));
 
-    // The new screen shows groupName and ownerDisplayName passed as params
-    expect(find.text('Test Family'), findsOneWidget);
-    // Waiting title from l10n.groupWaitingApproval
-    expect(find.text('Waiting for Owner approval...'), findsOneWidget);
+    // Header and owner-specific waiting state follow the selected mockup.
+    expect(find.text('Waiting for approval'), findsOneWidget);
+    expect(find.text('Waiting for owner approval'), findsOneWidget);
     // A progress indicator is displayed
     expect(find.byType(WaitingApprovalScreen), findsOneWidget);
   });
+
+  testWidgets(
+    'shows manual retry and safe rebuild path when zero-knowledge recovery expires',
+    (tester) async {
+      final recovery = MockGroupKeyRecoveryCoordinator();
+      final recoveryEvents =
+          StreamController<GroupKeyRecoveryStatus>.broadcast();
+      when(
+        () => recovery.currentStatus,
+      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(
+        () => recovery.statusStream,
+      ).thenAnswer((_) => recoveryEvents.stream);
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+            groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+          ],
+        ),
+      );
+      joinRequestEvents.add({'groupId': 'group-1', 'status': 'approved'});
+      recoveryEvents.add(
+        GroupKeyRecoveryStatus(
+          phase: GroupKeyRecoveryPhase.unrecoverable,
+          groupId: 'group-1',
+          expiresAt: DateTime.utc(2026, 8, 1),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Restoring the family key'), findsOneWidget);
+      expect(find.text('Retry key recovery'), findsOneWidget);
+      expect(find.text('Leave and set up a new family'), findsOneWidget);
+      await recoveryEvents.close();
+    },
+  );
 
   testWidgets(
     'verifies group state before navigating when memberConfirmed event is received',
@@ -200,8 +312,10 @@ void main() {
         () => groupRepository.getActiveGroup(),
       ).thenAnswer((_) async => buildActiveGroup());
       when(
-        () => checkGroupUseCase.execute(),
-      ).thenAnswer((_) async => const CheckGroupInGroup(groupId: 'group-1'));
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).thenAnswer(
+        (_) async => const MemberActivationReady(groupId: 'group-1'),
+      );
 
       await tester.pumpWidget(
         createLocalizedWidget(
@@ -212,10 +326,21 @@ void main() {
           ),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
-            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
             syncEngineProvider.overrideWithValue(syncEngine),
             webSocketServiceProvider.overrideWithValue(webSocketService),
             keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
           ],
         ),
       );
@@ -227,7 +352,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      verify(() => checkGroupUseCase.execute()).called(1);
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(1);
       // After approval the screen navigates to GroupManagementScreen,
       // which shows the group name from the loaded group data
       expect(find.text('Test Family'), findsOneWidget);
@@ -245,8 +372,8 @@ void main() {
         () => groupRepository.getActiveGroup(),
       ).thenAnswer((_) async => buildActiveGroup());
       when(
-        () => checkGroupUseCase.execute(),
-      ).thenAnswer((_) async => const CheckGroupNotInGroup());
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).thenAnswer((_) async => const MemberActivationNotInGroup());
 
       await tester.pumpWidget(
         createLocalizedWidget(
@@ -257,10 +384,21 @@ void main() {
           ),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
-            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
             syncEngineProvider.overrideWithValue(syncEngine),
             webSocketServiceProvider.overrideWithValue(webSocketService),
             keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
           ],
         ),
       );
@@ -270,8 +408,64 @@ void main() {
       syncEngine.onMemberConfirmed();
       await tester.pump(const Duration(milliseconds: 500));
 
-      verify(() => checkGroupUseCase.execute()).called(greaterThan(0));
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(greaterThan(0));
       // Screen should remain since checkGroup returns not-in-group
+      expect(find.byType(WaitingApprovalScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'stays on waiting screen while the local member is pending approval',
+    (tester) async {
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+      when(
+        () => groupRepository.getActiveGroup(),
+      ).thenAnswer((_) async => buildActiveGroup());
+      when(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).thenAnswer(
+        (_) async => const MemberActivationPendingApproval(groupId: 'group-1'),
+      );
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+          ],
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      syncEngine.onMemberConfirmed();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(greaterThan(0));
       expect(find.byType(WaitingApprovalScreen), findsOneWidget);
     },
   );
@@ -283,8 +477,8 @@ void main() {
       () => groupRepository.getGroupById('group-1'),
     ).thenAnswer((_) async => buildConfirmingGroup());
     when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationNotInGroup());
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -296,22 +490,37 @@ void main() {
           ),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
-            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
             syncEngineProvider.overrideWithValue(syncEngine),
             webSocketServiceProvider.overrideWithValue(webSocketService),
             keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
           ],
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      verifyNever(() => checkGroupUseCase.execute());
+      verifyNever(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      );
 
       // Wait for the 5-second adaptive polling timer to fire
       await Future<void>.delayed(const Duration(seconds: 6));
       await tester.pump(const Duration(milliseconds: 100));
 
-      verify(() => checkGroupUseCase.execute()).called(1);
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(1);
     });
   });
 
@@ -323,8 +532,8 @@ void main() {
       () => groupRepository.getActiveGroup(),
     ).thenAnswer((_) async => buildActiveGroup());
     when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupInGroup(groupId: 'group-1'));
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationReady(groupId: 'group-1'));
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -336,10 +545,21 @@ void main() {
           ),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
-            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
             syncEngineProvider.overrideWithValue(syncEngine),
             webSocketServiceProvider.overrideWithValue(webSocketService),
             keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
           ],
         ),
       );
@@ -349,13 +569,102 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 6));
       await tester.pump(const Duration(milliseconds: 100));
 
-      verify(() => checkGroupUseCase.execute()).called(1);
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(1);
 
       // Wait for another poll cycle — should not call again after navigation
       await Future<void>.delayed(const Duration(seconds: 11));
       await tester.pump(const Duration(milliseconds: 100));
 
-      verifyNever(() => checkGroupUseCase.execute());
+      verifyNever(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      );
     });
+  });
+
+  testWidgets('terminal push stops polling and shows a reapply path', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const WaitingApprovalScreen(
+          groupId: 'group-1',
+          groupName: 'Test Family',
+          ownerDisplayName: 'Owner phone',
+        ),
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(groupRepository),
+          completeMemberActivationUseCaseProvider.overrideWithValue(
+            memberActivationUseCase,
+          ),
+          syncEngineProvider.overrideWithValue(syncEngine),
+          webSocketServiceProvider.overrideWithValue(webSocketService),
+          keyManagerProvider.overrideWithValue(keyManager),
+          getJoinRequestStatusUseCaseProvider.overrideWithValue(
+            getJoinRequestStatusUseCase,
+          ),
+          cancelJoinRequestUseCaseProvider.overrideWithValue(
+            cancelJoinRequestUseCase,
+          ),
+          pushNotificationServiceProvider.overrideWithValue(
+            pushNotificationService,
+          ),
+        ],
+      ),
+    );
+    await tester.pump();
+
+    joinRequestEvents.add({
+      'type': 'join_request_rejected',
+      'groupId': 'group-1',
+      'status': 'rejected',
+    });
+    await tester.pump();
+
+    expect(find.text('Join request declined'), findsOneWidget);
+    expect(find.text('Enter another invite code'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 6));
+    verifyNever(() => getJoinRequestStatusUseCase.execute(groupId: 'group-1'));
+  });
+
+  testWidgets('applicant can cancel a pending request', (tester) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const WaitingApprovalScreen(
+          groupId: 'group-1',
+          groupName: 'Test Family',
+          ownerDisplayName: 'Owner phone',
+        ),
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(groupRepository),
+          completeMemberActivationUseCaseProvider.overrideWithValue(
+            memberActivationUseCase,
+          ),
+          syncEngineProvider.overrideWithValue(syncEngine),
+          webSocketServiceProvider.overrideWithValue(webSocketService),
+          keyManagerProvider.overrideWithValue(keyManager),
+          getJoinRequestStatusUseCaseProvider.overrideWithValue(
+            getJoinRequestStatusUseCase,
+          ),
+          cancelJoinRequestUseCaseProvider.overrideWithValue(
+            cancelJoinRequestUseCase,
+          ),
+          pushNotificationServiceProvider.overrideWithValue(
+            pushNotificationService,
+          ),
+        ],
+      ),
+    );
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Cancel join request'));
+    await tester.tap(find.text('Cancel join request'));
+    await tester.pump();
+
+    verify(
+      () => cancelJoinRequestUseCase.execute(groupId: 'group-1'),
+    ).called(1);
+    expect(find.text('Join request cancelled'), findsOneWidget);
   });
 }

@@ -16,6 +16,22 @@ _GroupMember _$GroupMemberFromJson(Map<String, dynamic> json) => _GroupMember(
   avatarEmoji: json['avatarEmoji'] as String,
   avatarImagePath: json['avatarImagePath'] as String?,
   avatarImageHash: json['avatarImageHash'] as String?,
+  profileRevision: (json['profileRevision'] as num?)?.toInt() ?? 0,
+  profileOriginDeviceId: json['profileOriginDeviceId'] as String? ?? '',
+  profileDigest: json['profileDigest'] as String? ?? '',
+  avatarRevision: (json['avatarRevision'] as num?)?.toInt() ?? 0,
+  avatarOriginDeviceId: json['avatarOriginDeviceId'] as String? ?? '',
+  avatarContentHash: json['avatarContentHash'] as String? ?? '',
+  joinedAt: json['joinedAt'] == null
+      ? null
+      : DateTime.parse(json['joinedAt'] as String),
+  confirmedAt: json['confirmedAt'] == null
+      ? null
+      : DateTime.parse(json['confirmedAt'] as String),
+  removedAt: json['removedAt'] == null
+      ? null
+      : DateTime.parse(json['removedAt'] as String),
+  removalReason: json['removalReason'] as String?,
 );
 
 Map<String, dynamic> _$GroupMemberToJson(_GroupMember instance) =>
@@ -29,4 +45,14 @@ Map<String, dynamic> _$GroupMemberToJson(_GroupMember instance) =>
       'avatarEmoji': instance.avatarEmoji,
       'avatarImagePath': instance.avatarImagePath,
       'avatarImageHash': instance.avatarImageHash,
+      'profileRevision': instance.profileRevision,
+      'profileOriginDeviceId': instance.profileOriginDeviceId,
+      'profileDigest': instance.profileDigest,
+      'avatarRevision': instance.avatarRevision,
+      'avatarOriginDeviceId': instance.avatarOriginDeviceId,
+      'avatarContentHash': instance.avatarContentHash,
+      'joinedAt': instance.joinedAt?.toIso8601String(),
+      'confirmedAt': instance.confirmedAt?.toIso8601String(),
+      'removedAt': instance.removedAt?.toIso8601String(),
+      'removalReason': instance.removalReason,
     };

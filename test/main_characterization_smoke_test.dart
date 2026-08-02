@@ -34,6 +34,7 @@ import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
 import 'package:home_pocket/core/initialization/app_initializer.dart';
 import 'package:home_pocket/core/initialization/init_failure_screen.dart';
+import 'package:home_pocket/core/initialization/init_result.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
@@ -99,7 +100,7 @@ class _FailEnsureDefaultBookUseCase extends Fake
 
 class _FakeSyncEngine extends Mock implements SyncEngine {
   @override
-  void initialize() {}
+  Future<void> initialize() async {}
 
   @override
   void connectPushNotifications(PushNotificationService pushService) {}
@@ -110,7 +111,16 @@ class _FakeSyncEngine extends Mock implements SyncEngine {
 
 class _FakePushNotificationService extends Mock
     implements PushNotificationService {
+  _FakePushNotificationService({this.onInitialize});
+
+  final void Function()? onInitialize;
   final _navController = StreamController<PushNavigationIntent>.broadcast();
+
+  @override
+  Future<String?> initialize() async {
+    onInitialize?.call();
+    return 'test-push-token';
+  }
 
   @override
   PushNavigationIntent? takePendingNavigationIntent() => null;
@@ -241,6 +251,7 @@ final _testProfile = UserProfile(
 Future<void> _pumpApp(
   WidgetTester tester, {
   required List<Override> overrides,
+  PushNotificationService? pushService,
   AppSettings appSettings = const AppSettings(),
   bool onboardingComplete = true,
   bool appLockEnabled = false,
@@ -265,7 +276,7 @@ Future<void> _pumpApp(
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
 
-  final fakePushService = _FakePushNotificationService();
+  final fakePushService = pushService ?? _FakePushNotificationService();
   final fakeListenUseCase = _FakeListenToPushNotificationsUseCase();
 
   final baseOverrides = [
@@ -374,6 +385,24 @@ void main() {
   }
 
   group('HomePocketApp smoke characterization (pre-Plan-03-02)', () {
+    testWidgets('initializes push delivery during application bootstrap', (
+      tester,
+    ) async {
+      var initializeCalls = 0;
+      final pushService = _FakePushNotificationService(
+        onInitialize: () => initializeCalls++,
+      );
+
+      await _pumpApp(
+        tester,
+        pushService: pushService,
+        overrides: buildSuccessOverrides(profile: _testProfile),
+      );
+      await _pumpInitNoSettle(tester);
+
+      expect(initializeCalls, 1);
+    });
+
     testWidgets(
       '_buildHome shows CircularProgressIndicator while initializing',
       (tester) async {
@@ -568,6 +597,7 @@ void main() {
       }
 
       final rendered = <Widget>[];
+      final failures = <InitFailure>[];
       await app.bootWithInitializerForTesting(
         makeInitializer(),
         appRunner: rendered.add,
@@ -579,8 +609,10 @@ void main() {
       await app.bootWithInitializerForTesting(
         makeInitializer(failDatabase: true),
         appRunner: rendered.add,
+        failureReporter: failures.add,
       );
       expect(rendered.last, isA<InitFailureApp>());
+      expect(failures.single.type, InitFailureType.database);
     });
   });
 
@@ -677,30 +709,26 @@ void main() {
       },
     );
 
-    testWidgets(
-      'G4 biometric ON: boot lock screen auto-prompts Face ID once',
-      (tester) async {
-        final spy = _SpyBiometricService();
-        await _pumpApp(
-          tester,
-          overrides: buildSuccessOverrides(profile: _testProfile),
-          appLockEnabled: true,
-          pinHash: 'argon2-phc',
-          biometricUnlockEnabled: true,
-          biometric: spy,
-        );
-        await _pumpInitNoSettle(tester);
-        expect(find.byType(AppLockScreen), findsOneWidget);
-        // Biometric ON → the Face ID auto-prompt fires exactly once at boot.
-        expect(spy.authenticateCalls, 1);
-        // Still on the Face ID surface (spy fell back to PIN), so the PIN page's
-        // 忘记PIN control is NOT yet shown.
-        expect(
-          find.byKey(const ValueKey('app-lock-forgot-pin')),
-          findsNothing,
-        );
-      },
-    );
+    testWidgets('G4 biometric ON: boot lock screen auto-prompts Face ID once', (
+      tester,
+    ) async {
+      final spy = _SpyBiometricService();
+      await _pumpApp(
+        tester,
+        overrides: buildSuccessOverrides(profile: _testProfile),
+        appLockEnabled: true,
+        pinHash: 'argon2-phc',
+        biometricUnlockEnabled: true,
+        biometric: spy,
+      );
+      await _pumpInitNoSettle(tester);
+      expect(find.byType(AppLockScreen), findsOneWidget);
+      // Biometric ON → the Face ID auto-prompt fires exactly once at boot.
+      expect(spy.authenticateCalls, 1);
+      // Still on the Face ID surface (spy fell back to PIN), so the PIN page's
+      // 忘记PIN control is NOT yet shown.
+      expect(find.byKey(const ValueKey('app-lock-forgot-pin')), findsNothing);
+    });
   });
 
   group('HomePocketApp cold-start SharedPreferences race (T-55 UAT blocker)', () {

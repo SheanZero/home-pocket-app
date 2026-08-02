@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
 import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
-import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
 import 'package:home_pocket/application/family_sync/repository_providers.dart'
     show notifyMemberApprovalUseCaseProvider;
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -21,7 +21,8 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 
 class MockConfirmMemberUseCase extends Mock implements ConfirmMemberUseCase {}
 
-class MockRemoveMemberUseCase extends Mock implements RemoveMemberUseCase {}
+class MockRejectJoinRequestUseCase extends Mock
+    implements RejectJoinRequestUseCase {}
 
 class MockNotifyMemberApprovalUseCase extends Mock
     implements NotifyMemberApprovalUseCase {}
@@ -29,14 +30,14 @@ class MockNotifyMemberApprovalUseCase extends Mock
 void main() {
   late MockGroupRepository groupRepository;
   late MockConfirmMemberUseCase confirmMemberUseCase;
-  late MockRemoveMemberUseCase removeMemberUseCase;
+  late MockRejectJoinRequestUseCase rejectJoinRequestUseCase;
   late MockNotifyMemberApprovalUseCase notifyUseCase;
   late StreamController<WebSocketEvent> wsEventController;
 
   setUp(() {
     groupRepository = MockGroupRepository();
     confirmMemberUseCase = MockConfirmMemberUseCase();
-    removeMemberUseCase = MockRemoveMemberUseCase();
+    rejectJoinRequestUseCase = MockRejectJoinRequestUseCase();
     notifyUseCase = MockNotifyMemberApprovalUseCase();
     wsEventController = StreamController<WebSocketEvent>.broadcast();
 
@@ -82,11 +83,14 @@ void main() {
     ).thenAnswer((_) async => const ConfirmMemberSuccess());
 
     when(
-      () => removeMemberUseCase.execute(
+      () => rejectJoinRequestUseCase.execute(
         groupId: any(named: 'groupId'),
         deviceId: any(named: 'deviceId'),
       ),
-    ).thenAnswer((_) async => const RemoveMemberResult.success());
+    ).thenAnswer(
+      (_) async =>
+          const JoinRequestLifecycleSuccess(JoinRequestStatus.rejected),
+    );
 
     // NotifyMemberApprovalUseCase mocks
     when(
@@ -105,7 +109,9 @@ void main() {
   List<Override> buildOverrides() => [
     groupRepositoryProvider.overrideWithValue(groupRepository),
     confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
-    removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
+    rejectJoinRequestUseCaseProvider.overrideWithValue(
+      rejectJoinRequestUseCase,
+    ),
     notifyMemberApprovalUseCaseProvider.overrideWithValue(notifyUseCase),
   ];
 
@@ -147,6 +153,29 @@ void main() {
     await tester.pumpAndSettle();
 
     // Group should be reloaded once more
+    verify(
+      () => groupRepository.getActiveGroup(),
+    ).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('reloads group when a pending request resolves', (tester) async {
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const MemberApprovalScreen(),
+        overrides: buildOverrides(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    wsEventController.add(
+      const WebSocketEvent(
+        type: WebSocketEventType.joinRequestResolved,
+        groupId: 'group-1',
+        data: {'status': 'cancelled', 'deviceId': 'member-1'},
+      ),
+    );
+    await tester.pumpAndSettle();
+
     verify(
       () => groupRepository.getActiveGroup(),
     ).called(greaterThanOrEqualTo(1));

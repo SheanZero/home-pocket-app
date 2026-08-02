@@ -214,4 +214,55 @@ void main() {
 
     await file.delete();
   });
+
+  test(
+    'receipt photo backup stores availability but never local hash',
+    () async {
+      final now = DateTime.utc(2026, 8, 1);
+      when(() => mockTransactionRepo.findAllByBook('book-1')).thenAnswer(
+        (_) async => [
+          Transaction(
+            id: 'tx-photo',
+            bookId: 'book-1',
+            deviceId: 'dev',
+            amount: 900,
+            type: TransactionType.expense,
+            categoryId: 'cat-1',
+            ledgerType: LedgerType.daily,
+            timestamp: now,
+            photoHash: 'local-content-hash',
+            currentHash: 'chain',
+            createdAt: now,
+          ),
+        ],
+      );
+      when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockSettingsRepo.getSettings(),
+      ).thenAnswer((_) async => const AppSettings());
+      when(() => mockExchangeRateRepo.findAll()).thenAnswer((_) async => []);
+
+      final result = await useCase.execute(
+        bookId: 'book-1',
+        password: 'test-password-123',
+        outputDirectory: tempDir,
+      );
+
+      final encrypted = await result.data!.readAsBytes();
+      final plaintext = await backupCrypto.decrypt(
+        encrypted,
+        'test-password-123',
+      );
+      final root =
+          jsonDecode(utf8.decode(gzip.decode(plaintext)))
+              as Map<String, dynamic>;
+      final transaction =
+          (root['transactions'] as List).single as Map<String, dynamic>;
+      expect(transaction, isNot(contains('photoHash')));
+      expect(transaction['photoAvailability'], 'local_only');
+    },
+  );
 }

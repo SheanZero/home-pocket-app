@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/shared_joy_insight.dart';
@@ -97,10 +98,52 @@ void main() {
       ),
     );
 
-    expect(
-      find.text('みんなで「食費」を楽しんでいます（5件、平均 8.2 / 10）'),
-      findsOneWidget,
+    expect(find.text('みんなで「食費」を楽しんでいます（5件、平均 8.2 / 10）'), findsOneWidget);
+  });
+
+  testWidgets('renders a custom shared category name instead of its id', (
+    tester,
+  ) async {
+    final custom = Category(
+      id: '01CUSTOMFAMILY',
+      name: '家族旅行',
+      icon: 'flight',
+      color: '#8B5CF6',
+      parentId: null,
+      level: 1,
+      createdAt: DateTime(2026),
     );
+    const family = FamilyHappiness(
+      year: 2026,
+      month: 5,
+      totalGroupJoyTx: 3,
+      familyHighlightsSum: Value<int>(3, 3),
+      sharedJoyInsight: Value<SharedJoyInsight>(
+        SharedJoyInsight(
+          categoryId: '01CUSTOMFAMILY',
+          avgSatisfaction: 7,
+          totalCount: 3,
+        ),
+        3,
+      ),
+      medianSatisfaction: Value<double>(7, 3),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        FamilyInsightCard(
+          family: family,
+          isGroupMode: true,
+          shadowBooks: const [_shadowBook],
+          locale: const Locale('zh'),
+          sharedJoyCategory: custom,
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+
+    expect(find.textContaining('家族旅行'), findsOneWidget);
+    expect(find.textContaining(custom.id), findsNothing);
   });
 
   testWidgets('renders empty sentence when shared joy insight is empty', (

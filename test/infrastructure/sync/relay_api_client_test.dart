@@ -94,6 +94,22 @@ void main() {
     ).called(1);
   });
 
+  test('control event requests clamp the signed page limit to 100', () async {
+    _stubGet(httpClient, '/group/group-1/events?afterRevision=7&limit=100', {
+      'events': <Object>[],
+      'hasMore': false,
+      'nextRevision': 7,
+    });
+
+    final response = await apiClient.getGroupControlEvents(
+      groupId: 'group-1',
+      afterRevision: 7,
+      limit: 500,
+    );
+
+    expect(response['nextRevision'], 7);
+  });
+
   test(
     'checkGroup returns false when server reports no active group',
     () async {
@@ -113,6 +129,64 @@ void main() {
     },
   );
 
+  test('join request lifecycle uses dedicated authenticated routes', () async {
+    when(
+      () => httpClient.get(
+        Uri.parse('https://example.com/api/v1/group/group-1/join-request'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer(
+      (_) async => http.Response(jsonEncode({'status': 'pending'}), 200),
+    );
+    when(
+      () => httpClient.post(
+        Uri.parse('https://example.com/api/v1/group/group-1/reject-join'),
+        headers: any(named: 'headers'),
+        body: any(named: 'body'),
+      ),
+    ).thenAnswer(
+      (_) async => http.Response(jsonEncode({'status': 'rejected'}), 200),
+    );
+    when(
+      () => httpClient.post(
+        Uri.parse('https://example.com/api/v1/group/group-1/cancel-join'),
+        headers: any(named: 'headers'),
+        body: any(named: 'body'),
+      ),
+    ).thenAnswer(
+      (_) async => http.Response(jsonEncode({'status': 'cancelled'}), 200),
+    );
+
+    expect(
+      (await apiClient.getJoinRequestStatus('group-1'))['status'],
+      'pending',
+    );
+    expect(
+      (await apiClient.rejectJoinRequest(
+        groupId: 'group-1',
+        deviceId: 'applicant',
+      ))['status'],
+      'rejected',
+    );
+    expect(
+      (await apiClient.cancelJoinRequest('group-1'))['status'],
+      'cancelled',
+    );
+
+    final rejectBody =
+        verify(
+              () => httpClient.post(
+                Uri.parse(
+                  'https://example.com/api/v1/group/group-1/reject-join',
+                ),
+                headers: any(named: 'headers'),
+                body: captureAny(named: 'body'),
+              ),
+            ).captured.single
+            as String;
+    expect(jsonDecode(rejectBody), {'deviceId': 'applicant'});
+  });
+
   test('pushSync sends group payload without targetDeviceId', () async {
     when(
       () => httpClient.post(
@@ -126,6 +200,7 @@ void main() {
 
     final response = await apiClient.pushSync(
       groupId: 'group-1',
+      syncId: 'sync-stable-1',
       payload: 'encrypted',
       vectorClock: const {'device-a': 3},
       operationCount: 4,
@@ -138,15 +213,85 @@ void main() {
         headers: any(named: 'headers'),
         body: jsonEncode({
           'groupId': 'group-1',
+          'syncId': 'sync-stable-1',
           'payload': 'encrypted',
           'vectorClock': {'device-a': 3},
           'operationCount': 4,
+          'keyEpoch': 1,
           'chunkIndex': 0,
           'totalChunks': 1,
         }),
       ),
     ).called(1);
   });
+
+  test(
+    'group key recovery uses request ledger and targeted push routes',
+    () async {
+      _stubPost(httpClient, '/group/group-1/request-key', {
+        'requestId': 'request-1',
+        'keyEpoch': 4,
+      });
+      _stubGet(httpClient, '/group/group-1/key-requests', {
+        'requests': <Object>[],
+      });
+      _stubPost(httpClient, '/sync/push-key', {'recipientCount': 1});
+
+      expect(
+        await apiClient.requestGroupKey(
+          groupId: 'group-1',
+          keyEpoch: 0,
+          forceNotify: true,
+        ),
+        containsPair('requestId', 'request-1'),
+      );
+      expect(
+        await apiClient.getPendingGroupKeyRequests('group-1'),
+        contains('requests'),
+      );
+      expect(
+        await apiClient.pushGroupKeyResponse(
+          groupId: 'group-1',
+          requestId: 'request-1',
+          targetDeviceId: 'member-1',
+          payload: 'sealed',
+          keyEpoch: 4,
+          syncId: 'sync-1',
+        ),
+        containsPair('recipientCount', 1),
+      );
+
+      final requestBody =
+          verify(
+                () => httpClient.post(
+                  Uri.parse(
+                    'https://example.com/api/v1/group/group-1/request-key',
+                  ),
+                  headers: any(named: 'headers'),
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as String;
+      final responseBody =
+          verify(
+                () => httpClient.post(
+                  Uri.parse('https://example.com/api/v1/sync/push-key'),
+                  headers: any(named: 'headers'),
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as String;
+      expect(jsonDecode(requestBody), {'keyEpoch': 0, 'forceNotify': true});
+      expect(jsonDecode(responseBody), {
+        'groupId': 'group-1',
+        'requestId': 'request-1',
+        'targetDeviceId': 'member-1',
+        'payload': 'sealed',
+        'keyEpoch': 4,
+        'syncId': 'sync-1',
+      });
+    },
+  );
 
   test('default URLs derive REST and WebSocket endpoints', () {
     expect(

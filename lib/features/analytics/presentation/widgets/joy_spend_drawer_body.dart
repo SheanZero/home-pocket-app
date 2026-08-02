@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/joy_warm_palette.dart';
@@ -10,6 +9,7 @@ import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/joy_category_amount.dart';
+import '../providers/state_analytics.dart';
 import 'joy_spend_stacked_bar.dart';
 
 /// Shared 悦己花在哪 body — the count-up「悦己 ¥…」header + the custom
@@ -43,6 +43,8 @@ class JoySpendDrawerBody extends ConsumerWidget {
     final palette = context.palette;
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final categoryMap =
+        ref.watch(analyticsCategoriesMapProvider).value ?? const {};
 
     if (amounts.isEmpty) {
       return Padding(
@@ -64,9 +66,10 @@ class JoySpendDrawerBody extends ConsumerWidget {
     final segments = <JoySpendSegment>[
       for (final entry in amounts.asMap().entries)
         JoySpendSegment(
-          label: CategoryLocalizationService.resolveFromId(
-            entry.value.categoryId,
-            locale,
+          label: categoryNameForDisplay(
+            categoryId: entry.value.categoryId,
+            category: categoryMap[entry.value.categoryId],
+            locale: locale,
           ),
           amount: entry.value.amount,
           formattedAmount: NumberFormatter.formatCurrency(
@@ -79,7 +82,11 @@ class JoySpendDrawerBody extends ConsumerWidget {
           // deterministically past 7 categories — NOT a single joy-family lerp.
           color: JoyWarmPalette.colorAt(entry.key),
           // TI1-ICON-01: L1 icon via the shared helper (categoryId is already L1).
-          icon: parentCategoryIconFromId(entry.value.categoryId),
+          icon: categoryMap[entry.value.categoryId] == null
+              ? parentCategoryIconFromId(entry.value.categoryId)
+              : parentCategoryIconForCategory(
+                  categoryMap[entry.value.categoryId]!,
+                ),
         ),
     ];
 

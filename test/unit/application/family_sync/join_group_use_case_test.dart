@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/group_operation_error.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -9,18 +12,27 @@ class MockRelayApiClient extends Mock implements RelayApiClient {}
 
 class MockKeyManager extends Mock implements KeyManager {}
 
+class MockGroupRepository extends Mock implements GroupRepository {}
+
 void main() {
   late MockRelayApiClient apiClient;
   late MockKeyManager keyManager;
+  late MockGroupRepository groupRepository;
   late JoinGroupUseCase useCase;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
-    useCase = JoinGroupUseCase(apiClient: apiClient, keyManager: keyManager);
+    groupRepository = MockGroupRepository();
+    useCase = JoinGroupUseCase(
+      apiClient: apiClient,
+      keyManager: keyManager,
+      groupRepository: groupRepository,
+    );
 
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => keyManager.getPublicKey()).thenAnswer((_) async => 'public-key');
+    when(() => groupRepository.getCurrentGroup()).thenAnswer((_) async => null);
     when(
       () => apiClient.registerDevice(
         deviceId: any(named: 'deviceId'),
@@ -32,6 +44,13 @@ void main() {
   });
 
   test('verifies group and returns group info without saving to DB', () async {
+    var tokenReplayCalls = 0;
+    useCase = JoinGroupUseCase(
+      apiClient: apiClient,
+      keyManager: keyManager,
+      groupRepository: groupRepository,
+      onDeviceRegistered: () async => tokenReplayCalls++,
+    );
     when(
       () => apiClient.joinGroup(
         inviteCode: any(named: 'inviteCode'),
@@ -72,6 +91,7 @@ void main() {
     expect(verified.ownerDisplayName, 'Papa');
     expect(verified.ownerAvatarEmoji, '\u{1F468}');
     expect(verified.ownerAvatarImageHash, 'hash123');
+    expect(tokenReplayCalls, 1);
   });
 
   test('passes optional avatarImageHash to API', () async {
@@ -214,6 +234,68 @@ void main() {
     expect(
       (result as JoinGroupError).message,
       'Already a member of this group',
+    );
+  });
+
+  test('maps server single-group conflict to typed conflict', () async {
+    when(
+      () => apiClient.joinGroup(
+        inviteCode: any(named: 'inviteCode'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenThrow(
+      const RelayApiException(
+        statusCode: 409,
+        message: 'device already grouped',
+        code: 'device_already_grouped',
+      ),
+    );
+
+    final result = await useCase.execute(
+      inviteCode: 'INV123',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
+    );
+
+    expect(result, isA<JoinGroupError>());
+    expect(
+      (result as JoinGroupError).kind,
+      GroupOperationErrorKind.membershipConflict,
+    );
+  });
+
+  test('blocks invite verification when a local live group exists', () async {
+    when(() => groupRepository.getCurrentGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'existing-group',
+        status: GroupStatus.pending,
+        groupName: 'Existing',
+        role: 'owner',
+        members: const [],
+        createdAt: DateTime(2026),
+      ),
+    );
+
+    final result = await useCase.execute(
+      inviteCode: 'INV123',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
+    );
+
+    expect(result, isA<JoinGroupError>());
+    expect(
+      (result as JoinGroupError).kind,
+      GroupOperationErrorKind.membershipConflict,
+    );
+    verifyNever(
+      () => apiClient.joinGroup(
+        inviteCode: any(named: 'inviteCode'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
     );
   });
 

@@ -3,11 +3,15 @@ import 'package:home_pocket/application/accounting/delete_transaction_use_case.d
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 
 class _MockTransactionRepository extends Mock
     implements TransactionRepository {}
 
+class _FakeTransaction extends Fake implements Transaction {}
+
 void main() {
+  setUpAll(() => registerFallbackValue(_FakeTransaction()));
   late _MockTransactionRepository mockRepo;
   late DeleteTransactionUseCase useCase;
 
@@ -32,12 +36,16 @@ void main() {
           createdAt: DateTime(2026, 2, 6),
         ),
       );
-      when(() => mockRepo.softDelete('tx_001')).thenAnswer((_) async {});
+      when(() => mockRepo.update(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute('tx_001');
 
       expect(result.isSuccess, isTrue);
-      verify(() => mockRepo.softDelete('tx_001')).called(1);
+      final tombstone =
+          verify(() => mockRepo.update(captureAny())).captured.single
+              as Transaction;
+      expect(tombstone.isDeleted, isTrue);
+      expect(tombstone.syncRevision, greaterThan(0));
     });
 
     test('returns error when transaction not found', () async {
@@ -49,7 +57,7 @@ void main() {
 
       expect(result.isError, isTrue);
       expect(result.error, contains('not found'));
-      verifyNever(() => mockRepo.softDelete(any()));
+      verifyNever(() => mockRepo.update(any()));
     });
 
     test('returns error when id is empty', () async {
@@ -74,12 +82,52 @@ void main() {
           createdAt: DateTime(2026, 3, 15),
         ),
       );
-      when(() => mockRepo.softDelete('tx_002')).thenAnswer((_) async {});
+      when(() => mockRepo.update(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute('tx_002');
 
       expect(result.isSuccess, isTrue);
-      verify(() => mockRepo.softDelete('tx_002')).called(1);
+      verify(() => mockRepo.update(any())).called(1);
     });
+
+    test(
+      'delete shared transaction sends minimal historical withdrawal',
+      () async {
+        final tracker = TransactionChangeTracker();
+        final sharedUseCase = DeleteTransactionUseCase(
+          transactionRepository: mockRepo,
+          changeTracker: tracker,
+        );
+        when(() => mockRepo.findById('shared')).thenAnswer(
+          (_) async => Transaction(
+            id: 'shared',
+            bookId: 'book_001',
+            deviceId: 'dev_local',
+            amount: 900,
+            type: TransactionType.expense,
+            categoryId: 'secret-category',
+            ledgerType: LedgerType.daily,
+            timestamp: DateTime(2026, 3, 15),
+            note: 'secret-note',
+            currentHash: 'hash',
+            createdAt: DateTime(2026, 3, 15),
+            syncRevision: 8,
+            syncOriginDeviceId: 'dev_local',
+            familySyncVisibility: FamilySyncVisibility.shared,
+            familySharedRevision: 8,
+          ),
+        );
+        when(() => mockRepo.update(any())).thenAnswer((_) async {});
+
+        expect((await sharedUseCase.execute('shared')).isSuccess, isTrue);
+        final operation = tracker.flush().single;
+        expect(operation['op'], 'delete');
+        expect(
+          (operation['data'] as Map<String, dynamic>).keys,
+          unorderedEquals({'isDeleted', 'syncRevision', 'syncOriginDeviceId'}),
+        );
+        expect(operation.toString(), isNot(contains('secret')));
+      },
+    );
   });
 }

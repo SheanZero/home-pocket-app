@@ -43,13 +43,16 @@ class CreateShoppingItemUseCase {
     required ShoppingItemRepository shoppingItemRepository,
     ShoppingItemChangeTracker? changeTracker, // nullable — D37-06
     SyncEngine? syncEngine, // nullable — fire-and-forget
+    Future<String?> Function()? deviceIdResolver,
   }) : _repo = shoppingItemRepository,
        _changeTracker = changeTracker,
-       _syncEngine = syncEngine;
+       _syncEngine = syncEngine,
+       _deviceIdResolver = deviceIdResolver;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;
   final SyncEngine? _syncEngine;
+  final Future<String?> Function()? _deviceIdResolver;
 
   Future<Result<ShoppingItem>> execute(CreateShoppingItemParams params) async {
     // 1. Validate input (ITEM-01)
@@ -74,11 +77,21 @@ class CreateShoppingItemUseCase {
     );
 
     // 3. Persist (note encryption handled at repo boundary)
-    await _repo.insert(item);
+    final durable = _repo is DurableFamilySyncShoppingItemRepository
+        ? _repo
+        : null;
+    final originDeviceId = await _deviceIdResolver?.call() ?? params.deviceId;
+    final persisted = durable != null
+        ? await durable.insertWithFamilySyncOutbox(
+            item,
+            originDeviceId: originDeviceId,
+          )
+        : item;
+    if (durable == null) await _repo.insert(item);
 
     // 4. Privacy gate (D37-06): ONLY public items enter the sync pipeline.
     //    Private items stay local — tracker is not called.
-    if (item.listType == 'public') {
+    if (item.listType == 'public' && durable == null) {
       _changeTracker?.trackCreate(
         ShoppingItemSyncMapper.toCreateOperation(item),
       );
@@ -87,6 +100,6 @@ class CreateShoppingItemUseCase {
     // 5. Fire-and-forget sync trigger — SyncEngine handles debounce and validity.
     _syncEngine?.onTransactionChanged();
 
-    return Result.success(item);
+    return Result.success(persisted);
   }
 }

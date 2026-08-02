@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../accounting/presentation/screens/manual_one_step_screen.dart';
-import '../../../analytics/presentation/providers/state_analytics.dart';
-import '../../../analytics/presentation/providers/state_happiness.dart';
+import '../../../accounting/domain/models/category.dart';
+import '../../../accounting/domain/models/transaction.dart';
+import '../../../analytics/presentation/providers/state_transaction_aggregate_refresh.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../list/presentation/providers/state_calendar_totals.dart';
 import '../../../list/presentation/providers/state_list_transactions.dart';
@@ -19,6 +20,7 @@ import '../providers/state_home.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../widgets/home_bottom_nav_bar.dart';
+import '../widgets/home_joy_prompt.dart';
 import 'home_screen.dart';
 
 /// Main navigation shell with custom bottom nav bar and FAB.
@@ -58,13 +60,7 @@ class MainShellScreen extends ConsumerWidget {
           59,
         );
         ref.invalidate(todayTransactionsProvider(bookId: bookId));
-        ref.invalidate(
-          monthlyReportProvider(
-            bookId: bookId,
-            startDate: currentMonthStart,
-            endDate: currentMonthEnd,
-          ),
-        );
+        invalidateTransactionAggregates(ref);
         ref.invalidate(shadowBooksProvider);
         ref.invalidate(
           shadowAggregateProvider(
@@ -72,24 +68,6 @@ class MainShellScreen extends ConsumerWidget {
             endDate: currentMonthEnd,
           ),
         );
-        ref.invalidate(
-          bestJoyMomentProvider(
-            bookId: bookId,
-            startDate: currentMonthStart,
-            endDate: currentMonthEnd,
-          ),
-        );
-        final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
-        if (bookAsync.hasValue) {
-          ref.invalidate(
-            happinessReportProvider(
-              bookId: bookId,
-              startDate: currentMonthStart,
-              endDate: currentMonthEnd,
-              currencyCode: bookAsync.value?.currency ?? 'JPY',
-            ),
-          );
-        }
         // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
         // P2-1: the list's SQL lives in the base; the search layer cascades.
         ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
@@ -107,12 +85,35 @@ class MainShellScreen extends ConsumerWidget {
     // from the FAB gesture (tap → false / long-press → true). The post-pop
     // invalidate block is preserved verbatim so home data refreshes after the
     // entry flow returns.
-    Future<void> openAddEntry({required bool continuousMode}) async {
+    Future<void> openAddEntry({
+      required bool continuousMode,
+      HomeJoyPrompt? joyPrompt,
+    }) async {
+      Category? initialCategory;
+      Category? initialParentCategory;
+      if (joyPrompt != null) {
+        final categoryId = switch (joyPrompt) {
+          HomeJoyPrompt.custom => 'cat_hobbies_other',
+          HomeJoyPrompt.coffee => 'cat_food_cafe',
+          HomeJoyPrompt.book => 'cat_education_books',
+          HomeJoyPrompt.rest => 'cat_hobbies_leisure',
+        };
+        final categoryRepository = ref.read(categoryRepositoryProvider);
+        initialCategory = await categoryRepository.findById(categoryId);
+        final parentId = initialCategory?.parentId;
+        if (parentId != null) {
+          initialParentCategory = await categoryRepository.findById(parentId);
+        }
+        if (!context.mounted) return;
+      }
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => ManualOneStepScreen(
             bookId: bookId,
             continuousMode: continuousMode,
+            initialCategory: initialCategory,
+            initialParentCategory: initialParentCategory,
+            initialLedgerType: joyPrompt == null ? null : LedgerType.joy,
             onHistoryTap: () {
               ref.read(selectedTabIndexProvider.notifier).select(1);
               Navigator.of(context).pop();
@@ -122,34 +123,8 @@ class MainShellScreen extends ConsumerWidget {
       );
       // Refresh data after returning from entry flow
       final now = DateTime.now();
-      final currentMonthStart = DateTime(now.year, now.month, 1);
-      final currentMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-      ref.invalidate(
-        monthlyReportProvider(
-          bookId: bookId,
-          startDate: currentMonthStart,
-          endDate: currentMonthEnd,
-        ),
-      );
+      invalidateTransactionAggregates(ref);
       ref.invalidate(todayTransactionsProvider(bookId: bookId));
-      ref.invalidate(
-        bestJoyMomentProvider(
-          bookId: bookId,
-          startDate: currentMonthStart,
-          endDate: currentMonthEnd,
-        ),
-      );
-      final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
-      if (bookAsync.hasValue) {
-        ref.invalidate(
-          happinessReportProvider(
-            bookId: bookId,
-            startDate: currentMonthStart,
-            endDate: currentMonthEnd,
-            currencyCode: bookAsync.value?.currency ?? 'JPY',
-          ),
-        );
-      }
       // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
       // P2-1: the list's SQL lives in the base; the search layer cascades.
       ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
@@ -171,6 +146,8 @@ class MainShellScreen extends ConsumerWidget {
               children: [
                 HomeScreen(
                   bookId: bookId,
+                  onAddJoyTap: (prompt) =>
+                      openAddEntry(continuousMode: false, joyPrompt: prompt),
                   onSettingsTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -198,8 +175,12 @@ class MainShellScreen extends ConsumerWidget {
               bottom: 0,
               child: HomeBottomNavBar(
                 currentIndex: currentIndex,
-                onTap: (index) =>
-                    ref.read(selectedTabIndexProvider.notifier).select(index),
+                onTap: (index) {
+                  if (index == 0 || index == 2) {
+                    invalidateTransactionAggregates(ref);
+                  }
+                  ref.read(selectedTabIndexProvider.notifier).select(index);
+                },
                 onFabTap: () async {
                   if (currentIndex == 3) {
                     // NAV-01: shopping tab → add-shopping-item screen.

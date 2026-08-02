@@ -13,6 +13,9 @@ enum SyncState {
   /// First-time full sync after joining a group.
   initialSyncing,
 
+  /// Server membership is active, but the targeted E2EE key is not ready yet.
+  awaitingKey,
+
   /// Incremental sync in progress.
   syncing,
 
@@ -24,6 +27,9 @@ enum SyncState {
 
   /// Offline with operations queued for later sync.
   queuedOffline,
+
+  /// One or more outbound envelopes require an explicit recovery decision.
+  needsAttention,
 }
 
 /// Sync mode determines what orchestration flow to run.
@@ -58,6 +64,7 @@ abstract class SyncStatus with _$SyncStatus {
     required SyncState state,
     DateTime? lastSyncAt,
     int? pendingQueueCount,
+    @Default(0) int deadLetterCount,
     String? errorMessage,
   }) = _SyncStatus;
 }

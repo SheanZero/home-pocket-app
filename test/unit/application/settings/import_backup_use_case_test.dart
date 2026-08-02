@@ -9,6 +9,7 @@ import 'package:home_pocket/application/settings/import_backup_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/models/backup_data.dart';
 import 'package:mocktail/mocktail.dart';
@@ -311,6 +312,73 @@ void main() {
     verify(() => mockTransactionRepo.insert(any())).called(1);
     verify(() => mockSettingsRepo.updateSettings(any())).called(1);
   });
+
+  test(
+    'legacy backup photo hash becomes an unavailable-photo marker',
+    () async {
+      final now = DateTime.utc(2026, 8, 1);
+      final transaction = Transaction(
+        id: 'tx-photo',
+        bookId: 'book-1',
+        deviceId: 'dev',
+        amount: 1000,
+        type: TransactionType.expense,
+        categoryId: 'cat-1',
+        ledgerType: LedgerType.daily,
+        timestamp: now,
+        photoHash: 'device-local-hash',
+        isPrivate: true,
+        familySyncVisibility: FamilySyncVisibility.shared,
+        familySharedRevision: 55,
+        currentHash: 'chain',
+        createdAt: now,
+      );
+      final backupData = BackupData(
+        metadata: BackupMetadata(
+          version: '1.0',
+          createdAt: now.millisecondsSinceEpoch,
+          deviceId: 'test',
+          appVersion: '0.1.0',
+        ),
+        transactions: [transaction.toJson()],
+        categories: [],
+        books: [],
+        settings: const AppSettings().toJson(),
+      );
+      final file = await _createEncryptedBackup(
+        password: 'test-password-123',
+        backupData: backupData,
+        filePath: '${tempDir.path}/photo-backup.hpb',
+      );
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+      when(
+        () => mockSettingsRepo.updateSettings(any()),
+      ).thenAnswer((_) async {});
+
+      final result = await useCase.execute(
+        backupFile: file,
+        password: 'test-password-123',
+      );
+
+      expect(result.isSuccess, isTrue);
+      final restored =
+          verify(() => mockTransactionRepo.insert(captureAny())).captured.single
+              as Transaction;
+      expect(restored.photoHash, isNull);
+      expect(restored.isPrivate, isTrue);
+      expect(restored.familySyncVisibility, FamilySyncVisibility.localOnly);
+      expect(restored.familySharedRevision, 0);
+      expect(
+        TransactionPhotoSyncPolicy.isUnavailableRemotePhoto(restored),
+        isTrue,
+      );
+    },
+  );
 
   test('D-10: upserts each exchange rate from the backup', () async {
     final now = DateTime(2026, 2, 7);

@@ -401,7 +401,7 @@
   "@selectTheme": {
     "description": "Theme dialog title"
   },
-  "themeSystem": "System",
+  "themeSystem": "Follow device settings",
   "@themeSystem": {
     "description": "System theme"
   },
@@ -449,6 +449,31 @@
   "@dataManagement": {
     "description": "Data management section"
   },
+  "settingsGeneral": "General",
+  "settingsFamily": "Family",
+  "settingsData": "Data",
+  "settingsThisApp": "This App",
+  "settingsAdditional": "Other settings",
+  "settingsAdditionalDescription": "Week start, voice recognition, and notifications",
+  "settingsNotSet": "Not set",
+  "settingsJoyTargetValue": "{value} Joy",
+  "@settingsJoyTargetValue": {
+    "placeholders": {"value": {"type": "int"}}
+  },
+  "settingsLocalDataProtected": "Your data is protected on this device",
+  "backupAndRestore": "Backup & Restore",
+  "backupAndRestoreDescription": "Encrypted file",
+  "backupHeroTitle": "Keep your data safely in your hands",
+  "backupHeroDescription": "Encrypt your records and settings with a password, then save them on your device or in a cloud drive you choose.",
+  "backupEncryptionChip": "AES-256-GCM",
+  "backupCompressedChip": "Compressed",
+  "backupNoUploadChip": "No automatic upload",
+  "backupSectionTitle": "Backup",
+  "restoreSectionTitle": "Restore",
+  "backupPasswordNotStored": "The password is not stored in this app. If you forget it, the backup cannot be restored.",
+  "restoreReplacesData": "Choose an .hpb file and replace current data",
+  "restoreWarningTitle": "Your current data will be replaced",
+  "restoreWarningBody": "If restoration fails, your current data will remain unchanged.",
   "exportBackup": "Export Backup",
   "@exportBackup": {
     "description": "Export backup action"
@@ -469,15 +494,15 @@
   "@deleteAllData": {
     "description": "Delete all data action"
   },
-  "deleteAllDataDescription": "Permanently delete all records",
+  "deleteAllDataDescription": "Permanently delete data on this device",
   "@deleteAllDataDescription": {
     "description": "Delete all subtitle"
   },
-  "deleteAllDataConfirmation": "This action cannot be undone. Are you sure you want to delete all data?",
+  "deleteAllDataConfirmation": "This permanently deletes Home Pocket data on this device. It does not delete family data from other devices or send a server deletion request.",
   "@deleteAllDataConfirmation": {
     "description": "Delete all confirmation"
   },
-  "allDataDeleted": "All data deleted",
+  "allDataDeleted": "Local data deleted",
   "@allDataDeleted": {
     "description": "Delete all success"
   },
@@ -603,6 +628,8 @@
   "profileEmojiTab": "Emoji",
   "profilePhotoTab": "Photo",
   "profileEdit": "Edit Profile",
+  "profileEditPersonalInfo": "Edit personal information",
+  "profileDisplayName": "Display name",
   "profileCancel": "Cancel",
   "profileDone": "Done",
   "profilePreview": "Preview",
@@ -830,6 +857,34 @@
       }
     }
   },
+  "homeJoyEmptyTitleSingle": "What made you smile today?",
+  "@homeJoyEmptyTitleSingle": {
+    "description": "Personal-mode title for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptyTitleGroup": "Family joy today?",
+  "@homeJoyEmptyTitleGroup": {
+    "description": "Family-mode title for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptySubtitle": "Start with one small pleasure",
+  "@homeJoyEmptySubtitle": {
+    "description": "Supporting copy for the no-Joy-transactions Home invitation"
+  },
+  "homeJoyEmptyFree": "Add your own",
+  "@homeJoyEmptyFree": {
+    "description": "Free-form Joy entry action"
+  },
+  "homeJoyEmptyCoffee": "A drink",
+  "@homeJoyEmptyCoffee": {
+    "description": "Coffee Joy-entry inspiration prompt"
+  },
+  "homeJoyEmptyBook": "A book",
+  "@homeJoyEmptyBook": {
+    "description": "Book Joy-entry inspiration prompt"
+  },
+  "homeJoyEmptyRest": "A breather",
+  "@homeJoyEmptyRest": {
+    "description": "Rest Joy-entry inspiration prompt"
+  },
   "homeRingSectionTitleSingle": "Joy Index",
   "@homeRingSectionTitleSingle": {
     "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
@@ -896,11 +951,11 @@
   },
   "homeBestJoyAllNeutralBig": "Rate your biggest spend",
   "@homeBestJoyAllNeutralBig": {
-    "description": "Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)"
+    "description": "Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data."
   },
   "homeBestJoyAllNeutralSmall": "Make it your monthly favorite",
   "@homeBestJoyAllNeutralSmall": {
-    "description": "Best Joy small line — all-neutral state (D-09)"
+    "description": "Legacy Best Joy all-neutral copy; score-2 Joy entries now render as valid data."
   },
   "homeAvgSatisfactionLegend": "Avg satisfaction",
   "@homeAvgSatisfactionLegend": {
@@ -1079,6 +1134,26 @@
   "@categoryNameHint": {
     "description": "Input hint for a new custom category name"
   },
+  "categoryAppearanceLabel": "Appearance",
+  "@categoryAppearanceLabel": {
+    "description": "Section label for custom category icon and color choices"
+  },
+  "categoryAppearanceDescription": "Makes it easy to spot in lists and charts.",
+  "@categoryAppearanceDescription": {
+    "description": "Helper copy for custom category visual identity"
+  },
+  "categoryPreviewName": "New category",
+  "@categoryPreviewName": {
+    "description": "Placeholder name in the custom category appearance preview"
+  },
+  "categoryIconLabel": "Icon",
+  "@categoryIconLabel": {
+    "description": "Label above the custom category icon choices"
+  },
+  "categoryColorLabel": "Color",
+  "@categoryColorLabel": {
+    "description": "Label above the custom category color choices"
+  },
   "categoryNameRequired": "Enter a category name",
   "@categoryNameRequired": {
     "description": "Validation error for an empty custom category name"
@@ -1215,7 +1290,7 @@
   "@familySyncShowMyCode": {
     "description": "Tab label to show pairing code"
   },
-  "familySyncEnterPartnerCode": "Join Group",
+  "familySyncEnterPartnerCode": "Join with an invite code",
   "@familySyncEnterPartnerCode": {
     "description": "Tab label to enter partner's pairing code"
   },
@@ -1418,6 +1493,46 @@
       }
     }
   },
+  "familySyncInviteTitle": "Invite a family member",
+  "@familySyncInviteTitle": {
+    "description": "Title of the owner-only invite management sheet"
+  },
+  "familySyncInviteDescription": "Share this code with the person you want to invite.",
+  "@familySyncInviteDescription": {
+    "description": "Instructions shown above the owner invite code"
+  },
+  "familySyncInviteCopy": "Copy code",
+  "@familySyncInviteCopy": {
+    "description": "Button label for copying the group invite code"
+  },
+  "familySyncInviteCopied": "Invite code copied",
+  "@familySyncInviteCopied": {
+    "description": "Success feedback after copying an invite code"
+  },
+  "familySyncInviteRefreshHint": "Refreshing invalidates the previous code immediately.",
+  "@familySyncInviteRefreshHint": {
+    "description": "Warning shown beside the explicit invite refresh action"
+  },
+  "familySyncInviteApprovalWindowHint": "Code expiry only controls new applications. After applying, the owner has 24 hours to approve the request.",
+  "@familySyncInviteApprovalWindowHint": {
+    "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
+  },
+  "familySyncInviteShareMessage": "Join {groupName} in Home Pocket with invite code {inviteCode}.",
+  "@familySyncInviteShareMessage": {
+    "description": "Text sent through the system share sheet for a group invite",
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      },
+      "inviteCode": {
+        "type": "String"
+      }
+    }
+  },
+  "familySyncInviteOwnerOnly": "Only the group owner can manage invite codes.",
+  "@familySyncInviteOwnerOnly": {
+    "description": "Feedback when invite management is attempted without owner permission"
+  },
   "familySyncMembers": "Members",
   "@familySyncMembers": {
     "description": "Section title for group members"
@@ -1575,7 +1690,7 @@
   "@familySyncApprovalTip": {
     "description": "Informational tip shown on the approval screen"
   },
-  "familySyncGroupManagement": "Group Management",
+  "familySyncGroupManagement": "Family Management",
   "@familySyncGroupManagement": {
     "description": "Title for the group management screen"
   },
@@ -1617,7 +1732,25 @@
       }
     }
   },
-  "groupCreate": "Create Group",
+  "groupCreate": "Create a new family",
+  "groupCreateConfirmationHint": "Your group and invite code are created only after you confirm.",
+  "groupCreateFailed": "Could not create the group: {message}",
+  "@groupCreateFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "familySyncSingleGroupConflict": "This device already has a family group or a pending join request. Leave or cancel it before creating or joining another group.",
+  "familySyncNetworkUnavailableTitle": "No internet connection",
+  "@familySyncNetworkUnavailableTitle": {
+    "description": "Title for the family-sync network unavailable dialog"
+  },
+  "familySyncNetworkUnavailableMessage": "Family sharing needs an internet connection. Check your connection and make sure Home Pocket can use mobile data, then try again.",
+  "@familySyncNetworkUnavailableMessage": {
+    "description": "Friendly guidance shown when a family-sync operation cannot reach the relay"
+  },
   "groupName": "Group Name",
   "groupOwner": "Owner",
   "groupMember": "Member",
@@ -1633,10 +1766,10 @@
   "groupShareCode": "Share Invite Code",
   "groupEnterCode": "Enter Invite Code",
   "groupVerify": "Verify",
-  "groupConfirmJoin": "Confirm Join",
+  "groupConfirmJoin": "Request to join",
   "groupJoinTarget": "Group to Join",
-  "groupWaitingApproval": "Waiting for Owner approval...",
-  "groupWaitingDesc": "{name} is reviewing your request",
+  "groupWaitingApproval": "Waiting for owner approval",
+  "groupWaitingDesc": "{name} is reviewing your join request.",
   "@groupWaitingDesc": {
     "placeholders": {
       "name": {
@@ -1663,16 +1796,78 @@
   "groupCodeExpired": "Invite code expired",
   "groupMyName": "My Name",
   "groupEnterGroup": "Enter Group",
-  "groupChoiceTitle": "Connect with family",
-  "groupChoiceSubtitle": "Manage your household budget together",
-  "groupCreateDesc": "Create a new family group and invite members",
-  "groupJoinDesc": "Enter an invite code to join an existing group",
-  "groupE2eeHint": "Privacy protected with E2E encryption",
+  "groupChoiceTitle": "How would you like to start?",
+  "groupChoiceSubtitle": "You can join one family at a time.",
+  "groupCreateDesc": "Issue an invite code and approve each member",
+  "groupJoinDesc": "Approval from the family owner is required",
+  "groupE2eeHint": "Shared family ledgers sync with encryption. Private ledgers stay on this device.",
+  "familyFlowCreateStepCreate": "Create",
+  "familyFlowCreateHeader": "Create family",
+  "familyFlowJoinHeader": "Join family",
+  "familyFlowReviewFamily": "Review family details",
+  "familyFlowCreateStepInvite": "Invite",
+  "familyFlowCreateStepApprove": "Approval",
+  "familyFlowJoinStepCode": "Code",
+  "familyFlowJoinStepConfirm": "Confirm",
+  "familyFlowJoinStepWait": "Wait",
+  "familyFlowOwnerSummary": "{name} · Owner",
+  "@familyFlowOwnerSummary": {"placeholders": {"name": {"type": "String"}}},
+  "familyFlowCreateTitle": "Create a new family",
+  "familyFlowCreateSubtitle": "Name your family to issue a secure invite code.",
+  "familyFlowCreateInviteHelper": "When someone requests to join, you will approve them in the next step.",
+  "familyFlowRegenerateInvite": "Reissue",
+  "familySyncInviteRegenerated": "Invite code reissued",
+  "familyFlowJoinCodeTitle": "Enter the 6-digit invite code",
+  "familyFlowJoinCodeSubtitle": "Enter the digits you received from the family owner.",
+  "familyFlowJoinBeforeApprovalHelper": "No ledgers sync until your request is approved.",
+  "familyFlowJoinConfirmHeader": "Confirm family",
+  "familyFlowJoinConfirmTitle": "Confirm the family you are joining",
+  "familyFlowJoinConfirmSubtitle": "Your join request will be sent to this family.",
+  "familyFlowPublicKeyVerified": "Public key verified",
+  "familyFlowPrivateLedgerHelper": "Your private ledgers are never shared with the family.",
+  "familyFlowWaitingHeader": "Waiting for approval",
+  "familyFlowWaitingFamily": "Joining: {groupName}",
+  "@familyFlowWaitingFamily": {"placeholders": {"groupName": {"type": "String"}}},
+  "familyFlowApprovalTitle": "New join request",
+  "familyFlowApprovalSubtitle": "Confirm the person and device before approving.",
+  "familyFlowApprovalDevice": "Request from {deviceName}",
+  "@familyFlowApprovalDevice": {"placeholders": {"deviceName": {"type": "String"}}},
+  "familyFlowDeviceKeyVerified": "Device public key verified",
+  "familyFlowApprovalHelper": "After approval, this device securely syncs the family's shared ledgers.",
+  "familyFlowApprovalEmptyTitle": "No requests to review",
+  "familyFlowPendingRequests": "New join requests · {count}",
+  "@familyFlowPendingRequests": {"placeholders": {"count": {"type": "int"}}},
+  "familyFlowViewRequests": "Review requests",
+  "familyFlowSyncSettings": "Sync settings",
+  "familyFlowManagementSummary": "Owner: {ownerName} · {count} members · {syncStatus}",
+  "@familyFlowManagementSummary": {"placeholders": {"ownerName": {"type": "String"}, "count": {"type": "int"}, "syncStatus": {"type": "String"}}},
   "groupInviteMembers": "Invite new member",
-  "groupDisband": "Disband Group",
+  "groupDisband": "Disband Family",
   "groupCancel": "Cancel",
-  "groupWaitingHint1": "Please wait for the notification",
-  "groupWaitingHint2": "It's safe to close the app",
+  "groupCancelRequest": "Cancel join request",
+  "groupRejectRequestFailed": "Failed to reject join request: {message}",
+  "@groupRejectRequestFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRequestRejectedTitle": "Join request declined",
+  "groupRequestRejectedDescription": "The group owner declined this request. You can try another invite code.",
+  "groupRequestCancelledTitle": "Join request cancelled",
+  "groupRequestCancelledDescription": "Your request was cancelled. You can submit a new request at any time.",
+  "groupRequestExpiredTitle": "Join request expired",
+  "groupRequestExpiredDescription": "The request was not reviewed within 24 hours. Ask for a current invite code and try again.",
+  "groupTryAnotherInvite": "Enter another invite code",
+  "groupKeyRecoveryTitle": "Restoring the family key",
+  "groupKeyRecoveryWaiting": "Your membership is active. Another active family device must securely re-seal the current key for this device. The relay cannot read or recreate it.",
+  "groupKeyRecoveryUnavailable": "No active device supplied the current key before the request expired. Because the relay is zero-knowledge, it cannot recover the key. You can retry or safely leave/dissolve this family and create a new one.",
+  "groupKeyRecoveryRateLimited": "A recovery request was sent recently. Wait a moment before notifying the other devices again.",
+  "groupKeyRecoveryRetry": "Retry key recovery",
+  "groupKeyRecoveryRebuild": "Leave and set up a new family",
+  "groupWaitingHint1": "It's safe to close the app.",
+  "groupWaitingHint2": "Sync starts automatically after approval.",
   "groupCodeHint": "Ask the group owner for the invite code",
   "groupBack": "Back",
   "syncInProgress": "Syncing...",
@@ -3478,6 +3673,14 @@
     "description": "SecuritySection: app-lock master toggle title (D-11)"
   },
   "securityAppLockDescription": "Protect the app with a passcode on launch and when returning to the foreground.",
+  "securityAppLockOff": "Off",
+  "securityAppLockPinOnly": "PIN",
+  "securityAppLockBiometricAndPin": "{biometric} + PIN",
+  "@securityAppLockBiometricAndPin": {
+    "placeholders": {"biometric": {"type": "String"}}
+  },
+  "securityFaceId": "Face ID",
+  "securityFingerprint": "Fingerprint",
   "@securityAppLockDescription": {
     "description": "SecuritySection: app-lock master toggle description (D-11)"
   },
@@ -3521,6 +3724,15 @@
   "@sponsorLaunchError": {
     "description": "Neutral SnackBar shown when the external donation link fails to launch (DONATE)"
   },
+  "legalNavigationSubtitle": "Privacy, terms, and open-source licenses",
+  "privacyPolicyDescription": "How your data is handled",
+  "termsOfUseDescription": "Service terms and conditions",
+  "openSourceLicensesDescription": "Libraries used by the app",
+  "sponsorSectionTitle": "Support Development",
+  "sponsorCardTitle": "Help this quiet household ledger grow",
+  "sponsorCardBody": "The support and contact page opens in your external browser. It does not affect app features or access to your data.",
+  "sponsorButton": "About supporting us",
+  "legalLinkLaunchError": "Couldn't open the link",
   "analyticsTrendInsightTotal": "This month {amount}",
   "@analyticsTrendInsightTotal": {
     "description": "Trend card insight strip — total tab, no previous-month reference",
@@ -3574,5 +3786,69 @@
   "@analyticsJoyDrawerToggleCollapse": {
     "description": "A11y label for the collapsible joy-spend drawer toggle when expanded"
   },
+  "syncQueueNeedsAttentionBadge": "Needs attention",
+  "syncQueueNeedsAttentionDescription": "Some changes need your attention",
+  "syncQueueNeedsAttentionTitle": "Sync needs attention",
+  "syncQueuePendingTitle": "Changes waiting to sync",
+  "syncQueueCounts": "{pendingCount} waiting · {deadLetterCount} need attention",
+  "@syncQueueCounts": {
+    "placeholders": {
+      "pendingCount": { "type": "int" },
+      "deadLetterCount": { "type": "int" }
+    }
+  },
+  "syncQueueReconcileHint": "The encrypted changes are preserved. Retry them first; a full reconciliation is still recommended afterward.",
+  "syncQueueRetryAll": "Retry all",
+  "syncQueueDiscardAll": "Discard",
+  "syncQueueRetryFailed": "Some changes still need attention",
+  "syncQueueRetrySucceeded": "Queued changes sent. Reconciliation is still recommended.",
+  "syncQueueDiscardConfirmTitle": "Discard unsent changes?",
+  "syncQueueDiscardConfirmBody": "This permanently removes the preserved outbound changes from this device. This cannot be undone.",
+  "syncQueueCancel": "Cancel",
+  "syncQueueDiscardConfirmAction": "Discard permanently",
+  "syncQueueDiscardFailed": "The unsent changes could not be discarded",
+  "inboundSyncSectionTitle": "Received changes held for review",
+  "inboundSyncCount": "{count} received changes quarantined",
+  "@inboundSyncCount": { "placeholders": { "count": { "type": "int" } } },
+  "inboundSyncErrorCode": "Safe code: {errorCode}",
+  "@inboundSyncErrorCode": { "placeholders": { "errorCode": { "type": "String" } } },
+  "inboundSyncRetryOne": "Retry",
+  "inboundSyncDiscardOne": "Discard received change",
+  "inboundSyncDiscardConfirmTitle": "Discard this received change?",
+  "inboundSyncDiscardConfirmBody": "This permanently removes the quarantined received change from this device. The relay copy was already acknowledged and this cannot be undone.",
+  "syncAttentionDiscardConfirmTitle": "Discard preserved sync changes?",
+  "syncAttentionDiscardConfirmBody": "This permanently removes all preserved outbound failures and quarantined received changes from this device. This cannot be undone.",
+  "familySyncTransferOwner": "Transfer ownership",
+  "familySyncTransferOwnerSelect": "Choose the new owner",
+  "familySyncTransferOwnerConfirmTitle": "Transfer ownership?",
+  "familySyncTransferOwnerConfirmBody": "{memberName} will manage members, invitations, and the family group.",
+  "@familySyncTransferOwnerConfirmBody": { "placeholders": { "memberName": { "type": "String" } } },
+  "familySyncTransferOwnerFinalTitle": "Final confirmation",
+  "familySyncTransferOwnerFinalBody": "A new encryption key will be issued to every active device. After transfer, you become a regular member. Transfer ownership to {memberName}?",
+  "@familySyncTransferOwnerFinalBody": { "placeholders": { "memberName": { "type": "String" } } },
+  "familySyncTransferOwnerSuccess": "Ownership transferred securely",
+  "familySyncTransferOwnerNotReady": "Ownership actions are unavailable until the current encryption key is ready",
+  "familySyncTransferOwnerInvalidTarget": "Choose a different active member",
+  "familySyncTransferOwnerFailed": "Could not transfer ownership: {message}",
+  "@familySyncTransferOwnerFailed": { "placeholders": { "message": { "type": "String" } } },
+  "transactionPhotoBoundaryTitle": "Receipt photo",
+  "transactionPhotoLocalOnlyBody": "This receipt photo stays on this device and is not included in family sync or backups.",
+  "transactionPhotoUnavailableBody": "The receipt photo is available only on the device that recorded this transaction and is not included in family sync or backups.",
+  "familySyncMemberHistory": "MEMBER HISTORY",
+  "familySyncRequestedAt": "Requested {date}",
+  "@familySyncRequestedAt": { "placeholders": { "date": { "type": "String" } } },
+  "familySyncJoinedAt": "{role} · Joined {date}",
+  "@familySyncJoinedAt": { "placeholders": { "role": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncConfirmedAt": "{role} · Confirmed {date}",
+  "@familySyncConfirmedAt": { "placeholders": { "role": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncRemovedAtReason": "{reason} · {date}",
+  "@familySyncRemovedAtReason": { "placeholders": { "reason": { "type": "String" }, "date": { "type": "String" } } },
+  "familySyncRemovalReasonLeft": "Left the family",
+  "familySyncRemovalReasonRemoved": "Removed by owner",
+  "familySyncRemovalReasonDissolved": "Family dissolved",
+  "familySyncRemovalReasonRejected": "Request rejected",
+  "familySyncRemovalReasonCancelled": "Request cancelled",
+  "familySyncRemovalReasonExpired": "Request expired",
+  "familySyncRemovalReasonUnknown": "Membership ended",
   "@@locale": "en"
 }

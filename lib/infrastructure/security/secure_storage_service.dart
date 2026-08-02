@@ -31,6 +31,18 @@ abstract final class StorageKeys {
   /// IMPORTANT: This key is consumed by crypto master-key repository logic.
   static const String masterKey = 'master_key';
 
+  /// User/device identity and local-authentication material erased by the
+  /// in-app local-data wipe. The installation-scoped [masterKey] is excluded:
+  /// the live SQLCipher database remains in place and cannot be reopened if
+  /// its encryption root is destroyed.
+  static const List<String> userDataKeys = [
+    devicePrivateKey,
+    devicePublicKey,
+    deviceId,
+    pinHash,
+    recoveryKitHash,
+  ];
+
   /// All known keys (used by [SecureStorageService.clearAll]).
   static const List<String> allKeys = [
     devicePrivateKey,
@@ -159,6 +171,17 @@ class SecureStorageService {
   /// Throws [SecureStorageException] if any deletion fails.
   Future<void> clearAll() async {
     for (final key in StorageKeys.allKeys) {
+      await delete(key: key);
+    }
+  }
+
+  /// Delete only Home Pocket user/device material.
+  ///
+  /// The operation is intentionally precise rather than delegating to the
+  /// platform-wide `deleteAll`. Each delete is idempotent, so a later retry can
+  /// complete after a partial platform-storage failure.
+  Future<void> clearUserData() async {
+    for (final key in StorageKeys.userDataKeys) {
       await delete(key: key);
     }
   }

@@ -224,6 +224,8 @@ class _InlineDayPanel extends ConsumerWidget {
     final palette = context.palette;
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final categoryMap =
+        ref.watch(analyticsCategoriesMapProvider).value ?? const {};
 
     // WR-04 / D-05: the day-keyed list uses LOCAL `_JoyCalendarBody` state, so the
     // registry union can't key it — mirror the refresh here (invalidate this day's
@@ -299,6 +301,9 @@ class _InlineDayPanel extends ConsumerWidget {
                   key: ValueKey('joy_calendar_compact_row_${tx.id}'),
                   transaction: tx,
                   locale: locale,
+                  category: categoryMap[tx.categoryId],
+                  parentCategory:
+                      categoryMap[categoryMap[tx.categoryId]?.parentId],
                 ),
             ],
           );
