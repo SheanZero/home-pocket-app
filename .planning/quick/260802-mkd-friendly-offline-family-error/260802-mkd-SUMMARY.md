@@ -35,7 +35,7 @@ metrics:
   completed_date: "2026-08-02"
   tasks_completed: "2 of 2"
   tests: "4320 passed, 11 skipped, 0 failed"
-  commit: "not created — relevant files contained pre-existing overlapping user changes"
+  commit: "3e04b70f"
 ---
 
 # Quick 260802-mkd: Friendly offline family error Summary
@@ -62,8 +62,8 @@ metrics:
 
 ## Commit note
 
-未创建 git commit。任务开始前，相关家庭同步源文件、ARB、generated l10n 和测试已包含大量未提交修改，且 `group_operation_error.dart` 与创建页测试本身是未跟踪的用户文件。提交这些路径会把既有工作夹带进本任务，因而按工作区保护规则保留为未提交改动。
+相关功能已随同一批家庭分享与引导体验优化提交为 `3e04b70f`。
 
 ## Self-check
 
-PASSED — 功能与自动化门禁均完成；唯一未满足的 GSD quick 机械步骤是出于现有脏工作树保护而跳过提交。
+PASSED — 功能、自动化门禁与提交记录均完成。
