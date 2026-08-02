@@ -1483,15 +1483,9 @@
   "@familySyncRegenerateInvite": {
     "description": "Button label to regenerate the group invite code"
   },
-  "familySyncRegenerateInviteFailed": "Regenerate invite failed: {message}",
+  "familySyncRegenerateInviteFailed": "Couldn't generate a new invite code. Please try again in a moment.",
   "@familySyncRegenerateInviteFailed": {
-    "description": "Error message when regenerating an invite fails",
-    "placeholders": {
-      "message": {
-        "type": "String",
-        "example": "Network error"
-      }
-    }
+    "description": "Friendly error shown when regenerating a family invite fails"
   },
   "familySyncInviteTitle": "Invite a family member",
   "@familySyncInviteTitle": {
@@ -1517,7 +1511,7 @@
   "@familySyncInviteApprovalWindowHint": {
     "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
   },
-  "familySyncInviteShareMessage": "Join {groupName} in Home Pocket with invite code {inviteCode}.",
+  "familySyncInviteShareMessage": "I saved you a place in “{groupName}”.\nLet’s keep track of everyday life and make managing our home a little easier—together.\n\nInvite code: {inviteCode}\nPlease use it within 10 minutes.",
   "@familySyncInviteShareMessage": {
     "description": "Text sent through the system share sheet for a group invite",
     "placeholders": {
@@ -1762,6 +1756,20 @@
         "type": "int"
       }
     }
+  },
+  "groupInviteCountdown": "Valid for {time}",
+  "@groupInviteCountdown": {
+    "description": "Live remaining time for a family invite code",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "09:59"
+      }
+    }
+  },
+  "groupInviteExpired": "Expired",
+  "@groupInviteExpired": {
+    "description": "Short red status shown when a family invite code expires"
   },
   "groupShareCode": "Share Invite Code",
   "groupEnterCode": "Enter Invite Code",
@@ -3587,6 +3595,10 @@
   "onboardingStart": "Start with these settings",
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
+  },
+  "onboardingPreparingHome": "Preparing your home…",
+  "@onboardingPreparingHome": {
+    "description": "Onboarding settings page: progress label while completing setup"
   },
   "onboardingPrivacyTagLocal": "LOCAL",
   "onboardingPrivacyTagE2ee": "E2EE",

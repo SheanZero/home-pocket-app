@@ -1189,9 +1189,8 @@ class SEn extends S {
   String get familySyncRegenerateInvite => 'Regenerate Invite';
 
   @override
-  String familySyncRegenerateInviteFailed(String message) {
-    return 'Regenerate invite failed: $message';
-  }
+  String get familySyncRegenerateInviteFailed =>
+      'Couldn\'t generate a new invite code. Please try again in a moment.';
 
   @override
   String get familySyncInviteTitle => 'Invite a family member';
@@ -1216,7 +1215,7 @@ class SEn extends S {
 
   @override
   String familySyncInviteShareMessage(String groupName, String inviteCode) {
-    return 'Join $groupName in Home Pocket with invite code $inviteCode.';
+    return 'I saved you a place in “$groupName”.\nLet’s keep track of everyday life and make managing our home a little easier—together.\n\nInvite code: $inviteCode\nPlease use it within 10 minutes.';
   }
 
   @override
@@ -1402,6 +1401,14 @@ class SEn extends S {
   String groupInviteExpiry(int minutes) {
     return 'Valid for $minutes minutes';
   }
+
+  @override
+  String groupInviteCountdown(String time) {
+    return 'Valid for $time';
+  }
+
+  @override
+  String get groupInviteExpired => 'Expired';
 
   @override
   String get groupShareCode => 'Share Invite Code';
@@ -3053,6 +3060,9 @@ class SEn extends S {
 
   @override
   String get onboardingStart => 'Start with these settings';
+
+  @override
+  String get onboardingPreparingHome => 'Preparing your home…';
 
   @override
   String get onboardingPrivacyTagLocal => 'LOCAL';

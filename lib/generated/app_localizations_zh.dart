@@ -1168,9 +1168,7 @@ class SZh extends S {
   String get familySyncRegenerateInvite => '重新生成邀请码';
 
   @override
-  String familySyncRegenerateInviteFailed(String message) {
-    return '重新生成邀请码失败: $message';
-  }
+  String get familySyncRegenerateInviteFailed => '暂时无法生成新的邀请码，请稍后再试。';
 
   @override
   String get familySyncInviteTitle => '邀请家庭成员';
@@ -1193,7 +1191,7 @@ class SZh extends S {
 
   @override
   String familySyncInviteShareMessage(String groupName, String inviteCode) {
-    return '使用邀请码 $inviteCode 加入 Home Pocket 中的“$groupName”。';
+    return '我在「$groupName」为你留了一个位置。\n一起来记录生活，轻松打理我们的小家吧。\n\n邀请码：$inviteCode\n请在 10 分钟内使用。';
   }
 
   @override
@@ -1372,6 +1370,14 @@ class SZh extends S {
   String groupInviteExpiry(int minutes) {
     return '$minutes分钟内有效';
   }
+
+  @override
+  String groupInviteCountdown(String time) {
+    return '$time内有效';
+  }
+
+  @override
+  String get groupInviteExpired => '已失效';
 
   @override
   String get groupShareCode => '分享邀请码';
@@ -2961,6 +2967,9 @@ class SZh extends S {
 
   @override
   String get onboardingStart => '用这些设置开始';
+
+  @override
+  String get onboardingPreparingHome => '正在准备首页…';
 
   @override
   String get onboardingPrivacyTagLocal => 'LOCAL';

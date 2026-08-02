@@ -1483,15 +1483,9 @@
   "@familySyncRegenerateInvite": {
     "description": "Button label to regenerate the group invite code"
   },
-  "familySyncRegenerateInviteFailed": "招待コードの再生成に失敗: {message}",
+  "familySyncRegenerateInviteFailed": "新しい招待コードを生成できませんでした。しばらくしてからもう一度お試しください。",
   "@familySyncRegenerateInviteFailed": {
-    "description": "Error message when regenerating an invite fails",
-    "placeholders": {
-      "message": {
-        "type": "String",
-        "example": "Network error"
-      }
-    }
+    "description": "Friendly error shown when regenerating a family invite fails"
   },
   "familySyncInviteTitle": "家族を招待",
   "@familySyncInviteTitle": {
@@ -1517,7 +1511,7 @@
   "@familySyncInviteApprovalWindowHint": {
     "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
   },
-  "familySyncInviteShareMessage": "Home Pocketの「{groupName}」に参加する招待コードは {inviteCode} です。",
+  "familySyncInviteShareMessage": "「{groupName}」に、あなたの場所を用意しました。\n一緒に暮らしを記録しながら、わが家のお金を気軽に整えていきましょう。\n\n招待コード：{inviteCode}\n10分以内にお使いください。",
   "@familySyncInviteShareMessage": {
     "description": "Text sent through the system share sheet for a group invite",
     "placeholders": {
@@ -1762,6 +1756,20 @@
         "type": "int"
       }
     }
+  },
+  "groupInviteCountdown": "あと{time}",
+  "@groupInviteCountdown": {
+    "description": "Live remaining time for a family invite code",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "09:59"
+      }
+    }
+  },
+  "groupInviteExpired": "期限切れ",
+  "@groupInviteExpired": {
+    "description": "Short red status shown when a family invite code expires"
   },
   "groupShareCode": "招待コードを共有",
   "groupEnterCode": "招待コードを入力",
@@ -3601,6 +3609,10 @@
   "onboardingStart": "この設定ではじめる",
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
+  },
+  "onboardingPreparingHome": "ホームを準備しています…",
+  "@onboardingPreparingHome": {
+    "description": "Onboarding settings page: progress label while completing setup"
   },
   "onboardingPrivacyTagLocal": "LOCAL",
   "onboardingPrivacyTagE2ee": "E2EE",

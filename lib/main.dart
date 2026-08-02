@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/app_gate_transition.dart';
 import 'core/initialization/app_initializer.dart';
 import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
@@ -433,32 +434,33 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   }
 
   Widget _buildHome(BuildContext context) {
+    final Widget gateChild;
     if (_error != null) {
-      return Scaffold(
+      gateChild = Scaffold(
+        key: const ValueKey('app-gate-error'),
         appBar: AppBar(title: Text(S.of(context).error)),
         body: Center(child: Text(S.of(context).initializationError(_error!))),
       );
-    }
-
-    if (!_initialized) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (_needsOnboarding) {
-      return OnboardingFlowScreen(
+    } else if (!_initialized) {
+      gateChild = const Scaffold(
+        key: ValueKey('app-gate-initializing'),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    } else if (_needsOnboarding) {
+      gateChild = OnboardingFlowScreen(
+        key: const ValueKey('app-gate-onboarding'),
         bookId: _bookId!,
         onCompleted: _completeOnboarding,
       );
-    }
-
-    // App-lock gate (LOCK-02): sits AFTER onboarding and BEFORE the shell so a
-    // locked cold start (or a lifecycle relock) hard-stops entry to the ledger.
-    // Unlock reports back via [_completeUnlock] (a setState flag flip, never
-    // pushReplacement) so the live '/' Builder keeps rendering this gate and
-    // the _reinitializeAfterDataReset refresh path stays attached
-    // ([[boot-gate-completion-must-flip-flag-not-pushreplacement]]).
-    if (_isLocked) {
-      return AppLockScreen(
+    } else if (_isLocked) {
+      // App-lock gate (LOCK-02): sits AFTER onboarding and BEFORE the shell so a
+      // locked cold start (or a lifecycle relock) hard-stops entry to the ledger.
+      // Unlock reports back via [_completeUnlock] (a setState flag flip, never
+      // pushReplacement) so the live '/' Builder keeps rendering this gate and
+      // the _reinitializeAfterDataReset refresh path stays attached
+      // ([[boot-gate-completion-must-flip-flag-not-pushreplacement]]).
+      gateChild = AppLockScreen(
+        key: const ValueKey('app-gate-locked'),
         onUnlocked: _completeUnlock,
         onBeginAuth: _lockObserver?.beginAuth,
         onEndAuth: _lockObserver?.endAuth,
@@ -466,9 +468,14 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // straight on the PIN keypad instead of surfacing the OS sheet (LOCK-07).
         startOnPinPage: !_biometricUnlockEnabled,
       );
+    } else {
+      gateChild = MainShellScreen(
+        key: ValueKey('app-gate-shell-${_bookId!}'),
+        bookId: _bookId!,
+      );
     }
 
-    return MainShellScreen(bookId: _bookId!);
+    return AppGateTransition(child: gateChild);
   }
 
   /// Completion handoff from [OnboardingFlowScreen] (HI-01). Flips the gate to

@@ -25,6 +25,7 @@ import '../providers/state_active_group.dart';
 import '../providers/state_sync.dart';
 import '../widgets/group_rename_dialog.dart';
 import '../widgets/family_flow_components.dart';
+import '../widgets/invite_expiry_countdown.dart';
 import '../widgets/member_list_tile.dart';
 import '../widgets/sync_status_badge.dart';
 import '../widgets/sync_queue_attention_card.dart';
@@ -220,11 +221,8 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
         );
       case ManageGroupInviteForbidden():
         showErrorFeedback(context, l10n.familySyncInviteOwnerOnly);
-      case ManageGroupInviteError(:final message):
-        showErrorFeedback(
-          context,
-          l10n.familySyncRegenerateInviteFailed(message),
-        );
+      case ManageGroupInviteError():
+        showErrorFeedback(context, l10n.familySyncRegenerateInviteFailed);
     }
   }
 
@@ -356,11 +354,8 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
         showSuccessFeedback(context, l10n.familySyncInviteRegenerated);
       case ManageGroupInviteForbidden():
         showErrorFeedback(context, l10n.familySyncInviteOwnerOnly);
-      case ManageGroupInviteError(:final message):
-        showErrorFeedback(
-          context,
-          l10n.familySyncRegenerateInviteFailed(message),
-        );
+      case ManageGroupInviteError():
+        showErrorFeedback(context, l10n.familySyncRegenerateInviteFailed);
     }
   }
 
@@ -904,10 +899,6 @@ class _InlineInviteCard extends StatelessWidget {
     final code = inviteCode.length == 6
         ? '${inviteCode.substring(0, 3)} ${inviteCode.substring(3)}'
         : inviteCode;
-    final remainingMinutes = expiresAt
-        ?.difference(DateTime.now())
-        .inMinutes
-        .clamp(0, 999);
 
     return Container(
       constraints: const BoxConstraints(minHeight: 62),
@@ -935,15 +926,9 @@ class _InlineInviteCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (remainingMinutes != null) ...[
+                if (expiresAt != null) ...[
                   const SizedBox(width: 8),
-                  Text(
-                    l10n.groupInviteExpiry(remainingMinutes),
-                    maxLines: 1,
-                    style: AppTextStyles.supporting.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
+                  FamilyInviteExpiryCountdown(expiresAt: expiresAt!),
                 ],
               ],
             ),
@@ -1053,12 +1038,10 @@ class _OwnerInviteSheetState extends State<_OwnerInviteSheet> {
           _isRefreshing = false;
           _refreshError = S.of(context).familySyncInviteOwnerOnly;
         });
-      case ManageGroupInviteError(:final message):
+      case ManageGroupInviteError():
         setState(() {
           _isRefreshing = false;
-          _refreshError = S
-              .of(context)
-              .familySyncRegenerateInviteFailed(message);
+          _refreshError = S.of(context).familySyncRegenerateInviteFailed;
         });
     }
   }
@@ -1068,10 +1051,6 @@ class _OwnerInviteSheetState extends State<_OwnerInviteSheet> {
     final l10n = S.of(context);
     final palette = context.palette;
     final expired = !_invite.expiresAt.isAfter(DateTime.now());
-    final remaining = _invite.expiresAt.difference(DateTime.now());
-    final remainingMinutes = remaining.isNegative
-        ? 0
-        : (remaining.inSeconds / 60).ceil();
 
     return SafeArea(
       top: false,
@@ -1149,29 +1128,9 @@ class _OwnerInviteSheetState extends State<_OwnerInviteSheet> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          expired ? LucideIcons.circleAlert : LucideIcons.clock,
-                          size: 14,
-                          color: expired
-                              ? palette.textTertiary
-                              : palette.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          expired
-                              ? l10n.groupCodeExpired
-                              : l10n.groupInviteExpiry(remainingMinutes),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: expired
-                                ? palette.textTertiary
-                                : palette.textSecondary,
-                          ),
-                        ),
-                      ],
+                    FamilyInviteExpiryCountdown(
+                      expiresAt: _invite.expiresAt,
+                      textStyle: const TextStyle(fontSize: 12),
                     ),
                   ],
                 ),

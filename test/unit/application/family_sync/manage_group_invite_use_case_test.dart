@@ -136,6 +136,35 @@ void main() {
     verify(() => apiClient.regenerateInvite('group-1')).called(1);
   });
 
+  test('pending owner can regenerate the invite shown during setup', () async {
+    final expiresAt = now.add(const Duration(minutes: 10));
+    when(
+      () => groupRepository.getGroupById('group-1'),
+    ).thenAnswer((_) async => group(status: GroupStatus.pending));
+    when(() => apiClient.regenerateInvite('group-1')).thenAnswer(
+      (_) async => {
+        'inviteCode': '654321',
+        'expiresAt': expiresAt.millisecondsSinceEpoch ~/ 1000,
+      },
+    );
+    when(
+      () => groupRepository.updateInviteCode('group-1', '654321', any()),
+    ).thenAnswer((_) async {});
+
+    final result = await useCase.execute(
+      groupId: 'group-1',
+      forceRefresh: true,
+    );
+
+    expect(
+      result,
+      isA<ManageGroupInviteSuccess>()
+          .having((value) => value.inviteCode, 'inviteCode', '654321')
+          .having((value) => value.expiresAt, 'expiresAt', expiresAt.toLocal()),
+    );
+    verify(() => apiClient.regenerateInvite('group-1')).called(1);
+  });
+
   test('rejects non-owner access before calling the API', () async {
     when(
       () => groupRepository.getGroupById('group-1'),

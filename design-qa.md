@@ -1,3 +1,75 @@
+# Unified Toast Status Pill — Selected Direction 3 (2026-08-02)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fc151-a7da-7953-8152-aee24d5ea2e2/exec-6e522b26-b8b8-49a8-bf63-c57d56d0d5ee.png`, the third ideation direction selected by the user.
+- Rendered Flutter implementation: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/feedback_toast_status_pill_dark_zh.png`.
+- Focused same-input comparison, selected mockup left and Flutter right: `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/invite-feedback-2026-08-02/status-pill-source-vs-implementation.png`.
+- Viewport and normalization: source frame 853×1844 px; source pill crop 420×160 px. Flutter rendered at 390×844 logical and physical px (DPR 1); implementation pill crop 250×100 px. Each crop was scaled to 600 px width, centered on an equal 620×270 px canvas, and placed side by side.
+- State: Simplified Chinese success feedback, dark theme, compact top status pill. The underlying Family screen was intentionally excluded because this QA scope is the shared transient-feedback component.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Fonts and typography: message copy uses the shared 15/1.35/600 style with `TextDecoration.none`; action labels also explicitly remove decoration. The deterministic Flutter golden environment renders CJK with Ahem square glyphs, so native-device Chinese glyph appearance remains a device-UAT item rather than a component geometry defect.
+- Spacing and layout rhythm: the pill has a 52 px minimum height, intrinsic short-copy width, a 360 px maximum width for localized copy, 10 px insets, a 28 px badge, an 18 px icon, an 8 px icon-to-copy gap, and a 26 px radius. Long messages wrap up to three lines instead of overflowing.
+- Colors and visual tokens: the warm card surface, restrained 14 px shadow, light-green success badge, and dark check reproduce the selected calm status treatment. Error and information variants keep the same geometry while changing only their semantic badge and action colors.
+- Image quality and asset fidelity: all states use real Material icons (`check_rounded`, `priority_high_rounded`, and `info_outline_rounded`) rendered by Flutter; no raster placeholders, emoji, handcrafted SVG, or custom-drawn substitute was introduced.
+- Copy and content: existing localized product copy is preserved. Raw transport errors remain handled by the existing friendly-message layer rather than exposed by the shared component.
+- Affordances and accessibility: feedback is an auto-dismiss live region, matching the selected no-close-button direction. Optional Undo or voice actions remain inside the same pill with a minimum 44 px target and no underline.
+- Full-view evidence: the production golden records the full viewport and top-safe-area placement.
+- Focused evidence: the normalized comparison keeps the pill silhouette, badge polarity, icon scale, text baseline, and shadow legible at equal visual width.
+
+## Comparison history and verification
+
+1. The previous shared toast used a larger emblem, outlined full-width card, close control, and link-like underlined copy.
+2. The first Direction 3 pass reduced the card but retained a 32 px dark badge with a bright check; the focused comparison identified a P2 scale and polarity mismatch.
+3. The badge was reduced to 28 px, inverted to a light badge with dark check for success, and the shadow was softened. The final equal-width comparison found no remaining P0/P1/P2 issue.
+- All production `SnackBar` and `showSnackBar` entry points were migrated to the shared success, error, or information pill; the architecture scan now returns no matches under `lib/`.
+- Six affected widget/unit/architecture files: 62 tests passed.
+- Full serial suite: 4342 tests passed, 11 skipped, 0 failed.
+- `flutter analyze`: 0 issues.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Family Network Dialog — Selected Direction 1 (2026-08-02)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fc151-a7da-7953-8152-aee24d5ea2e2/exec-b7f85111-8afc-4b3d-bf21-45f6634f1212.png`, the first displayed ideation result selected by the user.
+- Rendered Flutter implementation: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/family_network_unavailable_dialog_dark_zh.png`.
+- Same-input comparison, selected mockup left and Flutter right: `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/family-network-dialog-2026-08-02/source-vs-implementation.png`.
+- Viewport and normalization: source full frame 852×1846 px; source dialog crop 692×628 px. Flutter rendered at 390×844 logical and physical px (DPR 1); implementation dialog crop 318×299 px. Both crops were scaled to 636 px width and centered on equal 660×640 px canvases before comparison.
+- State: Simplified Chinese, dark theme, Create Family flow, network unavailable dialog open.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Fonts and typography: title weight and centered hierarchy follow the selected mockup; body copy remains the production 14/21 token and wraps to two balanced lines at the target viewport. Native-device CJK rendering remains system-owned; the golden loads a deterministic Unicode font for visual regression coverage.
+- Spacing and layout rhythm: the 36 px dialog inset, 20 px content inset, 80 px status badge, 40 px glyph, title gap, body gap, and trailing actions closely reproduce the selected component proportions without crowding the message or buttons.
+- Colors and visual tokens: the badge uses the production wakaba accent, accent-soft surface, and palette-driven border. The subtle shadow is intentionally restrained compared with the Image Gen halo so the result remains consistent with the app's low-elevation dark surfaces.
+- Image quality and asset fidelity: the network mark is the real Material `wifi_off_rounded` icon rendered by Flutter. No raster placeholder, emoji, handcrafted SVG, or custom-drawn substitute was introduced.
+- Copy and content: the existing localized title, guidance, Cancel, and Retry labels are unchanged; raw transport errors remain hidden.
+- Affordances and accessibility: the larger badge makes the failure state immediately recognizable while the title remains the semantic explanation. Cancel and Retry behavior is unchanged and covered through both Create Family and Family Settings widget paths.
+- Full-view evidence: the complete dialog component is visible in both halves of the comparison, including outer radius, emblem, title, body, and actions.
+- Focused evidence: no additional crop was needed because the normalized component comparison keeps the 40 px icon, Chinese text, border, and both controls legible.
+
+## Comparison history and verification
+
+1. Before formal QA, the first implementation check used an 88 px badge with default AlertDialog insets; it made the component too tall and forced the body to three lines.
+2. The badge was normalized to 80 px with a 40 px icon, the dialog inset to 36 px, and content inset to 20 px. The first formal equal-width comparison found no remaining P0/P1/P2 difference, so no further corrective iteration was required.
+- Create Family widget suite: 7 tests passed.
+- Family Settings widget suite: 6 tests passed.
+- Dark Chinese golden: passed without baseline updates after final capture.
+- `flutter analyze`: 0 issues.
+
+final result: passed
+
+---
+
 # V16 Family Entry to Management — Design QA (2026-08-02)
 
 ## Scope and evidence

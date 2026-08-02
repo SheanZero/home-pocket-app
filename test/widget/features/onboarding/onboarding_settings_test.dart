@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,6 +64,22 @@ class _FakeUserProfileRepository implements UserProfileRepository {
 
 class _MockAppLockService extends Mock implements AppLockService {}
 
+class _BlockingSaveUserProfileUseCase extends SaveUserProfileUseCase {
+  _BlockingSaveUserProfileUseCase(super.repository, this.completer);
+
+  final Completer<SaveProfileResult> completer;
+
+  @override
+  Future<SaveProfileResult> execute({
+    String? id,
+    required String displayName,
+    required String avatarEmoji,
+    String? avatarImagePath,
+    String? oldAvatarImagePath,
+    ProfileSavedCallback? onSaved,
+  }) => completer.future;
+}
+
 class _Harness {
   _Harness({
     required this.overrides,
@@ -88,6 +106,7 @@ Book _testBook() => Book(
 
 Future<_Harness> _buildHarness({
   Map<String, Object> prefsSeed = const {'language': 'system'},
+  Completer<SaveProfileResult>? profileSaveCompleter,
 }) async {
   SharedPreferences.setMockInitialValues(prefsSeed);
   final prefs = await SharedPreferences.getInstance();
@@ -108,7 +127,12 @@ Future<_Harness> _buildHarness({
       ),
       bookRepositoryProvider.overrideWith((_) => bookRepo),
       saveUserProfileUseCaseProvider.overrideWith(
-        (_) => SaveUserProfileUseCase(profileRepo),
+        (_) => profileSaveCompleter == null
+            ? SaveUserProfileUseCase(profileRepo)
+            : _BlockingSaveUserProfileUseCase(
+                profileRepo,
+                profileSaveCompleter,
+              ),
       ),
       appLockServiceProvider.overrideWithValue(appLockService),
     ],
@@ -356,8 +380,9 @@ void main() {
             await tester.tap(find.text(digit));
             await tester.pump();
           }
-          await tester.pumpAndSettle();
+          await tester.pump(const Duration(milliseconds: 350));
         }
+        await tester.pump();
 
         expect(confirmed, isTrue);
         expect(harness.prefs.getBool('app_lock_enabled'), isTrue);
@@ -368,6 +393,52 @@ void main() {
   });
 
   group('OnboardingSettingsScreen — write-through on confirm', () {
+    testWidgets('confirm immediately hides keyboard and shows progress', (
+      tester,
+    ) async {
+      final completer = Completer<SaveProfileResult>();
+      final harness = await _buildHarness(profileSaveCompleter: completer);
+      var confirmed = false;
+      await tester.pumpWidget(
+        _host(
+          overrides: harness.overrides,
+          onConfirmed: () => confirmed = true,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      await _setNickname(tester, 'たけし');
+
+      expect(tester.testTextInput.isVisible, isTrue);
+      await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
+      await tester.pump();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      expect(
+        find.byKey(const ValueKey('onboarding-confirm-progress')),
+        findsOneWidget,
+      );
+      expect(find.text('ホームを準備しています…'), findsOneWidget);
+      expect(confirmed, isFalse);
+
+      final now = DateTime(2026, 8, 2);
+      completer.complete(
+        SaveProfileResult.success(
+          UserProfile(
+            id: 'profile-1',
+            displayName: 'たけし',
+            avatarEmoji: 'icon:cat',
+            createdAt: now,
+            updatedAt: now,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(confirmed, isTrue);
+    });
+
     testWidgets(
       'tapping the English segment persists the concrete code (setLocale)',
       (tester) async {
@@ -442,7 +513,8 @@ void main() {
         await _setNickname(tester, 'たけし');
 
         await tester.tap(find.widgetWithText(TextButton, 'この設定ではじめる'));
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
 
         // onConfirmed fired only on save success.
         expect(confirmed, isTrue);

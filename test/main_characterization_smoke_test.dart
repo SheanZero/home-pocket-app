@@ -45,6 +45,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_sy
 import 'package:home_pocket/features/applock/presentation/screens/app_lock_screen.dart';
 import 'package:home_pocket/features/applock/presentation/widgets/privacy_mask.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
+import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show getUserProfileUseCaseProvider;
@@ -424,6 +425,55 @@ void main() {
         );
         await _pumpInitNoSettle(tester);
         expect(find.byType(MainShellScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'first shell frame keeps bottom navigation at the viewport bottom while '
+      'the onboarding keyboard inset is still dismissing',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetViewInsets);
+
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+        );
+        await _pumpInitNoSettle(tester);
+
+        expect(find.byType(MainShellScreen), findsOneWidget);
+        expect(find.byType(HomeBottomNavBar), findsOneWidget);
+        final shellBottom = tester.getRect(find.byType(MainShellScreen)).bottom;
+        final shellScaffoldBottom = tester
+            .getRect(
+              find
+                  .descendant(
+                    of: find.byType(MainShellScreen),
+                    matching: find.byType(Scaffold),
+                  )
+                  .first,
+            )
+            .bottom;
+        final bodyStackRect = tester.getRect(
+          find.byKey(const ValueKey('main-shell-body-stack')),
+        );
+        final navSurface = find
+            .descendant(
+              of: find.byType(HomeBottomNavBar),
+              matching: find.byType(Container),
+            )
+            .first;
+        final navRect = tester.getRect(navSurface);
+        expect([
+          shellBottom,
+          shellScaffoldBottom,
+        ], everyElement(moreOrLessEquals(844)));
+        expect(bodyStackRect, const Rect.fromLTRB(0, 0, 390, 844));
+        expect(navRect.bottom, moreOrLessEquals(844));
       },
     );
 

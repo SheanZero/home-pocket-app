@@ -23,11 +23,14 @@ import '../providers/repository_providers.dart';
 import '../widgets/family_flow_components.dart';
 import '../widgets/family_network_unavailable_dialog.dart';
 import '../widgets/group_rename_dialog.dart';
+import '../widgets/invite_expiry_countdown.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
 import 'member_approval_screen.dart';
 
 class CreateGroupScreen extends ConsumerStatefulWidget {
-  const CreateGroupScreen({super.key});
+  const CreateGroupScreen({super.key, this.shareInvite});
+
+  final Future<void> Function(String text)? shareInvite;
 
   @override
   ConsumerState<CreateGroupScreen> createState() => _CreateGroupScreenState();
@@ -208,7 +211,13 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   Future<void> _handleShare() async {
     final code = _inviteCode;
     if (code == null) return;
-    await SharePlus.instance.share(ShareParams(text: code));
+    final text = S.of(context).familySyncInviteShareMessage(_groupName, code);
+    final share = widget.shareInvite;
+    if (share != null) {
+      await share(text);
+    } else {
+      await SharePlus.instance.share(ShareParams(text: text));
+    }
   }
 
   Future<void> _handleCopy() async {
@@ -241,11 +250,11 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       case ManageGroupInviteForbidden():
         setState(() => _isRefreshingInvite = false);
         showErrorFeedback(context, S.of(context).familySyncInviteOwnerOnly);
-      case ManageGroupInviteError(:final message):
+      case ManageGroupInviteError():
         setState(() => _isRefreshingInvite = false);
         showErrorFeedback(
           context,
-          S.of(context).familySyncRegenerateInviteFailed(message),
+          S.of(context).familySyncRegenerateInviteFailed,
         );
     }
   }
@@ -356,6 +365,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           FamilyPrimaryButton(
             onPressed: _handleShare,
             label: l10n.groupShareCode,
+            controlKey: const Key('create-group-share-invite'),
           ),
           const SizedBox(height: 20),
           FamilyHelperNote(text: l10n.familyFlowCreateInviteHelper),
@@ -505,7 +515,11 @@ class _InviteCodeCard extends StatelessWidget {
                 ),
                 if (expiresAt != null) ...[
                   const SizedBox(width: 8),
-                  _TimerRow(expiresAt: expiresAt!),
+                  FamilyInviteExpiryCountdown(
+                    expiresAt: DateTime.fromMillisecondsSinceEpoch(
+                      expiresAt! * Duration.millisecondsPerSecond,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -542,38 +556,6 @@ class _InviteCodeCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _TimerRow extends StatelessWidget {
-  const _TimerRow({required this.expiresAt});
-
-  final int expiresAt;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    final palette = context.palette;
-    final expiresDateTime = DateTime.fromMillisecondsSinceEpoch(
-      expiresAt * 1000,
-    );
-    final remaining = expiresDateTime.difference(DateTime.now());
-    final minutes = remaining.inMinutes.clamp(0, 999);
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(LucideIcons.clock, size: 14, color: palette.textSecondary),
-        const SizedBox(width: 6),
-        Text(
-          l10n.groupInviteExpiry(minutes),
-          maxLines: 1,
-          style: AppTextStyles.supporting.copyWith(
-            color: palette.textSecondary,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -8,17 +8,22 @@ import '../../core/theme/app_palette.dart';
 /// colour family and the default leading icon.
 enum FeedbackTone {
   /// Red error family (`palette.error*`). Default — keeps existing inline
-  /// error-toast call sites unchanged.
+  /// error-feedback call sites unchanged.
   error,
 
   /// Green success family (`palette.success` / `palette.successLight`).
   success,
+
+  /// Blue information family (`palette.info`).
+  info,
 }
 
-/// A floating capsule-style soft toast for inline success/error feedback.
+/// A compact floating status pill for success, error, and informational
+/// feedback.
 ///
-/// Displays a pill-shaped message with icon, text, and optional close button.
-/// Auto-dismisses after [duration] and supports manual dismissal via close tap.
+/// Displays an intrinsic-width message with a semantic icon and optional action.
+/// Short copy stays compact; longer localized copy expands up to 360 logical
+/// pixels and wraps. The pill auto-dismisses after [duration].
 ///
 /// The [tone] selects the colour family (success = green, error = red) and the
 /// default leading icon. Defaults to [FeedbackTone.error] for backward
@@ -33,6 +38,7 @@ class SoftToast extends StatefulWidget {
     this.onDismissed,
     this.actionLabel,
     this.onAction,
+    this.actionKey,
   });
 
   final String message;
@@ -47,13 +53,16 @@ class SoftToast extends StatefulWidget {
   final Duration duration;
   final VoidCallback? onDismissed;
 
-  /// Optional inline action link (e.g. "退出记账"). When non-null, an underlined
-  /// link button is rendered before the close button; tapping it dismisses the
-  /// toast and then invokes [onAction] (260603-nr1 follow-up Ask 2).
+  /// Optional inline action (e.g. "退出记账"). Tapping it dismisses the pill and
+  /// then invokes [onAction] (260603-nr1 follow-up Ask 2).
   final String? actionLabel;
 
   /// Invoked after the toast dismisses when the [actionLabel] link is tapped.
   final VoidCallback? onAction;
+
+  /// Optional stable key for an inline action used by behavior tests and
+  /// callers that need to target a specific undo affordance.
+  final Key? actionKey;
 
   @override
   State<SoftToast> createState() => _SoftToastState();
@@ -119,92 +128,156 @@ class _SoftToastState extends State<SoftToast>
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final isSuccess = widget.tone == FeedbackTone.success;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final (
+      foreground,
+      badgeSurface,
+      badgeForeground,
+      leadingIcon,
+    ) = switch (widget.tone) {
+      FeedbackTone.success => (
+        palette.success,
+        isDark ? palette.accentPrimary : palette.accentPrimaryLight,
+        isDark ? palette.background : palette.accentPrimary,
+        widget.icon ?? Icons.check_rounded,
+      ),
+      FeedbackTone.error => (
+        palette.error,
+        palette.errorSurface,
+        palette.error,
+        widget.icon ?? Icons.priority_high_rounded,
+      ),
+      FeedbackTone.info => (
+        palette.info,
+        palette.info.withValues(alpha: 0.16),
+        palette.info,
+        widget.icon ?? Icons.info_outline_rounded,
+      ),
+    };
+    final Color shadow = palette.textPrimary.withValues(alpha: 0.08);
+    final maxWidth = (MediaQuery.sizeOf(context).width - 40).clamp(0.0, 360.0);
+    final messageStyle = TextStyle(
+      fontSize: 15,
+      height: 1.35,
+      fontWeight: FontWeight.w600,
+      color: palette.textPrimary,
+      decoration: TextDecoration.none,
+      decorationColor: Colors.transparent,
+    );
+    const actionStyle = TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      decoration: TextDecoration.none,
+    );
+    final textScaler = MediaQuery.textScalerOf(context);
+    final messagePainter = TextPainter(
+      text: TextSpan(text: widget.message, style: messageStyle),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: textScaler,
+    )..layout();
+    var desiredWidth = 20 + 28 + 8 + messagePainter.width;
+    if (widget.actionLabel != null) {
+      final actionPainter = TextPainter(
+        text: TextSpan(text: widget.actionLabel, style: actionStyle),
+        maxLines: 1,
+        textDirection: Directionality.of(context),
+        textScaler: textScaler,
+      )..layout();
+      desiredWidth += 6 + (actionPainter.width + 16).clamp(44.0, maxWidth);
+    }
+    desiredWidth = desiredWidth.clamp(0.0, maxWidth);
 
-    // Tone-resolved colour family. Success derives a soft border/shadow from
-    // [success] via alpha so no extra palette tokens are required; error keeps
-    // its dedicated error* tints for pixel-stable existing call sites.
-    final Color foreground = isSuccess ? palette.success : palette.error;
-    final Color surface = isSuccess
-        ? palette.successLight
-        : palette.errorSurface;
-    final Color border = isSuccess
-        ? palette.success.withValues(alpha: 0.35)
-        : palette.errorBorder;
-    final Color shadow = isSuccess
-        ? palette.success.withValues(alpha: 0.12)
-        : palette.errorShadow;
-    final Color closeBg = isSuccess
-        ? palette.success.withValues(alpha: 0.18)
-        : palette.errorBorder;
-    final IconData leadingIcon =
-        widget.icon ??
-        (isSuccess ? Icons.check_circle_outline : Icons.error_outline);
-
-    return SlideTransition(
-      position: _slideAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: border),
-              boxShadow: [
-                BoxShadow(
-                  color: shadow,
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(leadingIcon, size: 18, color: foreground),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    widget.message,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: foreground,
-                    ),
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: desiredWidth,
+                child: Container(
+                  key: const Key('feedback-toast-surface'),
+                  constraints: const BoxConstraints(minHeight: 52),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
                   ),
-                ),
-                if (widget.actionLabel != null) ...[
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _handleAction,
-                    child: Text(
-                      widget.actionLabel!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: foreground,
-                        decoration: TextDecoration.underline,
-                        decorationColor: foreground,
+                  decoration: BoxDecoration(
+                    color: palette.card,
+                    borderRadius: BorderRadius.circular(26),
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadow,
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: _dismiss,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: closeBg,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.close, size: 12, color: foreground),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        key: const Key('feedback-toast-icon-badge'),
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: badgeSurface,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          leadingIcon,
+                          key: const Key('feedback-toast-leading-icon'),
+                          size: 18,
+                          color: badgeForeground,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          widget.message,
+                          maxLines: 3,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          style: messageStyle,
+                        ),
+                      ),
+                      if (widget.actionLabel != null) ...[
+                        const SizedBox(width: 6),
+                        TextButton(
+                          key:
+                              widget.actionKey ??
+                              const Key('feedback-toast-action'),
+                          onPressed: _handleAction,
+                          style: TextButton.styleFrom(
+                            foregroundColor: foreground,
+                            minimumSize: const Size(44, 44),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            shape: const StadiumBorder(),
+                            textStyle: actionStyle,
+                          ),
+                          child: Text(
+                            widget.actionLabel!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: foreground,
+                              decoration: TextDecoration.none,
+                              decorationColor: Colors.transparent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),

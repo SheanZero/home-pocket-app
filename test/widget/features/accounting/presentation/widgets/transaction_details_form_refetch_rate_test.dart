@@ -225,7 +225,7 @@ void main() {
       expect(fake.lastParams?.currency, 'USD');
 
       // D-03: non-blocking toast driven by the fetched 160.00 → 8000 JPY.
-      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsOneWidget);
       expect(
         find.textContaining('¥7,415 → ¥8,000'),
         findsOneWidget,

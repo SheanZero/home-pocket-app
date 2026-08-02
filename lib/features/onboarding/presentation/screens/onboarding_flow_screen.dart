@@ -9,7 +9,7 @@ import 'onboarding_settings_screen.dart';
 /// The first-boot onboarding flow host (ONBOARD-07 / D-11 / D-12 / D-13).
 ///
 /// Composes the two step screens — intro → settings — inside a
-/// nested [Navigator] (the app navigates with Navigator + MaterialPageRoute,
+/// nested [Navigator] (the app navigates with Navigator + PageRouteBuilder,
 /// with no routing package). Forward navigation is wired through each screen's
 /// callback:
 ///   - [OnboardingIntroScreen.onContinue]   → push the settings route
@@ -35,6 +35,11 @@ class OnboardingFlowScreen extends ConsumerStatefulWidget {
 
   final String bookId;
 
+  /// Brief enough to preserve responsiveness while visually connecting the
+  /// intro and settings steps.
+  static const _settingsTransitionDuration = Duration(milliseconds: 240);
+  static const _settingsReverseTransitionDuration = Duration(milliseconds: 180);
+
   /// Fired exactly once when onboarding finishes (after `onboarding_complete`
   /// has been persisted). The gate owner (`_HomePocketAppState`) wires this to
   /// flip `_needsOnboarding=false` + `setState`, so the live `'/'` home Builder
@@ -53,12 +58,40 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
       GlobalKey<NavigatorState>();
 
   void _pushSettings() {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     _nestedNavigatorKey.currentState?.push(
-      MaterialPageRoute<void>(
-        builder: (_) => OnboardingSettingsScreen(
-          bookId: widget.bookId,
-          onConfirmed: () => _complete(setupSecurity: false),
-        ),
+      PageRouteBuilder<void>(
+        settings: const RouteSettings(name: 'onboarding-settings'),
+        transitionDuration: reduceMotion
+            ? Duration.zero
+            : OnboardingFlowScreen._settingsTransitionDuration,
+        reverseTransitionDuration: reduceMotion
+            ? Duration.zero
+            : OnboardingFlowScreen._settingsReverseTransitionDuration,
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            OnboardingSettingsScreen(
+              bookId: widget.bookId,
+              onConfirmed: () => _complete(setupSecurity: false),
+            ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          if (reduceMotion) {
+            return child;
+          }
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          final position = Tween<Offset>(
+            begin: const Offset(0, 0.018),
+            end: Offset.zero,
+          ).animate(curvedAnimation);
+          return FadeTransition(
+            opacity: curvedAnimation,
+            child: SlideTransition(position: position, child: child),
+          );
+        },
       ),
     );
   }

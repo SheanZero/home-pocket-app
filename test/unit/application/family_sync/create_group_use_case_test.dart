@@ -20,6 +20,16 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 
 class MockE2EEService extends Mock implements E2EEService {}
 
+Map<String, dynamic> ownerMemberJson() => {
+  'deviceId': 'device-1',
+  'publicKey': 'public-key',
+  'deviceName': 'My Phone',
+  'role': 'owner',
+  'status': 'active',
+  'displayName': 'Papa',
+  'avatarEmoji': '\u{1F468}',
+};
+
 void main() {
   late MockRelayApiClient apiClient;
   late MockKeyManager keyManager;
@@ -283,6 +293,220 @@ void main() {
   });
 
   test(
+    'resumes an existing local owner group instead of reporting a conflict',
+    () async {
+      final existingGroup = GroupInfo(
+        groupId: 'existing-group',
+        status: GroupStatus.pending,
+        groupName: 'Old local name',
+        inviteCode: 'OLD123',
+        inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(1),
+        role: 'owner',
+        groupKey: 'existing-group-key',
+        members: const [],
+        createdAt: DateTime(2026),
+      );
+      when(
+        () => groupRepository.getCurrentGroup(),
+      ).thenAnswer((_) async => existingGroup);
+      when(
+        () => groupRepository.getGroupById('existing-group'),
+      ).thenAnswer((_) async => existingGroup);
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+      when(
+        () => keyManager.getPublicKey(),
+      ).thenAnswer((_) async => 'public-key');
+      when(() => apiClient.checkGroup()).thenAnswer(
+        (_) async => {'groupExisted': true, 'groupId': 'existing-group'},
+      );
+      when(() => apiClient.getGroupStatus('existing-group')).thenAnswer(
+        (_) async => {
+          'groupId': 'existing-group',
+          'groupName': 'Authoritative Family',
+          'inviteCode': 'OLD999',
+          'inviteExpiresAt': 4102444800,
+          'members': [ownerMemberJson()],
+        },
+      );
+      when(() => apiClient.regenerateInvite('existing-group')).thenAnswer(
+        (_) async => {'inviteCode': 'INV123', 'expiresAt': 4102444800},
+      );
+
+      final result = await useCase.execute(
+        displayName: 'Papa',
+        avatarEmoji: '\u{1F468}',
+        groupName: 'Another Family',
+      );
+
+      expect(result, isA<CreateGroupSuccess>());
+      final success = result as CreateGroupSuccess;
+      expect(success.groupId, 'existing-group');
+      expect(success.groupName, 'Authoritative Family');
+      expect(success.inviteCode, 'INV123');
+      verifyNever(
+        () => apiClient.createGroup(
+          groupName: any(named: 'groupName'),
+          displayName: any(named: 'displayName'),
+          avatarEmoji: any(named: 'avatarEmoji'),
+          avatarImageHash: any(named: 'avatarImageHash'),
+        ),
+      );
+      verify(() => apiClient.regenerateInvite('existing-group')).called(1);
+      verify(
+        () => groupRepository.savePendingGroup(
+          groupId: 'existing-group',
+          groupName: 'Authoritative Family',
+          inviteCode: 'INV123',
+          inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(4102444800000),
+          groupKey: 'existing-group-key',
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    'does not create when the local owner group differs from the server group',
+    () async {
+      when(() => groupRepository.getCurrentGroup()).thenAnswer(
+        (_) async => GroupInfo(
+          groupId: 'local-group',
+          status: GroupStatus.pending,
+          groupName: 'Local Family',
+          role: 'owner',
+          groupKey: 'existing-group-key',
+          members: const [],
+          createdAt: DateTime(2026),
+        ),
+      );
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+      when(
+        () => keyManager.getPublicKey(),
+      ).thenAnswer((_) async => 'public-key');
+      when(() => apiClient.checkGroup()).thenAnswer(
+        (_) async => {'groupExisted': true, 'groupId': 'other-group'},
+      );
+
+      final result = await useCase.execute(
+        displayName: 'Papa',
+        avatarEmoji: '\u{1F468}',
+        groupName: 'Another Family',
+      );
+
+      expect(result, isA<CreateGroupError>());
+      expect(
+        (result as CreateGroupError).kind,
+        GroupOperationErrorKind.membershipConflict,
+      );
+      verifyNever(
+        () => apiClient.createGroup(
+          groupName: any(named: 'groupName'),
+          displayName: any(named: 'displayName'),
+          avatarEmoji: any(named: 'avatarEmoji'),
+          avatarImageHash: any(named: 'avatarImageHash'),
+        ),
+      );
+    },
+  );
+
+  test(
+    'maps owner-group recovery network failures without creating again',
+    () async {
+      when(() => groupRepository.getCurrentGroup()).thenAnswer(
+        (_) async => GroupInfo(
+          groupId: 'existing-group',
+          status: GroupStatus.pending,
+          groupName: 'Existing Family',
+          role: 'owner',
+          groupKey: 'existing-group-key',
+          members: const [],
+          createdAt: DateTime(2026),
+        ),
+      );
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+      when(
+        () => keyManager.getPublicKey(),
+      ).thenAnswer((_) async => 'public-key');
+      when(() => apiClient.checkGroup()).thenThrow(
+        http.ClientException(
+          'Failed host lookup: sync.happypocket.app',
+          Uri.parse('https://sync.happypocket.app/api/v1/group/check'),
+        ),
+      );
+
+      final result = await useCase.execute(
+        displayName: 'Papa',
+        avatarEmoji: '\u{1F468}',
+        groupName: 'Another Family',
+      );
+
+      expect(result, isA<CreateGroupError>());
+      final error = result as CreateGroupError;
+      expect(error.kind, GroupOperationErrorKind.networkUnavailable);
+      expect(error.message, networkUnavailableErrorMessage);
+      verifyNever(
+        () => apiClient.createGroup(
+          groupName: any(named: 'groupName'),
+          displayName: any(named: 'displayName'),
+          avatarEmoji: any(named: 'avatarEmoji'),
+          avatarImageHash: any(named: 'avatarImageHash'),
+        ),
+      );
+    },
+  );
+
+  test(
+    'does not resume a server group when this device is not the owner',
+    () async {
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+      when(
+        () => keyManager.getPublicKey(),
+      ).thenAnswer((_) async => 'public-key');
+      when(
+        () => apiClient.checkGroup(),
+      ).thenAnswer((_) async => {'groupExisted': true, 'groupId': 'group-1'});
+      when(() => apiClient.getGroupStatus('group-1')).thenAnswer(
+        (_) async => {
+          'groupId': 'group-1',
+          'groupName': 'Another Family',
+          'inviteCode': 'INV123',
+          'inviteExpiresAt': 4102444800,
+          'members': [
+            {
+              'deviceId': 'device-1',
+              'publicKey': 'public-key',
+              'deviceName': 'My Phone',
+              'role': 'member',
+              'status': 'active',
+              'displayName': 'Papa',
+              'avatarEmoji': '\u{1F468}',
+            },
+          ],
+        },
+      );
+
+      final result = await useCase.execute(
+        displayName: 'Papa',
+        avatarEmoji: '\u{1F468}',
+        groupName: 'Another Family',
+      );
+
+      expect(result, isA<CreateGroupError>());
+      expect(
+        (result as CreateGroupError).kind,
+        GroupOperationErrorKind.membershipConflict,
+      );
+      verifyNever(
+        () => apiClient.createGroup(
+          groupName: any(named: 'groupName'),
+          displayName: any(named: 'displayName'),
+          avatarEmoji: any(named: 'avatarEmoji'),
+          avatarImageHash: any(named: 'avatarImageHash'),
+        ),
+      );
+    },
+  );
+
+  test(
     'maps server single-group conflict without writing local state',
     () async {
       when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
@@ -350,6 +574,7 @@ void main() {
           'groupName': 'Smith Family',
           'inviteCode': 'INV123',
           'inviteExpiresAt': 123,
+          'members': [ownerMemberJson()],
         },
       );
       when(
@@ -390,6 +615,7 @@ void main() {
         'groupName': 'Smith Family',
         'inviteCode': 'INV123',
         'inviteExpiresAt': 123,
+        'members': [ownerMemberJson()],
       },
     );
     when(() => groupRepository.getGroupById('group-1')).thenAnswer(
@@ -449,6 +675,7 @@ void main() {
           'groupName': 'Smith Family',
           'inviteCode': 'INV123',
           'inviteExpiresAt': 123,
+          'members': [ownerMemberJson()],
         },
       );
       when(() => groupRepository.getGroupById('group-1')).thenAnswer(

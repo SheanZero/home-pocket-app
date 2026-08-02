@@ -77,8 +77,10 @@ class CreateGroupUseCase {
     String? avatarImageHash,
   }) async {
     try {
+      GroupInfo? currentGroup;
       try {
-        if (await _groupRepository.getCurrentGroup() != null) {
+        currentGroup = await _groupRepository.getCurrentGroup();
+        if (currentGroup != null && currentGroup.role != 'owner') {
           return const CreateGroupResult.error(
             'A family group is already active or awaiting confirmation',
             kind: GroupOperationErrorKind.membershipConflict,
@@ -106,7 +108,16 @@ class CreateGroupUseCase {
 
       // A prior create request may have reached the server while its response
       // was lost. Recover that owner group before issuing another mutation.
-      var recovered = await _recoverExistingOwnerGroup();
+      var recovered = await _recoverExistingOwnerGroup(
+        deviceId: identity.deviceId,
+        expectedGroupId: currentGroup?.groupId,
+      );
+      if (currentGroup != null && recovered == null) {
+        return const CreateGroupResult.error(
+          'The existing owner group could not be recovered',
+          kind: GroupOperationErrorKind.membershipConflict,
+        );
+      }
       Map<String, dynamic>? response;
       if (recovered == null) {
         try {
@@ -121,7 +132,9 @@ class CreateGroupUseCase {
         } catch (_) {
           // Transport failures are ambiguous: the server may already have
           // committed the request. Resolve the authoritative state first.
-          recovered = await _recoverExistingOwnerGroup();
+          recovered = await _recoverExistingOwnerGroup(
+            deviceId: identity.deviceId,
+          );
           if (recovered == null) rethrow;
         }
       }
@@ -181,6 +194,11 @@ class CreateGroupUseCase {
         expiresAt: expiresAt,
         groupName: authoritativeGroupName,
       );
+    } on _ExistingGroupNotOwned {
+      return const CreateGroupResult.error(
+        'A family group is already active or awaiting confirmation',
+        kind: GroupOperationErrorKind.membershipConflict,
+      );
     } on RelayApiException catch (error) {
       if (isSingleGroupConflict(error)) {
         return CreateGroupResult.error(
@@ -200,17 +218,40 @@ class CreateGroupUseCase {
     }
   }
 
-  Future<_RecoveredOwnerGroup?> _recoverExistingOwnerGroup() async {
+  Future<_RecoveredOwnerGroup?> _recoverExistingOwnerGroup({
+    required String deviceId,
+    String? expectedGroupId,
+  }) async {
     try {
       final check = await _apiClient.checkGroup();
       if (check['groupExisted'] != true) return null;
 
       final groupId = check['groupId'] as String?;
       if (groupId == null || groupId.isEmpty) return null;
+      if (expectedGroupId != null && groupId != expectedGroupId) return null;
 
       final status = await _apiClient.getGroupStatus(groupId);
-      final inviteCode = status['inviteCode'] as String?;
-      final expiresAt = (status['inviteExpiresAt'] as num?)?.toInt();
+      final rawMembers = status['members'];
+      var isOwner = false;
+      if (rawMembers is List) {
+        for (final rawMember in rawMembers) {
+          if (rawMember is Map &&
+              rawMember['deviceId'] == deviceId &&
+              rawMember['role'] == 'owner') {
+            isOwner = true;
+            break;
+          }
+        }
+      }
+      if (!isOwner) throw const _ExistingGroupNotOwned();
+
+      var inviteCode = status['inviteCode'] as String?;
+      var expiresAt = (status['inviteExpiresAt'] as num?)?.toInt();
+      if (expectedGroupId != null) {
+        final refreshedInvite = await _apiClient.regenerateInvite(groupId);
+        inviteCode = refreshedInvite['inviteCode'] as String?;
+        expiresAt = (refreshedInvite['expiresAt'] as num?)?.toInt();
+      }
       final groupName = status['groupName'] as String?;
       if (inviteCode == null ||
           inviteCode.isEmpty ||
@@ -227,7 +268,10 @@ class CreateGroupUseCase {
         inviteCode: inviteCode,
         expiresAt: expiresAt,
       );
+    } on _ExistingGroupNotOwned {
+      rethrow;
     } catch (_) {
+      if (expectedGroupId != null) rethrow;
       return null;
     }
   }
@@ -260,6 +304,10 @@ class CreateGroupUseCase {
 
     return null;
   }
+}
+
+class _ExistingGroupNotOwned implements Exception {
+  const _ExistingGroupNotOwned();
 }
 
 class _RecoveredOwnerGroup {

@@ -306,6 +306,7 @@ class _OnboardingSettingsScreenState
     if (!_canStart) {
       return;
     }
+    FocusManager.instance.primaryFocus?.unfocus();
     // Biometrics remains the primary unlock method, while the app's existing
     // security invariant still requires a PIN fallback so a biometric lockout
     // can never strand the user.
@@ -574,8 +575,11 @@ class _OnboardingSettingsScreenState
                   child: Column(
                     children: [
                       _ConfirmButton(
-                        label: l10n.onboardingStart,
+                        label: _isSaving
+                            ? l10n.onboardingPreparingHome
+                            : l10n.onboardingStart,
                         enabled: _canStart,
+                        isLoading: _isSaving,
                         onPressed: _confirm,
                       ),
                       const SizedBox(height: 6),
@@ -1380,11 +1384,13 @@ class _ConfirmButton extends StatelessWidget {
   const _ConfirmButton({
     required this.label,
     required this.enabled,
+    required this.isLoading,
     required this.onPressed,
   });
 
   final String label;
   final bool enabled;
+  final bool isLoading;
   final VoidCallback onPressed;
 
   @override
@@ -1393,13 +1399,13 @@ class _ConfirmButton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: enabled
+        color: enabled || isLoading
             ? palette.accentPrimary
             : palette.accentPrimary.withValues(alpha: 0.45),
         boxShadow: [
           BoxShadow(
             color: palette.accentPrimary.withValues(
-              alpha: enabled ? 0.30 : 0.12,
+              alpha: enabled || isLoading ? 0.30 : 0.12,
             ),
             blurRadius: 20,
             offset: const Offset(0, 8),
@@ -1417,13 +1423,45 @@ class _ConfirmButton extends StatelessWidget {
             ),
             foregroundColor: Colors.white,
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: enabled ? 1 : 0.7),
-            ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 160),
+            child: isLoading
+                ? Row(
+                    key: const ValueKey('onboarding-confirm-loading'),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          key: ValueKey('onboarding-confirm-progress'),
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          label,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    label,
+                    key: const ValueKey('onboarding-confirm-label'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withValues(alpha: enabled ? 1 : 0.7),
+                    ),
+                  ),
           ),
         ),
       ),

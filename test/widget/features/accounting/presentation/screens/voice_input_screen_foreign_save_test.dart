@@ -327,7 +327,9 @@ void main() {
 
       const utterance = '五十美元 咖啡';
       final speech = CapturingStartSpeechRecognitionUseCase();
-      final parse = _FakeParseVoiceInputUseCase({utterance: usdParse(utterance)});
+      final parse = _FakeParseVoiceInputUseCase({
+        utterance: usdParse(utterance),
+      });
       // Rate 150.00 → 50.00 USD (5000c) → 7500 JPY via the single-site convertToJpy.
       final rate = _FakeRateUseCase(
         RateFetched(
@@ -351,14 +353,10 @@ void main() {
 
       await commit(tester, speech, utterance);
 
-      // 260703 (2B): the conversion-undo snackbar floats over the bottom
-      // action row right after the commit fill. Swipe it away (as a user
-      // would) so the Save tap lands on the button, not on the snackbar.
-      // Auto-dismiss itself is proven in voice_ptt_session_mixin_test; this
-      // test's runAsync wall-clock dance arms the dismiss timer outside fake
-      // time, so waiting cannot clear it here.
-      if (tester.any(find.byType(SnackBar))) {
-        await tester.drag(find.byType(SnackBar), const Offset(0, 120));
+      // 260703 (2B): the conversion-undo feedback pill appears after the fill.
+      // Let its shared auto-dismiss complete before tapping Save.
+      if (tester.any(find.byKey(const Key('feedback-toast-surface')))) {
+        await tester.pump(const Duration(seconds: 5));
         await tester.pumpAndSettle();
       }
 
@@ -368,7 +366,11 @@ void main() {
       expect(rate.lastParams?.currency, 'USD');
 
       final params = create.captured;
-      expect(params, isNotNull, reason: 'foreign utterance must reach create()');
+      expect(
+        params,
+        isNotNull,
+        reason: 'foreign utterance must reach create()',
+      );
 
       final expectedJpy = convertToJpy(
         originalMinorUnits: 5000,
@@ -376,7 +378,11 @@ void main() {
         subunitToUnit: subunitToUnitFor('USD'),
       );
       expect(expectedJpy, 7500);
-      expect(params!.amount, expectedJpy, reason: 'persisted JPY == convertToJpy');
+      expect(
+        params!.amount,
+        expectedJpy,
+        reason: 'persisted JPY == convertToJpy',
+      );
 
       // COMPLETE triple — all three fields set together (no partial triple).
       expect(params.originalCurrency, 'USD');
@@ -385,131 +391,128 @@ void main() {
     },
   );
 
-  testWidgets(
-    'CR-01: RateUnavailable → JPY-native row (no partial triple)',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets('CR-01: RateUnavailable → JPY-native row (no partial triple)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-      const utterance = '五十美元 咖啡';
-      final speech = CapturingStartSpeechRecognitionUseCase();
-      final parse = _FakeParseVoiceInputUseCase({utterance: usdParse(utterance)});
-      final rate = _FakeRateUseCase(RateUnavailable(currency: 'USD'));
-      final create = _CapturingCreateTransactionUseCase();
+    const utterance = '五十美元 咖啡';
+    final speech = CapturingStartSpeechRecognitionUseCase();
+    final parse = _FakeParseVoiceInputUseCase({utterance: usdParse(utterance)});
+    final rate = _FakeRateUseCase(RateUnavailable(currency: 'USD'));
+    final create = _CapturingCreateTransactionUseCase();
 
-      await tester.pumpWidget(
-        buildSubject(
-          speechService: speech,
-          parseUseCase: parse,
-          rateUseCase: rate,
-          createUseCase: create,
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildSubject(
+        speechService: speech,
+        parseUseCase: parse,
+        rateUseCase: rate,
+        createUseCase: create,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await commit(tester, speech, utterance);
-      await tapSave(tester);
+    await commit(tester, speech, utterance);
+    await tapSave(tester);
 
-      final params = create.captured;
-      expect(params, isNotNull);
-      // No currency fields → JPY-native row; the spoken whole-unit amount (50)
-      // persists as JPY. Never a partial triple.
-      expect(params!.originalCurrency, isNull);
-      expect(params.originalAmount, isNull);
-      expect(params.appliedRate, isNull);
-      expect(params.amount, 50);
-    },
-  );
+    final params = create.captured;
+    expect(params, isNotNull);
+    // No currency fields → JPY-native row; the spoken whole-unit amount (50)
+    // persists as JPY. Never a partial triple.
+    expect(params!.originalCurrency, isNull);
+    expect(params.originalAmount, isNull);
+    expect(params.appliedRate, isNull);
+    expect(params.amount, 50);
+  });
 
   // ── Quick task 260614-goh: the headline currency pill must SWITCH to the
   // spoken currency. Previously AmountDisplay was rendered without a currency,
   // so the pill stayed "¥ JPY" even though the form state / saved row switched —
   // the user saw "货币没有切换". ─────────────────────────────────────────────
-  testWidgets(
-    '260614-goh: spoken USD switches the headline pill to USD',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets('260614-goh: spoken USD switches the headline pill to USD', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-      const utterance = '今天吃饭用了99美元';
-      final speech = CapturingStartSpeechRecognitionUseCase();
-      final parse = _FakeParseVoiceInputUseCase({
-        utterance: foreignParse(utterance, 'USD', 99),
-      });
-      final rate = _FakeRateUseCase(
-        RateFetched(
-          rate: '150.00',
-          currency: 'USD',
-          rateDate: DateTime(2026, 5, 25),
-          source: 'frankfurter',
-        ),
-      );
-      final create = _CapturingCreateTransactionUseCase();
+    const utterance = '今天吃饭用了99美元';
+    final speech = CapturingStartSpeechRecognitionUseCase();
+    final parse = _FakeParseVoiceInputUseCase({
+      utterance: foreignParse(utterance, 'USD', 99),
+    });
+    final rate = _FakeRateUseCase(
+      RateFetched(
+        rate: '150.00',
+        currency: 'USD',
+        rateDate: DateTime(2026, 5, 25),
+        source: 'frankfurter',
+      ),
+    );
+    final create = _CapturingCreateTransactionUseCase();
 
-      await tester.pumpWidget(
-        buildSubject(
-          speechService: speech,
-          parseUseCase: parse,
-          rateUseCase: rate,
-          createUseCase: create,
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildSubject(
+        speechService: speech,
+        parseUseCase: parse,
+        rateUseCase: rate,
+        createUseCase: create,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      // Before speaking, the pill is the JPY default.
-      expect(pillLabel('JPY'), findsOneWidget);
+    // Before speaking, the pill is the JPY default.
+    expect(pillLabel('JPY'), findsOneWidget);
 
-      await commit(tester, speech, utterance);
+    await commit(tester, speech, utterance);
 
-      // After a foreign utterance with a resolved rate, the pill shows USD.
-      expect(pillLabel('USD'), findsOneWidget);
-      expect(pillLabel('JPY'), findsNothing);
-    },
-  );
+    // After a foreign utterance with a resolved rate, the pill shows USD.
+    expect(pillLabel('USD'), findsOneWidget);
+    expect(pillLabel('JPY'), findsNothing);
+  });
 
-  testWidgets(
-    '260614-goh: spoken 人民币 switches the headline pill to CNY',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets('260614-goh: spoken 人民币 switches the headline pill to CNY', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-      const utterance = '购买手机用了9999人民币';
-      final speech = CapturingStartSpeechRecognitionUseCase();
-      final parse = _FakeParseVoiceInputUseCase({
-        utterance: foreignParse(utterance, 'CNY', 9999),
-      });
-      final rate = _FakeRateUseCase(
-        RateFetched(
-          rate: '20.00',
-          currency: 'CNY',
-          rateDate: DateTime(2026, 5, 25),
-          source: 'frankfurter',
-        ),
-      );
-      final create = _CapturingCreateTransactionUseCase();
+    const utterance = '购买手机用了9999人民币';
+    final speech = CapturingStartSpeechRecognitionUseCase();
+    final parse = _FakeParseVoiceInputUseCase({
+      utterance: foreignParse(utterance, 'CNY', 9999),
+    });
+    final rate = _FakeRateUseCase(
+      RateFetched(
+        rate: '20.00',
+        currency: 'CNY',
+        rateDate: DateTime(2026, 5, 25),
+        source: 'frankfurter',
+      ),
+    );
+    final create = _CapturingCreateTransactionUseCase();
 
-      await tester.pumpWidget(
-        buildSubject(
-          speechService: speech,
-          parseUseCase: parse,
-          rateUseCase: rate,
-          createUseCase: create,
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildSubject(
+        speechService: speech,
+        parseUseCase: parse,
+        rateUseCase: rate,
+        createUseCase: create,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await commit(tester, speech, utterance);
+    await commit(tester, speech, utterance);
 
-      expect(pillLabel('CNY'), findsOneWidget);
-      expect(pillLabel('JPY'), findsNothing);
-    },
-  );
+    expect(pillLabel('CNY'), findsOneWidget);
+    expect(pillLabel('JPY'), findsNothing);
+  });
 
   testWidgets(
     '260614-goh: RateUnavailable keeps the pill JPY (matches JPY-native save)',
@@ -521,7 +524,9 @@ void main() {
 
       const utterance = '五十美元 咖啡';
       final speech = CapturingStartSpeechRecognitionUseCase();
-      final parse = _FakeParseVoiceInputUseCase({utterance: usdParse(utterance)});
+      final parse = _FakeParseVoiceInputUseCase({
+        utterance: usdParse(utterance),
+      });
       final rate = _FakeRateUseCase(RateUnavailable(currency: 'USD'));
       final create = _CapturingCreateTransactionUseCase();
 

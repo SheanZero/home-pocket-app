@@ -5,6 +5,7 @@ import 'package:home_pocket/core/config/legal_urls.dart';
 import 'package:home_pocket/features/settings/presentation/screens/legal_doc_screen.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/legal_sponsor_section.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
+import 'package:home_pocket/shared/widgets/soft_toast.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
@@ -155,7 +156,7 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets('support launch failure shows one neutral SnackBar', (
+  testWidgets('support launch failure uses unified error feedback', (
     tester,
   ) async {
     launcher.result = false;
@@ -166,6 +167,7 @@ void main() {
     await tester.tap(find.text(l10n.sponsorButton));
     await tester.pumpAndSettle();
 
+    expect(find.byType(SoftToast), findsOneWidget);
     expect(find.text(l10n.sponsorLaunchError), findsOneWidget);
     expect(find.byType(AlertDialog), findsNothing);
   });

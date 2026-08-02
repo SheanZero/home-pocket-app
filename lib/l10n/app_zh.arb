@@ -1483,15 +1483,9 @@
   "@familySyncRegenerateInvite": {
     "description": "Button label to regenerate the group invite code"
   },
-  "familySyncRegenerateInviteFailed": "重新生成邀请码失败: {message}",
+  "familySyncRegenerateInviteFailed": "暂时无法生成新的邀请码，请稍后再试。",
   "@familySyncRegenerateInviteFailed": {
-    "description": "Error message when regenerating an invite fails",
-    "placeholders": {
-      "message": {
-        "type": "String",
-        "example": "Network error"
-      }
-    }
+    "description": "Friendly error shown when regenerating a family invite fails"
   },
   "familySyncInviteTitle": "邀请家庭成员",
   "@familySyncInviteTitle": {
@@ -1517,7 +1511,7 @@
   "@familySyncInviteApprovalWindowHint": {
     "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
   },
-  "familySyncInviteShareMessage": "使用邀请码 {inviteCode} 加入 Home Pocket 中的“{groupName}”。",
+  "familySyncInviteShareMessage": "我在「{groupName}」为你留了一个位置。\n一起来记录生活，轻松打理我们的小家吧。\n\n邀请码：{inviteCode}\n请在 10 分钟内使用。",
   "@familySyncInviteShareMessage": {
     "description": "Text sent through the system share sheet for a group invite",
     "placeholders": {
@@ -1762,6 +1756,20 @@
         "type": "int"
       }
     }
+  },
+  "groupInviteCountdown": "{time}内有效",
+  "@groupInviteCountdown": {
+    "description": "Live remaining time for a family invite code",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "09:59"
+      }
+    }
+  },
+  "groupInviteExpired": "已失效",
+  "@groupInviteExpired": {
+    "description": "Short red status shown when a family invite code expires"
   },
   "groupShareCode": "分享邀请码",
   "groupEnterCode": "输入邀请码",
@@ -3601,6 +3609,10 @@
   "onboardingStart": "用这些设置开始",
   "@onboardingStart": {
     "description": "Onboarding settings page: confirm/start button (locked copy, NOT profileStart)"
+  },
+  "onboardingPreparingHome": "正在准备首页…",
+  "@onboardingPreparingHome": {
+    "description": "Onboarding settings page: progress label while completing setup"
   },
   "onboardingPrivacyTagLocal": "LOCAL",
   "onboardingPrivacyTagE2ee": "E2EE",

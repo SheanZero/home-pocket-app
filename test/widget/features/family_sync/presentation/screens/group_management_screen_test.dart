@@ -445,7 +445,7 @@ void main() {
     await tester.tap(find.byKey(const Key('owner-invite-action')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Invite code expired'), findsOneWidget);
+    expect(find.text('Expired'), findsWidgets);
     final shareButton = tester.widget<FilledButton>(
       find.byKey(const Key('owner-invite-share')),
     );
@@ -499,9 +499,12 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('Regenerate invite failed: Network unavailable'),
+      find.text(
+        "Couldn't generate a new invite code. Please try again in a moment.",
+      ),
       findsOneWidget,
     );
+    expect(find.textContaining('Network unavailable'), findsNothing);
     expect(find.byKey(const Key('owner-invite-code')), findsNothing);
   });
 

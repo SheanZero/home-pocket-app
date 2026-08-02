@@ -1173,9 +1173,8 @@ class SJa extends S {
   String get familySyncRegenerateInvite => '招待コードを再生成';
 
   @override
-  String familySyncRegenerateInviteFailed(String message) {
-    return '招待コードの再生成に失敗: $message';
-  }
+  String get familySyncRegenerateInviteFailed =>
+      '新しい招待コードを生成できませんでした。しばらくしてからもう一度お試しください。';
 
   @override
   String get familySyncInviteTitle => '家族を招待';
@@ -1198,7 +1197,7 @@ class SJa extends S {
 
   @override
   String familySyncInviteShareMessage(String groupName, String inviteCode) {
-    return 'Home Pocketの「$groupName」に参加する招待コードは $inviteCode です。';
+    return '「$groupName」に、あなたの場所を用意しました。\n一緒に暮らしを記録しながら、わが家のお金を気軽に整えていきましょう。\n\n招待コード：$inviteCode\n10分以内にお使いください。';
   }
 
   @override
@@ -1379,6 +1378,14 @@ class SJa extends S {
   String groupInviteExpiry(int minutes) {
     return '$minutes分間有効';
   }
+
+  @override
+  String groupInviteCountdown(String time) {
+    return 'あと$time';
+  }
+
+  @override
+  String get groupInviteExpired => '期限切れ';
 
   @override
   String get groupShareCode => '招待コードを共有';
@@ -2975,6 +2982,9 @@ class SJa extends S {
 
   @override
   String get onboardingStart => 'この設定ではじめる';
+
+  @override
+  String get onboardingPreparingHome => 'ホームを準備しています…';
 
   @override
   String get onboardingPrivacyTagLocal => 'LOCAL';

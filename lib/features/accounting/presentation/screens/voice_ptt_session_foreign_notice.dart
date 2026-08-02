@@ -109,7 +109,7 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
       ):
         // 2B: the conversion is visible and reversible. Undo restores the
         // spoken amount and clears the triple back to a JPY-native row.
-        _showVoiceSnackBar(
+        _showVoiceFeedback(
           message: l10n.voiceCurrencyConverted(
             NumberFormatter.formatCurrency(
               spokenAmount,
@@ -139,7 +139,7 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
         :final candidate,
       ):
         // 1A: suspected ITN-concat amount — one-tap adopt, never silent.
-        _showVoiceSnackBar(
+        _showVoiceFeedback(
           message: l10n.voiceAmountRepairSuspect(
             jpy(shownAmount),
             jpy(candidate),
@@ -154,7 +154,7 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
       case VoiceLargeAmountNotice(filledAmount: final shownAmount):
         // 1E: sanity guardrail — a very large voice-filled amount gets a
         // visible "please double-check" nudge (non-blocking; still editable).
-        _showVoiceSnackBar(
+        _showVoiceFeedback(
           message: l10n.voiceLargeAmountNotice(jpy(shownAmount)),
         );
       case VoiceNoNotice():
@@ -162,26 +162,19 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
     }
   }
 
-  void _showVoiceSnackBar({
+  void _showVoiceFeedback({
     required String message,
     String? actionLabel,
     VoidCallback? onAction,
   }) {
     if (!mounted) return;
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-          action: (actionLabel != null && onAction != null)
-              ? SnackBarAction(label: actionLabel, onPressed: onAction)
-              : null,
-        ),
-      );
+    showInfoFeedback(
+      context,
+      message,
+      duration: const Duration(seconds: 4),
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 
   /// voice-consolidation P1-7: the joy-branch satisfaction estimation, moved

@@ -109,7 +109,9 @@ class SaveUserProfileUseCase {
       return SaveProfileResult.success(saved);
     }
 
-    if (stagingStore == null) return persist();
+    final isNewProfileWithoutImage =
+        id == null && avatarImagePath == null && oldAvatarImagePath == null;
+    if (stagingStore == null || isNewProfileWithoutImage) return persist();
     // oldAvatarImagePath may be a picker path or a content-addressed managed
     // path. Never compare/delete it directly: liveness comes from the committed
     // profile plus semantic outbox reference snapshot after [persist].

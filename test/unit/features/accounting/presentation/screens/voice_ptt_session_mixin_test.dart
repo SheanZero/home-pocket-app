@@ -1302,7 +1302,7 @@ void main() {
       expect(host.pttFormState!.currentAmount, 50);
       expect(host.pttFormState!.currentOriginalCurrency, isNull);
       expect(host.pttDisplayCurrency, 'JPY');
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsNothing);
 
       speech.emitFinal('五十美元');
       await tester.pumpAndSettle();
@@ -1313,10 +1313,10 @@ void main() {
       expect(host.pttDisplayCurrency, 'USD');
 
       // 2B: the conversion is visible and reversible.
-      expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.byType(SnackBarAction), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-action')), findsOneWidget);
 
-      await tester.tap(find.byType(SnackBarAction));
+      await tester.tap(find.byKey(const Key('feedback-toast-action')));
       await tester.pumpAndSettle();
 
       expect(host.pttFormState!.currentAmount, 50);
@@ -1354,9 +1354,9 @@ void main() {
       // The poisoned amount is filled (never silently rewritten)…
       expect(host.pttFormState!.currentAmount, 250046);
       // …and the one-tap adopt affordance is offered.
-      expect(find.byType(SnackBarAction), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-action')), findsOneWidget);
 
-      await tester.tap(find.byType(SnackBarAction));
+      await tester.tap(find.byKey(const Key('feedback-toast-action')));
       await tester.pumpAndSettle();
 
       expect(host.pttFormState!.currentAmount, 2546);
@@ -1385,9 +1385,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(host.pttFormState!.currentAmount, 5000000);
-      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsOneWidget);
       expect(
-        find.byType(SnackBarAction),
+        find.byKey(const Key('feedback-toast-action')),
         findsNothing,
         reason: 'the large-amount notice is informational — no action',
       );
@@ -1397,7 +1397,7 @@ void main() {
       // permanently cover the bottom actions).
       await tester.pump(const Duration(seconds: 7));
       await tester.pumpAndSettle();
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsNothing);
     },
   );
 
@@ -1810,10 +1810,10 @@ void main() {
       expect(host.pttFormState!.currentAmount, 5312);
 
       // 1A undo affordance: the original reading is one tap away.
-      expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.byType(SnackBarAction), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-action')), findsOneWidget);
 
-      await tester.tap(find.byType(SnackBarAction));
+      await tester.tap(find.byKey(const Key('feedback-toast-action')));
       await tester.pumpAndSettle();
 
       expect(host.pttFormState!.currentAmount, 53102);
@@ -1857,10 +1857,10 @@ void main() {
 
       expect(host.pttFormState!.currentAmount, 3516);
 
-      expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.byType(SnackBarAction), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsOneWidget);
+      expect(find.byKey(const Key('feedback-toast-action')), findsOneWidget);
 
-      await tester.tap(find.byType(SnackBarAction));
+      await tester.tap(find.byKey(const Key('feedback-toast-action')));
       await tester.pumpAndSettle();
 
       expect(host.pttFormState!.currentAmount, 35016);

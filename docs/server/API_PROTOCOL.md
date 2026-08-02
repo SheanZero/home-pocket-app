@@ -712,7 +712,8 @@ Owner-only. Removes a member from the group.
 POST /api/v1/group/{groupId}/invite
 ```
 
-Owner-only. Generates a new 6-digit invite code, invalidating the previous one.
+Owner-only. Generates a new 6-digit invite code with a 10-minute lifetime,
+invalidating the previous one.
 
 **Path Parameters:**
 

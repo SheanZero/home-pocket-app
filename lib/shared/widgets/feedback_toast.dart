@@ -20,9 +20,9 @@ void _dismissActiveToast() {
   }
 }
 
-/// Unified top-of-screen feedback entry point for success / error toasts.
+/// Unified top-of-screen feedback entry point for all transient status pills.
 ///
-/// This is the SINGLE entry for both success and error feedback app-wide
+/// This is the SINGLE entry for success, error, and informational feedback
 /// (260603-nr1 #1; promoted to lib/shared in the follow-up sweep). It mirrors
 /// the overlay pattern of `showVoiceRecognitionErrorToast`
 /// (voice_error_toast.dart): a top-anchored [SoftToast] inserted as an
@@ -32,7 +32,7 @@ void _dismissActiveToast() {
 /// replaces the previous (no stacking). Prefer [showSuccessFeedback] /
 /// [showErrorFeedback]; both delegate here.
 ///
-/// [actionLabel] + [onAction] render an optional inline link (e.g. "退出记账").
+/// [actionLabel] + [onAction] render an optional inline action (e.g. "退出记账").
 void showFeedbackToast(
   BuildContext context,
   String message, {
@@ -40,6 +40,7 @@ void showFeedbackToast(
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
+  Key? actionKey,
 }) {
   // Singleton: drop any toast still on screen before inserting the new one.
   _dismissActiveToast();
@@ -59,6 +60,7 @@ void showFeedbackToast(
         duration: duration,
         actionLabel: actionLabel,
         onAction: onAction,
+        actionKey: actionKey,
         onDismissed: () {
           if (entry.mounted) entry.remove();
           // Only clear the slot if this entry is still the active one — a newer
@@ -82,6 +84,7 @@ void showSuccessFeedback(
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
+  Key? actionKey,
 }) {
   showFeedbackToast(
     context,
@@ -90,6 +93,7 @@ void showSuccessFeedback(
     duration: duration,
     actionLabel: actionLabel,
     onAction: onAction,
+    actionKey: actionKey,
   );
 }
 
@@ -100,6 +104,7 @@ void showErrorFeedback(
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
+  Key? actionKey,
 }) {
   showFeedbackToast(
     context,
@@ -108,5 +113,26 @@ void showErrorFeedback(
     duration: duration,
     actionLabel: actionLabel,
     onAction: onAction,
+    actionKey: actionKey,
+  );
+}
+
+/// Show a neutral informational status pill.
+void showInfoFeedback(
+  BuildContext context,
+  String message, {
+  Duration duration = _kDefaultFeedbackDuration,
+  String? actionLabel,
+  VoidCallback? onAction,
+  Key? actionKey,
+}) {
+  showFeedbackToast(
+    context,
+    message,
+    tone: FeedbackTone.info,
+    duration: duration,
+    actionLabel: actionLabel,
+    onAction: onAction,
+    actionKey: actionKey,
   );
 }

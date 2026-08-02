@@ -128,6 +128,7 @@ Future<({List<Override> overrides, SharedPreferences prefs})> _buildOverrides({
 Widget _host(
   List<Override> overrides, {
   void Function({required bool setupSecurity})? onCompleted,
+  bool disableAnimations = false,
 }) {
   return ProviderScope(
     overrides: overrides,
@@ -140,6 +141,12 @@ Widget _host(
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('ja'), Locale('en'), Locale('zh')],
+      builder: disableAnimations
+          ? (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: child!,
+            )
+          : null,
       home: OnboardingFlowScreen(
         bookId: 'book-1',
         onCompleted: onCompleted ?? ({required bool setupSecurity}) {},
@@ -192,6 +199,73 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(OnboardingIntroScreen), findsOneWidget);
       expect(find.byType(OnboardingSettingsScreen), findsNothing);
+    });
+
+    testWidgets(
+      'intro and settings use a brief fade-slide transition in both directions',
+      (tester) async {
+        final h = await _buildOverrides();
+        await tester.pumpWidget(_host(h.overrides));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithText(TextButton, '次へ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(TextButton, 'はじめる'));
+        await tester.pump();
+
+        expect(
+          find.byType(OnboardingIntroScreen, skipOffstage: false),
+          findsOneWidget,
+        );
+        expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
+        expect(
+          find.ancestor(
+            of: find.byType(OnboardingSettingsScreen),
+            matching: find.byType(FadeTransition),
+          ),
+          findsWidgets,
+        );
+        expect(
+          find.ancestor(
+            of: find.byType(OnboardingSettingsScreen),
+            matching: find.byType(SlideTransition),
+          ),
+          findsWidgets,
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.byType(OnboardingIntroScreen), findsNothing);
+        expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
+
+        Navigator.of(
+          tester.element(find.byType(OnboardingSettingsScreen)),
+        ).pop();
+        await tester.pump();
+        expect(
+          find.byType(OnboardingSettingsScreen, skipOffstage: false),
+          findsOneWidget,
+        );
+        expect(find.byType(OnboardingIntroScreen), findsOneWidget);
+
+        await tester.pumpAndSettle();
+        expect(find.byType(OnboardingSettingsScreen), findsNothing);
+        expect(find.byType(OnboardingIntroScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets('intro to settings is immediate when animations are disabled', (
+      tester,
+    ) async {
+      final h = await _buildOverrides();
+      await tester.pumpWidget(_host(h.overrides, disableAnimations: true));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(TextButton, 'スキップ'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(OnboardingIntroScreen), findsNothing);
+      expect(find.byType(OnboardingSettingsScreen), findsOneWidget);
     });
 
     testWidgets(

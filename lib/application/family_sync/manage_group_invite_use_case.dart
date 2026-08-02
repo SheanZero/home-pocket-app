@@ -59,7 +59,10 @@ class ManageGroupInviteUseCase {
       if (group.role != 'owner') {
         return const ManageGroupInviteForbidden();
       }
-      if (group.status != GroupStatus.active) {
+      final canManageInvite =
+          group.status == GroupStatus.active ||
+          group.status == GroupStatus.pending;
+      if (!canManageInvite) {
         return const ManageGroupInviteError('Group is not active');
       }
 

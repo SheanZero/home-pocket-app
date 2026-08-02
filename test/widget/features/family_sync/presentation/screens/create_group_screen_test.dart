@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/group_operation_error.dart';
+import 'package:home_pocket/application/family_sync/manage_group_invite_use_case.dart';
 import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
 import 'package:home_pocket/application/family_sync/repository_providers.dart'
     show notifyMemberApprovalUseCaseProvider;
@@ -15,6 +16,7 @@ import 'package:home_pocket/features/profile/domain/repositories/user_profile_re
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show userProfileRepositoryProvider;
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
+import 'package:home_pocket/shared/widgets/soft_toast.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -24,12 +26,16 @@ class _MockCreateGroupUseCase extends Mock implements CreateGroupUseCase {}
 class _MockNotifyMemberApprovalUseCase extends Mock
     implements NotifyMemberApprovalUseCase {}
 
+class _MockManageGroupInviteUseCase extends Mock
+    implements ManageGroupInviteUseCase {}
+
 class _MockUserProfileRepository extends Mock
     implements UserProfileRepository {}
 
 void main() {
   late _MockCreateGroupUseCase createGroupUseCase;
   late _MockNotifyMemberApprovalUseCase notifyUseCase;
+  late _MockManageGroupInviteUseCase manageInviteUseCase;
   late _MockUserProfileRepository profileRepository;
 
   final profile = UserProfile(
@@ -43,6 +49,7 @@ void main() {
   setUp(() {
     createGroupUseCase = _MockCreateGroupUseCase();
     notifyUseCase = _MockNotifyMemberApprovalUseCase();
+    manageInviteUseCase = _MockManageGroupInviteUseCase();
     profileRepository = _MockUserProfileRepository();
 
     when(() => profileRepository.find()).thenAnswer((_) async => profile);
@@ -58,6 +65,7 @@ void main() {
   List<Override> overrides() => [
     createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
     notifyMemberApprovalUseCaseProvider.overrideWithValue(notifyUseCase),
+    manageGroupInviteUseCaseProvider.overrideWithValue(manageInviteUseCase),
     userProfileRepositoryProvider.overrideWithValue(profileRepository),
   ];
 
@@ -231,6 +239,118 @@ void main() {
     expect(find.text('INV 123'), findsOneWidget);
   });
 
+  testWidgets(
+    'recovered owner group opens the invite step without a conflict error',
+    (tester) async {
+      when(
+        () => createGroupUseCase.execute(
+          displayName: any(named: 'displayName'),
+          avatarEmoji: any(named: 'avatarEmoji'),
+          groupName: any(named: 'groupName'),
+          avatarImageHash: any(named: 'avatarImageHash'),
+        ),
+      ).thenAnswer(
+        (_) async => const CreateGroupResult.success(
+          groupId: 'existing-group',
+          groupName: 'Authoritative Family',
+          inviteCode: 'INV123',
+          expiresAt: 4102444800,
+        ),
+      );
+      await pumpScreen(tester);
+
+      await tester.tap(find.byKey(const Key('create-group-submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Authoritative Family'), findsOneWidget);
+      expect(find.text('INV 123'), findsOneWidget);
+      expect(find.byKey(const Key('create-group-retry')), findsNothing);
+      expect(find.textContaining('already has a family group'), findsNothing);
+      verify(
+        () => notifyUseCase.connectWebSocket(groupId: 'existing-group'),
+      ).called(1);
+    },
+  );
+
+  testWidgets('share sends the warm localized invitation instead of raw code', (
+    tester,
+  ) async {
+    when(
+      () => createGroupUseCase.execute(
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        groupName: any(named: 'groupName'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
+      (_) async => const CreateGroupResult.success(
+        groupId: 'group-1',
+        groupName: 'Pocket Family',
+        inviteCode: '931038',
+        expiresAt: 4102444800,
+      ),
+    );
+    final sharedTexts = <String>[];
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        CreateGroupScreen(shareInvite: (text) async => sharedTexts.add(text)),
+        locale: const Locale('zh'),
+        overrides: overrides(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('create-group-submit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('create-group-share-invite')));
+    await tester.pump();
+
+    expect(sharedTexts, [
+      '我在「Pocket Family」为你留了一个位置。\n'
+          '一起来记录生活，轻松打理我们的小家吧。\n\n'
+          '邀请码：931038\n'
+          '请在 10 分钟内使用。',
+    ]);
+  });
+
+  testWidgets('regenerate failure is friendly and hides relay details', (
+    tester,
+  ) async {
+    when(
+      () => createGroupUseCase.execute(
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        groupName: any(named: 'groupName'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
+      (_) async => const CreateGroupResult.success(
+        groupId: 'group-1',
+        groupName: 'Pocket Family',
+        inviteCode: 'INV123',
+        expiresAt: 4102444800,
+      ),
+    );
+    when(
+      () => manageInviteUseCase.execute(groupId: 'group-1', forceRefresh: true),
+    ).thenAnswer(
+      (_) async => const ManageGroupInviteError('Group is not active'),
+    );
+    await pumpScreen(tester);
+
+    await tester.tap(find.byKey(const Key('create-group-submit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('create-group-regenerate-code')));
+    await tester.pump();
+
+    expect(find.byType(SoftToast), findsOneWidget);
+    expect(find.textContaining('try again'), findsOneWidget);
+    expect(find.textContaining('Group is not active'), findsNothing);
+
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('single-group conflict uses localized guidance', (tester) async {
     when(
       () => createGroupUseCase.execute(
@@ -288,6 +408,16 @@ void main() {
         find.byKey(const Key('family-network-unavailable-dialog')),
         findsOneWidget,
       );
+      final badge = find.byKey(
+        const Key('family-network-unavailable-icon-badge'),
+      );
+      expect(badge, findsOneWidget);
+      expect(tester.getSize(badge), const Size.square(80));
+      final icon = tester.widget<Icon>(
+        find.byKey(const Key('family-network-unavailable-icon')),
+      );
+      expect(icon.icon, Icons.wifi_off_rounded);
+      expect(icon.size, 40);
       expect(find.textContaining('ClientException'), findsNothing);
       expect(find.textContaining('happypocket.app'), findsNothing);
       expect(find.byKey(const Key('create-group-name-field')), findsOneWidget);

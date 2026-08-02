@@ -16,6 +16,7 @@ import '../../../family_sync/presentation/widgets/family_sync_notification_route
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_item_form_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_list_screen.dart';
+import '../../../../shared/widgets/lazy_indexed_stack.dart';
 import '../providers/state_home.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
@@ -139,12 +140,21 @@ class MainShellScreen extends ConsumerWidget {
 
     return FamilySyncNotificationRouteListener(
       child: Scaffold(
+        // Onboarding can hand off while the iOS keyboard dismissal animation
+        // still reports a non-zero viewInset. The shell itself has no text
+        // input, so resizing here only lifts the floating tab bar/FAB into the
+        // middle of the first home frame. Input routes manage their own insets.
+        resizeToAvoidBottomInset: false,
         body: Stack(
+          key: const ValueKey('main-shell-body-stack'),
+          fit: StackFit.expand,
           children: [
-            IndexedStack(
+            LazyIndexedStack(
               index: currentIndex,
-              children: [
-                HomeScreen(
+              itemCount: 4,
+              cacheKey: bookId,
+              itemBuilder: (context, index) => switch (index) {
+                0 => HomeScreen(
                   bookId: bookId,
                   onAddJoyTap: (prompt) =>
                       openAddEntry(continuousMode: false, joyPrompt: prompt),
@@ -156,9 +166,9 @@ class MainShellScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                ListScreen(bookId: bookId),
-                AnalyticsScreen(bookId: bookId),
-                ShoppingListScreen(
+                1 => ListScreen(bookId: bookId),
+                2 => AnalyticsScreen(bookId: bookId),
+                3 => ShoppingListScreen(
                   onSettingsTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -167,7 +177,8 @@ class MainShellScreen extends ConsumerWidget {
                     );
                   },
                 ),
-              ],
+                _ => throw RangeError.index(index, const <Never>[]),
+              },
             ),
             Positioned(
               left: 0,

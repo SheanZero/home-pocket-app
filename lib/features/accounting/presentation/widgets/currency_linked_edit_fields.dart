@@ -31,6 +31,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import 'change_rate_confirmation_dialog.dart';
 import 'currency_edit_strings.dart';
 
@@ -293,25 +294,18 @@ class CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
     if (!mounted) return;
     final l10n = CurrencyEditStrings.of(context);
     final locale = Localizations.localeOf(context);
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 5),
-          content: Text(
-            l10n.rateChangedToast(
-              NumberFormatter.formatCurrency(oldJpy, 'JPY', locale),
-              NumberFormatter.formatCurrency(newJpy, 'JPY', locale),
-            ),
-          ),
-          action: SnackBarAction(
-            key: const Key('toast_undo_button'),
-            label: l10n.undo,
-            // Undo restores the OLD rate (JPY returns to its prior value).
-            onPressed: () => _applyRate(oldRate, manualOverride: false),
-          ),
-        ),
-      );
+    showInfoFeedback(
+      context,
+      l10n.rateChangedToast(
+        NumberFormatter.formatCurrency(oldJpy, 'JPY', locale),
+        NumberFormatter.formatCurrency(newJpy, 'JPY', locale),
+      ),
+      duration: const Duration(seconds: 5),
+      actionLabel: l10n.undo,
+      actionKey: const Key('toast_undo_button'),
+      // Undo restores the OLD rate (JPY returns to its prior value).
+      onAction: () => _applyRate(oldRate, manualOverride: false),
+    );
   }
 
   void _applyRate(String rate, {required bool manualOverride}) {
@@ -403,9 +397,7 @@ class CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
             child: Text(
               key: const Key('edit_rate_staleness'),
               widget.stalenessNote!,
-              style: AppTextStyles.labelMedium.copyWith(
-                color: palette.warning,
-              ),
+              style: AppTextStyles.labelMedium.copyWith(color: palette.warning),
             ),
           ),
       ],

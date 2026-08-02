@@ -8,6 +8,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/settings_section_card.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../screens/legal_doc_screen.dart';
 
 class LegalSponsorSection extends StatelessWidget {
@@ -32,9 +33,7 @@ class LegalSponsorSection extends StatelessWidget {
   Future<void> _openSupport(BuildContext context) async {
     final opened = await _launchExternal(LegalUrls.support);
     if (!opened && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(S.of(context).sponsorLaunchError)));
+      showErrorFeedback(context, S.of(context).sponsorLaunchError);
     }
   }
 

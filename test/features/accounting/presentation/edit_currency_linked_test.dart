@@ -273,40 +273,43 @@ void main() {
     });
   });
 
-  group('ADR-022 D-03 — no override + >1% change → non-blocking toast + Undo', () {
-    testWidgets('shows toast with Undo that restores the old rate', (
-      tester,
-    ) async {
-      final cardKey = GlobalKey<CurrencyLinkedEditFieldsState>();
-      await pumpHost(
+  group(
+    'ADR-022 D-03 — no override + >1% change → non-blocking toast + Undo',
+    () {
+      testWidgets('shows toast with Undo that restores the old rate', (
         tester,
-        cardKey: cardKey,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        // Real-rate source returns 160.00 for the new date.
-        refetchRate: () async => '160.00',
-      );
+      ) async {
+        final cardKey = GlobalKey<CurrencyLinkedEditFieldsState>();
+        await pumpHost(
+          tester,
+          cardKey: cardKey,
+          currency: 'USD',
+          originalAmount: 5000,
+          rate: '148.30',
+          manualOverride: false,
+          // Real-rate source returns 160.00 for the new date.
+          refetchRate: () async => '160.00',
+        );
 
-      // Date change auto-refetches a rate that moves JPY by >1% (148.30→160.00:
-      // 7415 → 8000, |8000-7415|/7415 ≈ 7.9% > 1%).
-      await cardKey.currentState!.triggerDateChangeRefetch();
-      await tester.pumpAndSettle();
+        // Date change auto-refetches a rate that moves JPY by >1% (148.30→160.00:
+        // 7415 → 8000, |8000-7415|/7415 ≈ 7.9% > 1%).
+        await cardKey.currentState!.triggerDateChangeRefetch();
+        await tester.pumpAndSettle();
 
-      // Non-blocking: no dialog, a SnackBar toast with an Undo action.
-      expect(find.byType(AlertDialog), findsNothing);
-      expect(find.byType(SnackBar), findsOneWidget);
+        // Non-blocking: no dialog, a shared status pill with an Undo action.
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.byKey(const Key('feedback-toast-surface')), findsOneWidget);
 
-      final undo = find.byKey(const Key('toast_undo_button'));
-      expect(undo, findsOneWidget);
-      await tester.tap(undo);
-      await tester.pumpAndSettle();
+        final undo = find.byKey(const Key('toast_undo_button'));
+        expect(undo, findsOneWidget);
+        await tester.tap(undo);
+        await tester.pumpAndSettle();
 
-      // Undo restores the OLD rate → JPY returns to 7415.
-      expect(find.textContaining('7,415'), findsOneWidget);
-    });
-  });
+        // Undo restores the OLD rate → JPY returns to 7415.
+        expect(find.textContaining('7,415'), findsOneWidget);
+      });
+    },
+  );
 
   group('never-block-save — real re-fetch resolves no rate', () {
     testWidgets('null rate source → date change is a no-op (no dialog/toast)', (
@@ -328,7 +331,7 @@ void main() {
 
       // Degrades gracefully: nothing surfaces, the existing rate stays.
       expect(find.byType(AlertDialog), findsNothing);
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsNothing);
       expect(find.textContaining('7,415'), findsOneWidget);
     });
 
@@ -350,7 +353,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsNothing);
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byKey(const Key('feedback-toast-surface')), findsNothing);
       expect(find.textContaining('7,415'), findsOneWidget);
     });
   });
@@ -385,38 +388,41 @@ void main() {
   });
 
   // ── WR-06: a cleared/non-positive injected amount degrades JPY to em-dash ──
-  group('WR-06 — non-positive injected amount → JPY em-dash + onAmountInvalid', () {
-    testWidgets('re-pumping originalAmount 0 → JPY shows the em-dash', (
-      tester,
-    ) async {
-      final invalidEvents = <bool>[];
-      await pumpHost(
+  group(
+    'WR-06 — non-positive injected amount → JPY em-dash + onAmountInvalid',
+    () {
+      testWidgets('re-pumping originalAmount 0 → JPY shows the em-dash', (
         tester,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        onAmountInvalid: invalidEvents.add,
-      );
-      expect(find.textContaining('7,415'), findsOneWidget);
+      ) async {
+        final invalidEvents = <bool>[];
+        await pumpHost(
+          tester,
+          currency: 'USD',
+          originalAmount: 5000,
+          rate: '148.30',
+          manualOverride: false,
+          onAmountInvalid: invalidEvents.add,
+        );
+        expect(find.textContaining('7,415'), findsOneWidget);
 
-      // The headline cleared the amount to 0 → host re-pumps with 0.
-      await pumpHost(
-        tester,
-        currency: 'USD',
-        originalAmount: 0,
-        rate: '148.30',
-        manualOverride: false,
-        onAmountInvalid: invalidEvents.add,
-      );
-      await tester.pumpAndSettle();
+        // The headline cleared the amount to 0 → host re-pumps with 0.
+        await pumpHost(
+          tester,
+          currency: 'USD',
+          originalAmount: 0,
+          rate: '148.30',
+          manualOverride: false,
+          onAmountInvalid: invalidEvents.add,
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('—'), findsOneWidget);
-      expect(
-        invalidEvents.contains(true),
-        isTrue,
-        reason: 'a non-positive injected amount must report invalid (WR-06)',
-      );
-    });
-  });
+        expect(find.textContaining('—'), findsOneWidget);
+        expect(
+          invalidEvents.contains(true),
+          isTrue,
+          reason: 'a non-positive injected amount must report invalid (WR-06)',
+        );
+      });
+    },
+  );
 }

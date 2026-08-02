@@ -2,9 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/profile/save_user_profile_use_case.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
+import 'package:home_pocket/infrastructure/sync/avatar_semantic_staging_store.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockUserProfileRepository extends Mock implements UserProfileRepository {}
+
+class MockAvatarSemanticStagingStore extends Mock
+    implements AvatarSemanticStagingStore {}
 
 class FakeUserProfile extends Fake implements UserProfile {}
 
@@ -84,6 +88,27 @@ void main() {
       expect(result.profile?.avatarEmoji, 'icon:cat');
       verify(() => repository.save(any())).called(1);
     });
+
+    test(
+      'new profile without an image skips avatar staging maintenance',
+      () async {
+        final stagingStore = MockAvatarSemanticStagingStore();
+        useCase = SaveUserProfileUseCase(
+          repository,
+          avatarStagingStore: stagingStore,
+        );
+        when(() => repository.save(any())).thenAnswer((_) async {});
+
+        final result = await useCase.execute(
+          displayName: 'たけし',
+          avatarEmoji: 'icon:cat',
+        );
+
+        expect(result.isSuccess, isTrue);
+        verify(() => repository.save(any())).called(1);
+        verifyNoMoreInteractions(stagingStore);
+      },
+    );
 
     test('rejects empty display name', () async {
       final result = await useCase.execute(

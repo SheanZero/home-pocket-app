@@ -2307,11 +2307,11 @@ abstract class S {
   /// **'Regenerate Invite'**
   String get familySyncRegenerateInvite;
 
-  /// Error message when regenerating an invite fails
+  /// Friendly error shown when regenerating a family invite fails
   ///
   /// In en, this message translates to:
-  /// **'Regenerate invite failed: {message}'**
-  String familySyncRegenerateInviteFailed(String message);
+  /// **'Couldn\'t generate a new invite code. Please try again in a moment.'**
+  String get familySyncRegenerateInviteFailed;
 
   /// Title of the owner-only invite management sheet
   ///
@@ -2352,7 +2352,7 @@ abstract class S {
   /// Text sent through the system share sheet for a group invite
   ///
   /// In en, this message translates to:
-  /// **'Join {groupName} in Home Pocket with invite code {inviteCode}.'**
+  /// **'I saved you a place in “{groupName}”.\nLet’s keep track of everyday life and make managing our home a little easier—together.\n\nInvite code: {inviteCode}\nPlease use it within 10 minutes.'**
   String familySyncInviteShareMessage(String groupName, String inviteCode);
 
   /// Feedback when invite management is attempted without owner permission
@@ -2666,6 +2666,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Valid for {minutes} minutes'**
   String groupInviteExpiry(int minutes);
+
+  /// Live remaining time for a family invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Valid for {time}'**
+  String groupInviteCountdown(String time);
+
+  /// Short red status shown when a family invite code expires
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get groupInviteExpired;
 
   /// No description provided for @groupShareCode.
   ///
@@ -5572,6 +5584,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Start with these settings'**
   String get onboardingStart;
+
+  /// Onboarding settings page: progress label while completing setup
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your home…'**
+  String get onboardingPreparingHome;
 
   /// No description provided for @onboardingPrivacyTagLocal.
   ///
