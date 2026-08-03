@@ -5,7 +5,7 @@ import 'package:home_pocket/features/family_sync/presentation/screens/confirm_jo
 import '../../../../../helpers/test_localizations.dart';
 
 void main() {
-  testWidgets('explains that confirming replaces the current empty family', (
+  testWidgets('keeps empty-family cleanup as an internal implementation detail', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -29,7 +29,8 @@ void main() {
         'After you submit the join request, your current family with no '
         'other members will be deleted automatically.',
       ),
-      findsOneWidget,
+      findsNothing,
     );
+    expect(find.text('Request to join'), findsOneWidget);
   });
 }

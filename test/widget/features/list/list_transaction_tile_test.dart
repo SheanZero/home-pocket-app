@@ -17,7 +17,9 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     show deleteTransactionUseCaseProvider;
 import 'package:home_pocket/features/list/domain/models/tagged_transaction.dart';
 import 'package:home_pocket/features/list/presentation/widgets/list_transaction_tile.dart';
+import 'package:home_pocket/features/profile/presentation/widgets/avatar_display.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
+import 'package:home_pocket/shared/widgets/family_transaction_attribution.dart';
 import 'package:home_pocket/shared/widgets/satisfaction_face_icon.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
@@ -53,6 +55,10 @@ Future<void> _pumpTile(
   VoidCallback? onTap,
   VoidCallback? onDeleted,
   int? satisfactionValue,
+  String? merchant,
+  String? familyPayerLabel,
+  String? familyPayerAvatarEmoji,
+  FamilyPayerTone familyPayerTone = FamilyPayerTone.primary,
 }) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -74,8 +80,11 @@ Future<void> _pumpTile(
             formattedAmount: '¥1,500',
             l1Icon: Icons.restaurant,
             locale: const Locale('ja'),
-            merchant: null,
+            merchant: merchant,
             satisfactionValue: satisfactionValue,
+            familyPayerLabel: familyPayerLabel,
+            familyPayerAvatarEmoji: familyPayerAvatarEmoji,
+            familyPayerTone: familyPayerTone,
           ),
         ),
       ),
@@ -214,35 +223,38 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('Phase 29: member attribution chip FAM-02', () {
-    testWidgets('FAM-02/CC-1: member chip renders when memberTag non-null', (
-      tester,
-    ) async {
-      final mockDelete = _MockDeleteTransactionUseCase();
-      when(
-        () => mockDelete.execute(any()),
-      ).thenAnswer((_) async => Result.success(null));
+    testWidgets(
+      'FAM-02/CC-1: family row uses avatar, category badge, and name chip',
+      (tester) async {
+        final mockDelete = _MockDeleteTransactionUseCase();
+        when(
+          () => mockDelete.execute(any()),
+        ).thenAnswer((_) async => Result.success(null));
 
-      final container = ProviderContainer.test(
-        overrides: [
-          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
-        ],
-      );
+        final container = ProviderContainer.test(
+          overrides: [
+            deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+          ],
+        );
 
-      // Build a TaggedTransaction with memberTag set
-      final tx = TaggedTransaction(
-        transaction: _makeTx().transaction,
-        memberTag: const MemberTag(emoji: '🐻', name: '太郎'),
-      );
+        // Build a TaggedTransaction with memberTag set
+        final tx = TaggedTransaction(
+          transaction: _makeTx().transaction,
+          memberTag: const MemberTag(emoji: '🐻', name: '太郎'),
+        );
 
-      await _pumpTile(tester, container, tx);
+        await _pumpTile(tester, container, tx);
 
-      // RED: tile does not render member chip yet (Plan 03 adds it)
-      expect(
-        find.text('🐻 太郎'),
-        findsOneWidget,
-        reason: 'FAM-02/CC-1: member chip must show emoji + name',
-      );
-    });
+        expect(find.byType(AvatarDisplay), findsOneWidget);
+        expect(
+          find.byKey(const Key('list-family-category-badge')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('family-payer-chip')), findsOneWidget);
+        expect(find.text('太郎'), findsOneWidget);
+        expect(find.text('日常'), findsNothing);
+      },
+    );
 
     testWidgets(
       'FAM-02/SC#3: member chip absent when memberTag null (own-book row)',
@@ -263,25 +275,8 @@ void main() {
 
         await _pumpTile(tester, container, tx);
 
-        // Own-book rows must never show a member chip
-        expect(
-          find.text('🐻 太郎'),
-          findsNothing,
-          reason: 'FAM-02/SC#3: no member chip when memberTag is null',
-        );
-        // No ConstrainedBox with maxWidth 72 should be added for own-book rows
-        final constrained = find.descendant(
-          of: find.byType(ListTransactionTile),
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is ConstrainedBox && widget.constraints.maxWidth == 72,
-          ),
-        );
-        expect(
-          constrained,
-          findsNothing,
-          reason: 'SC#3: no maxWidth-72 ConstrainedBox for own-book rows',
-        );
+        expect(find.byKey(const Key('family-payer-chip')), findsNothing);
+        expect(find.byType(AvatarDisplay), findsNothing);
       },
     );
 
@@ -307,10 +302,8 @@ void main() {
 
       await _pumpTile(tester, container, tx);
 
-      // RED: chip not yet rendered (Plan 03)
-      // After Plan 03: ConstrainedBox with maxWidth 72 must exist
       final constrained = find.descendant(
-        of: find.byType(ListTransactionTile),
+        of: find.byKey(const Key('family-payer-chip')),
         matching: find.byWidgetPredicate(
           (widget) =>
               widget is ConstrainedBox && widget.constraints.maxWidth == 72,
@@ -334,6 +327,40 @@ void main() {
         memberChipText,
         findsOneWidget,
         reason: 'CC-1: member chip text must use TextOverflow.ellipsis',
+      );
+    });
+
+    testWidgets('current phone owner is labelled Me and keeps Joy treatment', (
+      tester,
+    ) async {
+      final mockDelete = _MockDeleteTransactionUseCase();
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
+      final container = ProviderContainer.test(
+        overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ],
+      );
+
+      await _pumpTile(
+        tester,
+        container,
+        _makeTx(),
+        familyPayerLabel: '我',
+        familyPayerAvatarEmoji: '🌿',
+        familyPayerTone: FamilyPayerTone.primary,
+        merchant: '喫茶 月舟',
+        satisfactionValue: 8,
+      );
+
+      expect(find.text('我'), findsOneWidget);
+      expect(find.text('喫茶 月舟'), findsOneWidget);
+      expect(find.text('日常'), findsNothing);
+      expect(find.byType(SatisfactionFaceIcon), findsOneWidget);
+      expect(
+        find.byKey(const Key('list-family-category-badge')),
+        findsOneWidget,
       );
     });
   });

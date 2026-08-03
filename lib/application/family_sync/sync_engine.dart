@@ -29,6 +29,7 @@ typedef GroupDissolvedLifecycleHandler = Future<void> Function(String groupId);
 typedef DurableOutboxRecoveryCallback = Future<int> Function();
 typedef InboundQuarantineMaintenanceCallback = Future<void> Function();
 typedef AvatarStagingMaintenanceCallback = Future<void> Function();
+typedef SyncIssueResolutionCallback = Future<void> Function();
 
 /// Unified sync entry point. Combines SyncScheduler + SyncOrchestrator
 /// and exposes a reactive SyncStatus stream.
@@ -45,6 +46,7 @@ class SyncEngine {
     DurableOutboxRecoveryCallback? recoverDurableOutbox,
     InboundQuarantineMaintenanceCallback? maintainInboundQuarantine,
     AvatarStagingMaintenanceCallback? maintainAvatarStaging,
+    SyncIssueResolutionCallback? resolveSyncIssues,
   }) : _orchestrator = orchestrator,
        _groupRepo = groupRepo,
        _webSocketService = webSocketService,
@@ -55,7 +57,8 @@ class SyncEngine {
        _controlPlaneReconciliation = controlPlaneReconciliation,
        _recoverDurableOutbox = recoverDurableOutbox,
        _maintainInboundQuarantine = maintainInboundQuarantine,
-       _maintainAvatarStaging = maintainAvatarStaging {
+       _maintainAvatarStaging = maintainAvatarStaging,
+       _resolveSyncIssues = resolveSyncIssues {
     _scheduler = SyncScheduler(
       onSyncRequested: _handleSyncRequest,
       checkNeedsFullPull: _orchestrator.needsFullPull,
@@ -73,6 +76,7 @@ class SyncEngine {
   final DurableOutboxRecoveryCallback? _recoverDurableOutbox;
   final InboundQuarantineMaintenanceCallback? _maintainInboundQuarantine;
   final AvatarStagingMaintenanceCallback? _maintainAvatarStaging;
+  final SyncIssueResolutionCallback? _resolveSyncIssues;
   late final SyncScheduler _scheduler;
   SyncLifecycleObserver? _lifecycleObserver;
   StreamSubscription<WebSocketEvent>? _wsEventSubscription;
@@ -543,6 +547,7 @@ class SyncEngine {
       // Source-compatible path for lightweight legacy test doubles. Production
       // always injects the control-plane reconciler below.
       await _recoverDurableOutbox?.call();
+      await _resolveSyncIssuesSafely();
       await _refreshInitialStatus();
       await _connectWebSocket();
       await _groupKeyRecovery?.respondForCurrentGroup();
@@ -590,6 +595,16 @@ class SyncEngine {
     await _connectWebSocket();
     await _refreshInitialStatus();
     await _groupKeyRecovery?.respondForCurrentGroup();
+  }
+
+  Future<void> _resolveSyncIssuesSafely() async {
+    try {
+      await _resolveSyncIssues?.call();
+    } catch (_) {
+      if (kDebugMode) {
+        debugPrint('SyncEngine: automatic sync issue resolution failed');
+      }
+    }
   }
 
   Future<void> _reconcileAfterTransportMembershipFailure({
@@ -671,6 +686,7 @@ class SyncEngine {
     _updateStatus(_currentStatus.copyWith(state: syncingState));
 
     final result = await _orchestrator.execute(mode);
+    await _resolveSyncIssuesSafely();
 
     // Compute final status
     switch (result) {

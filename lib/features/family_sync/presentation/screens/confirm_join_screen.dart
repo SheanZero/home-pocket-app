@@ -142,13 +142,6 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              if (result.replacesEmptyOwnedGroup) ...[
-                FamilyHelperNote(
-                  icon: LucideIcons.triangleAlert,
-                  text: l10n.familySyncReplaceEmptyGroupHint,
-                ),
-                const SizedBox(height: 16),
-              ],
               FamilyPrimaryButton(
                 onPressed: _isConfirming ? null : _handleConfirm,
                 label: l10n.groupConfirmJoin,

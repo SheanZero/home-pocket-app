@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
@@ -18,9 +19,10 @@ import '../../domain/models/tagged_transaction.dart';
 /// Pure data-driven: all display values computed from [TaggedTransaction] by caller.
 ///
 /// Layout:
-/// - LEADING: enlarged, vertically-centered L1 category icon
+/// - LEADING: L1 category icon, or payer avatar with a category corner badge
 /// - LEFT primary row: L2 category name + optional joy emoji
-/// - LEFT secondary row: ledger type badge (background pill) + optional merchant
+/// - LEFT secondary row: ledger badge in personal mode; payer chip in family
+///   mode, followed by an optional merchant
 /// - RIGHT: amount only (no time label)
 ///
 /// Navigation on tap is handled by the [onTap] callback injected by the parent,
@@ -47,6 +49,10 @@ class ListTransactionTile extends ConsumerWidget {
     this.showDate = false,
     this.foreignAnnotation,
     this.readOnly = false,
+    this.familyPayerLabel,
+    this.familyPayerTone = FamilyPayerTone.shared,
+    this.familyPayerAvatarEmoji,
+    this.familyPayerAvatarImagePath,
   });
 
   final TaggedTransaction taggedTx;
@@ -98,6 +104,14 @@ class ListTransactionTile extends ConsumerWidget {
   /// mutations stay on the List/entry tab). Defaults to false so the List tab
   /// behaviour is byte-identical (ROW-01/ROW-02 unchanged).
   final bool readOnly;
+
+  /// Family-mode attribution. Explicit values are supplied for both the
+  /// current device owner and shadow-book members. [TaggedTransaction.memberTag]
+  /// remains a compatibility fallback for shadow rows built by older callers.
+  final String? familyPayerLabel;
+  final FamilyPayerTone familyPayerTone;
+  final String? familyPayerAvatarEmoji;
+  final String? familyPayerAvatarImagePath;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -167,20 +181,34 @@ class ListTransactionTile extends ConsumerWidget {
     AppPalette palette, {
     required bool showChevron,
   }) {
+    final fallbackMember = taggedTx.memberTag;
+    final payerLabel = familyPayerLabel ?? fallbackMember?.name;
+    final payerAvatarEmoji =
+        familyPayerAvatarEmoji ?? fallbackMember?.emoji ?? '';
+    final isFamilyRow = payerLabel != null;
+
     return Row(
       children: [
-        // Leading: enlarged, vertically-centered L1 category icon
-        SizedBox(
-          width: 28,
-          child: Center(
-            child: Icon(
-              l1Icon,
-              key: const Key('list-transaction-icon'),
-              size: 25,
-              color: categoryColor,
+        if (isFamilyRow)
+          FamilyTransactionAvatar(
+            avatarEmoji: payerAvatarEmoji,
+            avatarImagePath: familyPayerAvatarImagePath,
+            categoryIcon: l1Icon,
+            badgeColor: satisfactionValue == null ? palette.daily : palette.joy,
+            badgeKey: const Key('list-family-category-badge'),
+          )
+        else
+          SizedBox(
+            width: 28,
+            child: Center(
+              child: Icon(
+                l1Icon,
+                key: const Key('list-transaction-icon'),
+                size: 25,
+                color: categoryColor,
+              ),
             ),
           ),
-        ),
         const SizedBox(width: 12),
         // Left info column (title + ledger badge aligned to title)
         Expanded(
@@ -215,39 +243,61 @@ class ListTransactionTile extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              // Secondary: ledger badge (background pill) + optional merchant
+              // Secondary: payer identity + merchant for family rows;
+              // personal rows keep the original ledger badge.
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: tagBgColor,
-                      borderRadius: BorderRadius.circular(4),
+                  if (isFamilyRow) ...[
+                    FamilyPayerChip(
+                      key: const Key('family-payer-chip'),
+                      label: payerLabel,
+                      tone: familyPayerTone,
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
-                    child: Text(
-                      tagText,
-                      style: AppTextStyles.compact.copyWith(
-                        color: tagTextColor,
+                    if (merchant != null) ...[
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          merchant!,
+                          style: AppTextStyles.supporting.copyWith(
+                            color: palette.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 1,
-                    ),
-                  ),
-                  if (merchant != null) ...[
-                    const SizedBox(width: 6),
-                    Flexible(
+                    ],
+                  ] else ...[
+                    Container(
+                      decoration: BoxDecoration(
+                        color: tagBgColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
                       child: Text(
-                        merchant!,
-                        style: AppTextStyles.supporting.copyWith(
-                          color: palette.textSecondary,
+                        tagText,
+                        style: AppTextStyles.compact.copyWith(
+                          color: tagTextColor,
                         ),
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    if (merchant != null) ...[
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          merchant!,
+                          style: AppTextStyles.supporting.copyWith(
+                            color: palette.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ],
                 ],
               ),
@@ -255,29 +305,6 @@ class ListTransactionTile extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // Member attribution chip — second trailing element, only for shadow-book rows (D-01/SC#3)
-        // taggedTx.memberTag is null for own-book rows; no isOwn branch needed
-        if (taggedTx.memberTag case final tag?) ...[
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 72),
-            child: Container(
-              decoration: BoxDecoration(
-                color: palette.sharedLight,
-                borderRadius: BorderRadius.circular(3),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              child: Text(
-                '${tag.emoji} ${tag.name}',
-                style: AppTextStyles.compact.copyWith(
-                  color: palette.sharedText,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
         // Amount — amountSmall with tabular figures (SC#1)
         // Uses palette.textPrimary (general text, not ledger-coloured amount context)
         //

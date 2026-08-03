@@ -119,6 +119,7 @@ void main() {
     Future<int> Function()? recoverOutbox,
     Future<void> Function()? maintainInboundQuarantine,
     Future<void> Function()? maintainAvatarStaging,
+    Future<void> Function()? resolveSyncIssues,
   }) {
     return SyncEngine(
       orchestrator: orchestrator,
@@ -134,6 +135,7 @@ void main() {
           },
       maintainInboundQuarantine: maintainInboundQuarantine,
       maintainAvatarStaging: maintainAvatarStaging,
+      resolveSyncIssues: resolveSyncIssues,
     );
   }
 
@@ -204,6 +206,28 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump(const Duration(milliseconds: 20));
     expect(maintenanceCalls, 2);
+    engine.dispose();
+  });
+
+  testWidgets('cold start and resume resolve sync issues internally', (
+    tester,
+  ) async {
+    var resolutionCalls = 0;
+    final engine = makeEngine(
+      resolveSyncIssues: () async {
+        resolutionCalls++;
+      },
+    );
+    addTearDown(engine.dispose);
+    addTearDown(webSocket.events.close);
+
+    await engine.initialize();
+    expect(resolutionCalls, 1);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(resolutionCalls, 2);
     engine.dispose();
   });
 

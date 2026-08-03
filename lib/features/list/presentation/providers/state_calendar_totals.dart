@@ -10,6 +10,16 @@ import 'state_list_filter.dart';
 
 part 'state_calendar_totals.g.dart';
 
+/// Month-level expense totals used by the family calendar receipt footer.
+class CalendarLedgerTotals {
+  const CalendarLedgerTotals({required this.daily, required this.joy});
+
+  final int daily;
+  final int joy;
+
+  int get total => daily + joy;
+}
+
 /// Normalizes a DateTime to date-only key (strips time-of-day).
 ///
 /// Used by the provider when building map keys AND by the cell builder
@@ -37,9 +47,7 @@ Future<Map<DateTime, int>> calendarDailyTotals(
   // selected ledger per user decision; was previously always full-ledger.
   // Watch ONLY the ledgerType field (not the whole filter) — search/day/member
   // changes must NOT rebuild the 31-cell grid (Pitfall 3). すべて = null = all.
-  final ledgerType = ref.watch(
-    listFilterProvider.select((f) => f.ledgerType),
-  );
+  final ledgerType = ref.watch(listFilterProvider.select((f) => f.ledgerType));
   final isGroup = ref.watch(isGroupModeProvider);
   final shadowBookList = isGroup
       ? (await ref.watch(shadowBooksProvider.future))
@@ -66,4 +74,44 @@ Future<Map<DateTime, int>> calendarDailyTotals(
     }
   }
   return merged;
+}
+
+/// Family-wide month totals split by ledger.
+///
+/// This intentionally ignores search, category, day, and member filters. The
+/// calendar receipt footer is a stable monthly family overview; only the
+/// selected month and the locally available family books affect it.
+@riverpod
+Future<CalendarLedgerTotals> calendarFamilyLedgerTotals(
+  Ref ref, {
+  required String bookId,
+  required int year,
+  required int month,
+}) async {
+  final shadowBookList = await ref.watch(shadowBooksProvider.future);
+  final bookIds = [bookId, ...shadowBookList.map((s) => s.book.id)];
+  final repo = ref.watch(analyticsRepositoryProvider);
+  final range = DateBoundaries.monthRange(year, month);
+
+  var daily = 0;
+  var joy = 0;
+  for (final bid in bookIds) {
+    final totals = await repo.getLedgerTotals(
+      bookId: bid,
+      startDate: range.start,
+      endDate: range.end,
+    );
+    for (final row in totals) {
+      switch (row.ledgerType) {
+        case 'daily':
+          daily += row.totalAmount;
+          break;
+        case 'joy':
+          joy += row.totalAmount;
+          break;
+      }
+    }
+  }
+
+  return CalendarLedgerTotals(daily: daily, joy: joy);
 }

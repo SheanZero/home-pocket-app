@@ -17,6 +17,8 @@ import '../../../../features/analytics/presentation/providers/state_happiness.da
 import '../../../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/navigation/family_flow_launcher.dart';
+import '../../../../features/profile/domain/models/user_profile.dart';
+import '../../../../features/profile/presentation/providers/state_user_profile.dart';
 import '../../../list/presentation/providers/state_list_filter.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
@@ -27,8 +29,10 @@ import '../../../accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
 import '../../../../shared/utils/currency_conversion.dart'
     show subunitToUnitFor;
+import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
 import '../widgets/family_invite_banner.dart';
+import '../widgets/family_member_spending_card.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
 import '../widgets/home_joy_prompt.dart';
@@ -77,7 +81,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currentMonthStart = DateTime(year, month, 1);
     final currentMonthEnd = DateTime(year, month + 1, 0, 23, 59, 59);
 
-    final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
+    final shadowBooksAsync = isGroupMode
+        ? ref.watch(shadowBooksProvider)
+        : const AsyncData<List<ShadowBookInfo>>([]);
+    final profileAsync = isGroupMode
+        ? ref.watch(userProfileProvider)
+        : const AsyncData<UserProfile?>(null);
+    final transactionsAsync = isGroupMode
+        ? ref.watch(familyTodayTransactionsProvider(bookId: bookId))
+        : ref.watch(todayTransactionsProvider(bookId: bookId));
     // Used for currency code in the transaction list formatter (WR-01 fix).
     final bookAsyncOuter = ref.watch(bookByIdProvider(bookId: bookId));
     final outerCurrencyCode = bookAsyncOuter.value?.currency ?? 'JPY';
@@ -204,11 +216,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             )
                             .whenData<FamilyHappiness?>((value) => value)
                       : const AsyncData<FamilyHappiness?>(null);
-                  final shadowBooksAsync = isGroupMode
-                      ? ref
-                            .watch(shadowBooksProvider)
-                            .whenData<List<ShadowBookInfo>?>((value) => value)
-                      : const AsyncData<List<ShadowBookInfo>?>(null);
                   final shadowAggregateAsync = isGroupMode
                       ? ref
                             .watch(
@@ -244,29 +251,91 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             data: (shadowBooks) => shadowAggregateAsync.when(
                               loading: loading,
                               error: (e, _) => error(e),
-                              data: (shadowAggregate) => HomeHeroCard(
-                                report: report,
-                                happiness: happiness,
-                                bestJoy: bestJoy,
-                                bestJoyCategoryName: bestJoyCategoryName,
-                                family: family,
-                                shadowBooks: shadowBooks,
-                                shadowAggregate: shadowAggregate,
-                                currencyCode: currencyCode,
-                                locale: locale,
-                                isGroupMode: isGroupMode,
-                                activeMonthlyJoyTarget: activeMonthlyJoyTarget,
-                                recommendedMonthlyJoyTarget: recommendedTarget,
-                                isMonthlyJoyTargetConfigured:
-                                    configuredTargetValid,
-                                onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        AnalyticsScreen(bookId: bookId),
+                              data: (shadowAggregate) {
+                                final profile = profileAsync.value;
+                                final currentBook = bookAsync.value;
+                                final reports =
+                                    shadowAggregate?.perBookReports ?? const {};
+                                final memberItems = <FamilyMemberSpendingItem>[
+                                  FamilyMemberSpendingItem(
+                                    deviceId: currentBook?.deviceId ?? 'self',
+                                    displayName:
+                                        profile?.displayName ??
+                                        l10n.analyticsDonutMemberFilterSelf,
+                                    avatarEmoji: profile?.avatarEmoji ?? '',
+                                    avatarImagePath: profile?.avatarImagePath,
+                                    totalExpenses: report.totalExpenses,
+                                    joyTotal: report.joyTotal,
+                                    dailyTotal: report.dailyTotal,
                                   ),
-                                ),
-                                onAddJoy: widget.onAddJoyTap,
-                              ),
+                                  for (final shadow in shadowBooks)
+                                    FamilyMemberSpendingItem(
+                                      deviceId:
+                                          shadow.book.ownerDeviceId ??
+                                          shadow.book.id,
+                                      displayName: shadow.memberDisplayName,
+                                      avatarEmoji: shadow.memberAvatarEmoji,
+                                      avatarImagePath:
+                                          shadow.memberAvatarImagePath,
+                                      totalExpenses:
+                                          reports[shadow.book.id]
+                                              ?.totalExpenses ??
+                                          0,
+                                      joyTotal:
+                                          reports[shadow.book.id]?.joyTotal ??
+                                          0,
+                                      dailyTotal:
+                                          reports[shadow.book.id]?.dailyTotal ??
+                                          0,
+                                    ),
+                                ];
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    HomeHeroCard(
+                                      report: report,
+                                      happiness: happiness,
+                                      bestJoy: bestJoy,
+                                      bestJoyCategoryName: bestJoyCategoryName,
+                                      family: family,
+                                      shadowBooks: shadowBooks,
+                                      shadowAggregate: shadowAggregate,
+                                      currencyCode: currencyCode,
+                                      locale: locale,
+                                      isGroupMode: isGroupMode,
+                                      activeMonthlyJoyTarget:
+                                          activeMonthlyJoyTarget,
+                                      recommendedMonthlyJoyTarget:
+                                          recommendedTarget,
+                                      isMonthlyJoyTargetConfigured:
+                                          configuredTargetValid,
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              AnalyticsScreen(bookId: bookId),
+                                        ),
+                                      ),
+                                      onAddJoy: widget.onAddJoyTap,
+                                    ),
+                                    if (isGroupMode) ...[
+                                      const SizedBox(height: 18),
+                                      FamilyMemberSpendingCard(
+                                        items: memberItems,
+                                        currencyCode: currencyCode,
+                                        locale: locale,
+                                        onMemberTap: (_) =>
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute<void>(
+                                                builder: (_) => AnalyticsScreen(
+                                                  bookId: bookId,
+                                                ),
+                                              ),
+                                            ),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -278,11 +347,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 16),
 
               // ── Group bar or Family invite banner ──
-              if (isGroupMode) ...[
-                // TODO: Wire GroupBar with actual group data when available
-                const SizedBox.shrink(),
-                const SizedBox(height: 16),
-              ],
               if (!isGroupMode && !_inviteDismissed) ...[
                 FamilyInviteBanner(
                   onTap: () => openAuthoritativeFamilyFlow(context, ref),
@@ -296,11 +360,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    l10n.homeRecentTransactions,
-                    style: AppTextStyles.sectionTitle.copyWith(
-                      color: context.palette.textPrimary,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.receipt_long_rounded,
+                        size: 16,
+                        color: context.palette.accentPrimary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.homeRecentTransactions,
+                        style: AppTextStyles.label.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: context.palette.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
                   GestureDetector(
                     onTap: () {
@@ -322,7 +398,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
 
               // ── Transaction list card ──
-              todayTxAsync.when(
+              transactionsAsync.when(
                 data: (transactions) {
                   if (transactions.isEmpty) {
                     return Padding(
@@ -348,16 +424,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           : null;
                       final displayCategory =
                           defaultCategory ?? customCategoryAsync?.value;
+                      final payer = isGroupMode
+                          ? _familyPayer(
+                              tx,
+                              primaryBookId: bookId,
+                              profile: profileAsync.value,
+                              shadows: shadowBooksAsync.value ?? const [],
+                              selfLabel: l10n.familyTransactionPayerSelf,
+                              memberFallbackLabel:
+                                  l10n.analyticsDonutMemberFilterLabel,
+                            )
+                          : null;
                       return HomeTransactionTile(
                         foreignAnnotation: _foreignAnnotation(tx, locale),
                         l1Icon: displayCategory == null
                             ? Icons.category
                             : parentCategoryIconForCategory(displayCategory),
-                        tagText: isGroupMode
-                            ? _memberInitial(tx)
-                            : (isSoul
-                                  ? l10n.listLedgerJoy
-                                  : l10n.listLedgerDaily),
+                        tagText: isSoul
+                            ? l10n.listLedgerJoy
+                            : l10n.listLedgerDaily,
                         tagBgColor: isSoul
                             ? context.palette.joyLight
                             : context.palette.dailyLight,
@@ -367,6 +452,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ? context.palette.joyText
                             : context.palette.dailyText,
                         merchant: tx.merchant,
+                        payerName: payer?.name,
+                        payerTone: payer?.tone ?? FamilyPayerTone.primary,
+                        payerAvatarEmoji: payer?.avatarEmoji,
+                        payerAvatarImagePath: payer?.avatarImagePath,
                         category: categoryNameForDisplay(
                           categoryId: tx.categoryId,
                           category: displayCategory,
@@ -383,7 +472,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           outerCurrencyCode,
                           locale,
                         ),
-                        amountColor: isSoul
+                        amountColor: isGroupMode
+                            ? context.palette.textPrimary
+                            : isSoul
                             ? context.palette.joyText
                             : context.palette.textPrimary,
                         satisfactionValue: tx.ledgerType == LedgerType.joy
@@ -395,33 +486,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         // List does this too (list_screen.dart WR-03). Without
                         // it, edits/deletes persist to the DB but the cached
                         // todayTransactionsProvider keeps showing stale data.
-                        onTap: () async {
-                          try {
-                            final result = await Navigator.of(context)
-                                .push<bool>(
-                                  MaterialPageRoute<bool>(
-                                    builder: (_) =>
-                                        TransactionEditScreen(transaction: tx),
-                                  ),
-                                );
-                            if (result == true) {
-                              invalidateTransactionDependents(
-                                ref,
-                                bookId: bookId,
-                                year: year,
-                                month: month,
-                              );
-                            }
-                          } catch (e, st) {
-                            FlutterError.reportError(
-                              FlutterErrorDetails(
-                                exception: e,
-                                stack: st,
-                                library: 'home_screen',
-                              ),
-                            );
-                          }
-                        },
+                        onTap: isGroupMode && tx.bookId != bookId
+                            ? null
+                            : () async {
+                                try {
+                                  final result = await Navigator.of(context)
+                                      .push<bool>(
+                                        MaterialPageRoute<bool>(
+                                          builder: (_) => TransactionEditScreen(
+                                            transaction: tx,
+                                          ),
+                                        ),
+                                      );
+                                  if (result == true) {
+                                    invalidateTransactionDependents(
+                                      ref,
+                                      bookId: bookId,
+                                      year: year,
+                                      month: month,
+                                    );
+                                  }
+                                } catch (e, st) {
+                                  FlutterError.reportError(
+                                    FlutterErrorDetails(
+                                      exception: e,
+                                      stack: st,
+                                      library: 'home_screen',
+                                    ),
+                                  );
+                                }
+                              },
                       );
                     }).toList(),
                   );
@@ -470,11 +564,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Extracts the first character of a member identifier for group mode.
-  String _memberInitial(Transaction tx) {
-    // Use device ID first character as fallback; real member data TBD
-    return tx.deviceId.isNotEmpty ? tx.deviceId[0].toUpperCase() : '?';
+  _FamilyPayer _familyPayer(
+    Transaction tx, {
+    required String primaryBookId,
+    required UserProfile? profile,
+    required List<ShadowBookInfo> shadows,
+    required String selfLabel,
+    required String memberFallbackLabel,
+  }) {
+    if (tx.bookId == primaryBookId) {
+      return _FamilyPayer(
+        name: selfLabel,
+        tone: FamilyPayerTone.primary,
+        avatarEmoji: profile?.avatarEmoji ?? '',
+        avatarImagePath: profile?.avatarImagePath,
+      );
+    }
+    for (var index = 0; index < shadows.length; index++) {
+      final shadow = shadows[index];
+      if (shadow.book.id == tx.bookId) {
+        return _FamilyPayer(
+          name: shadow.memberDisplayName.isEmpty
+              ? memberFallbackLabel
+              : shadow.memberDisplayName,
+          tone: familyPayerToneForShadowIndex(index),
+          avatarEmoji: shadow.memberAvatarEmoji,
+          avatarImagePath: shadow.memberAvatarImagePath,
+        );
+      }
+    }
+    return _FamilyPayer(
+      name: memberFallbackLabel,
+      tone: FamilyPayerTone.shared,
+      avatarEmoji: '',
+      avatarImagePath: null,
+    );
   }
+}
+
+class _FamilyPayer {
+  const _FamilyPayer({
+    required this.name,
+    required this.tone,
+    required this.avatarEmoji,
+    required this.avatarImagePath,
+  });
+
+  final String name;
+  final FamilyPayerTone tone;
+  final String avatarEmoji;
+  final String? avatarImagePath;
 }
 
 /// Reusable error text widget for async error states.

@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show Consumer, ProviderScope;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
@@ -33,6 +34,7 @@ import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_to
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/unified_voice_entry_dock.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart'
     show voiceLocaleIdProvider;
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -1009,6 +1011,8 @@ void main() {
       when(
         () => mockCreateUseCase.execute(any()),
       ).thenAnswer((_) async => Result.success(_successTransaction));
+      var todayTransactionFetches = 0;
+      var didPushEntryScreen = false;
 
       // D-08 popUntil fix mirrors voice_input_screen_test._TwoRouteHost: push
       // ManualOneStepScreen on top of a dummy home so Navigator.popUntil
@@ -1027,31 +1031,44 @@ void main() {
                 mockCreateUseCase,
               ),
               categoryServiceProvider.overrideWithValue(mockCategoryService),
+              todayTransactionsProvider(bookId: 'book-1').overrideWith((ref) {
+                todayTransactionFetches++;
+                return Future.value(const <Transaction>[]);
+              }),
             ],
             child: Navigator(
               onGenerateRoute: (settings) {
                 if (settings.name == '/') {
                   return MaterialPageRoute<void>(
-                    builder: (ctx) => Scaffold(
-                      body: Builder(
-                        builder: (ctx) {
-                          // Push the screen on top of the home route after the
-                          // first frame so the toolbar/save flow can pop back.
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            Navigator.of(ctx).push<void>(
-                              MaterialPageRoute<void>(
-                                builder: (_) => ManualOneStepScreen(
-                                  bookId: 'book-1',
-                                  initialCategory: _l2Category,
-                                  initialParentCategory: _l1Category,
-                                  entrySource: EntrySource.manual,
-                                ),
-                              ),
-                            );
-                          });
-                          return const Center(child: Text('home'));
-                        },
-                      ),
+                    builder: (ctx) => Consumer(
+                      builder: (context, ref, _) {
+                        ref.watch(todayTransactionsProvider(bookId: 'book-1'));
+                        return Scaffold(
+                          body: Builder(
+                            builder: (ctx) {
+                              if (didPushEntryScreen) {
+                                return const Center(child: Text('home'));
+                              }
+                              didPushEntryScreen = true;
+                              // Push the screen on top of the home route after the
+                              // first frame so the toolbar/save flow can pop back.
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                Navigator.of(ctx).push<void>(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => ManualOneStepScreen(
+                                      bookId: 'book-1',
+                                      initialCategory: _l2Category,
+                                      initialParentCategory: _l1Category,
+                                      entrySource: EntrySource.manual,
+                                    ),
+                                  ),
+                                );
+                              });
+                              return const Center(child: Text('home'));
+                            },
+                          ),
+                        );
+                      },
                     ),
                   );
                 }
@@ -1129,6 +1146,12 @@ void main() {
         find.text('home'),
         findsOneWidget,
         reason: 'after popping, the home route is visible again',
+      );
+      expect(
+        todayTransactionFetches,
+        2,
+        reason:
+            'a successful save must invalidate the Home recent-transactions provider before returning',
       );
     },
   );

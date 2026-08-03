@@ -47,7 +47,18 @@ extension _ManualOneStepSave on _ManualOneStepScreenState {
       final result = await _formKey.currentState!.submit();
       if (!mounted) return;
       await result.when(
-        success: (_) async {
+        success: (transaction) async {
+          // Refresh transaction-backed screens at the successful persistence
+          // boundary. Depending only on the caller's post-navigation callback
+          // leaves quick Joy entry and continuous entry holding stale Home
+          // totals/recent rows while this route is closing or remains open.
+          invalidateTransactionDependents(
+            ref,
+            bookId: transaction.bookId,
+            year: transaction.timestamp.year,
+            month: transaction.timestamp.month,
+          );
+
           // 260614-iww: branch on continuousMode.
           if (_continuousMode) {
             // Continuous (FAB long-press) entry: keep the page open, show a

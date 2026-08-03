@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_transaction_tile.dart';
+import 'package:home_pocket/features/profile/presentation/widgets/avatar_display.dart';
+import 'package:home_pocket/shared/widgets/family_transaction_attribution.dart';
+import 'package:home_pocket/shared/widgets/satisfaction_face_icon.dart';
 
 void main() {
   group('HomeTransactionTile', () {
@@ -208,5 +211,44 @@ void main() {
       final iconWidget = tester.widget<Icon>(find.byIcon(Icons.sports_esports));
       expect(iconWidget.color, joyColor);
     });
+
+    testWidgets(
+      'family row shows payer chip, merchant, category badge, and Joy face',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: HomeTransactionTile(
+                l1Icon: Icons.local_cafe,
+                tagText: 'ときめき帳',
+                tagBgColor: AppPalette.light.joyLight,
+                tagTextColor: AppPalette.light.joyText,
+                category: 'カフェ',
+                categoryColor: AppPalette.light.joyText,
+                formattedAmount: '¥980',
+                amountColor: AppPalette.light.textPrimary,
+                merchant: '喫茶 月舟',
+                satisfactionValue: 8,
+                payerName: '我',
+                payerTone: FamilyPayerTone.primary,
+                payerAvatarEmoji: '🌿',
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AvatarDisplay), findsOneWidget);
+        expect(
+          find.byKey(const Key('home-family-category-badge')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('family-payer-chip')), findsOneWidget);
+        expect(find.text('我'), findsOneWidget);
+        expect(find.text('喫茶 月舟'), findsOneWidget);
+        expect(find.text('ときめき帳'), findsNothing);
+        expect(find.byType(SatisfactionFaceIcon), findsOneWidget);
+      },
+    );
   });
 }

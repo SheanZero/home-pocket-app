@@ -6,8 +6,10 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show getTransactionsUseCaseProvider;
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../../../helpers/happiness_test_fixtures.dart';
 import '../../../../../helpers/test_provider_scope.dart';
 
 class _MockTransactionRepository extends Mock
@@ -17,16 +19,18 @@ Transaction _makeTransaction(
   String id, {
   bool isDeleted = false,
   LedgerType ledgerType = LedgerType.daily,
+  String bookId = 'book_001',
+  DateTime? timestamp,
 }) {
   return Transaction(
     id: id,
-    bookId: 'book_001',
+    bookId: bookId,
     deviceId: 'dev_local',
     amount: 1000,
     type: TransactionType.expense,
     categoryId: 'cat_food',
     ledgerType: ledgerType,
-    timestamp: DateTime.now(),
+    timestamp: timestamp ?? DateTime.now(),
     currentHash: 'hash_$id',
     createdAt: DateTime.now(),
     isDeleted: isDeleted,
@@ -196,6 +200,73 @@ void main() {
       );
       expect(result.hasError, isTrue);
       expect(result.error, isA<Exception>());
+    });
+  });
+
+  group('familyTodayTransactionsProvider', () {
+    test('merges primary and shadow books newest first', () async {
+      final mockRepo = _MockTransactionRepository();
+      final now = DateTime.now();
+      final byBook = <String, List<Transaction>>{
+        'book_001': [
+          _makeTransaction(
+            'self',
+            timestamp: now.subtract(const Duration(minutes: 3)),
+          ),
+        ],
+        'shadow_001': [
+          _makeTransaction(
+            'member-newest',
+            bookId: 'shadow_001',
+            timestamp: now.subtract(const Duration(minutes: 1)),
+          ),
+        ],
+        'shadow_002': [
+          _makeTransaction('deleted', bookId: 'shadow_002', isDeleted: true),
+        ],
+        'shadow_003': const [],
+      };
+
+      when(
+        () => mockRepo.findByBookId(
+          any(),
+          ledgerType: any(named: 'ledgerType'),
+          categoryId: any(named: 'categoryId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+        ),
+      ).thenAnswer((invocation) async {
+        final bookId = invocation.positionalArguments.first as String;
+        return byBook[bookId] ?? const [];
+      });
+
+      final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
+      final container = ProviderContainer.test(
+        overrides: [
+          getTransactionsUseCaseProvider.overrideWithValue(useCase),
+          shadowBooksProvider.overrideWith(
+            (ref) async => fixtureShadowBooksThree(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final result = await container.read(
+        familyTodayTransactionsProvider(bookId: 'book_001').future,
+      );
+
+      expect(result.map((tx) => tx.id), ['member-newest', 'self']);
+      verify(
+        () => mockRepo.findByBookId(
+          any(),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+        ),
+      ).called(4);
     });
   });
 }

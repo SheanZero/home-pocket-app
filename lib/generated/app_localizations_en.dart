@@ -751,7 +751,7 @@ class SEn extends S {
   String get homeRingSectionTitleSingle => 'Joy Index';
 
   @override
-  String get homeRingSectionTitleGroup => 'Family Joy';
+  String get homeRingSectionTitleGroup => 'My Joy';
 
   @override
   String get homeViewMonthlyAnalysis => 'View monthly analysis';
@@ -777,7 +777,7 @@ class SEn extends S {
   }
 
   @override
-  String get homeMembersSectionTitle => 'Members';
+  String get homeMembersSectionTitle => 'Member Spending';
 
   @override
   String get homeNoJoyDataLegend => 'No data yet';
@@ -1386,10 +1386,6 @@ class SEn extends S {
   String get familySyncJoinAnotherFamily => 'Join another family';
 
   @override
-  String get familySyncReplaceEmptyGroupHint =>
-      'After you submit the join request, your current family with no other members will be deleted automatically.';
-
-  @override
   String get familySyncNetworkUnavailableTitle => 'No internet connection';
 
   @override
@@ -1670,6 +1666,23 @@ class SEn extends S {
   String get groupTryAnotherInvite => 'Enter another invite code';
 
   @override
+  String get groupUnableToJoinTitle => 'Unable to join this family right now';
+
+  @override
+  String get groupUnableToJoinDescription =>
+      'Don\'t worry. You can enter the invite code again, or leave and choose another family.';
+
+  @override
+  String get groupReenterInvite => 'Enter invite code again';
+
+  @override
+  String get groupExitAndChooseAnother => 'Leave and choose another family';
+
+  @override
+  String get groupUnableToJoinActionFailed =>
+      'Couldn\'t complete that action. Please try again.';
+
+  @override
   String get groupKeyRecoveryTitle => 'Restoring the family key';
 
   @override
@@ -1767,7 +1780,7 @@ class SEn extends S {
   String get homeLedgersSection => 'Ledgers';
 
   @override
-  String get homeRecentTransactions => 'Recent Transactions';
+  String get homeRecentTransactions => 'Recent Spending';
 
   @override
   String get homeViewAllTransactions => 'View All';
@@ -2289,6 +2302,9 @@ class SEn extends S {
 
   @override
   String get calMonthTotal => 'Monthly total';
+
+  @override
+  String get calFamilyMonthTotal => 'Family total';
 
   @override
   String get calMonthTotalDaily => 'Daily total';
@@ -3362,85 +3378,6 @@ class SEn extends S {
       'Some changes need your attention';
 
   @override
-  String get syncQueueNeedsAttentionTitle => 'Sync needs attention';
-
-  @override
-  String get syncQueuePendingTitle => 'Changes waiting to sync';
-
-  @override
-  String syncQueueCounts(int pendingCount, int deadLetterCount) {
-    return '$pendingCount waiting · $deadLetterCount need attention';
-  }
-
-  @override
-  String get syncQueueReconcileHint =>
-      'The encrypted changes are preserved. Retry them first; a full reconciliation is still recommended afterward.';
-
-  @override
-  String get syncQueueRetryAll => 'Retry all';
-
-  @override
-  String get syncQueueDiscardAll => 'Discard';
-
-  @override
-  String get syncQueueRetryFailed => 'Some changes still need attention';
-
-  @override
-  String get syncQueueRetrySucceeded =>
-      'Queued changes sent. Reconciliation is still recommended.';
-
-  @override
-  String get syncQueueDiscardConfirmTitle => 'Discard unsent changes?';
-
-  @override
-  String get syncQueueDiscardConfirmBody =>
-      'This permanently removes the preserved outbound changes from this device. This cannot be undone.';
-
-  @override
-  String get syncQueueCancel => 'Cancel';
-
-  @override
-  String get syncQueueDiscardConfirmAction => 'Discard permanently';
-
-  @override
-  String get syncQueueDiscardFailed =>
-      'The unsent changes could not be discarded';
-
-  @override
-  String get inboundSyncSectionTitle => 'Received changes held for review';
-
-  @override
-  String inboundSyncCount(int count) {
-    return '$count received changes quarantined';
-  }
-
-  @override
-  String inboundSyncErrorCode(String errorCode) {
-    return 'Safe code: $errorCode';
-  }
-
-  @override
-  String get inboundSyncRetryOne => 'Retry';
-
-  @override
-  String get inboundSyncDiscardOne => 'Discard received change';
-
-  @override
-  String get inboundSyncDiscardConfirmTitle => 'Discard this received change?';
-
-  @override
-  String get inboundSyncDiscardConfirmBody =>
-      'This permanently removes the quarantined received change from this device. The relay copy was already acknowledged and this cannot be undone.';
-
-  @override
-  String get syncAttentionDiscardConfirmTitle =>
-      'Discard preserved sync changes?';
-
-  @override
-  String get syncAttentionDiscardConfirmBody =>
-      'This permanently removes all preserved outbound failures and quarantined received changes from this device. This cannot be undone.';
-
-  @override
   String get familySyncTransferOwner => 'Transfer ownership';
 
   @override
@@ -3532,4 +3469,7 @@ class SEn extends S {
 
   @override
   String get familySyncRemovalReasonUnknown => 'Membership ended';
+
+  @override
+  String get familyTransactionPayerSelf => 'Me';
 }

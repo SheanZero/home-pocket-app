@@ -66,6 +66,7 @@ Future<ProviderContainer> _pumpScreen(
   _MockAnalyticsRepository mockRepo, {
   int year = 2026,
   int month = 5,
+  bool isGroupMode = false,
   Category? resolvedCategory,
 }) async {
   late ProviderContainer container;
@@ -80,7 +81,7 @@ Future<ProviderContainer> _pumpScreen(
             ListFilterState(selectedYear: year, selectedMonth: month),
           ),
         ),
-        isGroupModeProvider.overrideWithValue(false),
+        isGroupModeProvider.overrideWithValue(isGroupMode),
         shadowBooksProvider.overrideWith((_) async => const []),
         getListTransactionsUseCaseProvider.overrideWithValue(mockUseCase),
         if (resolvedCategory != null)
@@ -123,6 +124,37 @@ void main() {
   });
 
   group('ListScreen header affordances (quick 260714-qit — STRICT mockup)', () {
+    testWidgets('family mode shows the family badge in the main header', (
+      tester,
+    ) async {
+      final mockUseCase = _MockGetListTransactionsUseCase();
+      final mockRepo = _MockAnalyticsRepository();
+
+      when(
+        () => mockUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(<Transaction>[]));
+      when(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockRepo.getLedgerTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await _pumpScreen(tester, mockUseCase, mockRepo, isGroupMode: true);
+
+      expect(find.byKey(const Key('list-family-mode-badge')), findsOneWidget);
+      expect(find.text('家族'), findsOneWidget);
+      expect(find.byIcon(Icons.group_outlined), findsOneWidget);
+    });
+
     testWidgets(
       'header has month-picker + settings buttons and no prev/next chevrons',
       (tester) async {

@@ -6,6 +6,7 @@ import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
     show analyticsRepositoryProvider;
+import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/list/domain/models/list_filter_state.dart';
 import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/features/list/presentation/widgets/list_calendar_header.dart';
@@ -127,6 +128,56 @@ void main() {
       // JPY 0 decimals: ¥12,345
       expect(find.text('¥12,345'), findsOneWidget);
     });
+
+    testWidgets(
+      'family mode summary shows combined total with joy and daily breakdown',
+      (tester) async {
+        final mockRepo = _MockAnalyticsRepository();
+        when(
+          () => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            DailyTotal(date: DateTime(2025, 1, 3), totalAmount: 227620),
+          ],
+        );
+        when(
+          () => mockRepo.getLedgerTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer(
+          (_) async => const [
+            LedgerTotal(ledgerType: 'joy', totalAmount: 53620),
+            LedgerTotal(ledgerType: 'daily', totalAmount: 174000),
+          ],
+        );
+
+        final container = ProviderContainer.test(
+          overrides: [
+            listFilterProvider.overrideWith(() => _JanuaryListFilter()),
+            isGroupModeProvider.overrideWithValue(true),
+            analyticsRepositoryProvider.overrideWithValue(mockRepo),
+            appSettingsProvider.overrideWith(
+              (_) async => const AppSettings(weekStartDay: WeekStartDay.monday),
+            ),
+          ],
+        );
+
+        await _pumpCalendarHeader(tester, container);
+
+        expect(find.text('家族の合計'), findsOneWidget);
+        expect(find.text('¥227,620'), findsOneWidget);
+        expect(find.text('ときめき'), findsOneWidget);
+        expect(find.text('¥53,620'), findsOneWidget);
+        expect(find.text('日常'), findsOneWidget);
+        expect(find.text('¥174,000'), findsOneWidget);
+      },
+    );
 
     testWidgets('calendar card uses readable global type and shadow', (
       tester,

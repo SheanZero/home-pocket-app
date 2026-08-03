@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
 
 /// Read-only home recent-transaction row mirroring the monthly list tile
@@ -10,8 +11,8 @@ import '../../../../shared/widgets/satisfaction_face_icon.dart';
 /// merchant), and a trailing pre-formatted amount.
 ///
 /// Differs from the list tile by omitting the list-only affordances: no
-/// swipe-to-delete (Dismissible) and no member-attribution chip — the home
-/// preview is read-only.
+/// swipe-to-delete (Dismissible). In family mode it shares the same payer chip
+/// and avatar/category-badge treatment as the full transaction list.
 ///
 /// Pure UI component -- all data injected via constructor.
 /// Amount should be pre-formatted by the parent (e.g. "¥3,280").
@@ -29,6 +30,10 @@ class HomeTransactionTile extends StatelessWidget {
     this.merchant,
     this.satisfactionValue,
     this.foreignAnnotation,
+    this.payerName,
+    this.payerTone = FamilyPayerTone.primary,
+    this.payerAvatarEmoji,
+    this.payerAvatarImagePath,
     this.onTap,
   });
 
@@ -69,6 +74,13 @@ class HomeTransactionTile extends StatelessWidget {
   /// for JPY/domestic rows → the bare amount Text renders unchanged.
   final String? foreignAnnotation;
 
+  /// Family-mode attribution. When present, the row uses the payer avatar as
+  /// its leading visual and keeps the category icon as a small corner badge.
+  final String? payerName;
+  final FamilyPayerTone payerTone;
+  final String? payerAvatarEmoji;
+  final String? payerAvatarImagePath;
+
   /// Optional tap callback.
   final VoidCallback? onTap;
 
@@ -85,12 +97,23 @@ class HomeTransactionTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           child: Row(
             children: [
-              SizedBox(
-                width: 28,
-                child: Center(
-                  child: Icon(l1Icon, size: 25, color: categoryColor),
+              if (payerName == null)
+                SizedBox(
+                  width: 28,
+                  child: Center(
+                    child: Icon(l1Icon, size: 25, color: categoryColor),
+                  ),
+                )
+              else
+                FamilyTransactionAvatar(
+                  avatarEmoji: payerAvatarEmoji ?? '',
+                  avatarImagePath: payerAvatarImagePath,
+                  categoryIcon: l1Icon,
+                  badgeColor: satisfactionValue == null
+                      ? palette.daily
+                      : palette.joy,
+                  badgeKey: const Key('home-family-category-badge'),
                 ),
-              ),
               const SizedBox(width: 12),
               // Left info column (title + ledger badge aligned to title)
               Expanded(
@@ -122,40 +145,61 @@ class HomeTransactionTile extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    // Secondary: ledger badge (background pill) + optional merchant
+                    // Secondary: member identity + merchant in family mode;
+                    // personal mode keeps the existing ledger badge.
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: tagBgColor,
-                            borderRadius: BorderRadius.circular(4),
+                        if (payerName != null) ...[
+                          FamilyPayerChip(
+                            key: const Key('family-payer-chip'),
+                            label: payerName!,
+                            tone: payerTone,
                           ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          child: Text(
-                            tagText,
-                            style: AppTextStyles.compact.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: tagTextColor,
-                            ),
-                            maxLines: 1,
-                          ),
-                        ),
-                        if (merchant != null) ...[
                           const SizedBox(width: 6),
-                          Flexible(
+                          if (merchant != null)
+                            Flexible(
+                              child: Text(
+                                merchant!,
+                                style: AppTextStyles.supporting.copyWith(
+                                  color: palette.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ] else ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              color: tagBgColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
                             child: Text(
-                              merchant!,
-                              style: AppTextStyles.supporting.copyWith(
-                                color: palette.textSecondary,
+                              tagText,
+                              style: AppTextStyles.compact.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: tagTextColor,
                               ),
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (merchant != null) ...[
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                merchant!,
+                                style: AppTextStyles.supporting.copyWith(
+                                  color: palette.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ],
                       ],
                     ),

@@ -889,7 +889,7 @@
   "@homeRingSectionTitleSingle": {
     "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
   },
-  "homeRingSectionTitleGroup": "家族的悦己",
+  "homeRingSectionTitleGroup": "我的悦己",
   "@homeRingSectionTitleGroup": {
     "description": "Ring section title — group mode"
   },
@@ -929,7 +929,7 @@
       }
     }
   },
-  "homeMembersSectionTitle": "群组成员",
+  "homeMembersSectionTitle": "成员支出",
   "@homeMembersSectionTitle": {
     "description": "Group-mode member rows subheader"
   },
@@ -1739,7 +1739,6 @@
   },
   "familySyncSingleGroupConflict": "此设备已有家庭群组或待审批的加入申请。请先退出当前群组或取消申请，再创建或加入其他群组。",
   "familySyncJoinAnotherFamily": "加入其他家庭",
-  "familySyncReplaceEmptyGroupHint": "提交加入申请后，当前无人加入的家庭将自动删除。",
   "familySyncNetworkUnavailableTitle": "暂时无法连接网络",
   "@familySyncNetworkUnavailableTitle": {
     "description": "Title for the family-sync network unavailable dialog"
@@ -1872,6 +1871,11 @@
   "groupRequestExpiredTitle": "加入申请已过期",
   "groupRequestExpiredDescription": "申请在5分钟内未被处理，请获取当前有效的邀请码后重新申请。",
   "groupTryAnotherInvite": "输入其他邀请码",
+  "groupUnableToJoinTitle": "暂时无法加入家庭",
+  "groupUnableToJoinDescription": "别担心，你可以重新输入邀请码，或退出后重新选择家庭。",
+  "groupReenterInvite": "重新输入邀请码",
+  "groupExitAndChooseAnother": "退出并重新选择家庭",
+  "groupUnableToJoinActionFailed": "暂时无法完成操作，请稍后重试。",
   "groupKeyRecoveryTitle": "正在恢复家庭密钥",
   "groupKeyRecoveryWaiting": "成员资格已经生效，需要另一台仍持有密钥的家庭设备为本设备重新密封当前密钥。中继服务器无法读取或重新生成密钥。",
   "groupKeyRecoveryUnavailable": "请求过期前没有任何有效设备提供当前密钥。由于采用零知识设计，中继服务器无法恢复密钥。你可以重试，或安全退出／解散该家庭后重新创建。",
@@ -1973,7 +1977,7 @@
   "@homeLedgersSection": {
     "description": "Home section title for ledger cards"
   },
-  "homeRecentTransactions": "最近交易",
+  "homeRecentTransactions": "最近支出",
   "@homeRecentTransactions": {
     "description": "Home section title for recent transactions"
   },
@@ -2634,6 +2638,10 @@
   "calMonthTotal": "本月合计",
   "@calMonthTotal": {
     "description": "Calendar header: month total label, all ledgers (すべて)"
+  },
+  "calFamilyMonthTotal": "家庭合计",
+  "@calFamilyMonthTotal": {
+    "description": "Calendar header: family-wide month total label"
   },
   "calMonthTotalDaily": "日常合计",
   "@calMonthTotalDaily": {
@@ -3875,36 +3883,6 @@
   },
   "syncQueueNeedsAttentionBadge": "需要处理",
   "syncQueueNeedsAttentionDescription": "部分变更需要你处理",
-  "syncQueueNeedsAttentionTitle": "同步需要处理",
-  "syncQueuePendingTitle": "等待同步的变更",
-  "syncQueueCounts": "{pendingCount} 条等待发送 · {deadLetterCount} 条需要处理",
-  "@syncQueueCounts": {
-    "placeholders": {
-      "pendingCount": { "type": "int" },
-      "deadLetterCount": { "type": "int" }
-    }
-  },
-  "syncQueueReconcileHint": "加密变更仍被安全保留。请先重试，之后仍建议执行一次完整对账。",
-  "syncQueueRetryAll": "全部重试",
-  "syncQueueDiscardAll": "丢弃",
-  "syncQueueRetryFailed": "仍有变更需要处理",
-  "syncQueueRetrySucceeded": "待发送变更已发送，仍建议进行完整对账。",
-  "syncQueueDiscardConfirmTitle": "丢弃未发送的变更？",
-  "syncQueueDiscardConfirmBody": "这会永久删除本设备上保留的未发送变更，且无法撤销。",
-  "syncQueueCancel": "取消",
-  "syncQueueDiscardConfirmAction": "永久丢弃",
-  "syncQueueDiscardFailed": "无法丢弃未发送的变更",
-  "inboundSyncSectionTitle": "待处理的接收变更",
-  "inboundSyncCount": "{count} 条接收变更已隔离",
-  "@inboundSyncCount": { "placeholders": { "count": { "type": "int" } } },
-  "inboundSyncErrorCode": "安全代码：{errorCode}",
-  "@inboundSyncErrorCode": { "placeholders": { "errorCode": { "type": "String" } } },
-  "inboundSyncRetryOne": "重试",
-  "inboundSyncDiscardOne": "丢弃接收变更",
-  "inboundSyncDiscardConfirmTitle": "丢弃这条接收变更？",
-  "inboundSyncDiscardConfirmBody": "这会从本设备永久删除已隔离的接收变更。中继服务器副本已确认，操作无法撤销。",
-  "syncAttentionDiscardConfirmTitle": "丢弃保留的同步变更？",
-  "syncAttentionDiscardConfirmBody": "这会从本设备永久删除所有保留的发送失败和已隔离的接收变更，且无法撤销。",
   "familySyncTransferOwner": "转让家庭所有权",
   "familySyncTransferOwnerSelect": "选择新的家庭所有者",
   "familySyncTransferOwnerConfirmTitle": "转让家庭所有权？",
@@ -3937,5 +3915,7 @@
   "familySyncRemovalReasonCancelled": "申请已取消",
   "familySyncRemovalReasonExpired": "申请已过期",
   "familySyncRemovalReasonUnknown": "成员关系已结束",
+  "familyTransactionPayerSelf": "我",
+  "@familyTransactionPayerSelf": { "description": "Family transaction payer chip for the current device owner" },
   "@@locale": "zh"
 }

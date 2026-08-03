@@ -1482,7 +1482,7 @@ abstract class S {
   /// Ring section title — group mode
   ///
   /// In en, this message translates to:
-  /// **'Family Joy'**
+  /// **'My Joy'**
   String get homeRingSectionTitleGroup;
 
   /// Link in the joy section title row that opens the monthly analysis
@@ -1530,7 +1530,7 @@ abstract class S {
   /// Group-mode member rows subheader
   ///
   /// In en, this message translates to:
-  /// **'Members'**
+  /// **'Member Spending'**
   String get homeMembersSectionTitle;
 
   /// Legend rows when totalJoyTx == 0 (D-09)
@@ -2637,12 +2637,6 @@ abstract class S {
   /// **'Join another family'**
   String get familySyncJoinAnotherFamily;
 
-  /// No description provided for @familySyncReplaceEmptyGroupHint.
-  ///
-  /// In en, this message translates to:
-  /// **'After you submit the join request, your current family with no other members will be deleted automatically.'**
-  String get familySyncReplaceEmptyGroupHint;
-
   /// Title for the family-sync network unavailable dialog
   ///
   /// In en, this message translates to:
@@ -3133,6 +3127,36 @@ abstract class S {
   /// **'Enter another invite code'**
   String get groupTryAnotherInvite;
 
+  /// No description provided for @groupUnableToJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to join this family right now'**
+  String get groupUnableToJoinTitle;
+
+  /// No description provided for @groupUnableToJoinDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t worry. You can enter the invite code again, or leave and choose another family.'**
+  String get groupUnableToJoinDescription;
+
+  /// No description provided for @groupReenterInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter invite code again'**
+  String get groupReenterInvite;
+
+  /// No description provided for @groupExitAndChooseAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave and choose another family'**
+  String get groupExitAndChooseAnother;
+
+  /// No description provided for @groupUnableToJoinActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t complete that action. Please try again.'**
+  String get groupUnableToJoinActionFailed;
+
   /// No description provided for @groupKeyRecoveryTitle.
   ///
   /// In en, this message translates to:
@@ -3310,7 +3334,7 @@ abstract class S {
   /// Home section title for recent transactions
   ///
   /// In en, this message translates to:
-  /// **'Recent Transactions'**
+  /// **'Recent Spending'**
   String get homeRecentTransactions;
 
   /// Button label to view all transactions from home
@@ -4144,6 +4168,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Monthly total'**
   String get calMonthTotal;
+
+  /// Calendar header: family-wide month total label
+  ///
+  /// In en, this message translates to:
+  /// **'Family total'**
+  String get calFamilyMonthTotal;
 
   /// Calendar header: month total label when the Daily ledger is selected
   ///
@@ -6085,138 +6115,6 @@ abstract class S {
   /// **'Some changes need your attention'**
   String get syncQueueNeedsAttentionDescription;
 
-  /// No description provided for @syncQueueNeedsAttentionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync needs attention'**
-  String get syncQueueNeedsAttentionTitle;
-
-  /// No description provided for @syncQueuePendingTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Changes waiting to sync'**
-  String get syncQueuePendingTitle;
-
-  /// No description provided for @syncQueueCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'{pendingCount} waiting · {deadLetterCount} need attention'**
-  String syncQueueCounts(int pendingCount, int deadLetterCount);
-
-  /// No description provided for @syncQueueReconcileHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The encrypted changes are preserved. Retry them first; a full reconciliation is still recommended afterward.'**
-  String get syncQueueReconcileHint;
-
-  /// No description provided for @syncQueueRetryAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry all'**
-  String get syncQueueRetryAll;
-
-  /// No description provided for @syncQueueDiscardAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard'**
-  String get syncQueueDiscardAll;
-
-  /// No description provided for @syncQueueRetryFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Some changes still need attention'**
-  String get syncQueueRetryFailed;
-
-  /// No description provided for @syncQueueRetrySucceeded.
-  ///
-  /// In en, this message translates to:
-  /// **'Queued changes sent. Reconciliation is still recommended.'**
-  String get syncQueueRetrySucceeded;
-
-  /// No description provided for @syncQueueDiscardConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard unsent changes?'**
-  String get syncQueueDiscardConfirmTitle;
-
-  /// No description provided for @syncQueueDiscardConfirmBody.
-  ///
-  /// In en, this message translates to:
-  /// **'This permanently removes the preserved outbound changes from this device. This cannot be undone.'**
-  String get syncQueueDiscardConfirmBody;
-
-  /// No description provided for @syncQueueCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get syncQueueCancel;
-
-  /// No description provided for @syncQueueDiscardConfirmAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard permanently'**
-  String get syncQueueDiscardConfirmAction;
-
-  /// No description provided for @syncQueueDiscardFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The unsent changes could not be discarded'**
-  String get syncQueueDiscardFailed;
-
-  /// No description provided for @inboundSyncSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Received changes held for review'**
-  String get inboundSyncSectionTitle;
-
-  /// No description provided for @inboundSyncCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} received changes quarantined'**
-  String inboundSyncCount(int count);
-
-  /// No description provided for @inboundSyncErrorCode.
-  ///
-  /// In en, this message translates to:
-  /// **'Safe code: {errorCode}'**
-  String inboundSyncErrorCode(String errorCode);
-
-  /// No description provided for @inboundSyncRetryOne.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry'**
-  String get inboundSyncRetryOne;
-
-  /// No description provided for @inboundSyncDiscardOne.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard received change'**
-  String get inboundSyncDiscardOne;
-
-  /// No description provided for @inboundSyncDiscardConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard this received change?'**
-  String get inboundSyncDiscardConfirmTitle;
-
-  /// No description provided for @inboundSyncDiscardConfirmBody.
-  ///
-  /// In en, this message translates to:
-  /// **'This permanently removes the quarantined received change from this device. The relay copy was already acknowledged and this cannot be undone.'**
-  String get inboundSyncDiscardConfirmBody;
-
-  /// No description provided for @syncAttentionDiscardConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard preserved sync changes?'**
-  String get syncAttentionDiscardConfirmTitle;
-
-  /// No description provided for @syncAttentionDiscardConfirmBody.
-  ///
-  /// In en, this message translates to:
-  /// **'This permanently removes all preserved outbound failures and quarantined received changes from this device. This cannot be undone.'**
-  String get syncAttentionDiscardConfirmBody;
-
   /// No description provided for @familySyncTransferOwner.
   ///
   /// In en, this message translates to:
@@ -6366,6 +6264,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Membership ended'**
   String get familySyncRemovalReasonUnknown;
+
+  /// Family transaction payer chip for the current device owner
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get familyTransactionPayerSelf;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

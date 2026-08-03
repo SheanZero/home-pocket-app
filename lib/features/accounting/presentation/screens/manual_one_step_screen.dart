@@ -11,6 +11,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
+import '../../../../shared/utils/invalidate_transaction_dependents.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';

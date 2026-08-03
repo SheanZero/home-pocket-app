@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/analytics/presentation/providers/state_analytics.dart';
-import '../../features/analytics/presentation/providers/state_happiness.dart';
+import '../../features/analytics/presentation/providers/state_transaction_aggregate_refresh.dart';
 import '../../features/home/presentation/providers/state_today_transactions.dart';
 import '../../features/list/presentation/providers/state_calendar_totals.dart';
 import '../../features/list/presentation/providers/state_list_transactions.dart';
@@ -28,12 +27,20 @@ void invalidateTransactionDependents(
   ref.invalidate(
     calendarDailyTotalsProvider(bookId: bookId, year: year, month: month),
   );
+  ref.invalidate(
+    calendarFamilyLedgerTotalsProvider(
+      bookId: bookId,
+      year: year,
+      month: month,
+    ),
+  );
 
   // Home today summary (whole family).
   ref.invalidate(todayTransactionsProvider);
+  ref.invalidate(familyTodayTransactionsProvider);
 
-  // Analytics reports (whole families).
-  ref.invalidate(monthlyReportProvider);
-  ref.invalidate(happinessReportProvider);
-  ref.invalidate(bestJoyMomentProvider);
+  // Home + Statistics aggregates (whole families), including group Joy.
+  // Keep this list centralized with the other transaction-mutation paths so
+  // newly added aggregate providers cannot silently remain stale here.
+  invalidateTransactionAggregates(ref);
 }

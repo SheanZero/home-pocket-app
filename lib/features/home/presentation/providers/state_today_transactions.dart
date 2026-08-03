@@ -4,6 +4,7 @@ import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show getTransactionsUseCaseProvider;
+import 'state_shadow_books.dart';
 
 part 'state_today_transactions.g.dart';
 
@@ -35,4 +36,44 @@ Future<List<Transaction>> todayTransactions(
 
   final transactions = result.data ?? [];
   return transactions.where((tx) => !tx.isDeleted).toList();
+}
+
+/// Fetches today's transactions across the primary book and every active
+/// family shadow book, then presents them as one newest-first family feed.
+@riverpod
+Future<List<Transaction>> familyTodayTransactions(
+  Ref ref, {
+  required String bookId,
+}) async {
+  final shadowBooks = await ref.watch(shadowBooksProvider.future);
+  final bookIds = <String>[bookId, ...shadowBooks.map((item) => item.book.id)];
+  final batches = await Future.wait(
+    bookIds.map((id) => _fetchTodayTransactions(ref, id)),
+  );
+  final transactions = batches.expand((batch) => batch).toList()
+    ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  return transactions;
+}
+
+Future<List<Transaction>> _fetchTodayTransactions(
+  Ref ref,
+  String bookId,
+) async {
+  final useCase = ref.watch(getTransactionsUseCaseProvider);
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day);
+  final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+  final result = await useCase.execute(
+    GetTransactionsParams(
+      bookId: bookId,
+      startDate: todayStart,
+      endDate: todayEnd,
+    ),
+  );
+  if (result.isError) {
+    throw Exception(result.error ?? 'Failed to fetch family transactions');
+  }
+  return (result.data ?? const <Transaction>[])
+      .where((transaction) => !transaction.isDeleted)
+      .toList();
 }

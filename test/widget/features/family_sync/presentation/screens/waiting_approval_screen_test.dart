@@ -19,7 +19,9 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/navigation/family_flow_launcher.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/join_group_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
+import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
 import 'package:home_pocket/application/family_sync/complete_member_activation_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
 import 'package:home_pocket/application/family_sync/group_key_recovery_use_case.dart';
@@ -270,7 +272,7 @@ void main() {
   });
 
   testWidgets(
-    'shows manual retry and safe rebuild path when zero-knowledge recovery expires',
+    'shows the unified unable-to-join recovery layout without technical copy',
     (tester) async {
       final recovery = MockGroupKeyRecoveryCoordinator();
       final recoveryEvents =
@@ -323,9 +325,37 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Restoring the family key'), findsOneWidget);
-      expect(find.text('Retry key recovery'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsOneWidget);
+      expect(
+        find.text(
+          "Don't worry. You can enter the invite code again, or leave and choose another family.",
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Enter invite code again'), findsOneWidget);
       expect(find.text('Leave and choose another family'), findsOneWidget);
+      expect(find.text('Restoring the family key'), findsNothing);
+      expect(find.text('Retry key recovery'), findsNothing);
+
+      final reenterAction = find.byKey(
+        const Key('reenter-family-invite-action'),
+      );
+      final chooseAction = find.byKey(
+        const Key('choose-another-family-action'),
+      );
+      expect(reenterAction, findsOneWidget);
+      expect(chooseAction, findsOneWidget);
+      expect(tester.getSize(reenterAction), tester.getSize(chooseAction));
+      final reenterButton = tester.widget<OutlinedButton>(reenterAction);
+      final chooseButton = tester.widget<OutlinedButton>(chooseAction);
+      expect(
+        reenterButton.style?.backgroundColor?.resolve(<WidgetState>{}),
+        Colors.transparent,
+      );
+      expect(
+        chooseButton.style?.backgroundColor?.resolve(<WidgetState>{}),
+        Colors.transparent,
+      );
       await recoveryEvents.close();
     },
   );
@@ -388,9 +418,10 @@ void main() {
       await tester.tap(find.text('Open family'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Restoring the family key'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsOneWidget);
       expect(find.text('Waiting for owner approval'), findsNothing);
       expect(find.text('Cancel join request'), findsNothing);
+      expect(find.text('Enter invite code again'), findsOneWidget);
       expect(find.text('Leave and choose another family'), findsOneWidget);
       verify(() => checkGroupUseCase.execute()).called(1);
       await recoveryEvents.close();
@@ -449,6 +480,61 @@ void main() {
       verify(() => leaveGroupUseCase.execute('group-1')).called(1);
       verifyNever(() => deactivateGroupUseCase.execute(any()));
       expect(find.byType(GroupChoiceScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'active member can leave during key recovery and enter another invite',
+    (tester) async {
+      final recovery = MockGroupKeyRecoveryCoordinator();
+      when(
+        () => recovery.currentStatus,
+      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+            initialMode: WaitingApprovalInitialMode.recoveringKey,
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+            groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+            leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+            deactivateGroupUseCaseProvider.overrideWithValue(
+              deactivateGroupUseCase,
+            ),
+            userProfileProvider.overrideWith((_) async => null),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Enter invite code again'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Leave Group'));
+      await tester.pumpAndSettle();
+
+      verify(() => leaveGroupUseCase.execute('group-1')).called(1);
+      expect(find.byType(JoinGroupScreen), findsOneWidget);
     },
   );
 
@@ -829,7 +915,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('member not found in group'), findsNothing);
-      expect(find.text('Join request expired'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsOneWidget);
       verify(() => groupRepository.deactivateGroup('group-1')).called(1);
       verifyNever(
         () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
@@ -883,7 +969,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('member not found in group'), findsNothing);
-      expect(find.text('Join request expired'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsOneWidget);
       verify(() => groupRepository.deactivateGroup('group-1')).called(1);
     },
   );
@@ -986,8 +1072,8 @@ void main() {
     });
     await tester.pump();
 
-    expect(find.text('Join request declined'), findsOneWidget);
-    expect(find.text('Enter another invite code'), findsOneWidget);
+    expect(find.text('Unable to join this family right now'), findsOneWidget);
+    expect(find.text('Enter invite code again'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6));
     verifyNever(() => getJoinRequestStatusUseCase.execute(groupId: 'group-1'));
   });
@@ -1029,7 +1115,7 @@ void main() {
     verify(
       () => cancelJoinRequestUseCase.execute(groupId: 'group-1'),
     ).called(1);
-    expect(find.text('Join request cancelled'), findsOneWidget);
+    expect(find.text('Unable to join this family right now'), findsOneWidget);
   });
 
   testWidgets(
@@ -1093,7 +1179,7 @@ void main() {
       verify(
         () => cancelJoinRequestUseCase.execute(groupId: 'group-1'),
       ).called(1);
-      expect(find.text('Join request cancelled'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsOneWidget);
     },
   );
 }

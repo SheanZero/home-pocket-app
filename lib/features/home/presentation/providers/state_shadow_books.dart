@@ -14,11 +14,13 @@ class ShadowBookInfo {
     required this.book,
     required this.memberDisplayName,
     required this.memberAvatarEmoji,
+    this.memberAvatarImagePath,
   });
 
   final Book book;
   final String memberDisplayName;
   final String memberAvatarEmoji;
+  final String? memberAvatarImagePath;
 }
 
 @riverpod
@@ -37,6 +39,7 @@ Future<List<ShadowBookInfo>> shadowBooks(Ref ref) async {
       book: book,
       memberDisplayName: member?.displayName ?? book.ownerDeviceName ?? '',
       memberAvatarEmoji: member?.avatarEmoji ?? '',
+      memberAvatarImagePath: member?.avatarImagePath,
     );
   }).toList();
 }

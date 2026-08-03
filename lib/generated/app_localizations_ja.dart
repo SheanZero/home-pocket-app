@@ -742,7 +742,7 @@ class SJa extends S {
   String get homeRingSectionTitleSingle => 'ときめき度';
 
   @override
-  String get homeRingSectionTitleGroup => '家族のときめき';
+  String get homeRingSectionTitleGroup => '自分のときめき';
 
   @override
   String get homeViewMonthlyAnalysis => '今月の分析を見る';
@@ -768,7 +768,7 @@ class SJa extends S {
   }
 
   @override
-  String get homeMembersSectionTitle => 'メンバー';
+  String get homeMembersSectionTitle => 'メンバーの支出';
 
   @override
   String get homeNoJoyDataLegend => 'まだ記録なし';
@@ -1362,10 +1362,6 @@ class SJa extends S {
   String get familySyncJoinAnotherFamily => '別の家族に参加する';
 
   @override
-  String get familySyncReplaceEmptyGroupHint =>
-      '参加を申請すると、メンバーがいない現在の家族は自動的に削除されます。';
-
-  @override
   String get familySyncNetworkUnavailableTitle => 'ネットワークに接続できません';
 
   @override
@@ -1637,6 +1633,23 @@ class SJa extends S {
   String get groupTryAnotherInvite => '別の招待コードを入力';
 
   @override
+  String get groupUnableToJoinTitle => '今はファミリーに参加できません';
+
+  @override
+  String get groupUnableToJoinDescription =>
+      '招待コードをもう一度入力するか、退出して別のファミリーを選べます。';
+
+  @override
+  String get groupReenterInvite => '招待コードを再入力';
+
+  @override
+  String get groupExitAndChooseAnother => '退出して別のファミリーを選ぶ';
+
+  @override
+  String get groupUnableToJoinActionFailed =>
+      '操作を完了できませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
   String get groupKeyRecoveryTitle => 'ファミリーキーを復元しています';
 
   @override
@@ -1733,7 +1746,7 @@ class SJa extends S {
   String get homeLedgersSection => '帳簿';
 
   @override
-  String get homeRecentTransactions => '最近の取引';
+  String get homeRecentTransactions => '最近の支出';
 
   @override
   String get homeViewAllTransactions => 'すべて見る';
@@ -2236,6 +2249,9 @@ class SJa extends S {
 
   @override
   String get calMonthTotal => '今月の合計';
+
+  @override
+  String get calFamilyMonthTotal => '家族の合計';
 
   @override
   String get calMonthTotalDaily => '日常の合計';
@@ -3272,82 +3288,6 @@ class SJa extends S {
   String get syncQueueNeedsAttentionDescription => '確認が必要な変更があります';
 
   @override
-  String get syncQueueNeedsAttentionTitle => '同期の確認が必要です';
-
-  @override
-  String get syncQueuePendingTitle => '同期を待っている変更';
-
-  @override
-  String syncQueueCounts(int pendingCount, int deadLetterCount) {
-    return '送信待ち $pendingCount件・確認が必要 $deadLetterCount件';
-  }
-
-  @override
-  String get syncQueueReconcileHint =>
-      '暗号化された変更は保持されています。先に再送し、その後に完全な整合確認を行うことをおすすめします。';
-
-  @override
-  String get syncQueueRetryAll => 'すべて再送';
-
-  @override
-  String get syncQueueDiscardAll => '破棄';
-
-  @override
-  String get syncQueueRetryFailed => '確認が必要な変更が残っています';
-
-  @override
-  String get syncQueueRetrySucceeded => '変更を送信しました。引き続き整合確認をおすすめします。';
-
-  @override
-  String get syncQueueDiscardConfirmTitle => '未送信の変更を破棄しますか？';
-
-  @override
-  String get syncQueueDiscardConfirmBody =>
-      'この端末に保持された未送信の変更を完全に削除します。この操作は元に戻せません。';
-
-  @override
-  String get syncQueueCancel => 'キャンセル';
-
-  @override
-  String get syncQueueDiscardConfirmAction => '完全に破棄';
-
-  @override
-  String get syncQueueDiscardFailed => '未送信の変更を破棄できませんでした';
-
-  @override
-  String get inboundSyncSectionTitle => '確認待ちの受信変更';
-
-  @override
-  String inboundSyncCount(int count) {
-    return '隔離された受信変更 $count件';
-  }
-
-  @override
-  String inboundSyncErrorCode(String errorCode) {
-    return '安全コード: $errorCode';
-  }
-
-  @override
-  String get inboundSyncRetryOne => '再試行';
-
-  @override
-  String get inboundSyncDiscardOne => '受信変更を破棄';
-
-  @override
-  String get inboundSyncDiscardConfirmTitle => 'この受信変更を破棄しますか？';
-
-  @override
-  String get inboundSyncDiscardConfirmBody =>
-      '隔離された受信変更をこの端末から完全に削除します。中継サーバー上のコピーは確認済みのため、元に戻せません。';
-
-  @override
-  String get syncAttentionDiscardConfirmTitle => '保持された同期変更を破棄しますか？';
-
-  @override
-  String get syncAttentionDiscardConfirmBody =>
-      '保持された送信失敗と隔離済みの受信変更を、この端末からすべて完全に削除します。この操作は元に戻せません。';
-
-  @override
   String get familySyncTransferOwner => 'オーナーを引き継ぐ';
 
   @override
@@ -3437,4 +3377,7 @@ class SJa extends S {
 
   @override
   String get familySyncRemovalReasonUnknown => 'メンバー関係が終了しました';
+
+  @override
+  String get familyTransactionPayerSelf => '自分';
 }

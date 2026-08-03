@@ -1,3 +1,419 @@
+# V16 A2 Family List Top — Flutter Alignment (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_UU5U6I/截屏2026-08-03 21.46.42.png`.
+- Flutter implementation: `lib/features/list/presentation/screens/list_screen.dart`, `lib/features/list/presentation/widgets/list_calendar_header.dart`, `lib/features/list/presentation/widgets/list_sort_filter_bar.dart`, and `lib/features/list/presentation/providers/state_calendar_totals.dart`.
+- Flutter-rendered evidence: `test/golden/goldens/family_list_top_v16_ja.png` at a 390 px phone width.
+- Same-input visual comparison: `.planning/sketches/audits/family-list-v16-2026-08-03/source-vs-flutter-family-list-top.png`; approved Mockup on the left and Flutter on the right.
+- State: July 2026, A2 family, light theme, all ledgers, Monday week start, family totals ¥227,620 / Joy ¥53,620 / Daily ¥174,000.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Header: the month title keeps the List information-blue treatment; family mode now displays the compact family badge before the calendar and settings actions.
+- Ledger switch: the three full-width pill segments preserve the approved active-all treatment and the existing semantic Daily/Joy states.
+- Calendar: day numerals, weekend color, compact amounts, outside-month opacity, 46 dp rows, rounded receipt card, border, and soft shadow align with the Mockup geometry.
+- Family receipt footer: family mode now renders a stable family-wide month total followed by Joy and Daily colored-dot breakdowns. The values aggregate the owner book and all locally available shadow books and do not change with search/category/day filters.
+- Filter scope: the first version no longer exposes per-member filter chips. The compact row contains sort, category, search, and the existing clear affordance only when another filter is active.
+- Refresh behavior: transaction mutations, pull-to-refresh, and full data resets invalidate both calendar daily totals and the new family ledger split, preventing a stale family footer.
+- Personal isolation: solo mode retains the existing single-line monthly summary and does not show the family badge or family ledger split.
+
+## Verification
+
+- Same-input visual review confirms matching hierarchy, card width, segment geometry, calendar rhythm, summary hierarchy, and filter controls.
+- Family list widget/provider/refresh tests plus the List calendar and new V16 family-list Goldens: 36 tests passed, 0 failed.
+- The family ledger provider test confirms owner + shadow-book aggregation for both ledgers.
+- Localization is supplied for Japanese, Chinese, and English; generated localization outputs were refreshed.
+- `flutter analyze`: 0 issues.
+
+final result: passed
+
+---
+
+# V16 A2 Home + Detail — Shared Payer Attribution (2026-08-03)
+
+## Scope and evidence
+
+- Selected direction: scheme 2 from `/Users/xinz/.codex/generated_images/019fc151-a7da-7953-8152-aee24d5ea2e2/exec-04d78f89-fb1d-4182-89aa-4839939fd5a7.png`, extended from family detail into Home recent spending.
+- Mockup implementation: the A2 family Home and List branches in `docs/mockup/v16/index.html`; A1 personal rows remain unchanged.
+- Flutter implementation: `lib/shared/widgets/family_transaction_attribution.dart`, `lib/features/home/presentation/widgets/home_transaction_tile.dart`, `lib/features/home/presentation/screens/home_screen.dart`, `lib/features/list/presentation/widgets/list_transaction_tile.dart`, and `lib/features/list/presentation/screens/list_screen.dart`.
+- Browser-rendered Mockup evidence: `.planning/sketches/audits/family-list-v16-2026-08-03/a2-v3-home-member-chips-mockup.png` and `.planning/sketches/audits/family-list-v16-2026-08-03/a2-v3-list-member-chips-mockup.png`.
+- Flutter-rendered evidence: `test/golden/goldens/home_v16_family_alignment.png` and `test/golden/goldens/family_transaction_attribution_v16_zh.png`.
+- Same-input visual comparison: `.planning/sketches/audits/home-v16-flutter-2026-08-03/family-payer-chip-mockup-vs-flutter.png`; Mockup Home/List rows on the left and their shared Flutter row treatment on the right.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Shared structure: Home recent spending and List detail use the same payer avatar, lower-right category badge, title, optional satisfaction face, compact payer color chip, merchant, and neutral amount hierarchy.
+- Current-device owner: the owner chip is no longer a profile name. It uses the localized first-person label `我` / `自分` / `Me` and the primary green tone. Other members retain their server profile names and stable Joy/shared color roles.
+- Family semantics: family rows do not display the duplicate `悦己` / `日常` text badge. Joy rows retain the existing satisfaction face after the title; daily rows do not show it. The category remains visible through the avatar corner badge.
+- Personal isolation: personal Home and List branches keep their original category icon and ledger badge treatment. No payer chip, avatar substitution, or copy change is introduced outside family mode.
+- Data wiring: the current book resolves to the local profile avatar; shadow books resolve to each member's display name and avatar path. Amounts remain neutral so member identity and Joy satisfaction are the only row-level semantic accents.
+- Layout: both components retain the existing 68 dp minimum row height, bounded payer-chip width, ellipsized merchant copy, and tabular amount alignment.
+
+## Verification
+
+- Family Home/List targeted widget and screen tests plus both V16 Golden suites: 38 tests passed, 0 failed.
+- `flutter analyze`: 0 issues.
+- Mockup A2 Home recent rows / payer chips / category badges: 3 / 3 / 3; ledger text tags: 0; Joy faces: 1.
+- Mockup A2 List family rows use the same color-chip and category-badge classes; the first-version member filter remains absent.
+- Browser DOM inspection confirmed the current owner is rendered as `自分` in the Japanese Mockup and other members as `花子` / `太郎`.
+- Same-input visual review confirmed matching member-chip hierarchy, avatar-badge placement, smile placement, merchant rhythm, and neutral amount alignment.
+
+final result: passed
+
+---
+
+# V16 A2 Family Detail — Member Color Chips (2026-08-03)
+
+## Scope and evidence
+
+- Selected direction: `/Users/xinz/.codex/generated_images/019fc151-a7da-7953-8152-aee24d5ea2e2/exec-04d78f89-fb1d-4182-89aa-4839939fd5a7.png` (option 2).
+- Implementation: the A2 family transaction branch in `docs/mockup/v16/index.html`; A1 personal transaction rows remain unchanged.
+- Browser-rendered evidence: `.planning/sketches/audits/family-list-v16-2026-08-03/a2-v2-member-name-chips-final.png`.
+- Same-input comparison: `.planning/sketches/audits/family-list-v16-2026-08-03/selected-option2-vs-mockup.png`; selected option on the left, final A2 Mockup on the right.
+- State: July 2026, A2 family, light theme, all ledgers, three members, 390 px phone width.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Member identity: family rows replace the `日常` / `ときめき` text tag with a compact payer chip. あおい uses sage green, 花子 uses blush pink, and 太郎 uses slate blue, matching option 2's identity-first direction.
+- Category visibility: the existing category icon remains as a small badge at the lower-right of each avatar, as explicitly requested. Its category graphic and Joy/daily color semantics remain intact without adding a second text label.
+- Joy semantics: Joy rows retain the satisfaction smile directly after the transaction title. Daily rows do not show the smile.
+- Amount hierarchy: family amounts use one neutral ink treatment, so member color and satisfaction are the only row-level semantic accents. Personal A1 rows retain their existing ledger tags and layout.
+- Density: the chips fit the existing compact 68 px family rows without pushing merchant, amount, or chevron content outside the phone.
+
+## Verification
+
+- A2 family rows / payer chips / category badges: 5 / 5 / 5.
+- Payer chip distribution: あおい 2, 花子 2, 太郎 1.
+- A2 family ledger text tags: 0.
+- A2 Joy rows / satisfaction faces: 2 / 2.
+- A1 personal rows / original ledger tags: 4 / 4; payer chips: 0.
+- 375/390/430 px phone widths: `scrollWidth == clientWidth`; no transaction row escapes the app bounds.
+- Same-input visual review: member-chip hierarchy, title/smile placement, amount alignment, card grouping, and spacing match the selected direction; the category avatar badge is the intentional user-requested addition.
+
+final result: passed
+
+---
+
+# V16 A1/A2 Joy Rows — Satisfaction Face + V1 Filter Simplification (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_GWmx0J/截屏2026-08-03 20.41.20.png`, where a Joy transaction places the satisfaction face directly after its title.
+- Implementation: A1/A2 home-recent rows and A1/A2 detail rows in `docs/mockup/v16/index.html`; A2 detail no longer includes a member filter.
+- Product asset: `docs/mockup/v16/assets/satisfaction/sat_04.svg`, copied from the existing production asset `assets/satisfaction/sat_04.svg` so the standalone Mockup renders the same smile silhouette.
+- Browser-rendered evidence: `.planning/sketches/audits/family-list-v16-2026-08-03/a2-v1-list-satisfaction-final.png`, `.planning/sketches/audits/family-list-v16-2026-08-03/a2-v1-home-recent-satisfaction.png`, and `.planning/sketches/audits/family-list-v16-2026-08-03/a2-v1-no-member-filter-list.png`.
+- Same-input comparison: `.planning/sketches/audits/family-list-v16-2026-08-03/satisfaction-source-vs-mockup.png`; user reference on the left, final A2 Joy row on the right.
+- State: July 2026, light theme, A2 family detail with all ledgers and payer attribution; A1 personal and A2 family home-recent states were also checked.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Joy semantics: every Joy transaction title now shows the pink satisfaction smile inline. Daily rows do not show a smile, and the existing Joy/daily badge remains unchanged.
+- Asset fidelity: the face is the project's real `sat_04.svg`, rendered as a semantic color mask. It is not an emoji, generic Material face, CSS-drawn substitute, or raw asset key.
+- V1 scope: the A2 member filter and all of its presentation/state/event logic were removed. Payer avatar and name stay on every family row, preserving attribution without introducing a second filtering dimension.
+- Home consistency: A1 personal and A2 family recent-spending lists use the same inline satisfaction treatment as the detail list.
+- Layout: the smile shares the title baseline at 17×17 px and preserves truncation, amount alignment, payer metadata, and the existing 44 px+ row target.
+
+## Verification
+
+- A2 member-filter controls: 0.
+- A2 Joy detail rows / satisfaction faces: 2 / 2; daily detail faces: 0.
+- A1 home Joy rows / satisfaction faces: 1 / 1; daily home faces: 0.
+- A2 home Joy rows / satisfaction faces: 1 / 1; daily home faces: 0.
+- 375/390/430 px phone widths: `scrollWidth == clientWidth`; no horizontal overflow.
+- Browser console errors: 0.
+- Same-input comparison confirms the icon follows the title and uses the existing Joy-pink visual language.
+
+## Comparison history
+
+1. The previous family-detail direction added a horizontally scrollable member filter and showed only ledger/category semantics in transaction rows.
+2. The user simplified V1 scope by removing member filtering and requested the existing satisfaction face on Joy transactions.
+3. The final pass removed the filter end-to-end, added the real satisfaction asset to personal/family home and detail rows, and verified responsive behavior and runtime state.
+
+final result: passed
+
+---
+
+# V16 A2 Family Detail — Family Ledger Redesign (superseded draft, 2026-08-03)
+
+## Scope and evidence
+
+- Problem baseline: `/Users/xinz/Downloads/截屏 2026-08-03 16.31.16.png`, the current dark Flutter family-detail screen with no payer identity, an overflowing filter rail, and raw `icon:cat...` content.
+- Visual target: the existing A1 list/calendar language and the accepted A2 family-home payer/avatar language in `docs/mockup/v16/index.html`.
+- Redesigned implementation: the A2 family branch of `docs/mockup/v16/index.html`; A1 remains on its existing list implementation.
+- Browser-rendered implementation: `.planning/sketches/audits/family-list-v16-2026-08-03/a2-family-list-top-browser.png` and `.planning/sketches/audits/family-list-v16-2026-08-03/a2-family-list-rows-browser.png`.
+- Same-input comparisons: `.planning/sketches/audits/family-list-v16-2026-08-03/source-vs-mockup-top.png` and `.planning/sketches/audits/family-list-v16-2026-08-03/source-vs-mockup-rows.png`.
+- Viewport and normalization: browser evidence was captured at 1250×704 px with a 390×844 CSS-pixel phone at DPR 1. The 1320×2868 device baseline was normalized to 390 px width; focused source and implementation regions were cropped to equal 390×620 and 390×330 panels before side-by-side comparison.
+- State: A2 family, light theme, July 2026, all ledgers, all three members, family calendar summary, and grouped family transactions.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains in the redesigned Mockup.
+- Typography: A2 reuses A1's month, segmented-control, calendar, amount, date-header, and transaction hierarchy. Payer names use the existing item weight; merchant, ledger, and day-total copy stay in the supporting scale without wrapping.
+- Spacing and layout rhythm: the new member rail sits between ledger selection and the calendar, so member identity is visible before data filtering. The calendar remains the dominant region, the family summary stays inside its footer, and the utility filter row remains one compact line without the baseline's clipped `仅自己`/raw-icon controls.
+- Colors and tokens: family identity uses the existing primary green, Joy remains pink, daily remains green, and the design keeps the V16 warm paper surfaces, borders, radii, and shadows. No new family-only palette was added.
+- Images and icons: the member rail and transaction rows use the existing A2 raster profile assets. Each payer avatar receives a real Material category badge; no emoji, placeholder art, raw icon key, or handcrafted graphic was introduced.
+- Copy and content: the footer now says `家族の合計` and exposes the family Joy/daily split. Transaction rows show payer, ledger, merchant, amount, and category; date headers add the day's family total. Other members' transactions are explicitly read-only while the owner's remain editable.
+- Responsive behavior: 375, 390, and 430 px phone widths all report `screenScrollWidth == screenClientWidth`, the utility filter row has no overflow, and zero transaction rows clip their content. The member rail remains horizontally scrollable as an intentional compact control.
+- Interactions and runtime: member filtering, ledger filtering, date filtering, sort/category/search controls, month selection, and transaction actions remain wired. The member, ledger, and date filters were exercised; family rows filtered to the authoritative state and the browser console reported zero errors.
+
+## Comparison history
+
+1. The baseline used the personal list unchanged in family mode, hid payer identity, duplicated `仅自己` beside other filters, clipped a raw category token, and showed only a single monthly total.
+2. The redesign added an avatar member rail, family Joy/daily summary, payer-aware rows, per-day family totals, and read-only semantics for remote transactions while preserving A1's calendar and control hierarchy.
+3. The final normalized top and row comparisons found no remaining actionable P0/P1/P2 mismatch; A1 was switched back and visually checked to confirm no regression.
+
+## Verification
+
+- Family member filter: passed; selecting 花子 returns only 花子 rows.
+- Ledger filter: passed; selecting 日常 returns only daily rows and `¥174,000`.
+- Date filter: passed; selecting July 10 returns only the July 10 family group and `¥11,100` day total.
+- 375/390/430 px overflow check: passed.
+- Browser console errors: 0.
+- `git diff --check -- docs/mockup/v16/index.html design-qa.md`: passed after final report update.
+
+final result: passed
+
+---
+
+# V16 Personal + Family Home — Flutter Implementation (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: the A1 personal and A2 family branches in `docs/mockup/v16/index.html`, including the final tear-hero, member-detail, favorite-ticket, and recent-spending compositions.
+- Flutter implementation: `lib/features/home/presentation/screens/home_screen.dart`, `lib/features/home/presentation/widgets/home_hero_card.dart`, `lib/features/home/presentation/widgets/family_member_spending_card.dart`, and `lib/features/home/presentation/widgets/home_transaction_tile.dart`.
+- Rendered implementation: `test/golden/goldens/home_v16_personal_alignment.png` and `test/golden/goldens/home_v16_family_alignment.png`, both at 390×1180 logical/physical px (DPR 1), light theme, Simplified Chinese, July 2026.
+- Same-input focused comparisons: `.planning/sketches/audits/home-v16-flutter-2026-08-03/family-hero-side-by-side.png`, `.planning/sketches/audits/home-v16-flutter-2026-08-03/family-details-side-by-side.png`, and `.planning/sketches/audits/home-v16-flutter-2026-08-03/personal-focus-side-by-side.png`.
+
+## Findings
+
+- No actionable P0, P1, or P2 visual mismatch remains.
+- Typography and hierarchy: personal and family modes share the V16 hero hierarchy. `本月最爱`, `成员支出`, and `最近支出` use the same compact section-title scale and icon treatment; currency and invite-style numerals keep the product's monospaced numeral treatment.
+- Spacing and layout: family spending and personal Joy remain inside one combined tear-notch hero. The monthly favorite is a separate ticket. Member spending is independently titled outside its card, and each member row follows the mockup's avatar/name/total, Joy/daily split, and proportion-bar structure.
+- Colors and surfaces: the implementation reuses existing paper, ink, Joy pink, daily green, borders, notches, and shadows. No parallel palette or one-off card language was introduced.
+- Data and copy: the family header aggregates the primary and shadow books; the lower Joy metric remains personal; the monthly favorite appears only when the current user has a Joy expense. Family recent spending merges all family books, identifies the payer, keeps the existing Joy/daily badge semantics, and does not show a Joy score.
+- Images and icons: production rows pass the real member avatar image path into the shared `AvatarDisplay` widget. The deterministic widget-golden harness cannot decode the local file-backed profile photos and therefore captures the existing fallback circle; runtime image loading remains wired and covered by the same component. Category and section graphics use the existing product icon libraries.
+- Responsive and interaction behavior: all new rows use bounded flex layouts and 44dp avatar/tap targets. Member detail navigation, recent-spending navigation, personal transaction editing, and remote transaction read-only behavior remain wired. Provider tests cover merged, sorted family transactions and refresh invalidation.
+- Accepted P3 copy variance: the source sample says `大満足`, while Flutter renders the shared ADR-014 satisfaction label `至福`. The implementation intentionally keeps the product-wide localized terminology rather than introducing a home-only string.
+
+## Comparison history
+
+1. The first Flutter pass matched the overall A1/A2 structure but member rows were optically denser than the mockup and used the longer ledger-book labels.
+2. Member row padding was opened to the reference rhythm, ledger copy was switched to the compact localized `悦己`/`日常` labels, and the visual baselines were regenerated.
+3. Final same-input comparisons confirmed the combined tear hero, personal favorite, independent member card, member split bars, payer attribution, and recent-spending title treatment with no remaining actionable P0/P1/P2 mismatch.
+
+## Verification
+
+- Targeted home widget/provider suite: 74 tests passed, 0 failed.
+- Home isolation and shadow-book characterization: 5 tests passed, 0 failed.
+- Existing HomeHero and new A1/A2 Golden suites: 15 tests passed, 0 failed.
+- `flutter analyze`: 0 issues after the final unused-import cleanup.
+- `git diff --check`: passed for the implementation and QA artifacts.
+
+final result: passed
+
+---
+
+# V16 A2 Family Home — Tear Hero and Spending Detail Refinement (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: the combined spending/Joy structure at `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_EDBuwy/截屏2026-08-03 17.23.27.png` and the member-detail reference at `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_4nyq0Y/截屏2026-08-03 17.24.27.png`.
+- Implementation: A1 personal and A2 family home branches in `docs/mockup/v16/index.html`.
+- Browser-rendered implementation: `/private/tmp/a2-family-final-tear.png`, `/private/tmp/a2-family-final-details.png`, and `/private/tmp/a1-personal-final-recent.png`.
+- Viewport and pixels: implementation used a 390×844 CSS-pixel phone viewport at DPR 1 inside 1265×712 browser captures. Source crops are 772×788 px and 926×318 px; they were compared as focused composition references rather than treated as equal-density full screens.
+- State: Japanese, light theme, July 2026, A2 family mode with personal Joy records, three family members, and three recent family transactions; A1 personal mode was also checked for title-style regression.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Fonts and typography: `最近の支出` now reuses the same 13 px section-title token and weight as `今月の最愛` in both A1 and A2. Member names, totals, ledger amounts, and chevrons preserve the V16 type hierarchy without wrapping at the supported widths.
+- Spacing and layout rhythm: A2 once again uses one continuous hero card. The family aggregate and personal Joy metric are separated by the same centered tear-divider and side notches used by A1, restoring the intended receipt hierarchy. Member rows follow the focused reference: avatar left, name and total on the first line, Joy/daily subtotals on the second, and a full-width proportion bar beneath.
+- Colors and visual tokens: the combined hero, tear divider, Joy ring, daily progress, member split bars, and recent ledger labels use existing V16 paper, ink, Joy pink, and daily green tokens. No new palette was introduced.
+- Image quality and asset fidelity: member and payer rows retain the existing V16 raster avatars with circular cropping and no placeholder substitutions. Section and navigation icons use the existing Material Symbols Rounded family.
+- Copy and content: the family aggregate remains family-wide while the lower metric is explicitly personal. Recent-spending copy stays consistent across A1 and A2, and the member detail continues to show separate Joy and daily totals without adding a Joy score.
+- Responsive behavior: 375, 390, and 430 px phone widths all report `scrollWidth == clientWidth`; the combined hero remains a single component, all member rows retain their proportion bars, and no total, chevron, or ledger label is clipped.
+- Interactions and runtime: A1/A2 preset switching, viewport controls, and member-row feedback were exercised in the in-app browser. The member row produced its expected status feedback, and the browser console contained zero errors.
+
+## Comparison evidence
+
+- Full-view comparison: the combined A2 hero capture was compared in the same visual input with the provided header reference. The implementation preserves one receipt surface, the central tear, symmetrical side notches, aggregate-first hierarchy, and A1-derived personal Joy block.
+- Focused comparison: the A2 member capture was compared in the same visual input with the provided dark member-detail reference. The implementation matches the requested information order and proportional split-bar treatment while intentionally retaining the selected light theme and Japanese sample content.
+- A1 regression evidence: `/private/tmp/a1-personal-final-recent.png` confirms `最近の支出` uses the same title scale and leading-icon treatment as `今月の最愛` without changing the A1 hero or favorite ticket.
+
+## Comparison history
+
+1. The prior A2 pass split the family aggregate and personal Joy metric into two independent cards and rendered member subtotals without the reference proportion bars.
+2. This refinement merged the header back into one tear-divided receipt, converted member rows to the reference three-line detail structure, and standardized the recent-spending heading across A1 and A2.
+3. The final same-input visual comparison and 375/390/430 px responsive pass found no remaining actionable P0/P1/P2 mismatch.
+
+## Verification
+
+- A2 hero count: 1; tear divider present.
+- A2 member rows: 3; all include Joy/daily split bars.
+- A1 and A2 `今月の最愛`/`最近の支出` section title size: 13 px.
+- Browser console errors: 0.
+- `git diff --check -- docs/mockup/v16/index.html design-qa.md`: passed.
+
+final result: passed
+
+---
+
+# V16 A2 Family Home — A1 Visual Reuse (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: A1 personal home in `docs/mockup/v16/index.html`, captured at `/private/tmp/a1-personal-reference.png`, plus the focused user reference `/var/folders/qs/d64k8pm541nbr7hjj9scdxj00000gn/T/TemporaryItems/NSIRD_screencaptureui_GWG0a5/截屏2026-08-03 17.08.11.png`.
+- Implementation: the A2 family-home branch in `docs/mockup/v16/index.html`.
+- Rendered implementation: `/private/tmp/a2-family-final-top.png` and `/private/tmp/a2-family-final-lower.png`.
+- Viewport and pixels: A1 and A2 were rendered in the same 390×844 CSS-pixel phone frame at DPR 1 inside 1265×712 browser captures. The focused favorite source is 808×314 px and was compared against the same rendered ticket region without density-dependent layout changes.
+- State: Japanese, light theme, July 2026, family mode with personal Joy records, three family members, and three recent family transactions.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Fonts and typography: A2 reuses A1's exact `faithful-region-title`, goal, satisfaction, small-win, calendar, amount, and numeral styles. `今月の最愛` and `メンバーの支出` both resolve to the same 13 px section-title token and optical weight.
+- Spacing and layout rhythm: the family aggregate and personal Joy metrics are now separate cards. The favorite section has a transparent outer surface, with only the ticket receiving its paper fill. The member heading is outside its content card and uses the same 18 px section gap and 10 px heading-to-card gap as the favorite ticket.
+- Colors and tokens: the family summary, personal Joy card, favorite ticket, member rows, ledger dots, and transaction tags use existing V16 semantic tokens; no new palette or one-off surface was introduced.
+- Image and icon fidelity: member and payer rows use the three existing V16 raster avatars. `workspace_premium`, `groups`, category badges, and navigation affordances use the existing Material Symbols Rounded icon family; no placeholder avatar, emoji, or custom-drawn icon was added.
+- Copy and content: A2 keeps the family aggregate while presenting `自分のときめき` with the same 64/80 goal, 8.2/10 satisfaction average, and 12 small wins as A1. The monthly favorite is unchanged from A1. Recent Joy transactions show only the existing ledger label and never add a numeric satisfaction score.
+- Responsive behavior: 375, 390, and 430 px phone widths render with `scrollWidth == clientWidth`; the avatar, ledger split, total amount, and chevron remain visible without horizontal overflow.
+- Interactions: A1/A2 preset switching, Joy present/empty switching, member-row feedback, and family-transaction feedback were exercised. The empty personal-Joy state hides the monthly favorite while preserving member spending. No browser execution error surfaced during these interactions.
+
+## Comparison history
+
+1. Before the change, A2 placed the family Joy metric and text-avatar member totals inside the same large hero card.
+2. The first implementation separated family spending from the A1-derived personal Joy module, reused the transparent A1 favorite section, moved member spending into an independently titled card with real avatars, and added payer attribution to recent transactions.
+3. The 375/390/430 px pass found no overflow or title-size drift. The final full-view and focused-region comparison found no remaining actionable P0/P1/P2 mismatch.
+
+## Verification
+
+- A1 remains visually unchanged and does not render A2-only member or personal-Joy wrapper components.
+- A2 favorite outer background: transparent.
+- A2 favorite and member heading font size: both 13 px.
+- A2 member title is outside the member card and includes the `groups` icon.
+- `git diff --check -- docs/mockup/v16/index.html`: passed.
+
+final result: passed
+
+---
+
+# Unified Unable-to-Join Family State — Selected Direction 1 (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fc151-a7da-7953-8152-aee24d5ea2e2/exec-e163acf9-dcc0-4aa4-a3fd-cba013c4b845.png`, the first copy/layout direction selected by the user, with the explicit follow-up that neither lower action should have its own filled background.
+- Flutter implementation: `lib/features/family_sync/presentation/screens/waiting_approval_screen.dart`, shared by terminal join-request states and active-membership/missing-key states.
+- Rendered Flutter implementation: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/family_unable_to_join_safe_area_dark_zh.png`.
+- Same-state comparison, selected direction left and Flutter right: `/Users/xinz/.codex/visualizations/2026/08/02/019fc151-a7da-7953-8152-aee24d5ea2e2/family-unable-to-join-comparison.png`.
+- Viewport/state: Simplified Chinese, dark theme, 393×852 logical px, 47dp top inset, 34dp bottom safe area, and an unavailable family-join flow. The selected image was normalized from 853×1844 px to the same frame.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Hierarchy: the centered house/unavailable mark, 24sp title, calm two-line explanation, section divider, and fixed lower action region preserve the selected layout while remaining safe-area aware.
+- Requested action treatment: both actions have the same 62dp geometry, 18dp radius, padding, outline, centered label, leading icon, trailing chevron, and fully transparent enabled/disabled backgrounds. Green and Joy pink distinguish the two choices without placing either on a separate filled surface.
+- Copy: recovery, rejection, cancellation, and expiry no longer expose key-recovery or request-lifecycle terminology. All now use the same friendly Chinese, Japanese, and English copy and the two explicit next choices.
+- Interaction: `重新输入邀请码` leaves or dissolves an active family when required and opens invite entry; `退出并重新选择家庭` performs the same authoritative cleanup and opens family choice. Terminal server states clear stale local membership best-effort before continuing. Existing confirmation and network-error dialogs remain in the flow.
+- Accessibility and resilience: each action exceeds the 44dp minimum target, keeps its label geometrically centered, provides a loading state, honors bottom SafeArea, and allows the explanatory region to scroll on short screens.
+- P3 follow-up only: the production illustration intentionally uses the app's existing Lucide icon language instead of importing the generated concept's decorative path artwork. Its enlarged footprint now matches the reference hierarchy without introducing a one-off raster dependency.
+
+## Comparison history and verification
+
+1. The first Flutter pass unified the two states and replaced the technical copy, but the product-native illustration read smaller than the selected visual target.
+2. Same-viewport comparison preserved the user-requested transparent action treatment and increased the unavailable-family mark from 116×102dp to a 164×168dp visual slot.
+3. The final comparison confirms the central hierarchy, divider, action alignment, transparent backgrounds, safe-area spacing, and green/pink distinction with no remaining P0/P1/P2 mismatch.
+- Waiting-approval widget suite: 17 tests passed, 0 failed.
+- Family-flow Golden suite: 10 tests passed, including the new dark Chinese unavailable-state baseline.
+- Full Flutter suite: 4,371 tests passed, 11 skipped, 0 failed.
+- `flutter analyze`: 0 issues.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Family Waiting Approval Cancel Action — Design QA (2026-08-03)
+
+## Scope and evidence
+
+- Device-UAT source: `/Users/xinz/Downloads/截屏 2026-08-03 14.15.47.png`, with the reported inactive tap target, clipped lower edge, and low-contrast action.
+- Flutter implementation: `lib/features/family_sync/presentation/screens/waiting_approval_screen.dart`, with the emphasized shared button variant in `lib/features/family_sync/presentation/widgets/family_flow_components.dart`.
+- Rendered Flutter state: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/family_waiting_approval_safe_area_dark_zh.png`.
+- Same-state comparison, device capture left and revised Flutter right: `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/family-waiting-cancel-2026-08-03/comparison.png`.
+- Viewport/state: Simplified Chinese, dark theme, pending join request, 393×852 logical px, 47dp top inset, and 34dp bottom safe area. The device source was normalized from 944×2048 px to the same 393×852 frame; system status icons and the debug ribbon remain runtime-owned.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Root cause: the previous scroll column used fixed 198dp and 300dp gaps, placing the 52dp cancel action inside or below the iPhone bottom gesture area. The existing test called `ensureVisible`, so it did not reproduce the real-device tap geometry. Errors were also rendered below the clipped action, making a failed request appear inert.
+- Layout: the page header and progress indicator remain fixed, the waiting content now centers responsively in the available body, and the cancel action lives in a dedicated bottom navigation region with explicit SafeArea protection. The entire 58dp control stays above the 34dp gesture inset without requiring a scroll.
+- Affordance: the action now uses the existing Joy palette as a low-emphasis withdrawal treatment, with a visible pink-tinted surface, stronger border, heavier label, subtle shadow, and the real Lucide undo icon. It is visually distinct without competing with primary family-flow actions.
+- Interaction: tapping directly invokes the existing cancel join request use case, shows its loading state in place, and keeps friendly network or lifecycle feedback visible above the fixed button. No navigation or server contract was changed.
+- Responsive behavior: the center content remains scrollable on genuinely short viewports, while the action stays independently reachable and safe-area aligned.
+
+## Comparison history and verification
+
+1. The device capture showed only the upper portion of a neutral outline button at the physical screen edge.
+2. The first corrective pass moved the action into a fixed SafeArea region and added a prominent shared secondary-button variant.
+3. Visual QA at the matching dark Chinese viewport found the Material rounded icon unavailable in the deterministic golden font, so it was replaced with the product's existing Lucide icon set.
+4. The final side-by-side comparison confirms complete button visibility, stronger contrast, balanced bottom spacing, and no overlap with the gesture area.
+- Waiting, member approval, and group management widget suites: 27 tests passed, 0 failed.
+- Family-flow Golden suite: 9 tests passed, including the new dark Chinese safe-area baseline.
+- Full Flutter suite: 4363 tests passed, 11 skipped, 0 failed.
+- `flutter analyze`: 0 issues.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Family Invite Ticket — Selected Direction 3 (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fc151-a7da-7953-8152-aee24d5ea2e2/exec-0749cd6d-c504-4b4e-850b-91336938d6ab.png`, the third ticket direction selected by the user and refined to a 45sp invite code. Latest device-UAT evidence: `/Users/xinz/Downloads/截屏 2026-08-03 12.07.10.png`, with explicit requests to center the ticket title and both actions and reduce vertical whitespace.
+- Flutter implementation: `lib/features/family_sync/presentation/widgets/family_invite_ticket.dart`, integrated by `lib/features/family_sync/presentation/screens/create_group_screen.dart` with the live timer from `lib/features/family_sync/presentation/widgets/invite_expiry_countdown.dart`.
+- Rendered Flutter implementation: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/family_create_invite_ticket_light_zh.png`.
+- Full correction comparison, device-UAT screenshot left and revised Flutter right: `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/family-invite-ticket-2026-08-03/alignment-user-screenshot-vs-flutter.png`.
+- Focused equal-width before/after ticket comparison: `/Users/xinz/Development/home-pocket-app/.planning/sketches/audits/family-invite-ticket-2026-08-03/alignment-ticket-before-vs-after.png`.
+- Viewport and normalization: device-UAT source 1179×2556 px normalized to 390×844 px; Flutter rendered at 390×844 logical and physical px (DPR 1). Focused ticket crops were normalized to 600 px content width on equal 620×590 px canvases. System status-bar and SafeArea offsets are runtime-owned and excluded from component alignment judgments.
+- State: Simplified Chinese, light theme, owner `shean`, family `shean的家`, active six-digit invite with approximately ten minutes remaining. Live invite digits differ between evidence captures but use the same layout and interaction state.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains.
+- Typography: the full six-digit invite uses the explicitly approved 45sp monospaced numeral treatment, remains centered, and scales down only when a genuinely narrower localized viewport requires it; it never substitutes an ellipsis.
+- Ticket silhouette: the production clip path contains real 10.5dp scalloped edge perforations, symmetric 20dp semicircular side notches, 14dp top and bottom corner radii, and a one-pixel palette border. The card is not a raster image or approximate rectangular container.
+- Shadow: a separate clipped physical layer is shifted 4dp downward at elevation 2, creating the selected low, warm paper lift without turning the perimeter into a heavy floating-card halo.
+- Spacing and hierarchy: the ticket is reduced from 316dp to 252dp. Fixed 22dp title-to-code and code-to-progress gaps replace the former expanding spacers. Below the dashed divider, the remaining height is now an explicit action region; both controls are vertically centered in that region, leaving equal visual space above and below instead of accumulating padding at the card bottom.
+- Countdown correctness: the progress bar is driven by the real ten-minute lifetime. Therefore 09:44 correctly renders near-full progress rather than reproducing the source mockup's illustrative half-filled bar. Existing invite values longer than ten minutes are safely capped for display, and expiry still transitions to the localized red invalid state.
+- Copy and localization: `家庭邀请码`, `Family Invite Code`, and `家族の招待コード` are generated from the three ARB locales. Copy and regenerate controls keep localized labels with single-line overflow protection.
+- Alignment: the title now uses a forced symmetric flex track and centers within 0.5dp of the ticket. The Copy and Regenerate controls use the full ticket width and center exactly on the 1/4 and 3/4 axes instead of being pulled inward by the former 27dp shared inset.
+- Affordances and accessibility: both actions retain 48dp control height and localized semantics. Copy, regenerate, countdown, expiry, owner recovery, sharing, and friendly-error behavior remain wired to the existing production flow.
+
+## Comparison history and verification
+
+1. The first Flutter pass fixed the truncated code but used a denser edge pattern, a 296dp ticket, and a more ambient physical shadow.
+2. The visual comparison identified three P2 refinements: match the `家庭邀请码` title, open the vertical rhythm, and move the shadow downward.
+3. The next pass used 10.5dp scallop spacing, a 316dp ticket, and a dedicated 4dp-down shadow layer.
+4. Device UAT then identified a P2 alignment and density issue: the loose title track was not geometrically centered, action groups were each pulled 13.25dp toward the middle, and expanding spacers created excessive vertical blank space.
+5. The next pass forced the title track to fill symmetrically, removed the action-row horizontal inset, and reduced the ticket to 252dp with fixed vertical gaps.
+6. Device follow-up identified one remaining P2: the fixed 48dp action row sat immediately below the divider while unused column height accumulated underneath it.
+7. The final pass turns all space below the divider into one action region and centers the 48dp controls inside it. Geometry tests confirm each action center equals the midpoint between the divider and ticket bottom within 0.5dp; the revised focused comparison found no remaining actionable P0/P1/P2 mismatch.
+- 320dp widget and full-screen coverage confirms the entire `256 931` code remains visible without horizontal overflow, including when the golden test font is loaded concurrently.
+- Targeted widget and Golden set: 23 tests passed, 0 failed.
+- `flutter analyze`: 0 issues.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
 # Unified Toast Status Pill — Selected Direction 3 (2026-08-02)
 
 ## Scope and evidence

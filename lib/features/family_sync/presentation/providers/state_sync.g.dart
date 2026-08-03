@@ -230,7 +230,7 @@ final class SyncEngineProvider
   }
 }
 
-String _$syncEngineHash() => r'7c532f4563a96b5b29c777f16308f1cfc64fd2af';
+String _$syncEngineHash() => r'0d7986e4262f5379c5d82c5c0cd031eab3d4b029';
 
 /// Reactive sync status stream from SyncEngine.
 

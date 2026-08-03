@@ -88,20 +88,20 @@ _FixtureSnapshot _groupRich() => _FixtureSnapshot(
   shadowAggregate: fixtureShadowAggregateThree(),
 );
 
-_FixtureSnapshot _groupEmptyShadows() => _FixtureSnapshot(
-  monthlyReport: fixtureMonthlyReportRich(),
-  happiness: fixtureHappinessReportRich(),
-  bestJoy: fixtureBestJoyResultRich(),
-  family: fixtureFamilyHappinessRich(),
-  shadowBooks: const [],
-  shadowAggregate: fixtureShadowAggregateThree(),
-);
-
 _FixtureSnapshot _groupNoJoy() => _FixtureSnapshot(
   monthlyReport: _singleNoJoyWithDailySpend().monthlyReport,
   happiness: fixtureHappinessReportRich(),
   bestJoy: fixtureBestJoyResultEmpty(),
   family: fixtureFamilyHappinessEmpty(),
+  shadowBooks: fixtureShadowBooksThree(),
+  shadowAggregate: const ShadowAggregate.empty(),
+);
+
+_FixtureSnapshot _groupWithFamilyJoyButNoPersonalJoy() => _FixtureSnapshot(
+  monthlyReport: _singleNoJoyWithDailySpend().monthlyReport,
+  happiness: fixtureHappinessReportEmpty(),
+  bestJoy: fixtureBestJoyResultEmpty(),
+  family: fixtureFamilyHappinessRich(),
   shadowBooks: fixtureShadowBooksThree(),
   shadowAggregate: fixtureShadowAggregateThree(),
 );
@@ -453,60 +453,56 @@ void main() {
     });
   });
 
-  group('HomeHeroCard — group mode (HOMEUI-03, HOMEUI-07, FAMILY-03)', () {
-    testWidgets(
-      'renders FamilyHappiness rings when isGroupMode == true && shadowBooks.isNotEmpty',
-      (tester) async {
-        await tester.pumpWidget(
-          _buildSubject(snapshot: _groupRich(), isGroupMode: true),
-        );
-        await tester.pumpAndSettle();
+  group('HomeHeroCard — group mode (mockup A2)', () {
+    testWidgets('keeps one tear surface and reuses personal Joy metrics', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _groupRich(), isGroupMode: true),
+      );
+      await tester.pumpAndSettle();
 
-        // group-mode hero label
-        expect(find.textContaining('家族の支出'), findsOneWidget);
-        // familyHighlightsSum center text 27 — also appears in the legend value,
-        // so at least 1 occurrence is the strict assertion.
-        expect(find.text('27'), findsAtLeastNWidgets(1));
-        // group-mode ring section title 家族の小確幸
-        expect(find.textContaining('家族の小確幸'), findsWidgets);
-      },
-    );
+      expect(find.textContaining('家族の支出'), findsOneWidget);
+      expect(find.byKey(const Key('home-hero-main-surface')), findsOneWidget);
+      expect(
+        find.byKey(const Key('home-hero-tear-notch-left')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('home-hero-tear-notch-right')),
+        findsOneWidget,
+      );
+      expect(find.text('自分のときめき'), findsOneWidget);
 
-    testWidgets(
-      'renders 3 member rows after Best Joy strip with avatar + name + ¥amount',
-      (tester) async {
-        await tester.pumpWidget(
-          _buildSubject(snapshot: _groupRich(), isGroupMode: true),
-        );
-        await tester.pumpAndSettle();
+      final metrics = tester.widget<HomeMetricsRegion>(
+        find.byType(HomeMetricsRegion),
+      );
+      expect(metrics.isGroupMode, isFalse);
+    });
 
-        expect(find.text('TestMember1'), findsOneWidget);
-        expect(find.text('TestMember2'), findsOneWidget);
-        expect(find.text('TestMember3'), findsOneWidget);
-        // At least one avatar emoji renders (🦊 / 🐻 / 🐼)
-        expect(find.text('🦊'), findsOneWidget);
-        expect(find.text('🐻'), findsOneWidget);
-        expect(find.text('🐼'), findsOneWidget);
-        // Per-member ¥amounts from perBookReports
-        expect(find.textContaining('25,000'), findsWidgets);
-        expect(find.textContaining('20,500'), findsWidgets);
-        expect(find.textContaining('27,000'), findsWidgets);
-      },
-    );
+    testWidgets('aggregates family Joy and daily totals in the header split', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _groupRich(), isGroupMode: true),
+      );
+      await tester.pumpAndSettle();
 
-    testWidgets(
-      'hides member rows section when shadowBooks.isEmpty (D-08 minimum gate)',
-      (tester) async {
-        await tester.pumpWidget(
-          _buildSubject(snapshot: _groupEmptyShadows(), isGroupMode: true),
-        );
-        await tester.pumpAndSettle();
+      expect(find.textContaining('59,600'), findsOneWidget);
+      expect(find.textContaining('155,700'), findsOneWidget);
+    });
 
-        expect(find.textContaining('TestMember'), findsNothing);
-        // ja section title homeMembersSectionTitle = "メンバー"
-        expect(find.text('メンバー'), findsNothing);
-      },
-    );
+    testWidgets('keeps member spending out of the combined hero card', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _groupRich(), isGroupMode: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('TestMember'), findsNothing);
+      expect(find.text('メンバーの支出'), findsNothing);
+    });
 
     testWidgets('hides family region entirely when isGroupMode == false', (
       tester,
@@ -595,6 +591,31 @@ void main() {
       expect(find.text('家族の「うれしい」は？'), findsOneWidget);
       expect(find.byType(HomeMetricsRegion), findsNothing);
     });
+
+    testWidgets(
+      'group mode hides monthly favorite when only family members have Joy entries',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(
+            snapshot: _groupWithFamilyJoyButNoPersonalJoy(),
+            isGroupMode: true,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('home-hero-main-surface')),
+          findsOneWidget,
+          reason: 'family Joy still keeps the group metrics surface visible',
+        );
+        expect(
+          find.byKey(const Key('home-favorite-section')),
+          findsNothing,
+          reason:
+              'monthly favorite is personal and must not show a placeholder',
+        );
+      },
+    );
 
     for (final locale in const [Locale('ja'), Locale('zh'), Locale('en')]) {
       testWidgets('C2 empty state fits ${locale.languageCode} at 390px', (

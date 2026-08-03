@@ -6,8 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
-import '../../../../features/home/presentation/providers/state_shadow_books.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/list_sort_config.dart';
@@ -201,7 +199,6 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
     final palette = context.palette;
     final filter = ref.watch(listFilterProvider);
     final sortConfig = filter.sortConfig;
-    final isGroupMode = ref.watch(isGroupModeProvider);
 
     final anyFilterActive =
         filter.activeDayFilter != null ||
@@ -226,21 +223,13 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
             padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
             child: _searchExpanded
                 ? _buildSearchExpanded(context, palette, filter)
-                : (isGroupMode
-                      ? _buildGroupRow(
-                          context,
-                          palette,
-                          filter,
-                          sortConfig,
-                          anyFilterActive,
-                        )
-                      : _buildSoloRow(
-                          context,
-                          palette,
-                          filter,
-                          sortConfig,
-                          anyFilterActive,
-                        )),
+                : _buildSoloRow(
+                    context,
+                    palette,
+                    filter,
+                    sortConfig,
+                    anyFilterActive,
+                  ),
           ),
         ),
       ),
@@ -276,66 +265,6 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
         const SizedBox(width: 6),
         _buildSearchIconButton(palette),
       ],
-    );
-  }
-
-  /// Group-mode utilities row — horizontally scrollable to fit the family
-  /// member chips (FAM-03/FAM-04) while preserving the same controls.
-  Widget _buildGroupRow(
-    BuildContext context,
-    AppPalette palette,
-    ListFilterState filter,
-    ListSortConfig sortConfig,
-    bool anyFilterActive,
-  ) {
-    final shadowBooksAsync = ref.watch(shadowBooksProvider);
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildSortPill(context, palette, sortConfig),
-          const SizedBox(width: 6),
-          _buildCategoryAction(context, palette, filter),
-          const SizedBox(width: 6),
-          _buildSearchIconButton(palette),
-          const SizedBox(width: 6),
-          if (anyFilterActive) ...[
-            _buildClearAction(context, palette),
-            const SizedBox(width: 6),
-          ],
-          // Mine-only chip: always visible in group mode (SC#5)
-          _memberChip(
-            palette,
-            label: S.of(context).listMineOnly,
-            leadingIcon: Icons.person_outline,
-            selected: filter.memberBookId == widget.bookId,
-            onTap: () => ref
-                .read(listFilterProvider.notifier)
-                .setMemberFilter(
-                  filter.memberBookId == widget.bookId ? null : widget.bookId,
-                ),
-          ),
-          ...shadowBooksAsync.when(
-            data: (shadows) => shadows.map((info) {
-              final isSelected = filter.memberBookId == info.book.id;
-              return Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: _memberChip(
-                  palette,
-                  label: '${info.memberAvatarEmoji} ${info.memberDisplayName}',
-                  selected: isSelected,
-                  onTap: () => ref
-                      .read(listFilterProvider.notifier)
-                      .setMemberFilter(isSelected ? null : info.book.id),
-                ),
-              );
-            }).toList(),
-            loading: () => const <Widget>[],
-            error: (e, s) => const <Widget>[],
-          ),
-        ],
-      ),
     );
   }
 
@@ -583,56 +512,6 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               color: palette.textSecondary,
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _memberChip(
-    AppPalette palette, {
-    required String label,
-    IconData? leadingIcon,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        constraints: const BoxConstraints(maxWidth: 140),
-        decoration: BoxDecoration(
-          color: selected ? palette.sharedLight : palette.card,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected ? palette.sharedBorder : palette.borderDefault,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (leadingIcon != null) ...[
-              Icon(
-                leadingIcon,
-                size: 14,
-                color: selected ? palette.shared : palette.textSecondary,
-              ),
-              const SizedBox(width: 5),
-            ],
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.compact.copyWith(
-                  color: selected ? palette.shared : palette.textSecondary,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

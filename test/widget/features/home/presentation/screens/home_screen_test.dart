@@ -22,17 +22,23 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
 import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_home.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
+import 'package:home_pocket/features/home/presentation/widgets/family_member_spending_card.dart';
 import 'package:home_pocket/features/home/presentation/widgets/family_invite_banner.dart';
 import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_transaction_tile.dart';
 import 'package:home_pocket/features/home/presentation/widgets/transaction_list_card.dart';
+import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
+import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
+import 'package:home_pocket/features/profile/presentation/widgets/avatar_display.dart';
 import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
+import 'package:home_pocket/shared/widgets/satisfaction_face_icon.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/happiness_test_fixtures.dart';
@@ -151,6 +157,27 @@ void main() {
           todayTransactionsProvider(
             bookId: 'book_001',
           ).overrideWith((ref) async => transactions),
+          familyTodayTransactionsProvider(
+            bookId: 'book_001',
+          ).overrideWith((ref) async => transactions),
+          shadowBooksProvider.overrideWith((ref) async => const []),
+          shadowAggregateProvider(
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
+          ).overrideWith((ref) async => const ShadowAggregate.empty()),
+          familyHappinessProvider(
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
+          ).overrideWith((ref) async => fixtureFamilyHappinessEmpty()),
+          userProfileProvider.overrideWith(
+            (ref) async => UserProfile(
+              id: 'profile-1',
+              displayName: 'Test User',
+              avatarEmoji: '🌿',
+              createdAt: DateTime(2026, 1, 1),
+              updatedAt: DateTime(2026, 1, 1),
+            ),
+          ),
           if (resolvedCategory != null)
             categoryByIdProvider(
               resolvedCategory.id,
@@ -192,6 +219,7 @@ void main() {
       final l10n = S.of(tester.element(find.byType(HomeScreen)));
 
       expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
+      expect(find.byIcon(Icons.receipt_long_rounded), findsOneWidget);
     });
 
     testWidgets('renders English localized home section labels', (
@@ -391,7 +419,7 @@ void main() {
       expect(find.text('custom-craft'), findsNothing);
     });
 
-    testWidgets('group mode tags tiles with member initial from device id', (
+    testWidgets('group mode shows member spending and payer attribution', (
       tester,
     ) async {
       when(
@@ -403,10 +431,41 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // _memberInitial: first char of deviceId, uppercased.
+      expect(find.byType(FamilyMemberSpendingCard), findsOneWidget);
+      expect(find.text('Test User'), findsWidgets);
       expect(find.byType(HomeTransactionTile), findsOneWidget);
-      expect(find.text('D'), findsOneWidget);
+      expect(find.byType(AvatarDisplay), findsAtLeastNWidgets(2));
+      expect(find.text('自分'), findsOneWidget);
+      expect(find.text('Supermarket'), findsOneWidget);
+      expect(find.byType(SatisfactionFaceIcon), findsNothing);
     });
+
+    testWidgets(
+      'group-mode own Joy row keeps satisfaction face and hides ledger tag',
+      (tester) async {
+        when(
+          () => groupRepository.watchActiveGroup(),
+        ).thenAnswer((_) => Stream.value(_buildActiveGroup()));
+
+        await tester.pumpWidget(buildSubject(transactions: [_buildTx()]));
+        await tester.pumpAndSettle();
+
+        expect(find.text('自分'), findsOneWidget);
+        expect(find.text('Cinema'), findsOneWidget);
+        final recentTile = find.byType(HomeTransactionTile);
+        expect(
+          find.descendant(of: recentTile, matching: find.text('ときめき')),
+          findsNothing,
+        );
+        expect(
+          find.descendant(
+            of: recentTile,
+            matching: find.byType(SatisfactionFaceIcon),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('view-all tap selects list tab and current month filter', (
       tester,

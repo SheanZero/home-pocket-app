@@ -6,6 +6,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart'
     show LedgerType;
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/settings/domain/models/app_settings.dart';
 import '../../../../features/settings/presentation/providers/state_settings.dart';
 import '../../../../generated/app_localizations.dart';
@@ -48,6 +49,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
     final palette = context.palette;
     final l10n = S.of(context);
     final filter = ref.watch(listFilterProvider);
+    final isGroupMode = ref.watch(isGroupModeProvider);
     // Read weekStartDay from persisted settings (default: monday).
     final settingsAsync = ref.watch(appSettingsProvider);
     final weekStartDay =
@@ -62,6 +64,15 @@ class CalendarHeaderWidget extends ConsumerWidget {
 
     // Pass value ?? {} so cells render date numerals during loading/error
     final dailyMap = calendarAsync.value ?? {};
+    final familyTotalsAsync = isGroupMode && filter.ledgerType == null
+        ? ref.watch(
+            calendarFamilyLedgerTotalsProvider(
+              bookId: bookId,
+              year: filter.selectedYear,
+              month: filter.selectedMonth,
+            ),
+          )
+        : null;
 
     // v15 `.list-calendar`: bordered, rounded card wrapping the grid + summary.
     return Container(
@@ -94,7 +105,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
               calendarFormat: CalendarFormat.month,
               availableCalendarFormats: const {CalendarFormat.month: ''},
               headerVisible: false,
-              rowHeight: 44,
+              rowHeight: 46,
               daysOfWeekHeight: 20,
               locale: locale.toLanguageTag(),
               startingDayOfWeek: weekStartDay == WeekStartDay.monday
@@ -186,6 +197,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
             dailyMap: dailyMap,
             activeDayFilter: filter.activeDayFilter,
             ledgerType: filter.ledgerType,
+            familyTotalsAsync: familyTotalsAsync,
             currencyCode: currencyCode,
             locale: locale,
           ),
@@ -287,6 +299,7 @@ class _SummaryRow extends StatelessWidget {
     required this.dailyMap,
     required this.activeDayFilter,
     required this.ledgerType,
+    required this.familyTotalsAsync,
     required this.currencyCode,
     required this.locale,
   });
@@ -296,6 +309,7 @@ class _SummaryRow extends StatelessWidget {
   final Map<DateTime, int> dailyMap;
   final DateTime? activeDayFilter;
   final LedgerType? ledgerType;
+  final AsyncValue<CalendarLedgerTotals>? familyTotalsAsync;
   final String currencyCode;
   final Locale locale;
 
@@ -319,37 +333,33 @@ class _SummaryRow extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Month total line — always visible
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_summaryLabel, style: AppTextStyles.supporting),
-                calendarAsync.when(
-                  loading: () => SizedBox(
-                    width: 60,
-                    height: 15,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: palette.backgroundMuted,
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(4),
-                        ),
+            if (familyTotalsAsync != null)
+              _FamilySummary(
+                l10n: l10n,
+                totalsAsync: familyTotalsAsync!,
+                currencyCode: currencyCode,
+                locale: locale,
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_summaryLabel, style: AppTextStyles.supporting),
+                  calendarAsync.when(
+                    loading: () => const _SummaryLoadingBar(),
+                    error: (e, st) =>
+                        Text(l10n.calLoadError, style: AppTextStyles.caption),
+                    data: (map) => Text(
+                      NumberFormatter.formatCurrency(
+                        map.values.fold(0, (a, b) => a + b),
+                        currencyCode,
+                        locale,
                       ),
+                      style: AppTextStyles.amountSmall,
                     ),
                   ),
-                  error: (e, st) =>
-                      Text(l10n.calLoadError, style: AppTextStyles.caption),
-                  data: (map) => Text(
-                    NumberFormatter.formatCurrency(
-                      map.values.fold(0, (a, b) => a + b),
-                      currencyCode,
-                      locale,
-                    ),
-                    style: AppTextStyles.amountSmall,
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
             // Day subline — animated, visible only when activeDayFilter != null
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
@@ -381,6 +391,161 @@ class _SummaryRow extends StatelessWidget {
                   : const SizedBox.shrink(),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FamilySummary extends StatelessWidget {
+  const _FamilySummary({
+    required this.l10n,
+    required this.totalsAsync,
+    required this.currencyCode,
+    required this.locale,
+  });
+
+  final S l10n;
+  final AsyncValue<CalendarLedgerTotals> totalsAsync;
+  final String currencyCode;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return totalsAsync.when(
+      loading: () => const Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [_SummaryLoadingBar()],
+      ),
+      error: (error, stackTrace) => Align(
+        alignment: Alignment.centerRight,
+        child: Text(l10n.calLoadError, style: AppTextStyles.caption),
+      ),
+      data: (totals) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                l10n.calFamilyMonthTotal,
+                style: AppTextStyles.supporting.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+              Text(
+                NumberFormatter.formatCurrency(
+                  totals.total,
+                  currencyCode,
+                  locale,
+                ),
+                style: AppTextStyles.amountSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          Row(
+            children: [
+              Expanded(
+                child: _FamilyLedgerTotal(
+                  dotColor: palette.joy,
+                  label: l10n.listLedgerJoy,
+                  amount: totals.joy,
+                  amountColor: palette.joyText,
+                  currencyCode: currencyCode,
+                  locale: locale,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _FamilyLedgerTotal(
+                  dotColor: palette.daily,
+                  label: l10n.listLedgerDaily,
+                  amount: totals.daily,
+                  amountColor: palette.dailyText,
+                  currencyCode: currencyCode,
+                  locale: locale,
+                  alignEnd: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FamilyLedgerTotal extends StatelessWidget {
+  const _FamilyLedgerTotal({
+    required this.dotColor,
+    required this.label,
+    required this.amount,
+    required this.amountColor,
+    required this.currencyCode,
+    required this.locale,
+    this.alignEnd = false,
+  });
+
+  final Color dotColor;
+  final String label;
+  final int amount;
+  final Color amountColor;
+  final String currencyCode;
+  final Locale locale;
+  final bool alignEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Row(
+      mainAxisAlignment: alignEnd
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.compact.copyWith(color: palette.textSecondary),
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          NumberFormatter.formatCurrency(amount, currencyCode, locale),
+          style: AppTextStyles.label.copyWith(
+            color: amountColor,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryLoadingBar extends StatelessWidget {
+  const _SummaryLoadingBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return SizedBox(
+      width: 60,
+      height: 15,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: palette.backgroundMuted,
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
       ),
     );

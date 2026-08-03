@@ -506,6 +506,55 @@ void main() {
     await _matchScreen(tester, 'family_waiting_approval_safe_area_dark_zh.png');
   });
 
+  testWidgets('unable to join family — dark zh safe area', (tester) async {
+    await _setIPhoneSafeAreaViewport(tester);
+    final repository = _MockGroupRepository();
+    final activation = _MockCompleteMemberActivationUseCase();
+    final syncEngine = _MockSyncEngine();
+    final status = _MockGetJoinRequestStatusUseCase();
+    final cancel = _MockCancelJoinRequestUseCase();
+    final push = _MockPushNotificationService();
+    final recovery = _MockGroupKeyRecoveryCoordinator();
+    when(() => syncEngine.statusStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => push.joinRequestLifecycleEvents,
+    ).thenAnswer((_) => const Stream.empty());
+    when(() => recovery.currentStatus).thenReturn(
+      const GroupKeyRecoveryStatus(
+        phase: GroupKeyRecoveryPhase.unrecoverable,
+        groupId: 'family-golden-group',
+      ),
+    );
+    when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
+
+    await tester.pumpWidget(
+      _wrap(
+        const WaitingApprovalScreen(
+          groupId: 'family-golden-group',
+          groupName: 'Shean的家庭',
+          ownerDisplayName: 'Shean',
+        ),
+        locale: const Locale('zh'),
+        profile: _zhProfile,
+        themeMode: ThemeMode.dark,
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(repository),
+          completeMemberActivationUseCaseProvider.overrideWithValue(activation),
+          syncEngineProvider.overrideWithValue(syncEngine),
+          getJoinRequestStatusUseCaseProvider.overrideWithValue(status),
+          cancelJoinRequestUseCaseProvider.overrideWithValue(cancel),
+          pushNotificationServiceProvider.overrideWithValue(push),
+          groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+        ],
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await _matchScreen(
+      tester,
+      'family_unable_to_join_safe_area_dark_zh.png',
+    );
+  });
+
   testWidgets('family management — light ja', (tester) async {
     await _setPhoneViewport(tester);
     final repository = _MockGroupRepository();

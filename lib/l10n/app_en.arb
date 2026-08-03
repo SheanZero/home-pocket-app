@@ -889,7 +889,7 @@
   "@homeRingSectionTitleSingle": {
     "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
   },
-  "homeRingSectionTitleGroup": "Family Joy",
+  "homeRingSectionTitleGroup": "My Joy",
   "@homeRingSectionTitleGroup": {
     "description": "Ring section title — group mode"
   },
@@ -929,7 +929,7 @@
       }
     }
   },
-  "homeMembersSectionTitle": "Members",
+  "homeMembersSectionTitle": "Member Spending",
   "@homeMembersSectionTitle": {
     "description": "Group-mode member rows subheader"
   },
@@ -1739,7 +1739,6 @@
   },
   "familySyncSingleGroupConflict": "This device already has a family group or a pending join request. Leave or cancel it before creating or joining another group.",
   "familySyncJoinAnotherFamily": "Join another family",
-  "familySyncReplaceEmptyGroupHint": "After you submit the join request, your current family with no other members will be deleted automatically.",
   "familySyncNetworkUnavailableTitle": "No internet connection",
   "@familySyncNetworkUnavailableTitle": {
     "description": "Title for the family-sync network unavailable dialog"
@@ -1872,6 +1871,11 @@
   "groupRequestExpiredTitle": "Join request expired",
   "groupRequestExpiredDescription": "The request was not reviewed within 5 minutes. Ask for a current invite code and try again.",
   "groupTryAnotherInvite": "Enter another invite code",
+  "groupUnableToJoinTitle": "Unable to join this family right now",
+  "groupUnableToJoinDescription": "Don't worry. You can enter the invite code again, or leave and choose another family.",
+  "groupReenterInvite": "Enter invite code again",
+  "groupExitAndChooseAnother": "Leave and choose another family",
+  "groupUnableToJoinActionFailed": "Couldn't complete that action. Please try again.",
   "groupKeyRecoveryTitle": "Restoring the family key",
   "groupKeyRecoveryWaiting": "Your membership is active. Another active family device must securely re-seal the current key for this device. The relay cannot read or recreate it.",
   "groupKeyRecoveryUnavailable": "No active device supplied the current key before the request expired. Because the relay is zero-knowledge, it cannot recover the key. You can retry or safely leave/dissolve this family and create a new one.",
@@ -1973,7 +1977,7 @@
   "@homeLedgersSection": {
     "description": "Home section title for ledger cards"
   },
-  "homeRecentTransactions": "Recent Transactions",
+  "homeRecentTransactions": "Recent Spending",
   "@homeRecentTransactions": {
     "description": "Home section title for recent transactions"
   },
@@ -2620,6 +2624,10 @@
   "calMonthTotal": "Monthly total",
   "@calMonthTotal": {
     "description": "Calendar header: month total label, all ledgers (すべて)"
+  },
+  "calFamilyMonthTotal": "Family total",
+  "@calFamilyMonthTotal": {
+    "description": "Calendar header: family-wide month total label"
   },
   "calMonthTotalDaily": "Daily total",
   "@calMonthTotalDaily": {
@@ -3804,36 +3812,6 @@
   },
   "syncQueueNeedsAttentionBadge": "Needs attention",
   "syncQueueNeedsAttentionDescription": "Some changes need your attention",
-  "syncQueueNeedsAttentionTitle": "Sync needs attention",
-  "syncQueuePendingTitle": "Changes waiting to sync",
-  "syncQueueCounts": "{pendingCount} waiting · {deadLetterCount} need attention",
-  "@syncQueueCounts": {
-    "placeholders": {
-      "pendingCount": { "type": "int" },
-      "deadLetterCount": { "type": "int" }
-    }
-  },
-  "syncQueueReconcileHint": "The encrypted changes are preserved. Retry them first; a full reconciliation is still recommended afterward.",
-  "syncQueueRetryAll": "Retry all",
-  "syncQueueDiscardAll": "Discard",
-  "syncQueueRetryFailed": "Some changes still need attention",
-  "syncQueueRetrySucceeded": "Queued changes sent. Reconciliation is still recommended.",
-  "syncQueueDiscardConfirmTitle": "Discard unsent changes?",
-  "syncQueueDiscardConfirmBody": "This permanently removes the preserved outbound changes from this device. This cannot be undone.",
-  "syncQueueCancel": "Cancel",
-  "syncQueueDiscardConfirmAction": "Discard permanently",
-  "syncQueueDiscardFailed": "The unsent changes could not be discarded",
-  "inboundSyncSectionTitle": "Received changes held for review",
-  "inboundSyncCount": "{count} received changes quarantined",
-  "@inboundSyncCount": { "placeholders": { "count": { "type": "int" } } },
-  "inboundSyncErrorCode": "Safe code: {errorCode}",
-  "@inboundSyncErrorCode": { "placeholders": { "errorCode": { "type": "String" } } },
-  "inboundSyncRetryOne": "Retry",
-  "inboundSyncDiscardOne": "Discard received change",
-  "inboundSyncDiscardConfirmTitle": "Discard this received change?",
-  "inboundSyncDiscardConfirmBody": "This permanently removes the quarantined received change from this device. The relay copy was already acknowledged and this cannot be undone.",
-  "syncAttentionDiscardConfirmTitle": "Discard preserved sync changes?",
-  "syncAttentionDiscardConfirmBody": "This permanently removes all preserved outbound failures and quarantined received changes from this device. This cannot be undone.",
   "familySyncTransferOwner": "Transfer ownership",
   "familySyncTransferOwnerSelect": "Choose the new owner",
   "familySyncTransferOwnerConfirmTitle": "Transfer ownership?",
@@ -3866,5 +3844,7 @@
   "familySyncRemovalReasonCancelled": "Request cancelled",
   "familySyncRemovalReasonExpired": "Request expired",
   "familySyncRemovalReasonUnknown": "Membership ended",
+  "familyTransactionPayerSelf": "Me",
+  "@familyTransactionPayerSelf": { "description": "Family transaction payer chip for the current device owner" },
   "@@locale": "en"
 }

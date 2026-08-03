@@ -9,7 +9,11 @@ import '../../../../features/accounting/presentation/providers/repository_provid
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../features/accounting/presentation/utils/category_display_utils.dart';
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/home/presentation/widgets/month_picker_dialog.dart';
+import '../../../../features/home/presentation/providers/state_shadow_books.dart';
+import '../../../../features/profile/domain/models/user_profile.dart';
+import '../../../../features/profile/presentation/providers/state_user_profile.dart';
 import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
@@ -17,6 +21,7 @@ import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
 import '../../../../shared/constants/sort_config.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
+import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/tagged_transaction.dart';
@@ -47,6 +52,7 @@ class ListScreen extends ConsumerWidget {
     // Phase 29: resolve currencyCode from bookByIdProvider
     const currencyCode = 'JPY';
     final filter = ref.watch(listFilterProvider);
+    final isGroupMode = ref.watch(isGroupModeProvider);
 
     // Opens the shared month-grid picker (same widget the home header uses) and
     // applies the choice to the list's selected-month state. Future months are
@@ -82,6 +88,9 @@ class ListScreen extends ConsumerWidget {
                 titleColor: context.palette.info,
                 onTitleTap: openMonthPicker,
                 titleTooltip: l10n.listMonthPickerLabel,
+                trailing: isGroupMode
+                    ? _ListFamilyModeBadge(label: l10n.homeFamilyMode)
+                    : null,
                 actions: [
                   MainSurfaceHeaderAction(
                     key: const Key('list-month-picker-button'),
@@ -137,6 +146,13 @@ class ListScreen extends ConsumerWidget {
         ref.invalidate(listTransactionsBaseProvider(bookId: bookId));
         ref.invalidate(
           calendarDailyTotalsProvider(
+            bookId: bookId,
+            year: filter.selectedYear,
+            month: filter.selectedMonth,
+          ),
+        );
+        ref.invalidate(
+          calendarFamilyLedgerTotalsProvider(
             bookId: bookId,
             year: filter.selectedYear,
             month: filter.selectedMonth,
@@ -392,6 +408,17 @@ class ListScreen extends ConsumerWidget {
         ? transaction.joyFullness
         : null;
 
+    final isGroupMode = ref.watch(isGroupModeProvider);
+    final familyPayer = isGroupMode
+        ? _resolveFamilyPayer(
+            tx,
+            profile: ref.watch(userProfileProvider).value,
+            shadows: ref.watch(shadowBooksProvider).value ?? const [],
+            selfLabel: S.of(context).familyTransactionPayerSelf,
+            memberFallbackLabel: S.of(context).analyticsDonutMemberFilterLabel,
+          )
+        : null;
+
     // 260603-nr1 #5: refresh every transaction-dependent provider after an
     // edit-save or swipe-delete — list + calendar (keyed) AND the Home today
     // summary + Analytics reports (whole families). Previously only list +
@@ -442,10 +469,104 @@ class ListScreen extends ConsumerWidget {
       satisfactionValue: satisfactionValue,
       showDate: showDate,
       foreignAnnotation: foreignAnnotation,
+      familyPayerLabel: familyPayer?.label,
+      familyPayerTone: familyPayer?.tone ?? FamilyPayerTone.primary,
+      familyPayerAvatarEmoji: familyPayer?.avatarEmoji,
+      familyPayerAvatarImagePath: familyPayer?.avatarImagePath,
     );
 
     // Dividers between rows are owned by [_transactionCard]; the tile renders
     // bare.
     return tile;
   }
+
+  _ListFamilyPayer _resolveFamilyPayer(
+    TaggedTransaction tagged, {
+    required UserProfile? profile,
+    required List<ShadowBookInfo> shadows,
+    required String selfLabel,
+    required String memberFallbackLabel,
+  }) {
+    if (tagged.transaction.bookId == bookId) {
+      return _ListFamilyPayer(
+        label: selfLabel,
+        tone: FamilyPayerTone.primary,
+        avatarEmoji: profile?.avatarEmoji ?? '',
+        avatarImagePath: profile?.avatarImagePath,
+      );
+    }
+
+    final shadowIndex = shadows.indexWhere(
+      (shadow) => shadow.book.id == tagged.transaction.bookId,
+    );
+    if (shadowIndex >= 0) {
+      final shadow = shadows[shadowIndex];
+      return _ListFamilyPayer(
+        label: shadow.memberDisplayName.isEmpty
+            ? memberFallbackLabel
+            : shadow.memberDisplayName,
+        tone: familyPayerToneForShadowIndex(shadowIndex),
+        avatarEmoji: shadow.memberAvatarEmoji,
+        avatarImagePath: shadow.memberAvatarImagePath,
+      );
+    }
+
+    final fallback = tagged.memberTag;
+    return _ListFamilyPayer(
+      label: fallback?.name.isNotEmpty == true
+          ? fallback!.name
+          : memberFallbackLabel,
+      tone: FamilyPayerTone.shared,
+      avatarEmoji: fallback?.emoji ?? '',
+      avatarImagePath: null,
+    );
+  }
+}
+
+class _ListFamilyModeBadge extends StatelessWidget {
+  const _ListFamilyModeBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Container(
+      key: const Key('list-family-mode-badge'),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: palette.accentPrimaryLight,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.group_outlined, size: 16, color: palette.accentPrimary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: AppTextStyles.label.copyWith(
+              color: palette.accentPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ListFamilyPayer {
+  const _ListFamilyPayer({
+    required this.label,
+    required this.tone,
+    required this.avatarEmoji,
+    required this.avatarImagePath,
+  });
+
+  final String label;
+  final FamilyPayerTone tone;
+  final String avatarEmoji;
+  final String? avatarImagePath;
 }

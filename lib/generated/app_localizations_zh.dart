@@ -738,7 +738,7 @@ class SZh extends S {
   String get homeRingSectionTitleSingle => '悦己充盈';
 
   @override
-  String get homeRingSectionTitleGroup => '家族的悦己';
+  String get homeRingSectionTitleGroup => '我的悦己';
 
   @override
   String get homeViewMonthlyAnalysis => '查看本月分析';
@@ -764,7 +764,7 @@ class SZh extends S {
   }
 
   @override
-  String get homeMembersSectionTitle => '群组成员';
+  String get homeMembersSectionTitle => '成员支出';
 
   @override
   String get homeNoJoyDataLegend => '尚未记录';
@@ -1354,9 +1354,6 @@ class SZh extends S {
   String get familySyncJoinAnotherFamily => '加入其他家庭';
 
   @override
-  String get familySyncReplaceEmptyGroupHint => '提交加入申请后，当前无人加入的家庭将自动删除。';
-
-  @override
   String get familySyncNetworkUnavailableTitle => '暂时无法连接网络';
 
   @override
@@ -1625,6 +1622,21 @@ class SZh extends S {
   String get groupTryAnotherInvite => '输入其他邀请码';
 
   @override
+  String get groupUnableToJoinTitle => '暂时无法加入家庭';
+
+  @override
+  String get groupUnableToJoinDescription => '别担心，你可以重新输入邀请码，或退出后重新选择家庭。';
+
+  @override
+  String get groupReenterInvite => '重新输入邀请码';
+
+  @override
+  String get groupExitAndChooseAnother => '退出并重新选择家庭';
+
+  @override
+  String get groupUnableToJoinActionFailed => '暂时无法完成操作，请稍后重试。';
+
+  @override
   String get groupKeyRecoveryTitle => '正在恢复家庭密钥';
 
   @override
@@ -1720,7 +1732,7 @@ class SZh extends S {
   String get homeLedgersSection => '账本';
 
   @override
-  String get homeRecentTransactions => '最近交易';
+  String get homeRecentTransactions => '最近支出';
 
   @override
   String get homeViewAllTransactions => '查看全部';
@@ -2221,6 +2233,9 @@ class SZh extends S {
 
   @override
   String get calMonthTotal => '本月合计';
+
+  @override
+  String get calFamilyMonthTotal => '家庭合计';
 
   @override
   String get calMonthTotalDaily => '日常合计';
@@ -3254,80 +3269,6 @@ class SZh extends S {
   String get syncQueueNeedsAttentionDescription => '部分变更需要你处理';
 
   @override
-  String get syncQueueNeedsAttentionTitle => '同步需要处理';
-
-  @override
-  String get syncQueuePendingTitle => '等待同步的变更';
-
-  @override
-  String syncQueueCounts(int pendingCount, int deadLetterCount) {
-    return '$pendingCount 条等待发送 · $deadLetterCount 条需要处理';
-  }
-
-  @override
-  String get syncQueueReconcileHint => '加密变更仍被安全保留。请先重试，之后仍建议执行一次完整对账。';
-
-  @override
-  String get syncQueueRetryAll => '全部重试';
-
-  @override
-  String get syncQueueDiscardAll => '丢弃';
-
-  @override
-  String get syncQueueRetryFailed => '仍有变更需要处理';
-
-  @override
-  String get syncQueueRetrySucceeded => '待发送变更已发送，仍建议进行完整对账。';
-
-  @override
-  String get syncQueueDiscardConfirmTitle => '丢弃未发送的变更？';
-
-  @override
-  String get syncQueueDiscardConfirmBody => '这会永久删除本设备上保留的未发送变更，且无法撤销。';
-
-  @override
-  String get syncQueueCancel => '取消';
-
-  @override
-  String get syncQueueDiscardConfirmAction => '永久丢弃';
-
-  @override
-  String get syncQueueDiscardFailed => '无法丢弃未发送的变更';
-
-  @override
-  String get inboundSyncSectionTitle => '待处理的接收变更';
-
-  @override
-  String inboundSyncCount(int count) {
-    return '$count 条接收变更已隔离';
-  }
-
-  @override
-  String inboundSyncErrorCode(String errorCode) {
-    return '安全代码：$errorCode';
-  }
-
-  @override
-  String get inboundSyncRetryOne => '重试';
-
-  @override
-  String get inboundSyncDiscardOne => '丢弃接收变更';
-
-  @override
-  String get inboundSyncDiscardConfirmTitle => '丢弃这条接收变更？';
-
-  @override
-  String get inboundSyncDiscardConfirmBody =>
-      '这会从本设备永久删除已隔离的接收变更。中继服务器副本已确认，操作无法撤销。';
-
-  @override
-  String get syncAttentionDiscardConfirmTitle => '丢弃保留的同步变更？';
-
-  @override
-  String get syncAttentionDiscardConfirmBody =>
-      '这会从本设备永久删除所有保留的发送失败和已隔离的接收变更，且无法撤销。';
-
-  @override
   String get familySyncTransferOwner => '转让家庭所有权';
 
   @override
@@ -3416,4 +3357,7 @@ class SZh extends S {
 
   @override
   String get familySyncRemovalReasonUnknown => '成员关系已结束';
+
+  @override
+  String get familyTransactionPayerSelf => '我';
 }

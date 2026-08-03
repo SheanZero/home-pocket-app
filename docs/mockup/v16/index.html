@@ -419,7 +419,7 @@ body {
   /* Home — V16 synchronized with the shipped Flutter composition. */
   .home-faithful { padding-left: 20px; padding-right: 20px; }
   .home-faithful .app-header { min-height: 46px; margin-bottom: 13px; }
-  .home-faithful :where(.page-month-title, .faithful-goal-copy > strong, .faithful-satisfaction-head > strong, .faithful-small-win-value, .faithful-calendar, .faithful-ticket-copy > span, .faithful-member > strong, .faithful-tx-amount) { font-family: var(--hp-font-number); font-variant-numeric: tabular-nums slashed-zero; font-feature-settings: "tnum" 1, "zero" 1; }
+  .home-faithful :where(.page-month-title, .faithful-goal-copy > strong, .faithful-satisfaction-head > strong, .faithful-small-win-value, .faithful-calendar, .faithful-ticket-copy > span, .faithful-member > strong, .faithful-member-spend-amount, .faithful-member-ledgers strong, .faithful-tx-amount) { font-family: var(--hp-font-number); font-variant-numeric: tabular-nums slashed-zero; font-feature-settings: "tnum" 1, "zero" 1; }
   .home-mode-badge { min-height: 27px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px; border-radius: 8px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; white-space: nowrap; }
   .home-mode-badge.personal { background: var(--hp-daily-soft); color: var(--hp-daily); }
   .home-mode-badge.family { background: var(--hp-primary-soft); color: var(--hp-primary); }
@@ -571,10 +571,33 @@ body {
   .faithful-seal::before { top: -1px; border-top: 0; border-radius: 0 0 7px 7px; }
   .faithful-seal::after { bottom: -1px; border-bottom: 0; border-radius: 7px 7px 0 0; }
   .faithful-seal .material-symbols-rounded { font-size: 22px; }
+  .faithful-personal-empty { min-height: 86px; margin-top: 12px; padding: 14px; border-radius: 15px; background: color-mix(in srgb, var(--hp-joy-soft) 70%, var(--hp-surface)); display: grid; grid-template-columns: 38px minmax(0,1fr) auto; gap: 10px; align-items: center; }
+  .faithful-personal-empty > .material-symbols-rounded { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--hp-surface); color: var(--hp-joy-text); font-size: 21px; }
+  .faithful-personal-empty strong { display: block; font-size: var(--type-label); line-height: var(--line-label); }
+  .faithful-personal-empty small { display: block; margin-top: 3px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .faithful-personal-empty button { min-height: 40px; padding: 7px 10px; border: 0; border-radius: 11px; background: var(--hp-joy); color: #fff; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; cursor: pointer; white-space: nowrap; }
   .faithful-members { display: grid; gap: 8px; }
   .faithful-member { display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .faithful-member-avatar { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--hp-shared-soft); color: var(--hp-shared-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
   .faithful-member strong { margin-left: auto; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
+  .faithful-member-spending { width: 100%; margin-top: 18px; }
+  .faithful-member-spending .faithful-region-title > .material-symbols-rounded { color: var(--hp-primary-text); }
+  .faithful-member-card { margin-top: 10px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); box-shadow: var(--hp-shadow-soft); }
+  .faithful-member-spend-row { width: 100%; min-height: 90px; padding: 11px 12px; border: 0; background: transparent; color: var(--hp-text); display: grid; grid-template-columns: 44px minmax(0,1fr) auto 16px; grid-template-rows: auto auto 5px; column-gap: 10px; row-gap: 5px; align-items: center; text-align: left; cursor: pointer; }
+  .faithful-member-spend-row + .faithful-member-spend-row { border-top: 1px solid var(--hp-border); }
+  .faithful-member-spend-row:hover { background: color-mix(in srgb, var(--hp-surface-muted) 52%, transparent); }
+  .faithful-member-spend-avatar { width: 44px; height: 44px; grid-column: 1; grid-row: 1 / 4; align-self: start; border-radius: 50%; object-fit: cover; object-position: center 28%; border: 2px solid color-mix(in srgb, var(--hp-surface) 72%, var(--hp-border)); background: var(--hp-surface-muted); }
+  .faithful-member-spend-name { min-width: 0; grid-column: 2; grid-row: 1; overflow: hidden; font-size: var(--type-item); line-height: var(--line-item); text-overflow: ellipsis; white-space: nowrap; }
+  .faithful-member-ledgers { min-width: 0; grid-column: 2 / 5; grid-row: 2; display: flex; align-items: center; gap: 8px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); white-space: nowrap; }
+  .faithful-member-ledgers span { display: inline-flex; align-items: center; gap: 4px; }
+  .faithful-member-ledgers span.daily { padding-left: 8px; border-left: 1px solid var(--hp-border); }
+  .faithful-member-ledgers i { width: 6px; height: 6px; border-radius: 50%; background: var(--hp-joy); }
+  .faithful-member-ledgers span.daily i { background: var(--hp-daily); }
+  .faithful-member-ledgers strong { color: var(--hp-text-muted); font-size: inherit; }
+  .faithful-member-spend-amount { grid-column: 3; grid-row: 1; color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; white-space: nowrap; }
+  .faithful-member-spend-row > .material-symbols-rounded { grid-column: 4; grid-row: 1; color: var(--hp-text-muted); font-size: 17px; }
+  .faithful-member-split { height: 5px; grid-column: 2 / 5; grid-row: 3; overflow: hidden; border-radius: 4px; background: var(--hp-daily); }
+  .faithful-member-split span { display: block; width: var(--member-joy,0%); height: 100%; background: var(--hp-joy); }
   .faithful-invite { width: 100%; min-height: 132px; margin-top: 16px; padding: 14px 12px; border: 1px solid color-mix(in srgb, var(--hp-primary) 18%, var(--hp-border)); border-radius: 16px; background: var(--hp-surface); box-shadow: var(--hp-shadow-soft); display: grid; grid-template-columns: 52px minmax(0,1fr) 104px; gap: 10px; align-items: center; text-align: left; }
   .faithful-avatar-pair { display: block; width: 52px; height: 36px; position: relative; }
   .faithful-avatar-pair > span { position: absolute; width: 36px; height: 36px; display: grid; place-items: center; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-primary); color: #fff; }
@@ -594,7 +617,7 @@ body {
   .faithful-invite-cta:hover { background: color-mix(in srgb, var(--hp-joy) 88%, var(--hp-text)); }
   .faithful-invite-cta .material-symbols-rounded { font-size: 14px; }
   .faithful-recent { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
-  .faithful-recent h2 { margin: 0; font-size: var(--type-section); line-height: var(--line-section); }
+  .faithful-recent .faithful-region-title > .material-symbols-rounded { color: var(--hp-primary-text); }
   .faithful-list { margin-top: 12px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface); }
   .faithful-tx { width: 100%; min-height: 68px; padding: 11px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
   .faithful-tx + .faithful-tx { border-top: 1px solid var(--hp-border); }
@@ -604,12 +627,18 @@ body {
   .faithful-tx-icon .material-symbols-rounded { font-size: 25px; }
   .faithful-tx-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
   .faithful-tx-copy > strong { overflow: hidden; color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); text-overflow: ellipsis; white-space: nowrap; }
+  .joy-satisfaction-face { width: 17px; height: 17px; margin-left: 5px; display: inline-block; vertical-align: -3px; background: var(--hp-joy-text); -webkit-mask: var(--satisfaction-face) center/contain no-repeat; mask: var(--satisfaction-face) center/contain no-repeat; }
   .faithful-tx-meta { min-width: 0; display: flex; align-items: center; gap: 6px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .faithful-tag { padding: 1px 6px; border-radius: 4px; background: var(--hp-daily-soft); color: var(--hp-daily-text); font-size: var(--type-compact); line-height: var(--line-compact); font-style: normal; font-weight: 850; white-space: nowrap; }
   .faithful-tag.joy { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
   .faithful-tx-merchant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .faithful-tx-amount { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .faithful-tx-amount.joy { color: var(--hp-joy-text); }
+  .faithful-family-tx-avatar { width: 38px; height: 38px; position: relative; flex: 0 0 auto; }
+  .faithful-family-tx-avatar > img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; object-position: center 28%; border: 2px solid var(--hp-surface); background: var(--hp-surface-muted); }
+  .faithful-family-tx-badge { position: absolute; right: -4px; bottom: -3px; width: 19px; height: 19px; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-daily); color: #fff; display: grid; place-items: center; }
+  .faithful-family-tx-badge.joy { background: var(--hp-joy); }
+  .faithful-family-tx-badge .material-symbols-rounded { font-size: 12px; }
 
   /* Calendar / charts / lists */
   .calendar-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 9px; }
@@ -639,6 +668,17 @@ body {
   .list-calendar-summary { padding: 10px 14px; border-top: 1px solid var(--hp-border); display: grid; gap: 4px; }
   .list-calendar-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .list-calendar-summary-row strong { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
+  .list-family-summary { display: grid; gap: 7px; }
+  .list-family-summary-main { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .list-family-summary-main span { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .list-family-summary-main strong { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
+  .list-family-summary-ledgers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .list-family-summary-ledgers span { min-width: 0; display: inline-flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); white-space: nowrap; }
+  .list-family-summary-ledgers span:last-child { justify-content: flex-end; }
+  .list-family-summary-ledgers i { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--hp-joy); }
+  .list-family-summary-ledgers span:last-child i { background: var(--hp-daily); }
+  .list-family-summary-ledgers strong { color: var(--hp-joy-text); font-size: var(--type-label); line-height: var(--line-label); font-variant-numeric: tabular-nums; }
+  .list-family-summary-ledgers span:last-child strong { color: var(--hp-daily-text); }
   .list-filter-bar { position: sticky; top: 0; z-index: 5; margin: 10px -20px 0; padding: 6px 20px 8px; border-bottom: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-bg) 96%, transparent); backdrop-filter: blur(14px); }
   .list-ledger-segments { margin: 0 0 8px; }
   .list-filter-utilities { min-width: 0; height: 44px; display: flex; align-items: center; gap: 6px; }
@@ -656,6 +696,8 @@ body {
   .list-filter-search input { min-width: 0; flex: 1; height: 100%; padding: 0 8px; border: 0; outline: 0; background: transparent; color: var(--hp-text); font-size: var(--type-body); line-height: var(--line-body); }
   .list-filter-search button { width: 44px; height: 44px; flex: 0 0 auto; padding: 0; border: 0; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
   .list-day-header { height: 32px; padding: 0 2px; color: var(--hp-text-muted); display: flex; align-items: center; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .list-day-header.family { justify-content: space-between; }
+  .list-day-header.family strong { color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-variant-numeric: tabular-nums; }
   .list-transactions { margin: 0 0 10px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); box-shadow: 0 4px 14px rgba(76,61,48,.035); }
   .list-transaction { width: 100%; min-height: 68px; padding: 11px 12px; border: 0; background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
   .list-transaction + .list-transaction { border-top: 1px solid var(--hp-border); }
@@ -671,6 +713,16 @@ body {
   .list-transaction-merchant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .list-transaction-amount { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .list-transaction-chevron { margin-left: -6px; color: var(--hp-text-muted); font-size: 18px; }
+  .list-family-transaction-avatar { width: 38px; height: 38px; position: relative; flex: 0 0 auto; }
+  .list-family-transaction-avatar > img { width: 36px; height: 36px; border: 2px solid var(--hp-surface); border-radius: 50%; object-fit: cover; object-position: center 28%; background: var(--hp-surface-muted); }
+  .list-family-transaction-badge { position: absolute; right: -4px; bottom: -3px; width: 19px; height: 19px; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-daily); color: #fff; display: grid; place-items: center; }
+  .list-family-transaction-badge.joy { background: var(--hp-joy); }
+  .list-family-transaction-badge .material-symbols-rounded { font-size: 12px; }
+  .family-payer-chip { flex: 0 0 auto; padding: 2px 7px; border-radius: 5px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; white-space: nowrap; }
+  .family-payer-chip.member-self { background: var(--hp-primary-soft); color: var(--hp-primary-text); }
+  .family-payer-chip.member-hanako { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .family-payer-chip.member-taro { background: var(--hp-shared-soft); color: var(--hp-shared-text); }
+  .list-family-merchant { min-width: 0; overflow: hidden; color: var(--hp-text-muted); text-overflow: ellipsis; white-space: nowrap; }
   .list-empty-filtered { padding: 42px 20px; color: var(--hp-text-muted); text-align: center; font-size: var(--type-body); line-height: var(--line-body); }
   /* Analytics — current Flutter registry restored in the selected warm system. */
   .analytics-screen { padding-left: 20px; padding-right: 20px; }
@@ -1792,7 +1844,7 @@ body {
     foundation: ['Foundation','设计系统','色彩、字体、间距、组件与反馈都以生活手帐为同一来源。','令牌 + 原子组件','浅色 / 深色 / 可访问性','对应 AppPalette、AppTextStyles 与共享 widgets'],
     states: ['Foundation','系统状态','空、加载与错误状态共享同一套安静反馈语言；不使用插画占位或焦虑文案。','状态切换 + 恢复动作','空 / 加载 / 错误','对应 AsyncValue 与现有 EmptyState widgets'],
     home: ['Main shell','主页','有记录时呈现悦己累计；无悦己账单时隐藏所有零值指标，以柔和邀请引导用户记录花钱换来的享受。','HeroHeader + conditional HomeHero / Joy invitation + Invite + Recent','有悦己 / 无悦己 / 个人 / 家庭 / 明暗','首页视觉提案；空态由 joy transaction presence 驱动，CTA 预选悦己账本'],
-    list: ['Main shell','交易明细','右上角提供日历与设置入口；账本切换同时过滤月历金额、月合计与日期卡片。','账本切换 + 月历 + 筛选 + 日期卡片分组','搜索 / 空态 / 多币种','复用 ListScreen、设置路由与同一账本筛选状态'],
+    list: ['Main shell','交易明细','个人保持原有月历结构；家庭模式以成员色签区分付款人，保留头像类目徽标，首版不增加成员筛选。','账本切换 + 月历汇总 + 紧凑筛选 + 付款人明细','个人 / 家庭 / 搜索 / 空态','复用 ListScreen；家庭模式合并 Shadow Book 数据并以成员身份控制编辑权限'],
     analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
     'shopping-form': ['Main shell','购物项目','严格映射现有新增 / 编辑共用表单；语音只在同页填写草稿，右上保存仍是唯一提交入口。','名称 + 数量 + 用途 + 类型 + 分类 + 价格 + 备注','手动 / 聆听 / 解析 / 回填 / 编辑 / 权限不可用','复用 ShoppingItemFormScreen；新增购物专用语音解析器'],
@@ -1820,6 +1872,10 @@ body {
 
   const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   const icon = (name, cls='') => `<span class="material-symbols-rounded ${cls}">${name}</span>`;
+  const satisfactionFace = (score=8) => {
+    const asset = 'assets/satisfaction/sat_04.svg';
+    return `<i class="joy-satisfaction-face" style="--satisfaction-face:url('${asset}')" aria-label="満足度 ${score}/10"></i>`;
+  };
   const backHeader = (title, extra='') => `<header class="app-header"><button class="back-btn" data-action="back" aria-label="戻る">${icon('chevron_left')}</button><h1>${title}</h1><span class="spacer"></span>${extra}</header>`;
   const familyHeader = (title, extra='') => `<header class="family-appbar"><button class="back-btn" data-action="back" aria-label="戻る">${icon('chevron_left')}</button><h1>${title}</h1><span class="family-appbar-tail">${extra}</span></header>`;
   const familyProgress = (steps,activeIndex) => `<div class="family-progress" aria-label="${steps.map(step=>step.label).join('、')}">${steps.map((step,index)=>`${index?'<span class="family-progress-line"></span>':''}<span class="family-progress-step ${index<activeIndex?'complete':index===activeIndex?'active':''}"><i>${index<activeIndex?icon('check'):index+1}</i><span>${step.label}</span></span>`).join('')}</div>`;
@@ -1840,17 +1896,22 @@ body {
 
   function statesScreen() { const content = state.uiState==='empty' ? `<div class="state-hero">${icon('inventory_2')}<h2 class="display">まだ記録がありません</h2><p class="hint">最初の取引を記録すると、ここに月の流れが見えてきます。</p><button class="primary-btn" style="margin-top:16px" data-screen="entry">最初の取引を記録</button></div>` : state.uiState==='error' ? `<div class="state-hero">${icon('cloud_off')}<h2 class="display">読み込めませんでした</h2><p class="hint">データは失われていません。接続を確認して、もう一度お試しください。</p><button class="secondary-btn" style="margin-top:16px" data-action="toast" data-message="再読み込みしました">もう一度試す</button></div>` : `<div style="padding-top:28px"><div class="skeleton" style="width:45%;height:20px"></div><div class="skeleton" style="width:72%;height:38px;margin-top:14px"></div>${[1,2,3,4].map(()=>`<div class="card" style="margin-top:12px"><div class="skeleton" style="width:58%"></div><div class="skeleton" style="width:82%;margin-top:10px"></div></div>`).join('')}<p class="hint" style="text-align:center;margin-top:22px">データを準備しています</p></div>`; return `<section class="screen">${backHeader('システム状態')}${segmentedControl({ariaLabel:'表示状態',value:state.uiState,dataAttribute:'data-ui-state',options:[{value:'empty',label:'空'},{value:'loading',label:'読み込み'},{value:'error',label:'エラー'}]})}${content}</section>`; }
 
-  function faithfulMetrics() {
-    const goal = state.family ? ['18','24','75%'] : ['64','80','80%'];
-    const satisfaction = state.family ? ['8.6','86%'] : ['8.2','82%'];
-    const smallWins = state.family ? '24' : '12';
-    const goalLabel = state.family ? `家族のときめき目標 ${goal[0]} / ${goal[1]} Joy` : `ときめき目標 ${goal[0]} / ${goal[1]} Joy`;
+  function faithfulMetrics({family=state.family}={}) {
+    const goal = family ? ['18','24','75%'] : ['64','80','80%'];
+    const satisfaction = family ? ['8.6','86%'] : ['8.2','82%'];
+    const smallWins = family ? '24' : '12';
+    const goalLabel = family ? `家族のときめき目標 ${goal[0]} / ${goal[1]} Joy` : `ときめき目標 ${goal[0]} / ${goal[1]} Joy`;
     return `<div class="faithful-metric-grid"><div class="faithful-goal-ring" style="--goal:${goal[2]}" role="img" aria-label="${goalLabel}"><span class="faithful-goal-copy"><span>ときめき目標</span><strong>${goal[0]}<small> / ${goal[1]}</small></strong><em>Joy</em></span></div><div class="faithful-support-stack"><div class="faithful-support-block"><div class="faithful-satisfaction-head"><span>満足度の平均</span><strong>${satisfaction[0]} <small>/ 10</small></strong></div><div class="faithful-satisfaction-scale" style="--satisfaction:${satisfaction[1]}" role="img" aria-label="満足度の平均 ${satisfaction[0]} / 10"><span></span></div></div><div class="faithful-support-divider" aria-hidden="true"></div><div class="faithful-support-block faithful-small-win"><span class="faithful-small-win-copy"><strong>小確幸</strong></span><strong class="faithful-small-win-value">${smallWins}<small>件</small></strong></div></div></div>`;
   }
 
-  function faithfulMembers() {
+  function faithfulMemberSpending() {
     if (!state.family) return '';
-    return `<div class="faithful-divider"></div><div class="faithful-region-title">メンバー</div><div class="faithful-members"><div class="faithful-member"><span class="faithful-member-avatar">私</span><span>あおい</span><strong>¥84,200</strong></div><div class="faithful-member"><span class="faithful-member-avatar">花</span><span>花子</span><strong>¥62,600</strong></div><div class="faithful-member"><span class="faithful-member-avatar">太</span><span>太郎</span><strong>¥80,820</strong></div></div>`;
+    const rows = [
+      ['family-avatar-owner.png','あおい','¥84,200','¥18,400','¥65,800','21.9%'],
+      ['family-avatar-hanako.png','花子','¥62,600','¥16,420','¥46,180','26.2%'],
+      ['family-avatar-taro.png','太郎','¥80,820','¥18,800','¥62,020','23.3%'],
+    ].map(([avatar,name,total,joy,daily,joyRatio]) => `<button class="faithful-member-spend-row" data-action="toast" data-message="${name}の今月の支出"><img class="faithful-member-spend-avatar" src="assets/${avatar}" alt="${name}のアバター"><strong class="faithful-member-spend-name">${name}</strong><strong class="faithful-member-spend-amount">${total}</strong>${icon('chevron_right')}<span class="faithful-member-ledgers"><span><i></i>ときめき <strong>${joy}</strong></span><span class="daily"><i></i>日々 <strong>${daily}</strong></span></span><span class="faithful-member-split" style="--member-joy:${joyRatio}" aria-hidden="true"><span></span></span></button>`).join('');
+    return `<section class="faithful-member-spending" data-token="FamilyMemberSpending"><div class="faithful-region-title">${icon('groups')}<span>メンバーの支出</span></div><div class="faithful-member-card">${rows}</div></section>`;
   }
 
   function faithfulSpendingSummary() {
@@ -1875,10 +1936,16 @@ body {
   }
 
   function faithfulHero() {
+    if (state.family) {
+      const personalJoy = state.homeJoyEmpty
+        ? `<div class="faithful-personal-empty"><span class="material-symbols-rounded" aria-hidden="true">favorite</span><span><strong>自分の「うれしい」を残そう</strong><small>好きなことに使ったお金を、ときめき帳へ。</small></span><button data-action="home-add-joy">記録する</button></div>`
+        : faithfulMetrics({family:false});
+      return `<div class="faithful-hero" data-token="FamilySummaryWithPersonalJoy" data-action="hero-analytics" role="button" tabindex="0">${faithfulSpendingSummary()}<div class="faithful-tear-divider" aria-hidden="true"></div><div class="faithful-joy-section"><div class="faithful-region-title">${icon('eco')}<span>自分のときめき</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${personalJoy}</div></div>`;
+    }
     if (state.homeJoyEmpty) {
       return `<div class="faithful-hero home-joy-empty-state" data-token="HomeHeroCard · Joy empty · Variant ${state.homeJoyVariant.toUpperCase()}">${faithfulSpendingSummary()}<div class="faithful-tear-divider" aria-hidden="true"></div>${faithfulJoyEmpty()}</div>`;
     }
-    return `<div class="faithful-hero" data-token="HomeHeroCard · Original + Tear" data-action="hero-analytics" role="button" tabindex="0">${faithfulSpendingSummary()}<div class="faithful-tear-divider" aria-hidden="true"></div><div class="faithful-joy-section"><div class="faithful-region-title">${icon('eco')}<span>${state.family?'家族のときめき':'ときめき度'}</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics()}${faithfulMembers()}</div></div>`;
+    return `<div class="faithful-hero" data-token="HomeHeroCard · Original + Tear" data-action="hero-analytics" role="button" tabindex="0">${faithfulSpendingSummary()}<div class="faithful-tear-divider" aria-hidden="true"></div><div class="faithful-joy-section"><div class="faithful-region-title">${icon('eco')}<span>ときめき度</span><span class="faithful-info">${icon('info')}</span><span class="faithful-analysis-link">今月の分析を見る ${icon('chevron_right')}</span></div>${faithfulMetrics({family:false})}</div></div>`;
   }
 
   function faithfulFavoriteCard() {
@@ -1891,15 +1958,21 @@ body {
     return `<section class="faithful-invite" data-token="FamilyInviteBanner" aria-label="家族の追加案内"><span class="faithful-avatar-pair" aria-hidden="true"><span>${icon('face')}</span><span>${icon('face_2')}</span></span><span class="faithful-invite-copy"><h3>家族と家計を共有</h3><p>設定からいつでも追加できます</p><button class="faithful-settings-path" data-screen="settings">設定 ${icon('chevron_right')} 家庭</button></span><span class="faithful-invite-actions"><button class="faithful-invite-close" data-action="dismiss-invite" aria-label="家族の追加案内を閉じる">${icon('close')}</button><button class="faithful-invite-cta" data-screen="family">${icon('group_add')}家族を追加</button></span></section>`;
   }
 
-  function homeTxRow(ico, category, ledger, merchant, amount, joy=false) {
-    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span class="faithful-tx-merchant">${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
+  function homeTxRow(ico, category, ledger, merchant, amount, joy=false, satisfaction=8) {
+    return `<button class="faithful-tx" data-action="toast" data-message="取引の詳細"><span class="faithful-tx-icon ${joy?'joy':''}">${icon(ico)}</span><span class="faithful-tx-copy"><strong>${category}${joy?satisfactionFace(satisfaction):''}</strong><span class="faithful-tx-meta"><i class="faithful-tag ${joy?'joy':''}">${ledger}</i><span class="faithful-tx-merchant">${merchant}</span></span></span><strong class="faithful-tx-amount ${joy?'joy':''}">${amount}</strong></button>`;
+  }
+
+  function familyHomeTxRow(avatar, payer, member, ico, category, merchant, amount, joy=false, satisfaction=8) {
+    return `<button class="faithful-tx" data-action="toast" data-message="${payer}の取引詳細"><span class="faithful-family-tx-avatar"><img src="assets/${avatar}" alt="${payer}のアバター"><span class="faithful-family-tx-badge ${joy?'joy':''}">${icon(ico)}</span></span><span class="faithful-tx-copy"><strong>${category}${joy?satisfactionFace(satisfaction):''}</strong><span class="faithful-tx-meta"><span class="family-payer-chip member-${member}">${payer}</span><span class="faithful-tx-merchant">${merchant}</span></span></span><strong class="faithful-tx-amount">${amount}</strong></button>`;
   }
 
   function home() {
-    const recent = state.homeJoyEmpty
-      ? `${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}`
-      : `${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}`;
-    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulFavoriteCard()}${faithfulInvite()}<div class="faithful-recent"><h2>最近の取引</h2><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${recent}</div></section>`;
+    const recent = state.family
+      ? `${familyHomeTxRow('family-avatar-hanako.png','花子','hanako','local_grocery_store','食費','ライフ','¥3,280')}${familyHomeTxRow('family-avatar-owner.png','自分','self','local_cafe','カフェ','喫茶 月舟','¥980',true)}${familyHomeTxRow('family-avatar-taro.png','太郎','taro','train','交通','Suica','¥1,240')}`
+      : state.homeJoyEmpty
+        ? `${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}`
+        : `${homeTxRow('local_grocery_store','食費','日々の帳','ライフ','¥3,280')}${homeTxRow('local_cafe','カフェ','ときめき帳','喫茶 月舟','¥980',true)}${homeTxRow('train','交通','日々の帳','Suica','¥1,240')}`;
+    return `<section class="screen home-faithful">${mainHeader()}${faithfulHero()}${faithfulFavoriteCard()}${faithfulInvite()}${faithfulMemberSpending()}<div class="faithful-recent"><div class="faithful-region-title">${icon('receipt_long')}<span>最近の支出</span></div><button class="text-btn" data-screen="list">すべて見る</button></div><div class="faithful-list">${recent}</div></section>`;
   }
 
   function listCalendarDays(year, month) {
@@ -1908,7 +1981,10 @@ body {
     const daysInMonth = new Date(year, month, 0).getDate();
     const previousMonthDays = new Date(year, month - 1, 0).getDate();
     const count = Math.ceil((offset + daysInMonth) / 7) * 7;
-    const totalsByLedger = year === 2026 && month === 7 ? {
+    const totalsByLedger = year === 2026 && month === 7 ? state.family ? {
+      daily: {1:3280,3:12360,6:6400,9:15880,10:10120,15:12600,21:6400,24:2920,30:4180},
+      joy: {2:980,6:4800,10:980,12:1240,18:4800,27:4500},
+    } : {
       daily: {1:1280,3:2380,6:3200,9:8080,10:3280,15:6800,21:3200,24:920,30:2180},
       joy: {2:980,10:980,12:1240,18:4800,27:4500},
     } : {daily:{},joy:{}};
@@ -1934,12 +2010,15 @@ body {
     const weekdays = ['月','火','水','木','金','土','日'];
     const days = listCalendarDays(state.listYear, state.listMonth);
     const monthTotals = state.listYear === 2026 && state.listMonth === 7
-      ? {all:186420,daily:132800,joy:53620}
+      ? state.family ? {all:227620,daily:174000,joy:53620} : {all:186420,daily:132800,joy:53620}
       : {all:202640,daily:146020,joy:56620};
     const monthTotal = monthTotals[state.listLedger];
-    const summaryLabel = state.listLedger === 'daily' ? '日常の合計' : state.listLedger === 'joy' ? 'ときめきの合計' : '今月の合計';
+    const summaryLabel = state.listLedger === 'daily' ? '日常の合計' : state.listLedger === 'joy' ? 'ときめきの合計' : state.family ? '家族の合計' : '今月の合計';
     const selectedTotal = state.listDay == null ? 0 : (days.find(x=>!x.outside && x.day===state.listDay)?.total || 0);
-    return `<div class="list-calendar"><div class="list-calendar-grid">${weekdays.map((day,index)=>`<span class="list-calendar-weekday ${index>4?'weekend':''}">${day}</span>`).join('')}${days.map(({day,outside,total,weekend})=>`<button class="list-calendar-day ${outside?'outside':''} ${weekend?'weekend':''} ${!outside && state.listYear===2026 && state.listMonth===7 && day===12?'today':''} ${!outside && state.listDay===day?'selected':''}" ${outside?'disabled aria-hidden="true"':`data-list-day="${day}" aria-label="${state.listMonth}月${day}日${total?` 支出 ${total}円`:''}"`}><span>${day}</span><small>${listCompactAmount(total)}</small></button>`).join('')}</div><div class="list-calendar-summary"><div class="list-calendar-summary-row"><span>${summaryLabel}</span><strong>¥${monthTotal.toLocaleString('ja-JP')}</strong></div>${state.listDay==null?'':`<div class="list-calendar-summary-row"><span>${state.listMonth}月${state.listDay}日</span><span>¥${selectedTotal.toLocaleString('ja-JP')}</span></div>`}</div></div>`;
+    const summary = state.family && state.listLedger === 'all'
+      ? `<div class="list-family-summary"><div class="list-family-summary-main"><span>${summaryLabel}</span><strong>¥${monthTotal.toLocaleString('ja-JP')}</strong></div><div class="list-family-summary-ledgers"><span><i></i>ときめき <strong>¥53,620</strong></span><span><i></i>日常 <strong>¥174,000</strong></span></div>${state.listDay==null?'':`<div class="list-calendar-summary-row"><span>${state.listMonth}月${state.listDay}日</span><span>¥${selectedTotal.toLocaleString('ja-JP')}</span></div>`}</div>`
+      : `<div class="list-calendar-summary-row"><span>${summaryLabel}</span><strong>¥${monthTotal.toLocaleString('ja-JP')}</strong></div>${state.listDay==null?'':`<div class="list-calendar-summary-row"><span>${state.listMonth}月${state.listDay}日</span><span>¥${selectedTotal.toLocaleString('ja-JP')}</span></div>`}`;
+    return `<div class="list-calendar ${state.family?'family':''}"><div class="list-calendar-grid">${weekdays.map((day,index)=>`<span class="list-calendar-weekday ${index>4?'weekend':''}">${day}</span>`).join('')}${days.map(({day,outside,total,weekend})=>`<button class="list-calendar-day ${outside?'outside':''} ${weekend?'weekend':''} ${!outside && state.listYear===2026 && state.listMonth===7 && day===12?'today':''} ${!outside && state.listDay===day?'selected':''}" ${outside?'disabled aria-hidden="true"':`data-list-day="${day}" aria-label="${state.listMonth}月${day}日${total?` 支出 ${total}円`:''}"`}><span>${day}</span><small>${listCompactAmount(total)}</small></button>`).join('')}</div><div class="list-calendar-summary">${summary}</div></div>`;
   }
 
   function listLedgerFilter() {
@@ -1964,12 +2043,27 @@ body {
   function listTransactionRow(row, showDate=false) {
     const joy = row.ledger === 'joy';
     const title = showDate ? `${row.month}/${row.day} ${row.category}` : row.category;
-    return `<button class="list-transaction" data-screen="edit" data-list-ledger-row="${row.ledger}" data-search="${row.category} ${row.merchant}"><span class="list-transaction-icon ${joy?'joy':''}">${icon(row.icon)}</span><span class="list-transaction-copy"><strong>${title}</strong><span class="list-transaction-meta"><i class="list-transaction-tag ${joy?'joy':''}">${joy?'ときめき':'日常'}</i><span class="list-transaction-merchant">${row.merchant}</span></span></span><strong class="list-transaction-amount">¥${row.amount.toLocaleString('ja-JP')}</strong><span class="material-symbols-rounded list-transaction-chevron">chevron_right</span></button>`;
+    if (state.family) {
+      const own = row.member === 'self';
+      const interaction = own ? 'data-screen="edit"' : `data-action="toast" data-message="${row.payer}の取引は閲覧のみです"`;
+      return `<button class="list-transaction family" ${interaction} data-list-ledger-row="${row.ledger}" data-list-member-row="${row.member}" data-search="${row.category} ${row.merchant} ${row.payer}"><span class="list-family-transaction-avatar"><img src="assets/${row.avatar}" alt="${row.payer}のアバター"><span class="list-family-transaction-badge ${joy?'joy':''}">${icon(row.icon)}</span></span><span class="list-transaction-copy"><strong>${title}${joy?satisfactionFace(row.satisfaction||8):''}</strong><span class="list-transaction-meta"><span class="family-payer-chip member-${row.member}">${row.payer}</span><span class="list-family-merchant">${row.merchant}</span></span></span><strong class="list-transaction-amount">¥${row.amount.toLocaleString('ja-JP')}</strong><span class="material-symbols-rounded list-transaction-chevron">chevron_right</span></button>`;
+    }
+    return `<button class="list-transaction" data-screen="edit" data-list-ledger-row="${row.ledger}" data-search="${row.category} ${row.merchant}"><span class="list-transaction-icon ${joy?'joy':''}">${icon(row.icon)}</span><span class="list-transaction-copy"><strong>${title}${joy?satisfactionFace(row.satisfaction||8):''}</strong><span class="list-transaction-meta"><i class="list-transaction-tag ${joy?'joy':''}">${joy?'ときめき':'日常'}</i><span class="list-transaction-merchant">${row.merchant}</span></span></span><strong class="list-transaction-amount">¥${row.amount.toLocaleString('ja-JP')}</strong><span class="material-symbols-rounded list-transaction-chevron">chevron_right</span></button>`;
   }
 
   function listTransactionGroups() {
-    const groups = [
-      {day:10,label:'2026年7月10日',rows:[{day:10,month:7,icon:'local_grocery_store',category:'食費',merchant:'ライフ',amount:3280,ledger:'daily'},{day:10,month:7,icon:'local_cafe',category:'カフェ',merchant:'喫茶 月舟',amount:980,ledger:'joy'}]},
+    const groups = state.family ? [
+      {day:10,label:'2026年7月10日',rows:[
+        {day:10,month:7,icon:'local_grocery_store',category:'食費',merchant:'ライフ',amount:3280,ledger:'daily',member:'hanako',payer:'花子',avatar:'family-avatar-hanako.png'},
+        {day:10,month:7,icon:'local_cafe',category:'カフェ',merchant:'喫茶 月舟',amount:980,ledger:'joy',satisfaction:8,member:'self',payer:'自分',avatar:'family-avatar-owner.png'},
+        {day:10,month:7,icon:'bolt',category:'光熱費',merchant:'東京電力',amount:6840,ledger:'daily',member:'taro',payer:'太郎',avatar:'family-avatar-taro.png'},
+      ]},
+      {day:9,label:'2026年7月9日',rows:[
+        {day:9,month:7,icon:'train',category:'交通',merchant:'Suica',amount:1240,ledger:'daily',member:'self',payer:'自分',avatar:'family-avatar-owner.png'},
+        {day:9,month:7,icon:'sports_esports',category:'趣味・娯楽',merchant:'任天堂',amount:4800,ledger:'joy',satisfaction:10,member:'hanako',payer:'花子',avatar:'family-avatar-hanako.png'},
+      ]},
+    ] : [
+      {day:10,label:'2026年7月10日',rows:[{day:10,month:7,icon:'local_grocery_store',category:'食費',merchant:'ライフ',amount:3280,ledger:'daily'},{day:10,month:7,icon:'local_cafe',category:'カフェ',merchant:'喫茶 月舟',amount:980,ledger:'joy',satisfaction:8}]},
       {day:9,label:'2026年7月9日',rows:[{day:9,month:7,icon:'train',category:'交通',merchant:'Suica',amount:1240,ledger:'daily'},{day:9,month:7,icon:'bolt',category:'光熱費',merchant:'東京電力',amount:6840,ledger:'daily'}]},
     ];
     const filteredGroups = groups.map(group=>({...group,rows:group.rows.filter(row=>(state.listLedger==='all'||row.ledger===state.listLedger)&&(!state.listCategory||row.category==='食費')&&(!state.listDay||group.day===state.listDay))})).filter(group=>group.rows.length);
@@ -1979,12 +2073,12 @@ body {
       return `<div class="list-transactions">${rows.map(row=>listTransactionRow(row,true)).join('')}</div>`;
     }
     const ordered = state.listDirection === 'desc' ? filteredGroups : [...filteredGroups].reverse();
-    return ordered.map(group=>`<div class="list-day-header">${group.label}</div><div class="list-transactions">${group.rows.map(row=>listTransactionRow(row)).join('')}</div>`).join('');
+    return ordered.map(group=>`<div class="list-day-header ${state.family?'family':''}"><span>${group.label}</span>${state.family?`<strong>¥${group.rows.reduce((sum,row)=>sum+row.amount,0).toLocaleString('ja-JP')}</strong>`:''}</div><div class="list-transactions">${group.rows.map(row=>listTransactionRow(row)).join('')}</div>`).join('');
   }
 
   function listScreen() {
-    const header = tabHeader(monthTitle('list'),`<span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`);
-    return `<section class="screen list-screen">${header}${listLedgerFilter()}${listCalendar()}${listFilterBar()}<div id="transaction-list">${listTransactionGroups()}</div></section>`;
+    const header = tabHeader(monthTitle('list'),`${state.family?`<span class="home-mode-badge family">${icon('group')} 家族</span>`:''}<span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`);
+    return `<section class="screen list-screen ${state.family?'family-list-screen':''}">${header}${listLedgerFilter()}${listCalendar()}${listFilterBar()}<div id="transaction-list">${listTransactionGroups()}</div></section>`;
   }
 
   function analyticsSection(title, tone='', first=false) {

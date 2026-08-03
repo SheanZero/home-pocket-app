@@ -30,7 +30,6 @@ import '../widgets/family_flow_components.dart';
 import '../widgets/invite_expiry_countdown.dart';
 import '../widgets/member_list_tile.dart';
 import '../widgets/sync_status_badge.dart';
-import '../widgets/sync_queue_attention_card.dart';
 import 'member_approval_screen.dart';
 import 'join_group_screen.dart';
 
@@ -555,8 +554,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
             trailing: _buildSyncStatusRow(syncState),
           ),
           const SizedBox(height: 18),
-
-          const SyncQueueAttentionCard(),
 
           FamilyHouseIdentity(
             name: group.groupName,

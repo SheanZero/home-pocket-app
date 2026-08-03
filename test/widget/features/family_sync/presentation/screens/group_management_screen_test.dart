@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
+import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/join_group_screen.dart';
@@ -98,38 +100,40 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    when(() => groupRepository.getActiveGroup()).thenAnswer(
-      (_) async => GroupInfo(
-        groupId: 'group-1',
-        groupName: 'Test Family',
-        status: GroupStatus.active,
-        inviteCode: 'INV123',
-        role: 'owner',
-        groupKey: 'group-key',
-        members: const [
-          GroupMember(
-            deviceId: 'owner-1',
-            publicKey: 'pk-owner',
-            deviceName: 'Owner phone',
-            displayName: 'Owner phone',
-            avatarEmoji: '🏠',
-            role: 'owner',
-            status: 'active',
-          ),
-          GroupMember(
-            deviceId: 'member-1',
-            publicKey: 'pk-member',
-            deviceName: 'Kitchen tablet',
-            displayName: 'Kitchen tablet',
-            avatarEmoji: '🏠',
-            role: 'member',
-            status: 'pending',
-          ),
-        ],
-        createdAt: DateTime(2026, 3, 1),
-        confirmedAt: DateTime(2026, 3, 1),
-      ),
+    final group = GroupInfo(
+      groupId: 'group-1',
+      groupName: 'Test Family',
+      status: GroupStatus.active,
+      inviteCode: 'INV123',
+      role: 'owner',
+      groupKey: 'group-key',
+      members: const [
+        GroupMember(
+          deviceId: 'owner-1',
+          publicKey: 'pk-owner',
+          deviceName: 'Owner phone',
+          displayName: 'Owner phone',
+          avatarEmoji: '🏠',
+          role: 'owner',
+          status: 'active',
+        ),
+        GroupMember(
+          deviceId: 'member-1',
+          publicKey: 'pk-member',
+          deviceName: 'Kitchen tablet',
+          displayName: 'Kitchen tablet',
+          avatarEmoji: '🏠',
+          role: 'member',
+          status: 'pending',
+        ),
+      ],
+      createdAt: DateTime(2026, 3, 1),
+      confirmedAt: DateTime(2026, 3, 1),
     );
+    when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => group);
+    when(
+      () => groupRepository.watchActiveGroup(),
+    ).thenAnswer((_) => Stream.value(group));
 
     await tester.pumpWidget(
       createLocalizedWidget(
@@ -145,6 +149,12 @@ void main() {
             manageGroupInviteUseCase,
           ),
           syncStatusStreamProvider.overrideWith((_) => const Stream.empty()),
+          syncQueueSummaryProvider.overrideWith(
+            (_) => Stream.value(const SyncQueueSummary(deadLetterCount: 2)),
+          ),
+          inboundSyncSummaryProvider.overrideWith(
+            (_) => Stream.value(const InboundSyncSummary(quarantinedCount: 2)),
+          ),
           userProfileProvider.overrideWith((_) async => null),
         ],
       ),
@@ -166,6 +176,8 @@ void main() {
     expect(find.text('Disband Family', skipOffstage: false), findsOneWidget);
     // A family with another membership record cannot be auto-replaced.
     expect(find.text('Join another family'), findsNothing);
+    expect(find.text('Sync needs attention'), findsNothing);
+    expect(find.textContaining('Safe code:'), findsNothing);
 
     await tester.ensureVisible(find.text('Sync settings'));
     await tester.tap(find.text('Sync settings'));

@@ -131,6 +131,16 @@ SyncEngine syncEngine(Ref ref) {
     },
     maintainAvatarStaging: () =>
         ref.read(syncAvatarUseCaseProvider).cleanupStagingAfterSettlement(),
+    resolveSyncIssues: () async {
+      final group = await ref.read(groupRepositoryProvider).getActiveGroup();
+      if (group == null) return;
+      await Future.wait<void>([
+        ref
+            .read(inboundSyncRecoveryUseCaseProvider)
+            .resolveAutomatically(groupId: group.groupId),
+        ref.read(syncQueueRecoveryUseCaseProvider).resolveAutomatically(),
+      ]);
+    },
   );
   ref.onDispose(engine.dispose);
   return engine;

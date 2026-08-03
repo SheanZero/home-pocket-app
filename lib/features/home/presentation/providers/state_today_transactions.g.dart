@@ -108,3 +108,96 @@ final class TodayTransactionsFamily extends $Family
   @override
   String toString() => r'todayTransactionsProvider';
 }
+
+/// Fetches today's transactions across the primary book and every active
+/// family shadow book, then presents them as one newest-first family feed.
+
+@ProviderFor(familyTodayTransactions)
+final familyTodayTransactionsProvider = FamilyTodayTransactionsFamily._();
+
+/// Fetches today's transactions across the primary book and every active
+/// family shadow book, then presents them as one newest-first family feed.
+
+final class FamilyTodayTransactionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Transaction>>,
+          List<Transaction>,
+          FutureOr<List<Transaction>>
+        >
+    with
+        $FutureModifier<List<Transaction>>,
+        $FutureProvider<List<Transaction>> {
+  /// Fetches today's transactions across the primary book and every active
+  /// family shadow book, then presents them as one newest-first family feed.
+  FamilyTodayTransactionsProvider._({
+    required FamilyTodayTransactionsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'familyTodayTransactionsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$familyTodayTransactionsHash();
+
+  @override
+  String toString() {
+    return r'familyTodayTransactionsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Transaction>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Transaction>> create(Ref ref) {
+    final argument = this.argument as String;
+    return familyTodayTransactions(ref, bookId: argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FamilyTodayTransactionsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$familyTodayTransactionsHash() =>
+    r'fabb20646bb75f1daa42dcca1f4b69e33f25e098';
+
+/// Fetches today's transactions across the primary book and every active
+/// family shadow book, then presents them as one newest-first family feed.
+
+final class FamilyTodayTransactionsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<Transaction>>, String> {
+  FamilyTodayTransactionsFamily._()
+    : super(
+        retry: null,
+        name: r'familyTodayTransactionsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Fetches today's transactions across the primary book and every active
+  /// family shadow book, then presents them as one newest-first family feed.
+
+  FamilyTodayTransactionsProvider call({required String bookId}) =>
+      FamilyTodayTransactionsProvider._(argument: bookId, from: this);
+
+  @override
+  String toString() => r'familyTodayTransactionsProvider';
+}

@@ -16,6 +16,18 @@ class SyncQueueRecoveryResult {
   final bool reconcileSuggested;
 }
 
+class SyncQueueAutomaticResolutionResult {
+  const SyncQueueAutomaticResolutionResult({
+    required this.retriedCount,
+    required this.discardedCount,
+    required this.summary,
+  });
+
+  final int retriedCount;
+  final int discardedCount;
+  final SyncQueueSummary summary;
+}
+
 /// Explicit recovery operations for outbound sync dead letters.
 class SyncQueueRecoveryUseCase {
   SyncQueueRecoveryUseCase({required SyncQueueManager queueManager})
@@ -27,6 +39,30 @@ class SyncQueueRecoveryUseCase {
 
   Future<List<SyncQueueEntry>> getDeadLetters() =>
       _queueManager.getDeadLetters();
+
+  /// Resolves dead letters according to their persisted, non-sensitive error
+  /// classification. Transient/unknown failures get another background retry;
+  /// requests the relay can never accept are removed from the ciphertext queue.
+  /// Their semantic mutations remain in the durable family outbox and can be
+  /// rebuilt by the normal reconciliation pipeline.
+  Future<SyncQueueAutomaticResolutionResult> resolveAutomatically() async {
+    final entries = await _queueManager.getDeadLetters(limit: 10000);
+    var retried = 0;
+    var discarded = 0;
+    for (final entry in entries) {
+      if (_isPermanent(entry.lastErrorCode)) {
+        await _queueManager.discard(entry.id);
+        discarded++;
+      } else if (await _queueManager.retryOne(entry.id)) {
+        retried++;
+      }
+    }
+    return SyncQueueAutomaticResolutionResult(
+      retriedCount: retried,
+      discardedCount: discarded,
+      summary: await _queueManager.getSummary(),
+    );
+  }
 
   Future<SyncQueueRecoveryResult> retryOne(String id) async {
     final existed = (await _queueManager.getDeadLetters(
@@ -53,4 +89,11 @@ class SyncQueueRecoveryUseCase {
   Future<void> discard(String id) => _queueManager.discard(id);
 
   Future<void> discardAll() => _queueManager.discardAllDeadLetters();
+
+  bool _isPermanent(String? errorCode) {
+    return errorCode == SyncQueueErrorCode.authorizationRevoked.name ||
+        errorCode == SyncQueueErrorCode.invalidKeyEpoch.name ||
+        errorCode == SyncQueueErrorCode.invalidRequest.name ||
+        errorCode == SyncQueueErrorCode.protocolRejected.name;
+  }
 }

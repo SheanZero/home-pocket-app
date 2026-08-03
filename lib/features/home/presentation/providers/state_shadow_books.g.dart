@@ -48,7 +48,7 @@ final class ShadowBooksProvider
   }
 }
 
-String _$shadowBooksHash() => r'3f7b8df77348d3a2c3b3347f963beef28c20f1a8';
+String _$shadowBooksHash() => r'ec5d01ad5e0e793673e3c66d151c87d20369624d';
 
 @ProviderFor(shadowAggregate)
 final shadowAggregateProvider = ShadowAggregateFamily._();

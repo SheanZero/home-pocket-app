@@ -140,7 +140,8 @@ class SyncQueueManager {
     return sent;
   }
 
-  /// Explicit destructive recovery action. Callers must obtain user consent.
+  /// Removes ciphertext that cannot be delivered. The semantic family outbox
+  /// remains authoritative and is rebuilt by reconciliation when appropriate.
   Future<void> discard(String id) async {
     final entry = await _syncRepository.getEntry(id);
     if (entry?.state != SyncQueueEntryState.deadLetter) return;

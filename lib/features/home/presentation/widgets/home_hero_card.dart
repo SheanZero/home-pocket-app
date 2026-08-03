@@ -77,18 +77,21 @@ class HomeHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
-    final showMembers = isGroupMode && (shadowBooks?.isNotEmpty ?? false);
     final hasJoyTransactions = isGroupMode
         ? (family?.totalGroupJoyTx ?? 0) > 0
         : happiness.totalJoyTx > 0;
+    final hasPersonalBestJoy = switch (bestJoy) {
+      Value<BestJoyMomentRow>() => true,
+      Empty<BestJoyMomentRow>() => false,
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (hasJoyTransactions)
-          _buildFilledSurface(context, l10n, palette, showMembers)
+          _buildFilledSurface(context, l10n, palette)
         else
           _buildEmptySurface(context, l10n, palette),
-        if (hasJoyTransactions) ...[
+        if (hasJoyTransactions && hasPersonalBestJoy) ...[
           const SizedBox(height: 18),
           GestureDetector(
             key: const Key('home-favorite-section'),
@@ -101,12 +104,7 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFilledSurface(
-    BuildContext context,
-    S l10n,
-    AppPalette palette,
-    bool showMembers,
-  ) {
+  Widget _buildFilledSurface(BuildContext context, S l10n, AppPalette palette) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -129,12 +127,6 @@ class HomeHeroCard extends StatelessWidget {
                   children: [
                     const SizedBox(height: 17),
                     _ringSection(context, l10n, palette),
-                    if (showMembers) ...[
-                      const SizedBox(height: 12),
-                      _divider(context),
-                      const SizedBox(height: 12),
-                      _buildMembersSection(context, l10n, palette),
-                    ],
                   ],
                 ),
                 Positioned(
@@ -343,8 +335,15 @@ class HomeHeroCard extends StatelessWidget {
 
   // ─── Region 2: ときめき/日常 split bar (ABSOLUTE amounts only — D-02) ────────────
   Widget _splitBar(BuildContext context, S l10n, AppPalette palette) {
-    final joy = report.joyTotal;
-    final daily = report.dailyTotal;
+    final shadowReports = shadowAggregate?.perBookReports.values ?? const [];
+    final shadowJoy = isGroupMode
+        ? shadowReports.fold<int>(0, (sum, item) => sum + item.joyTotal)
+        : 0;
+    final shadowDaily = isGroupMode
+        ? shadowReports.fold<int>(0, (sum, item) => sum + item.dailyTotal)
+        : 0;
+    final joy = report.joyTotal + shadowJoy;
+    final daily = report.dailyTotal + shadowDaily;
     final combined = joy + daily;
     final ratio = combined > 0 ? (joy / combined).clamp(0.0, 1.0) : 0.0;
     final joyText = _fmt.formatCurrency(joy, currencyCode, locale);
@@ -437,12 +436,6 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 3+5+7: Divider ────────────────────────────────────────────────
-  Widget _divider(BuildContext context) => Container(
-    height: 1,
-    color: HomeV15VisualTokens.of(context).metricDivider,
-  );
-
   // ─── Region 4: ときめき度 metrics section (v15 faithfulMetrics) ───────────────
   Widget _ringSection(BuildContext context, S l10n, AppPalette palette) {
     final homeColors = HomeV15VisualTokens.of(context);
@@ -484,7 +477,7 @@ class HomeHeroCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         HomeMetricsRegion(
-          isGroupMode: isGroupMode,
+          isGroupMode: false,
           joyContribution: happiness.joyContribution,
           avgSatisfaction: happiness.avgSatisfaction,
           highlightsCount: happiness.highlightsCount,
@@ -869,88 +862,6 @@ class HomeHeroCard extends StatelessWidget {
     if (sat <= 6) return l10n.satisfactionLabelGood;
     if (sat <= 8) return l10n.satisfactionLabelGreat;
     return l10n.satisfactionLabelAmazing;
-  }
-
-  // ─── Region 8: Members section (group mode + non-empty shadowBooks) ───────
-  Widget _buildMembersSection(
-    BuildContext context,
-    S l10n,
-    AppPalette palette,
-  ) {
-    // FAMILY-03 minimum gate.
-    final books = shadowBooks;
-    if (!isGroupMode || books == null || books.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final reports = shadowAggregate?.perBookReports ?? const {};
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            l10n.homeMembersSectionTitle,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: palette.textPrimary,
-            ),
-          ),
-        ),
-        for (final m in books) _memberRow(palette, m, reports[m.book.id]),
-      ],
-    );
-  }
-
-  Widget _memberRow(
-    AppPalette palette,
-    ShadowBookInfo member,
-    MonthlyReport? report,
-  ) {
-    final amount = report?.totalExpenses ?? 0;
-    final amountText = _fmt.formatCurrency(amount, currencyCode, locale);
-    final initial = member.memberAvatarEmoji.isNotEmpty
-        ? member.memberAvatarEmoji
-        : (member.memberDisplayName.isNotEmpty
-              ? member.memberDisplayName.characters.first
-              : '?');
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: palette.borderDefault,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initial,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: palette.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              member.memberDisplayName,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: palette.textPrimary,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Text(
-            amountText,
-            style: AppTextStyles.numerals(
-              AppTextStyles.amountSmall.copyWith(color: palette.textPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

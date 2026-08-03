@@ -25,6 +25,8 @@ import 'join_group_screen.dart';
 
 enum WaitingApprovalInitialMode { pendingApproval, recoveringKey }
 
+enum _UnableToJoinActionTarget { reenterInvite, chooseAnother }
+
 /// Centered waiting screen displayed after the joiner has confirmed their
 /// join request and is waiting for the group owner to approve.
 ///
@@ -60,8 +62,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   bool _isCancelling = false;
   String? _lifecycleError;
   GroupKeyRecoveryStatus _keyRecoveryStatus = const GroupKeyRecoveryStatus();
-  bool _isRetryingKey = false;
-  bool _isAbandoningRecovery = false;
+  _UnableToJoinActionTarget? _pendingUnableToJoinAction;
 
   @override
   void initState() {
@@ -93,26 +94,19 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     });
   }
 
-  Future<void> _retryGroupKey() async {
-    if (_isRetryingKey) return;
-    setState(() => _isRetryingKey = true);
-    await ref
-        .read(groupKeyRecoveryCoordinatorProvider)
-        .requestKey(groupId: widget.groupId, manual: true);
-    await _verifyGroupAndNavigate();
-    if (mounted) setState(() => _isRetryingKey = false);
-  }
-
-  Future<void> _leaveAndChooseAnotherFamily({
+  Future<void> _leaveCurrentFamilyAndContinue({
+    required _UnableToJoinActionTarget target,
     bool skipConfirmation = false,
   }) async {
-    if (_isAbandoningRecovery) return;
+    if (_pendingUnableToJoinAction != null) return;
     final group = await ref
         .read(groupRepositoryProvider)
         .getGroupById(widget.groupId);
     if (!mounted) return;
     if (group == null) {
-      setState(() => _lifecycleError = S.of(context).familySyncRestoreFailed);
+      setState(
+        () => _lifecycleError = S.of(context).groupUnableToJoinActionFailed,
+      );
       return;
     }
     final l10n = S.of(context);
@@ -135,7 +129,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     }
 
     setState(() {
-      _isAbandoningRecovery = true;
+      _pendingUnableToJoinAction = target;
       _lifecycleError = null;
     });
     final result = group.role == 'owner'
@@ -145,7 +139,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     final succeeded =
         result is DeactivateGroupSuccess || result is LeaveGroupSuccess;
     if (!succeeded) {
-      setState(() => _isAbandoningRecovery = false);
+      setState(() => _pendingUnableToJoinAction = null);
       final GroupOperationFailure? failure = switch (result) {
         DeactivateGroupError() => result,
         LeaveGroupError() => result,
@@ -155,24 +149,48 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
           await handleFamilyNetworkFailure(
             context,
             failure,
-            onRetry: () => _leaveAndChooseAnotherFamily(skipConfirmation: true),
+            onRetry: () => _leaveCurrentFamilyAndContinue(
+              target: target,
+              skipConfirmation: true,
+            ),
           )) {
         return;
       }
       setState(() {
-        _lifecycleError = switch (result) {
-          DeactivateGroupError(:final message) =>
-            l10n.familySyncDeactivateGroupFailed(message),
-          LeaveGroupError(:final message) => l10n.familySyncLeaveGroupFailed(
-            message,
-          ),
-          _ => l10n.groupKeyRecoveryUnavailable,
-        };
+        _lifecycleError = l10n.groupUnableToJoinActionFailed;
       });
       return;
     }
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => target == _UnableToJoinActionTarget.reenterInvite
+            ? const JoinGroupScreen()
+            : const GroupChoiceScreen(),
+      ),
+    );
+  }
+
+  Future<void> _clearTerminalStateAndContinue(
+    _UnableToJoinActionTarget target,
+  ) async {
+    if (_pendingUnableToJoinAction != null) return;
+    setState(() {
+      _pendingUnableToJoinAction = target;
+      _lifecycleError = null;
+    });
+    try {
+      await ref.read(groupRepositoryProvider).deactivateGroup(widget.groupId);
+    } catch (_) {
+      // The relay's terminal membership state is authoritative. Local cleanup
+      // is best-effort and reconciliation will remove stale cache later.
+    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => target == _UnableToJoinActionTarget.reenterInvite
+            ? const JoinGroupScreen()
+            : const GroupChoiceScreen(),
+      ),
     );
   }
 
@@ -309,14 +327,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     }
   }
 
-  Future<void> _tryAnotherInvite() async {
-    await ref.read(groupRepositoryProvider).deactivateGroup(widget.groupId);
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const JoinGroupScreen()),
-    );
-  }
-
   void _stopPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
@@ -365,11 +375,19 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
 
     final palette = context.palette;
     if (_requestStatus.isTerminal) {
-      return _buildTerminalState(context, l10n);
+      return _buildUnableToJoinState(
+        context,
+        l10n,
+        requiresMembershipExit: false,
+      );
     }
     if (_requestStatus == JoinRequestStatus.approved ||
         _keyRecoveryStatus.groupId == widget.groupId) {
-      return _buildKeyRecoveryState(context, l10n);
+      return _buildUnableToJoinState(
+        context,
+        l10n,
+        requiresMembershipExit: true,
+      );
     }
     return Scaffold(
       backgroundColor: palette.background,
@@ -491,143 +509,233 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     );
   }
 
-  Widget _buildKeyRecoveryState(BuildContext context, S l10n) {
+  Widget _buildUnableToJoinState(
+    BuildContext context,
+    S l10n, {
+    required bool requiresMembershipExit,
+  }) {
     final palette = context.palette;
-    final phase = _keyRecoveryStatus.phase;
-    final unavailable = phase == GroupKeyRecoveryPhase.unrecoverable;
-    final rateLimited = phase == GroupKeyRecoveryPhase.rateLimited;
-    final description = unavailable
-        ? l10n.groupKeyRecoveryUnavailable
-        : rateLimited
-        ? l10n.groupKeyRecoveryRateLimited
-        : l10n.groupKeyRecoveryWaiting;
+    final reenterLoading =
+        _pendingUnableToJoinAction ==
+        _UnableToJoinActionTarget.reenterInvite;
+    final chooseLoading =
+        _pendingUnableToJoinAction ==
+        _UnableToJoinActionTarget.chooseAnother;
+
+    Future<void> continueWith(_UnableToJoinActionTarget target) =>
+        requiresMembershipExit
+        ? _leaveCurrentFamilyAndContinue(target: target)
+        : _clearTerminalStateAndContinue(target);
 
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: familyFlowHorizontalPadding,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  unavailable ? Icons.key_off_outlined : Icons.key_outlined,
-                  size: 64,
-                  color: unavailable ? palette.warning : palette.accentPrimary,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.groupKeyRecoveryTitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: palette.textPrimary,
+        bottom: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: (constraints.maxHeight - 52).clamp(
+                        0,
+                        double.infinity,
+                      ),
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 340),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const _UnableToJoinIllustration(),
+                            const SizedBox(height: 34),
+                            Text(
+                              l10n.groupUnableToJoinTitle,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.pageTitle.copyWith(
+                                fontSize: 24,
+                                height: 32 / 24,
+                                color: palette.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              l10n.groupUnableToJoinDescription,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body.copyWith(
+                                height: 22 / 14,
+                                color: palette.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
+              ),
+            ),
+            Divider(height: 1, thickness: 1, color: palette.borderDivider),
+          ],
+        ),
+      ),
+      bottomNavigationBar: ColoredBox(
+        color: palette.background,
+        child: SafeArea(
+          top: false,
+          minimum: const EdgeInsets.fromLTRB(
+            familyFlowHorizontalPadding,
+            24,
+            familyFlowHorizontalPadding,
+            22,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_lifecycleError case final error?) ...[
                 Text(
-                  description,
+                  error,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: palette.textSecondary),
-                ),
-                const SizedBox(height: 28),
-                FilledButton(
-                  onPressed: _isRetryingKey ? null : _retryGroupKey,
-                  child: _isRetryingKey
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.groupKeyRecoveryRetry),
+                  style: AppTextStyles.label.copyWith(color: palette.error),
                 ),
                 const SizedBox(height: 12),
-                FamilySecondaryButton(
-                  controlKey: const Key('choose-another-family-action'),
-                  onPressed: _isAbandoningRecovery
-                      ? null
-                      : _leaveAndChooseAnotherFamily,
-                  label: l10n.groupKeyRecoveryRebuild,
-                  icon: LucideIcons.logOut,
-                  isLoading: _isAbandoningRecovery,
-                ),
-                if (_lifecycleError case final error?) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    error,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: palette.error),
-                  ),
-                ],
               ],
-            ),
+              _UnableToJoinAction(
+                controlKey: const Key('reenter-family-invite-action'),
+                label: l10n.groupReenterInvite,
+                icon: LucideIcons.logIn,
+                color: palette.accentPrimary,
+                isLoading: reenterLoading,
+                onPressed: _pendingUnableToJoinAction == null
+                    ? () => continueWith(
+                        _UnableToJoinActionTarget.reenterInvite,
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              _UnableToJoinAction(
+                controlKey: const Key('choose-another-family-action'),
+                label: l10n.groupExitAndChooseAnother,
+                icon: LucideIcons.logOut,
+                color: palette.joyText,
+                isLoading: chooseLoading,
+                onPressed: _pendingUnableToJoinAction == null
+                    ? () => continueWith(
+                        _UnableToJoinActionTarget.chooseAnother,
+                      )
+                    : null,
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildTerminalState(BuildContext context, S l10n) {
+class _UnableToJoinIllustration extends StatelessWidget {
+  const _UnableToJoinIllustration();
+
+  @override
+  Widget build(BuildContext context) {
     final palette = context.palette;
-    final (title, description) = switch (_requestStatus) {
-      JoinRequestStatus.rejected => (
-        l10n.groupRequestRejectedTitle,
-        l10n.groupRequestRejectedDescription,
-      ),
-      JoinRequestStatus.cancelled => (
-        l10n.groupRequestCancelledTitle,
-        l10n.groupRequestCancelledDescription,
-      ),
-      JoinRequestStatus.expired => (
-        l10n.groupRequestExpiredTitle,
-        l10n.groupRequestExpiredDescription,
-      ),
-      JoinRequestStatus.pending || JoinRequestStatus.approved => ('', ''),
-    };
-
-    return Scaffold(
-      backgroundColor: palette.background,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: familyFlowHorizontalPadding,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 64,
-                  color: palette.textSecondary,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: palette.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: palette.textSecondary),
-                ),
-                const SizedBox(height: 28),
-                FilledButton(
-                  onPressed: _tryAnotherInvite,
-                  child: Text(l10n.groupTryAnotherInvite),
-                ),
-              ],
+    return SizedBox(
+      width: 164,
+      height: 168,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(
+            LucideIcons.house,
+            size: 120,
+            color: palette.textSecondary,
+          ),
+          Positioned(
+            right: 4,
+            bottom: 12,
+            child: Icon(
+              LucideIcons.circleX,
+              size: 42,
+              color: palette.joyText,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnableToJoinAction extends StatelessWidget {
+  const _UnableToJoinAction({
+    required this.controlKey,
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+    required this.isLoading,
+  });
+
+  final Key controlKey;
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return OutlinedButton(
+      key: controlKey,
+      onPressed: isLoading ? null : onPressed,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(62),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        foregroundColor: color,
+        backgroundColor: Colors.transparent,
+        disabledForegroundColor: color.withValues(alpha: 0.62),
+        disabledBackgroundColor: Colors.transparent,
+        side: BorderSide(color: palette.borderDefault),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
+      child: SizedBox(
+        height: 60,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: isLoading
+                  ? SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: color,
+                      ),
+                    )
+                  : Icon(icon, size: 22),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 34),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.button.copyWith(
+                  color: color,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Icon(LucideIcons.chevronRight, size: 20),
+            ),
+          ],
         ),
       ),
     );

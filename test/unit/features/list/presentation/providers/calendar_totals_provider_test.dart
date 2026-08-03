@@ -18,13 +18,13 @@ class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
 /// Minimal Book fixture for shadow-book stubs.
 Book _stubBook(String id) => Book(
-      id: id,
-      name: 'Shadow $id',
-      currency: 'JPY',
-      deviceId: 'device-$id',
-      createdAt: DateTime(2026, 1, 1),
-      isShadow: true,
-    );
+  id: id,
+  name: 'Shadow $id',
+  currency: 'JPY',
+  deviceId: 'device-$id',
+  createdAt: DateTime(2026, 1, 1),
+  isShadow: true,
+);
 
 /// Fixed filter override — injects a known ListFilterState synchronously.
 class _FixedListFilter extends ListFilter {
@@ -159,48 +159,41 @@ void main() {
       expect(map.values.fold(0, (a, b) => a + b), equals(6000));
     });
 
-    test(
-      'repository error propagates as AsyncValue.error (StateError)',
-      () async {
-        final mockRepo = _MockAnalyticsRepository();
-        when(
-          () => mockRepo.getDailyTotals(
-            bookId: any(named: 'bookId'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-          ),
-        ).thenThrow(StateError('db error'));
+    test('repository error propagates as AsyncValue.error (StateError)', () async {
+      final mockRepo = _MockAnalyticsRepository();
+      when(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenThrow(StateError('db error'));
 
-        final container = _makeContainer(mockRepo);
+      final container = _makeContainer(mockRepo);
 
-        // For @riverpod Future<T> providers in Riverpod 3.1.0, errors thrown
-        // by the async function are stored in AsyncValue.error as-is (the raw
-        // error, not wrapped in ProviderException).
-        // ProviderException wrapping applies to synchronous provider reads only.
-        // Import ProviderException from package:flutter_riverpod/misc.dart.
-        final result = await waitForFirstValue<Map<DateTime, int>>(
-          container,
+      // For @riverpod Future<T> providers in Riverpod 3.1.0, errors thrown
+      // by the async function are stored in AsyncValue.error as-is (the raw
+      // error, not wrapped in ProviderException).
+      // ProviderException wrapping applies to synchronous provider reads only.
+      // Import ProviderException from package:flutter_riverpod/misc.dart.
+      final result = await waitForFirstValue<Map<DateTime, int>>(
+        container,
+        calendarDailyTotalsProvider(bookId: 'book1', year: 2026, month: 5),
+      );
+
+      expect(result.hasError, isTrue);
+      // The error stored in AsyncValue is the raw StateError thrown by the repo.
+      // Use ProviderException pattern when reading synchronous providers;
+      // for async providers the inner error is accessible directly.
+      expect(result.error, isA<StateError>());
+      expect(
+        () => container.read(
           calendarDailyTotalsProvider(bookId: 'book1', year: 2026, month: 5),
-        );
-
-        expect(result.hasError, isTrue);
-        // The error stored in AsyncValue is the raw StateError thrown by the repo.
-        // Use ProviderException pattern when reading synchronous providers;
-        // for async providers the inner error is accessible directly.
-        expect(result.error, isA<StateError>());
-        expect(
-          () => container.read(
-            calendarDailyTotalsProvider(
-              bookId: 'book1',
-              year: 2026,
-              month: 5,
-            ),
-          ),
-          isNot(throwsA(anything)),
-          // container.read() for settled async providers returns AsyncValue, never throws.
-        );
-      },
-    );
+        ),
+        isNot(throwsA(anything)),
+        // container.read() for settled async providers returns AsyncValue, never throws.
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -211,6 +204,62 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('Phase 29: family calendar D-06', () {
+    test(
+      'V16 family footer sums ledger totals across every family book',
+      () async {
+        final mockRepo = _MockAnalyticsRepository();
+        when(
+          () => mockRepo.getLedgerTotals(
+            bookId: 'book1',
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer(
+          (_) async => const [
+            LedgerTotal(ledgerType: 'daily', totalAmount: 1000),
+            LedgerTotal(ledgerType: 'joy', totalAmount: 400),
+          ],
+        );
+        when(
+          () => mockRepo.getLedgerTotals(
+            bookId: 'shadow-1',
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer(
+          (_) async => const [
+            LedgerTotal(ledgerType: 'daily', totalAmount: 500),
+            LedgerTotal(ledgerType: 'joy', totalAmount: 100),
+          ],
+        );
+
+        final container = _makeContainer(
+          mockRepo,
+          isGroupMode: true,
+          shadows: [
+            ShadowBookInfo(
+              book: _stubBook('shadow-1'),
+              memberDisplayName: '太郎',
+              memberAvatarEmoji: '🐻',
+            ),
+          ],
+        );
+
+        final result = await waitForFirstValue<CalendarLedgerTotals>(
+          container,
+          calendarFamilyLedgerTotalsProvider(
+            bookId: 'book1',
+            year: 2026,
+            month: 5,
+          ),
+        );
+
+        expect(result.requireValue.daily, 1500);
+        expect(result.requireValue.joy, 500);
+        expect(result.requireValue.total, 2000);
+      },
+    );
+
     test(
       'FAM-01/D-06: group mode sums own + shadow book daily totals',
       () async {
@@ -275,54 +324,48 @@ void main() {
       },
     );
 
-    test(
-      'D-04: solo mode uses own book only',
-      () async {
-        final mockRepo = _MockAnalyticsRepository();
+    test('D-04: solo mode uses own book only', () async {
+      final mockRepo = _MockAnalyticsRepository();
 
-        when(
-          () => mockRepo.getDailyTotals(
-            bookId: any(named: 'bookId'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-          ),
-        ).thenAnswer(
-          (_) async => [
-            DailyTotal(date: DateTime(2026, 5, 15), totalAmount: 1000),
-          ],
-        );
+      when(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          DailyTotal(date: DateTime(2026, 5, 15), totalAmount: 1000),
+        ],
+      );
 
-        // Solo mode — no shadow books
-        final container = _makeContainer(
-          mockRepo,
-          isGroupMode: false,
-        );
+      // Solo mode — no shadow books
+      final container = _makeContainer(mockRepo, isGroupMode: false);
 
-        final result = await waitForFirstValue<Map<DateTime, int>>(
-          container,
-          calendarDailyTotalsProvider(bookId: 'book1', year: 2026, month: 5),
-        );
+      final result = await waitForFirstValue<Map<DateTime, int>>(
+        container,
+        calendarDailyTotalsProvider(bookId: 'book1', year: 2026, month: 5),
+      );
 
-        expect(result.hasValue, isTrue);
-        final map = result.requireValue;
+      expect(result.hasValue, isTrue);
+      final map = result.requireValue;
 
-        // Solo mode: only own book is queried; total should be exactly 1000
-        expect(
-          map[DateTime(2026, 5, 15)],
-          equals(1000),
-          reason: 'D-04: solo mode uses own book only, total = 1000',
-        );
+      // Solo mode: only own book is queried; total should be exactly 1000
+      expect(
+        map[DateTime(2026, 5, 15)],
+        equals(1000),
+        reason: 'D-04: solo mode uses own book only, total = 1000',
+      );
 
-        // Verify getDailyTotals was called exactly once (own book only)
-        verify(
-          () => mockRepo.getDailyTotals(
-            bookId: any(named: 'bookId'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-          ),
-        ).called(1);
-      },
-    );
+      // Verify getDailyTotals was called exactly once (own book only)
+      verify(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).called(1);
+    });
 
     test(
       'Pitfall 3/D-06: calendar is isolated from memberBookId filter — '
