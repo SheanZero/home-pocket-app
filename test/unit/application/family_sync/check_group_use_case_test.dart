@@ -54,6 +54,8 @@ void main() {
       () => groupRepository.markGroupConfirming(any()),
     ).thenAnswer((_) async {});
     when(() => groupRepository.getPendingGroup()).thenAnswer((_) async => null);
+    when(() => groupRepository.getCurrentGroup()).thenAnswer((_) async => null);
+    when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
     when(
       () => groupRepository.updateInviteCode(any(), any(), any()),
     ).thenAnswer((_) async {});
@@ -97,6 +99,83 @@ void main() {
     expect(result, isA<CheckGroupNotInGroup>());
     verify(() => apiClient.checkGroup()).called(1);
     verifyNever(() => apiClient.getGroupStatus(any()));
+  });
+
+  test('server none deactivates a stale local membership', () async {
+    when(() => apiClient.checkGroup()).thenAnswer(
+      (_) async => {'groupExisted': false, 'membershipStatus': 'none'},
+    );
+    when(() => groupRepository.getCurrentGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'stale-group',
+        groupName: 'Stale Family',
+        status: GroupStatus.active,
+        role: 'owner',
+        members: const [],
+        createdAt: DateTime(2026, 3, 14),
+      ),
+    );
+
+    final result = await useCase.execute();
+
+    expect(result, isA<CheckGroupNotInGroup>());
+    verify(() => groupRepository.deactivateGroup('stale-group')).called(1);
+    verifyNever(() => apiClient.getGroupStatus(any()));
+  });
+
+  test('restores a server pending membership without local state', () async {
+    when(() => apiClient.checkGroup()).thenAnswer(
+      (_) async => {
+        'groupExisted': false,
+        'groupId': 'group-123',
+        'membershipStatus': 'pending',
+      },
+    );
+    when(() => apiClient.getGroupStatus('group-123')).thenAnswer(
+      (_) async => {
+        'groupId': 'group-123',
+        'status': 'active',
+        'groupName': 'Test Family',
+        'keyEpoch': 1,
+        'members': [
+          {
+            'deviceId': 'device-owner',
+            'publicKey': 'owner-key',
+            'deviceName': 'Owner Phone',
+            'role': 'owner',
+            'status': 'active',
+            'displayName': 'Owner',
+            'avatarEmoji': '🏠',
+          },
+          {
+            'deviceId': 'device-1',
+            'publicKey': 'public-key',
+            'deviceName': 'My Phone',
+            'role': 'member',
+            'status': 'pending',
+            'displayName': 'Me',
+            'avatarEmoji': '🏠',
+          },
+        ],
+      },
+    );
+    when(
+      () => groupRepository.getGroupById('group-123'),
+    ).thenAnswer((_) async => null);
+
+    final result = await useCase.execute();
+
+    expect(result, isA<CheckGroupPendingApproval>());
+    expect((result as CheckGroupPendingApproval).groupId, 'group-123');
+    verify(
+      () => groupRepository.saveConfirmingGroup(
+        groupId: 'group-123',
+        groupName: 'Test Family',
+        role: 'member',
+        keyEpoch: 1,
+        members: any(named: 'members'),
+      ),
+    ).called(1);
   });
 
   test(

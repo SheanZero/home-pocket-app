@@ -8,6 +8,7 @@ import '../../features/family_sync/domain/repositories/sync_repository.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
+import 'group_operation_error.dart';
 import 'sync_vector_clock.dart';
 
 /// Result of pushing sync data.
@@ -153,7 +154,11 @@ class PushSyncUseCase {
         return PushSyncResult.queued(safeOperations.length);
       }
     } catch (e) {
-      return PushSyncResult.error(e.toString());
+      final failure = groupOperationFailureFrom(
+        e,
+        fallbackMessage: 'Failed to push family sync data',
+      );
+      return PushSyncResult.error(failure.message);
     }
   }
 

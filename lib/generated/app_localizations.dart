@@ -2211,6 +2211,12 @@ abstract class S {
   /// **'Could not check group status: {message}'**
   String familySyncCheckFailed(String message);
 
+  /// No description provided for @familySyncRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t restore your family status. Please try again shortly.'**
+  String get familySyncRestoreFailed;
+
   /// Sync status description when unpaired
   ///
   /// In en, this message translates to:
@@ -2346,7 +2352,7 @@ abstract class S {
   /// Clarifies that invite-code expiry and join-request approval TTL are separate
   ///
   /// In en, this message translates to:
-  /// **'Code expiry only controls new applications. After applying, the owner has 24 hours to approve the request.'**
+  /// **'Code expiry only controls new applications. After applying, the owner has 5 minutes to approve the request.'**
   String get familySyncInviteApprovalWindowHint;
 
   /// Text sent through the system share sheet for a group invite
@@ -2625,6 +2631,18 @@ abstract class S {
   /// **'This device already has a family group or a pending join request. Leave or cancel it before creating or joining another group.'**
   String get familySyncSingleGroupConflict;
 
+  /// No description provided for @familySyncJoinAnotherFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Join another family'**
+  String get familySyncJoinAnotherFamily;
+
+  /// No description provided for @familySyncReplaceEmptyGroupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After you submit the join request, your current family with no other members will be deleted automatically.'**
+  String get familySyncReplaceEmptyGroupHint;
+
   /// Title for the family-sync network unavailable dialog
   ///
   /// In en, this message translates to:
@@ -2658,7 +2676,7 @@ abstract class S {
   /// No description provided for @groupInviteCode.
   ///
   /// In en, this message translates to:
-  /// **'Invite Code'**
+  /// **'Family Invite Code'**
   String get groupInviteCode;
 
   /// No description provided for @groupInviteExpiry.
@@ -2901,6 +2919,12 @@ abstract class S {
   /// **'When someone requests to join, you will approve them in the next step.'**
   String get familyFlowCreateInviteHelper;
 
+  /// No description provided for @familyFlowCopyInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get familyFlowCopyInvite;
+
   /// No description provided for @familyFlowRegenerateInvite.
   ///
   /// In en, this message translates to:
@@ -3100,7 +3124,7 @@ abstract class S {
   /// No description provided for @groupRequestExpiredDescription.
   ///
   /// In en, this message translates to:
-  /// **'The request was not reviewed within 24 hours. Ask for a current invite code and try again.'**
+  /// **'The request was not reviewed within 5 minutes. Ask for a current invite code and try again.'**
   String get groupRequestExpiredDescription;
 
   /// No description provided for @groupTryAnotherInvite.
@@ -3142,7 +3166,7 @@ abstract class S {
   /// No description provided for @groupKeyRecoveryRebuild.
   ///
   /// In en, this message translates to:
-  /// **'Leave and set up a new family'**
+  /// **'Leave and choose another family'**
   String get groupKeyRecoveryRebuild;
 
   /// No description provided for @groupWaitingHint1.

@@ -1399,6 +1399,7 @@
     "description": "Loading text while checking whether the device is already in a group"
   },
   "familySyncCheckFailed": "无法检查群组状态: {message}",
+  "familySyncRestoreFailed": "暂时无法恢复家庭状态，请稍后重试。",
   "@familySyncCheckFailed": {
     "description": "Error shown when verifying current group membership fails",
     "placeholders": {
@@ -1507,7 +1508,7 @@
   "@familySyncInviteRefreshHint": {
     "description": "Warning shown beside the explicit invite refresh action"
   },
-  "familySyncInviteApprovalWindowHint": "邀请码有效期仅限制发起新申请；提交申请后，家庭创建者有24小时进行审批。",
+  "familySyncInviteApprovalWindowHint": "邀请码有效期仅限制发起新申请；提交申请后，家庭创建者有5分钟进行审批。",
   "@familySyncInviteApprovalWindowHint": {
     "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
   },
@@ -1737,6 +1738,8 @@
     }
   },
   "familySyncSingleGroupConflict": "此设备已有家庭群组或待审批的加入申请。请先退出当前群组或取消申请，再创建或加入其他群组。",
+  "familySyncJoinAnotherFamily": "加入其他家庭",
+  "familySyncReplaceEmptyGroupHint": "提交加入申请后，当前无人加入的家庭将自动删除。",
   "familySyncNetworkUnavailableTitle": "暂时无法连接网络",
   "@familySyncNetworkUnavailableTitle": {
     "description": "Title for the family-sync network unavailable dialog"
@@ -1748,7 +1751,7 @@
   "groupName": "群组名称",
   "groupOwner": "群主",
   "groupMember": "成员",
-  "groupInviteCode": "邀请码",
+  "groupInviteCode": "家庭邀请码",
   "groupInviteExpiry": "{minutes}分钟内有效",
   "@groupInviteExpiry": {
     "placeholders": {
@@ -1823,6 +1826,7 @@
   "familyFlowCreateTitle": "创建新家庭",
   "familyFlowCreateSubtitle": "设置家庭名称后，将生成安全的邀请码。",
   "familyFlowCreateInviteHelper": "家人提交加入申请后，你将在下一步审批成员。",
+  "familyFlowCopyInvite": "复制",
   "familyFlowRegenerateInvite": "重新生成",
   "familySyncInviteRegenerated": "邀请码已重新生成",
   "familyFlowJoinCodeTitle": "输入 6 位邀请码",
@@ -1866,14 +1870,14 @@
   "groupRequestCancelledTitle": "加入申请已撤回",
   "groupRequestCancelledDescription": "申请已撤回，你可以随时重新提交新的申请。",
   "groupRequestExpiredTitle": "加入申请已过期",
-  "groupRequestExpiredDescription": "申请在24小时内未被处理，请获取当前有效的邀请码后重新申请。",
+  "groupRequestExpiredDescription": "申请在5分钟内未被处理，请获取当前有效的邀请码后重新申请。",
   "groupTryAnotherInvite": "输入其他邀请码",
   "groupKeyRecoveryTitle": "正在恢复家庭密钥",
   "groupKeyRecoveryWaiting": "成员资格已经生效，需要另一台仍持有密钥的家庭设备为本设备重新密封当前密钥。中继服务器无法读取或重新生成密钥。",
   "groupKeyRecoveryUnavailable": "请求过期前没有任何有效设备提供当前密钥。由于采用零知识设计，中继服务器无法恢复密钥。你可以重试，或安全退出／解散该家庭后重新创建。",
   "groupKeyRecoveryRateLimited": "刚刚已经发送过恢复请求，请稍后再通知其他设备。",
   "groupKeyRecoveryRetry": "重试密钥恢复",
-  "groupKeyRecoveryRebuild": "退出并重新创建家庭",
+  "groupKeyRecoveryRebuild": "退出并重新选择家庭",
   "groupWaitingHint1": "关闭应用也没有关系。",
   "groupWaitingHint2": "批准后将自动开始同步。",
   "groupCodeHint": "请向群组的群主索取邀请码",

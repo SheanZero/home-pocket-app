@@ -19,6 +19,8 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_happ
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
+import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_home.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
@@ -37,6 +39,8 @@ import '../../../../../helpers/happiness_test_fixtures.dart';
 import '../../helpers/test_localizations.dart';
 
 class MockGroupRepository extends Mock implements GroupRepository {}
+
+class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
 
 class _MockUpdateTransactionUseCase extends Mock
     implements UpdateTransactionUseCase {}
@@ -101,12 +105,14 @@ final _mockBook = Book(
 void main() {
   group('HomeScreen', () {
     late MockGroupRepository groupRepository;
+    late MockCheckGroupUseCase checkGroupUseCase;
     late DateTime now;
     late DateTime currentMonthStart;
     late DateTime currentMonthEnd;
 
     setUp(() {
       groupRepository = MockGroupRepository();
+      checkGroupUseCase = MockCheckGroupUseCase();
       now = DateTime.now();
       currentMonthStart = DateTime(now.year, now.month);
       currentMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
@@ -150,6 +156,7 @@ void main() {
               resolvedCategory.id,
             ).overrideWith((ref) async => resolvedCategory),
           groupRepositoryProvider.overrideWithValue(groupRepository),
+          checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
         ],
         child: testLocalizedApp(
           locale: locale,
@@ -238,6 +245,28 @@ void main() {
         expect(find.text('Personal'), findsOneWidget);
       },
     );
+
+    testWidgets('invite banner checks server before opening family choices', (
+      tester,
+    ) async {
+      when(
+        () => checkGroupUseCase.execute(),
+      ).thenAnswer((_) async => const CheckGroupNotInGroup());
+
+      await tester.pumpWidget(buildSubject(locale: const Locale('en')));
+      await tester.pumpAndSettle();
+
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+      final addFamilyButton = find.text(l10n.homeFamilyInviteTitle);
+      await tester.ensureVisible(addFamilyButton);
+      await tester.pump();
+      await tester.tap(addFamilyButton);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      verify(() => checkGroupUseCase.execute()).called(1);
+      expect(find.byType(GroupChoiceScreen), findsOneWidget);
+    });
 
     testWidgets(
       'hides invite banner and shows family mode when active group exists',

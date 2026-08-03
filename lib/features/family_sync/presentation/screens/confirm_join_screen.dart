@@ -12,6 +12,7 @@ import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/family_flow_components.dart';
+import '../widgets/family_network_unavailable_dialog.dart';
 import 'waiting_approval_screen.dart';
 
 class ConfirmJoinScreen extends ConsumerStatefulWidget {
@@ -57,6 +58,14 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
         );
       case ConfirmJoinError(:final message):
         setState(() => _isConfirming = false);
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleConfirm,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(context, message);
     }
   }
@@ -133,6 +142,13 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                 ),
               ),
               const SizedBox(height: 18),
+              if (result.replacesEmptyOwnedGroup) ...[
+                FamilyHelperNote(
+                  icon: LucideIcons.triangleAlert,
+                  text: l10n.familySyncReplaceEmptyGroupHint,
+                ),
+                const SizedBox(height: 16),
+              ],
               FamilyPrimaryButton(
                 onPressed: _isConfirming ? null : _handleConfirm,
                 label: l10n.groupConfirmJoin,

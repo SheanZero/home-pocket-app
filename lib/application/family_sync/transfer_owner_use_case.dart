@@ -10,6 +10,7 @@ import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import 'refresh_group_snapshot_use_case.dart';
+import 'group_operation_error.dart';
 
 sealed class OwnerTransferResult {
   const OwnerTransferResult();
@@ -35,10 +36,17 @@ class OwnerTransferInvalidTarget extends OwnerTransferResult {
   const OwnerTransferInvalidTarget();
 }
 
-class OwnerTransferError extends OwnerTransferResult {
-  const OwnerTransferError(this.message);
+class OwnerTransferError extends OwnerTransferResult
+    implements GroupOperationFailure {
+  const OwnerTransferError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 typedef OwnerTransferRequestIdFactory = String Function();
@@ -147,7 +155,7 @@ class OwnerTransferUseCase {
       );
       final refreshed = await _refreshGroupSnapshot.execute(groupId: groupId);
       if (refreshed is RefreshGroupSnapshotFailed) {
-        return OwnerTransferError(refreshed.message);
+        return OwnerTransferError(refreshed.message, kind: refreshed.kind);
       }
       await _onEpochCommitted?.call(groupId, newEpoch);
       return OwnerTransferSuccess(
@@ -158,9 +166,17 @@ class OwnerTransferUseCase {
     } on RelayApiException catch (error) {
       if (error.isForbidden) return const OwnerTransferForbidden();
       if (error.statusCode == 400) return const OwnerTransferInvalidTarget();
-      return OwnerTransferError(error.message);
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to transfer ownership',
+      );
+      return OwnerTransferError(failure.message, kind: failure.kind);
     } catch (error) {
-      return OwnerTransferError(error.toString());
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to transfer ownership',
+      );
+      return OwnerTransferError(failure.message, kind: failure.kind);
     }
   }
 

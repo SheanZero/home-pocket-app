@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/network/network_status_checker.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
@@ -13,18 +15,30 @@ class MockKeyManager extends Mock implements KeyManager {}
 
 class MockHttpClient extends Mock implements http.Client {}
 
+class FakeNetworkStatusChecker implements NetworkStatusChecker {
+  FakeNetworkStatusChecker(this.isAvailable);
+
+  bool isAvailable;
+
+  @override
+  Future<bool> get isNetworkAvailable async => isAvailable;
+}
+
 void main() {
   late MockRequestSigner signer;
   late MockHttpClient httpClient;
+  late FakeNetworkStatusChecker networkStatusChecker;
   late RelayApiClient apiClient;
 
   setUp(() {
     signer = MockRequestSigner();
     httpClient = MockHttpClient();
+    networkStatusChecker = FakeNetworkStatusChecker(true);
     apiClient = RelayApiClient(
       baseUrl: 'https://example.com/api/v1',
       signer: signer,
       httpClient: httpClient,
+      networkStatusChecker: networkStatusChecker,
     );
 
     when(
@@ -34,6 +48,35 @@ void main() {
         body: any(named: 'body'),
       ),
     ).thenAnswer((_) async => 'Ed25519 signed');
+  });
+
+  test('fails before HTTP when no network interface is available', () async {
+    networkStatusChecker.isAvailable = false;
+
+    await expectLater(
+      apiClient.checkGroup(),
+      throwsA(isA<NetworkUnavailableException>()),
+    );
+    verifyNever(
+      () => httpClient.get(
+        Uri.parse('https://example.com/api/v1/group/check'),
+        headers: any(named: 'headers'),
+      ),
+    );
+  });
+
+  test('normalizes socket failures from the HTTP client', () async {
+    when(
+      () => httpClient.get(
+        Uri.parse('https://example.com/api/v1/group/check'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenThrow(const SocketException('Failed host lookup: example.com'));
+
+    await expectLater(
+      apiClient.checkGroup(),
+      throwsA(isA<NetworkUnavailableException>()),
+    );
   });
 
   test('createGroup posts to /group/create', () async {

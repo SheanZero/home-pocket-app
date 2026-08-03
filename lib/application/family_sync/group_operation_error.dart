@@ -1,13 +1,37 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:http/http.dart' as http;
-
+import '../../infrastructure/network/network_status_checker.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 
-enum GroupOperationErrorKind { general, membershipConflict, networkUnavailable }
+export '../../infrastructure/network/network_status_checker.dart'
+    show isNetworkUnavailableError;
+
+enum GroupOperationErrorKind {
+  general,
+  membershipConflict,
+  networkUnavailable,
+  notFound,
+  rateLimited,
+}
 
 const networkUnavailableErrorMessage = 'Network unavailable';
+
+/// Common contract for user-triggered family operations.
+///
+/// Screens use [kind] for presentation decisions and never inspect [message]
+/// for socket/client substrings.
+abstract interface class GroupOperationFailure {
+  String get message;
+  GroupOperationErrorKind get kind;
+}
+
+class GroupOperationFailureData implements GroupOperationFailure {
+  const GroupOperationFailureData(this.message, {required this.kind});
+
+  @override
+  final String message;
+
+  @override
+  final GroupOperationErrorKind kind;
+}
 
 bool isSingleGroupConflict(RelayApiException error) {
   return error.isConflict &&
@@ -15,24 +39,37 @@ bool isSingleGroupConflict(RelayApiException error) {
           error.code == 'group_membership_conflict');
 }
 
-/// Returns whether an operation failed before receiving a relay response.
-///
-/// Presentation code must never inspect exception strings. The string fallback
-/// only handles wrapped platform errors whose public type is hidden by the HTTP
-/// client, while keeping all technical details below the UI boundary.
-bool isNetworkUnavailableError(Object error) {
-  if (error is SocketException ||
-      error is http.ClientException ||
-      error is TimeoutException) {
-    return true;
+/// Converts infrastructure/server failures into a presentation-safe result.
+GroupOperationFailureData groupOperationFailureFrom(
+  Object error, {
+  required String fallbackMessage,
+}) {
+  if (isNetworkUnavailableError(error)) {
+    return const GroupOperationFailureData(
+      networkUnavailableErrorMessage,
+      kind: GroupOperationErrorKind.networkUnavailable,
+    );
   }
-
-  final message = error.toString().toLowerCase();
-  return message.contains('socketexception') ||
-      message.contains('failed host lookup') ||
-      message.contains('network is unreachable') ||
-      message.contains('connection refused') ||
-      message.contains('connection reset') ||
-      message.contains('connection closed') ||
-      message.contains('timed out');
+  if (error is RelayApiException) {
+    if (error.isNotFound) {
+      return GroupOperationFailureData(
+        error.message,
+        kind: GroupOperationErrorKind.notFound,
+      );
+    }
+    if (error.statusCode == 429) {
+      return const GroupOperationFailureData(
+        'Too many requests',
+        kind: GroupOperationErrorKind.rateLimited,
+      );
+    }
+    return GroupOperationFailureData(
+      error.message,
+      kind: GroupOperationErrorKind.general,
+    );
+  }
+  return GroupOperationFailureData(
+    fallbackMessage,
+    kind: GroupOperationErrorKind.general,
+  );
 }

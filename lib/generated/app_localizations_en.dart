@@ -1134,6 +1134,10 @@ class SEn extends S {
   }
 
   @override
+  String get familySyncRestoreFailed =>
+      'We couldn\'t restore your family status. Please try again shortly.';
+
+  @override
   String get familySyncStatusUnpaired => 'Tap to create or join a family group';
 
   @override
@@ -1211,7 +1215,7 @@ class SEn extends S {
 
   @override
   String get familySyncInviteApprovalWindowHint =>
-      'Code expiry only controls new applications. After applying, the owner has 24 hours to approve the request.';
+      'Code expiry only controls new applications. After applying, the owner has 5 minutes to approve the request.';
 
   @override
   String familySyncInviteShareMessage(String groupName, String inviteCode) {
@@ -1379,6 +1383,13 @@ class SEn extends S {
       'This device already has a family group or a pending join request. Leave or cancel it before creating or joining another group.';
 
   @override
+  String get familySyncJoinAnotherFamily => 'Join another family';
+
+  @override
+  String get familySyncReplaceEmptyGroupHint =>
+      'After you submit the join request, your current family with no other members will be deleted automatically.';
+
+  @override
   String get familySyncNetworkUnavailableTitle => 'No internet connection';
 
   @override
@@ -1395,7 +1406,7 @@ class SEn extends S {
   String get groupMember => 'Member';
 
   @override
-  String get groupInviteCode => 'Invite Code';
+  String get groupInviteCode => 'Family Invite Code';
 
   @override
   String groupInviteExpiry(int minutes) {
@@ -1531,6 +1542,9 @@ class SEn extends S {
       'When someone requests to join, you will approve them in the next step.';
 
   @override
+  String get familyFlowCopyInvite => 'Copy';
+
+  @override
   String get familyFlowRegenerateInvite => 'Reissue';
 
   @override
@@ -1650,7 +1664,7 @@ class SEn extends S {
 
   @override
   String get groupRequestExpiredDescription =>
-      'The request was not reviewed within 24 hours. Ask for a current invite code and try again.';
+      'The request was not reviewed within 5 minutes. Ask for a current invite code and try again.';
 
   @override
   String get groupTryAnotherInvite => 'Enter another invite code';
@@ -1674,7 +1688,7 @@ class SEn extends S {
   String get groupKeyRecoveryRetry => 'Retry key recovery';
 
   @override
-  String get groupKeyRecoveryRebuild => 'Leave and set up a new family';
+  String get groupKeyRecoveryRebuild => 'Leave and choose another family';
 
   @override
   String get groupWaitingHint1 => 'It\'s safe to close the app.';

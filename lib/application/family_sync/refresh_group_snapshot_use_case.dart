@@ -3,6 +3,7 @@ import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import 'control_snapshot_digest.dart';
+import 'group_operation_error.dart';
 import 'membership_rotation_coordinator.dart';
 
 sealed class RefreshGroupSnapshotResult {
@@ -26,11 +27,19 @@ class RefreshGroupSnapshotIgnored extends RefreshGroupSnapshotResult {
   const RefreshGroupSnapshotIgnored();
 }
 
-class RefreshGroupSnapshotFailed extends RefreshGroupSnapshotResult {
-  const RefreshGroupSnapshotFailed(this.message, {this.statusCode});
+class RefreshGroupSnapshotFailed extends RefreshGroupSnapshotResult
+    implements GroupOperationFailure {
+  const RefreshGroupSnapshotFailed(
+    this.message, {
+    this.statusCode,
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
   final int? statusCode;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 /// An authenticated status response proves this device can no longer use the
@@ -225,10 +234,12 @@ class RefreshGroupSnapshotUseCase {
       return const RefreshGroupSnapshotFailed(
         'Conflicting authoritative group snapshot revision',
       );
-    } catch (_) {
-      return const RefreshGroupSnapshotFailed(
-        'Failed to refresh the group snapshot',
+    } catch (error) {
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to refresh the group snapshot',
       );
+      return RefreshGroupSnapshotFailed(failure.message, kind: failure.kind);
     }
   }
 

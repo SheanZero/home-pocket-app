@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import 'check_group_validity_use_case.dart';
+import 'group_operation_error.dart';
 import 'refresh_group_snapshot_use_case.dart';
 
 enum ControlPlaneReconciliationDeferredReason {
@@ -203,7 +204,11 @@ class ControlPlaneReconciliationUseCase {
         }
         return ControlPlaneReconciliationResult.unavailable(error.message);
       } catch (error) {
-        return ControlPlaneReconciliationResult.unavailable(error.toString());
+        final failure = groupOperationFailureFrom(
+          error,
+          fallbackMessage: 'Control-plane reconciliation unavailable',
+        );
+        return ControlPlaneReconciliationResult.unavailable(failure.message);
       }
 
       pageCount++;
@@ -261,7 +266,11 @@ class ControlPlaneReconciliationUseCase {
           .execute(groupId: localGroup.groupId, controlEvents: events)
           .timeout(_requestTimeout);
     } catch (error) {
-      return ControlPlaneReconciliationResult.unavailable(error.toString());
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Control-plane reconciliation unavailable',
+      );
+      return ControlPlaneReconciliationResult.unavailable(failure.message);
     }
     switch (snapshotResult) {
       case RefreshGroupSnapshotMembershipInvalid(

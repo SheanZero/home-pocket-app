@@ -1399,6 +1399,7 @@
     "description": "Loading text while checking whether the device is already in a group"
   },
   "familySyncCheckFailed": "グループ状況を確認できません: {message}",
+  "familySyncRestoreFailed": "家族の状態を復元できませんでした。しばらくしてからもう一度お試しください。",
   "@familySyncCheckFailed": {
     "description": "Error shown when verifying current group membership fails",
     "placeholders": {
@@ -1507,7 +1508,7 @@
   "@familySyncInviteRefreshHint": {
     "description": "Warning shown beside the explicit invite refresh action"
   },
-  "familySyncInviteApprovalWindowHint": "コードの有効期限は新規申請にのみ適用されます。申請後、オーナーは24時間以内に承認できます。",
+  "familySyncInviteApprovalWindowHint": "コードの有効期限は新規申請にのみ適用されます。申請後、オーナーは5分以内に承認できます。",
   "@familySyncInviteApprovalWindowHint": {
     "description": "Clarifies that invite-code expiry and join-request approval TTL are separate"
   },
@@ -1737,6 +1738,8 @@
     }
   },
   "familySyncSingleGroupConflict": "この端末には参加中のグループ、または承認待ちの参加リクエストがあります。別のグループを作成・参加する前に、現在のグループから退出するかリクエストをキャンセルしてください。",
+  "familySyncJoinAnotherFamily": "別の家族に参加する",
+  "familySyncReplaceEmptyGroupHint": "参加を申請すると、メンバーがいない現在の家族は自動的に削除されます。",
   "familySyncNetworkUnavailableTitle": "ネットワークに接続できません",
   "@familySyncNetworkUnavailableTitle": {
     "description": "Title for the family-sync network unavailable dialog"
@@ -1748,7 +1751,7 @@
   "groupName": "グループ名",
   "groupOwner": "オーナー",
   "groupMember": "メンバー",
-  "groupInviteCode": "招待コード",
+  "groupInviteCode": "家族の招待コード",
   "groupInviteExpiry": "{minutes}分間有効",
   "@groupInviteExpiry": {
     "placeholders": {
@@ -1823,6 +1826,7 @@
   "familyFlowCreateTitle": "新しい家族を作る",
   "familyFlowCreateSubtitle": "家族の名前を決めると、安全な招待コードを発行します。",
   "familyFlowCreateInviteHelper": "家族が参加申請を送ると、次のステップでメンバーを承認します。",
+  "familyFlowCopyInvite": "コピー",
   "familyFlowRegenerateInvite": "再発行",
   "familySyncInviteRegenerated": "招待コードを再発行しました",
   "familyFlowJoinCodeTitle": "6桁の招待コードを入力",
@@ -1866,14 +1870,14 @@
   "groupRequestCancelledTitle": "参加リクエストを取り消しました",
   "groupRequestCancelledDescription": "リクエストを取り消しました。いつでも新しいリクエストを送信できます。",
   "groupRequestExpiredTitle": "参加リクエストの期限が切れました",
-  "groupRequestExpiredDescription": "24時間以内に確認されませんでした。最新の招待コードを受け取り、もう一度お試しください。",
+  "groupRequestExpiredDescription": "5分以内に確認されませんでした。最新の招待コードを受け取り、もう一度お試しください。",
   "groupTryAnotherInvite": "別の招待コードを入力",
   "groupKeyRecoveryTitle": "ファミリーキーを復元しています",
   "groupKeyRecoveryWaiting": "メンバー承認は完了しています。別の有効なファミリーデバイスが、現在のキーをこの端末向けに安全に再暗号化する必要があります。リレーはキーを閲覧・再作成できません。",
   "groupKeyRecoveryUnavailable": "期限内に有効なデバイスから現在のキーを受け取れませんでした。ゼロ知識設計のため、リレーでキーを復元することはできません。再試行するか、安全にファミリーを退出／解散して新しく作成してください。",
   "groupKeyRecoveryRateLimited": "復元リクエストは直前に送信されています。ほかのデバイスへ再通知するまで少しお待ちください。",
   "groupKeyRecoveryRetry": "キーの復元を再試行",
-  "groupKeyRecoveryRebuild": "退出して新しいファミリーを設定",
+  "groupKeyRecoveryRebuild": "退出して別のファミリーを選ぶ",
   "groupWaitingHint1": "アプリを閉じても大丈夫です。",
   "groupWaitingHint2": "承認されたら自動で同期を始めます。",
   "groupCodeHint": "招待コードはグループのオーナーに聞いてください",

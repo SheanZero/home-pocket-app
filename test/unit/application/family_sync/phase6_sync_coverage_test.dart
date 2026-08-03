@@ -494,7 +494,7 @@ void main() {
       },
     );
 
-    test('execute catches exceptions as SyncOrchestratorError', () async {
+    test('execute sanitizes exceptions as SyncOrchestratorError', () async {
       when(
         () => groupRepo.getActiveGroup(),
       ).thenThrow(StateError('database unavailable'));
@@ -502,7 +502,9 @@ void main() {
       final result = await orchestrator.execute(SyncMode.initialSync);
 
       expect(result, isA<SyncOrchestratorError>());
-      expect((result as SyncOrchestratorError).message, contains('database'));
+      final message = (result as SyncOrchestratorError).message;
+      expect(message, 'Family sync failed');
+      expect(message, isNot(contains('database')));
     });
 
     test(

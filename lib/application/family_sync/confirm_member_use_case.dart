@@ -4,6 +4,7 @@ import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import 'full_sync_use_case.dart';
+import 'group_operation_error.dart';
 import 'sync_avatar_use_case.dart';
 
 sealed class ConfirmMemberResult {
@@ -11,17 +12,27 @@ sealed class ConfirmMemberResult {
 
   const factory ConfirmMemberResult.success() = ConfirmMemberSuccess;
 
-  const factory ConfirmMemberResult.error(String message) = ConfirmMemberError;
+  const factory ConfirmMemberResult.error(
+    String message, {
+    GroupOperationErrorKind kind,
+  }) = ConfirmMemberError;
 }
 
 class ConfirmMemberSuccess extends ConfirmMemberResult {
   const ConfirmMemberSuccess();
 }
 
-class ConfirmMemberError extends ConfirmMemberResult {
-  const ConfirmMemberError(this.message);
+class ConfirmMemberError extends ConfirmMemberResult
+    implements GroupOperationFailure {
+  const ConfirmMemberError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 /// Confirms a pending member in the group and exchanges the group key.
@@ -87,10 +98,12 @@ class ConfirmMemberUseCase {
       }
 
       return const ConfirmMemberResult.success();
-    } on RelayApiException catch (error) {
-      return ConfirmMemberResult.error(error.message);
     } catch (error) {
-      return ConfirmMemberResult.error('Failed to confirm member: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to confirm member',
+      );
+      return ConfirmMemberResult.error(failure.message, kind: failure.kind);
     }
   }
 }

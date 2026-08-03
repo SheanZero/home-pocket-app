@@ -1,5 +1,6 @@
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
+import 'group_operation_error.dart';
 
 sealed class RenameGroupResult {
   const RenameGroupResult();
@@ -7,7 +8,10 @@ sealed class RenameGroupResult {
   const factory RenameGroupResult.success(String groupName) =
       RenameGroupSuccess;
 
-  const factory RenameGroupResult.error(String message) = RenameGroupError;
+  const factory RenameGroupResult.error(
+    String message, {
+    GroupOperationErrorKind kind,
+  }) = RenameGroupError;
 }
 
 class RenameGroupSuccess extends RenameGroupResult {
@@ -16,10 +20,17 @@ class RenameGroupSuccess extends RenameGroupResult {
   final String groupName;
 }
 
-class RenameGroupError extends RenameGroupResult {
-  const RenameGroupError(this.message);
+class RenameGroupError extends RenameGroupResult
+    implements GroupOperationFailure {
+  const RenameGroupError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 /// Renames a group with server-first update strategy.
@@ -60,10 +71,12 @@ class RenameGroupUseCase {
       await _groupRepository.updateGroupName(groupId, trimmedName);
 
       return RenameGroupResult.success(trimmedName);
-    } on RelayApiException catch (error) {
-      return RenameGroupResult.error(error.message);
     } catch (error) {
-      return RenameGroupResult.error('Failed to rename group: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to rename group',
+      );
+      return RenameGroupResult.error(failure.message, kind: failure.kind);
     }
   }
 }

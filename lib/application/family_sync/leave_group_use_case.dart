@@ -3,22 +3,33 @@ import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import 'membership_rotation_coordinator.dart';
+import 'group_operation_error.dart';
 
 sealed class LeaveGroupResult {
   const LeaveGroupResult();
 
   const factory LeaveGroupResult.success() = LeaveGroupSuccess;
-  const factory LeaveGroupResult.error(String message) = LeaveGroupError;
+  const factory LeaveGroupResult.error(
+    String message, {
+    GroupOperationErrorKind kind,
+  }) = LeaveGroupError;
 }
 
 class LeaveGroupSuccess extends LeaveGroupResult {
   const LeaveGroupSuccess();
 }
 
-class LeaveGroupError extends LeaveGroupResult {
-  const LeaveGroupError(this.message);
+class LeaveGroupError extends LeaveGroupResult
+    implements GroupOperationFailure {
+  const LeaveGroupError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 class LeaveGroupUseCase {
@@ -41,10 +52,12 @@ class LeaveGroupUseCase {
       final intent = await coordinator.submitSelfLeave(groupId);
       await coordinator.finalizeSelfLeave(intent);
       return const LeaveGroupResult.success();
-    } on RelayApiException catch (error) {
-      return LeaveGroupResult.error(error.message);
     } catch (error) {
-      return LeaveGroupResult.error(error.toString());
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to leave group',
+      );
+      return LeaveGroupResult.error(failure.message, kind: failure.kind);
     }
   }
 }

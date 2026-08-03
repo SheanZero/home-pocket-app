@@ -351,6 +351,40 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('invite ticket keeps the full code visible at 320dp', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    when(
+      () => createGroupUseCase.execute(
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        groupName: any(named: 'groupName'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
+      (_) async => const CreateGroupResult.success(
+        groupId: 'group-1',
+        inviteCode: '256931',
+        expiresAt: 4102444800,
+      ),
+    );
+    await pumpScreen(tester);
+
+    await tester.tap(find.byKey(const Key('create-group-submit')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('256 931'), findsOneWidget);
+    expect(
+      find.byKey(const Key('family-invite-ticket-surface')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('single-group conflict uses localized guidance', (tester) async {
     when(
       () => createGroupUseCase.execute(

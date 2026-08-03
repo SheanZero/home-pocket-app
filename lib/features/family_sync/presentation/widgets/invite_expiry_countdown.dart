@@ -17,6 +17,8 @@ class FamilyInviteExpiryCountdown extends StatefulWidget {
     required this.expiresAt,
     this.now,
     this.textStyle,
+    this.showProgress = false,
+    this.validityDuration = const Duration(minutes: 10),
   });
 
   final DateTime expiresAt;
@@ -25,6 +27,8 @@ class FamilyInviteExpiryCountdown extends StatefulWidget {
   final DateTime Function()? now;
 
   final TextStyle? textStyle;
+  final bool showProgress;
+  final Duration validityDuration;
 
   @override
   State<FamilyInviteExpiryCountdown> createState() =>
@@ -74,9 +78,16 @@ class _FamilyInviteExpiryCountdownState
     final palette = context.palette;
     final remaining = widget.expiresAt.difference(_now);
     final expired = remaining <= Duration.zero;
+    final maxVisibleRemaining = widget.validityDuration.isNegative
+        ? Duration.zero
+        : widget.validityDuration;
+    final visibleRemaining = !expired && remaining > maxVisibleRemaining
+        ? maxVisibleRemaining
+        : remaining;
     final totalSeconds = expired
         ? 0
-        : (remaining.inMilliseconds / Duration.millisecondsPerSecond).ceil();
+        : (visibleRemaining.inMilliseconds / Duration.millisecondsPerSecond)
+              .ceil();
     final minutes = totalSeconds ~/ Duration.secondsPerMinute;
     final seconds = totalSeconds.remainder(Duration.secondsPerMinute);
     final time =
@@ -86,29 +97,55 @@ class _FamilyInviteExpiryCountdownState
         ? l10n.groupInviteExpired
         : l10n.groupInviteCountdown(time);
     final color = expired ? palette.error : palette.textSecondary;
+    final validitySeconds =
+        widget.validityDuration.inMilliseconds / Duration.millisecondsPerSecond;
+    final progress = validitySeconds <= 0
+        ? 0.0
+        : (totalSeconds / validitySeconds).clamp(0.0, 1.0).toDouble();
+    final status = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          expired ? LucideIcons.circleAlert : LucideIcons.clock,
+          key: const Key('family-invite-expiry-countdown-icon'),
+          size: 14,
+          color: color,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          key: const Key('family-invite-expiry-countdown-label'),
+          maxLines: 1,
+          style: (widget.textStyle ?? AppTextStyles.supporting).copyWith(
+            color: color,
+          ),
+        ),
+      ],
+    );
 
     return Semantics(
       label: label,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            expired ? LucideIcons.circleAlert : LucideIcons.clock,
-            key: const Key('family-invite-expiry-countdown-icon'),
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            key: const Key('family-invite-expiry-countdown-label'),
-            maxLines: 1,
-            style: (widget.textStyle ?? AppTextStyles.supporting).copyWith(
-              color: color,
-            ),
-          ),
-        ],
-      ),
+      child: widget.showProgress
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    key: const Key('family-invite-expiry-progress'),
+                    value: progress,
+                    minHeight: 4,
+                    color: expired
+                        ? palette.error
+                        : palette.accentPrimary.withValues(alpha: 0.58),
+                    backgroundColor: palette.borderDefault,
+                  ),
+                ),
+                const SizedBox(height: 13),
+                status,
+              ],
+            )
+          : status,
     );
   }
 }

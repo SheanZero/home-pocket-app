@@ -2,23 +2,34 @@ import '../../features/family_sync/domain/models/group_member.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
+import 'group_operation_error.dart';
 
 sealed class ConfirmJoinResult {
   const ConfirmJoinResult();
 
   const factory ConfirmJoinResult.success() = ConfirmJoinSuccess;
 
-  const factory ConfirmJoinResult.error(String message) = ConfirmJoinError;
+  const factory ConfirmJoinResult.error(
+    String message, {
+    GroupOperationErrorKind kind,
+  }) = ConfirmJoinError;
 }
 
 class ConfirmJoinSuccess extends ConfirmJoinResult {
   const ConfirmJoinSuccess();
 }
 
-class ConfirmJoinError extends ConfirmJoinResult {
-  const ConfirmJoinError(this.message);
+class ConfirmJoinError extends ConfirmJoinResult
+    implements GroupOperationFailure {
+  const ConfirmJoinError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 /// Confirms a group join after the user previews group info.
@@ -59,6 +70,14 @@ class ConfirmJoinUseCase {
         avatarImageHash: avatarImageHash,
       );
 
+      // Confirmation is the server-side commit point. Only now may a stale or
+      // server-deleted owner-only local group be deactivated; previewing an
+      // invite must remain side-effect free in case the user goes back.
+      final localGroup = await _groupRepository.getCurrentGroup();
+      if (localGroup != null && localGroup.groupId != groupId) {
+        await _groupRepository.deactivateGroup(localGroup.groupId);
+      }
+
       await _groupRepository.saveConfirmingGroup(
         groupId: groupId,
         groupName: groupName,
@@ -66,10 +85,12 @@ class ConfirmJoinUseCase {
       );
 
       return const ConfirmJoinResult.success();
-    } on RelayApiException catch (error) {
-      return ConfirmJoinResult.error(error.message);
     } catch (error) {
-      return ConfirmJoinResult.error('Failed to confirm join: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to confirm join',
+      );
+      return ConfirmJoinResult.error(failure.message, kind: failure.kind);
     }
   }
 }

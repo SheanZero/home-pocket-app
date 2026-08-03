@@ -469,20 +469,24 @@ class FamilySecondaryButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onPressed,
+    this.controlKey,
     this.icon,
     this.isLoading = false,
+    this.prominent = false,
   });
 
   final String label;
   final VoidCallback? onPressed;
+  final Key? controlKey;
   final IconData? icon;
   final bool isLoading;
+  final bool prominent;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return OutlinedButton.icon(
-      key: key,
+    final button = OutlinedButton.icon(
+      key: controlKey,
       onPressed: isLoading ? null : onPressed,
       icon: isLoading
           ? SizedBox(
@@ -490,18 +494,44 @@ class FamilySecondaryButton extends StatelessWidget {
               height: 18,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: palette.textSecondary,
+                color: prominent ? palette.joyText : palette.textSecondary,
               ),
             )
           : Icon(icon ?? LucideIcons.circle, size: icon == null ? 0 : 17),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
-        foregroundColor: palette.textPrimary,
-        side: BorderSide(color: palette.borderDefault),
+        minimumSize: Size.fromHeight(prominent ? 58 : 52),
+        foregroundColor: prominent ? palette.joyText : palette.textPrimary,
+        backgroundColor: prominent ? palette.joyLight : null,
+        disabledForegroundColor: prominent
+            ? palette.joyText.withValues(alpha: 0.68)
+            : palette.textSecondary,
+        disabledBackgroundColor: prominent ? palette.joyLight : null,
+        side: BorderSide(
+          color: prominent
+              ? palette.joy.withValues(alpha: 0.72)
+              : palette.borderDefault,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        textStyle: AppTextStyles.button,
+        textStyle: AppTextStyles.button.copyWith(
+          fontWeight: prominent ? FontWeight.w700 : FontWeight.w600,
+        ),
       ),
+    );
+
+    if (!prominent) return button;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: palette.actionShadow,
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: button,
     );
   }
 }

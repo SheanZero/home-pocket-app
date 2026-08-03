@@ -92,6 +92,9 @@ void main() {
   testWidgets('navigates to GroupManagementScreen when already paired', (
     tester,
   ) async {
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupInGroup(groupId: 'group-1'));
     await tester.pumpWidget(
       createLocalizedWidget(
         const Scaffold(body: FamilySyncSettingsSection()),
@@ -114,37 +117,39 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(GroupManagementScreen), findsOneWidget);
-    verifyNever(() => checkGroupUseCase.execute());
+    verify(() => checkGroupUseCase.execute()).called(1);
   });
 
-  testWidgets(
-    'navigates to local group management when active group exists even if sync status is unpaired',
-    (tester) async {
-      await tester.pumpWidget(
-        createLocalizedWidget(
-          const Scaffold(body: FamilySyncSettingsSection()),
-          overrides: [
-            groupRepositoryProvider.overrideWithValue(groupRepository),
-            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-            createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
-            joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
-            syncStatusStreamProvider.overrideWith(
-              (ref) => Stream.value(
-                const model.SyncStatus(state: model.SyncState.noGroup),
-              ),
+  testWidgets('server none overrides a stale local active group', (
+    tester,
+  ) async {
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const Scaffold(body: FamilySyncSettingsSection()),
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(groupRepository),
+          checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+          createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
+          joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
+          syncStatusStreamProvider.overrideWith(
+            (ref) => Stream.value(
+              const model.SyncStatus(state: model.SyncState.noGroup),
             ),
-          ],
-        ),
-      );
-      await tester.pumpAndSettle();
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(ListTile).first);
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(ListTile).first);
+    await tester.pumpAndSettle();
 
-      expect(find.byType(GroupManagementScreen), findsOneWidget);
-      verifyNever(() => checkGroupUseCase.execute());
-    },
-  );
+    expect(find.byType(GroupChoiceScreen), findsOneWidget);
+    verify(() => checkGroupUseCase.execute()).called(1);
+  });
 
   testWidgets(
     'checks server before showing pairing when unpaired and no local group exists',
@@ -221,7 +226,7 @@ void main() {
   );
 
   testWidgets(
-    'shows error snackbar and falls back to pairing when server check fails',
+    'shows an error and does not enter pairing when server check fails',
     (tester) async {
       when(
         () => groupRepository.watchActiveGroup(),
@@ -252,7 +257,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      expect(find.byType(GroupChoiceScreen), findsOneWidget);
+      expect(find.byType(GroupChoiceScreen), findsNothing);
       expect(find.textContaining('Network error'), findsOneWidget);
       verify(() => checkGroupUseCase.execute()).called(1);
     },

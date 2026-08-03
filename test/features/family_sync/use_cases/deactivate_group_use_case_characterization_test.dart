@@ -92,20 +92,18 @@ void main() {
       },
     );
 
-    test(
-      'returns error when generic exception is thrown by queueManager',
-      () async {
-        when(
-          () => fakeSyncQueueManager.clearQueue(),
-        ).thenThrow(StateError('queue broken'));
+    test('sanitizes a generic exception thrown by queueManager', () async {
+      when(
+        () => fakeSyncQueueManager.clearQueue(),
+      ).thenThrow(StateError('queue broken'));
 
-        final result = await useCase.execute('group-1');
+      final result = await useCase.execute('group-1');
 
-        expect(result, isA<DeactivateGroupError>());
-        final error = result as DeactivateGroupError;
-        expect(error.message, contains('queue broken'));
-      },
-    );
+      expect(result, isA<DeactivateGroupError>());
+      final error = result as DeactivateGroupError;
+      expect(error.message, 'Failed to deactivate group');
+      expect(error.message, isNot(contains('queue broken')));
+    });
 
     test('returns error when groupRepository.deactivateGroup throws', () async {
       when(

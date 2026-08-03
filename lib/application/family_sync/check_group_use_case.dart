@@ -40,13 +40,16 @@ class CheckGroupAwaitingKey extends CheckGroupResult {
   final String groupId;
 }
 
-class CheckGroupError extends CheckGroupResult {
+class CheckGroupError extends CheckGroupResult
+    implements GroupOperationFailure {
   const CheckGroupError(
     this.message, {
     this.kind = GroupOperationErrorKind.general,
   });
 
+  @override
   final String message;
+  @override
   final GroupOperationErrorKind kind;
 }
 
@@ -86,7 +89,28 @@ class CheckGroupUseCase {
 
       final checkResult = await _apiClient.checkGroup();
       final groupExisted = checkResult['groupExisted'] as bool? ?? false;
-      if (!groupExisted) {
+      final membershipStatus = checkResult['membershipStatus'] as String?;
+      if (membershipStatus != null &&
+          membershipStatus != 'none' &&
+          membershipStatus != 'pending' &&
+          membershipStatus != 'active') {
+        return const CheckGroupError(
+          'Server returned an invalid membership status',
+        );
+      }
+
+      if (membershipStatus == 'none') {
+        if (await _membershipRotation?.resumeSelfLeaveIfPending() == true) {
+          return const CheckGroupNotInGroup();
+        }
+        await _deactivateStaleLocalGroup();
+        return const CheckGroupNotInGroup();
+      }
+
+      // Compatibility with servers deployed before membershipStatus was
+      // introduced. New responses are authoritative; only legacy responses
+      // fall back to a locally persisted pending request.
+      if (membershipStatus == null && !groupExisted) {
         if (await _membershipRotation?.resumeSelfLeaveIfPending() == true) {
           return const CheckGroupNotInGroup();
         }
@@ -231,13 +255,18 @@ class CheckGroupUseCase {
     } on RelayApiException catch (error) {
       return CheckGroupError(error.message);
     } catch (error) {
-      if (isNetworkUnavailableError(error)) {
-        return const CheckGroupError(
-          networkUnavailableErrorMessage,
-          kind: GroupOperationErrorKind.networkUnavailable,
-        );
-      }
-      return CheckGroupError('Failed to check group: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to check group',
+      );
+      return CheckGroupError(failure.message, kind: failure.kind);
+    }
+  }
+
+  Future<void> _deactivateStaleLocalGroup() async {
+    final localGroup = await _groupRepository.getCurrentGroup();
+    if (localGroup != null) {
+      await _groupRepository.deactivateGroup(localGroup.groupId);
     }
   }
 

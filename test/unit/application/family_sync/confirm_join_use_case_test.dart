@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/confirm_join_use_case.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
@@ -29,7 +30,66 @@ void main() {
     );
 
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+    when(() => groupRepository.getCurrentGroup()).thenAnswer((_) async => null);
   });
+
+  test(
+    'deactivates the previous local group after server confirmation',
+    () async {
+      final previousGroup = GroupInfo(
+        groupId: 'empty-owned-group',
+        status: GroupStatus.active,
+        groupName: 'My Empty Family',
+        role: 'owner',
+        members: const <GroupMember>[],
+        createdAt: DateTime(2026),
+      );
+      when(
+        () => groupRepository.getCurrentGroup(),
+      ).thenAnswer((_) async => previousGroup);
+      when(
+        () => apiClient.confirmJoin(
+          groupId: any(named: 'groupId'),
+          displayName: any(named: 'displayName'),
+          avatarEmoji: any(named: 'avatarEmoji'),
+          avatarImageHash: any(named: 'avatarImageHash'),
+        ),
+      ).thenAnswer((_) async => <String, dynamic>{});
+      when(
+        () => groupRepository.deactivateGroup('empty-owned-group'),
+      ).thenAnswer((_) async {});
+      when(
+        () => groupRepository.saveConfirmingGroup(
+          groupId: any(named: 'groupId'),
+          groupName: any(named: 'groupName'),
+          members: any(named: 'members'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final result = await useCase.execute(
+        groupId: 'target-group',
+        groupName: 'Target Family',
+        displayName: 'Mama',
+        avatarEmoji: '\u{1F469}',
+      );
+
+      expect(result, isA<ConfirmJoinSuccess>());
+      verifyInOrder([
+        () => apiClient.confirmJoin(
+          groupId: 'target-group',
+          displayName: 'Mama',
+          avatarEmoji: '\u{1F469}',
+        ),
+        () => groupRepository.getCurrentGroup(),
+        () => groupRepository.deactivateGroup('empty-owned-group'),
+        () => groupRepository.saveConfirmingGroup(
+          groupId: 'target-group',
+          groupName: 'Target Family',
+          members: const <GroupMember>[],
+        ),
+      ]);
+    },
+  );
 
   test('confirms join and saves group with empty members', () async {
     when(

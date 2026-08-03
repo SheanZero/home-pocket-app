@@ -22,6 +22,7 @@ import '../providers/repository_providers.dart'
         groupRepositoryProvider,
         rejectJoinRequestUseCaseProvider;
 import '../widgets/family_flow_components.dart';
+import '../widgets/family_network_unavailable_dialog.dart';
 import 'group_management_screen.dart';
 
 class MemberApprovalScreen extends ConsumerStatefulWidget {
@@ -108,6 +109,14 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
       return;
     }
     if (result is ConfirmMemberError) {
+      if (await handleFamilyNetworkFailure(
+        context,
+        result,
+        onRetry: () => _approve(member),
+      )) {
+        return;
+      }
+      if (!mounted) return;
       showErrorFeedback(context, result.message);
     }
   }
@@ -128,6 +137,14 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
       return;
     }
     if (result is JoinRequestLifecycleError) {
+      if (await handleFamilyNetworkFailure(
+        context,
+        result,
+        onRetry: () => _reject(member),
+      )) {
+        return;
+      }
+      if (!mounted) return;
       showErrorFeedback(
         context,
         S.of(context).groupRejectRequestFailed(result.message),

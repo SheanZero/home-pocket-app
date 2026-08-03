@@ -12,6 +12,7 @@ import '../../infrastructure/sync/sync_queue_manager.dart';
 import 'check_group_validity_use_case.dart';
 import 'drain_family_sync_outbox_use_case.dart';
 import 'full_sync_use_case.dart';
+import 'group_operation_error.dart';
 import 'pull_sync_use_case.dart';
 import 'push_sync_use_case.dart';
 import 'shadow_book_service.dart';
@@ -121,9 +122,13 @@ class SyncOrchestrator {
       };
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('SyncOrchestrator: $mode failed: $e');
+        debugPrint('SyncOrchestrator: $mode failed');
       }
-      return SyncOrchestratorError(e.toString());
+      final failure = groupOperationFailureFrom(
+        e,
+        fallbackMessage: 'Family sync failed',
+      );
+      return SyncOrchestratorError(failure.message);
     }
   }
 

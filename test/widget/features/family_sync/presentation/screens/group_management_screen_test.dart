@@ -7,12 +7,15 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/join_group_screen.dart';
 import 'package:home_pocket/application/family_sync/deactivate_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/group_operation_error.dart';
 import 'package:home_pocket/application/family_sync/leave_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
 import 'package:home_pocket/application/family_sync/manage_group_invite_use_case.dart';
 import 'package:home_pocket/application/family_sync/transfer_owner_use_case.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
+import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -141,6 +144,8 @@ void main() {
           manageGroupInviteUseCaseProvider.overrideWithValue(
             manageGroupInviteUseCase,
           ),
+          syncStatusStreamProvider.overrideWith((_) => const Stream.empty()),
+          userProfileProvider.overrideWith((_) async => null),
         ],
       ),
     );
@@ -159,12 +164,58 @@ void main() {
     expect(find.text('Invite new member', skipOffstage: false), findsOneWidget);
     // Disband Group action is visible for owner
     expect(find.text('Disband Family', skipOffstage: false), findsOneWidget);
+    // A family with another membership record cannot be auto-replaced.
+    expect(find.text('Join another family'), findsNothing);
 
     await tester.ensureVisible(find.text('Sync settings'));
     await tester.tap(find.text('Sync settings'));
     await tester.pumpAndSettle();
     expect(find.text('Sync Ledger'), findsOneWidget);
     expect(find.text('Manually sync data'), findsOneWidget);
+  });
+
+  testWidgets('empty owner-only family can open the join-another flow', (
+    tester,
+  ) async {
+    when(() => groupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'empty-group',
+        groupName: 'My Empty Family',
+        status: GroupStatus.active,
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [],
+        createdAt: DateTime(2026, 8, 3),
+      ),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const GroupManagementScreen(),
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(groupRepository),
+          leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+          deactivateGroupUseCaseProvider.overrideWithValue(
+            deactivateGroupUseCase,
+          ),
+          removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
+          manageGroupInviteUseCaseProvider.overrideWithValue(
+            manageGroupInviteUseCase,
+          ),
+          syncStatusStreamProvider.overrideWith((_) => const Stream.empty()),
+          userProfileProvider.overrideWith((_) async => null),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final action = find.text('Join another family');
+    expect(action, findsOneWidget);
+    await tester.ensureVisible(action);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(JoinGroupScreen), findsOneWidget);
   });
 
   testWidgets('uses explicit groupId to load the target group', (tester) async {
@@ -453,7 +504,7 @@ void main() {
     expect(shared, false);
   });
 
-  testWidgets('invite API failure is shown without opening the sheet', (
+  testWidgets('invite network failure uses the shared retry dialog', (
     tester,
   ) async {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
@@ -473,7 +524,10 @@ void main() {
         forceRefresh: false,
       ),
     ).thenAnswer(
-      (_) async => const ManageGroupInviteError('Network unavailable'),
+      (_) async => const ManageGroupInviteError(
+        'ClientException: Failed host lookup: sync.happypocket.app',
+        kind: GroupOperationErrorKind.networkUnavailable,
+      ),
     );
 
     await tester.pumpWidget(
@@ -499,12 +553,11 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text(
-        "Couldn't generate a new invite code. Please try again in a moment.",
-      ),
+      find.byKey(const Key('family-network-unavailable-dialog')),
       findsOneWidget,
     );
-    expect(find.textContaining('Network unavailable'), findsNothing);
+    expect(find.textContaining('ClientException'), findsNothing);
+    expect(find.textContaining('Failed host lookup'), findsNothing);
     expect(find.byKey(const Key('owner-invite-code')), findsNothing);
   });
 

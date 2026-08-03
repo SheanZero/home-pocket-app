@@ -1,6 +1,7 @@
 import '../../features/family_sync/domain/models/group_info.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
+import 'group_operation_error.dart';
 
 sealed class ManageGroupInviteResult {
   const ManageGroupInviteResult();
@@ -22,10 +23,17 @@ class ManageGroupInviteForbidden extends ManageGroupInviteResult {
   const ManageGroupInviteForbidden();
 }
 
-class ManageGroupInviteError extends ManageGroupInviteResult {
-  const ManageGroupInviteError(this.message);
+class ManageGroupInviteError extends ManageGroupInviteResult
+    implements GroupOperationFailure {
+  const ManageGroupInviteError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 /// Resolves the invite an owner should present to a prospective member.
@@ -109,9 +117,18 @@ class ManageGroupInviteUseCase {
         wasRegenerated: true,
       );
     } on RelayApiException catch (error) {
-      return ManageGroupInviteError(error.message);
+      if (error.isForbidden) return const ManageGroupInviteForbidden();
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to manage group invite',
+      );
+      return ManageGroupInviteError(failure.message, kind: failure.kind);
     } catch (error) {
-      return ManageGroupInviteError(error.toString());
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to manage group invite',
+      );
+      return ManageGroupInviteError(failure.message, kind: failure.kind);
     }
   }
 }

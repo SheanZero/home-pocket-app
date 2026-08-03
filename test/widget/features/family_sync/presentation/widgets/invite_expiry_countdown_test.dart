@@ -6,6 +6,31 @@ import 'package:home_pocket/features/family_sync/presentation/widgets/invite_exp
 import '../../../../../helpers/test_localizations.dart';
 
 void main() {
+  testWidgets('optionally renders remaining lifetime as a progress bar', (
+    tester,
+  ) async {
+    final start = DateTime(2026, 8, 3, 11, 50);
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(
+          body: FamilyInviteExpiryCountdown(
+            expiresAt: start.add(const Duration(minutes: 5)),
+            now: () => start,
+            showProgress: true,
+            validityDuration: const Duration(minutes: 10),
+          ),
+        ),
+        locale: const Locale('zh'),
+      ),
+    );
+
+    final progress = tester.widget<LinearProgressIndicator>(
+      find.byKey(const Key('family-invite-expiry-progress')),
+    );
+    expect(progress.value, 0.5);
+  });
+
   testWidgets('counts down every second then shows red expired copy', (
     tester,
   ) async {

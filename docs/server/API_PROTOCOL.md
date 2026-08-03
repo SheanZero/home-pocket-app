@@ -281,14 +281,18 @@ All group endpoints require authentication.
 GET /api/v1/group/check
 ```
 
-Check whether the authenticated device belongs to an active group.
+Return the authenticated device's authoritative live-membership state.
+`groupExisted` remains for backward compatibility and is true only for an
+active membership. New clients use `membershipStatus` (`none`, `pending`, or
+`active`); pending responses include `groupId` so local state can be restored.
 
 **Response 200:**
 
 ```json
 {
   "groupExisted": true,
-  "groupId": "550e8400-e29b-41d4-a716-446655440000"
+  "groupId": "550e8400-e29b-41d4-a716-446655440000",
+  "membershipStatus": "active"
 }
 ```
 
@@ -296,7 +300,8 @@ or:
 
 ```json
 {
-  "groupExisted": false
+  "groupExisted": false,
+  "membershipStatus": "none"
 }
 ```
 
@@ -343,7 +348,7 @@ Same format as above with refreshed invite code.
 POST /api/v1/group/join
 ```
 
-Lookup a group by invite code and return group/owner info for the joiner to review. This is a **read-only** operation — the member is not persisted until `confirm-join`.
+Lookup a group by invite code and return group/owner info for the joiner to review. This is a **read-only** operation — the member is not persisted until `confirm-join`. A device that owns a never-used family (only its active owner membership exists) may preview another family; the response marks that the empty family will be replaced after confirmation.
 
 **Request:**
 
@@ -374,8 +379,9 @@ Lookup a group by invite code and return group/owner info for the joiner to revi
       "avatarImageHash": "sha256hex..."
     }
   ],
-  "status": "active",
+  "status": "confirming",
   "groupName": "My Family",
+  "replacesEmptyOwnedGroup": true,
   "owner": {
     "deviceId": "owner-device-id",
     "displayName": "Papa",
@@ -384,6 +390,11 @@ Lookup a group by invite code and return group/owner info for the joiner to revi
   }
 }
 ```
+
+When `replacesEmptyOwnedGroup` is `true`, the client must keep the current
+local family during preview and explain that it will be deleted after the join
+request is submitted. The server revalidates and performs the replacement in
+`confirm-join`.
 
 **Error Responses:**
 
@@ -401,7 +412,10 @@ Lookup a group by invite code and return group/owner info for the joiner to revi
 POST /api/v1/group/{groupId}/confirm-join
 ```
 
-Called by the joiner after reviewing group info. Persists the member as `pending` and notifies the owner.
+Called by the joiner after reviewing group info. Persists the member as
+`pending` with a **5-minute** approval deadline and notifies the owner. For an
+eligible empty owned family, the server deletes the old family and creates this
+pending request atomically; if any step fails, neither change is committed.
 
 **Path Parameters:**
 
@@ -1086,6 +1100,7 @@ All push notifications include `extraData`:
 ```
 (none) --[create]--> active
 (none) --[join + confirm-join]--> pending member in active group
+active owner-only never-used group --[join + confirm-join]--> pending member in target group
 pending --[confirm]--> active member
 active --[leave/remove]--> removed
 active --[deactivate]--> inactive (entire group)

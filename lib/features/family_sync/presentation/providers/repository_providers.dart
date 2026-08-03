@@ -440,7 +440,6 @@ final joinGroupUseCaseProvider = Provider<JoinGroupUseCase>((ref) {
   return JoinGroupUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     keyManager: ref.watch(keyManagerProvider),
-    groupRepository: ref.watch(groupRepositoryProvider),
     onDeviceRegistered: () =>
         ref.read(pushNotificationServiceProvider).registerCurrentToken(),
   );

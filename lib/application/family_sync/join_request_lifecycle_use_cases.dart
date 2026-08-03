@@ -1,5 +1,6 @@
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
+import 'group_operation_error.dart';
 
 enum JoinRequestStatus { pending, approved, rejected, cancelled, expired }
 
@@ -31,10 +32,17 @@ class JoinRequestLifecycleSuccess extends JoinRequestLifecycleResult {
   final JoinRequestStatus status;
 }
 
-class JoinRequestLifecycleError extends JoinRequestLifecycleResult {
-  const JoinRequestLifecycleError(this.message);
+class JoinRequestLifecycleError extends JoinRequestLifecycleResult
+    implements GroupOperationFailure {
+  const JoinRequestLifecycleError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 class GetJoinRequestStatusUseCase {
@@ -53,12 +61,12 @@ class GetJoinRequestStatusUseCase {
         );
       }
       return JoinRequestLifecycleSuccess(status);
-    } on RelayApiException catch (error) {
-      return JoinRequestLifecycleError(error.message);
     } catch (error) {
-      return JoinRequestLifecycleError(
-        'Failed to check join request status: $error',
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to check join request status',
       );
+      return JoinRequestLifecycleError(failure.message, kind: failure.kind);
     }
   }
 }
@@ -98,10 +106,12 @@ class RejectJoinRequestUseCase {
         );
       }
       return JoinRequestLifecycleSuccess(status!);
-    } on RelayApiException catch (error) {
-      return JoinRequestLifecycleError(error.message);
     } catch (error) {
-      return JoinRequestLifecycleError('Failed to reject join request: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to reject join request',
+      );
+      return JoinRequestLifecycleError(failure.message, kind: failure.kind);
     }
   }
 }
@@ -128,10 +138,30 @@ class CancelJoinRequestUseCase {
       }
       await _groupRepository.deactivateGroup(groupId);
       return JoinRequestLifecycleSuccess(status!);
-    } on RelayApiException catch (error) {
-      return JoinRequestLifecycleError(error.message);
     } catch (error) {
-      return JoinRequestLifecycleError('Failed to cancel join request: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to cancel join request',
+      );
+      if (failure.kind == GroupOperationErrorKind.notFound) {
+        try {
+          // The relay is authoritative. A missing request row means there is
+          // nothing left to cancel, so converge the stale local cache instead
+          // of surfacing the transport detail to the user.
+          await _groupRepository.deactivateGroup(groupId);
+          return const JoinRequestLifecycleSuccess(JoinRequestStatus.cancelled);
+        } catch (localError) {
+          final localFailure = groupOperationFailureFrom(
+            localError,
+            fallbackMessage: 'Failed to clear cancelled join request',
+          );
+          return JoinRequestLifecycleError(
+            localFailure.message,
+            kind: localFailure.kind,
+          );
+        }
+      }
+      return JoinRequestLifecycleError(failure.message, kind: failure.kind);
     }
   }
 }

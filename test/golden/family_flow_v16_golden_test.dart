@@ -91,15 +91,29 @@ final _profile = UserProfile(
   updatedAt: DateTime(2026, 1, 1),
 );
 
-Widget _wrap(Widget home, {List<Override> overrides = const []}) {
+final _zhProfile = UserProfile(
+  id: 'family-invite-ticket-golden-profile',
+  displayName: 'shean',
+  avatarEmoji: '🌿',
+  createdAt: DateTime(2026, 8, 3),
+  updatedAt: DateTime(2026, 8, 3),
+);
+
+Widget _wrap(
+  Widget home, {
+  List<Override> overrides = const [],
+  Locale locale = const Locale('ja'),
+  UserProfile? profile,
+  ThemeMode themeMode = ThemeMode.light,
+}) {
   return ProviderScope(
     overrides: [
-      userProfileProvider.overrideWith((_) async => _profile),
+      userProfileProvider.overrideWith((_) async => profile ?? _profile),
       ...overrides,
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      locale: const Locale('ja'),
+      locale: locale,
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -108,6 +122,8 @@ Widget _wrap(Widget home, {List<Override> overrides = const []}) {
       ],
       supportedLocales: S.supportedLocales,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       home: home,
     ),
   );
@@ -118,6 +134,24 @@ Future<void> _setPhoneViewport(WidgetTester tester) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+Future<void> _setReferenceViewport(WidgetTester tester) async {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+Future<void> _setIPhoneSafeAreaViewport(WidgetTester tester) async {
+  tester.view.physicalSize = const Size(393, 852);
+  tester.view.devicePixelRatio = 1;
+  tester.view.padding = const FakeViewPadding(top: 47, bottom: 34);
+  tester.view.viewPadding = const FakeViewPadding(top: 47, bottom: 34);
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  addTearDown(tester.view.resetPadding);
+  addTearDown(tester.view.resetViewPadding);
 }
 
 Future<void> _matchScreen(WidgetTester tester, String goldenName) async {
@@ -160,7 +194,7 @@ GroupInfo _managementGroup() => GroupInfo(
   groupName: '青木家の家計',
   status: GroupStatus.active,
   inviteCode: '482169',
-  inviteExpiresAt: DateTime.now().add(const Duration(minutes: 15)),
+  inviteExpiresAt: DateTime.now().add(const Duration(minutes: 10)),
   role: 'owner',
   groupKey: 'golden-key',
   members: [
@@ -236,6 +270,7 @@ void main() {
 
   testWidgets('create family invite — light ja', (tester) async {
     await _setPhoneViewport(tester);
+    final now = DateTime(2026, 8, 3, 12);
     final create = _MockCreateGroupUseCase();
     final notify = _MockNotifyMemberApprovalUseCase();
     when(
@@ -251,8 +286,52 @@ void main() {
         groupName: '青木家の家計',
         inviteCode: '482169',
         expiresAt:
-            DateTime.now()
-                .add(const Duration(minutes: 15))
+            now.add(const Duration(minutes: 10)).millisecondsSinceEpoch ~/ 1000,
+      ),
+    );
+    when(
+      () => notify.listenForJoinRequests(),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => notify.connectWebSocket(groupId: any(named: 'groupId')),
+    ).thenAnswer((_) async {});
+    when(() => notify.disconnectWebSocket()).thenReturn(null);
+
+    await tester.pumpWidget(
+      _wrap(
+        CreateGroupScreen(now: () => now),
+        overrides: [
+          createGroupUseCaseProvider.overrideWithValue(create),
+          notifyMemberApprovalUseCaseProvider.overrideWithValue(notify),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('create-group-submit')));
+    await tester.pumpAndSettle();
+    await _matchScreen(tester, 'family_create_invite_v16_light_ja.png');
+  });
+
+  testWidgets('create family invite ticket — light zh', (tester) async {
+    await _setReferenceViewport(tester);
+    final now = DateTime(2026, 8, 3, 11, 50, 16);
+    final create = _MockCreateGroupUseCase();
+    final notify = _MockNotifyMemberApprovalUseCase();
+    when(
+      () => create.execute(
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        groupName: any(named: 'groupName'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
+      (_) async => CreateGroupResult.success(
+        groupId: 'family-invite-ticket-golden-group',
+        groupName: 'shean的家',
+        inviteCode: '256931',
+        expiresAt:
+            now
+                .add(const Duration(minutes: 9, seconds: 44))
                 .millisecondsSinceEpoch ~/
             1000,
       ),
@@ -267,7 +346,9 @@ void main() {
 
     await tester.pumpWidget(
       _wrap(
-        const CreateGroupScreen(),
+        CreateGroupScreen(now: () => now),
+        locale: const Locale('zh'),
+        profile: _zhProfile,
         overrides: [
           createGroupUseCaseProvider.overrideWithValue(create),
           notifyMemberApprovalUseCaseProvider.overrideWithValue(notify),
@@ -277,7 +358,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('create-group-submit')));
     await tester.pumpAndSettle();
-    await _matchScreen(tester, 'family_create_invite_v16_light_ja.png');
+    await _matchScreen(tester, 'family_create_invite_ticket_light_zh.png');
   });
 
   testWidgets('join family code — light ja', (tester) async {
@@ -380,6 +461,49 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 100));
     await _matchScreen(tester, 'family_waiting_approval_v16_light_ja.png');
+  });
+
+  testWidgets('waiting for approval — dark zh safe area', (tester) async {
+    await _setIPhoneSafeAreaViewport(tester);
+    final repository = _MockGroupRepository();
+    final activation = _MockCompleteMemberActivationUseCase();
+    final syncEngine = _MockSyncEngine();
+    final status = _MockGetJoinRequestStatusUseCase();
+    final cancel = _MockCancelJoinRequestUseCase();
+    final push = _MockPushNotificationService();
+    final recovery = _MockGroupKeyRecoveryCoordinator();
+    when(() => syncEngine.statusStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => push.joinRequestLifecycleEvents,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => recovery.currentStatus,
+    ).thenReturn(const GroupKeyRecoveryStatus());
+    when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
+
+    await tester.pumpWidget(
+      _wrap(
+        const WaitingApprovalScreen(
+          groupId: 'family-golden-group',
+          groupName: 'Shean的家庭',
+          ownerDisplayName: 'Shean',
+        ),
+        locale: const Locale('zh'),
+        profile: _zhProfile,
+        themeMode: ThemeMode.dark,
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(repository),
+          completeMemberActivationUseCaseProvider.overrideWithValue(activation),
+          syncEngineProvider.overrideWithValue(syncEngine),
+          getJoinRequestStatusUseCaseProvider.overrideWithValue(status),
+          cancelJoinRequestUseCaseProvider.overrideWithValue(cancel),
+          pushNotificationServiceProvider.overrideWithValue(push),
+          groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+        ],
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await _matchScreen(tester, 'family_waiting_approval_safe_area_dark_zh.png');
   });
 
   testWidgets('family management — light ja', (tester) async {

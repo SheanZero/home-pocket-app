@@ -13,7 +13,9 @@ import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../providers/repository_providers.dart';
+import '../navigation/family_flow_launcher.dart';
 import '../widgets/family_flow_components.dart';
+import '../widgets/family_network_unavailable_dialog.dart';
 import 'confirm_join_screen.dart';
 
 class JoinGroupScreen extends ConsumerStatefulWidget {
@@ -92,11 +94,29 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
           ),
         );
       case JoinGroupError(:final message, :final kind):
+        if (kind == GroupOperationErrorKind.networkUnavailable) {
+          setState(() {
+            _isVerifying = false;
+            _errorMessage = null;
+          });
+          await handleFamilyNetworkFailure(
+            context,
+            result,
+            onRetry: _handleVerify,
+          );
+          return;
+        }
+        if (kind == GroupOperationErrorKind.membershipConflict) {
+          setState(() {
+            _isVerifying = false;
+            _errorMessage = null;
+          });
+          await openAuthoritativeFamilyFlow(context, ref, replaceCurrent: true);
+          return;
+        }
         setState(() {
           _isVerifying = false;
-          _errorMessage = kind == GroupOperationErrorKind.membershipConflict
-              ? S.of(context).familySyncSingleGroupConflict
-              : message;
+          _errorMessage = message;
         });
     }
   }

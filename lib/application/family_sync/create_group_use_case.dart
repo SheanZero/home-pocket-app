@@ -38,13 +38,16 @@ class CreateGroupSuccess extends CreateGroupResult {
   final String? groupName;
 }
 
-class CreateGroupError extends CreateGroupResult {
+class CreateGroupError extends CreateGroupResult
+    implements GroupOperationFailure {
   const CreateGroupError(
     this.message, {
     this.kind = GroupOperationErrorKind.general,
   });
 
+  @override
   final String message;
+  @override
   final GroupOperationErrorKind kind;
 }
 
@@ -208,13 +211,11 @@ class CreateGroupUseCase {
       }
       return CreateGroupResult.error(error.message);
     } catch (error) {
-      if (isNetworkUnavailableError(error)) {
-        return const CreateGroupResult.error(
-          networkUnavailableErrorMessage,
-          kind: GroupOperationErrorKind.networkUnavailable,
-        );
-      }
-      return CreateGroupResult.error('Failed to create group: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to create group',
+      );
+      return CreateGroupResult.error(failure.message, kind: failure.kind);
     }
   }
 

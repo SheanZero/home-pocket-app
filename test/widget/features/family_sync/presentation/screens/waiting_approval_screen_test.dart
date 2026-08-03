@@ -1,7 +1,13 @@
 import 'dart:async';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/deactivate_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/leave_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -11,10 +17,13 @@ import 'package:home_pocket/features/family_sync/domain/repositories/group_repos
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
+import 'package:home_pocket/features/family_sync/presentation/navigation/family_flow_launcher.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
 import 'package:home_pocket/application/family_sync/complete_member_activation_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
 import 'package:home_pocket/application/family_sync/group_key_recovery_use_case.dart';
+import 'package:home_pocket/application/family_sync/group_operation_error.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
@@ -46,6 +55,13 @@ class MockPushNotificationService extends Mock
 class MockGroupKeyRecoveryCoordinator extends Mock
     implements GroupKeyRecoveryCoordinator {}
 
+class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
+
+class MockLeaveGroupUseCase extends Mock implements LeaveGroupUseCase {}
+
+class MockDeactivateGroupUseCase extends Mock
+    implements DeactivateGroupUseCase {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(SyncMode.initialSync);
@@ -59,6 +75,9 @@ void main() {
   late MockGetJoinRequestStatusUseCase getJoinRequestStatusUseCase;
   late MockCancelJoinRequestUseCase cancelJoinRequestUseCase;
   late MockPushNotificationService pushNotificationService;
+  late MockCheckGroupUseCase checkGroupUseCase;
+  late MockLeaveGroupUseCase leaveGroupUseCase;
+  late MockDeactivateGroupUseCase deactivateGroupUseCase;
   late StreamController<Map<String, dynamic>> joinRequestEvents;
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
@@ -135,6 +154,9 @@ void main() {
     getJoinRequestStatusUseCase = MockGetJoinRequestStatusUseCase();
     cancelJoinRequestUseCase = MockCancelJoinRequestUseCase();
     pushNotificationService = MockPushNotificationService();
+    checkGroupUseCase = MockCheckGroupUseCase();
+    leaveGroupUseCase = MockLeaveGroupUseCase();
+    deactivateGroupUseCase = MockDeactivateGroupUseCase();
     joinRequestEvents = StreamController<Map<String, dynamic>>.broadcast();
 
     when(
@@ -172,6 +194,12 @@ void main() {
       (_) async =>
           const JoinRequestLifecycleSuccess(JoinRequestStatus.cancelled),
     );
+    when(
+      () => leaveGroupUseCase.execute(any()),
+    ).thenAnswer((_) async => const LeaveGroupResult.success());
+    when(
+      () => deactivateGroupUseCase.execute(any()),
+    ).thenAnswer((_) async => const DeactivateGroupResult.success());
     when(
       () => pushNotificationService.joinRequestLifecycleEvents,
     ).thenAnswer((_) => joinRequestEvents.stream);
@@ -297,8 +325,185 @@ void main() {
 
       expect(find.text('Restoring the family key'), findsOneWidget);
       expect(find.text('Retry key recovery'), findsOneWidget);
-      expect(find.text('Leave and set up a new family'), findsOneWidget);
+      expect(find.text('Leave and choose another family'), findsOneWidget);
       await recoveryEvents.close();
+    },
+  );
+
+  testWidgets(
+    'authoritative awaiting-key entry opens recovery without approval copy',
+    (tester) async {
+      final recovery = MockGroupKeyRecoveryCoordinator();
+      final recoveryEvents =
+          StreamController<GroupKeyRecoveryStatus>.broadcast();
+      when(
+        () => recovery.currentStatus,
+      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(
+        () => recovery.statusStream,
+      ).thenAnswer((_) => recoveryEvents.stream);
+      when(() => checkGroupUseCase.execute()).thenAnswer(
+        (_) async => const CheckGroupAwaitingKey(groupId: 'group-1'),
+      );
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Consumer(
+            builder: (context, ref, _) => Scaffold(
+              body: FilledButton(
+                onPressed: () => openAuthoritativeFamilyFlow(context, ref),
+                child: const Text('Open family'),
+              ),
+            ),
+          ),
+          overrides: [
+            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+            groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+            leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+            deactivateGroupUseCaseProvider.overrideWithValue(
+              deactivateGroupUseCase,
+            ),
+          ],
+        ),
+      );
+      await tester.tap(find.text('Open family'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Restoring the family key'), findsOneWidget);
+      expect(find.text('Waiting for owner approval'), findsNothing);
+      expect(find.text('Cancel join request'), findsNothing);
+      expect(find.text('Leave and choose another family'), findsOneWidget);
+      verify(() => checkGroupUseCase.execute()).called(1);
+      await recoveryEvents.close();
+    },
+  );
+
+  testWidgets(
+    'active member can leave during key recovery and choose another family',
+    (tester) async {
+      final recovery = MockGroupKeyRecoveryCoordinator();
+      when(
+        () => recovery.currentStatus,
+      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+            initialMode: WaitingApprovalInitialMode.recoveringKey,
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+            groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+            leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+            deactivateGroupUseCaseProvider.overrideWithValue(
+              deactivateGroupUseCase,
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Leave and choose another family'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Leave Group'));
+      await tester.pumpAndSettle();
+
+      verify(() => leaveGroupUseCase.execute('group-1')).called(1);
+      verifyNever(() => deactivateGroupUseCase.execute(any()));
+      expect(find.byType(GroupChoiceScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'active owner can dissolve during key recovery and choose another family',
+    (tester) async {
+      final recovery = MockGroupKeyRecoveryCoordinator();
+      when(
+        () => recovery.currentStatus,
+      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup().copyWith(role: 'owner'));
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+            initialMode: WaitingApprovalInitialMode.recoveringKey,
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+            groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+            leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+            deactivateGroupUseCaseProvider.overrideWithValue(
+              deactivateGroupUseCase,
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Leave and choose another family'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Deactivate Group'));
+      await tester.pumpAndSettle();
+
+      verify(() => deactivateGroupUseCase.execute('group-1')).called(1);
+      verifyNever(() => leaveGroupUseCase.execute(any()));
+      expect(find.byType(GroupChoiceScreen), findsOneWidget);
     },
   );
 
@@ -524,6 +729,165 @@ void main() {
     });
   });
 
+  testWidgets(
+    'rate-limited background poll stays quiet and skips activation request',
+    (tester) async {
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+      when(
+        () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+      ).thenAnswer(
+        (_) async => const JoinRequestLifecycleError(
+          'rate limit exceeded',
+          kind: GroupOperationErrorKind.rateLimited,
+        ),
+      );
+
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          createLocalizedWidget(
+            const WaitingApprovalScreen(
+              groupId: 'group-1',
+              groupName: 'Test Family',
+              ownerDisplayName: 'Owner phone',
+            ),
+            overrides: [
+              groupRepositoryProvider.overrideWithValue(groupRepository),
+              completeMemberActivationUseCaseProvider.overrideWithValue(
+                memberActivationUseCase,
+              ),
+              syncEngineProvider.overrideWithValue(syncEngine),
+              webSocketServiceProvider.overrideWithValue(webSocketService),
+              keyManagerProvider.overrideWithValue(keyManager),
+              getJoinRequestStatusUseCaseProvider.overrideWithValue(
+                getJoinRequestStatusUseCase,
+              ),
+              cancelJoinRequestUseCaseProvider.overrideWithValue(
+                cancelJoinRequestUseCase,
+              ),
+              pushNotificationServiceProvider.overrideWithValue(
+                pushNotificationService,
+              ),
+            ],
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(seconds: 6));
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.text('rate limit exceeded'), findsNothing);
+        verify(
+          () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+        ).called(1);
+        verifyNever(
+          () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+        );
+      });
+    },
+  );
+
+  testWidgets(
+    'missing authoritative request clears stale local waiting state',
+    (tester) async {
+      when(
+        () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+      ).thenAnswer(
+        (_) async => const JoinRequestLifecycleError(
+          'member not found in group',
+          kind: GroupOperationErrorKind.notFound,
+        ),
+      );
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('member not found in group'), findsNothing);
+      expect(find.text('Join request expired'), findsOneWidget);
+      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+      verifyNever(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      );
+    },
+  );
+
+  testWidgets(
+    'missing authoritative request remains terminal when local cleanup fails',
+    (tester) async {
+      when(
+        () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+      ).thenAnswer(
+        (_) async => const JoinRequestLifecycleError(
+          'member not found in group',
+          kind: GroupOperationErrorKind.notFound,
+        ),
+      );
+      when(
+        () => groupRepository.deactivateGroup('group-1'),
+      ).thenThrow(StateError('local cache unavailable'));
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('member not found in group'), findsNothing);
+      expect(find.text('Join request expired'), findsOneWidget);
+      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+    },
+  );
+
   testWidgets('stops polling after successful navigation', (tester) async {
     when(
       () => groupRepository.getGroupById('group-1'),
@@ -667,4 +1031,69 @@ void main() {
     ).called(1);
     expect(find.text('Join request cancelled'), findsOneWidget);
   });
+
+  testWidgets(
+    'cancel action stays above the iPhone safe area and works without scrolling',
+    (tester) async {
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(top: 47, bottom: 34);
+      tester.view.viewPadding = const FakeViewPadding(top: 47, bottom: 34);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      final action = find.ancestor(
+        of: find.text('Cancel join request'),
+        matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+      );
+      expect(action, findsOneWidget);
+      final actionRect = tester.getRect(action);
+      expect(actionRect.height, greaterThanOrEqualTo(56));
+      expect(
+        actionRect.bottom,
+        lessThanOrEqualTo(852 - 34),
+        reason: 'the entire action must stay above the bottom safe area',
+      );
+      expect(find.byIcon(LucideIcons.undo), findsOneWidget);
+
+      await tester.tap(action);
+      await tester.pump();
+
+      verify(
+        () => cancelJoinRequestUseCase.execute(groupId: 'group-1'),
+      ).called(1);
+      expect(find.text('Join request cancelled'), findsOneWidget);
+    },
+  );
 }

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../crypto/services/key_manager.dart';
+import '../network/network_status_checker.dart';
 
 /// A bounded page returned by the relay pull endpoint.
 ///
@@ -101,12 +102,19 @@ class RelayApiClient {
     required this.baseUrl,
     required RequestSigner signer,
     http.Client? httpClient,
+    NetworkStatusChecker? networkStatusChecker,
+    Duration requestTimeout = const Duration(seconds: 15),
   }) : _signer = signer,
-       _httpClient = httpClient ?? http.Client();
+       _httpClient = httpClient ?? http.Client(),
+       _networkStatusChecker =
+           networkStatusChecker ?? ConnectivityNetworkStatusChecker(),
+       _requestTimeout = requestTimeout;
 
   final String baseUrl;
   final RequestSigner _signer;
   final http.Client _httpClient;
+  final NetworkStatusChecker _networkStatusChecker;
+  final Duration _requestTimeout;
 
   static String get defaultBaseUrl {
     const url = String.fromEnvironment('SYNC_SERVER_URL', defaultValue: '');
@@ -511,7 +519,9 @@ class RelayApiClient {
       );
     }
 
-    final response = await _httpClient.get(url, headers: headers);
+    final response = await _sendHttp(
+      () => _httpClient.get(url, headers: headers),
+    );
     _logResponse('GET', path, response);
     return response;
   }
@@ -533,7 +543,9 @@ class RelayApiClient {
       );
     }
 
-    final response = await _httpClient.post(url, headers: headers, body: body);
+    final response = await _sendHttp(
+      () => _httpClient.post(url, headers: headers, body: body),
+    );
     _logResponse('POST', path, response);
     return response;
   }
@@ -555,7 +567,9 @@ class RelayApiClient {
       );
     }
 
-    final response = await _httpClient.put(url, headers: headers, body: body);
+    final response = await _sendHttp(
+      () => _httpClient.put(url, headers: headers, body: body),
+    );
     _logResponse('PUT', path, response);
     return response;
   }
@@ -576,9 +590,28 @@ class RelayApiClient {
       );
     }
 
-    final response = await _httpClient.delete(url, headers: headers);
+    final response = await _sendHttp(
+      () => _httpClient.delete(url, headers: headers),
+    );
     _logResponse('DELETE', path, response);
     return response;
+  }
+
+  Future<http.Response> _sendHttp(
+    Future<http.Response> Function() request,
+  ) async {
+    if (!await _networkStatusChecker.isNetworkAvailable) {
+      throw const NetworkUnavailableException();
+    }
+
+    try {
+      return await request().timeout(_requestTimeout);
+    } catch (error) {
+      if (isNetworkUnavailableError(error)) {
+        throw const NetworkUnavailableException();
+      }
+      rethrow;
+    }
   }
 
   Map<String, dynamic> _parseResponse(http.Response response) {

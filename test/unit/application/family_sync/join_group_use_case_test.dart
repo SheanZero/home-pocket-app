@@ -1,8 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/group_operation_error.dart';
-import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -12,27 +12,18 @@ class MockRelayApiClient extends Mock implements RelayApiClient {}
 
 class MockKeyManager extends Mock implements KeyManager {}
 
-class MockGroupRepository extends Mock implements GroupRepository {}
-
 void main() {
   late MockRelayApiClient apiClient;
   late MockKeyManager keyManager;
-  late MockGroupRepository groupRepository;
   late JoinGroupUseCase useCase;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
-    groupRepository = MockGroupRepository();
-    useCase = JoinGroupUseCase(
-      apiClient: apiClient,
-      keyManager: keyManager,
-      groupRepository: groupRepository,
-    );
+    useCase = JoinGroupUseCase(apiClient: apiClient, keyManager: keyManager);
 
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => keyManager.getPublicKey()).thenAnswer((_) async => 'public-key');
-    when(() => groupRepository.getCurrentGroup()).thenAnswer((_) async => null);
     when(
       () => apiClient.registerDevice(
         deviceId: any(named: 'deviceId'),
@@ -48,7 +39,6 @@ void main() {
     useCase = JoinGroupUseCase(
       apiClient: apiClient,
       keyManager: keyManager,
-      groupRepository: groupRepository,
       onDeviceRegistered: () async => tokenReplayCalls++,
     );
     when(
@@ -266,17 +256,15 @@ void main() {
     );
   });
 
-  test('blocks invite verification when a local live group exists', () async {
-    when(() => groupRepository.getCurrentGroup()).thenAnswer(
-      (_) async => GroupInfo(
-        groupId: 'existing-group',
-        status: GroupStatus.pending,
-        groupName: 'Existing',
-        role: 'owner',
-        members: const [],
-        createdAt: DateTime(2026),
+  test('maps transport failures to a sanitized network error', () async {
+    when(
+      () => apiClient.registerDevice(
+        deviceId: any(named: 'deviceId'),
+        publicKey: any(named: 'publicKey'),
+        deviceName: any(named: 'deviceName'),
+        platform: any(named: 'platform'),
       ),
-    );
+    ).thenThrow(const SocketException('Failed host lookup: secret.example'));
 
     final result = await useCase.execute(
       inviteCode: 'INV123',
@@ -285,18 +273,45 @@ void main() {
     );
 
     expect(result, isA<JoinGroupError>());
-    expect(
-      (result as JoinGroupError).kind,
-      GroupOperationErrorKind.membershipConflict,
-    );
-    verifyNever(
+    final error = result as JoinGroupError;
+    expect(error.kind, GroupOperationErrorKind.networkUnavailable);
+    expect(error.message, networkUnavailableErrorMessage);
+    expect(error.message, isNot(contains('secret.example')));
+  });
+
+  test('reports when confirmation will replace an empty owned group', () async {
+    when(
       () => apiClient.joinGroup(
         inviteCode: any(named: 'inviteCode'),
         displayName: any(named: 'displayName'),
         avatarEmoji: any(named: 'avatarEmoji'),
         avatarImageHash: any(named: 'avatarImageHash'),
       ),
+    ).thenAnswer(
+      (_) async => {
+        'groupId': 'group-1',
+        'groupName': 'Server Family',
+        'replacesEmptyOwnedGroup': true,
+        'members': [
+          {
+            'deviceId': 'owner-device',
+            'role': 'owner',
+            'status': 'active',
+            'displayName': 'Owner',
+            'avatarEmoji': '🏠',
+          },
+        ],
+      },
     );
+
+    final result = await useCase.execute(
+      inviteCode: 'INV123',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
+    );
+
+    expect(result, isA<JoinGroupVerified>());
+    expect((result as JoinGroupVerified).replacesEmptyOwnedGroup, isTrue);
   });
 
   test('returns error when device identity cannot be resolved', () async {

@@ -12,6 +12,7 @@ import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
 import 'apply_sync_operations_use_case.dart';
+import 'group_operation_error.dart';
 import 'transfer_owner_use_case.dart';
 
 /// Result of pulling sync data.
@@ -395,8 +396,12 @@ class PullSyncUseCase {
         pageCount: pageCount,
       );
     } catch (e) {
+      final failure = groupOperationFailureFrom(
+        e,
+        fallbackMessage: 'Failed to pull family sync data',
+      );
       return PullSyncResult.error(
-        e.toString(),
+        failure.message,
         appliedCount: appliedCount,
         ackedCount: ackedCount,
         pageCount: pageCount,

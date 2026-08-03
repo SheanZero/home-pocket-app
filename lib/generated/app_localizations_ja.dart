@@ -1119,6 +1119,9 @@ class SJa extends S {
   }
 
   @override
+  String get familySyncRestoreFailed => '家族の状態を復元できませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
   String get familySyncStatusUnpaired => 'タップしてファミリーグループを作成または参加';
 
   @override
@@ -1193,7 +1196,7 @@ class SJa extends S {
 
   @override
   String get familySyncInviteApprovalWindowHint =>
-      'コードの有効期限は新規申請にのみ適用されます。申請後、オーナーは24時間以内に承認できます。';
+      'コードの有効期限は新規申請にのみ適用されます。申請後、オーナーは5分以内に承認できます。';
 
   @override
   String familySyncInviteShareMessage(String groupName, String inviteCode) {
@@ -1356,6 +1359,13 @@ class SJa extends S {
       'この端末には参加中のグループ、または承認待ちの参加リクエストがあります。別のグループを作成・参加する前に、現在のグループから退出するかリクエストをキャンセルしてください。';
 
   @override
+  String get familySyncJoinAnotherFamily => '別の家族に参加する';
+
+  @override
+  String get familySyncReplaceEmptyGroupHint =>
+      '参加を申請すると、メンバーがいない現在の家族は自動的に削除されます。';
+
+  @override
   String get familySyncNetworkUnavailableTitle => 'ネットワークに接続できません';
 
   @override
@@ -1372,7 +1382,7 @@ class SJa extends S {
   String get groupMember => 'メンバー';
 
   @override
-  String get groupInviteCode => '招待コード';
+  String get groupInviteCode => '家族の招待コード';
 
   @override
   String groupInviteExpiry(int minutes) {
@@ -1505,6 +1515,9 @@ class SJa extends S {
   String get familyFlowCreateInviteHelper => '家族が参加申請を送ると、次のステップでメンバーを承認します。';
 
   @override
+  String get familyFlowCopyInvite => 'コピー';
+
+  @override
   String get familyFlowRegenerateInvite => '再発行';
 
   @override
@@ -1618,7 +1631,7 @@ class SJa extends S {
 
   @override
   String get groupRequestExpiredDescription =>
-      '24時間以内に確認されませんでした。最新の招待コードを受け取り、もう一度お試しください。';
+      '5分以内に確認されませんでした。最新の招待コードを受け取り、もう一度お試しください。';
 
   @override
   String get groupTryAnotherInvite => '別の招待コードを入力';
@@ -1642,7 +1655,7 @@ class SJa extends S {
   String get groupKeyRecoveryRetry => 'キーの復元を再試行';
 
   @override
-  String get groupKeyRecoveryRebuild => '退出して新しいファミリーを設定';
+  String get groupKeyRecoveryRebuild => '退出して別のファミリーを選ぶ';
 
   @override
   String get groupWaitingHint1 => 'アプリを閉じても大丈夫です。';

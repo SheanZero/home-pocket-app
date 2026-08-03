@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../application/family_sync/create_group_use_case.dart';
+import '../../../../application/family_sync/check_group_use_case.dart';
 import '../../../../application/family_sync/group_operation_error.dart';
 import '../../../../application/family_sync/manage_group_invite_use_case.dart';
 import '../../../../application/family_sync/notify_member_approval_use_case.dart';
@@ -21,16 +22,16 @@ import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/family_flow_components.dart';
+import '../widgets/family_invite_ticket.dart';
 import '../widgets/family_network_unavailable_dialog.dart';
 import '../widgets/group_rename_dialog.dart';
-import '../widgets/invite_expiry_countdown.dart';
-import '../../../../application/family_sync/check_group_use_case.dart';
 import 'member_approval_screen.dart';
 
 class CreateGroupScreen extends ConsumerStatefulWidget {
-  const CreateGroupScreen({super.key, this.shareInvite});
+  const CreateGroupScreen({super.key, this.shareInvite, this.now});
 
   final Future<void> Function(String text)? shareInvite;
+  final DateTime Function()? now;
 
   @override
   ConsumerState<CreateGroupScreen> createState() => _CreateGroupScreenState();
@@ -125,10 +126,11 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             _isCreating = false;
             _errorMessage = null;
           });
-          final retry = await showFamilyNetworkUnavailableDialog(context);
-          if (retry && mounted) {
-            await _submitCreate();
-          }
+          await handleFamilyNetworkFailure(
+            context,
+            result,
+            onRetry: _submitCreate,
+          );
           return;
         }
         setState(() {
@@ -204,6 +206,14 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       case RenameGroupSuccess(:final groupName):
         setState(() => _groupName = groupName);
       case RenameGroupError(:final message):
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleRename,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(context, message);
     }
   }
@@ -252,6 +262,14 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         showErrorFeedback(context, S.of(context).familySyncInviteOwnerOnly);
       case ManageGroupInviteError():
         setState(() => _isRefreshingInvite = false);
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleRegenerate,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(
           context,
           S.of(context).familySyncRegenerateInviteFailed,
@@ -354,12 +372,17 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             editLabel: l10n.edit,
           ),
           const SizedBox(height: 22),
-          _InviteCodeCard(
+          FamilyInviteTicket(
             code: '$firstHalf $secondHalf'.trim(),
-            expiresAt: _expiresAt,
+            expiresAt: _expiresAt == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(
+                    _expiresAt! * Duration.millisecondsPerSecond,
+                  ),
             onCopy: _handleCopy,
             onRegenerate: _isRefreshingInvite ? null : _handleRegenerate,
             isRefreshing: _isRefreshingInvite,
+            now: widget.now,
           ),
           const SizedBox(height: 18),
           FamilyPrimaryButton(
@@ -459,101 +482,6 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             isLoading: _isCreating,
           ),
           const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-}
-
-class _InviteCodeCard extends StatelessWidget {
-  const _InviteCodeCard({
-    required this.code,
-    required this.expiresAt,
-    required this.onCopy,
-    required this.onRegenerate,
-    required this.isRefreshing,
-  });
-
-  final String code;
-  final int? expiresAt;
-  final VoidCallback onCopy;
-  final VoidCallback? onRegenerate;
-  final bool isRefreshing;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    final palette = context.palette;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 70),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: palette.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: palette.borderDefault),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    code,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.numerals(
-                      TextStyle(
-                        fontSize: 27,
-                        height: 34 / 27,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 2.5,
-                        color: palette.textPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-                if (expiresAt != null) ...[
-                  const SizedBox(width: 8),
-                  FamilyInviteExpiryCountdown(
-                    expiresAt: DateTime.fromMillisecondsSinceEpoch(
-                      expiresAt! * Duration.millisecondsPerSecond,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          IconButton(
-            key: const Key('create-group-copy-code'),
-            onPressed: onCopy,
-            tooltip: l10n.familySyncInviteCopy,
-            icon: Icon(
-              LucideIcons.copy,
-              size: 20,
-              color: palette.textSecondary,
-            ),
-          ),
-          TextButton(
-            key: const Key('create-group-regenerate-code'),
-            onPressed: onRegenerate,
-            style: TextButton.styleFrom(
-              foregroundColor: palette.accentPrimary,
-              minimumSize: const Size(44, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              textStyle: AppTextStyles.label,
-            ),
-            child: isRefreshing
-                ? SizedBox(
-                    width: 17,
-                    height: 17,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: palette.accentPrimary,
-                    ),
-                  )
-                : Text(l10n.familyFlowRegenerateInvite),
-          ),
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'dart:io';
 import '../../infrastructure/crypto/models/device_key_pair.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
-import '../../features/family_sync/domain/repositories/group_repository.dart';
 import 'group_operation_error.dart';
 
 sealed class JoinGroupResult {
@@ -16,6 +15,7 @@ sealed class JoinGroupResult {
     required String ownerDisplayName,
     required String ownerAvatarEmoji,
     String? ownerAvatarImageHash,
+    bool replacesEmptyOwnedGroup,
   }) = JoinGroupVerified;
 
   const factory JoinGroupResult.error(
@@ -32,6 +32,7 @@ class JoinGroupVerified extends JoinGroupResult {
     required this.ownerDisplayName,
     required this.ownerAvatarEmoji,
     this.ownerAvatarImageHash,
+    this.replacesEmptyOwnedGroup = false,
   });
 
   final String groupId;
@@ -40,15 +41,18 @@ class JoinGroupVerified extends JoinGroupResult {
   final String ownerDisplayName;
   final String ownerAvatarEmoji;
   final String? ownerAvatarImageHash;
+  final bool replacesEmptyOwnedGroup;
 }
 
-class JoinGroupError extends JoinGroupResult {
+class JoinGroupError extends JoinGroupResult implements GroupOperationFailure {
   const JoinGroupError(
     this.message, {
     this.kind = GroupOperationErrorKind.general,
   });
 
+  @override
   final String message;
+  @override
   final GroupOperationErrorKind kind;
 }
 
@@ -63,16 +67,13 @@ class JoinGroupUseCase {
   JoinGroupUseCase({
     required RelayApiClient apiClient,
     required KeyManager keyManager,
-    required GroupRepository groupRepository,
     Future<void> Function()? onDeviceRegistered,
   }) : _apiClient = apiClient,
        _keyManager = keyManager,
-       _groupRepository = groupRepository,
        _onDeviceRegistered = onDeviceRegistered;
 
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;
-  final GroupRepository _groupRepository;
   final Future<void> Function()? _onDeviceRegistered;
 
   Future<JoinGroupResult> execute({
@@ -82,20 +83,6 @@ class JoinGroupUseCase {
     String? avatarImageHash,
   }) async {
     try {
-      try {
-        if (await _groupRepository.getCurrentGroup() != null) {
-          return const JoinGroupResult.error(
-            'A family group is already active or awaiting confirmation',
-            kind: GroupOperationErrorKind.membershipConflict,
-          );
-        }
-      } on StateError {
-        return const JoinGroupResult.error(
-          'Conflicting local family groups require recovery',
-          kind: GroupOperationErrorKind.membershipConflict,
-        );
-      }
-
       final identity = await _ensureDeviceIdentity();
       if (identity == null) {
         return const JoinGroupResult.error('Device key not initialized');
@@ -133,6 +120,8 @@ class JoinGroupUseCase {
         ownerDisplayName: ownerJson['displayName'] as String? ?? '',
         ownerAvatarEmoji: ownerJson['avatarEmoji'] as String? ?? '',
         ownerAvatarImageHash: ownerJson['avatarImageHash'] as String?,
+        replacesEmptyOwnedGroup:
+            response['replacesEmptyOwnedGroup'] as bool? ?? false,
       );
     } on RelayApiException catch (error) {
       if (error.isNotFound) {
@@ -149,7 +138,11 @@ class JoinGroupUseCase {
       }
       return JoinGroupResult.error(error.message);
     } catch (error) {
-      return JoinGroupResult.error('Failed to join group: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to join group',
+      );
+      return JoinGroupResult.error(failure.message, kind: failure.kind);
     }
   }
 

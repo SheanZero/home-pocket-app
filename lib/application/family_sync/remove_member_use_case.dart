@@ -2,22 +2,33 @@ import '../../infrastructure/sync/relay_api_client.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import 'rotate_group_key_use_case.dart';
 import 'membership_rotation_coordinator.dart';
+import 'group_operation_error.dart';
 
 sealed class RemoveMemberResult {
   const RemoveMemberResult();
 
   const factory RemoveMemberResult.success() = RemoveMemberSuccess;
-  const factory RemoveMemberResult.error(String message) = RemoveMemberError;
+  const factory RemoveMemberResult.error(
+    String message, {
+    GroupOperationErrorKind kind,
+  }) = RemoveMemberError;
 }
 
 class RemoveMemberSuccess extends RemoveMemberResult {
   const RemoveMemberSuccess();
 }
 
-class RemoveMemberError extends RemoveMemberResult {
-  const RemoveMemberError(this.message);
+class RemoveMemberError extends RemoveMemberResult
+    implements GroupOperationFailure {
+  const RemoveMemberError(
+    this.message, {
+    this.kind = GroupOperationErrorKind.general,
+  });
 
+  @override
   final String message;
+  @override
+  final GroupOperationErrorKind kind;
 }
 
 class RemoveMemberUseCase {
@@ -44,10 +55,12 @@ class RemoveMemberUseCase {
         targetDeviceId: deviceId,
       );
       return const RemoveMemberResult.success();
-    } on RelayApiException catch (error) {
-      return RemoveMemberResult.error(error.message);
     } catch (error) {
-      return RemoveMemberResult.error('Failed to remove member: $error');
+      final failure = groupOperationFailureFrom(
+        error,
+        fallbackMessage: 'Failed to remove member',
+      );
+      return RemoveMemberResult.error(failure.message, kind: failure.kind);
     }
   }
 }

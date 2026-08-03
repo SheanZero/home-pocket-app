@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../application/family_sync/manage_group_invite_use_case.dart';
+import '../../../../application/family_sync/group_operation_error.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -24,12 +25,14 @@ import '../providers/repository_providers.dart';
 import '../providers/state_active_group.dart';
 import '../providers/state_sync.dart';
 import '../widgets/group_rename_dialog.dart';
+import '../widgets/family_network_unavailable_dialog.dart';
 import '../widgets/family_flow_components.dart';
 import '../widgets/invite_expiry_countdown.dart';
 import '../widgets/member_list_tile.dart';
 import '../widgets/sync_status_badge.dart';
 import '../widgets/sync_queue_attention_card.dart';
 import 'member_approval_screen.dart';
+import 'join_group_screen.dart';
 
 class GroupManagementScreen extends ConsumerStatefulWidget {
   const GroupManagementScreen({
@@ -111,6 +114,14 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           _activeGroup = group.copyWith(groupName: groupName);
         });
       case RenameGroupError():
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleRename,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(context, l10n.groupRenameFailed);
     }
   }
@@ -146,6 +157,21 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       Navigator.of(context).pop();
       return;
     }
+
+    final GroupOperationFailure? failure = switch (result) {
+      DeactivateGroupError() => result,
+      LeaveGroupError() => result,
+      _ => null,
+    };
+    if (failure != null &&
+        await handleFamilyNetworkFailure(
+          context,
+          failure,
+          onRetry: _handleLeaveOrDeactivate,
+        )) {
+      return;
+    }
+    if (!mounted) return;
 
     final message = switch (result) {
       DeactivateGroupError(:final message) =>
@@ -183,6 +209,14 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     }
 
     if (result is RemoveMemberError) {
+      if (await handleFamilyNetworkFailure(
+        context,
+        result,
+        onRetry: () => _handleRemoveMember(member),
+      )) {
+        return;
+      }
+      if (!mounted) return;
       showErrorFeedback(
         context,
         l10n.familySyncRemoveMemberFailed(result.message),
@@ -222,6 +256,14 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       case ManageGroupInviteForbidden():
         showErrorFeedback(context, l10n.familySyncInviteOwnerOnly);
       case ManageGroupInviteError():
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleInvite,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(context, l10n.familySyncRegenerateInviteFailed);
     }
   }
@@ -311,6 +353,14 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       case OwnerTransferInvalidTarget():
         showErrorFeedback(context, l10n.familySyncTransferOwnerInvalidTarget);
       case OwnerTransferError(:final message):
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleTransferOwnership,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(context, l10n.familySyncTransferOwnerFailed(message));
     }
   }
@@ -355,6 +405,14 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       case ManageGroupInviteForbidden():
         showErrorFeedback(context, l10n.familySyncInviteOwnerOnly);
       case ManageGroupInviteError():
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _handleRegenerateInlineInvite,
+        )) {
+          return;
+        }
+        if (!mounted) return;
         showErrorFeedback(context, l10n.familySyncRegenerateInviteFailed);
     }
   }
@@ -475,6 +533,13 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
               )
               .toList()
         : const <GroupMember>[];
+    final canJoinAnotherFamily =
+        isOwner &&
+        group.status == GroupStatus.active &&
+        group.members.length <= 1 &&
+        group.members.every(
+          (member) => member.role == 'owner' && member.status == 'active',
+        );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
@@ -734,6 +799,20 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
             ),
           ),
           const SizedBox(height: 12),
+
+          if (canJoinAnotherFamily) ...[
+            FamilySecondaryButton(
+              key: const Key('join-another-family-action'),
+              label: l10n.familySyncJoinAnotherFamily,
+              icon: LucideIcons.logIn,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const JoinGroupScreen(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
 
           // Disband / leave group ghost button
           Center(
@@ -1041,8 +1120,20 @@ class _OwnerInviteSheetState extends State<_OwnerInviteSheet> {
       case ManageGroupInviteError():
         setState(() {
           _isRefreshing = false;
-          _refreshError = S.of(context).familySyncRegenerateInviteFailed;
+          _refreshError = null;
         });
+        if (await handleFamilyNetworkFailure(
+          context,
+          result,
+          onRetry: _refresh,
+        )) {
+          return;
+        }
+        if (mounted) {
+          setState(() {
+            _refreshError = S.of(context).familySyncRegenerateInviteFailed;
+          });
+        }
     }
   }
 

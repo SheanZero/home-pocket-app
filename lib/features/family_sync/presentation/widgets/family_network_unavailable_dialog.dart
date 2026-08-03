@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../application/family_sync/group_operation_error.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -76,4 +77,20 @@ Future<bool> showFamilyNetworkUnavailableDialog(BuildContext context) async {
     },
   );
   return retry ?? false;
+}
+
+/// Handles the shared presentation and retry contract for a typed family
+/// operation failure. Returns whether the failure was a network failure.
+Future<bool> handleFamilyNetworkFailure(
+  BuildContext context,
+  GroupOperationFailure failure, {
+  required Future<void> Function() onRetry,
+}) async {
+  if (failure.kind != GroupOperationErrorKind.networkUnavailable) return false;
+
+  final retry = await showFamilyNetworkUnavailableDialog(context);
+  if (retry && context.mounted) {
+    await onRetry();
+  }
+  return true;
 }

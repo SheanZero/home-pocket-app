@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/group_operation_error.dart';
 import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
@@ -114,6 +115,33 @@ void main() {
   );
 
   test(
+    'cancel treats an absent authoritative request as already cancelled',
+    () async {
+      when(() => apiClient.cancelJoinRequest('group-1')).thenThrow(
+        const RelayApiException(
+          statusCode: 404,
+          message: 'member not found in group',
+        ),
+      );
+      when(
+        () => groupRepository.deactivateGroup('group-1'),
+      ).thenAnswer((_) async {});
+
+      final result = await CancelJoinRequestUseCase(
+        apiClient: apiClient,
+        groupRepository: groupRepository,
+      ).execute(groupId: 'group-1');
+
+      expect(result, isA<JoinRequestLifecycleSuccess>());
+      expect(
+        (result as JoinRequestLifecycleSuccess).status,
+        JoinRequestStatus.cancelled,
+      );
+      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+    },
+  );
+
+  test(
     'unknown status is rejected instead of silently polling forever',
     () async {
       when(
@@ -127,4 +155,20 @@ void main() {
       expect(result, isA<JoinRequestLifecycleError>());
     },
   );
+
+  test('status classifies server throttling as rate limited', () async {
+    when(() => apiClient.getJoinRequestStatus('group-1')).thenThrow(
+      const RelayApiException(statusCode: 429, message: 'rate limit exceeded'),
+    );
+
+    final result = await GetJoinRequestStatusUseCase(
+      apiClient: apiClient,
+    ).execute(groupId: 'group-1');
+
+    expect(result, isA<JoinRequestLifecycleError>());
+    expect(
+      (result as JoinRequestLifecycleError).kind,
+      GroupOperationErrorKind.rateLimited,
+    );
+  });
 }

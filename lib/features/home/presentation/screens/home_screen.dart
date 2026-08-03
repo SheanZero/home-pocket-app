@@ -16,7 +16,7 @@ import '../../../../features/analytics/presentation/providers/state_analytics.da
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
 import '../../../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
-import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
+import '../../../../features/family_sync/presentation/navigation/family_flow_launcher.dart';
 import '../../../list/presentation/providers/state_list_filter.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
@@ -285,13 +285,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
               if (!isGroupMode && !_inviteDismissed) ...[
                 FamilyInviteBanner(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const GroupChoiceScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => openAuthoritativeFamilyFlow(context, ref),
                   onSettingsTap: widget.onSettingsTap ?? () {},
                   onDismiss: () => setState(() => _inviteDismissed = true),
                 ),

@@ -1115,6 +1115,9 @@ class SZh extends S {
   }
 
   @override
+  String get familySyncRestoreFailed => '暂时无法恢复家庭状态，请稍后重试。';
+
+  @override
   String get familySyncStatusUnpaired => '点击创建或加入家庭分组';
 
   @override
@@ -1187,7 +1190,7 @@ class SZh extends S {
 
   @override
   String get familySyncInviteApprovalWindowHint =>
-      '邀请码有效期仅限制发起新申请；提交申请后，家庭创建者有24小时进行审批。';
+      '邀请码有效期仅限制发起新申请；提交申请后，家庭创建者有5分钟进行审批。';
 
   @override
   String familySyncInviteShareMessage(String groupName, String inviteCode) {
@@ -1348,6 +1351,12 @@ class SZh extends S {
       '此设备已有家庭群组或待审批的加入申请。请先退出当前群组或取消申请，再创建或加入其他群组。';
 
   @override
+  String get familySyncJoinAnotherFamily => '加入其他家庭';
+
+  @override
+  String get familySyncReplaceEmptyGroupHint => '提交加入申请后，当前无人加入的家庭将自动删除。';
+
+  @override
   String get familySyncNetworkUnavailableTitle => '暂时无法连接网络';
 
   @override
@@ -1364,7 +1373,7 @@ class SZh extends S {
   String get groupMember => '成员';
 
   @override
-  String get groupInviteCode => '邀请码';
+  String get groupInviteCode => '家庭邀请码';
 
   @override
   String groupInviteExpiry(int minutes) {
@@ -1497,6 +1506,9 @@ class SZh extends S {
   String get familyFlowCreateInviteHelper => '家人提交加入申请后，你将在下一步审批成员。';
 
   @override
+  String get familyFlowCopyInvite => '复制';
+
+  @override
   String get familyFlowRegenerateInvite => '重新生成';
 
   @override
@@ -1607,7 +1619,7 @@ class SZh extends S {
   String get groupRequestExpiredTitle => '加入申请已过期';
 
   @override
-  String get groupRequestExpiredDescription => '申请在24小时内未被处理，请获取当前有效的邀请码后重新申请。';
+  String get groupRequestExpiredDescription => '申请在5分钟内未被处理，请获取当前有效的邀请码后重新申请。';
 
   @override
   String get groupTryAnotherInvite => '输入其他邀请码';
@@ -1630,7 +1642,7 @@ class SZh extends S {
   String get groupKeyRecoveryRetry => '重试密钥恢复';
 
   @override
-  String get groupKeyRecoveryRebuild => '退出并重新创建家庭';
+  String get groupKeyRecoveryRebuild => '退出并重新选择家庭';
 
   @override
   String get groupWaitingHint1 => '关闭应用也没有关系。';
