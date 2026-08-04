@@ -41,10 +41,11 @@ void main() {
     });
 
     test(
-      'findByBookId returns transactions ordered by timestamp desc',
+      'findByBookId returns transactions ordered by createdAt desc',
       () async {
-        final t1 = DateTime(2026, 2, 5, 10, 0);
-        final t2 = DateTime(2026, 2, 6, 10, 0);
+        final transactionDay = DateTime(2026, 2, 6);
+        final earlierCreation = DateTime(2026, 2, 6, 10);
+        final laterCreation = DateTime(2026, 2, 6, 11);
 
         await dao.insertTransaction(
           id: 'tx_001',
@@ -54,9 +55,9 @@ void main() {
           type: 'expense',
           categoryId: 'cat_food',
           ledgerType: 'daily',
-          timestamp: t1,
+          timestamp: transactionDay.add(const Duration(hours: 20)),
           currentHash: 'h1',
-          createdAt: t1,
+          createdAt: earlierCreation,
 
           entrySource: 'manual',
         );
@@ -69,9 +70,9 @@ void main() {
           type: 'income',
           categoryId: 'cat_food_dining_out',
           ledgerType: 'daily',
-          timestamp: t2,
+          timestamp: transactionDay.add(const Duration(hours: 8)),
           currentHash: 'h2',
-          createdAt: t2,
+          createdAt: laterCreation,
 
           entrySource: 'manual',
         );

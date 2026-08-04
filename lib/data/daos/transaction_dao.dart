@@ -85,7 +85,8 @@ class TransactionDao {
   }
 
   /// Query transactions for a book with optional filters.
-  /// Soft-deleted transactions are excluded. Ordered newest-first.
+  /// Soft-deleted transactions are excluded. Ordered by creation time,
+  /// newest-first.
   Future<List<TransactionRow>> findByBookId(
     String bookId, {
     String? ledgerType,
@@ -99,7 +100,7 @@ class TransactionDao {
       ..where((t) => t.bookId.equals(bookId))
       ..where((t) => t.isDeleted.equals(false))
       ..orderBy([
-        (t) => OrderingTerm.desc(t.timestamp),
+        (t) => OrderingTerm.desc(t.createdAt),
         (t) => OrderingTerm.desc(t.id),
       ])
       ..limit(limit, offset: offset);
@@ -260,11 +261,12 @@ class TransactionDao {
 
   String _orderByClause(SortField sortField, SortDirection sortDirection) {
     final direction = sortDirection == SortDirection.asc ? 'ASC' : 'DESC';
-    final col = switch (sortField) {
-      SortField.timestamp => 'timestamp',
-      SortField.amount => 'amount',
+    return switch (sortField) {
+      SortField.timestamp =>
+        "DATE(timestamp, 'unixepoch', 'localtime') $direction, "
+            'created_at DESC, id DESC',
+      SortField.amount => 'amount $direction, id DESC',
     };
-    return '$col $direction, id DESC';
   }
 
   /// Query transactions spanning multiple books in a single SQL call.
@@ -275,7 +277,7 @@ class TransactionDao {
   /// - [startDate]..[endDate] are inclusive timestamp bounds.
   ///
   /// Optional filters: [ledgerType], [categoryId].
-  /// Default ORDER BY: [SortField.timestamp] DESC, id DESC.
+  /// Default ORDER BY: transaction day DESC, created_at DESC, id DESC.
   ///
   /// D-02: No default limit applied — all matching rows for the date range
   /// are returned. Pagination is deferred to v1.5.

@@ -21,6 +21,7 @@ Transaction _makeTransaction(
   LedgerType ledgerType = LedgerType.daily,
   String bookId = 'book_001',
   DateTime? timestamp,
+  DateTime? createdAt,
 }) {
   return Transaction(
     id: id,
@@ -32,7 +33,7 @@ Transaction _makeTransaction(
     ledgerType: ledgerType,
     timestamp: timestamp ?? DateTime.now(),
     currentHash: 'hash_$id',
-    createdAt: DateTime.now(),
+    createdAt: createdAt ?? DateTime.now(),
     isDeleted: isDeleted,
   );
 }
@@ -204,21 +205,23 @@ void main() {
   });
 
   group('familyTodayTransactionsProvider', () {
-    test('merges primary and shadow books newest first', () async {
+    test('merges primary and shadow books by newest creation first', () async {
       final mockRepo = _MockTransactionRepository();
       final now = DateTime.now();
       final byBook = <String, List<Transaction>>{
         'book_001': [
           _makeTransaction(
             'self',
-            timestamp: now.subtract(const Duration(minutes: 3)),
+            timestamp: now.subtract(const Duration(minutes: 1)),
+            createdAt: now.subtract(const Duration(minutes: 3)),
           ),
         ],
         'shadow_001': [
           _makeTransaction(
             'member-newest',
             bookId: 'shadow_001',
-            timestamp: now.subtract(const Duration(minutes: 1)),
+            timestamp: now.subtract(const Duration(minutes: 3)),
+            createdAt: now.subtract(const Duration(minutes: 1)),
           ),
         ],
         'shadow_002': [

@@ -39,7 +39,7 @@ Future<List<Transaction>> todayTransactions(
 }
 
 /// Fetches today's transactions across the primary book and every active
-/// family shadow book, then presents them as one newest-first family feed.
+/// family shadow book, then presents them as one creation-newest-first feed.
 @riverpod
 Future<List<Transaction>> familyTodayTransactions(
   Ref ref, {
@@ -51,7 +51,10 @@ Future<List<Transaction>> familyTodayTransactions(
     bookIds.map((id) => _fetchTodayTransactions(ref, id)),
   );
   final transactions = batches.expand((batch) => batch).toList()
-    ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    ..sort((a, b) {
+      final byCreatedAt = b.createdAt.compareTo(a.createdAt);
+      return byCreatedAt != 0 ? byCreatedAt : b.id.compareTo(a.id);
+    });
   return transactions;
 }
 

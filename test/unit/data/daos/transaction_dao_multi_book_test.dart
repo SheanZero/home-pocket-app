@@ -24,6 +24,7 @@ void main() {
     required String bookId,
     required int amount,
     required DateTime timestamp,
+    DateTime? createdAt,
     String ledgerType = 'daily',
     String categoryId = 'cat_misc',
     String currentHash = 'hash_default',
@@ -41,7 +42,7 @@ void main() {
       ledgerType: ledgerType,
       timestamp: timestamp,
       currentHash: currentHash,
-      createdAt: timestamp,
+      createdAt: createdAt ?? timestamp,
       prevHash: prevHash,
       entrySource: entrySource,
     );
@@ -185,6 +186,40 @@ void main() {
       // tx_c has the latest timestamp (t3), so it should come first.
       expect(results.first.id, 'tx_c');
     });
+
+    test(
+      'timestamp sort orders transactions within one day by createdAt desc',
+      () async {
+        final day = DateTime(2026, 3, 10);
+        await insertTx(
+          id: 'created-earlier',
+          bookId: 'book_001',
+          amount: 100,
+          timestamp: day.add(const Duration(hours: 20)),
+          createdAt: day.add(const Duration(hours: 21)),
+        );
+        await insertTx(
+          id: 'created-later',
+          bookId: 'book_001',
+          amount: 200,
+          timestamp: day.add(const Duration(hours: 8)),
+          createdAt: day.add(const Duration(hours: 22)),
+        );
+
+        final results = await dao.findByBookIds(
+          ['book_001'],
+          startDate: start,
+          endDate: end,
+          sortField: SortField.timestamp,
+          sortDirection: SortDirection.desc,
+        );
+
+        expect(results.map((row) => row.id), [
+          'created-later',
+          'created-earlier',
+        ]);
+      },
+    );
 
     test('bookIds=[] short-circuits and returns empty list immediately', () async {
       final ts = DateTime(2026, 3, 1);
