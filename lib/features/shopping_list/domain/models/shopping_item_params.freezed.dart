@@ -19,7 +19,9 @@ mixin _$ShoppingItemParams {
   String? get categoryId;
   List<String> get tags;
   String? get note;
-  int get quantity;
+  double get quantity;
+  ShoppingUnit get unit;
+  String? get customUnit;
   int? get estimatedPrice;
   String? get addedByBookId;
 
@@ -49,6 +51,9 @@ mixin _$ShoppingItemParams {
             (identical(other.note, note) || other.note == note) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
+            (identical(other.unit, unit) || other.unit == unit) &&
+            (identical(other.customUnit, customUnit) ||
+                other.customUnit == customUnit) &&
             (identical(other.estimatedPrice, estimatedPrice) ||
                 other.estimatedPrice == estimatedPrice) &&
             (identical(other.addedByBookId, addedByBookId) ||
@@ -65,13 +70,15 @@ mixin _$ShoppingItemParams {
     const DeepCollectionEquality().hash(tags),
     note,
     quantity,
+    unit,
+    customUnit,
     estimatedPrice,
     addedByBookId,
   );
 
   @override
   String toString() {
-    return 'ShoppingItemParams(name: $name, listType: $listType, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, addedByBookId: $addedByBookId)';
+    return 'ShoppingItemParams(name: $name, listType: $listType, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, unit: $unit, customUnit: $customUnit, estimatedPrice: $estimatedPrice, addedByBookId: $addedByBookId)';
   }
 }
 
@@ -89,7 +96,9 @@ abstract mixin class $ShoppingItemParamsCopyWith<$Res> {
     String? categoryId,
     List<String> tags,
     String? note,
-    int quantity,
+    double quantity,
+    ShoppingUnit unit,
+    String? customUnit,
     int? estimatedPrice,
     String? addedByBookId,
   });
@@ -115,6 +124,8 @@ class _$ShoppingItemParamsCopyWithImpl<$Res>
     Object? tags = null,
     Object? note = freezed,
     Object? quantity = null,
+    Object? unit = null,
+    Object? customUnit = freezed,
     Object? estimatedPrice = freezed,
     Object? addedByBookId = freezed,
   }) {
@@ -147,7 +158,15 @@ class _$ShoppingItemParamsCopyWithImpl<$Res>
         quantity: null == quantity
             ? _self.quantity
             : quantity // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
+        unit: null == unit
+            ? _self.unit
+            : unit // ignore: cast_nullable_to_non_nullable
+                  as ShoppingUnit,
+        customUnit: freezed == customUnit
+            ? _self.customUnit
+            : customUnit // ignore: cast_nullable_to_non_nullable
+                  as String?,
         estimatedPrice: freezed == estimatedPrice
             ? _self.estimatedPrice
             : estimatedPrice // ignore: cast_nullable_to_non_nullable
@@ -261,7 +280,9 @@ extension ShoppingItemParamsPatterns on ShoppingItemParams {
       String? categoryId,
       List<String> tags,
       String? note,
-      int quantity,
+      double quantity,
+      ShoppingUnit unit,
+      String? customUnit,
       int? estimatedPrice,
       String? addedByBookId,
     )?
@@ -279,6 +300,8 @@ extension ShoppingItemParamsPatterns on ShoppingItemParams {
           _that.tags,
           _that.note,
           _that.quantity,
+          _that.unit,
+          _that.customUnit,
           _that.estimatedPrice,
           _that.addedByBookId,
         );
@@ -309,7 +332,9 @@ extension ShoppingItemParamsPatterns on ShoppingItemParams {
       String? categoryId,
       List<String> tags,
       String? note,
-      int quantity,
+      double quantity,
+      ShoppingUnit unit,
+      String? customUnit,
       int? estimatedPrice,
       String? addedByBookId,
     )
@@ -326,6 +351,8 @@ extension ShoppingItemParamsPatterns on ShoppingItemParams {
           _that.tags,
           _that.note,
           _that.quantity,
+          _that.unit,
+          _that.customUnit,
           _that.estimatedPrice,
           _that.addedByBookId,
         );
@@ -355,7 +382,9 @@ extension ShoppingItemParamsPatterns on ShoppingItemParams {
       String? categoryId,
       List<String> tags,
       String? note,
-      int quantity,
+      double quantity,
+      ShoppingUnit unit,
+      String? customUnit,
       int? estimatedPrice,
       String? addedByBookId,
     )?
@@ -372,6 +401,8 @@ extension ShoppingItemParamsPatterns on ShoppingItemParams {
           _that.tags,
           _that.note,
           _that.quantity,
+          _that.unit,
+          _that.customUnit,
           _that.estimatedPrice,
           _that.addedByBookId,
         );
@@ -391,7 +422,9 @@ class _ShoppingItemParams implements ShoppingItemParams {
     this.categoryId,
     final List<String> tags = const <String>[],
     this.note,
-    this.quantity = 1,
+    this.quantity = 1.0,
+    this.unit = ShoppingUnit.piece,
+    this.customUnit,
     this.estimatedPrice,
     this.addedByBookId,
   }) : _tags = tags;
@@ -417,7 +450,12 @@ class _ShoppingItemParams implements ShoppingItemParams {
   final String? note;
   @override
   @JsonKey()
-  final int quantity;
+  final double quantity;
+  @override
+  @JsonKey()
+  final ShoppingUnit unit;
+  @override
+  final String? customUnit;
   @override
   final int? estimatedPrice;
   @override
@@ -447,6 +485,9 @@ class _ShoppingItemParams implements ShoppingItemParams {
             (identical(other.note, note) || other.note == note) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
+            (identical(other.unit, unit) || other.unit == unit) &&
+            (identical(other.customUnit, customUnit) ||
+                other.customUnit == customUnit) &&
             (identical(other.estimatedPrice, estimatedPrice) ||
                 other.estimatedPrice == estimatedPrice) &&
             (identical(other.addedByBookId, addedByBookId) ||
@@ -463,13 +504,15 @@ class _ShoppingItemParams implements ShoppingItemParams {
     const DeepCollectionEquality().hash(_tags),
     note,
     quantity,
+    unit,
+    customUnit,
     estimatedPrice,
     addedByBookId,
   );
 
   @override
   String toString() {
-    return 'ShoppingItemParams(name: $name, listType: $listType, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, addedByBookId: $addedByBookId)';
+    return 'ShoppingItemParams(name: $name, listType: $listType, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, unit: $unit, customUnit: $customUnit, estimatedPrice: $estimatedPrice, addedByBookId: $addedByBookId)';
   }
 }
 
@@ -489,7 +532,9 @@ abstract mixin class _$ShoppingItemParamsCopyWith<$Res>
     String? categoryId,
     List<String> tags,
     String? note,
-    int quantity,
+    double quantity,
+    ShoppingUnit unit,
+    String? customUnit,
     int? estimatedPrice,
     String? addedByBookId,
   });
@@ -515,6 +560,8 @@ class __$ShoppingItemParamsCopyWithImpl<$Res>
     Object? tags = null,
     Object? note = freezed,
     Object? quantity = null,
+    Object? unit = null,
+    Object? customUnit = freezed,
     Object? estimatedPrice = freezed,
     Object? addedByBookId = freezed,
   }) {
@@ -547,7 +594,15 @@ class __$ShoppingItemParamsCopyWithImpl<$Res>
         quantity: null == quantity
             ? _self.quantity
             : quantity // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
+        unit: null == unit
+            ? _self.unit
+            : unit // ignore: cast_nullable_to_non_nullable
+                  as ShoppingUnit,
+        customUnit: freezed == customUnit
+            ? _self.customUnit
+            : customUnit // ignore: cast_nullable_to_non_nullable
+                  as String?,
         estimatedPrice: freezed == estimatedPrice
             ? _self.estimatedPrice
             : estimatedPrice // ignore: cast_nullable_to_non_nullable

@@ -1755,6 +1755,54 @@ abstract class S {
   /// **'Amazing!'**
   String get satisfactionExcellent;
 
+  /// Context shown when the user manually switches an entry to the Joy ledger
+  ///
+  /// In en, this message translates to:
+  /// **'Set as a Joy expense'**
+  String get satisfactionSheetManualReason;
+
+  /// Context shown when category inference switches an entry to the Joy ledger
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Joy based on “{categoryName}”'**
+  String satisfactionSheetCategoryReason(String categoryName);
+
+  /// Title of the Joy satisfaction selection bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'How satisfying was this expense?'**
+  String get satisfactionSheetTitle;
+
+  /// Current Joy satisfaction summary in the selection bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Currently “{level}” — you can change it anytime'**
+  String satisfactionSheetCurrent(String level);
+
+  /// Second Joy satisfaction choice shown in the bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get satisfactionSheetChoiceTwo;
+
+  /// Fourth Joy satisfaction choice shown in the bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Great'**
+  String get satisfactionSheetChoiceFour;
+
+  /// Explains that choosing a satisfaction value closes the bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice returns you to the entry'**
+  String get satisfactionSheetAutoReturn;
+
+  /// Keeps the current Joy satisfaction value and closes the bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Keep “{level}”'**
+  String satisfactionSheetKeepCurrent(String level);
+
   /// Variant A pill label: val 2, unipolar positive baseline (ADR-014)
   ///
   /// In en, this message translates to:
@@ -4828,6 +4876,96 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Quantity'**
   String get shoppingFormQuantityLabel;
+
+  /// No description provided for @shoppingFormQuantityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the amount and unit separately'**
+  String get shoppingFormQuantityHint;
+
+  /// No description provided for @shoppingUnitPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a unit'**
+  String get shoppingUnitPickerTitle;
+
+  /// No description provided for @shoppingUnitPickerHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing the unit does not convert the amount'**
+  String get shoppingUnitPickerHelp;
+
+  /// No description provided for @shoppingUnitCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom unit'**
+  String get shoppingUnitCustom;
+
+  /// No description provided for @shoppingUnitCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. cup'**
+  String get shoppingUnitCustomHint;
+
+  /// No description provided for @shoppingUnitCustomError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–12 characters'**
+  String get shoppingUnitCustomError;
+
+  /// No description provided for @shoppingUnitApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get shoppingUnitApply;
+
+  /// No description provided for @shoppingUnitPiece.
+  ///
+  /// In en, this message translates to:
+  /// **'pc'**
+  String get shoppingUnitPiece;
+
+  /// No description provided for @shoppingUnitGram.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get shoppingUnitGram;
+
+  /// No description provided for @shoppingUnitKilogram.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get shoppingUnitKilogram;
+
+  /// No description provided for @shoppingUnitMilliliter.
+  ///
+  /// In en, this message translates to:
+  /// **'ml'**
+  String get shoppingUnitMilliliter;
+
+  /// No description provided for @shoppingUnitLiter.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get shoppingUnitLiter;
+
+  /// No description provided for @shoppingUnitBag.
+  ///
+  /// In en, this message translates to:
+  /// **'bag'**
+  String get shoppingUnitBag;
+
+  /// No description provided for @shoppingUnitBottle.
+  ///
+  /// In en, this message translates to:
+  /// **'btl'**
+  String get shoppingUnitBottle;
+
+  /// No description provided for @shoppingUnitPack.
+  ///
+  /// In en, this message translates to:
+  /// **'pack'**
+  String get shoppingUnitPack;
 
   /// Label for the estimated price field in the shopping item form (Phase 38-07)
   ///

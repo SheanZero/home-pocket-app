@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 import '../../../../application/shopping_list/parse_shopping_voice_input_use_case.dart';
@@ -26,8 +27,13 @@ import '../../../settings/presentation/providers/state_settings.dart';
 import '../../../settings/presentation/utils/voice_locale_helpers.dart';
 // isGroupModeProvider import removed — selector no longer gated on group mode (G8Z)
 import '../../domain/models/shopping_item.dart';
+import '../../domain/models/shopping_unit.dart';
 import '../providers/repository_providers.dart'
-    show createShoppingItemUseCaseProvider, updateShoppingItemUseCaseProvider;
+    show
+        createShoppingItemUseCaseProvider,
+        shoppingUnitSuggestionsProvider,
+        updateShoppingItemUseCaseProvider;
+import '../utils/shopping_quantity_formatter.dart';
 import '../widgets/shopping_voice_draft_panel.dart';
 import '../../../../application/shopping_list/create_shopping_item_use_case.dart';
 import '../../../../application/shopping_list/update_shopping_item_use_case.dart';
@@ -52,6 +58,7 @@ class ShoppingItemFormScreen extends ConsumerStatefulWidget {
     required this.listType,
     this.item,
     this.speechService,
+    this.unitSuggestions,
   });
 
   /// 'public' or 'private' — immutable after creation (D6).
@@ -66,6 +73,10 @@ class ShoppingItemFormScreen extends ConsumerStatefulWidget {
   /// speech provider. Edit mode never initializes or renders voice input.
   final StartSpeechRecognitionUseCase? speechService;
 
+  /// Explicit visual/test override. Production falls back to the learned
+  /// suggestion provider when this is null.
+  final List<ShoppingUnitSuggestion>? unitSuggestions;
+
   @override
   ConsumerState<ShoppingItemFormScreen> createState() =>
       _ShoppingItemFormScreenState();
@@ -73,6 +84,10 @@ class ShoppingItemFormScreen extends ConsumerStatefulWidget {
 
 class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     with WidgetsBindingObserver {
+  // Explicit release gate: preserve the drafted capability for a post-MVP
+  // iteration without exposing any shopping voice entry in production today.
+  static bool get _shoppingVoiceInputEnabledForMvp => false;
+
   final _formKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
   bool _showNameError = false;
@@ -85,6 +100,8 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
   // Edit mode: used to hold item.tags for transparency; save uses widget.item!.tags directly.
   // Create mode: not used in save path.
   late final TextEditingController _tagsController;
+  ShoppingUnit _selectedUnit = ShoppingUnit.piece;
+  String? _customUnit;
 
   // Non-null LedgerType — defaults to daily; cannot be toggled to null (D-1).
   LedgerType _ledgerType = LedgerType.daily;
@@ -124,8 +141,10 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
       // Edit mode — pre-populate from existing item (ITEM-04)
       _nameController = TextEditingController(text: item.name);
       _quantityController = TextEditingController(
-        text: item.quantity.toString(),
+        text: formatShoppingQuantityValue(item.quantity),
       );
+      _selectedUnit = item.unit;
+      _customUnit = item.customUnit;
       _priceController = TextEditingController(
         text: item.estimatedPrice?.toString() ?? '',
       );
@@ -194,6 +213,8 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     categoryId: _categoryId,
     category: _category,
     parentCategory: _parentCategory,
+    unit: _selectedUnit,
+    customUnit: _customUnit,
   );
 
   void _restoreVoiceSnapshot(_ShoppingFormSnapshot snapshot) {
@@ -205,6 +226,8 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     _categoryId = snapshot.categoryId;
     _category = snapshot.category;
     _parentCategory = snapshot.parentCategory;
+    _selectedUnit = snapshot.unit;
+    _customUnit = snapshot.customUnit;
   }
 
   Future<void> _openVoiceDraft() async {
@@ -381,7 +404,12 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
       }
       final parsedQuantity = draft.quantity;
       if (parsedQuantity != null && parsedQuantity > 0) {
-        _quantityController.text = parsedQuantity.toString();
+        _quantityController.text = formatShoppingQuantityValue(parsedQuantity);
+      }
+      final parsedUnit = draft.unit;
+      if (parsedUnit != null) {
+        _selectedUnit = parsedUnit;
+        _customUnit = null;
       }
       final parsedLedger = draft.ledgerType;
       if (parsedLedger != null) _ledgerType = parsedLedger;
@@ -509,12 +537,16 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
       _isSubmitting = true;
     });
 
-    // Sanitize numeric inputs (WR-03): quantity is at least 1; a negative or
-    // zero entry falls back to 1. Estimated price must be non-negative; a
-    // negative entry is treated as "not provided".
-    final parsedQuantity = int.tryParse(_quantityController.text);
-    final quantity = (parsedQuantity == null || parsedQuantity < 1)
-        ? 1
+    // Quantity accepts decimals. A malformed or non-positive value safely
+    // falls back to one while preserving the separately selected unit.
+    final parsedQuantity = double.tryParse(
+      _quantityController.text.trim().replaceAll(',', '.'),
+    );
+    final quantity =
+        (parsedQuantity == null ||
+            !parsedQuantity.isFinite ||
+            parsedQuantity <= 0)
+        ? 1.0
         : parsedQuantity;
     final parsedPrice = int.tryParse(_priceController.text);
     final estimatedPrice = (parsedPrice == null || parsedPrice < 0)
@@ -536,6 +568,8 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
           tags: const [],
           note: _noteController.text.isEmpty ? null : _noteController.text,
           quantity: quantity,
+          unit: _selectedUnit,
+          customUnit: _customUnit,
           estimatedPrice: estimatedPrice,
         );
         final result = await ref
@@ -553,6 +587,8 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
           tags: widget.item!.tags,
           note: _noteController.text.isEmpty ? null : _noteController.text,
           quantity: quantity,
+          unit: _selectedUnit,
+          customUnit: _customUnit,
           estimatedPrice: estimatedPrice,
         );
         final result = await ref
@@ -662,105 +698,372 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     );
   }
 
-  Widget _buildStepper(S l) {
+  Widget _buildQuantitySection(S l, List<ShoppingUnitSuggestion> suggestions) {
     final palette = context.palette;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border.all(color: palette.borderDefault),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _stepBtn(
-              key: const Key('shopping_quantity_decrease'),
-              label: '−',
-              semanticLabel: '${l.shoppingFormQuantityLabel} −',
-              onTap: () {
-                final value = int.tryParse(_quantityController.text) ?? 1;
-                if (value > 1) {
-                  setState(
-                    () => _quantityController.text = (value - 1).toString(),
-                  );
-                }
-              },
-              palette: palette,
-            ),
-            SizedBox(
-              width: 50,
-              height: 44,
-              child: TextField(
-                key: const Key('shopping_form_quantity_field'),
-                controller: _quantityController,
-                textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                  isDense: true,
+    final selection = ShoppingUnitSelection(
+      _selectedUnit,
+      customLabel: _customUnit,
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 68,
+                child: Text(
+                  l.shoppingFormQuantityLabel,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.textSecondary,
+                  ),
                 ),
-                style: AppTextStyles.itemTitle.copyWith(
-                  color: palette.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-                onChanged: (value) {
-                  final parsed = int.tryParse(value);
-                  if (parsed != null && parsed < 1) {
-                    setState(() => _quantityController.text = '1');
-                  }
-                },
               ),
-            ),
-            _stepBtn(
-              key: const Key('shopping_quantity_increase'),
-              label: '＋',
-              semanticLabel: '${l.shoppingFormQuantityLabel} ＋',
-              onTap: () {
-                final value = int.tryParse(_quantityController.text) ?? 1;
-                setState(
-                  () => _quantityController.text = (value + 1).toString(),
-                );
-              },
-              palette: palette,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        key: const Key('shopping_form_quantity_input_box'),
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: palette.card,
+                          border: Border.all(color: palette.borderDefault),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextField(
+                          key: const Key('shopping_form_quantity_field'),
+                          controller: _quantityController,
+                          textAlign: TextAlign.center,
+                          textAlignVertical: TextAlignVertical.center,
+                          minLines: null,
+                          maxLines: null,
+                          expands: true,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9.,]'),
+                            ),
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            isDense: true,
+                          ),
+                          style: AppTextStyles.amountLarge.copyWith(
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildUnitSelect(l, palette, selection),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (suggestions.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              key: const Key('shopping_unit_suggestions'),
+              children: [
+                for (var index = 0; index < suggestions.length; index++) ...[
+                  if (index > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildUnitSuggestionChip(l, suggestions[index]),
+                  ),
+                ],
+              ],
             ),
           ],
+          const SizedBox(height: 7),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 15,
+                  color: palette.textTertiary,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    l.shoppingFormQuantityHint,
+                    textAlign: TextAlign.right,
+                    style: AppTextStyles.supporting.copyWith(
+                      color: palette.textTertiary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUnitSelect(
+    S l,
+    AppPalette palette,
+    ShoppingUnitSelection selection,
+  ) {
+    return Semantics(
+      button: true,
+      label: l.shoppingUnitPickerTitle,
+      child: SizedBox(
+        key: const Key('shopping_form_unit_select'),
+        width: 76,
+        height: 48,
+        child: Material(
+          color: palette.backgroundMuted,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: palette.borderDefault),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => unawaited(_showUnitPicker()),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Text(
+                    shoppingUnitLabel(l, selection),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.itemTitle.copyWith(
+                      color: palette.dailyText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 4,
+                  child: Icon(
+                    Icons.expand_more_rounded,
+                    size: 16,
+                    color: palette.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _stepBtn({
-    required Key key,
-    required String label,
-    required String semanticLabel,
-    required VoidCallback onTap,
-    required AppPalette palette,
-  }) {
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      child: SizedBox.square(
-        key: key,
-        dimension: 44,
-        child: Material(
-          color: palette.backgroundMuted,
-          child: InkWell(
-            onTap: onTap,
-            child: Center(
-              child: Text(
-                label,
-                style: AppTextStyles.amountMedium.copyWith(
-                  color: palette.dailyText,
-                  fontWeight: FontWeight.w500,
-                ),
+  Widget _buildUnitSuggestionChip(S l, ShoppingUnitSuggestion suggestion) {
+    final palette = context.palette;
+    final selected =
+        suggestion.selection ==
+        ShoppingUnitSelection(_selectedUnit, customLabel: _customUnit);
+    return SizedBox(
+      height: 36,
+      child: Material(
+        color: selected ? palette.dailyLight : palette.backgroundMuted,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+          side: BorderSide(
+            color: selected ? palette.daily : palette.borderDefault,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => setState(() {
+            _selectedUnit = suggestion.selection.unit;
+            _customUnit = suggestion.selection.unit == ShoppingUnit.custom
+                ? suggestion.selection.normalizedCustomLabel
+                : null;
+          }),
+          child: Center(
+            child: Text(
+              shoppingUnitLabel(l, suggestion.selection),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.label.copyWith(
+                color: selected ? palette.dailyText : palette.textSecondary,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _showUnitPicker() async {
+    FocusScope.of(context).unfocus();
+    var draftUnit = _selectedUnit;
+    final customController = TextEditingController(text: _customUnit ?? '');
+    String? customError;
+    final selected = await showModalBottomSheet<ShoppingUnitSelection>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final l = S.of(sheetContext);
+        final palette = sheetContext.palette;
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final options = ShoppingUnit.values;
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: Material(
+                color: palette.card,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 38,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: palette.borderDefault,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l.shoppingUnitPickerTitle,
+                        style: AppTextStyles.sectionTitle.copyWith(
+                          color: palette.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l.shoppingUnitPickerHelp,
+                        style: AppTextStyles.supporting.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: options
+                            .map((unit) {
+                              final label = unit == ShoppingUnit.custom
+                                  ? l.shoppingUnitCustom
+                                  : shoppingUnitLabel(
+                                      l,
+                                      ShoppingUnitSelection(unit),
+                                    );
+                              return ChoiceChip(
+                                key: Key('shopping_unit_option_${unit.name}'),
+                                label: Text(label),
+                                selected: draftUnit == unit,
+                                onSelected: (_) => setSheetState(() {
+                                  draftUnit = unit;
+                                  customError = null;
+                                }),
+                              );
+                            })
+                            .toList(growable: false),
+                      ),
+                      if (draftUnit == ShoppingUnit.custom) ...[
+                        const SizedBox(height: 14),
+                        TextField(
+                          key: const Key('shopping_custom_unit_field'),
+                          controller: customController,
+                          autofocus: true,
+                          maxLength: 12,
+                          textInputAction: TextInputAction.done,
+                          decoration: InputDecoration(
+                            hintText: l.shoppingUnitCustomHint,
+                            errorText: customError,
+                            counterText: '',
+                            filled: true,
+                            fillColor: palette.backgroundMuted,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                MaterialLocalizations.of(
+                                  context,
+                                ).cancelButtonLabel,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: FilledButton(
+                              key: const Key('shopping_unit_apply'),
+                              onPressed: () {
+                                final custom = customController.text.trim();
+                                if (draftUnit == ShoppingUnit.custom &&
+                                    custom.isEmpty) {
+                                  setSheetState(
+                                    () =>
+                                        customError = l.shoppingUnitCustomError,
+                                  );
+                                  return;
+                                }
+                                Navigator.pop(
+                                  context,
+                                  ShoppingUnitSelection(
+                                    draftUnit,
+                                    customLabel:
+                                        draftUnit == ShoppingUnit.custom
+                                        ? custom
+                                        : null,
+                                  ),
+                                );
+                              },
+                              child: Text(l.shoppingUnitApply),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+    // The route future completes when dismissal begins; disposing the
+    // controller here would race the closing animation's final build.
+    if (selected == null || !mounted) return;
+    setState(() {
+      _selectedUnit = selected.unit;
+      _customUnit = selected.unit == ShoppingUnit.custom
+          ? selected.normalizedCustomLabel
+          : null;
+    });
   }
 
   Widget _divider(AppPalette palette) {
@@ -814,6 +1117,10 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     final l = S.of(context);
     final palette = context.palette;
     final isEditMode = widget.item != null;
+    final unitSuggestions =
+        widget.unitSuggestions ??
+        ref.watch(shoppingUnitSuggestionsProvider).value ??
+        const <ShoppingUnitSuggestion>[];
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
     // Render the full "parent > child" localized path at build time (mirrors
     // transaction_details_form — never render the raw key/id).
@@ -907,7 +1214,7 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
                 ),
               ),
             ),
-            if (!isEditMode) ...[
+            if (!isEditMode && _shoppingVoiceInputEnabledForMvp) ...[
               const SizedBox(height: 10),
               ShoppingVoiceDraftPanel(
                 state: _voiceState,
@@ -929,24 +1236,7 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 9,
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          l.shoppingFormQuantityLabel,
-                          style: AppTextStyles.label.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                        const Spacer(),
-                        _buildStepper(l),
-                      ],
-                    ),
-                  ),
+                  _buildQuantitySection(l, unitSuggestions),
                   _divider(palette),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -1207,6 +1497,8 @@ class _ShoppingFormSnapshot {
     required this.categoryId,
     required this.category,
     required this.parentCategory,
+    required this.unit,
+    required this.customUnit,
   });
 
   final String name;
@@ -1217,4 +1509,6 @@ class _ShoppingFormSnapshot {
   final String? categoryId;
   final Category? category;
   final Category? parentCategory;
+  final ShoppingUnit unit;
+  final String? customUnit;
 }

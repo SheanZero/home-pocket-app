@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../accounting/domain/models/transaction.dart';
+import 'shopping_unit.dart';
 
 part 'shopping_item.freezed.dart';
 
@@ -28,7 +29,9 @@ abstract class ShoppingItem with _$ShoppingItem {
     @Default(<String>[])
     List<String> tags, // D-01: JSON-encoded at repo boundary
     String? note, // decrypted plaintext
-    @Default(1) int quantity, // D-02
+    @Default(1.0) double quantity,
+    @Default(ShoppingUnit.piece) ShoppingUnit unit,
+    String? customUnit,
     int? estimatedPrice, // ITEM-05
     DateTime? completedAt, // D-03
     @Default(false) bool isCompleted,

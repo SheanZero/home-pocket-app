@@ -15,6 +15,7 @@ import '../../../accounting/presentation/providers/repository_providers.dart'
 import '../../domain/models/time_window.dart';
 import '../analytics_card_registry.dart';
 import '../providers/state_analytics.dart';
+import '../providers/state_primary_tab.dart';
 import '../providers/state_time_window.dart';
 import '../widgets/analytics_primary_tabs.dart';
 import '../widgets/analytics_section_header.dart';
@@ -41,11 +42,10 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  AnalyticsPrimaryTab _selectedTab = AnalyticsPrimaryTab.joy;
-
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final selectedTab = ref.watch(selectedAnalyticsPrimaryTabProvider);
 
     // ONE canonical context drives BOTH the card map and `_refresh` so build
     // and invalidation keys cannot drift (D-A1 / D-B2).
@@ -64,7 +64,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     // `_refresh` union, D-B3). Resolved here and injected into the one
     // FamilyInsightDataCard the registry leaves with a null placeholder.
     final shadowBooksAsync =
-        ctx.isGroupMode && _selectedTab == AnalyticsPrimaryTab.spending
+        ctx.isGroupMode && selectedTab == AnalyticsPrimaryTab.spending
         ? ref
               .watch(shadowBooksProvider)
               .whenData<List<Object>?>((value) => value)
@@ -163,7 +163,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             const SizedBox(height: MainSurfaceHeader.contentSpacing),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () async => _refresh(ref, ctx),
+                onRefresh: () async => _refresh(ref, ctx, selectedTab),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(
@@ -176,14 +176,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       AnalyticsPrimaryTabs(
-                        selected: _selectedTab,
+                        selected: selectedTab,
                         spendingLabel: spendingLabel,
                         joyLabel: joyLabel,
                         spendingSummary: spendingSummary,
                         joySummary: joySummary,
                         onChanged: (tab) {
-                          if (tab == _selectedTab) return;
-                          setState(() => _selectedTab = tab);
+                          if (tab == selectedTab) return;
+                          ref
+                              .read(
+                                selectedAnalyticsPrimaryTabProvider.notifier,
+                              )
+                              .select(tab);
                         },
                       ),
                       const SizedBox(height: 18),
@@ -194,12 +198,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeOut,
                         child: Column(
-                          key: ValueKey(_selectedTab),
+                          key: ValueKey(selectedTab),
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: _buildCardChildren(
                             l10n,
                             ctx,
                             shadowBooksAsync,
+                            selectedTab,
                           ),
                         ),
                       ),
@@ -227,12 +232,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     S l10n,
     AnalyticsCardContext ctx,
     AsyncValue<List<Object>?> shadowBooksAsync,
+    AnalyticsPrimaryTab selectedTab,
   ) {
     final children = <Widget>[];
     var isFirst = true;
 
     for (final spec in analyticsCardRegistry) {
-      if (spec.primaryTab != _selectedTab) continue;
+      if (spec.primaryTab != selectedTab) continue;
       if (!spec.isVisible(ctx)) continue;
 
       final header = spec.sectionHeader;
@@ -289,9 +295,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   /// `where(isVisible)` filters BEFORE `expand(refreshTargets)` so solo mode
   /// never invalidates family providers (D-B4). `.toSet()` dedupes the
   /// monthlyReport/happinessReport instances shared across cards.
-  void _refresh(WidgetRef ref, AnalyticsCardContext ctx) {
+  void _refresh(
+    WidgetRef ref,
+    AnalyticsCardContext ctx,
+    AnalyticsPrimaryTab selectedTab,
+  ) {
     final targets = analyticsCardRegistry
-        .where((spec) => spec.primaryTab == _selectedTab && spec.isVisible(ctx))
+        .where((spec) => spec.primaryTab == selectedTab && spec.isVisible(ctx))
         .expand((spec) => spec.refreshTargets(ctx))
         .toSet();
     for (final ProviderBase<Object?> p in targets) {

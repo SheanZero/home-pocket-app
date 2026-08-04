@@ -4,6 +4,8 @@
 //
 // Run: flutter test test/widget/features/shopping_list/presentation/screens/shopping_list_screen_test.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -69,6 +71,7 @@ Future<void> _pumpScreen(
   MockToggleItemCompletedUseCase? toggle,
   MockReorderShoppingItemsUseCase? reorder,
   MockClearCompletedItemsUseCase? clearCompleted,
+  Stream<List<ShoppingItem>>? itemsStream,
   VoidCallback? onSettingsTap,
   List<Override> extraOverrides = const [],
 }) async {
@@ -83,16 +86,18 @@ Future<void> _pumpScreen(
   when(
     () => toggleUC.execute(any()),
   ).thenAnswer((_) async => Result.success(null));
-  when(
-    () => clearUC.execute(any()),
-  ).thenAnswer((_) async => Result.success(null));
+  if (clearCompleted == null) {
+    when(
+      () => clearUC.execute(any()),
+    ).thenAnswer((_) async => Result.success(null));
+  }
 
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         // Provide a stream of items for filteredShoppingItemsProvider
         filteredShoppingItemsProvider.overrideWith(
-          (ref) => Stream.value(items),
+          (ref) => itemsStream ?? Stream.value(items),
         ),
         deleteShoppingItemUseCaseProvider.overrideWithValue(deleteUC),
         toggleItemCompletedUseCaseProvider.overrideWithValue(toggleUC),
@@ -273,6 +278,56 @@ void main() {
         expect(find.text('Completed'), findsNothing);
         expect(find.text('完了済み'), findsNothing);
         expect(find.text('已完成'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'clear all waits for persistence then removes rows from the live stream',
+      (tester) async {
+        final completedItem = _makeItem(
+          id: 'c-live',
+          isCompleted: true,
+          name: 'Live completed item',
+        );
+        late StreamController<List<ShoppingItem>> controller;
+        controller = StreamController<List<ShoppingItem>>.broadcast(
+          onListen: () => controller.add([completedItem]),
+        );
+        addTearDown(controller.close);
+
+        final clearCompleted = MockClearCompletedItemsUseCase();
+        final completion = Completer<Result<void>>();
+        when(() => clearCompleted.execute('all')).thenAnswer((_) async {
+          final result = await completion.future;
+          controller.add(const []);
+          return result;
+        });
+        await _pumpScreen(
+          tester,
+          items: [completedItem],
+          itemsStream: controller.stream,
+          clearCompleted: clearCompleted,
+        );
+        final l10n = S.of(tester.element(find.byType(ShoppingListScreen)));
+
+        await tester.tap(find.text(l10n.shoppingClearCompletedAction));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.shoppingClearCompletedConfirm));
+        await tester.pump();
+
+        verify(() => clearCompleted.execute('all')).called(1);
+        expect(find.text('Live completed item'), findsOneWidget);
+        expect(find.text(l10n.shoppingClearCompletedSnackBar), findsNothing);
+
+        completion.complete(Result.success(null));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.text('Live completed item'), findsNothing);
+        expect(find.text(l10n.shoppingClearCompletedSnackBar), findsOneWidget);
+
+        await tester.pump(const Duration(seconds: 4));
+        await tester.pumpAndSettle();
       },
     );
   });

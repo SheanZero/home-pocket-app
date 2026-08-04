@@ -1,5 +1,6 @@
 import '../../features/shopping_list/domain/models/shopping_item.dart';
 import '../../features/shopping_list/domain/models/shopping_item_sync_mapper.dart';
+import '../../features/shopping_list/domain/models/shopping_unit.dart';
 import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import '../../shared/utils/result.dart';
 import '../family_sync/shopping_item_change_tracker.dart';
@@ -29,7 +30,9 @@ class UpdateShoppingItemParams {
   final String? categoryId;
   final List<String>? tags;
   final String? note; // pass-through: null clears
-  final int? quantity;
+  final double? quantity;
+  final ShoppingUnit? unit;
+  final String? customUnit;
   final int? estimatedPrice;
 
   const UpdateShoppingItemParams({
@@ -41,6 +44,8 @@ class UpdateShoppingItemParams {
     this.tags,
     this.note,
     this.quantity,
+    this.unit,
+    this.customUnit,
     this.estimatedPrice,
   });
 }
@@ -87,6 +92,19 @@ class UpdateShoppingItemUseCase {
       );
     }
 
+    final quantity = params.quantity ?? existing.quantity;
+    if (!quantity.isFinite || quantity <= 0) {
+      return Result.error('quantity must be greater than zero');
+    }
+    final unit = params.unit ?? existing.unit;
+    final customUnit = unit == ShoppingUnit.custom
+        ? (params.customUnit ?? existing.customUnit)?.trim()
+        : null;
+    if (unit == ShoppingUnit.custom &&
+        (customUnit == null || customUnit.isEmpty || customUnit.length > 12)) {
+      return Result.error('custom unit must contain 1 to 12 characters');
+    }
+
     // 2. Build updated row via copyWith (immutable pattern — CLAUDE.md Pitfall #4)
     //    Coalesce fields: null param → keep existing value.
     //    Pass-through fields: note applied verbatim (null clears — EDIT-02).
@@ -99,7 +117,9 @@ class UpdateShoppingItemUseCase {
       categoryId: params.categoryId ?? existing.categoryId,
       tags: params.tags ?? existing.tags,
       note: params.note, // pass-through: null clears (EDIT-02 convention)
-      quantity: params.quantity ?? existing.quantity,
+      quantity: quantity,
+      unit: unit,
+      customUnit: customUnit,
       estimatedPrice: params.estimatedPrice ?? existing.estimatedPrice,
       updatedAt: DateTime.now(),
       // isCompleted, completedAt, listType, sortOrder, id, deviceId,

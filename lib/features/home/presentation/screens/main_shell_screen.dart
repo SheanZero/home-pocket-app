@@ -6,7 +6,9 @@ import '../../../accounting/presentation/screens/manual_one_step_screen.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../analytics/presentation/providers/state_transaction_aggregate_refresh.dart';
+import '../../../analytics/presentation/providers/state_primary_tab.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
+import '../../../analytics/presentation/widgets/analytics_primary_tabs.dart';
 import '../../../list/presentation/providers/state_calendar_totals.dart';
 import '../../../list/presentation/providers/state_list_transactions.dart';
 import '../../../list/presentation/screens/list_screen.dart';
@@ -138,6 +140,11 @@ class MainShellScreen extends ConsumerWidget {
       );
     }
 
+    void openAnalytics(AnalyticsPrimaryTab tab) {
+      ref.read(selectedAnalyticsPrimaryTabProvider.notifier).select(tab);
+      ref.read(selectedTabIndexProvider.notifier).select(2);
+    }
+
     return FamilySyncNotificationRouteListener(
       child: Scaffold(
         // Onboarding can hand off while the iOS keyboard dismissal animation
@@ -158,6 +165,8 @@ class MainShellScreen extends ConsumerWidget {
                   bookId: bookId,
                   onAddJoyTap: (prompt) =>
                       openAddEntry(continuousMode: false, joyPrompt: prompt),
+                  onJoyAnalyticsTap: () =>
+                      openAnalytics(AnalyticsPrimaryTab.joy),
                   onSettingsTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -189,6 +198,10 @@ class MainShellScreen extends ConsumerWidget {
                 onTap: (index) {
                   if (index == 0 || index == 2) {
                     invalidateTransactionAggregates(ref);
+                  }
+                  if (index == 2) {
+                    openAnalytics(AnalyticsPrimaryTab.spending);
+                    return;
                   }
                   ref.read(selectedTabIndexProvider.notifier).select(index);
                 },

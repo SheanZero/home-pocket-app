@@ -12,6 +12,7 @@ import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart';
 import '../screens/shopping_item_form_screen.dart';
+import '../utils/shopping_quantity_formatter.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 
 /// Shopping list item tile — v15 warm-Japanese port (D-02, ADR-019).
@@ -149,6 +150,7 @@ class ShoppingItemTile extends ConsumerWidget {
     AppPalette palette,
   ) {
     final locale = Localizations.localeOf(context);
+    final l = S.of(context);
 
     // Meta line (mockup `.row-copy small`) — "{category} · {quantity}".
     // Category resolves via CategoryLocalizationService (the SAME path the list
@@ -159,9 +161,10 @@ class ShoppingItemTile extends ConsumerWidget {
     final categoryName = (categoryId != null && categoryId.isNotEmpty)
         ? CategoryLocalizationService.resolveFromId(categoryId, locale)
         : null;
+    final quantityText = formatShoppingQuantity(item, l, locale);
     final metaText = categoryName != null
-        ? '$categoryName · ${item.quantity}'
-        : '${item.quantity}';
+        ? '$categoryName · $quantityText'
+        : quantityText;
 
     return Container(
       key: const Key('shopping_item_content'),

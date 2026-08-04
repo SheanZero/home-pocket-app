@@ -19,7 +19,6 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/amount_edit_bottom_sheet.dart';
 import '../widgets/transaction_details_form.dart';
-import '../../../../shared/widgets/soft_toast.dart';
 import '../widgets/voice_waveform.dart';
 import 'voice_input_screen_helpers.dart';
 import 'voice_locale_readiness_mixin.dart';
@@ -123,21 +122,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   }
 
   void _showPermissionError() {
-    final overlay = Overlay.of(context);
-    late OverlayEntry entry;
-    entry = OverlayEntry(
-      builder: (_) => Positioned(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 0,
-        right: 0,
-        child: SoftToast(
-          message: S.of(context).voiceMicrophonePermissionRequired,
-          icon: Icons.mic_off,
-          onDismissed: () => entry.remove(),
-        ),
-      ),
+    showErrorFeedback(
+      context,
+      S.of(context).voiceMicrophonePermissionRequired,
+      icon: Icons.mic_off,
     );
-    overlay.insert(entry);
   }
 
   // ── Phase 22 D-03: hold-to-record gesture lifecycle ──

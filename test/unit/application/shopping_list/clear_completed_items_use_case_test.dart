@@ -8,6 +8,9 @@ import 'package:mocktail/mocktail.dart';
 class _MockShoppingItemRepository extends Mock
     implements ShoppingItemRepository {}
 
+class _MockDurableShoppingItemRepository extends Mock
+    implements DurableFamilySyncShoppingItemRepository {}
+
 void main() {
   late _MockShoppingItemRepository mockRepo;
   late ShoppingItemChangeTracker tracker;
@@ -97,13 +100,65 @@ void main() {
       },
     );
 
+    test('private list soft-delete calls repo with private listType', () async {
+      final result = await useCase.execute('private');
+
+      expect(result.isSuccess, isTrue);
+      verify(() => mockRepo.softDeleteAllCompleted('private')).called(1);
+    });
+
+    test('all clears completed items from both persisted list types', () async {
+      final result = await useCase.execute('all');
+
+      expect(result.isSuccess, isTrue);
+      verify(() => mockRepo.softDeleteAllCompleted('private')).called(1);
+      verify(() => mockRepo.softDeleteAllCompleted('public')).called(1);
+      expect(tracker.pendingCount, 2);
+      verifyNever(() => mockRepo.softDeleteAllCompleted('all'));
+    });
+
     test(
-      'private list soft-delete calls repo with private listType',
+      'all uses durable outbox writes for private and public segments',
       () async {
-        final result = await useCase.execute('private');
+        final durableRepo = _MockDurableShoppingItemRepository();
+        when(
+          () => durableRepo.softDeleteAllCompletedWithFamilySyncOutbox(
+            'private',
+            originDeviceId: 'device-1',
+          ),
+        ).thenAnswer((_) async => [completedPrivateItem]);
+        when(
+          () => durableRepo.softDeleteAllCompletedWithFamilySyncOutbox(
+            'public',
+            originDeviceId: 'device-1',
+          ),
+        ).thenAnswer((_) async => [completedPublicItem1, completedPublicItem2]);
+        final durableUseCase = ClearCompletedItemsUseCase(
+          shoppingItemRepository: durableRepo,
+          deviceIdResolver: () async => 'device-1',
+        );
+
+        final result = await durableUseCase.execute('all');
 
         expect(result.isSuccess, isTrue);
-        verify(() => mockRepo.softDeleteAllCompleted('private')).called(1);
+        verify(
+          () => durableRepo.softDeleteAllCompletedWithFamilySyncOutbox(
+            'private',
+            originDeviceId: 'device-1',
+          ),
+        ).called(1);
+        verify(
+          () => durableRepo.softDeleteAllCompletedWithFamilySyncOutbox(
+            'public',
+            originDeviceId: 'device-1',
+          ),
+        ).called(1);
+        verifyNever(
+          () => durableRepo.softDeleteAllCompletedWithFamilySyncOutbox(
+            'all',
+            originDeviceId: any(named: 'originDeviceId'),
+          ),
+        );
       },
     );
   });

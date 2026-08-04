@@ -33,6 +33,7 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
   void _onResult(SpeechRecognitionResult result, int generation) {
     if (!_isPttSessionCurrent(generation)) return;
     final resultRevision = ++_pttResultRevision;
+    _recordPttSpeechActivity(result.recognizedWords, generation);
 
     if (!result.finalResult) {
       _partialResultCount++;
@@ -43,7 +44,15 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
       _parseDebounce = Timer(VoiceTuning.partialParseDebounce, () {
         if (_isPttResultCurrent(generation, resultRevision) &&
             result.recognizedWords.isNotEmpty) {
-          _parseVoiceInput(result.recognizedWords, generation, resultRevision);
+          final fill = _parseVoiceInput(
+            result.recognizedWords,
+            generation,
+            resultRevision,
+          );
+          _pttPendingFillGeneration = generation;
+          _pttPendingFillRevision = resultRevision;
+          _pttPendingFill = fill;
+          unawaited(fill);
         }
       });
     } else {
@@ -72,14 +81,17 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
         // The legacy hold path only refreshes _parseResult here; the fill happens
         // on release (still one parse, via the release commit).
         if (_continuousActive) {
-          unawaited(
-            _parseAndFillContinuousFinal(
-              text,
-              generation: generation,
-              resultRevision: resultRevision,
-              alternateTexts: alternateTexts,
-            ),
+          final fill = _parseAndFillContinuousFinal(
+            text,
+            generation: generation,
+            resultRevision: resultRevision,
+            alternateTexts: alternateTexts,
           );
+          _pttPendingFillGeneration = generation;
+          _pttPendingFillRevision = resultRevision;
+          _pttPendingFill = fill;
+          _armPttFinalCompletion(generation);
+          unawaited(fill);
         } else {
           _parseFinalResult(
             text,

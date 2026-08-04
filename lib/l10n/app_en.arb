@@ -1081,6 +1081,47 @@
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },
+  "satisfactionSheetManualReason": "Set as a Joy expense",
+  "@satisfactionSheetManualReason": {
+    "description": "Context shown when the user manually switches an entry to the Joy ledger"
+  },
+  "satisfactionSheetCategoryReason": "Set as Joy based on “{categoryName}”",
+  "@satisfactionSheetCategoryReason": {
+    "description": "Context shown when category inference switches an entry to the Joy ledger",
+    "placeholders": {
+      "categoryName": {"type": "String"}
+    }
+  },
+  "satisfactionSheetTitle": "How satisfying was this expense?",
+  "@satisfactionSheetTitle": {
+    "description": "Title of the Joy satisfaction selection bottom sheet"
+  },
+  "satisfactionSheetCurrent": "Currently “{level}” — you can change it anytime",
+  "@satisfactionSheetCurrent": {
+    "description": "Current Joy satisfaction summary in the selection bottom sheet",
+    "placeholders": {
+      "level": {"type": "String"}
+    }
+  },
+  "satisfactionSheetChoiceTwo": "Okay",
+  "@satisfactionSheetChoiceTwo": {
+    "description": "Second Joy satisfaction choice shown in the bottom sheet"
+  },
+  "satisfactionSheetChoiceFour": "Great",
+  "@satisfactionSheetChoiceFour": {
+    "description": "Fourth Joy satisfaction choice shown in the bottom sheet"
+  },
+  "satisfactionSheetAutoReturn": "Your choice returns you to the entry",
+  "@satisfactionSheetAutoReturn": {
+    "description": "Explains that choosing a satisfaction value closes the bottom sheet"
+  },
+  "satisfactionSheetKeepCurrent": "Keep “{level}”",
+  "@satisfactionSheetKeepCurrent": {
+    "description": "Keeps the current Joy satisfaction value and closes the bottom sheet",
+    "placeholders": {
+      "level": {"type": "String"}
+    }
+  },
   "satisfactionLabelNeutral": "Neutral",
   "@satisfactionLabelNeutral": {
     "description": "Variant A pill label: val 2, unipolar positive baseline (ADR-014)"
@@ -3109,6 +3150,21 @@
   "@shoppingFormQuantityLabel": {
     "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormQuantityHint": "Set the amount and unit separately",
+  "shoppingUnitPickerTitle": "Choose a unit",
+  "shoppingUnitPickerHelp": "Changing the unit does not convert the amount",
+  "shoppingUnitCustom": "Custom unit",
+  "shoppingUnitCustomHint": "e.g. cup",
+  "shoppingUnitCustomError": "Enter 1–12 characters",
+  "shoppingUnitApply": "Apply",
+  "shoppingUnitPiece": "pc",
+  "shoppingUnitGram": "g",
+  "shoppingUnitKilogram": "kg",
+  "shoppingUnitMilliliter": "ml",
+  "shoppingUnitLiter": "L",
+  "shoppingUnitBag": "bag",
+  "shoppingUnitBottle": "btl",
+  "shoppingUnitPack": "pack",
   "shoppingFormPrice": "Estimated price",
   "@shoppingFormPrice": {
     "description": "Label for the estimated price field in the shopping item form (Phase 38-07)"

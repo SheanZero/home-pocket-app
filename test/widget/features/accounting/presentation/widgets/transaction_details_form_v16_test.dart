@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/update_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
@@ -11,6 +12,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction_photo_
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/detail_info_card.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_bottom_sheet.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart';
@@ -21,6 +23,8 @@ import '../../../../../helpers/test_localizations.dart';
 
 class _MockUpdateTransactionUseCase extends Mock
     implements UpdateTransactionUseCase {}
+
+class _MockCategoryService extends Mock implements CategoryService {}
 
 class _FakeUpdateTransactionParams extends Fake
     implements UpdateTransactionParams {}
@@ -71,6 +75,7 @@ void main() {
     bool useV16Layout = false,
     LedgerType? initialLedgerType,
     TransactionDetailsFormConfig? config,
+    SatisfactionPromptCallback? onSatisfactionRequested,
     List<Override> overrides = const [],
   }) {
     return createLocalizedWidget(
@@ -85,6 +90,7 @@ void main() {
               ),
           useV16Layout: useV16Layout,
           initialLedgerType: initialLedgerType,
+          onSatisfactionRequested: onSatisfactionRequested,
         ),
       ),
       overrides: [
@@ -293,6 +299,94 @@ void main() {
     expect(formKey.currentState!.currentLedgerType, LedgerType.joy);
     expect(find.byKey(const ValueKey('v16-satisfaction-card')), findsOneWidget);
   });
+
+  testWidgets('v16 Joy selection requests satisfaction and shows summary row', (
+    tester,
+  ) async {
+    final requests = <SatisfactionPromptRequest>[];
+    final formKey = GlobalKey<TransactionDetailsFormState>();
+
+    await tester.pumpWidget(
+      buildForm(
+        formKey: formKey,
+        useV16Layout: true,
+        onSatisfactionRequested: (request) async {
+          requests.add(request);
+          return 8;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('ledger_type_joy_chip')));
+    await tester.pumpAndSettle();
+
+    expect(requests, hasLength(1));
+    expect(requests.single.reason, SatisfactionPromptReason.manualSelection);
+    expect(requests.single.currentValue, 2);
+    expect(formKey.currentState!.currentSatisfaction, 8);
+    expect(
+      find.byKey(const ValueKey('v16-satisfaction-summary')),
+      findsOneWidget,
+    );
+    expect(find.text('Great'), findsOneWidget);
+    expect(find.byType(SvgPicture), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('v16-satisfaction-summary')));
+    await tester.pumpAndSettle();
+
+    expect(requests, hasLength(2));
+    expect(requests.last.reason, SatisfactionPromptReason.revisit);
+    expect(requests.last.currentValue, 8);
+  });
+
+  testWidgets(
+    'category inference requests satisfaction with category context',
+    (tester) async {
+      final category = Category(
+        id: 'custom-dining-out',
+        name: 'Dining out',
+        icon: 'restaurant',
+        color: '#000000',
+        level: 1,
+        createdAt: DateTime.utc(2026),
+      );
+      final categoryService = _MockCategoryService();
+      when(
+        () => categoryService.resolveLedgerType(category.id),
+      ).thenAnswer((_) async => LedgerType.joy);
+      final requests = <SatisfactionPromptRequest>[];
+      final formKey = GlobalKey<TransactionDetailsFormState>();
+
+      await tester.pumpWidget(
+        buildForm(
+          formKey: formKey,
+          useV16Layout: true,
+          config: TransactionDetailsFormConfig.$new(
+            bookId: 'book-1',
+            initialCategory: category,
+            entrySource: EntrySource.manual,
+          ),
+          onSatisfactionRequested: (request) async {
+            requests.add(request);
+            return null;
+          },
+          overrides: [
+            categoryServiceProvider.overrideWithValue(categoryService),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(formKey.currentState!.currentLedgerType, LedgerType.joy);
+      expect(requests, hasLength(1));
+      expect(
+        requests.single.reason,
+        SatisfactionPromptReason.categoryInference,
+      );
+      expect(requests.single.categoryName, 'Dining out');
+    },
+  );
 
   testWidgets(
     'v16 voice entry hides provenance badges but keeps weak-category warning',

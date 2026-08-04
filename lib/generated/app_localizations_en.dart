@@ -892,6 +892,37 @@ class SEn extends S {
   String get satisfactionExcellent => 'Amazing!';
 
   @override
+  String get satisfactionSheetManualReason => 'Set as a Joy expense';
+
+  @override
+  String satisfactionSheetCategoryReason(String categoryName) {
+    return 'Set as Joy based on “$categoryName”';
+  }
+
+  @override
+  String get satisfactionSheetTitle => 'How satisfying was this expense?';
+
+  @override
+  String satisfactionSheetCurrent(String level) {
+    return 'Currently “$level” — you can change it anytime';
+  }
+
+  @override
+  String get satisfactionSheetChoiceTwo => 'Okay';
+
+  @override
+  String get satisfactionSheetChoiceFour => 'Great';
+
+  @override
+  String get satisfactionSheetAutoReturn =>
+      'Your choice returns you to the entry';
+
+  @override
+  String satisfactionSheetKeepCurrent(String level) {
+    return 'Keep “$level”';
+  }
+
+  @override
   String get satisfactionLabelNeutral => 'Neutral';
 
   @override
@@ -2651,6 +2682,52 @@ class SEn extends S {
 
   @override
   String get shoppingFormQuantityLabel => 'Quantity';
+
+  @override
+  String get shoppingFormQuantityHint => 'Set the amount and unit separately';
+
+  @override
+  String get shoppingUnitPickerTitle => 'Choose a unit';
+
+  @override
+  String get shoppingUnitPickerHelp =>
+      'Changing the unit does not convert the amount';
+
+  @override
+  String get shoppingUnitCustom => 'Custom unit';
+
+  @override
+  String get shoppingUnitCustomHint => 'e.g. cup';
+
+  @override
+  String get shoppingUnitCustomError => 'Enter 1–12 characters';
+
+  @override
+  String get shoppingUnitApply => 'Apply';
+
+  @override
+  String get shoppingUnitPiece => 'pc';
+
+  @override
+  String get shoppingUnitGram => 'g';
+
+  @override
+  String get shoppingUnitKilogram => 'kg';
+
+  @override
+  String get shoppingUnitMilliliter => 'ml';
+
+  @override
+  String get shoppingUnitLiter => 'L';
+
+  @override
+  String get shoppingUnitBag => 'bag';
+
+  @override
+  String get shoppingUnitBottle => 'btl';
+
+  @override
+  String get shoppingUnitPack => 'pack';
 
   @override
   String get shoppingFormPrice => 'Estimated price';

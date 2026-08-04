@@ -8281,13 +8281,34 @@ class $ShoppingItemsTable extends ShoppingItems
     'quantity',
   );
   @override
-  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
     'quantity',
     aliasedName,
     false,
-    type: DriftSqlType.int,
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(1),
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _unitIdMeta = const VerificationMeta('unitId');
+  @override
+  late final GeneratedColumn<String> unitId = GeneratedColumn<String>(
+    'unit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('piece'),
+  );
+  static const VerificationMeta _customUnitMeta = const VerificationMeta(
+    'customUnit',
+  );
+  @override
+  late final GeneratedColumn<String> customUnit = GeneratedColumn<String>(
+    'custom_unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _estimatedPriceMeta = const VerificationMeta(
     'estimatedPrice',
@@ -8436,6 +8457,8 @@ class $ShoppingItemsTable extends ShoppingItems
     tags,
     note,
     quantity,
+    unitId,
+    customUnit,
     estimatedPrice,
     completedAt,
     isCompleted,
@@ -8515,6 +8538,18 @@ class $ShoppingItemsTable extends ShoppingItems
       context.handle(
         _quantityMeta,
         quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('unit_id')) {
+      context.handle(
+        _unitIdMeta,
+        unitId.isAcceptableOrUnknown(data['unit_id']!, _unitIdMeta),
+      );
+    }
+    if (data.containsKey('custom_unit')) {
+      context.handle(
+        _customUnitMeta,
+        customUnit.isAcceptableOrUnknown(data['custom_unit']!, _customUnitMeta),
       );
     }
     if (data.containsKey('estimated_price')) {
@@ -8645,9 +8680,17 @@ class $ShoppingItemsTable extends ShoppingItems
         data['${effectivePrefix}note'],
       ),
       quantity: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.double,
         data['${effectivePrefix}quantity'],
       )!,
+      unitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit_id'],
+      )!,
+      customUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_unit'],
+      ),
       estimatedPrice: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}estimated_price'],
@@ -8710,7 +8753,9 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
   final String? categoryId;
   final String? tags;
   final String? note;
-  final int quantity;
+  final double quantity;
+  final String unitId;
+  final String? customUnit;
   final int? estimatedPrice;
   final DateTime? completedAt;
   final bool isCompleted;
@@ -8732,6 +8777,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     this.tags,
     this.note,
     required this.quantity,
+    required this.unitId,
+    this.customUnit,
     this.estimatedPrice,
     this.completedAt,
     required this.isCompleted,
@@ -8763,7 +8810,11 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
-    map['quantity'] = Variable<int>(quantity);
+    map['quantity'] = Variable<double>(quantity);
+    map['unit_id'] = Variable<String>(unitId);
+    if (!nullToAbsent || customUnit != null) {
+      map['custom_unit'] = Variable<String>(customUnit);
+    }
     if (!nullToAbsent || estimatedPrice != null) {
       map['estimated_price'] = Variable<int>(estimatedPrice);
     }
@@ -8801,6 +8852,10 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       quantity: Value(quantity),
+      unitId: Value(unitId),
+      customUnit: customUnit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customUnit),
       estimatedPrice: estimatedPrice == null && nullToAbsent
           ? const Value.absent()
           : Value(estimatedPrice),
@@ -8837,7 +8892,9 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       categoryId: serializer.fromJson<String?>(json['categoryId']),
       tags: serializer.fromJson<String?>(json['tags']),
       note: serializer.fromJson<String?>(json['note']),
-      quantity: serializer.fromJson<int>(json['quantity']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      unitId: serializer.fromJson<String>(json['unitId']),
+      customUnit: serializer.fromJson<String?>(json['customUnit']),
       estimatedPrice: serializer.fromJson<int?>(json['estimatedPrice']),
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
@@ -8865,7 +8922,9 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       'categoryId': serializer.toJson<String?>(categoryId),
       'tags': serializer.toJson<String?>(tags),
       'note': serializer.toJson<String?>(note),
-      'quantity': serializer.toJson<int>(quantity),
+      'quantity': serializer.toJson<double>(quantity),
+      'unitId': serializer.toJson<String>(unitId),
+      'customUnit': serializer.toJson<String?>(customUnit),
       'estimatedPrice': serializer.toJson<int?>(estimatedPrice),
       'completedAt': serializer.toJson<DateTime?>(completedAt),
       'isCompleted': serializer.toJson<bool>(isCompleted),
@@ -8889,7 +8948,9 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     Value<String?> categoryId = const Value.absent(),
     Value<String?> tags = const Value.absent(),
     Value<String?> note = const Value.absent(),
-    int? quantity,
+    double? quantity,
+    String? unitId,
+    Value<String?> customUnit = const Value.absent(),
     Value<int?> estimatedPrice = const Value.absent(),
     Value<DateTime?> completedAt = const Value.absent(),
     bool? isCompleted,
@@ -8911,6 +8972,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     tags: tags.present ? tags.value : this.tags,
     note: note.present ? note.value : this.note,
     quantity: quantity ?? this.quantity,
+    unitId: unitId ?? this.unitId,
+    customUnit: customUnit.present ? customUnit.value : this.customUnit,
     estimatedPrice: estimatedPrice.present
         ? estimatedPrice.value
         : this.estimatedPrice,
@@ -8942,6 +9005,10 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
       tags: data.tags.present ? data.tags.value : this.tags,
       note: data.note.present ? data.note.value : this.note,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unitId: data.unitId.present ? data.unitId.value : this.unitId,
+      customUnit: data.customUnit.present
+          ? data.customUnit.value
+          : this.customUnit,
       estimatedPrice: data.estimatedPrice.present
           ? data.estimatedPrice.value
           : this.estimatedPrice,
@@ -8980,6 +9047,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
           ..write('tags: $tags, ')
           ..write('note: $note, ')
           ..write('quantity: $quantity, ')
+          ..write('unitId: $unitId, ')
+          ..write('customUnit: $customUnit, ')
           ..write('estimatedPrice: $estimatedPrice, ')
           ..write('completedAt: $completedAt, ')
           ..write('isCompleted: $isCompleted, ')
@@ -8996,7 +9065,7 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     deviceId,
     listType,
@@ -9006,6 +9075,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     tags,
     note,
     quantity,
+    unitId,
+    customUnit,
     estimatedPrice,
     completedAt,
     isCompleted,
@@ -9017,7 +9088,7 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
     updatedAt,
     syncRevision,
     syncOriginDeviceId,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -9031,6 +9102,8 @@ class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
           other.tags == this.tags &&
           other.note == this.note &&
           other.quantity == this.quantity &&
+          other.unitId == this.unitId &&
+          other.customUnit == this.customUnit &&
           other.estimatedPrice == this.estimatedPrice &&
           other.completedAt == this.completedAt &&
           other.isCompleted == this.isCompleted &&
@@ -9053,7 +9126,9 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
   final Value<String?> categoryId;
   final Value<String?> tags;
   final Value<String?> note;
-  final Value<int> quantity;
+  final Value<double> quantity;
+  final Value<String> unitId;
+  final Value<String?> customUnit;
   final Value<int?> estimatedPrice;
   final Value<DateTime?> completedAt;
   final Value<bool> isCompleted;
@@ -9076,6 +9151,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     this.tags = const Value.absent(),
     this.note = const Value.absent(),
     this.quantity = const Value.absent(),
+    this.unitId = const Value.absent(),
+    this.customUnit = const Value.absent(),
     this.estimatedPrice = const Value.absent(),
     this.completedAt = const Value.absent(),
     this.isCompleted = const Value.absent(),
@@ -9099,6 +9176,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     this.tags = const Value.absent(),
     this.note = const Value.absent(),
     this.quantity = const Value.absent(),
+    this.unitId = const Value.absent(),
+    this.customUnit = const Value.absent(),
     this.estimatedPrice = const Value.absent(),
     this.completedAt = const Value.absent(),
     this.isCompleted = const Value.absent(),
@@ -9124,7 +9203,9 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     Expression<String>? categoryId,
     Expression<String>? tags,
     Expression<String>? note,
-    Expression<int>? quantity,
+    Expression<double>? quantity,
+    Expression<String>? unitId,
+    Expression<String>? customUnit,
     Expression<int>? estimatedPrice,
     Expression<DateTime>? completedAt,
     Expression<bool>? isCompleted,
@@ -9148,6 +9229,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
       if (tags != null) 'tags': tags,
       if (note != null) 'note': note,
       if (quantity != null) 'quantity': quantity,
+      if (unitId != null) 'unit_id': unitId,
+      if (customUnit != null) 'custom_unit': customUnit,
       if (estimatedPrice != null) 'estimated_price': estimatedPrice,
       if (completedAt != null) 'completed_at': completedAt,
       if (isCompleted != null) 'is_completed': isCompleted,
@@ -9173,7 +9256,9 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
     Value<String?>? categoryId,
     Value<String?>? tags,
     Value<String?>? note,
-    Value<int>? quantity,
+    Value<double>? quantity,
+    Value<String>? unitId,
+    Value<String?>? customUnit,
     Value<int?>? estimatedPrice,
     Value<DateTime?>? completedAt,
     Value<bool>? isCompleted,
@@ -9197,6 +9282,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
       tags: tags ?? this.tags,
       note: note ?? this.note,
       quantity: quantity ?? this.quantity,
+      unitId: unitId ?? this.unitId,
+      customUnit: customUnit ?? this.customUnit,
       estimatedPrice: estimatedPrice ?? this.estimatedPrice,
       completedAt: completedAt ?? this.completedAt,
       isCompleted: isCompleted ?? this.isCompleted,
@@ -9240,7 +9327,13 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
       map['note'] = Variable<String>(note.value);
     }
     if (quantity.present) {
-      map['quantity'] = Variable<int>(quantity.value);
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unitId.present) {
+      map['unit_id'] = Variable<String>(unitId.value);
+    }
+    if (customUnit.present) {
+      map['custom_unit'] = Variable<String>(customUnit.value);
     }
     if (estimatedPrice.present) {
       map['estimated_price'] = Variable<int>(estimatedPrice.value);
@@ -9293,6 +9386,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
           ..write('tags: $tags, ')
           ..write('note: $note, ')
           ..write('quantity: $quantity, ')
+          ..write('unitId: $unitId, ')
+          ..write('customUnit: $customUnit, ')
           ..write('estimatedPrice: $estimatedPrice, ')
           ..write('completedAt: $completedAt, ')
           ..write('isCompleted: $isCompleted, ')
@@ -9304,6 +9399,380 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
           ..write('updatedAt: $updatedAt, ')
           ..write('syncRevision: $syncRevision, ')
           ..write('syncOriginDeviceId: $syncOriginDeviceId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ShoppingUnitUsagesTable extends ShoppingUnitUsages
+    with TableInfo<$ShoppingUnitUsagesTable, ShoppingUnitUsageRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingUnitUsagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _usageKeyMeta = const VerificationMeta(
+    'usageKey',
+  );
+  @override
+  late final GeneratedColumn<String> usageKey = GeneratedColumn<String>(
+    'usage_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitIdMeta = const VerificationMeta('unitId');
+  @override
+  late final GeneratedColumn<String> unitId = GeneratedColumn<String>(
+    'unit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customUnitMeta = const VerificationMeta(
+    'customUnit',
+  );
+  @override
+  late final GeneratedColumn<String> customUnit = GeneratedColumn<String>(
+    'custom_unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _useCountMeta = const VerificationMeta(
+    'useCount',
+  );
+  @override
+  late final GeneratedColumn<int> useCount = GeneratedColumn<int>(
+    'use_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _lastUsedAtMeta = const VerificationMeta(
+    'lastUsedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUsedAt = GeneratedColumn<DateTime>(
+    'last_used_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    usageKey,
+    unitId,
+    customUnit,
+    useCount,
+    lastUsedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_unit_usages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ShoppingUnitUsageRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('usage_key')) {
+      context.handle(
+        _usageKeyMeta,
+        usageKey.isAcceptableOrUnknown(data['usage_key']!, _usageKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_usageKeyMeta);
+    }
+    if (data.containsKey('unit_id')) {
+      context.handle(
+        _unitIdMeta,
+        unitId.isAcceptableOrUnknown(data['unit_id']!, _unitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitIdMeta);
+    }
+    if (data.containsKey('custom_unit')) {
+      context.handle(
+        _customUnitMeta,
+        customUnit.isAcceptableOrUnknown(data['custom_unit']!, _customUnitMeta),
+      );
+    }
+    if (data.containsKey('use_count')) {
+      context.handle(
+        _useCountMeta,
+        useCount.isAcceptableOrUnknown(data['use_count']!, _useCountMeta),
+      );
+    }
+    if (data.containsKey('last_used_at')) {
+      context.handle(
+        _lastUsedAtMeta,
+        lastUsedAt.isAcceptableOrUnknown(
+          data['last_used_at']!,
+          _lastUsedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastUsedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {usageKey};
+  @override
+  ShoppingUnitUsageRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingUnitUsageRow(
+      usageKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}usage_key'],
+      )!,
+      unitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit_id'],
+      )!,
+      customUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_unit'],
+      ),
+      useCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}use_count'],
+      )!,
+      lastUsedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_used_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ShoppingUnitUsagesTable createAlias(String alias) {
+    return $ShoppingUnitUsagesTable(attachedDatabase, alias);
+  }
+}
+
+class ShoppingUnitUsageRow extends DataClass
+    implements Insertable<ShoppingUnitUsageRow> {
+  final String usageKey;
+  final String unitId;
+  final String? customUnit;
+  final int useCount;
+  final DateTime lastUsedAt;
+  const ShoppingUnitUsageRow({
+    required this.usageKey,
+    required this.unitId,
+    this.customUnit,
+    required this.useCount,
+    required this.lastUsedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['usage_key'] = Variable<String>(usageKey);
+    map['unit_id'] = Variable<String>(unitId);
+    if (!nullToAbsent || customUnit != null) {
+      map['custom_unit'] = Variable<String>(customUnit);
+    }
+    map['use_count'] = Variable<int>(useCount);
+    map['last_used_at'] = Variable<DateTime>(lastUsedAt);
+    return map;
+  }
+
+  ShoppingUnitUsagesCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingUnitUsagesCompanion(
+      usageKey: Value(usageKey),
+      unitId: Value(unitId),
+      customUnit: customUnit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customUnit),
+      useCount: Value(useCount),
+      lastUsedAt: Value(lastUsedAt),
+    );
+  }
+
+  factory ShoppingUnitUsageRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingUnitUsageRow(
+      usageKey: serializer.fromJson<String>(json['usageKey']),
+      unitId: serializer.fromJson<String>(json['unitId']),
+      customUnit: serializer.fromJson<String?>(json['customUnit']),
+      useCount: serializer.fromJson<int>(json['useCount']),
+      lastUsedAt: serializer.fromJson<DateTime>(json['lastUsedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'usageKey': serializer.toJson<String>(usageKey),
+      'unitId': serializer.toJson<String>(unitId),
+      'customUnit': serializer.toJson<String?>(customUnit),
+      'useCount': serializer.toJson<int>(useCount),
+      'lastUsedAt': serializer.toJson<DateTime>(lastUsedAt),
+    };
+  }
+
+  ShoppingUnitUsageRow copyWith({
+    String? usageKey,
+    String? unitId,
+    Value<String?> customUnit = const Value.absent(),
+    int? useCount,
+    DateTime? lastUsedAt,
+  }) => ShoppingUnitUsageRow(
+    usageKey: usageKey ?? this.usageKey,
+    unitId: unitId ?? this.unitId,
+    customUnit: customUnit.present ? customUnit.value : this.customUnit,
+    useCount: useCount ?? this.useCount,
+    lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+  );
+  ShoppingUnitUsageRow copyWithCompanion(ShoppingUnitUsagesCompanion data) {
+    return ShoppingUnitUsageRow(
+      usageKey: data.usageKey.present ? data.usageKey.value : this.usageKey,
+      unitId: data.unitId.present ? data.unitId.value : this.unitId,
+      customUnit: data.customUnit.present
+          ? data.customUnit.value
+          : this.customUnit,
+      useCount: data.useCount.present ? data.useCount.value : this.useCount,
+      lastUsedAt: data.lastUsedAt.present
+          ? data.lastUsedAt.value
+          : this.lastUsedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingUnitUsageRow(')
+          ..write('usageKey: $usageKey, ')
+          ..write('unitId: $unitId, ')
+          ..write('customUnit: $customUnit, ')
+          ..write('useCount: $useCount, ')
+          ..write('lastUsedAt: $lastUsedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(usageKey, unitId, customUnit, useCount, lastUsedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingUnitUsageRow &&
+          other.usageKey == this.usageKey &&
+          other.unitId == this.unitId &&
+          other.customUnit == this.customUnit &&
+          other.useCount == this.useCount &&
+          other.lastUsedAt == this.lastUsedAt);
+}
+
+class ShoppingUnitUsagesCompanion
+    extends UpdateCompanion<ShoppingUnitUsageRow> {
+  final Value<String> usageKey;
+  final Value<String> unitId;
+  final Value<String?> customUnit;
+  final Value<int> useCount;
+  final Value<DateTime> lastUsedAt;
+  final Value<int> rowid;
+  const ShoppingUnitUsagesCompanion({
+    this.usageKey = const Value.absent(),
+    this.unitId = const Value.absent(),
+    this.customUnit = const Value.absent(),
+    this.useCount = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShoppingUnitUsagesCompanion.insert({
+    required String usageKey,
+    required String unitId,
+    this.customUnit = const Value.absent(),
+    this.useCount = const Value.absent(),
+    required DateTime lastUsedAt,
+    this.rowid = const Value.absent(),
+  }) : usageKey = Value(usageKey),
+       unitId = Value(unitId),
+       lastUsedAt = Value(lastUsedAt);
+  static Insertable<ShoppingUnitUsageRow> custom({
+    Expression<String>? usageKey,
+    Expression<String>? unitId,
+    Expression<String>? customUnit,
+    Expression<int>? useCount,
+    Expression<DateTime>? lastUsedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (usageKey != null) 'usage_key': usageKey,
+      if (unitId != null) 'unit_id': unitId,
+      if (customUnit != null) 'custom_unit': customUnit,
+      if (useCount != null) 'use_count': useCount,
+      if (lastUsedAt != null) 'last_used_at': lastUsedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShoppingUnitUsagesCompanion copyWith({
+    Value<String>? usageKey,
+    Value<String>? unitId,
+    Value<String?>? customUnit,
+    Value<int>? useCount,
+    Value<DateTime>? lastUsedAt,
+    Value<int>? rowid,
+  }) {
+    return ShoppingUnitUsagesCompanion(
+      usageKey: usageKey ?? this.usageKey,
+      unitId: unitId ?? this.unitId,
+      customUnit: customUnit ?? this.customUnit,
+      useCount: useCount ?? this.useCount,
+      lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (usageKey.present) {
+      map['usage_key'] = Variable<String>(usageKey.value);
+    }
+    if (unitId.present) {
+      map['unit_id'] = Variable<String>(unitId.value);
+    }
+    if (customUnit.present) {
+      map['custom_unit'] = Variable<String>(customUnit.value);
+    }
+    if (useCount.present) {
+      map['use_count'] = Variable<int>(useCount.value);
+    }
+    if (lastUsedAt.present) {
+      map['last_used_at'] = Variable<DateTime>(lastUsedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingUnitUsagesCompanion(')
+          ..write('usageKey: $usageKey, ')
+          ..write('unitId: $unitId, ')
+          ..write('customUnit: $customUnit, ')
+          ..write('useCount: $useCount, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -12194,6 +12663,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $MerchantMatchKeysTable(this);
   late final $MerchantsTable merchants = $MerchantsTable(this);
   late final $ShoppingItemsTable shoppingItems = $ShoppingItemsTable(this);
+  late final $ShoppingUnitUsagesTable shoppingUnitUsages =
+      $ShoppingUnitUsagesTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $UserProfilesTable userProfiles = $UserProfilesTable(this);
@@ -12217,6 +12688,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     merchantMatchKeys,
     merchants,
     shoppingItems,
+    shoppingUnitUsages,
     syncQueue,
     transactions,
     userProfiles,
@@ -16623,7 +17095,9 @@ typedef $$ShoppingItemsTableCreateCompanionBuilder =
       Value<String?> categoryId,
       Value<String?> tags,
       Value<String?> note,
-      Value<int> quantity,
+      Value<double> quantity,
+      Value<String> unitId,
+      Value<String?> customUnit,
       Value<int?> estimatedPrice,
       Value<DateTime?> completedAt,
       Value<bool> isCompleted,
@@ -16647,7 +17121,9 @@ typedef $$ShoppingItemsTableUpdateCompanionBuilder =
       Value<String?> categoryId,
       Value<String?> tags,
       Value<String?> note,
-      Value<int> quantity,
+      Value<double> quantity,
+      Value<String> unitId,
+      Value<String?> customUnit,
       Value<int?> estimatedPrice,
       Value<DateTime?> completedAt,
       Value<bool> isCompleted,
@@ -16711,8 +17187,18 @@ class $$ShoppingItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get quantity => $composableBuilder(
+  ColumnFilters<double> get quantity => $composableBuilder(
     column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unitId => $composableBuilder(
+    column: $table.unitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customUnit => $composableBuilder(
+    column: $table.customUnit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16821,8 +17307,18 @@ class $$ShoppingItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get quantity => $composableBuilder(
+  ColumnOrderings<double> get quantity => $composableBuilder(
     column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unitId => $composableBuilder(
+    column: $table.unitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customUnit => $composableBuilder(
+    column: $table.customUnit,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -16919,8 +17415,16 @@ class $$ShoppingItemsTableAnnotationComposer
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
 
-  GeneratedColumn<int> get quantity =>
+  GeneratedColumn<double> get quantity =>
       $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unitId =>
+      $composableBuilder(column: $table.unitId, builder: (column) => column);
+
+  GeneratedColumn<String> get customUnit => $composableBuilder(
+    column: $table.customUnit,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get estimatedPrice => $composableBuilder(
     column: $table.estimatedPrice,
@@ -17007,7 +17511,9 @@ class $$ShoppingItemsTableTableManager
                 Value<String?> categoryId = const Value.absent(),
                 Value<String?> tags = const Value.absent(),
                 Value<String?> note = const Value.absent(),
-                Value<int> quantity = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<String> unitId = const Value.absent(),
+                Value<String?> customUnit = const Value.absent(),
                 Value<int?> estimatedPrice = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
@@ -17030,6 +17536,8 @@ class $$ShoppingItemsTableTableManager
                 tags: tags,
                 note: note,
                 quantity: quantity,
+                unitId: unitId,
+                customUnit: customUnit,
                 estimatedPrice: estimatedPrice,
                 completedAt: completedAt,
                 isCompleted: isCompleted,
@@ -17053,7 +17561,9 @@ class $$ShoppingItemsTableTableManager
                 Value<String?> categoryId = const Value.absent(),
                 Value<String?> tags = const Value.absent(),
                 Value<String?> note = const Value.absent(),
-                Value<int> quantity = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<String> unitId = const Value.absent(),
+                Value<String?> customUnit = const Value.absent(),
                 Value<int?> estimatedPrice = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
@@ -17076,6 +17586,8 @@ class $$ShoppingItemsTableTableManager
                 tags: tags,
                 note: note,
                 quantity: quantity,
+                unitId: unitId,
+                customUnit: customUnit,
                 estimatedPrice: estimatedPrice,
                 completedAt: completedAt,
                 isCompleted: isCompleted,
@@ -17112,6 +17624,223 @@ typedef $$ShoppingItemsTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $ShoppingItemsTable, ShoppingItemRow>,
       ),
       ShoppingItemRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ShoppingUnitUsagesTableCreateCompanionBuilder =
+    ShoppingUnitUsagesCompanion Function({
+      required String usageKey,
+      required String unitId,
+      Value<String?> customUnit,
+      Value<int> useCount,
+      required DateTime lastUsedAt,
+      Value<int> rowid,
+    });
+typedef $$ShoppingUnitUsagesTableUpdateCompanionBuilder =
+    ShoppingUnitUsagesCompanion Function({
+      Value<String> usageKey,
+      Value<String> unitId,
+      Value<String?> customUnit,
+      Value<int> useCount,
+      Value<DateTime> lastUsedAt,
+      Value<int> rowid,
+    });
+
+class $$ShoppingUnitUsagesTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingUnitUsagesTable> {
+  $$ShoppingUnitUsagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get usageKey => $composableBuilder(
+    column: $table.usageKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unitId => $composableBuilder(
+    column: $table.unitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customUnit => $composableBuilder(
+    column: $table.customUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get useCount => $composableBuilder(
+    column: $table.useCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ShoppingUnitUsagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingUnitUsagesTable> {
+  $$ShoppingUnitUsagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get usageKey => $composableBuilder(
+    column: $table.usageKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unitId => $composableBuilder(
+    column: $table.unitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customUnit => $composableBuilder(
+    column: $table.customUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get useCount => $composableBuilder(
+    column: $table.useCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ShoppingUnitUsagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingUnitUsagesTable> {
+  $$ShoppingUnitUsagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get usageKey =>
+      $composableBuilder(column: $table.usageKey, builder: (column) => column);
+
+  GeneratedColumn<String> get unitId =>
+      $composableBuilder(column: $table.unitId, builder: (column) => column);
+
+  GeneratedColumn<String> get customUnit => $composableBuilder(
+    column: $table.customUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get useCount =>
+      $composableBuilder(column: $table.useCount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ShoppingUnitUsagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ShoppingUnitUsagesTable,
+          ShoppingUnitUsageRow,
+          $$ShoppingUnitUsagesTableFilterComposer,
+          $$ShoppingUnitUsagesTableOrderingComposer,
+          $$ShoppingUnitUsagesTableAnnotationComposer,
+          $$ShoppingUnitUsagesTableCreateCompanionBuilder,
+          $$ShoppingUnitUsagesTableUpdateCompanionBuilder,
+          (
+            ShoppingUnitUsageRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ShoppingUnitUsagesTable,
+              ShoppingUnitUsageRow
+            >,
+          ),
+          ShoppingUnitUsageRow,
+          PrefetchHooks Function()
+        > {
+  $$ShoppingUnitUsagesTableTableManager(
+    _$AppDatabase db,
+    $ShoppingUnitUsagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingUnitUsagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingUnitUsagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingUnitUsagesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> usageKey = const Value.absent(),
+                Value<String> unitId = const Value.absent(),
+                Value<String?> customUnit = const Value.absent(),
+                Value<int> useCount = const Value.absent(),
+                Value<DateTime> lastUsedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShoppingUnitUsagesCompanion(
+                usageKey: usageKey,
+                unitId: unitId,
+                customUnit: customUnit,
+                useCount: useCount,
+                lastUsedAt: lastUsedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String usageKey,
+                required String unitId,
+                Value<String?> customUnit = const Value.absent(),
+                Value<int> useCount = const Value.absent(),
+                required DateTime lastUsedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ShoppingUnitUsagesCompanion.insert(
+                usageKey: usageKey,
+                unitId: unitId,
+                customUnit: customUnit,
+                useCount: useCount,
+                lastUsedAt: lastUsedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ShoppingUnitUsagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ShoppingUnitUsagesTable,
+      ShoppingUnitUsageRow,
+      $$ShoppingUnitUsagesTableFilterComposer,
+      $$ShoppingUnitUsagesTableOrderingComposer,
+      $$ShoppingUnitUsagesTableAnnotationComposer,
+      $$ShoppingUnitUsagesTableCreateCompanionBuilder,
+      $$ShoppingUnitUsagesTableUpdateCompanionBuilder,
+      (
+        ShoppingUnitUsageRow,
+        BaseReferences<
+          _$AppDatabase,
+          $ShoppingUnitUsagesTable,
+          ShoppingUnitUsageRow
+        >,
+      ),
+      ShoppingUnitUsageRow,
       PrefetchHooks Function()
     >;
 typedef $$SyncQueueTableCreateCompanionBuilder =
@@ -18450,6 +19179,8 @@ class $AppDatabaseManager {
       $$MerchantsTableTableManager(_db, _db.merchants);
   $$ShoppingItemsTableTableManager get shoppingItems =>
       $$ShoppingItemsTableTableManager(_db, _db.shoppingItems);
+  $$ShoppingUnitUsagesTableTableManager get shoppingUnitUsages =>
+      $$ShoppingUnitUsagesTableTableManager(_db, _db.shoppingUnitUsages);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$TransactionsTableTableManager get transactions =>

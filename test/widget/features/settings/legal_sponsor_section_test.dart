@@ -56,18 +56,9 @@ void main() {
   S l10nOf(WidgetTester tester) =>
       S.of(tester.element(find.byType(LegalSponsorSection)));
 
-  test('production legal and support URLs are HTTPS and not placeholders', () {
-    final urls = [
-      LegalUrls.privacyPolicyFor('ja'),
-      LegalUrls.termsOfUseFor('ja'),
-      LegalUrls.tokushoFor('ja'),
-      LegalUrls.support,
-    ];
-
-    for (final url in urls) {
-      expect(Uri.parse(url).scheme, 'https');
-      expect(url, isNot(contains('example.com')));
-    }
+  test('production support URL is HTTPS and not a placeholder', () {
+    expect(Uri.parse(LegalUrls.support).scheme, 'https');
+    expect(LegalUrls.support, isNot(contains('example.com')));
   });
 
   testWidgets('renders legal links and the support card', (tester) async {
@@ -83,7 +74,7 @@ void main() {
     expect(find.text(l10n.sponsorButton), findsOneWidget);
   });
 
-  testWidgets('privacy row opens the real localized URL externally', (
+  testWidgets('privacy row opens the bundled document internally', (
     tester,
   ) async {
     await pump(tester);
@@ -92,12 +83,15 @@ void main() {
     await tester.tap(find.text(l10n.privacyPolicy));
     await tester.pumpAndSettle();
 
-    expect(launcher.lastUrl, LegalUrls.privacyPolicyFor('ja'));
-    expect(launcher.lastOptions?.mode, PreferredLaunchMode.externalApplication);
-    expect(find.byType(LegalDocScreen), findsNothing);
+    expect(launcher.lastUrl, isNull);
+    expect(find.byType(LegalDocScreen), findsOneWidget);
+    expect(
+      tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
+      LegalDoc.privacy,
+    );
   });
 
-  testWidgets('terms and tokusho rows use their real localized URLs', (
+  testWidgets('terms row opens its bundled document internally', (
     tester,
   ) async {
     await pump(tester);
@@ -105,28 +99,27 @@ void main() {
 
     await tester.tap(find.text(l10n.termsOfUse));
     await tester.pumpAndSettle();
-    expect(launcher.lastUrl, LegalUrls.termsOfUseFor('ja'));
+    expect(launcher.lastUrl, isNull);
+    expect(
+      tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
+      LegalDoc.terms,
+    );
+  });
+
+  testWidgets('tokusho row opens its bundled document internally', (
+    tester,
+  ) async {
+    await pump(tester);
+    final l10n = l10nOf(tester);
 
     await tester.ensureVisible(find.text(l10n.tokushoNotice));
     await tester.tap(find.text(l10n.tokushoNotice));
     await tester.pumpAndSettle();
-    expect(launcher.lastUrl, LegalUrls.tokushoFor('ja'));
-  });
-
-  testWidgets('failed legal launch falls back to the bundled offline reader', (
-    tester,
-  ) async {
-    launcher.result = false;
-    await pump(tester);
-    final l10n = l10nOf(tester);
-
-    await tester.tap(find.text(l10n.privacyPolicy));
-    await tester.pumpAndSettle();
-
+    expect(launcher.lastUrl, isNull);
     expect(find.byType(LegalDocScreen), findsOneWidget);
     expect(
       tester.widget<LegalDocScreen>(find.byType(LegalDocScreen)).doc,
-      LegalDoc.privacy,
+      LegalDoc.tokusho,
     );
   });
 
@@ -187,13 +180,11 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('external legal affordances use the shared-link palette', (
-    tester,
-  ) async {
+  testWidgets('legal rows use internal-navigation affordances', (tester) async {
     await pump(tester);
 
-    final icons = tester.widgetList<Icon>(find.byIcon(Icons.open_in_new));
-    expect(icons, isNotEmpty);
-    expect(icons.first.color, const Color(0xFF4F7186));
+    expect(find.byIcon(Icons.chevron_right), findsNWidgets(4));
+    // The support button is the only remaining external-link affordance.
+    expect(find.byIcon(Icons.open_in_new), findsOneWidget);
   });
 }

@@ -70,6 +70,105 @@ final class ShoppingItemRepositoryProvider
 String _$shoppingItemRepositoryHash() =>
     r'8d72a92f4a00eb850078c548bac926c518839491';
 
+@ProviderFor(shoppingUnitUsageRepository)
+final shoppingUnitUsageRepositoryProvider =
+    ShoppingUnitUsageRepositoryProvider._();
+
+final class ShoppingUnitUsageRepositoryProvider
+    extends
+        $FunctionalProvider<
+          ShoppingUnitUsageRepository,
+          ShoppingUnitUsageRepository,
+          ShoppingUnitUsageRepository
+        >
+    with $Provider<ShoppingUnitUsageRepository> {
+  ShoppingUnitUsageRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shoppingUnitUsageRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shoppingUnitUsageRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ShoppingUnitUsageRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ShoppingUnitUsageRepository create(Ref ref) {
+    return shoppingUnitUsageRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ShoppingUnitUsageRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ShoppingUnitUsageRepository>(value),
+    );
+  }
+}
+
+String _$shoppingUnitUsageRepositoryHash() =>
+    r'0223dbc60e9b701a324feea3fdab96db6dd0abdd';
+
+/// Up to three learned unit shortcuts. Hidden for the first ten creations and
+/// whenever the history contains only one distinct unit.
+
+@ProviderFor(shoppingUnitSuggestions)
+final shoppingUnitSuggestionsProvider = ShoppingUnitSuggestionsProvider._();
+
+/// Up to three learned unit shortcuts. Hidden for the first ten creations and
+/// whenever the history contains only one distinct unit.
+
+final class ShoppingUnitSuggestionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ShoppingUnitSuggestion>>,
+          List<ShoppingUnitSuggestion>,
+          Stream<List<ShoppingUnitSuggestion>>
+        >
+    with
+        $FutureModifier<List<ShoppingUnitSuggestion>>,
+        $StreamProvider<List<ShoppingUnitSuggestion>> {
+  /// Up to three learned unit shortcuts. Hidden for the first ten creations and
+  /// whenever the history contains only one distinct unit.
+  ShoppingUnitSuggestionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shoppingUnitSuggestionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shoppingUnitSuggestionsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<ShoppingUnitSuggestion>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<ShoppingUnitSuggestion>> create(Ref ref) {
+    return shoppingUnitSuggestions(ref);
+  }
+}
+
+String _$shoppingUnitSuggestionsHash() =>
+    r'57f9bb7e6e90c89dc08e7f6dfe10833aa636f95a';
+
 /// [CreateShoppingItemUseCase] provider wired with repo + sync deps.
 ///
 /// Privacy gate (D37-06): only public items enter the sync pipeline;
@@ -130,7 +229,7 @@ final class CreateShoppingItemUseCaseProvider
 }
 
 String _$createShoppingItemUseCaseHash() =>
-    r'80e5582438b7fc3073c40b7de0a92499f75ebb87';
+    r'be8d5d79044a7fa62e27b005a1baf831bb71535a';
 
 /// [ToggleItemCompletedUseCase] provider wired with repo + sync deps.
 

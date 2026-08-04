@@ -96,7 +96,7 @@ void main() {
     final surfaceSize = tester.getSize(
       find.byKey(const Key('feedback-toast-surface')),
     );
-    expect(surfaceSize.height, 52);
+    expect(surfaceSize.height, 44);
     expect(surfaceSize.width, lessThan(320));
 
     await tester.pump(const Duration(seconds: 4));
@@ -119,7 +119,7 @@ void main() {
       find.byKey(const Key('feedback-toast-surface')),
     );
     expect(surfaceSize.width, lessThanOrEqualTo(360));
-    expect(surfaceSize.height, greaterThanOrEqualTo(52));
+    expect(surfaceSize.height, greaterThanOrEqualTo(44));
     expect(tester.takeException(), isNull);
 
     await tester.pump(const Duration(seconds: 4));
@@ -141,8 +141,61 @@ void main() {
     expect(action.style, isNotNull);
     expect(actionText.style?.decoration, TextDecoration.none);
     expect(find.byType(SnackBar), findsNothing);
+    expect(
+      tester.getSize(find.byKey(const Key('feedback-toast-surface'))).height,
+      44,
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('feedback-toast-action'))).height,
+      44,
+    );
 
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'feedback stays below the iOS top safe area from nested SafeArea',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(top: 59);
+      tester.view.viewPadding = const FakeViewPadding(top: 59);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+
+      late BuildContext safeAreaContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          home: Scaffold(
+            body: SafeArea(
+              child: Builder(
+                builder: (context) {
+                  safeAreaContext = context;
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(MediaQuery.paddingOf(safeAreaContext).top, 0);
+
+      showSuccessFeedback(safeAreaContext, 'Safe below camera');
+      await tester.pump();
+
+      final positioned = tester.widget<Positioned>(
+        find.ancestor(
+          of: find.byType(SoftToast),
+          matching: find.byType(Positioned),
+        ),
+      );
+      expect(positioned.top, 75);
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+    },
+  );
 }

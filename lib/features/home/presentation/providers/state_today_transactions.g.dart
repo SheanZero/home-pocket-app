@@ -110,13 +110,13 @@ final class TodayTransactionsFamily extends $Family
 }
 
 /// Fetches today's transactions across the primary book and every active
-/// family shadow book, then presents them as one newest-first family feed.
+/// family shadow book, then presents them as one creation-newest-first feed.
 
 @ProviderFor(familyTodayTransactions)
 final familyTodayTransactionsProvider = FamilyTodayTransactionsFamily._();
 
 /// Fetches today's transactions across the primary book and every active
-/// family shadow book, then presents them as one newest-first family feed.
+/// family shadow book, then presents them as one creation-newest-first feed.
 
 final class FamilyTodayTransactionsProvider
     extends
@@ -129,7 +129,7 @@ final class FamilyTodayTransactionsProvider
         $FutureModifier<List<Transaction>>,
         $FutureProvider<List<Transaction>> {
   /// Fetches today's transactions across the primary book and every active
-  /// family shadow book, then presents them as one newest-first family feed.
+  /// family shadow book, then presents them as one creation-newest-first feed.
   FamilyTodayTransactionsProvider._({
     required FamilyTodayTransactionsFamily super.from,
     required String super.argument,
@@ -176,10 +176,10 @@ final class FamilyTodayTransactionsProvider
 }
 
 String _$familyTodayTransactionsHash() =>
-    r'fabb20646bb75f1daa42dcca1f4b69e33f25e098';
+    r'7e612efbd418c7fda4686e46b05f7a9a7ad5605d';
 
 /// Fetches today's transactions across the primary book and every active
-/// family shadow book, then presents them as one newest-first family feed.
+/// family shadow book, then presents them as one creation-newest-first feed.
 
 final class FamilyTodayTransactionsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<Transaction>>, String> {
@@ -193,7 +193,7 @@ final class FamilyTodayTransactionsFamily extends $Family
       );
 
   /// Fetches today's transactions across the primary book and every active
-  /// family shadow book, then presents them as one newest-first family feed.
+  /// family shadow book, then presents them as one creation-newest-first feed.
 
   FamilyTodayTransactionsProvider call({required String bookId}) =>
       FamilyTodayTransactionsProvider._(argument: bookId, from: this);

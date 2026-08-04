@@ -29,35 +29,46 @@ class ClearCompletedItemsUseCase {
   final Future<String?> Function()? _deviceIdResolver;
 
   Future<Result<void>> execute(String listType) async {
+    // `all` is a presentation segment only. Persisted rows use the concrete
+    // `private` / `public` list types, so clearing the merged segment must
+    // explicitly cover both or the repository query matches zero rows.
+    final targetListTypes = listType == 'all'
+        ? const ['private', 'public']
+        : [listType];
     final durable = _repo is DurableFamilySyncShoppingItemRepository
         ? _repo
         : null;
     if (durable != null) {
       final originDeviceId = await _deviceIdResolver?.call() ?? '';
-      await durable.softDeleteAllCompletedWithFamilySyncOutbox(
-        listType,
-        originDeviceId: originDeviceId,
-      );
+      for (final targetListType in targetListTypes) {
+        await durable.softDeleteAllCompletedWithFamilySyncOutbox(
+          targetListType,
+          originDeviceId: originDeviceId,
+        );
+      }
       _syncEngine?.onTransactionChanged();
       return Result.success(null);
     }
-    if (listType == 'public') {
-      // Read IDs before bulk-delete so we can emit per-item tracker ops (D37-06, DONE-03)
-      final items = await _repo.watchByListType(listType).first;
-      final completed = items
-          .where((i) => i.isCompleted && !i.isDeleted)
-          .toList();
 
-      // Bulk soft-delete in one DB write — no N+1 (DONE-03)
-      await _repo.softDeleteAllCompleted(listType);
+    for (final targetListType in targetListTypes) {
+      if (targetListType == 'public') {
+        // Read IDs before bulk-delete so we can emit per-item tracker ops (D37-06, DONE-03)
+        final items = await _repo.watchByListType(targetListType).first;
+        final completed = items
+            .where((i) => i.isCompleted && !i.isDeleted)
+            .toList();
 
-      // Emit per-item tombstone ops for sync (one op per completed item — SYNC-01, SC-2)
-      for (final item in completed) {
-        _changeTracker?.trackDelete(itemId: item.id);
+        // Bulk soft-delete in one DB write — no N+1 (DONE-03)
+        await _repo.softDeleteAllCompleted(targetListType);
+
+        // Emit per-item tombstone ops for sync (one op per completed item — SYNC-01, SC-2)
+        for (final item in completed) {
+          _changeTracker?.trackDelete(itemId: item.id);
+        }
+      } else {
+        // D37-06: private items never enter sync pipeline — no tracker ops emitted
+        await _repo.softDeleteAllCompleted(targetListType);
       }
-    } else {
-      // D37-06: private items never enter sync pipeline — no tracker ops emitted
-      await _repo.softDeleteAllCompleted(listType);
     }
 
     // Fire-and-forget sync trigger — SyncEngine handles debounce (D-20).

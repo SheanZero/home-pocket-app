@@ -219,48 +219,43 @@ void main() {
 
   group('AnalyticsScreen primary tabs', () {
     testWidgets(
-      'personal mode defaults to Joy and separates the two card groups',
+      'personal mode defaults to Spending and separates the two card groups',
       (tester) async {
         await _pump(tester, _buildSubject());
 
         expect(find.text('May 2026'), findsOneWidget);
-        expect(find.text('Spending'), findsOneWidget);
-        expect(find.text('Joy'), findsOneWidget);
         expect(
-          find.byKey(const Key('analytics-primary-tab-joy-bookmark')),
-          findsOneWidget,
+          tester
+              .widget<Text>(
+                find.byKey(const Key('analytics-primary-tab-spending-title')),
+              )
+              .data,
+          'Spending',
+        );
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(const Key('analytics-primary-tab-joy-title')),
+              )
+              .data,
+          'Joy',
         );
         expect(
           find.byKey(const Key('analytics-primary-tab-spending-bookmark')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('analytics-primary-tab-joy-bookmark')),
           findsNothing,
         );
         expect(
           find.byType(AnalyticsSectionHeader, skipOffstage: false),
           findsNWidgets(2),
         );
-        expect(find.byType(WithinMonthTrendCard), findsNothing);
-        expect(find.byType(CategoryDonutCard), findsNothing);
-        expect(find.byType(JoyCalendarCard), findsOneWidget);
-        expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
-
-        await tester.tap(
-          find.byKey(const Key('analytics-primary-tab-spending')),
-        );
-        await tester.pumpAndSettle();
-
         expect(find.byType(WithinMonthTrendCard), findsOneWidget);
         expect(find.byType(CategoryDonutCard), findsOneWidget);
         expect(find.byType(JoyCalendarCard), findsNothing);
         expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
-        expect(
-          find.byKey(const Key('analytics-primary-tab-spending-bookmark')),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(const Key('analytics-primary-tab-joy-bookmark')),
-          findsNothing,
-        );
-        expect(find.byType(JoySpendCard), findsNothing);
         expect(
           find.descendant(
             of: find.byType(CategoryDonutCard),
@@ -269,6 +264,23 @@ void main() {
           ),
           findsOneWidget,
         );
+
+        await tester.tap(find.byKey(const Key('analytics-primary-tab-joy')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WithinMonthTrendCard), findsNothing);
+        expect(find.byType(CategoryDonutCard), findsNothing);
+        expect(find.byType(JoyCalendarCard), findsOneWidget);
+        expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
+        expect(
+          find.byKey(const Key('analytics-primary-tab-joy-bookmark')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('analytics-primary-tab-spending-bookmark')),
+          findsNothing,
+        );
+        expect(find.byType(JoySpendCard), findsNothing);
       },
     );
 
@@ -276,8 +288,22 @@ void main() {
       'uses concise personal labels and owner-qualified family labels',
       (tester) async {
         await _pump(tester, _buildSubject(locale: const Locale('ja')));
-        expect(find.text('支出'), findsOneWidget);
-        expect(find.text('ときめき'), findsOneWidget);
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(const Key('analytics-primary-tab-spending-title')),
+              )
+              .data,
+          '支出',
+        );
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(const Key('analytics-primary-tab-joy-title')),
+              )
+              .data,
+          'ときめき',
+        );
         expect(find.text('私のときめき'), findsNothing);
 
         await _resetProviderScope(tester);
@@ -289,8 +315,22 @@ void main() {
             locale: const Locale('ja'),
           ),
         );
-        expect(find.text('家族の支出'), findsOneWidget);
-        expect(find.text('私のときめき'), findsOneWidget);
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(const Key('analytics-primary-tab-spending-title')),
+              )
+              .data,
+          '家族の支出',
+        );
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(const Key('analytics-primary-tab-joy-title')),
+              )
+              .data,
+          '私のときめき',
+        );
       },
     );
 
@@ -364,13 +404,14 @@ void main() {
 
       expect(find.text('Family Spending'), findsOneWidget);
       expect(find.text('My Joy'), findsOneWidget);
-      expect(find.byType(FamilyInsightCard), findsNothing);
-
-      await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
-      await tester.pumpAndSettle();
-
       expect(find.byType(FamilyInsightCard), findsOneWidget);
       expect(find.byType(JoyCalendarCard), findsNothing);
+
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-joy')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FamilyInsightCard), findsNothing);
+      expect(find.byType(JoyCalendarCard), findsOneWidget);
     });
 
     testWidgets('per-card error isolation keeps the Joy calendar visible', (
@@ -380,6 +421,9 @@ void main() {
         tester,
         _buildSubject(distributionError: StateError('distribution failed')),
       );
+
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-joy')));
+      await tester.pumpAndSettle();
 
       // The satisfaction-distribution card surfaces its error in isolation
       // while its Joy-tab sibling stays rendered.
@@ -399,6 +443,8 @@ void main() {
           tester,
           _buildSubject(happinessReport: fixtureHappinessReportThin()),
         );
+        await tester.tap(find.byKey(const Key('analytics-primary-tab-joy')));
+        await tester.pumpAndSettle();
 
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
       },
@@ -408,6 +454,8 @@ void main() {
       tester,
     ) async {
       await _pump(tester, _buildSubject());
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-joy')));
+      await tester.pumpAndSettle();
 
       // D-C1/D-C2: the Joy-tab cards keep local-only interactions and render
       // their empty paths without throwing.

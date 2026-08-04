@@ -256,6 +256,8 @@ void main() {
 
       await tester.pumpWidget(_wrap(locale: const Locale('ja')));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-joy')));
+      await tester.pumpAndSettle();
 
       await expectLater(
         find.byType(AnalyticsScreen),

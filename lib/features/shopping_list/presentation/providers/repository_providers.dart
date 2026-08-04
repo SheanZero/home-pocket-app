@@ -8,12 +8,17 @@ import '../../../../application/shopping_list/delete_shopping_item_use_case.dart
 import '../../../../application/shopping_list/reorder_shopping_items_use_case.dart';
 import '../../../../application/shopping_list/toggle_item_completed_use_case.dart';
 import '../../../../application/shopping_list/update_shopping_item_use_case.dart';
+import '../../../../application/shopping_list/watch_shopping_unit_suggestions_use_case.dart';
 import '../../../../data/daos/shopping_item_dao.dart';
+import '../../../../data/daos/shopping_unit_usage_dao.dart';
 import '../../../../data/repositories/shopping_item_repository_impl.dart';
+import '../../../../data/repositories/shopping_unit_usage_repository_impl.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart'
     show shoppingItemChangeTrackerProvider, syncEngineProvider;
 import '../../domain/models/shopping_item.dart';
+import '../../domain/models/shopping_unit.dart';
 import '../../domain/repositories/shopping_item_repository.dart';
+import '../../domain/repositories/shopping_unit_usage_repository.dart';
 import 'state_shopping_filter.dart';
 
 part 'repository_providers.g.dart';
@@ -35,6 +40,20 @@ ShoppingItemRepository shoppingItemRepository(Ref ref) {
   );
 }
 
+@riverpod
+ShoppingUnitUsageRepository shoppingUnitUsageRepository(Ref ref) {
+  final database = ref.watch(app_accounting.appAppDatabaseProvider);
+  return ShoppingUnitUsageRepositoryImpl(dao: ShoppingUnitUsageDao(database));
+}
+
+/// Up to three learned unit shortcuts. Hidden for the first ten creations and
+/// whenever the history contains only one distinct unit.
+@riverpod
+Stream<List<ShoppingUnitSuggestion>> shoppingUnitSuggestions(Ref ref) =>
+    WatchShoppingUnitSuggestionsUseCase(
+      repository: ref.watch(shoppingUnitUsageRepositoryProvider),
+    ).watch();
+
 /// [CreateShoppingItemUseCase] provider wired with repo + sync deps.
 ///
 /// Privacy gate (D37-06): only public items enter the sync pipeline;
@@ -47,6 +66,7 @@ CreateShoppingItemUseCase createShoppingItemUseCase(Ref ref) =>
       syncEngine: ref.watch(syncEngineProvider),
       deviceIdResolver: () =>
           ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
+      unitUsageRepository: ref.watch(shoppingUnitUsageRepositoryProvider),
     );
 
 /// [ToggleItemCompletedUseCase] provider wired with repo + sync deps.

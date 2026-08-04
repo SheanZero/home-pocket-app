@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/shopping_list/parse_shopping_voice_input_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
 
 void main() {
   const useCase = ParseShoppingVoiceInputUseCase();
@@ -14,6 +15,7 @@ void main() {
       expect(draft.rawText, rawText);
       expect(draft.name, '牛乳');
       expect(draft.quantity, 2);
+      expect(draft.unit, ShoppingUnit.bottle);
       expect(draft.ledgerType, LedgerType.daily);
       expect(draft.categoryId, 'cat_food_groceries');
       expect(draft.estimatedPrice, 500);
@@ -27,6 +29,7 @@ void main() {
       expect(draft.rawText, rawText);
       expect(draft.name, '牛奶');
       expect(draft.quantity, 2);
+      expect(draft.unit, ShoppingUnit.bottle);
       expect(draft.ledgerType, LedgerType.daily);
       expect(draft.categoryId, 'cat_food_groceries');
       expect(draft.estimatedPrice, 20);
@@ -40,6 +43,7 @@ void main() {
       expect(draft.rawText, rawText);
       expect(draft.name, 'milk');
       expect(draft.quantity, 2);
+      expect(draft.unit, ShoppingUnit.bottle);
       expect(draft.ledgerType, LedgerType.daily);
       expect(draft.categoryId, 'cat_food_groceries');
       expect(draft.estimatedPrice, 500);
@@ -53,9 +57,18 @@ void main() {
 
       expect(draft.name, 'コーヒー豆');
       expect(draft.quantity, 1);
+      expect(draft.unit, ShoppingUnit.bag);
       expect(draft.ledgerType, LedgerType.joy);
       expect(draft.categoryId, 'cat_food_cafe');
       expect(draft.estimatedPrice, 1280);
+    });
+
+    test('parses a decimal metric quantity and removes it from the name', () {
+      final draft = useCase.execute('砂糖 200g、日常', localeId: 'ja-JP');
+
+      expect(draft.name, '砂糖');
+      expect(draft.quantity, 200);
+      expect(draft.unit, ShoppingUnit.gram);
     });
 
     test('recognizes Chinese joy wording', () {

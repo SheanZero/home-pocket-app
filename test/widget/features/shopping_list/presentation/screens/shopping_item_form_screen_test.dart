@@ -22,8 +22,10 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart'
     show isGroupModeProvider;
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_item_form_screen.dart';
+import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_voice_draft_panel.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:home_pocket/shared/widgets/ledger_type_selector.dart';
@@ -58,7 +60,7 @@ ShoppingItem _makeItem({
   String listType = 'private',
   LedgerType? ledgerType,
   String? categoryId,
-  int quantity = 2,
+  double quantity = 2.0,
   int? estimatedPrice = 350,
   String? note = 'from the bakery',
   List<String> tags = const [],
@@ -88,6 +90,7 @@ Future<void> _pumpForm(
   String listType = 'public',
   ShoppingItem? item,
   bool isGroupMode = false,
+  List<ShoppingUnitSuggestion> unitSuggestions = const [],
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -107,7 +110,11 @@ Future<void> _pumpForm(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: S.supportedLocales,
-        home: ShoppingItemFormScreen(listType: listType, item: item),
+        home: ShoppingItemFormScreen(
+          listType: listType,
+          item: item,
+          unitSuggestions: unitSuggestions,
+        ),
       ),
     ),
   );
@@ -699,8 +706,22 @@ void main() {
 
   // ── New tests for redesigned UI ───────────────────────────────────────────
 
-  group('Stepper', () {
-    testWidgets('STEPPER-01: create mode quantity defaults to 1', (
+  group('Quantity and unit', () {
+    testWidgets('create mode hides shopping voice input for MVP', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShoppingVoiceDraftPanel), findsNothing);
+    });
+
+    testWidgets('create mode defaults to 1 piece and hides suggestions', (
       tester,
     ) async {
       await _pumpForm(
@@ -715,6 +736,113 @@ void main() {
         find.byKey(const Key('shopping_form_quantity_field')),
       );
       expect(qField.controller?.text, equals('1'));
+      expect(find.text('pc'), findsOneWidget);
+      expect(find.byKey(const Key('shopping_unit_suggestions')), findsNothing);
+    });
+
+    testWidgets('quantity field is compact and its numeral is centered', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      final quantityField = tester.widget<TextField>(
+        find.byKey(const Key('shopping_form_quantity_field')),
+      );
+
+      expect(quantityField.textAlign, TextAlign.center);
+      expect(quantityField.textAlignVertical, TextAlignVertical.center);
+      expect(quantityField.style?.fontSize, 24);
+
+      final quantityBox = find.byKey(
+        const Key('shopping_form_quantity_input_box'),
+      );
+      final quantityBoxSize = tester.getSize(quantityBox);
+      expect(quantityBoxSize.width, inInclusiveRange(160, 170));
+      expect(quantityBoxSize.height, 48);
+
+      final unitSelect = find.byKey(const Key('shopping_form_unit_select'));
+      expect(tester.getSize(unitSelect).width, 76);
+      expect(tester.getCenter(quantityBox).dy, tester.getCenter(unitSelect).dy);
+    });
+
+    testWidgets('learned suggestions can change the unit without the amount', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+        unitSuggestions: const [
+          ShoppingUnitSuggestion(
+            selection: ShoppingUnitSelection(ShoppingUnit.gram),
+            useCount: 7,
+          ),
+          ShoppingUnitSuggestion(
+            selection: ShoppingUnitSelection(ShoppingUnit.bag),
+            useCount: 4,
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('shopping_unit_suggestions')),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('g'));
+      await tester.enterText(
+        find.byKey(const Key('shopping_form_name_field')),
+        'Sugar',
+      );
+      await tester.enterText(
+        find.byKey(const Key('shopping_form_quantity_field')),
+        '200',
+      );
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      final params =
+          verify(() => mockCreate.execute(captureAny())).captured.single
+              as CreateShoppingItemParams;
+      expect(params.quantity, 200);
+      expect(params.unit, ShoppingUnit.gram);
+    });
+
+    testWidgets('custom unit is entered inside the unit picker', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('shopping_form_unit_select')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('shopping_unit_option_custom')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('shopping_custom_unit_field')),
+        'cup',
+      );
+      await tester.tap(find.byKey(const Key('shopping_unit_apply')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('cup'), findsOneWidget);
     });
   });
 

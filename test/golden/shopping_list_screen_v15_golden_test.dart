@@ -32,7 +32,7 @@ ShoppingItem _item(
   String id,
   String name, {
   String categoryId = 'category_food',
-  int quantity = 1,
+  double quantity = 1.0,
   LedgerType ledgerType = LedgerType.daily,
   bool completed = false,
 }) {

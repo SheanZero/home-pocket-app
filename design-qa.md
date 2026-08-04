@@ -1,3 +1,82 @@
+# Shopping Quantity & Unit — Flutter Implementation (2026-08-04)
+
+## Scope and evidence
+
+- Selected direction: scheme 3 from `/Users/xinz/.codex/generated_images/019fcc2c-9422-7540-b11e-87c2e935c407/exec-1c26af70-72db-43d8-8647-133c0c5e3bc5.png`, refined by the approved v16 mockup at `/Users/xinz/Development/home-pocket-app/docs/mockup/v16/index.html` (no caption, 76 px centered unit selector, no initial suggestion chips, custom entry inside the picker, and no shopping voice entry for MVP).
+- Refined source capture: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc2c-9422-7540-b11e-87c2e935c407/shopping-units-mockup-focus.png`, 390×844 logical pixels, Japanese, light theme, Sugar, `200 g`, no learned suggestions.
+- MVP no-voice browser capture: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc2c-9422-7540-b11e-87c2e935c407/shopping-form-mvp-no-voice-browser.png`, 1265×712 px; the central 390 px phone shows the name field followed directly by the quantity card with no voice panel or reserved gap.
+- Pre-fix device evidence: `/Users/xinz/Downloads/截屏 2026-08-04 20.45.10.png` (945×2048 px), normalized to 390×844 for the focused comparison; Simplified Chinese, light theme, default `1 piece`, keyboard open.
+- Flutter implementation capture: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/shopping_item_form_units_light_ja.png`, 390×844 logical pixels at DPR 1, Japanese, light theme, Sugar, `200 g`, no learned suggestions.
+- Full MVP comparison: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc2c-9422-7540-b11e-87c2e935c407/shopping-form-mvp-no-voice-comparison.png`; current mockup is left and corrected Flutter is right, both with the shopping voice entry absent.
+- Focused quantity comparison: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc2c-9422-7540-b11e-87c2e935c407/shopping-units-quantity-layout-before-target-after.png`; pre-fix device capture, refined mockup, and corrected Flutter appear from left to right.
+- Custom-unit state: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/shopping_unit_custom_sheet_light_ja.png`, 390×844 logical pixels at DPR 1, picker open with the custom-unit field and actions visible.
+
+## Findings
+
+- No actionable P0, P1, or P2 mismatch remains.
+- Layout and spacing: the 390 px form now uses a 68 px label slot, 10 px gap, 164 px amount box, 8 px inter-control gap, and 76 px unit control. The amount and unit centers share the same vertical axis; the initial form does not reserve space for suggestion chips.
+- Typography: the amount now uses the 24 px / 30 px production `amountLarge` tabular-numeral token instead of the undersized 15 px item-title token. Flutter's deterministic golden font renders unsupported Japanese glyphs as squares; the browser capture confirms the intended native Japanese typography, while the golden remains valid for geometry and numerals.
+- Colors and visual tokens: the implementation reuses the existing paper surface, warm borders, green accent, and form-divider tokens without introducing a parallel palette.
+- Content and localization: quantity and unit are edited separately; built-in and custom unit copy is supplied for Japanese, Simplified Chinese, and English. No fixed suggestion copy appears before learning has enough evidence.
+- Interaction states: the default is `1 piece`; built-in and custom pickers, decimal input, learned suggestion selection, save arguments, list formatting, and empty learned state are covered by focused tests. The shopping voice entry is absent in production; its parser and draft component remain dormant for post-MVP work.
+- Responsiveness and overflow: the 390 px create form and custom-unit bottom sheet render without overflow, with the sheet's apply/cancel actions remaining reachable.
+
+## Verification
+
+- Focused quantity/unit golden, frequency-use-case, DAO, sync-mapper, formatter, form, and list-tile suites: 69 tests passed.
+- Additional create, voice-parser, repository, sync, database wipe, and clear-completed focused suites passed during implementation. The obsolete shopping-form voice integration suite is explicitly skipped while the MVP release gate is closed.
+- `flutter analyze`: 0 issues.
+- `git diff --check`: passed.
+
+## Comparison history
+
+1. The selected scheme initially contained a quantity caption and fixed unit chips; the approved mockup refinements removed the caption and fixed custom option, narrowed the selector, and moved custom entry into the unit picker.
+2. The production form's integer stepper was replaced with a centered decimal amount field plus centered compact unit selector; fresh state now shows no suggestion row.
+3. The 20:45 device capture exposed a P1 density mismatch missed by the first pass: the amount box expanded to roughly 200 px and the 15 px numeral looked weak and visually high against the unit control.
+4. The quantity row was rebuilt with the mockup's fixed 68 px label track, reducing the amount box to 164 px at a 390 px viewport; the numeral moved to the 24 px amount token and a fill-height centered editor. The post-fix full and focused comparisons found no remaining P0/P1/P2 issue. A native-device screenshot remains an optional P3 release check for exact platform CJK glyph rendering.
+5. MVP scope removed the shopping voice launch from both Flutter and the v16 mockup. The primary quantity card now follows the name/error slot directly; dormant parser and draft code remain behind a closed release gate.
+
+final result: passed
+
+---
+
+# Home Monthly Favorite — Square Satisfaction Panel (2026-08-04)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/Downloads/截屏 2026-08-04 19.22.26.png` (1179×2556 px, 393×852 logical viewport at DPR 3), plus the requested square-panel and enlarged-content delta.
+- Flutter implementation capture: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc4e-7d93-72f2-b449-1aae7a47aca3/home-favorite-section-implementation-zh.png` (390×477 px, 390 logical width at DPR 1), Simplified Chinese, light theme, August 4, Dining out, ¥768, satisfaction 8.
+- Full section comparison: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc4e-7d93-72f2-b449-1aae7a47aca3/home-favorite-section-before-after.png`; source is left and Flutter is right.
+- Focused ticket comparison: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc4e-7d93-72f2-b449-1aae7a47aca3/home-favorite-ticket-before-after.png`; source is left and Flutter is right.
+- Density normalization: the source section crop was reduced from 1057×351 to 350×117 and its ticket crop from 1057×246 to 350×82. The Flutter capture used equal 350×117 and 350×82 crops at DPR 1.
+
+## Findings
+
+- No actionable P0, P1, or P2 mismatch remains.
+- Spacing and layout rhythm: the satisfaction panel changed from 58×80 logical pixels to a true 80×80 square inside the unchanged 82 px outer ticket height. The dashed perforation, paired edge notches, outer border, radius, calendar tile, and section spacing remain aligned.
+- Fonts and typography: the tier label moves from the 10 px micro style to the 13 px semantic label style with the same bold weight. The Chinese capture confirms the enlarged label remains centered, legible, and unwrapped.
+- Colors and visual tokens: the existing ticket surface, pink border, perforation, and semantic satisfaction foreground are unchanged.
+- Image quality and asset fidelity: the existing satisfaction SVG continues to render through `SatisfactionFaceIcon`; it grows from 22×22 to 30×30 without raster scaling or a replacement asset.
+- Copy and content: the localized tier wording is unchanged. No ARB key or transaction/category content changed.
+- Responsiveness and interaction: the square geometry and the longest English tier label (`Amazing`) pass at the 390 px phone width. The whole favorite section retains its existing tap behavior.
+
+## Verification
+
+- Home hero widget and golden suites: 54 tests passed.
+- Full personal/family Home alignment goldens: 2 tests passed.
+- `flutter analyze`: 0 issues.
+- Direct iOS simulator launch was unavailable because Xcode failed while resolving Swift Package Manager dependencies with a `DVTDeviceOperation` build-number error; Flutter-rendered component and full-Home captures provide the visual evidence for this scoped change.
+
+## Comparison history
+
+1. The source and initial implementation showed a narrow 58×80 satisfaction panel with a 22 px face and 10 px label.
+2. The panel was widened to 80×80, the face to 30 px, and the label to 13 px while preserving the ticket height and chrome.
+3. Post-fix full-section and focused comparisons found no remaining P0/P1/P2 issue.
+
+final result: passed
+
+---
+
 # V16 Analytics Primary Tabs — Flutter Implementation (2026-08-04)
 
 ## Scope and evidence
@@ -27,6 +106,47 @@
 - Focused 375 px personal/family, Japanese/English title, tab-switching, card ownership, and refresh tests: 12 tests passed.
 - `flutter analyze`: 0 issues.
 - `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# Joy Satisfaction Bottom Sheet — Design QA (2026-08-04)
+
+## Scope and evidence
+
+- Source visual: `/Users/xinz/.codex/generated_images/019fcc24-41d0-7fe0-83e5-5d1fd3a923fd/exec-03597618-c89c-4abe-9b6e-797f4ae9c6e3.png`.
+- Implementation capture: `test/golden/goldens/satisfaction_bottom_sheet_manual_zh.png`.
+- Full comparison: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc24-41d0-7fe0-83e5-5d1fd3a923fd/satisfaction-sheet-full-comparison.png`.
+- Focused comparison: `/Users/xinz/.codex/visualizations/2026/08/04/019fcc24-41d0-7fe0-83e5-5d1fd3a923fd/satisfaction-sheet-focused-comparison.png`.
+- Viewport/state: 390×844 logical pixels at DPR 1, Simplified Chinese, light theme, manual entry ¥1,236, Food > Dining out, Joy selected, satisfaction 2, sheet open.
+- The source was normalized to the implementation viewport before both images were placed in the same comparison input.
+
+## Findings
+
+- No actionable P0, P1, or P2 issue remains. The final sheet top differs from the selected direction by approximately 2 logical pixels.
+- Layout and spacing: 28px top radius, grabber, context pill, title hierarchy, five-choice row, footer, and keep action align with the selected visual.
+- Typography and copy: implementation uses semantic `AppTextStyles`; category reason, title, current hint, five choices, auto-return hint, and keep action are localized in zh/ja/en. Flutter golden tests render CJK with the Ahem fallback, so exact Chinese copy is asserted separately in widget tests.
+- Colors and surfaces: existing palette tokens provide the scrim, paper surface, muted choices, and Joy-pink selected state.
+- Icons and imagery: all five existing satisfaction SVG assets are reused; no placeholder, emoji, CSS art, or generated production asset was introduced.
+- Responsiveness: choice size adapts to available width, and a 320×568 test confirms no horizontal overflow.
+- Accessibility: every face exposes a labeled button semantic and selected state; tap targets are 64px at the reference viewport and shrink only when necessary on narrow screens.
+
+## Interaction and verification
+
+- Manual Daily → Joy selection and category-inferred Joy both open the sheet; category inference shows localized category context.
+- Selecting a value closes the sheet, writes the value, and restores the keypad. Keeping the current value closes without changing it. The compact summary reopens the sheet.
+- Existing edit, OCR, and voice hosts retain the established inline picker.
+- `flutter analyze`: 0 issues.
+- Targeted accounting, localization architecture, responsiveness, semantics, and golden checks: 65 passed.
+- `flutter test --exclude-tags golden`: 4,179 passed, 11 skipped.
+- Full `flutter test`: feature tests passed; 13 unrelated `home_hero_card_golden_test.dart` baselines fail against concurrent dirty Home changes. The new satisfaction golden passes in isolation and in the targeted run.
+
+## Comparison history
+
+1. The initial capture missed the modal because the golden targeted only the screen subtree; the capture was moved to the overlay.
+2. The first modal comparison showed a 21–23px vertical offset and undersized choice cards.
+3. Sheet rhythm and 64px choice sizing were aligned, then narrow-width adaptation was added. The final full and focused comparisons found no P0/P1/P2 mismatch.
 
 final result: passed
 

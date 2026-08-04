@@ -37,6 +37,7 @@ void showFeedbackToast(
   BuildContext context,
   String message, {
   required FeedbackTone tone,
+  IconData? icon,
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
@@ -46,7 +47,12 @@ void showFeedbackToast(
   _dismissActiveToast();
 
   final overlay = Overlay.of(context);
-  final topInset = MediaQuery.of(context).padding.top + 16;
+  // Read the platform view directly: a caller nested below SafeArea sees a
+  // MediaQuery whose top padding has already been consumed (usually zero).
+  // View.padding remains the authoritative system inset for the current
+  // window, keeping every shared toast below notches and Dynamic Island.
+  final view = View.of(context);
+  final topInset = view.padding.top / view.devicePixelRatio + 16;
 
   late OverlayEntry entry;
   entry = OverlayEntry(
@@ -57,6 +63,7 @@ void showFeedbackToast(
       child: SoftToast(
         message: message,
         tone: tone,
+        icon: icon,
         duration: duration,
         actionLabel: actionLabel,
         onAction: onAction,
@@ -81,6 +88,7 @@ void showFeedbackToast(
 void showSuccessFeedback(
   BuildContext context,
   String message, {
+  IconData? icon,
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
@@ -90,6 +98,7 @@ void showSuccessFeedback(
     context,
     message,
     tone: FeedbackTone.success,
+    icon: icon,
     duration: duration,
     actionLabel: actionLabel,
     onAction: onAction,
@@ -101,6 +110,7 @@ void showSuccessFeedback(
 void showErrorFeedback(
   BuildContext context,
   String message, {
+  IconData? icon,
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
@@ -110,6 +120,7 @@ void showErrorFeedback(
     context,
     message,
     tone: FeedbackTone.error,
+    icon: icon,
     duration: duration,
     actionLabel: actionLabel,
     onAction: onAction,
@@ -121,6 +132,7 @@ void showErrorFeedback(
 void showInfoFeedback(
   BuildContext context,
   String message, {
+  IconData? icon,
   Duration duration = _kDefaultFeedbackDuration,
   String? actionLabel,
   VoidCallback? onAction,
@@ -130,6 +142,7 @@ void showInfoFeedback(
     context,
     message,
     tone: FeedbackTone.info,
+    icon: icon,
     duration: duration,
     actionLabel: actionLabel,
     onAction: onAction,

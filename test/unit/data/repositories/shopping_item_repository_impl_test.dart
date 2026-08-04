@@ -7,6 +7,7 @@ import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/shopping_item_dao.dart';
 import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -16,8 +17,7 @@ class _MockFieldEncryptionService extends Mock
 /// Simulates decryption failure to test silent-failure behaviour (ITEM-05).
 class _ThrowingFieldEncryptionService implements FieldEncryptionService {
   @override
-  Future<String> encryptField(String plaintext) async =>
-      'encrypted_$plaintext';
+  Future<String> encryptField(String plaintext) async => 'encrypted_$plaintext';
 
   /// Always throws — simulates wrong-device-key scenario.
   @override
@@ -118,6 +118,21 @@ void main() {
       expect(result!.estimatedPrice, equals(1500));
     });
 
+    test('decimal quantity and custom unit round-trip together', () async {
+      final item = _makeItem(
+        quantity: 1.5,
+        unit: ShoppingUnit.custom,
+        customUnit: 'cup',
+      );
+      await repo.insert(item);
+
+      final result = await repo.findById(item.id);
+      expect(result, isNotNull);
+      expect(result!.quantity, 1.5);
+      expect(result.unit, ShoppingUnit.custom);
+      expect(result.customUnit, 'cup');
+    });
+
     test('decrypt failure returns null note with other fields intact', () async {
       // Build a repo with the throwing service
       final throwingRepo = ShoppingItemRepositoryImpl(
@@ -145,6 +160,9 @@ ShoppingItem _makeItem({
   String? note,
   List<String> tags = const [],
   int? estimatedPrice,
+  double quantity = 1.0,
+  ShoppingUnit unit = ShoppingUnit.piece,
+  String? customUnit,
 }) {
   return ShoppingItem(
     id: id,
@@ -154,6 +172,9 @@ ShoppingItem _makeItem({
     note: note,
     tags: tags,
     estimatedPrice: estimatedPrice,
+    quantity: quantity,
+    unit: unit,
+    customUnit: customUnit,
     isCompleted: false,
     sortOrder: 0,
     isSynced: false,

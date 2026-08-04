@@ -1,4 +1,5 @@
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/shopping_list/domain/models/shopping_unit.dart';
 
 /// Side-effect-free result of parsing one shopping-list utterance.
 ///
@@ -11,6 +12,7 @@ class ShoppingVoiceDraft {
     required this.rawText,
     this.name,
     this.quantity,
+    this.unit,
     this.ledgerType,
     this.categoryId,
     this.estimatedPrice,
@@ -18,7 +20,8 @@ class ShoppingVoiceDraft {
 
   final String rawText;
   final String? name;
-  final int? quantity;
+  final double? quantity;
+  final ShoppingUnit? unit;
   final LedgerType? ledgerType;
   final String? categoryId;
   final int? estimatedPrice;
@@ -30,6 +33,7 @@ class ShoppingVoiceDraft {
           other.rawText == rawText &&
           other.name == name &&
           other.quantity == quantity &&
+          other.unit == unit &&
           other.ledgerType == ledgerType &&
           other.categoryId == categoryId &&
           other.estimatedPrice == estimatedPrice;
@@ -39,6 +43,7 @@ class ShoppingVoiceDraft {
     rawText,
     name,
     quantity,
+    unit,
     ledgerType,
     categoryId,
     estimatedPrice,
@@ -50,6 +55,7 @@ class ShoppingVoiceDraft {
       'rawText: $rawText, '
       'name: $name, '
       'quantity: $quantity, '
+      'unit: $unit, '
       'ledgerType: $ledgerType, '
       'categoryId: $categoryId, '
       'estimatedPrice: $estimatedPrice)';
@@ -71,10 +77,12 @@ class ParseShoppingVoiceInputUseCase {
     }
 
     final name = _extractName(parseText, locale);
+    final parsedQuantity = _extractQuantity(parseText, locale);
     return ShoppingVoiceDraft(
       rawText: text,
       name: name,
-      quantity: _extractQuantity(parseText, locale),
+      quantity: parsedQuantity?.quantity,
+      unit: parsedQuantity?.unit,
       ledgerType: _extractLedgerType(parseText, locale),
       categoryId: name == null ? null : _inferCategoryId(name),
       estimatedPrice: _extractEstimatedPrice(parseText, locale),
@@ -87,6 +95,7 @@ enum _ShoppingVoiceLocale { ja, zh, en, unsupported }
 const _arabicNumberPattern = r'[0-9０-９][0-9０-９,，]*';
 const _cjkNumberPattern = r'[零〇一二两兩三四五六七八九十百千万萬]+';
 const _localizedNumberPattern = '(?:$_arabicNumberPattern|$_cjkNumberPattern)';
+const _decimalArabicNumberPattern = r'[0-9０-９]+(?:[.．][0-9０-９]+)?';
 const _englishNumberWord =
     r'(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)';
 const _englishNumberPattern =
@@ -99,6 +108,8 @@ const _jaCounterPattern = r'(?:個|本|袋|箱|パック|枚|冊|つ|台|缶|瓶
 const _zhCounterPattern = r'(?:个|個|件|瓶|袋|盒|箱|包|罐|罐|本|支|条|條|份|套|双|雙|卷|桶|提|斤)';
 const _enCounterPattern =
     r'(?:bottles?|bags?|boxes?|packs?|cartons?|cans?|jars?|pieces?|items?|rolls?|pairs?|sets?|loaves?)';
+const _metricUnitPattern =
+    r'(?:kilograms?|kg|grams?|g|milliliters?|millilitres?|ml|liters?|litres?|l|キログラム|キロ|グラム|ミリリットル|リットル|公斤|千克|克|毫升|升)';
 
 _ShoppingVoiceLocale _localeFor(String localeId) {
   final normalized = localeId.trim().toLowerCase();
@@ -134,7 +145,25 @@ LedgerType? _extractLedgerType(String text, _ShoppingVoiceLocale locale) {
   return hasJoy ? LedgerType.joy : LedgerType.daily;
 }
 
-int? _extractQuantity(String text, _ShoppingVoiceLocale locale) {
+({double quantity, ShoppingUnit unit})? _extractQuantity(
+  String text,
+  _ShoppingVoiceLocale locale,
+) {
+  final metricMatch = RegExp(
+    '($_decimalArabicNumberPattern)\\s*($_metricUnitPattern)',
+    caseSensitive: false,
+  ).firstMatch(text);
+  if (metricMatch != null) {
+    final quantity = _parseDecimalNumber(metricMatch.group(1));
+    final unit = _metricUnit(metricMatch.group(2));
+    if (quantity != null &&
+        quantity > 0 &&
+        quantity <= 999999 &&
+        unit != null) {
+      return (quantity: quantity, unit: unit);
+    }
+  }
+
   RegExpMatch? match;
   switch (locale) {
     case _ShoppingVoiceLocale.ja:
@@ -167,7 +196,57 @@ int? _extractQuantity(String text, _ShoppingVoiceLocale locale) {
   }
 
   final value = _parseNumber(match?.group(1), locale);
-  return value != null && value > 0 && value <= 999 ? value : null;
+  if (value == null || value <= 0 || value > 999) return null;
+  final token = match?.group(0) ?? '';
+  return (quantity: value.toDouble(), unit: _counterUnit(token, locale));
+}
+
+ShoppingUnit? _metricUnit(String? raw) {
+  final token = raw?.toLowerCase() ?? '';
+  if (RegExp(r'^(?:kilograms?|kg|キログラム|キロ|公斤|千克)$').hasMatch(token)) {
+    return ShoppingUnit.kilogram;
+  }
+  if (RegExp(r'^(?:grams?|g|グラム|克)$').hasMatch(token)) {
+    return ShoppingUnit.gram;
+  }
+  if (RegExp(r'^(?:milliliters?|millilitres?|ml|ミリリットル|毫升)$').hasMatch(token)) {
+    return ShoppingUnit.milliliter;
+  }
+  if (RegExp(r'^(?:liters?|litres?|l|リットル|升)$').hasMatch(token)) {
+    return ShoppingUnit.liter;
+  }
+  return null;
+}
+
+ShoppingUnit _counterUnit(String token, _ShoppingVoiceLocale locale) {
+  final lower = token.toLowerCase();
+  return switch (locale) {
+    _ShoppingVoiceLocale.ja =>
+      RegExp(r'袋').hasMatch(token)
+          ? ShoppingUnit.bag
+          : RegExp(r'パック').hasMatch(token)
+          ? ShoppingUnit.pack
+          : RegExp(r'本|瓶').hasMatch(token)
+          ? ShoppingUnit.bottle
+          : ShoppingUnit.piece,
+    _ShoppingVoiceLocale.zh =>
+      RegExp(r'袋').hasMatch(token)
+          ? ShoppingUnit.bag
+          : RegExp(r'包').hasMatch(token)
+          ? ShoppingUnit.pack
+          : RegExp(r'瓶').hasMatch(token)
+          ? ShoppingUnit.bottle
+          : ShoppingUnit.piece,
+    _ShoppingVoiceLocale.en =>
+      RegExp(r'\bbottles?\b').hasMatch(lower)
+          ? ShoppingUnit.bottle
+          : RegExp(r'\bbags?\b').hasMatch(lower)
+          ? ShoppingUnit.bag
+          : RegExp(r'\b(?:packs?|cartons?)\b').hasMatch(lower)
+          ? ShoppingUnit.pack
+          : ShoppingUnit.piece,
+    _ShoppingVoiceLocale.unsupported => ShoppingUnit.piece,
+  };
 }
 
 int? _extractEstimatedPrice(String text, _ShoppingVoiceLocale locale) {
@@ -315,6 +394,13 @@ String _cleanJapaneseNameClause(String value) {
     ),
     '',
   );
+  result = result.replaceAll(
+    RegExp(
+      '$_decimalArabicNumberPattern\\s*$_metricUnitPattern',
+      caseSensitive: false,
+    ),
+    '',
+  );
   return _trimNameConnectors(result, RegExp(r'^[のをにと\s]+|[のをにと\s]+$'));
 }
 
@@ -327,6 +413,13 @@ String _cleanChineseNameClause(String value) {
   result = result.replaceAll(
     RegExp(
       '(?:参考价格|參考價格|预估价格|預估價格|价格|價格|预算|預算)\\s*(?:是|为|為|:|：)?\\s*[¥￥]?\\s*$_localizedNumberPattern\\s*(?:元|块|塊)?',
+    ),
+    '',
+  );
+  result = result.replaceAll(
+    RegExp(
+      '$_decimalArabicNumberPattern\\s*$_metricUnitPattern',
+      caseSensitive: false,
     ),
     '',
   );
@@ -361,6 +454,13 @@ String _cleanEnglishNameClause(String value) {
   result = result.replaceAll(
     RegExp(
       '\\b(?:quantity|qty)\\s*(?:is|:)?\\s*$_englishNumberPattern\\b',
+      caseSensitive: false,
+    ),
+    '',
+  );
+  result = result.replaceAll(
+    RegExp(
+      '\\b$_decimalArabicNumberPattern\\s*$_metricUnitPattern\\b',
       caseSensitive: false,
     ),
     '',
@@ -457,6 +557,14 @@ int? _parseNumber(String? raw, _ShoppingVoiceLocale locale) {
     return _parseEnglishNumber(normalized);
   }
   return _parseCjkNumber(normalized);
+}
+
+double? _parseDecimalNumber(String? raw) {
+  if (raw == null) return null;
+  final normalized = _normalizeDigits(
+    raw,
+  ).replaceAll('．', '.').replaceAll(RegExp(r'[,，\s]'), '');
+  return double.tryParse(normalized);
 }
 
 String _normalizeDigits(String value) {

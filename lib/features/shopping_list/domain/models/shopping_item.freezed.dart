@@ -21,7 +21,9 @@ mixin _$ShoppingItem {
   String? get categoryId;
   List<String> get tags; // D-01: JSON-encoded at repo boundary
   String? get note; // decrypted plaintext
-  int get quantity; // D-02
+  double get quantity;
+  ShoppingUnit get unit;
+  String? get customUnit;
   int? get estimatedPrice; // ITEM-05
   DateTime? get completedAt; // D-03
   bool get isCompleted;
@@ -63,6 +65,9 @@ mixin _$ShoppingItem {
             (identical(other.note, note) || other.note == note) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
+            (identical(other.unit, unit) || other.unit == unit) &&
+            (identical(other.customUnit, customUnit) ||
+                other.customUnit == customUnit) &&
             (identical(other.estimatedPrice, estimatedPrice) ||
                 other.estimatedPrice == estimatedPrice) &&
             (identical(other.completedAt, completedAt) ||
@@ -99,6 +104,8 @@ mixin _$ShoppingItem {
     const DeepCollectionEquality().hash(tags),
     note,
     quantity,
+    unit,
+    customUnit,
     estimatedPrice,
     completedAt,
     isCompleted,
@@ -114,7 +121,7 @@ mixin _$ShoppingItem {
 
   @override
   String toString() {
-    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
+    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, unit: $unit, customUnit: $customUnit, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
   }
 }
 
@@ -134,7 +141,9 @@ abstract mixin class $ShoppingItemCopyWith<$Res> {
     String? categoryId,
     List<String> tags,
     String? note,
-    int quantity,
+    double quantity,
+    ShoppingUnit unit,
+    String? customUnit,
     int? estimatedPrice,
     DateTime? completedAt,
     bool isCompleted,
@@ -170,6 +179,8 @@ class _$ShoppingItemCopyWithImpl<$Res> implements $ShoppingItemCopyWith<$Res> {
     Object? tags = null,
     Object? note = freezed,
     Object? quantity = null,
+    Object? unit = null,
+    Object? customUnit = freezed,
     Object? estimatedPrice = freezed,
     Object? completedAt = freezed,
     Object? isCompleted = null,
@@ -219,7 +230,15 @@ class _$ShoppingItemCopyWithImpl<$Res> implements $ShoppingItemCopyWith<$Res> {
         quantity: null == quantity
             ? _self.quantity
             : quantity // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
+        unit: null == unit
+            ? _self.unit
+            : unit // ignore: cast_nullable_to_non_nullable
+                  as ShoppingUnit,
+        customUnit: freezed == customUnit
+            ? _self.customUnit
+            : customUnit // ignore: cast_nullable_to_non_nullable
+                  as String?,
         estimatedPrice: freezed == estimatedPrice
             ? _self.estimatedPrice
             : estimatedPrice // ignore: cast_nullable_to_non_nullable
@@ -371,7 +390,9 @@ extension ShoppingItemPatterns on ShoppingItem {
       String? categoryId,
       List<String> tags,
       String? note,
-      int quantity,
+      double quantity,
+      ShoppingUnit unit,
+      String? customUnit,
       int? estimatedPrice,
       DateTime? completedAt,
       bool isCompleted,
@@ -400,6 +421,8 @@ extension ShoppingItemPatterns on ShoppingItem {
           _that.tags,
           _that.note,
           _that.quantity,
+          _that.unit,
+          _that.customUnit,
           _that.estimatedPrice,
           _that.completedAt,
           _that.isCompleted,
@@ -441,7 +464,9 @@ extension ShoppingItemPatterns on ShoppingItem {
       String? categoryId,
       List<String> tags,
       String? note,
-      int quantity,
+      double quantity,
+      ShoppingUnit unit,
+      String? customUnit,
       int? estimatedPrice,
       DateTime? completedAt,
       bool isCompleted,
@@ -469,6 +494,8 @@ extension ShoppingItemPatterns on ShoppingItem {
           _that.tags,
           _that.note,
           _that.quantity,
+          _that.unit,
+          _that.customUnit,
           _that.estimatedPrice,
           _that.completedAt,
           _that.isCompleted,
@@ -509,7 +536,9 @@ extension ShoppingItemPatterns on ShoppingItem {
       String? categoryId,
       List<String> tags,
       String? note,
-      int quantity,
+      double quantity,
+      ShoppingUnit unit,
+      String? customUnit,
       int? estimatedPrice,
       DateTime? completedAt,
       bool isCompleted,
@@ -537,6 +566,8 @@ extension ShoppingItemPatterns on ShoppingItem {
           _that.tags,
           _that.note,
           _that.quantity,
+          _that.unit,
+          _that.customUnit,
           _that.estimatedPrice,
           _that.completedAt,
           _that.isCompleted,
@@ -567,7 +598,9 @@ class _ShoppingItem extends ShoppingItem {
     this.categoryId,
     final List<String> tags = const <String>[],
     this.note,
-    this.quantity = 1,
+    this.quantity = 1.0,
+    this.unit = ShoppingUnit.piece,
+    this.customUnit,
     this.estimatedPrice,
     this.completedAt,
     this.isCompleted = false,
@@ -610,8 +643,12 @@ class _ShoppingItem extends ShoppingItem {
   // decrypted plaintext
   @override
   @JsonKey()
-  final int quantity;
-  // D-02
+  final double quantity;
+  @override
+  @JsonKey()
+  final ShoppingUnit unit;
+  @override
+  final String? customUnit;
   @override
   final int? estimatedPrice;
   // ITEM-05
@@ -670,6 +707,9 @@ class _ShoppingItem extends ShoppingItem {
             (identical(other.note, note) || other.note == note) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
+            (identical(other.unit, unit) || other.unit == unit) &&
+            (identical(other.customUnit, customUnit) ||
+                other.customUnit == customUnit) &&
             (identical(other.estimatedPrice, estimatedPrice) ||
                 other.estimatedPrice == estimatedPrice) &&
             (identical(other.completedAt, completedAt) ||
@@ -706,6 +746,8 @@ class _ShoppingItem extends ShoppingItem {
     const DeepCollectionEquality().hash(_tags),
     note,
     quantity,
+    unit,
+    customUnit,
     estimatedPrice,
     completedAt,
     isCompleted,
@@ -721,7 +763,7 @@ class _ShoppingItem extends ShoppingItem {
 
   @override
   String toString() {
-    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
+    return 'ShoppingItem(id: $id, deviceId: $deviceId, listType: $listType, name: $name, ledgerType: $ledgerType, categoryId: $categoryId, tags: $tags, note: $note, quantity: $quantity, unit: $unit, customUnit: $customUnit, estimatedPrice: $estimatedPrice, completedAt: $completedAt, isCompleted: $isCompleted, sortOrder: $sortOrder, isSynced: $isSynced, isDeleted: $isDeleted, addedByBookId: $addedByBookId, createdAt: $createdAt, updatedAt: $updatedAt, syncRevision: $syncRevision, syncOriginDeviceId: $syncOriginDeviceId)';
   }
 }
 
@@ -743,7 +785,9 @@ abstract mixin class _$ShoppingItemCopyWith<$Res>
     String? categoryId,
     List<String> tags,
     String? note,
-    int quantity,
+    double quantity,
+    ShoppingUnit unit,
+    String? customUnit,
     int? estimatedPrice,
     DateTime? completedAt,
     bool isCompleted,
@@ -780,6 +824,8 @@ class __$ShoppingItemCopyWithImpl<$Res>
     Object? tags = null,
     Object? note = freezed,
     Object? quantity = null,
+    Object? unit = null,
+    Object? customUnit = freezed,
     Object? estimatedPrice = freezed,
     Object? completedAt = freezed,
     Object? isCompleted = null,
@@ -829,7 +875,15 @@ class __$ShoppingItemCopyWithImpl<$Res>
         quantity: null == quantity
             ? _self.quantity
             : quantity // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
+        unit: null == unit
+            ? _self.unit
+            : unit // ignore: cast_nullable_to_non_nullable
+                  as ShoppingUnit,
+        customUnit: freezed == customUnit
+            ? _self.customUnit
+            : customUnit // ignore: cast_nullable_to_non_nullable
+                  as String?,
         estimatedPrice: freezed == estimatedPrice
             ? _self.estimatedPrice
             : estimatedPrice // ignore: cast_nullable_to_non_nullable

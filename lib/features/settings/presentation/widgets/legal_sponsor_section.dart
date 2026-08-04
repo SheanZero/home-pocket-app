@@ -16,15 +16,7 @@ class LegalSponsorSection extends StatelessWidget {
 
   final bool showTitle;
 
-  Future<void> _openLegalDocument(
-    BuildContext context,
-    LegalDoc doc,
-    String url,
-  ) async {
-    final opened = await _launchExternal(url);
-    if (!context.mounted || opened) return;
-
-    // Legal text remains available offline if the browser cannot be opened.
+  Future<void> _openLegalDocument(BuildContext context, LegalDoc doc) async {
     await Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => LegalDocScreen(doc: doc)));
@@ -55,7 +47,6 @@ class LegalSponsorSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
-    final languageCode = Localizations.localeOf(context).languageCode;
 
     final legalRows = SettingsSectionCard(
       title: showTitle ? l10n.legalSponsorSectionTitle : null,
@@ -64,37 +55,24 @@ class LegalSponsorSection extends StatelessWidget {
           icon: Icons.privacy_tip_outlined,
           title: l10n.privacyPolicy,
           subtitle: l10n.privacyPolicyDescription,
-          onTap: () => _openLegalDocument(
-            context,
-            LegalDoc.privacy,
-            LegalUrls.privacyPolicyFor(languageCode),
-          ),
+          onTap: () => _openLegalDocument(context, LegalDoc.privacy),
         ),
         _LegalLinkTile(
           icon: Icons.description_outlined,
           title: l10n.termsOfUse,
           subtitle: l10n.termsOfUseDescription,
-          onTap: () => _openLegalDocument(
-            context,
-            LegalDoc.terms,
-            LegalUrls.termsOfUseFor(languageCode),
-          ),
+          onTap: () => _openLegalDocument(context, LegalDoc.terms),
         ),
         _LegalLinkTile(
           icon: Icons.storefront_outlined,
           title: l10n.tokushoNotice,
           subtitle: l10n.tokushoNoticeSubtitle,
-          onTap: () => _openLegalDocument(
-            context,
-            LegalDoc.tokusho,
-            LegalUrls.tokushoFor(languageCode),
-          ),
+          onTap: () => _openLegalDocument(context, LegalDoc.tokusho),
         ),
         _LegalLinkTile(
           icon: Icons.code_outlined,
           title: l10n.openSourceLicenses,
           subtitle: l10n.openSourceLicensesDescription,
-          trailingExternal: false,
           onTap: () => showLicensePage(
             context: context,
             applicationName: l10n.appName,
@@ -174,14 +152,12 @@ class _LegalLinkTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
-    this.trailingExternal = true,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
-  final bool trailingExternal;
 
   @override
   Widget build(BuildContext context) {
@@ -207,8 +183,8 @@ class _LegalLinkTile extends StatelessWidget {
         style: AppTextStyles.supporting.copyWith(color: palette.textSecondary),
       ),
       trailing: Icon(
-        trailingExternal ? Icons.open_in_new : Icons.chevron_right,
-        color: trailingExternal ? palette.shared : palette.textTertiary,
+        Icons.chevron_right,
+        color: palette.textTertiary,
         size: 20,
       ),
       onTap: onTap,

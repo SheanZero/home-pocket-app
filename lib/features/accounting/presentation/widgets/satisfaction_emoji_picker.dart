@@ -12,10 +12,13 @@ class SatisfactionEmojiPicker extends StatelessWidget {
     required this.title,
     required this.levelLabels,
     required this.bottomLabels,
+    this.showHeader = true,
+    this.choiceLabels,
+    this.chipSize = _defaultChipSize,
   });
 
   static const _faceValues = [2, 4, 6, 8, 10];
-  static const _chipSize = 56.0;
+  static const _defaultChipSize = 56.0;
 
   /// Satisfaction faces (cat set), ordered low → high satisfaction.
   /// Monochrome SVGs — tinted via [ColorFilter] to match the picker state.
@@ -32,6 +35,9 @@ class SatisfactionEmojiPicker extends StatelessWidget {
   final String title;
   final List<String> levelLabels;
   final List<String> bottomLabels;
+  final bool showHeader;
+  final List<String>? choiceLabels;
+  final double chipSize;
 
   int get _selectedIndex {
     if (value <= 2) return 0;
@@ -49,89 +55,118 @@ class SatisfactionEmojiPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              title,
-              style: AppTextStyles.titleMedium.copyWith(
-                fontSize: 13,
-                color: palette.textPrimary,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              levelLabels[selectedIndex],
-              style: AppTextStyles.bodySmall.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: palette.joy,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(_icons.length, (index) {
-            final isSelected = index == selectedIndex;
-            return GestureDetector(
-              key: ValueKey('face_$index'),
-              onTap: () => onChanged(_faceValues[index]),
-              child: Container(
-                width: _chipSize,
-                height: _chipSize,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isSelected ? palette.joyLight : palette.backgroundMuted,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? palette.joy : Colors.transparent,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: SvgPicture.asset(
-                  _icons[index],
-                  width: 34,
-                  height: 34,
-                  colorFilter: ColorFilter.mode(
-                    isSelected ? palette.joy : palette.textSecondary,
-                    BlendMode.srcIn,
-                  ),
+        if (showHeader) ...[
+          Row(
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.titleMedium.copyWith(
+                  fontSize: 13,
+                  color: palette.textPrimary,
                 ),
               ),
-            );
-          }),
-        ),
-        const SizedBox(height: 8),
-        // Labels sit in fixed-width columns matching the icon row (same
-        // spaceBetween), so 平和/不错/最爱 center under icons 1 / 3 / 5
-        // instead of hugging the card edges.
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(_icons.length, (index) {
-            final String label;
-            if (index == 0) {
-              label = bottomLabels[0];
-            } else if (index == 2) {
-              label = bottomLabels[1];
-            } else if (index == _icons.length - 1) {
-              label = bottomLabels[2];
-            } else {
-              label = '';
-            }
-            return SizedBox(
-              width: _chipSize,
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
+              const Spacer(),
+              Text(
+                levelLabels[selectedIndex],
                 style: AppTextStyles.bodySmall.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textTertiary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: palette.joy,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final availableChipSize = constraints.hasBoundedWidth
+                ? constraints.maxWidth / _icons.length
+                : chipSize;
+            final effectiveChipSize = availableChipSize < chipSize
+                ? availableChipSize
+                : chipSize;
+
+            return Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(_icons.length, (index) {
+                    final isSelected = index == selectedIndex;
+                    final label = choiceLabels?[index] ?? levelLabels[index];
+                    return Semantics(
+                      button: true,
+                      selected: isSelected,
+                      label: label,
+                      child: GestureDetector(
+                        key: ValueKey('face_$index'),
+                        excludeFromSemantics: true,
+                        onTap: () => onChanged(_faceValues[index]),
+                        child: Container(
+                          width: effectiveChipSize,
+                          height: effectiveChipSize,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? palette.joyLight
+                                : palette.backgroundMuted,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? palette.joy
+                                  : Colors.transparent,
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: SvgPicture.asset(
+                            _icons[index],
+                            width: 34,
+                            height: 34,
+                            colorFilter: ColorFilter.mode(
+                              isSelected ? palette.joy : palette.textSecondary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 8),
+                // Labels sit in fixed-width columns matching the icon row
+                // so each caption stays centered under its choice.
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(_icons.length, (index) {
+                    final String label;
+                    if (choiceLabels != null) {
+                      label = choiceLabels![index];
+                    } else if (index == 0) {
+                      label = bottomLabels[0];
+                    } else if (index == 2) {
+                      label = bottomLabels[1];
+                    } else if (index == _icons.length - 1) {
+                      label = bottomLabels[2];
+                    } else {
+                      label = '';
+                    }
+                    return SizedBox(
+                      width: effectiveChipSize,
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: palette.textTertiary,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             );
-          }),
+          },
         ),
       ],
     );

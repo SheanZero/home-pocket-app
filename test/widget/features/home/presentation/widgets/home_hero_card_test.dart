@@ -438,25 +438,33 @@ void main() {
       expect(find.text('WED'), findsOneWidget);
     });
 
-    testWidgets('Best Joy seal matches the compact V16 ticket geometry', (
+    testWidgets('Best Joy seal is square with enlarged content', (
       tester,
     ) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 1000);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _singleRich(), locale: const Locale('en')),
+      );
       await tester.pumpAndSettle();
 
       final sealPanel = find.byKey(const Key('best-joy-seal-panel'));
       final faceFinder = find.byType(SatisfactionFaceIcon);
 
       expect(sealPanel, findsOneWidget);
-      expect(tester.getSize(sealPanel).width, 58);
+      expect(tester.getSize(sealPanel), const Size.square(80));
       expect(faceFinder, findsOneWidget);
 
       final face = tester.widget<SatisfactionFaceIcon>(faceFinder);
       expect(face.value, 10);
-      expect(face.size, 22);
+      expect(face.size, 30);
 
-      final tierLabel = tester.widget<Text>(find.text('至福'));
-      expect(tierLabel.style?.fontSize, AppTypography.micro);
+      final tierLabel = tester.widget<Text>(find.text('Amazing'));
+      expect(tierLabel.style?.fontSize, AppTypography.label);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('Best Joy tear notches interrupt the outer horizontal border', (
@@ -550,6 +558,60 @@ void main() {
   });
 
   group('HomeHeroCard — empty states (D-09)', () {
+    final notchAlignmentCases =
+        <({String label, _FixtureSnapshot snapshot, bool isGroupMode})>[
+          (
+            label: 'single empty month',
+            snapshot: _singleEmpty(),
+            isGroupMode: false,
+          ),
+          (
+            label: 'single daily-only month',
+            snapshot: _singleNoJoyWithDailySpend(),
+            isGroupMode: false,
+          ),
+          (
+            label: 'group month without Joy',
+            snapshot: _groupNoJoy(),
+            isGroupMode: true,
+          ),
+        ];
+
+    for (final testCase in notchAlignmentCases) {
+      testWidgets('${testCase.label}: tear notches mask the outer border', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _buildSubject(
+            snapshot: testCase.snapshot,
+            isGroupMode: testCase.isGroupMode,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final surfaceRect = tester.getRect(
+          find.byKey(const Key('home-hero-main-surface')),
+        );
+        final leftNotchRect = tester.getRect(
+          find.byKey(const Key('home-hero-tear-notch-left')),
+        );
+        final rightNotchRect = tester.getRect(
+          find.byKey(const Key('home-hero-tear-notch-right')),
+        );
+        final leftMaskRect = tester.getRect(
+          find.byKey(const Key('home-hero-tear-notch-left-opening-mask')),
+        );
+        final rightMaskRect = tester.getRect(
+          find.byKey(const Key('home-hero-tear-notch-right-opening-mask')),
+        );
+
+        expect(leftNotchRect.left, closeTo(surfaceRect.left, 0.01));
+        expect(rightNotchRect.right, closeTo(surfaceRect.right, 0.01));
+        expect(leftMaskRect.left, closeTo(surfaceRect.left, 0.01));
+        expect(rightMaskRect.right, closeTo(surfaceRect.right, 0.01));
+      });
+    }
+
     testWidgets(
       'totalExpenses == 0: hero renders ¥0, trend chip hidden, split bar gray, rings Empty',
       (tester) async {

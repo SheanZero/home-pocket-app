@@ -2,11 +2,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
 import 'package:home_pocket/application/shopping_list/create_shopping_item_use_case.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
+import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_unit_usage_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockShoppingItemRepository extends Mock
     implements ShoppingItemRepository {}
+
+class _RecordingUnitUsageRepository implements ShoppingUnitUsageRepository {
+  final selections = <ShoppingUnitSelection>[];
+
+  @override
+  Future<void> record(ShoppingUnitSelection selection, DateTime usedAt) async {
+    selections.add(selection);
+  }
+
+  @override
+  Stream<List<ShoppingUnitUsage>> watchAll() => const Stream.empty();
+}
 
 void main() {
   late _MockShoppingItemRepository mockRepo;
@@ -37,21 +51,18 @@ void main() {
   });
 
   group('CreateShoppingItemUseCase', () {
-    test(
-      'private create does NOT enqueue tracker op (D37-06, SC-1)',
-      () async {
-        final params = CreateShoppingItemParams(
-          deviceId: 'device-1',
-          listType: 'private',
-          name: 'Secret Gift',
-        );
+    test('private create does NOT enqueue tracker op (D37-06, SC-1)', () async {
+      final params = CreateShoppingItemParams(
+        deviceId: 'device-1',
+        listType: 'private',
+        name: 'Secret Gift',
+      );
 
-        final result = await useCase.execute(params);
+      final result = await useCase.execute(params);
 
-        expect(result.isSuccess, isTrue);
-        expect(tracker.pendingCount, 0);
-      },
-    );
+      expect(result.isSuccess, isTrue);
+      expect(tracker.pendingCount, 0);
+    });
 
     test('public create enqueues tracker op (SC-1, SYNC-02)', () async {
       final params = CreateShoppingItemParams(
@@ -101,6 +112,29 @@ void main() {
       final result = await useCase.execute(params);
 
       expect(result.isSuccess, isFalse);
+    });
+
+    test('successful create records the selected unit once', () async {
+      final usageRepository = _RecordingUnitUsageRepository();
+      final unitAwareUseCase = CreateShoppingItemUseCase(
+        shoppingItemRepository: mockRepo,
+        unitUsageRepository: usageRepository,
+      );
+
+      final result = await unitAwareUseCase.execute(
+        const CreateShoppingItemParams(
+          deviceId: 'device-1',
+          listType: 'private',
+          name: 'Sugar',
+          quantity: 200,
+          unit: ShoppingUnit.gram,
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(usageRepository.selections, [
+        const ShoppingUnitSelection(ShoppingUnit.gram),
+      ]);
     });
   });
 }

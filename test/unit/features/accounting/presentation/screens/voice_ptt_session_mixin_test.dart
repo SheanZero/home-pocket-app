@@ -36,6 +36,7 @@ import 'package:home_pocket/features/accounting/presentation/screens/voice_recog
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
+import 'package:home_pocket/shared/constants/voice_tuning.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
@@ -48,10 +49,13 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
   void Function(double normalizedLevel)? onSoundLevel;
   String? startedLocaleId;
   var stopped = false;
+  var stopCount = 0;
   var canceled = false;
   var startCount = 0;
   var initializeCount = 0;
   Object? startError;
+  Duration lastListenFor = Duration.zero;
+  Duration lastPauseFor = Duration.zero;
 
   /// KFB C2: the last `allowOnDeviceFallback` value threaded into
   /// [startListening] (default true preserves every existing call site).
@@ -95,13 +99,18 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     startedLocaleId = localeId;
     stopped = false;
     startCount++;
+    lastListenFor = listenFor;
+    lastPauseFor = pauseFor;
     lastAllowOnDeviceFallback = allowOnDeviceFallback;
     final error = startError;
     if (error != null) throw error;
   }
 
   @override
-  Future<void> stop() async => stopped = true;
+  Future<void> stop() async {
+    stopped = true;
+    stopCount++;
+  }
 
   @override
   Future<void> cancel() async {
@@ -268,7 +277,9 @@ class _MixinHostState extends ConsumerState<_MixinHost>
         VoicePttSessionMixin {
   final _formKey = GlobalKey<TransactionDetailsFormState>();
   String _voiceLocaleId = 'ja-JP';
-  var committed = false;
+  var commitCount = 0;
+
+  bool get committed => commitCount > 0;
 
   @override
   TransactionDetailsFormState? get pttFormState => _formKey.currentState;
@@ -283,7 +294,7 @@ class _MixinHostState extends ConsumerState<_MixinHost>
   }
 
   @override
-  void onPttCommitted() => committed = true;
+  void onPttCommitted() => commitCount++;
 
   @override
   void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
@@ -487,7 +498,7 @@ void main() {
   // ── R2 tap-modal / continuous auto-fill ──────────────────────────────────
 
   testWidgets(
-    'R2: tap-session auto-fills the form on each speech-final (no exit needed)',
+    'voice-end: non-empty final auto-completes after parse and fill settle',
     (tester) async {
       useTallSurface(tester);
       final speech = CapturingSpeechService();
@@ -516,8 +527,17 @@ void main() {
       await tester.pump();
       expect(host.pttIsRecording, isTrue);
 
-      // A speech-final result AUTO-fills the form — no exit / release needed.
+      // A speech-final result AUTO-fills and completes — no terminal platform
+      // status, manual exit, or release is needed.
       speech.emitFinal('1千8百4十元 星巴克');
+      await tester.pumpAndSettle();
+
+      expect(
+        host.pttIsRecording,
+        isTrue,
+        reason: 'the final grace keeps split-final amount chunks possible',
+      );
+      await tester.pump(VoiceTuning.finalCompletionGrace);
       await tester.pumpAndSettle();
 
       expect(parse.inputs, contains('1千8百4十元 星巴克'));
@@ -528,11 +548,164 @@ void main() {
       );
       expect(
         host.pttIsRecording,
-        isTrue,
-        reason: 'the session keeps listening after an auto-fill',
+        isFalse,
+        reason: 'the final result owns the one-shot completion transition',
+      );
+      expect(
+        host.pttListenStatus,
+        PttListenStatus.stopped,
+        reason: 'review is exposed only after the final fill has settled',
+      );
+      expect(
+        speech.stopCount,
+        1,
+        reason: 'final-result completion stops the recognizer exactly once',
       );
       expect(find.text('星巴克'), findsOneWidget);
       expect(find.textContaining('Cafe'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'voice-end: completion is idempotent across final, terminal status, '
+    'manual stop, and elapsed fallback windows',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        'ラテ 1千': VoiceParseResult(
+          rawText: 'ラテ 1千',
+          amount: 1000,
+          parsedDate: DateTime(2026, 4, 27),
+          merchantName: 'スタバ',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'cat_food_cafe',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.daily,
+        ),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      await host.startPttTapSession();
+      speech.emitFinal('ラテ 1千');
+      await tester.pumpAndSettle();
+
+      // Late/competing completion signals must all converge on the already
+      // completed session instead of replaying stop/fill/provenance work.
+      speech.emitStatus('done');
+      speech.emitStatus('notListening');
+      await host.exitPttTapSession();
+      await tester.pump(speech.lastListenFor + const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(host.pttIsRecording, isFalse);
+      expect(host.pttListenStatus, PttListenStatus.stopped);
+      expect(
+        host.pttContinuousActive,
+        isFalse,
+        reason: 'a late manual exit still closes the already-completed session',
+      );
+      expect(
+        speech.stopCount,
+        1,
+        reason: 'all completion signals share one speech-stop operation',
+      );
+      expect(
+        parse.inputs.where((text) => text == 'ラテ 1千'),
+        hasLength(1),
+        reason: 'the final draft is parsed/filled only once',
+      );
+      expect(
+        host.commitCount,
+        1,
+        reason: 'onPttCommitted is not replayed by a completion race',
+      );
+    },
+  );
+
+  testWidgets(
+    'voice-end: meaningful result activity resets the app silence fallback',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase({
+        'ラテ': const VoiceParseResult(rawText: 'ラテ'),
+        'ラテ 1千': const VoiceParseResult(rawText: 'ラテ 1千', amount: 1000),
+      });
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      await host.startPttTapSession();
+      speech.emitPartial('ラテ');
+      await tester.pump(speech.lastPauseFor - const Duration(milliseconds: 1));
+
+      // New meaningful speech moves the silence deadline. Crossing the first
+      // deadline must not terminate the live second utterance.
+      speech.emitPartial('ラテ 1千');
+      await tester.pump(const Duration(milliseconds: 2));
+      expect(host.pttIsRecording, isTrue);
+
+      await tester.pump(speech.lastPauseFor);
+      await tester.pumpAndSettle();
+
+      expect(
+        host.pttIsRecording,
+        isFalse,
+        reason: 'app-owned silence completion does not await platform status',
+      );
+      expect(host.pttListenStatus, PttListenStatus.stopped);
+      expect(speech.stopCount, 1);
+      expect(
+        host.commitCount,
+        2,
+        reason:
+            'the two live partial fills are not replayed by silence completion',
+      );
+    },
+  );
+
+  testWidgets(
+    'voice-end: initial silence terminates via app maximum-session timeout',
+    (tester) async {
+      useTallSurface(tester);
+      final speech = CapturingSpeechService();
+      final parse = FakeParseVoiceInputUseCase(const {});
+
+      await tester.pumpWidget(
+        buildHost(speechService: speech, parseUseCase: parse),
+      );
+      await tester.pumpAndSettle();
+
+      final host = hostOf(tester);
+      await host.startPttTapSession();
+      expect(host.pttIsRecording, isTrue);
+
+      await tester.pump(speech.lastListenFor + const Duration(milliseconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(
+        host.pttIsRecording,
+        isFalse,
+        reason: 'the app owns a hard deadline even before any speech arrives',
+      );
+      expect(host.pttListenStatus, PttListenStatus.stopped);
+      expect(speech.stopCount, 1);
+      expect(
+        host.commitCount,
+        0,
+        reason: 'empty silence does not fill a draft',
+      );
     },
   );
 

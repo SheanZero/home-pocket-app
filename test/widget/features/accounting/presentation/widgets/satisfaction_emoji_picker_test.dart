@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,6 +84,19 @@ void main() {
 
       expect(find.text('満足度'), findsOneWidget);
       expect(find.text('満足'), findsOneWidget);
+    });
+
+    testWidgets('exposes each face as a labeled selectable button', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildTestWidget(value: 6, onChanged: (_) {}));
+
+      final semantics = tester.getSemantics(
+        find.byKey(const ValueKey('face_2')),
+      );
+      expect(semantics.label, '順調');
+      expect(semantics.flagsCollection.isButton, isTrue);
+      expect(semantics.flagsCollection.isSelected, Tristate.isTrue);
     });
   });
 }

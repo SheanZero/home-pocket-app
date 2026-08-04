@@ -38,6 +38,7 @@
 | 🔹 MOD-007 设置管理 | [MOD-007_Settings.md](../02-module-specs/MOD-007_Settings.md) | PRD_MVP_App.md | 6天 | ✅ 完成 |
 | 🔹 MOD-008 趣味功能 | [MOD-008_Gamification.md](../02-module-specs/MOD-008_Gamification.md) | PRD_Module_Gamification.md | 7天 | ✅ 完成 |
 | 🔹 MOD-009 语音记账 | [MOD-009_VoiceInput.md](../02-module-specs/MOD-009_VoiceInput.md) | — | 8天 | ✅ 完成（v2.2 as-built 深度检查+改进建议，2026-07-07） |
+| 🔹 MOD-010 购物数量与单位 | [MOD-010_Shopping_Units.md](../02-module-specs/MOD-010_Shopping_Units.md) | v16 mockup 方案 3 | 分阶段评估 | 📝 待评审（数据、同步、展示、推荐） |
 
 ### 基础能力 PRD 文档（04-basic）
 

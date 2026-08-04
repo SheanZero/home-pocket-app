@@ -324,17 +324,19 @@ class _CompletedSectionHeader extends ConsumerWidget {
                 cancelLabel: l10n.shoppingDeleteCancelButton,
               );
               if (!confirmed) return;
-              // Show feedback BEFORE use-case call (context validity rule)
-              if (context.mounted) {
+              // SC5/DONE-03: fire for current listType regardless of active filter
+              final result = await ref
+                  .read(clearCompletedItemsUseCaseProvider)
+                  .execute(listType);
+              // Only report success after the persisted mutation completes.
+              // The Drift watch stream re-emits and removes deleted rows from
+              // this screen without a manual provider invalidation.
+              if (context.mounted && result.isSuccess) {
                 showSuccessFeedback(
                   context,
                   l10n.shoppingClearCompletedSnackBar,
                 );
               }
-              // SC5/DONE-03: fire for current listType regardless of active filter
-              await ref
-                  .read(clearCompletedItemsUseCaseProvider)
-                  .execute(listType);
             },
             child: Text(
               l10n.shoppingClearCompletedAction,

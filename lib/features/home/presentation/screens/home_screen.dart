@@ -14,7 +14,6 @@ import '../../../../features/analytics/domain/models/family_happiness.dart';
 import '../../../../features/analytics/domain/models/metric_result.dart';
 import '../../../../features/analytics/presentation/providers/state_analytics.dart';
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
-import '../../../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/navigation/family_flow_launcher.dart';
 import '../../../../features/profile/domain/models/user_profile.dart';
@@ -50,11 +49,13 @@ class HomeScreen extends ConsumerStatefulWidget {
     required this.bookId,
     this.onSettingsTap,
     this.onAddJoyTap,
+    this.onJoyAnalyticsTap,
   });
 
   final String bookId;
   final VoidCallback? onSettingsTap;
   final ValueChanged<HomeJoyPrompt>? onAddJoyTap;
+  final VoidCallback? onJoyAnalyticsTap;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -310,12 +311,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           recommendedTarget,
                                       isMonthlyJoyTargetConfigured:
                                           configuredTargetValid,
-                                      onTap: () => Navigator.of(context).push(
-                                        MaterialPageRoute<void>(
-                                          builder: (_) =>
-                                              AnalyticsScreen(bookId: bookId),
-                                        ),
-                                      ),
+                                      onTap: widget.onJoyAnalyticsTap ?? () {},
                                       onAddJoy: widget.onAddJoyTap,
                                     ),
                                     if (isGroupMode) ...[
@@ -325,13 +321,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         currencyCode: currencyCode,
                                         locale: locale,
                                         onMemberTap: (_) =>
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute<void>(
-                                                builder: (_) => AnalyticsScreen(
-                                                  bookId: bookId,
-                                                ),
-                                              ),
-                                            ),
+                                            widget.onJoyAnalyticsTap?.call(),
                                       ),
                                     ],
                                   ],

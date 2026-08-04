@@ -1081,6 +1081,47 @@
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },
+  "satisfactionSheetManualReason": "已设为悦己支出",
+  "@satisfactionSheetManualReason": {
+    "description": "Context shown when the user manually switches an entry to the Joy ledger"
+  },
+  "satisfactionSheetCategoryReason": "已根据“{categoryName}”设为悦己支出",
+  "@satisfactionSheetCategoryReason": {
+    "description": "Context shown when category inference switches an entry to the Joy ledger",
+    "placeholders": {
+      "categoryName": {"type": "String"}
+    }
+  },
+  "satisfactionSheetTitle": "这笔消费让你有多满足？",
+  "@satisfactionSheetTitle": {
+    "description": "Title of the Joy satisfaction selection bottom sheet"
+  },
+  "satisfactionSheetCurrent": "当前为「{level}」，选择后可随时修改",
+  "@satisfactionSheetCurrent": {
+    "description": "Current Joy satisfaction summary in the selection bottom sheet",
+    "placeholders": {
+      "level": {"type": "String"}
+    }
+  },
+  "satisfactionSheetChoiceTwo": "还好",
+  "@satisfactionSheetChoiceTwo": {
+    "description": "Second Joy satisfaction choice shown in the bottom sheet"
+  },
+  "satisfactionSheetChoiceFour": "很棒",
+  "@satisfactionSheetChoiceFour": {
+    "description": "Fourth Joy satisfaction choice shown in the bottom sheet"
+  },
+  "satisfactionSheetAutoReturn": "选择后自动返回记账",
+  "@satisfactionSheetAutoReturn": {
+    "description": "Explains that choosing a satisfaction value closes the bottom sheet"
+  },
+  "satisfactionSheetKeepCurrent": "保持「{level}」",
+  "@satisfactionSheetKeepCurrent": {
+    "description": "Keeps the current Joy satisfaction value and closes the bottom sheet",
+    "placeholders": {
+      "level": {"type": "String"}
+    }
+  },
   "satisfactionLabelNeutral": "中性",
   "@satisfactionLabelNeutral": {
     "description": "Variant A pill label: val 2, unipolar positive baseline (ADR-014)"
@@ -3123,6 +3164,21 @@
   "@shoppingFormQuantityLabel": {
     "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormQuantityHint": "数值与单位可以分别设置",
+  "shoppingUnitPickerTitle": "选择单位",
+  "shoppingUnitPickerHelp": "切换单位不会自动换算数量",
+  "shoppingUnitCustom": "自定义单位",
+  "shoppingUnitCustomHint": "例如：杯",
+  "shoppingUnitCustomError": "请输入 1–12 个字符",
+  "shoppingUnitApply": "应用",
+  "shoppingUnitPiece": "件",
+  "shoppingUnitGram": "g",
+  "shoppingUnitKilogram": "kg",
+  "shoppingUnitMilliliter": "ml",
+  "shoppingUnitLiter": "L",
+  "shoppingUnitBag": "袋",
+  "shoppingUnitBottle": "瓶",
+  "shoppingUnitPack": "包",
   "shoppingFormPrice": "预估价格",
   "@shoppingFormPrice": {
     "description": "Label for the estimated price field in the shopping item form (Phase 38-07)"

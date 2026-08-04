@@ -878,6 +878,36 @@ class SZh extends S {
   String get satisfactionExcellent => '最爱！';
 
   @override
+  String get satisfactionSheetManualReason => '已设为悦己支出';
+
+  @override
+  String satisfactionSheetCategoryReason(String categoryName) {
+    return '已根据“$categoryName”设为悦己支出';
+  }
+
+  @override
+  String get satisfactionSheetTitle => '这笔消费让你有多满足？';
+
+  @override
+  String satisfactionSheetCurrent(String level) {
+    return '当前为「$level」，选择后可随时修改';
+  }
+
+  @override
+  String get satisfactionSheetChoiceTwo => '还好';
+
+  @override
+  String get satisfactionSheetChoiceFour => '很棒';
+
+  @override
+  String get satisfactionSheetAutoReturn => '选择后自动返回记账';
+
+  @override
+  String satisfactionSheetKeepCurrent(String level) {
+    return '保持「$level」';
+  }
+
+  @override
   String get satisfactionLabelNeutral => '中性';
 
   @override
@@ -2579,6 +2609,51 @@ class SZh extends S {
 
   @override
   String get shoppingFormQuantityLabel => '数量';
+
+  @override
+  String get shoppingFormQuantityHint => '数值与单位可以分别设置';
+
+  @override
+  String get shoppingUnitPickerTitle => '选择单位';
+
+  @override
+  String get shoppingUnitPickerHelp => '切换单位不会自动换算数量';
+
+  @override
+  String get shoppingUnitCustom => '自定义单位';
+
+  @override
+  String get shoppingUnitCustomHint => '例如：杯';
+
+  @override
+  String get shoppingUnitCustomError => '请输入 1–12 个字符';
+
+  @override
+  String get shoppingUnitApply => '应用';
+
+  @override
+  String get shoppingUnitPiece => '件';
+
+  @override
+  String get shoppingUnitGram => 'g';
+
+  @override
+  String get shoppingUnitKilogram => 'kg';
+
+  @override
+  String get shoppingUnitMilliliter => 'ml';
+
+  @override
+  String get shoppingUnitLiter => 'L';
+
+  @override
+  String get shoppingUnitBag => '袋';
+
+  @override
+  String get shoppingUnitBottle => '瓶';
+
+  @override
+  String get shoppingUnitPack => '包';
 
   @override
   String get shoppingFormPrice => '预估价格';

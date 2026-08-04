@@ -92,6 +92,27 @@ void main() {
       expect(row!.isDeleted, isTrue);
     });
 
+    test('watchAll re-emits after completed items are cleared', () async {
+      await dao.upsert(
+        _makeItem(id: 'private_done', listType: 'private', isCompleted: true),
+      );
+      await dao.upsert(
+        _makeItem(id: 'public_done', listType: 'public', isCompleted: true),
+      );
+
+      final emissionsFuture = dao.watchAll().take(3).toList();
+      await Future<void>.delayed(Duration.zero);
+      await dao.softDeleteAllCompleted('private');
+      await dao.softDeleteAllCompleted('public');
+      final emissions = await emissionsFuture;
+
+      expect(emissions.first.map((row) => row.id), [
+        'private_done',
+        'public_done',
+      ]);
+      expect(emissions.last, isEmpty);
+    });
+
     test('upsert inserts new row and updates existing row', () async {
       // Insert
       await dao.upsert(_makeItem(id: 'item_upsert', sortOrder: 0));

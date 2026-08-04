@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../accounting/domain/models/transaction.dart';
+import 'shopping_unit.dart';
 
 part 'shopping_item_params.freezed.dart';
 
@@ -17,7 +18,9 @@ abstract class ShoppingItemParams with _$ShoppingItemParams {
     String? categoryId,
     @Default(<String>[]) List<String> tags,
     String? note,
-    @Default(1) int quantity,
+    @Default(1.0) double quantity,
+    @Default(ShoppingUnit.piece) ShoppingUnit unit,
+    String? customUnit,
     int? estimatedPrice,
     String? addedByBookId,
   }) = _ShoppingItemParams;

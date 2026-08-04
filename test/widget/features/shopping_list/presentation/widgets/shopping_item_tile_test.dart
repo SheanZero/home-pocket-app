@@ -41,7 +41,7 @@ ShoppingItem _makeItem({
   bool isCompleted = false,
   String? addedByBookId,
   int? estimatedPrice,
-  int quantity = 1,
+  double quantity = 1.0,
   int sortOrder = 0,
 }) {
   final now = DateTime(2026, 6, 8, 10, 0);
@@ -313,7 +313,7 @@ void main() {
       expect(find.byIcon(Icons.chevron_right), findsNothing);
     });
 
-    testWidgets('quantity > 1 shows the number (no ×) in trailing area', (
+    testWidgets('quantity > 1 shows the number and unit in metadata', (
       tester,
     ) async {
       final item = _makeItem(quantity: 3);
@@ -324,13 +324,11 @@ void main() {
         toggle: mockToggle,
       );
 
-      expect(find.text('3'), findsOneWidget);
+      expect(find.text('3 pc'), findsOneWidget);
       expect(find.textContaining('×'), findsNothing);
     });
 
-    testWidgets('quantity == 1 still shows the number 1 (always shown)', (
-      tester,
-    ) async {
+    testWidgets('quantity == 1 still shows its default unit', (tester) async {
       final item = _makeItem(quantity: 1);
       await _pumpTile(
         tester,
@@ -339,7 +337,7 @@ void main() {
         toggle: mockToggle,
       );
 
-      expect(find.text('1'), findsOneWidget);
+      expect(find.text('1 pc'), findsOneWidget);
     });
   });
 

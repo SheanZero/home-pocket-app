@@ -31,6 +31,7 @@ import 'package:home_pocket/features/accounting/presentation/widgets/amount_disp
 import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/hold_to_talk_bar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_toolbar.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_bottom_sheet.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/unified_voice_entry_dock.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
@@ -475,6 +476,41 @@ void main() {
       findsNothing,
       reason: 'history remains host-owned and is absent without a callback',
     );
+  });
+
+  testWidgets('selecting Joy opens the satisfaction sheet and applies choice', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _pumpScreen(
+        mockCreateUseCase: mockCreateUseCase,
+        fakeCategoryRepo: FakeCategoryRepository(_fakeCategories),
+        mockCategoryService: mockCategoryService,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('ledger_type_joy_chip')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SatisfactionBottomSheet), findsOneWidget);
+    expect(find.text('How satisfying was this expense?'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('face_3')));
+    await tester.pumpAndSettle();
+
+    final form = tester.state<TransactionDetailsFormState>(
+      find.byType(TransactionDetailsForm),
+    );
+    expect(form.currentSatisfaction, 8);
+    expect(find.byType(SatisfactionBottomSheet), findsNothing);
+    expect(find.text('Great'), findsOneWidget);
+    expect(find.byType(SmartKeyboard), findsOneWidget);
   });
 
   testWidgets(

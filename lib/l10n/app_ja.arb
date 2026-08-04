@@ -1081,6 +1081,47 @@
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },
+  "satisfactionSheetManualReason": "ときめき支出に設定しました",
+  "@satisfactionSheetManualReason": {
+    "description": "Context shown when the user manually switches an entry to the Joy ledger"
+  },
+  "satisfactionSheetCategoryReason": "「{categoryName}」に基づき、ときめき支出に設定しました",
+  "@satisfactionSheetCategoryReason": {
+    "description": "Context shown when category inference switches an entry to the Joy ledger",
+    "placeholders": {
+      "categoryName": {"type": "String"}
+    }
+  },
+  "satisfactionSheetTitle": "この支出にどのくらい満足していますか？",
+  "@satisfactionSheetTitle": {
+    "description": "Title of the Joy satisfaction selection bottom sheet"
+  },
+  "satisfactionSheetCurrent": "現在は「{level}」です。選択後も変更できます",
+  "@satisfactionSheetCurrent": {
+    "description": "Current Joy satisfaction summary in the selection bottom sheet",
+    "placeholders": {
+      "level": {"type": "String"}
+    }
+  },
+  "satisfactionSheetChoiceTwo": "まあまあ",
+  "@satisfactionSheetChoiceTwo": {
+    "description": "Second Joy satisfaction choice shown in the bottom sheet"
+  },
+  "satisfactionSheetChoiceFour": "とても満足",
+  "@satisfactionSheetChoiceFour": {
+    "description": "Fourth Joy satisfaction choice shown in the bottom sheet"
+  },
+  "satisfactionSheetAutoReturn": "選択すると記録画面に戻ります",
+  "@satisfactionSheetAutoReturn": {
+    "description": "Explains that choosing a satisfaction value closes the bottom sheet"
+  },
+  "satisfactionSheetKeepCurrent": "「{level}」のままにする",
+  "@satisfactionSheetKeepCurrent": {
+    "description": "Keeps the current Joy satisfaction value and closes the bottom sheet",
+    "placeholders": {
+      "level": {"type": "String"}
+    }
+  },
   "satisfactionLabelNeutral": "無難",
   "@satisfactionLabelNeutral": {
     "description": "Variant A pill label: val 2, unipolar positive baseline (ADR-014). JA register matches picker labels per ADR-015 lock."
@@ -3123,6 +3164,21 @@
   "@shoppingFormQuantityLabel": {
     "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
   },
+  "shoppingFormQuantityHint": "数値と単位は別々に設定できます",
+  "shoppingUnitPickerTitle": "単位を選ぶ",
+  "shoppingUnitPickerHelp": "単位を変えても数量は換算されません",
+  "shoppingUnitCustom": "カスタム単位",
+  "shoppingUnitCustomHint": "例：カップ",
+  "shoppingUnitCustomError": "1〜12文字で入力してください",
+  "shoppingUnitApply": "適用",
+  "shoppingUnitPiece": "個",
+  "shoppingUnitGram": "g",
+  "shoppingUnitKilogram": "kg",
+  "shoppingUnitMilliliter": "ml",
+  "shoppingUnitLiter": "L",
+  "shoppingUnitBag": "袋",
+  "shoppingUnitBottle": "本",
+  "shoppingUnitPack": "パック",
   "shoppingFormPrice": "参考価格",
   "@shoppingFormPrice": {
     "description": "Label for the estimated price field in the shopping item form (Phase 38-07)"

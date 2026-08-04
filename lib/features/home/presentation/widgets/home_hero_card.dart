@@ -70,8 +70,9 @@ class HomeHeroCard extends StatelessWidget {
   final ValueChanged<HomeJoyPrompt>? onAddJoy;
 
   static const FormatterService _fmt = FormatterService();
+  static const double _heroSurfaceBorderWidth = 1;
   // The stack starts after 18 px of padding and the 1 px decoration border.
-  static const double _heroSurfaceContentInset = 19;
+  static const double _heroSurfaceContentInset = 18 + _heroSurfaceBorderWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +182,10 @@ class HomeHeroCard extends StatelessWidget {
                 onPromptTap: (prompt) => onAddJoy?.call(prompt),
               ),
               Positioned(
-                left: 0,
+                // BoxDecoration contributes its border width to the
+                // Container's implicit padding. Pull the notch back over that
+                // inset so its opening mask covers the actual outer border.
+                left: -_heroSurfaceBorderWidth,
                 top: -10,
                 child: _heroTearNotch(
                   palette,
@@ -190,7 +194,7 @@ class HomeHeroCard extends StatelessWidget {
                 ),
               ),
               Positioned(
-                right: 0,
+                right: -_heroSurfaceBorderWidth,
                 top: -10,
                 child: _heroTearNotch(
                   palette,
@@ -210,6 +214,7 @@ class HomeHeroCard extends StatelessWidget {
       color: Color.lerp(palette.card, palette.accentPrimaryLight, 0.10),
       borderRadius: BorderRadius.circular(22),
       border: Border.all(
+        width: _heroSurfaceBorderWidth,
         color: Color.lerp(palette.borderDefault, palette.accentPrimary, 0.18)!,
       ),
       boxShadow: [
@@ -662,7 +667,9 @@ class HomeHeroCard extends StatelessWidget {
             if (seal != null)
               SizedBox(
                 key: const Key('best-joy-seal-panel'),
-                width: 58,
+                // The 82dp ticket loses 1dp to each outer border, so an 80dp
+                // width keeps the visible satisfaction panel square.
+                width: 80,
                 child: _TicketSealChrome(
                   borderColor: colors.ticketBorder,
                   cutoutColor: palette.background,
@@ -856,13 +863,13 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         SatisfactionFaceIcon(
           value: row.joyFullness,
-          size: 22,
+          size: 30,
           color: colors.ticketText,
         ),
-        const SizedBox(height: 3),
+        const SizedBox(height: 4),
         Text(
           _satisfactionPillLabel(l10n, row.joyFullness),
-          style: AppTextStyles.micro.copyWith(
+          style: AppTextStyles.label.copyWith(
             fontWeight: FontWeight.w700,
             color: colors.ticketText,
           ),

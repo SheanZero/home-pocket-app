@@ -974,9 +974,43 @@ body {
   .shopping-form-row:last-child { border-bottom: 0; }
   .shopping-form-label { width: 68px; flex: 0 0 68px; color: var(--hp-text-muted); font-size: var(--type-label); line-height: var(--line-label); font-weight: 700; }
   .shopping-form-value { min-width: 0; flex: 1; color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; text-align: right; }
-  .shopping-stepper { margin-left: auto; display: inline-flex; align-items: center; border: 1px solid var(--hp-border); border-radius: 12px; overflow: hidden; }
-  .shopping-stepper button { width: 44px; height: 44px; padding: 0; border: 0; background: var(--hp-surface-muted); color: var(--hp-primary-text); font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); cursor: pointer; }
-  .shopping-stepper input { width: 50px; height: 44px; padding: 0; border: 0; outline: 0; background: var(--hp-surface); color: var(--hp-text); text-align: center; font-size: var(--type-item); line-height: var(--line-item); font-weight: 850; font-variant-numeric: tabular-nums; }
+  .shopping-quantity-row { min-height: 112px; align-items: flex-start; padding-top: 16px; padding-bottom: 16px; background: color-mix(in srgb, var(--hp-primary-soft) 34%, var(--hp-surface)); }
+  .shopping-quantity-row:has(.shopping-unit-chips) { min-height: 150px; }
+  .shopping-quantity-row > .shopping-form-label { padding-top: 13px; }
+  .shopping-quantity-control { min-width: 0; flex: 1; display: grid; gap: 12px; }
+  .shopping-quantity-main { display: grid; grid-template-columns: minmax(0,1fr) 76px; align-items: center; gap: 8px; }
+  .shopping-quantity-input { min-width: 0; height: 48px; padding: 0 12px; border: 1px solid var(--hp-border); border-radius: 13px; outline: 0; background: var(--hp-surface); color: var(--hp-primary-text); text-align: center; font-size: 25px; line-height: 30px; font-weight: 850; font-variant-numeric: tabular-nums; }
+  .shopping-quantity-input:focus { border-color: var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hp-primary) 14%, transparent); }
+  .shopping-unit-select { position: relative; min-width: 0; height: 48px; padding: 0 14px; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; justify-content: center; font-size: var(--type-label); line-height: var(--line-label); font-weight: 850; text-align: center; cursor: pointer; }
+  .shopping-unit-select > span:first-child { width: 100%; min-width: 0; overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+  .shopping-unit-select .material-symbols-rounded { position: absolute; right: 4px; color: var(--hp-text-muted); font-size: 19px; }
+  .shopping-unit-chips { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+  .shopping-unit-chip { min-width: 0; min-height: 44px; padding: 5px 7px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); overflow: hidden; background: var(--hp-surface-muted); color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; cursor: pointer; white-space: nowrap; text-overflow: ellipsis; }
+  .shopping-unit-chip.active { border-color: var(--hp-daily); background: var(--hp-daily-soft); color: var(--hp-daily-text); box-shadow: inset 0 0 0 1px var(--hp-daily); }
+  .shopping-quantity-helper { margin: -3px 1px 0; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); }
+
+  .shopping-unit-sheet { padding: 0 0 2px; }
+  .shopping-unit-sheet-head { min-height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .shopping-unit-sheet-head h3 { margin: 0; }
+  .shopping-unit-sheet-close { width: 44px; height: 44px; margin-right: -9px; padding: 0; border: 0; border-radius: 12px; background: transparent; color: var(--hp-text-muted); display: grid; place-items: center; cursor: pointer; }
+  .shopping-unit-sheet-close .material-symbols-rounded { font-size: 21px; }
+  .shopping-unit-sheet-copy { margin: 2px 0 14px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .shopping-unit-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .shopping-unit-option { min-height: 48px; padding: 9px 12px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface-muted); color: var(--hp-text); display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
+  .shopping-unit-option strong { font-size: var(--type-label); line-height: var(--line-label); }
+  .shopping-unit-option small { color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .shopping-unit-option.active { border-color: var(--hp-daily); background: var(--hp-daily-soft); color: var(--hp-daily-text); box-shadow: inset 0 0 0 1px var(--hp-daily); }
+  .shopping-unit-option .material-symbols-rounded { font-size: 18px; }
+  .shopping-custom-unit-card { margin-top: 12px; padding: 12px; border: 1px solid var(--hp-border); border-radius: 16px; background: color-mix(in srgb, var(--hp-primary-soft) 34%, var(--hp-surface)); }
+  .shopping-custom-unit-card label { display: block; margin-bottom: 7px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .shopping-custom-unit-input { width: 100%; height: 48px; padding: 0 13px; border: 1px solid var(--hp-border); border-radius: 13px; outline: 0; background: var(--hp-surface); color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); font-weight: 750; }
+  .shopping-custom-unit-input:focus { border-color: var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hp-primary) 14%, transparent); }
+  .shopping-custom-unit-help { margin: 7px 2px 0; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .shopping-unit-sheet-actions { margin-top: 15px; display: grid; grid-template-columns: 1fr 1.25fr; gap: 9px; }
+  .shopping-unit-sheet-actions .primary-btn, .shopping-unit-sheet-actions .secondary-btn { min-height: 48px; }
+  .shopping-unit-sheet-actions .primary-btn:disabled { opacity: .45; box-shadow: none; cursor: not-allowed; }
+  .modal-sheet:has(.shopping-unit-sheet) { max-height: 88%; }
+  .shopping-unit-sheet-actions { position: sticky; bottom: -28px; z-index: 2; padding: 12px 0 26px; background: var(--hp-surface); }
   .shopping-form-segments { min-width: 178px; margin-left: auto; }
   .shopping-form-segments .segmented-option { min-height: 40px; }
   .shopping-form-segments .segmented-option.active.daily { background: var(--hp-daily-soft); color: var(--hp-daily-text); box-shadow: inset 0 0 0 1px var(--hp-daily); }
@@ -1745,11 +1779,12 @@ body {
       <div id="shopping-form-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">购物项表单</span>
         <div class="coverage" style="margin-top:9px">
-          <div><strong>与 App 对齐</strong><br>名称、数量、用途、类型、分类、预估价格和备注共用新增 / 编辑表单；右上保存是唯一落库动作。</div>
+          <div><strong>方案 3 · 数值 + 单位 ★ 已选</strong><br>数量值与单位分开编辑；克、千克、袋可快速切换，自定义单位通过底部面板完成。</div>
           <div><strong>语音建议</strong><br>语音只填写一个购物草稿，不新开页面、不自动保存，也不会猜测或修改公开 / 私有。</div>
         </div>
-        <p>复用设备语音识别、语言和权限能力；购物名称 / 数量 / 价格需要新的专用解析模型。</p>
+        <p>单位不做自动换算，始终保留用户输入的数值和单位；自定义单位只从完整选择器进入，并回显在单位按钮中。</p>
         <div class="coverage" style="margin-top:10px">
+          <div><strong>数量演示</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-quantity-demo="standard">初始隐藏</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-quantity-demo="learned">常用单位</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-quantity-demo="custom">自定义单位</button></span></div>
           <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="manual">手动</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="listening">聆听</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="review">识别回填</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="edit">编辑态</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-shopping-demo="unavailable">麦克风不可用</button></span></div>
           <div><strong>MVP 边界</strong><br>一次一个商品；3 秒停顿自动解析；中央按钮可提前结束 / 重新录音；识别结果仍需用户检查并点击保存。</div>
         </div>
@@ -1839,7 +1874,7 @@ body {
     uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
     analyticsTab: 'joy', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsCalendarMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
     shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [],
-    shoppingFormMode: 'create', shoppingFormName: '', shoppingFormQuantity: 1, shoppingFormLedger: 'daily', shoppingFormListType: 'public', shoppingFormCategory: '', shoppingFormPrice: '', shoppingFormNote: '', shoppingFormSubmitting: false, shoppingFormError: '',
+    shoppingFormMode: 'create', shoppingFormName: new URLSearchParams(location.search).get('shopping-quantity-demo')==='standard'?'砂糖':'', shoppingFormQuantity: new URLSearchParams(location.search).get('shopping-quantity-demo')==='standard'?'200':'1', shoppingFormUnit: new URLSearchParams(location.search).get('shopping-quantity-demo')==='standard'?'g':'piece', shoppingFormCustomUnit: '', shoppingFormUnitDraft: 'g', shoppingFormCustomUnitDraft: '', shoppingFormUnitSuggestions: [], shoppingFormLedger: 'daily', shoppingFormListType: 'public', shoppingFormCategory: '', shoppingFormPrice: '', shoppingFormNote: '', shoppingFormSubmitting: false, shoppingFormError: '',
     shoppingVoiceState: 'manual', shoppingVoiceTranscript: '', shoppingVoiceApplied: false, shoppingVoiceSnapshot: null,
     backupStatus: 'overview', backupExportPassword: '', backupExportConfirm: '', backupRestorePassword: '', backupPasswordError: '', backupSelectedFile: '', backupSelectedFileKind: 'valid',
     editAmount: '3280', editAmountDraft: '3280', editCurrency: 'JPY', editJpyAmount: '3280', editRate: '1', editRateDate: '2026年7月10日', editCategory: '食费 > 超市', editDate: '2026年7月10日', editMerchant: 'Life 超市', editLedger: 'daily', editNote: '周末采购', editSatisfaction: 8, editSubmitting: false,
@@ -1895,7 +1930,7 @@ body {
     list: ['Main shell','交易明细','个人保持原有月历结构；家庭模式以成员色签区分付款人，保留头像类目徽标，首版不增加成员筛选。','账本切换 + 月历汇总 + 紧凑筛选 + 付款人明细','个人 / 家庭 / 搜索 / 空态','复用 ListScreen；家庭模式合并 Shadow Book 数据并以成员身份控制编辑权限'],
     analytics: ['Main shell','统计','将支出与悦己拆成两个独立页签：个人模式为「支出 / ときめき」，A2 家庭模式为「家族の支出 / 私のときめき」。选中项以柔和纸片抬升，未选中项贴合共享底板。','标题栏 + 双页签 + 每页 2 个注册卡片','个人 / 家庭 / 支出 / 我的悦己 / 日期展开 / 时间窗','保留现有 Analytics registry 与 drill-down；家庭模式的悦己页签只呈现当前用户数据'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
-    'shopping-form': ['Main shell','购物项目','严格映射现有新增 / 编辑共用表单；语音只在同页填写草稿，右上保存仍是唯一提交入口。','名称 + 数量 + 用途 + 类型 + 分类 + 价格 + 备注','手动 / 聆听 / 解析 / 回填 / 编辑 / 权限不可用','复用 ShoppingItemFormScreen；新增购物专用语音解析器'],
+    'shopping-form': ['Main shell','购物项目','采用方案 3：数量数值与单位分离，常用单位可快速切换，自定义单位可输入、应用并回显。','名称 + 数值 / 单位 + 用途 + 类型 + 分类 + 价格 + 备注','200 克 / 克·千克·袋 / 自定义单位 / 语音回填 / 编辑','扩展 ShoppingItemFormScreen 的数量模型；保留用户原始单位，不做隐式换算'],
     entry: ['Entry','统一记账','金额、类目、日期、商家、用途与备注始终属于同一表单；聆听、解析与识别结果只更新底部输入区，右上键盘入口全程固定。','共享表单 + 单一语音底板 + 数字键盘','手动 / 聆听 / 解析 / 识别结果 / 权限不可用','映射 ManualOneStepScreen、PTT session、快照恢复与 SmartKeyboard'],
     ocr: ['Entry','OCR 扫描','沉浸相机保持深色；拍摄完成后回到同一套详情确认语言。','取景框 + 拍摄控制','权限 / 拍摄 / 复核','复用 OCR scanner 与 review'],
     category: ['Entry','类目选择','与当前 App 一致：L1 用带独立色的可展开卡片建立扫描层级，L2 用紧凑标签完成选择；排序是独立编辑态。','关闭 + 居中标题 + 搜索 + L1 卡片 + L2 标签 + 固定添加入口','预选展开 / 搜索 / L1·L2 重排 / 未保存确认','映射 CategorySelectionScreen、CategoryReorderRow 与 categoryReorderProvider'],
@@ -2362,18 +2397,38 @@ body {
     const settings = voiceState === 'unavailable' ? `<button class="shopping-voice-settings" data-action="shopping-mic-settings">設定を開く</button>` : '';
     return `<div class="shopping-voice-panel ${voiceState}" aria-live="polite"><div class="shopping-voice-head"><span class="shopping-voice-privacy">${icon('shield')}端末内認識を優先</span><span class="shopping-voice-status"><span class="shopping-voice-dot"></span>${status}</span><button class="shopping-voice-keyboard" data-action="shopping-voice-keyboard" aria-label="手動入力へ戻る">${icon('keyboard')}</button></div><div class="shopping-voice-body"><p class="shopping-voice-transcript">${transcript}</p>${shoppingVoiceWave()}${core}<p class="shopping-voice-help">${help}</p>${settings}</div></div>`;
   }
+  const shoppingUnitOptions = [
+    ['g','グラム','g'],['kg','キログラム','kg'],['ml','ミリリットル','ml'],['l','リットル','L'],
+    ['piece','個','個'],['bag','袋','袋'],['bottle','本','本'],['pack','パック','パック'],
+  ];
+  function shoppingUnitLabel(unit=state.shoppingFormUnit,customUnit=state.shoppingFormCustomUnit){
+    if(unit==='custom') return customUnit.trim()||'カスタム';
+    return shoppingUnitOptions.find(option=>option[0]===unit)?.[2]||'個';
+  }
+  function shoppingQuantityControl(){
+    const quickUnits=state.shoppingFormUnitSuggestions.map(unit=>[unit,shoppingUnitLabel(unit,'')]);
+    const unitLabel=shoppingUnitLabel();
+    const quickUnitMarkup=quickUnits.length?`<div class="shopping-unit-chips" role="group" aria-label="よく使う単位">${quickUnits.map(([unit,label])=>`<button class="shopping-unit-chip ${state.shoppingFormUnit===unit?'active':''}" data-shopping-unit="${unit}" aria-pressed="${state.shoppingFormUnit===unit}">${label}</button>`).join('')}</div>`:'';
+    return `<div class="shopping-quantity-control"><div class="shopping-quantity-main"><input class="shopping-quantity-input" data-shopping-input="quantity" inputmode="decimal" value="${escapeHtml(String(state.shoppingFormQuantity))}" aria-label="数量"><button class="shopping-unit-select" data-action="shopping-unit-open" aria-label="単位を選択"><span>${escapeHtml(unitLabel)}</span>${icon('expand_more')}</button></div>${quickUnitMarkup}<p class="shopping-quantity-helper">数値と単位は別々に編集できます</p></div>`;
+  }
+  function shoppingUnitSheet(){
+    const selected=state.shoppingFormUnitDraft;
+    const customSelected=selected==='custom';
+    const applyDisabled=customSelected&&!state.shoppingFormCustomUnitDraft.trim();
+    const options=shoppingUnitOptions.map(([unit,name,label])=>`<button class="shopping-unit-option ${selected===unit?'active':''}" data-shopping-unit-option="${unit}" aria-pressed="${selected===unit}"><span><strong>${label}</strong><br><small>${name}</small></span>${selected===unit?icon('check'):''}</button>`).join('');
+    return `<div class="shopping-unit-sheet"><div class="shopping-unit-sheet-head"><h3>単位を選ぶ</h3><button class="shopping-unit-sheet-close" data-action="close-modal" aria-label="閉じる">${icon('close')}</button></div><p class="shopping-unit-sheet-copy">よく使う単位を選ぶか、家で使う呼び方を追加できます。</p><div class="shopping-unit-options" role="group" aria-label="単位">${options}<button class="shopping-unit-option ${customSelected?'active':''}" data-shopping-unit-option="custom" aria-pressed="${customSelected}"><span><strong>カスタム</strong><br><small>自由入力</small></span>${customSelected?icon('check'):icon('edit')}</button></div>${customSelected?`<div class="shopping-custom-unit-card"><label for="shopping-custom-unit">自分の単位</label><input id="shopping-custom-unit" class="shopping-custom-unit-input" data-shopping-custom-unit maxlength="12" value="${escapeHtml(state.shoppingFormCustomUnitDraft)}" placeholder="例：ひとつまみ、箱、束" autocomplete="off"><p class="shopping-custom-unit-help">12文字まで。入力した表記のまま保存します。</p></div>`:''}<div class="shopping-unit-sheet-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="primary-btn" data-action="shopping-unit-apply" ${applyDisabled?'disabled':''}>この単位を使う</button></div></div>`;
+  }
   function shoppingForm() {
     const isEdit = state.shoppingFormMode === 'edit';
-    const voiceTransient = ['listening','processing'].includes(state.shoppingVoiceState);
-    const saveDisabled = state.shoppingFormSubmitting || voiceTransient;
+    const saveDisabled = state.shoppingFormSubmitting;
     const saveAction = `<button class="shopping-form-save" data-action="save-shopping" ${saveDisabled?'disabled':''}>${state.shoppingFormSubmitting?'保存中…':'保存'}</button>`;
     const nameError = state.shoppingFormError === 'name';
-    const voiceEntry = isEdit ? '' : shoppingVoicePanel();
+    const voiceEntry = '';
     const category = state.shoppingFormCategory || 'カテゴリなし';
     const typeHint = isEdit
       ? `<div class="shopping-type-hint locked">${icon('lock_outline')}作成後のタイプは変更できません</div>`
       : `<div class="shopping-type-hint">${icon('info')}保存後はタイプを変更できません</div>`;
-    return `<section class="screen shopping-form-screen">${backHeader(isEdit?'アイテムを編集':'アイテムを追加',saveAction)}<div class="shopping-name-card ${nameError?'invalid':''}"><input id="shopping-form-name" class="shopping-name-input" data-shopping-input="name" maxlength="200" value="${escapeHtml(state.shoppingFormName)}" placeholder="アイテム名" aria-label="アイテム名" aria-invalid="${nameError}"></div><p class="shopping-name-error" role="alert">${nameError?'名前を入力してください':''}</p>${voiceEntry}<div class="shopping-form-card"><div class="shopping-form-row"><span class="shopping-form-label">数量</span><span class="shopping-stepper"><button data-action="shopping-quantity-decrease" aria-label="数量を減らす">−</button><input data-shopping-input="quantity" inputmode="numeric" value="${state.shoppingFormQuantity}" aria-label="数量"><button data-action="shopping-quantity-increase" aria-label="数量を増やす">＋</button></span></div><div class="shopping-form-row"><span class="shopping-form-label">用途</span>${shoppingLedgerSelector()}</div><div class="shopping-form-row shopping-type-row"><span class="shopping-form-label">タイプ</span><div class="shopping-type-control">${shoppingListTypeSelector()}${typeHint}</div></div></div><div class="shopping-form-card"><button class="shopping-form-row shopping-category-row" data-action="shopping-form-category"><span class="shopping-form-label">カテゴリ</span><strong class="shopping-form-value">${escapeHtml(category)}</strong>${icon('chevron_right')}</button><div class="shopping-form-row"><label class="shopping-form-label" for="shopping-form-price">参考価格</label><span class="shopping-price-prefix">¥</span><input id="shopping-form-price" class="shopping-inline-input" data-shopping-input="price" inputmode="numeric" value="${escapeHtml(state.shoppingFormPrice)}" placeholder="未入力" aria-label="参考価格"></div><div class="shopping-form-row shopping-note-row"><label class="shopping-form-label" for="shopping-form-note">メモ</label><textarea id="shopping-form-note" class="shopping-note-input" data-shopping-input="note" rows="3" placeholder="必要なメモを入力">${escapeHtml(state.shoppingFormNote)}</textarea></div></div></section>`;
+    return `<section class="screen shopping-form-screen">${backHeader(isEdit?'アイテムを編集':'アイテムを追加',saveAction)}<div class="shopping-name-card ${nameError?'invalid':''}"><input id="shopping-form-name" class="shopping-name-input" data-shopping-input="name" maxlength="200" value="${escapeHtml(state.shoppingFormName)}" placeholder="アイテム名" aria-label="アイテム名" aria-invalid="${nameError}"></div><p class="shopping-name-error" role="alert">${nameError?'名前を入力してください':''}</p>${voiceEntry}<div class="shopping-form-card"><div class="shopping-form-row shopping-quantity-row"><span class="shopping-form-label">数量</span>${shoppingQuantityControl()}</div><div class="shopping-form-row"><span class="shopping-form-label">用途</span>${shoppingLedgerSelector()}</div><div class="shopping-form-row shopping-type-row"><span class="shopping-form-label">タイプ</span><div class="shopping-type-control">${shoppingListTypeSelector()}${typeHint}</div></div></div><div class="shopping-form-card"><button class="shopping-form-row shopping-category-row" data-action="shopping-form-category"><span class="shopping-form-label">カテゴリ</span><strong class="shopping-form-value">${escapeHtml(category)}</strong>${icon('chevron_right')}</button><div class="shopping-form-row"><label class="shopping-form-label" for="shopping-form-price">参考価格</label><span class="shopping-price-prefix">¥</span><input id="shopping-form-price" class="shopping-inline-input" data-shopping-input="price" inputmode="numeric" value="${escapeHtml(state.shoppingFormPrice)}" placeholder="未入力" aria-label="参考価格"></div><div class="shopping-form-row shopping-note-row"><label class="shopping-form-label" for="shopping-form-note">メモ</label><textarea id="shopping-form-note" class="shopping-note-input" data-shopping-input="note" rows="3" placeholder="必要なメモを入力">${escapeHtml(state.shoppingFormNote)}</textarea></div></div></section>`;
   }
 
   function entryHeader() {
@@ -2818,6 +2873,7 @@ body {
     const shoppingFormPanel=document.getElementById('shopping-form-design-note');
     shoppingFormPanel.hidden=!isShoppingForm;
     shoppingFormPanel.querySelectorAll('[data-shopping-demo]').forEach(button=>{ const demo=button.dataset.shoppingDemo; const active=isShoppingForm&&((demo==='edit'&&state.shoppingFormMode==='edit')||(demo!=='edit'&&state.shoppingFormMode==='create'&&demo===state.shoppingVoiceState)); button.classList.toggle('active',active); });
+    shoppingFormPanel.querySelectorAll('[data-shopping-quantity-demo]').forEach(button=>{ const demo=button.dataset.shoppingQuantityDemo; const hasSuggestions=state.shoppingFormUnitSuggestions.length>0; const active=isShoppingForm&&state.shoppingFormName==='砂糖'&&((demo==='custom'&&state.shoppingFormUnit==='custom')||(demo==='learned'&&hasSuggestions)||(demo==='standard'&&state.shoppingFormUnit==='g'&&String(state.shoppingFormQuantity)==='200'&&!hasSuggestions)); button.classList.toggle('active',active); });
     const isEditScreen=state.screen==='edit';
     const editPanel=document.getElementById('edit-design-note');
     editPanel.hidden=!isEditScreen;
@@ -2900,7 +2956,12 @@ body {
     invalidateShoppingVoiceSession();
     state.shoppingFormMode=mode;
     state.shoppingFormName=mode==='edit'?'コーヒー豆':'';
-    state.shoppingFormQuantity=mode==='edit'?2:1;
+    state.shoppingFormQuantity=mode==='edit'?'200':'1';
+    state.shoppingFormUnit=mode==='edit'?'g':'piece';
+    state.shoppingFormCustomUnit='';
+    state.shoppingFormUnitDraft=state.shoppingFormUnit;
+    state.shoppingFormCustomUnitDraft='';
+    state.shoppingFormUnitSuggestions=[];
     state.shoppingFormLedger=mode==='edit'?'joy':'daily';
     state.shoppingFormListType=mode==='edit'?'private':'public';
     state.shoppingFormCategory=mode==='edit'?'食費 > 嗜好品':'';
@@ -2910,11 +2971,11 @@ body {
     state.shoppingVoiceState='manual'; state.shoppingVoiceTranscript=''; state.shoppingVoiceApplied=false; state.shoppingVoiceSnapshot=null;
   }
   function captureShoppingVoiceSnapshot(){
-    state.shoppingVoiceSnapshot={ name:state.shoppingFormName, quantity:state.shoppingFormQuantity, ledger:state.shoppingFormLedger, listType:state.shoppingFormListType, category:state.shoppingFormCategory, price:state.shoppingFormPrice, note:state.shoppingFormNote };
+    state.shoppingVoiceSnapshot={ name:state.shoppingFormName, quantity:state.shoppingFormQuantity, unit:state.shoppingFormUnit, customUnit:state.shoppingFormCustomUnit, ledger:state.shoppingFormLedger, listType:state.shoppingFormListType, category:state.shoppingFormCategory, price:state.shoppingFormPrice, note:state.shoppingFormNote };
   }
   function restoreShoppingVoiceSnapshot(){
     const snapshot=state.shoppingVoiceSnapshot; if(!snapshot) return;
-    state.shoppingFormName=snapshot.name; state.shoppingFormQuantity=snapshot.quantity; state.shoppingFormLedger=snapshot.ledger; state.shoppingFormListType=snapshot.listType; state.shoppingFormCategory=snapshot.category; state.shoppingFormPrice=snapshot.price; state.shoppingFormNote=snapshot.note;
+    state.shoppingFormName=snapshot.name; state.shoppingFormQuantity=snapshot.quantity; state.shoppingFormUnit=snapshot.unit||'piece'; state.shoppingFormCustomUnit=snapshot.customUnit||''; state.shoppingFormLedger=snapshot.ledger; state.shoppingFormListType=snapshot.listType; state.shoppingFormCategory=snapshot.category; state.shoppingFormPrice=snapshot.price; state.shoppingFormNote=snapshot.note;
   }
   function normalizeShoppingVoiceBeforeExit(){
     const transient=['listening','processing','unavailable'].includes(state.shoppingVoiceState);
@@ -2944,7 +3005,7 @@ body {
   }
   function applyShoppingVoiceResult(){
     const preservedListType=state.shoppingFormListType;
-    state.shoppingFormName='牛乳'; state.shoppingFormQuantity=2; state.shoppingFormLedger='daily'; state.shoppingFormCategory='食費 > 乳製品'; state.shoppingFormPrice='500';
+    state.shoppingFormName='牛乳'; state.shoppingFormQuantity='2'; state.shoppingFormUnit='bottle'; state.shoppingFormCustomUnit=''; state.shoppingFormLedger='daily'; state.shoppingFormCategory='食費 > 乳製品'; state.shoppingFormPrice='500';
     state.shoppingFormListType=preservedListType;
     state.shoppingVoiceTranscript='牛乳を2本、日常、参考価格500円'; state.shoppingVoiceApplied=true; state.shoppingVoiceState='review'; state.shoppingFormError='';
   }
@@ -2966,6 +3027,14 @@ body {
     else if(demo==='unavailable'){ captureShoppingVoiceSnapshot(); state.shoppingVoiceState='unavailable'; }
     render(); document.getElementById('app-screen').scrollTop=0;
     if(autoFinish) scheduleShoppingVoiceAutoFinish();
+  }
+  function showShoppingQuantityDemo(demo){
+    resetShoppingForm();
+    state.shoppingFormName='砂糖'; state.shoppingFormQuantity=demo==='custom'?'2':'200'; state.shoppingFormUnit=demo==='custom'?'custom':'g'; state.shoppingFormCustomUnit=demo==='custom'?'カップ':'';
+    state.shoppingFormUnitDraft=demo==='custom'?'custom':'g'; state.shoppingFormCustomUnitDraft=demo==='custom'?'カップ':'';
+    state.shoppingFormUnitSuggestions=demo==='learned'?['piece','bag','g']:[];
+    state.screen='shopping-form'; render(); document.getElementById('app-screen').scrollTop=0;
+    if(demo==='custom') openModal(shoppingUnitSheet());
   }
   let entryVoiceSequence = 0;
   let entryVoiceAutoFinishTimer = null;
@@ -3193,6 +3262,12 @@ body {
       }
       return;
     }
+    const customUnitInput=e.target.closest?.('[data-shopping-custom-unit]');
+    if(customUnitInput){
+      state.shoppingFormCustomUnitDraft=customUnitInput.value;
+      const apply=document.querySelector('[data-action="shopping-unit-apply"]'); if(apply) apply.disabled=!state.shoppingFormCustomUnitDraft.trim();
+      return;
+    }
     const shoppingInput=e.target.closest?.('[data-shopping-input]'); if(!shoppingInput) return;
     const field=shoppingInput.dataset.shoppingInput;
     if(field==='name'){
@@ -3205,7 +3280,9 @@ body {
       }
     }
     else if(field==='quantity'){
-      const parsed=Number.parseInt(shoppingInput.value,10); state.shoppingFormQuantity=Number.isFinite(parsed)&&parsed>0?parsed:1;
+      const normalized=shoppingInput.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1');
+      if(shoppingInput.value!==normalized) shoppingInput.value=normalized;
+      state.shoppingFormQuantity=normalized;
     }
     else if(field==='price') state.shoppingFormPrice=shoppingInput.value.replace(/[^0-9]/g,'');
     else if(field==='note') state.shoppingFormNote=shoppingInput.value;
@@ -3225,6 +3302,7 @@ body {
     const entryVariant=e.target.closest('[data-entry-variant]'); if(entryVariant){ state.entryVariant=entryVariant.dataset.entryVariant; render(); return; }
     const entryDemo=e.target.closest('[data-entry-demo]'); if(entryDemo){ showEntryDemo(entryDemo.dataset.entryDemo); return; }
     const shoppingDemo=e.target.closest('[data-shopping-demo]'); if(shoppingDemo){ showShoppingVoiceDemo(shoppingDemo.dataset.shoppingDemo); return; }
+    const shoppingQuantityDemo=e.target.closest('[data-shopping-quantity-demo]'); if(shoppingQuantityDemo){ showShoppingQuantityDemo(shoppingQuantityDemo.dataset.shoppingQuantityDemo); return; }
     const editDemo=e.target.closest('[data-edit-demo]'); if(editDemo){ showEditDemo(editDemo.dataset.editDemo); return; }
     const categoryDemo=e.target.closest('[data-category-demo]'); if(categoryDemo){ showCategoryDemo(categoryDemo.dataset.categoryDemo); return; }
     const familyDemo=e.target.closest('[data-family-demo]'); if(familyDemo){ if(familyDemo.dataset.familyDemo==='approval') state.familyRequestPending=true; setScreen(familyDemo.dataset.familyDemo); return; }
@@ -3273,6 +3351,8 @@ body {
     const shoppingLedger=e.target.closest('[data-shopping-ledger]'); if(shoppingLedger){ state.shoppingLedger=shoppingLedger.dataset.shoppingLedger; render(); return; }
     const shoppingFormLedger=e.target.closest('[data-shopping-form-ledger]'); if(shoppingFormLedger){ state.shoppingFormLedger=shoppingFormLedger.dataset.shoppingFormLedger; render(); return; }
     const shoppingFormListType=e.target.closest('[data-shopping-form-list-type]'); if(shoppingFormListType && state.shoppingFormMode!=='edit'){ state.shoppingFormListType=shoppingFormListType.dataset.shoppingFormListType; render(); return; }
+    const shoppingUnit=e.target.closest('[data-shopping-unit]'); if(shoppingUnit){ state.shoppingFormUnit=shoppingUnit.dataset.shoppingUnit; state.shoppingFormCustomUnit=''; render(); return; }
+    const shoppingUnitOption=e.target.closest('[data-shopping-unit-option]'); if(shoppingUnitOption){ state.shoppingFormUnitDraft=shoppingUnitOption.dataset.shoppingUnitOption; document.getElementById('modal-content').innerHTML=shoppingUnitSheet(); if(state.shoppingFormUnitDraft==='custom') requestAnimationFrame(()=>document.querySelector('[data-shopping-custom-unit]')?.focus()); return; }
     const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
     const analyticsTab=e.target.closest('[data-analytics-tab]'); if(analyticsTab){ state.analyticsTab=analyticsTab.dataset.analyticsTab; render(); document.getElementById('app-screen').scrollTop=0; return; }
     const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
@@ -3385,8 +3465,13 @@ body {
     else if(a==='shopping-voice-keyboard') switchShoppingVoiceToKeyboard();
     else if(a==='shopping-voice-rerecord') rerecordShoppingVoice();
     else if(a==='shopping-mic-settings') toast('マイクの権限設定を開きます');
-    else if(a==='shopping-quantity-decrease'){ state.shoppingFormQuantity=Math.max(1,Number(state.shoppingFormQuantity||1)-1); render(); }
-    else if(a==='shopping-quantity-increase'){ state.shoppingFormQuantity=Math.max(1,Number(state.shoppingFormQuantity||1)+1); render(); }
+    else if(a==='shopping-unit-open'){ state.shoppingFormUnitDraft=state.shoppingFormUnit; state.shoppingFormCustomUnitDraft=state.shoppingFormCustomUnit; openModal(shoppingUnitSheet()); }
+    else if(a==='shopping-unit-apply'){
+      const customUnit=state.shoppingFormCustomUnitDraft.trim();
+      if(state.shoppingFormUnitDraft==='custom'&&!customUnit){ document.querySelector('[data-shopping-custom-unit]')?.focus(); return; }
+      state.shoppingFormUnit=state.shoppingFormUnitDraft; state.shoppingFormCustomUnit=state.shoppingFormUnitDraft==='custom'?customUnit:'';
+      closeModal(); render(); toast(`単位を「${shoppingUnitLabel()}」にしました`);
+    }
     else if(a==='shopping-form-category') setScreen('category');
     else if(a==='shopping-form-category-select'){ state.shoppingFormCategory=action.dataset.category||''; closeModal(); render(); }
     else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
@@ -3421,6 +3506,7 @@ body {
       if(state.shoppingFormSubmitting||['listening','processing'].includes(state.shoppingVoiceState)) return;
       state.shoppingFormName=state.shoppingFormName.trim();
       if(!state.shoppingFormName){ state.shoppingFormError='name'; render(); requestAnimationFrame(()=>document.getElementById('shopping-form-name')?.focus()); return; }
+      if(!(Number(state.shoppingFormQuantity)>0)){ toast('0より大きい数量を入力してください'); requestAnimationFrame(()=>document.querySelector('[data-shopping-input="quantity"]')?.focus()); return; }
       state.shoppingFormSubmitting=true; state.shoppingFormError=''; render();
       const message=state.shoppingFormMode==='edit'?'変更を保存しました':'買い物リストに追加しました';
       setTimeout(()=>{ if(state.screen!=='shopping-form') return; toast(message); setScreen('shopping',false); },550);

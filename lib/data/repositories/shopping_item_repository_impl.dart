@@ -8,6 +8,7 @@ import '../daos/family_sync_outbox_dao.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/shopping_list/domain/models/shopping_item.dart';
 import '../../features/shopping_list/domain/models/shopping_item_sync_mapper.dart';
+import '../../features/shopping_list/domain/models/shopping_unit.dart';
 import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import '../../infrastructure/crypto/services/field_encryption_service.dart';
 
@@ -232,6 +233,10 @@ class ShoppingItemRepositoryImpl
       tags: Value(encodedTags),
       note: Value(encryptedNote),
       quantity: Value(item.quantity),
+      unitId: Value(item.unit.name),
+      customUnit: Value(
+        item.unit == ShoppingUnit.custom ? item.customUnit?.trim() : null,
+      ),
       estimatedPrice: Value(item.estimatedPrice),
       completedAt: Value(item.completedAt),
       isCompleted: Value(item.isCompleted),
@@ -303,6 +308,8 @@ class ShoppingItemRepositoryImpl
       tags: tags,
       note: decryptedNote,
       quantity: row.quantity,
+      unit: ShoppingUnit.fromId(row.unitId),
+      customUnit: row.customUnit,
       estimatedPrice: row.estimatedPrice,
       completedAt: row.completedAt,
       isCompleted: row.isCompleted,

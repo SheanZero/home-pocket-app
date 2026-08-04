@@ -1,3 +1,6 @@
+@Skip('Shopping-item voice input is outside the MVP scope.')
+library;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';

@@ -28,6 +28,7 @@ import '../widgets/hold_to_talk_bar.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
+import '../widgets/satisfaction_bottom_sheet.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/unified_voice_entry_dock.dart';
 import 'manual_one_step_foreign_card.dart';
@@ -397,6 +398,20 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     // _isTextFieldFocused = false → _showSmartKeypad = true.
   }
 
+  Future<int?> _showSatisfactionPrompt(
+    SatisfactionPromptRequest request,
+  ) async {
+    if (!mounted) return null;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _amountFocused = false);
+    final selected = await SatisfactionBottomSheet.show(
+      context,
+      request: request,
+    );
+    if (mounted) _restoreKeypadFocus();
+    return selected;
+  }
+
   // quick-260707-kfb A2: the keypad handlers (_onAmountTap / _onDigit /
   // _onDoubleZero / _onDot / _onDelete / _onClear / _syncAmountToForm) moved
   // verbatim to `manual_one_step_keypad.dart`; the currency / foreign-triple
@@ -543,6 +558,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
                         // Item 4 (260526-j98): reclaim amount focus after date /
                         // category picker dismisses so SmartKeyboard reappears.
                         onPickerDismissed: _restoreKeypadFocus,
+                        onSatisfactionRequested: _showSatisfactionPrompt,
                         // Quick 260613-ufn (D-4): keep the screen's _selectedDate
                         // in lock-step with the form's date picker so the keyed
                         // rate provider re-resolves the rate for the new date.

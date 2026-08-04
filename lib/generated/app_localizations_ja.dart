@@ -882,6 +882,36 @@ class SJa extends S {
   String get satisfactionExcellent => '至福！';
 
   @override
+  String get satisfactionSheetManualReason => 'ときめき支出に設定しました';
+
+  @override
+  String satisfactionSheetCategoryReason(String categoryName) {
+    return '「$categoryName」に基づき、ときめき支出に設定しました';
+  }
+
+  @override
+  String get satisfactionSheetTitle => 'この支出にどのくらい満足していますか？';
+
+  @override
+  String satisfactionSheetCurrent(String level) {
+    return '現在は「$level」です。選択後も変更できます';
+  }
+
+  @override
+  String get satisfactionSheetChoiceTwo => 'まあまあ';
+
+  @override
+  String get satisfactionSheetChoiceFour => 'とても満足';
+
+  @override
+  String get satisfactionSheetAutoReturn => '選択すると記録画面に戻ります';
+
+  @override
+  String satisfactionSheetKeepCurrent(String level) {
+    return '「$level」のままにする';
+  }
+
+  @override
   String get satisfactionLabelNeutral => '無難';
 
   @override
@@ -2595,6 +2625,51 @@ class SJa extends S {
 
   @override
   String get shoppingFormQuantityLabel => '数量';
+
+  @override
+  String get shoppingFormQuantityHint => '数値と単位は別々に設定できます';
+
+  @override
+  String get shoppingUnitPickerTitle => '単位を選ぶ';
+
+  @override
+  String get shoppingUnitPickerHelp => '単位を変えても数量は換算されません';
+
+  @override
+  String get shoppingUnitCustom => 'カスタム単位';
+
+  @override
+  String get shoppingUnitCustomHint => '例：カップ';
+
+  @override
+  String get shoppingUnitCustomError => '1〜12文字で入力してください';
+
+  @override
+  String get shoppingUnitApply => '適用';
+
+  @override
+  String get shoppingUnitPiece => '個';
+
+  @override
+  String get shoppingUnitGram => 'g';
+
+  @override
+  String get shoppingUnitKilogram => 'kg';
+
+  @override
+  String get shoppingUnitMilliliter => 'ml';
+
+  @override
+  String get shoppingUnitLiter => 'L';
+
+  @override
+  String get shoppingUnitBag => '袋';
+
+  @override
+  String get shoppingUnitBottle => '本';
+
+  @override
+  String get shoppingUnitPack => 'パック';
 
   @override
   String get shoppingFormPrice => '参考価格';

@@ -24,8 +24,11 @@ class ShoppingItems extends Table {
   // note encrypted at repository boundary (ITEM-05); nullable in schema, repo handles empty string as null
   TextColumn get note => text().nullable()();
 
-  // D-02: whole-count; UI defaults blank to 1
-  IntColumn get quantity => integer().withDefault(const Constant(1))();
+  // Decimal quantity + stable unit identifier. The app has not launched yet,
+  // so this is part of the fresh schema rather than a compatibility migration.
+  RealColumn get quantity => real().withDefault(const Constant(1.0))();
+  TextColumn get unitId => text().withDefault(const Constant('piece'))();
+  TextColumn get customUnit => text().nullable()();
 
   // ITEM-05: integer yen, rendered via NumberFormatter
   IntColumn get estimatedPrice => integer().nullable()();
@@ -58,7 +61,9 @@ class ShoppingItems extends Table {
   @override
   List<String> get customConstraints => [
     "CHECK(list_type IN ('public', 'private'))",
-    'CHECK(quantity >= 1)',
+    'CHECK(quantity > 0)',
+    "CHECK(unit_id IN ('piece', 'gram', 'kilogram', 'milliliter', 'liter', 'bag', 'bottle', 'pack', 'custom'))",
+    "CHECK(unit_id != 'custom' OR (custom_unit IS NOT NULL AND length(trim(custom_unit)) BETWEEN 1 AND 12))",
     "CHECK(ledger_type IN ('daily', 'joy') OR ledger_type IS NULL)",
     'CHECK(estimated_price IS NULL OR estimated_price >= 0)',
   ];

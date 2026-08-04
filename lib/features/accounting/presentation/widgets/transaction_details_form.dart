@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/update_transaction_use_case.dart';
 import '../../../../application/currency/get_exchange_rate_use_case.dart';
@@ -48,6 +49,7 @@ import '../widgets/currency_linked_edit_fields.dart';
 import '../widgets/detail_info_card.dart';
 import '../widgets/keyboard_toolbar.dart' show kKeyboardToolbarTapRegionGroup;
 import '../../../../shared/widgets/ledger_type_selector.dart';
+import '../widgets/satisfaction_bottom_sheet.dart';
 import '../widgets/satisfaction_emoji_picker.dart';
 
 /// Embeddable form for creating and editing transactions.
@@ -63,6 +65,7 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.merchantFocusNode,
     this.noteFocusNode,
     this.onPickerDismissed,
+    this.onSatisfactionRequested,
     this.onForeignChanged,
     this.onDateChanged,
     this.showAlternateChips = false,
@@ -125,6 +128,11 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
   /// ManualOneStepScreen wires this to reclaim amount focus so the
   /// SmartKeyboard reappears. Null in hosts that don't render the keypad.
   final VoidCallback? onPickerDismissed;
+
+  /// ManualOneStepScreen supplies the modal satisfaction chooser used when a
+  /// new entry transitions to the Joy ledger. Other hosts keep the established
+  /// inline picker by leaving this null.
+  final SatisfactionPromptCallback? onSatisfactionRequested;
 
   @override
   ConsumerState<TransactionDetailsForm> createState() =>
@@ -197,6 +205,7 @@ class TransactionDetailsFormState
 
   int _joyFullness = 2;
   bool _isSubmitting = false;
+  bool _satisfactionPromptOpen = false;
 
   // Phase 52 (RECUX-01/02 / D-08/D-09/D-10): recognition confidence state.
   // Pushed by the voice host at resolve-on-final via [updateRecognition] (D-08)
@@ -362,7 +371,12 @@ class TransactionDetailsFormState
     final service = ref.read(categoryServiceProvider);
     final resolved = await service.resolveLedgerType(categoryId);
     if (mounted && epoch == _ledgerResolutionEpoch && resolved != null) {
+      final becameJoy =
+          _ledgerType != LedgerType.joy && resolved == LedgerType.joy;
       setState(() => _ledgerType = resolved);
+      if (becameJoy) {
+        await _requestSatisfaction(SatisfactionPromptReason.categoryInference);
+      }
     }
   }
 
@@ -707,6 +721,40 @@ class TransactionDetailsFormState
     _ledgerResolutionEpoch++;
     if (ledgerType == _ledgerType) return;
     setState(() => _ledgerType = ledgerType);
+  }
+
+  Future<void> _selectLedgerType(LedgerType ledgerType) async {
+    if (ledgerType == _ledgerType) return;
+    updateLedgerType(ledgerType);
+    if (ledgerType == LedgerType.joy) {
+      await _requestSatisfaction(SatisfactionPromptReason.manualSelection);
+    }
+  }
+
+  Future<void> _requestSatisfaction(SatisfactionPromptReason reason) async {
+    final callback = widget.onSatisfactionRequested;
+    if (callback == null || _satisfactionPromptOpen || !mounted) return;
+
+    final category = _category;
+    final categoryName = category == null
+        ? null
+        : CategoryLocalizationService.resolve(
+            category.name,
+            Localizations.localeOf(context),
+          );
+    _satisfactionPromptOpen = true;
+    try {
+      final selected = await callback(
+        SatisfactionPromptRequest(
+          currentValue: _joyFullness,
+          reason: reason,
+          categoryName: categoryName,
+        ),
+      );
+      if (selected != null && mounted) updateSatisfaction(selected);
+    } finally {
+      _satisfactionPromptOpen = false;
+    }
   }
 
   /// Phase 23 D-08 / WR-04: host-await accessor used by the voice screen to
@@ -1510,7 +1558,7 @@ class TransactionDetailsFormState
         child: InkWell(
           key: key,
           borderRadius: BorderRadius.circular(20),
-          onTap: () => updateLedgerType(type),
+          onTap: () => unawaited(_selectLedgerType(type)),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             height: 36,
@@ -1552,6 +1600,55 @@ class TransactionDetailsFormState
   }
 
   Widget _buildV16SatisfactionCard(S l10n) {
+    if (widget.onSatisfactionRequested != null) {
+      final label = satisfactionSheetLabelFor(l10n, _joyFullness);
+      return KeyedSubtree(
+        key: const ValueKey('v16-satisfaction-card'),
+        child: Semantics(
+          button: true,
+          label: '${l10n.satisfactionLevel}: $label',
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              key: const ValueKey('v16-satisfaction-summary'),
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => unawaited(
+                _requestSatisfaction(SatisfactionPromptReason.revisit),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 44),
+                child: Row(
+                  children: [
+                    Text(
+                      l10n.satisfactionLevel,
+                      style: AppTextStyles.label.copyWith(
+                        color: context.palette.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      label,
+                      style: AppTextStyles.label.copyWith(
+                        color: context.palette.joyText,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: context.palette.joyText,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final levelLabels = <String>[
       l10n.satisfactionBad,
       l10n.satisfactionSlightlyBad,

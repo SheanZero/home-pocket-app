@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../../accounting/domain/models/transaction.dart';
 import 'shopping_item.dart';
+import 'shopping_unit.dart';
 
 /// Maps [ShoppingItem] to and from the sync protocol payload.
 ///
@@ -34,6 +35,8 @@ class ShoppingItemSyncMapper {
       // E2EE wrapping the whole payload — NOT on field encryption.
       'note': item.note,
       'quantity': item.quantity,
+      'unitId': item.unit.name,
+      'customUnit': item.unit == ShoppingUnit.custom ? item.customUnit : null,
       'estimatedPrice': item.estimatedPrice,
       'isCompleted': item.isCompleted,
       'completedAt': item.completedAt?.toUtc().toIso8601String(),
@@ -148,7 +151,9 @@ class ShoppingItemSyncMapper {
       categoryId: data['categoryId'] as String?,
       tags: tags,
       note: data['note'] as String?,
-      quantity: (data['quantity'] as int?) ?? 1,
+      quantity: (data['quantity'] as num?)?.toDouble() ?? 1.0,
+      unit: ShoppingUnit.fromId(data['unitId'] as String?),
+      customUnit: data['customUnit'] as String?,
       estimatedPrice: data['estimatedPrice'] as int?,
       isCompleted: (data['isCompleted'] as bool?) ?? false,
       completedAt: data['completedAt'] != null

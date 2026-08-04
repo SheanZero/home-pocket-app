@@ -20,6 +20,7 @@ import 'tables/merchant_category_preferences_table.dart';
 import 'tables/merchant_match_keys_table.dart';
 import 'tables/merchants_table.dart';
 import 'tables/shopping_items_table.dart';
+import 'tables/shopping_unit_usages_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
 import 'tables/user_profiles_table.dart';
@@ -47,6 +48,7 @@ part 'app_database.g.dart';
     MerchantMatchKeys,
     Merchants,
     ShoppingItems,
+    ShoppingUnitUsages,
     SyncQueue,
     Transactions,
     UserProfiles,
@@ -80,6 +82,7 @@ class AppDatabase extends _$AppDatabase {
     'membership_rotation_intents',
     'merchant_category_preferences',
     'shopping_items',
+    'shopping_unit_usages',
     'sync_queue',
     'transactions',
     'user_profiles',
@@ -136,6 +139,7 @@ class AppDatabase extends _$AppDatabase {
         'sync_queue',
         'membership_rotation_intents',
         'group_members',
+        'shopping_unit_usages',
         'shopping_items',
         'transactions',
         'category_keyword_preferences',
@@ -1082,6 +1086,7 @@ class AppDatabase extends _$AppDatabase {
       includeSyncQueueRecoveryIndex: includeSyncQueueRecoveryIndex,
     );
     await _createShoppingItemIndexes();
+    await _createShoppingUnitUsageIndexes();
     await _createExchangeRateIndexes();
     await _createMerchantIndexes();
     await _createInboundSyncOperationIndexes();
@@ -1268,6 +1273,17 @@ class AppDatabase extends _$AppDatabase {
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_shopping_added_by_book '
       'ON shopping_items (added_by_book_id)',
+    );
+  }
+
+  Future<void> _createShoppingUnitUsageIndexes() async {
+    // This table is part of the current fresh-install schema only. The guard
+    // keeps historical migration test ladders valid without introducing a
+    // pre-launch compatibility migration.
+    if (!await _tableExists('shopping_unit_usages')) return;
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_shopping_unit_usage_rank '
+      'ON shopping_unit_usages (use_count, last_used_at)',
     );
   }
 

@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_palette.dart';
 
+const double _kCompactToastHeight = 44;
+const double _kToastVerticalPadding = 4;
+const double _kToastActionHeight = 44;
+
 /// Visual tone of a [SoftToast] — drives surface/border/shadow/foreground
 /// colour family and the default leading icon.
 enum FeedbackTone {
@@ -186,6 +190,10 @@ class _SoftToastState extends State<SoftToast>
       )..layout();
       desiredWidth += 6 + (actionPainter.width + 16).clamp(44.0, maxWidth);
     }
+    final needsVerticalPadding =
+        widget.actionLabel == null ||
+        messagePainter.didExceedMaxLines ||
+        desiredWidth > maxWidth;
     desiredWidth = desiredWidth.clamp(0.0, maxWidth);
 
     return Semantics(
@@ -203,10 +211,12 @@ class _SoftToastState extends State<SoftToast>
                 width: desiredWidth,
                 child: Container(
                   key: const Key('feedback-toast-surface'),
-                  constraints: const BoxConstraints(minHeight: 52),
-                  padding: const EdgeInsets.symmetric(
+                  constraints: const BoxConstraints(
+                    minHeight: _kCompactToastHeight,
+                  ),
+                  padding: EdgeInsets.symmetric(
                     horizontal: 10,
-                    vertical: 10,
+                    vertical: needsVerticalPadding ? _kToastVerticalPadding : 0,
                   ),
                   decoration: BoxDecoration(
                     color: palette.card,
@@ -257,7 +267,8 @@ class _SoftToastState extends State<SoftToast>
                           onPressed: _handleAction,
                           style: TextButton.styleFrom(
                             foregroundColor: foreground,
-                            minimumSize: const Size(44, 44),
+                            minimumSize: const Size(44, _kToastActionHeight),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             shape: const StadiumBorder(),
                             textStyle: actionStyle,

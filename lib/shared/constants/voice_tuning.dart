@@ -29,6 +29,11 @@ class VoiceTuning {
   /// [listenFor]. Tolerates in-sentence pauses in the one-shot listen model.
   static const Duration pauseFor = Duration(seconds: 3);
 
+  /// App-owned grace after a non-empty final result. The recognizer may split a
+  /// spoken amount across multiple final chunks, so completion waits slightly
+  /// beyond the normal pause window; another result resets this deadline.
+  static const Duration finalCompletionGrace = Duration(milliseconds: 3500);
+
   /// Debounce for parsing PARTIAL recognition results (`_onResult` Timer in
   /// `voice_ptt_session_mixin.dart`). NOT the same semantic as
   /// [holdMisfireThreshold] despite the equal value — this one throttles

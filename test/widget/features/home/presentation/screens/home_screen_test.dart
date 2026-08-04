@@ -132,6 +132,7 @@ void main() {
       List<Transaction> transactions = const [],
       Category? resolvedCategory,
       MetricResult<BestJoyMomentRow>? bestJoy,
+      VoidCallback? onJoyAnalyticsTap,
     }) {
       return ProviderScope(
         overrides: [
@@ -188,7 +189,12 @@ void main() {
         ],
         child: testLocalizedApp(
           locale: locale,
-          child: const Scaffold(body: HomeScreen(bookId: 'book_001')),
+          child: Scaffold(
+            body: HomeScreen(
+              bookId: 'book_001',
+              onJoyAnalyticsTap: onJoyAnalyticsTap,
+            ),
+          ),
         ),
       );
     }
@@ -202,6 +208,22 @@ void main() {
       expect(find.byType(HeroHeader), findsOneWidget);
       expect(find.byType(HomeHeroCard), findsOneWidget);
     });
+
+    testWidgets(
+      'both hero Joy entries delegate analytics navigation to shell',
+      (tester) async {
+        var navigationCount = 0;
+        await tester.pumpWidget(
+          buildSubject(onJoyAnalyticsTap: () => navigationCount++),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('home-hero-main-surface')));
+        await tester.tap(find.byKey(const Key('home-favorite-section')));
+
+        expect(navigationCount, 2);
+      },
+    );
 
     testWidgets('does NOT contain BottomNavigationBar', (tester) async {
       await tester.pumpWidget(buildSubject());
@@ -440,6 +462,27 @@ void main() {
       expect(find.text('Supermarket'), findsOneWidget);
       expect(find.byType(SatisfactionFaceIcon), findsNothing);
     });
+
+    testWidgets(
+      'family member Joy entry delegates analytics navigation to the shell',
+      (tester) async {
+        when(
+          () => groupRepository.watchActiveGroup(),
+        ).thenAnswer((_) => Stream.value(_buildActiveGroup()));
+        var navigationCount = 0;
+
+        await tester.pumpWidget(
+          buildSubject(onJoyAnalyticsTap: () => navigationCount++),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('family-member-row-device_local')),
+        );
+
+        expect(navigationCount, 1);
+      },
+    );
 
     testWidgets(
       'group-mode own Joy row keeps satisfaction face and hides ledger tag',
