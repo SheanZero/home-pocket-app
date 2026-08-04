@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 Phase: 56 — setting (COMPLETE)
 Plan: 7/7 executed (56-01..56-07; 56-07 gap-closure)
 Status: Phase 56 complete & re-verified (5/5 success criteria; 10/10 req IDs + LEGAL-V2-01 traced) — 56-07 closed UAT Test 4; milestone v2.0 ready to close
-Last activity: 2026-08-02 — Completed quick task 260802-tfv: 家庭邀请码在创建页、管理页内联卡和邀请详情弹层中按秒显示 MM:SS 实时倒计时，到期自动以语义红显示“已失效”；功能随批次提交 3e04b70f 落库。
+Last activity: 2026-08-04 — Completed quick task 260804-ok7: 修正首次 Face ID 授权与生物识别可用性判断；代码提交 32ccec3a。
 
 Progress: Phase 56 COMPLETE (7/7: 56-01..56-07, re-verified 5/5 SC); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete. Milestone v2.0 = 4/4 phases (100%).
 
@@ -117,6 +117,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260802-mkd | 家庭同步入口/创建家庭无网络时显示友好取消/重试弹窗，不再暴露底层异常 | 2026-08-02 | 3e04b70f | [260802-mkd-friendly-offline-family-error](./quick/260802-mkd-friendly-offline-family-error/) |
 | 260802-tai | 创建家庭与家庭管理统一分享温馨的三语邀请文本（家庭名、邀请码、10 分钟有效提示），不再只分享裸码 | 2026-08-02 | 3e04b70f | [260802-tai-warm-family-invite-copy](./quick/260802-tai-warm-family-invite-copy/) |
 | 260802-tfv | 家庭邀请码在三个入口按秒显示 MM:SS 实时倒计时，到期自动以红色显示“已失效” | 2026-08-02 | 3e04b70f | [260802-tfv-invite-expiry-countdown](./quick/260802-tfv-invite-expiry-countdown/) |
+| 260804-ok7 | 修正首次 Face ID 授权与生物识别可用性判断 | 2026-08-04 | 32ccec3a | [260804-ok7-face-id](./quick/260804-ok7-face-id/) |
 
 ## Last Milestone Snapshot (v1.9)
 
