@@ -356,11 +356,10 @@ List<Override> _donutValueOverrides(Locale locale) => [
     startDate: _startDate,
     endDate: _endDate,
     joyMetricVariant: _variant,
+    includeFamily: true,
   ).overrideWith(
-    (_) async => _report(
-      breakdowns: _donutValueBreakdowns,
-      totalExpenses: 30000,
-    ),
+    (_) async =>
+        _report(breakdowns: _donutValueBreakdowns, totalExpenses: 30000),
   ),
   analyticsCategoriesMapProvider.overrideWith((_) async => _donutValueMap),
   // D2: the donut now nests the 悦己 joybar drawer, which watches
@@ -380,9 +379,8 @@ List<Override> _donutEmptyOverrides(Locale locale) => [
     startDate: _startDate,
     endDate: _endDate,
     joyMetricVariant: _variant,
-  ).overrideWith(
-    (_) async => _report(breakdowns: const [], totalExpenses: 0),
-  ),
+    includeFamily: true,
+  ).overrideWith((_) async => _report(breakdowns: const [], totalExpenses: 0)),
   analyticsCategoriesMapProvider.overrideWith(
     (_) async => const <String, Category>{},
   ),
@@ -402,6 +400,7 @@ List<Override> _donutOtherOverrides(Locale locale) => [
     startDate: _startDate,
     endDate: _endDate,
     joyMetricVariant: _variant,
+    includeFamily: true,
   ).overrideWith(
     (_) async => _report(
       breakdowns: _donutOtherBreakdowns,
@@ -476,12 +475,14 @@ List<Override> _histogramValueOverrides(Locale locale) => [
     endDate: _endDate,
     currencyCode: 'JPY',
     joyMetricVariant: _variant,
+    includeFamily: false,
   ).overrideWith((_) async => _happinessVisible()),
   satisfactionDistributionProvider(
     bookId: _bookId,
     startDate: _startDate,
     endDate: _endDate,
     joyMetricVariant: _variant,
+    includeFamily: false,
   ).overrideWith((_) async => _bucketsValue()),
 ];
 
@@ -493,6 +494,7 @@ List<Override> _histogramEmptyOverrides(Locale locale) => [
     endDate: _endDate,
     currencyCode: 'JPY',
     joyMetricVariant: _variant,
+    includeFamily: false,
   ).overrideWith(
     (_) async =>
         // totalJoyTx < 5 + empty distribution → round-5 r5b: no longer self-hides;
@@ -504,6 +506,7 @@ List<Override> _histogramEmptyOverrides(Locale locale) => [
     startDate: _startDate,
     endDate: _endDate,
     joyMetricVariant: _variant,
+    includeFamily: false,
   ).overrideWith((_) async => const <SatisfactionScoreBucket>[]),
 ];
 
@@ -659,7 +662,8 @@ void main() {
         expect(
           find.byKey(const ValueKey('donut_legend_row_other')),
           findsOneWidget,
-          reason: 'WR-02 / D-03 — the >10-L1 "Other" rollup row must render so '
+          reason:
+              'WR-02 / D-03 — the >10-L1 "Other" rollup row must render so '
               'the analyticsCategoryDonutOther label is swept.',
         );
         _sweepForbiddenSubstrings(
@@ -765,7 +769,8 @@ void main() {
         expect(
           find.byKey(const ValueKey('joy_calendar_inline_panel')),
           findsOneWidget,
-          reason: 'D-C1 — the inline day panel must expand so its joy一刻 list '
+          reason:
+              'D-C1 — the inline day panel must expand so its joy一刻 list '
               'copy is swept.',
         );
         _sweepForbiddenSubstrings(
@@ -805,47 +810,50 @@ void main() {
   // -------------------------------------------------------------------------
   group('D-14 / SatisfactionHistogramCard / forbidden substring sweep', () {
     for (final locale in locales) {
-      testWidgets('SatisfactionHistogramCard / ${locale.languageCode} / value',
-          (tester) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(
-            _satisfactionHistogramCard(),
-            locale: locale,
-            overrides: _histogramValueOverrides(locale),
-          ),
-        );
-        await tester.pumpAndSettle();
+      testWidgets(
+        'SatisfactionHistogramCard / ${locale.languageCode} / value',
+        (tester) async {
+          await tester.pumpWidget(
+            createLocalizedWidget(
+              _satisfactionHistogramCard(),
+              locale: locale,
+              overrides: _histogramValueOverrides(locale),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        _expectRenderedText();
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          card: 'SatisfactionHistogramCard',
-          state: 'value',
-        );
-      });
+          _expectRenderedText();
+          _sweepForbiddenSubstrings(
+            locale: locale,
+            card: 'SatisfactionHistogramCard',
+            state: 'value',
+          );
+        },
+      );
 
       // totalJoyTx < 5, empty distribution → round-5 r5b: the card now renders
       // the histogram empty state (10 zero-stub bars +「0 笔」footer) rather than
       // self-hiding. Swept like the value state, with the rendered-text guard.
       testWidgets(
-          'SatisfactionHistogramCard / ${locale.languageCode} / empty',
-          (tester) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(
-            _satisfactionHistogramCard(),
-            locale: locale,
-            overrides: _histogramEmptyOverrides(locale),
-          ),
-        );
-        await tester.pumpAndSettle();
+        'SatisfactionHistogramCard / ${locale.languageCode} / empty',
+        (tester) async {
+          await tester.pumpWidget(
+            createLocalizedWidget(
+              _satisfactionHistogramCard(),
+              locale: locale,
+              overrides: _histogramEmptyOverrides(locale),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        _expectRenderedText();
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          card: 'SatisfactionHistogramCard',
-          state: 'empty',
-        );
-      });
+          _expectRenderedText();
+          _sweepForbiddenSubstrings(
+            locale: locale,
+            card: 'SatisfactionHistogramCard',
+            state: 'empty',
+          );
+        },
+      );
     }
   });
 }

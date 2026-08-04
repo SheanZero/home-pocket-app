@@ -2049,6 +2049,23 @@ class SEn extends S {
   String get analyticsJoyCalendarDayEmpty => 'No little joys recorded this day';
 
   @override
+  String get analyticsTabSpending => 'Spending';
+
+  @override
+  String get analyticsTabFamilySpending => 'Family Spending';
+
+  @override
+  String get analyticsTabJoy => 'Joy';
+
+  @override
+  String get analyticsTabMyJoy => 'My Joy';
+
+  @override
+  String analyticsTabJoyCount(int count) {
+    return '$count entries';
+  }
+
+  @override
   String get analyticsSectionTrend => 'Spending trend';
 
   @override
@@ -3067,7 +3084,7 @@ class SEn extends S {
   String get onboardingSetupTopbar => 'Initial setup';
 
   @override
-  String get onboardingSetupTitle => 'Basic setup';
+  String get onboardingSetupTitle => 'Initial Setup';
 
   @override
   String get onboardingRowName => 'Name · Required';
@@ -3152,6 +3169,9 @@ class SEn extends S {
   String get onboardingSecurityPinSetup => 'Set a 4-digit PIN';
 
   @override
+  String get onboardingSecurityPinSetAction => 'Set';
+
+  @override
   String get onboardingSecurityPinComplete => 'PIN is set';
 
   @override
@@ -3160,6 +3180,9 @@ class SEn extends S {
 
   @override
   String get onboardingSecurityPinChange => 'Change PIN';
+
+  @override
+  String get onboardingSecurityPinUpdateAction => 'Update';
 
   @override
   String get onboardingSetupNameRequiredHint => 'Enter your name to continue';
@@ -3207,7 +3230,23 @@ class SEn extends S {
   String get appLockSetPinTitle => 'Set a passcode';
 
   @override
+  String get appLockUpdatePinTitle => 'Update passcode';
+
+  @override
+  String get appLockSetPinDescription =>
+      'Choose four digits you\'ll remember to unlock Home Pocket.';
+
+  @override
   String get appLockConfirmPinTitle => 'Re-enter passcode';
+
+  @override
+  String get appLockConfirmPinDescription =>
+      'Enter the same four digits again to confirm.';
+
+  @override
+  String appLockPinSetupProgress(int current, int total) {
+    return 'Step $current of $total';
+  }
 
   @override
   String get appLockPinMismatch => 'Passcodes don\'t match';

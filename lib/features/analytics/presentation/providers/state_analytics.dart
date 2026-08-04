@@ -14,6 +14,7 @@ import '../../domain/models/monthly_report.dart';
 import '../../domain/models/per_day_joy_count.dart';
 import '../../domain/models/within_month_cumulative_trend.dart';
 import 'repository_providers.dart';
+import 'state_analytics_book_scope.dart';
 import 'state_joy_metric_variant.dart';
 
 part 'state_analytics.g.dart';
@@ -26,14 +27,28 @@ Future<MonthlyReport> monthlyReport(
   required DateTime startDate,
   required DateTime endDate,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  bool includeFamily = false,
 }) async {
   final useCase = ref.watch(getMonthlyReportUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
       : null;
-  return useCase.execute(
-    bookId: bookId,
+  if (!includeFamily) {
+    return useCase.execute(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
+    );
+  }
+  final bookIds = await resolveAnalyticsBookIds(
+    ref,
+    primaryBookId: bookId,
+    includeFamily: includeFamily,
+  );
+  return useCase.executeAcrossBooks(
+    bookIds: bookIds,
     startDate: startDate,
     endDate: endDate,
     entrySourceFilter: entrySourceFilter,
@@ -54,8 +69,8 @@ Future<MonthlyReport> monthlyReport(
 /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
 /// here; this provider defends the contract by re-anchoring to month precision.
 ///
-/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default, never kept alive — D-14). Its refresh
+/// identity remains analytics-owned while family scope is resolved transitively.
 @riverpod
 Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
   Ref ref, {
@@ -75,8 +90,9 @@ Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
   // (D-5): "today" / the carry-forward right edge lives in the use case, never
   // in the chart widget (golden determinism). Use-case tests pass an explicit
   // `now`.
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
   return useCase.execute(
-    bookIds: [bookId],
+    bookIds: bookIds,
     monthAnchor: monthAnchor,
     now: DateTime.now(),
     entrySourceFilter: entrySourceFilter,
@@ -94,10 +110,10 @@ Future<WithinMonthCumulativeTrend> withinMonthCumulativeTrend(
 /// the id and re-computes percentages off the true total) plus the member's
 /// total + entry count for the center figure.
 ///
-/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
-/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+/// Runs the SQL member/category aggregate for every active-family book, then
+/// merges equal category IDs across those books. No new DAO/migration (v21).
 ///
-/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+/// D-12 normalized window; auto-dispose; family-scope aware.
 @riverpod
 Future<MemberFilteredCategoryBreakdown> memberFilteredCategoryBreakdown(
   Ref ref, {
@@ -115,13 +131,37 @@ Future<MemberFilteredCategoryBreakdown> memberFilteredCategoryBreakdown(
   final end = DateBoundaries.dayRange(endDate).end;
   // P2-3: expense-only, member-only aggregation is pushed into SQL — no more
   // pulling every row for the window and filtering/summing in a Dart loop.
-  final totals = await repository.getMemberCategoryTotals(
-    bookId: bookId,
-    startDate: start,
-    endDate: end,
-    deviceId: deviceId,
-    entrySourceFilter: entrySourceFilter,
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
+  final totalsByBook = await Future.wait(
+    bookIds.map(
+      (id) => repository.getMemberCategoryTotals(
+        bookId: id,
+        startDate: start,
+        endDate: end,
+        deviceId: deviceId,
+        entrySourceFilter: entrySourceFilter,
+      ),
+    ),
   );
+  final amountByCategory = <String, int>{};
+  final countByCategory = <String, int>{};
+  for (final totals in totalsByBook) {
+    for (final row in totals) {
+      amountByCategory[row.categoryId] =
+          (amountByCategory[row.categoryId] ?? 0) + row.totalAmount;
+      countByCategory[row.categoryId] =
+          (countByCategory[row.categoryId] ?? 0) + row.transactionCount;
+    }
+  }
+  final totals = amountByCategory.entries
+      .map(
+        (entry) => CategoryTotal(
+          categoryId: entry.key,
+          totalAmount: entry.value,
+          transactionCount: countByCategory[entry.key]!,
+        ),
+      )
+      .toList(growable: false);
   var total = 0;
   var entryCount = 0;
   for (final t in totals) {
@@ -162,8 +202,9 @@ Future<MemberFilteredCategoryBreakdown> memberFilteredCategoryBreakdown(
 /// they reach the use case — never accept microsecond-exact instants into the
 /// family key (rebuild-storm guard).
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default — D-14). The public refresh target stays
+/// analytics-owned while book-scope resolution transitively watches the active
+/// family's shadow books.
 @riverpod
 Future<List<MemberSpendBreakdown>> memberSpendBreakdown(
   Ref ref, {
@@ -181,8 +222,9 @@ Future<List<MemberSpendBreakdown>> memberSpendBreakdown(
   // so two callers with differing sub-day precision share one cache key.
   final start = DateBoundaries.dayRange(startDate).start;
   final end = DateBoundaries.dayRange(endDate).end;
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
   return useCase.execute(
-    bookIds: [bookId],
+    bookIds: bookIds,
     startDate: start,
     endDate: end,
     entrySourceFilter: entrySourceFilter,
@@ -194,7 +236,7 @@ Future<List<MemberSpendBreakdown>> memberSpendBreakdown(
 ///
 /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
 /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
-/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// family book scope) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
 /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
 /// rows aggregate per member (a daily-only member yields no bucket).
 @riverpod
@@ -214,8 +256,9 @@ Future<List<MemberSpendBreakdown>> joyMemberAmounts(
   // so two callers with differing sub-day precision share one cache key.
   final start = DateBoundaries.dayRange(startDate).start;
   final end = DateBoundaries.dayRange(endDate).end;
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
   return useCase.execute(
-    bookIds: [bookId],
+    bookIds: bookIds,
     startDate: start,
     endDate: end,
     entrySourceFilter: entrySourceFilter,
@@ -236,9 +279,8 @@ Future<List<MemberSpendBreakdown>> joyMemberAmounts(
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
-/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
-/// home_screen_isolation_test.dart).
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and uses
+/// the same active-family scope as the donut subtotal.
 @riverpod
 Future<CategoryDrillDown> categoryDrillDown(
   Ref ref, {
@@ -252,8 +294,9 @@ Future<CategoryDrillDown> categoryDrillDown(
   // bounds so two callers with differing sub-day precision share one cache key.
   final start = DateBoundaries.dayRange(startDate).start;
   final end = DateBoundaries.dayRange(endDate).end;
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
   return useCase.execute(
-    bookIds: [bookId],
+    bookIds: bookIds,
     startDate: start,
     endDate: end,
     l1CategoryId: l1CategoryId,
@@ -279,8 +322,14 @@ Future<DateTime?> earliestTransactionMonth(
   required String bookId,
 }) async {
   final repository = ref.watch(analyticsRepositoryProvider);
-  final timestamp = await repository.getEarliestTransactionTimestamp(
-    bookId: bookId,
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
+  final timestamps = await Future.wait(
+    bookIds.map((id) => repository.getEarliestTransactionTimestamp(bookId: id)),
+  );
+  final timestamp = timestamps.whereType<DateTime>().fold<DateTime?>(
+    null,
+    (earliest, value) =>
+        earliest == null || value.isBefore(earliest) ? value : earliest,
   );
   if (timestamp == null) {
     return null;
@@ -296,14 +345,28 @@ Future<List<SatisfactionScoreBucket>> satisfactionDistribution(
   required DateTime startDate,
   required DateTime endDate,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  bool includeFamily = false,
 }) async {
   final useCase = ref.watch(getSatisfactionDistributionUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
       : null;
-  return useCase.execute(
-    bookId: bookId,
+  if (!includeFamily) {
+    return useCase.execute(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
+    );
+  }
+  final bookIds = await resolveAnalyticsBookIds(
+    ref,
+    primaryBookId: bookId,
+    includeFamily: includeFamily,
+  );
+  return useCase.executeAcrossBooks(
+    bookIds: bookIds,
     startDate: startDate,
     endDate: endDate,
     entrySourceFilter: entrySourceFilter,
@@ -344,8 +407,9 @@ Future<List<JoyCategoryAmount>> joyCategoryAmounts(
   // so two callers with differing sub-day precision share one cache key.
   final start = DateBoundaries.dayRange(startDate).start;
   final end = DateBoundaries.dayRange(endDate).end;
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
   return useCase.execute(
-    bookIds: [bookId],
+    bookIds: bookIds,
     startDate: start,
     endDate: end,
     entrySourceFilter: entrySourceFilter,
@@ -371,6 +435,7 @@ Future<List<PerDayJoyCount>> perDayJoyCounts(
   required String bookId,
   required DateTime anchor,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  bool includeFamily = false,
 }) async {
   final useCase = ref.watch(getPerDayJoyCountsUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -381,8 +446,13 @@ Future<List<PerDayJoyCount>> perDayJoyCounts(
   // whole-day closed bounds for the month.
   final monthStart = DateTime(anchor.year, anchor.month, 1);
   final monthEnd = DateTime(anchor.year, anchor.month + 1, 0, 23, 59, 59);
+  final bookIds = await resolveAnalyticsBookIds(
+    ref,
+    primaryBookId: bookId,
+    includeFamily: includeFamily,
+  );
   return useCase.execute(
-    bookIds: [bookId],
+    bookIds: bookIds,
     startDate: monthStart,
     endDate: monthEnd,
     entrySourceFilter: entrySourceFilter,
@@ -392,8 +462,8 @@ Future<List<PerDayJoyCount>> perDayJoyCounts(
 /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
 /// heatmap's INLINE day expansion.
 ///
-/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
-/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the
+/// tapped day's whole-day window and the explicitly selected book scope; keeps
 /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
 /// demand rather than widening the count model. Returns EXPENSE joy rows only,
 /// time-descending, with the optional manualOnly entry-source filter applied —
@@ -403,15 +473,15 @@ Future<List<PerDayJoyCount>> perDayJoyCounts(
 /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
 /// here) so two callers with differing sub-day precision share one cache key.
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
-/// never logs tx contents (T-46-05-02).
+/// Auto-dispose (the @riverpod default — D-14). Never logs transaction contents
+/// (T-46-05-02).
 @riverpod
 Future<List<Transaction>> joyDayTransactions(
   Ref ref, {
   required String bookId,
   required DateTime day,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  bool includeFamily = false,
 }) async {
   final repository = ref.watch(transactionRepositoryProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero
@@ -421,8 +491,13 @@ Future<List<Transaction>> joyDayTransactions(
       : null;
   // D-12 defensive normalization: collapse to the tapped day's whole-day bounds.
   final dayRange = DateBoundaries.dayRange(day);
+  final bookIds = await resolveAnalyticsBookIds(
+    ref,
+    primaryBookId: bookId,
+    includeFamily: includeFamily,
+  );
   final txns = await repository.findByBookIds(
-    [bookId],
+    bookIds,
     ledgerType: LedgerType.joy,
     categoryId: null,
     startDate: dayRange.start,

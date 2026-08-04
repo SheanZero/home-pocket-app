@@ -102,6 +102,153 @@ class GetHappinessReportUseCase {
     );
   }
 
+  /// Computes the report over the union of the active family's books.
+  Future<HappinessReport> executeAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String currencyCode,
+    EntrySource? entrySourceFilter,
+  }) async {
+    TimeWindowValidation.assertValid(startDate, endDate);
+    final uniqueBookIds = bookIds.toSet().toList(growable: false);
+    if (uniqueBookIds.isEmpty) {
+      throw ArgumentError.value(bookIds, 'bookIds', 'must not be empty');
+    }
+    if (uniqueBookIds.length == 1) {
+      return execute(
+        bookId: uniqueBookIds.single,
+        startDate: startDate,
+        endDate: endDate,
+        currencyCode: currencyCode,
+        entrySourceFilter: entrySourceFilter,
+      );
+    }
+
+    final results = await Future.wait<Object>([
+      Future.wait(
+        uniqueBookIds.map(
+          (bookId) => _repo.getJoyFullnessOverview(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: entrySourceFilter,
+          ),
+        ),
+      ),
+      Future.wait(
+        uniqueBookIds.map(
+          (bookId) => _repo.getSatisfactionDistribution(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: entrySourceFilter,
+          ),
+        ),
+      ),
+      Future.wait(
+        uniqueBookIds.map(
+          (bookId) => _repo.getJoyRowsForJoyContribution(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: entrySourceFilter,
+          ),
+        ),
+      ),
+      Future.wait(
+        uniqueBookIds.map(
+          (bookId) => _repo.getBestJoyMoment(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: entrySourceFilter,
+          ),
+        ),
+      ),
+    ]);
+
+    final overviews = results[0] as List<JoyFullnessOverview>;
+    final distributions = results[1] as List<List<SatisfactionScoreBucket>>;
+    final rowsByBook = results[2] as List<List<JoyRowSample>>;
+    final topCandidates = results[3] as List<BestJoyMomentRow?>;
+
+    final totalJoyTx = overviews.fold<int>(
+      0,
+      (sum, overview) => sum + overview.count,
+    );
+    if (totalJoyTx == 0) {
+      return HappinessReport(
+        year: endDate.year,
+        month: endDate.month,
+        bookId: uniqueBookIds.first,
+        totalJoyTx: 0,
+        avgSatisfaction: const Empty(),
+        joyContribution: const Empty(),
+        medianSatisfaction: const Empty(),
+        highlightsCount: const Empty(),
+        topJoy: const Empty(),
+      );
+    }
+
+    final weightedSatisfaction = overviews.fold<double>(
+      0,
+      (sum, overview) => sum + overview.avgSatisfaction * overview.count,
+    );
+    final countByScore = <int, int>{};
+    for (final distribution in distributions) {
+      for (final bucket in distribution) {
+        countByScore[bucket.score] =
+            (countByScore[bucket.score] ?? 0) + bucket.count;
+      }
+    }
+    final distribution =
+        countByScore.entries
+            .map(
+              (entry) =>
+                  SatisfactionScoreBucket(score: entry.key, count: entry.value),
+            )
+            .toList(growable: false)
+          ..sort((a, b) => a.score.compareTo(b.score));
+    final ptvfRows = rowsByBook.expand((rows) => rows).toList(growable: false);
+
+    BestJoyMomentRow? topJoy;
+    for (final candidate in topCandidates.whereType<BestJoyMomentRow>()) {
+      if (topJoy == null || _isBetterTopJoy(candidate, topJoy)) {
+        topJoy = candidate;
+      }
+    }
+
+    final joyContribution = _computeJoyContribution(
+      ptvfRows,
+      ptvfBaseFor(currencyCode),
+    );
+    return HappinessReport(
+      year: endDate.year,
+      month: endDate.month,
+      bookId: uniqueBookIds.first,
+      totalJoyTx: totalJoyTx,
+      avgSatisfaction: Value(weightedSatisfaction / totalJoyTx, totalJoyTx),
+      joyContribution: Value(joyContribution, totalJoyTx),
+      medianSatisfaction: Value(
+        _computeMedianFromDistribution(distribution),
+        totalJoyTx,
+      ),
+      highlightsCount: Value(_countHighlights(distribution), totalJoyTx),
+      topJoy: topJoy == null ? const Empty() : Value(topJoy, totalJoyTx),
+    );
+  }
+
+  bool _isBetterTopJoy(BestJoyMomentRow candidate, BestJoyMomentRow current) {
+    if (candidate.joyFullness != current.joyFullness) {
+      return candidate.joyFullness > current.joyFullness;
+    }
+    if (candidate.amount != current.amount) {
+      return candidate.amount > current.amount;
+    }
+    return candidate.timestamp.isAfter(current.timestamp);
+  }
+
   /// ADR-016 §2: joy_contribution = Σ(sat × (amount/base)^α).
   double _computeJoyContribution(List<JoyRowSample> rows, double base) {
     if (rows.isEmpty) return 0;

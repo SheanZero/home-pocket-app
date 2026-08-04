@@ -1,12 +1,18 @@
 @Tags(['golden'])
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_theme.dart';
+import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
+    as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/joy_category_amount.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
@@ -19,22 +25,18 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_joy_
 import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
 import 'package:home_pocket/generated/app_localizations.dart';
 
 import '../helpers/happiness_test_fixtures.dart';
 
-/// Full-page scroll-smoke golden for [AnalyticsScreen] (D-07, Plan 47-05).
+/// V16 first-viewport goldens for [AnalyticsScreen].
 ///
-/// Coverage (GUARD-04 / 47-UI-SPEC §Golden Visual-Contract Matrix):
-/// - ja / light, full-page card-ORDER verification (1 master).
-///
-/// Overrides ALL providers the 5 always-visible cards watch with deterministic
-/// fixtures so the whole page renders in one tall frame; the golden captures the
-/// round-5 B card order: within_month_trend → category_donut → joy_spend →
-/// joy_calendar → satisfaction_histogram (the registry lineup, D-07). Solo mode
-/// (isGroupMode false) so the group-only family_insight card is absent.
+/// Covers the two approved entry states at a 390 × 844 phone viewport:
+/// - personal: `支出 / ときめき`, with Joy selected by default;
+/// - family: `家族の支出 / 私のときめき`, with Family Spending selected.
 ///
 /// Wraps the PRODUCTION [AppTheme] so `context.palette` resolves the real
 /// ADR-019 palette.
@@ -43,6 +45,14 @@ const _bookId = 'book_a';
 final _windowStart = DateTime(2026, 5);
 final _windowEnd = DateTime(2026, 5, 31, 23, 59, 59);
 final _anchor = DateTime(2026, 5);
+
+final _book = Book(
+  id: _bookId,
+  name: 'Main Book',
+  currency: 'JPY',
+  deviceId: 'device_local',
+  createdAt: DateTime.utc(2026, 1),
+);
 
 class _FixedTimeWindow extends SelectedTimeWindow {
   _FixedTimeWindow();
@@ -132,13 +142,19 @@ List<SatisfactionScoreBucket> _distribution() => const [
   SatisfactionScoreBucket(score: 10, count: 2),
 ];
 
-Widget _wrap({required Locale locale}) {
+Widget _wrap({required Locale locale, bool groupMode = false}) {
   return ProviderScope(
     overrides: [
       selectedTimeWindowProvider.overrideWith(_FixedTimeWindow.new),
       locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
-      isGroupModeProvider.overrideWith((_) => false),
+      accounting_providers
+          .bookByIdProvider(bookId: _bookId)
+          .overrideWith((_) async => _book),
+      isGroupModeProvider.overrideWith((_) => groupMode),
       activeGroupProvider.overrideWith((_) => Stream.value(null)),
+      shadowBooksProvider.overrideWith(
+        (_) async => groupMode ? fixtureShadowBooksThree() : const [],
+      ),
       earliestTransactionMonthProvider(
         bookId: _bookId,
       ).overrideWith((_) async => DateTime(2024, 12)),
@@ -152,6 +168,7 @@ Widget _wrap({required Locale locale}) {
         startDate: _windowStart,
         endDate: _windowEnd,
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: true,
       ).overrideWith((_) async => _report()),
       analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
       joyCategoryAmountsProvider(
@@ -171,13 +188,21 @@ Widget _wrap({required Locale locale}) {
         endDate: _windowEnd,
         currencyCode: 'JPY',
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: false,
       ).overrideWith((_) async => fixtureHappinessReportRich()),
       satisfactionDistributionProvider(
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: false,
       ).overrideWith((_) async => _distribution()),
+      familyHappinessProvider(
+        primaryBookId: _bookId,
+        startDate: _windowStart,
+        endDate: _windowEnd,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => fixtureFamilyHappinessRich()),
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -198,13 +223,36 @@ Widget _wrap({required Locale locale}) {
 }
 
 void main() {
-  group('AnalyticsScreen scroll-smoke golden', () {
-    testWidgets('full-page card order — light ja', (tester) async {
-      // Tall surface so the whole 5-card lineup is captured in one frame (D-07).
-      tester.view.physicalSize = const Size(390, 2600);
+  setUpAll(() async {
+    final textFont = FontLoader('RobotoMonoNumerals')
+      ..addFont(
+        File('/System/Library/Fonts/Supplemental/Arial Unicode.ttf')
+            .readAsBytes()
+            .then((bytes) => ByteData.sublistView(Uint8List.fromList(bytes))),
+      );
+    await textFont.load();
+    final materialIcons = FontLoader('MaterialIcons')
+      ..addFont(
+        File(
+          '/Users/xinz/flutter/bin/cache/artifacts/material_fonts/'
+          'MaterialIcons-Regular.otf',
+        ).readAsBytes().then(
+          (bytes) => ByteData.sublistView(Uint8List.fromList(bytes)),
+        ),
+      );
+    await materialIcons.load();
+  });
+
+  group('AnalyticsScreen V16 primary tabs golden', () {
+    Future<void> setPhoneViewport(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+    }
+
+    testWidgets('personal Joy selected — light ja', (tester) async {
+      await setPhoneViewport(tester);
 
       await tester.pumpWidget(_wrap(locale: const Locale('ja')));
       await tester.pumpAndSettle();
@@ -212,6 +260,29 @@ void main() {
       await expectLater(
         find.byType(AnalyticsScreen),
         matchesGoldenFile('goldens/analytics_screen_scroll_smoke_light_ja.png'),
+      );
+    });
+
+    testWidgets('family Spending selected — light ja', (tester) async {
+      await setPhoneViewport(tester);
+
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('ja'), groupMode: true),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
+      await tester.pumpAndSettle();
+      await tester.drag(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, 600),
+      );
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(AnalyticsScreen),
+        matchesGoldenFile(
+          'goldens/analytics_screen_family_spending_light_ja.png',
+        ),
       );
     });
   });

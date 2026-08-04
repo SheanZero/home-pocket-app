@@ -101,6 +101,7 @@ Widget _subject({List<CategoryBreakdown>? breakdowns, MonthlyReport? report}) {
         bookId: _bookId,
         startDate: _start,
         endDate: _end,
+        includeFamily: true,
       ).overrideWith((_) async => report ?? _report(breakdowns ?? _breakdowns)),
       analyticsCategoriesMapProvider.overrideWith((_) async => _categoryMap),
     ],
@@ -265,6 +266,7 @@ void main() {
             bookId: _bookId,
             startDate: _start,
             endDate: _end,
+            includeFamily: true,
           ).overrideWith(
             // True total 12000 = full 12-category spend; donutTotal = 10000.
             (_) async => _report(manyBreakdowns).copyWith(totalExpenses: 12000),
@@ -365,6 +367,7 @@ void main() {
             bookId: _bookId,
             startDate: _start,
             endDate: _end,
+            includeFamily: true,
           ).overrideWith((_) async => _report(_breakdowns)),
           analyticsCategoriesMapProvider.overrideWith(
             (_) async => _categoryMap,
@@ -439,6 +442,7 @@ void main() {
             bookId: _bookId,
             startDate: _start,
             endDate: _end,
+            includeFamily: true,
           ).overrideWith((_) async => _report(_breakdowns)),
           analyticsCategoriesMapProvider.overrideWith(
             (_) async => _categoryMap,
@@ -497,6 +501,7 @@ void main() {
             bookId: _bookId,
             startDate: _start,
             endDate: _end,
+            includeFamily: true,
           ).overrideWith((_) async => _report(_breakdowns)),
           analyticsCategoriesMapProvider.overrideWith(
             (_) async => _categoryMap,
@@ -598,6 +603,7 @@ void main() {
             bookId: _bookId,
             startDate: _start,
             endDate: _end,
+            includeFamily: true,
           ).overrideWith((_) async => _report(_breakdowns)),
           analyticsCategoriesMapProvider.overrideWith(
             (_) async => _categoryMap,

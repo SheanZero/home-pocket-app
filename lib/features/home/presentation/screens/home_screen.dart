@@ -210,6 +210,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ? ref
                             .watch(
                               familyHappinessProvider(
+                                primaryBookId: bookId,
                                 startDate: currentMonthStart,
                                 endDate: currentMonthEnd,
                               ),

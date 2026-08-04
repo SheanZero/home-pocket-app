@@ -2349,6 +2349,31 @@
   "@analyticsJoyCalendarDayEmpty": {
     "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
   },
+  "analyticsTabSpending": "支出",
+  "@analyticsTabSpending": {
+    "description": "Personal-mode primary Statistics tab for spending"
+  },
+  "analyticsTabFamilySpending": "家庭支出",
+  "@analyticsTabFamilySpending": {
+    "description": "Family-mode primary Statistics tab for aggregate family spending"
+  },
+  "analyticsTabJoy": "悦己",
+  "@analyticsTabJoy": {
+    "description": "Personal-mode primary Statistics tab for Joy"
+  },
+  "analyticsTabMyJoy": "我的悦己",
+  "@analyticsTabMyJoy": {
+    "description": "Family-mode primary Statistics tab for the current user's Joy"
+  },
+  "analyticsTabJoyCount": "{count}次",
+  "@analyticsTabJoyCount": {
+    "description": "Compact Joy entry count shown in the primary Statistics tab",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsSectionTrend": "支出趋势",
   "@analyticsSectionTrend": {
     "description": "Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)"
@@ -3590,9 +3615,9 @@
     "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
   "onboardingSetupTopbar": "初始设置",
-  "onboardingSetupTitle": "基础设置",
+  "onboardingSetupTitle": "初始设置",
   "@onboardingSetupTitle": {
-    "description": "Design-04 setup screen: two-line title"
+    "description": "Compact centered title for the onboarding setup screen"
   },
   "onboardingRowName": "姓名・必填",
   "@onboardingRowName": {
@@ -3644,9 +3669,11 @@
   "onboardingSecurityPinMissing": "尚未设置 PIN",
   "onboardingSecurityPinSetupHint": "输入两次后即可启用",
   "onboardingSecurityPinSetup": "设置4位 PIN",
+  "onboardingSecurityPinSetAction": "设置",
   "onboardingSecurityPinComplete": "PIN 已设置",
   "onboardingSecurityPinCompleteDescription": "当前由4位 PIN 保护",
   "onboardingSecurityPinChange": "修改 PIN",
+  "onboardingSecurityPinUpdateAction": "更新",
   "onboardingSetupNameRequiredHint": "输入姓名后即可开始",
   "onboardingSetupPinRequiredHint": "设置 PIN 后即可开始",
   "onboardingSetupChangeLaterHint": "之后可随时在设置中更改",
@@ -3694,9 +3721,29 @@
   "@appLockSetPinTitle": {
     "description": "Set-PIN flow: title for the first passcode entry (Plan 10)"
   },
+  "appLockUpdatePinTitle": "更新密码",
+  "@appLockUpdatePinTitle": {
+    "description": "Set-PIN flow: first-step title when replacing an existing passcode"
+  },
+  "appLockSetPinDescription": "选择一组容易记住的4位数字，用于解锁 Home Pocket。",
+  "@appLockSetPinDescription": {
+    "description": "Set-PIN flow: supporting copy for the first passcode entry"
+  },
   "appLockConfirmPinTitle": "再次输入密码",
   "@appLockConfirmPinTitle": {
     "description": "Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)"
+  },
+  "appLockConfirmPinDescription": "再次输入相同的4位数字进行确认。",
+  "@appLockConfirmPinDescription": {
+    "description": "Set-PIN flow: supporting copy for the confirmation entry"
+  },
+  "appLockPinSetupProgress": "第 {current} 步，共 {total} 步",
+  "@appLockPinSetupProgress": {
+    "description": "Set-PIN flow: accessible two-step progress label",
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
   },
   "appLockPinMismatch": "密码不一致",
   "@appLockPinMismatch": {

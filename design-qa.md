@@ -1,3 +1,100 @@
+# V16 Analytics Primary Tabs — Flutter Implementation (2026-08-04)
+
+## Scope and evidence
+
+- Approved source direction: `/Users/xinz/.codex/generated_images/019fca24-b105-7a70-86cb-1e662b812922/exec-b2bd2b20-74f1-4334-a875-58c8cb5054ba.png`, with final ownership copy and responsive rules from `docs/mockup/v16/index.html` and `docs/mockup/v16/README.md`.
+- Pre-fix evidence: `/Users/xinz/.codex/visualizations/2026/08/04/019fca24-b105-7a70-86cb-1e662b812922/analytics-tab-title-truncation.png`.
+- Flutter personal evidence: `test/golden/goldens/analytics_screen_scroll_smoke_light_ja.png` at 390×844, Joy selected.
+- Flutter family evidence: `test/golden/goldens/analytics_screen_family_spending_light_ja.png` at 390×844, Family Spending selected.
+- The source, pre-fix crop, and Flutter render were reviewed together in one visual comparison input.
+
+## Findings
+
+- No actionable P0, P1, or P2 mismatch remains.
+- Header fidelity: the existing month, calendar, and settings title bar is unchanged.
+- State fidelity: the inactive tab remains flat on a borderless warm base; the selected tab uses the approved raised paper surface, soft shadow, semantic tint, and centered top bookmark.
+- Ownership copy: personal mode uses `支出 / ときめき`; family mode uses `家族の支出 / 私のときめき`. Chinese and English equivalents are supplied by ARB localizations.
+- Content separation: Spending owns trend, category, and the group-only family insight. Joy owns the calendar and satisfaction histogram. Joy is selected by default.
+- Data scope: Family Spending aggregates the current book and shadow books. My Joy explicitly stays on the current user's book for the tab summary, calendar, day details, report, and satisfaction distribution.
+- Responsive priority: at 375 px, titles retain the 15 px single-line style. The supporting visual is removed when the measured localized title needs its space; the title is never shortened to make room for decoration. Japanese and English family labels were verified without truncation.
+- Accessibility and motion: both full tab surfaces expose button and selected semantics, and selection animation respects the platform reduce-motion preference.
+
+## Verification
+
+- Analytics unit/widget suite: 310 tests passed.
+- Analytics application + ARB parity + hardcoded-CJK architecture suite: 178 tests passed.
+- Updated Analytics screen and satisfaction goldens: 9 tests passed.
+- Focused 375 px personal/family, Japanese/English title, tab-switching, card ownership, and refresh tests: 12 tests passed.
+- `flutter analyze`: 0 issues.
+- `git diff --check`: passed.
+
+final result: passed
+
+---
+
+# V16 Analytics Tabs — Selected Direction 2 (2026-08-04)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fca24-b105-7a70-86cb-1e662b812922/exec-b2bd2b20-74f1-4334-a875-58c8cb5054ba.png` (the selected second direction).
+- Mockup implementation: personal and A2 family branches of `analytics()` in `docs/mockup/v16/index.html`.
+- Target states: personal `支出 / ときめき`; A2 family `家族の支出 / 私のときめき`; Joy selected by default to match the source visual.
+- Pre-fix rendered evidence supplied by the user: `/Users/xinz/.codex/visualizations/2026/08/04/019fca24-b105-7a70-86cb-1e662b812922/analytics-tab-title-truncation.png` (736×224 focused @2x crop), showing `私のときめき` truncated in A2.
+- Post-fix browser-rendered evidence: unavailable because the in-app browser safety policy blocks local-file mockup access in this task.
+
+## Implemented design decisions
+
+- The existing month, calendar, and settings title bar is unchanged.
+- The shared warm base has no industrial outline. The inactive tab sits flat on that base; the active tab becomes a softly raised paper surface with a centered color bookmark.
+- Both tabs use the established Material Symbols set (`donut_small`, `bar_chart`) instead of introducing a new illustration style.
+- The supporting visual track is reduced from 50px to 38px, its symbol from 42px to 34px, and the text gap from 8px to 4px. At 375px the visual track becomes 34px with a 32px symbol, preserving the full 15px title before considering truncation.
+- The first two analytics sections render only under spending; the calendar and satisfaction sections render only under Joy.
+- A2 uses family totals in the spending tab, while its `私のときめき` tab intentionally renders the current user's Joy calendar and satisfaction data.
+- Personal mode omits `私の` from both labels because the screen context already establishes ownership; A2 retains `家族の / 私の` because the two tabs have different data owners.
+- Tab buttons expose `tablist` / `tab` / `tabpanel` semantics and support Left, Right, Home, and End keys.
+
+## Verification
+
+- Inline JavaScript syntax: passed.
+- Required personal/A2 labels and tab ARIA wiring: present.
+- Pre-fix P2 title truncation: addressed in code by yielding horizontal space from the secondary visual to the primary label.
+- Post-fix responsive visual comparison, overflow check, and console check: blocked pending manual opening of the local mockup.
+
+final result: blocked
+
+---
+
+# V16 A2 Analytics — Family Joy Calendar Refinement (2026-08-03)
+
+## Scope and evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fc7df-2f73-7820-a949-39c2f2c3f5e0/exec-58be5acf-2b7a-41e0-8dcb-ed9b7d6eee8e.png`.
+- Mockup implementation: the A2 family branch of `analyticsCalendarCard()` in `docs/mockup/v16/index.html`; the personal A1/A3 branch remains unchanged.
+- Browser-rendered evidence: `/private/tmp/a2-family-calendar-viewport.png`, focused to `/private/tmp/a2-family-calendar-focus.png` at the 390 px phone width.
+- Same-input comparison: `/private/tmp/a2-family-calendar-qa-composite.png`; the selected visual direction is on the left and the rendered Mockup is on the right.
+- State: July 2026, A2 family, light theme, all three members, July 12 selected.
+
+## Findings
+
+- No actionable P0, P1, or P2 visual mismatch remains.
+- Calendar meaning: the unfiltered heatmap is derived from the family's per-day total count. July 6 and 21 show two-item intensity, while July 12 uses the strongest three-item intensity and remains selected.
+- Member filtering: the three avatar/name controls above the card are real toggle buttons. Selecting a member recalculates the calendar heatmap and selected-day details for that member; pressing the active member again restores the whole-family view.
+- Unified composition: calendar, low-to-high legend, selected-day heading, and detail rows share one continuous paper card. The calendar no longer repeats a month selector or a monthly-total sentence.
+- Detail simplification: each row keeps the payer avatar, category badge, category, satisfaction, merchant, and amount. Duplicate member names and right-side chevrons are absent, so the row no longer implies a second navigation destination.
+- Visual rhythm: the implementation intentionally compresses the isolated concept into the existing 390×844 app shell while preserving its hierarchy, warm paper surface, blush heat scale, selected-day outline, avatar order, and amount alignment.
+
+## Verification
+
+- Default July 12 accessible count: `家族のときめき3件`; selecting あおい changes it to `あおいのときめき1件`, and selecting あおい again restores the family count.
+- Selected-member `aria-pressed`: `true`; after reset: `false`.
+- Detail member-name nodes: 0; detail `chevron_right` nodes: 0.
+- Browser console errors: 0.
+- `git diff --check` and inline-script parsing: passed.
+
+final result: passed
+
+---
+
 # V16 A2 Family List Top — Flutter Alignment (2026-08-03)
 
 ## Scope and evidence

@@ -113,6 +113,66 @@ void main() {
       expect(avg.data, 8.5);
       expect(avg.sampleSize, 4);
     });
+
+    test(
+      'family average is weighted across primary and shadow books',
+      () async {
+        when(
+          () => repository.getJoyFullnessOverview(
+            bookId: any(named: 'bookId'),
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer((invocation) async {
+          final bookId = invocation.namedArguments[#bookId] as String;
+          return bookId == 'personal'
+              ? const JoyFullnessOverview(avgSatisfaction: 4, count: 1)
+              : const JoyFullnessOverview(avgSatisfaction: 8, count: 3);
+        });
+        when(
+          () => repository.getSatisfactionDistribution(
+            bookId: any(named: 'bookId'),
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer((invocation) async {
+          final bookId = invocation.namedArguments[#bookId] as String;
+          return bookId == 'personal'
+              ? const [SatisfactionScoreBucket(score: 4, count: 1)]
+              : const [SatisfactionScoreBucket(score: 8, count: 3)];
+        });
+        when(
+          () => repository.getJoyRowsForJoyContribution(
+            bookId: any(named: 'bookId'),
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer(
+          (_) async => const [JoyRowSample(amount: 500, joyFullness: 6)],
+        );
+        when(
+          () => repository.getBestJoyMoment(
+            bookId: any(named: 'bookId'),
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer((_) async => null);
+
+        final report = await useCase.executeAcrossBooks(
+          bookIds: const ['personal', 'shadow'],
+          startDate: startDate,
+          endDate: endDate,
+          currencyCode: 'JPY',
+        );
+        final avg = await valueMetric<double>(report.avgSatisfaction);
+        final median = await valueMetric<double>(report.medianSatisfaction);
+
+        expect(report.totalJoyTx, 4);
+        expect(avg.data, 7);
+        expect(avg.sampleSize, 4);
+        expect(median.data, 8);
+      },
+    );
   });
 
   group('Joy contribution (ADR-016 / HAPPY-02)', () {

@@ -32,6 +32,7 @@ final class HappinessReportProvider
       DateTime endDate,
       String currencyCode,
       JoyMetricVariant joyMetricVariant,
+      bool includeFamily,
     })
     super.argument,
   }) : super(
@@ -68,6 +69,7 @@ final class HappinessReportProvider
               DateTime endDate,
               String currencyCode,
               JoyMetricVariant joyMetricVariant,
+              bool includeFamily,
             });
     return happinessReport(
       ref,
@@ -76,6 +78,7 @@ final class HappinessReportProvider
       endDate: argument.endDate,
       currencyCode: argument.currencyCode,
       joyMetricVariant: argument.joyMetricVariant,
+      includeFamily: argument.includeFamily,
     );
   }
 
@@ -90,7 +93,7 @@ final class HappinessReportProvider
   }
 }
 
-String _$happinessReportHash() => r'155e4dc5ce8e48848014a7900e153deb84469080';
+String _$happinessReportHash() => r'17d44a157ade50b9562ebf39e07689a60045db86';
 
 /// HAPPY-01..04 personal happiness report.
 
@@ -104,6 +107,7 @@ final class HappinessReportFamily extends $Family
             DateTime endDate,
             String currencyCode,
             JoyMetricVariant joyMetricVariant,
+            bool includeFamily,
           })
         > {
   HappinessReportFamily._()
@@ -123,6 +127,7 @@ final class HappinessReportFamily extends $Family
     required DateTime endDate,
     required String currencyCode,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+    bool includeFamily = false,
   }) => HappinessReportProvider._(
     argument: (
       bookId: bookId,
@@ -130,6 +135,7 @@ final class HappinessReportFamily extends $Family
       endDate: endDate,
       currencyCode: currencyCode,
       joyMetricVariant: joyMetricVariant,
+      includeFamily: includeFamily,
     ),
     from: this,
   );
@@ -505,18 +511,16 @@ final class LargestMonthlyExpenseFamily extends $Family
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
-/// D-09: presentation resolves shadow books to book IDs before invoking the
-/// use case. Q6c remains open: this currently passes shadow books only; Phase
-/// 10/11 may extend the call site if current-device book inclusion is required.
+/// Includes both the current member's primary book and every shadow book for
+/// the active family.
 
 @ProviderFor(familyHappiness)
 final familyHappinessProvider = FamilyHappinessFamily._();
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
-/// D-09: presentation resolves shadow books to book IDs before invoking the
-/// use case. Q6c remains open: this currently passes shadow books only; Phase
-/// 10/11 may extend the call site if current-device book inclusion is required.
+/// Includes both the current member's primary book and every shadow book for
+/// the active family.
 
 final class FamilyHappinessProvider
     extends
@@ -528,12 +532,12 @@ final class FamilyHappinessProvider
     with $FutureModifier<FamilyHappiness>, $FutureProvider<FamilyHappiness> {
   /// FAMILY-01..02 family happiness aggregate.
   ///
-  /// D-09: presentation resolves shadow books to book IDs before invoking the
-  /// use case. Q6c remains open: this currently passes shadow books only; Phase
-  /// 10/11 may extend the call site if current-device book inclusion is required.
+  /// Includes both the current member's primary book and every shadow book for
+  /// the active family.
   FamilyHappinessProvider._({
     required FamilyHappinessFamily super.from,
     required ({
+      String primaryBookId,
       DateTime startDate,
       DateTime endDate,
       JoyMetricVariant joyMetricVariant,
@@ -568,12 +572,14 @@ final class FamilyHappinessProvider
     final argument =
         this.argument
             as ({
+              String primaryBookId,
               DateTime startDate,
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
             });
     return familyHappiness(
       ref,
+      primaryBookId: argument.primaryBookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
       joyMetricVariant: argument.joyMetricVariant,
@@ -591,19 +597,19 @@ final class FamilyHappinessProvider
   }
 }
 
-String _$familyHappinessHash() => r'2e9d6f9e67b026b3d95a77f7280ca6275704389b';
+String _$familyHappinessHash() => r'5db0cbd7fef268d377ff3b562fca81567b615c49';
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
-/// D-09: presentation resolves shadow books to book IDs before invoking the
-/// use case. Q6c remains open: this currently passes shadow books only; Phase
-/// 10/11 may extend the call site if current-device book inclusion is required.
+/// Includes both the current member's primary book and every shadow book for
+/// the active family.
 
 final class FamilyHappinessFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<FamilyHappiness>,
           ({
+            String primaryBookId,
             DateTime startDate,
             DateTime endDate,
             JoyMetricVariant joyMetricVariant,
@@ -620,16 +626,17 @@ final class FamilyHappinessFamily extends $Family
 
   /// FAMILY-01..02 family happiness aggregate.
   ///
-  /// D-09: presentation resolves shadow books to book IDs before invoking the
-  /// use case. Q6c remains open: this currently passes shadow books only; Phase
-  /// 10/11 may extend the call site if current-device book inclusion is required.
+  /// Includes both the current member's primary book and every shadow book for
+  /// the active family.
 
   FamilyHappinessProvider call({
+    required String primaryBookId,
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => FamilyHappinessProvider._(
     argument: (
+      primaryBookId: primaryBookId,
       startDate: startDate,
       endDate: endDate,
       joyMetricVariant: joyMetricVariant,

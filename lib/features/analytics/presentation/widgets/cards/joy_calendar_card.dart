@@ -21,6 +21,8 @@ import 'analytics_data_card.dart';
 /// `*RefreshTargets` contract: watches exactly ONE provider family
 /// ([perDayJoyCountsProvider], MONTH-anchored, D-12) and routes its error-retry
 /// through the single-source [joyCalendarRefreshTargets].
+/// The V16 family screen calls this tab “My Joy”, so all providers in this card
+/// explicitly keep `includeFamily: false` even while group mode is active.
 ///
 /// On data: an `AnalyticsDataCard` with the custom [JoyCalendarHeatmap] (R-2 —
 /// NOT fl_chart) and, BELOW it, an INLINE expandable panel ([AnimatedSize],
@@ -51,6 +53,7 @@ class JoyCalendarCard extends ConsumerWidget {
         bookId: bookId,
         anchor: ctx.trendAnchor,
         joyMetricVariant: joyMetricVariant,
+        includeFamily: false,
       ),
     );
 
@@ -99,6 +102,7 @@ List<ProviderBase<Object?>> joyCalendarRefreshTargets(
     bookId: ctx.bookId,
     anchor: ctx.trendAnchor,
     joyMetricVariant: ctx.joyMetricVariant,
+    includeFamily: false,
   ),
 ];
 
@@ -235,12 +239,14 @@ class _InlineDayPanel extends ConsumerWidget {
         bookId: bookId,
         anchor: anchor,
         joyMetricVariant: joyMetricVariant,
+        includeFamily: false,
       ),
       (_, _) => ref.invalidate(
         joyDayTransactionsProvider(
           bookId: bookId,
           day: day,
           joyMetricVariant: joyMetricVariant,
+          includeFamily: false,
         ),
       ),
     );
@@ -250,6 +256,7 @@ class _InlineDayPanel extends ConsumerWidget {
         bookId: bookId,
         day: day,
         joyMetricVariant: joyMetricVariant,
+        includeFamily: false,
       ),
     );
 

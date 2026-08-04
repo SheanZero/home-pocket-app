@@ -116,6 +116,7 @@ Widget _wrap({
         startDate: _startDate,
         endDate: _endDate,
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: true,
       ).overrideWith((_) async => report),
       analyticsCategoriesMapProvider.overrideWith((_) async => categoryMap),
     ],
@@ -219,6 +220,7 @@ Widget _wrapMember({
         startDate: _startDate,
         endDate: _endDate,
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: true,
       ).overrideWith((_) async => _reportFour()),
       analyticsCategoriesMapProvider.overrideWith(
         (_) async => _categoryMapFour,

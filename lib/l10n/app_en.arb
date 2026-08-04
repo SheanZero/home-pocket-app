@@ -2335,6 +2335,31 @@
   "@analyticsJoyCalendarDayEmpty": {
     "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
   },
+  "analyticsTabSpending": "Spending",
+  "@analyticsTabSpending": {
+    "description": "Personal-mode primary Statistics tab for spending"
+  },
+  "analyticsTabFamilySpending": "Family Spending",
+  "@analyticsTabFamilySpending": {
+    "description": "Family-mode primary Statistics tab for aggregate family spending"
+  },
+  "analyticsTabJoy": "Joy",
+  "@analyticsTabJoy": {
+    "description": "Personal-mode primary Statistics tab for Joy"
+  },
+  "analyticsTabMyJoy": "My Joy",
+  "@analyticsTabMyJoy": {
+    "description": "Family-mode primary Statistics tab for the current user's Joy"
+  },
+  "analyticsTabJoyCount": "{count} entries",
+  "@analyticsTabJoyCount": {
+    "description": "Compact Joy entry count shown in the primary Statistics tab",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsSectionTrend": "Spending trend",
   "@analyticsSectionTrend": {
     "description": "Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)"
@@ -3576,9 +3601,9 @@
     "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
   "onboardingSetupTopbar": "Initial setup",
-  "onboardingSetupTitle": "Basic setup",
+  "onboardingSetupTitle": "Initial Setup",
   "@onboardingSetupTitle": {
-    "description": "Design-04 setup screen: two-line title"
+    "description": "Compact centered title for the onboarding setup screen"
   },
   "onboardingRowName": "Name · Required",
   "@onboardingRowName": {
@@ -3630,9 +3655,11 @@
   "onboardingSecurityPinMissing": "PIN has not been set",
   "onboardingSecurityPinSetupHint": "Enter it twice to enable",
   "onboardingSecurityPinSetup": "Set a 4-digit PIN",
+  "onboardingSecurityPinSetAction": "Set",
   "onboardingSecurityPinComplete": "PIN is set",
   "onboardingSecurityPinCompleteDescription": "Protected by a 4-digit PIN",
   "onboardingSecurityPinChange": "Change PIN",
+  "onboardingSecurityPinUpdateAction": "Update",
   "onboardingSetupNameRequiredHint": "Enter your name to continue",
   "onboardingSetupPinRequiredHint": "Set a PIN to continue",
   "onboardingSetupChangeLaterHint": "You can change these anytime in Settings",
@@ -3680,9 +3707,29 @@
   "@appLockSetPinTitle": {
     "description": "Set-PIN flow: title for the first passcode entry (Plan 10)"
   },
+  "appLockUpdatePinTitle": "Update passcode",
+  "@appLockUpdatePinTitle": {
+    "description": "Set-PIN flow: first-step title when replacing an existing passcode"
+  },
+  "appLockSetPinDescription": "Choose four digits you'll remember to unlock Home Pocket.",
+  "@appLockSetPinDescription": {
+    "description": "Set-PIN flow: supporting copy for the first passcode entry"
+  },
   "appLockConfirmPinTitle": "Re-enter passcode",
   "@appLockConfirmPinTitle": {
     "description": "Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)"
+  },
+  "appLockConfirmPinDescription": "Enter the same four digits again to confirm.",
+  "@appLockConfirmPinDescription": {
+    "description": "Set-PIN flow: supporting copy for the confirmation entry"
+  },
+  "appLockPinSetupProgress": "Step {current} of {total}",
+  "@appLockPinSetupProgress": {
+    "description": "Set-PIN flow: accessible two-step progress label",
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
   },
   "appLockPinMismatch": "Passcodes don't match",
   "@appLockPinMismatch": {

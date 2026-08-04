@@ -8,10 +8,15 @@ import '../../../../features/home/presentation/widgets/month_picker_dialog.dart'
 import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
+import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
+import '../../../accounting/presentation/providers/repository_providers.dart'
+    as accounting_providers;
 import '../../domain/models/time_window.dart';
 import '../analytics_card_registry.dart';
+import '../providers/state_analytics.dart';
 import '../providers/state_time_window.dart';
+import '../widgets/analytics_primary_tabs.dart';
 import '../widgets/analytics_section_header.dart';
 import '../widgets/cards/family_insight_data_card.dart';
 
@@ -26,18 +31,25 @@ import '../widgets/cards/family_insight_data_card.dart';
 /// hand-listed providers, and headers carry none) so HomeHero isolation is
 /// guaranteed by construction (GUARD-01): the registry imports zero `home/*`
 /// providers.
-class AnalyticsScreen extends ConsumerWidget {
+class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key, required this.bookId});
 
   final String bookId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  AnalyticsPrimaryTab _selectedTab = AnalyticsPrimaryTab.joy;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = S.of(context);
 
     // ONE canonical context drives BOTH the card map and `_refresh` so build
     // and invalidation keys cannot drift (D-A1 / D-B2).
-    final ctx = buildAnalyticsCardContext(context, ref, bookId: bookId);
+    final ctx = buildAnalyticsCardContext(context, ref, bookId: widget.bookId);
 
     // v15 header (260714): month-only. The header title is the selected month
     // (joy-tinted per mock `.analytics-month-title`) and opens the same
@@ -51,11 +63,53 @@ class AnalyticsScreen extends ConsumerWidget {
     // Display-only home-feature read (NOT an invalidation target — never in the
     // `_refresh` union, D-B3). Resolved here and injected into the one
     // FamilyInsightDataCard the registry leaves with a null placeholder.
-    final shadowBooksAsync = ctx.isGroupMode
+    final shadowBooksAsync =
+        ctx.isGroupMode && _selectedTab == AnalyticsPrimaryTab.spending
         ? ref
               .watch(shadowBooksProvider)
               .whenData<List<Object>?>((value) => value)
         : const AsyncValue<List<Object>?>.data(null);
+
+    final spendingAsync = ref.watch(
+      monthlyReportProvider(
+        bookId: widget.bookId,
+        startDate: ctx.startDate,
+        endDate: ctx.endDate,
+        joyMetricVariant: ctx.joyMetricVariant,
+        includeFamily: true,
+      ),
+    );
+    final joyCountsAsync = ref.watch(
+      perDayJoyCountsProvider(
+        bookId: widget.bookId,
+        anchor: ctx.trendAnchor,
+        joyMetricVariant: ctx.joyMetricVariant,
+        includeFamily: false,
+      ),
+    );
+    final bookAsync = ref.watch(
+      accounting_providers.bookByIdProvider(bookId: widget.bookId),
+    );
+    final currencyCode = bookAsync.value?.currency ?? 'JPY';
+    final spendingReport = spendingAsync.value;
+    final spendingSummary = spendingReport == null
+        ? '—'
+        : NumberFormatter.formatCurrency(
+            spendingReport.totalExpenses,
+            currencyCode,
+            ctx.locale,
+          );
+    final joyCounts = joyCountsAsync.value;
+    final joyCount = joyCounts?.fold<int>(0, (sum, row) => sum + row.count);
+    final joySummary = joyCount == null
+        ? '—'
+        : l10n.analyticsTabJoyCount(joyCount);
+    final spendingLabel = ctx.isGroupMode
+        ? l10n.analyticsTabFamilySpending
+        : l10n.analyticsTabSpending;
+    final joyLabel = ctx.isGroupMode
+        ? l10n.analyticsTabMyJoy
+        : l10n.analyticsTabJoy;
 
     // Opens the shared month-grid picker (same widget home/list use) and applies
     // the choice to the analytics time window as a MonthWindow. Future months are
@@ -99,7 +153,7 @@ class AnalyticsScreen extends ConsumerWidget {
                     tooltip: l10n.settings,
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) => SettingsScreen(bookId: bookId),
+                        builder: (_) => SettingsScreen(bookId: widget.bookId),
                       ),
                     ),
                   ),
@@ -120,7 +174,36 @@ class AnalyticsScreen extends ConsumerWidget {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _buildCardChildren(l10n, ctx, shadowBooksAsync),
+                    children: [
+                      AnalyticsPrimaryTabs(
+                        selected: _selectedTab,
+                        spendingLabel: spendingLabel,
+                        joyLabel: joyLabel,
+                        spendingSummary: spendingSummary,
+                        joySummary: joySummary,
+                        onChanged: (tab) {
+                          if (tab == _selectedTab) return;
+                          setState(() => _selectedTab = tab);
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                      AnimatedSwitcher(
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 180),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeOut,
+                        child: Column(
+                          key: ValueKey(_selectedTab),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _buildCardChildren(
+                            l10n,
+                            ctx,
+                            shadowBooksAsync,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -149,6 +232,7 @@ class AnalyticsScreen extends ConsumerWidget {
     var isFirst = true;
 
     for (final spec in analyticsCardRegistry) {
+      if (spec.primaryTab != _selectedTab) continue;
       if (!spec.isVisible(ctx)) continue;
 
       final header = spec.sectionHeader;
@@ -184,6 +268,7 @@ class AnalyticsScreen extends ConsumerWidget {
     final built = spec.build(ctx);
     if (built is FamilyInsightDataCard) {
       return FamilyInsightDataCard(
+        bookId: ctx.bookId,
         startDate: ctx.startDate,
         endDate: ctx.endDate,
         isGroupMode: ctx.isGroupMode,
@@ -206,7 +291,7 @@ class AnalyticsScreen extends ConsumerWidget {
   /// monthlyReport/happinessReport instances shared across cards.
   void _refresh(WidgetRef ref, AnalyticsCardContext ctx) {
     final targets = analyticsCardRegistry
-        .where((spec) => spec.isVisible(ctx))
+        .where((spec) => spec.primaryTab == _selectedTab && spec.isVisible(ctx))
         .expand((spec) => spec.refreshTargets(ctx))
         .toSet();
     for (final ProviderBase<Object?> p in targets) {

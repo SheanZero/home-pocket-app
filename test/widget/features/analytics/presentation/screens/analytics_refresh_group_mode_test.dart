@@ -103,12 +103,14 @@ Widget _buildSubject({
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
+        includeFamily: true,
       ).overrideWith((_) async => _monthlyReport),
       happinessReportProvider(
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
         currencyCode: 'JPY',
+        includeFamily: false,
       ).overrideWith((_) async => fixtureHappinessReportRich()),
       bestJoyMomentProvider(
         bookId: _bookId,
@@ -184,6 +186,11 @@ Future<void> _pullToRefresh(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> _selectSpending(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2000));
@@ -205,91 +212,83 @@ void main() {
   });
 
   group('AnalyticsScreen pull-to-refresh — Assumption A1 / D-B4', () {
-    testWidgets(
-      'group mode: refresh transitively re-fetches family data '
-      '(familyHappinessUseCase invoked again) after dropping the direct '
-      'shadowBooksProvider invalidate',
-      (tester) async {
-        await _pump(
-          tester,
-          _buildSubject(
-            groupMode: true,
-            familyUseCase: familyHappinessUseCase,
-            shadowBooks: fixtureShadowBooksThree(),
-          ),
-        );
+    testWidgets('group mode: refresh transitively re-fetches family data '
+        '(familyHappinessUseCase invoked again) after dropping the direct '
+        'shadowBooksProvider invalidate', (tester) async {
+      await _pump(
+        tester,
+        _buildSubject(
+          groupMode: true,
+          familyUseCase: familyHappinessUseCase,
+          shadowBooks: fixtureShadowBooksThree(),
+        ),
+      );
+      await _selectSpending(tester);
 
-        // The initial build already resolved familyHappinessProvider once.
-        verify(
-          () => familyHappinessUseCase.execute(
-            groupBookIds: any(named: 'groupBookIds'),
-            startDate: _windowStart,
-            endDate: _windowEnd,
-            entrySourceFilter: any(named: 'entrySourceFilter'),
-          ),
-        ).called(greaterThanOrEqualTo(1));
+      // The initial build already resolved familyHappinessProvider once.
+      verify(
+        () => familyHappinessUseCase.execute(
+          groupBookIds: any(named: 'groupBookIds'),
+          startDate: _windowStart,
+          endDate: _windowEnd,
+          entrySourceFilter: any(named: 'entrySourceFilter'),
+        ),
+      ).called(greaterThanOrEqualTo(1));
 
-        // Isolate the refresh signal from the initial build.
-        clearInteractions(familyHappinessUseCase);
+      // Isolate the refresh signal from the initial build.
+      clearInteractions(familyHappinessUseCase);
 
-        await _pullToRefresh(tester);
-        expect(tester.takeException(), isNull);
+      await _pullToRefresh(tester);
+      expect(tester.takeException(), isNull);
 
-        // A1: invalidating familyHappinessProvider re-reads shadowBooksProvider
-        // transitively, re-invoking the use case — proving Option A preserves
-        // today's behavior even though _refresh no longer touches
-        // shadowBooksProvider directly.
-        verify(
-          () => familyHappinessUseCase.execute(
-            groupBookIds: any(named: 'groupBookIds'),
-            startDate: _windowStart,
-            endDate: _windowEnd,
-            entrySourceFilter: any(named: 'entrySourceFilter'),
-          ),
-        ).called(greaterThanOrEqualTo(1));
-      },
-    );
+      // A1: invalidating familyHappinessProvider re-reads shadowBooksProvider
+      // transitively, re-invoking the use case — proving Option A preserves
+      // today's behavior even though _refresh no longer touches
+      // shadowBooksProvider directly.
+      verify(
+        () => familyHappinessUseCase.execute(
+          groupBookIds: any(named: 'groupBookIds'),
+          startDate: _windowStart,
+          endDate: _windowEnd,
+          entrySourceFilter: any(named: 'entrySourceFilter'),
+        ),
+      ).called(greaterThanOrEqualTo(1));
+    });
 
-    testWidgets(
-      'solo mode: refresh does NOT touch the family use case '
-      '(family spec hidden, not invalidated — D-B4)',
-      (tester) async {
-        await _pump(
-          tester,
-          _buildSubject(
-            groupMode: false,
-            familyUseCase: familyHappinessUseCase,
-          ),
-        );
+    testWidgets('solo mode: refresh does NOT touch the family use case '
+        '(family spec hidden, not invalidated — D-B4)', (tester) async {
+      await _pump(
+        tester,
+        _buildSubject(groupMode: false, familyUseCase: familyHappinessUseCase),
+      );
 
-        // Family spec is invisible in solo mode, so it never built.
-        verifyNever(
-          () => familyHappinessUseCase.execute(
-            groupBookIds: any(named: 'groupBookIds'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-            entrySourceFilter: any(named: 'entrySourceFilter'),
-          ),
-        );
+      // Family spec is invisible in solo mode, so it never built.
+      verifyNever(
+        () => familyHappinessUseCase.execute(
+          groupBookIds: any(named: 'groupBookIds'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          entrySourceFilter: any(named: 'entrySourceFilter'),
+        ),
+      );
 
-        clearInteractions(familyHappinessUseCase);
+      clearInteractions(familyHappinessUseCase);
 
-        await _pullToRefresh(tester);
-        expect(tester.takeException(), isNull);
+      await _pullToRefresh(tester);
+      expect(tester.takeException(), isNull);
 
-        // D-B4: where(isVisible) filters the family spec BEFORE
-        // expand(refreshTargets), so familyHappinessProvider is never
-        // invalidated in solo mode → use case untouched.
-        verifyNever(
-          () => familyHappinessUseCase.execute(
-            groupBookIds: any(named: 'groupBookIds'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-            entrySourceFilter: any(named: 'entrySourceFilter'),
-          ),
-        );
-      },
-    );
+      // D-B4: where(isVisible) filters the family spec BEFORE
+      // expand(refreshTargets), so familyHappinessProvider is never
+      // invalidated in solo mode → use case untouched.
+      verifyNever(
+        () => familyHappinessUseCase.execute(
+          groupBookIds: any(named: 'groupBookIds'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          entrySourceFilter: any(named: 'entrySourceFilter'),
+        ),
+      );
+    });
   });
 }
 
@@ -414,9 +413,8 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<DateTime?> getEarliestTransactionTimestamp({
-    required String bookId,
-  }) => throw UnimplementedError();
+  Future<DateTime?> getEarliestTransactionTimestamp({required String bookId}) =>
+      throw UnimplementedError();
 
   @override
   Future<List<LedgerTotal>> getLedgerTotals({

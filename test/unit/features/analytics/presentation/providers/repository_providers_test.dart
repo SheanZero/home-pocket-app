@@ -5,6 +5,7 @@ import 'package:home_pocket/application/analytics/get_family_happiness_use_case.
 import 'package:home_pocket/application/analytics/get_happiness_report_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
@@ -86,7 +87,11 @@ void main() {
 
         final result = await waitForFirstValue<FamilyHappiness>(
           container,
-          familyHappinessProvider(startDate: startDate, endDate: endDate),
+          familyHappinessProvider(
+            primaryBookId: 'personal',
+            startDate: startDate,
+            endDate: endDate,
+          ),
         );
         final data = result.requireValue;
 
@@ -99,7 +104,7 @@ void main() {
     );
 
     test(
-      'familyHappinessProvider short-circuits when shadow books are empty',
+      'familyHappinessProvider includes the primary book when shadows are empty',
       () async {
         when(
           () => groupRepository.watchActiveGroup(),
@@ -107,11 +112,38 @@ void main() {
         when(
           () => bookRepository.findShadowBooksByGroupId('group-1'),
         ).thenAnswer((_) async => []);
+        when(
+          () => analyticsRepository.getJoyFullnessOverview(
+            bookId: 'personal',
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer(
+          (_) async => const JoyFullnessOverview(avgSatisfaction: 0, count: 0),
+        );
+        when(
+          () => analyticsRepository.getSatisfactionDistribution(
+            bookId: 'personal',
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer((_) async => const []);
+        when(
+          () => analyticsRepository.getSharedJoyCategoryInsight(
+            bookIds: const ['personal'],
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer((_) async => null);
         final container = makeContainer();
 
         final result = await waitForFirstValue<FamilyHappiness>(
           container,
-          familyHappinessProvider(startDate: startDate, endDate: endDate),
+          familyHappinessProvider(
+            primaryBookId: 'personal',
+            startDate: startDate,
+            endDate: endDate,
+          ),
         );
         final data = result.requireValue;
 
@@ -119,7 +151,13 @@ void main() {
         expect(data.familyHighlightsSum, isA<Empty<int>>());
         expect(data.sharedJoyInsight, isA<Empty>());
         expect(data.medianSatisfaction, isA<Empty<double>>());
-        verifyZeroInteractions(analyticsRepository);
+        verify(
+          () => analyticsRepository.getJoyFullnessOverview(
+            bookId: 'personal',
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).called(1);
       },
     );
   });

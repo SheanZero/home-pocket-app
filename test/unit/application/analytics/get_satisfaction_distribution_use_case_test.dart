@@ -64,6 +64,36 @@ void main() {
     ).called(1);
   });
 
+  test('combines score buckets across all family books', () async {
+    when(
+      () => repository.getSatisfactionDistribution(
+        bookId: any(named: 'bookId'),
+        startDate: startDate,
+        endDate: endDate,
+      ),
+    ).thenAnswer((invocation) async {
+      final bookId = invocation.namedArguments[#bookId] as String;
+      return bookId == 'personal'
+          ? const [SatisfactionScoreBucket(score: 6, count: 1)]
+          : const [
+              SatisfactionScoreBucket(score: 6, count: 2),
+              SatisfactionScoreBucket(score: 9, count: 1),
+            ];
+    });
+
+    final result = await useCase.executeAcrossBooks(
+      bookIds: const ['personal', 'shadow'],
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    expect(result, hasLength(2));
+    expect(result[0].score, 6);
+    expect(result[0].count, 3);
+    expect(result[1].score, 9);
+    expect(result[1].count, 1);
+  });
+
   test('throws ArgumentError when start > end', () async {
     expect(
       () => useCase.execute(

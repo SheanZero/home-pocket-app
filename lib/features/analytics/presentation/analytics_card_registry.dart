@@ -11,6 +11,7 @@ import 'providers/state_analytics.dart';
 import 'providers/state_donut_dimension.dart';
 import 'providers/state_joy_metric_variant.dart';
 import 'providers/state_time_window.dart';
+import 'widgets/analytics_primary_tabs.dart';
 import 'widgets/analytics_section_header.dart';
 import 'widgets/cards/category_donut_card.dart';
 import 'widgets/cards/family_insight_data_card.dart';
@@ -94,12 +95,16 @@ class AnalyticsCardSpec {
   const AnalyticsCardSpec({
     required this.build,
     required this.refreshTargets,
+    required this.primaryTab,
     this.isVisible = _always,
     this.sectionHeader,
   });
 
   /// Builds the card widget from the shared [AnalyticsCardContext].
   final Widget Function(AnalyticsCardContext ctx) build;
+
+  /// The V16 top-level tab that owns this card.
+  final AnalyticsPrimaryTab primaryTab;
 
   /// Optional leading section-header descriptor (round-5 r5 / D2 reversal of
   /// Phase-46 D-F2). PROVIDER-FREE by construction — it holds only two text
@@ -190,6 +195,7 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
   //    Spend tabs draw 本月 solid + 上月 dashed; the 悦己 tab is a
   //    structurally-single 本月 line (zero cross-period).
   AnalyticsCardSpec(
+    primaryTab: AnalyticsPrimaryTab.spending,
     build: (ctx) => WithinMonthTrendCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
@@ -205,6 +211,7 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
   // 2. 分类支出 (实用) hero — donut with 10 tappable L1-rollup legend rows → drill,
   //    PLUS the nested 悦己 joybar connector+drawer (round-5 r5 / D2).
   AnalyticsCardSpec(
+    primaryTab: AnalyticsPrimaryTab.spending,
     build: (ctx) => CategoryDonutCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
@@ -220,6 +227,7 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
   // 3. 小确幸日历 (悦己) — custom GridView heatmap with inline day expand (R-2,
   //    D-C1). The de-registered JoySpendCard's joybar now lives inside spec #2.
   AnalyticsCardSpec(
+    primaryTab: AnalyticsPrimaryTab.joy,
     build: (ctx) => JoyCalendarCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
@@ -235,6 +243,7 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
   // 4. 悦己满足度分布 (悦己) — histogram. round-5 r5b: the former in-card
   //    `totalJoyTx < 5` self-hide (D-B5) is REMOVED; the card always renders.
   AnalyticsCardSpec(
+    primaryTab: AnalyticsPrimaryTab.joy,
     build: (ctx) => SatisfactionHistogramCard(
       bookId: ctx.bookId,
       startDate: ctx.startDate,
@@ -255,7 +264,9 @@ final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
   //     (the shell already imports the home provider for display; reading it for
   //     display is NOT an invalidation target and never enters the union).
   AnalyticsCardSpec(
+    primaryTab: AnalyticsPrimaryTab.spending,
     build: (ctx) => FamilyInsightDataCard(
+      bookId: ctx.bookId,
       startDate: ctx.startDate,
       endDate: ctx.endDate,
       isGroupMode: ctx.isGroupMode,

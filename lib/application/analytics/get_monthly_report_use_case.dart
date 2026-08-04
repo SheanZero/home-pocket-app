@@ -130,6 +130,127 @@ class GetMonthlyReportUseCase {
     );
   }
 
+  /// Builds the same report over the union of [bookIds].
+  ///
+  /// Family members are persisted as separate local shadow books, so a
+  /// Statistics report must combine their per-book reports rather than query
+  /// only the current member's primary book.
+  Future<MonthlyReport> executeAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+    EntrySource? entrySourceFilter,
+    DateTime? asOf,
+  }) async {
+    TimeWindowValidation.assertValid(startDate, endDate);
+    if (bookIds.isEmpty) {
+      throw ArgumentError.value(bookIds, 'bookIds', 'must not be empty');
+    }
+
+    final reports = await Future.wait(
+      bookIds.toSet().map(
+        (bookId) => execute(
+          bookId: bookId,
+          startDate: startDate,
+          endDate: endDate,
+          entrySourceFilter: entrySourceFilter,
+          asOf: asOf,
+        ),
+      ),
+    );
+    if (reports.length == 1) return reports.single;
+
+    final totalIncome = reports.fold<int>(
+      0,
+      (sum, report) => sum + report.totalIncome,
+    );
+    final totalExpenses = reports.fold<int>(
+      0,
+      (sum, report) => sum + report.totalExpenses,
+    );
+    final savings = totalIncome - totalExpenses;
+
+    final categoryById = <String, CategoryBreakdown>{};
+    for (final report in reports) {
+      for (final category in report.categoryBreakdowns) {
+        final previous = categoryById[category.categoryId];
+        categoryById[category.categoryId] = category.copyWith(
+          amount: (previous?.amount ?? 0) + category.amount,
+          transactionCount:
+              (previous?.transactionCount ?? 0) + category.transactionCount,
+        );
+      }
+    }
+    final categoryBreakdowns = categoryById.values
+        .map(
+          (category) => category.copyWith(
+            percentage: totalExpenses == 0
+                ? 0
+                : category.amount / totalExpenses * 100,
+          ),
+        )
+        .toList(growable: false);
+
+    final amountByDay = <DateTime, int>{};
+    for (final report in reports) {
+      for (final daily in report.dailyExpenses) {
+        final day = DateTime(daily.date.year, daily.date.month, daily.date.day);
+        amountByDay[day] = (amountByDay[day] ?? 0) + daily.amount;
+      }
+    }
+    final dailyExpenses =
+        amountByDay.entries
+            .map((entry) => DailyExpense(date: entry.key, amount: entry.value))
+            .toList(growable: false)
+          ..sort((a, b) => a.date.compareTo(b.date));
+
+    final previousReports = reports
+        .map((report) => report.previousMonthComparison)
+        .whereType<MonthComparison>()
+        .toList(growable: false);
+    MonthComparison? comparison;
+    if (previousReports.isNotEmpty) {
+      final previousIncome = previousReports.fold<int>(
+        0,
+        (sum, item) => sum + item.previousIncome,
+      );
+      final previousExpenses = previousReports.fold<int>(
+        0,
+        (sum, item) => sum + item.previousExpenses,
+      );
+      final first = previousReports.first;
+      comparison = MonthComparison(
+        previousMonth: first.previousMonth,
+        previousYear: first.previousYear,
+        previousIncome: previousIncome,
+        previousExpenses: previousExpenses,
+        incomeChange: previousIncome == 0
+            ? 0
+            : (totalIncome - previousIncome) / previousIncome * 100,
+        expenseChange: previousExpenses == 0
+            ? 0
+            : (totalExpenses - previousExpenses) / previousExpenses * 100,
+      );
+    }
+
+    return MonthlyReport(
+      year: endDate.year,
+      month: endDate.month,
+      totalIncome: totalIncome,
+      totalExpenses: totalExpenses,
+      savings: savings,
+      savingsRate: totalIncome == 0 ? 0 : savings / totalIncome * 100,
+      dailyTotal: reports.fold<int>(
+        0,
+        (sum, report) => sum + report.dailyTotal,
+      ),
+      joyTotal: reports.fold<int>(0, (sum, report) => sum + report.joyTotal),
+      categoryBreakdowns: categoryBreakdowns,
+      dailyExpenses: dailyExpenses,
+      previousMonthComparison: comparison,
+    );
+  }
+
   List<CategoryBreakdown> _buildCategoryBreakdowns({
     required List<CategoryTotal> categoryTotals,
     required Map<String, Category> categoryMap,

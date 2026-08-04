@@ -16,9 +16,9 @@ import '../family_insight_card.dart';
 /// `analytics_screen.dart` (D-A1 byte-faithful move — class name de-privatised,
 /// `super.key` added, error-retry now invalidates the single-source
 /// `familyInsightRefreshTargets` element instead of a literal). Watches
-/// `familyHappinessProvider(startDate, endDate, joyMetricVariant)` (NO bookId —
-/// it derives ids internally) and renders [FamilyInsightCard] with the
-/// shell-resolved `shadowBooksAsync.value` for display only.
+/// `familyHappinessProvider(primaryBookId, startDate, endDate,
+/// joyMetricVariant)` and renders [FamilyInsightCard] with the shell-resolved
+/// `shadowBooksAsync.value` for display only.
 ///
 /// Registry visibility (Plan 03): `isVisible: (ctx) => ctx.isGroupMode` (D-B4),
 /// so `familyInsightRefreshTargets` is only ever expanded in group mode and
@@ -32,6 +32,7 @@ import '../family_insight_card.dart';
 class FamilyInsightDataCard extends ConsumerWidget {
   const FamilyInsightDataCard({
     super.key,
+    required this.bookId,
     required this.startDate,
     required this.endDate,
     required this.isGroupMode,
@@ -40,6 +41,7 @@ class FamilyInsightDataCard extends ConsumerWidget {
     required this.joyMetricVariant,
   });
 
+  final String bookId;
   final DateTime startDate;
   final DateTime endDate;
   final bool isGroupMode;
@@ -53,6 +55,7 @@ class FamilyInsightDataCard extends ConsumerWidget {
 
     final familyAsync = ref.watch(
       familyHappinessProvider(
+        primaryBookId: bookId,
         startDate: startDate,
         endDate: endDate,
         joyMetricVariant: joyMetricVariant,
@@ -81,10 +84,9 @@ class FamilyInsightDataCard extends ConsumerWidget {
     );
   }
 
-  /// Minimal [AnalyticsCardContext] for this card's single target. `bookId` and
-  /// `trendAnchor` are unused by `familyInsightRefreshTargets`.
+  /// Minimal [AnalyticsCardContext] for this card's single target.
   AnalyticsCardContext _ctx() => AnalyticsCardContext(
-    bookId: '',
+    bookId: bookId,
     startDate: startDate,
     endDate: endDate,
     trendAnchor: DateTime(endDate.year, endDate.month),
@@ -108,6 +110,7 @@ List<ProviderBase<Object?>> familyInsightRefreshTargets(
   AnalyticsCardContext ctx,
 ) => [
   familyHappinessProvider(
+    primaryBookId: ctx.bookId,
     startDate: ctx.startDate,
     endDate: ctx.endDate,
     joyMetricVariant: ctx.joyMetricVariant,

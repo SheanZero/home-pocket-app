@@ -31,6 +31,7 @@ final class MonthlyReportProvider
       DateTime startDate,
       DateTime endDate,
       JoyMetricVariant joyMetricVariant,
+      bool includeFamily,
     })
     super.argument,
   }) : super(
@@ -66,6 +67,7 @@ final class MonthlyReportProvider
               DateTime startDate,
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
+              bool includeFamily,
             });
     return monthlyReport(
       ref,
@@ -73,6 +75,7 @@ final class MonthlyReportProvider
       startDate: argument.startDate,
       endDate: argument.endDate,
       joyMetricVariant: argument.joyMetricVariant,
+      includeFamily: argument.includeFamily,
     );
   }
 
@@ -87,7 +90,7 @@ final class MonthlyReportProvider
   }
 }
 
-String _$monthlyReportHash() => r'c8717c211e662147ef931407e27e2de744382378';
+String _$monthlyReportHash() => r'd14297d6e728bf2e2a05b96968dcc52ed596e944';
 
 /// Monthly report for the selected window.
 
@@ -100,6 +103,7 @@ final class MonthlyReportFamily extends $Family
             DateTime startDate,
             DateTime endDate,
             JoyMetricVariant joyMetricVariant,
+            bool includeFamily,
           })
         > {
   MonthlyReportFamily._()
@@ -118,12 +122,14 @@ final class MonthlyReportFamily extends $Family
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+    bool includeFamily = false,
   }) => MonthlyReportProvider._(
     argument: (
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
       joyMetricVariant: joyMetricVariant,
+      includeFamily: includeFamily,
     ),
     from: this,
   );
@@ -146,8 +152,8 @@ final class MonthlyReportFamily extends $Family
 /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
 /// here; this provider defends the contract by re-anchoring to month precision.
 ///
-/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default, never kept alive — D-14). Its refresh
+/// identity remains analytics-owned while family scope is resolved transitively.
 
 @ProviderFor(withinMonthCumulativeTrend)
 final withinMonthCumulativeTrendProvider = WithinMonthCumulativeTrendFamily._();
@@ -166,8 +172,8 @@ final withinMonthCumulativeTrendProvider = WithinMonthCumulativeTrendFamily._();
 /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
 /// here; this provider defends the contract by re-anchoring to month precision.
 ///
-/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default, never kept alive — D-14). Its refresh
+/// identity remains analytics-owned while family scope is resolved transitively.
 
 final class WithinMonthCumulativeTrendProvider
     extends
@@ -193,8 +199,8 @@ final class WithinMonthCumulativeTrendProvider
   /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
   /// here; this provider defends the contract by re-anchoring to month precision.
   ///
-  /// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
-  /// invalidates ZERO `home/*` providers (GUARD-01).
+  /// Auto-dispose (the @riverpod default, never kept alive — D-14). Its refresh
+  /// identity remains analytics-owned while family scope is resolved transitively.
   WithinMonthCumulativeTrendProvider._({
     required WithinMonthCumulativeTrendFamily super.from,
     required ({
@@ -257,7 +263,7 @@ final class WithinMonthCumulativeTrendProvider
 }
 
 String _$withinMonthCumulativeTrendHash() =>
-    r'd52098662e8ca6bb02bccb64b2db7f4c45e90a6e';
+    r'8dcc02ae0b1f0770256eca05337eed4d624247a6';
 
 /// OVW-02 / D-E1: within-month per-day-cumulative spend trend.
 ///
@@ -273,8 +279,8 @@ String _$withinMonthCumulativeTrendHash() =>
 /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
 /// here; this provider defends the contract by re-anchoring to month precision.
 ///
-/// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
-/// invalidates ZERO `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default, never kept alive — D-14). Its refresh
+/// identity remains analytics-owned while family scope is resolved transitively.
 
 final class WithinMonthCumulativeTrendFamily extends $Family
     with
@@ -305,8 +311,8 @@ final class WithinMonthCumulativeTrendFamily extends $Family
   /// the anchor (see analytics_card_registry.dart trendAnchor) before it reaches
   /// here; this provider defends the contract by re-anchoring to month precision.
   ///
-  /// Auto-dispose (the @riverpod default, never kept alive — D-14) and reads /
-  /// invalidates ZERO `home/*` providers (GUARD-01).
+  /// Auto-dispose (the @riverpod default, never kept alive — D-14). Its refresh
+  /// identity remains analytics-owned while family scope is resolved transitively.
 
   WithinMonthCumulativeTrendProvider call({
     required String bookId,
@@ -336,10 +342,10 @@ final class WithinMonthCumulativeTrendFamily extends $Family
 /// the id and re-computes percentages off the true total) plus the member's
 /// total + entry count for the center figure.
 ///
-/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
-/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+/// Runs the SQL member/category aggregate for every active-family book, then
+/// merges equal category IDs across those books. No new DAO/migration (v21).
 ///
-/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+/// D-12 normalized window; auto-dispose; family-scope aware.
 
 @ProviderFor(memberFilteredCategoryBreakdown)
 final memberFilteredCategoryBreakdownProvider =
@@ -356,10 +362,10 @@ final memberFilteredCategoryBreakdownProvider =
 /// the id and re-computes percentages off the true total) plus the member's
 /// total + entry count for the center figure.
 ///
-/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
-/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+/// Runs the SQL member/category aggregate for every active-family book, then
+/// merges equal category IDs across those books. No new DAO/migration (v21).
 ///
-/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+/// D-12 normalized window; auto-dispose; family-scope aware.
 
 final class MemberFilteredCategoryBreakdownProvider
     extends
@@ -382,10 +388,10 @@ final class MemberFilteredCategoryBreakdownProvider
   /// the id and re-computes percentages off the true total) plus the member's
   /// total + entry count for the center figure.
   ///
-  /// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
-  /// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+  /// Runs the SQL member/category aggregate for every active-family book, then
+  /// merges equal category IDs across those books. No new DAO/migration (v21).
   ///
-  /// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+  /// D-12 normalized window; auto-dispose; family-scope aware.
   MemberFilteredCategoryBreakdownProvider._({
     required MemberFilteredCategoryBreakdownFamily super.from,
     required ({
@@ -454,7 +460,7 @@ final class MemberFilteredCategoryBreakdownProvider
 }
 
 String _$memberFilteredCategoryBreakdownHash() =>
-    r'd7c2926b5c756933a63413a4a7c7ddcf78c5951c';
+    r'5af8d5292d8effbdfb72653b53525014d1c4164c';
 
 /// STATSUI-DONUT-MEMBER / D2: category breakdown restricted to ONE member's
 /// (deviceId) expense transactions over the active window — the donut's 分类
@@ -467,10 +473,10 @@ String _$memberFilteredCategoryBreakdownHash() =>
 /// the id and re-computes percentages off the true total) plus the member's
 /// total + entry count for the center figure.
 ///
-/// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
-/// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+/// Runs the SQL member/category aggregate for every active-family book, then
+/// merges equal category IDs across those books. No new DAO/migration (v21).
 ///
-/// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+/// D-12 normalized window; auto-dispose; family-scope aware.
 
 final class MemberFilteredCategoryBreakdownFamily extends $Family
     with
@@ -504,10 +510,10 @@ final class MemberFilteredCategoryBreakdownFamily extends $Family
   /// the id and re-computes percentages off the true total) plus the member's
   /// total + entry count for the center figure.
   ///
-  /// Reuses `findByBookIds` (both ledgers) over the normalized window, Dart-side
-  /// filtered to expense rows recorded by [deviceId]. No new DAO/migration (v21).
+  /// Runs the SQL member/category aggregate for every active-family book, then
+  /// merges equal category IDs across those books. No new DAO/migration (v21).
   ///
-  /// D-12 normalized window; auto-dispose; zero `home/*` (GUARD-01).
+  /// D-12 normalized window; auto-dispose; family-scope aware.
 
   MemberFilteredCategoryBreakdownProvider call({
     required String bookId,
@@ -541,8 +547,9 @@ final class MemberFilteredCategoryBreakdownFamily extends $Family
 /// they reach the use case — never accept microsecond-exact instants into the
 /// family key (rebuild-storm guard).
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default — D-14). The public refresh target stays
+/// analytics-owned while book-scope resolution transitively watches the active
+/// family's shadow books.
 
 @ProviderFor(memberSpendBreakdown)
 final memberSpendBreakdownProvider = MemberSpendBreakdownFamily._();
@@ -558,8 +565,9 @@ final memberSpendBreakdownProvider = MemberSpendBreakdownFamily._();
 /// they reach the use case — never accept microsecond-exact instants into the
 /// family key (rebuild-storm guard).
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default — D-14). The public refresh target stays
+/// analytics-owned while book-scope resolution transitively watches the active
+/// family's shadow books.
 
 final class MemberSpendBreakdownProvider
     extends
@@ -582,8 +590,9 @@ final class MemberSpendBreakdownProvider
   /// they reach the use case — never accept microsecond-exact instants into the
   /// family key (rebuild-storm guard).
   ///
-  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-  /// `home/*` providers (GUARD-01).
+  /// Auto-dispose (the @riverpod default — D-14). The public refresh target stays
+  /// analytics-owned while book-scope resolution transitively watches the active
+  /// family's shadow books.
   MemberSpendBreakdownProvider._({
     required MemberSpendBreakdownFamily super.from,
     required ({
@@ -648,7 +657,7 @@ final class MemberSpendBreakdownProvider
 }
 
 String _$memberSpendBreakdownHash() =>
-    r'0c3e688a398122cb08484c1f5c2115711fadd04e';
+    r'f8c59492b17fb309703d7b3dd094ebb77dce047c';
 
 /// STATSUI-DONUT-MEMBER / D2: per-member (deviceId) expense breakdown for the
 /// donut's 成员 dimension over the active window.
@@ -661,8 +670,9 @@ String _$memberSpendBreakdownHash() =>
 /// they reach the use case — never accept microsecond-exact instants into the
 /// family key (rebuild-storm guard).
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01).
+/// Auto-dispose (the @riverpod default — D-14). The public refresh target stays
+/// analytics-owned while book-scope resolution transitively watches the active
+/// family's shadow books.
 
 final class MemberSpendBreakdownFamily extends $Family
     with
@@ -695,8 +705,9 @@ final class MemberSpendBreakdownFamily extends $Family
   /// they reach the use case — never accept microsecond-exact instants into the
   /// family key (rebuild-storm guard).
   ///
-  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-  /// `home/*` providers (GUARD-01).
+  /// Auto-dispose (the @riverpod default — D-14). The public refresh target stays
+  /// analytics-owned while book-scope resolution transitively watches the active
+  /// family's shadow books.
 
   MemberSpendBreakdownProvider call({
     required String bookId,
@@ -722,7 +733,7 @@ final class MemberSpendBreakdownFamily extends $Family
 ///
 /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
 /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
-/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// family book scope) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
 /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
 /// rows aggregate per member (a daily-only member yields no bucket).
 
@@ -734,7 +745,7 @@ final joyMemberAmountsProvider = JoyMemberAmountsFamily._();
 ///
 /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
 /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
-/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// family book scope) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
 /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
 /// rows aggregate per member (a daily-only member yields no bucket).
 
@@ -753,7 +764,7 @@ final class JoyMemberAmountsProvider
   ///
   /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
   /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
-  /// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+  /// family book scope) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
   /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
   /// rows aggregate per member (a daily-only member yields no bucket).
   JoyMemberAmountsProvider._({
@@ -819,14 +830,14 @@ final class JoyMemberAmountsProvider
   }
 }
 
-String _$joyMemberAmountsHash() => r'8963406648a89ac6c0e920c419a96d8a47ebfb42';
+String _$joyMemberAmountsHash() => r'5aa88d347ed66bcb812c4c00a9b914577e45d6a3';
 
 /// 260622-d5i / D3: 悦己 by-member amounts for the drawer's 成员 dimension —
 /// joy-ledger only, a strict subset of [memberSpendBreakdown].
 ///
 /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
 /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
-/// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+/// family book scope) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
 /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
 /// rows aggregate per member (a daily-only member yields no bucket).
 
@@ -855,7 +866,7 @@ final class JoyMemberAmountsFamily extends $Family
   ///
   /// Mirrors [memberSpendBreakdown] EXACTLY (same key tuple, same D-12 day-range
   /// normalization, same manualOnly→EntrySource.manual mapping, auto-dispose,
-  /// zero `home/*`) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
+  /// family book scope) and reuses the SAME `getMemberSpendBreakdownUseCaseProvider`,
   /// with ONE difference: `ledgerType: LedgerType.joy` so only joy-ledger expense
   /// rows aggregate per member (a daily-only member yields no bucket).
 
@@ -891,9 +902,8 @@ final class JoyMemberAmountsFamily extends $Family
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
-/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
-/// home_screen_isolation_test.dart).
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and uses
+/// the same active-family scope as the donut subtotal.
 
 @ProviderFor(categoryDrillDown)
 final categoryDrillDownProvider = CategoryDrillDownFamily._();
@@ -911,9 +921,8 @@ final categoryDrillDownProvider = CategoryDrillDownFamily._();
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
-/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
-/// home_screen_isolation_test.dart).
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and uses
+/// the same active-family scope as the donut subtotal.
 
 final class CategoryDrillDownProvider
     extends
@@ -938,9 +947,8 @@ final class CategoryDrillDownProvider
   /// the contract by re-normalizing the bounds via [DateBoundaries] before they
   /// reach the use case — never accept microsecond-exact instants into the key.
   ///
-  /// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
-  /// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
-  /// home_screen_isolation_test.dart).
+  /// Auto-dispose (the @riverpod default here, never kept alive — D-14) and uses
+  /// the same active-family scope as the donut subtotal.
   CategoryDrillDownProvider._({
     required CategoryDrillDownFamily super.from,
     required ({
@@ -1004,7 +1012,7 @@ final class CategoryDrillDownProvider
   }
 }
 
-String _$categoryDrillDownHash() => r'780cecb1ce06f8c4efa63f96cf90d7c633d833a1';
+String _$categoryDrillDownHash() => r'b25231ee16717dc01564d4dec8745e3fcb5cb6b4';
 
 /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
 /// over the active analytics window.
@@ -1019,9 +1027,8 @@ String _$categoryDrillDownHash() => r'780cecb1ce06f8c4efa63f96cf90d7c633d833a1';
 /// the contract by re-normalizing the bounds via [DateBoundaries] before they
 /// reach the use case — never accept microsecond-exact instants into the key.
 ///
-/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
-/// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
-/// home_screen_isolation_test.dart).
+/// Auto-dispose (the @riverpod default here, never kept alive — D-14) and uses
+/// the same active-family scope as the donut subtotal.
 
 final class CategoryDrillDownFamily extends $Family
     with
@@ -1056,9 +1063,8 @@ final class CategoryDrillDownFamily extends $Family
   /// the contract by re-normalizing the bounds via [DateBoundaries] before they
   /// reach the use case — never accept microsecond-exact instants into the key.
   ///
-  /// Auto-dispose (the @riverpod default here, never kept alive — D-14) and reads
-  /// / invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
-  /// home_screen_isolation_test.dart).
+  /// Auto-dispose (the @riverpod default here, never kept alive — D-14) and uses
+  /// the same active-family scope as the donut subtotal.
 
   CategoryDrillDownProvider call({
     required String bookId,
@@ -1199,7 +1205,7 @@ final class EarliestTransactionMonthProvider
 }
 
 String _$earliestTransactionMonthHash() =>
-    r'71b0c1fffe8f2530e09b0a091c191cf7d7e68634';
+    r'801b828058af0f651ef9151ef1467fc71b3e067c';
 
 /// Earliest month with a non-deleted transaction in the active book.
 
@@ -1248,6 +1254,7 @@ final class SatisfactionDistributionProvider
       DateTime startDate,
       DateTime endDate,
       JoyMetricVariant joyMetricVariant,
+      bool includeFamily,
     })
     super.argument,
   }) : super(
@@ -1283,6 +1290,7 @@ final class SatisfactionDistributionProvider
               DateTime startDate,
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
+              bool includeFamily,
             });
     return satisfactionDistribution(
       ref,
@@ -1290,6 +1298,7 @@ final class SatisfactionDistributionProvider
       startDate: argument.startDate,
       endDate: argument.endDate,
       joyMetricVariant: argument.joyMetricVariant,
+      includeFamily: argument.includeFamily,
     );
   }
 
@@ -1306,7 +1315,7 @@ final class SatisfactionDistributionProvider
 }
 
 String _$satisfactionDistributionHash() =>
-    r'179ba0ba9c310d05c182c3c23aaec6ddb12f5627';
+    r'fdab9c2264fee5cf0c8f68b45ac177afcab5e715';
 
 /// Satisfaction score distribution for the selected window.
 
@@ -1319,6 +1328,7 @@ final class SatisfactionDistributionFamily extends $Family
             DateTime startDate,
             DateTime endDate,
             JoyMetricVariant joyMetricVariant,
+            bool includeFamily,
           })
         > {
   SatisfactionDistributionFamily._()
@@ -1337,12 +1347,14 @@ final class SatisfactionDistributionFamily extends $Family
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+    bool includeFamily = false,
   }) => SatisfactionDistributionProvider._(
     argument: (
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
       joyMetricVariant: joyMetricVariant,
+      includeFamily: includeFamily,
     ),
     from: this,
   );
@@ -1481,7 +1493,7 @@ final class JoyCategoryAmountsProvider
 }
 
 String _$joyCategoryAmountsHash() =>
-    r'd903912b757675355851eba50bf78554a1e324e3';
+    r'39b9b5257b018d60c362deb78387e15383b9c228';
 
 /// JOY-02 / D-C2: per-L1 joy AMOUNT segments for the 悦己花在哪 stacked bar.
 ///
@@ -1616,6 +1628,7 @@ final class PerDayJoyCountsProvider
       String bookId,
       DateTime anchor,
       JoyMetricVariant joyMetricVariant,
+      bool includeFamily,
     })
     super.argument,
   }) : super(
@@ -1650,12 +1663,14 @@ final class PerDayJoyCountsProvider
               String bookId,
               DateTime anchor,
               JoyMetricVariant joyMetricVariant,
+              bool includeFamily,
             });
     return perDayJoyCounts(
       ref,
       bookId: argument.bookId,
       anchor: argument.anchor,
       joyMetricVariant: argument.joyMetricVariant,
+      includeFamily: argument.includeFamily,
     );
   }
 
@@ -1670,7 +1685,7 @@ final class PerDayJoyCountsProvider
   }
 }
 
-String _$perDayJoyCountsHash() => r'f50e5b3ec0656ef871186628217fcb795a9b1d33';
+String _$perDayJoyCountsHash() => r'05ad50067b055d3a3ebfaf1cb9e10cbec3b48b75';
 
 /// JOY-01 / D-C1: per-day joy COUNT (笔数) for the active month — the 小确幸
 /// calendar heatmap depth.
@@ -1689,7 +1704,12 @@ final class PerDayJoyCountsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<List<PerDayJoyCount>>,
-          ({String bookId, DateTime anchor, JoyMetricVariant joyMetricVariant})
+          ({
+            String bookId,
+            DateTime anchor,
+            JoyMetricVariant joyMetricVariant,
+            bool includeFamily,
+          })
         > {
   PerDayJoyCountsFamily._()
     : super(
@@ -1717,11 +1737,13 @@ final class PerDayJoyCountsFamily extends $Family
     required String bookId,
     required DateTime anchor,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+    bool includeFamily = false,
   }) => PerDayJoyCountsProvider._(
     argument: (
       bookId: bookId,
       anchor: anchor,
       joyMetricVariant: joyMetricVariant,
+      includeFamily: includeFamily,
     ),
     from: this,
   );
@@ -1733,8 +1755,8 @@ final class PerDayJoyCountsFamily extends $Family
 /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
 /// heatmap's INLINE day expansion.
 ///
-/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
-/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the
+/// tapped day's whole-day window and the explicitly selected book scope; keeps
 /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
 /// demand rather than widening the count model. Returns EXPENSE joy rows only,
 /// time-descending, with the optional manualOnly entry-source filter applied —
@@ -1744,9 +1766,8 @@ final class PerDayJoyCountsFamily extends $Family
 /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
 /// here) so two callers with differing sub-day precision share one cache key.
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
-/// never logs tx contents (T-46-05-02).
+/// Auto-dispose (the @riverpod default — D-14). Never logs transaction contents
+/// (T-46-05-02).
 
 @ProviderFor(joyDayTransactions)
 final joyDayTransactionsProvider = JoyDayTransactionsFamily._();
@@ -1754,8 +1775,8 @@ final joyDayTransactionsProvider = JoyDayTransactionsFamily._();
 /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
 /// heatmap's INLINE day expansion.
 ///
-/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
-/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the
+/// tapped day's whole-day window and the explicitly selected book scope; keeps
 /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
 /// demand rather than widening the count model. Returns EXPENSE joy rows only,
 /// time-descending, with the optional manualOnly entry-source filter applied —
@@ -1765,9 +1786,8 @@ final joyDayTransactionsProvider = JoyDayTransactionsFamily._();
 /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
 /// here) so two callers with differing sub-day precision share one cache key.
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
-/// never logs tx contents (T-46-05-02).
+/// Auto-dispose (the @riverpod default — D-14). Never logs transaction contents
+/// (T-46-05-02).
 
 final class JoyDayTransactionsProvider
     extends
@@ -1782,8 +1802,8 @@ final class JoyDayTransactionsProvider
   /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
   /// heatmap's INLINE day expansion.
   ///
-  /// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
-  /// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+  /// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the
+  /// tapped day's whole-day window and the explicitly selected book scope; keeps
   /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
   /// demand rather than widening the count model. Returns EXPENSE joy rows only,
   /// time-descending, with the optional manualOnly entry-source filter applied —
@@ -1793,12 +1813,16 @@ final class JoyDayTransactionsProvider
   /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
   /// here) so two callers with differing sub-day precision share one cache key.
   ///
-  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-  /// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
-  /// never logs tx contents (T-46-05-02).
+  /// Auto-dispose (the @riverpod default — D-14). Never logs transaction contents
+  /// (T-46-05-02).
   JoyDayTransactionsProvider._({
     required JoyDayTransactionsFamily super.from,
-    required ({String bookId, DateTime day, JoyMetricVariant joyMetricVariant})
+    required ({
+      String bookId,
+      DateTime day,
+      JoyMetricVariant joyMetricVariant,
+      bool includeFamily,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -1832,12 +1856,14 @@ final class JoyDayTransactionsProvider
               String bookId,
               DateTime day,
               JoyMetricVariant joyMetricVariant,
+              bool includeFamily,
             });
     return joyDayTransactions(
       ref,
       bookId: argument.bookId,
       day: argument.day,
       joyMetricVariant: argument.joyMetricVariant,
+      includeFamily: argument.includeFamily,
     );
   }
 
@@ -1853,13 +1879,13 @@ final class JoyDayTransactionsProvider
 }
 
 String _$joyDayTransactionsHash() =>
-    r'ffcbe22225e80be82783df2b9ff83f804848df25';
+    r'e5dd23fd3239e0ba2ab27bd9180d0d54cae9c87b';
 
 /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
 /// heatmap's INLINE day expansion.
 ///
-/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
-/// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+/// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the
+/// tapped day's whole-day window and the explicitly selected book scope; keeps
 /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
 /// demand rather than widening the count model. Returns EXPENSE joy rows only,
 /// time-descending, with the optional manualOnly entry-source filter applied —
@@ -1869,15 +1895,19 @@ String _$joyDayTransactionsHash() =>
 /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
 /// here) so two callers with differing sub-day precision share one cache key.
 ///
-/// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-/// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
-/// never logs tx contents (T-46-05-02).
+/// Auto-dispose (the @riverpod default — D-14). Never logs transaction contents
+/// (T-46-05-02).
 
 final class JoyDayTransactionsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<List<Transaction>>,
-          ({String bookId, DateTime day, JoyMetricVariant joyMetricVariant})
+          ({
+            String bookId,
+            DateTime day,
+            JoyMetricVariant joyMetricVariant,
+            bool includeFamily,
+          })
         > {
   JoyDayTransactionsFamily._()
     : super(
@@ -1891,8 +1921,8 @@ final class JoyDayTransactionsFamily extends $Family
   /// D-C1: the joy transactions for ONE tapped calendar day — the 小确幸 calendar
   /// heatmap's INLINE day expansion.
   ///
-  /// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the single
-  /// tapped day's whole-day window (NOT a wider book set, T-46-05-01); keeps the
+  /// Reuses the existing `findByBookIds(ledgerType: joy)` primitive over the
+  /// tapped day's whole-day window and the explicitly selected book scope; keeps
   /// `perDayJoyCounts` model count-only (D-C1) by reading the day's rows here on
   /// demand rather than widening the count model. Returns EXPENSE joy rows only,
   /// time-descending, with the optional manualOnly entry-source filter applied —
@@ -1902,16 +1932,21 @@ final class JoyDayTransactionsFamily extends $Family
   /// D-12: keyed on a DAY-anchored [day] (re-normalized to whole-day closed bounds
   /// here) so two callers with differing sub-day precision share one cache key.
   ///
-  /// Auto-dispose (the @riverpod default — D-14) and reads / invalidates ZERO
-  /// `home/*` providers (GUARD-01). Renders the active book's own joy rows only;
-  /// never logs tx contents (T-46-05-02).
+  /// Auto-dispose (the @riverpod default — D-14). Never logs transaction contents
+  /// (T-46-05-02).
 
   JoyDayTransactionsProvider call({
     required String bookId,
     required DateTime day,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+    bool includeFamily = false,
   }) => JoyDayTransactionsProvider._(
-    argument: (bookId: bookId, day: day, joyMetricVariant: joyMetricVariant),
+    argument: (
+      bookId: bookId,
+      day: day,
+      joyMetricVariant: joyMetricVariant,
+      includeFamily: includeFamily,
+    ),
     from: this,
   );
 

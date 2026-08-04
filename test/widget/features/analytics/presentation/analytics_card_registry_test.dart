@@ -7,6 +7,7 @@ import 'package:home_pocket/features/analytics/presentation/analytics_card_regis
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/analytics_primary_tabs.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart'
@@ -109,6 +110,19 @@ Set<ProviderBase<Object?>> _union(AnalyticsCardContext ctx) {
   };
 }
 
+/// The card-owned refresh union for one V16 top-level tab. This mirrors the
+/// tab filter in `AnalyticsScreen._refresh`; shell targets are intentionally
+/// excluded because the month header is shared by both tabs.
+Set<ProviderBase<Object?>> _tabUnion(
+  AnalyticsCardContext ctx,
+  AnalyticsPrimaryTab tab,
+) {
+  return analyticsCardRegistry
+      .where((spec) => spec.primaryTab == tab && spec.isVisible(ctx))
+      .expand((spec) => spec.refreshTargets(ctx))
+      .toSet();
+}
+
 void main() {
   group('analyticsCardRegistry — D-B3 / GUARD-01 structural invariants', () {
     final soloCtx = _ctx(isGroupMode: false);
@@ -119,7 +133,8 @@ void main() {
       expect(
         analyticsCardRegistry,
         isNotEmpty,
-        reason: 'A vacuously-empty registry would make every union assertion '
+        reason:
+            'A vacuously-empty registry would make every union assertion '
             'pass falsely (T-45-10).',
       );
       // The registry is a `final List` whose iteration order is its declaration
@@ -130,9 +145,41 @@ void main() {
       expect(
         analyticsCardRegistry.length,
         5,
-        reason: 'D-B1/D2: 5 specs in stable round-5 r5 render order (4 '
+        reason:
+            'D-B1/D2: 5 specs in stable round-5 r5 render order (4 '
             'always-visible + 1 group-only family insight); JoySpendCard '
             'de-registered (joybar nested in the donut card).',
+      );
+    });
+
+    test('V16 tabs own distinct card groups and keep My Joy personal', () {
+      expect(
+        analyticsCardRegistry
+            .where((spec) => spec.primaryTab == AnalyticsPrimaryTab.spending)
+            .length,
+        3,
+      );
+      expect(
+        analyticsCardRegistry
+            .where((spec) => spec.primaryTab == AnalyticsPrimaryTab.joy)
+            .length,
+        2,
+      );
+
+      expect(
+        _tabUnion(groupCtx, AnalyticsPrimaryTab.joy),
+        _tabUnion(soloCtx, AnalyticsPrimaryTab.joy),
+        reason:
+            'The family screen label is My Joy, so its Joy tab must use '
+            'the same current-user providers as the personal screen.',
+      );
+      expect(
+        _tabUnion(groupCtx, AnalyticsPrimaryTab.spending)
+            .difference(_tabUnion(soloCtx, AnalyticsPrimaryTab.spending))
+            .map((provider) => provider.runtimeType.toString())
+            .toSet(),
+        <String>{'FamilyHappinessProvider'},
+        reason: 'Only Family Spending gains the group-only insight provider.',
       );
     });
 
@@ -146,7 +193,8 @@ void main() {
         expect(
           _analyticsProviderTypeWhitelist.contains(typeName),
           isTrue,
-          reason: 'D-B3: every union member must originate from an analytics '
+          reason:
+              'D-B3: every union member must originate from an analytics '
               'state_* family; "$typeName" is not in the analytics whitelist.',
         );
       }
@@ -155,7 +203,8 @@ void main() {
       expect(
         union.any((p) => p.runtimeType == shadowBooksProvider.runtimeType),
         isFalse,
-        reason: 'D-B3 Option A: shadowBooksProvider (home/*) is dropped from '
+        reason:
+            'D-B3 Option A: shadowBooksProvider (home/*) is dropped from '
             'the union — FamilyInsightDataCard reads it display-only via a '
             'shell-injected prop, never as an invalidation target.',
       );
@@ -174,7 +223,8 @@ void main() {
           ),
         ),
         isTrue,
-        reason: 'D2 / Pitfall-3: the joy drawer refresh target must survive '
+        reason:
+            'D2 / Pitfall-3: the joy drawer refresh target must survive '
             'JoySpendCard de-registration by being folded into the donut '
             "card's targets.",
       );
@@ -189,7 +239,8 @@ void main() {
         expect(
           _analyticsProviderTypeWhitelist.contains(typeName),
           isTrue,
-          reason: 'D-B3: group-mode union member "$typeName" is not an '
+          reason:
+              'D-B3: group-mode union member "$typeName" is not an '
               'analytics family.',
         );
       }
@@ -201,12 +252,14 @@ void main() {
     });
 
     test('(c) D-B4 visibility: exactly the 1 family spec is group-gated', () {
-      final groupOnly =
-          analyticsCardRegistry.where((s) => !s.isVisible(soloCtx)).toList();
+      final groupOnly = analyticsCardRegistry
+          .where((s) => !s.isVisible(soloCtx))
+          .toList();
       expect(
         groupOnly.length,
         1,
-        reason: 'D-F1/D-B4: ONLY the FamilyInsightDataCard spec is gated behind '
+        reason:
+            'D-F1/D-B4: ONLY the FamilyInsightDataCard spec is gated behind '
             'isGroupMode in the round-5 B lineup (the family '
             'PerCategoryBreakdownCard spec was de-registered).',
       );
@@ -217,7 +270,8 @@ void main() {
           expect(
             spec.isVisible(groupCtx),
             isTrue,
-            reason: 'D-B4: any solo-visible spec must remain visible in group '
+            reason:
+                'D-B4: any solo-visible spec must remain visible in group '
                 'mode (group is a superset).',
           );
         }
@@ -242,17 +296,18 @@ void main() {
       expect(
         soloUnion.difference(groupUnion),
         isEmpty,
-        reason: 'D-B4: group mode only ADDS targets; it never drops a '
+        reason:
+            'D-B4: group mode only ADDS targets; it never drops a '
             'solo-visible target.',
       );
 
       final added = groupUnion.difference(soloUnion);
-      final addedTypes =
-          added.map((p) => p.runtimeType.toString()).toSet();
+      final addedTypes = added.map((p) => p.runtimeType.toString()).toSet();
       expect(
         addedTypes,
         <String>{'FamilyHappinessProvider'},
-        reason: 'D-F1/D-B4: in the round-5 B lineup the ONLY group-only spec is '
+        reason:
+            'D-F1/D-B4: in the round-5 B lineup the ONLY group-only spec is '
             'FamilyInsightDataCard, so group mode adds exactly its '
             'familyHappinessProvider target (the family PerCategory + DailyVsJoy '
             'family specs were de-registered).',
@@ -264,109 +319,95 @@ void main() {
       final ctx = soloCtx;
 
       // WithinMonthTrend: withinMonthCumulativeTrend keyed on book + trendAnchor.
-      expect(
-        withinMonthTrendRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          withinMonthCumulativeTrendProvider(
-            bookId: ctx.bookId,
-            anchor: ctx.trendAnchor,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
+      expect(withinMonthTrendRefreshTargets(ctx), <ProviderBase<Object?>>[
+        withinMonthCumulativeTrendProvider(
+          bookId: ctx.bookId,
+          anchor: ctx.trendAnchor,
+          joyMetricVariant: ctx.joyMetricVariant,
+        ),
+      ]);
 
       // CategoryDonut: monthlyReport + the FOLDED joyCategoryAmounts (D2 /
       // Pitfall-3 — the nested joy drawer's refresh target now lives here so
       // pull-to-refresh still invalidates it after JoySpendCard de-registration)
       // + the 260620-v2m memberSpendBreakdown (donut 成员 dimension data).
-      expect(
-        categoryDonutRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          monthlyReportProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-          joyCategoryAmountsProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-          memberSpendBreakdownProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-          // 260622-d5i / D3: the drawer's 成员-dimension joy split, folded in so
-          // pull-to-refresh covers the by-member joy path (unfiltered key).
-          joyMemberAmountsProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
+      expect(categoryDonutRefreshTargets(ctx), <ProviderBase<Object?>>[
+        monthlyReportProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          joyMetricVariant: ctx.joyMetricVariant,
+          includeFamily: true,
+        ),
+        joyCategoryAmountsProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          joyMetricVariant: ctx.joyMetricVariant,
+        ),
+        memberSpendBreakdownProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          joyMetricVariant: ctx.joyMetricVariant,
+        ),
+        // 260622-d5i / D3: the drawer's 成员-dimension joy split, folded in so
+        // pull-to-refresh covers the by-member joy path (unfiltered key).
+        joyMemberAmountsProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          joyMetricVariant: ctx.joyMetricVariant,
+        ),
+      ]);
 
       // The de-registered JoySpendCard's single-source function is retained (its
       // wrapper + tests still consume it) and returns its joyCategoryAmounts
       // target — the SAME provider instance now folded into the donut's targets.
-      expect(
-        joySpendRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          joyCategoryAmountsProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
+      expect(joySpendRefreshTargets(ctx), <ProviderBase<Object?>>[
+        joyCategoryAmountsProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          joyMetricVariant: ctx.joyMetricVariant,
+        ),
+      ]);
 
       // JoyCalendar: perDayJoyCounts keyed on book + trendAnchor.
-      expect(
-        joyCalendarRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          perDayJoyCountsProvider(
-            bookId: ctx.bookId,
-            anchor: ctx.trendAnchor,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
+      expect(joyCalendarRefreshTargets(ctx), <ProviderBase<Object?>>[
+        perDayJoyCountsProvider(
+          bookId: ctx.bookId,
+          anchor: ctx.trendAnchor,
+          joyMetricVariant: ctx.joyMetricVariant,
+          includeFamily: false,
+        ),
+      ]);
 
       // SatisfactionHistogram: happinessReport + satisfactionDistribution.
-      expect(
-        satisfactionHistogramRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          happinessReportProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            // Matches the card's literal 'JPY' (WR-01 / D-02) — currencyCode was
-            // removed from AnalyticsCardContext, kept as a provider key literal.
-            currencyCode: 'JPY',
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-          satisfactionDistributionProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
+      expect(satisfactionHistogramRefreshTargets(ctx), <ProviderBase<Object?>>[
+        happinessReportProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          // Matches the card's literal 'JPY' (WR-01 / D-02) — currencyCode was
+          // removed from AnalyticsCardContext, kept as a provider key literal.
+          currencyCode: 'JPY',
+          joyMetricVariant: ctx.joyMetricVariant,
+          includeFamily: false,
+        ),
+        satisfactionDistributionProvider(
+          bookId: ctx.bookId,
+          startDate: ctx.startDate,
+          endDate: ctx.endDate,
+          joyMetricVariant: ctx.joyMetricVariant,
+          includeFamily: false,
+        ),
+      ]);
 
       // shell-level target: earliestTransactionMonth keyed on bookId.
-      expect(
-        shellRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          earliestTransactionMonthProvider(bookId: ctx.bookId),
-        ],
-      );
+      expect(shellRefreshTargets(ctx), <ProviderBase<Object?>>[
+        earliestTransactionMonthProvider(bookId: ctx.bookId),
+      ]);
     });
 
     test('(f) completeness: active member filter puts '
@@ -398,7 +439,8 @@ void main() {
           ),
         ),
         isTrue,
-        reason: 'D-03 / TD-1: with a member filter active, the breakdown the '
+        reason:
+            'D-03 / TD-1: with a member filter active, the breakdown the '
             'donut watches must be in the registry-derived refresh union — '
             'otherwise pull-to-refresh serves stale cached filtered data.',
       );
@@ -412,7 +454,8 @@ void main() {
               'MemberFilteredCategoryBreakdownProvider',
         ),
         isFalse,
-        reason: 'D-01: the filtered breakdown target only appears when a member '
+        reason:
+            'D-01: the filtered breakdown target only appears when a member '
             'filter is active; the unfiltered union stays byte-stable.',
       );
 
@@ -423,7 +466,8 @@ void main() {
         expect(
           _analyticsProviderTypeWhitelist.contains(typeName),
           isTrue,
-          reason: 'D-02/D-03: the member-filtered union must still be ⊆ '
+          reason:
+              'D-02/D-03: the member-filtered union must still be ⊆ '
               'analytics families; "$typeName" is not in the whitelist.',
         );
       }
@@ -441,13 +485,15 @@ void main() {
       expect(
         source.contains('home/presentation/providers'),
         isFalse,
-        reason: 'D-B3 file-wide gate: the registry must not import any '
+        reason:
+            'D-B3 file-wide gate: the registry must not import any '
             'home-feature provider.',
       );
       expect(
         source.contains('shadowBooksProvider'),
         isFalse,
-        reason: 'D-B3 Option A: shadowBooksProvider must not appear in any '
+        reason:
+            'D-B3 Option A: shadowBooksProvider must not appear in any '
             'refreshTargets/shellRefreshTargets — it is display-only and '
             'shell-injected.',
       );
@@ -479,7 +525,8 @@ void main() {
       expect(
         cardFiles,
         isNotEmpty,
-        reason: 'T-45-10: a vacuous (empty) cards/ dir would pass the loop '
+        reason:
+            'T-45-10: a vacuous (empty) cards/ dir would pass the loop '
             'falsely.',
       );
 

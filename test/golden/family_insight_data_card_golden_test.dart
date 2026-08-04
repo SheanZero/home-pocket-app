@@ -34,6 +34,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
   return ProviderScope(
     overrides: [
       familyHappinessProvider(
+        primaryBookId: 'personal',
         startDate: _startDate,
         endDate: _endDate,
         joyMetricVariant: JoyMetricVariant.all,
@@ -59,6 +60,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
             height: 260,
             child: SingleChildScrollView(
               child: FamilyInsightDataCard(
+                bookId: 'personal',
                 startDate: _startDate,
                 endDate: _endDate,
                 isGroupMode: true,
@@ -83,7 +85,9 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(FamilyInsightDataCard),
-          matchesGoldenFile('goldens/family_insight_data_card_group_light_$tag.png'),
+          matchesGoldenFile(
+            'goldens/family_insight_data_card_group_light_$tag.png',
+          ),
         );
       });
 
@@ -94,7 +98,9 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(FamilyInsightDataCard),
-          matchesGoldenFile('goldens/family_insight_data_card_group_dark_$tag.png'),
+          matchesGoldenFile(
+            'goldens/family_insight_data_card_group_dark_$tag.png',
+          ),
         );
       });
     }

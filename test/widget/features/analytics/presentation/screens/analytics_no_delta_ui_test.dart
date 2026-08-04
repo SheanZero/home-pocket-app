@@ -90,17 +90,20 @@ void main() {
           bookId: _bookId,
           startDate: range.start,
           endDate: range.end,
+          includeFamily: true,
         ).overrideWith((_) async => fixtureMonthlyReportRich()),
         happinessReportProvider(
           bookId: _bookId,
           startDate: range.start,
           endDate: range.end,
           currencyCode: 'JPY',
+          includeFamily: false,
         ).overrideWith((_) async => fixtureHappinessReportRich()),
         satisfactionDistributionProvider(
           bookId: _bookId,
           startDate: range.start,
           endDate: range.end,
+          includeFamily: false,
         ).overrideWith((_) async => _distribution),
         bestJoyMomentProvider(
           bookId: _bookId,
@@ -113,6 +116,7 @@ void main() {
           endDate: range.end,
         ).overrideWith((_) async => _largestExpense),
         familyHappinessProvider(
+          primaryBookId: _bookId,
           startDate: range.start,
           endDate: range.end,
         ).overrideWith((_) async => fixtureFamilyHappinessRich()),

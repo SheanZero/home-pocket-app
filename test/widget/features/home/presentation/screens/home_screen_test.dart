@@ -166,6 +166,7 @@ void main() {
             endDate: currentMonthEnd,
           ).overrideWith((ref) async => const ShadowAggregate.empty()),
           familyHappinessProvider(
+            primaryBookId: 'book_001',
             startDate: currentMonthStart,
             endDate: currentMonthEnd,
           ).overrideWith((ref) async => fixtureFamilyHappinessEmpty()),

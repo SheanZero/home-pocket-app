@@ -727,6 +727,32 @@ body {
   /* Analytics — current Flutter registry restored in the selected warm system. */
   .analytics-screen { padding-left: 20px; padding-right: 20px; }
   .analytics-screen .app-header { min-height: 46px; margin-bottom: 13px; }
+  .analytics-primary-tabs { margin: 0 -4px 18px; padding: 5px; border-radius: 20px; background: color-mix(in srgb,var(--hp-surface-muted) 66%,var(--hp-bg)); display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+  .analytics-primary-tab { min-width: 0; min-height: 94px; padding: 14px 12px; position: relative; border: 0; border-radius: 16px; background: transparent; color: var(--hp-text); display: grid; grid-template-columns: minmax(0,1fr) 38px; align-items: center; gap: 4px; text-align: left; cursor: pointer; transition: transform .16s ease, background .16s ease, box-shadow .16s ease, color .16s ease; }
+  .analytics-primary-tab:hover { background: color-mix(in srgb,var(--hp-surface) 42%,transparent); }
+  .analytics-primary-tab:active { transform: scale(.985); }
+  .analytics-primary-tab.selected { transform: translateY(-2px); background: color-mix(in srgb,var(--hp-surface) 84%,var(--hp-primary-soft)); color: var(--hp-primary-text); box-shadow: 0 8px 18px rgba(76,61,48,.11), inset 0 1px 0 color-mix(in srgb,var(--hp-surface) 78%,transparent); }
+  .analytics-primary-tab.joy.selected { background: color-mix(in srgb,var(--hp-surface) 82%,var(--hp-joy-soft)); color: var(--hp-joy-text); }
+  .analytics-primary-tab.selected::before { content: ""; width: 36px; height: 8px; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); border-radius: 0 0 8px 8px; background: var(--hp-primary); }
+  .analytics-primary-tab.joy.selected::before { background: var(--hp-joy); }
+  .analytics-primary-tab-copy { min-width: 0; display: grid; gap: 5px; }
+  .analytics-primary-tab-title { overflow: hidden; font-size: var(--type-item); line-height: var(--line-item); font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-primary-tab-value { overflow: hidden; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); font-weight: 650; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-primary-tab.selected .analytics-primary-tab-title { font-weight: 850; }
+  .analytics-primary-tab.selected .analytics-primary-tab-value { color: currentColor; }
+  .analytics-primary-tab-visual { width: 38px; height: 38px; display: grid; place-items: center; color: var(--hp-primary-text); opacity: .52; }
+  .analytics-primary-tab.joy .analytics-primary-tab-visual { color: var(--hp-joy-text); }
+  .analytics-primary-tab.selected .analytics-primary-tab-visual { opacity: 1; }
+  .analytics-primary-tab-visual .material-symbols-rounded { font-size: 34px; font-variation-settings: 'FILL' 0, 'wght' 330, 'GRAD' 0, 'opsz' 40; }
+  .analytics-tab-panel { animation: analytics-panel-in .18s ease-out; }
+  @keyframes analytics-panel-in { from { opacity: .25; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  [data-theme="dark"] .analytics-primary-tab.selected { box-shadow: 0 9px 20px rgba(0,0,0,.25), inset 0 1px 0 color-mix(in srgb,var(--hp-text) 12%,transparent); }
+  @container phone (max-width: 379px) {
+    .analytics-primary-tab { grid-template-columns: minmax(0,1fr) 34px; gap: 3px; }
+    .analytics-primary-tab-visual { width: 34px; height: 34px; }
+    .analytics-primary-tab-visual .material-symbols-rounded { font-size: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .analytics-primary-tab, .analytics-tab-panel { transition: none; animation: none; } }
   .analytics-window { min-height: 44px; max-width: 172px; padding: 6px 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius-pill); background: var(--hp-surface); color: var(--hp-text); display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: var(--type-label); line-height: var(--line-label); font-weight: 750; cursor: pointer; box-shadow: 0 2px 8px rgba(76,61,48,.035); }
   .analytics-window span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-window .material-symbols-rounded { flex: 0 0 auto; color: var(--hp-text-muted); font-size: 15px; }
@@ -823,7 +849,14 @@ body {
   .analytics-joy-row .material-symbols-rounded { color: var(--joy-row-color,var(--hp-joy)); font-size: 13px; }
   .analytics-joy-row strong { color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-joy-row small { text-align: right; }
+  .analytics-calendar-members { margin: 0 0 9px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .analytics-calendar-member { min-width: 0; min-height: 46px; padding: 5px 8px; border: 1px solid var(--hp-border); border-radius: 13px; background: var(--hp-surface); color: var(--hp-text); display: grid; grid-template-columns: 30px minmax(0,1fr); align-items: center; gap: 7px; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+  .analytics-calendar-member:hover { transform: translateY(-1px); border-color: color-mix(in srgb,var(--member-color) 54%,var(--hp-border)); }
+  .analytics-calendar-member.active { border-color: var(--member-color); background: color-mix(in srgb,var(--member-color) 11%,var(--hp-surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--member-color) 24%,transparent); }
+  .analytics-calendar-member img { width: 30px; height: 30px; border: 2px solid var(--hp-surface); border-radius: 50%; object-fit: cover; object-position: center 28%; background: var(--hp-surface-muted); box-shadow: 0 0 0 1px color-mix(in srgb,var(--member-color) 32%,var(--hp-border)); }
+  .analytics-calendar-member span { min-width: 0; overflow: hidden; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-calendar-card { padding-left: 8px; padding-right: 8px; }
+  .analytics-calendar-card.family { padding-top: 12px; padding-bottom: 8px; }
   .analytics-calendar-weekdays, .analytics-calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
   .analytics-calendar-weekdays { margin-bottom: 4px; }
   .analytics-calendar-weekdays span { color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; text-align: center; }
@@ -838,6 +871,7 @@ body {
   .analytics-calendar-legend { min-height: 36px; margin-top: 10px; padding: 0 5px; display: flex; align-items: center; gap: 5px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .analytics-heat { width: 12px; height: 12px; border-radius: 4px; }
   .analytics-calendar-legend p { flex: 1; margin: 0 0 0 5px; color: var(--hp-text-faint); line-height: 1.35; text-align: right; }
+  .analytics-calendar-card.family .analytics-calendar-legend { justify-content: flex-start; }
   .analytics-day-panel { margin: 10px 8px 0; padding-top: 10px; border-top: 1px solid var(--hp-border); }
   .analytics-day-panel-head { margin-bottom: 4px; color: var(--hp-joy-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
   .analytics-day-row { min-height: 50px; display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; }
@@ -846,6 +880,18 @@ body {
   .analytics-day-row span { overflow: hidden; font-size: var(--type-body); line-height: var(--line-body); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
   .analytics-day-row span small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 600; }
   .analytics-day-row strong { font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-variant-numeric: tabular-nums; }
+  .analytics-family-day-row { min-height: 58px; display: grid; grid-template-columns: 38px minmax(0,1fr) auto; align-items: center; gap: 10px; }
+  .analytics-family-day-row + .analytics-family-day-row { border-top: 1px solid var(--hp-border); }
+  .analytics-family-day-avatar { width: 38px; height: 38px; position: relative; }
+  .analytics-family-day-avatar > img { width: 36px; height: 36px; border: 2px solid var(--hp-surface); border-radius: 50%; object-fit: cover; object-position: center 28%; background: var(--hp-surface-muted); }
+  .analytics-family-day-badge { width: 18px; height: 18px; position: absolute; right: -3px; bottom: -2px; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-joy); color: #fff; display: grid; place-items: center; }
+  .analytics-family-day-badge .material-symbols-rounded { font-size: 11px; }
+  .analytics-family-day-copy { min-width: 0; }
+  .analytics-family-day-title { display: flex; align-items: baseline; gap: 6px; }
+  .analytics-family-day-title strong { overflow: hidden; color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-family-day-title small { flex: 0 0 auto; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 700; }
+  .analytics-family-day-merchant { display: block; margin-top: 2px; overflow: hidden; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); text-overflow: ellipsis; white-space: nowrap; }
+  .analytics-family-day-amount { color: var(--hp-text); font-size: var(--type-amount-small); line-height: var(--line-amount-small); font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .analytics-histogram { height: 154px; display: grid; grid-template-columns: repeat(10,1fr); gap: 4px; align-items: end; }
   .analytics-histogram-col { height: 100%; display: grid; grid-template-rows: 16px 1fr; align-items: end; justify-items: center; }
   .analytics-histogram-col > span { color: var(--hp-joy-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
@@ -1791,7 +1837,7 @@ body {
     onboardingSecurityEnabled: false, onboardingUnlockMethod: 'biometric', onboardingPinConfigured: false, onboardingPinStage: 'create', onboardingPinFirst: '', onboardingPinDraft: '', onboardingPinError: '', onboardingPinReturn: 'preferences', onboardingPinIntent: 'onboarding',
     settingsWeekStart: 'monday', settingsNotificationsEnabled: true,
     uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
-    analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
+    analyticsTab: 'joy', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsCalendarMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
     shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [],
     shoppingFormMode: 'create', shoppingFormName: '', shoppingFormQuantity: 1, shoppingFormLedger: 'daily', shoppingFormListType: 'public', shoppingFormCategory: '', shoppingFormPrice: '', shoppingFormNote: '', shoppingFormSubmitting: false, shoppingFormError: '',
     shoppingVoiceState: 'manual', shoppingVoiceTranscript: '', shoppingVoiceApplied: false, shoppingVoiceSnapshot: null,
@@ -1847,7 +1893,7 @@ body {
     states: ['Foundation','系统状态','空、加载与错误状态共享同一套安静反馈语言；不使用插画占位或焦虑文案。','状态切换 + 恢复动作','空 / 加载 / 错误','对应 AsyncValue 与现有 EmptyState widgets'],
     home: ['Main shell','主页','有记录时呈现悦己累计；无悦己账单时隐藏所有零值指标，以柔和邀请引导用户记录花钱换来的享受。','HeroHeader + conditional HomeHero / Joy invitation + Invite + Recent','有悦己 / 无悦己 / 个人 / 家庭 / 明暗','首页视觉提案；空态由 joy transaction presence 驱动，CTA 预选悦己账本'],
     list: ['Main shell','交易明细','个人保持原有月历结构；家庭模式以成员色签区分付款人，保留头像类目徽标，首版不增加成员筛选。','账本切换 + 月历汇总 + 紧凑筛选 + 付款人明细','个人 / 家庭 / 搜索 / 空态','复用 ListScreen；家庭模式合并 Shadow Book 数据并以成员身份控制编辑权限'],
-    analytics: ['Main shell','统计','按当前 Analytics registry 复原四个分析区：趋势、分类与悦己去向、小确幸日历、满足度；家庭洞察仅在家庭模式追加。','时间窗 + 4 个注册卡片 + 条件家庭洞察','趋势标签 / 分类与成员 / 日期展开 / 时间窗','逐项映射现有 AnalyticsScreen、registry 与 drill-down'],
+    analytics: ['Main shell','统计','将支出与悦己拆成两个独立页签：个人模式为「支出 / ときめき」，A2 家庭模式为「家族の支出 / 私のときめき」。选中项以柔和纸片抬升，未选中项贴合共享底板。','标题栏 + 双页签 + 每页 2 个注册卡片','个人 / 家庭 / 支出 / 我的悦己 / 日期展开 / 时间窗','保留现有 Analytics registry 与 drill-down；家庭模式的悦己页签只呈现当前用户数据'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
     'shopping-form': ['Main shell','购物项目','严格映射现有新增 / 编辑共用表单；语音只在同页填写草稿，右上保存仍是唯一提交入口。','名称 + 数量 + 用途 + 类型 + 分类 + 价格 + 备注','手动 / 聆听 / 解析 / 回填 / 编辑 / 权限不可用','复用 ShoppingItemFormScreen；新增购物专用语音解析器'],
     entry: ['Entry','统一记账','金额、类目、日期、商家、用途与备注始终属于同一表单；聆听、解析与识别结果只更新底部输入区，右上键盘入口全程固定。','共享表单 + 单一语音底板 + 数字键盘','手动 / 聆听 / 解析 / 识别结果 / 权限不可用','映射 ManualOneStepScreen、PTT session、快照恢复与 SmartKeyboard'],
@@ -2088,15 +2134,16 @@ body {
   }
 
   function analyticsTrendCard() {
+    const familyMode=state.family;
     const trends = {
-      total: {end:'¥186,420', previous:'¥202,640', current:'M34 160 C70 145 92 129 126 118 S185 91 218 72 S282 49 316 34', prior:'M34 160 C73 141 98 132 129 119 S188 98 221 79 S280 62 316 52', fill:'M34 160 C70 145 92 129 126 118 S185 91 218 72 S282 49 316 34 L316 166 L34 166 Z', y:34, py:52, klass:''},
-      daily: {end:'¥132,800', previous:'¥146,020', current:'M34 160 C70 151 96 137 126 127 S187 108 220 89 S280 76 316 65', prior:'M34 160 C70 147 98 140 130 129 S186 112 222 98 S282 85 316 78', fill:'M34 160 C70 151 96 137 126 127 S187 108 220 89 S280 76 316 65 L316 166 L34 166 Z', y:65, py:78, klass:''},
+      total: {end:familyMode?'¥227,620':'¥186,420', previous:familyMode?'¥243,800':'¥202,640', current:'M34 160 C70 145 92 129 126 118 S185 91 218 72 S282 49 316 34', prior:'M34 160 C73 141 98 132 129 119 S188 98 221 79 S280 62 316 52', fill:'M34 160 C70 145 92 129 126 118 S185 91 218 72 S282 49 316 34 L316 166 L34 166 Z', y:34, py:52, klass:''},
+      daily: {end:familyMode?'¥174,000':'¥132,800', previous:familyMode?'¥187,300':'¥146,020', current:'M34 160 C70 151 96 137 126 127 S187 108 220 89 S280 76 316 65', prior:'M34 160 C70 147 98 140 130 129 S186 112 222 98 S282 85 316 78', fill:'M34 160 C70 151 96 137 126 127 S187 108 220 89 S280 76 316 65 L316 166 L34 166 Z', y:65, py:78, klass:''},
       joy: {end:'¥53,620', previous:null, current:'M34 160 C74 158 100 149 128 143 S184 132 218 116 S282 101 316 91', prior:'', fill:'M34 160 C74 158 100 149 128 143 S184 132 218 116 S282 101 316 91 L316 166 L34 166 Z', y:91, py:0, klass:'joy'}
     };
     const active = trends[state.analyticsTrend];
     const insight = {
-      total: ['trending_down','今月は ¥186,420 · 先月より8%少なく推移'],
-      daily: ['trending_down','日常支出は ¥132,800 · 先月より9%少なく推移'],
+      total: ['trending_down',familyMode?'今月の家族支出は ¥227,620 · 先月より7%少なく推移':'今月は ¥186,420 · 先月より8%少なく推移'],
+      daily: ['trending_down',familyMode?'家族の日常支出は ¥174,000 · 先月より7%少なく推移':'日常支出は ¥132,800 · 先月より9%少なく推移'],
       joy: ['favorite_border','今月のときめき支出は ¥53,620']
     }[state.analyticsTrend];
     const emptyInsight = {
@@ -2136,7 +2183,8 @@ body {
 
   function analyticsDonutCard() {
     const categorySets={all:[['restaurant','食費',68400,37,'#69a873'],['home','住居',54000,29,'#5f8dca'],['sports_esports','趣味・ときめき',53620,29,'var(--hp-joy)'],['train','交通',10400,5,'#86c994']],self:[['restaurant','食費',32000,38,'#69a873'],['home','住居',24000,29,'#5f8dca'],['sports_esports','趣味・ときめき',18400,22,'var(--hp-joy)'],['train','交通',9800,11,'#86c994']],hanako:[['restaurant','食費',24600,39,'#69a873'],['home','住居',17500,28,'#5f8dca'],['sports_esports','趣味・ときめき',16420,26,'var(--hp-joy)'],['train','交通',4080,7,'#86c994']],taro:[['restaurant','食費',29200,36,'#69a873'],['home','住居',22500,28,'#5f8dca'],['sports_esports','趣味・ときめき',18800,23,'var(--hp-joy)'],['train','交通',10320,13,'#86c994']]};
-    const categoryRows = state.analyticsEmpty ? [] : (categorySets[state.analyticsMember] || categorySets.all);
+    const familyCategories=[['restaurant','食費',82400,36,'#69a873'],['home','住居',68000,30,'#5f8dca'],['sports_esports','趣味・ときめき',53620,24,'var(--hp-joy)'],['train','交通',23600,10,'#86c994']];
+    const categoryRows = state.analyticsEmpty ? [] : (state.family&&state.analyticsMember==='all'?familyCategories:(categorySets[state.analyticsMember] || categorySets.all));
     const familyRows = [['🌿','あおい','¥84,200',37,'#6fa36f'],['🌸','花子','¥62,600',28,'#5b8ac4'],['☕','太郎','¥80,820',35,'#86c79a']];
     const soloRows = [['🌿','あおい','¥186,420',100,'#6fa36f']];
     let memberRows = state.analyticsEmpty ? [] : (state.family ? familyRows : soloRows);
@@ -2152,10 +2200,9 @@ body {
     return `<div class="analytics-card analytics-category-card" data-token="CategoryDonutCard"><div class="analytics-donut-wrap"><div class="analytics-donut" style="${donutStyle}">${shares.map((row,i)=>`<span class="analytics-ring-note ${positions[i]||'d'}">${categoryMode?icon(row[0]):`<span class="analytics-ring-emoji">${row[0]}</span>`}<b>${row[3]}%</b></span>`).join('')}<span class="analytics-donut-center"><span>今月の支出</span><strong>¥${total.toLocaleString('ja-JP')}</strong><small>${memberCount}件</small></span></div></div><div class="analytics-donut-controls">${segmentedControl({ariaLabel:'支出の集計方法',value:state.analyticsDimension,dataAttribute:'data-analytics-dimension',className:'analytics-dimension-segments',options:[{value:'category',label:'カテゴリ別',tone:'daily'},{value:'member',label:'メンバー別',tone:'shared'}]})}<button class="analytics-member-filter" data-action="analytics-member-filter" aria-label="対象メンバー ${analyticsMemberName()}">${icon('person')}<span class="analytics-member-filter-label">${state.analyticsMember==='all'?'全員':analyticsMemberName()}</span>${icon('expand_more')}</button></div>${rows.map(row=>analyticsLegendRow(row,!categoryMode)).join('')}${analyticsJoyDrawer(!categoryMode)}</div>`;
   }
 
-  function analyticsCalendarCard() {
-    const counts = {2:1,6:2,12:3,18:1,21:2,28:1};
+  function analyticsCalendarCard(personalOnly=false) {
     const offset = (new Date(2026,6,1).getDay()+6)%7;
-    const recordSets = {
+    const personalRecords = {
       2: [['local_cafe','カフェ','珈琲 小径','¥620']],
       6: [['music_note','音楽','音楽配信','¥980'],['icecream','おやつ','甘味処 花月','¥560']],
       12: [['local_cafe','カフェ','喫茶 月舟','¥980'],['book_2','書籍','青灯書房','¥1,240'],['local_florist','花','季節の花','¥880']],
@@ -2163,10 +2210,40 @@ body {
       21: [['movie','映画','ミニシアター','¥1,800'],['restaurant','ランチ','小春食堂','¥1,200']],
       28: [['bakery_dining','パン','朝のベーカリー','¥540']]
     };
-    const cells = [...Array(offset)].map(()=>`<span class="analytics-calendar-day empty"></span>`).concat([...Array(31)].map((_,i)=>{ const day=i+1, count=counts[day]||0; const heat=count===0?'var(--hp-surface-muted)':count===1?'var(--hp-joy-soft)':count===2?'color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))':'var(--hp-joy)'; return `<button class="analytics-calendar-day ${state.analyticsJoyDay===day?'selected':''}" style="--heat:${heat}" data-count="${count}" data-analytics-joy-day="${day}" aria-label="7月${day}日 ときめき${count}件" aria-pressed="${state.analyticsJoyDay===day}"><span>${day}</span></button>`; })).join('');
-    const panelRows = recordSets[state.analyticsJoyDay] || [];
-    const panel = state.analyticsJoyDay==null ? '' : `<div class="analytics-day-panel"><div class="analytics-day-panel-head">7月${state.analyticsJoyDay}日 · ${counts[state.analyticsJoyDay]||0}件のときめき</div>${panelRows.length?panelRows.map(row=>`<div class="analytics-day-row">${icon(row[0])}<span>${row[1]}<small>${row[2]}</small></span><strong>${row[3]}</strong></div>`).join(''):`<p class="hint">この日のときめき支出はありません。</p>`}</div>`;
-    return `<div class="analytics-card analytics-calendar-card" data-token="JoyCalendarCard"><div class="analytics-calendar-weekdays">${['月','火','水','木','金','土','日'].map(day=>`<span>${day}</span>`).join('')}</div><div class="analytics-calendar-grid">${cells}</div><div class="analytics-calendar-legend"><span>少</span><i class="analytics-heat" style="background:var(--hp-surface-muted)"></i><i class="analytics-heat" style="background:var(--hp-joy-soft)"></i><i class="analytics-heat" style="background:color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))"></i><i class="analytics-heat" style="background:var(--hp-joy)"></i><span>多</span><p>今月10件 · 6日間に記録</p></div>${panel}</div>`;
+    if(!state.family || personalOnly){
+      const counts = Object.fromEntries(Object.entries(personalRecords).map(([day,rows])=>[day,rows.length]));
+      const cells = [...Array(offset)].map(()=>`<span class="analytics-calendar-day empty"></span>`).concat([...Array(31)].map((_,i)=>{ const day=i+1, count=counts[day]||0; const heat=count===0?'var(--hp-surface-muted)':count===1?'var(--hp-joy-soft)':count===2?'color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))':'var(--hp-joy)'; return `<button class="analytics-calendar-day ${state.analyticsJoyDay===day?'selected':''}" style="--heat:${heat}" data-count="${count}" data-analytics-joy-day="${day}" aria-label="7月${day}日 ときめき${count}件" aria-pressed="${state.analyticsJoyDay===day}"><span>${day}</span></button>`; })).join('');
+      const panelRows = personalRecords[state.analyticsJoyDay] || [];
+      const panel = state.analyticsJoyDay==null ? '' : `<div class="analytics-day-panel"><div class="analytics-day-panel-head">7月${state.analyticsJoyDay}日 · ${counts[state.analyticsJoyDay]||0}件のときめき</div>${panelRows.length?panelRows.map(row=>`<div class="analytics-day-row">${icon(row[0])}<span>${row[1]}<small>${row[2]}</small></span><strong>${row[3]}</strong></div>`).join(''):`<p class="hint">この日のときめき支出はありません。</p>`}</div>`;
+      return `<div class="analytics-card analytics-calendar-card" data-token="JoyCalendarCard"><div class="analytics-calendar-weekdays">${['月','火','水','木','金','土','日'].map(day=>`<span>${day}</span>`).join('')}</div><div class="analytics-calendar-grid">${cells}</div><div class="analytics-calendar-legend"><span>少</span><i class="analytics-heat" style="background:var(--hp-surface-muted)"></i><i class="analytics-heat" style="background:var(--hp-joy-soft)"></i><i class="analytics-heat" style="background:color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))"></i><i class="analytics-heat" style="background:var(--hp-joy)"></i><span>多</span><p>今月10件 · 6日間に記録</p></div>${panel}</div>`;
+    }
+
+    const members = [
+      {id:'self',name:'あおい',avatar:'family-avatar-owner.png',color:'var(--hp-primary)'},
+      {id:'hanako',name:'花子',avatar:'family-avatar-hanako.png',color:'var(--hp-joy)'},
+      {id:'taro',name:'太郎',avatar:'family-avatar-taro.png',color:'var(--hp-shared)'}
+    ];
+    const familyRecords = {
+      2: [['hanako','family-avatar-hanako.png','local_cafe','カフェ',8,'珈琲 小径','¥620']],
+      6: [['self','family-avatar-owner.png','music_note','音楽',9,'音楽配信','¥980'],['taro','family-avatar-taro.png','icecream','おやつ',8,'甘味処 花月','¥560']],
+      12: [['self','family-avatar-owner.png','local_cafe','カフェ',8,'喫茶 月舟','¥980'],['hanako','family-avatar-hanako.png','book_2','書籍',9,'青灯書房','¥1,240'],['taro','family-avatar-taro.png','local_florist','花',8,'季節の花','¥880']],
+      18: [['self','family-avatar-owner.png','spa','ケア',8,'入浴剤','¥760']],
+      21: [['self','family-avatar-owner.png','movie','映画',9,'ミニシアター','¥1,800'],['hanako','family-avatar-hanako.png','restaurant','ランチ',8,'小春食堂','¥1,200']],
+      28: [['taro','family-avatar-taro.png','bakery_dining','パン',8,'朝のベーカリー','¥540']]
+    };
+    const selectedMember = state.analyticsCalendarMember;
+    const filteredRecords = Object.fromEntries(Object.entries(familyRecords).map(([day,rows])=>[day,selectedMember==='all'?rows:rows.filter(row=>row[0]===selectedMember)]));
+    const counts = Object.fromEntries(Object.entries(filteredRecords).map(([day,rows])=>[day,rows.length]));
+    const memberButtons = `<div class="analytics-calendar-members" role="group" aria-label="メンバーで絞り込む">${members.map(member=>{ const active=selectedMember===member.id; return `<button class="analytics-calendar-member ${active?'active':''}" style="--member-color:${member.color}" data-analytics-calendar-member="${member.id}" aria-pressed="${active}" aria-label="${member.name}で絞り込む${active?'、もう一度押すと家族全員に戻ります':''}"><img src="assets/${member.avatar}" alt=""><span>${member.name}</span></button>`; }).join('')}</div>`;
+    const cells = [...Array(offset)].map(()=>`<span class="analytics-calendar-day empty"></span>`).concat([...Array(31)].map((_,i)=>{ const day=i+1, count=counts[day]||0; const heat=count===0?'var(--hp-surface-muted)':count===1?'var(--hp-joy-soft)':count===2?'color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))':'var(--hp-joy)'; const scope=selectedMember==='all'?'家族':analyticsMemberNameForCalendar(selectedMember); return `<button class="analytics-calendar-day ${state.analyticsJoyDay===day?'selected':''}" style="--heat:${heat}" data-count="${count}" data-analytics-joy-day="${day}" aria-label="7月${day}日 ${scope}のときめき${count}件" aria-pressed="${state.analyticsJoyDay===day}"><span>${day}</span></button>`; })).join('');
+    const panelRows = filteredRecords[state.analyticsJoyDay] || [];
+    const scopeLabel = selectedMember==='all'?'家族':analyticsMemberNameForCalendar(selectedMember);
+    const panel = state.analyticsJoyDay==null ? '' : `<div class="analytics-day-panel"><div class="analytics-day-panel-head">7月${state.analyticsJoyDay}日 · ${scopeLabel}のときめき ${counts[state.analyticsJoyDay]||0}件</div>${panelRows.length?panelRows.map(row=>`<div class="analytics-family-day-row"><span class="analytics-family-day-avatar"><img src="assets/${row[1]}" alt="${analyticsMemberNameForCalendar(row[0])}のアバター"><span class="analytics-family-day-badge">${icon(row[2])}</span></span><span class="analytics-family-day-copy"><span class="analytics-family-day-title"><strong>${row[3]}</strong><small>${row[4]} / 10</small></span><span class="analytics-family-day-merchant">${row[5]}</span></span><strong class="analytics-family-day-amount">${row[6]}</strong></div>`).join(''):`<p class="hint">この日のときめき支出はありません。</p>`}</div>`;
+    return `${memberButtons}<div class="analytics-card analytics-calendar-card family" data-token="JoyCalendarCard"><div class="analytics-calendar-weekdays">${['月','火','水','木','金','土','日'].map(day=>`<span>${day}</span>`).join('')}</div><div class="analytics-calendar-grid">${cells}</div><div class="analytics-calendar-legend"><span>少</span><i class="analytics-heat" style="background:var(--hp-surface-muted)"></i><i class="analytics-heat" style="background:var(--hp-joy-soft)"></i><i class="analytics-heat" style="background:color-mix(in srgb,var(--hp-joy) 64%,var(--hp-surface))"></i><i class="analytics-heat" style="background:var(--hp-joy)"></i><span>多</span></div>${panel}</div>`;
+  }
+
+  function analyticsMemberNameForCalendar(member) {
+    return ({self:'あおい',hanako:'花子',taro:'太郎'})[member] || '家族';
   }
 
   function analyticsHistogramCard() {
@@ -2179,10 +2256,26 @@ body {
     return `<h3>月を選ぶ</h3>${months.map(([value,label])=>`<button class="tap-row row-divider" data-analytics-window="${value}" data-label="${label}"><span class="row-copy"><strong>${label}</strong></span>${icon('chevron_right')}</button>`).join('')}`;
   }
 
+  function analyticsPrimaryTabs() {
+    const active=state.analyticsTab;
+    const spendingLabel=state.family?'家族の支出':'支出';
+    const joyLabel=state.family?'私のときめき':'ときめき';
+    const spendingValue=state.analyticsEmpty?'¥0':(state.family?'¥227,620':'¥186,420');
+    const joyValue=state.analyticsEmpty?'0回':'10回';
+    const tabs=[
+      {id:'spending',label:spendingLabel,value:spendingValue,icon:'donut_small'},
+      {id:'joy',label:joyLabel,value:joyValue,icon:'bar_chart'}
+    ];
+    return `<div class="analytics-primary-tabs" role="tablist" aria-label="統計の表示内容">${tabs.map(tab=>{ const selected=active===tab.id; return `<button id="analytics-tab-${tab.id}" class="analytics-primary-tab ${tab.id} ${selected?'selected':''}" type="button" role="tab" data-analytics-tab="${tab.id}" aria-selected="${selected}" aria-controls="analytics-tab-panel" tabindex="${selected?'0':'-1'}"><span class="analytics-primary-tab-copy"><span class="analytics-primary-tab-title">${tab.label}</span><span class="analytics-primary-tab-value">${tab.value}</span></span><span class="analytics-primary-tab-visual" aria-hidden="true">${icon(tab.icon)}</span></button>`; }).join('')}</div>`;
+  }
+
   function analytics() {
     const header=tabHeader(monthTitle('analytics'),`<span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`);
     const family=state.family?`<div class="analytics-family-card" data-token="FamilyInsightDataCard"><h3>家族 · ハイライトサマリー</h3><p>家族のときめき 24回</p><p>みんなで「趣味・コレクション」を楽しんでいます（12件、平均 8.6 / 10）</p></div>`:'';
-    return `<section class="screen analytics-screen">${header}${analyticsSection('支出の推移','',true)}${analyticsTrendCard()}${analyticsSection('カテゴリ支出','category')}${analyticsDonutCard()}${analyticsSection('ときめきカレンダー','joy')}${analyticsCalendarCard()}${analyticsSection('ときめきの満足度','joy')}${analyticsHistogramCard()}${family}</section>`;
+    const spending=`${analyticsSection('支出の推移','',true)}${analyticsTrendCard()}${analyticsSection('カテゴリ支出','category')}${analyticsDonutCard()}${family}`;
+    const joy=`${analyticsSection('ときめきカレンダー','joy',true)}${analyticsCalendarCard(true)}${analyticsSection('ときめきの満足度','joy')}${analyticsHistogramCard()}`;
+    const panel=state.analyticsTab==='joy'?joy:spending;
+    return `<section class="screen analytics-screen">${header}${analyticsPrimaryTabs()}<div id="analytics-tab-panel" class="analytics-tab-panel" role="tabpanel" aria-labelledby="analytics-tab-${state.analyticsTab}" tabindex="0">${panel}</div></section>`;
   }
 
   function shoppingFilterCard() {
@@ -3126,7 +3219,7 @@ body {
     const onboardingVoiceChoice=e.target.closest('[data-onboarding-voice-choice]'); if(onboardingVoiceChoice){ state.onboardingVoice=onboardingVoiceChoice.dataset.onboardingVoiceChoice; state.onboardingVoiceExplicit=true; closeModal(); render(); return; }
     const settingsWeekStartChoice=e.target.closest('[data-settings-week-start-choice]'); if(settingsWeekStartChoice){ state.settingsWeekStart=settingsWeekStartChoice.dataset.settingsWeekStartChoice; closeModal(); renderPreservingAppScroll(); toast(`${state.settingsWeekStart==='monday'?'月曜日':'日曜日'}始まりに変更しました`); return; }
     const settingsVoiceLanguageChoice=e.target.closest('[data-settings-voice-language-choice]'); if(settingsVoiceLanguageChoice){ state.onboardingVoice=settingsVoiceLanguageChoice.dataset.settingsVoiceLanguageChoice; closeModal(); renderPreservingAppScroll(); toast('認識言語を変更しました'); return; }
-    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); return; }
+    const preset=e.target.closest('[data-preset]'); if(preset){ document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active')); preset.classList.add('active'); const p=preset.dataset.preset; state.family=p==='family-light'; state.theme=p==='solo-dark'?'dark':'light'; state.inviteDismissed=false; state.analyticsMember='all'; state.analyticsCalendarMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); return; }
     const homeJoyDemo=e.target.closest('[data-home-joy-demo]'); if(homeJoyDemo){ state.homeJoyEmpty=homeJoyDemo.dataset.homeJoyDemo==='empty'; render(); return; }
     const homeJoyVariant=e.target.closest('[data-home-joy-variant]'); if(homeJoyVariant){ state.homeJoyVariant=homeJoyVariant.dataset.homeJoyVariant; state.homeJoyEmpty=true; render(); return; }
     const entryVariant=e.target.closest('[data-entry-variant]'); if(entryVariant){ state.entryVariant=entryVariant.dataset.entryVariant; render(); return; }
@@ -3181,16 +3274,18 @@ body {
     const shoppingFormLedger=e.target.closest('[data-shopping-form-ledger]'); if(shoppingFormLedger){ state.shoppingFormLedger=shoppingFormLedger.dataset.shoppingFormLedger; render(); return; }
     const shoppingFormListType=e.target.closest('[data-shopping-form-list-type]'); if(shoppingFormListType && state.shoppingFormMode!=='edit'){ state.shoppingFormListType=shoppingFormListType.dataset.shoppingFormListType; render(); return; }
     const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
+    const analyticsTab=e.target.closest('[data-analytics-tab]'); if(analyticsTab){ state.analyticsTab=analyticsTab.dataset.analyticsTab; render(); document.getElementById('app-screen').scrollTop=0; return; }
     const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
     const analyticsDimension=e.target.closest('[data-analytics-dimension]'); if(analyticsDimension){ state.analyticsDimension=analyticsDimension.dataset.analyticsDimension; render(); return; }
     const analyticsJoyDay=e.target.closest('[data-analytics-joy-day]'); if(analyticsJoyDay){ const day=Number(analyticsJoyDay.dataset.analyticsJoyDay); state.analyticsJoyDay=state.analyticsJoyDay===day?null:day; render(); return; }
+    const analyticsCalendarMember=e.target.closest('[data-analytics-calendar-member]'); if(analyticsCalendarMember){ const member=analyticsCalendarMember.dataset.analyticsCalendarMember; state.analyticsCalendarMember=state.analyticsCalendarMember===member?'all':member; render(); return; }
     const analyticsWindowType=e.target.closest('[data-analytics-window-type]'); if(analyticsWindowType){ state.analyticsWindowType=analyticsWindowType.dataset.analyticsWindowType; document.getElementById('modal-content').innerHTML=analyticsWindowPicker(); return; }
     const analyticsWindow=e.target.closest('[data-analytics-window]'); if(analyticsWindow){ state.analyticsWindow=analyticsWindow.dataset.analyticsWindow; state.analyticsWindowLabel=analyticsWindow.dataset.label; closeModal(); render(); toast(`${state.analyticsWindowLabel}に更新しました`); return; }
     const analyticsMember=e.target.closest('[data-analytics-member]'); if(analyticsMember){ state.analyticsMember=analyticsMember.dataset.analyticsMember; closeModal(); render(); return; }
     const tool=e.target.closest('[data-tool]'); if(tool){ if(tool.dataset.tool==='annotations') document.body.classList.toggle('annotations'); else document.getElementById('phone').style.width=tool.dataset.tool+'px'; return; }
     const action=e.target.closest('[data-action]'); if(!action) return; const a=action.dataset.action;
     if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
-    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); toast(state.family?'家庭モード':'個人モード'); }
+    else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.analyticsCalendarMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); toast(state.family?'家庭モード':'個人モード'); }
     else if(a==='family-create') setScreen('create');
     else if(a==='family-join') setScreen('join');
     else if(a==='family-copy-code') toast('招待コードをコピーしました');
@@ -3341,6 +3436,15 @@ body {
     if(familyCodeInput&&e.key==='Backspace'&&!familyCodeInput.value){
       const index=Number(familyCodeInput.dataset.familyCodeIndex);
       document.querySelector(`[data-family-code-index="${Math.max(0,index-1)}"]`)?.focus();
+      return;
+    }
+    const analyticsTab=e.target.closest?.('[data-analytics-tab]');
+    if(analyticsTab && ['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
+      e.preventDefault();
+      const next=e.key==='ArrowLeft'||e.key==='Home'?'spending':'joy';
+      state.analyticsTab=next;
+      render();
+      requestAnimationFrame(()=>document.querySelector(`[data-analytics-tab="${next}"]`)?.focus());
       return;
     }
     const hero=e.target.closest?.('.faithful-hero, .faithful-favorite-card');

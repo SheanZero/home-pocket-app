@@ -2003,6 +2003,23 @@ class SJa extends S {
   String get analyticsJoyCalendarDayEmpty => 'この日の小确幸の記録はありません';
 
   @override
+  String get analyticsTabSpending => '支出';
+
+  @override
+  String get analyticsTabFamilySpending => '家族の支出';
+
+  @override
+  String get analyticsTabJoy => 'ときめき';
+
+  @override
+  String get analyticsTabMyJoy => '私のときめき';
+
+  @override
+  String analyticsTabJoyCount(int count) {
+    return '$count回';
+  }
+
+  @override
   String get analyticsSectionTrend => '支出の推移';
 
   @override
@@ -2989,7 +3006,7 @@ class SJa extends S {
   String get onboardingSetupTopbar => '初期設定';
 
   @override
-  String get onboardingSetupTitle => '基本設定';
+  String get onboardingSetupTitle => '初期設定';
 
   @override
   String get onboardingRowName => 'お名前・必須';
@@ -3070,6 +3087,9 @@ class SJa extends S {
   String get onboardingSecurityPinSetup => '4桁のPINを設定';
 
   @override
+  String get onboardingSecurityPinSetAction => '設定';
+
+  @override
   String get onboardingSecurityPinComplete => 'PINを設定しました';
 
   @override
@@ -3077,6 +3097,9 @@ class SJa extends S {
 
   @override
   String get onboardingSecurityPinChange => 'PINを変更';
+
+  @override
+  String get onboardingSecurityPinUpdateAction => '更新';
 
   @override
   String get onboardingSetupNameRequiredHint => 'お名前を入力すると開始できます';
@@ -3122,7 +3145,22 @@ class SJa extends S {
   String get appLockSetPinTitle => 'パスコードを設定';
 
   @override
+  String get appLockUpdatePinTitle => 'パスコードを更新';
+
+  @override
+  String get appLockSetPinDescription =>
+      'Home Pocket のロック解除に使う、覚えやすい4桁を選んでください。';
+
+  @override
   String get appLockConfirmPinTitle => 'パスコードを再入力';
+
+  @override
+  String get appLockConfirmPinDescription => '確認のため、同じ4桁をもう一度入力してください。';
+
+  @override
+  String appLockPinSetupProgress(int current, int total) {
+    return 'ステップ $current / $total';
+  }
 
   @override
   String get appLockPinMismatch => 'パスコードが一致しません';

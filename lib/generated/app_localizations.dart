@@ -3759,6 +3759,36 @@ abstract class S {
   /// **'No little joys recorded this day'**
   String get analyticsJoyCalendarDayEmpty;
 
+  /// Personal-mode primary Statistics tab for spending
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get analyticsTabSpending;
+
+  /// Family-mode primary Statistics tab for aggregate family spending
+  ///
+  /// In en, this message translates to:
+  /// **'Family Spending'**
+  String get analyticsTabFamilySpending;
+
+  /// Personal-mode primary Statistics tab for Joy
+  ///
+  /// In en, this message translates to:
+  /// **'Joy'**
+  String get analyticsTabJoy;
+
+  /// Family-mode primary Statistics tab for the current user's Joy
+  ///
+  /// In en, this message translates to:
+  /// **'My Joy'**
+  String get analyticsTabMyJoy;
+
+  /// Compact Joy entry count shown in the primary Statistics tab
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String analyticsTabJoyCount(int count);
+
   /// Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)
   ///
   /// In en, this message translates to:
@@ -5591,10 +5621,10 @@ abstract class S {
   /// **'Initial setup'**
   String get onboardingSetupTopbar;
 
-  /// Design-04 setup screen: two-line title
+  /// Compact centered title for the onboarding setup screen
   ///
   /// In en, this message translates to:
-  /// **'Basic setup'**
+  /// **'Initial Setup'**
   String get onboardingSetupTitle;
 
   /// Design-04 setup screen: inline name field label
@@ -5753,6 +5783,12 @@ abstract class S {
   /// **'Set a 4-digit PIN'**
   String get onboardingSecurityPinSetup;
 
+  /// No description provided for @onboardingSecurityPinSetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set'**
+  String get onboardingSecurityPinSetAction;
+
   /// No description provided for @onboardingSecurityPinComplete.
   ///
   /// In en, this message translates to:
@@ -5770,6 +5806,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Change PIN'**
   String get onboardingSecurityPinChange;
+
+  /// No description provided for @onboardingSecurityPinUpdateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get onboardingSecurityPinUpdateAction;
 
   /// No description provided for @onboardingSetupNameRequiredHint.
   ///
@@ -5855,11 +5897,35 @@ abstract class S {
   /// **'Set a passcode'**
   String get appLockSetPinTitle;
 
+  /// Set-PIN flow: first-step title when replacing an existing passcode
+  ///
+  /// In en, this message translates to:
+  /// **'Update passcode'**
+  String get appLockUpdatePinTitle;
+
+  /// Set-PIN flow: supporting copy for the first passcode entry
+  ///
+  /// In en, this message translates to:
+  /// **'Choose four digits you\'ll remember to unlock Home Pocket.'**
+  String get appLockSetPinDescription;
+
   /// Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)
   ///
   /// In en, this message translates to:
   /// **'Re-enter passcode'**
   String get appLockConfirmPinTitle;
+
+  /// Set-PIN flow: supporting copy for the confirmation entry
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the same four digits again to confirm.'**
+  String get appLockConfirmPinDescription;
+
+  /// Set-PIN flow: accessible two-step progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String appLockPinSetupProgress(int current, int total);
 
   /// Set-PIN flow: re-prompt shown when the confirmation passcode does not match the first entry
   ///

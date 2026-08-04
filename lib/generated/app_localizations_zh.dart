@@ -1987,6 +1987,23 @@ class SZh extends S {
   String get analyticsJoyCalendarDayEmpty => '这一天还没有小确幸记录';
 
   @override
+  String get analyticsTabSpending => '支出';
+
+  @override
+  String get analyticsTabFamilySpending => '家庭支出';
+
+  @override
+  String get analyticsTabJoy => '悦己';
+
+  @override
+  String get analyticsTabMyJoy => '我的悦己';
+
+  @override
+  String analyticsTabJoyCount(int count) {
+    return '$count次';
+  }
+
+  @override
   String get analyticsSectionTrend => '支出趋势';
 
   @override
@@ -2972,7 +2989,7 @@ class SZh extends S {
   String get onboardingSetupTopbar => '初始设置';
 
   @override
-  String get onboardingSetupTitle => '基础设置';
+  String get onboardingSetupTitle => '初始设置';
 
   @override
   String get onboardingRowName => '姓名・必填';
@@ -3053,6 +3070,9 @@ class SZh extends S {
   String get onboardingSecurityPinSetup => '设置4位 PIN';
 
   @override
+  String get onboardingSecurityPinSetAction => '设置';
+
+  @override
   String get onboardingSecurityPinComplete => 'PIN 已设置';
 
   @override
@@ -3060,6 +3080,9 @@ class SZh extends S {
 
   @override
   String get onboardingSecurityPinChange => '修改 PIN';
+
+  @override
+  String get onboardingSecurityPinUpdateAction => '更新';
 
   @override
   String get onboardingSetupNameRequiredHint => '输入姓名后即可开始';
@@ -3105,7 +3128,21 @@ class SZh extends S {
   String get appLockSetPinTitle => '设置密码';
 
   @override
+  String get appLockUpdatePinTitle => '更新密码';
+
+  @override
+  String get appLockSetPinDescription => '选择一组容易记住的4位数字，用于解锁 Home Pocket。';
+
+  @override
   String get appLockConfirmPinTitle => '再次输入密码';
+
+  @override
+  String get appLockConfirmPinDescription => '再次输入相同的4位数字进行确认。';
+
+  @override
+  String appLockPinSetupProgress(int current, int total) {
+    return '第 $current 步，共 $total 步';
+  }
 
   @override
   String get appLockPinMismatch => '密码不一致';

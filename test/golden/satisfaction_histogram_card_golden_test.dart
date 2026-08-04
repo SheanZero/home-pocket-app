@@ -61,12 +61,14 @@ Widget _wrap({
         endDate: _endDate,
         currencyCode: 'JPY',
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: false,
       ).overrideWith((_) async => happiness),
       satisfactionDistributionProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
         joyMetricVariant: JoyMetricVariant.all,
+        includeFamily: false,
       ).overrideWith((_) async => distribution),
     ],
     child: MaterialApp(
@@ -117,7 +119,9 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(SatisfactionHistogramCard),
-          matchesGoldenFile('goldens/satisfaction_histogram_card_light_$tag.png'),
+          matchesGoldenFile(
+            'goldens/satisfaction_histogram_card_light_$tag.png',
+          ),
         );
       });
 
@@ -133,7 +137,9 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(SatisfactionHistogramCard),
-          matchesGoldenFile('goldens/satisfaction_histogram_card_dark_$tag.png'),
+          matchesGoldenFile(
+            'goldens/satisfaction_histogram_card_dark_$tag.png',
+          ),
         );
       });
     }

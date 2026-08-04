@@ -174,6 +174,39 @@ void main() {
       expect(report.savingsRate, closeTo(73.3, 0.1));
     });
 
+    test('combines the primary and shadow books into one report', () async {
+      await insertExpense(
+        id: 'tx_personal',
+        amount: 1000,
+        timestamp: DateTime(2026, 2, 10),
+      );
+      await transactionDao.insertTransaction(
+        id: 'tx_shadow',
+        bookId: 'shadow1',
+        deviceId: 'dev2',
+        amount: 2000,
+        type: 'expense',
+        categoryId: 'cat_food',
+        ledgerType: 'daily',
+        timestamp: DateTime(2026, 2, 10),
+        currentHash: 'hash_shadow',
+        createdAt: DateTime(2026, 2, 10),
+        entrySource: 'manual',
+      );
+
+      final report = await useCase.executeAcrossBooks(
+        bookIds: const ['book1', 'shadow1'],
+        startDate: DateTime(2026, 2),
+        endDate: DateTime(2026, 2, 28, 23, 59, 59),
+      );
+
+      expect(report.totalExpenses, 3000);
+      expect(report.dailyTotal, 3000);
+      expect(report.categoryBreakdowns.single.amount, 3000);
+      expect(report.categoryBreakdowns.single.transactionCount, 2);
+      expect(report.dailyExpenses[9].amount, 3000);
+    });
+
     test('builds correct category breakdowns', () async {
       await transactionDao.insertTransaction(
         id: 'tx1',

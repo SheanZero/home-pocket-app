@@ -27,6 +27,8 @@ import 'analytics_data_card.dart';
 /// `happinessReportProvider` is still watched (loading/error gating only — its
 /// value is discarded), and `satisfactionHistogramRefreshTargets` still returns
 /// BOTH providers.
+/// The V16 family screen calls this tab “My Joy”, so both provider reads and
+/// refresh targets explicitly keep `includeFamily: false` in group mode.
 class SatisfactionHistogramCard extends ConsumerWidget {
   const SatisfactionHistogramCard({
     super.key,
@@ -56,6 +58,7 @@ class SatisfactionHistogramCard extends ConsumerWidget {
         // still requires a currency key, so feed it the literal — not a dropped field.
         currencyCode: 'JPY',
         joyMetricVariant: joyMetricVariant,
+        includeFamily: false,
       ),
     );
     final distributionAsync = ref.watch(
@@ -64,6 +67,7 @@ class SatisfactionHistogramCard extends ConsumerWidget {
         startDate: startDate,
         endDate: endDate,
         joyMetricVariant: joyMetricVariant,
+        includeFamily: false,
       ),
     );
 
@@ -86,14 +90,12 @@ class SatisfactionHistogramCard extends ConsumerWidget {
           child: SatisfactionDistributionHistogram(buckets: buckets),
         ),
         loading: () => const SizedBox(height: 260),
-        error: (_, _) => AnalyticsCardErrorState(
-          onRetry: () => ref.invalidate(targets[1]),
-        ),
+        error: (_, _) =>
+            AnalyticsCardErrorState(onRetry: () => ref.invalidate(targets[1])),
       ),
       loading: () => const SizedBox(height: 260),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(targets[0]),
-      ),
+      error: (_, _) =>
+          AnalyticsCardErrorState(onRetry: () => ref.invalidate(targets[0])),
     );
   }
 
@@ -125,11 +127,13 @@ List<ProviderBase<Object?>> satisfactionHistogramRefreshTargets(
     // currency key; only the AnalyticsCardContext.currencyCode plumbing was removed.
     currencyCode: 'JPY',
     joyMetricVariant: ctx.joyMetricVariant,
+    includeFamily: false,
   ),
   satisfactionDistributionProvider(
     bookId: ctx.bookId,
     startDate: ctx.startDate,
     endDate: ctx.endDate,
     joyMetricVariant: ctx.joyMetricVariant,
+    includeFamily: false,
   ),
 ];

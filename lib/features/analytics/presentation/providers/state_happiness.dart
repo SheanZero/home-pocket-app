@@ -9,6 +9,7 @@ import '../../domain/models/metric_result.dart';
 import '../../../family_sync/presentation/providers/state_active_group.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 import 'repository_providers.dart';
+import 'state_analytics_book_scope.dart';
 import 'state_joy_metric_variant.dart';
 
 part 'state_happiness.g.dart';
@@ -22,14 +23,25 @@ Future<HappinessReport> happinessReport(
   required DateTime endDate,
   required String currencyCode,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
+  bool includeFamily = false,
 }) async {
   final useCase = ref.watch(getHappinessReportUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
       : null;
-  return useCase.execute(
-    bookId: bookId,
+  if (!includeFamily) {
+    return useCase.execute(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      currencyCode: currencyCode,
+      entrySourceFilter: entrySourceFilter,
+    );
+  }
+  final bookIds = await resolveAnalyticsBookIds(ref, primaryBookId: bookId);
+  return useCase.executeAcrossBooks(
+    bookIds: bookIds,
     startDate: startDate,
     endDate: endDate,
     currencyCode: currencyCode,
@@ -100,12 +112,12 @@ Future<LargestMonthlyExpense?> largestMonthlyExpense(
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
-/// D-09: presentation resolves shadow books to book IDs before invoking the
-/// use case. Q6c remains open: this currently passes shadow books only; Phase
-/// 10/11 may extend the call site if current-device book inclusion is required.
+/// Includes both the current member's primary book and every shadow book for
+/// the active family.
 @riverpod
 Future<FamilyHappiness> familyHappiness(
   Ref ref, {
+  required String primaryBookId,
   required DateTime startDate,
   required DateTime endDate,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
@@ -116,10 +128,10 @@ Future<FamilyHappiness> familyHappiness(
   }
 
   final shadowBooks = await ref.watch(shadowBooksProvider.future);
-  final groupBookIds = shadowBooks.map((shadow) => shadow.book.id).toList();
-  if (groupBookIds.isEmpty) {
-    return _emptyFamilyHappiness(endDate: endDate);
-  }
+  final groupBookIds = <String>{
+    primaryBookId,
+    ...shadowBooks.map((shadow) => shadow.book.id),
+  }.toList(growable: false);
 
   final useCase = ref.watch(getFamilyHappinessUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.

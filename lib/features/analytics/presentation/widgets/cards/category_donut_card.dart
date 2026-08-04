@@ -52,6 +52,7 @@ class CategoryDonutCard extends ConsumerWidget {
         startDate: startDate,
         endDate: endDate,
         joyMetricVariant: joyMetricVariant,
+        includeFamily: true,
       ),
     );
     final categoryMapAsync = ref.watch(analyticsCategoriesMapProvider);
@@ -309,6 +310,7 @@ List<ProviderBase<Object?>> categoryDonutRefreshTargets(
     startDate: ctx.startDate,
     endDate: ctx.endDate,
     joyMetricVariant: ctx.joyMetricVariant,
+    includeFamily: true,
   ),
   joyCategoryAmountsProvider(
     bookId: ctx.bookId,

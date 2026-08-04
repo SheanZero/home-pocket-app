@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
@@ -73,17 +77,16 @@ Widget _buildSubject({
   Object? distributionError,
   bool groupMode = false,
   List<ShadowBookInfo> shadowBooks = const [],
+  Locale locale = const Locale('en'),
 }) {
   _TestSelectedTimeWindow.fixedWindow = TimeWindow.month(year: 2026, month: 5);
 
   return createLocalizedWidget(
     const AnalyticsScreen(bookId: _bookId),
-    locale: const Locale('en'),
+    locale: locale,
     overrides: [
       selectedTimeWindowProvider.overrideWith(_TestSelectedTimeWindow.new),
-      locale_providers.currentLocaleProvider.overrideWith(
-        (_) async => const Locale('en'),
-      ),
+      locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
       accounting_providers
           .bookByIdProvider(bookId: _bookId)
           .overrideWith((_) async => _book),
@@ -91,12 +94,14 @@ Widget _buildSubject({
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
+        includeFamily: true,
       ).overrideWith((_) async => _monthlyReport),
       happinessReportProvider(
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
         currencyCode: 'JPY',
+        includeFamily: false,
       ).overrideWith(
         (_) async => happinessReport ?? fixtureHappinessReportRich(),
       ),
@@ -115,6 +120,7 @@ Widget _buildSubject({
         anchor: _trendAnchor,
       ).overrideWith((_) async => const <PerDayJoyCount>[]),
       familyHappinessProvider(
+        primaryBookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
       ).overrideWith((_) async => fixtureFamilyHappinessRich()),
@@ -172,6 +178,16 @@ Future<void> _resetProviderScope(WidgetTester tester) async {
 }
 
 void main() {
+  setUpAll(() async {
+    final textFont = FontLoader('RobotoMonoNumerals')
+      ..addFont(
+        File('/System/Library/Fonts/Supplemental/Arial Unicode.ttf')
+            .readAsBytes()
+            .then((bytes) => ByteData.sublistView(Uint8List.fromList(bytes))),
+      );
+    await textFont.load();
+  });
+
   group('AnalyticsScreen — main header', () {
     testWidgets('matches the shared title and action geometry', (tester) async {
       await _pump(tester, _buildSubject());
@@ -180,7 +196,7 @@ void main() {
       final title = find.byKey(const Key('analytics-main-title'));
       final calendar = find.byKey(const Key('analytics-month-picker-button'));
       final settings = find.byKey(const Key('analytics-settings-button'));
-      final firstSection = find.byType(AnalyticsSectionHeader).first;
+      final tabs = find.byKey(const Key('analytics-primary-tabs'));
 
       expect(find.byType(AppBar), findsNothing);
       expect(tester.getSize(header).height, 46);
@@ -197,39 +213,53 @@ void main() {
       expect(tester.getSize(calendar), const Size(40, 40));
       expect(tester.getSize(settings), const Size(40, 40));
       expect(tester.getCenter(settings).dx - tester.getCenter(calendar).dx, 40);
-      expect(
-        tester.getTopLeft(firstSection).dy - tester.getBottomLeft(header).dy,
-        13,
-      );
+      expect(tester.getTopLeft(tabs).dy - tester.getBottomLeft(header).dy, 13);
     });
   });
 
-  group('AnalyticsScreen round-5 B lineup', () {
+  group('AnalyticsScreen primary tabs', () {
     testWidgets(
-      'renders the round-5 r5 sectioned lineup with 4 section headers + nested '
-      'joybar (JoySpendCard de-registered)',
+      'personal mode defaults to Joy and separates the two card groups',
       (tester) async {
         await _pump(tester, _buildSubject());
 
-        // v15 header (260714): the AppBar title is the selected month (month-only
-        // header — the multi-granularity TimeWindowChip was removed). The fixed
-        // test window is 2026-05 → "May 2026" in the en locale.
         expect(find.text('May 2026'), findsOneWidget);
-        // round-5 r5 (D2) reverses Phase-46 D-F2: the 4 section headers
-        // (支出趋势·实用 / 分类支出·实用 / 小确幸日历·悦己 / 悦己满足度分布·悦己) are back.
+        expect(find.text('Spending'), findsOneWidget);
+        expect(find.text('Joy'), findsOneWidget);
+        expect(
+          find.byKey(const Key('analytics-primary-tab-joy-bookmark')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('analytics-primary-tab-spending-bookmark')),
+          findsNothing,
+        );
         expect(
           find.byType(AnalyticsSectionHeader, skipOffstage: false),
-          findsNWidgets(4),
+          findsNWidgets(2),
         );
-        expect(find.byType(WithinMonthTrendCard), findsOneWidget);
-        expect(find.byType(CategoryDonutCard), findsOneWidget);
+        expect(find.byType(WithinMonthTrendCard), findsNothing);
+        expect(find.byType(CategoryDonutCard), findsNothing);
         expect(find.byType(JoyCalendarCard), findsOneWidget);
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
 
-        // D2: JoySpendCard is no longer a top-level sibling card — its joybar is
-        // nested inside CategoryDonutCard (the JoySpendDrawer lives in the donut
-        // subtree). The empty-joy fixture renders the drawer's neutral empty copy
-        // (no JoySpendStackedBar), so assert the drawer widget itself.
+        await tester.tap(
+          find.byKey(const Key('analytics-primary-tab-spending')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WithinMonthTrendCard), findsOneWidget);
+        expect(find.byType(CategoryDonutCard), findsOneWidget);
+        expect(find.byType(JoyCalendarCard), findsNothing);
+        expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
+        expect(
+          find.byKey(const Key('analytics-primary-tab-spending-bookmark')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('analytics-primary-tab-joy-bookmark')),
+          findsNothing,
+        );
         expect(find.byType(JoySpendCard), findsNothing);
         expect(
           find.descendant(
@@ -242,7 +272,108 @@ void main() {
       },
     );
 
-    testWidgets('per-card error isolation keeps the donut visible', (
+    testWidgets(
+      'uses concise personal labels and owner-qualified family labels',
+      (tester) async {
+        await _pump(tester, _buildSubject(locale: const Locale('ja')));
+        expect(find.text('支出'), findsOneWidget);
+        expect(find.text('ときめき'), findsOneWidget);
+        expect(find.text('私のときめき'), findsNothing);
+
+        await _resetProviderScope(tester);
+        await _pump(
+          tester,
+          _buildSubject(
+            groupMode: true,
+            shadowBooks: fixtureShadowBooksThree(),
+            locale: const Locale('ja'),
+          ),
+        );
+        expect(find.text('家族の支出'), findsOneWidget);
+        expect(find.text('私のときめき'), findsOneWidget);
+      },
+    );
+
+    testWidgets('family tab titles remain untruncated at 375 logical pixels', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(375, 844);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await _pump(
+        tester,
+        _buildSubject(
+          groupMode: true,
+          shadowBooks: fixtureShadowBooksThree(),
+          locale: const Locale('ja'),
+        ),
+      );
+
+      final spending = tester.renderObject<RenderParagraph>(
+        find.byKey(const Key('analytics-primary-tab-spending-title')),
+      );
+      final joy = tester.renderObject<RenderParagraph>(
+        find.byKey(const Key('analytics-primary-tab-joy-title')),
+      );
+      expect(spending.didExceedMaxLines, isFalse);
+      expect(joy.didExceedMaxLines, isFalse);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('375px English hides decoration before truncating ownership', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(375, 844);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await _pump(
+        tester,
+        _buildSubject(
+          groupMode: true,
+          shadowBooks: fixtureShadowBooksThree(),
+          locale: const Locale('en'),
+        ),
+      );
+
+      final spending = tester.renderObject<RenderParagraph>(
+        find.byKey(const Key('analytics-primary-tab-spending-title')),
+      );
+      final joy = tester.renderObject<RenderParagraph>(
+        find.byKey(const Key('analytics-primary-tab-joy-title')),
+      );
+      expect(spending.didExceedMaxLines, isFalse);
+      expect(joy.didExceedMaxLines, isFalse);
+      expect(
+        find.byKey(const Key('analytics-primary-tab-spending-icon')),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('family mode keeps family insight under spending only', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _buildSubject(groupMode: true, shadowBooks: fixtureShadowBooksThree()),
+      );
+
+      expect(find.text('Family Spending'), findsOneWidget);
+      expect(find.text('My Joy'), findsOneWidget);
+      expect(find.byType(FamilyInsightCard), findsNothing);
+
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FamilyInsightCard), findsOneWidget);
+      expect(find.byType(JoyCalendarCard), findsNothing);
+    });
+
+    testWidgets('per-card error isolation keeps the Joy calendar visible', (
       tester,
     ) async {
       await _pump(
@@ -251,8 +382,8 @@ void main() {
       );
 
       // The satisfaction-distribution card surfaces its error in isolation
-      // while sibling cards (e.g. the donut) stay rendered.
-      expect(find.byType(CategoryDonutCard), findsOneWidget);
+      // while its Joy-tab sibling stays rendered.
+      expect(find.byType(JoyCalendarCard), findsOneWidget);
       expect(find.byType(AnalyticsCardErrorState), findsOneWidget);
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
     });
@@ -278,11 +409,8 @@ void main() {
     ) async {
       await _pump(tester, _buildSubject());
 
-      // D-C1/D-C2: the joy cards have local-only tap interactions (segment
-      // highlight / calendar day expand) — none push a route. With empty data
-      // they render their neutral states without throwing. The joybar now lives
-      // INSIDE the donut card (D2), so ensure the donut + calendar are visible.
-      await tester.ensureVisible(find.byType(CategoryDonutCard));
+      // D-C1/D-C2: the Joy-tab cards keep local-only interactions and render
+      // their empty paths without throwing.
       await tester.ensureVisible(find.byType(JoyCalendarCard));
       expect(tester.takeException(), isNull);
     });
@@ -305,10 +433,14 @@ void main() {
       tester,
     ) async {
       await _pump(tester, _buildSubject());
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
+      await tester.pumpAndSettle();
       expect(find.text('Family · Highlights Summary'), findsNothing);
 
       await _resetProviderScope(tester);
       await _pump(tester, _buildSubject(groupMode: true));
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
+      await tester.pumpAndSettle();
       expect(find.text('Family · Highlights Summary'), findsNothing);
 
       await _resetProviderScope(tester);
@@ -316,6 +448,8 @@ void main() {
         tester,
         _buildSubject(groupMode: true, shadowBooks: fixtureShadowBooksThree()),
       );
+      await tester.tap(find.byKey(const Key('analytics-primary-tab-spending')));
+      await tester.pumpAndSettle();
       expect(
         find.byType(FamilyInsightCard, skipOffstage: false),
         findsOneWidget,

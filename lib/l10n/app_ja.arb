@@ -2349,6 +2349,31 @@
   "@analyticsJoyCalendarDayEmpty": {
     "description": "小确幸日历 inline-expanded panel copy for a tapped day with no joy entries (neutral)"
   },
+  "analyticsTabSpending": "支出",
+  "@analyticsTabSpending": {
+    "description": "Personal-mode primary Statistics tab for spending"
+  },
+  "analyticsTabFamilySpending": "家族の支出",
+  "@analyticsTabFamilySpending": {
+    "description": "Family-mode primary Statistics tab for aggregate family spending"
+  },
+  "analyticsTabJoy": "ときめき",
+  "@analyticsTabJoy": {
+    "description": "Personal-mode primary Statistics tab for Joy"
+  },
+  "analyticsTabMyJoy": "私のときめき",
+  "@analyticsTabMyJoy": {
+    "description": "Family-mode primary Statistics tab for the current user's Joy"
+  },
+  "analyticsTabJoyCount": "{count}回",
+  "@analyticsTabJoyCount": {
+    "description": "Compact Joy entry count shown in the primary Statistics tab",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsSectionTrend": "支出の推移",
   "@analyticsSectionTrend": {
     "description": "Section header above the within-month spend trend card (round-5 r5 mock, 实用 section)"
@@ -3590,9 +3615,9 @@
     "description": "Design-04 setup screen: letterspaced eyebrow above the title"
   },
   "onboardingSetupTopbar": "初期設定",
-  "onboardingSetupTitle": "基本設定",
+  "onboardingSetupTitle": "初期設定",
   "@onboardingSetupTitle": {
-    "description": "Design-04 setup screen: two-line title"
+    "description": "Compact centered title for the onboarding setup screen"
   },
   "onboardingRowName": "お名前・必須",
   "@onboardingRowName": {
@@ -3644,9 +3669,11 @@
   "onboardingSecurityPinMissing": "PINがまだ設定されていません",
   "onboardingSecurityPinSetupHint": "2回入力すると有効になります",
   "onboardingSecurityPinSetup": "4桁のPINを設定",
+  "onboardingSecurityPinSetAction": "設定",
   "onboardingSecurityPinComplete": "PINを設定しました",
   "onboardingSecurityPinCompleteDescription": "4桁のPINで保護されています",
   "onboardingSecurityPinChange": "PINを変更",
+  "onboardingSecurityPinUpdateAction": "更新",
   "onboardingSetupNameRequiredHint": "お名前を入力すると開始できます",
   "onboardingSetupPinRequiredHint": "PINを設定すると開始できます",
   "onboardingSetupChangeLaterHint": "あとから設定でいつでも変更できます",
@@ -3694,9 +3721,29 @@
   "@appLockSetPinTitle": {
     "description": "Set-PIN flow: title for the first passcode entry (Plan 10)"
   },
+  "appLockUpdatePinTitle": "パスコードを更新",
+  "@appLockUpdatePinTitle": {
+    "description": "Set-PIN flow: first-step title when replacing an existing passcode"
+  },
+  "appLockSetPinDescription": "Home Pocket のロック解除に使う、覚えやすい4桁を選んでください。",
+  "@appLockSetPinDescription": {
+    "description": "Set-PIN flow: supporting copy for the first passcode entry"
+  },
   "appLockConfirmPinTitle": "パスコードを再入力",
   "@appLockConfirmPinTitle": {
     "description": "Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)"
+  },
+  "appLockConfirmPinDescription": "確認のため、同じ4桁をもう一度入力してください。",
+  "@appLockConfirmPinDescription": {
+    "description": "Set-PIN flow: supporting copy for the confirmation entry"
+  },
+  "appLockPinSetupProgress": "ステップ {current} / {total}",
+  "@appLockPinSetupProgress": {
+    "description": "Set-PIN flow: accessible two-step progress label",
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
   },
   "appLockPinMismatch": "パスコードが一致しません",
   "@appLockPinMismatch": {
