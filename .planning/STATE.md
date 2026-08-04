@@ -121,6 +121,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260804-tch | 修正首页卡片易撕口与页面阴影背景的视觉色差 | 2026-08-04 | 927caf6a | — |
 | 260804-tln | 去掉首页卡片易撕口开口处贯穿上下区域的直线边框 | 2026-08-04 | 734b7c5e | — |
 | 260804-pih | 统一首页空悦己卡片上下区域为同一表面，移除内部色差并同步浅深 golden | 2026-08-04 | c6c3fad1 | [260804-pih-golden](./quick/260804-pih-golden/) |
+| 260804-fast-amount-edit-align | 修复账目编辑页金额右侧编辑图标未与金额垂直居中 | 2026-08-04 | f4c473f3 | — |
 
 ## Last Milestone Snapshot (v1.9)
 
