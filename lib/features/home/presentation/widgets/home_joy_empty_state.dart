@@ -28,10 +28,6 @@ class HomeJoyEmptyState extends StatelessWidget {
       key: const Key('home-joy-empty-state'),
       constraints: const BoxConstraints(minHeight: 166),
       padding: const EdgeInsets.fromLTRB(15, 16, 15, 17),
-      decoration: BoxDecoration(
-        color: Color.lerp(palette.card, palette.joyLight, 0.18),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(21)),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
