@@ -582,6 +582,27 @@ void main() {
       },
     );
 
+    testWidgets('parent is the sole card surface and retains one outer shadow', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(snapshot: _singleNoJoyWithDailySpend()),
+      );
+      await tester.pumpAndSettle();
+
+      final parent = tester.widget<Container>(
+        find.byKey(const Key('home-hero-main-surface')),
+      );
+      final child = tester.widget<Container>(
+        find.byKey(const Key('home-joy-empty-state')),
+      );
+
+      final parentDecoration = parent.decoration! as BoxDecoration;
+      expect(parentDecoration.boxShadow, hasLength(1));
+      expect(child.color, isNull);
+      expect(child.decoration, isNull);
+    });
+
     testWidgets('C2 prompts forward the selected Joy-entry intent', (
       tester,
     ) async {
