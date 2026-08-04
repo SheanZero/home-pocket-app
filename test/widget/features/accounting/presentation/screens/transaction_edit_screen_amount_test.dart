@@ -251,6 +251,11 @@ void main() {
         closeTo(6, 0.5),
         reason: 'the 16dp edit affordance follows the right-aligned amount',
       );
+      expect(
+        tester.getCenter(editAffordance).dy,
+        closeTo(tester.getCenter(amount).dy, 0.5),
+        reason: 'the edit affordance is vertically centered with the amount',
+      );
 
       final saveCheck = find.byKey(
         const ValueKey('transaction-edit-save-check'),

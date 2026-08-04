@@ -273,7 +273,7 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
                   Positioned(
                     right: 18,
                     top: 0,
-                    bottom: 0,
+                    height: 72,
                     child: IgnorePointer(
                       child: Icon(
                         Icons.edit_outlined,
