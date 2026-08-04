@@ -123,6 +123,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260804-pih | 统一首页空悦己卡片上下区域为同一表面，移除内部色差并同步浅深 golden | 2026-08-04 | c6c3fad1 | [260804-pih-golden](./quick/260804-pih-golden/) |
 | 260804-fast-amount-edit-align | 修复账目编辑页金额右侧编辑图标未与金额垂直居中 | 2026-08-04 | f4c473f3 | — |
 | 260804-rjw | 修复最近支出与明细同日账目按创建时间倒序 | 2026-08-04 | 9cacf498 | [260804-rjw-recent-created-at-sort](./quick/260804-rjw-recent-created-at-sort/) |
+| 260804-fast-privacy-analytics | 移除 Android Firebase Analytics 与广告标识权限，保留 FCM，并增加隐私依赖回归门禁 | 2026-08-04 | 1aa59c4f | — |
 
 ## Last Milestone Snapshot (v1.9)
 
