@@ -47,6 +47,7 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Firebase Core/Messaging are supplied by their Flutter plugins. Keep
+    // behavioral analytics and advertising-ID dependencies out of this app.
     implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
-    implementation("com.google.firebase:firebase-analytics")
 }
