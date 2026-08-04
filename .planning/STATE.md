@@ -118,6 +118,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260802-tai | 创建家庭与家庭管理统一分享温馨的三语邀请文本（家庭名、邀请码、10 分钟有效提示），不再只分享裸码 | 2026-08-02 | 3e04b70f | [260802-tai-warm-family-invite-copy](./quick/260802-tai-warm-family-invite-copy/) |
 | 260802-tfv | 家庭邀请码在三个入口按秒显示 MM:SS 实时倒计时，到期自动以红色显示“已失效” | 2026-08-02 | 3e04b70f | [260802-tfv-invite-expiry-countdown](./quick/260802-tfv-invite-expiry-countdown/) |
 | 260804-ok7 | 修正首次 Face ID 授权与生物识别可用性判断 | 2026-08-04 | 32ccec3a | [260804-ok7-face-id](./quick/260804-ok7-face-id/) |
+| 260804-tch | 修正首页卡片易撕口与页面阴影背景的视觉色差 | 2026-08-04 | 927caf6a | — |
 
 ## Last Milestone Snapshot (v1.9)
 
