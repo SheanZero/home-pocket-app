@@ -21,6 +21,7 @@ import 'package:home_pocket/features/profile/presentation/widgets/avatar_display
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
+import 'package:home_pocket/infrastructure/security/models/auth_result.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/shared/constants/warm_emojis.dart';
 import 'package:mocktail/mocktail.dart';
@@ -63,6 +64,16 @@ class _FakeUserProfileRepository implements UserProfileRepository {
 }
 
 class _MockAppLockService extends Mock implements AppLockService {}
+
+class _MockBiometricService extends Mock implements BiometricService {}
+
+class _SuccessfulBiometricService extends Fake implements BiometricService {
+  @override
+  Future<AuthResult> authenticate({
+    required String reason,
+    bool biometricOnly = true,
+  }) async => const AuthResult.success();
+}
 
 class _BlockingSaveUserProfileUseCase extends SaveUserProfileUseCase {
   _BlockingSaveUserProfileUseCase(super.repository, this.completer);
@@ -139,11 +150,19 @@ Future<_Harness> _buildHarness({
   );
 }
 
-Widget _host({List<Override> overrides = const [], VoidCallback? onConfirmed}) {
+Widget _host({
+  List<Override> overrides = const [],
+  VoidCallback? onConfirmed,
+  BiometricAvailability biometricAvailability = BiometricAvailability.faceId,
+  BiometricService? biometricService,
+}) {
   return ProviderScope(
     overrides: [
       biometricAvailabilityProvider.overrideWith(
-        (_) async => BiometricAvailability.faceId,
+        (_) async => biometricAvailability,
+      ),
+      biometricServiceProvider.overrideWithValue(
+        biometricService ?? _SuccessfulBiometricService(),
       ),
       ...overrides,
     ],
@@ -302,6 +321,99 @@ void main() {
         expect(find.text('おすすめ'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'capable hardware with hidden types stays selectable and first enable '
+      'actively requests biometric authorization',
+      (tester) async {
+        final biometric = _MockBiometricService();
+        when(
+          () => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: any(named: 'biometricOnly'),
+          ),
+        ).thenAnswer((_) async => const AuthResult.success());
+
+        await tester.pumpWidget(
+          _host(
+            biometricAvailability: BiometricAvailability.generic,
+            biometricService: biometric,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const ValueKey('onboarding-security-toggle')),
+        );
+        await tester.pumpAndSettle();
+
+        final biometricRow = find.byKey(
+          const ValueKey('onboarding-security-biometric'),
+        );
+        expect(biometricRow, findsOneWidget);
+        expect(
+          find.descendant(
+            of: biometricRow,
+            matching: find.byIcon(Icons.radio_button_checked),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          tester
+              .widget<Opacity>(
+                find.descendant(
+                  of: biometricRow,
+                  matching: find.byType(Opacity),
+                ),
+              )
+              .opacity,
+          1,
+        );
+        verify(
+          () => biometric.authenticate(
+            reason: any(named: 'reason'),
+            biometricOnly: true,
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets('failed first biometric authorization keeps security on PIN', (
+      tester,
+    ) async {
+      final biometric = _MockBiometricService();
+      when(
+        () => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: any(named: 'biometricOnly'),
+        ),
+      ).thenAnswer((_) async => const AuthResult.fallbackToPIN());
+
+      await tester.pumpWidget(
+        _host(
+          biometricAvailability: BiometricAvailability.generic,
+          biometricService: biometric,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const ValueKey('onboarding-security-toggle')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('onboarding-security-pin')),
+          matching: find.byIcon(Icons.radio_button_checked),
+        ),
+        findsOneWidget,
+      );
+    });
 
     testWidgets(
       'PIN choice expands setup guidance and keeps start disabled until '

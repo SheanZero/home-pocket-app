@@ -5,6 +5,7 @@ import '../../../../application/security/app_lock_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
+import '../../../../infrastructure/security/models/auth_result.dart';
 import '../../../../infrastructure/security/providers.dart';
 import '../../../../shared/widgets/settings_section_card.dart';
 import '../../../applock/presentation/providers/repository_providers.dart';
@@ -45,16 +46,12 @@ class SecuritySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = S.of(context);
-    final biometricAvailable = switch (ref
-        .watch(biometricAvailabilityProvider)
-        .value) {
-      BiometricAvailability.faceId ||
-      BiometricAvailability.fingerprint ||
-      BiometricAvailability.strongBiometric ||
-      BiometricAvailability.weakBiometric ||
-      BiometricAvailability.generic => true,
-      _ => false,
-    };
+    final biometricAvailable =
+        ref
+            .watch(biometricAvailabilityProvider)
+            .value
+            ?.canAttemptAuthentication ??
+        false;
     final biometricAvailability = ref
         .watch(biometricAvailabilityProvider)
         .value;
@@ -99,12 +96,8 @@ class SecuritySection extends ConsumerWidget {
               title: Text(compact ? biometricLabel : l.securityBiometricUnlock),
               subtitle: Text(l.securityBiometricUnlockDescription),
               value: settings.biometricUnlockEnabled,
-              onChanged: (value) async {
-                await ref
-                    .read(settingsRepositoryProvider)
-                    .setBiometricUnlockEnabled(value);
-                ref.invalidate(appSettingsProvider);
-              },
+              onChanged: (value) =>
+                  _setBiometricUnlock(context, ref, enabled: value),
             ),
           SettingsActionTile(
             icon: Icons.password,
@@ -139,6 +132,30 @@ class SecuritySection extends ConsumerWidget {
     if (!ok || !context.mounted) return;
     final changed = await _openSetPin(context, ref, isUpdating: true);
     if (changed) ref.invalidate(appSettingsProvider);
+  }
+
+  /// Enabling biometrics performs a real authentication first. Besides
+  /// confirming the user, this is the operation that asks iOS for this app's
+  /// initial Face ID authorization; capability probing alone cannot do that.
+  Future<void> _setBiometricUnlock(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool enabled,
+  }) async {
+    if (enabled) {
+      final result = await ref
+          .read(biometricServiceProvider)
+          .authenticate(reason: S.of(context).appLockReauthReason);
+      if (!context.mounted || result is! AuthResultSuccess) {
+        return;
+      }
+      ref.invalidate(biometricAvailabilityProvider);
+    }
+
+    await ref
+        .read(settingsRepositoryProvider)
+        .setBiometricUnlockEnabled(enabled);
+    ref.invalidate(appSettingsProvider);
   }
 
   /// Pushes [SetPinScreen]; returns true only when a PIN was successfully set.

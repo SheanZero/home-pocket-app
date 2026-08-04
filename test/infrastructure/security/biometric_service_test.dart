@@ -30,7 +30,8 @@ void main() {
     );
 
     test(
-      'returns notEnrolled when supported but no biometrics enrolled',
+      'returns generic when hardware can authenticate but enrolled types are '
+      'hidden before app authorization',
       () async {
         when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -40,9 +41,20 @@ void main() {
 
         final result = await service.checkAvailability();
 
-        expect(result, BiometricAvailability.notEnrolled);
+        expect(result, BiometricAvailability.generic);
       },
     );
+
+    test('returns notEnrolled when device support exists but biometrics cannot '
+        'currently be checked', () async {
+      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => false);
+      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
+      when(() => mockAuth.getAvailableBiometrics()).thenAnswer((_) async => []);
+
+      final result = await service.checkAvailability();
+
+      expect(result, BiometricAvailability.notEnrolled);
+    });
 
     test('returns faceId when face biometric is available', () async {
       when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
@@ -127,6 +139,33 @@ void main() {
       expect(result, const AuthResult.success());
     });
 
+    test('attempts authentication when capable hardware hides enrolled types '
+        'before first app authorization', () async {
+      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
+      when(() => mockAuth.getAvailableBiometrics()).thenAnswer((_) async => []);
+      when(
+        () => mockAuth.authenticate(
+          localizedReason: any(named: 'localizedReason'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+        ),
+      ).thenAnswer((_) async => true);
+
+      final result = await service.authenticate(reason: 'Enable Face ID');
+
+      expect(result, const AuthResult.success());
+      verify(
+        () => mockAuth.authenticate(
+          localizedReason: 'Enable Face ID',
+          biometricOnly: true,
+          sensitiveTransaction: true,
+          persistAcrossBackgrounding: true,
+        ),
+      ).called(1);
+    });
+
     // G2 (55-12 / LOCK-05,06,10): app-lock auth must be biometric-only so iOS
     // never renders its own device-passcode sheet. Calling authenticate WITHOUT
     // an explicit biometricOnly argument must forward biometricOnly:true
@@ -141,7 +180,9 @@ void main() {
             localizedReason: any(named: 'localizedReason'),
             biometricOnly: any(named: 'biometricOnly'),
             sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
         ).thenAnswer((_) async => true);
 
@@ -152,7 +193,9 @@ void main() {
             localizedReason: any(named: 'localizedReason'),
             biometricOnly: true,
             sensitiveTransaction: any(named: 'sensitiveTransaction'),
-            persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
         ).called(1);
       },
@@ -248,7 +291,7 @@ void main() {
     });
 
     test('returns fallbackToPIN when biometrics not enrolled', () async {
-      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => false);
       when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
       when(() => mockAuth.getAvailableBiometrics()).thenAnswer((_) async => []);
 
@@ -309,19 +352,16 @@ void main() {
 
     // Residual safety net: a stray PlatformException (legacy throw type) must
     // still resolve to PIN fallback, never an uncaught throw.
-    test(
-      'residual net: stray PlatformException -> fallbackToPIN',
-      () async {
-        setupAvailableBiometrics();
-        whenAuthenticateThrows(
-          PlatformException(code: 'LockedOut', message: 'legacy'),
-        );
+    test('residual net: stray PlatformException -> fallbackToPIN', () async {
+      setupAvailableBiometrics();
+      whenAuthenticateThrows(
+        PlatformException(code: 'LockedOut', message: 'legacy'),
+      );
 
-        final result = await service.authenticate(reason: 'test');
+      final result = await service.authenticate(reason: 'test');
 
-        expect(result, const AuthResult.fallbackToPIN());
-      },
-    );
+      expect(result, const AuthResult.fallbackToPIN());
+    });
 
     // Residual safety net: any other Exception type -> PIN fallback.
     test('residual net: generic Exception -> fallbackToPIN', () async {

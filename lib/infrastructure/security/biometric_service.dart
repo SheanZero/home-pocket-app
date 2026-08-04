@@ -37,6 +37,24 @@ enum BiometricAvailability {
   notSupported,
 }
 
+extension BiometricAvailabilityCapability on BiometricAvailability {
+  /// Whether it is valid to ask the platform to authenticate.
+  ///
+  /// [generic] deliberately includes the iOS pre-authorization state: the
+  /// device reports biometric capability, but does not reveal Face ID/Touch ID
+  /// in `getAvailableBiometrics()` until this app performs its first actual
+  /// authentication request.
+  bool get canAttemptAuthentication => switch (this) {
+    BiometricAvailability.faceId ||
+    BiometricAvailability.fingerprint ||
+    BiometricAvailability.strongBiometric ||
+    BiometricAvailability.weakBiometric ||
+    BiometricAvailability.generic => true,
+    BiometricAvailability.notEnrolled ||
+    BiometricAvailability.notSupported => false,
+  };
+}
+
 /// Biometric authentication service wrapping platform APIs.
 ///
 /// Encapsulates Face ID / Touch ID / Fingerprint authentication
@@ -63,7 +81,14 @@ class BiometricService {
     final available = await _localAuth.getAvailableBiometrics();
 
     if (available.isEmpty) {
-      return BiometricAvailability.notEnrolled;
+      // On iOS, LocalAuthentication can confirm that biometric hardware is
+      // usable while withholding the enrolled Face ID/Touch ID type until the
+      // app makes its first authentication request. Treat that state as
+      // type-unknown but actionable, otherwise the disabled UI can never
+      // trigger the system permission prompt.
+      return canCheck
+          ? BiometricAvailability.generic
+          : BiometricAvailability.notEnrolled;
     }
 
     if (available.contains(BiometricType.face)) {
@@ -128,7 +153,8 @@ class BiometricService {
       // be added non-breakingly — all on the same PIN-fallback path.
       return switch (e.code) {
         LocalAuthExceptionCode.temporaryLockout ||
-        LocalAuthExceptionCode.biometricLockout => const AuthResult.fallbackToPIN(),
+        LocalAuthExceptionCode.biometricLockout =>
+          const AuthResult.fallbackToPIN(),
         _ => const AuthResult.fallbackToPIN(),
       };
     } on PlatformException catch (_) {

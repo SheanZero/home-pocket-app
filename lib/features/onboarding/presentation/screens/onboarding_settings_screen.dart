@@ -7,6 +7,7 @@ import '../../../../application/profile/save_user_profile_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
+import '../../../../infrastructure/security/models/auth_result.dart';
 import '../../../../infrastructure/security/providers.dart';
 import '../../../../shared/constants/warm_emojis.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
@@ -81,6 +82,8 @@ class _OnboardingSettingsScreenState
   _OnboardingSecurityMethod _securityMethod =
       _OnboardingSecurityMethod.biometric;
   bool _pinConfigured = false;
+  bool _biometricAuthorized = false;
+  bool _biometricAuthorizationInProgress = false;
 
   bool _isSaving = false;
 
@@ -271,19 +274,78 @@ class _OnboardingSettingsScreenState
     });
   }
 
-  void _toggleSecurity(bool enabled, {required bool biometricAvailable}) {
+  Future<void> _toggleSecurity(
+    bool enabled, {
+    required bool biometricAvailable,
+  }) async {
+    if (_biometricAuthorizationInProgress) {
+      return;
+    }
+    if (!enabled) {
+      setState(() => _securityEnabled = false);
+      return;
+    }
+
     setState(() {
-      _securityEnabled = enabled;
-      if (enabled &&
-          _securityMethod == _OnboardingSecurityMethod.biometric &&
+      _securityEnabled = true;
+      if (_securityMethod == _OnboardingSecurityMethod.biometric &&
           !biometricAvailable) {
         _securityMethod = _OnboardingSecurityMethod.pin;
       }
     });
+
+    if (_securityMethod != _OnboardingSecurityMethod.biometric) {
+      return;
+    }
+    final authorized = await _authorizeBiometric();
+    if (!authorized && mounted) {
+      setState(() => _securityMethod = _OnboardingSecurityMethod.pin);
+    }
   }
 
-  void _selectSecurityMethod(_OnboardingSecurityMethod method) {
-    setState(() => _securityMethod = method);
+  Future<void> _selectSecurityMethod(_OnboardingSecurityMethod method) async {
+    if (_biometricAuthorizationInProgress) {
+      return;
+    }
+    if (method == _OnboardingSecurityMethod.pin) {
+      setState(() => _securityMethod = method);
+      return;
+    }
+
+    final authorized = await _authorizeBiometric();
+    if (!mounted) {
+      return;
+    }
+    setState(
+      () => _securityMethod = authorized
+          ? _OnboardingSecurityMethod.biometric
+          : _OnboardingSecurityMethod.pin,
+    );
+  }
+
+  Future<bool> _authorizeBiometric() async {
+    if (_biometricAuthorized) {
+      return true;
+    }
+    if (_biometricAuthorizationInProgress) {
+      return false;
+    }
+
+    setState(() => _biometricAuthorizationInProgress = true);
+    final result = await ref
+        .read(biometricServiceProvider)
+        .authenticate(reason: S.of(context).appLockReauthReason);
+    if (!mounted) {
+      return false;
+    }
+
+    final authorized = result is AuthResultSuccess;
+    ref.invalidate(biometricAvailabilityProvider);
+    setState(() {
+      _biometricAuthorizationInProgress = false;
+      _biometricAuthorized = authorized;
+    });
+    return authorized;
   }
 
   Future<bool> _openSetPin() async {
@@ -412,16 +474,12 @@ class _OnboardingSettingsScreenState
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final palette = context.palette;
-    final biometricAvailable = switch (ref
-        .watch(biometricAvailabilityProvider)
-        .value) {
-      BiometricAvailability.faceId ||
-      BiometricAvailability.fingerprint ||
-      BiometricAvailability.strongBiometric ||
-      BiometricAvailability.weakBiometric ||
-      BiometricAvailability.generic => true,
-      _ => false,
-    };
+    final biometricAvailable =
+        ref
+            .watch(biometricAvailabilityProvider)
+            .value
+            ?.canAttemptAuthentication ??
+        false;
     final languageValue = _selectedLanguageSegment == 'system'
         ? l10n.onboardingLanguageAuto
         : _languageName(l10n, _selectedLanguageSegment);

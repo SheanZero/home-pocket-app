@@ -3,9 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/security/app_lock_service.dart';
 import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
+import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/security_section.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
+import 'package:home_pocket/infrastructure/security/models/auth_result.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/shared/widgets/settings_section_card.dart';
@@ -14,6 +17,10 @@ import 'package:mocktail/mocktail.dart';
 import '../../../helpers/test_localizations.dart';
 
 class _MockAppLockService extends Mock implements AppLockService {}
+
+class _MockBiometricService extends Mock implements BiometricService {}
+
+class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
 void main() {
   late _MockAppLockService appLock;
@@ -31,6 +38,8 @@ void main() {
     WidgetTester tester, {
     required AppSettings settings,
     BiometricAvailability availability = BiometricAvailability.faceId,
+    BiometricService? biometricService,
+    SettingsRepository? settingsRepository,
   }) async {
     await tester.pumpWidget(
       createLocalizedWidget(
@@ -42,7 +51,13 @@ void main() {
         locale: const Locale('ja'),
         overrides: [
           appLockServiceProvider.overrideWithValue(appLock),
-          biometricAvailabilityProvider.overrideWith((ref) async => availability),
+          biometricAvailabilityProvider.overrideWith(
+            (ref) async => availability,
+          ),
+          if (biometricService != null)
+            biometricServiceProvider.overrideWithValue(biometricService),
+          if (settingsRepository != null)
+            settingsRepositoryProvider.overrideWithValue(settingsRepository),
         ],
       ),
     );
@@ -187,4 +202,79 @@ void main() {
     expect(find.text(l.securityChangePin), findsOneWidget);
     expect(find.text(l.securityBiometricUnlock), findsNothing);
   });
+
+  testWidgets(
+    'enabling biometric unlock requests authorization before persisting',
+    (tester) async {
+      final biometric = _MockBiometricService();
+      final settingsRepository = _MockSettingsRepository();
+      when(
+        () => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: any(named: 'biometricOnly'),
+        ),
+      ).thenAnswer((_) async => const AuthResult.success());
+      when(
+        () => settingsRepository.setBiometricUnlockEnabled(true),
+      ).thenAnswer((_) async {});
+
+      await pump(
+        tester,
+        settings: const AppSettings(appLockEnabled: true),
+        availability: BiometricAvailability.generic,
+        biometricService: biometric,
+        settingsRepository: settingsRepository,
+      );
+
+      await tester.tap(
+        find.widgetWithText(
+          SwitchListTile,
+          l10nOf(tester).securityBiometricUnlock,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      verify(
+        () => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: true,
+        ),
+      ).called(1);
+      verify(
+        () => settingsRepository.setBiometricUnlockEnabled(true),
+      ).called(1);
+    },
+  );
+
+  testWidgets(
+    'failed biometric authorization does not persist biometric unlock',
+    (tester) async {
+      final biometric = _MockBiometricService();
+      final settingsRepository = _MockSettingsRepository();
+      when(
+        () => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: any(named: 'biometricOnly'),
+        ),
+      ).thenAnswer((_) async => const AuthResult.fallbackToPIN());
+
+      await pump(
+        tester,
+        settings: const AppSettings(appLockEnabled: true),
+        availability: BiometricAvailability.generic,
+        biometricService: biometric,
+        settingsRepository: settingsRepository,
+      );
+
+      await tester.tap(
+        find.widgetWithText(
+          SwitchListTile,
+          l10nOf(tester).securityBiometricUnlock,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      verifyNever(() => settingsRepository.setBiometricUnlockEnabled(true));
+    },
+  );
 }
