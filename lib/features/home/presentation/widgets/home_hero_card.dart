@@ -230,26 +230,48 @@ class HomeHeroCard extends StatelessWidget {
       palette.navShadow.withValues(alpha: palette.navShadow.a * 0.5),
       palette.background,
     );
+    final isLeftNotch = alignment == Alignment.centerRight;
     return ClipRect(
       key: key,
-      child: Align(
-        alignment: alignment,
-        widthFactor: 0.5,
-        child: Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: cutoutColor,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Color.lerp(
-                palette.borderDefault,
-                palette.accentPrimary,
-                0.12,
-              )!,
+      child: Stack(
+        children: [
+          Align(
+            alignment: alignment,
+            widthFactor: 0.5,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: cutoutColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Color.lerp(
+                    palette.borderDefault,
+                    palette.accentPrimary,
+                    0.12,
+                  )!,
+                ),
+              ),
             ),
           ),
-        ),
+          // Mask the card's straight outer border through the notch opening;
+          // leave only the concave arc joining the border above and below.
+          Positioned(
+            top: 1,
+            bottom: 1,
+            left: isLeftNotch ? 0 : null,
+            right: isLeftNotch ? null : 0,
+            width: 2,
+            child: ColoredBox(
+              key: Key(
+                isLeftNotch
+                    ? 'home-hero-tear-notch-left-opening-mask'
+                    : 'home-hero-tear-notch-right-opening-mask',
+              ),
+              color: cutoutColor,
+            ),
+          ),
+        ],
       ),
     );
   }

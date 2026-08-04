@@ -363,6 +363,9 @@ void main() {
         final favoriteSection = find.byKey(const Key('home-favorite-section'));
         final leftNotch = find.byKey(const Key('home-hero-tear-notch-left'));
         final rightNotch = find.byKey(const Key('home-hero-tear-notch-right'));
+        final rightOpeningMask = find.byKey(
+          const Key('home-hero-tear-notch-right-opening-mask'),
+        );
 
         expect(mainSurface, findsOneWidget);
         expect(favoriteSection, findsOneWidget);
@@ -376,6 +379,7 @@ void main() {
         );
         expect(leftNotch, findsOneWidget);
         expect(rightNotch, findsOneWidget);
+        expect(rightOpeningMask, findsOneWidget);
 
         final surfaceRect = tester.getRect(mainSurface);
         final leftRect = tester.getRect(leftNotch);
@@ -384,6 +388,12 @@ void main() {
         expect(rightRect.size, const Size(10, 20));
         expect(leftRect.left, closeTo(surfaceRect.left, 0.01));
         expect(rightRect.right, closeTo(surfaceRect.right, 0.01));
+
+        final rightOpeningMaskRect = tester.getRect(rightOpeningMask);
+        expect(rightOpeningMaskRect.width, 2);
+        expect(rightOpeningMaskRect.top, rightRect.top + 1);
+        expect(rightOpeningMaskRect.bottom, rightRect.bottom - 1);
+        expect(rightOpeningMaskRect.right, rightRect.right);
 
         final rightNotchFill =
             tester
