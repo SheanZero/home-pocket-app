@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 Phase: 56 — setting (COMPLETE)
 Plan: 7/7 executed (56-01..56-07; 56-07 gap-closure)
 Status: Phase 56 complete & re-verified (5/5 success criteria; 10/10 req IDs + LEGAL-V2-01 traced) — 56-07 closed UAT Test 4; milestone v2.0 ready to close
-Last activity: 2026-08-04 — Completed quick task 260804-ok7: 修正首次 Face ID 授权与生物识别可用性判断；代码提交 32ccec3a。
+Last activity: 2026-08-04 - Completed quick task 260804-pih: 统一首页空悦己卡片上下区域为同一表面，移除内部色差并同步浅深 golden
 
 Progress: Phase 56 COMPLETE (7/7: 56-01..56-07, re-verified 5/5 SC); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete. Milestone v2.0 = 4/4 phases (100%).
 
@@ -120,6 +120,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260804-ok7 | 修正首次 Face ID 授权与生物识别可用性判断 | 2026-08-04 | 32ccec3a | [260804-ok7-face-id](./quick/260804-ok7-face-id/) |
 | 260804-tch | 修正首页卡片易撕口与页面阴影背景的视觉色差 | 2026-08-04 | 927caf6a | — |
 | 260804-tln | 去掉首页卡片易撕口开口处贯穿上下区域的直线边框 | 2026-08-04 | 734b7c5e | — |
+| 260804-pih | 统一首页空悦己卡片上下区域为同一表面，移除内部色差并同步浅深 golden | 2026-08-04 | c6c3fad1 | [260804-pih-golden](./quick/260804-pih-golden/) |
 
 ## Last Milestone Snapshot (v1.9)
 
