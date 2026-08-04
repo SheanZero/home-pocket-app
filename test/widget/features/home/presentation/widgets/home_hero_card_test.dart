@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
@@ -383,6 +384,26 @@ void main() {
         expect(rightRect.size, const Size(10, 20));
         expect(leftRect.left, closeTo(surfaceRect.left, 0.01));
         expect(rightRect.right, closeTo(surfaceRect.right, 0.01));
+
+        final rightNotchFill =
+            tester
+                    .widget<Container>(
+                      find.descendant(
+                        of: rightNotch,
+                        matching: find.byType(Container),
+                      ),
+                    )
+                    .decoration!
+                as BoxDecoration;
+        expect(
+          rightNotchFill.color,
+          Color.alphaBlend(
+            AppPalette.light.navShadow.withValues(
+              alpha: AppPalette.light.navShadow.a * 0.5,
+            ),
+            AppPalette.light.background,
+          ),
+        );
       },
     );
 

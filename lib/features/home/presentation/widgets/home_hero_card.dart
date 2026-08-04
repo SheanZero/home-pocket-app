@@ -223,6 +223,13 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   Widget _heroTearNotch(AppPalette palette, Key key, Alignment alignment) {
+    // The notch is painted over the card's blurred shadow. Compensate for that
+    // shadow so the cut-out visually continues the surrounding page instead
+    // of appearing as a brighter semicircle.
+    final cutoutColor = Color.alphaBlend(
+      palette.navShadow.withValues(alpha: palette.navShadow.a * 0.5),
+      palette.background,
+    );
     return ClipRect(
       key: key,
       child: Align(
@@ -232,7 +239,7 @@ class HomeHeroCard extends StatelessWidget {
           width: 20,
           height: 20,
           decoration: BoxDecoration(
-            color: palette.background,
+            color: cutoutColor,
             shape: BoxShape.circle,
             border: Border.all(
               color: Color.lerp(
