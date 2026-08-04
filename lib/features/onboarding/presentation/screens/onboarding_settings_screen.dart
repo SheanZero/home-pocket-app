@@ -8,7 +8,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
 import '../../../../infrastructure/security/providers.dart';
-import '../../../../shared/constants/avatar_icon_ids.dart';
+import '../../../../shared/constants/warm_emojis.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../accounting/presentation/widgets/currency_selector_sheet.dart';
@@ -89,7 +89,7 @@ class _OnboardingSettingsScreenState
   @override
   void initState() {
     super.initState();
-    _selectedEmoji = widget.initialAvatarId ?? randomAvatarIconId();
+    _selectedEmoji = widget.initialAvatarId ?? randomWarmEmoji();
     _nicknameController = TextEditingController();
     // Voice tracks the (untouched) UI-language preselect, always concrete.
     _voiceLanguageCode = resolveVoiceLanguageForOnboarding(
@@ -287,9 +287,19 @@ class _OnboardingSettingsScreenState
   }
 
   Future<bool> _openSetPin() async {
-    final result = await Navigator.of(
-      context,
-    ).push<bool>(MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()));
+    // The nickname field can still own focus when the PIN action is tapped.
+    // Release it before pushing the app-owned keypad so the iOS QWERTY
+    // keyboard cannot linger over the transition.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) {
+      return false;
+    }
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => SetPinScreen(isUpdating: _pinConfigured),
+      ),
+    );
     if (result != true || !mounted) {
       return false;
     }
@@ -433,19 +443,15 @@ class _OnboardingSettingsScreenState
             Column(
               children: [
                 SizedBox(
-                  height: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Row(
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).maybePop(),
-                          child: Text(
-                            MaterialLocalizations.of(context).backButtonTooltip,
-                          ),
-                        ),
-                        const Spacer(),
-                      ],
+                  height: 52,
+                  child: Center(
+                    child: Text(
+                      l10n.onboardingSetupTitle,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: palette.textPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -453,26 +459,6 @@ class _OnboardingSettingsScreenState
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
                     children: [
-                      Text(
-                        l10n.onboardingSetupEyebrow,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.8,
-                          color: palette.dailyText,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.onboardingSetupTitle,
-                        style: TextStyle(
-                          fontSize: 30,
-                          height: 1.25,
-                          fontWeight: FontWeight.w700,
-                          color: palette.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 19),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1140,16 +1126,17 @@ class _OnboardingSecurityCard extends StatelessWidget {
                     selected: method == _OnboardingSecurityMethod.pin,
                     onTap: () => onSelectMethod(_OnboardingSecurityMethod.pin),
                   ),
-                  if (method == _OnboardingSecurityMethod.pin) ...[
-                    Divider(height: 1, color: palette.borderDefault),
-                    if (pinConfigured)
-                      _PinCompletion(onSetPin: onSetPin)
-                    else
-                      _PinGuidance(onSetPin: onSetPin),
-                  ],
                 ],
               ),
             ),
+            if (method == _OnboardingSecurityMethod.pin) ...[
+              const SizedBox(height: 9),
+              _PinStatusRow(
+                key: const ValueKey('onboarding-pin-status-row'),
+                configured: pinConfigured,
+                onSetPin: onSetPin,
+              ),
+            ],
           ],
         ],
       ),
@@ -1269,108 +1256,117 @@ class _SecurityMethodRow extends StatelessWidget {
   }
 }
 
-class _PinGuidance extends StatelessWidget {
-  const _PinGuidance({required this.onSetPin});
+/// Sketch 004A: one compact status/action row for both pending and configured
+/// states. Keeping the same structure prevents the security card from jumping
+/// into a different nested layout after a PIN is saved.
+class _PinStatusRow extends StatelessWidget {
+  const _PinStatusRow({
+    super.key,
+    required this.configured,
+    required this.onSetPin,
+  });
 
+  final bool configured;
   final Future<bool> Function() onSetPin;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final l10n = S.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(59, 11, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.onboardingSecurityPinMissing,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: palette.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            l10n.onboardingSecurityPinSetupHint,
-            style: TextStyle(fontSize: 10.5, color: palette.textSecondary),
-          ),
-          const SizedBox(height: 9),
-          FilledButton.icon(
-            onPressed: onSetPin,
-            icon: const Icon(Icons.chevron_right, size: 18),
-            label: Text(l10n.onboardingSecurityPinSetup),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, 42),
-              backgroundColor: palette.info,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
+    final statusColor = configured ? palette.success : palette.warning;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 64),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(
+          (configured ? palette.successLight : palette.accentPrimaryLight)
+              .withValues(alpha: 0.48),
+          palette.card,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.accentPrimaryBorder),
       ),
-    );
-  }
-}
-
-class _PinCompletion extends StatelessWidget {
-  const _PinCompletion({required this.onSetPin});
-
-  final Future<bool> Function() onSetPin;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final l10n = S.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(59, 11, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(Icons.check_circle, size: 22, color: palette.dailyText),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: palette.accentPrimaryLight,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            alignment: Alignment.center,
+            child: Icon(Icons.tag, size: 22, color: palette.dailyText),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      l10n.onboardingSecurityPinComplete,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: palette.textPrimary,
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(height: 1),
-                    Text(
-                      l10n.onboardingSecurityPinCompleteDescription,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        color: palette.textSecondary,
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        configured
+                            ? l10n.onboardingSecurityPinComplete
+                            : l10n.onboardingSecurityPinMissing,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: palette.textPrimary,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  configured
+                      ? l10n.onboardingSecurityPinCompleteDescription
+                      : l10n.onboardingSecurityPinSetupHint,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    height: 1.25,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(width: 8),
           OutlinedButton(
+            key: const ValueKey('onboarding-pin-status-action'),
             onPressed: onSetPin,
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 13),
               foregroundColor: palette.dailyText,
               side: BorderSide(color: palette.accentPrimary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(11),
               ),
+              textStyle: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            child: Text(l10n.onboardingSecurityPinChange),
+            child: Text(
+              configured
+                  ? l10n.onboardingSecurityPinUpdateAction
+                  : l10n.onboardingSecurityPinSetAction,
+            ),
           ),
         ],
       ),

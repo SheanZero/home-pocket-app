@@ -11,7 +11,7 @@ import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
-import 'package:home_pocket/shared/constants/avatar_icon_ids.dart';
+import 'package:home_pocket/shared/constants/warm_emojis.dart';
 
 Widget _host(Widget child, {bool needsProviders = false}) {
   // The headless Flutter test engine does not provide a CJK system-font
@@ -82,7 +82,7 @@ void main() {
       _host(
         OnboardingSettingsScreen(
           bookId: 'book-1',
-          initialAvatarId: avatarIconIds[1],
+          initialAvatarId: warmEmojis[3],
           onConfirmed: () {},
         ),
         needsProviders: true,

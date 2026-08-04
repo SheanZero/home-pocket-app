@@ -137,15 +137,21 @@ class SecuritySection extends ConsumerWidget {
   Future<void> _changePin(BuildContext context, WidgetRef ref) async {
     final ok = await _reauthenticate(context, ref);
     if (!ok || !context.mounted) return;
-    final changed = await _openSetPin(context, ref);
+    final changed = await _openSetPin(context, ref, isUpdating: true);
     if (changed) ref.invalidate(appSettingsProvider);
   }
 
   /// Pushes [SetPinScreen]; returns true only when a PIN was successfully set.
-  Future<bool> _openSetPin(BuildContext context, WidgetRef ref) async {
-    final result = await Navigator.of(
-      context,
-    ).push<bool>(MaterialPageRoute<bool>(builder: (_) => const SetPinScreen()));
+  Future<bool> _openSetPin(
+    BuildContext context,
+    WidgetRef ref, {
+    bool isUpdating = false,
+  }) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => SetPinScreen(isUpdating: isUpdating),
+      ),
+    );
     return result ?? false;
   }
 

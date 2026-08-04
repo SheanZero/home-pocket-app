@@ -47,6 +47,21 @@ void main() {
       expect(find.byType(PageView), findsOneWidget);
     });
 
+    testWidgets('prebuilds page 2 before the first transition', (tester) async {
+      await tester.pumpWidget(_host(onContinue: () {}));
+      await tester.pump();
+
+      // The privacy page contains SVG, icon, layout, and animation resources.
+      // Keeping it built offscreen prevents those one-time costs from landing
+      // inside the first 300 ms page transition.
+      final privacyTitle = find.text('データは、\nあなたの手の中に。', skipOffstage: false);
+      expect(privacyTitle, findsOneWidget);
+      expect(
+        TickerMode.valuesOf(tester.element(privacyTitle)).enabled,
+        isFalse,
+      );
+    });
+
     testWidgets('次へ moves 1 → 2; page 2 shows privacy promises and '
         'はじめる fires onContinue exactly once', (tester) async {
       var count = 0;

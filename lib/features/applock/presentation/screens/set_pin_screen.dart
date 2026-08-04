@@ -10,7 +10,7 @@ import '../widgets/pin_keypad.dart';
 /// The two-step values the set-PIN flow walks through (D-03).
 enum _SetPinStep { enter, confirm }
 
-/// Reusable double-entry set-PIN flow (sketch 002 tone B — D-03 / LOCK-06).
+/// Reusable double-entry set-PIN flow (sketch 004A — D-03 / LOCK-06).
 ///
 /// Composes the Plan 08 presentational [PinKeypad] / [PinDots] and drives them
 /// with a two-step state machine:
@@ -34,7 +34,11 @@ enum _SetPinStep { enter, confirm }
 /// (close button / system back) yields no result, so the caller leaves the lock
 /// state untouched (never enable without a PIN).
 class SetPinScreen extends ConsumerStatefulWidget {
-  const SetPinScreen({super.key, this.onCompleted});
+  const SetPinScreen({super.key, this.isUpdating = false, this.onCompleted});
+
+  /// Whether this flow replaces an existing PIN rather than creating one.
+  /// The interaction remains identical; only the first-step heading changes.
+  final bool isUpdating;
 
   /// Fired exactly once after the PIN is successfully set. When null the screen
   /// instead pops itself with `true`.
@@ -119,66 +123,185 @@ class _SetPinScreenState extends ConsumerState<SetPinScreen> {
     final palette = context.palette;
     final l = S.of(context);
     final title = _step == _SetPinStep.enter
-        ? l.appLockSetPinTitle
+        ? (widget.isUpdating ? l.appLockUpdatePinTitle : l.appLockSetPinTitle)
         : l.appLockConfirmPinTitle;
+    final description = _step == _SetPinStep.enter
+        ? l.appLockSetPinDescription
+        : l.appLockConfirmPinDescription;
+    final currentStep = _step == _SetPinStep.enter ? 1 : 2;
     return Scaffold(
       backgroundColor: palette.background,
       appBar: AppBar(
         backgroundColor: palette.background,
         elevation: 0,
+        toolbarHeight: 52,
         leading: IconButton(
+          key: const ValueKey('set-pin-close'),
           icon: Icon(Icons.close, color: palette.textSecondary),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
       body: SafeArea(
-        child: Center(
-          child: SizedBox(
-            width: 318,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Center(
-                  child: PinDots(
-                    filledCount: _entered.length,
-                    length: _pinLength,
-                    errorTrigger: _errorTrigger,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 20,
-                  child: _mismatch
-                      ? Text(
-                          l.appLockPinMismatch,
-                          key: const ValueKey('set-pin-mismatch'),
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 16,
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 318,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          key: const ValueKey('set-pin-visual'),
+                          width: 54,
+                          height: 54,
+                          decoration: BoxDecoration(
+                            color: palette.accentPrimaryLight,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: palette.accentPrimaryBorder,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.password_rounded,
+                            size: 29,
+                            color: palette.dailyText,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        child: Text(
+                          title,
+                          key: ValueKey(title),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: palette.error,
+                            fontSize: 21,
+                            height: 1.3,
+                            fontWeight: FontWeight.w800,
+                            color: palette.textPrimary,
                           ),
-                        )
-                      : null,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        child: Text(
+                          description,
+                          key: ValueKey(description),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.4,
+                            color: palette.textSecondary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _PinStepProgress(
+                        currentStep: currentStep,
+                        semanticLabel: l.appLockPinSetupProgress(
+                          currentStep,
+                          2,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Center(
+                        child: PinDots(
+                          filledCount: _entered.length,
+                          length: _pinLength,
+                          errorTrigger: _errorTrigger,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 18,
+                        child: _mismatch
+                            ? Text(
+                                l.appLockPinMismatch,
+                                key: const ValueKey('set-pin-mismatch'),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: palette.error,
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(height: 8),
+                      PinKeypad(onDigit: _onDigit, onBackspace: _onBackspace),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 20),
-                PinKeypad(onDigit: _onDigit, onBackspace: _onBackspace),
-              ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PinStepProgress extends StatelessWidget {
+  const _PinStepProgress({
+    required this.currentStep,
+    required this.semanticLabel,
+  });
+
+  final int currentStep;
+  final String semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Semantics(
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: Row(
+        key: const ValueKey('set-pin-progress'),
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                for (var step = 1; step <= 2; step++) ...[
+                  Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: step <= currentStep
+                            ? palette.accentPrimary
+                            : palette.borderDefault,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                  ),
+                  if (step == 1) const SizedBox(width: 6),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '$currentStep / 2',
+            key: ValueKey('set-pin-step-$currentStep'),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: palette.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }

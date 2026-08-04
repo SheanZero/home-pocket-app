@@ -25,6 +25,17 @@ const List<String> warmEmojis = [
   '🍃',
   '💫',
   '🫧',
+  '🐻',
+  '🐨',
+  '🐹',
+  '🐧',
+  '🦔',
+  '🐳',
+  '🌱',
+  '🌼',
+  '🍄',
+  '🍓',
+  '☁️',
 ];
 
 final _random = Random();

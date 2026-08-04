@@ -1458,9 +1458,8 @@ body {
   .onboarding-primary:active { transform: scale(.985); }
 
   .setup-screen { position: relative; height: 100%; min-height: 100%; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
+  .setup-header-title { min-height: 52px; display: grid; place-items: center; color: var(--hp-text); font-size: 17px; line-height: 24px; font-weight: 800; }
   .setup-scroll { min-height: 0; flex: 1; padding: 14px 24px 8px; overflow-y: auto; scrollbar-width: none; }
-  .setup-eyebrow { color: var(--hp-primary-text); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; letter-spacing: .16em; }
-  .setup-title { margin: 6px 0 19px; color: var(--hp-text); font-family: var(--hp-font-display); font-size: 30px; line-height: 38px; font-weight: 750; letter-spacing: .01em; }
   .setup-profile-editor { display: grid; grid-template-columns: 76px minmax(0,1fr); align-items: start; gap: 15px; }
   .setup-avatar-column { min-width: 0; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
   .setup-avatar-button { width: 76px; height: 76px; border: 1px solid var(--hp-border); border-radius: 24px; background: color-mix(in srgb,var(--hp-primary-soft) 74%,var(--hp-surface)); display: grid; place-items: center; overflow: hidden; }
@@ -1510,24 +1509,27 @@ body {
   .setup-method-radio { width: 20px; height: 20px; border: 2px solid var(--hp-border-strong); border-radius: 50%; display: grid; place-items: center; }
   .setup-method-row.selected .setup-method-radio { border-color: var(--hp-primary); }
   .setup-method-row.selected .setup-method-radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--hp-primary); }
-  .setup-pin-guidance { padding: 11px 12px 12px 59px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb,var(--hp-primary-soft) 38%,var(--hp-surface)); }
-  .setup-pin-guidance strong { display: block; color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
-  .setup-pin-guidance small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
-  .setup-pin-action { min-height: 42px; margin-top: 9px; padding: 0 14px; border: 0; border-radius: 12px; background: #617f99; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 850; }
-  [data-theme="dark"] .setup-pin-action { background: #7898b4; color: #10202a; }
-  .setup-pin-complete { padding: 11px 12px 12px 59px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb,var(--hp-primary-soft) 38%,var(--hp-surface)); }
-  .setup-pin-complete-copy { display: grid; grid-template-columns: 24px minmax(0,1fr); align-items: center; gap: 8px; }
-  .setup-pin-complete-copy > .material-symbols-rounded { color: var(--hp-primary-text); font-size: 22px; }
-  .setup-pin-complete strong { display: block; color: var(--hp-text); font-size: var(--type-supporting); line-height: var(--line-supporting); }
-  .setup-pin-complete small { display: block; margin-top: 1px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
-  .setup-pin-change { min-height: 38px; margin: 9px 0 0 32px; padding: 0 17px; border: 1px solid var(--hp-primary); border-radius: 11px; background: transparent; color: var(--hp-primary-text); cursor: pointer; font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 800; }
+  .setup-pin-status { min-height: 64px; margin-top: 9px; padding: 10px; border: 1px solid color-mix(in srgb,var(--hp-primary) 34%,var(--hp-border)); border-radius: 14px; background: color-mix(in srgb,var(--hp-primary-soft) 48%,var(--hp-surface)); display: grid; grid-template-columns: 38px minmax(0,1fr) auto; align-items: center; gap: 10px; }
+  .setup-pin-status.configured { background: color-mix(in srgb,var(--hp-success) 12%,var(--hp-surface)); }
+  .setup-pin-status-icon { width: 38px; height: 38px; border-radius: 11px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: grid; place-items: center; }
+  .setup-pin-status-icon .material-symbols-rounded { font-size: 22px; }
+  .setup-pin-status-copy { min-width: 0; }
+  .setup-pin-status-copy strong { color: var(--hp-text); display: flex; align-items: center; gap: 6px; font-size: var(--type-supporting); line-height: var(--line-supporting); }
+  .setup-pin-status-copy small { display: block; margin-top: 2px; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .setup-pin-status-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--hp-warning); }
+  .setup-pin-status.configured .setup-pin-status-dot { background: var(--hp-success); }
+  .setup-pin-status-action { min-height: 38px; padding: 0 13px; border: 1px solid var(--hp-primary); border-radius: 11px; background: transparent; color: var(--hp-primary-text); cursor: pointer; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; }
   .setup-pin-screen { height: 100%; min-height: 100%; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
   .setup-pin-body { min-height: 0; flex: 1; padding: 26px 34px 22px; display: flex; flex-direction: column; align-items: center; }
   .setup-pin-mark { width: 72px; height: 72px; border: 1px solid var(--hp-border); border-radius: 23px; background: var(--hp-primary-soft); color: var(--hp-primary-text); display: grid; place-items: center; }
   .setup-pin-mark .material-symbols-rounded { font-size: 35px; }
   .setup-pin-body h1 { margin: 20px 0 0; color: var(--hp-text); font-size: 22px; line-height: 30px; font-weight: 800; }
   .setup-pin-body > p { margin: 7px 0 0; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); text-align: center; }
-  .setup-pin-body .pin-dots { margin-top: 24px; }
+  .setup-pin-progress { width: 100%; margin-top: 16px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px; color: var(--hp-text-muted); font-size: var(--type-compact); font-weight: 750; }
+  .setup-pin-progress-track { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .setup-pin-progress-track i { height: 4px; border-radius: 99px; background: var(--hp-border); }
+  .setup-pin-progress-track i.active { background: var(--hp-primary); }
+  .setup-pin-body .pin-dots { margin-top: 20px; }
   .setup-pin-error { min-height: 18px; margin-top: 5px; color: var(--hp-error); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
   .setup-pin-keypad { width: 100%; margin-top: auto; }
   .setup-pin-keypad .key { min-height: 54px; }
@@ -2579,12 +2581,10 @@ body {
     const voiceLabels={ja:'日本語',zh:'中文',en:'English'};
     const name=escapeHtml(state.onboardingName);
     return `<section class="setup-screen" lang="ja">${onboardingAmbience('setup')}
-      <div class="onboarding-topbar"><button class="onboarding-text-action" data-action="back">戻る</button><span class="eyebrow">初期設定</span><span class="onboarding-topbar-spacer"></span></div>
+      <div class="setup-header-title">初期設定</div>
       <div class="setup-scroll">
-        <span class="setup-eyebrow">最後のステップ</span>
-        <h1 class="setup-title">基本設定</h1>
         <div class="setup-profile-editor"><button class="setup-avatar-column" data-action="onboarding-avatar" aria-label="画像を変更"><span class="setup-avatar-button"><img class="setup-avatar-asset" src="assets/onboarding-avatar-warm-v1.png" alt="芽とハートのプロフィール"></span><span class="setup-avatar-hint" aria-hidden="true">${icon('photo_camera')}画像を変更</span></button><div class="setup-profile-name"><label for="onboarding-name">お名前 · 必須</label><input id="onboarding-name" class="setup-name-input" data-onboarding-name value="${name}" placeholder="名前を入力" autocomplete="name" maxlength="40" aria-required="true"></div></div>
-        <div class="setup-preference-card" aria-label="基本設定">
+        <div class="setup-preference-card" aria-label="初期設定の項目">
           <button class="setup-preference-row" data-action="onboarding-language"><span class="setup-preference-icon">${icon('language')}</span><span class="setup-preference-label">表示言語</span><span class="setup-preference-value">${languageLabels[state.onboardingLanguage]||'自動'} ${icon('chevron_right')}</span></button>
           <button class="setup-preference-row" data-action="onboarding-currency"><span class="setup-preference-icon">${icon('account_balance_wallet')}</span><span class="setup-preference-label">通貨単位</span><span class="setup-preference-value">${state.onboardingCurrency} ${icon('chevron_right')}</span></button>
           <button class="setup-preference-row" data-action="onboarding-voice"><span class="setup-preference-icon">${icon('mic')}</span><span class="setup-preference-label">音声入力の言語</span><span class="setup-preference-value">${voiceLabels[state.onboardingVoice]||'日本語'} ${icon('chevron_right')}</span></button>
@@ -2607,17 +2607,19 @@ body {
   }
 
   function setupSecuritySection() {
+    const pinStatus=state.onboardingUnlockMethod==='pin' ? `<div class="setup-pin-status ${state.onboardingPinConfigured?'configured':''}"><span class="setup-pin-status-icon">${icon('tag')}</span><span class="setup-pin-status-copy"><strong><i class="setup-pin-status-dot"></i>${state.onboardingPinConfigured?'PINを設定しました':'PINがまだ設定されていません'}</strong><small>${state.onboardingPinConfigured?'4桁のPINで保護されています':'2回入力すると有効になります'}</small></span><button class="setup-pin-status-action" data-action="onboarding-pin-setup">${state.onboardingPinConfigured?'更新':'設定'}</button></div>` : '';
     const securityMethods=state.onboardingSecurityEnabled ? `<span class="setup-method-label">ロック解除方法</span><div class="setup-method-list" role="radiogroup" aria-label="ロック解除方法">
       <button class="setup-method-row ${state.onboardingUnlockMethod==='biometric'?'selected':''}" data-action="onboarding-security-method" data-method="biometric" role="radio" aria-checked="${state.onboardingUnlockMethod==='biometric'}"><span class="setup-method-icon">${icon('fingerprint')}</span><span class="setup-method-copy"><strong>生体認証 <em class="setup-method-badge">おすすめ</em></strong><small>Face ID または指紋ですばやく解除</small></span><span class="setup-method-radio" aria-hidden="true"></span></button>
       <button class="setup-method-row ${state.onboardingUnlockMethod==='pin'?'selected':''}" data-action="onboarding-security-method" data-method="pin" role="radio" aria-checked="${state.onboardingUnlockMethod==='pin'}"><span class="setup-method-icon">${icon('password')}</span><span class="setup-method-copy"><strong>アプリロック</strong><small>4桁のPINで解除</small></span><span class="setup-method-radio" aria-hidden="true"></span></button>
-      ${state.onboardingUnlockMethod==='pin' ? (state.onboardingPinConfigured ? `<div class="setup-pin-complete"><span class="setup-pin-complete-copy">${icon('check_circle')}<span><strong>PINを設定しました</strong><small>4桁のPINで保護されています</small></span></span><button class="setup-pin-change" data-action="onboarding-pin-setup">PINを変更</button></div>` : `<div class="setup-pin-guidance"><strong>PINがまだ設定されていません</strong><small>2回入力すると有効になります</small><button class="setup-pin-action" data-action="onboarding-pin-setup">4桁のPINを設定 ${icon('chevron_right')}</button></div>`) : ''}
-    </div>` : `<p class="setup-security-defer">今は設定せず、あとで決める<small>設定からいつでも有効にできます</small></p>`;
+    </div>${pinStatus}` : `<p class="setup-security-defer">今は設定せず、あとで決める<small>設定からいつでも有効にできます</small></p>`;
     return `<section class="setup-security-card" aria-label="安全保護"><div class="setup-security-intro"><img class="setup-security-mark" src="assets/onboarding-privacy-warm-v1.png" alt="家の中を守る鍵"><div class="setup-security-copy"><h2>家計簿を安全に保護</h2><p>有効にすると、アプリを開くたびに本人確認します。</p></div></div><button class="setup-security-master" data-action="onboarding-security-toggle" aria-pressed="${state.onboardingSecurityEnabled}"><span>安全保護を有効にする</span><span class="switch ${state.onboardingSecurityEnabled?'on':''}" aria-hidden="true"></span></button>${securityMethods}</section>`;
   }
 
   function setupPinScreen() {
     const confirming=state.onboardingPinStage==='confirm';
-    return `<section class="setup-pin-screen" lang="ja"><div class="onboarding-topbar"><button class="onboarding-text-action" data-action="onboarding-pin-cancel">戻る</button><span class="eyebrow">安全保護</span><span class="onboarding-topbar-spacer"></span></div><div class="setup-pin-body"><div class="setup-pin-mark">${icon('password')}</div><h1>${confirming?'もう一度入力':'4桁のPINを設定'}</h1><p>${confirming?'確認のため、同じPINを入力してください。':'アプリを開くときに使うPINです。'}</p><div class="pin-dots" aria-label="${state.onboardingPinDraft.length}桁入力済み">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.onboardingPinDraft.length?'filled':''}"></i>`).join('')}</div><div class="setup-pin-error" role="alert">${escapeHtml(state.onboardingPinError)}</div><div class="setup-pin-keypad"><div class="pinpad">${['1','2','3','4','5','6','7','8','9','blank','0','backspace'].map(k=>k==='blank'?'<span></span>':`<button class="key" data-onboarding-pin-key="${k}" aria-label="${k==='backspace'?'1文字削除':k}">${k==='backspace'?icon('backspace'):k}</button>`).join('')}</div><p class="setup-pin-helper">推測されにくい4桁を選んでください</p></div></div></section>`;
+    const updating=state.onboardingPinConfigured||state.onboardingPinIntent==='change-pin';
+    const step=confirming?2:1;
+    return `<section class="setup-pin-screen" lang="ja"><div class="onboarding-topbar"><button class="onboarding-text-action" data-action="onboarding-pin-cancel" aria-label="閉じる">${icon('close')}</button><span class="onboarding-topbar-spacer"></span></div><div class="setup-pin-body"><div class="setup-pin-mark">${icon('password')}</div><h1>${confirming?'パスコードを再入力':(updating?'パスコードを更新':'パスコードを設定')}</h1><p>${confirming?'確認のため、同じ4桁をもう一度入力してください。':'Home Pocket のロック解除に使う、覚えやすい4桁を選んでください。'}</p><div class="setup-pin-progress" aria-label="ステップ ${step} / 2"><span class="setup-pin-progress-track"><i class="active"></i><i class="${confirming?'active':''}"></i></span><span>${step} / 2</span></div><div class="pin-dots" aria-label="${state.onboardingPinDraft.length}桁入力済み">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.onboardingPinDraft.length?'filled':''}"></i>`).join('')}</div><div class="setup-pin-error" role="alert">${escapeHtml(state.onboardingPinError)}</div><div class="setup-pin-keypad"><div class="pinpad">${['1','2','3','4','5','6','7','8','9','blank','0','backspace'].map(k=>k==='blank'?'<span></span>':`<button class="key" data-onboarding-pin-key="${k}" aria-label="${k==='backspace'?'1文字削除':k}">${k==='backspace'?icon('backspace'):k}</button>`).join('')}</div></div></div></section>`;
   }
 
   function lock() { return `<section class="screen"><div class="intro-hero" style="padding-top:46px"><div class="intro-mark" style="border-radius:50%">${icon('fingerprint')}</div><h1>おかえりなさい</h1><p class="hint">Face ID または PIN でロックを解除</p></div><div class="pin-dots">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.pin.length?'filled':''}"></i>`).join('')}</div><div class="pinpad">${['1','2','3','4','5','6','7','8','9','fingerprint','0','backspace'].map(k=>`<button class="key" data-lock-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}</div><button class="ghost-btn" data-action="forgot-pin">PINを忘れた場合</button></section>`; }

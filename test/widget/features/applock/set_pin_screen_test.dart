@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/security/app_lock_service.dart';
 import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
+import 'package:home_pocket/features/applock/presentation/widgets/pin_keypad.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
@@ -20,10 +21,16 @@ void main() {
     when(() => appLock.setPin(any())).thenAnswer((_) async {});
   });
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    bool isUpdating = false,
+  }) async {
     await tester.pumpWidget(
       createLocalizedWidget(
-        SetPinScreen(onCompleted: () => completedCount++),
+        SetPinScreen(
+          isUpdating: isUpdating,
+          onCompleted: () => completedCount++,
+        ),
         locale: const Locale('ja'),
         overrides: [appLockServiceProvider.overrideWithValue(appLock)],
       ),
@@ -46,16 +53,34 @@ void main() {
     await pumpScreen(tester);
 
     expect(find.text(l10nOf(tester).appLockSetPinTitle), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-visual')), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-progress')), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-step-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-step-2')), findsNothing);
 
     await enterPin(tester, '1234');
 
     // Step switched: confirm title shows, enter title gone.
     expect(find.text(l10nOf(tester).appLockConfirmPinTitle), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-step-1')), findsNothing);
+    expect(find.byKey(const ValueKey('set-pin-step-2')), findsOneWidget);
     verifyNever(() => appLock.setPin(any()));
   });
 
-  testWidgets('matching re-entry calls setPin once and reports completion',
-      (tester) async {
+  testWidgets('updating an existing PIN uses the same focused A layout', (
+    tester,
+  ) async {
+    await pumpScreen(tester, isUpdating: true);
+
+    expect(find.text(l10nOf(tester).appLockUpdatePinTitle), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-visual')), findsOneWidget);
+    expect(find.byKey(const ValueKey('set-pin-progress')), findsOneWidget);
+    expect(find.byType(PinKeypad), findsOneWidget);
+  });
+
+  testWidgets('matching re-entry calls setPin once and reports completion', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     await enterPin(tester, '1234');

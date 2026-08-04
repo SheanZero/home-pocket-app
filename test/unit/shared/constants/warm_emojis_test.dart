@@ -3,8 +3,27 @@ import 'package:home_pocket/shared/constants/warm_emojis.dart';
 
 void main() {
   group('warmEmojis', () {
-    test('contains exactly 24 emojis', () {
-      expect(warmEmojis.length, 24);
+    test('contains exactly 35 emojis', () {
+      expect(warmEmojis.length, 35);
+    });
+
+    test('includes the expanded warm nature and animal set', () {
+      expect(
+        warmEmojis,
+        containsAll(const [
+          '🐻',
+          '🐨',
+          '🐹',
+          '🐧',
+          '🦔',
+          '🐳',
+          '🌱',
+          '🌼',
+          '🍄',
+          '🍓',
+          '☁️',
+        ]),
+      );
     });
 
     test('has no duplicates', () {

@@ -30,7 +30,7 @@ C1 and C3 remain preserved as comparisons. All variants open the
 unified entry flow with the Joy ledger selected. Do not keep a second whole-app HTML copy under
 `.planning/sketches`.
 
-This directory retains only the still-relevant pre-launch input sketches 001–003. Historical audits,
+This directory retains only the still-relevant pre-launch input sketches 001–004. Historical audits,
 quick experiments, and milestone archives remain in their own evidence directories and are not
 current whole-app mockups.
 
@@ -41,6 +41,7 @@ current whole-app mockups.
 | 001 | onboarding-gate | First-run intro page → default-only basic settings with on-demand picker modal | **A · 温柔抛茶感** | onboarding, gate, i18n |
 | 002 | app-lock | Separate Face ID page + PIN page, chosen by settings; Face ID preferred when both on | **B · 清爽极简** (light + dark) | security, lock, biometric |
 | 003 | legal-sponsor | Complete Settings page = existing 8 sections + App Lock expansion + legal + external sponsor | **C · 混合** | settings, legal, compliance, app-lock |
+| 004 | onboarding-pin-setup | How should the initial-settings security card present and launch required 4-digit PIN setup? | **A · 紧凑操作行** | onboarding, security, pin, layout |
 
 ## Decisions
 - **001 = A (温柔抛茶感):** two-step first run — intro page (value prop) → basic settings showing
@@ -51,3 +52,6 @@ current whole-app mockups.
 - **003 = C (混合):** complete Settings page. Merged 一般 group (appearance + voice + joy target),
   App Lock expanded under セキュリティ (master + Face ID + PIN + priority note), and a single
   法的情報・応援 group (Privacy / Terms / 特商法 / OSS + external 応援 row).
+- **004 = A (紧凑操作行):** PIN pending and configured states share one compact row below the
+  unlock-method selector. Status, semantic color, and Set/Update copy change in place; the action
+  opens the focused app-owned two-step numeric keypad.

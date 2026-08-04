@@ -92,9 +92,23 @@ class _OnboardingIntroScreenState extends State<OnboardingIntroScreen> {
                 Expanded(
                   child: PageView(
                     controller: _pageController,
+                    // Keep the adjacent intro page built before the first
+                    // interaction. Its SVG, icons, layout, and repeating
+                    // decor tickers otherwise initialize during nextPage's
+                    // 300 ms animation and make the first transition jank.
+                    allowImplicitScrolling: true,
                     onPageChanged: (page) =>
                         setState(() => _currentPage = page),
-                    children: const [_WelcomePage(), _PrivacyPage()],
+                    children: [
+                      TickerMode(
+                        enabled: _currentPage == 0,
+                        child: const _WelcomePage(),
+                      ),
+                      TickerMode(
+                        enabled: _currentPage == 1,
+                        child: const _PrivacyPage(),
+                      ),
+                    ],
                   ),
                 ),
                 Padding(

@@ -22,7 +22,7 @@ import 'package:home_pocket/features/settings/presentation/providers/repository_
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
-import 'package:home_pocket/shared/constants/avatar_icon_ids.dart';
+import 'package:home_pocket/shared/constants/warm_emojis.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -180,9 +180,10 @@ void main() {
         await tester.pumpWidget(_host());
         await tester.pumpAndSettle();
 
-        expect(find.text('初期設定'), findsNothing);
-        expect(find.text('最後のステップ'), findsOneWidget); // eyebrow
-        expect(find.text('基本設定'), findsOneWidget);
+        expect(find.text('初期設定'), findsOneWidget);
+        expect(find.text('最後のステップ'), findsNothing);
+        expect(find.text('基本設定'), findsNothing);
+        expect(find.widgetWithText(TextButton, '戻る'), findsNothing);
         expect(
           find.byKey(const ValueKey('onboarding-avatar-block')),
           findsOneWidget,
@@ -193,8 +194,14 @@ void main() {
             matching: find.byType(AvatarDisplay),
           ),
         );
-        expect(avatarIconIds, contains(avatar.emoji));
-        expect(find.byKey(ValueKey(avatar.emoji)), findsOneWidget);
+        expect(warmEmojis, contains(avatar.emoji));
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('onboarding-avatar-block')),
+            matching: find.text(avatar.emoji),
+          ),
+          findsOneWidget,
+        );
         expect(avatar.imagePath, isNull);
         expect(find.text('画像を変更'), findsOneWidget);
         expect(find.text('お名前・必須'), findsOneWidget);
@@ -316,7 +323,13 @@ void main() {
         await tester.tap(pinMethod);
         await tester.pumpAndSettle();
 
+        final pinStatus = find.byKey(
+          const ValueKey('onboarding-pin-status-row'),
+        );
+        expect(pinStatus, findsOneWidget);
+        final pendingStatusType = tester.widget(pinStatus).runtimeType;
         expect(find.text('PINがまだ設定されていません'), findsOneWidget);
+        expect(find.text('設定'), findsOneWidget);
         expect(
           tester
               .widget<TextButton>(find.widgetWithText(TextButton, 'この設定ではじめる'))
@@ -324,11 +337,14 @@ void main() {
           isNull,
         );
 
-        final setupPin = find.text('4桁のPINを設定');
+        final setupPin = find.byKey(
+          const ValueKey('onboarding-pin-status-action'),
+        );
         await tester.ensureVisible(setupPin);
         await tester.pumpAndSettle();
         await tester.tap(setupPin);
         await tester.pumpAndSettle();
+        expect(tester.testTextInput.isVisible, isFalse);
         expect(find.byType(SetPinScreen), findsOneWidget);
 
         for (final pin in const ['1234', '1234']) {
@@ -340,7 +356,11 @@ void main() {
         }
 
         expect(find.byType(SetPinScreen), findsNothing);
+        expect(pinStatus, findsOneWidget);
+        expect(tester.widget(pinStatus).runtimeType, pendingStatusType);
         expect(find.text('PINを設定しました'), findsOneWidget);
+        expect(find.text('更新'), findsOneWidget);
+        expect(find.text('PINがまだ設定されていません'), findsNothing);
         expect(
           tester
               .widget<TextButton>(find.widgetWithText(TextButton, 'この設定ではじめる'))
