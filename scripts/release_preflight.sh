@@ -15,6 +15,10 @@ RELEASE_PREFLIGHT_PLATFORM="all"
 DRY_RUN=false
 REGENERATE=false
 PACKAGE_RELEASE=false
+RELEASE_DEPENDENCY_SCOPE_ACTIVE=false
+RELEASE_DEPENDENCY_SCOPE_DIR=''
+RELEASE_PUBSPEC_BACKUP=''
+RELEASE_LOCK_BACKUP=''
 
 usage() {
   cat <<'USAGE'
@@ -32,7 +36,8 @@ Options:
   --dry-run                   Print the ordered commands without changing files.
   -h, --help                  Show this help.
 
-Without --package this script only creates unsigned/profile smoke artifacts.
+Without --package this script performs credential-free release verification:
+Android generates release metadata only; iOS creates an unsigned release app.
 USAGE
 }
 
@@ -67,6 +72,82 @@ remove_generated_registrants() {
     "$root/ios/Runner/GeneratedPluginRegistrant.m"
 }
 
+write_ios_release_pubspec() {
+  local input="$1"
+  local output="$2"
+
+  # Flutter 3.44 intentionally does not filter native dev dependencies for
+  # iOS/macOS (flutter/flutter#163874). Keep integration_test available to
+  # device-test jobs, but remove it from the temporary manifest used for a
+  # shipping iOS build so it cannot enter the generated registrant or app.
+  awk '
+    /^  integration_test:$/ {
+      if (removed != 0) {
+        exit 43
+      }
+      removed = 1
+      skipping = 1
+      next
+    }
+    skipping && /^    sdk: flutter$/ {
+      skipping = 0
+      next
+    }
+    { print }
+    END {
+      if (removed != 1 || skipping != 0) {
+        exit 42
+      }
+    }
+  ' "$input" > "$output"
+}
+
+prepare_ios_release_dependency_scope() {
+  case "$RELEASE_PREFLIGHT_PLATFORM" in
+    ios|all) ;;
+    *) return 0 ;;
+  esac
+
+  "$DRY_RUN" && return 0
+
+  RELEASE_DEPENDENCY_SCOPE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/happy-pocket-release-preflight.XXXXXX")"
+  RELEASE_PUBSPEC_BACKUP="$RELEASE_DEPENDENCY_SCOPE_DIR/pubspec.yaml"
+  RELEASE_LOCK_BACKUP="$RELEASE_DEPENDENCY_SCOPE_DIR/pubspec.lock"
+  cp "$PROJECT_ROOT/pubspec.yaml" "$RELEASE_PUBSPEC_BACKUP"
+  cp "$PROJECT_ROOT/pubspec.lock" "$RELEASE_LOCK_BACKUP"
+  RELEASE_DEPENDENCY_SCOPE_ACTIVE=true
+
+  if ! write_ios_release_pubspec \
+    "$RELEASE_PUBSPEC_BACKUP" \
+    "$PROJECT_ROOT/pubspec.yaml"; then
+    fail 'could not create the temporary iOS release manifest without integration_test'
+  fi
+}
+
+restore_release_dependency_scope() {
+  local exit_status="$1"
+  trap - EXIT
+
+  if ! "$RELEASE_DEPENDENCY_SCOPE_ACTIVE"; then
+    return "$exit_status"
+  fi
+
+  cp "$RELEASE_PUBSPEC_BACKUP" "$PROJECT_ROOT/pubspec.yaml"
+  cp "$RELEASE_LOCK_BACKUP" "$PROJECT_ROOT/pubspec.lock"
+  RELEASE_DEPENDENCY_SCOPE_ACTIVE=false
+
+  # Restore the normal development package configuration after the release
+  # artifact has been checked. This is deliberately after all artifact scans:
+  # pub get regenerates development registrants that include integration_test.
+  if ! flutter pub get; then
+    log 'ERROR: restored pubspec files, but flutter pub get could not restore the development package configuration.' >&2
+    exit_status=1
+  fi
+  rm -rf "$RELEASE_DEPENDENCY_SCOPE_DIR"
+
+  return "$exit_status"
+}
+
 assert_release_registrants_clean() {
   local root="${1:-$PROJECT_ROOT}"
   local registrant
@@ -82,6 +163,16 @@ assert_release_registrants_clean() {
       fail "dev-only integration_test reference found in generated release registrant: ${registrant#$root/}"
     fi
   done
+}
+
+assert_ios_release_artifact_clean() {
+  local root="${1:-$PROJECT_ROOT}"
+  local binary="$root/build/ios/iphoneos/Runner.app/Runner"
+
+  [[ -f "$binary" ]] || fail 'iOS release smoke build did not produce Runner.app/Runner'
+  if strings "$binary" | grep -n -i -E 'integration[_-]?test|IntegrationTestPlugin' >&2; then
+    fail 'dev-only integration_test reference found in the iOS release Runner.app binary'
+  fi
 }
 
 assert_expected_registrants_exist() {
@@ -116,14 +207,20 @@ regenerate_if_required() {
 run_smoke_compile() {
   case "$RELEASE_PREFLIGHT_PLATFORM" in
     android)
-      run_flutter build apk --profile
+      # Generates release-mode Android metadata without constructing an APK or
+      # reaching the CR-04 signing gate. A signed artifact is only attempted by
+      # --package and remains fail-closed.
+      run_flutter build apk --release --config-only
       ;;
     ios)
-      run_flutter build ios --profile --no-codesign
+      # This is a real unsigned release build, not a profile build. Profile
+      # mode includes dev plugins in its registrant and cannot prove release
+      # artifact hygiene.
+      run_flutter build ios --release --no-codesign
       ;;
     all)
-      run_flutter build apk --profile
-      run_flutter build ios --profile --no-codesign
+      run_flutter build apk --release --config-only
+      run_flutter build ios --release --no-codesign
       ;;
   esac
 }
@@ -181,6 +278,8 @@ main() {
 
   cd "$PROJECT_ROOT"
   log "Starting clean $RELEASE_PREFLIGHT_PLATFORM release preflight."
+  trap 'restore_release_dependency_scope "$?"' EXIT
+  prepare_ios_release_dependency_scope
   run_flutter clean
   remove_generated_registrants
   run_flutter pub get
@@ -192,6 +291,9 @@ main() {
   else
     assert_expected_registrants_exist
     assert_release_registrants_clean
+    case "$RELEASE_PREFLIGHT_PLATFORM" in
+      ios|all) assert_ios_release_artifact_clean ;;
+    esac
   fi
 
   if "$PACKAGE_RELEASE"; then

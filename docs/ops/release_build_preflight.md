@@ -19,9 +19,10 @@ The preflight always performs, in order:
 2. `flutter pub get`;
 3. optional Dart generation, only when this release changed ARB, Riverpod,
    Freezed, or Drift generator inputs;
-4. credential-free profile smoke compilation; and
-5. a fail-closed scan of the regenerated Android/iOS registrants for
-   `integration_test`.
+4. credential-free release verification: Android release metadata generation
+   and/or an unsigned iOS release build; and
+5. fail-closed scans of regenerated registrants and, for iOS, the actual
+   `Runner.app` binary for `integration_test`.
 
 Pass `--regenerate` for step 3 when it is needed:
 
@@ -29,10 +30,13 @@ Pass `--regenerate` for step 3 when it is needed:
 bash scripts/release_preflight.sh --platform all --regenerate
 ```
 
-The default command never makes a production artifact. It deliberately uses
-an unsigned/profile smoke compile so local and CI verification do not need
-release secrets. Once it passes, production packaging is an explicit and
-separate action:
+The default command never makes a signed production artifact. Android only
+generates release-mode configuration, while iOS creates an unsigned release
+app so its real binary can be checked. For iOS, the script temporarily removes
+the dev-only `integration_test` dependency during that build because Flutter
+does not yet filter native iOS dev plugins; it restores the normal development
+manifest immediately afterward. Neither path needs release secrets. Once it
+passes, production packaging is an explicit and separate action:
 
 ```bash
 bash scripts/release_preflight.sh --platform android --package
