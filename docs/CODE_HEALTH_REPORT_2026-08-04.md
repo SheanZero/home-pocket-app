@@ -184,7 +184,7 @@ CI 在 [`.github/workflows/audit.yml:49`](../.github/workflows/audit.yml#L49) �
 
 | 位置 | 圈复杂度/规模 | 风险 |
 |---|---:|---|
-| `lib/data/database/app_database.dart` migration getter | CC 92 / SLOC 583 / nesting 7 | schema 演进回归难定位 |
+| `lib/data/app_database.dart` migration getter | CC 92 / SLOC 583 / nesting 7 | schema 演进回归难定位 |
 | `lib/features/home/presentation/screens/home_screen.dart` build | CC 71 / SLOC 415 | UI 状态组合过多，重构/测试成本高 |
 | `lib/application/family_sync/check_group_validity_use_case.dart` execute | CC 59 | 高风险同步状态机过度集中 |
 | `lib/application/family_sync/pull_sync_use_case.dart` execute | CC 35 / SLOC 218 / nesting 7 | 错误、分页、ACK 时序难验证 |
@@ -193,6 +193,16 @@ CI 在 [`.github/workflows/audit.yml:49`](../.github/workflows/audit.yml#L49) �
 `app_palette.copyWith` 的 CC 63 主要是机械参数分支，可作为生成/样板例外，不应与业务复杂度等同。
 
 **建议：** 优先按行为边界拆迁移步骤、同步实体处理器和 Home UI section；每次拆分先补 characterization tests，避免大规模一次性重写。
+
+**修复状态（2026-08-05）：已完成。** 已按报告点名范围完成行为保持型拆分，并以针对性测试锁定迁移阶梯、同步分页/ACK、实体应用和 Home 页面行为：
+
+- `AppDatabase.migration`：CC 92 / SLOC 583 / nesting 7 → CC 1 / SLOC 14 / nesting 2；迁移步骤迁至独立 runner，保留各来源版本的兼容分支。
+- `_HomeScreenState.build`：CC 71 / SLOC 415 / nesting 6 → CC 4 / SLOC 45 / nesting 2；页面壳、Hero、近期交易和编辑入口已按 UI section 拆分。
+- `PullSyncUseCase.execute`：CC 35 / SLOC 218 / nesting 7 → CC 4 / SLOC 28 / nesting 2；分页、消息分派、密钥消息、ACK 和 legacy avatar MIME 识别已解耦。
+- `ApplySyncOperationsUseCase.execute`：CC 25 / SLOC 188 → CC 7 / SLOC 14；账单与资料处理方法分别降至 CC 2 和 CC 4。
+- `CheckGroupValidityUseCase.execute` 在当前基线已是 CC 16 / SLOC 44 / nesting 3，低于门禁阈值，无需重复改写；`AppPalette.copyWith` 继续作为机械样板例外。
+
+修复后，以上目标文件在 CC > 20、方法 SLOC > 50、nesting > 5 的扫描中均为零违规。全库同口径扫描的 CC 违规由 38 降至 30，当前扫描器精确基线下的方法 SLOC 违规由 229 降至 221；剩余项属于未被 P2-01 点名的后续复杂度债务。
 
 ### P2-02：生产目录有 25 个疑似未使用文件
 
