@@ -511,367 +511,24 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   }
 
   Widget _buildGroupContent(SyncState syncState, GroupInfo group) {
-    final palette = context.palette;
-    final isOwner = group.role == 'owner';
-    final isOwnerReady = isOwner && group.groupKey?.isNotEmpty == true;
-    final canManageInvites = isOwnerReady && group.status == GroupStatus.active;
-    final hasPendingMembers = group.members.any(
-      (member) => member.status == 'pending',
+    return _GroupManagementContent(
+      syncState: syncState,
+      group: group,
+      isInviteLoading: _isInviteLoading,
+      isTransferLoading: _isTransferLoading,
+      managementSummary: _managementSummary,
+      roleLabel: _roleLabel,
+      memberLifecycleLabel: _memberLifecycleLabel,
+      onRename: _handleRename,
+      onRemoveMember: _handleRemoveMember,
+      onInvite: _handleInvite,
+      onCopyInvite: _copyInvite,
+      onShareInvite: _shareInvite,
+      onRegenerateInvite: _handleRegenerateInlineInvite,
+      onSyncSettings: _showSyncSettings,
+      onLeaveOrDeactivate: _handleLeaveOrDeactivate,
+      onTransferOwnership: _handleTransferOwnership,
     );
-    final pendingMemberCount = group.members
-        .where((member) => member.status == 'pending')
-        .length;
-    final activeMembers = group.members
-        .where((member) => member.status == 'active')
-        .toList();
-    final terminalMembers = isOwner
-        ? group.members
-              .where(
-                (member) =>
-                    member.status != 'active' && member.status != 'pending',
-              )
-              .toList()
-        : const <GroupMember>[];
-    final canJoinAnotherFamily =
-        isOwner &&
-        group.status == GroupStatus.active &&
-        group.members.length <= 1 &&
-        group.members.every(
-          (member) => member.role == 'owner' && member.status == 'active',
-        );
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: familyFlowHorizontalPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 7),
-          FamilyFlowHeader(
-            title: l10n.familySyncGroupManagement,
-            onBack: () => Navigator.maybePop(context),
-            trailing: _buildSyncStatusRow(syncState),
-          ),
-          const SizedBox(height: 18),
-
-          FamilyHouseIdentity(
-            name: group.groupName,
-            subtitle: _managementSummary(group, activeMembers),
-            compact: true,
-            onEdit: isOwner ? _handleRename : null,
-            editLabel: l10n.edit,
-          ),
-          const SizedBox(height: 8),
-
-          // Pending approval alert
-          if (isOwner && hasPendingMembers) ...[
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        MemberApprovalScreen(groupId: group.groupId),
-                  ),
-                );
-              },
-              child: Container(
-                width: double.infinity,
-                height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: palette.satisfactionPillBg,
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: palette.joyFullnessBorder),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.userPlus,
-                      size: 19,
-                      color: palette.joyText,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        l10n.familyFlowPendingRequests(pendingMemberCount),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.label.copyWith(
-                          color: palette.textPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      l10n.familyFlowViewRequests,
-                      maxLines: 1,
-                      style: AppTextStyles.supporting.copyWith(
-                        color: palette.joyText,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      LucideIcons.chevronRight,
-                      size: 16,
-                      color: palette.joyText,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-
-          // Member card
-          Container(
-            decoration: BoxDecoration(
-              color: palette.card,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: palette.borderDefault),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (var index = 0; index < activeMembers.length; index++) ...[
-                  MemberListTile(
-                    displayName: activeMembers[index].displayName,
-                    avatarEmoji: activeMembers[index].avatarEmoji,
-                    avatarImagePath: activeMembers[index].avatarImagePath,
-                    roleLabel: _roleLabel(activeMembers[index].role),
-                    isOwner: activeMembers[index].role == 'owner',
-                    isCurrentUser:
-                        group.role == 'owner' &&
-                        activeMembers[index].role == 'owner',
-                    youSuffix: l10n.familySyncYouSuffix,
-                    onRemove: isOwner && activeMembers[index].role != 'owner'
-                        ? () => _handleRemoveMember(activeMembers[index])
-                        : null,
-                  ),
-                  if (index < activeMembers.length - 1)
-                    Divider(height: 1, color: palette.borderDivider),
-                ],
-                if (canManageInvites) ...[
-                  Divider(height: 1, color: palette.borderDivider),
-                  InkWell(
-                    key: const Key('owner-invite-action'),
-                    onTap: _isInviteLoading ? null : _handleInvite,
-                    child: SizedBox(
-                      height: 54,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            if (_isInviteLoading)
-                              SizedBox(
-                                width: 17,
-                                height: 17,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: palette.accentPrimary,
-                                ),
-                              )
-                            else
-                              Icon(
-                                LucideIcons.plus,
-                                size: 18,
-                                color: palette.accentPrimary,
-                              ),
-                            const SizedBox(width: 7),
-                            Expanded(
-                              child: Text(
-                                l10n.groupInviteMembers,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.label.copyWith(
-                                  color: palette.accentPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (canManageInvites && group.inviteCode?.isNotEmpty == true) ...[
-            const SizedBox(height: 10),
-            _InlineInviteCard(
-              inviteCode: group.inviteCode!,
-              expiresAt: group.inviteExpiresAt,
-              onCopy: () => _copyInvite(group.inviteCode!),
-              onShare: () => _shareInvite(
-                groupName: group.groupName,
-                inviteCode: group.inviteCode!,
-              ),
-              onRegenerate: _isInviteLoading
-                  ? null
-                  : _handleRegenerateInlineInvite,
-            ),
-          ],
-          if (terminalMembers.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              l10n.familySyncMemberHistory,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-                color: palette.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: palette.card,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  for (
-                    var index = 0;
-                    index < terminalMembers.length;
-                    index++
-                  ) ...[
-                    MemberListTile(
-                      displayName: terminalMembers[index].displayName,
-                      avatarEmoji: terminalMembers[index].avatarEmoji,
-                      avatarImagePath: terminalMembers[index].avatarImagePath,
-                      roleLabel: _memberLifecycleLabel(terminalMembers[index]),
-                    ),
-                    if (index < terminalMembers.length - 1)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Divider(height: 1, color: palette.borderDivider),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 8),
-
-          Material(
-            color: palette.card,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(13),
-              side: BorderSide(color: palette.borderDefault),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: () => _showSyncSettings(syncState),
-              child: SizedBox(
-                height: 50,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.refreshCw,
-                        size: 19,
-                        color: palette.accentPrimary,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          l10n.familyFlowSyncSettings,
-                          style: AppTextStyles.label.copyWith(
-                            color: palette.textPrimary,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        size: 19,
-                        color: palette.textSecondary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          if (canJoinAnotherFamily) ...[
-            FamilySecondaryButton(
-              key: const Key('join-another-family-action'),
-              label: l10n.familySyncJoinAnotherFamily,
-              icon: LucideIcons.logIn,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const JoinGroupScreen(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          // Disband / leave group ghost button
-          Center(
-            child: TextButton(
-              onPressed: isOwner && !isOwnerReady
-                  ? null
-                  : _handleLeaveOrDeactivate,
-              style: TextButton.styleFrom(
-                foregroundColor: palette.error,
-                minimumSize: const Size(44, 44),
-                textStyle: AppTextStyles.label,
-              ),
-              child: Text(
-                group.role == 'owner'
-                    ? l10n.groupDisband
-                    : l10n.familySyncLeaveGroup,
-              ),
-            ),
-          ),
-          if (canManageInvites &&
-              activeMembers.any((member) => member.role == 'member')) ...[
-            const SizedBox(height: 240),
-            GestureDetector(
-              key: const Key('transfer-owner-action'),
-              onTap: _isTransferLoading ? null : _handleTransferOwnership,
-              child: Container(
-                width: double.infinity,
-                height: 48,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: palette.borderDefault),
-                ),
-                child: Center(
-                  child: _isTransferLoading
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: palette.textPrimary,
-                          ),
-                        )
-                      : Text(
-                          l10n.familySyncTransferOwner,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: palette.textPrimary,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSyncStatusRow(SyncState syncState) {
-    return SyncStatusBadge(state: syncState);
   }
 
   Widget _buildEmptyState() {
@@ -950,6 +607,684 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     return member.confirmedAt != null
         ? l10n.familySyncConfirmedAt(role, formatted)
         : l10n.familySyncJoinedAt(role, formatted);
+  }
+}
+
+class _GroupManagementContent extends StatelessWidget {
+  const _GroupManagementContent({
+    required this.syncState,
+    required this.group,
+    required this.isInviteLoading,
+    required this.isTransferLoading,
+    required this.managementSummary,
+    required this.roleLabel,
+    required this.memberLifecycleLabel,
+    required this.onRename,
+    required this.onRemoveMember,
+    required this.onInvite,
+    required this.onCopyInvite,
+    required this.onShareInvite,
+    required this.onRegenerateInvite,
+    required this.onSyncSettings,
+    required this.onLeaveOrDeactivate,
+    required this.onTransferOwnership,
+  });
+
+  final SyncState syncState;
+  final GroupInfo group;
+  final bool isInviteLoading;
+  final bool isTransferLoading;
+  final String Function(GroupInfo group, List<GroupMember> activeMembers)
+  managementSummary;
+  final String Function(String role) roleLabel;
+  final String Function(GroupMember member) memberLifecycleLabel;
+  final VoidCallback onRename;
+  final Future<void> Function(GroupMember member) onRemoveMember;
+  final Future<void> Function() onInvite;
+  final Future<void> Function(String inviteCode) onCopyInvite;
+  final Future<void> Function({
+    required String groupName,
+    required String inviteCode,
+  })
+  onShareInvite;
+  final Future<void> Function() onRegenerateInvite;
+  final Future<void> Function(SyncState syncState) onSyncSettings;
+  final Future<void> Function() onLeaveOrDeactivate;
+  final Future<void> Function() onTransferOwnership;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _GroupManagementViewData.fromGroup(group);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: familyFlowHorizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _GroupManagementHeader(
+            group: group,
+            activeMembers: data.activeMembers,
+            isOwner: data.isOwner,
+            managementSummary: managementSummary,
+            onRename: onRename,
+            syncState: syncState,
+          ),
+          if (data.isOwner && data.pendingMemberCount > 0)
+            _PendingMemberRequests(
+              groupId: group.groupId,
+              pendingMemberCount: data.pendingMemberCount,
+            ),
+          _ActiveMemberCard(
+            group: group,
+            activeMembers: data.activeMembers,
+            isOwner: data.isOwner,
+            canManageInvites: data.canManageInvites,
+            isInviteLoading: isInviteLoading,
+            roleLabel: roleLabel,
+            onRemoveMember: onRemoveMember,
+            onInvite: onInvite,
+          ),
+          if (data.canManageInvites && group.inviteCode?.isNotEmpty == true)
+            _ManagedInviteSection(
+              group: group,
+              isInviteLoading: isInviteLoading,
+              onCopyInvite: onCopyInvite,
+              onShareInvite: onShareInvite,
+              onRegenerateInvite: onRegenerateInvite,
+            ),
+          if (data.terminalMembers.isNotEmpty)
+            _MemberHistorySection(
+              members: data.terminalMembers,
+              memberLifecycleLabel: memberLifecycleLabel,
+            ),
+          const SizedBox(height: 8),
+          _SyncSettingsAction(syncState: syncState, onTap: onSyncSettings),
+          const SizedBox(height: 12),
+          _GroupExitActions(
+            group: group,
+            canJoinAnotherFamily: data.canJoinAnotherFamily,
+            canManageInvites: data.canManageInvites,
+            hasTransferCandidate: data.hasTransferCandidate,
+            isTransferLoading: isTransferLoading,
+            onLeaveOrDeactivate: onLeaveOrDeactivate,
+            onTransferOwnership: onTransferOwnership,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GroupManagementViewData {
+  const _GroupManagementViewData({
+    required this.isOwner,
+    required this.canManageInvites,
+    required this.pendingMemberCount,
+    required this.activeMembers,
+    required this.terminalMembers,
+    required this.canJoinAnotherFamily,
+  });
+
+  factory _GroupManagementViewData.fromGroup(GroupInfo group) {
+    final isOwner = group.role == 'owner';
+    final activeMembers = group.members
+        .where((member) => member.status == 'active')
+        .toList();
+    return _GroupManagementViewData(
+      isOwner: isOwner,
+      canManageInvites:
+          isOwner &&
+          group.groupKey?.isNotEmpty == true &&
+          group.status == GroupStatus.active,
+      pendingMemberCount: group.members
+          .where((member) => member.status == 'pending')
+          .length,
+      activeMembers: activeMembers,
+      terminalMembers: isOwner
+          ? group.members
+                .where(
+                  (member) =>
+                      member.status != 'active' && member.status != 'pending',
+                )
+                .toList()
+          : const <GroupMember>[],
+      canJoinAnotherFamily:
+          isOwner &&
+          group.status == GroupStatus.active &&
+          group.members.length <= 1 &&
+          group.members.every(
+            (member) => member.role == 'owner' && member.status == 'active',
+          ),
+    );
+  }
+
+  final bool isOwner;
+  final bool canManageInvites;
+  final int pendingMemberCount;
+  final List<GroupMember> activeMembers;
+  final List<GroupMember> terminalMembers;
+  final bool canJoinAnotherFamily;
+
+  bool get hasTransferCandidate =>
+      activeMembers.any((member) => member.role == 'member');
+}
+
+class _GroupManagementHeader extends StatelessWidget {
+  const _GroupManagementHeader({
+    required this.group,
+    required this.activeMembers,
+    required this.isOwner,
+    required this.managementSummary,
+    required this.onRename,
+    required this.syncState,
+  });
+
+  final GroupInfo group;
+  final List<GroupMember> activeMembers;
+  final bool isOwner;
+  final String Function(GroupInfo group, List<GroupMember> activeMembers)
+  managementSummary;
+  final VoidCallback onRename;
+  final SyncState syncState;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 7),
+        FamilyFlowHeader(
+          title: l10n.familySyncGroupManagement,
+          onBack: () => Navigator.maybePop(context),
+          trailing: SyncStatusBadge(state: syncState),
+        ),
+        const SizedBox(height: 18),
+        FamilyHouseIdentity(
+          name: group.groupName,
+          subtitle: managementSummary(group, activeMembers),
+          compact: true,
+          onEdit: isOwner ? onRename : null,
+          editLabel: l10n.edit,
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+class _PendingMemberRequests extends StatelessWidget {
+  const _PendingMemberRequests({
+    required this.groupId,
+    required this.pendingMemberCount,
+  });
+
+  final String groupId;
+  final int pendingMemberCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => MemberApprovalScreen(groupId: groupId),
+              ),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: palette.satisfactionPillBg,
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: palette.joyFullnessBorder),
+            ),
+            child: Row(
+              children: [
+                Icon(LucideIcons.userPlus, size: 19, color: palette.joyText),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.familyFlowPendingRequests(pendingMemberCount),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.label.copyWith(
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  l10n.familyFlowViewRequests,
+                  maxLines: 1,
+                  style: AppTextStyles.supporting.copyWith(
+                    color: palette.joyText,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 16,
+                  color: palette.joyText,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+class _ActiveMemberCard extends StatelessWidget {
+  const _ActiveMemberCard({
+    required this.group,
+    required this.activeMembers,
+    required this.isOwner,
+    required this.canManageInvites,
+    required this.isInviteLoading,
+    required this.roleLabel,
+    required this.onRemoveMember,
+    required this.onInvite,
+  });
+
+  final GroupInfo group;
+  final List<GroupMember> activeMembers;
+  final bool isOwner;
+  final bool canManageInvites;
+  final bool isInviteLoading;
+  final String Function(String role) roleLabel;
+  final Future<void> Function(GroupMember member) onRemoveMember;
+  final Future<void> Function() onInvite;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.borderDefault),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var index = 0; index < activeMembers.length; index++) ...[
+            _ActiveMemberTile(
+              member: activeMembers[index],
+              isOwner: isOwner,
+              isCurrentUser:
+                  group.role == 'owner' && activeMembers[index].role == 'owner',
+              roleLabel: roleLabel,
+              onRemoveMember: onRemoveMember,
+            ),
+            if (index < activeMembers.length - 1)
+              Divider(height: 1, color: palette.borderDivider),
+          ],
+          if (canManageInvites) ...[
+            Divider(height: 1, color: palette.borderDivider),
+            _OwnerInviteAction(
+              isLoading: isInviteLoading,
+              label: l10n.groupInviteMembers,
+              onInvite: onInvite,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveMemberTile extends StatelessWidget {
+  const _ActiveMemberTile({
+    required this.member,
+    required this.isOwner,
+    required this.isCurrentUser,
+    required this.roleLabel,
+    required this.onRemoveMember,
+  });
+
+  final GroupMember member;
+  final bool isOwner;
+  final bool isCurrentUser;
+  final String Function(String role) roleLabel;
+  final Future<void> Function(GroupMember member) onRemoveMember;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return MemberListTile(
+      displayName: member.displayName,
+      avatarEmoji: member.avatarEmoji,
+      avatarImagePath: member.avatarImagePath,
+      roleLabel: roleLabel(member.role),
+      isOwner: member.role == 'owner',
+      isCurrentUser: isCurrentUser,
+      youSuffix: l10n.familySyncYouSuffix,
+      onRemove: isOwner && member.role != 'owner'
+          ? () => onRemoveMember(member)
+          : null,
+    );
+  }
+}
+
+class _OwnerInviteAction extends StatelessWidget {
+  const _OwnerInviteAction({
+    required this.isLoading,
+    required this.label,
+    required this.onInvite,
+  });
+
+  final bool isLoading;
+  final String label;
+  final Future<void> Function() onInvite;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return InkWell(
+      key: const Key('owner-invite-action'),
+      onTap: isLoading ? null : onInvite,
+      child: SizedBox(
+        height: 54,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              if (isLoading)
+                SizedBox(
+                  width: 17,
+                  height: 17,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: palette.accentPrimary,
+                  ),
+                )
+              else
+                Icon(LucideIcons.plus, size: 18, color: palette.accentPrimary),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.accentPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ManagedInviteSection extends StatelessWidget {
+  const _ManagedInviteSection({
+    required this.group,
+    required this.isInviteLoading,
+    required this.onCopyInvite,
+    required this.onShareInvite,
+    required this.onRegenerateInvite,
+  });
+
+  final GroupInfo group;
+  final bool isInviteLoading;
+  final Future<void> Function(String inviteCode) onCopyInvite;
+  final Future<void> Function({
+    required String groupName,
+    required String inviteCode,
+  })
+  onShareInvite;
+  final Future<void> Function() onRegenerateInvite;
+
+  @override
+  Widget build(BuildContext context) {
+    final inviteCode = group.inviteCode!;
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        _InlineInviteCard(
+          inviteCode: inviteCode,
+          expiresAt: group.inviteExpiresAt,
+          onCopy: () => onCopyInvite(inviteCode),
+          onShare: () =>
+              onShareInvite(groupName: group.groupName, inviteCode: inviteCode),
+          onRegenerate: isInviteLoading ? null : onRegenerateInvite,
+        ),
+      ],
+    );
+  }
+}
+
+class _MemberHistorySection extends StatelessWidget {
+  const _MemberHistorySection({
+    required this.members,
+    required this.memberLifecycleLabel,
+  });
+
+  final List<GroupMember> members;
+  final String Function(GroupMember member) memberLifecycleLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Text(
+          l10n.familySyncMemberHistory,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+            color: palette.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              for (var index = 0; index < members.length; index++) ...[
+                MemberListTile(
+                  displayName: members[index].displayName,
+                  avatarEmoji: members[index].avatarEmoji,
+                  avatarImagePath: members[index].avatarImagePath,
+                  roleLabel: memberLifecycleLabel(members[index]),
+                ),
+                if (index < members.length - 1)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Divider(height: 1, color: palette.borderDivider),
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SyncSettingsAction extends StatelessWidget {
+  const _SyncSettingsAction({required this.syncState, required this.onTap});
+
+  final SyncState syncState;
+  final Future<void> Function(SyncState syncState) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    return Material(
+      color: palette.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(13),
+        side: BorderSide(color: palette.borderDefault),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => onTap(syncState),
+        child: SizedBox(
+          height: 50,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              children: [
+                Icon(
+                  LucideIcons.refreshCw,
+                  size: 19,
+                  color: palette.accentPrimary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.familyFlowSyncSettings,
+                    style: AppTextStyles.label.copyWith(
+                      color: palette.textPrimary,
+                    ),
+                  ),
+                ),
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 19,
+                  color: palette.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GroupExitActions extends StatelessWidget {
+  const _GroupExitActions({
+    required this.group,
+    required this.canJoinAnotherFamily,
+    required this.canManageInvites,
+    required this.hasTransferCandidate,
+    required this.isTransferLoading,
+    required this.onLeaveOrDeactivate,
+    required this.onTransferOwnership,
+  });
+
+  final GroupInfo group;
+  final bool canJoinAnotherFamily;
+  final bool canManageInvites;
+  final bool hasTransferCandidate;
+  final bool isTransferLoading;
+  final Future<void> Function() onLeaveOrDeactivate;
+  final Future<void> Function() onTransferOwnership;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    final isOwner = group.role == 'owner';
+    final isOwnerReady = isOwner && group.groupKey?.isNotEmpty == true;
+    return Column(
+      children: [
+        if (canJoinAnotherFamily) ...[
+          FamilySecondaryButton(
+            key: const Key('join-another-family-action'),
+            label: l10n.familySyncJoinAnotherFamily,
+            icon: LucideIcons.logIn,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const JoinGroupScreen()),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Center(
+          child: TextButton(
+            onPressed: isOwner && !isOwnerReady ? null : onLeaveOrDeactivate,
+            style: TextButton.styleFrom(
+              foregroundColor: palette.error,
+              minimumSize: const Size(44, 44),
+              textStyle: AppTextStyles.label,
+            ),
+            child: Text(
+              isOwner ? l10n.groupDisband : l10n.familySyncLeaveGroup,
+            ),
+          ),
+        ),
+        if (canManageInvites && hasTransferCandidate) ...[
+          const SizedBox(height: 240),
+          _TransferOwnershipAction(
+            isLoading: isTransferLoading,
+            onTap: onTransferOwnership,
+          ),
+        ],
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+}
+
+class _TransferOwnershipAction extends StatelessWidget {
+  const _TransferOwnershipAction({
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  final bool isLoading;
+  final Future<void> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    return GestureDetector(
+      key: const Key('transfer-owner-action'),
+      onTap: isLoading ? null : onTap,
+      child: Container(
+        width: double.infinity,
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: palette.borderDefault),
+        ),
+        child: Center(
+          child: isLoading
+              ? SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: palette.textPrimary,
+                  ),
+                )
+              : Text(
+                  l10n.familySyncTransferOwner,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: palette.textPrimary,
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 }
 
