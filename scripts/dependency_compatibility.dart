@@ -446,7 +446,35 @@ CompatibilityReport validateDependencyCompatibility({
     futureWorkflow,
     'flutter build ios --simulator --debug',
   );
+  final futureProbeSdkValidator = RegExp(
+    r'^\s*-\s+run:\s+dart run scripts/dependency_compatibility\.dart --mode=future-probe --verify-running-flutter-sdk[ \t]*$',
+    multiLine: true,
+  );
+  const betaJobs = ['android-beta', 'ios-beta'];
+  if (futureProbeSdkValidator.allMatches(futureWorkflow).length != 2 ||
+      betaJobs.any(
+        (job) =>
+            futureProbeSdkValidator
+                .allMatches(_workflowJobBody(futureWorkflow, job))
+                .length !=
+            1,
+      )) {
+    issues.add('future workflow must invoke SDK verification in each beta job');
+  }
   return _reportFromMessages(issues, mode);
+}
+
+String _workflowJobBody(String workflow, String job) {
+  final headers = RegExp(
+    r'^  ([A-Za-z0-9_-]+):\s*$',
+    multiLine: true,
+  ).allMatches(workflow).toList();
+  final index = headers.indexWhere((header) => header.group(1) == job);
+  if (index == -1) return '';
+  final end = index + 1 < headers.length
+      ? headers[index + 1].start
+      : workflow.length;
+  return workflow.substring(headers[index].end, end);
 }
 
 bool _hasActiveSqlCipherLinkerStrip(String podfile) => RegExp(

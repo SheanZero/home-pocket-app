@@ -379,6 +379,21 @@ void main() {
       );
     });
 
+    test('rejects commented-out beta SDK verification commands', () {
+      final input = currentInputs();
+      input['future'] = input['future']!.replaceAll(
+        '      - run: dart run scripts/dependency_compatibility.dart --mode=future-probe --verify-running-flutter-sdk',
+        '      # - run: dart run scripts/dependency_compatibility.dart --mode=future-probe --verify-running-flutter-sdk',
+      );
+
+      expect(
+        validate(input),
+        contains(
+          'future workflow must invoke SDK verification in each beta job',
+        ),
+      );
+    });
+
     test('rejects metadata revision and channel drift independently', () {
       final input = currentInputs();
       input['metadata'] = input['metadata']!.replaceFirst(
@@ -687,7 +702,10 @@ void main() {
         final future = currentInputs()['future']!;
         expect(RegExp(r'channel: beta').allMatches(future), hasLength(2));
         expect(
-          RegExp(RegExp.escape(futureProbeCommand)).allMatches(future),
+          RegExp(
+            r'^\s*-\s+run:\s+' + RegExp.escape(futureProbeCommand) + r'[ \t]*$',
+            multiLine: true,
+          ).allMatches(future),
           hasLength(2),
         );
         expect(future, contains('flutter build apk --debug'));
