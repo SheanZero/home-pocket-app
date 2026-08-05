@@ -1,10 +1,14 @@
 # Per-subdirectory whitelist (Phase 3 D-01 corrected). Inherits parent feature-level deny.
 allow:
   - dart:core
+  - dart:convert                       # UTF-8 payload sizing in memory quarantine repository
   - package:freezed_annotation/**
   - package:json_annotation/**
   - package:meta/**
-  - ../models/group_info.dart         # closes LV-015 (group_repository.dart line 1)
-  - ../models/group_member.dart       # closes LV-016 (group_repository.dart line 2)
+  - ../models/group_info.dart                    # closes LV-015 (group_repository.dart line 1)
+  - ../models/group_member.dart                  # closes LV-016 (group_repository.dart line 2)
+  - ../models/family_sync_outbox_entry.dart      # outbox repository domain model
+  - ../models/member_content_version.dart        # versioned group repository domain model
+  - ../models/inbound_sync_resource_policy.dart  # quarantine bounds policy
 
 inherit: true

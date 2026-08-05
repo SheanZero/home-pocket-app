@@ -5,8 +5,8 @@
 // does NOT carry an `allow:` block (corrected D-01 strategy moves the
 // whitelist to per-subdirectory yamls). Asserts each
 // `lib/features/<f>/domain/{models,repositories}/import_guard.yaml`
-// (where present) declares only annotation packages + same-feature
-// intra-domain leaves.
+// (where present) declares only approved pure-Dart SDK libraries,
+// annotation packages, and same-feature intra-domain leaves.
 //
 // Failing this test means someone weakened the architectural commitment;
 // fix the yaml or have an explicit conversation about why it should change.
@@ -15,6 +15,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
+
+const _approvedDomainSdkImports = {'dart:core', 'dart:convert'};
 
 void main() {
   group('Domain layer import_guard rules', () {
@@ -70,8 +72,8 @@ void main() {
               .map((e) => e.toString())
               .toList();
           for (final entry in allow) {
-            final isAnnotation =
-                entry == 'dart:core' ||
+            final isSdkOrAnnotation =
+                _approvedDomainSdkImports.contains(entry) ||
                 entry.startsWith('package:freezed_annotation') ||
                 entry.startsWith('package:json_annotation') ||
                 entry.startsWith('package:meta');
@@ -85,10 +87,12 @@ void main() {
             final isCrossFeatureDomainModel =
                 entry.contains('/domain/models/') && entry.endsWith('.dart');
             expect(
-              isAnnotation || isIntraDomainLeaf || isCrossFeatureDomainModel,
+              isSdkOrAnnotation ||
+                  isIntraDomainLeaf ||
+                  isCrossFeatureDomainModel,
               isTrue,
               reason:
-                  'Feature $feature models/: allow leaf "$entry" is neither annotation, '
+                  'Feature $feature models/: allow leaf "$entry" is neither approved SDK/annotation, '
                   'intra-domain leaf, nor cross-feature domain model',
             );
           }
@@ -104,8 +108,8 @@ void main() {
               .map((e) => e.toString())
               .toList();
           for (final entry in allow) {
-            final isAnnotation =
-                entry == 'dart:core' ||
+            final isSdkOrAnnotation =
+                _approvedDomainSdkImports.contains(entry) ||
                 entry.startsWith('package:freezed_annotation') ||
                 entry.startsWith('package:json_annotation') ||
                 entry.startsWith('package:meta');
@@ -122,13 +126,13 @@ void main() {
             final isSharedConstant =
                 entry.contains('shared/constants/') && entry.endsWith('.dart');
             expect(
-              isAnnotation ||
+              isSdkOrAnnotation ||
                   isIntraDomainLeaf ||
                   isCrossFeatureDomainModel ||
                   isSharedConstant,
               isTrue,
               reason:
-                  'Feature $feature repositories/: allow leaf "$entry" is not an annotation, '
+                  'Feature $feature repositories/: allow leaf "$entry" is not an approved SDK/annotation, '
                   '../models/*.dart, cross-feature domain model, or shared/constants/*.dart',
             );
           }

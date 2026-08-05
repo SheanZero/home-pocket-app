@@ -6,6 +6,7 @@ allow:
   - dart:convert # ShoppingItemSyncMapper JSON-encodes the tags list for the sync wire
   - package:freezed_annotation/**
   - shopping_item.dart # intra-domain sibling (model + kShoppingItemEntityType)
+  - shopping_unit.dart # intra-domain sibling unit model and selection types
   - ../../../accounting/domain/models/transaction.dart
 
 inherit: true

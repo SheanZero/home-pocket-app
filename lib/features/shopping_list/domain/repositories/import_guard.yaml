@@ -4,5 +4,6 @@
 allow:
   - dart:core
   - ../models/shopping_item.dart
+  - ../models/shopping_unit.dart
 
 inherit: true
