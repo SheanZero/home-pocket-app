@@ -740,5 +740,114 @@ void main() {
       expect(authMessage, contains('timestamp'));
       expect(authMessage, contains('signature'));
     });
+
+    test(
+      'stale authentication never writes to a replacement channel',
+      () async {
+        final delayedSignature = Completer<String>();
+        final sinks = <MockWebSocketSink>[];
+        final controllers = <StreamController<dynamic>>[];
+        final replacementService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            final controller = StreamController<dynamic>.broadcast();
+            final localSink = MockWebSocketSink();
+            when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+            when(() => localSink.add(any())).thenReturn(null);
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            controllers.add(controller);
+            sinks.add(localSink);
+            return channel;
+          },
+        );
+        addTearDown(() async {
+          replacementService.dispose();
+          for (final controller in controllers) {
+            await controller.close();
+          }
+        });
+
+        replacementService.connect(
+          groupId: 'group-a',
+          deviceId: 'device-a',
+          signMessage: (_) => delayedSignature.future,
+        );
+        replacementService.connect(
+          groupId: 'group-b',
+          deviceId: 'device-b',
+          signMessage: (_) async => 'signature-b',
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        delayedSignature.complete('signature-a');
+        await Future<void>.delayed(Duration.zero);
+
+        verifyNever(() => sinks[0].add(any()));
+        verify(() => sinks[1].add(any())).called(1);
+      },
+    );
+
+    test('disconnect invalidates pending authentication', () async {
+      final delayedSignature = Completer<String>();
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (_) => delayedSignature.future,
+      );
+
+      service.disconnect();
+      delayedSignature.complete('signature');
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(() => sink.add(any()));
+    });
+
+    test(
+      'a stale stream error cannot disconnect the replacement connection',
+      () async {
+        final controllers = <StreamController<dynamic>>[];
+        final replacementService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            final controller = StreamController<dynamic>.broadcast(sync: true);
+            final localSink = MockWebSocketSink();
+            when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+            when(() => localSink.add(any())).thenReturn(null);
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            controllers.add(controller);
+            return channel;
+          },
+        );
+        addTearDown(() async {
+          replacementService.dispose();
+          for (final controller in controllers) {
+            await controller.close();
+          }
+        });
+
+        replacementService.connect(
+          groupId: 'group-a',
+          deviceId: 'device-a',
+          signMessage: (_) async => 'signature-a',
+        );
+        replacementService.connect(
+          groupId: 'group-b',
+          deviceId: 'device-b',
+          signMessage: (_) async => 'signature-b',
+        );
+        controllers[1].add(jsonEncode({'type': 'auth_success'}));
+
+        controllers[0].addError(StateError('stale socket failed'));
+
+        expect(
+          replacementService.connectionState,
+          WebSocketConnectionState.connected,
+        );
+      },
+    );
   });
 }

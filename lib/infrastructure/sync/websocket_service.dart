@@ -83,6 +83,7 @@ class WebSocketService with WidgetsBindingObserver {
   String? _groupId;
   String? _deviceId;
   SignMessageFn? _signMessage;
+  int _connectionGeneration = 0;
 
   int _reconnectAttempts = 0;
   static const _maxReconnectDelay = Duration(seconds: 30);
@@ -142,38 +143,69 @@ class WebSocketService with WidgetsBindingObserver {
   }
 
   void _doConnect() {
+    final groupId = _groupId;
+    final deviceId = _deviceId;
+    final signMessage = _signMessage;
+    if (groupId == null || deviceId == null || signMessage == null) return;
+
+    final generation = ++_connectionGeneration;
     _setConnectionState(WebSocketConnectionState.connecting);
 
-    final url = '$_baseUrl/ws/group/$_groupId';
-    _channel = _channelFactory(url: url);
+    final url = '$_baseUrl/ws/group/$groupId';
+    final channel = _channelFactory(url: url);
+    _channel = channel;
 
-    _messageSubscription = _channel!.stream.listen(
-      _onMessage,
-      onError: _onError,
-      onDone: _onDone,
+    _messageSubscription = channel.stream.listen(
+      (raw) => _onMessage(raw, generation, channel, groupId),
+      onError: (Object error, StackTrace stackTrace) =>
+          _onError(error, generation, channel),
+      onDone: () => _onDone(generation, channel),
     );
 
-    _authenticate();
+    unawaited(
+      _authenticate(
+        generation: generation,
+        channel: channel,
+        groupId: groupId,
+        deviceId: deviceId,
+        signMessage: signMessage,
+      ),
+    );
   }
 
-  Future<void> _authenticate() async {
-    if (_channel == null || _deviceId == null || _signMessage == null) return;
-
+  Future<void> _authenticate({
+    required int generation,
+    required WebSocketChannel channel,
+    required String groupId,
+    required String deviceId,
+    required SignMessageFn signMessage,
+  }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final message = 'ws:connect:$_groupId:$_deviceId:$timestamp';
-    final signature = await _signMessage!(message);
+    final message = 'ws:connect:$groupId:$deviceId:$timestamp';
+    final signature = await signMessage(message);
+    if (!_isCurrentConnection(generation, channel)) return;
 
     final authMessage = jsonEncode({
-      'deviceId': _deviceId,
+      'deviceId': deviceId,
       'timestamp': timestamp,
       'signature': signature,
       'protocolVersion': 1,
     });
 
-    _channel!.sink.add(authMessage);
+    channel.sink.add(authMessage);
   }
 
-  void _onMessage(dynamic raw) {
+  bool _isCurrentConnection(int generation, WebSocketChannel channel) {
+    return generation == _connectionGeneration && identical(channel, _channel);
+  }
+
+  void _onMessage(
+    dynamic raw,
+    int generation,
+    WebSocketChannel channel,
+    String groupId,
+  ) {
+    if (!_isCurrentConnection(generation, channel)) return;
     if (raw is! String) return;
 
     Map<String, dynamic> data;
@@ -190,7 +222,7 @@ class WebSocketService with WidgetsBindingObserver {
     if (type == 'auth_success') {
       _setConnectionState(WebSocketConnectionState.connected);
       _reconnectAttempts = 0;
-      _startHeartbeat();
+      _startHeartbeat(generation, channel);
       return;
     }
 
@@ -198,11 +230,11 @@ class WebSocketService with WidgetsBindingObserver {
       // Auth errors are non-recoverable — do not reconnect
       if (!_eventController.isClosed) {
         _eventController.add(
-          WebSocketEvent(type: WebSocketEventType.authError, groupId: _groupId),
+          WebSocketEvent(type: WebSocketEventType.authError, groupId: groupId),
         );
       }
       _reconnectAttempts = -1; // Sentinel to prevent reconnect
-      disconnect();
+      _handleDisconnect(generation, channel);
       return;
     }
 
@@ -269,36 +301,44 @@ class WebSocketService with WidgetsBindingObserver {
     );
   }
 
-  void _startHeartbeat() {
+  void _startHeartbeat(int generation, WebSocketChannel channel) {
     _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (_channel == null) return;
-      _channel!.sink.add(jsonEncode({'type': 'ping'}));
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (!_isCurrentConnection(generation, channel)) {
+        timer.cancel();
+        return;
+      }
+      channel.sink.add(jsonEncode({'type': 'ping'}));
 
       // Expect pong within 45s
       _pongTimeoutTimer?.cancel();
       _pongTimeoutTimer = Timer(const Duration(seconds: 45), () {
+        if (!_isCurrentConnection(generation, channel)) return;
         if (kDebugMode) {
           debugPrint('WebSocketService: pong timeout, reconnecting');
         }
-        _handleDisconnect();
+        _handleDisconnect(generation, channel);
       });
     });
   }
 
-  void _onError(Object error) {
+  void _onError(Object error, int generation, WebSocketChannel channel) {
+    if (!_isCurrentConnection(generation, channel)) return;
     if (kDebugMode) {
       debugPrint('WebSocketService: error: $error');
     }
-    _handleDisconnect();
+    _handleDisconnect(generation, channel);
   }
 
-  void _onDone() {
-    _handleDisconnect();
+  void _onDone(int generation, WebSocketChannel channel) {
+    if (!_isCurrentConnection(generation, channel)) return;
+    _handleDisconnect(generation, channel);
   }
 
-  void _handleDisconnect() {
+  void _handleDisconnect(int generation, WebSocketChannel channel) {
+    if (!_isCurrentConnection(generation, channel)) return;
     _cleanup();
+    _connectionGeneration++;
     _setConnectionState(WebSocketConnectionState.disconnected);
 
     // Don't reconnect if auth failed
@@ -309,6 +349,9 @@ class WebSocketService with WidgetsBindingObserver {
   }
 
   void _scheduleReconnect() {
+    final generation = _connectionGeneration;
+    final groupId = _groupId;
+    final deviceId = _deviceId;
     final delay = Duration(
       milliseconds: (1000 * (1 << _reconnectAttempts)).clamp(
         1000,
@@ -324,11 +367,21 @@ class WebSocketService with WidgetsBindingObserver {
       );
     }
 
-    _reconnectTimer = Timer(delay, _doConnect);
+    _reconnectTimer = Timer(delay, () {
+      if (generation != _connectionGeneration ||
+          groupId != _groupId ||
+          deviceId != _deviceId ||
+          _channel != null) {
+        return;
+      }
+      _reconnectTimer = null;
+      _doConnect();
+    });
   }
 
   /// Disconnect from the WebSocket and stop all timers.
   void disconnect() {
+    _connectionGeneration++;
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     _backgroundDisconnectTimer?.cancel();
@@ -392,7 +445,9 @@ class WebSocketService with WidgetsBindingObserver {
         state == AppLifecycleState.inactive) {
       // Schedule disconnect after 60s in background
       _backgroundDisconnectTimer?.cancel();
+      final generation = _connectionGeneration;
       _backgroundDisconnectTimer = Timer(const Duration(seconds: 60), () {
+        if (generation != _connectionGeneration) return;
         if (kDebugMode) {
           debugPrint('WebSocketService: background timeout, disconnecting');
         }
