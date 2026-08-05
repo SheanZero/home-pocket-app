@@ -327,7 +327,9 @@ class _CentralSquare extends StatelessWidget {
       child: Icon(
         // Stopped → reset (re-record) icon; listening → passive line mic.
         isStopped ? Icons.restore : Icons.mic_none,
-        color: isStopped ? Colors.white : palette.textTertiary,
+        color: isStopped
+            ? palette.primaryActionForeground
+            : palette.textTertiary,
         size: 32,
       ),
     );

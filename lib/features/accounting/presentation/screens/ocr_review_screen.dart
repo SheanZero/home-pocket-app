@@ -31,7 +31,8 @@ class OcrReviewScreen extends ConsumerStatefulWidget {
 
   final String bookId;
   final OcrParseDraft draft;
-  @override ConsumerState<OcrReviewScreen> createState() => _OcrReviewScreenState();
+  @override
+  ConsumerState<OcrReviewScreen> createState() => _OcrReviewScreenState();
 }
 
 class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
@@ -46,19 +47,26 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
   late int _displayAmount;
 
   TransactionDetailsFormConfig get _config => widget.draft.maybeWhen(
-        (amount, merchant, date, rawOcrText, imagePath) =>
-            TransactionDetailsFormConfig.$new(
-              bookId: widget.bookId,
-              initialAmount: amount,
-              initialMerchant: merchant,
-              initialDate: date,
-              entrySource: EntrySource.manual, // MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)
-            ),
-        orElse: () => TransactionDetailsFormConfig.$new(
-          bookId: widget.bookId,
-          entrySource: EntrySource.manual, // MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)
-        ),
-      );
+    (
+      amount,
+      merchant,
+      date,
+      rawOcrText,
+      imagePath,
+    ) => TransactionDetailsFormConfig.$new(
+      bookId: widget.bookId,
+      initialAmount: amount,
+      initialMerchant: merchant,
+      initialDate: date,
+      entrySource: EntrySource
+          .manual, // MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)
+    ),
+    orElse: () => TransactionDetailsFormConfig.$new(
+      bookId: widget.bookId,
+      entrySource: EntrySource
+          .manual, // MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)
+    ),
+  );
 
   @override
   void initState() {
@@ -79,7 +87,9 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
     result.when(
       success: (_) {
         showSuccessFeedback(context, S.of(context).transactionSaved);
-        Navigator.of(context).popUntil((r) => r.isFirst); // .new flow, D-13/D-04
+        Navigator.of(
+          context,
+        ).popUntil((r) => r.isFirst); // .new flow, D-13/D-04
       },
       validationError: (msg) => showErrorFeedback(context, msg),
       persistError: (msg) => showErrorFeedback(context, msg),
@@ -114,87 +124,105 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
         leading: TextButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.chevron_left, color: palette.daily),
-          label: Text(l10n.back,
-              style: AppTextStyles.titleMedium.copyWith(color: palette.daily)),
+          label: Text(
+            l10n.back,
+            style: AppTextStyles.titleMedium.copyWith(color: palette.daily),
+          ),
         ),
         leadingWidth: 100,
-        title: Text(l10n.ocrReviewTitle,
-            style: AppTextStyles.headlineMedium.copyWith(
-              color: palette.textPrimary,
-            )),
+        title: Text(
+          l10n.ocrReviewTitle,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: palette.textPrimary,
+          ),
+        ),
         centerTitle: true,
       ),
-      body: Column(children: [
-        // D-14 spillover: host renders AmountDisplay above the form.
-        // Tapping opens AmountEditBottomSheet (modal-sheet UX, not persistent keyboard).
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _editAmount,
-          child: AmountDisplay(
-            amount: _displayAmount > 0 ? _displayAmount.toString() : '',
-            onClear: () {
-              if (!mounted) return;
-              setState(() => _displayAmount = 0);
-              _formKey.currentState?.updateAmount(0);
-            },
+      body: Column(
+        children: [
+          // D-14 spillover: host renders AmountDisplay above the form.
+          // Tapping opens AmountEditBottomSheet (modal-sheet UX, not persistent keyboard).
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _editAmount,
+            child: AmountDisplay(
+              amount: _displayAmount > 0 ? _displayAmount.toString() : '',
+              onClear: () {
+                if (!mounted) return;
+                setState(() => _displayAmount = 0);
+                _formKey.currentState?.updateAmount(0);
+              },
+            ),
           ),
-        ),
-        // Empty-draft banner — preserved verbatim (Phase 18 D-13).
-        // Positioned AFTER AmountDisplay so the display is always visible at top.
-        if (widget.draft.isEmpty)
-          MaterialBanner(
-            content: Text(l10n.ocrReviewEmptyDraftBanner),
-            actions: const [SizedBox.shrink()],
+          // Empty-draft banner — preserved verbatim (Phase 18 D-13).
+          // Positioned AFTER AmountDisplay so the display is always visible at top.
+          if (widget.draft.isEmpty)
+            MaterialBanner(
+              content: Text(l10n.ocrReviewEmptyDraftBanner),
+              actions: const [SizedBox.shrink()],
+            ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: TransactionDetailsForm(key: _formKey, config: _config),
+            ),
           ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: TransactionDetailsForm(key: _formKey, config: _config),
-          ),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [palette.fabGradientStart, palette.fabGradientEnd],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(color: palette.actionShadow, blurRadius: 14, offset: const Offset(0, 4)),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _isSubmitting ? null : _save,
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        palette.fabGradientStart,
+                        palette.fabGradientEnd,
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(14),
-                    child: Center(
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : Text(l10n.save,
-                              style: AppTextStyles.titleLarge.copyWith(
-                                color: Colors.white,
-                                fontSize: 16,
-                              )),
+                    boxShadow: [
+                      BoxShadow(
+                        color: palette.actionShadow,
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _isSubmitting ? null : _save,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Center(
+                        child: _isSubmitting
+                            ? SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: palette.primaryActionForeground,
+                                ),
+                              )
+                            : Text(
+                                l10n.save,
+                                style: AppTextStyles.titleLarge.copyWith(
+                                  color: palette.primaryActionForeground,
+                                  fontSize: 16,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

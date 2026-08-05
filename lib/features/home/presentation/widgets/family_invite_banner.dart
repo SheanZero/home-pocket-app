@@ -131,7 +131,7 @@ class FamilyInviteBanner extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.compact.copyWith(
                 fontWeight: FontWeight.w700,
-                color: palette.accentPrimary,
+                color: palette.accentPrimaryText,
               ),
             ),
           ),

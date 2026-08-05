@@ -349,28 +349,28 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
             borderRadius: BorderRadius.circular(14),
             child: Center(
               child: _isSubmitting
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 22,
                       width: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: palette.primaryActionForeground,
                       ),
                     )
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.check_rounded,
                           key: ValueKey('transaction-edit-save-check'),
                           size: 19,
-                          color: Colors.white,
+                          color: palette.primaryActionForeground,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           l10n.save,
                           style: AppTextStyles.titleLarge.copyWith(
-                            color: Colors.white,
+                            color: palette.primaryActionForeground,
                             fontSize: 16,
                           ),
                         ),

@@ -22,6 +22,11 @@ void main() {
 
     test('accentPrimary is V15 deep green #456B59', () {
       expect(AppPalette.light.accentPrimary, const Color(0xFF456B59));
+      expect(AppPalette.light.accentPrimaryText, const Color(0xFF456B59));
+      expect(
+        AppPalette.light.primaryActionForeground,
+        const Color(0xFFFFFFFF),
+      );
     });
 
     test('shared and info use the V15 information blue #4F7186', () {
@@ -57,25 +62,44 @@ void main() {
     });
   });
 
-  group('AppPalette.dark — ADR-019 contract', () {
-    test('background is warm-dark #171210', () {
-      expect(AppPalette.dark.background, const Color(0xFF171210));
+  group('AppPalette.dark — Mockup V16 A3 contract', () {
+    test('surfaces match the A3 ink-green hierarchy', () {
+      expect(AppPalette.dark.background, const Color(0xFF171C19));
+      expect(AppPalette.dark.card, const Color(0xFF222923));
+      expect(AppPalette.dark.backgroundMuted, const Color(0xFF2B342D));
+      expect(AppPalette.dark.backgroundDivider, const Color(0xFF354038));
     });
 
-    test('accentPrimary is bright leaf green #8DC68D on dark', () {
-      expect(AppPalette.dark.accentPrimary, const Color(0xFF8DC68D));
+    test('text and borders match the A3 hierarchy', () {
+      expect(AppPalette.dark.textPrimary, const Color(0xFFEEF1EB));
+      expect(AppPalette.dark.textSecondary, const Color(0xFFA1ADA4));
+      expect(AppPalette.dark.textTertiary, const Color(0xFF8B978E));
+      expect(AppPalette.dark.borderDefault, const Color(0xFF354038));
+      expect(AppPalette.dark.borderList, const Color(0xFF465248));
     });
 
-    test('daily is #7DC88D (bright leaf on dark)', () {
+    test('primary and ledger families match A3', () {
+      expect(AppPalette.dark.accentPrimary, const Color(0xFF99BCA5));
+      expect(AppPalette.dark.accentPrimaryText, const Color(0xFFB4D2BC));
+      expect(AppPalette.dark.accentPrimaryLight, const Color(0xFF293B30));
+      expect(
+        AppPalette.dark.primaryActionForeground,
+        const Color(0xFF222923),
+      );
       expect(AppPalette.dark.daily, const Color(0xFF7DC88D));
-    });
-
-    test('joy is #E89BB0 (bright sakura pink on dark — Amber → Sakura)', () {
+      expect(AppPalette.dark.dailyLight, const Color(0xFF1A2E1A));
       expect(AppPalette.dark.joy, const Color(0xFFE89BB0));
+      expect(AppPalette.dark.joyLight, const Color(0xFF2E1820));
+      expect(AppPalette.dark.shared, const Color(0xFF91ADC2));
+      expect(AppPalette.dark.sharedText, const Color(0xFFAAC4D7));
+      expect(AppPalette.dark.sharedLight, const Color(0xFF263640));
     });
 
-    test('textPrimary is #F0EBE6 (warm near-white on dark background)', () {
-      expect(AppPalette.dark.textPrimary, const Color(0xFFF0EBE6));
+    test('semantic colors match A3', () {
+      expect(AppPalette.dark.success, const Color(0xFF89B49C));
+      expect(AppPalette.dark.warning, const Color(0xFFD3A571));
+      expect(AppPalette.dark.error, const Color(0xFFE58C8C));
+      expect(AppPalette.dark.info, const Color(0xFF8CB1C8));
     });
   });
 

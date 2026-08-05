@@ -104,7 +104,7 @@ class HomeBottomNavBar extends StatelessWidget {
   Widget _buildTab(BuildContext context, int index, String label) {
     final isActive = index == currentIndex;
 
-    final activeColor = context.palette.accentPrimary;
+    final activeColor = context.palette.accentPrimaryText;
     // V15 text-faint token, resolved per brightness by the theme extension.
     final inactiveColor = context.palette.navInactive;
 

@@ -44,8 +44,8 @@ void main() {
       final text = tester.widget<Text>(find.text('ホーム'));
       expect(
         text.style?.color,
-        AppPalette.light.accentPrimary,
-      ); // Active tab text is tinted with the accent colour (no background)
+        AppPalette.light.accentPrimaryText,
+      ); // Active tab text maps to Mockup V16's primary-text role.
     });
 
     testWidgets('inactive tab uses inactive color', (tester) async {

@@ -40,6 +40,47 @@ final result: passed
 
 ---
 
+# Mockup A3 Dark Palette Alignment — Design QA (2026-08-04)
+
+## Scope and evidence
+
+- Source visual truth: `docs/mockup/v16/index.html`, A3 personal dark preset.
+- Implementation: Flutter dark theme and all screens consuming `AppPalette` / `AppTheme`.
+- Change constraint: color-only review; existing layout, spacing, typography, copy, and navigation were intentionally left unchanged.
+- Matched viewport/state comparison: 390×600 personal-home composition.
+- Source capture: `/Users/xinz/.codex/visualizations/2026/08/04/019fccb5-eb77-7383-9394-b3f3e36e0195/mockup-a3-home-visible.png`.
+- Flutter capture: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/home_v16_phone_dark_ja.png`.
+- Combined comparison input: `/Users/xinz/.codex/visualizations/2026/08/04/019fccb5-eb77-7383-9394-b3f3e36e0195/a3-dark-390-comparison.png`.
+
+## Findings
+
+- No actionable P0, P1, or P2 color mismatch remains.
+- Global surfaces now map to A3 exactly: background `#171C19`, card `#222923`, muted surface `#2B342D`, divider/default border `#354038`, and strong border `#465248`.
+- Text hierarchy now maps to `#EEF1EB`, `#A1ADA4`, and `#8B978E`; the distinct A3 primary-text role is `#B4D2BC` for active navigation and text actions.
+- Ledger and semantic colors match A3: primary `#99BCA5`, daily `#7DC88D`, Joy `#E89BB0`, shared `#91ADC2` / `#AAC4D7`, success `#89B49C`, warning `#D3A571`, error `#E58C8C`, and info `#8CB1C8`.
+- Material controls receive the same explicit dark `ColorScheme`, preventing stock Material dark colors from leaking into dialogs and controls.
+- Saturated primary/FAB actions use the A3 dark paper foreground while preserving the established light-mode white foreground.
+- The 390×600 comparison confirms the hero blend, border mix, page background, green/pink ledger bar, Joy ring, favorite ticket, and active-action colors track the A3 reference. Content and icon-glyph differences are fixture/font differences and were not layout work.
+- No imagery or custom asset treatment changed. Existing icon libraries and interaction behavior remain intact.
+
+## Page and state coverage
+
+- Rebased and re-verified 94 dark golden cases across Home, List, Analytics, Shopping, Family, currency/edit surfaces, empty states, feedback, calendar, and category drill-down components.
+- Re-verified three SmartKeyboard locale goldens plus JPY/USD dot-gating dark states.
+- Targeted widget coverage passed for onboarding, profile, app lock, OCR review, transaction edit, voice input/listening, keyboard toolbar, shopping empty state, Home hero, and bottom navigation.
+- Dark-mode resolution and raw-color architecture scans passed.
+- `flutter analyze`: 0 issues.
+
+## Comparison history
+
+1. Before the fix, the Flutter dark theme used a brown-black foundation (`#171210` / `#231E1B`) that visibly diverged from A3's ink-green foundation.
+2. The global palette, Material color roles, semantic foregrounds, and dark action ink were aligned to the live A3 tokens without changing layout.
+3. The post-fix matched-viewport comparison and dark golden matrix found no remaining P0/P1/P2 color issue.
+
+final result: passed
+
+---
+
 # Home Monthly Favorite — Square Satisfaction Panel (2026-08-04)
 
 ## Scope and evidence

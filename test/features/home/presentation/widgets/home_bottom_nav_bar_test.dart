@@ -59,16 +59,16 @@ void main() {
     expect(tappedIndex, 1);
   });
 
-  testWidgets('active tab icon uses primary accent color', (tester) async {
+  testWidgets('active tab icon uses primary text color', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         HomeBottomNavBar(currentIndex: 2, onTap: (_) {}, onFabTap: () {}),
       ),
     );
     await tester.pumpAndSettle();
-    // The active tab (index 2, bar_chart) icon is tinted with the accent colour
+    // The active tab mirrors Mockup V16's `--hp-primary-text` role.
     final barChartIcon = tester.widget<Icon>(find.byIcon(Icons.bar_chart));
-    expect(barChartIcon.color, AppPalette.light.accentPrimary);
+    expect(barChartIcon.color, AppPalette.light.accentPrimaryText);
   });
 
   testWidgets('inactive tab icon uses tertiary color', (tester) async {

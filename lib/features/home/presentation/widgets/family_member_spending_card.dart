@@ -54,7 +54,11 @@ class FamilyMemberSpendingCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.groups_rounded, size: 16, color: palette.accentPrimary),
+            Icon(
+              Icons.groups_rounded,
+              size: 16,
+              color: palette.accentPrimaryText,
+            ),
             const SizedBox(width: 6),
             Text(
               l10n.homeMembersSectionTitle,

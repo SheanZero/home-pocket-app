@@ -116,16 +116,16 @@ class KeyboardToolbar extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.receipt_long_rounded,
                               size: 18,
-                              color: Colors.white,
+                              color: palette.primaryActionForeground,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               S.of(context).record,
                               style: AppTextStyles.bodyMedium.copyWith(
-                                color: Colors.white,
+                                color: palette.primaryActionForeground,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

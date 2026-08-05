@@ -46,8 +46,8 @@ class ShoppingEmptyState extends ConsumerWidget {
     final variant = (listType == 'private' || listType == 'all')
         ? ShoppingEmptyVariant.privateEmpty
         : (isGroupMode
-            ? ShoppingEmptyVariant.publicFamily
-            : ShoppingEmptyVariant.publicSolo);
+              ? ShoppingEmptyVariant.publicFamily
+              : ShoppingEmptyVariant.publicSolo);
     // Create-target for the CTA: new items default to 'public' (G8Z2 FIX-2),
     // independent of the current view ('all'/'private' are views, not storable
     // list_types). Private is opt-in via the form's public/private selector.
@@ -56,20 +56,20 @@ class ShoppingEmptyState extends ConsumerWidget {
     final l10n = S.of(context);
     final (icon, heading, body) = switch (variant) {
       ShoppingEmptyVariant.privateEmpty => (
-          Icons.shopping_bag_outlined,
-          l10n.shoppingEmptyPrivateHeading,
-          l10n.shoppingEmptyPrivateBody,
-        ),
+        Icons.shopping_bag_outlined,
+        l10n.shoppingEmptyPrivateHeading,
+        l10n.shoppingEmptyPrivateBody,
+      ),
       ShoppingEmptyVariant.publicSolo => (
-          Icons.group_outlined,
-          l10n.shoppingEmptyPublicSoloHeading,
-          l10n.shoppingEmptyPublicSoloBody,
-        ),
+        Icons.group_outlined,
+        l10n.shoppingEmptyPublicSoloHeading,
+        l10n.shoppingEmptyPublicSoloBody,
+      ),
       ShoppingEmptyVariant.publicFamily => (
-          Icons.add_shopping_cart_outlined,
-          l10n.shoppingEmptyPublicFamilyHeading,
-          l10n.shoppingEmptyPublicFamilyBody,
-        ),
+        Icons.add_shopping_cart_outlined,
+        l10n.shoppingEmptyPublicFamilyHeading,
+        l10n.shoppingEmptyPublicFamilyBody,
+      ),
     };
 
     final palette = context.palette;
@@ -90,8 +90,9 @@ class ShoppingEmptyState extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               heading,
-              style: AppTextStyles.headlineSmall
-                  .copyWith(color: palette.textPrimary),
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: palette.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -116,8 +117,9 @@ class ShoppingEmptyState extends ConsumerWidget {
               ),
               child: Text(
                 l10n.shoppingEmptyCta,
-                style:
-                    AppTextStyles.titleSmall.copyWith(color: Colors.white),
+                style: AppTextStyles.titleSmall.copyWith(
+                  color: palette.primaryActionForeground,
+                ),
               ),
             ),
           ],

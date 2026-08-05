@@ -35,6 +35,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     required this.borderInputActive,
     // ── Accent primary (Leaf Green) ──
     required this.accentPrimary,
+    required this.accentPrimaryText,
     required this.accentPrimaryLight,
     required this.accentPrimaryBorder,
     required this.fabGradientStart,
@@ -124,11 +125,19 @@ final class AppPalette extends ThemeExtension<AppPalette> {
 
   // ── Accent primary (Leaf Green) ──
   final Color accentPrimary;
+  final Color accentPrimaryText;
   final Color accentPrimaryLight;
   final Color accentPrimaryBorder;
   final Color fabGradientStart;
   final Color fabGradientEnd;
   final Color actionShadow;
+
+  /// Foreground for saturated primary and FAB-gradient actions.
+  ///
+  /// A3 uses the dark paper surface as ink in dark mode. Keep the established
+  /// white foreground in light mode so this dark-theme refresh stays scoped.
+  Color get primaryActionForeground =>
+      background.computeLuminance() < 0.2 ? card : Colors.white;
 
   /// Alias for [fabGradientStart].
   Color get actionGradientStart => fabGradientStart;
@@ -239,6 +248,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     borderInputActive: Color(0xFF456B59),
     // Accent primary (V15 deep-green family)
     accentPrimary: Color(0xFF456B59),
+    accentPrimaryText: Color(0xFF456B59),
     accentPrimaryLight: Color(0xFFE2ECE4),
     accentPrimaryBorder: Color(0xFFCFE6CF),
     fabGradientStart: Color(0xFFD98CA0),
@@ -303,33 +313,35 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     surfaceScrimMedium: Color(0x0A000000),
   );
 
-  /// ADR-019 Dark palette — Sakura Mochi × Wakaba.
+  /// Mockup V16 A3 dark palette — ink green × Sakura Mochi × Wakaba.
   static const dark = AppPalette(
-    // Backgrounds (warm-dark)
-    background: Color(0xFF171210),
-    card: Color(0xFF231E1B),
-    backgroundMuted: Color(0xFF2E2723),
-    backgroundSubtle: Color(0xFF1E1916),
-    backgroundDivider: Color(0xFF2E2723),
+    // Backgrounds (`--hp-bg` / `--hp-surface*`)
+    background: Color(0xFF171C19),
+    card: Color(0xFF222923),
+    backgroundMuted: Color(0xFF2B342D),
+    backgroundSubtle: Color(0xFF171C19),
+    backgroundDivider: Color(0xFF354038),
     // Text
-    textPrimary: Color(0xFFF0EBE6),
-    textSecondary: Color(0xFF9A8E87),
-    textTertiary: Color(0xFF6B5F58),
+    textPrimary: Color(0xFFEEF1EB),
+    textSecondary: Color(0xFFA1ADA4),
+    textTertiary: Color(0xFF8B978E),
     // Borders
-    borderDefault: Color(0xFF2E2723),
-    borderDivider: Color(0xFF2E2723),
-    borderList: Color(0xFF2E2723),
-    borderInputActive: Color(0xFF8DC68D),
-    // Accent primary (bright leaf green on dark)
-    accentPrimary: Color(0xFF8DC68D),
-    accentPrimaryLight: Color(0xFF1A2E1A),
-    accentPrimaryBorder: Color(0xFF283E28),
-    fabGradientStart: Color(0xFFEDB8CA),
-    fabGradientEnd: Color(0xFFE09DB4),
-    actionShadow: Color(0x33E09DB4),
-    // Recording (error semantic family — dark variant)
-    recordingGradientStart: Color(0xFFF0676B),
-    recordingGradientEnd: Color(0xFFD44050),
+    borderDefault: Color(0xFF354038),
+    borderDivider: Color(0xFF354038),
+    borderList: Color(0xFF465248),
+    borderInputActive: Color(0xFF99BCA5),
+    // Accent primary (`--hp-primary*`)
+    accentPrimary: Color(0xFF99BCA5),
+    accentPrimaryText: Color(0xFFB4D2BC),
+    accentPrimaryLight: Color(0xFF293B30),
+    accentPrimaryBorder: Color(0xFF465248),
+    // FAB mirrors A3's joy → deep-rose color mix.
+    fabGradientStart: Color(0xFFE89BB0),
+    fabGradientEnd: Color(0xFFD38796),
+    actionShadow: Color(0x33E89BB0),
+    // Recording (A3 error family)
+    recordingGradientStart: Color(0xFFE58C8C),
+    recordingGradientEnd: Color(0xFFD07B7B),
     // Ledger — Daily (bright leaf on dark)
     daily: Color(0xFF7DC88D),
     dailyText: Color(0xFF7DC88D),
@@ -339,48 +351,48 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     joyText: Color(0xFFE89BB0),
     joyLight: Color(0xFF2E1820),
     // Ledger — Shared
-    shared: Color(0xFF7FA8D8),
-    sharedText: Color(0xFF7FA8D8),
-    sharedLight: Color(0xFF1E2A3A),
-    sharedBorder: Color(0xFF2A3D55),
-    sharedChevron: Color(0xFF4A6E8A),
+    shared: Color(0xFF91ADC2),
+    sharedText: Color(0xFFAAC4D7),
+    sharedLight: Color(0xFF263640),
+    sharedBorder: Color(0xFF465248),
+    sharedChevron: Color(0xFF91ADC2),
     // Semantic
-    success: Color(0xFF3FC78E),
-    successLight: Color(0xFF1E3329),
-    warning: Color(0xFFE5B53A),
-    error: Color(0xFFF0676B),
-    info: Color(0xFF5AA8E0),
+    success: Color(0xFF89B49C),
+    successLight: Color(0xFF243128),
+    warning: Color(0xFFD3A571),
+    error: Color(0xFFE58C8C),
+    info: Color(0xFF8CB1C8),
     // Error tints
-    errorSurface: Color(0xFF2D1515),
-    errorBorder: Color(0xFF4D2020),
-    errorShadow: Color(0x15F0676B),
+    errorSurface: Color(0xFF36332E),
+    errorBorder: Color(0xFF84625E),
+    errorShadow: Color(0x15E58C8C),
     // Shadows
-    fabShadow: Color(0x33E09DB4),
-    navShadow: Color(0x20000000),
-    navInactive: Color(0xFF8A8A8A),
+    fabShadow: Color(0x57E89BB0),
+    navShadow: Color(0x3D000000),
+    navInactive: Color(0xFF8B978E),
     // Joy card (sakura pink dark tints — joyRoi* stays green = success/ROI semantic)
     joyFullnessBg: Color(0xFF2E1820),
     joyFullnessBorder: Color(0xFF4A2834),
-    joyRoiBg: Color(0xFF173330),
-    joyRoiBorder: Color(0xFF2D4D45),
+    joyRoiBg: Color(0xFF243128),
+    joyRoiBorder: Color(0xFF354038),
     // Family
-    familyBadgeBg: Color(0xFF1A2E1A),
-    // Best Joy strip (warm-dark surface)
-    surfaceCream: Color(0xFF1A1512),
-    surfaceCreamBorder: Color(0xFF2E2723),
-    textMutedGold: Color(0xFFD98CA0),
+    familyBadgeBg: Color(0xFF293B30),
+    // Best Joy strip (`--hp-ticket-*`)
+    surfaceCream: Color(0xFF243128),
+    surfaceCreamBorder: Color(0xFFB36B7E),
+    textMutedGold: Color(0xFFE89BB0),
     satisfactionPillBg: Color(0xFF2E1820),
     satisfactionPillRose: Color(0xFFE89BB0),
     // Decorative — avatar (leaf-green dark family, D-04)
-    avatarGradientStart: Color(0xFF1F3020),
-    avatarGradientMid: Color(0xFF1A2A1B),
-    avatarGradientEnd: Color(0xFF162416),
+    avatarGradientStart: Color(0xFF354039),
+    avatarGradientMid: Color(0xFF2B342D),
+    avatarGradientEnd: Color(0xFF293B30),
     // Single brightness-resolved alpha border
     avatarBorderAlpha: Color(0x26FFFFFF),
     // Decorative — member tile (leaf-green dark family, D-04)
-    memberGradientA: Color(0xFF1F3020),
-    memberGradientB: Color(0xFF1A2A1B),
-    memberGradientC: Color(0xFF162416),
+    memberGradientA: Color(0xFF354039),
+    memberGradientB: Color(0xFF2B342D),
+    memberGradientC: Color(0xFF293B30),
     // Alpha overlays
     surfaceScrimLight: Color(0x14000000),
     surfaceScrimMedium: Color(0x0A000000),
@@ -401,6 +413,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     Color? borderList,
     Color? borderInputActive,
     Color? accentPrimary,
+    Color? accentPrimaryText,
     Color? accentPrimaryLight,
     Color? accentPrimaryBorder,
     Color? fabGradientStart,
@@ -464,6 +477,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
       borderList: borderList ?? this.borderList,
       borderInputActive: borderInputActive ?? this.borderInputActive,
       accentPrimary: accentPrimary ?? this.accentPrimary,
+      accentPrimaryText: accentPrimaryText ?? this.accentPrimaryText,
       accentPrimaryLight: accentPrimaryLight ?? this.accentPrimaryLight,
       accentPrimaryBorder: accentPrimaryBorder ?? this.accentPrimaryBorder,
       fabGradientStart: fabGradientStart ?? this.fabGradientStart,
@@ -545,6 +559,11 @@ final class AppPalette extends ThemeExtension<AppPalette> {
         t,
       )!,
       accentPrimary: Color.lerp(accentPrimary, other.accentPrimary, t)!,
+      accentPrimaryText: Color.lerp(
+        accentPrimaryText,
+        other.accentPrimaryText,
+        t,
+      )!,
       accentPrimaryLight: Color.lerp(
         accentPrimaryLight,
         other.accentPrimaryLight,

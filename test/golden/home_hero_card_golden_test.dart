@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
+import 'package:home_pocket/core/theme/app_theme.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
@@ -188,7 +190,7 @@ Widget _wrap({
   );
 }
 
-Widget _v16PhonePreview() {
+Widget _v16PhonePreview({bool dark = false}) {
   const locale = Locale('ja');
   final snapshot = _v16PhoneSnapshot();
   return MaterialApp(
@@ -201,11 +203,11 @@ Widget _v16PhonePreview() {
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: S.supportedLocales,
-    theme: ThemeData.light(),
+    theme: dark ? AppTheme.dark : ThemeData.light(),
     home: Scaffold(
       body: ColoredBox(
         key: const Key('home-v16-phone-preview'),
-        color: const Color(0xFFF5EFE2),
+        color: dark ? AppPalette.dark.background : const Color(0xFFF5EFE2),
         child: SizedBox(
           width: 390,
           height: 600,
@@ -267,6 +269,20 @@ void main() {
       await expectLater(
         find.byKey(const Key('home-v16-phone-preview')),
         matchesGoldenFile('goldens/home_v16_phone_light_ja.png'),
+      );
+    });
+
+    testWidgets('V16 phone composition dark ja', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 600);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(_v16PhonePreview(dark: true));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byKey(const Key('home-v16-phone-preview')),
+        matchesGoldenFile('goldens/home_v16_phone_dark_ja.png'),
       );
     });
 

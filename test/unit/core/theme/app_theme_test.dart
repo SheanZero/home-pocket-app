@@ -44,6 +44,24 @@ void main() {
       expect(theme.textTheme.bodySmall?.color, AppPalette.dark.textSecondary);
     });
 
+    test('dark Material controls use the Mockup V16 A3 color roles', () {
+      final scheme = AppTheme.dark.colorScheme;
+
+      expect(scheme.primary, AppPalette.dark.accentPrimary);
+      expect(scheme.onPrimary, AppPalette.dark.card);
+      expect(scheme.primaryContainer, AppPalette.dark.accentPrimaryLight);
+      expect(scheme.onPrimaryContainer, AppPalette.dark.accentPrimaryText);
+      expect(scheme.surface, AppPalette.dark.card);
+      expect(scheme.surfaceContainerHighest, AppPalette.dark.backgroundMuted);
+      expect(scheme.onSurface, AppPalette.dark.textPrimary);
+      expect(scheme.onSurfaceVariant, AppPalette.dark.textSecondary);
+      expect(scheme.outline, AppPalette.dark.borderList);
+      expect(scheme.outlineVariant, AppPalette.dark.borderDefault);
+      expect(scheme.error, AppPalette.dark.error);
+      expect(scheme.onError, AppPalette.dark.card);
+      expect(scheme.errorContainer, AppPalette.dark.errorSurface);
+    });
+
     test('app bar titles use the global page-title style in both themes', () {
       final lightTitle = AppTheme.light.appBarTheme.titleTextStyle!;
       final darkTitle = AppTheme.dark.appBarTheme.titleTextStyle!;

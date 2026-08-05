@@ -142,10 +142,10 @@ class VoiceRecordBar extends StatelessWidget {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.mic_none,
                           size: 18,
-                          color: Colors.white,
+                          color: palette.primaryActionForeground,
                         ),
                         const SizedBox(width: 8),
                         Flexible(
@@ -154,7 +154,7 @@ class VoiceRecordBar extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.titleMedium.copyWith(
-                              color: Colors.white,
+                              color: palette.primaryActionForeground,
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                             ),

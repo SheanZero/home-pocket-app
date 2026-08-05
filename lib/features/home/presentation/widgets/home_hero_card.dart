@@ -531,10 +531,10 @@ class HomeHeroCard extends StatelessWidget {
           label,
           style: AppTextStyles.compact.copyWith(
             fontWeight: FontWeight.w700,
-            color: palette.accentPrimary,
+            color: palette.accentPrimaryText,
           ),
         ),
-        Icon(Icons.chevron_right, size: 14, color: palette.accentPrimary),
+        Icon(Icons.chevron_right, size: 14, color: palette.accentPrimaryText),
       ],
     );
   }

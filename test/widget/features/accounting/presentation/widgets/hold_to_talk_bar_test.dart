@@ -98,10 +98,14 @@ void main() {
     expect(pillDeco.borderRadius, BorderRadius.circular(22.0),
         reason: '椭圆: fully rounded (stadium) capsule, radius = height/2');
 
-    // Font matches the 「记录」 button: white, w700, 16 dp.
+    // Font matches the 「记录」 button: surface-colored, w700, 16 dp.
     final l10n = S.of(tester.element(find.byType(VoiceRecordBar)));
     final label = tester.widget<Text>(find.text(l10n.voiceRecordBar));
-    expect(label.style?.color, Colors.white, reason: '字体: white like 「记录」');
+    expect(
+      label.style?.color,
+      Colors.white,
+      reason: '字体: surface color like 「记录」',
+    );
     expect(label.style?.fontWeight, FontWeight.w700);
     expect(label.style?.fontSize, 16.0);
   });

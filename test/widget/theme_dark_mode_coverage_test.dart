@@ -32,25 +32,24 @@ Widget _darkApp({required Widget child}) {
 
 void main() {
   group('Dark-mode theme resolution (D-07 / THEME-V2-02)', () {
-    testWidgets(
-      'Builder under dark theme resolves Brightness.dark',
-      (tester) async {
-        Brightness? capturedBrightness;
+    testWidgets('Builder under dark theme resolves Brightness.dark', (
+      tester,
+    ) async {
+      Brightness? capturedBrightness;
 
-        await tester.pumpWidget(
-          _darkApp(
-            child: Builder(
-              builder: (context) {
-                capturedBrightness = Theme.of(context).brightness;
-                return const SizedBox.shrink();
-              },
-            ),
+      await tester.pumpWidget(
+        _darkApp(
+          child: Builder(
+            builder: (context) {
+              capturedBrightness = Theme.of(context).brightness;
+              return const SizedBox.shrink();
+            },
           ),
-        );
+        ),
+      );
 
-        expect(capturedBrightness, Brightness.dark);
-      },
-    );
+      expect(capturedBrightness, Brightness.dark);
+    });
 
     testWidgets(
       'AppPalette ThemeExtension resolves non-null under dark theme',
@@ -75,7 +74,7 @@ void main() {
     );
 
     testWidgets(
-      'AppPalette.dark background resolves correct ADR-019 hex under dark theme',
+      'AppPalette.dark background resolves the Mockup V16 A3 ink-green hex',
       (tester) async {
         Color? capturedBackground;
 
@@ -91,8 +90,7 @@ void main() {
           ),
         );
 
-        // ADR-019 dark background is #171210 (warm dark)
-        expect(capturedBackground, const Color(0xFF171210));
+        expect(capturedBackground, const Color(0xFF171C19));
       },
     );
   });

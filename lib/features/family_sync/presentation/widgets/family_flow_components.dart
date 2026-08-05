@@ -429,17 +429,21 @@ class FamilyPrimaryButton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (isLoading)
-                      const SizedBox(
+                      SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: palette.primaryActionForeground,
                         ),
                       )
                     else ...[
                       if (icon != null) ...[
-                        Icon(icon, size: 18, color: Colors.white),
+                        Icon(
+                          icon,
+                          size: 18,
+                          color: palette.primaryActionForeground,
+                        ),
                         const SizedBox(width: 8),
                       ],
                       Flexible(
@@ -448,7 +452,7 @@ class FamilyPrimaryButton extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.sectionTitle.copyWith(
-                            color: Colors.white,
+                            color: palette.primaryActionForeground,
                           ),
                         ),
                       ),

@@ -246,14 +246,16 @@ class _ProfileEditButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            foregroundColor: Colors.white,
+            foregroundColor: palette.primaryActionForeground,
           ),
           child: Text(
             label,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: enabled ? 1 : 0.7),
+              color: palette.primaryActionForeground.withValues(
+                alpha: enabled ? 1 : 0.7,
+              ),
             ),
           ),
         ),

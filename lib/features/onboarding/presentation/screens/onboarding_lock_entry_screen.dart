@@ -170,14 +170,14 @@ class _OnboardingGradientButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            foregroundColor: Colors.white,
+            foregroundColor: palette.primaryActionForeground,
           ),
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: palette.primaryActionForeground,
             ),
           ),
         ),

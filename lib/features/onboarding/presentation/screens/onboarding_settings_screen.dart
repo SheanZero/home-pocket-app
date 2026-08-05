@@ -1475,7 +1475,7 @@ class _ConfirmButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            foregroundColor: Colors.white,
+            foregroundColor: palette.primaryActionForeground,
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 160),
@@ -1484,13 +1484,13 @@ class _ConfirmButton extends StatelessWidget {
                     key: const ValueKey('onboarding-confirm-loading'),
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           key: ValueKey('onboarding-confirm-progress'),
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: palette.primaryActionForeground,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -1498,10 +1498,10 @@ class _ConfirmButton extends StatelessWidget {
                         child: Text(
                           label,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: palette.primaryActionForeground,
                           ),
                         ),
                       ),
@@ -1513,7 +1513,9 @@ class _ConfirmButton extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white.withValues(alpha: enabled ? 1 : 0.7),
+                      color: palette.primaryActionForeground.withValues(
+                        alpha: enabled ? 1 : 0.7,
+                      ),
                     ),
                   ),
           ),

@@ -229,9 +229,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     final amountStr = _hostAmount > 0 ? _hostAmount.toString() : '';
     final pillLocale =
         ref.watch(currentLocaleProvider).value ?? const Locale('ja');
-    final pillSymbol =
-        NumberFormatter.formatCurrency(0, pttDisplayCurrency, pillLocale)
-            .replaceAll(RegExp(r'[\d.,\s]'), '');
+    final pillSymbol = NumberFormatter.formatCurrency(
+      0,
+      pttDisplayCurrency,
+      pillLocale,
+    ).replaceAll(RegExp(r'[\d.,\s]'), '');
 
     return Scaffold(
       backgroundColor: palette.background,
@@ -240,10 +242,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: palette.textPrimary,
-          ),
+          icon: Icon(Icons.close, color: palette.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -302,9 +301,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             decoration: BoxDecoration(
               color: palette.card,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: palette.borderDefault,
-              ),
+              border: Border.all(color: palette.borderDefault),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -393,9 +390,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.mic,
-                        color: Colors.white,
+                        color: palette.primaryActionForeground,
                         size: 32,
                       ),
                     ),
@@ -437,9 +434,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                         )
                       : LinearGradient(
                           colors: [
-                            palette.fabGradientStart.withValues(
-                              alpha: 0.4,
-                            ),
+                            palette.fabGradientStart.withValues(alpha: 0.4),
                             palette.fabGradientEnd.withValues(alpha: 0.4),
                           ],
                         ),
@@ -454,7 +449,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                       child: Text(
                         l10n.record,
                         style: AppTextStyles.titleLarge.copyWith(
-                          color: Colors.white,
+                          color: palette.primaryActionForeground,
                           fontSize: 16,
                         ),
                       ),

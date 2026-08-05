@@ -497,7 +497,7 @@ class _GradientKey extends StatelessWidget {
             child: Text(
               label,
               style: AppTextStyles.titleMedium.copyWith(
-                color: Colors.white,
+                color: palette.primaryActionForeground,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
