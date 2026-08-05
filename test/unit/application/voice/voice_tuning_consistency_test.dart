@@ -1,39 +1,17 @@
 // Quick task 260706-saz (MOD-009 P0-2): locks the VoiceTuning consolidation.
 //
-// Three guarantees:
-//   1. The dual-declared `kMerchantAutoFillFloor` (application vs domain)
-//      stays equal — the domain layer must not import shared tuning, so the
-//      value IS the contract and this test is the machine lock (ADR-012 /
-//      T-saz-03).
-//   2. The three preserved public aliases resolve to their VoiceTuning value.
-//   3. Every VoiceTuning value equals the pre-consolidation literal — any
+// Two guarantees:
+//   1. The three preserved public aliases resolve to their VoiceTuning value.
+//   2. Every VoiceTuning value equals the pre-consolidation literal — any
 //      silent drift of a tuning constant turns this file red.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart'
-    as application;
 import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_ptt_session_mixin.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_recognition_event_handler_mixin.dart';
-import 'package:home_pocket/features/voice/domain/services/recognition_reconciler.dart'
-    as domain;
 import 'package:home_pocket/shared/constants/voice_tuning.dart';
 
 void main() {
-  group('kMerchantAutoFillFloor dual declaration (T-saz-03)', () {
-    test('domain-side floor equals application-side floor', () {
-      expect(
-        domain.kMerchantAutoFillFloor,
-        application.kMerchantAutoFillFloor,
-        reason:
-            'recognition_reconciler.dart (domain) and '
-            'parse_voice_input_use_case.dart (application) each declare the '
-            '0.85 auto-fill floor — a single-sided change silently breaks the '
-            'ADR-012 floor contract.',
-      );
-    });
-  });
-
   group('preserved public aliases resolve to VoiceTuning', () {
     test('kVoiceLargeAmountNoticeThreshold aliases VoiceTuning', () {
       expect(
@@ -50,10 +28,7 @@ void main() {
     });
 
     test('kLearnedPromotionThreshold aliases VoiceTuning', () {
-      expect(
-        kLearnedPromotionThreshold,
-        VoiceTuning.learnedPromotionThreshold,
-      );
+      expect(kLearnedPromotionThreshold, VoiceTuning.learnedPromotionThreshold);
     });
   });
 
@@ -80,10 +55,7 @@ void main() {
         VoiceTuning.intraSessionThreshold,
         const Duration(milliseconds: 800),
       );
-      expect(
-        VoiceTuning.soundLevelThrottle,
-        const Duration(milliseconds: 100),
-      );
+      expect(VoiceTuning.soundLevelThrottle, const Duration(milliseconds: 100));
     });
 
     test('amount thresholds', () {

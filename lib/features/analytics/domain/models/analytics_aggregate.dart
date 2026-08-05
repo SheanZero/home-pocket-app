@@ -51,20 +51,6 @@ class JoyRowSample {
   final int joyFullness;
 }
 
-/// STATSUI-01 row-wise daily PTVF input row.
-/// Note: the leading "Daily" refers to calendar-day granularity, not the daily ledger.
-class DailyJoyRowSampleWithDay {
-  const DailyJoyRowSampleWithDay({
-    required this.day,
-    required this.amount,
-    required this.joyFullness,
-  });
-
-  final DateTime day;
-  final int amount;
-  final int joyFullness;
-}
-
 /// HAPPY-03 distribution bucket - score to count.
 class SatisfactionScoreBucket {
   const SatisfactionScoreBucket({required this.score, required this.count});

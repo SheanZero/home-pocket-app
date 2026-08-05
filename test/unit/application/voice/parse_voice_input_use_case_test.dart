@@ -8,6 +8,8 @@ import 'package:home_pocket/features/accounting/domain/models/merchant_match_ent
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart';
+import 'package:home_pocket/features/voice/domain/services/recognition_reconciler.dart'
+    show kMerchantAutoFillFloor;
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_repository.dart';
 import 'package:home_pocket/infrastructure/ml/merchant_name_normalizer.dart';
 import 'package:mocktail/mocktail.dart';

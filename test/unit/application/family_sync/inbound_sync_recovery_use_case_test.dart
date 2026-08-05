@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/apply_sync_operations_use_case.dart';
 import 'package:home_pocket/application/family_sync/inbound_sync_recovery_use_case.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../../helpers/memory_inbound_sync_operation_repository.dart';
 
 class _MockApplySyncOperationsUseCase extends Mock
     implements ApplySyncOperationsUseCase {}

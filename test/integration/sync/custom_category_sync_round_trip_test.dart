@@ -14,10 +14,11 @@ import 'package:home_pocket/features/accounting/domain/models/category_sync_snap
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_sync_mapper.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../helpers/memory_inbound_sync_operation_repository.dart';
 
 class _Encryption extends Mock implements FieldEncryptionService {}
 

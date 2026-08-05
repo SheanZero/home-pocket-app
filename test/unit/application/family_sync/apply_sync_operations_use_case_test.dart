@@ -17,11 +17,12 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/models/inbound_sync_resource_policy.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../../helpers/memory_inbound_sync_operation_repository.dart';
 
 class _MockFieldEncryptionService extends Mock
     implements FieldEncryptionService {}

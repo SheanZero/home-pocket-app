@@ -11,14 +11,6 @@ import 'recognition/category_recognizer.dart';
 import 'recognition/merchant_recognizer.dart';
 import 'voice_text_parser.dart';
 
-/// Auto-fill floor (D-03). When the keyword engine misses, the orchestrator
-/// auto-fills the category from the best merchant candidate ONLY when its raw
-/// score is at or above this floor (the exact / anchored-prefix tier). Below
-/// the floor the category stays null and the ranked candidates are surfaced
-/// for Phase-52 chips — never silently auto-filled. The floor lives in the
-/// ORCHESTRATOR, not the engine (the engine is recall-first / floor-agnostic).
-const double kMerchantAutoFillFloor = 0.85;
-
 /// Use case for parsing voice-recognized text into structured transaction data.
 ///
 /// Phase 50 (DECOUP-01): orchestrates two INDEPENDENT engines that never call

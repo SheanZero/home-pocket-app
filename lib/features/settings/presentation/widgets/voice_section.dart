@@ -7,21 +7,6 @@ import '../../domain/models/app_settings.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_settings.dart';
 
-/// Settings section for voice recognition configuration.
-class VoiceSection extends ConsumerWidget {
-  const VoiceSection({super.key, required this.settings});
-
-  final AppSettings settings;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SettingsSectionCard(
-      title: S.of(context).voiceInputSettings,
-      children: [VoiceLanguageSettingTile(settings: settings)],
-    );
-  }
-}
-
 /// Recognition-language row reused by the main General settings card.
 class VoiceLanguageSettingTile extends ConsumerWidget {
   const VoiceLanguageSettingTile({super.key, required this.settings});

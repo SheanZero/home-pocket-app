@@ -2,10 +2,9 @@ import '../models/merchant_candidate.dart';
 import '../models/recognition_outcome.dart';
 import '../models/voice_parse_result.dart';
 
-/// Auto-fill floor for the merchant engine (mirrors the canonical
-/// `kMerchantAutoFillFloor` in `application/voice/parse_voice_input_use_case.dart`).
-/// Re-declared as a domain-local const because the domain layer must NOT import
-/// the application layer — the value is the contract, not the import.
+/// Auto-fill floor for merchant reconciliation. Its value currently matches
+/// the recognizer's anchored-prefix tier, but the two thresholds have distinct
+/// semantics.
 const double kMerchantAutoFillFloor = 0.85;
 
 /// Pure domain reconciler (D-09) — merges the keyword verdict and merchant
@@ -33,8 +32,9 @@ class RecognitionReconciler {
     List<MerchantCandidate> merchantCandidates, {
     String? resolvedKeyword,
   }) {
-    final MerchantCandidate? bestMerchant =
-        merchantCandidates.isEmpty ? null : merchantCandidates.first;
+    final MerchantCandidate? bestMerchant = merchantCandidates.isEmpty
+        ? null
+        : merchantCandidates.first;
     final bool merchantStrong =
         bestMerchant != null && bestMerchant.score >= kMerchantAutoFillFloor;
 

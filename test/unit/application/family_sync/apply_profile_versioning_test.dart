@@ -10,9 +10,10 @@ import 'package:home_pocket/data/daos/group_member_dao.dart';
 import 'package:home_pocket/data/repositories/group_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../../helpers/memory_inbound_sync_operation_repository.dart';
 
 class _MockTransactionRepository extends Mock
     implements TransactionRepository {}

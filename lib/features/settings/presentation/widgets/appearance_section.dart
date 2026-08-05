@@ -9,24 +9,6 @@ import '../providers/state_locale.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_settings.dart';
 
-class AppearanceSection extends ConsumerWidget {
-  const AppearanceSection({super.key, required this.settings});
-
-  final AppSettings settings;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SettingsSectionCard(
-      title: S.of(context).settingsGeneral,
-      children: [
-        ThemeSettingTile(settings: settings),
-        const LanguageSettingTile(),
-        WeekStartSettingTile(settings: settings),
-      ],
-    );
-  }
-}
-
 /// Theme row reused by the compact General section on [SettingsScreen].
 class ThemeSettingTile extends ConsumerWidget {
   const ThemeSettingTile({super.key, required this.settings});

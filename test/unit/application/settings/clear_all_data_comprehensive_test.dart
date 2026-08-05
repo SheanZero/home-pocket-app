@@ -13,6 +13,8 @@ import 'package:home_pocket/infrastructure/storage/privacy_wipe_journal.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/in_memory_privacy_wipe_journal_store.dart';
+
 class _MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
 Future<int> _count(AppDatabase db, String table) async {

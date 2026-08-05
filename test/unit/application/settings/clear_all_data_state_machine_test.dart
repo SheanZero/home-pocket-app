@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/settings/clear_all_data_use_case.dart';
-import 'package:home_pocket/infrastructure/storage/privacy_wipe_journal.dart';
+
+import '../../../helpers/in_memory_privacy_wipe_journal_store.dart';
 
 void main() {
   test('runs the restart-safe wipe stages in privacy-safe order', () async {

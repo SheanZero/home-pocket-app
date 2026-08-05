@@ -8,11 +8,9 @@
 /// against silent drift.
 ///
 /// NOT in here (deliberately):
-///   - `kMerchantAutoFillFloor` (0.85) — dual-declared in
-///     `application/voice/parse_voice_input_use_case.dart` (application) and
-///     `features/voice/domain/services/recognition_reconciler.dart` (domain).
-///     The domain layer must stay import-free of shared tuning; the
-///     consistency test asserts the two declarations stay equal.
+///   - `kMerchantAutoFillFloor` (0.85) — owned by
+///     `features/voice/domain/services/recognition_reconciler.dart`, where the
+///     reconciliation decision is made.
 ///   - `MerchantRecognizer._scoreAnchoredPrefix` (0.85) — an anchored-prefix
 ///     scoring TIER that only coincidentally equals the auto-fill floor;
 ///     semantically unrelated, so it must not track floor changes.

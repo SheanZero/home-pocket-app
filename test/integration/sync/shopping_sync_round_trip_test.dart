@@ -12,9 +12,10 @@ import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../helpers/memory_inbound_sync_operation_repository.dart';
 
 class _MockFieldEncryptionService extends Mock
     implements FieldEncryptionService {}

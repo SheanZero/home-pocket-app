@@ -3,37 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/settings_section_card.dart';
 
-class JoyTargetSection extends StatelessWidget {
-  const JoyTargetSection({
-    required this.configuredTarget,
-    required this.recommendedTarget,
-    required this.fallbackTarget,
-    required this.onSave,
-    super.key,
-  });
-
-  final int? configuredTarget;
-  final int? recommendedTarget;
-  final int fallbackTarget;
-  final Future<void> Function(int? value) onSave;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    return SettingsSectionCard(
-      title: l10n.settingsJoyTargetTitle,
-      children: [
-        JoyTargetTile(
-          configuredTarget: configuredTarget,
-          recommendedTarget: recommendedTarget,
-          fallbackTarget: fallbackTarget,
-          onSave: onSave,
-        ),
-      ],
-    );
-  }
-}
-
 /// Monthly Joy-target row reused by the compact General section.
 class JoyTargetTile extends StatelessWidget {
   const JoyTargetTile({

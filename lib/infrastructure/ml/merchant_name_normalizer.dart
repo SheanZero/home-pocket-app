@@ -103,15 +103,6 @@ String normalizeMerchantKey(String input) {
   return lowered.replaceAll('・', '').replaceAll(RegExp(r'\s+'), '');
 }
 
-/// Convenience namespace wrapper around [normalizeMerchantKey] for callers that
-/// prefer a typed entry point. The top-level function remains the canonical API.
-abstract final class MerchantNameNormalizer {
-  const MerchantNameNormalizer._();
-
-  /// See [normalizeMerchantKey].
-  static String key(String input) => normalizeMerchantKey(input);
-}
-
 // ---------------------------------------------------------------------------
 // Lookup tables (const). All values are HIRAGANA codepoints so half-width
 // katakana lands directly in the hiragana namespace alongside steps 3/4.

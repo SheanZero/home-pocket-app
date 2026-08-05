@@ -1,5 +1,3 @@
-import 'dart:math';
-
 /// Persisted identifiers for the warm avatar icons offered by the app.
 ///
 /// The `icon:` prefix keeps these values distinguishable from legacy emoji
@@ -21,9 +19,4 @@ const List<String> avatarIconIds = [
   'icon:star',
 ];
 
-final _avatarIconRandom = Random();
-
 bool isAvatarIconId(String value) => avatarIconIds.contains(value);
-
-String randomAvatarIconId() =>
-    avatarIconIds[_avatarIconRandom.nextInt(avatarIconIds.length)];

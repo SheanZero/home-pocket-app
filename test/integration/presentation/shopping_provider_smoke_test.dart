@@ -31,7 +31,6 @@ import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/inbound_sync_operation_repository.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_filter.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart'
@@ -44,6 +43,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 
 import '../../helpers/test_provider_scope.dart';
+import '../../helpers/memory_inbound_sync_operation_repository.dart';
 
 /// Waits for filteredShoppingItemsProvider to emit a state that contains [itemId].
 ///
