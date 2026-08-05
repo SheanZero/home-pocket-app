@@ -126,23 +126,41 @@ Future<void> main(List<String> args) async {
       continue;
     }
 
-    completedAuthoritativeTools.add(entry.value);
+    // A canonical shard is lifecycle evidence only if every finding in it is
+    // valid. Accepting its tool identity before validating individual entries
+    // would let a truncated/corrupt shard close unrelated historical findings.
+    final validatedFindings = <Finding>[];
+    var hasMalformedFinding = false;
     for (final findingRaw in findingsRaw) {
       if (findingRaw is! Map) {
         stderr.writeln(
           '[audit:merge] WARNING: malformed finding in $shardPath',
         );
-        continue;
+        hasMalformedFinding = true;
+        break;
       }
       try {
-        shards.add(Finding.fromJson(findingRaw.cast<String, dynamic>()));
+        validatedFindings.add(
+          Finding.fromJson(findingRaw.cast<String, dynamic>()),
+        );
       } catch (error) {
-        // Pitfall P1-10: skip malformed entries with stderr warning.
         stderr.writeln(
           '[audit:merge] WARNING: malformed finding in $shardPath: $error',
         );
+        hasMalformedFinding = true;
+        break;
       }
     }
+    if (hasMalformedFinding) {
+      _recordIncompleteScan(
+        incompleteScans,
+        '$shardPath (malformed finding entry)',
+      );
+      continue;
+    }
+
+    completedAuthoritativeTools.add(entry.value);
+    shards.addAll(validatedFindings);
   }
 
   // 1. Drop generated-file findings (defense-in-depth — Pitfall P1-6 echo).

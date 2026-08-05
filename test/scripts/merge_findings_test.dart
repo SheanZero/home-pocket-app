@@ -756,6 +756,140 @@ void main() {
       },
     );
 
+    test(
+      'fails closed when one canonical finding is malformed without observing any of that shard',
+      () async {
+        final open = _f(
+          filePath: 'lib/open.dart',
+          line: 7,
+          category: 'dead_code',
+          severity: 'LOW',
+          toolSource: 'dart_code_linter',
+          description: 'still open dead code',
+        );
+        final closed = _f(
+          filePath: 'lib/closed.dart',
+          line: 8,
+          category: 'dead_code',
+          severity: 'LOW',
+          toolSource: 'dart_code_linter',
+          description: 'already closed dead code',
+        );
+        final validButUntrusted = _f(
+          filePath: 'lib/new.dart',
+          line: 9,
+          category: 'dead_code',
+          severity: 'LOW',
+          toolSource: 'dart_code_linter',
+          description: 'must not become an observation',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...open.toJson(), 'id': 'DC-001'},
+              {...closed.toJson(), 'id': 'DC-002', 'status': 'closed'},
+            ],
+          }),
+        );
+        File('${shardRoot.path}/shards/dead_code.json').writeAsStringSync(
+          jsonEncode({
+            ..._shardWith([validButUntrusted], 'dart_code_linter'),
+            'findings': [validButUntrusted.toJson(), 'malformed finding'],
+          }),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(1));
+        expect(result.stderr, contains('malformed finding'));
+        final findings =
+            (jsonDecode(
+                      File('${shardRoot.path}/issues.json').readAsStringSync(),
+                    )['findings']
+                    as List)
+                .cast<Map>();
+        expect(findings, hasLength(2));
+        expect(
+          findings.singleWhere(
+            (finding) => finding['id'] == 'DC-001',
+          )['status'],
+          equals('open'),
+        );
+        expect(
+          findings.singleWhere(
+            (finding) => finding['id'] == 'DC-002',
+          )['status'],
+          equals('closed'),
+        );
+      },
+    );
+
+    test(
+      'allows other valid canonical tools to transition their own findings when one shard is malformed',
+      () async {
+        final deadCode = _f(
+          filePath: 'lib/dead_code.dart',
+          line: 7,
+          category: 'dead_code',
+          severity: 'LOW',
+          toolSource: 'dart_code_linter',
+        );
+        final layer = _f(filePath: 'lib/layer.dart', line: 8);
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...deadCode.toJson(), 'id': 'DC-001'},
+              {...layer.toJson(), 'id': 'LV-001'},
+            ],
+          }),
+        );
+        File('${shardRoot.path}/shards/dead_code.json').writeAsStringSync(
+          jsonEncode({
+            ..._shardWith([deadCode], 'dart_code_linter'),
+            'findings': [deadCode.toJson(), 42],
+          }),
+        );
+        File(
+          '${shardRoot.path}/shards/layer.json',
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_guard')));
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(1));
+        final findings =
+            (jsonDecode(
+                      File('${shardRoot.path}/issues.json').readAsStringSync(),
+                    )['findings']
+                    as List)
+                .cast<Map>();
+        expect(
+          findings.singleWhere(
+            (finding) => finding['id'] == 'DC-001',
+          )['status'],
+          equals('open'),
+        );
+        expect(
+          findings.singleWhere(
+            (finding) => finding['id'] == 'LV-001',
+          )['status'],
+          equals('closed'),
+        );
+      },
+    );
+
+    test(
+      'ignores malformed historical agent shards without crashing',
+      () async {
+        File(
+          '${shardRoot.path}/agent-shards/layer.json',
+        ).writeAsStringSync('{not valid json');
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+      },
+    );
+
     test('fails closed when canonical scan_state is absent', () async {
       File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
         jsonEncode({'tool_source': 'import_guard', 'findings': []}),
