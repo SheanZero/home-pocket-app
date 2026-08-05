@@ -9,7 +9,7 @@
 
 v2.1 must deliver a **reproducible, production-stable compatibility window**, not an empty `pub outdated` report. The shipped Flutter app has encrypted local financial data, historical Drift migrations, Argon2id/AES backup recovery, app lock, sync, and native integrations; version work is successful only when the exact resolved graph, generated source, native toolchains, and evidence all agree. Upgrade by coherent lanes with a committed lockfile and executable compatibility contract—never by blanket major upgrades or `dependency_overrides`.
 
-The recommended baseline is Flutter stable **3.44.7** (Dart 3.12; re-check the official stable archive when execution begins), with **AGP 9.0.1 + Gradle 9.1 + JDK 17 + API 36** as the Android migration candidate. Preserve the known-good encrypted iOS lane exactly: `sqlcipher_flutter_libs 0.6.8` + `sqlite3 2.9.4` + SQLCipher CocoaPod 4.10.0, the Podfile system-`sqlite3` strip, and SwiftPM-for-supported-plugins/CocoaPods-for-SQLCipher split. Do not adopt `sqlcipher_flutter_libs 0.7.0+eol`, `sqlite3_flutter_libs`, or system SQLite.
+The execution-date baseline is Flutter stable **3.44.8** (Dart 3.12.2, confirmed from the refreshed official Stable checkout on 2026-08-05), with **AGP 9.0.1 + Gradle 9.1 + JDK 17 + API 36** as the Android migration candidate. Preserve the known-good encrypted iOS lane exactly: `sqlcipher_flutter_libs 0.6.8` + `sqlite3 2.9.4` + SQLCipher CocoaPod 4.10.0, the Podfile system-`sqlite3` strip, and SwiftPM-for-supported-plugins/CocoaPods-for-SQLCipher split. Do not adopt `sqlcipher_flutter_libs 0.7.0+eol`, `sqlite3_flutter_libs`, or system SQLite.
 
 The decisive risks are silent loss of SQLCipher linkage, data/keychain loss during testing, partial analyzer/codegen upgrades that disable the Clean Architecture import gate, and native artifacts that differ from test artifacts. Mitigate them with clean regeneration, fail-closed contracts, signed Android release + emulator proof, and an **isolated Bundle ID** wired-iPhone UAT. This milestone has one available physical target—a wired iPhone; Android physical-device UAT is explicitly unavailable/out of scope and must never be claimed.
 
@@ -19,7 +19,7 @@ The decisive risks are silent loss of SQLCipher linkage, data/keychain loss duri
 
 | Lane | v2.1 decision | Rationale / non-negotiable condition |
 |---|---|---|
-| Flutter / Dart | Upgrade to Flutter stable **3.44.7** and raise app SDK lower bound to `^3.12.0` | Revalidate official stable status at execution; do not choose scheduled, beta, RC, or dev releases. |
+| Flutter / Dart | Upgrade to Flutter stable **3.44.8** / Dart **3.12.2** and raise app SDK lower bound to `^3.12.0` | Confirmed from the official Stable checkout on 2026-08-05; do not choose scheduled, beta, RC, or dev releases. |
 | Android native toolchain | Candidate: **AGP 9.0.1, Gradle 9.1, JDK 17, API 36** | Migrate as one lane to AGP built-in Kotlin/new DSL; remove legacy KGP/false flags only after every plugin builds. |
 | SQLCipher native storage | **Hold:** `sqlcipher_flutter_libs 0.6.8` + `sqlite3 2.9.4` + Pod 4.10.0 | Last proven functional encrypted path. Preserve `ensureNativeLibrary()` order and Podfile `-lsqlite3` removal. |
 | Analyzer / architecture lint | **Hold analyzer 8.x** | `import_guard_custom_lint 1.0.0` requires `<9`; solve this blocker before an analyzer-9+/Riverpod-generator modernization. No override or disabled architecture gate. |
@@ -70,7 +70,7 @@ Suggested sequential phases are **57–63**. Keep each phase as a green, reverti
 
 **Rationale:** All later work depends on a single resolved baseline; version claims made on 2026-08-05 may have changed by execution.
 
-**Delivers:** Recorded Flutter/Dart/Xcode/CocoaPods/Java/Gradle/SDK and dependency baseline; re-checks official Flutter stable status (target 3.44.7 if still stable); allow/hold matrix; updated machine-checked compatibility contract and lockfile policy.
+**Delivers:** Recorded Flutter/Dart/Xcode/CocoaPods/Java/Gradle/SDK and dependency baseline; confirmed official Flutter 3.44.8 / Dart 3.12.2 Stable identity; allow/hold matrix; updated machine-checked compatibility contract and lockfile policy.
 
 **Must avoid:** no blanket updater, no overrides, no SQLCipher EOL/system-SQLite resolution, and no unexplained hold.
 
@@ -78,7 +78,7 @@ Suggested sequential phases are **57–63**. Keep each phase as a green, reverti
 
 **Rationale:** Flutter pins Dart and constrains Pub; code generation must be coherent before native/package cohorts consume its lockfile.
 
-**Delivers:** Flutter 3.44.7/Dart ^3.12 baseline if official stable check confirms it; clean resolve; Freezed patch only if resolver-safe; generated artifacts/l10n/analysis/custom-lint/architecture gates green. Explicitly either (a) completes an import-guard-compatible analyzer upgrade or (b) records the analyzer-8/Riverpod/Drift/JSON/build-runner holds as accepted compatibility debt.
+**Delivers:** Flutter 3.44.8/Dart ^3.12 baseline confirmed at execution; clean resolve; Freezed patch only if resolver-safe; generated artifacts/l10n/analysis/custom-lint/architecture gates green. Explicitly either (a) completes an import-guard-compatible analyzer upgrade or (b) records the analyzer-8/Riverpod/Drift/JSON/build-runner holds as accepted compatibility debt.
 
 **Dependency:** The `import_guard_custom_lint <9` blocker must be solved before any analyzer-9+ or modern Riverpod generator lane. It is a prerequisite, not an override opportunity.
 
@@ -175,7 +175,7 @@ This order fixes the resolver before plugin/native artifacts, proves encrypted p
 
 ### Conflicts and Uncertainties to Resolve During Planning
 
-- **Flutter freshness:** 3.44.7 is the 2026-08-05 stable target. Re-query only official Flutter sources when Phase 57 starts; retain it if it is still the required stable compatibility choice, otherwise make a new documented GA-only decision.
+- **Flutter freshness:** 3.44.8 is the official Stable tag confirmed and installed on 2026-08-05; future refreshes must still use official Flutter sources and a documented GA-only decision.
 - **Analyzer/Riverpod conflict:** latest Riverpod/codegen candidates conflict with the current analyzer-8 import guard. Do not put their upgrades into requirements as guaranteed delivery until the lint solution is researched and proven.
 - **SQLCipher replacement:** none is authorized by current evidence. The v2.1 default is retention of 0.6.8/2.9.4/Pod 4.10.0, not migration to sqlite3 3.x.
 - **AGP 9 candidate:** AGP 9.0.1/Gradle 9.1/API 36 is recommended, but delivery is conditional on the selected Flutter stable and all plugins completing built-in Kotlin/new DSL migration. A documented AGP-8 hold is preferable to a partial migration.

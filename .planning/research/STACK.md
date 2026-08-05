@@ -7,7 +7,7 @@
 
 ## Recommendation
 
-Modernize by **compatibility lane**, not with `flutter pub upgrade --major-versions`. Adopt Flutter **3.44.7** (Dart **3.12**) and the Android AGP 9 migration, but keep two deliberately pinned lanes intact until their real native/architecture replacements exist:
+Modernize by **compatibility lane**, not with `flutter pub upgrade --major-versions`. Adopt Flutter **3.44.8** (Dart **3.12.2**) and the Android AGP 9 migration, but keep two deliberately pinned lanes intact until their real native/architecture replacements exist:
 
 1. Keep `sqlcipher_flutter_libs 0.6.8` plus `sqlite3 2.9.4`. The apparent latest `sqlcipher_flutter_libs 0.7.0+eol` is an EOL marker with no usable native SQLCipher payload; it is not an upgrade. Do not add `sqlite3_flutter_libs`.
 2. Keep the analyzer-8 custom-lint boundary lane while `import_guard_custom_lint 1.0.0` and `custom_lint 0.8.1` are retained. Both constrain the resolver below analyzer 9, so forcing modern Riverpod generators/analyzer with overrides would disable or destabilize an architecture gate.
@@ -20,7 +20,7 @@ Everything else proceeds only after `flutter pub get` resolves the exact lane wi
 
 | Area | Current resolved / configured | Latest production stable at cutoff | v2.1 decision | Required coupling and migration | Confidence |
 |---|---|---|---|---|---|
-| Flutter SDK | 3.44.0 (`.flutter-plugins-dependencies`) | **3.44.7** | **Upgrade** to 3.44.7; it is the latest documented stable patch. Do not take 3.47 merely because it is scheduled for August—its release status must be stable/GA at execution time. | Run `flutter upgrade` on stable; update `.metadata`; regenerate SwiftPM plugin integration and verify all platform builds. Flutter 3.44 is the release containing legacy-KGP/new-DSL transition support. | MEDIUM |
+| Flutter SDK | 3.44.0 (`.flutter-plugins-dependencies`) | **3.44.8** | **Upgrade** to 3.44.8; it is the execution-date official Stable patch. Do not take 3.47 merely because it is scheduled for August—its release status must be stable/GA at execution time. | Refresh the official Stable checkout; update `.metadata`; regenerate SwiftPM plugin integration and verify all platform builds. Flutter 3.44 is the release containing legacy-KGP/new-DSL transition support. | MEDIUM |
 | Dart SDK / app constraint | Flutter 3.44 supplies Dart 3.12; app permits `^3.10.8` | Dart **3.12.0** bundled with Flutter 3.44 | **Raise lower bound to `^3.12.0`** after the SDK upgrade. | This unlocks packages that require Dart 3.12 while remaining inside the actual Flutter SDK. Do not use a separately installed Dart SDK to build the Flutter app. | MEDIUM |
 | Riverpod runtime | `flutter_riverpod 3.1.0`; annotation/generator/lint `4.0.0` / `4.0.0+1` / `3.1.0` | 3.4.1 / 4.0.6 / 4.0.8 / 3.1.8 (all need Dart 3.12) | **Defer as one analyzer/codegen lane**; do not partially update runtime, annotation, generator, or lint. | Latest generator/lint no longer fit the analyzer-8 architecture-gate lane. First replace or upgrade the import-boundary/custom-lint implementation with one supporting a common modern analyzer version; then update all four together, regenerate every `.g.dart`, and resolve Riverpod 3 migration diagnostics. | MEDIUM |
 | Freezed | `freezed 3.2.3`, `freezed_annotation 3.1.0` | **3.2.5**, **3.1.0** | **Upgrade generator patch only** (`freezed: ^3.2.5`); keep annotation 3.1.0. | Run Freezed generation in the same codegen validation phase. Do not select `freezed 4.0.0-dev.3` (pre-release). | MEDIUM |
@@ -54,7 +54,7 @@ Everything else proceeds only after `flutter pub get` resolves the exact lane wi
 | Android SDK | Flutter-managed `compileSdk` / `targetSdk` | **API 36** | **Make the resolved values explicit/verify 36**, not a preview API. | Android's API-36 setup guidance requires compileSdk and targetSdk 36; AGP 9 supports through API 36.1. Test Android 16 behavior changes on emulator. |
 | Legacy migration flags | `android.builtInKotlin=false`, `android.newDsl=false` | absent after full migration | **Remove only as the final Android migration commit.** | Flutter 3.44 temporarily supports the legacy KGP/DSL route; this is a bridge, not the destination. Any remaining incompatible plugin blocks flag removal. |
 
-Implementation order: first update Flutter 3.44.7; then make the Gradle 9.1/AGP 9 migration on a clean branch of the work, remove KGP usage and both opt-out flags, run `flutter build apk --debug` and the signed Android release build. Do not leave AGP 9 running in “legacy flags permanently false” mode; it postpones a removal scheduled for AGP 10.
+Implementation order: first update Flutter 3.44.8; then make the Gradle 9.1/AGP 9 migration on a clean branch of the work, remove KGP usage and both opt-out flags, run `flutter build apk --debug` and the signed Android release build. Do not leave AGP 9 running in “legacy flags permanently false” mode; it postpones a removal scheduled for AGP 10.
 
 ### iOS
 
@@ -84,7 +84,7 @@ The real-device iPhone gate is mandatory for any database/Pod/Flutter-native cha
 
 ## Ordered Upgrade Plan
 
-1. **Baseline and Flutter patch:** record `flutter --version`; move stable Flutter 3.44.0 → 3.44.7; raise Dart constraint to `^3.12.0`; regenerate the project integration files; run all existing gates before dependency changes.
+1. **Baseline and Flutter patch:** record `flutter --version`; move stable Flutter 3.44.0 → 3.44.8; raise Dart constraint to `^3.12.0`; regenerate the project integration files; run all existing gates before dependency changes.
 2. **Android AGP 9 migration:** Gradle 9.1 + AGP 9.0.1 + API 36, migrate to built-in Kotlin/new DSL, then remove legacy flags only when every plugin builds. This is the first native-risk phase because Flutter's legacy support is temporary.
 3. **Low-risk already-compatible refresh:** keep already-current file/Firebase/notification packages unchanged; take the Freezed 3.2.5 patch. Attempt JSON/build tooling only as one clean resolver-tested unit that retains analyzer 8.x.
 4. **Speech adapter migration:** move 7.3.0 → 7.4.0, update mocks/adapter code, regenerate, and prove real platform recognition/permission flow.
@@ -94,7 +94,7 @@ The real-device iPhone gate is mandatory for any database/Pod/Flutter-native cha
 
 | Category | Recommended | Rejected | Why |
 |---|---|---|---|
-| Flutter | 3.44.7 stable | Flutter 3.47 scheduled release / beta | Only GA stable is permitted; the archive's schedule is not a release guarantee. |
+| Flutter | 3.44.8 stable | Flutter 3.47 scheduled release / beta | Only GA stable is permitted; the archive's schedule is not a release guarantee. |
 | Android Kotlin | AGP 9 built-in Kotlin | Kotlin Gradle Plugin 2.4.10 upgrade | AGP 9's architecture is built-in Kotlin. Independently pinning a newer KGP preserves the legacy path rather than completing the migration. |
 | SQLCipher | retain 0.6.8 + sqlite3 2.9.4 | `sqlcipher_flutter_libs 0.7.0+eol`, `sqlite3_flutter_libs`, or plain SQLite | None prove equivalent encrypted persistence. The EOL package itself directs a migration; it is not a native library release. |
 | File group | retain stable coordinated group | file_picker 12 beta / partial plus-plugin upgrades | Beta violates scope; partial majors conflict with the tested win32 lane. |
@@ -128,7 +128,7 @@ flutter build ios --simulator --debug
 
 Primary official sources (all checked 2026-08-05):
 
-- [Flutter SDK archive](https://docs.flutter.dev/install/archive) — stable-channel policy, 3.44.7 documentation baseline, 2026 release schedule, and Dart pairing.
+- [Flutter SDK archive](https://docs.flutter.dev/install/archive) — stable-channel policy, 3.44.8 execution-date baseline, 2026 release schedule, and Dart pairing.
 - [Flutter 3.44 release notes](https://docs.flutter.dev/release/release-notes/release-notes-3.44.0) and [built-in Kotlin migration](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin) / [app guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers).
 - pub.dev official version pages: [Riverpod](https://pub.dev/packages/flutter_riverpod/versions), [Riverpod annotation](https://pub.dev/packages/riverpod_annotation/versions), [generator](https://pub.dev/packages/riverpod_generator/versions), [lint](https://pub.dev/packages/riverpod_lint/versions), [Freezed](https://pub.dev/packages/freezed/versions), [Drift](https://pub.dev/packages/drift/versions), [Drift dev](https://pub.dev/packages/drift_dev/versions), [analyzer](https://pub.dev/packages/analyzer/versions), [build_runner](https://pub.dev/packages/build_runner/versions), [JSON annotation](https://pub.dev/packages/json_annotation/versions), [JSON serializable](https://pub.dev/packages/json_serializable/versions), [custom_lint](https://pub.dev/packages/custom_lint/versions), and [import guard](https://pub.dev/packages/import_guard_custom_lint/versions).
 - pub.dev official native/plugin version pages: [SQLCipher Flutter libs](https://pub.dev/packages/sqlcipher_flutter_libs/versions), [sqlite3](https://pub.dev/packages/sqlite3/versions), [sqlite3 Flutter libs](https://pub.dev/packages/sqlite3_flutter_libs/versions), [file_picker](https://pub.dev/packages/file_picker/versions), [share_plus](https://pub.dev/packages/share_plus/versions), [package_info_plus](https://pub.dev/packages/package_info_plus/versions), [speech_to_text](https://pub.dev/packages/speech_to_text/versions), [Firebase Core](https://pub.dev/packages/firebase_core/versions), [Firebase Messaging](https://pub.dev/packages/firebase_messaging/versions), and [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications/versions).
