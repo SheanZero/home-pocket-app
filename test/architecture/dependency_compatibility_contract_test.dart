@@ -434,6 +434,56 @@ void main() {
     expect(probe.isPassing, isTrue);
   });
 
+  test('future probe keeps security and platform-floor failures blocking', () {
+    final baseline = File('docs/testing/STABLE_BASELINE.json')
+        .readAsStringSync()
+        .replaceFirst('"resolved": "0.6.8"', '"resolved": "0.7.0+eol"')
+        .replaceFirst('"selected": 24', '"selected": 23');
+    final probe = validateReport(
+      currentInputs(),
+      baselineJson: baseline,
+      mode: compatibility.DependencyCompatibilityMode.futureProbe,
+    );
+
+    expect(probe.errors, isNotEmpty);
+    expect(probe.warnings, isEmpty);
+  });
+
+  group('CI workflow source contracts', () {
+    const baselineCommand =
+        'dart run scripts/dependency_compatibility.dart '
+        '--mode=baseline --verify-running-flutter-sdk';
+    const futureProbeCommand =
+        'dart run scripts/dependency_compatibility.dart '
+        '--mode=future-probe --verify-running-flutter-sdk';
+
+    test('Stable analysis pins, locks, and verifies the baseline before analyze',
+        () {
+      final audit = currentInputs()['audit']!;
+      expect(audit, contains('flutter-version: 3.44.8'));
+      expect(audit, contains('flutter pub get --enforce-lockfile'));
+      expect(audit, contains(baselineCommand));
+      expect(
+        audit.indexOf('flutter pub get --enforce-lockfile'),
+        lessThan(audit.indexOf(baselineCommand)),
+      );
+      expect(
+        audit.indexOf(baselineCommand),
+        lessThan(audit.indexOf('run: flutter analyze')),
+      );
+    });
+
+    test('both beta jobs are explicit future probes that keep their builds', () {
+      final future = currentInputs()['future']!;
+      expect(RegExp(r'channel: beta').allMatches(future), hasLength(2));
+      expect(RegExp(RegExp.escape(futureProbeCommand)).allMatches(future),
+          hasLength(2));
+      expect(future, contains('flutter build apk --debug'));
+      expect(future, contains('flutter build ios --simulator --debug'));
+      expect(future, isNot(contains('--mode=baseline')));
+    });
+  });
+
   test(
     'concurrent pure validations return identical immutable reports',
     () async {
