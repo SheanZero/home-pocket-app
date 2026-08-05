@@ -1,0 +1,13 @@
+<section class="section download-section" id="download" aria-labelledby="download-title">
+  <div class="shell download-panel">
+    <div>
+      <p class="eyebrow">{{ i18n "download_eyebrow" }}</p>
+      <h2 id="download-title">{{ i18n "download_title" }}</h2>
+      <p>{{ i18n "download_body" }}</p>
+    </div>
+    <div>
+      {{ partial "store-buttons.html" (dict "page" . "footer" true "platforms" false) }}
+      {{ if not .Site.Params.storeListingsReady }}<p class="release-note release-note-light"><span></span>{{ i18n "store_release_note" }}</p>{{ end }}
+    </div>
+  </div>
+</section>

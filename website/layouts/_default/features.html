@@ -1,0 +1,83 @@
+{{ define "main" }}
+<section class="inner-hero page-hero">
+  <div class="shell inner-hero-grid product-page-hero-grid">
+    <div class="inner-hero-copy">
+      <p class="eyebrow">{{ .Params.eyebrow }}</p>
+      <h1>{{ .Params.titleLine1 }}<br>{{ .Params.titleLine2 }}</h1>
+      <p>{{ .Params.description }}</p>
+    </div>
+    <div class="screen-stage page-hero-screen">
+      <div class="screen-meta"><span>{{ i18n "screen_month" }}</span><span>{{ i18n "screen_local" }}</span></div>
+      <div class="product-screen">
+        <img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" fetchpriority="high">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section page-features" aria-labelledby="features-page-title">
+  <div class="shell section-intro">
+    <p class="eyebrow">{{ i18n "features_eyebrow" }}</p>
+    <h2 id="features-page-title">{{ i18n "features_title" }}</h2>
+    <p>{{ i18n "features_body" }}</p>
+  </div>
+  <div class="shell feature-grid page-feature-grid">
+    <article class="feature-card feature-card-small">
+      <span class="feature-number">01</span>
+      <p class="feature-kicker">{{ i18n "feature_ledger_kicker" }}</p>
+      <h3>{{ i18n "feature_ledger_title" }}</h3>
+      <p>{{ i18n "feature_ledger_body" }}</p>
+      <ul class="soft-list compact-list">
+        <li>{{ i18n "feature_ledger_point_1" }}</li>
+        <li>{{ i18n "feature_ledger_point_2" }}</li>
+        <li>{{ i18n "feature_ledger_point_3" }}</li>
+      </ul>
+    </article>
+    <article class="feature-card feature-card-small feature-card-joy">
+      <span class="feature-number">02</span>
+      <p class="feature-kicker">{{ i18n "feature_joy_kicker" }}</p>
+      <h3>{{ i18n "feature_joy_title" }}</h3>
+      <p>{{ i18n "feature_joy_body" }}</p>
+      <ul class="soft-list compact-list">
+        <li>{{ i18n "feature_joy_point_1" }}</li>
+        <li>{{ i18n "feature_joy_point_2" }}</li>
+        <li>{{ i18n "feature_joy_point_3" }}</li>
+      </ul>
+    </article>
+    <article class="feature-card feature-card-small feature-card-capture">
+      <span class="feature-number">03</span>
+      <p class="feature-kicker">{{ i18n "capture_kicker" }}</p>
+      <h3>{{ i18n "capture_title" }}</h3>
+      <p>{{ i18n "capture_body" }}</p>
+      <div class="method-list" aria-label="{{ i18n "capture_methods_label" }}">
+        <span>{{ i18n "capture_method_1" }}</span>
+        <span>{{ i18n "capture_method_2" }}</span>
+        <span>{{ i18n "capture_method_3" }}</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section app-views" aria-labelledby="app-views-title">
+  <div class="shell app-views-grid">
+    <div class="app-views-copy">
+      <p class="eyebrow">{{ i18n "features_showcase_eyebrow" }}</p>
+      <h2 id="app-views-title">{{ i18n "features_showcase_title" }}</h2>
+      <p>{{ i18n "features_showcase_body" }}</p>
+      <a class="quiet-link" href="{{ with .Site.GetPage "/family" }}{{ .RelPermalink }}{{ end }}">{{ i18n "features_next" }} <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="app-view-pair">
+      <figure class="app-view-card">
+        <figcaption>{{ i18n "light_mode_label" }}</figcaption>
+        <img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="lazy">
+      </figure>
+      <figure class="app-view-card app-view-card-dark">
+        <figcaption>{{ i18n "dark_mode_label" }}</figcaption>
+        <img src="{{ (printf "images/home-dark-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_dark_screenshot_alt" }}" loading="lazy">
+      </figure>
+    </div>
+  </div>
+</section>
+
+{{ partial "download-section.html" . }}
+{{ end }}

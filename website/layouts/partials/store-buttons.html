@@ -1,0 +1,12 @@
+{{- $page := .page -}}
+<div class="store-row{{ if .footer }} store-row-footer{{ end }}" aria-label="{{ i18n "store_links_label" }}">
+  <a class="store-badge" href="{{ $page.Site.Params.iosURL }}" target="_blank" rel="noreferrer">
+    <img class="store-badge-icon" src="{{ "images/apple.svg" | relURL }}" width="24" height="24" alt="" aria-hidden="true">
+    <span class="store-badge-copy"><small>{{ i18n "store_open_on" }}</small><strong>App Store</strong></span>
+  </a>
+  <a class="store-badge" href="{{ $page.Site.Params.androidURL }}" target="_blank" rel="noreferrer">
+    <img class="store-badge-icon" src="{{ "images/google-play.svg" | relURL }}" width="24" height="24" alt="" aria-hidden="true">
+    <span class="store-badge-copy"><small>{{ i18n "store_open_on" }}</small><strong>Google Play</strong></span>
+  </a>
+</div>
+{{ if .platforms }}<div class="store-platforms" aria-hidden="true"><span>iPhone / iPad</span><span>Android</span></div>{{ end }}

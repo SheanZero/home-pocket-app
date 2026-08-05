@@ -1,0 +1,54 @@
+{{ define "main" }}
+<section class="inner-hero page-hero">
+  <div class="shell inner-hero-grid">
+    <div class="inner-hero-copy">
+      <p class="eyebrow">{{ .Params.eyebrow }}</p>
+      <h1>{{ .Params.titleLine1 }}<br>{{ .Params.titleLine2 }}</h1>
+      <p>{{ .Params.description }}</p>
+    </div>
+    <figure class="inner-hero-photo"><img src="{{ "images/joy-still-life.jpg" | relURL }}" width="1535" height="1024" alt="{{ i18n "joy_photo_alt" }}" fetchpriority="high"></figure>
+  </div>
+</section>
+
+<section class="section product-proof" aria-labelledby="philosophy-page-title">
+  <div class="shell proof-grid">
+    <div class="screen-stage">
+      <div class="screen-meta"><span>{{ i18n "screen_month" }}</span><span>{{ i18n "screen_local" }}</span></div>
+      <div class="product-screen">
+        <img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="eager">
+      </div>
+    </div>
+    <div class="proof-copy">
+      <p class="eyebrow">{{ i18n "philosophy_eyebrow" }}</p>
+      <h2 id="philosophy-page-title">{{ i18n "philosophy_title_line_1" }}<br><em>{{ i18n "philosophy_title_accent" }}</em>{{ i18n "philosophy_title_line_2" }}</h2>
+      <p>{{ i18n "philosophy_body" }}</p>
+      <blockquote>{{ i18n "philosophy_quote" }}</blockquote>
+      <div class="boundary-note">
+        <span aria-hidden="true">○○</span>
+        <p><strong>{{ i18n "boundary_title" }}</strong>{{ i18n "boundary_body" }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section joy-story" aria-labelledby="joy-story-title">
+  <div class="joy-story-layout">
+    <div class="joy-story-copy">
+      <p class="eyebrow">{{ i18n "joy_story_eyebrow" }}</p>
+      <h2 id="joy-story-title">{{ i18n "joy_story_title_line_1" }}<br><em>{{ i18n "joy_story_title_accent" }}</em>{{ i18n "joy_story_title_line_2" }}</h2>
+      <p>{{ i18n "joy_story_body" }}</p>
+      <ul class="soft-list">
+        <li>{{ i18n "joy_story_point_1" }}</li>
+        <li>{{ i18n "joy_story_point_2" }}</li>
+        <li>{{ i18n "joy_story_point_3" }}</li>
+      </ul>
+      <a class="quiet-link" href="{{ with .Site.GetPage "/features" }}{{ .RelPermalink }}{{ end }}">{{ i18n "philosophy_next" }} <span aria-hidden="true">→</span></a>
+    </div>
+    <figure class="joy-photo">
+      <img src="{{ "images/hero-family.jpg" | relURL }}" width="1535" height="1024" alt="{{ i18n "hero_photo_alt" }}" loading="lazy">
+    </figure>
+  </div>
+</section>
+
+{{ partial "download-section.html" . }}
+{{ end }}

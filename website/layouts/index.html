@@ -1,0 +1,99 @@
+{{ define "main" }}
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-layout">
+    <div class="hero-copy">
+      <p class="eyebrow">{{ i18n "hero_eyebrow" }}</p>
+      <h1 id="hero-title">
+        <span>{{ i18n "hero_title_line_1" }}</span>
+        <span>{{ i18n "hero_title_line_2_before" }}<span class="hero-accent-group"><em>{{ i18n "hero_title_accent" }}</em>{{ i18n "hero_title_line_2_after" }}</span></span>
+      </h1>
+      <p class="hero-lede">{{ i18n "hero_body" }}</p>
+
+      {{ partial "store-buttons.html" (dict "page" . "footer" false "platforms" true) }}
+      {{ if not .Site.Params.storeListingsReady }}<p class="release-note"><span></span>{{ i18n "store_release_note" }}</p>{{ end }}
+
+      <a class="quiet-link" href="{{ with .Site.GetPage "/philosophy" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_philosophy" }} <span aria-hidden="true">→</span></a>
+    </div>
+    <figure class="hero-photo">
+      <img src="{{ "images/hero-family.jpg" | relURL }}" width="1535" height="1024" alt="{{ i18n "hero_photo_alt" }}" fetchpriority="high">
+      <figcaption>{{ i18n "hero_photo_caption" }}</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="section home-routes" aria-labelledby="home-routes-title">
+  <div class="shell section-intro home-routes-intro">
+    <p class="eyebrow">{{ i18n "home_routes_eyebrow" }}</p>
+    <h2 id="home-routes-title">{{ i18n "home_routes_title" }}</h2>
+    <p>{{ i18n "home_routes_body" }}</p>
+  </div>
+
+  <div class="shell home-route-grid">
+    {{ with .Site.GetPage "/philosophy" }}
+    <a class="home-route-card home-route-philosophy" href="{{ .RelPermalink }}">
+      <figure><img src="{{ "images/joy-still-life.jpg" | relURL }}" width="1535" height="1024" alt="{{ i18n "joy_photo_alt" }}" loading="lazy"></figure>
+      <div class="home-route-copy">
+        <span>01</span>
+        <p class="feature-kicker">{{ i18n "nav_philosophy" }}</p>
+        <h3>{{ i18n "route_philosophy_title" }}</h3>
+        <p>{{ i18n "route_philosophy_body" }}</p>
+        <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
+      </div>
+    </a>
+    {{ end }}
+
+    {{ with .Site.GetPage "/features" }}
+    <a class="home-route-card home-route-product" href="{{ .RelPermalink }}">
+      <div class="home-route-copy">
+        <span>02</span>
+        <p class="feature-kicker">{{ i18n "nav_features" }}</p>
+        <h3>{{ i18n "route_features_title" }}</h3>
+        <p>{{ i18n "route_features_body" }}</p>
+        <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
+      </div>
+      <figure class="home-route-screen"><img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="lazy"></figure>
+    </a>
+    {{ end }}
+
+    {{ with .Site.GetPage "/family" }}
+    <a class="home-route-card home-route-family" href="{{ .RelPermalink }}">
+      <div class="home-route-copy">
+        <span>03</span>
+        <p class="feature-kicker">{{ i18n "nav_family" }}</p>
+        <h3>{{ i18n "route_family_title" }}</h3>
+        <p>{{ i18n "route_family_body" }}</p>
+        <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
+      </div>
+      <figure class="home-route-screen"><img src="{{ (printf "images/family-management-%s.png" .Lang) | relURL }}" width="780" height="1560" alt="{{ i18n "family_screenshot_alt" }}" loading="lazy"></figure>
+    </a>
+    {{ end }}
+
+    {{ with .Site.GetPage "/privacy" }}
+    <a class="home-route-card home-route-privacy" href="{{ .RelPermalink }}">
+      <img class="home-route-icon" src="{{ "images/privacy-shield.png" | relURL }}" width="180" height="180" alt="" aria-hidden="true" loading="lazy">
+      <div class="home-route-copy">
+        <span>04</span>
+        <p class="feature-kicker">{{ i18n "nav_privacy" }}</p>
+        <h3>{{ i18n "route_privacy_title" }}</h3>
+        <p>{{ i18n "route_privacy_body" }}</p>
+        <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
+      </div>
+    </a>
+    {{ end }}
+
+    {{ with .Site.GetPage "/faq" }}
+    <a class="home-route-card home-route-faq" href="{{ .RelPermalink }}">
+      <div class="home-route-copy">
+        <span>05</span>
+        <p class="feature-kicker">{{ i18n "nav_faq" }}</p>
+        <h3>{{ i18n "route_faq_title" }}</h3>
+        <p>{{ i18n "route_faq_body" }}</p>
+        <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
+      </div>
+    </a>
+    {{ end }}
+  </div>
+</section>
+
+{{ partial "download-section.html" . }}
+{{ end }}

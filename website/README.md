@@ -1,0 +1,32 @@
+# Home Pocket website
+
+The official Home Pocket marketing site is a dependency-free, multi-page Hugo project with native Japanese and English routes.
+
+## Local preview
+
+```bash
+hugo server --source website --disableFastRender
+```
+
+Open the local URL printed by Hugo. Japanese is served under `/ja/` and English under `/en/`.
+
+## Production build
+
+```bash
+hugo --source website --minify
+```
+
+The generated static site is written to `website/public/` by default. Product screens under `website/static/images/` are first-party captures from the iOS Simulator, with separate Japanese and English variants; refresh those captures when the app UI changes materially. The family and still-life photographs are generated project assets with no embedded copy, logos, or financial documents.
+
+The App Store and Google Play destinations are configured in `[params]` inside `website/hugo.toml`. Until the official listings are live, the page shows a localized release-status note next to both platform links; replace the temporary iOS search destination with the direct product URL after App Store Connect assigns it.
+
+For the private Sites preview, Hugo output is staged under `website/dist/client/` and the minimal worker in `website/worker/index.js` serves those static files. This hosting adapter does not replace Hugo or add an application runtime to the site.
+
+## Structure
+
+- `content/ja/` and `content/en/` contain the localized home, philosophy, features, family, privacy, and FAQ pages.
+- `i18n/` contains the shared interface and component copy.
+- `layouts/` contains the Hugo templates and partials.
+- `assets/css/main.css` contains the responsive visual system.
+- `static/images/` contains the first-party product imagery used by the site.
+- `docs/SITE_RESEARCH.md` records the market-structure research and resulting information architecture.

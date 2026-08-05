@@ -1,0 +1,338 @@
+meta_tagline:
+  other: "Turn spending into a record of what makes life yours"
+meta_description:
+  other: "A private family ledger for everyday needs and the spending that brings joy—without blame, comparison, or tracking."
+skip_to_content:
+  other: "Skip to content"
+brand_home_label:
+  other: "Home Pocket home"
+brand_name:
+  other: "Home Pocket"
+brand_subtitle:
+  other: "まもる家計簿"
+primary_navigation:
+  other: "Primary navigation"
+nav_philosophy:
+  other: "Our idea"
+nav_features:
+  other: "What it does"
+nav_privacy:
+  other: "Privacy"
+nav_faq:
+  other: "Questions"
+nav_download:
+  other: "Get the app"
+language_switcher:
+  other: "Choose language"
+menu_label:
+  other: "Open menu"
+
+hero_eyebrow:
+  other: "A ledger for your household—and your life"
+hero_title_line_1:
+  other: "Turn what you spend"
+hero_title_line_2_before:
+  other: "into what makes "
+hero_title_accent:
+  other: "life feel yours"
+hero_title_line_2_after:
+  other: "."
+hero_body:
+  other: "Everyday necessities and the things that restore you both belong. Record them as part of a good life—without blame or comparison."
+store_links_label:
+  other: "App store links"
+store_open_on:
+  other: "Open in"
+store_release_note:
+  other: "Preparing for release — official listings will replace these links after review"
+hero_privacy_link:
+  other: "See how privacy works"
+hero_photo_alt:
+  other: "A family gathered around a notebook at a bright dining table"
+hero_photo_caption:
+  other: "Money conversations can feel as gentle as the table you share."
+
+screen_month:
+  other: "August 2026"
+screen_local:
+  other: "Stored on this device"
+home_screenshot_alt:
+  other: "Home Pocket home screen showing everyday spending and Joy records"
+philosophy_eyebrow:
+  other: "What money makes possible"
+philosophy_title_line_1:
+  other: "What life needs,"
+philosophy_title_accent:
+  other: "and what restores you"
+philosophy_title_line_2:
+  other: "."
+philosophy_body:
+  other: "Keep the expenses that sustain daily life in Everyday. Keep small choices that felt meaningful in Joy. The same amount can carry a different meaning, so it should not collapse into one guilty total."
+philosophy_quote:
+  other: "A record is not a reprimand. It is a way to care for the person you were today."
+boundary_title:
+  other: "You choose what your family can see."
+boundary_body:
+  other: "Shared clarity and personal space can coexist."
+
+trust_label:
+  other: "Privacy essentials"
+trust_local_title:
+  other: "Stored on your device"
+trust_local_body:
+  other: "Plaintext financial data and encryption keys stay close."
+trust_e2ee_title:
+  other: "Only chosen family records use E2EE"
+trust_e2ee_body:
+  other: "Shared records are encrypted on-device before sync."
+trust_clean_title:
+  other: "No ads or analytics SDK"
+trust_clean_body:
+  other: "No advertising or behavioral tracking."
+
+joy_story_eyebrow:
+  other: "Remembering small joys"
+joy_story_title_line_1:
+  other: "Make your ledger a place"
+joy_story_title_accent:
+  other: "to notice happiness"
+joy_story_title_line_2:
+  other: "."
+joy_story_body:
+  other: "A favorite drink, a book, an hour to yourself. Small moments like these are not waste. They are part of what carried you through the day."
+joy_story_point_1:
+  other: "Satisfaction is never used to rank or judge"
+joy_story_point_2:
+  other: "No streak pressure or achievement badges"
+joy_story_point_3:
+  other: "A quiet reflection on choices that felt like yours"
+joy_photo_alt:
+  other: "A ceramic mug, flowers, and botanical print on a sunlit wooden table"
+
+features_eyebrow:
+  other: "Made for ordinary family days"
+features_title:
+  other: "Ease, clarity, and privacy in one calm flow."
+features_body:
+  other: "Rather than piling on features, Home Pocket connects three everyday actions: record it, see it together, and keep what is personal close."
+family_kicker:
+  other: "For the household"
+family_title:
+  other: "See the same home without becoming the same person."
+family_body:
+  other: "Only the household ledger moves between family devices. See who recorded what, while personal entries remain in your own space."
+family_point_1:
+  other: "Invite family with a simple code"
+family_point_2:
+  other: "End-to-end encrypt shared records"
+family_point_3:
+  other: "Keep household and personal ledgers separate"
+family_screenshot_alt:
+  other: "Family management screen with members and sync status"
+capture_kicker:
+  other: "Lighter capture"
+capture_title:
+  other: "Choose the input that fits the moment."
+capture_body:
+  other: "Keyboard, receipt, or voice. Review recognized details before saving while merchant and category learning adapts privately on your device."
+capture_methods_label:
+  other: "Input methods"
+capture_method_1:
+  other: "Keyboard"
+capture_method_2:
+  other: "Receipt"
+capture_method_3:
+  other: "Voice"
+private_kicker:
+  other: "Safety in the system"
+private_title:
+  other: "Protected by implementation, not a vague promise."
+private_body:
+  other: "The database, sensitive fields, files, and family sync each have a separate encryption layer. Necessary connections are disclosed plainly."
+
+privacy_eyebrow:
+  other: "PRIVACY BY ARCHITECTURE"
+privacy_title:
+  other: "Because finances map a life, four layers protect them."
+privacy_body:
+  other: "Financial data can reveal habits and relationships. We explain storage, encryption, and connections separately, based on the implementation that exists today."
+privacy_cta:
+  other: "Read the privacy design"
+privacy_layer_1_title:
+  other: "On-device database"
+privacy_layer_1_body:
+  other: "SQLCipher / AES-256"
+privacy_layer_2_title:
+  other: "Sensitive fields"
+privacy_layer_2_body:
+  other: "ChaCha20-Poly1305"
+privacy_layer_3_title:
+  other: "Photos and files"
+privacy_layer_3_body:
+  other: "AES-256-GCM"
+privacy_layer_4_title:
+  other: "Family sync"
+privacy_layer_4_body:
+  other: "TLS + end-to-end encryption"
+
+faq_eyebrow:
+  other: "Questions, answered"
+faq_title:
+  other: "What you should know before you begin."
+faq_body:
+  other: "A clear view of release status, sharing boundaries, and how your data is handled."
+faq_1_question:
+  other: "When can I download it?"
+faq_1_answer:
+  other: "Home Pocket is preparing for release on the App Store and Google Play. After store review, the buttons on this site will point to the official product listings."
+faq_2_question:
+  other: "Does my financial data go to the cloud?"
+faq_2_answer:
+  other: "Plaintext financial data is stored on-device. Connections occur for exchange rates, optional notifications, and family sync; shared records are encrypted on your device before they are sent."
+faq_3_question:
+  other: "Can my family see every expense?"
+faq_3_answer:
+  other: "No. Household and personal ledgers are separate. You choose which records belong in the shared household view, while private records stay on your device."
+faq_4_question:
+  other: "Which languages and devices are supported?"
+faq_4_answer:
+  other: "The app targets Japanese, English, and Chinese on iOS 15+ and Android 7+. This website is available in Japanese and English."
+faq_5_question:
+  other: "Are there ads or usage analytics?"
+faq_5_answer:
+  other: "There are no ads and no third-party advertising or behavioral analytics SDK. The privacy page explains each limited external connection separately."
+
+download_eyebrow:
+  other: "HOME POCKET FOR YOUR FAMILY"
+download_title:
+  other: "Keep today’s spending as part of today’s happiness."
+download_body:
+  other: "Planned for iPhone, iPad, and Android. We will keep the store links and release status current here."
+
+footer_statement:
+  other: "A local-first family ledger for shared peace of mind and the spending that makes life yours."
+footer_product:
+  other: "Product"
+footer_project:
+  other: "Project"
+footer_support:
+  other: "Support"
+footer_release_note:
+  other: "Preparing for release · Open source"
+inner_eyebrow:
+  other: "HOME POCKET PRIVACY"
+inner_summary_label:
+  other: "On this page"
+inner_summary:
+  other: "Storage, encryption, family sync, and necessary external connections—explained separately."
+inner_source_link:
+  other: "Inspect the implementation"
+not_found_title:
+  other: "Page not found"
+not_found_body:
+  other: "The page may have moved or may not be public yet."
+not_found_cta:
+  other: "Return home"
+
+nav_family:
+  other: "For family"
+home_routes_eyebrow:
+  other: "Start with what matters to you"
+home_routes_title:
+  other: "Five clear paths—not one very long homepage."
+home_routes_body:
+  other: "Read about the idea, everyday features, family boundaries, privacy architecture, or common questions. Each page gives the subject room to breathe."
+route_philosophy_title:
+  other: "Turn spending into a memory of a good life."
+route_philosophy_body:
+  other: "Why a ledger can care for you without blame or comparison."
+route_features_title:
+  other: "Make everyday recording feel lighter."
+route_features_body:
+  other: "Two ledgers, quiet Joy reflection, and keyboard, receipt, or voice capture."
+route_family_title:
+  other: "See it together. Stay yourselves."
+route_family_body:
+  other: "Separate household records from the spending that remains personal."
+route_privacy_title:
+  other: "Make safety a system, not a promise."
+route_privacy_body:
+  other: "On-device storage, four encryption layers, and honest connection disclosure."
+route_faq_title:
+  other: "Plain answers before you begin."
+route_faq_body:
+  other: "Release status, supported devices, sync boundaries, and advertising."
+route_cta:
+  other: "Read this page"
+home_dark_screenshot_alt:
+  other: "Home Pocket home screen showing everyday spending and Joy records in dark mode"
+philosophy_next:
+  other: "Explore the everyday features"
+feature_ledger_kicker:
+  other: "Two ledgers"
+feature_ledger_title:
+  other: "Separate what sustains life from what restores you."
+feature_ledger_body:
+  other: "The same amount can support a household or make a difficult day gentler. Everyday and Joy keep those meanings distinct instead of collapsing them into one guilty total."
+feature_ledger_point_1:
+  other: "Everyday for the full household picture"
+feature_ledger_point_2:
+  other: "Joy for choices that felt personally meaningful"
+feature_ledger_point_3:
+  other: "Separate household and personal records"
+feature_joy_kicker:
+  other: "Today’s Joy"
+feature_joy_title:
+  other: "Reflect on satisfaction—never compete over it."
+feature_joy_body:
+  other: "Record how a purchase left you feeling. Home Pocket avoids rankings, streak pressure, and achievement events so the result stays a private reflection on your own patterns."
+feature_joy_point_1:
+  other: "One simple Joy expression"
+feature_joy_point_2:
+  other: "No rankings, streaks, or achievement badges"
+feature_joy_point_3:
+  other: "Review monthly patterns at your pace"
+features_showcase_eyebrow:
+  other: "A view for every part of the day"
+features_showcase_title:
+  other: "Readable in bright mornings and quiet evenings."
+features_showcase_body:
+  other: "Light and dark modes keep amounts and emotional context calm and legible. These product images are first-party captures from the actual iOS Simulator."
+light_mode_label:
+  other: "Light mode"
+dark_mode_label:
+  other: "Dark mode"
+features_next:
+  other: "See how family sharing works"
+family_story_eyebrow:
+  other: "One household, distinct people"
+family_values_label:
+  other: "Three principles for family use"
+family_value_1_title:
+  other: "Only chosen records are shared"
+family_value_1_body:
+  other: "Personal-ledger records are never included."
+family_value_2_title:
+  other: "See who recorded what"
+family_value_2_body:
+  other: "Review household spending without blame."
+family_value_3_title:
+  other: "Encrypted before it leaves"
+family_value_3_body:
+  other: "Shared data uses E2EE between family devices."
+family_boundary_eyebrow:
+  other: "SHARED, NOT EXPOSED"
+family_boundary_1_title:
+  other: "Household ledger"
+family_boundary_1_body:
+  other: "Only records chosen for the family view are shared."
+family_boundary_2_title:
+  other: "Personal ledger"
+family_boundary_2_body:
+  other: "Spending that is yours alone remains on your device."
+family_boundary_3_title:
+  other: "Sync relay"
+family_boundary_3_body:
+  other: "The relay never holds the keys needed to read financial data."
+family_next:
+  other: "Read the privacy architecture"

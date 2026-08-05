@@ -1,0 +1,32 @@
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <div class="footer-brand">
+      <a class="brand" href="{{ .Site.Home.RelPermalink }}">
+        <img src="{{ "images/app-icon.png" | relURL }}" width="44" height="44" alt="">
+        <span class="brand-copy"><strong>{{ i18n "brand_name" }}</strong><small>{{ i18n "brand_subtitle" }}</small></span>
+      </a>
+      <p>{{ i18n "footer_statement" }}</p>
+    </div>
+    <div class="footer-links">
+      <div>
+        <strong>{{ i18n "footer_product" }}</strong>
+        <a href="{{ with .Site.GetPage "/philosophy" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_philosophy" }}</a>
+        <a href="{{ with .Site.GetPage "/features" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_features" }}</a>
+        <a href="{{ with .Site.GetPage "/family" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_family" }}</a>
+        <a href="{{ with .Site.GetPage "/privacy" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_privacy" }}</a>
+        <a href="{{ with .Site.GetPage "/faq" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_faq" }}</a>
+        <a href="{{ .Site.Home.RelPermalink }}#download">{{ i18n "nav_download" }}</a>
+      </div>
+      <div>
+        <strong>{{ i18n "footer_project" }}</strong>
+        <a href="{{ .Site.Params.githubURL }}" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        <a href="{{ .Site.Params.githubURL }}/issues" target="_blank" rel="noreferrer">{{ i18n "footer_support" }} <span aria-hidden="true">↗</span></a>
+        <a href="{{ .Site.Params.githubURL }}/blob/main/LICENSE" target="_blank" rel="noreferrer">Apache 2.0 <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </div>
+  <div class="shell footer-bottom">
+    <p>© {{ now.Year }} Home Pocket.</p>
+    <p>{{ i18n "footer_release_note" }}</p>
+  </div>
+</footer>

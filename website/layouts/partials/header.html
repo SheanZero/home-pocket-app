@@ -1,0 +1,47 @@
+<header class="site-header">
+  <div class="header-inner shell">
+    <a class="brand" href="{{ .Site.Home.RelPermalink }}" aria-label="{{ i18n "brand_home_label" }}">
+      <img src="{{ "images/app-icon.png" | relURL }}" width="46" height="46" alt="">
+      <span class="brand-copy">
+        <strong>{{ i18n "brand_name" }}</strong>
+        <small>{{ i18n "brand_subtitle" }}</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="{{ i18n "primary_navigation" }}">
+      {{ with .Site.GetPage "/philosophy" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "philosophy" }} aria-current="page"{{ end }}>{{ i18n "nav_philosophy" }}</a>{{ end }}
+      {{ with .Site.GetPage "/features" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "features" }} aria-current="page"{{ end }}>{{ i18n "nav_features" }}</a>{{ end }}
+      {{ with .Site.GetPage "/family" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "family" }} aria-current="page"{{ end }}>{{ i18n "nav_family" }}</a>{{ end }}
+      {{ with .Site.GetPage "/privacy" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "privacy" }} aria-current="page"{{ end }}>{{ i18n "nav_privacy" }}</a>{{ end }}
+      {{ with .Site.GetPage "/faq" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "faq" }} aria-current="page"{{ end }}>{{ i18n "nav_faq" }}</a>{{ end }}
+    </nav>
+
+    <div class="header-actions">
+      <div class="language-switcher" aria-label="{{ i18n "language_switcher" }}">
+        {{ range .AllTranslations }}
+          <a href="{{ .RelPermalink }}" hreflang="{{ .Language.LanguageCode }}" lang="{{ .Language.LanguageCode }}"{{ if eq $.Lang .Lang }} aria-current="page"{{ end }}>{{ if eq .Lang "ja" }}JP{{ else }}EN{{ end }}</a>
+        {{ end }}
+      </div>
+      <a class="header-download" href="{{ .Site.Home.RelPermalink }}#download">{{ i18n "nav_download" }}</a>
+    </div>
+
+    <details class="mobile-menu">
+      <summary aria-label="{{ i18n "menu_label" }}"><span></span><span></span></summary>
+      <div class="mobile-menu-panel">
+        <nav aria-label="{{ i18n "primary_navigation" }}">
+          {{ with .Site.GetPage "/philosophy" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "philosophy" }} aria-current="page"{{ end }}>{{ i18n "nav_philosophy" }}</a>{{ end }}
+          {{ with .Site.GetPage "/features" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "features" }} aria-current="page"{{ end }}>{{ i18n "nav_features" }}</a>{{ end }}
+          {{ with .Site.GetPage "/family" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "family" }} aria-current="page"{{ end }}>{{ i18n "nav_family" }}</a>{{ end }}
+          {{ with .Site.GetPage "/privacy" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "privacy" }} aria-current="page"{{ end }}>{{ i18n "nav_privacy" }}</a>{{ end }}
+          {{ with .Site.GetPage "/faq" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "faq" }} aria-current="page"{{ end }}>{{ i18n "nav_faq" }}</a>{{ end }}
+          <a href="{{ .Site.Home.RelPermalink }}#download">{{ i18n "nav_download" }}</a>
+        </nav>
+        <div class="language-switcher language-switcher-mobile" aria-label="{{ i18n "language_switcher" }}">
+          {{ range .AllTranslations }}
+            <a href="{{ .RelPermalink }}" hreflang="{{ .Language.LanguageCode }}" lang="{{ .Language.LanguageCode }}"{{ if eq $.Lang .Lang }} aria-current="page"{{ end }}>{{ .Language.LanguageName }}</a>
+          {{ end }}
+        </div>
+      </div>
+    </details>
+  </div>
+</header>

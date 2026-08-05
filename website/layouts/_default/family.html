@@ -1,0 +1,56 @@
+{{ define "main" }}
+<section class="inner-hero page-hero">
+  <div class="shell inner-hero-grid family-page-hero-grid">
+    <div class="inner-hero-copy">
+      <p class="eyebrow">{{ .Params.eyebrow }}</p>
+      <h1>{{ .Params.titleLine1 }}<br>{{ .Params.titleLine2 }}</h1>
+      <p>{{ .Params.description }}</p>
+    </div>
+    <div class="family-screen family-hero-screen">
+      <img src="{{ (printf "images/family-management-%s.png" .Lang) | relURL }}" width="780" height="1560" alt="{{ i18n "family_screenshot_alt" }}" fetchpriority="high">
+    </div>
+  </div>
+</section>
+
+<section class="section family-story" aria-labelledby="family-story-title">
+  <div class="shell family-story-grid">
+    <figure class="family-story-photo"><img src="{{ "images/hero-family.jpg" | relURL }}" width="1535" height="1024" alt="{{ i18n "hero_photo_alt" }}" loading="lazy"></figure>
+    <div class="family-story-copy">
+      <p class="eyebrow">{{ i18n "family_story_eyebrow" }}</p>
+      <h2 id="family-story-title">{{ i18n "family_title" }}</h2>
+      <p>{{ i18n "family_body" }}</p>
+      <ul class="soft-list">
+        <li>{{ i18n "family_point_1" }}</li>
+        <li>{{ i18n "family_point_2" }}</li>
+        <li>{{ i18n "family_point_3" }}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="trust-band" aria-label="{{ i18n "family_values_label" }}">
+  <div class="shell trust-grid">
+    <article><span>01</span><div><h2>{{ i18n "family_value_1_title" }}</h2><p>{{ i18n "family_value_1_body" }}</p></div></article>
+    <article><span>02</span><div><h2>{{ i18n "family_value_2_title" }}</h2><p>{{ i18n "family_value_2_body" }}</p></div></article>
+    <article><span>03</span><div><h2>{{ i18n "family_value_3_title" }}</h2><p>{{ i18n "family_value_3_body" }}</p></div></article>
+  </div>
+</section>
+
+<section class="section family-boundaries">
+  <div class="shell privacy-panel">
+    <div class="privacy-heading">
+      <p class="eyebrow eyebrow-light">{{ i18n "family_boundary_eyebrow" }}</p>
+      <h2>{{ i18n "boundary_title" }}</h2>
+      <p>{{ i18n "boundary_body" }}</p>
+      <a class="button-light" href="{{ with .Site.GetPage "/privacy" }}{{ .RelPermalink }}{{ end }}">{{ i18n "family_next" }} <span aria-hidden="true">→</span></a>
+    </div>
+    <ol class="privacy-layers">
+      <li><span>01</span><div><strong>{{ i18n "family_boundary_1_title" }}</strong><p>{{ i18n "family_boundary_1_body" }}</p></div></li>
+      <li><span>02</span><div><strong>{{ i18n "family_boundary_2_title" }}</strong><p>{{ i18n "family_boundary_2_body" }}</p></div></li>
+      <li><span>03</span><div><strong>{{ i18n "family_boundary_3_title" }}</strong><p>{{ i18n "family_boundary_3_body" }}</p></div></li>
+    </ol>
+  </div>
+</section>
+
+{{ partial "download-section.html" . }}
+{{ end }}

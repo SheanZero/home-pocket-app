@@ -1,0 +1,23 @@
+{{ define "main" }}
+<section class="inner-hero">
+  <div class="shell inner-hero-grid">
+    <div class="inner-hero-copy">
+      <p class="eyebrow"><span></span>{{ .Params.eyebrow | default (i18n "inner_eyebrow") }}</p>
+      <h1>{{ .Title }}</h1>
+      <p>{{ .Params.description }}</p>
+    </div>
+    <figure class="inner-hero-photo"><img src="{{ "images/joy-still-life.jpg" | relURL }}" width="1535" height="1024" alt="" fetchpriority="high"></figure>
+  </div>
+</section>
+<section class="inner-content-section">
+  <div class="shell inner-content-grid">
+    <aside class="inner-aside">
+      <span>{{ i18n "inner_summary_label" }}</span>
+      <p>{{ i18n "inner_summary" }}</p>
+      <a class="quiet-link" href="{{ .Site.Params.githubURL }}" target="_blank" rel="noreferrer">{{ i18n "inner_source_link" }} <span aria-hidden="true">↗</span></a>
+    </aside>
+    <article class="prose">{{ .Content }}</article>
+  </div>
+</section>
+{{ partial "download-section.html" . }}
+{{ end }}

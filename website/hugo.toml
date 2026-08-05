@@ -1,0 +1,35 @@
+baseURL = "https://sheanzero.github.io/home-pocket-app/"
+title = "Home Pocket"
+defaultContentLanguage = "ja"
+defaultContentLanguageInSubdir = true
+enableRobotsTXT = true
+disableKinds = ["taxonomy", "term", "RSS"]
+
+[params]
+  githubURL = "https://github.com/SheanZero/home-pocket-app"
+  iosURL = "https://apps.apple.com/jp/search?term=%E3%81%BE%E3%82%82%E3%82%8B%E5%AE%B6%E8%A8%88%E7%B0%BF"
+  androidURL = "https://play.google.com/store/apps/details?id=com.sheanzero.happypocket.app"
+  storeListingsReady = false
+  productVersion = "0.1.0"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = false
+
+[minify]
+  minifyOutput = true
+
+[languages]
+  [languages.ja]
+    languageCode = "ja-JP"
+    languageName = "日本語"
+    title = "まもる家計簿"
+    weight = 1
+    contentDir = "content/ja"
+  [languages.en]
+    languageCode = "en"
+    languageName = "English"
+    title = "Home Pocket"
+    weight = 2
+    contentDir = "content/en"
