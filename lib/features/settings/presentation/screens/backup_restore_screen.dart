@@ -12,6 +12,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/settings_section_card.dart';
 import '../providers/repository_providers.dart';
+import '../utils/backup_import_error_message.dart';
 import '../widgets/password_dialog.dart';
 
 class BackupRestoreScreen extends ConsumerStatefulWidget {
@@ -149,9 +150,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       showSuccessFeedback(context, S.of(context).backupImportedSuccessfully);
       return;
     }
-    showErrorFeedback(context, result.error ?? S.of(context).importFailed);
+    showErrorFeedback(
+      context,
+      backupImportErrorMessage(S.of(context), result.error),
+    );
   }
-
 }
 
 class _BackupHeroCard extends StatelessWidget {

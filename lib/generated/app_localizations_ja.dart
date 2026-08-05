@@ -446,6 +446,12 @@ class SJa extends S {
   String get importFailed => 'インポートに失敗しました';
 
   @override
+  String get backupFileTooLarge => 'バックアップファイルが大きすぎるため、インポートできません。';
+
+  @override
+  String get backupDataTooLarge => 'バックアップの展開後サイズが安全な上限を超えています。';
+
+  @override
   String get setBackupPassword => 'バックアップパスワードを設定';
 
   @override

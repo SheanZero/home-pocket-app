@@ -526,6 +526,14 @@
   "@importFailed": {
     "description": "Import failure"
   },
+  "backupFileTooLarge": "This backup file is too large to import.",
+  "@backupFileTooLarge": {
+    "description": "Encrypted backup input exceeds the safe import limit"
+  },
+  "backupDataTooLarge": "This backup expands beyond the safe import limit.",
+  "@backupDataTooLarge": {
+    "description": "Decompressed backup data exceeds the safe import limit"
+  },
   "setBackupPassword": "Set Backup Password",
   "@setBackupPassword": {
     "description": "Export password dialog title"

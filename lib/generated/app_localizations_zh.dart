@@ -444,6 +444,12 @@ class SZh extends S {
   String get importFailed => '导入失败';
 
   @override
+  String get backupFileTooLarge => '备份文件过大，无法导入。';
+
+  @override
+  String get backupDataTooLarge => '备份解压后的大小超过安全导入上限。';
+
+  @override
   String get setBackupPassword => '设置备份密码';
 
   @override

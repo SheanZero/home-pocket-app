@@ -10,6 +10,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../providers/repository_providers.dart';
+import '../utils/backup_import_error_message.dart';
 import 'password_dialog.dart';
 
 class DataManagementSection extends ConsumerWidget {
@@ -134,7 +135,7 @@ class DataManagementSection extends ConsumerWidget {
       if (context.mounted) {
         showErrorFeedback(
           context,
-          importResult.error ?? S.of(context).importFailed,
+          backupImportErrorMessage(S.of(context), importResult.error),
         );
       }
     }

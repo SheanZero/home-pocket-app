@@ -526,6 +526,14 @@
   "@importFailed": {
     "description": "Import failure"
   },
+  "backupFileTooLarge": "バックアップファイルが大きすぎるため、インポートできません。",
+  "@backupFileTooLarge": {
+    "description": "Encrypted backup input exceeds the safe import limit"
+  },
+  "backupDataTooLarge": "バックアップの展開後サイズが安全な上限を超えています。",
+  "@backupDataTooLarge": {
+    "description": "Decompressed backup data exceeds the safe import limit"
+  },
   "setBackupPassword": "バックアップパスワードを設定",
   "@setBackupPassword": {
     "description": "Export password dialog title"

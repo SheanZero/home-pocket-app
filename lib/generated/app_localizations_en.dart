@@ -454,6 +454,13 @@ class SEn extends S {
   String get importFailed => 'Import failed';
 
   @override
+  String get backupFileTooLarge => 'This backup file is too large to import.';
+
+  @override
+  String get backupDataTooLarge =>
+      'This backup expands beyond the safe import limit.';
+
+  @override
   String get setBackupPassword => 'Set Backup Password';
 
   @override

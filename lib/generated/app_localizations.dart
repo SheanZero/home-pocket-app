@@ -939,6 +939,18 @@ abstract class S {
   /// **'Import failed'**
   String get importFailed;
 
+  /// Encrypted backup input exceeds the safe import limit
+  ///
+  /// In en, this message translates to:
+  /// **'This backup file is too large to import.'**
+  String get backupFileTooLarge;
+
+  /// Decompressed backup data exceeds the safe import limit
+  ///
+  /// In en, this message translates to:
+  /// **'This backup expands beyond the safe import limit.'**
+  String get backupDataTooLarge;
+
   /// Export password dialog title
   ///
   /// In en, this message translates to:

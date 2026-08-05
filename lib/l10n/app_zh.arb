@@ -526,6 +526,14 @@
   "@importFailed": {
     "description": "Import failure"
   },
+  "backupFileTooLarge": "备份文件过大，无法导入。",
+  "@backupFileTooLarge": {
+    "description": "Encrypted backup input exceeds the safe import limit"
+  },
+  "backupDataTooLarge": "备份解压后的大小超过安全导入上限。",
+  "@backupDataTooLarge": {
+    "description": "Decompressed backup data exceeds the safe import limit"
+  },
   "setBackupPassword": "设置备份密码",
   "@setBackupPassword": {
     "description": "Export password dialog title"

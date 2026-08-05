@@ -23,6 +23,9 @@ import '../../shared/utils/result.dart';
 ///
 /// Algorithm: decrypt ([BackupCryptoService]) → GZip decompress → JSON parse
 /// → DB restore.
+///
+/// Both the encrypted input and the decompressed JSON are treated as untrusted
+/// and bounded by [BackupImportLimits] before parsing or database writes.
 class ImportBackupUseCase {
   ImportBackupUseCase({
     required TransactionRepository transactionRepo,
@@ -32,6 +35,7 @@ class ImportBackupUseCase {
     required ExchangeRateRepository exchangeRateRepo,
     required UnitOfWork unitOfWork,
     required BackupCryptoService backupCrypto,
+    this.limits = const BackupImportLimits(),
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
@@ -47,14 +51,22 @@ class ImportBackupUseCase {
   final ExchangeRateRepository _exchangeRateRepo;
   final UnitOfWork _unitOfWork;
   final BackupCryptoService _backupCrypto;
+  final BackupImportLimits limits;
 
   Future<Result<void>> execute({
     required File backupFile,
     required String password,
   }) async {
     try {
-      // 1. Read encrypted file
-      final encryptedData = await backupFile.readAsBytes();
+      // 1. Read encrypted file through a bounded stream. The cheap length
+      // check rejects ordinary oversized files before opening them, while the
+      // stream cap also handles a file growing between length() and read().
+      final Uint8List encryptedData;
+      try {
+        encryptedData = await _readEncryptedBackup(backupFile);
+      } on _BackupImportSizeLimitException catch (e) {
+        return Result.error(e.error.name);
+      }
 
       // 2. Decrypt (format detection, size validation and KDF handling live
       // in the crypto layer — legacy and v2 .hpb files both supported).
@@ -69,11 +81,17 @@ class ImportBackupUseCase {
         return Result.error('Incorrect password');
       }
 
-      // 4. Decompress
-      final jsonBytes = gzip.decode(decryptedData);
+      // 3. Decompress through a chunked sink so a high-compression-ratio
+      // payload is stopped as soon as its output budget is exhausted.
+      final Uint8List jsonBytes;
+      try {
+        jsonBytes = _decompressBackup(decryptedData);
+      } on _BackupImportSizeLimitException catch (e) {
+        return Result.error(e.error.name);
+      }
       final jsonString = utf8.decode(jsonBytes);
 
-      // 5. Parse JSON
+      // 4. Parse JSON
       final Map<String, dynamic> jsonMap;
       try {
         jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
@@ -83,20 +101,53 @@ class ImportBackupUseCase {
 
       final backupData = BackupData.fromJson(jsonMap);
 
-      // 6. Validate version
+      // 5. Validate version
       if (backupData.metadata.version != '1.0') {
         return Result.error(
           'Unsupported backup version: ${backupData.metadata.version}',
         );
       }
 
-      // 7. Restore data
+      // 6. Restore data
       await _restoreData(backupData);
 
       return Result.success(null);
     } catch (e) {
       return Result.error('Backup import failed: $e');
     }
+  }
+
+  Future<Uint8List> _readEncryptedBackup(File backupFile) async {
+    final maxBytes = limits.maxEncryptedBytes;
+    if (await backupFile.length() > maxBytes) {
+      throw const _BackupImportSizeLimitException(
+        BackupImportError.encryptedFileTooLarge,
+      );
+    }
+
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in backupFile.openRead(0, maxBytes + 1)) {
+      if (chunk.length > maxBytes - bytes.length) {
+        throw const _BackupImportSizeLimitException(
+          BackupImportError.encryptedFileTooLarge,
+        );
+      }
+      bytes.add(chunk);
+    }
+    return bytes.takeBytes();
+  }
+
+  Uint8List _decompressBackup(Uint8List compressedData) {
+    final bytes = BytesBuilder(copy: false);
+    final output = _BoundedBytesSink(
+      bytes: bytes,
+      maxBytes: limits.maxDecompressedBytes,
+      limitError: BackupImportError.decompressedDataTooLarge,
+    );
+    final input = gzip.decoder.startChunkedConversion(output);
+    input.add(compressedData);
+    input.close();
+    return bytes.takeBytes();
   }
 
   Future<void> _restoreData(BackupData backupData) async {
@@ -210,4 +261,53 @@ class ImportBackupUseCase {
     'fawazahmed0',
     'manual',
   };
+}
+
+/// Memory budgets for importing an untrusted backup file.
+///
+/// Backups contain JSON records only; receipt image bytes are deliberately
+/// excluded by [TransactionPhotoSyncPolicy]. The defaults allow substantial
+/// account histories while preventing a single import from allocating
+/// unbounded encrypted or decompressed data.
+class BackupImportLimits {
+  const BackupImportLimits({
+    this.maxEncryptedBytes = 16 * 1024 * 1024,
+    this.maxDecompressedBytes = 64 * 1024 * 1024,
+  }) : assert(maxEncryptedBytes > 0),
+       assert(maxDecompressedBytes > 0);
+
+  final int maxEncryptedBytes;
+  final int maxDecompressedBytes;
+}
+
+/// Stable error codes that the presentation layer maps to localized copy.
+enum BackupImportError { encryptedFileTooLarge, decompressedDataTooLarge }
+
+class _BoundedBytesSink implements Sink<List<int>> {
+  _BoundedBytesSink({
+    required this.bytes,
+    required this.maxBytes,
+    required this.limitError,
+  });
+
+  final BytesBuilder bytes;
+  final int maxBytes;
+  final BackupImportError limitError;
+
+  @override
+  void add(List<int> data) {
+    if (data.length > maxBytes - bytes.length) {
+      throw _BackupImportSizeLimitException(limitError);
+    }
+    bytes.add(data);
+  }
+
+  @override
+  void close() {}
+}
+
+class _BackupImportSizeLimitException implements Exception {
+  const _BackupImportSizeLimitException(this.error);
+
+  final BackupImportError error;
 }
