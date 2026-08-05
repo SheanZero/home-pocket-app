@@ -5,6 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../scripts/dependency_compatibility.dart' as compatibility;
 
 void main() {
+  test('BASE-01 committed stable baseline manifest exists', () {
+    expect(File('docs/testing/STABLE_BASELINE.json').existsSync(), isTrue);
+  });
+
   Map<String, String> currentInputs() => {
     'pubspec': File('pubspec.yaml').readAsStringSync(),
     'lock': File('pubspec.lock').readAsStringSync(),
