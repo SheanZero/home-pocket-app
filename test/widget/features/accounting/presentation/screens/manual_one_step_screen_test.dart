@@ -28,7 +28,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
         parseVoiceInputUseCaseProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/hold_to_talk_bar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_toolbar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_bottom_sheet.dart';
@@ -2233,23 +2232,19 @@ void main() {
         speech.emitFinal('500円 weak');
         await tester.pump();
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
         await _switchVoiceDockToKeyboard(tester);
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
 
         // A review re-record uses the same restore contract and clears it too.
         await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 weak');
         await tester.pump();
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
         await _finishVoiceUtterance(tester, speech);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
         await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
         await tester.pump();
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
       },
     );
 
@@ -2447,7 +2442,6 @@ void main() {
         form.updateLedgerType(LedgerType.joy);
         form.updateSatisfaction(10);
         await tester.pump();
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
 
         final resetGate = Completer<void>();
         repository.nextGate = resetGate;
@@ -2465,7 +2459,6 @@ void main() {
         expect(form.currentLedgerType, LedgerType.daily);
         expect(form.currentSatisfaction, 2);
         expect(form.currentMerchant, isEmpty);
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
 
         // The dock is already an empty fresh slate, but no new recording may
         // start until the default-category lookup and ledger mapping finish.
@@ -2481,7 +2474,6 @@ void main() {
         expect(form.currentCategory?.id, _l2Category.id);
         expect(form.currentLedgerType, LedgerType.daily);
         expect(form.currentSatisfaction, 2);
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.idle);
         expect(_voiceDock(tester).isSubmitting, isFalse);
 

@@ -32,7 +32,6 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/alternate_category_chips.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart'
     show ConfidenceBand;
@@ -725,13 +724,6 @@ void main() {
         ]);
         await tester.pumpAndSettle();
 
-        // Recognition confidence remains form state, but its decorative band
-        // is intentionally hidden from the production form.
-        expect(
-          find.byType(ConfidenceBandIndicator),
-          findsNothing,
-          reason: 'confidence band is no longer a visible form affordance',
-        );
         // …but the whole chip row is gone: no alternate chips and no exit chip.
         expect(
           find.byType(AlternateCategoryChips),

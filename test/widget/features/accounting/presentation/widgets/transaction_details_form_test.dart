@@ -4,7 +4,7 @@
 /// - D-15: joy celebration shows only on .new joy saves, never on .edit
 /// - D-02: submit() returns sealed-union result; validationError on null category
 /// - D-07: Phase 22 public setter surface (updateCategory / updateMerchant /
-///         updateNote / updateSatisfaction) — host (VoiceInputScreen) batch-fill
+///         updateNote / updateSatisfaction) — host (ManualOneStepScreen) batch-fill
 ///         via `GlobalKey<TransactionDetailsFormState>`
 library;
 

@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/alternate_category_chips.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
-import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart';
 import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
 
 import '../../../../../helpers/test_localizations.dart';
 
 /// RECUX-04 / D-17 anti-toxicity widget sweep — Phase 52 (recognition UX).
 ///
-/// Verifies that the NEW recognition surfaces this phase introduced — the
-/// confidence band ([ConfidenceBandIndicator]) and the alternate-category
-/// correction chips ([AlternateCategoryChips]) — never leak any forbidden
-/// gamification / value-judgment / comparison substring into rendered output,
-/// across the canonical state matrix (band-strong / band-weak+chips /
-/// correction-open / manual-no-affordance / voice-panel) in EACH of the three
-/// supported locales (en / ja / zh).
+/// Verifies that the still-reachable alternate-category correction chips never
+/// leak any forbidden gamification / value-judgment / comparison substring
+/// into rendered output in any supported locale. The retired confidence-band
+/// surface is intentionally absent from this production-surface gate.
 ///
 /// Rationale (CONTEXT D-17 + UI-SPEC §Copywriting Contract + ADR-012):
 /// Anti-toxicity intent is a "compile-and-test gate" (automated, audit-friendly)
@@ -162,29 +156,8 @@ final _alternates = <CategoryMatchResult>[
 ];
 
 // ---------------------------------------------------------------------------
-// Subject builders — each new surface wrapped in a Scaffold. The band paints no
-// text (a11y-only Semantics); the chips paint category labels + the exit chip.
+// Subject builder — the chips paint category labels + the exit chip.
 // ---------------------------------------------------------------------------
-
-Widget _bandStrong(LedgerType ledger) => Scaffold(
-  body: ConfidenceBandIndicator(
-    band: ConfidenceBand.strong,
-    ledgerType: ledger,
-  ),
-);
-
-Widget _bandWeakWithChips(LedgerType ledger) => Scaffold(
-  body: Column(
-    children: [
-      ConfidenceBandIndicator(band: ConfidenceBand.weak, ledgerType: ledger),
-      AlternateCategoryChips(
-        alternates: _alternates,
-        selectedCategoryId: null,
-        onSelect: (_) {},
-      ),
-    ],
-  ),
-);
 
 // The "correction-open" surface is the alternate chips with the exit chip
 // (→ full selector) and a currently-selected alternate, i.e. mid-correction.
@@ -193,31 +166,6 @@ Widget _correctionOpen() => Scaffold(
     alternates: _alternates,
     selectedCategoryId: 'cat_food',
     onSelect: (_) {},
-  ),
-);
-
-// The "manual-no-affordance" surface (D-10): no recognition outcome → band null
-// → SizedBox.shrink, no chips. Asserts the affordance does not appear AND
-// nothing forbidden renders.
-Widget _manualNoAffordance() => const Scaffold(
-  body: ConfidenceBandIndicator(band: null, ledgerType: LedgerType.daily),
-);
-
-// The "voice-panel" surface: the band + chips as they render alongside the
-// voice record panel at resolve-on-final (medium band, joy ledger family).
-Widget _voicePanel() => Scaffold(
-  body: Column(
-    children: [
-      ConfidenceBandIndicator(
-        band: ConfidenceBand.medium,
-        ledgerType: LedgerType.joy,
-      ),
-      AlternateCategoryChips(
-        alternates: _alternates,
-        selectedCategoryId: 'cat_transport',
-        onSelect: (_) {},
-      ),
-    ],
   ),
 );
 
@@ -270,70 +218,6 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // ConfidenceBandIndicator — band-strong. 3 locales.
-  // -------------------------------------------------------------------------
-  group('RECUX-04 / band-strong / forbidden substring sweep', () {
-    for (final locale in locales) {
-      for (final ledger in LedgerType.values) {
-        testWidgets(
-          'band-strong / ${locale.languageCode} / ${ledger.name}',
-          (tester) async {
-            await tester.pumpWidget(
-              createLocalizedWidget(_bandStrong(ledger), locale: locale),
-            );
-            await tester.pumpAndSettle();
-
-            _sweepForbiddenSubstrings(
-              locale: locale,
-              surface: 'ConfidenceBandIndicator',
-              state: 'band-strong-${ledger.name}',
-            );
-          },
-        );
-      }
-    }
-  });
-
-  // -------------------------------------------------------------------------
-  // band-weak + chips. 3 locales.
-  // -------------------------------------------------------------------------
-  group('RECUX-04 / band-weak+chips / forbidden substring sweep', () {
-    for (final locale in locales) {
-      testWidgets('band-weak+chips / ${locale.languageCode}', (tester) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(
-            _bandWeakWithChips(LedgerType.daily),
-            locale: locale,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        // Coverage guard: the chips actually rendered (the exit chip is always
-        // built) so the sweep is not a trivial pass.
-        expect(
-          find.byKey(const ValueKey('alt-chip-exit')),
-          findsOneWidget,
-          reason: 'the exit chip must render so the chip copy is swept.',
-        );
-        // Coverage guard: the chip resolved a REAL localized label (not the raw
-        // `cat_food` key), so the trilingual sweep exercises actual rendered
-        // copy in each locale.
-        const foodLabel = {'en': 'Food', 'ja': '食費', 'zh': '食费'};
-        expect(
-          find.text(foodLabel[locale.languageCode]!),
-          findsOneWidget,
-          reason: 'the food chip must render its ${locale.languageCode} label.',
-        );
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          surface: 'AlternateCategoryChips',
-          state: 'band-weak+chips',
-        );
-      });
-    }
-  });
-
-  // -------------------------------------------------------------------------
   // correction-open (alternates with a selected chip + exit chip). 3 locales.
   // -------------------------------------------------------------------------
   group('RECUX-04 / correction-open / forbidden substring sweep', () {
@@ -347,74 +231,14 @@ void main() {
         expect(
           find.byKey(const ValueKey('alt-chip-exit')),
           findsOneWidget,
-          reason: 'the exit chip (→ full selector) must render in the '
+          reason:
+              'the exit chip (→ full selector) must render in the '
               'correction-open state so its copy is swept.',
         );
         _sweepForbiddenSubstrings(
           locale: locale,
           surface: 'AlternateCategoryChips',
           state: 'correction-open',
-        );
-      });
-    }
-  });
-
-  // -------------------------------------------------------------------------
-  // manual-no-affordance (D-10): band null → no band, no chips. Asserts the
-  // affordance is absent AND nothing forbidden renders. 3 locales.
-  // -------------------------------------------------------------------------
-  group('RECUX-04 / manual-no-affordance / forbidden substring sweep', () {
-    for (final locale in locales) {
-      testWidgets('manual-no-affordance / ${locale.languageCode}', (
-        tester,
-      ) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(_manualNoAffordance(), locale: locale),
-        );
-        await tester.pumpAndSettle();
-
-        // D-10: no recognition outcome → no band/chips render at all.
-        expect(
-          find.byType(ActionChip),
-          findsNothing,
-          reason: 'D-10 — manual entry renders no alternate chips.',
-        );
-        expect(
-          find.byType(Text),
-          findsNothing,
-          reason: 'D-10 — manual entry renders no band/chip text affordance.',
-        );
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          surface: 'ConfidenceBandIndicator',
-          state: 'manual-no-affordance',
-        );
-      });
-    }
-  });
-
-  // -------------------------------------------------------------------------
-  // voice-panel (band + chips alongside the record panel, resolve-on-final).
-  // 3 locales.
-  // -------------------------------------------------------------------------
-  group('RECUX-04 / voice-panel / forbidden substring sweep', () {
-    for (final locale in locales) {
-      testWidgets('voice-panel / ${locale.languageCode}', (tester) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(_voicePanel(), locale: locale),
-        );
-        await tester.pumpAndSettle();
-
-        expect(
-          find.byKey(const ValueKey('alt-chip-exit')),
-          findsOneWidget,
-          reason: 'the exit chip must render so the voice-panel chip copy is '
-              'swept.',
-        );
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          surface: 'voice-panel (band+chips)',
-          state: 'voice-panel',
         );
       });
     }

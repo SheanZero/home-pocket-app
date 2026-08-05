@@ -25,7 +25,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     show categoryRepositoryProvider, categoryServiceProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_snapshot.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_input_controller.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/confidence_band_indicator.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/voice/domain/models/recognition_outcome.dart';
 import 'package:home_pocket/features/voice/domain/models/voice_parse_result.dart';
@@ -368,8 +367,6 @@ void main() {
           'cat-b',
           reason: 'precondition: form is dirty',
         );
-        expect(find.byType(ConfidenceBandIndicator), findsNothing);
-
         snapshot.restoreForm(form);
         await tester.pumpAndSettle();
 
@@ -388,11 +385,6 @@ void main() {
         expect(form.currentOriginalCurrency, 'USD');
         expect(form.currentOriginalAmount, 1250);
         expect(form.currentAppliedRate, '155.0');
-        expect(
-          find.byType(ConfidenceBandIndicator),
-          findsNothing,
-          reason: 'discarded voice confidence must not survive restore',
-        );
       },
     );
 
