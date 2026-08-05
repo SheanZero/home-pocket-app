@@ -31,7 +31,6 @@ import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/features/applock/presentation/screens/set_pin_screen.dart';
 import 'package:home_pocket/features/settings/presentation/screens/settings_screen.dart';
-import 'package:home_pocket/features/settings/presentation/widgets/additional_settings_navigation_section.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/backup_restore_navigation_section.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/delete_all_data_section.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/legal_sponsor_navigation_section.dart';
@@ -160,7 +159,6 @@ void main() {
     int indexForType<T extends Widget>() =>
         children.indexWhere((child) => child is T);
 
-    expect(children.whereType<AdditionalSettingsNavigationSection>(), isEmpty);
     expect(indexForType<FamilySyncSettingsSection>(), greaterThan(0));
     expect(
       indexForKey(const ValueKey('settings-notifications-section')),

@@ -257,7 +257,7 @@ void main() {
       await bookRepo.deleteAll();
       expect(await bookRepo.findAll(), isEmpty);
 
-      // Fire the global reset signal — exactly what DataManagementSection does
+      // Fire the global reset signal — exactly what DeleteAllDataSection does
       // on clear-all success.
       container.read(dataResetSignalProvider.notifier).fire();
       await _pumpBounded(tester);
@@ -310,7 +310,7 @@ void main() {
       );
       await bookRepo.insert(importedBook);
 
-      // Fire the signal — exactly what DataManagementSection does on import
+      // Fire the signal — exactly what BackupRestoreScreen does on import
       // success.
       container.read(dataResetSignalProvider.notifier).fire();
       await _pumpBounded(tester);

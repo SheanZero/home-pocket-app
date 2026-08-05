@@ -8,13 +8,12 @@ import 'package:flutter/material.dart';
 /// be hue-separated AND to AVOID the green (日常/daily) and blue (shared) ledger
 /// semantic families, so the bar never visually collides with a ledger color.
 ///
-/// Like [HappinessRingPalette] (happiness_ring_palette.dart), this is a
-/// joybar-专属 palette defined here in `lib/core/theme/` rather than as inline
+/// This is a joybar-专属 palette defined in `lib/core/theme/` rather than as inline
 /// `Color(0x…)` literals inside a `lib/features/...` widget. That placement is
 /// deliberate: `color_literal_scan_test` forbids raw hex in
 /// `lib/features/` / `lib/application/` / `lib/shared/`, and this is the ONE
-/// sanctioned hex carve-out (D5) — exactly analogous to the happiness ring
-/// palette. Do NOT inline these constants into a feature widget.
+/// sanctioned hex carve-out (D5). Do NOT inline these constants into a feature
+/// widget.
 ///
 /// Order = mock j1..j7 (largest→smallest joy category, anchored on sakura):
 ///   j1 樱粉   #D98CA0 (anchor) · j2 琥珀金 #E2A23B · j3 珊瑚赤陶 #E0664B ·
