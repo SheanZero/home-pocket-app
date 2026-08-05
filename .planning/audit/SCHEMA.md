@@ -131,7 +131,7 @@ Both `split_from` and `closed_as_duplicate_of` are OPTIONAL fields on the findin
 | `tool_source` | Producer | Confidence default | Phase / Plan |
 |---------------|----------|--------------------|--------------|
 | `import_guard` | `dart run custom_lint` (`import_guard_custom_lint` plugin) → `audit_layer.sh` | `high` | Phase 1 Plan 04 |
-| `riverpod_lint` | `dart run custom_lint` (`riverpod_lint` plugin) → `audit_providers.sh` | `high` | Phase 1 Plan 04 |
+| `owned_provider_contract` | Repository-owned provider app-root and held-lint contract (`scripts/audit/providers.dart` / `provider_contract.dart`) → `audit_providers.sh` | `high` | Phase 58 HP-06 |
 | `dart_code_linter` | `dart_code_linter:metrics check-unused-{code,files}` → `audit_dead_code.sh` | `high` | Phase 1 Plan 04 |
 | `owned_duplication_detector` | Repository-owned exact 16-line cross-file Dart clone detector → `audit_duplication.sh` | `medium` | HP-07 |
 | `agent:layer` | AI subagent for indirect layer violations (transitive imports, type-alias smuggling) | `medium` | Phase 1 Plan 06 |
@@ -139,7 +139,9 @@ Both `split_from` and `closed_as_duplicate_of` are OPTIONAL fields on the findin
 | `agent:transitive` | AI subagent for transitive imports across boundary layers | `medium` | Phase 1 Plan 06 |
 | `agent:drift_col` | AI subagent for Drift unused-column detection | `low` | Phase 1 Plan 06 |
 
-`audit_duplication.sh` emits `owned_duplication_detector` only after its detector runs. A failed or skipped run records `scan_state: not_run`; `merge_findings.dart` then exits non-zero and marks the report incomplete rather than treating its empty findings array as a clean result.
+Each repository-owned scanner emits its identity only after its contract runs. In particular, `scripts/audit/providers.dart` emits `owned_provider_contract` with `scan_state: ran`; an exception writes `scan_state: not_run` with `scan_failed: true` and exits non-zero. HP-19 makes the merger fail closed: it accepts `providers.json` as lifecycle evidence only when its source is `owned_provider_contract`, its `scan_state` is `ran`, and it has not failed; any other state is incomplete, never a clean empty scan or a basis for closing findings.
+
+**Current clarification (2026-08-06, HP-24):** `riverpod_lint` 3.1.0 is a locked, inactive compatibility hold for the Flutter 3.44.8/analyzer-8 graph, not the provider scanner. The owned contract guards both the inactive plugin configuration and its held lockfile version while protecting the app-root scope invariant. Do not activate or restore `riverpod_lint` as the scanner until the selected graph passes the real analysis-server bad-fixture versus `ProviderScope`/`UncontrolledProviderScope` control probe and the corresponding plugin/configuration guard; then update this inventory and the canonical merger source together.
 
 ---
 
