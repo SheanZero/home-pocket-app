@@ -208,6 +208,44 @@ class ToolingGuardCase {
         diagnosticCode: 'missing_provider_scope',
       );
 
+  const ToolingGuardCase.providerScopeExtensionTypeShadow()
+    : this(
+        name: 'provider app root extension-type constructor shadow',
+        fixturePath:
+            'lib/phase58_provider_scope_extension_type_shadow_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n"
+            "import 'package:flutter_riverpod/flutter_riverpod.dart';\n\n"
+            'final ProviderContainer importedContainer = ProviderContainer();\n\n'
+            'extension type ProviderScope._(Widget _widget) implements Widget {}\n\n'
+            'void phase58ExtensionTypeShadow() =>\n'
+            '    runApp(ProviderScope._(const Placeholder()));\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
+  const ToolingGuardCase.providerScopeExtensionTypeAliasControl()
+    : this(
+        // A top-level `extension type riverpod` cannot coexist with an
+        // `as riverpod` import prefix in valid Dart. Keep this companion
+        // fixture compilable while proving an extension-type declaration does
+        // not incorrectly shadow a real qualified Riverpod import.
+        name: 'provider app root extension-type alias control',
+        fixturePath:
+            'lib/phase58_provider_scope_extension_type_alias_shadow_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n"
+            "import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;\n\n"
+            'extension type ProviderScope._(Widget _widget) implements Widget {}\n\n'
+            'void phase58ExtensionTypeAliasShadow() =>\n'
+            '    runApp(riverpod.ProviderScope(child: const Placeholder()));\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        expectFailure: false,
+        expectsFixturePath: false,
+      );
+
   const ToolingGuardCase.validProductionAnalyzer()
     : this(
         name: 'valid production flutter analyze',
@@ -337,6 +375,8 @@ Future<ToolingGuardResult> verifyToolingGuards({
     ToolingGuardCase.providerScopeUnrelatedAlias(),
     ToolingGuardCase.providerScopeQualifiedAliasShadow(),
     ToolingGuardCase.providerScopeRecordPatternAliasShadow(),
+    ToolingGuardCase.providerScopeExtensionTypeShadow(),
+    ToolingGuardCase.providerScopeExtensionTypeAliasControl(),
   ],
   ToolingGuardCommand runCommand = runToolingGuardCommand,
   bool runValidTreeChecks = true,

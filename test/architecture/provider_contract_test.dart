@@ -215,6 +215,18 @@ void main() => runApp(ProviderScope(child: const Placeholder()));
 ''',
           ),
           (
+            name: 'extension type',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+extension type ProviderScope._(Widget _widget) implements Widget {
+}
+
+void main() => runApp(ProviderScope._(const Placeholder()));
+''',
+          ),
+          (
             name: 'lexical parameter',
             source: '''
 import 'package:flutter/widgets.dart';
@@ -253,6 +265,28 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 
 final ProviderScope = ({required Widget child}) => child;
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+        );
+        addTearDown(() => root.delete(recursive: true));
+
+        final report = checkProviderContract(root.path);
+
+        expect(report.isPassing, isTrue, reason: report.describe());
+      },
+    );
+
+    test(
+      'qualified Riverpod aliases stay valid beside an extension-type declaration',
+      () async {
+        final root = await _createFixtureRoot(
+          appSource: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+extension type ProviderScope._(Widget _widget) implements Widget {}
 
 void main() =>
     runApp(riverpod.ProviderScope(child: const Placeholder()));

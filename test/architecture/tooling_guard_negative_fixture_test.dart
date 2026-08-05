@@ -91,6 +91,63 @@ void main() {
       expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
     });
 
+    test('extension-type shadow fixtures compile as Dart', () async {
+      const cases = <tooling.ToolingGuardCase>[
+        tooling.ToolingGuardCase.providerScopeExtensionTypeShadow(),
+        tooling.ToolingGuardCase.providerScopeExtensionTypeAliasControl(),
+      ];
+      final fixtures = cases
+          .map((guardCase) => File(guardCase.fixturePath))
+          .toList(growable: false);
+      for (var index = 0; index < cases.length; index++) {
+        await fixtures[index].writeAsString(cases[index].source!);
+      }
+      addTearDown(() async {
+        for (final fixture in fixtures) {
+          if (fixture.existsSync()) await fixture.delete();
+        }
+      });
+
+      for (final fixture in fixtures) {
+        final result = await Process.run('flutter', [
+          'analyze',
+          '--no-fatal-infos',
+          fixture.path,
+        ], workingDirectory: Directory.current.path);
+        expect(
+          result.exitCode,
+          0,
+          reason: '${fixture.path}: ${result.stdout}\n${result.stderr}',
+        );
+      }
+    });
+
+    test(
+      'extension-type constructor shadow is rejected and alias control passes',
+      () async {
+        const negative =
+            tooling.ToolingGuardCase.providerScopeExtensionTypeShadow();
+        const control =
+            tooling.ToolingGuardCase.providerScopeExtensionTypeAliasControl();
+
+        final result = await tooling.verifyToolingGuards(
+          cases: const [negative, control],
+          runCommand: tooling.runToolingGuardCommand,
+          runValidTreeChecks: false,
+        );
+
+        expect(result.isPassing, isTrue, reason: result.describe());
+        expect(result.cases[0].output, contains('missing_provider_scope'));
+        expect(
+          result.cases[1].output,
+          contains('PASS owned provider contract'),
+        );
+        for (final caseResult in result.cases) {
+          expect(File(caseResult.guardCase.fixturePath).existsSync(), isFalse);
+        }
+      },
+    );
+
     test('pre-existing sentinel is refused without deleting it', () async {
       final fixture = File(_packageFixturePath);
       await fixture.writeAsString('// preserved stale sentinel\n');

@@ -401,6 +401,17 @@ bool _isScopeDeclaration(List<_Token> tokens, int index) {
     return true;
   }
 
+  // `extension type Name(...)` introduces a library declaration just like a
+  // class or typedef. The declaration name follows `type`, so the generic
+  // declaration check above cannot see it. Treat it as a shadow before
+  // considering calls or member accesses; only the exact `extension type`
+  // token pair qualifies, so ordinary extension members remain untouched.
+  if (previous == 'type' &&
+      index >= 2 &&
+      tokens[index - 2].text == 'extension') {
+    return true;
+  }
+
   if (_isTypedVariableDeclaration(tokens, index)) return true;
 
   if (index + 1 >= tokens.length || tokens[index + 1].text != '(') {
