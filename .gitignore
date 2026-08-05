@@ -86,3 +86,4 @@ lib/features/accounting/presentation/providers/voice_providers_part*
 # so the glob must match every subtree, not only `test/golden/failures/`.
 test/golden/failures/
 **/failures/
+performance/results/
