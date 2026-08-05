@@ -46,7 +46,6 @@ Future<_UnusedScan> _runUnused(
 ) async {
   // mode: 'check-unused-code' | 'check-unused-files'
   final findings = <Finding>[];
-
   final arguments = [
     'run',
     'dart_code_linter:metrics',
@@ -73,98 +72,74 @@ Future<_UnusedScan> _runUnused(
       stdout is String ? stdout : '',
     ).replaceAll('\r', '\n').trim();
     if (_isConfirmedZeroFindingOutput(normalizedOutput)) {
-      return _UnusedScan.success(findings);
+      return const _UnusedScan.success([]);
     }
-    final stdoutText = _extractJsonPayload(normalizedOutput);
-    if (stdoutText.isEmpty) {
+    if (normalizedOutput.isEmpty) {
       return _UnusedScan.failure('$mode emitted empty output');
     }
 
     dynamic decoded;
     try {
-      decoded = jsonDecode(stdoutText);
+      decoded = jsonDecode(normalizedOutput);
     } on FormatException {
       return _UnusedScan.failure('$mode emitted malformed JSON');
     } catch (_) {
       return _UnusedScan.failure('$mode emitted malformed JSON');
     }
 
-    Iterable<dynamic>? records;
-    if (decoded is List) {
-      records = decoded;
-    } else if (decoded is Map) {
-      // common shapes: {records: [...]} or {issues: [...]} or {files: [...]}
-      for (final key in const [
-        'records',
-        'issues',
-        'files',
-        'unusedCode',
-        'unusedFiles',
-      ]) {
-        final v = decoded[key];
-        if (v is List) {
-          records = v;
-          break;
-        }
-      }
-    }
-
+    final records = _strictUnusedRecords(decoded, mode);
     if (records == null) {
       return _UnusedScan.failure('$mode emitted an unrecognized JSON report');
     }
 
     for (final r in records) {
-      if (r is! Map) continue;
-      final filePath =
-          (r['path'] as String?) ??
-          (r['file'] as String?) ??
-          (r['filePath'] as String?) ??
-          '';
+      if (r is! Map || r['path'] is! String || (r['path'] as String).isEmpty) {
+        return _UnusedScan.failure('$mode emitted a malformed record');
+      }
+      final filePath = r['path'] as String;
       final relFile = _relPath(filePath);
-      if (relFile.isEmpty) continue;
-      if (_isGenerated(relFile)) continue;
+      if (relFile.isEmpty) {
+        return _UnusedScan.failure('$mode emitted a malformed record');
+      }
 
-      final issues = r['issues'];
-      if (issues is List && issues.isNotEmpty) {
+      if (mode == 'check-unused-code') {
+        if (r.length != 2 || r['issues'] is! List) {
+          return _UnusedScan.failure('$mode emitted a malformed record');
+        }
+        final issues = r['issues'] as List;
         for (final iss in issues) {
-          if (iss is! Map) continue;
-          final loc = iss['location'];
-          var lineStart = (iss['line'] as int?) ?? 1;
-          var lineEnd = lineStart;
-          if (loc is Map) {
-            final start = loc['start'];
-            final end = loc['end'];
-            if (start is Map && start['line'] is int) {
-              lineStart = start['line'] as int;
-            }
-            if (end is Map && end['line'] is int) {
-              lineEnd = end['line'] as int;
-            }
+          if (iss is! Map ||
+              iss.length != 5 ||
+              iss['declarationType'] is! String ||
+              iss['declarationName'] is! String ||
+              iss['column'] is! int ||
+              iss['line'] is! int ||
+              iss['offset'] is! int) {
+            return _UnusedScan.failure('$mode emitted a malformed issue');
           }
-          final desc =
-              (iss['message'] as String?) ??
-              (iss['ruleId'] as String?) ??
-              _formatUnusedDeclaration(iss) ??
-              'Unused code element';
+          if (_isGenerated(relFile)) continue;
+          final lineStart = iss['line'] as int;
+          final desc = _formatUnusedDeclaration(iss)!;
           findings.add(
             Finding(
               category: 'dead_code',
               severity: 'LOW',
               filePath: relFile,
               lineStart: lineStart,
-              lineEnd: lineEnd,
+              lineEnd: lineStart,
               description: desc,
               rationale: 'dart_code_linter:metrics $mode',
-              suggestedFix: mode == 'check-unused-files'
-                  ? 'Delete the file if truly unused.'
-                  : 'Remove the unused declaration or export it.',
+              suggestedFix: 'Remove the unused declaration or export it.',
               toolSource: 'dart_code_linter',
               confidence: 'high',
             ),
           );
         }
-      } else if (mode == 'check-unused-files') {
-        // unused-files reports may have only the path
+      } else {
+        if (r.length != 1) {
+          return _UnusedScan.failure('$mode emitted a malformed record');
+        }
+        if (_isGenerated(relFile)) continue;
         findings.add(
           Finding(
             category: 'dead_code',
@@ -187,19 +162,25 @@ Future<_UnusedScan> _runUnused(
   return _UnusedScan.success(findings);
 }
 
-String _extractJsonPayload(String output) {
-  final firstObject = output.indexOf('{');
-  final firstArray = output.indexOf('[');
-  final starts = [firstObject, firstArray].where((index) => index >= 0);
-  if (starts.isEmpty) {
-    return output;
+List<dynamic>? _strictUnusedRecords(dynamic decoded, String mode) {
+  if (decoded is! Map ||
+      decoded['formatVersion'] != 2 ||
+      decoded['timestamp'] is! String ||
+      (decoded['timestamp'] as String).isEmpty) {
+    return null;
   }
-  final start = starts.reduce((a, b) => a < b ? a : b);
-  final end = output[start] == '{'
-      ? output.lastIndexOf('}')
-      : output.lastIndexOf(']');
-  if (end < start) return output;
-  return output.substring(start, end + 1);
+
+  if (mode == 'check-unused-code') {
+    if (decoded.length != 3 || decoded['unusedCode'] is! List) return null;
+    return decoded['unusedCode'] as List<dynamic>;
+  }
+
+  if (decoded.length != 4 ||
+      decoded['unusedFiles'] is! List ||
+      decoded['automaticallyDeleted'] is! bool) {
+    return null;
+  }
+  return decoded['unusedFiles'] as List<dynamic>;
 }
 
 String _stripAnsi(String output) =>
