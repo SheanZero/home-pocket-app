@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
 Phase: 56 — setting (COMPLETE)
 Plan: 7/7 executed (56-01..56-07; 56-07 gap-closure)
 Status: Phase 56 complete & re-verified (5/5 success criteria; 10/10 req IDs + LEGAL-V2-01 traced) — 56-07 closed UAT Test 4; milestone v2.0 ready to close
-Last activity: 2026-08-04 - Completed quick task 260804-rjw: 修复最近支出与明细同日账目按创建时间倒序
+Last activity: 2026-08-05 - Completed quick task 260805-cgj: 修复 P1-01 主分支 CI custom_lint 门禁
 
 Progress: Phase 56 COMPLETE (7/7: 56-01..56-07, re-verified 5/5 SC); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete. Milestone v2.0 = 4/4 phases (100%).
 
@@ -124,6 +124,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 | 260804-fast-amount-edit-align | 修复账目编辑页金额右侧编辑图标未与金额垂直居中 | 2026-08-04 | f4c473f3 | — |
 | 260804-rjw | 修复最近支出与明细同日账目按创建时间倒序 | 2026-08-04 | 9cacf498 | [260804-rjw-recent-created-at-sort](./quick/260804-rjw-recent-created-at-sort/) |
 | 260804-fast-privacy-analytics | 移除 Android Firebase Analytics 与广告标识权限，保留 FCM，并增加隐私依赖回归门禁 | 2026-08-04 | 1aa59c4f | — |
+| 260805-cgj | 修复 P1-01：补齐 5 个 domain 目录的精确 import_guard allowlist，并允许受控的 dart:convert 纯 SDK 依赖；custom_lint 11 warnings→0 | 2026-08-05 | a361b1bf | [260805-cgj-p1-01-ci-custom-lint](./quick/260805-cgj-p1-01-ci-custom-lint/) |
 
 ## Last Milestone Snapshot (v1.9)
 
