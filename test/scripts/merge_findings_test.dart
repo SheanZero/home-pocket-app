@@ -825,7 +825,7 @@ void main() {
     );
 
     test(
-      'allows other valid canonical tools to transition their own findings when one shard is malformed',
+      'allows other valid canonical tools to transition their own findings when one shard is structurally malformed',
       () async {
         final deadCode = _f(
           filePath: 'lib/dead_code.dart',
@@ -874,6 +874,238 @@ void main() {
           )['status'],
           equals('closed'),
         );
+      },
+    );
+
+    test(
+      'rejects semantically invalid canonical findings without writing either output',
+      () async {
+        final existingIssues = '''{\n  "findings": []\n}\n''';
+        const existingMarkdown = '# Existing audit report\n';
+        final issuesFile = File('${shardRoot.path}/issues.json')
+          ..writeAsStringSync(existingIssues);
+        final markdownFile = File('${shardRoot.path}/ISSUES.md')
+          ..writeAsStringSync(existingMarkdown);
+
+        final invalidFindings = <String, Map<String, dynamic>>{
+          'mismatched source': _f(
+            filePath: 'lib/source.dart',
+            toolSource: 'dart_code_linter',
+          ).toJson(),
+          'mismatched category': _f(
+            filePath: 'lib/category.dart',
+            category: 'dead_code',
+          ).toJson(),
+          'closed scanner observation': {
+            ..._f(filePath: 'lib/closed.dart').toJson(),
+            'status': 'closed',
+          },
+          'invalid severity': {
+            ..._f(filePath: 'lib/severity.dart').toJson(),
+            'severity': 'URGENT',
+          },
+          'invalid confidence': {
+            ..._f(filePath: 'lib/confidence.dart').toJson(),
+            'confidence': 'certain',
+          },
+          'unsafe path': {
+            ..._f(filePath: 'lib/path.dart').toJson(),
+            'file_path': '../outside.dart',
+          },
+          'invalid line range': {
+            ..._f(filePath: 'lib/range.dart').toJson(),
+            'line_start': 4,
+            'line_end': 3,
+          },
+        };
+
+        for (final entry in invalidFindings.entries) {
+          File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+            jsonEncode({
+              ..._shardWith([], 'import_guard'),
+              'findings': [entry.value],
+            }),
+          );
+
+          final result = await _runMerger(tmp);
+
+          expect(result.exitCode, equals(1), reason: entry.key);
+          expect(
+            issuesFile.readAsStringSync(),
+            equals(existingIssues),
+            reason: '${entry.key} must not rewrite issues.json',
+          );
+          expect(
+            markdownFile.readAsStringSync(),
+            equals(existingMarkdown),
+            reason: '${entry.key} must not rewrite ISSUES.md',
+          );
+        }
+      },
+    );
+
+    test(
+      'rejects an unallowlisted accepted duplication observation without writing outputs',
+      () async {
+        const existingIssues = '{"findings":[]}';
+        const existingMarkdown = '# Existing\n';
+        File('${shardRoot.path}/issues.json').writeAsStringSync(existingIssues);
+        File('${shardRoot.path}/ISSUES.md').writeAsStringSync(existingMarkdown);
+        final accepted = _f(
+          filePath: 'lib/clone.dart',
+          category: 'redundant_code',
+          severity: 'LOW',
+          toolSource: 'owned_duplication_detector',
+          confidence: 'medium',
+          description: 'clone also appears at lib/other.dart:1.',
+          rationale:
+              'Accepted duplicate clone: forged. Fingerprint: 1111111111111111.',
+        );
+        File('${shardRoot.path}/shards/duplication.json').writeAsStringSync(
+          jsonEncode({
+            ..._shardWith([], 'owned_duplication_detector'),
+            'findings': [
+              {...accepted.toJson(), 'status': 'accepted'},
+            ],
+          }),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(1));
+        expect(
+          File('${shardRoot.path}/issues.json').readAsStringSync(),
+          existingIssues,
+        );
+        expect(
+          File('${shardRoot.path}/ISSUES.md').readAsStringSync(),
+          existingMarkdown,
+        );
+      },
+    );
+
+    test('accepts only the exact duplication allowlist observation', () async {
+      final accepted = _f(
+        filePath: 'lib/clone.dart',
+        category: 'redundant_code',
+        severity: 'LOW',
+        toolSource: 'owned_duplication_detector',
+        confidence: 'medium',
+        description: 'clone also appears at lib/other.dart:1.',
+        rationale:
+            'Accepted duplicate clone: reviewed fixture Fingerprint: 1111111111111111.',
+      );
+      File('${shardRoot.path}/duplication_allowlist.json').writeAsStringSync(
+        jsonEncode({
+          'accepted': [
+            {
+              'files': ['lib/clone.dart', 'lib/other.dart'],
+              'fingerprint': '1111111111111111',
+              'rationale': 'reviewed fixture',
+            },
+          ],
+        }),
+      );
+      File('${shardRoot.path}/shards/duplication.json').writeAsStringSync(
+        jsonEncode({
+          ..._shardWith([], 'owned_duplication_detector'),
+          'findings': [
+            {...accepted.toJson(), 'status': 'accepted'},
+          ],
+        }),
+      );
+
+      final result = await _runMerger(tmp);
+
+      expect(result.exitCode, equals(0), reason: result.stderr.toString());
+      final finding =
+          ((jsonDecode(
+                        File(
+                          '${shardRoot.path}/issues.json',
+                        ).readAsStringSync(),
+                      )['findings']
+                      as List)
+                  .single
+              as Map);
+      expect(finding['status'], 'accepted');
+      expect(finding['id'], 'RD-001');
+    });
+
+    test(
+      'retains accepted historical agent findings with a noncanonical source',
+      () async {
+        final historical = _f(
+          filePath: 'lib/historical_agent.dart',
+          toolSource: 'agent:layer',
+          confidence: 'medium',
+          description: 'accepted agent history',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...historical.toJson(), 'id': 'LV-001', 'status': 'accepted'},
+            ],
+          }),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final finding =
+            ((jsonDecode(
+                          File(
+                            '${shardRoot.path}/issues.json',
+                          ).readAsStringSync(),
+                        )['findings']
+                        as List)
+                    .single
+                as Map);
+        expect(finding['tool_source'], 'agent:layer');
+        expect(finding['status'], 'accepted');
+      },
+    );
+
+    test(
+      'rejects corrupt or invalid existing history before valid scans can write outputs',
+      () async {
+        final histories = <String, String>{
+          'corrupt JSON': '{not JSON',
+          'malformed finding': jsonEncode({
+            'findings': ['not a finding'],
+          }),
+          'duplicate IDs': jsonEncode({
+            'findings': [
+              {..._f(filePath: 'lib/one.dart').toJson(), 'id': 'LV-001'},
+              {..._f(filePath: 'lib/two.dart').toJson(), 'id': 'LV-001'},
+            ],
+          }),
+        };
+        const existingMarkdown = '# Preserved report\n';
+        final validLayer = _f(filePath: 'lib/valid.dart');
+
+        for (final entry in histories.entries) {
+          final issuesFile = File('${shardRoot.path}/issues.json')
+            ..writeAsStringSync(entry.value);
+          final markdownFile = File('${shardRoot.path}/ISSUES.md')
+            ..writeAsStringSync(existingMarkdown);
+          File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+            jsonEncode(_shardWith([validLayer], 'import_guard')),
+          );
+
+          final result = await _runMerger(tmp);
+
+          expect(result.exitCode, equals(1), reason: entry.key);
+          expect(
+            issuesFile.readAsStringSync(),
+            entry.value,
+            reason: '${entry.key} must preserve issues.json bytes',
+          );
+          expect(
+            markdownFile.readAsStringSync(),
+            existingMarkdown,
+            reason: '${entry.key} must preserve ISSUES.md bytes',
+          );
+        }
       },
     );
 

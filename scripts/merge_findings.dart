@@ -33,6 +33,23 @@ const _canonicalShardTools = {
   'duplication.json': 'owned_duplication_detector',
 };
 
+const _canonicalShardCategories = {
+  'layer.json': 'layer_violation',
+  'dead_code.json': 'dead_code',
+  'providers.json': 'provider_hygiene',
+  'duplication.json': 'redundant_code',
+};
+
+const _categories = {
+  'layer_violation',
+  'provider_hygiene',
+  'dead_code',
+  'redundant_code',
+};
+const _severities = {'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'};
+const _confidences = {'high', 'medium', 'low'};
+const _statuses = {'open', 'closed', 'accepted'};
+
 const _generatedFileGlobs = ['.g.dart', '.freezed.dart', '.mocks.dart'];
 
 bool _isGenerated(String path) =>
@@ -67,10 +84,18 @@ String _resolveRoot(List<String> args) {
 
 Future<void> main(List<String> args) async {
   final root = _resolveRoot(args);
-  final existingFindings = await _readExistingFindings(root);
+  final history = await _readExistingFindings(root);
+  if (history.error != null) {
+    stderr.writeln('[audit:merge] ERROR: ${history.error}');
+    exitCode = 1;
+    return;
+  }
+  final existingFindings = history.findings;
+  final acceptedDuplicationAllowlist = _readDuplicationAllowlist();
   final shards = <Finding>[];
   final incompleteScans = <String>[];
   final completedAuthoritativeTools = <String>{};
+  final semanticErrors = <String>[];
 
   for (final entry in _canonicalShardTools.entries) {
     final shardPath = '$root/shards/${entry.key}';
@@ -140,9 +165,18 @@ Future<void> main(List<String> args) async {
         break;
       }
       try {
-        validatedFindings.add(
-          Finding.fromJson(findingRaw.cast<String, dynamic>()),
+        final finding = Finding.fromJson(findingRaw.cast<String, dynamic>());
+        final semanticError = _validateCanonicalFinding(
+          finding,
+          expectedToolSource: entry.value,
+          expectedCategory: _canonicalShardCategories[entry.key]!,
+          acceptedDuplicationAllowlist: acceptedDuplicationAllowlist,
         );
+        if (semanticError != null) {
+          semanticErrors.add('$shardPath ($semanticError)');
+          break;
+        }
+        validatedFindings.add(finding);
       } catch (error) {
         stderr.writeln(
           '[audit:merge] WARNING: malformed finding in $shardPath: $error',
@@ -158,9 +192,26 @@ Future<void> main(List<String> args) async {
       );
       continue;
     }
+    if (semanticErrors.isNotEmpty &&
+        semanticErrors.last.startsWith('$shardPath (')) {
+      continue;
+    }
 
     completedAuthoritativeTools.add(entry.value);
     shards.addAll(validatedFindings);
+  }
+
+  // Semantic corruption is a global transaction failure. Unlike a scanner
+  // that merely did not run, a shard with an invalid observation cannot be
+  // safely merged alongside the valid shards: doing so could write lifecycle
+  // transitions while concealing tampered evidence. Leave both outputs byte
+  // for byte unchanged until a complete valid input set is available.
+  if (semanticErrors.isNotEmpty) {
+    for (final error in semanticErrors) {
+      stderr.writeln('[audit:merge] ERROR: invalid canonical finding: $error');
+    }
+    exitCode = 1;
+    return;
   }
 
   // 1. Drop generated-file findings (defense-in-depth — Pitfall P1-6 echo).
@@ -270,18 +321,21 @@ Future<void> main(List<String> args) async {
   // 5. Emit issues.json (machine-readable; no top-level timestamp so the
   //    file is byte-identical across re-runs — see merger_findings_test.dart).
   final issuesPath = '$root/issues.json';
+  final issuesContent = const JsonEncoder.withIndent(
+    '  ',
+  ).convert({'findings': catalogue.map((f) => f.toJson()).toList()});
+
+  // Validation above completes before this point. Write each output via a
+  // sibling temporary file so a process interruption cannot leave malformed
+  // JSON or markdown for the next lifecycle reconciliation.
   final issuesDir = Directory(root);
   if (!issuesDir.existsSync()) issuesDir.createSync(recursive: true);
-  await File(issuesPath).writeAsString(
-    const JsonEncoder.withIndent(
-      '  ',
-    ).convert({'findings': catalogue.map((f) => f.toJson()).toList()}),
-  );
+  await _writeAtomically(File(issuesPath), issuesContent);
 
   // 6. Emit ISSUES.md (human-readable, severity-then-category, table per group).
   // A non-empty catalogue is never evidence that every scanner completed.
   final md = _renderMarkdown(catalogue, incompleteScans: incompleteScans);
-  await File('$root/ISSUES.md').writeAsString(md);
+  await _writeAtomically(File('$root/ISSUES.md'), md);
 
   stdout.writeln(
     '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
@@ -294,33 +348,233 @@ void _recordIncompleteScan(List<String> incompleteScans, String detail) {
   stderr.writeln('[audit:merge] ERROR: $detail');
 }
 
-Future<Map<String, Finding>> _readExistingFindings(String root) async {
+class _ExistingHistory {
+  const _ExistingHistory({required this.findings, this.error});
+
+  final Map<String, Finding> findings;
+  final String? error;
+}
+
+Future<_ExistingHistory> _readExistingFindings(String root) async {
   final file = File('$root/issues.json');
-  if (!file.existsSync()) return const {};
+  if (!file.existsSync()) return const _ExistingHistory(findings: {});
 
   try {
-    final decoded =
-        jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-    final findings = decoded['findings'];
-    if (findings is! List) return const {};
+    final decoded = jsonDecode(await file.readAsString());
+    if (decoded is! Map) {
+      return const _ExistingHistory(
+        findings: {},
+        error: 'existing issues.json must be a JSON object',
+      );
+    }
+    final data = decoded.cast<String, dynamic>();
+    final findings = data['findings'];
+    if (findings is! List) {
+      return const _ExistingHistory(
+        findings: {},
+        error: 'existing issues.json must contain a findings list',
+      );
+    }
 
     final existing = <String, Finding>{};
-    for (final entry in findings.whereType<Map>()) {
+    final ids = <String>{};
+    for (var index = 0; index < findings.length; index++) {
+      final entry = findings[index];
+      if (entry is! Map) {
+        return _ExistingHistory(
+          findings: const {},
+          error: 'malformed existing finding at index $index',
+        );
+      }
       try {
         final finding = Finding.fromJson(entry.cast<String, dynamic>());
-        existing[_lifecycleKey(finding)] = finding;
+        final semanticError = _validateHistoricalFinding(finding);
+        if (semanticError != null) {
+          return _ExistingHistory(
+            findings: const {},
+            error: 'invalid existing finding at index $index ($semanticError)',
+          );
+        }
+        if (!ids.add(finding.id!)) {
+          return _ExistingHistory(
+            findings: const {},
+            error: 'duplicate existing finding ID: ${finding.id}',
+          );
+        }
+        final lifecycleKey = _lifecycleKey(finding);
+        if (existing.containsKey(lifecycleKey)) {
+          return _ExistingHistory(
+            findings: const {},
+            error: 'duplicate existing finding lifecycle key at index $index',
+          );
+        }
+        existing[lifecycleKey] = finding;
       } catch (error) {
-        stderr.writeln(
-          '[audit:merge] WARNING: malformed existing finding in $root/issues.json: $error',
+        return _ExistingHistory(
+          findings: const {},
+          error: 'malformed existing finding at index $index: $error',
         );
       }
     }
-    return existing;
+    return _ExistingHistory(findings: existing);
   } catch (e) {
-    stderr.writeln(
-      '[audit:merge] WARNING: failed to read existing lifecycle metadata: $e',
+    return _ExistingHistory(
+      findings: const {},
+      error: 'failed to read existing lifecycle metadata: $e',
     );
+  }
+}
+
+String? _validateCanonicalFinding(
+  Finding finding, {
+  required String expectedToolSource,
+  required String expectedCategory,
+  required Set<String> acceptedDuplicationAllowlist,
+}) {
+  final commonError = _validateCommonFinding(finding);
+  if (commonError != null) return commonError;
+  if (finding.id != null) return 'raw scanner finding must not include an ID';
+  if (finding.toolSource != expectedToolSource) {
+    return 'tool_source must be $expectedToolSource';
+  }
+  if (finding.category != expectedCategory) {
+    return 'category must be $expectedCategory';
+  }
+  if (finding.status == 'open') return null;
+  if (finding.status == 'accepted' &&
+      _isExactAcceptedDuplication(finding, acceptedDuplicationAllowlist)) {
+    return null;
+  }
+  return 'scanner observation status must be open'
+      ' (except an exact duplication allowlist acceptance)';
+}
+
+String? _validateHistoricalFinding(Finding finding) {
+  final commonError = _validateCommonFinding(finding);
+  if (commonError != null) return commonError;
+  if (finding.id == null || !_hasValidFindingId(finding)) {
+    return 'missing or invalid permanent finding ID';
+  }
+  if (!_statuses.contains(finding.status)) return 'invalid status';
+  if (!_isMeaningful(finding.toolSource)) return 'empty tool_source';
+  return null;
+}
+
+String? _validateCommonFinding(Finding finding) {
+  if (!_categories.contains(finding.category)) return 'invalid category';
+  if (!_severities.contains(finding.severity)) return 'invalid severity';
+  if (!_confidences.contains(finding.confidence)) return 'invalid confidence';
+  if (!_isSafeRepoRelativePath(finding.filePath)) {
+    return 'file_path must be a safe repo-relative path';
+  }
+  if (finding.lineStart < 1 || finding.lineEnd < finding.lineStart) {
+    return 'line range must start at 1 or later and not be inverted';
+  }
+  if (!_isMeaningful(finding.description) ||
+      !_isMeaningful(finding.rationale) ||
+      !_isMeaningful(finding.suggestedFix)) {
+    return 'description, rationale, and suggested_fix must be nonempty';
+  }
+  return null;
+}
+
+bool _hasValidFindingId(Finding finding) {
+  final expectedPrefix = _categoryPrefix[finding.category];
+  return expectedPrefix != null &&
+      RegExp(
+        '^${RegExp.escape(expectedPrefix)}-[0-9]{3,}\$',
+      ).hasMatch(finding.id!);
+}
+
+bool _isSafeRepoRelativePath(String path) {
+  if (!_isMeaningful(path) ||
+      path != path.trim() ||
+      path.contains('\u0000') ||
+      path.startsWith('/') ||
+      path.startsWith('\\\\') ||
+      path.contains('\\')) {
+    return false;
+  }
+  if (RegExp(r'^[A-Za-z]:').hasMatch(path)) return false;
+  final segments = path.split('/');
+  return segments.every(
+    (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
+  );
+}
+
+bool _isMeaningful(String value) => value.trim().isNotEmpty;
+
+Set<String> _readDuplicationAllowlist() {
+  final file = File('.planning/audit/duplication_allowlist.json');
+  if (!file.existsSync()) return const {};
+  try {
+    final decoded = jsonDecode(file.readAsStringSync());
+    if (decoded is! Map || decoded['accepted'] is! List) return const {};
+    return {
+      for (final entry in (decoded['accepted'] as List))
+        if (entry is Map &&
+            entry['files'] is List &&
+            (entry['files'] as List).length == 2 &&
+            (entry['files'] as List).every((file) => file is String) &&
+            entry['fingerprint'] is String &&
+            entry['rationale'] is String)
+          _duplicationAllowlistKey(
+            (entry['files'] as List).cast<String>(),
+            entry['fingerprint'] as String,
+            entry['rationale'] as String,
+          ),
+    };
+  } catch (_) {
     return const {};
+  }
+}
+
+bool _isExactAcceptedDuplication(
+  Finding finding,
+  Set<String> acceptedDuplicationAllowlist,
+) {
+  if (finding.toolSource != 'owned_duplication_detector' ||
+      finding.category != 'redundant_code') {
+    return false;
+  }
+  final counterpart = _cloneCounterpart(finding);
+  final fingerprint = RegExp(
+    r'Fingerprint: ([0-9a-f]{16})\.$',
+  ).firstMatch(finding.rationale);
+  if (counterpart == null || fingerprint == null) return false;
+  final prefix = 'Accepted duplicate clone: ';
+  if (!finding.rationale.startsWith(prefix)) return false;
+  final rationale = finding.rationale.substring(
+    prefix.length,
+    finding.rationale.length - ' Fingerprint: ${fingerprint[1]}.'.length,
+  );
+  return acceptedDuplicationAllowlist.contains(
+    _duplicationAllowlistKey(
+      [finding.filePath, counterpart],
+      fingerprint[1]!,
+      rationale,
+    ),
+  );
+}
+
+String _duplicationAllowlistKey(
+  List<String> files,
+  String fingerprint,
+  String rationale,
+) {
+  final sortedFiles = [...files]..sort();
+  return '${sortedFiles.join('|')}|$fingerprint|$rationale';
+}
+
+Future<void> _writeAtomically(File destination, String content) async {
+  final temp = File(
+    '${destination.path}.tmp.$pid.${DateTime.now().microsecondsSinceEpoch}',
+  );
+  try {
+    await temp.writeAsString(content);
+    await temp.rename(destination.path);
+  } finally {
+    if (temp.existsSync()) await temp.delete();
   }
 }
 
