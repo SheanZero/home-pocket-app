@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/security/app_lock_service.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/config/release_features.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
 import '../../../../infrastructure/security/models/auth_result.dart';
@@ -105,7 +106,8 @@ class SecuritySection extends ConsumerWidget {
             onTap: () => _changePin(context, ref),
           ),
         ],
-        if (showNotifications) NotificationsSettingTile(settings: settings),
+        if (showNotifications && ReleaseFeatures.pushNotifications)
+          NotificationsSettingTile(settings: settings),
       ],
     );
   }

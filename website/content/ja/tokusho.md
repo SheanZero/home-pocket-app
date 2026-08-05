@@ -1,4 +1,9 @@
-# 特定商取引法に基づく表記
+---
+title: "特定商取引法に基づく表記"
+description: "Happy Pocket の運営者情報と、初回一般公開版に有償取引がないことを表示します。"
+translationKey: "tokusho"
+eyebrow: "LEGAL · OPERATOR"
+---
 
 **ハピポケ家族家計簿（Happy Pocket）**
 

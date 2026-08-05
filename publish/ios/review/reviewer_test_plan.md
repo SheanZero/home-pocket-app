@@ -5,8 +5,7 @@
 - [ ] 双设备家庭同步演示视频，画面同时包含两台真实 Apple 设备或两个可辨识的设备窗口。
 - [ ] 如审核需要，提供一个仍在有效期内的测试邀请码；不要把短时效邀请码永久写进 Notes。
 - [ ] 说明无需远程账号登录，本地 nickname/profile 不等同于账号。
-- [ ] 确保生产 relay、APNs 和汇率服务在整个审核期可用。
-- [ ] 若外部打赏/支持页存在，审核期展示内容与 Notes 一致：无数字商品、无会员权益、无功能解锁。
+- [ ] 确保生产 relay 和汇率服务在整个审核期可用；首版不依赖 APNs/FCM。
 
 ## 单设备审核路径
 
@@ -16,7 +15,7 @@
 4. 新增一笔 Daily 交易和一笔 Joy 交易。
 5. 查看 Home ring、交易列表和 Analytics。
 6. 新增 public/private shopping item，确认 private 标识。
-7. Settings 中验证 backup/restore、Privacy Policy、Terms、licenses、Support development。
+7. Settings 中验证 backup/restore、Privacy Policy、Terms 和 licenses；确认通知配置与赞助入口均不显示。
 
 ## 双设备审核路径
 
@@ -25,7 +24,7 @@
 3. A：批准 B 的请求。
 4. A 新增共享交易 / public shopping item；B 验证同步。
 5. B 新增 private shopping item；A 不应收到。
-6. 验证断网后恢复、push notification、退出/移除成员。
+6. 验证断网后恢复、退出/移除成员，并确认不请求通知权限。
 
 ## 权限预期
 
@@ -34,7 +33,6 @@
 | Microphone | Voice entry | 回到手动输入，不阻塞核心记账 |
 | Speech Recognition | Voice entry | 回到手动输入；需说明 on-device 与可选网络降级 |
 | Face ID | App lock | 可使用 PIN 或不启用 app lock |
-| Notifications | Family notifications | 家庭同步仍可通过 WebSocket/polling 工作 |
 | Photos | Profile avatar | 可继续使用 emoji/avatar；送审前确认用途说明 |
 
 ## 不应出现
@@ -42,4 +40,5 @@
 - OCR/receipt scanning 入口（本版本 feature flag 为 false）。
 - Joy/¥、ROI、density、streak、achievement、100% 达标庆祝。
 - 任何广告、订阅、付费功能解锁或强制打赏。
+- 通知配置、通知权限请求或赞助入口。
 - 未定稿法律占位符或“草案”标记。

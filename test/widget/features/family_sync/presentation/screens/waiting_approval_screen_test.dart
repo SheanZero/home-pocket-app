@@ -1033,7 +1033,7 @@ void main() {
     });
   });
 
-  testWidgets('terminal push stops polling and shows a reapply path', (
+  testWidgets('first release does not subscribe to terminal push events', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -1065,6 +1065,8 @@ void main() {
     );
     await tester.pump();
 
+    verifyNever(() => pushNotificationService.joinRequestLifecycleEvents);
+
     joinRequestEvents.add({
       'type': 'join_request_rejected',
       'groupId': 'group-1',
@@ -1072,10 +1074,8 @@ void main() {
     });
     await tester.pump();
 
-    expect(find.text('Unable to join this family right now'), findsOneWidget);
-    expect(find.text('Enter invite code again'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 6));
-    verifyNever(() => getJoinRequestStatusUseCase.execute(groupId: 'group-1'));
+    expect(find.text('Waiting for approval'), findsOneWidget);
+    expect(find.text('Unable to join this family right now'), findsNothing);
   });
 
   testWidgets('applicant can cancel a pending request', (tester) async {

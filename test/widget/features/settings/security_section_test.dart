@@ -75,40 +75,48 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('master toggle + notifications render; sub-items hidden when off',
-      (tester) async {
+  testWidgets('master toggle renders; dormant notifications stay hidden', (
+    tester,
+  ) async {
     await pump(tester, settings: const AppSettings());
 
     final l = l10nOf(tester);
     expect(find.text(l.securityAppLock), findsOneWidget);
-    expect(find.text(l.notifications), findsOneWidget);
+    expect(find.text(l.notifications), findsNothing);
     // Lock disabled -> no sub-items.
     expect(find.text(l.securityChangePin), findsNothing);
     expect(find.text(l.securityBiometricUnlock), findsNothing);
   });
 
-  testWidgets('enabling requires a PIN: only enables after SetPinScreen success',
-      (tester) async {
+  testWidgets(
+    'enabling requires a PIN: only enables after SetPinScreen success',
+    (tester) async {
+      await pump(tester, settings: const AppSettings());
+
+      await tester.tap(
+        find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock),
+      );
+      await tester.pumpAndSettle();
+
+      // Pushes the double-entry set-PIN flow.
+      expect(find.byType(SetPinScreen), findsOneWidget);
+
+      await enterPin(tester, '1234');
+      await enterPin(tester, '1234');
+
+      verify(() => appLock.setPin('1234')).called(1);
+      verify(() => appLock.enableLock()).called(1);
+    },
+  );
+
+  testWidgets('cancelling set-PIN leaves the lock disabled (revert)', (
+    tester,
+  ) async {
     await pump(tester, settings: const AppSettings());
 
-    await tester.tap(find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock));
-    await tester.pumpAndSettle();
-
-    // Pushes the double-entry set-PIN flow.
-    expect(find.byType(SetPinScreen), findsOneWidget);
-
-    await enterPin(tester, '1234');
-    await enterPin(tester, '1234');
-
-    verify(() => appLock.setPin('1234')).called(1);
-    verify(() => appLock.enableLock()).called(1);
-  });
-
-  testWidgets('cancelling set-PIN leaves the lock disabled (revert)',
-      (tester) async {
-    await pump(tester, settings: const AppSettings());
-
-    await tester.tap(find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock));
+    await tester.tap(
+      find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(SetPinScreen), findsOneWidget);
 
@@ -120,8 +128,9 @@ void main() {
     verifyNever(() => appLock.setPin(any()));
   });
 
-  testWidgets('disabling requires reauth: biometric success -> disableLock',
-      (tester) async {
+  testWidgets('disabling requires reauth: biometric success -> disableLock', (
+    tester,
+  ) async {
     when(() => appLock.reauth()).thenAnswer((_) async => true);
 
     await pump(
@@ -132,24 +141,26 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock));
+    await tester.tap(
+      find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock),
+    );
     await tester.pumpAndSettle();
 
     verify(() => appLock.reauth()).called(1);
     verify(() => appLock.disableLock()).called(1);
   });
 
-  testWidgets('disabling without biometric prompts current PIN then disables',
-      (tester) async {
+  testWidgets('disabling without biometric prompts current PIN then disables', (
+    tester,
+  ) async {
     when(() => appLock.reauth()).thenAnswer((_) async => false);
     when(() => appLock.verifyPin('4321')).thenAnswer((_) async => true);
 
-    await pump(
-      tester,
-      settings: const AppSettings(appLockEnabled: true),
-    );
+    await pump(tester, settings: const AppSettings(appLockEnabled: true));
 
-    await tester.tap(find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock));
+    await tester.tap(
+      find.widgetWithText(SwitchListTile, l10nOf(tester).securityAppLock),
+    );
     await tester.pumpAndSettle();
 
     // Biometric reauth failed -> a PIN verify surface is shown.
@@ -162,8 +173,9 @@ void main() {
     verify(() => appLock.disableLock()).called(1);
   });
 
-  testWidgets('sub-items shown when enabled; biometric gated by availability',
-      (tester) async {
+  testWidgets('sub-items shown when enabled; biometric gated by availability', (
+    tester,
+  ) async {
     await pump(
       tester,
       settings: const AppSettings(appLockEnabled: true),
@@ -189,8 +201,9 @@ void main() {
     );
   });
 
-  testWidgets('biometric sub-toggle hidden when biometrics unavailable',
-      (tester) async {
+  testWidgets('biometric sub-toggle hidden when biometrics unavailable', (
+    tester,
+  ) async {
     await pump(
       tester,
       settings: const AppSettings(appLockEnabled: true),

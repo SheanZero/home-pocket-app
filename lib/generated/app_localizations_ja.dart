@@ -3042,13 +3042,14 @@ class SJa extends S {
   String get onboardingPrivacyTitle => 'データは、\nあなたの手の中に。';
 
   @override
-  String get onboardingPrivacySubtitle => 'すべて端末の中だけで完結。アカウントもサーバーも、いりません。';
+  String get onboardingPrivacySubtitle =>
+      '平文の家計データは端末内に保存し、選んだ共有データだけを暗号化して同期します。';
 
   @override
   String get onboardingPrivacyCardLocalTitle => '端末内に保存';
 
   @override
-  String get onboardingPrivacyCardLocalBody => 'クラウドには送信しません';
+  String get onboardingPrivacyCardLocalBody => '平文の家計データは端末内に保存';
 
   @override
   String get onboardingPrivacyCardE2eTitle => 'エンドツーエンド暗号化';

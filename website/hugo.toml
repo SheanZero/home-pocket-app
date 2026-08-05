@@ -1,7 +1,7 @@
 baseURL = "https://happypocket.app/"
 title = "Happy Pocket: Family Budget"
 defaultContentLanguage = "ja"
-defaultContentLanguageInSubdir = true
+defaultContentLanguageInSubdir = false
 enableRobotsTXT = true
 disableKinds = ["taxonomy", "term", "RSS"]
 

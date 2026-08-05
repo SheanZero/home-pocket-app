@@ -1,17 +1,17 @@
-# App Store Connect App Privacy — 保守答题稿
+# App Store Connect App Privacy — 运营确认基线
 
-状态：**Draft / 必须由生产后端负责人和法务复核。**
+状态：**已按首版产品行为更新；提交前仍须与生产配置和 Xcode Privacy Report 逐项核对。**
 
-Apple 将“Collect”定义为：数据被传出设备，并允许开发者或第三方在完成实时请求所需时间之外访问。Happy Pocket 的 family relay 会保留设备/组元数据，并暂存消息，因此总问题应答 **Yes, we collect data from this app**。旧清单中仅因 FCM token 而回答 Yes 的逻辑已不适用于当前 iOS 实现：iOS 使用原生 APNs，且开发者 relay 本身接收更多数据。
+Apple 将“Collect”定义为：数据被传出设备，并允许开发者或第三方在完成实时请求所需时间之外访问。Happy Pocket 的 family relay 会保留设备/组元数据，并暂存消息，因此总问题应答 **Yes, we collect data from this app**。首版不启用 APNs/FCM，收集判断来自 relay 数据流，而不是推送令牌。
 
 ## 已从客户端代码确认的数据流
 
 | 流程 | 发送内容 | 目的 | 保留/可读性 |
 |---|---|---|---|
-| Device registration | device ID、公钥、device name、platform | 设备身份与安全认证 | relay 可读；保留期需服务端确认 |
-| Family group | group ID/name、display name、avatar emoji/hash、邀请/成员状态 | 家庭组创建与成员管理 | relay 可读；保留期需服务端确认 |
-| Push | APNs token、platform | 可选家庭通知 | relay 可读；撤销/删除策略需确认 |
-| Sync | 加密 payload、vector clock、operation count、group/device identifiers | 家庭同步 | relay 暂存；内容 E2EE 不可解密；ACK/过期删除策略需确认 |
+| Device registration | device ID、公钥、device name、platform | 设备身份与安全认证 | relay 可读；不活跃设备记录保留90日 |
+| Family group | group ID/name、display name、avatar emoji/hash、邀请/成员状态 | 家庭组创建与成员管理 | relay 可读；组控制事件保留90日 |
+| Push | 首版不注册或发送 APNs/FCM token | — | 首版停用 |
+| Sync | 加密 payload、vector clock、operation count、group/device identifiers | 家庭同步 | 内容 E2EE 不可解密；消息最多7日并在 ACK 后提前删除；备份14日、幂等记录7日 |
 | Exchange rate | currency/date 等查询参数 | 多币种换算 | 不包含交易金额、备注或身份；第三方日志/IP 仍需核对 |
 | Voice | 优先 on-device；可选 system network fallback | 语音转文字 | 开发者不存储音频；Apple/system 行为与用户开关需核对 |
 | Local-only | 照片、未共享账本、private shopping item | 端内功能 | 不传出设备 |
@@ -24,7 +24,7 @@ Apple 将“Collect”定义为：数据被传出设备，并允许开发者或�
 |---|---:|---:|---:|---|---|
 | Contact Info > Name | Yes | Yes | No | App Functionality | app 要求 nickname/display name，family relay 接收 display/device name；用户可能填写真实姓名 |
 | Identifiers > User ID | Yes | Yes | No | App Functionality | group/account-level identifiers、group membership |
-| Identifiers > Device ID | Yes | Yes | No | App Functionality | app-generated device ID、公钥标识、APNs token |
+| Identifiers > Device ID | Yes | Yes | No | App Functionality | app-generated device ID、公钥标识；首版不收集 APNs/FCM token |
 | User Content > Other User Content | Yes | Yes | No | App Functionality | group name/avatar metadata 明文；notes/merchant/shopping 等共享内容以 E2EE payload 传输 |
 | Financial Info > Purchase History | Conservative Yes | Yes | No | App Functionality | 家庭交易记录会以 E2EE payload 暂存于 relay；需 Apple/法务确认加密不可读内容是否仍按此类申报 |
 | Financial Info > Other Financial Info | Conservative Yes | Yes | No | App Functionality | 收支/预算等同步内容同上；若最终确认仅 ciphertext 不构成可访问数据，可在有书面依据后缩减 |
@@ -53,9 +53,9 @@ Apple 将“Collect”定义为：数据被传出设备，并允许开发者或�
 
 ## 送审前证据
 
-- [ ] 生产 relay 数据库 schema、retention、ACK/expiry 删除任务。
-- [ ] 反向代理/application logs 是否保存 IP、User-Agent、request body、device ID、token，保存多久。
-- [ ] APNs token 删除/更新/退出家庭后的清理路径。
+- [ ] 生产 relay 数据库 schema 与已确认的 7/14/7/90/90 日保留及 ACK 提前删除任务一致。
+- [ ] 反向代理/application logs 与政策一致：不记录请求正文，日志30日自动轮转并永久删除。
+- [x] 首版 APNs/FCM 自动注册、通知权限和 push capability 已停用。
 - [ ] 汇率供应商及请求参数、日志/隐私条款。
 - [ ] iOS archive 的 Xcode Privacy Report 与所有第三方 SDK manifests。
 - [ ] `Podfile.lock` / Flutter plugins 中是否出现 analytics、ads、crash reporting。

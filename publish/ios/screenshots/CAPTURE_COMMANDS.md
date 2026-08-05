@@ -71,4 +71,4 @@ xcrun simctl io booted screenshot \
 
 ## 真机补充
 
-Simulator 图可用于 App Store，但以下项目仍需真机/TestFlight 证据：Face ID、APNs production、麦克风/语音识别、照片权限、后台状态和双设备同步。审核附件中的双设备演示应优先使用真实设备。
+Simulator 图可用于 App Store，但以下项目仍需真机/TestFlight 证据：Face ID、麦克风/语音识别、照片权限、后台状态和双设备同步。首版还应验证不会请求通知权限。审核附件中的双设备演示应优先使用真实设备。

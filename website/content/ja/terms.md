@@ -1,4 +1,9 @@
-# 利用規約
+---
+title: "利用規約"
+description: "Happy Pocket の利用条件、無料提供、利用者の責任、外部サービスおよび準拠法を定めます。"
+translationKey: "terms"
+eyebrow: "LEGAL · TERMS"
+---
 
 **ハピポケ家族家計簿（Happy Pocket）**
 

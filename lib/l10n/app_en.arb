@@ -3608,7 +3608,7 @@
   "@onboardingPrivacyTitle": {
     "description": "Welcome A intro page 2: privacy title (two lines)"
   },
-  "onboardingPrivacySubtitle": "Everything stays on your device. No account, no server needed.",
+  "onboardingPrivacySubtitle": "Plaintext financial data stays on your device; only records you choose to share are encrypted and synced.",
   "@onboardingPrivacySubtitle": {
     "description": "Welcome A intro page 2: privacy subtitle"
   },
@@ -3616,7 +3616,7 @@
   "@onboardingPrivacyCardLocalTitle": {
     "description": "Welcome A intro page 2: on-device storage card title"
   },
-  "onboardingPrivacyCardLocalBody": "Never sent to the cloud",
+  "onboardingPrivacyCardLocalBody": "Plaintext financial data stays on-device",
   "@onboardingPrivacyCardLocalBody": {
     "description": "Welcome A intro page 2: on-device storage card body"
   },

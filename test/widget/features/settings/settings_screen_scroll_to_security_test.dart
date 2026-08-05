@@ -162,13 +162,12 @@ void main() {
     expect(indexForType<FamilySyncSettingsSection>(), greaterThan(0));
     expect(
       indexForKey(const ValueKey('settings-notifications-section')),
-      greaterThan(indexForType<FamilySyncSettingsSection>()),
+      equals(-1),
+      reason: 'push notification settings are hidden in the first release',
     );
     expect(
       indexForType<BackupRestoreNavigationSection>(),
-      greaterThan(
-        indexForKey(const ValueKey('settings-notifications-section')),
-      ),
+      greaterThan(indexForType<FamilySyncSettingsSection>()),
     );
     expect(
       indexForType<LegalSponsorNavigationSection>(),

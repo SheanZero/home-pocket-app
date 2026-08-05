@@ -1,5 +1,5 @@
 Please test a clean install and Initial Setup in Japanese, Simplified Chinese, and English; Daily/Joy transaction entry and editing; monthly analytics; shopping lists; multiple currencies; encrypted backup/restore; Face ID/PIN app lock; microphone and speech recognition permissions; and Settings legal/support links.
 
-For Family Sync, use two devices: create a family on device A, join with the six-digit invite code on device B, approve on device A, then verify shared ledger/shopping updates, offline recovery, push notifications, leave/remove-member behavior, and that private shopping items are never synchronized.
+For Family Sync, use two devices: create a family on device A, join with the six-digit invite code on device B, approve on device A, then verify shared ledger/shopping updates, offline recovery, leave/remove-member behavior, and that private shopping items are never synchronized. Confirm that this release does not request notification permission or show notification settings.
 
 Known release gate: do not promote this build to App Review until publish/ios/RELEASE_GATES.md is fully closed.

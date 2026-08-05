@@ -1,4 +1,9 @@
-# 使用条款
+---
+title: "使用条款"
+description: "规定 Happy Pocket 的免费提供、使用条件、用户责任、外部服务及适用法律。"
+translationKey: "terms"
+eyebrow: "LEGAL · TERMS"
+---
 
 **Happy Pocket 家庭账本**
 

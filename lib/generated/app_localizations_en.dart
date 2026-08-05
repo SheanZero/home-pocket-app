@@ -3121,13 +3121,14 @@ class SEn extends S {
 
   @override
   String get onboardingPrivacySubtitle =>
-      'Everything stays on your device. No account, no server needed.';
+      'Plaintext financial data stays on your device; only records you choose to share are encrypted and synced.';
 
   @override
   String get onboardingPrivacyCardLocalTitle => 'Stored on device';
 
   @override
-  String get onboardingPrivacyCardLocalBody => 'Never sent to the cloud';
+  String get onboardingPrivacyCardLocalBody =>
+      'Plaintext financial data stays on-device';
 
   @override
   String get onboardingPrivacyCardE2eTitle => 'End-to-end encryption';

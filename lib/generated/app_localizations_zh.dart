@@ -3025,13 +3025,13 @@ class SZh extends S {
   String get onboardingPrivacyTitle => '数据，\n掌握在你手中。';
 
   @override
-  String get onboardingPrivacySubtitle => '一切都在设备内完成。无需账号，也无需服务器。';
+  String get onboardingPrivacySubtitle => '明文账务数据保存在设备内，只有你选择共享的数据会加密同步。';
 
   @override
   String get onboardingPrivacyCardLocalTitle => '保存在设备内';
 
   @override
-  String get onboardingPrivacyCardLocalBody => '不会上传到云端';
+  String get onboardingPrivacyCardLocalBody => '明文账务数据保存在设备内';
 
   @override
   String get onboardingPrivacyCardE2eTitle => '端到端加密';

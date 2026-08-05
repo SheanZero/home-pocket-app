@@ -126,10 +126,23 @@ for locale in ja zh-Hans en-US; do
   fi
 done
 
-if rg -n 'support@example\.com|\[上线前填真实值\]|DRAFT MARKER|草案マーカー|草案标记|IMPORTANT / DRAFT|重要・草案|重要·草案' assets/legal >/dev/null; then
+LEGAL_SNAPSHOT_DIR="$PUBLISH_DIR/legal/current"
+if rg -n 'support@example\.com|\[上线前填真实值\]|DRAFT MARKER|草案マーカー|草案标记|IMPORTANT / DRAFT|重要・草案|重要·草案' assets/legal "$LEGAL_SNAPSHOT_DIR" >/dev/null; then
   block "shipping legal assets still contain draft markers or required placeholders"
 else
   pass "shipping legal assets contain no known draft markers/placeholders"
+fi
+
+LEGAL_MISMATCH=0
+for legal_file in assets/legal/*.md; do
+  legal_name="$(basename "$legal_file")"
+  if ! cmp -s "$legal_file" "$LEGAL_SNAPSHOT_DIR/$legal_name"; then
+    block "shipping legal snapshot differs from app asset: $legal_name"
+    LEGAL_MISMATCH=1
+  fi
+done
+if [ "$LEGAL_MISMATCH" -eq 0 ]; then
+  pass "shipping legal snapshot exactly matches all app legal assets"
 fi
 
 if rg -q 'Everything stays on your device|Never sent to the cloud' lib/l10n/app_en.arb; then

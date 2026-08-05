@@ -4,21 +4,31 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Architecture test: trilingual legal-asset parity gate (D-02 / LEGAL-06).
 ///
-/// Asserts all 9 `assets/legal/{doc}_{lang}.md` drafts are present AND
+/// Asserts all 9 `assets/legal/{doc}_{lang}.md` final documents are present AND
 /// structurally consistent so `rootBundle.loadString` resolves at runtime /
-/// in widget tests, and so a locale cannot silently ship a stub or a draft
+/// in widget tests, and so a locale cannot silently ship a stub or a document
 /// whose section structure diverges from its siblings.
 ///
 /// Guarantees per file:
 ///   - non-empty (guards against blank/stub drafts),
 ///   - its first non-blank line is a top-level `#` heading (well-formed doc),
 ///   - the count of `##` section headers matches across all three locales of
-///     the same doc (cross-locale structural parity).
+///     the same doc (cross-locale structural parity),
+///   - contains no launch placeholders or draft markers.
 ///
 /// Run: flutter test test/architecture/legal_asset_parity_test.dart
 
 const _docs = ['privacy', 'terms', 'tokusho'];
 const _langs = ['ja', 'zh', 'en'];
+
+const _ageContract = <String, List<String>>{
+  'ja': ['一律の年齢制限は設けません', '子ども向け専用サービス'],
+  'zh': ['不设置统一的年龄限制', '并非专门面向儿童'],
+  'en': [
+    'no general age restriction',
+    'not offered specifically as a service for children',
+  ],
+};
 
 const _privacyRelayContract = <String, List<String>>{
   'ja': [
@@ -30,7 +40,9 @@ const _privacyRelayContract = <String, List<String>>{
     '90日間',
     '14日間',
     'PostgreSQL',
-    '固定のログ保存期間を設定していません',
+    '30日間',
+    'Tencent Cloud',
+    '日本（東京）',
   ],
   'zh': [
     '由中继服务器临时存储和转发',
@@ -41,7 +53,9 @@ const _privacyRelayContract = <String, List<String>>{
     '90天',
     '14天',
     'PostgreSQL',
-    '未设定固定的日志保留期限',
+    '30天',
+    'Tencent Cloud',
+    '日本（东京）',
   ],
   'en': [
     'temporarily stored and forwarded by the relay server',
@@ -52,9 +66,24 @@ const _privacyRelayContract = <String, List<String>>{
     '90 days',
     '14 days',
     'PostgreSQL',
-    'does not set a fixed log-retention period',
+    '30 days',
+    'Tencent Cloud',
+    'Japan (Tokyo)',
   ],
 };
+
+const _forbiddenReleaseMarkers = [
+  'support@example.com',
+  '[上线前填真实值]',
+  'DRAFT MARKER',
+  '草案マーカー',
+  '草案标记',
+  'IMPORTANT / DRAFT',
+  '重要・草案',
+  '重要·草案',
+  '（草案）',
+  '(Draft)',
+];
 
 const _obsoletePrivacyClaims = <String, List<String>>{
   'ja': ['端末間で直接行われる', 'サーバーに保存されることはありません'],
@@ -158,6 +187,53 @@ void main() {
                 '$path still contains obsolete direct-sync claim: '
                 '$obsoleteText',
           );
+        }
+      }
+    });
+
+    test('shipping documents contain final operator information', () {
+      for (final doc in _docs) {
+        for (final lang in _langs) {
+          final path = 'assets/legal/${doc}_$lang.md';
+          final content = File(path).readAsStringSync();
+
+          expect(content, contains('ナープ株式会社'), reason: path);
+          expect(content, contains('support@napu.co.jp'), reason: path);
+          for (final marker in _forbiddenReleaseMarkers) {
+            expect(
+              content,
+              isNot(contains(marker)),
+              reason: '$path contains release-blocking marker: $marker',
+            );
+          }
+        }
+      }
+
+      final tokushoJa = File('assets/legal/tokusho_ja.md').readAsStringSync();
+      expect(tokushoJa, contains('代表取締役 張欣'));
+      expect(tokushoJa, contains('03-6859-7235'));
+      expect(tokushoJa, contains('〒101-0041'));
+    });
+
+    test('terms disclose the no-age-restriction product decision', () {
+      for (final lang in _langs) {
+        final path = 'assets/legal/terms_$lang.md';
+        final content = File(path).readAsStringSync();
+        for (final requiredText in _ageContract[lang]!) {
+          expect(content, contains(requiredText), reason: path);
+        }
+      }
+    });
+
+    test('release snapshots exactly match app legal assets', () {
+      for (final doc in _docs) {
+        for (final lang in _langs) {
+          final name = '${doc}_$lang.md';
+          final asset = File('assets/legal/$name').readAsStringSync();
+          final snapshot = File(
+            'publish/ios/legal/current/$name',
+          ).readAsStringSync();
+          expect(snapshot, asset, reason: 'release snapshot drift: $name');
         }
       }
     });

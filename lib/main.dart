@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_gate_transition.dart';
+import 'core/config/release_features.dart';
 import 'core/initialization/app_initializer.dart';
 import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
@@ -234,13 +235,17 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
           },
         );
 
-        final pushService = ref.read(pushNotificationServiceProvider);
-        syncEngine.connectPushNotifications(pushService);
-
-        // Initialize SyncEngine (lifecycle observer + status stream), then start
-        // push delivery. Push initialization is concurrency-safe and idempotent.
+        // Preserve the established connection order when the channel is
+        // re-enabled, while keeping all push providers dormant in v1.
+        if (ReleaseFeatures.pushNotifications) {
+          syncEngine.connectPushNotifications(
+            ref.read(pushNotificationServiceProvider),
+          );
+        }
         await syncEngine.initialize();
-        await pushService.initialize();
+        if (ReleaseFeatures.pushNotifications) {
+          await ref.read(pushNotificationServiceProvider).initialize();
+        }
 
         // Register the app-lock lifecycle observer alongside the sync engine's
         // own observer. `isLockEffective` reads the synchronous [_lockConfigured]

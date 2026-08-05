@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/config/legal_urls.dart';
+import '../../../../core/config/release_features.dart';
 import '../../../../core/constants/app_info.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -86,61 +87,63 @@ class LegalSponsorSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         legalRows,
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-          child: Text(
-            l10n.sponsorSectionTitle,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: palette.textPrimary,
+        if (ReleaseFeatures.sponsorship) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+            child: Text(
+              l10n.sponsorSectionTitle,
+              style: AppTextStyles.sectionTitle.copyWith(
+                color: palette.textPrimary,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: palette.card,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: palette.borderDefault),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: palette.joyLight,
-                    borderRadius: BorderRadius.circular(14),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: palette.card,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: palette.borderDefault),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: palette.joyLight,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(Icons.favorite_outline, color: palette.joyText),
                   ),
-                  child: Icon(Icons.favorite_outline, color: palette.joyText),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  l10n.sponsorCardTitle,
-                  style: AppTextStyles.sectionTitle.copyWith(
-                    color: palette.textPrimary,
+                  const SizedBox(height: 14),
+                  Text(
+                    l10n.sponsorCardTitle,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: palette.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  l10n.sponsorCardBody,
-                  style: AppTextStyles.body.copyWith(
-                    color: palette.textSecondary,
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.sponsorCardBody,
+                    style: AppTextStyles.body.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  key: const ValueKey('legal-support-link'),
-                  onPressed: () => _openSupport(context),
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  label: Text(l10n.sponsorButton),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    key: const ValueKey('legal-support-link'),
+                    onPressed: () => _openSupport(context),
+                    icon: const Icon(Icons.open_in_new, size: 18),
+                    label: Text(l10n.sponsorButton),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }

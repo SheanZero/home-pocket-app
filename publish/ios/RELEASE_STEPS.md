@@ -17,7 +17,7 @@
 1. 确认 Apple Developer Program 会员有效，最新协议已接受。
 2. Certificates, Identifiers & Profiles 中确认 App ID：
    - Bundle ID：`com.sheanzero.happypocket.app`
-   - Push Notifications：启用
+   - Push Notifications：首版不启用
    - Team ID：`6Y64KR8RLP`
 3. 在 App Store Connect 创建 App record：
    - Platforms：iOS
@@ -71,7 +71,7 @@
 
 1. 打开 `ios/Runner.xcworkspace`。
 2. Scheme 选择 Runner，Destination 选择 Any iOS Device (arm64)。
-3. Runner > Signing & Capabilities：确认 Team、Bundle ID、Push Notifications、Release provisioning。
+3. Runner > Signing & Capabilities：确认 Team、Bundle ID、Release provisioning，并确认首版没有 Push Notifications capability。
 4. Product > Archive。
 5. 在 Organizer 中：
    - Validate App；
@@ -107,8 +107,8 @@ flutter build ipa \
    - 语音 on-device 与网络降级开关；
    - Face ID/PIN；
    - 双设备家庭加入、批准、同步、离线恢复、退出；
-   - APNs production token 与通知跳转；
-   - 隐私/条款/支持/打赏外链；
+   - 首版不请求通知权限、不注册 APNs token，家庭同步仍正常；
+   - 隐私/条款/支持外链；
    - iPad 布局和旋转；
    - 删除本地数据与组成员数据的实际效果。
 
@@ -137,4 +137,4 @@ flutter build ipa \
 2. 由发布负责人手动 Release。
 3. 发布后在日本/中国大陆以外目标区分别检查本地化、下载、首次启动和深色/浅色展示。
 4. 记录 App Store version、build、Apple ID、发布日期、审核往返、已知问题和回滚方案。
-5. 监控崩溃、评论、支持邮箱、同步服务和推送；隐私处理变化时立即更新 App Privacy answers 与政策。
+5. 监控崩溃、评论、支持邮箱和同步服务；隐私处理变化时立即更新 App Privacy answers 与政策。

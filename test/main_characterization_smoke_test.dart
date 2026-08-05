@@ -386,7 +386,7 @@ void main() {
   }
 
   group('HomePocketApp smoke characterization (pre-Plan-03-02)', () {
-    testWidgets('initializes push delivery during application bootstrap', (
+    testWidgets('keeps push delivery dormant during first-release bootstrap', (
       tester,
     ) async {
       var initializeCalls = 0;
@@ -401,7 +401,7 @@ void main() {
       );
       await _pumpInitNoSettle(tester);
 
-      expect(initializeCalls, 1);
+      expect(initializeCalls, 0);
     });
 
     testWidgets(

@@ -10,6 +10,7 @@ import '../../../../features/accounting/presentation/providers/repository_provid
 import '../../../../features/analytics/domain/models/metric_result.dart';
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
 import '../../../../core/constants/app_info.dart';
+import '../../../../core/config/release_features.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -163,11 +164,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   compact: true,
                 ),
               ),
-              SettingsSectionCard(
-                key: const ValueKey('settings-notifications-section'),
-                title: S.of(context).notifications,
-                children: [NotificationsSettingTile(settings: settings)],
-              ),
+              if (ReleaseFeatures.pushNotifications)
+                SettingsSectionCard(
+                  key: const ValueKey('settings-notifications-section'),
+                  title: S.of(context).notifications,
+                  children: [NotificationsSettingTile(settings: settings)],
+                ),
               BackupRestoreNavigationSection(bookId: widget.bookId),
               const LegalSponsorNavigationSection(),
               const DeleteAllDataSection(),

@@ -19,7 +19,7 @@
 | 支持设备 | iPhone + iPad（`TARGETED_DEVICE_FAMILY = 1,2`） |
 | Xcode | `26.2`，满足 2026-04-28 起的 Xcode 26 / iOS 26 SDK 上传要求 |
 | App Icon | `assets/app-icon/AppIcon-1024.png`，1024×1024、无 Alpha，可用于商店 |
-| 推送 | iOS 原生 APNs；production entitlement 已配置 |
+| 推送 | 首版停用；通知入口、自动注册与 iOS push capability 已关闭 |
 
 ## 目录说明
 
@@ -30,7 +30,7 @@
 - `review/`：App Review Notes、审核测试路径与 TestFlight 测试说明。
 - `privacy/`：App Privacy 保守答题稿、加密出口合规判断清单、隐私清单模板。
 - `assets/`：1024 App Icon 与品牌源文件。
-- `legal/current-drafts/`：当前随包三语法律文本的只读快照；仍含草案/占位，不可作为最终上线版。
+- `legal/current/`：与 `assets/legal/` 同步的三语正式文本快照；运营方已批准，尚待专业法务复核。
 - `screenshots/`：截图分镜、规格、采集路径与规范化脚本。
 - `scripts/validate_materials.sh`：本地发布物料门禁。
 - `SOURCES.md`：本包采用的 Apple 官方依据。

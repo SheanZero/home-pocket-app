@@ -26,7 +26,10 @@ void main() {
     ];
 
     final forbiddenPatterns = <RegExp>[
-      RegExp(r'firebase[-_:]analytics', caseSensitive: false),
+      RegExp(
+        r'firebase[-_:]analytics(?!_collection_enabled)',
+        caseSensitive: false,
+      ),
       RegExp(r'com\.google\.android\.gms\.permission\.AD_ID'),
       RegExp(r'android\.permission\.ACCESS_ADSERVICES_AD_ID'),
       RegExp(r'android\.permission\.ACCESS_ADSERVICES_ATTRIBUTION'),

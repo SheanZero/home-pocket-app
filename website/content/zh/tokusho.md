@@ -1,4 +1,9 @@
-# 基于日本《特定商业交易法》的说明
+---
+title: "特定商业交易法说明"
+description: "披露 Happy Pocket 运营方信息，并说明首次公开发布版本不存在付费交易。"
+translationKey: "tokusho"
+eyebrow: "LEGAL · OPERATOR"
+---
 
 **Happy Pocket 家庭账本**
 

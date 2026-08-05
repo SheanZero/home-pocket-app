@@ -1,4 +1,9 @@
-# Disclosure under Japan's Act on Specified Commercial Transactions
+---
+title: "Specified Commercial Transactions Disclosure"
+description: "Operator details for Happy Pocket and confirmation that the first public release has no paid transaction."
+translationKey: "tokusho"
+eyebrow: "LEGAL · OPERATOR"
+---
 
 **Happy Pocket: Family Budget**
 

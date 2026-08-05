@@ -3622,7 +3622,7 @@
   "@onboardingPrivacyTitle": {
     "description": "Welcome A intro page 2: privacy title (two lines)"
   },
-  "onboardingPrivacySubtitle": "一切都在设备内完成。无需账号，也无需服务器。",
+  "onboardingPrivacySubtitle": "明文账务数据保存在设备内，只有你选择共享的数据会加密同步。",
   "@onboardingPrivacySubtitle": {
     "description": "Welcome A intro page 2: privacy subtitle"
   },
@@ -3630,7 +3630,7 @@
   "@onboardingPrivacyCardLocalTitle": {
     "description": "Welcome A intro page 2: on-device storage card title"
   },
-  "onboardingPrivacyCardLocalBody": "不会上传到云端",
+  "onboardingPrivacyCardLocalBody": "明文账务数据保存在设备内",
   "@onboardingPrivacyCardLocalBody": {
     "description": "Welcome A intro page 2: on-device storage card body"
   },

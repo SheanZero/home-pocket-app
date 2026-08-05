@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../../core/config/release_features.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -195,6 +196,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   }
 
   void _listenForJoinRequestResolution() {
+    if (!ReleaseFeatures.pushNotifications) return;
     _joinRequestSubscription = ref
         .read(pushNotificationServiceProvider)
         .joinRequestLifecycleEvents

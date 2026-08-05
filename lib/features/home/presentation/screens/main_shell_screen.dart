@@ -19,6 +19,7 @@ import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_item_form_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_list_screen.dart';
 import '../../../../shared/widgets/lazy_indexed_stack.dart';
+import '../../../../core/config/release_features.dart';
 import '../providers/state_home.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
@@ -145,96 +146,96 @@ class MainShellScreen extends ConsumerWidget {
       ref.read(selectedTabIndexProvider.notifier).select(2);
     }
 
-    return FamilySyncNotificationRouteListener(
-      child: Scaffold(
-        // Onboarding can hand off while the iOS keyboard dismissal animation
-        // still reports a non-zero viewInset. The shell itself has no text
-        // input, so resizing here only lifts the floating tab bar/FAB into the
-        // middle of the first home frame. Input routes manage their own insets.
-        resizeToAvoidBottomInset: false,
-        body: Stack(
-          key: const ValueKey('main-shell-body-stack'),
-          fit: StackFit.expand,
-          children: [
-            LazyIndexedStack(
-              index: currentIndex,
-              itemCount: 4,
-              cacheKey: bookId,
-              itemBuilder: (context, index) => switch (index) {
-                0 => HomeScreen(
-                  bookId: bookId,
-                  onAddJoyTap: (prompt) =>
-                      openAddEntry(continuousMode: false, joyPrompt: prompt),
-                  onJoyAnalyticsTap: () =>
-                      openAnalytics(AnalyticsPrimaryTab.joy),
-                  onSettingsTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => SettingsScreen(bookId: bookId),
-                      ),
-                    );
-                  },
-                ),
-                1 => ListScreen(bookId: bookId),
-                2 => AnalyticsScreen(bookId: bookId),
-                3 => ShoppingListScreen(
-                  onSettingsTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => SettingsScreen(bookId: bookId),
-                      ),
-                    );
-                  },
-                ),
-                _ => throw RangeError.index(index, const <Never>[]),
-              },
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: HomeBottomNavBar(
-                currentIndex: currentIndex,
-                onTap: (index) {
-                  if (index == 0 || index == 2) {
-                    invalidateTransactionAggregates(ref);
-                  }
-                  if (index == 2) {
-                    openAnalytics(AnalyticsPrimaryTab.spending);
-                    return;
-                  }
-                  ref.read(selectedTabIndexProvider.notifier).select(index);
+    final shell = Scaffold(
+      // Onboarding can hand off while the iOS keyboard dismissal animation
+      // still reports a non-zero viewInset. The shell itself has no text
+      // input, so resizing here only lifts the floating tab bar/FAB into the
+      // middle of the first home frame. Input routes manage their own insets.
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        key: const ValueKey('main-shell-body-stack'),
+        fit: StackFit.expand,
+        children: [
+          LazyIndexedStack(
+            index: currentIndex,
+            itemCount: 4,
+            cacheKey: bookId,
+            itemBuilder: (context, index) => switch (index) {
+              0 => HomeScreen(
+                bookId: bookId,
+                onAddJoyTap: (prompt) =>
+                    openAddEntry(continuousMode: false, joyPrompt: prompt),
+                onJoyAnalyticsTap: () => openAnalytics(AnalyticsPrimaryTab.joy),
+                onSettingsTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => SettingsScreen(bookId: bookId),
+                    ),
+                  );
                 },
-                onFabTap: () async {
-                  if (currentIndex == 3) {
-                    // NAV-01: shopping tab → add-shopping-item screen.
-                    // New items default to 'public' (G8Z2 FIX-2); the form
-                    // exposes a public/private switch in every mode (private is
-                    // opt-in). The view toggle value, which can be 'all', is
-                    // not a storable list_type.
-                    await Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            const ShoppingItemFormScreen(listType: 'public'),
-                      ),
-                    );
-                    // Shopping items reactive via .watch() — NO invalidate needed here
-                  } else {
-                    // 260614-iww: single tap → non-continuous add entry.
-                    await openAddEntry(continuousMode: false);
-                  }
-                },
-                // 260614-iww: long-press → continuous add entry. Gated to the
-                // accounting path only; on the shopping tab it is a no-op so
-                // the FAB behaves normally there.
-                onFabLongPress: currentIndex == 3
-                    ? null
-                    : () => openAddEntry(continuousMode: true),
               ),
+              1 => ListScreen(bookId: bookId),
+              2 => AnalyticsScreen(bookId: bookId),
+              3 => ShoppingListScreen(
+                onSettingsTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => SettingsScreen(bookId: bookId),
+                    ),
+                  );
+                },
+              ),
+              _ => throw RangeError.index(index, const <Never>[]),
+            },
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: HomeBottomNavBar(
+              currentIndex: currentIndex,
+              onTap: (index) {
+                if (index == 0 || index == 2) {
+                  invalidateTransactionAggregates(ref);
+                }
+                if (index == 2) {
+                  openAnalytics(AnalyticsPrimaryTab.spending);
+                  return;
+                }
+                ref.read(selectedTabIndexProvider.notifier).select(index);
+              },
+              onFabTap: () async {
+                if (currentIndex == 3) {
+                  // NAV-01: shopping tab → add-shopping-item screen.
+                  // New items default to 'public' (G8Z2 FIX-2); the form
+                  // exposes a public/private switch in every mode (private is
+                  // opt-in). The view toggle value, which can be 'all', is
+                  // not a storable list_type.
+                  await Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          const ShoppingItemFormScreen(listType: 'public'),
+                    ),
+                  );
+                  // Shopping items reactive via .watch() — NO invalidate needed here
+                } else {
+                  // 260614-iww: single tap → non-continuous add entry.
+                  await openAddEntry(continuousMode: false);
+                }
+              },
+              // 260614-iww: long-press → continuous add entry. Gated to the
+              // accounting path only; on the shopping tab it is a no-op so
+              // the FAB behaves normally there.
+              onFabLongPress: currentIndex == 3
+                  ? null
+                  : () => openAddEntry(continuousMode: true),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+    return ReleaseFeatures.pushNotifications
+        ? FamilySyncNotificationRouteListener(child: shell)
+        : shell;
   }
 }

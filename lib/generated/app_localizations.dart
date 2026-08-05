@@ -5684,7 +5684,7 @@ abstract class S {
   /// Welcome A intro page 2: privacy subtitle
   ///
   /// In en, this message translates to:
-  /// **'Everything stays on your device. No account, no server needed.'**
+  /// **'Plaintext financial data stays on your device; only records you choose to share are encrypted and synced.'**
   String get onboardingPrivacySubtitle;
 
   /// Welcome A intro page 2: on-device storage card title
@@ -5696,7 +5696,7 @@ abstract class S {
   /// Welcome A intro page 2: on-device storage card body
   ///
   /// In en, this message translates to:
-  /// **'Never sent to the cloud'**
+  /// **'Plaintext financial data stays on-device'**
   String get onboardingPrivacyCardLocalBody;
 
   /// Welcome A intro page 2: end-to-end encryption card title

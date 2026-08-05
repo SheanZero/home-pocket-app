@@ -38,6 +38,7 @@ import '../../../../application/family_sync/sync_queue_recovery_use_case.dart';
 import '../../../../application/family_sync/transaction_withdrawal_acknowledger.dart';
 import '../../../../application/profile/repository_providers.dart'
     as app_profile;
+import '../../../../core/config/release_features.dart';
 import '../../../../data/daos/group_dao.dart';
 import '../../../../data/daos/group_member_dao.dart';
 import '../../../../data/daos/family_sync_outbox_dao.dart';
@@ -431,8 +432,9 @@ final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
     keyManager: ref.watch(keyManagerProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
-    onDeviceRegistered: () =>
-        ref.read(pushNotificationServiceProvider).registerCurrentToken(),
+    onDeviceRegistered: ReleaseFeatures.pushNotifications
+        ? () => ref.read(pushNotificationServiceProvider).registerCurrentToken()
+        : null,
   );
 });
 
@@ -440,8 +442,9 @@ final joinGroupUseCaseProvider = Provider<JoinGroupUseCase>((ref) {
   return JoinGroupUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     keyManager: ref.watch(keyManagerProvider),
-    onDeviceRegistered: () =>
-        ref.read(pushNotificationServiceProvider).registerCurrentToken(),
+    onDeviceRegistered: ReleaseFeatures.pushNotifications
+        ? () => ref.read(pushNotificationServiceProvider).registerCurrentToken()
+        : null,
   );
 });
 
@@ -517,8 +520,9 @@ final checkGroupUseCaseProvider = Provider<CheckGroupUseCase>((ref) {
     keyManager: ref.watch(keyManagerProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     membershipRotation: ref.watch(membershipRotationCoordinatorProvider),
-    onDeviceRegistered: () =>
-        ref.read(pushNotificationServiceProvider).registerCurrentToken(),
+    onDeviceRegistered: ReleaseFeatures.pushNotifications
+        ? () => ref.read(pushNotificationServiceProvider).registerCurrentToken()
+        : null,
   );
 });
 

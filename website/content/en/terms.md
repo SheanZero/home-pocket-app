@@ -1,4 +1,9 @@
-# Terms of Use
+---
+title: "Terms of Use"
+description: "The conditions for using Happy Pocket, including free supply, user responsibilities, external services, and governing law."
+translationKey: "terms"
+eyebrow: "LEGAL · TERMS"
+---
 
 **Happy Pocket: Family Budget**
 

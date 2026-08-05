@@ -21,6 +21,8 @@
         <strong>{{ i18n "footer_project" }}</strong>
         <a href="{{ .Site.Params.githubURL }}" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
         {{ with .Site.GetPage "/support" }}<a href="{{ .RelPermalink }}">{{ i18n "nav_support" }}</a>{{ end }}
+        {{ with .Site.GetPage "/terms" }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
+        {{ with .Site.GetPage "/tokusho" }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
         <a href="{{ .Site.Params.githubURL }}/issues" target="_blank" rel="noreferrer">GitHub Issues <span aria-hidden="true">↗</span></a>
         <a href="{{ .Site.Params.githubURL }}/blob/main/LICENSE" target="_blank" rel="noreferrer">Apache 2.0 <span aria-hidden="true">↗</span></a>
       </div>
