@@ -302,7 +302,7 @@
 平台与框架
 ├─ Flutter 3.16+
 ├─ Dart 3.2+
-└─ Target: iOS 14+ / Android 7+
+└─ Target: iOS 15+ / Android 7+
 
 架构模式
 ├─ Clean Architecture

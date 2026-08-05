@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "Home Pocket";
+"NSMicrophoneUsageDescription" = "Home Pocket uses the microphone for voice entry.";
+"NSSpeechRecognitionUsageDescription" = "Home Pocket uses speech recognition to enter amounts and transaction details by voice.";
+"NSFaceIDUsageDescription" = "Home Pocket uses Face ID to unlock the app.";

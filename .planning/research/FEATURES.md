@@ -1,6 +1,6 @@
 # Feature Research
 
-**Domain:** Pre-launch capstone features for a free, local-first, privacy-first family accounting app — Japanese market (iOS 14+/Android 7+). Scope: (a) first-run onboarding with mandatory locale/currency/voice-language setup, (b) app-lock (Face ID + PIN), (c) in-Settings donation/sponsorship link, (d) in-Settings legal section.
+**Domain:** Pre-launch capstone features for a free, local-first, privacy-first family accounting app — Japanese market (iOS 15+/Android 7+). Scope: (a) first-run onboarding with mandatory locale/currency/voice-language setup, (b) app-lock (Face ID + PIN), (c) in-Settings donation/sponsorship link, (d) in-Settings legal section.
 **Researched:** 2026-06-28
 **Confidence:** MEDIUM-HIGH (UX patterns HIGH/well-established; Apple-policy + Japan-legal specifics MEDIUM and flagged for legal review)
 

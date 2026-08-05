@@ -228,7 +228,7 @@ lib/
 
 - Flutter 3.16.0+
 - Dart 3.2.0+
-- iOS 14+ / Android 7+ (API 24+)
+- iOS 15+ / Android 7+ (API 24+)
 - Xcode 15+ (for iOS) / Android Studio (for Android)
 
 ### Installation Steps

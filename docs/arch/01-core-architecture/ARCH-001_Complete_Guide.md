@@ -33,7 +33,7 @@
 # 平台与框架
 Platform: Flutter 3.16+
 Language: Dart 3.2+
-Target: iOS 14+ / Android 7+ (API 24+)
+Target: iOS 15+ / Android 7+ (API 24+)
 
 # 架构模式
 Architecture: Clean Architecture + Repository Pattern

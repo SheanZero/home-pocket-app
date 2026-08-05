@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "家庭口袋";
+"NSMicrophoneUsageDescription" = "家庭口袋使用麦克风进行语音记账。";
+"NSSpeechRecognitionUsageDescription" = "家庭口袋使用语音识别输入金额和交易内容。";
+"NSFaceIDUsageDescription" = "家庭口袋使用面容 ID 解锁应用。";
