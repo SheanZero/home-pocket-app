@@ -1,156 +1,212 @@
 # Project Research Summary
 
-**Project:** Happy Pocket (ハピポケ家族家計簿) — v2.0 pre-launch capstone
-**Domain:** Pre-launch gating/lock/compliance for a shipped local-first encrypted Flutter family-accounting app (Japan market, iOS 15+/Android 7+)
-**Researched:** 2026-06-28
-**Confidence:** HIGH (integration/stack/architecture grounded in current source; store-policy/JP-legal specifics MEDIUM, flagged for legal review)
+**Project:** Happy Pocket (ハピポケ家族家計簿)
+**Domain:** Local-first, privacy-first Flutter family accounting app; v2.1 dependency and native toolchain modernization
+**Researched:** 2026-08-05
+**Confidence:** MEDIUM
 
 ## Executive Summary
 
-This milestone adds four pre-launch surfaces to an already-shipped app — first-run onboarding (mandatory UI-language / currency / voice-language setup), an app-lock (Face ID/biometric + PIN), a Settings donation link, and a Japanese-market legal section (Privacy Policy / Terms / OSS licenses, with 特商法 flagged). The defining characteristic of the research is that **this is an integration milestone, not a greenfield build.** Almost everything needed already exists in the codebase: `local_auth ^3.0.1`, `flutter_secure_storage ^10.2.0` (with a pre-wired `StorageKeys.pinHash` slot), `crypto`/`cryptography` KDFs, the SharedPreferences-backed `SettingsRepository`, the v1.7 JPY-first currency selector, voice-locale routing, and Flutter's built-in `showLicensePage`. The single genuinely-new runtime dependency is **`url_launcher ^6.3.2`** (donation link), and it has been verified clear of the project's `win32`-pinned `file_picker`/`share_plus`/`package_info_plus` trap.
+v2.1 must deliver a **reproducible, production-stable compatibility window**, not an empty `pub outdated` report. The shipped Flutter app has encrypted local financial data, historical Drift migrations, Argon2id/AES backup recovery, app lock, sync, and native integrations; version work is successful only when the exact resolved graph, generated source, native toolchains, and evidence all agree. Upgrade by coherent lanes with a committed lockfile and executable compatibility contract—never by blanket major upgrades or `dependency_overrides`.
 
-The recommended approach is to attach both new gates to the **one existing integration seam** — the synchronous branch ladder in `HomePocketApp._buildHome()` (`lib/main.dart`), mirroring the existing `_needsProfileOnboarding` gate. Gate config is read once in `_initialize()` after `AppInitializer` completes and held in local widget state, so the gates can never race init and never flash protected content. Onboarding writes through existing providers (`localeProvider`, `BookRepository.update` for currency, `setVoiceLanguage`) and sets a single `onboarding_complete` flag **last**; app-lock adds a `PinService` (salted slow-KDF hash in the Keychain), an `AppLockScreen`, and a `WidgetsBindingObserver` for resume re-lock; legal/donation extend the Settings `AboutSection`.
+The recommended baseline is Flutter stable **3.44.7** (Dart 3.12; re-check the official stable archive when execution begins), with **AGP 9.0.1 + Gradle 9.1 + JDK 17 + API 36** as the Android migration candidate. Preserve the known-good encrypted iOS lane exactly: `sqlcipher_flutter_libs 0.6.8` + `sqlite3 2.9.4` + SQLCipher CocoaPod 4.10.0, the Podfile system-`sqlite3` strip, and SwiftPM-for-supported-plugins/CocoaPods-for-SQLCipher split. Do not adopt `sqlcipher_flutter_libs 0.7.0+eol`, `sqlite3_flutter_libs`, or system SQLite.
 
-The key risks are concentrated in security and compliance, not feature complexity. The highest-severity pitfall is **changing `flutter_secure_storage` keychain accessibility** — on 10.x this silently bricks every existing install (documented project gotcha, quick 260610-ss7); the PIN must reuse the shared `unlocked_this_device` options. Other critical risks: weak/plaintext PIN storage (use salted slow KDF + persisted lockout), onboarding racing `AppInitializer`, missing re-lock-on-resume plus app-switcher data leak, biometric edge cases with no PIN fallback, ARB trilingual-parity / hardcoded-CJK scan failures on the large legal copy volume, and store-review/特商法 rejection of the donation path. Mitigation is well-understood for all of them and mapped to specific phases below.
+The decisive risks are silent loss of SQLCipher linkage, data/keychain loss during testing, partial analyzer/codegen upgrades that disable the Clean Architecture import gate, and native artifacts that differ from test artifacts. Mitigate them with clean regeneration, fail-closed contracts, signed Android release + emulator proof, and an **isolated Bundle ID** wired-iPhone UAT. This milestone has one available physical target—a wired iPhone; Android physical-device UAT is explicitly unavailable/out of scope and must never be claimed.
 
 ## Key Findings
 
-### Recommended Stack
+### Recommended Stack and Explicit Holds
 
-The milestone needs **almost no new dependencies** — onboarding persistence, biometric, PIN hashing, secure storage, OSS-license display, and the about/version surface are all satisfiable with packages already in `pubspec.yaml` or Flutter built-ins. Frame every decision as "reuse vs add" and default to reuse. No `go_router` (boot-time branch widgets, not routes), no IAP/payment SDK (donation is a link), no `sqlite3_flutter_libs` (banned), no `flutter_markdown` (discontinued 2025), and do not bump the win32-pinned trio.
+| Lane | v2.1 decision | Rationale / non-negotiable condition |
+|---|---|---|
+| Flutter / Dart | Upgrade to Flutter stable **3.44.7** and raise app SDK lower bound to `^3.12.0` | Revalidate official stable status at execution; do not choose scheduled, beta, RC, or dev releases. |
+| Android native toolchain | Candidate: **AGP 9.0.1, Gradle 9.1, JDK 17, API 36** | Migrate as one lane to AGP built-in Kotlin/new DSL; remove legacy KGP/false flags only after every plugin builds. |
+| SQLCipher native storage | **Hold:** `sqlcipher_flutter_libs 0.6.8` + `sqlite3 2.9.4` + Pod 4.10.0 | Last proven functional encrypted path. Preserve `ensureNativeLibrary()` order and Podfile `-lsqlite3` removal. |
+| Analyzer / architecture lint | **Hold analyzer 8.x** | `import_guard_custom_lint 1.0.0` requires `<9`; solve this blocker before an analyzer-9+/Riverpod-generator modernization. No override or disabled architecture gate. |
+| Riverpod / Drift / JSON / builders | Defer as coordinated solver lanes | Do not partially bump runtime, annotations, generators, lints, analyzer, builder, or `drift_dev`; each changes generated source contracts. |
+| Freezed | Candidate low-risk patch: `freezed 3.2.5`; annotation stays 3.1.0 | Regenerate and verify in the selected analyzer-8 graph; no pre-release Freezed 4. |
+| File/share/metadata | **Hold group:** file_picker 11.0.3, share_plus 12.0.2, package_info_plus 9.0.1, win32 5.15.0 | Partial major moves can change `.hpb` import or sharing behavior; file_picker 12 is pre-release. |
+| Speech | Candidate `speech_to_text` 7.4.0 in an isolated adapter lane | Requires ja/zh/en parsing and platform permission/recognition proof; otherwise retain 7.3.0. |
+| iOS | Xcode 26.6 stable; iOS floor remains 15.0; Swift 5 remains | Keep generated SwiftPM enabled; keep CocoaPods 1.16.2 locked and use `pod install`, not bulk `pod update`. |
 
-**Core technologies:**
-- `url_launcher ^6.3.2` (NEW, the only added dep): donation link via `launchUrl(..., LaunchMode.externalApplication)` — verified no win32 conflict (`url_launcher_windows` deps only flutter + platform interface).
-- `local_auth ^3.0.1` (reuse): Face ID/Touch ID/Android biometric — extend existing `biometric_service.dart`, do not re-wrap.
-- `flutter_secure_storage ^10.2.0` (reuse): PIN hash+salt + lock flags in `StorageKeys.pinHash` — keep `unlocked_this_device` accessibility unchanged.
-- `crypto ^3.0.6` / `cryptography ^2.7.0` (reuse): salted slow-KDF (PBKDF2 ≥100k iterations or Argon2id) for the PIN — never plaintext, never fast hash.
-- `shared_preferences ^2.3.4` via `SettingsRepository` (reuse): UI-language, voice-language, and the new `onboarding_complete` flag — same store the app already reads.
-- Flutter built-ins `showLicensePage`/`LicenseRegistry` (reuse): OSS attribution, auto-aggregates transitive deps.
+### Core Deliverable Capabilities
 
-### Expected Features
+The roadmap must cover these release-gating capabilities, not new product features:
 
-**Must have (table stakes):**
-- Onboarding: device-locale-aware language pre-selection, JPY default, re-entrant (can't get stuck), progress + back nav — "confirm a sensible default," not "fill a blank form."
-- App-lock: biometric-first with mandatory PIN fallback, lock on cold launch, re-lock on resume past grace threshold, failed-attempt feedback + escalating cooldown (no default data-wipe), Settings toggle.
-- Donation: exactly one unobtrusive external-browser link in Settings (応援/支援 framing), no IAP, no webview, no nags.
-- Legal: Privacy Policy (hosted URL mandatory for App Store Connect + in-app), 利用規約, OSS licenses — all localized in ja/zh/en.
-
-**Should have (competitive / on-brand):**
-- Skippable privacy/local-first intro slides (trust differentiator vs account-pushing kakeibo apps).
-- Voice-input language confirmed during onboarding, defaulted to chosen UI language.
-- App-lock prompt offered (clearly skippable) during onboarding for adoption-without-nagging.
-
-**Defer (v2.x / future):**
-- Forgot-PIN → BIP39 recovery reset (strongly recommended; if descoped, document the lockout trade-off explicitly).
-- Configurable re-lock grace period (ship a fixed default first).
-- 特商法 表記 entry (add if/when legal review says the donation path triggers it).
-- Opt-in "erase after N failures" (default off, likely never).
+- Production-stable baseline, reviewed `pubspec.lock`, version decision record, and a compatibility contract that rejects forbidden/partial lanes.
+- Clean reproducible l10n and code generation with no stale generated `lib/` diff; analysis, custom lint/import boundaries, architecture tests, full tests, coverage, and release preflight stay blocking.
+- Native encryption proof: non-empty `PRAGMA cipher_version` on the iPhone after initial open **and reopen**, historical encrypted schema migration, and preserved data/index/default invariants.
+- Encrypted `.hpb` backup export → test-only destructive clear → password restore, including legacy-format/error-path coverage.
+- Existing app-lock, manual accounting persistence, and encrypted sync queue/core delivery compatibility after cold relaunch.
+- Signed Android release AAB/APK and Android-emulator integration validation; no Android physical device claim.
+- Isolated wired-iPhone installation and profile/release-compatible performance evidence, with a distinct Bundle ID, container, keychain access group, notification configuration, test keys, and synthetic data.
 
 ### Architecture Approach
 
-There is a single integration seam: the synchronous gate ladder in `HomePocketApp._buildHome()`. `AppInitializer` completes (KeyManager → DB → container) before `runApp`, so by the time `HomePocketApp` mounts the container is guaranteed ready. Both new gates are added as branches in this ladder, **below** the existing error/spinner branches and reading config resolved once in `_initialize()` — never as a second `ProviderScope`, never as an async gate in `build()`, never via go_router. Order: error → loading → onboarding (branch 3, first-run only) → app-lock (branch 4, launch + resume) → profile onboarding (branch 5) → main shell (branch 6).
+Do not redesign Clean Architecture. Keep build/dependency declarations at the composition boundary; SQLCipher/native loading in infrastructure; existing data/domain/presentation boundaries intact. A compatibility window owns source constraints, lockfile, generated artifacts, native project state, and evidence as one reviewable unit. Every exceptional pin co-evolves with `docs/testing/DEPENDENCY_COMPATIBILITY.md`, `scripts/dependency_compatibility.dart`, and its contract test.
 
-**Major components:**
-1. `OnboardingFlow` (NEW `features/onboarding/presentation/`) — intro + mandatory language/currency/voice setup writing through existing providers; writes `onboarding_complete` last.
-2. `AppLockScreen` + `AppLockController` (NEW `features/app_lock/`) — biometric + PIN unlock UI; `WidgetsBindingObserver` re-locks on `resumed`-after-`paused` (mirrors `SyncEngine`).
-3. `PinService` (NEW `infrastructure/security/`) — salted-hash PIN, verify, store/clear via pre-wired `StorageKeys.pinHash`.
-4. `LegalSection` / `DonationSection` (extend `AboutSection`) — Privacy/Terms/特商法/OSS + `url_launcher` donation; legal text as bundled localized `assets/legal/` (offline).
-5. Modified `lib/main.dart` (`_initialize()` + `_buildHome()` branches 3/4), `SecuritySection` (PIN setup tile), ARB ja/zh/en.
+Major boundaries:
 
-Persistence is per-setting and justified: PIN hash → Keychain (only true secret); lock toggles + `onboarding_complete` → SharedPreferences (boot-safe, no DB dependency); UI/voice language → SharedPreferences (canonical paths); currency → encrypted Drift `Book.currency` (per-book domain data).
+1. **SDK/solver and generator boundary** — one Flutter/Dart-resolved graph; generated files are regenerated, never hand-edited.
+2. **Secure native database boundary** — `ensureNativeLibrary()` before initialization/DB access, SQLCipher pragma proof, Podfile safeguard, migration ladder, and backup restore.
+3. **Android build boundary** — AGP/wrapper/Kotlin/DSL/SDK/plugins migrate atomically; release signing remains enforced.
+4. **iOS dependency and UAT boundary** — SwiftPM plus narrow SQLCipher Pods exception; an additive test identity protects the production app/container/keychain.
+5. **Release evidence boundary** — `release_preflight.sh`, clean registrants, emulator/simulator prerequisites, then exact-artifact iPhone UAT.
 
 ### Critical Pitfalls
 
-1. **Changing keychain accessibility bricks every install** — keep the new PIN write on the shared `unlocked_this_device` options object; never pass per-call `IOSOptions(accessibility:)`. Add a regression test asserting the shared options object. (Project memory: quick 260610-ss7.)
-2. **Weak PIN storage** — salted slow KDF (≥100k iterations) in secure storage, constant-time compare, persisted retry counter with escalating backoff (cleared only on success), no auto-wipe. Run KDF off the main isolate (`compute`) to avoid unlock jank on Android 7.
-3. **Onboarding races `AppInitializer`** — derive the onboarding decision from settled init state held in local widget state; write `onboarding_complete` exactly once on explicit finish; never infer completion from "currency != null."
-4. **No re-lock on resume + app-switcher leak** — re-lock on `paused`/resume (NOT `inactive`, which loops the biometric prompt); suppress re-lock while a biometric prompt is in flight; shield overlay on `inactive` so the switcher snapshot shows no data; lock screen sits as a root overlay above the IndexedStack, and fully no-ops when disabled.
-5. **Biometric edge cases with no PIN fallback** — PIN mandatory whenever lock enabled; handle the full `local_auth` error taxonomy (`notAvailable`/`notEnrolled`/`lockedOut`/`permanentlyLockedOut`/`passcodeNotSet`/cancel) → route to PIN; check availability at enable + each unlock.
-6. **i18n parity / CJK scan on new screens (esp. legal)** — every visible string through ARB ×3 + `flutter gen-l10n` + `git add -f lib/generated/`; for long legal docs use bundled per-locale assets WITH a matching "all three locales present" gate; run hardcoded-CJK scan + full `flutter test` before done.
-7. **Donation rejection / 特商法** — external browser only, neutral non-transactional wording, no reward; prepare a 特商法 表記 surface; verify via a real TestFlight/internal-track review, not self-assessment.
-8. **Store privacy forms / OSS attribution** — fill Apple/Google forms truthfully and consistently with the policy (disclose the v1.7 exchange-rate network call); surface `showLicensePage` (don't hand-maintain); hosted Privacy Policy + 利用規約 URLs in all three languages.
+1. **System SQLite wins iOS symbol resolution.** Preserve the Podfile post-install `-lsqlite3` strip and require non-empty `cipher_version`; a successful host test is not encryption proof.
+2. **EOL packages masquerade as upgrades.** Reject `sqlcipher_flutter_libs 0.7.0+eol` and `sqlite3_flutter_libs`; never fall back to plaintext/system SQLite.
+3. **Partial codegen/analyzer updates remove lint protection.** `import_guard_custom_lint` blocks analyzer 9+; resolve/replace it first, then upgrade the whole affected lane and regenerate.
+4. **AGP 9 is migrated halfway.** Do not remove KGP or legacy flags until plugin/app compilation, signed release packaging, and emulator E2E pass; otherwise keep a documented AGP-8 recovery point.
+5. **The UAT app touches production data.** A distinct UAT Bundle ID/App ID/profile/keychain/container is mandatory; run destructive backup/restore only against deterministic test data.
+6. **Migration/backup appears green but encrypted data is lost.** Preserve historical fixture and restore-atomicity tests; never mint a new master key when an encrypted DB already exists.
 
 ## Implications for Roadmap
 
-> Numbering continues from v1.9 Phase 52 → this milestone starts at **Phase 53**. The architecture and pitfalls research independently converge on the same four-phase, design-gate-first ordering.
+Suggested sequential phases are **57–63**. Keep each phase as a green, revertible compatibility window and record the SHA/evidence before advancing.
 
-### Phase 53: HTML design gate (no production code)
-**Rationale:** Mirrors the v1.8 Phase 43 precedent — onboarding flow approved as an HTML draft before any Dart, per the explicit milestone requirement. Can start early/in parallel with research since it produces no code.
-**Delivers:** Approved HTML design drafts for the onboarding flow, the lock screen, and the legal/donation Settings layout.
-**Addresses:** Onboarding UX (step order: language-first), app-lock screen, legal/donation layout.
-**Avoids:** Rework from building the flow before the design is settled.
+### Phase 57: Baseline, Official Stable Decision, and Contract
 
-### Phase 54: Onboarding flow
-**Rationale:** Build before app-lock because the lock setup is *offered during* onboarding; the onboarding gate slot is the structural prerequisite for the milestone.
-**Delivers:** Gate branch 3 + mandatory language/currency/voice setup writing through existing providers; `onboarding_complete` written last; optional skippable intro; optional "set up app lock" prompt placeholder.
-**Uses:** `localeProvider`, `SettingsRepository`, `BookRepository.update`, `voiceLocaleIdProvider`, v1.7 currency selector.
-**Implements:** `OnboardingFlow` + gate branch in `_buildHome()`.
-**Avoids:** Pitfall 3 (race/idempotency), Pitfall 6 (i18n parity).
+**Rationale:** All later work depends on a single resolved baseline; version claims made on 2026-08-05 may have changed by execution.
 
-### Phase 55: App-lock (highest-risk — own phase + security review)
-**Rationale:** The highest-risk integration (keychain + lifecycle + biometric). Depends on the onboarding lock prompt existing.
-**Delivers:** `AppLockScreen` (biometric + PIN), `PinService` (salted KDF), `AppLockController` resume re-lock + switcher shield, gate branch 4, `SecuritySection` PIN/toggle controls.
-**Uses:** `local_auth`, `flutter_secure_storage` (shared accessibility), `crypto`/`cryptography`.
-**Avoids:** Pitfalls 1, 2, 4, 5 (keychain brick, weak PIN, resume leak, biometric fallback).
+**Delivers:** Recorded Flutter/Dart/Xcode/CocoaPods/Java/Gradle/SDK and dependency baseline; re-checks official Flutter stable status (target 3.44.7 if still stable); allow/hold matrix; updated machine-checked compatibility contract and lockfile policy.
 
-### Phase 56: Settings legal + donation + Japan compliance (launch gate)
-**Rationale:** Independent of the gates; schedule last but with slack for a real store-review round-trip — donation/privacy rejection is the most likely external blocker.
-**Delivers:** Privacy/Terms/特商法/OSS surfaces, `url_launcher` donation link, bundled localized legal assets, trilingual ARB, hosted-URL coordination, store privacy-form reconciliation.
-**Uses:** `url_launcher`, `showLicensePage`, bundled `assets/legal/`.
-**Avoids:** Pitfalls 6, 7, 8 (i18n, donation/特商法, privacy forms/OSS).
+**Must avoid:** no blanket updater, no overrides, no SQLCipher EOL/system-SQLite resolution, and no unexplained hold.
+
+### Phase 58: Flutter/Dart and Codegen/Analyzer Decision
+
+**Rationale:** Flutter pins Dart and constrains Pub; code generation must be coherent before native/package cohorts consume its lockfile.
+
+**Delivers:** Flutter 3.44.7/Dart ^3.12 baseline if official stable check confirms it; clean resolve; Freezed patch only if resolver-safe; generated artifacts/l10n/analysis/custom-lint/architecture gates green. Explicitly either (a) completes an import-guard-compatible analyzer upgrade or (b) records the analyzer-8/Riverpod/Drift/JSON/build-runner holds as accepted compatibility debt.
+
+**Dependency:** The `import_guard_custom_lint <9` blocker must be solved before any analyzer-9+ or modern Riverpod generator lane. It is a prerequisite, not an override opportunity.
+
+### Phase 59: Isolated Flutter/Plugin Cohorts
+
+**Rationale:** Plugin changes require narrow causal attribution after the base solver is reproducible.
+
+**Delivers:** Only resolver-safe cohorts, principally the speech adapter 7.3.0→7.4.0 if tests/permissions validate it; preserve file/share/metadata group unless a complete stable lane is proven. Firebase/messaging/notifications remain held if already current.
+
+**Must avoid:** moving one package in the file/share/win32 group; accepting a beta; treating build success as microphone, share-sheet, APNs/FCM, or cold-start proof.
+
+### Phase 60: Encrypted Native DB and iOS Dependency Resolution
+
+**Rationale:** It establishes the privacy-critical native graph and must precede release gates/UAT.
+
+**Delivers:** Clean SwiftPM/Pods regeneration, locked SQLCipher 0.6.8/sqlite3 2.9.4/Pod 4.10.0 lane, preserved linker safeguard, simulator/native encrypted reopen plus migration/backup test preparation.
+
+**Must avoid:** a cosmetic SQLCipher upgrade, `pod update`, removing the system-SQLite strip, schema bumps not required by an app data change, or any plaintext fallback.
+
+### Phase 61: Android AGP 9 Toolchain Migration
+
+**Rationale:** Android host tooling is an atomic graph and can be rolled back independently to the last AGP-8 green point.
+
+**Delivers:** AGP 9.0.1, Gradle 9.1, JDK 17, API 36 candidate validation; built-in Kotlin/new DSL migration; KGP and temporary opt-out flag removal only when compatible; debug build, signed release package, signing contract, and emulator E2E.
+
+**Must avoid:** SDK/min-support-floor drift, debug signing as release proof, or claiming Android physical-device validation.
+
+### Phase 62: Automated Release-Gate Hardening
+
+**Rationale:** The final candidate must be produced by the exact reproducible process used for release, not cached native artifacts.
+
+**Delivers:** CI exact SDK/lockfile enforcement; dependency contract, generation clean diff, analyze/custom lint/architecture tests, full suite/coverage, release preflight, Android release+emulator and iOS simulator gates; future-channel probe remains warning-only.
+
+**Must avoid:** hand-editing plugin registrants, shipping `integration_test` registrants, suppressing signing failures, or converting `baseline_required` performance results into passes.
+
+### Phase 63: Isolated Wired-iPhone Acceptance and Final Lock
+
+**Rationale:** Only the connected iPhone proves signed-device SQLCipher linkage, Keychain/Face ID lifecycle, and representative performance. It must validate the candidate CI actually produced.
+
+**Delivers:** Additive UAT scheme/configuration with a distinct Bundle ID/App ID/profile; redacted signed-device UAT record; final decision manifest/lock.
+
+**Must avoid:** production app installation/overwrite, production keys/data/backups, sensitive logs, simulator substitution, and treating an unavailable sync environment as pass.
 
 ### Phase Ordering Rationale
-- **Design-gate-first** is a hard milestone requirement (HTML draft → strict implementation) and matches the proven Phase 43 precedent.
-- **Onboarding before app-lock** because step ⑤ of onboarding offers to enable a lock that must already exist.
-- **App-lock isolated** because it concentrates the three highest-severity integration risks and warrants its own security review.
-- **Legal/donation last but early-scheduled for review slack** — it is the only phase whose blocker (store review) is external and non-deterministic.
+
+`57 baseline → 58 SDK/solver → (59 constrained cohorts + 60 encrypted iOS lane) → 61 Android → 62 release gates → 63 wired-iPhone lock`.
+
+This order fixes the resolver before plugin/native artifacts, proves encrypted persistence before platform release claims, and runs physical UAT last against the actual final lockfile. Keep 59 and 60 logically separate; if parallelized during planning, they cannot merge until the selected Flutter/Dart lockfile is identical and all joint gates pass.
 
 ### Research Flags
 
-Phases likely needing deeper research / external verification during planning:
-- **Phase 55 (App-lock):** keychain-accessibility regression behavior on a populated install, `local_auth` error taxonomy, and off-isolate KDF tuning warrant a focused security review (`--research-phase` or `gsd-secure-phase`).
-- **Phase 56 (Legal/compliance):** 特商法 applicability to an individual developer's external-platform donation, APPI policy wording, and current Apple/Google donation-review stance are MEDIUM-confidence and need a JP-savvy legal advisor + a real review submission — not self-assessment.
+**Needs deeper planning research:**
 
-Phases with standard patterns (skip research-phase):
-- **Phase 53 (HTML design):** established Phase 43 precedent.
-- **Phase 54 (Onboarding):** all write paths already exist; pattern mirrors `_needsProfileOnboarding`.
+- **58:** import-guard/custom-lint replacement or upgrade path; it is the hard analyzer<9 blocker and must preserve enforcement, not merely solve Pub.
+- **60:** any proposed SQLCipher/sqlite3/Pod/SwiftPM change; current recommendation is hold, and a replacement needs official maintained-packaging evidence plus physical-device proof.
+- **61:** AGP 9 built-in Kotlin/new DSL plugin-fleet compatibility under the exact chosen Flutter stable.
+- **63:** separate Bundle ID/App ID, entitlements, Firebase/notification configuration, provisioning, and whether a production-identity in-place upgrade test is additionally required. Isolated identity alone does not prove production Keychain continuity.
+
+**Standard/reuse-first planning:**
+
+- **57 and 62:** repository has the compatibility script, CI workflows, release preflight, and contract tests to extend.
+- **59 speech/file cohorts:** only after a standard clean solve; defer rather than research/force a non-essential upgrade.
+
+## Release Blockers and Acceptance Matrix
+
+| Gate | Required evidence | Cannot be substituted by |
+|---|---|---|
+| Stable/version decision | Official-source recheck; reviewed manifest, lockfile, exact command output, no unapproved beta/RC/override | A scheduled release date or `pub outdated` |
+| Dependency/security contract | `dependency_compatibility.dart` and tests pass; no `sqlite3_flutter_libs`, no 0.7.0+eol; preserved known-good encrypted lane | Resolver success alone |
+| Generation and architecture | clean `pub get`, l10n, build_runner; no generated `lib/` diff; analyze, custom lint/import guard, architecture tests, full suite/coverage | Manually edited generated code |
+| Encryption and migration | non-empty `PRAGMA cipher_version` after open/reopen; historical fixture→current migration, schema/index/data assertions | Host VM test or a successful unencrypted DB open |
+| Backup and lock | `.hpb` export/clear/restore exact sentinel; wrong-password/limits; PIN and Face ID/fallback/lifecycle evidence | Widget tests alone |
+| Core/sync | manual daily/joy transaction persists over restart; encrypted queue/outbox settles without E2EE weakening | New feature work or unredacted payload logs |
+| Android | signed release AAB/APK, signing contract, emulator integration test | Android debug build or Android physical-device claim |
+| iPhone identity | distinct test Bundle ID/container/keychain/notification config; production install remains untouched | RunnerTests unit-test ID or changing production ID |
+| Wired iPhone | exact signed artifact; install/start/reopen/migrate/backup/lock/core/sync-smoke record; profile/release benchmark metadata | Simulator, debug mode, or warm-cache observations |
+
+## Scope Boundaries
+
+**In scope:** stable-tooling/dependency decisions, generated output, native build integration, preservation of existing behavior, automated gates, Android release+emulator proof, and one isolated wired-iPhone acceptance.
+
+**Out of scope:** product/UI features, beta/RC/dev adoption, Android physical-device UAT, iPad coverage, store submission/legal-content changes, production support/sponsor URLs, and SQLCipher architecture replacement without a separately approved ADR and evidence.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | Versions confirmed in `pubspec.yaml`/`pubspec.lock`; `url_launcher` win32-conflict cleared by transitive analysis. |
-| Features | MEDIUM-HIGH | UX patterns well-established; Apple-policy + Japan-legal specifics MEDIUM and flagged. |
-| Architecture | HIGH | All integration points read directly from current source (main.dart, app_initializer, secure_storage_service, settings/about/security sections, state_locale). |
-| Pitfalls | MEDIUM-HIGH | Integration/security pitfalls HIGH (codebase + project memory grounded); store-policy/legal MEDIUM (policies shift, needs JP legal sign-off). |
+|---|---|---|
+| Stack | MEDIUM | Versions and migration requirements use official primary sources; exact compatibility is still resolver/device dependent. SQLCipher and analyzer holds are HIGH-confidence project constraints. |
+| Features / acceptance | HIGH | Existing scripts, CI, integration tests, migration/backup/lock harnesses, and stated device availability were directly observed. |
+| Architecture | HIGH | Repository boundaries and fail-closed contracts are directly evidenced; recommended phase sequence is MEDIUM inference. |
+| Pitfalls | MEDIUM | Official platform/SQLCipher guidance plus direct project safeguards; final failure modes require native-device validation. |
 
-**Overall confidence:** HIGH for engineering execution; MEDIUM for external compliance/store-review outcomes.
+**Overall confidence:** MEDIUM. The recommended holds are stronger than speculative upgrade targets: preserving security and architecture enforcement is mandatory even if it means some apparent latest versions remain deferred.
 
-### Gaps to Address
+### Conflicts and Uncertainties to Resolve During Planning
 
-- **特商法 applicability** to an external-platform donation by an individual developer — resolve with a JP legal advisor in Phase 56; default to providing a 特商法 表記 surface if in doubt.
-- **Store-review approval of the donation link** — non-deterministic; verify via TestFlight/internal-track submission and keep a fallback (soften wording / external Settings entry) ready.
-- **Forgot-PIN recovery decision** — whether BIP39 recovery resets the PIN; decide explicitly in Phase 55, and if descoped, ensure lock copy promises no recovery that doesn't exist.
-- **Re-lock grace policy** — confirm default (immediate vs 1 min) and whether user-configurable; ship a fixed default first.
-- **PIN length** — pick and fix 4 vs 6 digits (research recommends 6) before Phase 55 implementation.
-- **Hosted legal URLs** — Privacy Policy + 利用規約 must exist as reachable URLs for both store listings (ops/external task, not pure code).
+- **Flutter freshness:** 3.44.7 is the 2026-08-05 stable target. Re-query only official Flutter sources when Phase 57 starts; retain it if it is still the required stable compatibility choice, otherwise make a new documented GA-only decision.
+- **Analyzer/Riverpod conflict:** latest Riverpod/codegen candidates conflict with the current analyzer-8 import guard. Do not put their upgrades into requirements as guaranteed delivery until the lint solution is researched and proven.
+- **SQLCipher replacement:** none is authorized by current evidence. The v2.1 default is retention of 0.6.8/2.9.4/Pod 4.10.0, not migration to sqlite3 3.x.
+- **AGP 9 candidate:** AGP 9.0.1/Gradle 9.1/API 36 is recommended, but delivery is conditional on the selected Flutter stable and all plugins completing built-in Kotlin/new DSL migration. A documented AGP-8 hold is preferable to a partial migration.
+- **iPhone evidence scope:** an isolated app identity protects user data but proves clean-install compatibility, not production-identity/keychain in-place upgrade continuity; release owner must decide whether the latter becomes an added gate.
+- **Performance:** existing tools may return `baseline_required`; that is not a pass. Define the same-device baseline and cold-start procedure before Phase 63.
+
+## Direct Requirements and Roadmap Recommendations
+
+- Make requirements explicitly binary: every changed lane must either ship with the above evidence or be **held with rationale**. “Latest version” is not independently a requirement.
+- Include a hard requirement that the analyzer/import-boundary gate remains active; a resolver that disables it fails the milestone.
+- Include all nine acceptance-matrix rows as release gates, with an explicit “Android physical device: unavailable/out of scope, not verified” result.
+- Require the UAT Bundle ID/identity assertion before any device install. Do not reuse the RunnerTests Bundle ID as proof that the full UAT app is isolated.
+- Plan rollback points after each compatibility window; SQLCipher, codegen/analyzer, and AGP 9 lanes must be reverted atomically to their last green lockfile/native state.
+- Keep legal/store owner values out of this roadmap; retain them as separate pre-store-release gates from v2.0.
 
 ## Sources
 
-### Primary (HIGH confidence)
-- Repo source: `lib/main.dart`, `lib/core/initialization/app_initializer.dart`, `lib/infrastructure/security/secure_storage_service.dart` + `providers.dart`, `lib/data/repositories/settings_repository_impl.dart`, settings `about_section.dart`/`security_section.dart`, `state_locale.dart`/`state_settings.dart`, `profile_onboarding_screen.dart` — integration seams, pre-wired `pinHash` slot, write-through paths.
-- `pubspec.yaml`/`pubspec.lock` — already-present versions; `url_launcher_windows` resolves win32-free.
-- CLAUDE.md + project memory `flutter-secure-storage-accessibility-read-filter` (quick 260610-ss7) — keychain-accessibility brick, iOS pin constraints, no-go_router / no-sqlite3_flutter_libs, ARB parity discipline.
+### Official primary sources
 
-### Secondary (MEDIUM confidence)
-- Apple App Review Guidelines (3.1.1/3.1.3) + external-link updates; Google Play donation/external-link policy — donation-review stance, region-scoped entitlements.
-- Japan スマホ新法 (in force 2025-12-18) — external payment links permitted/fee-capped, but review approval still required.
-- pub.dev `url_launcher` / `local_auth` / `flutter_secure_storage` docs; Flutter `showLicensePage`/`LicenseRegistry`.
+- Flutter SDK archive, 3.44 release notes, built-in Kotlin migration, dependency management, integration testing, build modes/performance, and SwiftPM guidance.
+- pub.dev version pages and maintainer documentation for Flutter/Dart packages, SQLCipher, SQLite, Riverpod, Drift, Freezed, custom lint/import guard, speech, Firebase, and platform plugins.
+- Android Developers AGP 9.0.1 release notes, Android 16/API 36 setup, release build/signing guidance; Kotlin release documentation.
+- Apple Xcode support, physical-device, bundle-ID, signing/provisioning, Keychain, Swift package, distribution, and responsiveness documentation; CocoaPods `pod install`/`pod update` guide.
+- SQLCipher API/design/changelog primary documentation.
 
-### Tertiary (LOW confidence — needs validation)
-- 特定商取引法 表記 applicability for individual-operator external-platform donations — confirm with JP legal advisor.
-- APPI privacy-policy wording expectations — confirm against PPC guidance before store submission.
+### Project evidence
+
+- `.planning/PROJECT.md`, `.planning/STATE.md`, `pubspec.yaml`, lockfile, Android Gradle configuration, `ios/Podfile`/lock/project, and current iOS 15 support decision.
+- `docs/testing/DEPENDENCY_COMPATIBILITY.md`, `scripts/dependency_compatibility.dart`, `.github/workflows/{audit,device-e2e,flutter-future-compat}.yml`, `scripts/release_preflight.sh`, and performance scripts.
+- Encrypted database/init code, historical migration tests, device critical journey, sync delivery tests, backup-restore atomicity tests, and architecture/dependency contract tests.
 
 ---
-*Research completed: 2026-06-28*
+*Research completed: 2026-08-05*
 *Ready for roadmap: yes*

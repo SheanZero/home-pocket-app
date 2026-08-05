@@ -1,207 +1,113 @@
-# Feature Research
+# Feature Landscape — v2.1 Dependency & Native Toolchain Modernization
 
-**Domain:** Pre-launch capstone features for a free, local-first, privacy-first family accounting app — Japanese market (iOS 15+/Android 7+). Scope: (a) first-run onboarding with mandatory locale/currency/voice-language setup, (b) app-lock (Face ID + PIN), (c) in-Settings donation/sponsorship link, (d) in-Settings legal section.
-**Researched:** 2026-06-28
-**Confidence:** MEDIUM-HIGH (UX patterns HIGH/well-established; Apple-policy + Japan-legal specifics MEDIUM and flagged for legal review)
+**Domain:** Local-first, privacy-first Flutter family-accounting app (SQLCipher, Drift, Riverpod) undergoing a coordinated production-stable upgrade.
+**Researched:** 2026-08-05
+**Confidence:** MEDIUM — platform/tool expectations are cross-checked against official Flutter, Apple, and Android documentation; exact final version choices remain a phase-1 compatibility investigation.
 
-> Scope note: This file covers ONLY the four new v2.0 features. Existing infra (i18n `currentLocaleProvider`/ARB ja·zh·en, v1.7 JPY-first currency selector, zh/ja/en voice locale routing, `biometric_service`/`secure_storage`/Ed25519/BIP39) is treated as a dependency, not re-researched.
+## Product Framing
 
----
+This is not a “make `pub outdated` empty” milestone. Its user-visible product is a *verified compatibility window*: a production-stable Flutter/Dart/native/plugin set whose generation outputs, encrypted on-device data, recovery paths, and essential accounting/sync flows all remain intact. Every changed version must have a resolved, locked, and explainable rationale; a package that is newer but breaks the encrypted native path is not an upgrade.
 
-## Feature Landscape
+The existing repository already supplies most of the acceptance harness: a blocking compatibility contract, generated-code clean-diff gate, schema v36 migration tests, an encrypted device critical journey, Android/iOS simulator CI, release-preflight checks, and an opt-in device performance benchmark. v2.1 should consolidate and extend these into one release decision record rather than introduce product features.
 
-### Table Stakes (Users Expect These)
+## Must-Have Capabilities
 
-Missing these = the app feels broken, unsafe, or gets rejected from the App Store.
+These are release-blocking requirements. “Automated” means a committed test/script/CI job with a captured result; “human/device” means dated evidence from the specified target, not an assertion that it was probably tested.
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| **Onboarding: device-locale-aware language pre-selection** | The very first screen must already be in the user's language; a Japanese user must not face a Chinese/English form | LOW | Detect device locale → pre-select ja/zh/en in `currentLocaleProvider`. "Mandatory" should feel like *confirm a sensible default*, not *fill a blank form* |
-| **Onboarding: currency defaults to JPY** | Japanese-market app; JPY is the obvious default and already the v1.7 pinned currency | LOW | Reuse v1.7 selector logic; JPY pre-selected. Treat as confirm-not-configure |
-| **Onboarding: re-entrant / can't get stuck** | If the app is killed mid-onboarding it must resume cleanly, never lock the user out of their own app | MEDIUM | Persist a single `onboarding_completed` flag; gate runs after `AppInitializer`, before main shell. Until the flag is set, re-show onboarding on next launch |
-| **Onboarding: progress + back navigation** | Multi-step flows without progress/back feel like a trap | LOW | Step indicator + back button; final step is an explicit "始める/Start" |
-| **App-lock: biometric-first with knowledge-factor fallback** | Standard iOS pattern — try Face ID/Touch ID automatically, fall back to a code the user knows | MEDIUM | PIN is the base credential; biometric is a convenience layer on top. Never biometric-only (a failed/changed face would lock the user out forever) |
-| **App-lock: lock on cold launch when enabled** | A lock that doesn't trigger on a fresh launch is pointless | LOW | Gate the main shell behind the lock screen at boot when `appLockEnabled` |
-| **App-lock: re-lock on resume from background** | Users expect a privacy lock to re-engage when they return to the app | MEDIUM | Lock when returning from background past a grace threshold (see UX params). This is the behavior people mean by "app lock" |
-| **App-lock: failed-attempt feedback + escalating delay** | Silent failure or instant infinite retries feel broken/insecure | MEDIUM | Show remaining attempts; impose escalating cooldown after N failures. Do NOT wipe data by default (see anti-features) |
-| **App-lock: settings toggle** | Users must be able to turn the lock on/off and change PIN later | LOW | Settings switch; enabling requires setting a PIN first |
-| **Donation: single unobtrusive external link in Settings** | A free app may ask for support, but only quietly and only via an external browser per Apple policy | LOW | One row ("開発を支援" / "応援する") → `url_launcher` external browser. NOT IAP, NOT in-app webview |
-| **Legal: Privacy Policy reachable in-app** | App Store **requires** a privacy policy URL for every app (even local-only); users + reviewers expect to find it in Settings | LOW-MEDIUM | Needs a publicly hosted URL regardless (App Store Connect field). In-app: link out and/or render bundled localized copy |
-| **Legal: Terms of Use (利用規約)** | Standard Japanese-market expectation; defines the no-warranty/local-data relationship | LOW | Bundled localized screen or external link. If you supply none, Apple's standard EULA applies — but a Japanese 利用規約 is expected |
-| **Legal: OSS license attribution** | MIT/BSD/Apache/etc. legally require attribution; a Flutter app shipping without it is non-compliant | LOW | Flutter's built-in `showLicensePage()` auto-aggregates all deps incl. transitive — near-zero cost, do not hand-maintain |
-| **Legal: all of the above available in Japanese** | Japanese-market launch; ja is the default locale | LOW | Localize via ARB/bundled assets; license page is auto but its chrome should respect locale |
+| Suggested requirement | Capability | Observable acceptance evidence | Classification |
+|---|---|---|---|
+| `UPG-BASE-01` | **Production-stable version baseline and lock**: record the selected Flutter/Dart, native toolchain, direct dependencies, and material transitive versions; commit `pubspec.lock`; explain each intentionally held version. | `flutter --version`, `dart --version`, `pubspec.yaml`, `pubspec.lock`, native wrapper/project versions, and a dated compatibility matrix agree. `flutter pub get` from a clean checkout resolves without overrides that merely force incompatibility. | Functional / release gate |
+| `UPG-BASE-02` | **Coordinated compatibility lanes** rather than independent major bumps: SQLCipher/sqlite3; Riverpod/Freezed/Drift/analyzer/custom lint; Android Gradle/Kotlin/SDK; iOS SwiftPM/CocoaPods; constrained platform plugins. | `dart run scripts/dependency_compatibility.dart` passes after its expected versions/rationale are updated; negative contract tests reject forbidden or partial combinations. No `sqlite3_flutter_libs`; no `sqlcipher_flutter_libs 0.7.0+eol`; no unexplained `dependency_overrides`. | Security / compatibility |
+| `UPG-GEN-01` | **Reproducible generated artifacts** for Riverpod, Freezed, JSON, Drift, and localization. | From clean generated state: `flutter pub get`, `flutter gen-l10n`, and `flutter pub run build_runner build --delete-conflicting-outputs` complete; `git diff --exit-code lib/` is clean afterwards; `flutter analyze` and custom lint pass. Existing CI’s build-runner clean-diff gate remains blocking. | Quality / reproducibility |
+| `UPG-DB-01` | **SQLCipher cold reopen on iPhone**: the production encrypted executor opens, closes, and reopens one isolated database with the same key material. Encryption must be actively proven, not inferred from a successful Drift query. | On the wired iPhone: non-empty `PRAGMA cipher_version` after initial open *and after reopen*; persisted sentinel accounting row remains readable. Test data uses a deterministic non-production master key and an isolated file. | Security / device E2E |
+| `UPG-DB-02` | **Historical schema migration preservation**: a DB fixture representing the previously shipped state upgrades to the current schema under the real `onUpgrade` path, with expected data/index/default invariants retained. Maintain host migration coverage for detailed DDL and an encrypted device/simulator ladder for the cipher boundary. | All committed migration tests for v8–v36 pass; the device ladder proves at least the prior release fixture → current schema under SQLCipher, asserts non-empty cipher version, target `PRAGMA user_version`, and critical schema/data checks. Any schema bump adds its migration test in the same change. | Data integrity / regression |
+| `UPG-BACKUP-01` | **Encrypted backup export, destructive clear, and password restore** preserve a representative ledger. Compatibility includes the current Argon2id + AES-256-GCM format and supported legacy backup input. | Unit tests cover crypto format, wrong password, and resource limits. Device critical journey exports a `.hpb`, verifies it is non-empty, clears the test ledger, restores it, and verifies the sentinel transaction (amount/category/book as applicable) exactly. | Security / recovery |
+| `UPG-LOCK-01` | **App-lock compatibility**: lock enabled + PIN succeeds after cold boot; Face ID/biometric succeeds on the enabled iPhone when available; biometric cancellation/unavailability/enrollment change falls back to PIN without dead end; foreground/resume relock remains correct. | Unit/widget tests remain green for Argon2id PIN KDF, fallback, and lifecycle guards. Wired-iPhone record shows lock setup, biometric success or documented device-unavailable result, PIN fallback, cold launch/reopen to lock screen, and unlock to the unchanged ledger. Never log PINs, hashes, biometric data, keys, or transaction details. | Security / device E2E |
+| `UPG-CORE-01` | **Core accounting compatibility**: create and save a manual daily/joy ledger transaction through the real upgraded app path, then read the exact persisted result after restart. | Existing `device_critical_journey_test.dart` (or its successor) drives onboarding/test setup → manual entry → repository assertion → DB close/reopen → same assertion. Full host accounting integration/invariant suite passes. | Functional / data integrity |
+| `UPG-SYNC-01` | **Critical sync compatibility without weakening E2EE**: encrypted queue/outbox survives SQLCipher reopen, pull/ack/offline queue behavior still settles correctly, and no production payload/key is recorded in logs or artifacts. | Existing device sync delivery integration test and host sync round-trip/degradation tests pass. If backend transport versions/configuration changed, add a controlled two-device or relay staging result; otherwise state that network delivery is not newly claimed. | Security / integration |
+| `UPG-IOS-01` | **Isolated iPhone test identity and data boundary**. A test scheme/flavor uses a distinct Bundle ID from the shipping app; test keychain access group, app container, Firebase/notification configuration, and backup paths are reviewed for that identity. `RunnerTests` already has a separate unit-test Bundle ID, but a device integration runner must not silently install over or read the production app. | Build/install output identifies the test Bundle ID (for example a `.e2e` suffix), device settings show it as separate from the production app, and a pre-existing production app/database remains untouched. Device tests use test-only keys and temporary files. | Privacy / release safety |
+| `UPG-IOS-02` | **Wired iPhone acceptance and performance evidence**. Validate the final release/profile-compatible build on one connected iPhone; simulators remain automation coverage but are not performance proof. | Dated UAT record: device model, iOS version, app build/commit, Flutter/Xcode versions, bundle ID, install/launch result, SQLCipher/backup/lock/core-flow results. Capture raw JSON from `scripts/performance/run_performance_benchmark.sh --device … --mode profile|release`; reviewed baseline/threshold evaluation must pass or explicitly return `baseline_required` (never silently pass as a limit). Startup/TTI needs a separate launcher trace because the current in-process benchmark explicitly cannot measure it. | Performance / human device gate |
+| `UPG-ANDROID-01` | **Android release build, signing protection, and emulator validation**. Build a release AAB/APK with the upgraded toolchain and run the integration suite on a supported Android emulator. | `flutter build appbundle --release` (with non-debug signing credentials) or documented CI equivalent produces `build/app/outputs/bundle/release/app.aab`; Android signing contract rejects absent/debug credentials; emulator run `flutter test integration_test/ -d <emulator>` passes; release-preflight confirms integration-test plugins do not contaminate release registrants. | Release engineering / automated E2E |
 
-### Differentiators (Competitive Advantage)
+## Nice-to-Have Capabilities
 
-Aligned with the app's core value: privacy, local-first, calm/non-coercive, family-friendly.
+| Suggested requirement | Capability | Value | Evidence | Classification |
+|---|---|---|---|---|
+| `UPG-NICE-01` | Machine-readable signed/dated upgrade decision manifest containing SDK, plugin, AGP/Kotlin, CocoaPods/SwiftPM, Xcode, Java, Gradle, and resolved transitive versions. | Makes the next upgrade/audit diffable and lowers incident triage time. | CI artifact plus a concise checked-in matrix. | Documentation / reproducibility |
+| `UPG-NICE-02` | Upgrade smoke matrix across iOS Simulator and Android emulator for both fresh-install and upgrade-in-place fixtures. | Finds platform-specific registrar/linker failures earlier. | CI results attached to the upgrade PR. | Automated compatibility |
+| `UPG-NICE-03` | iPhone Instruments trace (Time Profiler / responsiveness-oriented template) alongside app benchmark JSON. | Diagnoses regressions; Apple recommends real hardware for realistic hitch measurements. | Saved trace or summarized metrics with raw file/artifact location. | Performance evidence |
+| `UPG-NICE-04` | Controlled backup fixture corpus: current encrypted backup, supported pre-v2 backup, wrong-password, truncated, and resource-limit inputs. | Prevents format drift and turns legacy compatibility into an explicit contract. | Deterministic test fixtures and passing import tests. | Recovery / security |
+| `UPG-NICE-05` | Weekly future-channel probe kept non-release-blocking. | Detects Flutter/AGP/SwiftPM deprecations before stable moves. | Existing `flutter-future-compat` workflow succeeds or creates a tracked compatibility issue. | Early warning |
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| **Onboarding: a genuine privacy/local-first intro (skippable)** | Most kakeibo apps push accounts/cloud; leading with "your data stays on this device, no account needed" is a real trust differentiator | LOW-MEDIUM | 2-4 calm intro slides; **skippable** (intro is skippable, *setup* is not). Reinforces the brand before the mandatory setup |
-| **Onboarding: voice-input language confirmed, defaulted to UI language** | The app's voice entry is a signature feature; surfacing the voice locale at setup primes the killer feature | LOW | Default voice locale = chosen UI language (zh-CN/ja-JP/en-US); offer to confirm/override. Depends on existing voice routing |
-| **App-lock: in-context, optional prompt during onboarding** | Offering the lock at first run (clearly skippable) drives adoption without nagging later | LOW-MEDIUM | "Skip" must be a first-class equal option, not a greyed-out afterthought. Enabling it = set PIN now, biometric opt-in |
-| **App-lock: forgot-PIN recovery via existing BIP39 phrase** | Turns a dead-end ("forgot PIN = locked out / wiped") into graceful recovery, leveraging infra already built | MEDIUM | Decision needed: does the recovery phrase reset the PIN? Strongly recommended so a forgotten PIN never bricks local data |
-| **Donation: warm, non-transactional framing (応援/支援)** | Japanese donation culture is reserved; "support the developer / cheer us on" lands better than "tip/投げ銭" | LOW | Copy choice, not engineering. One quiet line, no number suggestions, no guilt |
-| **Legal: offline, bundled, localized legal screens** | A privacy-first offline app rendering its policy *without a network call* is on-brand and reviewer-friendly | MEDIUM | Bundle localized markdown; still keep the hosted URL for App Store Connect. Slightly more work than pure links |
+## Explicit Anti-Features / Out of Scope
 
-### Anti-Features (Commonly Requested, Often Problematic)
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| **In-app IAP "tip jar" / paid tiers** | "Monetize the free app" | Apple's stance on pure *developer* donations via IAP is murky and review-risky; 30% cut; contradicts the "entirely free" promise; adds StoreKit complexity | External-browser link to Buy Me a Coffee / Ko-fi / GitHub Sponsors / PayPal.me only |
-| **Gating any feature behind a donation** | "Incentivize donating" | Breaks the "entirely free, no forced payment" core promise; coercive; erodes trust | Donation is purely optional and grants nothing; never paywall |
-| **Donation nag dialogs / interstitials / badges** | "More visibility = more donations" | Dark pattern; the opposite of the app's calm/non-coercive identity (ADR-012 spirit); annoys Japanese users especially | One static Settings row. No popups, no counters, no "you haven't donated" reminders |
-| **Forced account / email capture at onboarding** | "Build a user list", "enable sync" | Directly contradicts local-first/no-account architecture; #1 onboarding drop-off cause; privacy red flag | No account. Onboarding collects only locale/currency/voice + optional lock |
-| **Unskippable intro carousel / forced tutorial** | "Make sure they see our features" | Feels like a hostage screen; users want to reach the app | Intro slides skippable; only the 3 setup choices are mandatory (and pre-filled) |
-| **Requesting mic/biometric/notification permissions up front during onboarding** | "Get permissions out of the way" | iOS best practice is in-context permission requests; pre-asking tanks grant rates and looks creepy | Request biometric only when the user opts into app-lock; request mic only on first voice use (already the case) |
-| **App-lock that wipes data after N failures (default-on)** | "Bank-grade security" | A family expense app silently destroying local data is catastrophic and surprising; no cloud backup to restore from | Escalating cooldown only. If offered at all, "erase after N fails" must be explicit opt-in, off by default, with the BIP39 caveat spelled out |
-| **Biometric-only app-lock (no PIN)** | "Face ID is enough" | Face/Touch changes, OS biometric lockout, or sensor failure = permanent lockout with no fallback | PIN is mandatory whenever lock is enabled; biometric layered on top |
-| **Storing the PIN in plaintext / reversible** | "Simplest to implement" | Trivial extraction defeats the whole privacy posture | Store a salted KDF hash (or derive a key) in `secure_storage`; never the raw PIN |
-| **Locking the whole app behind a blocking ToS-accept gate** | "Legal cover" | Heavy friction for a free local app; un-Japanese (利用規約 is browsable, not a wall) | Legal docs are *reachable* in Settings + linked at first run; no blocking modal |
-| **Per-currency home base other than JPY at onboarding** | "Be international" | Out of v1.7 scope (JPY is the stored base); adds confusion at first run | Onboarding currency = entry-currency default only; base stays JPY (carried v1.7 decision) |
-
----
-
-## Concrete UX Parameters (for the requirements writer — make these testable)
-
-### (a) Onboarding flow
-- **Step order:** ① (optional) intro slides → ② UI language (pre-selected from device locale) → ③ currency (JPY pre-selected) → ④ voice-input language (defaults to chosen UI language) → ⑤ optional app-lock prompt → ⑥ "Start". Language MUST come first so steps 3-6 render in the chosen language.
-- **Skippable vs mandatory:** intro = skippable; steps ②③④ = mandatory but pre-filled (a single tap to confirm each, or a "use defaults" path); step ⑤ = skippable.
-- **Persistence:** one boolean `onboarding_completed` (recommend `secure_storage` or app prefs); gate evaluated after `AppInitializer`, before main `IndexedStack` shell. Re-entrant if killed before the flag is set.
-- **No account, no email, no upfront OS permission prompts.**
-- **Open decision to spell out:** whether changing UI language mid-onboarding rebuilds the flow live (recommended) and whether there's a single "skip all setup → use device defaults" express path.
-
-### (b) App-lock
-- **Credentials:** PIN mandatory when lock enabled; biometric optional add-on. Fallback ordering: on a locked screen, **attempt biometric automatically first**; on biometric fail/cancel/unavailable → **PIN entry**. PIN is also the explicit "use passcode" fallback button.
-- **PIN length:** recommend **6 digits** (matches iOS default, ~10⁶ space); 4-digit acceptable if simplicity preferred — pick one and fix it. Numeric.
-- **PIN storage:** salted KDF hash (e.g. PBKDF2/Argon2 via existing crypto infra) in `secure_storage`. Never plaintext, never reversible.
-- **Retry / lockout:** show remaining attempts; after **5** failed PIN attempts apply an **escalating cooldown** (e.g. 30s → 1m → 5m → 15m). **No data wipe** by default. Define exact thresholds as testable values.
-- **Re-lock timing:** **always lock on cold launch** (when enabled). On **resume from background**, lock if backgrounded longer than a **grace threshold** — recommend a small set: *immediately / 1 min / 5 min*, default **immediately or 1 min** for a privacy app. Define default + whether it's user-configurable.
-- **"Skip app-lock" meaning:** app-lock stays **OFF**; no PIN set; user can enable later in Settings. Enabling later = set PIN (mandatory) + optional biometric.
-- **Forgot-PIN:** decision required — recommend **BIP39 recovery phrase resets the PIN** so a forgotten PIN never bricks local data. Alternative (no recovery) must be stated as an explicit, scary trade-off.
-- **Scope clarification needed:** is the lock a **UI gate over the already-decrypted SQLCipher DB**, or tied to the DB key? Almost certainly a UI gate (DB is decrypted by `KeyManager` at boot). State this so the threat model is honest (UI gate ≠ at-rest protection; SQLCipher already provides that).
-- **Biometric change handling:** if enrolled biometrics change (iOS invalidates), fall back to PIN (don't silently trust). Reuse `biometric_service` semantics.
-
-### (c) Donation link
-- **Presentation:** exactly one Settings row, calm copy ("開発を支援する" / "応援する" / "Support development"). No amounts, no frequency, no counters, no popups.
-- **Mechanism:** `url_launcher` with `LaunchMode.externalApplication` (external browser, NOT SFSafariViewController/in-app webview, NOT IAP) → developer-owned/3rd-party donation page (Buy Me a Coffee / Ko-fi / GitHub Sponsors / PayPal.me).
-- **Non-coercive invariants (testable):** grants no in-app benefit; never blocks any feature; never auto-prompts; appears only when the user navigates to Settings.
-
-### (d) Legal section
-- **Structure:** a single "About / 法的情報" group in Settings containing three rows: プライバシーポリシー, 利用規約, オープンソースライセンス. Three rows, not one merged screen — each is independently linkable/citable.
-- **Privacy Policy:** publicly **hosted URL is mandatory** for App Store Connect regardless of in-app rendering. In-app: link out and/or render bundled localized copy.
-- **Terms of Use:** bundled localized 利用規約 screen or external link. (Absent your own, Apple's standard EULA applies — but ship a Japanese 利用規約.)
-- **OSS licenses:** Flutter built-in `showLicensePage()` — auto-aggregates incl. transitive deps. Set `applicationName`/`applicationVersion`/`applicationLegalese`. Do not hand-maintain.
-- **No blocking accept-gate.** Reachable, not a wall.
-
----
-
-## Japanese-Market Expectations (explicit callouts)
-
-- **特定商取引法 (Act on Specified Commercial Transactions):** when money changes hands, a 「特定商取引法に基づく表記」 may be required. For donations routed through an **external platform** (Buy Me a Coffee/Ko-fi/etc.), that platform's own 特商法 表記 generally applies and the app links out — but **this is a legal-review flag, not a settled engineering fact.** If the project ever takes donations *directly*, 特商法 表記 + プライバシーポリシー placement rules (easy-to-find, linked from top + transaction page) become directly relevant. Recommend confirming with the chosen donation platform's policy and, if in doubt, adding a 特商法 表記 entry under the legal section. (Confidence: MEDIUM — verify before launch.)
-- **利用規約 is a baseline expectation** in Japan, not optional polish.
-- **プライバシーポリシー in Japanese** is both an App Store requirement (hosted URL) and a strong local expectation; for a local-first app it can honestly state "data stored only on device, no transmission."
-- **Tone:** Japanese users respond poorly to aggressive monetization/nagging. The non-coercive donation framing (応援/支援) and the absence of nags are market-fit features, not just ethics.
-- **Defaults:** ja locale + JPY are the obvious first-run defaults; treat onboarding as confirmation.
-
----
+| Anti-feature or excluded work | Why it must not enter v2.1 | Do instead |
+|---|---|---|
+| Blind `flutter pub upgrade --major-versions` / “upgrade everything” | It can select a resolver-valid but native-incompatible set and obscures causality. | Upgrade one coordinated lane at a time; keep the executable matrix current. |
+| Replacing SQLCipher with `sqlite3_flutter_libs`, system SQLite, or `sqlcipher_flutter_libs 0.7.0+eol` just to get a higher version number | Violates the at-rest-encryption contract or replaces the native library with an EOL placeholder. | Retain the proven encrypted path until an ADR-reviewed replacement completes real-device cipher/reopen/migration/backup proof. |
+| Analyzer/Riverpod/serializer partial override | Bypasses the single-version solver and can leave generation/lint tooling internally incompatible. | Upgrade the custom-lint/import-boundary/Riverpod/JSON lane together, regenerate, then run all lint/architecture gates. |
+| New accounting, UI, onboarding, sync, biometric, or backup product features | Changes behavior and dilutes the upgrade compatibility signal. | Repair only a regression required to preserve existing behavior; record any unavoidable behavioral change explicitly. |
+| Beta/RC/dev versions in the production baseline | Project goal is latest *production stable*, not speculative toolchain validation. | Keep beta only in the existing scheduled future-compat warning workflow. |
+| Android physical-device UAT | Explicitly not required for this milestone and cannot be claimed as completed. | Require release build + Android Emulator E2E; record “no Android physical device tested” in the final verification. |
+| iPad matrix, store submission, legal-content work, or production support/URL changes | Separate release-owner and legal scope. | Preserve current release gates; do not invent production values. |
+| Overwriting a user’s installed app, keychain, or backup while testing | A privacy and data-loss failure, especially for a finance app. | Install a distinct test Bundle ID and use only deterministic test keys, app container, temporary DB, and synthetic backup data. |
+| Treating a simulator or host `flutter test` as a SQLCipher/performance substitute | Host tests can use plain SQLite; Apple states simulators do not replicate physical-device performance/features. | Keep host tests for fast coverage, but require native device/simulator cipher assertion and wired-iPhone final evidence. |
 
 ## Feature Dependencies
 
-```
-First-run onboarding
-    ├──requires──> i18n (currentLocaleProvider, ARB ja/zh/en)        [EXISTS]
-    ├──requires──> v1.7 currency selector                             [EXISTS]
-    ├──requires──> voice locale routing (zh-CN/ja-JP/en-US)           [EXISTS]
-    ├──requires──> onboarding gate slot (after AppInitializer,        [NEW — first time]
-    │              before IndexedStack main shell)
-    └──enhances/optionally-embeds──> App-lock prompt (step ⑤)
+```text
+Production-stable SDK/native baseline + lockfile
+  ├──> coordinated compatibility contract
+  │     ├──> code generation + l10n reproducibility
+  │     ├──> host quality gates (analyze / custom lint / test / coverage)
+  │     └──> Android + iOS native builds and release-preflight
+  ├──> encrypted migration/reopen verification
+  │     ├──> backup restore verification
+  │     ├──> PIN/biometric/cold-start verification
+  │     └──> accounting + sync compatibility verification
+  └──> isolated test Bundle ID
+        └──> wired-iPhone install + final E2E + performance evidence
 
-App-lock (Face ID + PIN)
-    ├──requires──> biometric_service                                  [EXISTS]
-    ├──requires──> secure_storage                                     [EXISTS]
-    ├──requires──> PIN entry UI + salted-hash storage                 [NEW]
-    ├──requires──> lifecycle observer (cold launch + resume gate)     [NEW]
-    └──enhances──> BIP39 recovery phrase as forgot-PIN reset          [EXISTS infra, NEW wiring]
-
-Donation link
-    └──requires──> url_launcher external browser                      [LIKELY NEW dep]
-
-Legal section
-    ├── Privacy Policy ──requires──> hosted URL (App Store Connect)   [NEW, external/ops]
-    ├── Terms of Use   ──requires──> bundled localized copy or link   [NEW content]
-    └── OSS licenses   ──requires──> Flutter showLicensePage()        [BUILT-IN]
-
-App-lock prompt in onboarding ──requires──> App-lock feature complete (ordering constraint)
+Android release build + emulator E2E ── independent final platform gate
 ```
 
-### Dependency Notes
-- **Onboarding needs its gate built before its steps:** the "evaluate `onboarding_completed` after `AppInitializer`, before main shell" slot is the app's first onboarding gate and is the structural prerequisite for all onboarding work.
-- **App-lock must land before (or with) the onboarding app-lock prompt:** step ⑤ can't offer to enable a lock that doesn't exist. Sequence app-lock core → then wire the onboarding prompt.
-- **Donation + Legal are independent leaves:** no dependency on onboarding/app-lock; can be built in parallel. Both are low-complexity.
-- **PIN is the only genuinely new security primitive;** biometric, secure storage, and KDF infra already exist and should be reused (no custom crypto per CLAUDE.md).
+## MVP Recommendation
 
----
+Prioritize in this order:
 
-## MVP Definition
+1. **Baseline and compatibility lanes** — establish the exact stable target and prohibitions before editing version constraints.
+2. **Regeneration and host gates** — make resolver, code generation, architecture, analysis, tests, coverage, and release-preflight reproducible.
+3. **Data/security device proof** — SQLCipher reopen, prior-release schema migration, encrypted backup restore, and app lock are the non-negotiable privacy core.
+4. **Business compatibility** — manual accounting persistence and encrypted sync queue flow prove the app remains useful, not merely buildable.
+5. **Platform release gates** — Android signed release + emulator; then an isolated wired-iPhone final run with performance evidence.
 
-### Launch With (v2.0 — these ARE the milestone)
-- [ ] **Onboarding gate + mandatory locale/currency/voice setup** — required for a public first-run; defaults pre-filled (Japanese-market confirm-not-configure)
-- [ ] **Skippable privacy/local-first intro** — trust differentiator, cheap
-- [ ] **App-lock: PIN (mandatory base) + Face ID/Touch ID (optional), cold-launch + resume re-lock, escalating cooldown** — table stakes for a finance app holding family money data
-- [ ] **App-lock onboarding prompt (skippable) + Settings toggle** — adoption without nagging
-- [ ] **Donation: one external-browser link in Settings** — satisfies the "free + optional support" goal Apple-compliantly
-- [ ] **Legal section: Privacy Policy + 利用規約 + OSS licenses, all localized** — App Store + Japanese-market compliance
+Defer: any net-new product feature, Android physical-device validation, iPad coverage, store submission operations, and an encrypted-storage architecture rewrite. They reduce the diagnostic value of this milestone without improving its stated acceptance target.
 
-### Add After Validation (v2.x)
-- [ ] **Forgot-PIN → BIP39 recovery reset** — strongly recommended; if descoped at launch, document the "forgotten PIN" trade-off explicitly first
-- [ ] **Configurable re-lock grace period (immediate/1m/5m)** — ship a sensible fixed default first, make it a setting later
-- [ ] **特商法 表記 entry** — add if/when legal review says the donation path triggers it
+## Existing Assets to Reuse (Not Rebuild)
 
-### Future Consideration (v2+)
-- [ ] **Opt-in "erase data after N failures"** — only with heavy warnings + BIP39 awareness; default off, likely never
-- [ ] **Re-onboarding / change-defaults wizard** — defaults are already changeable in Settings, so low value
-
-## Feature Prioritization Matrix
-
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Onboarding gate + mandatory setup (defaults pre-filled) | HIGH | MEDIUM | P1 |
-| Skippable privacy intro | MEDIUM | LOW | P1 |
-| App-lock PIN + biometric + re-lock + cooldown | HIGH | MEDIUM-HIGH | P1 |
-| App-lock onboarding prompt + Settings toggle | MEDIUM | LOW | P1 |
-| Donation external link | MEDIUM | LOW | P1 |
-| Legal: Privacy / Terms / OSS licenses | HIGH (compliance) | LOW-MEDIUM | P1 |
-| Forgot-PIN BIP39 recovery | MEDIUM | MEDIUM | P2 |
-| Configurable re-lock grace | LOW | LOW | P2 |
-| 特商法 表記 (if triggered) | LOW (legal) | LOW | P2 (gated by legal review) |
-| Opt-in erase-after-N | LOW | MEDIUM | P3 |
-
-**Priority key:** P1 = must have for launch · P2 = should have / fast-follow · P3 = future/likely-never.
-
-## Competitor Feature Analysis
-
-| Feature | Typical kakeibo / finance app | Privacy-first app norm | Our Approach |
-|---------|------------------------------|------------------------|--------------|
-| Onboarding | Push account/cloud signup, upsell premium | No account, local setup | Mandatory locale/currency/voice only, no account, skippable intro |
-| App-lock | PIN/biometric gate, some wipe-on-fail | Biometric + PIN, escalating delay | PIN-base + biometric layer, cold+resume lock, cooldown (no default wipe), BIP39 recovery |
-| Donation/monetization | IAP tiers, ads, premium paywall | External "support" link | One quiet external-browser link, zero gating, 応援 framing |
-| Legal | Hosted PP/ToS links, license page | Bundled/offline legal | PP (hosted URL req'd) + ja 利用規約 + `showLicensePage()`, localized, no accept-wall |
+| Existing asset | What it already proves / where to extend |
+|---|---|
+| `docs/testing/DEPENDENCY_COMPATIBILITY.md` + `scripts/dependency_compatibility.dart` | Compatibility lanes, SQLCipher prohibition, analyzer/native constraints, and future probe. Update its matrix and executable contract together with a version decision. |
+| `.github/workflows/audit.yml` | Stable Flutter build, compatibility contract, `flutter analyze`, custom lint, generated-code clean diff, full tests, and coverage. |
+| `.github/workflows/device-e2e.yml` | Android API-35 emulator and iPhone Simulator integration runs plus release-preflight regeneration after test registrants. |
+| `integration_test/device_critical_journey_test.dart` | Isolated encrypted DB, manual ledger entry, encrypted backup restore, SQLCipher close/reopen assertion, and cold-PIN unlock. Make the shipped-DB migration and isolated iPhone identity explicit. |
+| `integration_test/merchant_migration_ladder_test.dart` + `test/unit/data/migrations/` | Current SQLCipher device ladder plus granular historical migration coverage through schema v36. |
+| `integration_test/device_sync_delivery_test.dart` + `test/integration/sync/` | Encrypted queue reopen, pull/ack/offline delivery plus host sync behavior. |
+| `scripts/performance/run_performance_benchmark.sh`, `integration_test/performance/`, `scripts/performance/performance_gate.dart` | Raw, labeled, opt-in device benchmark; it intentionally fails closed when a required baseline is missing and does not claim startup/TTI. |
+| `scripts/release_preflight.sh` + Android signing contract tests | Removes dev-only integration-test registrants, builds credential-free native smoke artifacts, scans release binary, and enforces non-debug Android signing for packaging. |
 
 ## Sources
 
-- [Apple App Review Guidelines (3.1.1 / 3.2.1 donations)](https://developer.apple.com/app-store/review/guidelines/) — donations via external Safari link, free apps collect funds outside app, IAP tip-jar discouraged for developer donations (MEDIUM confidence on exact current wording — verify at submission)
-- [Apple Developer Forums — "Donate to Developer" on a free app](https://developer.apple.com/forums/thread/114186)
-- [Medium — Buy Me a Coffee link vs Apple review experience](https://medium.com/@robert-baer/my-ongoing-battle-with-apple-over-a-buy-me-a-coffee-link-is-over-9c158df81c05)
-- [Stripe — Notation based on Japan's Act on Specified Commercial Transactions (特定商取引法)](https://stripe.com/resources/more/specified-commercial-transactions-act-japan)
-- [PAY.JP — 特定商取引法に基づく表記：寄付の記載例](https://help.pay.jp/ja/articles/3438270)
-- [IT弁護士 中野秀俊 — アプリ/ECに必要な特定商取引法に基づく表記](https://it-bengosi.com/%E3%82%A2%E3%83%97%E3%83%AA%E9%96%8B%E7%99%BA%E3%81%AE%E6%B3%95%E5%BE%8B/ec-apuri/)
-- [Apple Support — Lock or hide an app / re-auth on resume](https://support.apple.com/guide/iphone/lock-or-hide-or-an-app-iph00f208d05/ios)
-- [Medium (Gaurav Harkhani) — Implementing App Lock in iOS (biometric + passcode fallback, lockout)](https://medium.com/@gauravharkhani01/implementing-app-lock-in-ios-everything-you-need-to-know-918d65dff9c0)
-- [App Store Connect — Manage app privacy (privacy policy URL mandatory)](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy/)
-- [Flutter LicensePage / showLicensePage (auto OSS attribution incl. transitive)](https://api.flutter.dev/flutter/material/LicensePage-class.html) · [code with andrea — Show licenses in Flutter](https://codewithandrea.com/tips/show-licenses-flutter-app/)
-- Project context: `.planning/PROJECT.md` (v2.0 milestone scope), CLAUDE.md (existing i18n/currency/voice/biometric infra)
+### Official primary sources (platform/tool requirements)
 
----
-*Feature research for: pre-launch onboarding / app-lock / donation / legal — Japanese-market local-first family accounting app*
-*Researched: 2026-06-28*
+- [Flutter: Package dependency management](https://docs.flutter.dev/packages-and-plugins/dependency-management) — Flutter apps should commit `pubspec.lock`; it records exact direct and transitive versions, while overrides are temporary and must be thoroughly tested. **Confidence: MEDIUM** (official source; classified by research seam).
+- [Flutter: Integration testing concepts](https://docs.flutter.dev/cookbook/testing/integration/introduction) and [Check app functionality with an integration test](https://docs.flutter.dev/testing/integration-tests) — `integration_test` runs on targets/devices/emulators and supports end-to-end behavior/performance; it cannot automate native platform UI. **Confidence: MEDIUM**.
+- [Flutter: Build and release an Android app](https://docs.flutter.dev/deployment/android) — `flutter build appbundle` produces the release AAB; Play prefers AAB. **Confidence: MEDIUM**.
+- [Apple: Running apps on simulated or physical devices](https://developer.apple.com/documentation/Xcode/running-your-app-on-simulated-or-physical-devices) — simulator hardware/features and real-device behavior differ; use a physical device to verify intended operation. **Confidence: MEDIUM**.
+- [Apple: Improving app responsiveness](https://developer.apple.com/documentation/xcode/improving-app-responsiveness) — real-device Instruments measurement is recommended for realistic hitch evaluation. **Confidence: MEDIUM**.
+- [Apple: Preparing your app for distribution](https://developer.apple.com/documentation/xcode/preparing-your-app-for-distribution) — bundle IDs uniquely identify apps, supporting a distinct device-test identity. **Confidence: MEDIUM**.
+- [Android Developers: Build your app from the command line](https://developer.android.com/build/building-cmdline) and [Build and test your Android App Bundle](https://developer.android.com/guide/app-bundle/test) — release artifacts must be built/signed and can be tested through emulator/device-oriented workflows. **Confidence: MEDIUM**.
+
+### Project evidence
+
+- `PROJECT.md`, `STATE.md`, `docs/testing/DEPENDENCY_COMPATIBILITY.md`, current `pubspec.yaml`/lockfile, platform configurations, existing integration tests, scripts, and CI workflows inspected on 2026-08-05.
