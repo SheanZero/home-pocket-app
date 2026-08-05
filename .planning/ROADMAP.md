@@ -44,7 +44,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 
 **Phase Numbering:** Continues from v2.0 Phase 56. Integer phases are planned milestone work; decimal phases, if urgently inserted, execute between their surrounding integers.
 
-- [ ] **Phase 57: Stable Baseline & Compatibility Contract** - Establish the official-source stable decision and reproducible, machine-checked dependency policy.
+- [x] **Phase 57: Stable Baseline & Compatibility Contract** - Establish the official-source stable decision and reproducible, machine-checked dependency policy. (completed 2026-08-06)
 - [ ] **Phase 58: Flutter, Analyzer & Code Generation Lane** - Select a coherent SDK, analyzer, lint, and generator graph without weakening architecture enforcement.
 - [ ] **Phase 59: Controlled Platform Plugin Cohorts** - Upgrade or evidence-hold native plugin groups through narrow behavioral compatibility lanes.
 - [ ] **Phase 60: SQLCipher & iOS Native Safety Lane** - Preserve and prove the encrypted iOS database, migration, and backup path from clean native artifacts.
@@ -164,7 +164,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 57. Stable Baseline & Compatibility Contract | 3/3 | In Progress|  |
+| 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
 | 58. Flutter, Analyzer & Code Generation Lane | 0/TBD | Not started | - |
 | 59. Controlled Platform Plugin Cohorts | 0/TBD | Not started | - |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
