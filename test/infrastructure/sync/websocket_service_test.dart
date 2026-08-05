@@ -386,27 +386,28 @@ void main() {
       expect(events, isEmpty);
     });
 
-    test('ignores malformed raw messages and handles pong frames', () async {
-      service.connect(
-        groupId: 'group-1',
-        deviceId: 'device-1',
-        signMessage: (msg) async => 'mock-sig',
-      );
+    test(
+      'ignores non-text and invalid JSON raw messages and handles pong frames',
+      () async {
+        service.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (msg) async => 'mock-sig',
+        );
 
-      incomingController.add(42);
-      incomingController.add('{not json');
-      incomingController.add(jsonEncode({'payload': 'missing-type'}));
-      incomingController.add(jsonEncode({'type': 'pong'}));
-      await Future<void>.delayed(Duration.zero);
+        incomingController.add(42);
+        incomingController.add('{not json');
+        incomingController.add(jsonEncode({'type': 'pong'}));
+        await Future<void>.delayed(Duration.zero);
 
-      expect(service.connectionState, WebSocketConnectionState.connecting);
-    });
+        expect(service.connectionState, WebSocketConnectionState.connecting);
+      },
+    );
 
     for (final malformedFrame in <({String name, String raw})>[
-      (
-        name: 'a non-string type',
-        raw: jsonEncode({'type': 1}),
-      ),
+      (name: 'a non-map JSON root', raw: jsonEncode([])),
+      (name: 'a missing type', raw: jsonEncode({'payload': 'missing-type'})),
+      (name: 'a non-string type', raw: jsonEncode({'type': 1})),
       (
         name: 'a non-string group id',
         raw: jsonEncode({'type': 'sync_available', 'groupId': 1}),
@@ -416,17 +417,14 @@ void main() {
         raw: jsonEncode({'type': 'group_status', 'data': []}),
       ),
     ]) {
-      test(
-        'rejects a control frame with ${malformedFrame.name}',
-        () async {
-          await expectUnsafeControlMessageIsRejected(
-            service: service,
-            incomingController: incomingController,
-            sink: sink,
-            raw: malformedFrame.raw,
-          );
-        },
-      );
+      test('rejects a control frame with ${malformedFrame.name}', () async {
+        await expectUnsafeControlMessageIsRejected(
+          service: service,
+          incomingController: incomingController,
+          sink: sink,
+          raw: malformedFrame.raw,
+        );
+      });
     }
 
     test(

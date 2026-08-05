@@ -241,20 +241,29 @@ class WebSocketService with WidgetsBindingObserver {
       return;
     }
 
-    Map<String, dynamic> data;
+    final Object? decoded;
     try {
-      data = jsonDecode(raw) as Map<String, dynamic>;
+      decoded = jsonDecode(raw);
     } catch (_) {
       return;
     }
+
+    if (decoded is! Map<String, dynamic>) {
+      _rejectControlMessage(generation, channel);
+      return;
+    }
+    final data = decoded;
 
     if (!_isDecodedControlMessageWithinBudget(data)) {
       _rejectControlMessage(generation, channel);
       return;
     }
 
-    final type = data['type'] as String?;
-    if (type == null) return;
+    final type = data['type'];
+    if (type is! String || !_hasExpectedControlFieldTypes(data)) {
+      _rejectControlMessage(generation, channel);
+      return;
+    }
 
     // Handle auth response
     if (type == 'auth_success') {
@@ -370,6 +379,16 @@ class WebSocketService with WidgetsBindingObserver {
     return isWithinBudget(value, 0);
   }
 
+  /// Validates the outer control schema before parsing. This keeps untrusted
+  /// JSON values from reaching event parsing through unchecked casts.
+  static bool _hasExpectedControlFieldTypes(Map<String, dynamic> data) {
+    final groupId = data['groupId'];
+    if (groupId != null && groupId is! String) return false;
+
+    final eventData = data['data'];
+    return eventData == null || eventData is Map<String, dynamic>;
+  }
+
   /// Counts UTF-8 bytes without allocating an encoded copy of [value].
   static bool _isWithinUtf8ByteBudget(String value, int maxBytes) {
     if (value.length > maxBytes) return false;
@@ -397,8 +416,12 @@ class WebSocketService with WidgetsBindingObserver {
   }
 
   WebSocketEvent? _parseEvent(String type, Map<String, dynamic> data) {
-    final groupId = data['groupId'] as String?;
-    final eventData = data['data'] as Map<String, dynamic>?;
+    final rawGroupId = data['groupId'];
+    final groupId = rawGroupId is String ? rawGroupId : null;
+    final rawEventData = data['data'];
+    final eventData = rawEventData is Map<String, dynamic>
+        ? rawEventData
+        : null;
     final eventType = switch (type) {
       'member_confirmed' => WebSocketEventType.memberConfirmed,
       'join_request' => WebSocketEventType.joinRequest,
