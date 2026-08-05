@@ -67,9 +67,24 @@ List<String> _twoPassContractViolations(String source) {
     'dart run scripts/verify_tooling_guards.dart',
   );
   final whitespace = executable.indexOf('git diff --check');
+  final l10nMatches = RegExp(
+    RegExp.escape('flutter gen-l10n'),
+  ).allMatches(executable).toList();
+  final buildRunnerMatches = RegExp(
+    RegExp.escape('flutter pub run build_runner build --delete-conflicting-outputs'),
+  ).allMatches(executable).toList();
 
-  if (pass1Diff < 0 || pass2 < pass1Diff || pass2Diff < pass2) {
-    violations.add('both clean generation boundaries must precede pass 2');
+  if (pass1Diff < 0 ||
+      pass2 < pass1Diff ||
+      pass2Diff < pass2 ||
+      l10nMatches.length != 2 ||
+      buildRunnerMatches.length != 2 ||
+      l10nMatches[0].start > buildRunnerMatches[0].start ||
+      buildRunnerMatches[0].start > pass1Diff ||
+      l10nMatches[1].start < pass2 ||
+      l10nMatches[1].start > buildRunnerMatches[1].start ||
+      buildRunnerMatches[1].start > pass2Diff) {
+    violations.add('each clean generation boundary must follow l10n then build_runner');
   }
   if (analyzer < pass2Diff ||
       customLint < analyzer ||
@@ -166,6 +181,10 @@ void main() {
     final source = File(_scriptPath).readAsStringSync();
 
     expect(_twoPassContractViolations(source), isEmpty);
+    expect(
+      source,
+      contains('Generator nondeterminism occurred on the second pass.'),
+    );
 
     expect(
       _twoPassContractViolations(
