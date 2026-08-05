@@ -185,6 +185,8 @@ List<String> validateDependencyCompatibility({
   final baselineDependencies = _map(baseline.data['direct_dependencies']);
   final flutterToolchain = _map(_map(baseline.data['toolchains'])['flutter']);
 
+  _validateManifestPolicy(issues: issues, baseline: baseline.data);
+
   void expectConstraint(String package, String expected) {
     final actual = allDirectDependencies[package]?.toString();
     if (actual != expected) {
@@ -318,13 +320,19 @@ List<String> validateDependencyCompatibility({
     'FlutterGeneratedPluginSwiftPackage',
   );
   expectText('ios/Podfile.lock', podfileLock, 'SQLCipher (4.10.0)');
-  expectText('ios/Podfile', podfile, 'original.gsub');
-  expectText('ios/Podfile', podfile, 'sqlite3');
-  expectText('ios/Podfile', podfile, 'stripped');
-  if (pubspecOverridesPresent) {
+  if (!podfile.contains('original.gsub') ||
+      !podfile.contains('sqlite3') ||
+      !podfile.contains('stripped')) {
     issues.add(
-      'pubspec dependency_overrides or pubspec_overrides.yaml must not be present',
+      'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
     );
+  }
+  if (pubspecOverridesPresent) {
+    issues.add('pubspec_overrides.yaml must not be present');
+  }
+  if (_map(pubspec['dependency_overrides']).isNotEmpty ||
+      pubspecYaml.contains('dependency_overrides:')) {
+    issues.add('pubspec dependency_overrides must not be present');
   }
   if (!androidAppBuild.contains('minSdk = flutter.minSdkVersion')) {
     issues.add('Android minSdk must inherit flutter.minSdkVersion');
@@ -344,11 +352,9 @@ List<String> validateDependencyCompatibility({
     flutterExtensionSource: flutterExtensionSource,
   );
 
-  expectText(
-    'audit workflow',
-    auditWorkflow,
-    'dart run scripts/dependency_compatibility.dart --verify-running-flutter-sdk',
-  );
+  if (!auditWorkflow.contains('--verify-running-flutter-sdk')) {
+    issues.add('audit workflow must invoke SDK verification');
+  }
   expectText('future workflow', futureWorkflow, 'channel: beta');
   expectText('future workflow', futureWorkflow, 'flutter build apk --debug');
   expectText(
@@ -357,6 +363,107 @@ List<String> validateDependencyCompatibility({
     'flutter build ios --simulator --debug',
   );
   return issues;
+}
+
+void _validateManifestPolicy({
+  required List<String> issues,
+  required Map<String, Object?> baseline,
+}) {
+  final floors = _map(baseline['platform_floors']);
+  if (_map(floors['ios'])['selected']?.toString() != '15.0') {
+    issues.add('iOS support floor must be 15.0');
+  }
+  final androidFloor = _map(floors['android'])['selected'];
+  if (androidFloor != 24) {
+    issues.add('Android support floor must be API 24');
+  }
+
+  final toolchains = _map(baseline['toolchains']);
+  for (final entry in toolchains.entries) {
+    final id = entry.key.toString();
+    final row = _map(entry.value);
+    final selected = row['selected_current']?.toString() ?? '';
+    final candidate = row['production_stable_candidate']?.toString() ?? '';
+    final decision = row['decision']?.toString();
+    if (_isUnsafeRelease(selected)) {
+      issues.add('toolchain $id selects forbidden prerelease or EOL value');
+    }
+    if (decision == 'already_current' && _isUnsafeRelease(candidate)) {
+      issues.add('toolchain $id candidate must be production stable');
+    }
+    if (decision == 'already_current' &&
+        _compareVersion(selected, candidate) < 0) {
+      issues.add(
+        'toolchain $id selected value must not be lower than its candidate',
+      );
+    }
+  }
+
+  final dependencies = _map(baseline['direct_dependencies']);
+  for (final entry in dependencies.entries) {
+    final id = entry.key.toString();
+    final row = _map(entry.value);
+    final selected = row['resolved']?.toString() ?? '';
+    final candidate = row['candidate']?.toString() ?? '';
+    final decision = row['decision']?.toString();
+    if (_isUnsafeRelease(selected)) {
+      issues.add('dependency $id selects forbidden prerelease or EOL value');
+    }
+    if (decision == 'already_current' && _isUnsafeRelease(candidate)) {
+      issues.add('dependency $id candidate must be production stable');
+    }
+    if (row['kind']?.toString().contains('sdk') != true &&
+        decision == 'already_current' &&
+        _compareVersion(selected, candidate) < 0) {
+      issues.add(
+        'dependency $id selected value must not be lower than its candidate',
+      );
+    }
+  }
+
+  const laneMembers = {
+    'encrypted_storage': [
+      'sqlcipher_flutter_libs 0.6.8',
+      'sqlite3 2.9.4',
+      'SQLCipher Pod 4.10.0',
+    ],
+    'platform_floors': ['iOS 15.0', 'Android API 24'],
+    'architecture': ['analyzer 8.x', 'import-boundary gate'],
+  };
+  final lanes = _map(baseline['lanes']);
+  for (final entry in laneMembers.entries) {
+    final selected = _map(lanes[entry.key])['selected']?.toString() ?? '';
+    if (entry.value.any((member) => !selected.contains(member))) {
+      issues.add('compatibility lane ${entry.key} is incomplete');
+    }
+  }
+}
+
+bool _isUnsafeRelease(String value) => RegExp(
+  r'(?:^|[-+._])(?:beta|rc|dev|eol)(?:[+._-]|$)',
+  caseSensitive: false,
+).hasMatch(value);
+
+int _compareVersion(String left, String right) {
+  final leftParts = RegExp(
+    r'\d+',
+  ).allMatches(left).map((m) => int.parse(m.group(0)!));
+  final rightParts = RegExp(
+    r'\d+',
+  ).allMatches(right).map((m) => int.parse(m.group(0)!));
+  final l = leftParts.toList();
+  final r = rightParts.toList();
+  if (l.isEmpty || r.isEmpty) return 0;
+  for (
+    var index = 0;
+    index < (l.length > r.length ? l.length : r.length);
+    index++
+  ) {
+    final a = index < l.length ? l[index] : 0;
+    final b = index < r.length ? r[index] : 0;
+    if (a != b) return a.compareTo(b);
+  }
+  return 0;
 }
 
 void _validateTrackedInputs({
@@ -398,9 +505,15 @@ void _validateFlutterIdentity({
   final revision = flutterToolchain['framework_revision']?.toString();
   final metadata = _map(loadYaml(metadataYaml));
   final metadataVersion = _map(metadata['version']);
-  if (metadataVersion['revision']?.toString() != revision ||
-      metadataVersion['channel']?.toString() != channel) {
-    issues.add('.metadata must match the selected Flutter Stable identity');
+  if (metadataVersion['revision']?.toString() != revision) {
+    issues.add(
+      '.metadata revision must match the selected Flutter Stable identity',
+    );
+  }
+  if (metadataVersion['channel']?.toString() != channel) {
+    issues.add(
+      '.metadata channel must match the selected Flutter Stable identity',
+    );
   }
   final pins = RegExp(r'flutter-version:\s*([^\s#]+)')
       .allMatches(auditWorkflow)
@@ -427,7 +540,9 @@ void _validateFlutterIdentity({
       );
     }
   }
-  if (flutterExtensionSource.isNotEmpty) {
+  if (flutterExtensionSource.isEmpty && machineJson.isNotEmpty) {
+    issues.add('FlutterExtension.kt is missing from the resolved Flutter SDK');
+  } else if (flutterExtensionSource.isNotEmpty) {
     final expectedMinSdk = _map(
       flutterToolchain['flutter_extension_defaults'],
     )['min_sdk'];

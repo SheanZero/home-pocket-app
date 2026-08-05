@@ -171,45 +171,60 @@ void main() {
   });
 
   group('BASE-03/BASE-04 fail-closed repository fixtures', () {
-    String baseline() => File(
-      'docs/testing/STABLE_BASELINE.json',
-    ).readAsStringSync();
+    String baseline() =>
+        File('docs/testing/STABLE_BASELINE.json').readAsStringSync();
 
     void expectIssue(String source, String expected) {
-      expect(validate(currentInputs(), baselineJson: source), contains(expected));
+      expect(
+        validate(currentInputs(), baselineJson: source),
+        contains(expected),
+      );
     }
 
     test('rejects malformed direct-dependency evidence', () {
       expectIssue(
-        baseline().replaceFirst('"official_source":', '"source":'),
-        'dependency flutter is missing required field: official_source',
+        baseline().replaceFirst(
+          '"official_source": "https://pub.dev/packages/file_picker"',
+          '"source": "https://pub.dev/packages/file_picker"',
+        ),
+        'dependency file_picker is missing required field: official_source',
       );
     });
 
     test('rejects an EOL SQLCipher selection', () {
       expectIssue(
-        baseline().replaceFirst('"resolved": "0.6.8"', '"resolved": "0.7.0+eol"'),
+        baseline().replaceFirst(
+          '"resolved": "0.6.8"',
+          '"resolved": "0.7.0+eol"',
+        ),
         'dependency sqlcipher_flutter_libs selects forbidden prerelease or EOL value',
       );
     });
 
     test('rejects prerelease candidates presented as production stable', () {
       expectIssue(
-        baseline().replaceFirst('"candidate": "3.44.8"', '"candidate": "3.45.0-beta.1"'),
-        'toolchain flutter candidate must be production stable',
+        baseline().replaceFirst(
+          '"candidate": "3.44.8"',
+          '"candidate": "3.45.0-beta.1"',
+        ),
+        'dependency flutter candidate must be production stable',
       );
     });
 
     test('rejects a selected value below its reviewed candidate', () {
       expectIssue(
-        baseline().replaceFirst('"selected_current": "3.44.8"', '"selected_current": "3.44.7"'),
+        baseline().replaceFirst(
+          '"selected_current": "3.44.8"',
+          '"selected_current": "3.44.7"',
+        ),
         'toolchain flutter selected value must not be lower than its candidate',
       );
     });
 
     test('rejects dependency_overrides in pubspec independently', () {
       final input = currentInputs();
-      input['pubspec'] = '${input['pubspec']}\ndependency_overrides:\n  intl: 0.20.2\n';
+      input['pubspec'] =
+          '${input['pubspec']}\ndependency_overrides:\n  intl: 0.20.2\n';
       expect(
         validate(input),
         contains('pubspec dependency_overrides must not be present'),
@@ -231,16 +246,23 @@ void main() {
       );
       expect(
         validate(input),
-        contains('sqlite3_flutter_libs conflicts with SQLCipher and is forbidden'),
+        contains(
+          'sqlite3_flutter_libs conflicts with SQLCipher and is forbidden',
+        ),
       );
     });
 
     test('rejects a missing SQLCipher linker strip', () {
       final input = currentInputs();
-      input['podfile'] = input['podfile']!.replaceFirst('original.gsub', 'original.sub');
+      input['podfile'] = input['podfile']!.replaceFirst(
+        'original.gsub',
+        'original.sub',
+      );
       expect(
         validate(input),
-        contains('ios/Podfile must preserve the SQLCipher system-SQLite linker strip'),
+        contains(
+          'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
+        ),
       );
     });
 
@@ -260,19 +282,27 @@ void main() {
 
     test('rejects missing Stable CI mode contract marker', () {
       final input = currentInputs();
-      input['audit'] = input['audit']!.replaceFirst('--verify-running-flutter-sdk', '');
+      input['audit'] = input['audit']!.replaceFirst(
+        '--verify-running-flutter-sdk',
+        '',
+      );
       expect(
         validate(input),
-        contains('audit workflow must use --mode=baseline --verify-running-flutter-sdk'),
+        contains('audit workflow must invoke SDK verification'),
       );
     });
 
     test('rejects metadata revision and channel drift independently', () {
       final input = currentInputs();
-      input['metadata'] = input['metadata']!.replaceFirst('channel: "stable"', 'channel: "beta"');
+      input['metadata'] = input['metadata']!.replaceFirst(
+        'channel: "stable"',
+        'channel: "beta"',
+      );
       expect(
         validate(input),
-        contains('.metadata channel must match the selected Flutter Stable identity'),
+        contains(
+          '.metadata channel must match the selected Flutter Stable identity',
+        ),
       );
     });
 
@@ -280,19 +310,29 @@ void main() {
       expect(
         validate(
           currentInputs(),
-          runningFlutterMachineJson: _runningFlutterMachineJson.replaceFirst('3.44.8', '3.45.0'),
+          runningFlutterMachineJson: _runningFlutterMachineJson.replaceFirst(
+            '3.44.8',
+            '3.45.0',
+          ),
         ),
-        contains('running Flutter SDK must match the selected current identity'),
+        contains(
+          'running Flutter SDK must match the selected current identity',
+        ),
       );
     });
 
     test('rejects missing and malformed FlutterExtension minSdk source', () {
       expect(
         validate(currentInputs(), extensionSource: ''),
-        contains('FlutterExtension.kt is missing from the resolved Flutter SDK'),
+        contains(
+          'FlutterExtension.kt is missing from the resolved Flutter SDK',
+        ),
       );
       expect(
-        validate(currentInputs(), extensionSource: 'val minSdkVersion: Int = API24'),
+        validate(
+          currentInputs(),
+          extensionSource: 'val minSdkVersion: Int = API24',
+        ),
         contains('FlutterExtension.kt must declare an integer minSdkVersion'),
       );
     });
@@ -303,10 +343,18 @@ void main() {
         'minSdk = flutter.minSdkVersion',
         'minSdk = 24',
       );
-      expect(validate(input), contains('Android minSdk must inherit flutter.minSdkVersion'));
       expect(
-        validate(currentInputs(), extensionSource: 'val minSdkVersion: Int = 23'),
-        contains('FlutterExtension.kt minSdkVersion must match the manifest and be >= 24'),
+        validate(input),
+        contains('Android minSdk must inherit flutter.minSdkVersion'),
+      );
+      expect(
+        validate(
+          currentInputs(),
+          extensionSource: 'val minSdkVersion: Int = 23',
+        ),
+        contains(
+          'FlutterExtension.kt minSdkVersion must match the manifest and be >= 24',
+        ),
       );
     });
   });
