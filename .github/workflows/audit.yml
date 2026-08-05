@@ -28,7 +28,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.0
+          flutter-version: 3.44.8
       - uses: actions/cache@v4
         with:
           path: |
@@ -40,7 +40,7 @@ jobs:
       # contract. It includes the verified analyzer 8.x line and must run
       # before static analysis instead of a warning-only version probe.
       - name: Dependency compatibility contract
-        run: dart run scripts/dependency_compatibility.dart
+        run: dart run scripts/dependency_compatibility.dart --verify-running-flutter-sdk
       - run: dart pub global activate coverde 0.3.0+1
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
@@ -75,7 +75,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.0
+          flutter-version: 3.44.8
       - run: flutter pub get
 
       - name: Android release signing contract
@@ -109,7 +109,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.0
+          flutter-version: 3.44.8
       - run: flutter pub get
       - run: dart pub global activate coverde 0.3.0+1
       - run: flutter test --coverage

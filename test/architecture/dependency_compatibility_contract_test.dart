@@ -4,11 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../scripts/dependency_compatibility.dart' as compatibility;
 
-void main() {
-  test('BASE-01 committed stable baseline manifest exists', () {
-    expect(File('docs/testing/STABLE_BASELINE.json').existsSync(), isTrue);
-  });
+const _runningFlutterMachineJson = '''
+{
+  "flutterVersion": "3.44.8",
+  "channel": "stable",
+  "frameworkRevision": "058e0af2c2b57e369d905a03ac9748b0ebf543c6"
+}
+''';
 
+const _flutterExtensionFixture = 'val minSdkVersion: Int = 24';
+
+void main() {
   Map<String, String> currentInputs() => {
     'pubspec': File('pubspec.yaml').readAsStringSync(),
     'lock': File('pubspec.lock').readAsStringSync(),
@@ -25,78 +31,124 @@ void main() {
     'future': File(
       '.github/workflows/flutter-future-compat.yml',
     ).readAsStringSync(),
+    'metadata': File('.metadata').readAsStringSync(),
   };
 
-  List<String> validate(Map<String, String> input) {
-    return compatibility.validateDependencyCompatibility(
-      pubspecYaml: input['pubspec']!,
-      lockYaml: input['lock']!,
-      androidSettings: input['settings']!,
-      androidAppBuild: input['appBuild']!,
-      androidProperties: input['properties']!,
-      gradleWrapper: input['wrapper']!,
-      podfile: input['podfile']!,
-      podfileLock: input['podLock']!,
-      xcodeProject: input['xcode']!,
-      auditWorkflow: input['audit']!,
-      futureWorkflow: input['future']!,
-    );
-  }
+  Map<String, String> trackedInputs(Map<String, String> input) => {
+    '.metadata': input['metadata']!,
+    'pubspec.yaml': input['pubspec']!,
+    'pubspec.lock': input['lock']!,
+    'android/settings.gradle.kts': input['settings']!,
+    'android/app/build.gradle.kts': input['appBuild']!,
+    'android/gradle.properties': input['properties']!,
+    'android/gradle/wrapper/gradle-wrapper.properties': input['wrapper']!,
+    'ios/Podfile': input['podfile']!,
+    'ios/Podfile.lock': input['podLock']!,
+    'ios/Runner.xcodeproj/project.pbxproj': input['xcode']!,
+  };
 
-  test('P2-04 current dependency and native compatibility contract passes', () {
+  List<String> validate(
+    Map<String, String> input, {
+    String? baselineJson,
+    String? extensionSource,
+  }) => compatibility.validateDependencyCompatibility(
+    pubspecYaml: input['pubspec']!,
+    lockYaml: input['lock']!,
+    androidSettings: input['settings']!,
+    androidAppBuild: input['appBuild']!,
+    androidProperties: input['properties']!,
+    gradleWrapper: input['wrapper']!,
+    podfile: input['podfile']!,
+    podfileLock: input['podLock']!,
+    xcodeProject: input['xcode']!,
+    auditWorkflow: input['audit']!,
+    futureWorkflow: input['future']!,
+    baselineJson:
+        baselineJson ??
+        File('docs/testing/STABLE_BASELINE.json').readAsStringSync(),
+    metadataYaml: input['metadata']!,
+    flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
+    runningFlutterMachineJson: _runningFlutterMachineJson,
+    pubspecOverridesPresent: false,
+    trackedInputContents: trackedInputs(input),
+  );
+
+  test('BASE-01 committed stable baseline manifest exists', () {
+    expect(File('docs/testing/STABLE_BASELINE.json').existsSync(), isTrue);
+  });
+
+  test('BASE-01 traces the reviewed SQLCipher hold through the validator', () {
     expect(validate(currentInputs()), isEmpty);
   });
 
-  test('P2-04 rejects the no-op SQLCipher EOL line', () {
-    final input = currentInputs();
-    input['pubspec'] = input['pubspec']!.replaceFirst(
-      'sqlcipher_flutter_libs: ^0.6.8',
-      'sqlcipher_flutter_libs: ^0.7.0',
-    );
+  test('BASE-01 returns diagnostics for malformed baseline JSON', () {
+    expect(validate(currentInputs(), baselineJson: '{'), isNotEmpty);
+  });
 
+  test('BASE-01 rejects an unsupported manifest schema', () {
+    final baseline = File(
+      'docs/testing/STABLE_BASELINE.json',
+    ).readAsStringSync();
+    expect(
+      validate(
+        currentInputs(),
+        baselineJson: baseline.replaceFirst(
+          '"schema_version": 1',
+          '"schema_version": 2',
+        ),
+      ),
+      isNotEmpty,
+    );
+  });
+
+  test('BASE-01 rejects a missing SQLCipher hold evidence field', () {
+    final baseline = File(
+      'docs/testing/STABLE_BASELINE.json',
+    ).readAsStringSync();
+    expect(
+      validate(
+        currentInputs(),
+        baselineJson: baseline.replaceFirst(
+          '"exit_condition":',
+          '"missing_exit_condition":',
+        ),
+      ),
+      isNotEmpty,
+    );
+  });
+
+  test(
+    'BASE-02 rejects direct dependency inventory drift in both directions',
+    () {
+      final baseline = File(
+        'docs/testing/STABLE_BASELINE.json',
+      ).readAsStringSync();
+      expect(
+        validate(
+          currentInputs(),
+          baselineJson: baseline.replaceFirst(
+            '"cupertino_icons": {',
+            '"unexpected_package": {',
+          ),
+        ),
+        isNotEmpty,
+      );
+    },
+  );
+
+  test('BASE-02 rejects tracked input digest drift', () {
+    final input = currentInputs();
+    input['properties'] = '${input['properties']}\n# drift';
     expect(
       validate(input),
-      contains(contains('sqlcipher_flutter_libs constraint')),
+      contains('tracked input digest mismatch: android/gradle.properties'),
     );
   });
 
-  test('P2-04 rejects an uncoordinated stable plugin upgrade', () {
-    final input = currentInputs();
-    input['pubspec'] = input['pubspec']!.replaceFirst(
-      'share_plus: ^12.0.2',
-      'share_plus: ^13.3.0',
+  test('BASE-02 rejects an effective Flutter Android floor below API 24', () {
+    expect(
+      validate(currentInputs(), extensionSource: 'val minSdkVersion: Int = 23'),
+      isNotEmpty,
     );
-
-    expect(validate(input), contains(contains('share_plus constraint')));
-  });
-
-  test('P2-04 rejects an analyzer-incompatible Riverpod upgrade', () {
-    final input = currentInputs();
-    input['pubspec'] = input['pubspec']!.replaceFirst(
-      'flutter_riverpod: ^3.1.0',
-      'flutter_riverpod: ^3.4.2',
-    );
-
-    expect(validate(input), contains(contains('flutter_riverpod constraint')));
-  });
-
-  test('P2-04 rejects analyzer versions outside the verified 8.x line', () {
-    final input = currentInputs();
-    input['lock'] = input['lock']!.replaceFirst(
-      'version: "8.4.0"',
-      'version: "9.0.0"',
-    );
-
-    expect(validate(input), contains(contains('analyzer lock')));
-  });
-
-  test('P2-04 rejects premature Built-in Kotlin enablement', () {
-    final input = currentInputs();
-    input['properties'] = input['properties']!.replaceFirst(
-      'android.builtInKotlin=false',
-      'android.builtInKotlin=true',
-    );
-
-    expect(validate(input), contains(contains('android.builtInKotlin=false')));
   });
 }

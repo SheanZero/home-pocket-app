@@ -1,9 +1,156 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:yaml/yaml.dart';
 
-/// P2-04 compatibility contract for dependency versions that cannot be
-/// upgraded independently without weakening SQLCipher or native builds.
+/// Parsed, versioned policy for the reviewed production-stable baseline.
+///
+/// The parser deliberately accumulates diagnostics so a malformed policy cannot
+/// hide a second missing control behind its first error.
+class StableBaselineManifest {
+  StableBaselineManifest._(this.data, this.diagnostics);
+
+  final Map<String, Object?> data;
+  final List<String> diagnostics;
+
+  factory StableBaselineManifest.parse(String baselineJson) {
+    final diagnostics = <String>[];
+    Map<String, Object?> data = const {};
+    try {
+      final decoded = jsonDecode(baselineJson);
+      if (decoded is! Map) {
+        diagnostics.add('baseline manifest root must be a JSON object');
+      } else {
+        data = decoded.cast<String, Object?>();
+      }
+    } on FormatException catch (error) {
+      diagnostics.add('baseline manifest is invalid JSON: ${error.message}');
+    }
+
+    const requiredTopLevel = {
+      'schema_version',
+      'queried_on',
+      'official_source_policy',
+      'platform_floors',
+      'toolchains',
+      'direct_dependencies',
+      'lanes',
+      'holds',
+      'prohibitions',
+      'tracked_inputs',
+    };
+    final unexpected = data.keys.where(
+      (key) => !requiredTopLevel.contains(key),
+    );
+    for (final key in unexpected) {
+      diagnostics.add('baseline manifest has unexpected key: $key');
+    }
+    for (final key in requiredTopLevel) {
+      if (!data.containsKey(key)) {
+        diagnostics.add('baseline manifest is missing required key: $key');
+      }
+    }
+    if (data['schema_version'] != 1) {
+      diagnostics.add('baseline manifest schema_version must be 1');
+    }
+    if (!_isIsoDate(data['queried_on'])) {
+      diagnostics.add('baseline manifest queried_on must be an ISO date');
+    }
+
+    final toolchains = _map(data['toolchains']);
+    const toolchainIds = {
+      'flutter',
+      'dart',
+      'xcode',
+      'cocoapods',
+      'jdk',
+      'gradle',
+      'agp',
+      'android_sdk',
+    };
+    for (final id in toolchainIds) {
+      final row = _map(toolchains[id]);
+      for (final field in {
+        'selected_current',
+        'production_stable_candidate',
+        'decision',
+        'owner_phase',
+        'official_source',
+        'queried_on',
+      }) {
+        if (_isBlank(row[field])) {
+          diagnostics.add('toolchain $id is missing required field: $field');
+        }
+      }
+      if (!_isIsoDate(row['queried_on'])) {
+        diagnostics.add('toolchain $id queried_on must be an ISO date');
+      }
+    }
+    final flutter = _map(toolchains['flutter']);
+    for (final field in {'framework_revision', 'channel'}) {
+      if (_isBlank(flutter[field])) {
+        diagnostics.add('Flutter toolchain is missing required field: $field');
+      }
+    }
+    if (_map(flutter['flutter_extension_defaults'])['min_sdk'] != 24) {
+      diagnostics.add(
+        'Flutter toolchain must declare an Android min_sdk of 24',
+      );
+    }
+
+    final dependencies = _map(data['direct_dependencies']);
+    if (dependencies.isEmpty) {
+      diagnostics.add('baseline manifest must inventory direct dependencies');
+    }
+    for (final entry in dependencies.entries) {
+      final row = _map(entry.value);
+      for (final field in {
+        'kind',
+        'declared',
+        'resolved',
+        'candidate',
+        'decision',
+        'owner_phase',
+        'official_source',
+        'queried_on',
+      }) {
+        if (_isBlank(row[field])) {
+          diagnostics.add(
+            'dependency ${entry.key} is missing required field: $field',
+          );
+        }
+      }
+      if (!_isIsoDate(row['queried_on'])) {
+        diagnostics.add(
+          'dependency ${entry.key} queried_on must be an ISO date',
+        );
+      }
+    }
+
+    for (final entry in _map(data['holds']).entries) {
+      final hold = _map(entry.value);
+      for (final field in {
+        'selected_value',
+        'candidate',
+        'official_source',
+        'queried_on',
+        'compatibility_reason',
+        'exit_condition',
+        'owner_phase',
+      }) {
+        if (_isBlank(hold[field])) {
+          diagnostics.add(
+            '${entry.key} hold is missing required field: $field',
+          );
+        }
+      }
+    }
+
+    return StableBaselineManifest._(data, diagnostics);
+  }
+}
+
 List<String> validateDependencyCompatibility({
   required String pubspecYaml,
   required String lockYaml,
@@ -16,17 +163,30 @@ List<String> validateDependencyCompatibility({
   required String xcodeProject,
   required String auditWorkflow,
   required String futureWorkflow,
+  required String baselineJson,
+  required String metadataYaml,
+  required String flutterExtensionSource,
+  required String runningFlutterMachineJson,
+  required bool pubspecOverridesPresent,
+  required Map<String, String> trackedInputContents,
 }) {
   final issues = <String>[];
+  final baseline = StableBaselineManifest.parse(baselineJson);
+  issues.addAll(baseline.diagnostics);
   final pubspec = _map(loadYaml(pubspecYaml));
   final dependencies = _map(pubspec['dependencies']);
   final devDependencies = _map(pubspec['dev_dependencies']);
+  final allDirectDependencies = <Object?, Object?>{
+    ...dependencies,
+    ...devDependencies,
+  };
   final lock = _map(loadYaml(lockYaml));
   final packages = _map(lock['packages']);
+  final baselineDependencies = _map(baseline.data['direct_dependencies']);
+  final flutterToolchain = _map(_map(baseline.data['toolchains'])['flutter']);
 
   void expectConstraint(String package, String expected) {
-    final actual = (dependencies[package] ?? devDependencies[package])
-        ?.toString();
+    final actual = allDirectDependencies[package]?.toString();
     if (actual != expected) {
       issues.add('$package constraint must be $expected (found $actual)');
     }
@@ -45,6 +205,36 @@ List<String> validateDependencyCompatibility({
     }
   }
 
+  final actualDependencyKeys = allDirectDependencies.keys
+      .map((key) => key.toString())
+      .toSet();
+  final manifestDependencyKeys = baselineDependencies.keys
+      .map((key) => key.toString())
+      .toSet();
+  for (final package in actualDependencyKeys.difference(
+    manifestDependencyKeys,
+  )) {
+    issues.add('baseline is missing direct dependency: $package');
+  }
+  for (final package in manifestDependencyKeys.difference(
+    actualDependencyKeys,
+  )) {
+    issues.add('baseline declares non-direct dependency: $package');
+  }
+  for (final package in actualDependencyKeys.intersection(
+    manifestDependencyKeys,
+  )) {
+    final row = _map(baselineDependencies[package]);
+    final declared = _declaredDependency(allDirectDependencies[package]);
+    final resolved = _map(packages[package])['version']?.toString();
+    if (row['declared']?.toString() != declared) {
+      issues.add('$package baseline declared constraint must be $declared');
+    }
+    if (row['resolved']?.toString() != resolved) {
+      issues.add('$package baseline resolved version must be $resolved');
+    }
+  }
+
   // Security lane: 0.7.0+eol contains no native SQLCipher library, and
   // sqlite3 3.x is not compatible with the current encrypted native path.
   expectConstraint('sqlcipher_flutter_libs', '^0.6.8');
@@ -58,9 +248,6 @@ List<String> validateDependencyCompatibility({
     );
   }
 
-  // Stable native-plugin lane: these versions share win32 5.x. The newer
-  // plus plugins require win32 6.x, which only file_picker 12 prereleases
-  // currently support. Upgrade all four together after a stable release.
   expectConstraint('file_picker', '^11.0.3');
   expectLocked('file_picker', '11.0.3');
   expectConstraint('share_plus', '^12.0.2');
@@ -68,17 +255,10 @@ List<String> validateDependencyCompatibility({
   expectConstraint('package_info_plus', '^9.0.1');
   expectLocked('package_info_plus', '9.0.1');
   expectLocked('win32', '5.15.0');
-
-  // 7.4.0 was published from a beta line and changes the adapter API. Keep
-  // the proven version exact until a compatible stable release is available.
   expectConstraint('speech_to_text', '7.3.0');
   expectLocked('speech_to_text', '7.3.0');
   expectConstraint('flutter_local_notifications', '^22.2.0');
   expectLocked('flutter_local_notifications', '22.2.0');
-
-  // The architecture lint and code-generation toolchains are collectively
-  // constrained by analyzer 8.x. Newer Riverpod and JSON releases require
-  // analyzer 9+/13+, so they cannot be advanced independently.
   expectConstraint('flutter_riverpod', '^3.1.0');
   expectLocked('flutter_riverpod', '3.1.0');
   expectConstraint('riverpod_annotation', '^4.0.0');
@@ -99,13 +279,10 @@ List<String> validateDependencyCompatibility({
   if (analyzerVersion == null ||
       !RegExp(r'^8\.\d+\.\d+$').hasMatch(analyzerVersion)) {
     issues.add(
-      'analyzer lock must stay on the verified 8.x line '
-      '(found $analyzerVersion)',
+      'analyzer lock must stay on the verified 8.x line (found $analyzerVersion)',
     );
   }
 
-  // Flutter 3.44 must remain on the legacy Android DSL. Flutter's official
-  // migration guide requires Flutter 3.47+ before Built-in Kotlin is enabled.
   expectText(
     'android/gradle.properties',
     androidProperties,
@@ -132,9 +309,6 @@ List<String> validateDependencyCompatibility({
     'id("kotlin-android")',
   );
   expectText('Gradle wrapper', gradleWrapper, 'gradle-8.14-all.zip');
-
-  // iOS intentionally uses Flutter SwiftPM plus a CocoaPods fallback only for
-  // SQLCipher. The linker strip prevents system sqlite3 from winning symbols.
   if (pubspecYaml.contains('enable-swift-package-manager: false')) {
     issues.add('Swift Package Manager must stay enabled for supported plugins');
   }
@@ -147,22 +321,34 @@ List<String> validateDependencyCompatibility({
   expectText('ios/Podfile', podfile, 'original.gsub');
   expectText('ios/Podfile', podfile, 'sqlite3');
   expectText('ios/Podfile', podfile, 'stripped');
+  if (pubspecOverridesPresent) {
+    issues.add(
+      'pubspec dependency_overrides or pubspec_overrides.yaml must not be present',
+    );
+  }
+  if (!androidAppBuild.contains('minSdk = flutter.minSdkVersion')) {
+    issues.add('Android minSdk must inherit flutter.minSdkVersion');
+  }
 
-  // Make removal of either the stable blocking contract or future beta probe
-  // visible in ordinary host tests.
+  _validateTrackedInputs(
+    issues: issues,
+    manifestInputs: _map(baseline.data['tracked_inputs']),
+    actualContents: trackedInputContents,
+  );
+  _validateFlutterIdentity(
+    issues: issues,
+    flutterToolchain: flutterToolchain,
+    metadataYaml: metadataYaml,
+    machineJson: runningFlutterMachineJson,
+    auditWorkflow: auditWorkflow,
+    flutterExtensionSource: flutterExtensionSource,
+  );
+
   expectText(
     'audit workflow',
     auditWorkflow,
-    'dart run scripts/dependency_compatibility.dart',
+    'dart run scripts/dependency_compatibility.dart --verify-running-flutter-sdk',
   );
-  if (auditWorkflow.contains('Verify analyzer pin (smoke check)') ||
-      auditWorkflow.contains('analyzer 7.x confirmed') ||
-      auditWorkflow.contains('FUTURE-TOOL-01 readiness')) {
-    issues.add(
-      'audit workflow must use the blocking dependency compatibility contract '
-      'instead of the legacy analyzer 7.x smoke check',
-    );
-  }
   expectText('future workflow', futureWorkflow, 'channel: beta');
   expectText('future workflow', futureWorkflow, 'flutter build apk --debug');
   expectText(
@@ -170,39 +356,252 @@ List<String> validateDependencyCompatibility({
     futureWorkflow,
     'flutter build ios --simulator --debug',
   );
-
   return issues;
 }
 
-Map<Object?, Object?> _map(Object? value) {
-  return value is Map ? value.cast<Object?, Object?>() : const {};
+void _validateTrackedInputs({
+  required List<String> issues,
+  required Map<Object?, Object?> manifestInputs,
+  required Map<String, String> actualContents,
+}) {
+  final manifestPaths = manifestInputs.keys
+      .map((key) => key.toString())
+      .toSet();
+  final actualPaths = actualContents.keys.toSet();
+  for (final path in actualPaths.difference(manifestPaths)) {
+    issues.add('tracked input is missing from baseline: $path');
+  }
+  for (final path in manifestPaths.difference(actualPaths)) {
+    issues.add('baseline declares unprovided tracked input: $path');
+  }
+  for (final path in actualPaths.intersection(manifestPaths)) {
+    final expected = _map(manifestInputs[path])['sha256']?.toString();
+    final actual = sha256
+        .convert(utf8.encode(actualContents[path]!))
+        .toString();
+    if (expected != actual) {
+      issues.add('tracked input digest mismatch: $path');
+    }
+  }
 }
 
-void main() {
+void _validateFlutterIdentity({
+  required List<String> issues,
+  required Map<Object?, Object?> flutterToolchain,
+  required String metadataYaml,
+  required String machineJson,
+  required String auditWorkflow,
+  required String flutterExtensionSource,
+}) {
+  final selected = flutterToolchain['selected_current']?.toString();
+  final channel = flutterToolchain['channel']?.toString();
+  final revision = flutterToolchain['framework_revision']?.toString();
+  final metadata = _map(loadYaml(metadataYaml));
+  final metadataVersion = _map(metadata['version']);
+  if (metadataVersion['revision']?.toString() != revision ||
+      metadataVersion['channel']?.toString() != channel) {
+    issues.add('.metadata must match the selected Flutter Stable identity');
+  }
+  final pins = RegExp(r'flutter-version:\s*([^\s#]+)')
+      .allMatches(auditWorkflow)
+      .map((match) => match.group(1))
+      .whereType<String>()
+      .toList();
+  if (pins.isEmpty || pins.any((pin) => pin != selected)) {
+    issues.add(
+      'every Stable CI Flutter pin must match the selected current identity',
+    );
+  }
+  if (machineJson.isNotEmpty) {
+    final machine = _parseMachineJson(machineJson, issues);
+    if (machine['flutterVersion']?.toString() != selected ||
+        machine['channel']?.toString() != channel ||
+        machine['frameworkRevision']?.toString() != revision) {
+      issues.add(
+        'running Flutter SDK must match the selected current identity',
+      );
+    }
+  }
+  if (flutterExtensionSource.isNotEmpty) {
+    final expectedMinSdk = _map(
+      flutterToolchain['flutter_extension_defaults'],
+    )['min_sdk'];
+    final minSdk = RegExp(
+      r'val minSdkVersion: Int = (\d+)',
+    ).firstMatch(flutterExtensionSource)?.group(1);
+    if (minSdk == null || int.tryParse(minSdk) == null) {
+      issues.add('FlutterExtension.kt must declare an integer minSdkVersion');
+    } else if (int.parse(minSdk) < 24 || minSdk != expectedMinSdk?.toString()) {
+      issues.add(
+        'FlutterExtension.kt minSdkVersion must match the manifest and be >= 24',
+      );
+    }
+  }
+}
+
+Map<String, Object?> _parseMachineJson(String source, List<String> issues) {
+  try {
+    final value = jsonDecode(source);
+    if (value is Map) {
+      return value.cast<String, Object?>();
+    }
+  } on FormatException {
+    // The caller receives a stable aggregated diagnostic below.
+  }
+  issues.add('running Flutter --version --machine output must be valid JSON');
+  return const {};
+}
+
+String _declaredDependency(Object? value) {
+  if (value is Map) {
+    return value.entries
+        .map((entry) => '${entry.key}:${entry.value}')
+        .join(',');
+  }
+  return value.toString();
+}
+
+bool _isBlank(Object? value) =>
+    value == null || value.toString().trim().isEmpty;
+
+bool _isIsoDate(Object? value) =>
+    RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value?.toString() ?? '');
+
+Map<Object?, Object?> _map(Object? value) =>
+    value is Map ? value.cast<Object?, Object?>() : const {};
+
+class _RunningFlutterSdk {
+  const _RunningFlutterSdk({
+    required this.machineJson,
+    required this.extensionSource,
+    required this.errors,
+  });
+
+  final String machineJson;
+  final String extensionSource;
+  final List<String> errors;
+}
+
+Future<_RunningFlutterSdk> _readRunningFlutterSdk() async {
+  final command = Platform.isWindows ? 'where' : 'which';
+  final result = await Process.run(command, const ['flutter']);
+  if (result.exitCode != 0 || result.stdout.toString().trim().isEmpty) {
+    return const _RunningFlutterSdk(
+      machineJson: '',
+      extensionSource: '',
+      errors: ['could not resolve flutter executable on PATH'],
+    );
+  }
+  try {
+    final executable = result.stdout
+        .toString()
+        .trim()
+        .split(RegExp(r'\r?\n'))
+        .first;
+    final resolvedExecutable = File(executable).resolveSymbolicLinksSync();
+    final flutterRoot = File(resolvedExecutable).parent.parent.path;
+    final machine = await Process.run(executable, const [
+      '--version',
+      '--machine',
+    ]);
+    if (machine.exitCode != 0) {
+      return _RunningFlutterSdk(
+        machineJson: '',
+        extensionSource: '',
+        errors: ['flutter --version --machine failed: ${machine.stderr}'],
+      );
+    }
+    final extension = File(
+      '$flutterRoot/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt',
+    );
+    if (!extension.existsSync()) {
+      return _RunningFlutterSdk(
+        machineJson: '',
+        extensionSource: '',
+        errors: [
+          'FlutterExtension.kt is missing from the resolved Flutter SDK',
+        ],
+      );
+    }
+    return _RunningFlutterSdk(
+      machineJson: machine.stdout.toString(),
+      extensionSource: extension.readAsStringSync(),
+      errors: const [],
+    );
+  } on FileSystemException catch (error) {
+    return _RunningFlutterSdk(
+      machineJson: '',
+      extensionSource: '',
+      errors: ['could not inspect resolved Flutter SDK: ${error.message}'],
+    );
+  }
+}
+
+Map<String, String> _trackedInputContents(String Function(String path) read) =>
+    {
+      '.metadata': read('.metadata'),
+      'pubspec.yaml': read('pubspec.yaml'),
+      'pubspec.lock': read('pubspec.lock'),
+      'android/settings.gradle.kts': read('android/settings.gradle.kts'),
+      'android/app/build.gradle.kts': read('android/app/build.gradle.kts'),
+      'android/gradle.properties': read('android/gradle.properties'),
+      'android/gradle/wrapper/gradle-wrapper.properties': read(
+        'android/gradle/wrapper/gradle-wrapper.properties',
+      ),
+      'ios/Podfile': read('ios/Podfile'),
+      'ios/Podfile.lock': read('ios/Podfile.lock'),
+      'ios/Runner.xcodeproj/project.pbxproj': read(
+        'ios/Runner.xcodeproj/project.pbxproj',
+      ),
+    };
+
+bool _pubspecOverridesPresent(String pubspecYaml) =>
+    _map(loadYaml(pubspecYaml)).containsKey('dependency_overrides') ||
+    File('pubspec_overrides.yaml').existsSync();
+
+Future<void> main(List<String> arguments) async {
   String read(String path) {
     final file = File(path);
     if (!file.existsSync()) {
       stderr.writeln('[dependency-compat] ERROR: missing $path');
-      exitCode = 1;
       return '';
     }
     return file.readAsStringSync();
   }
 
-  final issues = validateDependencyCompatibility(
-    pubspecYaml: read('pubspec.yaml'),
-    lockYaml: read('pubspec.lock'),
-    androidSettings: read('android/settings.gradle.kts'),
-    androidAppBuild: read('android/app/build.gradle.kts'),
-    androidProperties: read('android/gradle.properties'),
-    gradleWrapper: read('android/gradle/wrapper/gradle-wrapper.properties'),
-    podfile: read('ios/Podfile'),
-    podfileLock: read('ios/Podfile.lock'),
-    xcodeProject: read('ios/Runner.xcodeproj/project.pbxproj'),
-    auditWorkflow: read('.github/workflows/audit.yml'),
-    futureWorkflow: read('.github/workflows/flutter-future-compat.yml'),
+  final verifyRunningFlutterSdk = arguments.contains(
+    '--verify-running-flutter-sdk',
   );
-
+  final running = verifyRunningFlutterSdk
+      ? await _readRunningFlutterSdk()
+      : const _RunningFlutterSdk(
+          machineJson: '',
+          extensionSource: '',
+          errors: [],
+        );
+  final pubspec = read('pubspec.yaml');
+  final issues = <String>[...running.errors];
+  issues.addAll(
+    validateDependencyCompatibility(
+      pubspecYaml: pubspec,
+      lockYaml: read('pubspec.lock'),
+      androidSettings: read('android/settings.gradle.kts'),
+      androidAppBuild: read('android/app/build.gradle.kts'),
+      androidProperties: read('android/gradle.properties'),
+      gradleWrapper: read('android/gradle/wrapper/gradle-wrapper.properties'),
+      podfile: read('ios/Podfile'),
+      podfileLock: read('ios/Podfile.lock'),
+      xcodeProject: read('ios/Runner.xcodeproj/project.pbxproj'),
+      auditWorkflow: read('.github/workflows/audit.yml'),
+      futureWorkflow: read('.github/workflows/flutter-future-compat.yml'),
+      baselineJson: read('docs/testing/STABLE_BASELINE.json'),
+      metadataYaml: read('.metadata'),
+      flutterExtensionSource: running.extensionSource,
+      runningFlutterMachineJson: running.machineJson,
+      pubspecOverridesPresent: _pubspecOverridesPresent(pubspec),
+      trackedInputContents: _trackedInputContents(read),
+    ),
+  );
   if (issues.isNotEmpty) {
     stderr.writeln('[dependency-compat] FAIL (${issues.length} issue(s))');
     for (final issue in issues) {
@@ -211,11 +610,9 @@ void main() {
     exitCode = 1;
     return;
   }
-
   stdout.writeln('[dependency-compat] PASS');
   stdout.writeln('  SQLCipher 0.6.8 / sqlite3 2.9.4 / pod 4.10.0');
-  stdout.writeln('  stable file/share/package-info/win32 group aligned');
   stdout.writeln(
-    '  Flutter 3.44 Android legacy flags and future beta probes wired',
+    '  Flutter Stable identity and effective Android minSdk >= 24 verified',
   );
 }
