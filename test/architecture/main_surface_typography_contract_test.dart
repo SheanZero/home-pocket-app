@@ -83,13 +83,18 @@ void main() {
   });
 
   test(
-    'canonical V16 shopping form mirrors the app fields and safe voice draft',
+    'canonical V16 shopping form mirrors the app fields, units, and safe voice draft',
     () {
       final source = File(_mockupFiles.single).readAsStringSync();
       const requiredFragments = <String>[
         'data-shopping-input="name"',
-        'data-action="shopping-quantity-decrease"',
-        'data-action="shopping-quantity-increase"',
+        'function shoppingQuantityControl()',
+        'data-shopping-input="quantity"',
+        'data-action="shopping-unit-open"',
+        'function shoppingUnitSheet()',
+        'data-shopping-unit-option',
+        'data-shopping-custom-unit',
+        'data-action="shopping-unit-apply"',
         'data-shopping-form-ledger="daily"',
         'data-shopping-form-list-type="public"',
         'shopping-type-row',
@@ -117,6 +122,21 @@ void main() {
               '$fragment',
         );
       }
+
+      expect(
+        source,
+        isNot(contains('data-action="shopping-quantity-decrease"')),
+        reason:
+            '${_mockupFiles.single} must keep the V16 decimal quantity field; '
+            'the retired integer stepper cannot represent fractional units.',
+      );
+      expect(
+        source,
+        isNot(contains('data-action="shopping-quantity-increase"')),
+        reason:
+            '${_mockupFiles.single} must keep the V16 decimal quantity field; '
+            'the retired integer stepper cannot represent fractional units.',
+      );
     },
   );
 
