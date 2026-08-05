@@ -473,6 +473,10 @@ void main() {
     );
     final futureProbeSummary = compatibility.successSummary(
       compatibility.DependencyCompatibilityMode.futureProbe,
+      betaIdentityParsed: true,
+    );
+    final nonBetaFutureProbeSummary = compatibility.successSummary(
+      compatibility.DependencyCompatibilityMode.futureProbe,
     );
 
     expect(baselineSummary, contains('Flutter Stable identity'));
@@ -481,6 +485,11 @@ void main() {
     expect(futureProbeSummary, contains('iOS 15'));
     expect(futureProbeSummary, contains('Android minSdk >= 24'));
     expect(futureProbeSummary, isNot(contains('Stable identity')));
+    expect(
+      nonBetaFutureProbeSummary,
+      contains('Flutter future-probe identity parsed'),
+    );
+    expect(nonBetaFutureProbeSummary, isNot(contains('beta identity parsed')));
   });
 
   test('future probe demotes only ordinary candidate drift', () {

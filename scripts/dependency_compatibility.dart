@@ -66,11 +66,14 @@ DependencyCompatibilityMode parseDependencyCompatibilityMode(
   return mode;
 }
 
-String successSummary(DependencyCompatibilityMode mode) => switch (mode) {
+String successSummary(
+  DependencyCompatibilityMode mode, {
+  bool betaIdentityParsed = false,
+}) => switch (mode) {
   DependencyCompatibilityMode.baseline =>
     'Flutter Stable identity and effective Android minSdk >= 24 verified',
   DependencyCompatibilityMode.futureProbe =>
-    'Flutter beta identity parsed; SQLCipher, iOS 15, and Android minSdk >= 24 invariants verified',
+    '${betaIdentityParsed ? 'Flutter beta identity parsed' : 'Flutter future-probe identity parsed'}; SQLCipher, iOS 15, and Android minSdk >= 24 invariants verified',
 };
 
 /// Parsed, versioned policy for the reviewed production-stable baseline.
@@ -960,5 +963,12 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln('  - [${warning.code}] ${warning.message}');
   }
   stdout.writeln('  SQLCipher 0.6.8 / sqlite3 2.9.4 / pod 4.10.0');
-  stdout.writeln('  ${successSummary(mode)}');
+  final betaIdentityParsed = completeReport.warnings.any(
+    (warning) =>
+        warning.message ==
+        'running Flutter beta SDK differs from the selected Stable identity',
+  );
+  stdout.writeln(
+    '  ${successSummary(mode, betaIdentityParsed: betaIdentityParsed)}',
+  );
 }
