@@ -404,6 +404,108 @@ void main() {
       },
     );
 
+    const groupScopedControlEventTypes = <String>[
+      'member_confirmed',
+      'join_request',
+      'join_request_rejected',
+      'join_request_cancelled',
+      'join_request_expired',
+      'member_left',
+      'group_dissolved',
+      'group_status',
+      'group_name_updated',
+      'sync_available',
+      'group_key_requested',
+      'owner_transferred',
+    ];
+
+    for (final eventType in groupScopedControlEventTypes) {
+      test(
+        'rejects pre-auth $eventType control events without dispatching',
+        () async {
+          final events = <WebSocketEvent>[];
+          service.eventStream.listen(events.add);
+          service.connect(
+            groupId: 'group-1',
+            deviceId: 'device-1',
+            signMessage: (_) async => 'mock-signature',
+          );
+
+          incomingController.add(
+            jsonEncode({'type': eventType, 'groupId': 'group-1'}),
+          );
+          await Future<void>.delayed(Duration.zero);
+          await Future<void>.delayed(Duration.zero);
+
+          expect(events, isEmpty);
+          expect(
+            service.connectionState,
+            WebSocketConnectionState.disconnected,
+          );
+          verify(() => sink.close(any(), any())).called(1);
+        },
+      );
+    }
+
+    for (final eventType in groupScopedControlEventTypes) {
+      for (final invalidGroupId in <String?>[null, 'other-group']) {
+        final groupDescription = invalidGroupId == null
+            ? 'missing'
+            : 'mismatched';
+        test(
+          'rejects authenticated $eventType events with a $groupDescription group id',
+          () async {
+            final events = <WebSocketEvent>[];
+            service.eventStream.listen(events.add);
+            service.connect(
+              groupId: 'group-1',
+              deviceId: 'device-1',
+              signMessage: (_) async => 'mock-signature',
+            );
+            incomingController.add(
+              jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+            );
+            await Future<void>.delayed(Duration.zero);
+
+            final frame = <String, dynamic>{'type': eventType};
+            if (invalidGroupId != null) frame['groupId'] = invalidGroupId;
+            incomingController.add(jsonEncode(frame));
+            await Future<void>.delayed(Duration.zero);
+            await Future<void>.delayed(Duration.zero);
+
+            expect(events, isEmpty);
+            expect(
+              service.connectionState,
+              WebSocketConnectionState.disconnected,
+            );
+            verify(() => sink.close(any(), any())).called(1);
+          },
+        );
+      }
+    }
+
+    for (final invalidGroupId in <String?>[null, 'other-group']) {
+      final groupDescription = invalidGroupId == null
+          ? 'missing'
+          : 'mismatched';
+      test('rejects auth_success with a $groupDescription group id', () async {
+        service.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (_) async => 'mock-signature',
+        );
+
+        final frame = <String, dynamic>{'type': 'auth_success'};
+        if (invalidGroupId != null) frame['groupId'] = invalidGroupId;
+        incomingController.add(jsonEncode(frame));
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(service.connectionState, WebSocketConnectionState.disconnected);
+        verify(() => sink.close(any(), any())).called(1);
+      });
+    }
+
     for (final malformedFrame in <({String name, String raw})>[
       (name: 'a non-map JSON root', raw: jsonEncode([])),
       (name: 'a missing type', raw: jsonEncode({'payload': 'missing-type'})),
@@ -538,7 +640,9 @@ void main() {
           deviceId: 'device-b',
           signMessage: (_) async => 'signature-b',
         );
-        controllers.last.add(jsonEncode({'type': 'auth_success'}));
+        controllers.last.add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-b'}),
+        );
         await Future<void>.delayed(Duration.zero);
 
         expect(
@@ -834,7 +938,9 @@ void main() {
           signMessage: (msg) async => 'mock-sig',
         );
         async.flushMicrotasks();
-        controller.add(jsonEncode({'type': 'auth_success'}));
+        controller.add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+        );
         async.flushMicrotasks();
 
         async.elapse(const Duration(seconds: 30));
@@ -1080,7 +1186,9 @@ void main() {
         deviceId: 'device-b',
         signMessage: (_) async => 'signature-b',
       );
-      controllers[1].add(jsonEncode({'type': 'auth_success'}));
+      controllers[1].add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-b'}),
+      );
       await Future<void>.delayed(Duration.zero);
 
       delayedSignature.completeError(StateError('old sign failed'));
@@ -1092,6 +1200,64 @@ void main() {
       );
       verifyNever(() => sinks[1].close(any(), any()));
     });
+
+    test(
+      'a stale auth_success cannot authenticate a replacement generation',
+      () async {
+        final controllers = <StreamController<dynamic>>[];
+        final replacementService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            final controller = StreamController<dynamic>.broadcast(sync: true);
+            final localSink = MockWebSocketSink();
+            when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+            when(() => localSink.add(any())).thenReturn(null);
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            controllers.add(controller);
+            return channel;
+          },
+        );
+        addTearDown(() async {
+          replacementService.dispose();
+          for (final controller in controllers) {
+            await controller.close();
+          }
+        });
+
+        replacementService.connect(
+          groupId: 'group-a',
+          deviceId: 'device-a',
+          signMessage: (_) async => 'signature-a',
+        );
+        replacementService.connect(
+          groupId: 'group-b',
+          deviceId: 'device-b',
+          signMessage: (_) async => 'signature-b',
+        );
+
+        controllers[0].add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-a'}),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          replacementService.connectionState,
+          WebSocketConnectionState.connecting,
+        );
+
+        controllers[1].add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-b'}),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          replacementService.connectionState,
+          WebSocketConnectionState.connected,
+        );
+      },
+    );
 
     test('disconnect invalidates pending authentication', () async {
       final delayedSignature = Completer<String>();
@@ -1143,7 +1309,9 @@ void main() {
           deviceId: 'device-b',
           signMessage: (_) async => 'signature-b',
         );
-        controllers[1].add(jsonEncode({'type': 'auth_success'}));
+        controllers[1].add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-b'}),
+        );
 
         controllers[0].addError(StateError('stale socket failed'));
 

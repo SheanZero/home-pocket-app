@@ -265,8 +265,16 @@ class WebSocketService with WidgetsBindingObserver {
       return;
     }
 
-    // Handle auth response
+    // Session control frames are the only non-group-scoped incoming frames:
+    // auth_error terminates the pending session and pong acknowledges a local
+    // heartbeat. auth_success must still bind this generation to its captured
+    // group before it can authenticate the transport.
     if (type == 'auth_success') {
+      if (_connectionState != WebSocketConnectionState.connecting ||
+          !_hasExpectedGroupId(data, groupId)) {
+        _rejectControlMessage(generation, channel);
+        return;
+      }
       _setConnectionState(WebSocketConnectionState.connected);
       _reconnectAttempts = 0;
       _startHeartbeat(generation, channel);
@@ -290,12 +298,25 @@ class WebSocketService with WidgetsBindingObserver {
       return;
     }
 
-    // Parse event
+    // Every relay event in [_parseEvent] is group-scoped. Do not expose any
+    // stateful invalidation until this exact connection generation completed
+    // its group-bound authentication, and reject frames for another group.
     final event = _parseEvent(type, data);
-    if (event != null && !_eventController.isClosed) {
+    if (event == null) return;
+    if (_connectionState != WebSocketConnectionState.connected ||
+        !_hasExpectedGroupId(data, groupId)) {
+      _rejectControlMessage(generation, channel);
+      return;
+    }
+    if (!_eventController.isClosed) {
       _eventController.add(event);
     }
   }
+
+  static bool _hasExpectedGroupId(
+    Map<String, dynamic> data,
+    String expectedGroupId,
+  ) => data['groupId'] == expectedGroupId;
 
   /// Reject a malformed or over-budget control frame without exposing it in
   /// logs. The current-generation guard prevents a stale frame from closing a
