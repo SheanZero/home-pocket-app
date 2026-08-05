@@ -13,6 +13,16 @@ const _projectRoot = '.';
 
 String _absoluteProjectRoot() => Directory.current.path;
 
+Set<String> _pathEntries(File file, {bool hasRationale = false}) => file
+    .readAsLinesSync()
+    .map((line) => line.trim())
+    .where((line) => line.isNotEmpty && !line.startsWith('#'))
+    .map(
+      (line) =>
+          hasRationale ? line.substring(0, line.indexOf('  #')).trim() : line,
+    )
+    .toSet();
+
 Future<ProcessResult> _runGate(Directory cwd, [List<String> extra = const []]) {
   return Process.run(
     'dart',
@@ -106,6 +116,16 @@ void main() {
       },
     );
 
+    test('--list ignores blank lines and documented comment lines', () async {
+      _writeLcov(tmp, {'lib/a.dart': (10, 10)});
+      File(
+        '${tmp.path}/scope.txt',
+      ).writeAsStringSync('# critical data boundary\n\nlib/a.dart\n');
+      final r = await _runGate(tmp, ['--list', 'scope.txt']);
+      expect(r.exitCode, equals(0), reason: r.stderr.toString());
+      expect(r.stdout.toString(), contains('lib/a.dart'));
+    });
+
     test(
       'falls back to .planning/audit/files-needing-tests.txt when no positional/--list',
       () async {
@@ -181,19 +201,15 @@ void main() {
       expect(r.stderr.toString(), contains('--banana'));
     });
 
-    test(
-      'file in args but missing from lcov is WARN-only (does NOT fail gate) — Phase 8 amendment 2026-04-28',
-      () async {
-        // Pre-amendment behavior: missing-from-lcov treated as 0% → exit 1.
-        // Post-amendment: missing files are reported as WARNINGs and listed
-        // separately; only files present in lcov below threshold fail exit code.
-        _writeLcov(tmp, {'lib/exists.dart': (10, 10)});
-        final r = await _runGate(tmp, ['lib/missing.dart', 'lib/exists.dart']);
-        expect(r.exitCode, equals(0), reason: r.stderr.toString());
-        expect(r.stderr.toString(), contains('not in lcov source'));
-        expect(r.stdout.toString(), contains('missing-from-lcov'));
-      },
-    );
+    test('required file missing from lcov fails the gate', () async {
+      // A scope manifest represents executable, hand-written production
+      // code. Missing coverage must not silently waive its requirement.
+      _writeLcov(tmp, {'lib/exists.dart': (10, 10)});
+      final r = await _runGate(tmp, ['lib/missing.dart', 'lib/exists.dart']);
+      expect(r.exitCode, equals(1), reason: r.stderr.toString());
+      expect(r.stderr.toString(), contains('MISSING: lib/missing.dart'));
+      expect(r.stdout.toString(), contains('1 missing-from-lcov'));
+    });
 
     test(
       '--json output includes a "missing" key listing files absent from lcov',
@@ -204,7 +220,7 @@ void main() {
           'lib/missing.dart',
           'lib/exists.dart',
         ]);
-        expect(r.exitCode, equals(0));
+        expect(r.exitCode, equals(1));
         final out = r.stdout.toString();
         final start = out.indexOf('{');
         expect(start, greaterThanOrEqualTo(0));
@@ -236,6 +252,24 @@ void main() {
         expect(r.stderr.toString(), contains('DEFERRED: lib/a.dart'));
         expect(r.stderr.toString(), contains('deferred for X reason'));
         expect(r.stdout.toString(), contains('1 deferred (skipped)'));
+      },
+    );
+
+    test(
+      '--deferred explicitly excludes a generated file absent from lcov',
+      () async {
+        _writeLcov(tmp, {'lib/a.dart': (10, 10)});
+        File('${tmp.path}/deferred.txt').writeAsStringSync(
+          'lib/a.g.dart  # generated provider output is filtered upstream\n',
+        );
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'deferred.txt',
+          'lib/a.g.dart',
+          'lib/a.dart',
+        ]);
+        expect(r.exitCode, equals(0), reason: r.stderr.toString());
+        expect(r.stderr.toString(), contains('DEFERRED: lib/a.g.dart'));
       },
     );
 
@@ -273,6 +307,20 @@ void main() {
       final r = await _runGate(tmp, ['--deferred', 'nope.txt', 'lib/a.dart']);
       expect(r.exitCode, equals(2));
       expect(r.stderr.toString(), contains('--deferred path not found'));
+    });
+
+    test('--deferred entry outside the required input list exits 2', () async {
+      _writeLcov(tmp, {'lib/a.dart': (10, 10)});
+      File(
+        '${tmp.path}/deferred.txt',
+      ).writeAsStringSync('lib/not-required.dart  # stale waiver\n');
+      final r = await _runGate(tmp, [
+        '--deferred',
+        'deferred.txt',
+        'lib/a.dart',
+      ]);
+      expect(r.exitCode, equals(2));
+      expect(r.stderr.toString(), contains('not present in required input'));
     });
 
     test(
@@ -324,6 +372,55 @@ void main() {
         expect(r.exitCode, equals(1));
         expect(r.stdout.toString(), contains('lib/c.dart'));
         expect(r.stdout.toString(), contains('FAIL'));
+      },
+    );
+
+    test(
+      'checked-in risk manifest retains every executable trust boundary',
+      () {
+        final root = _absoluteProjectRoot();
+        final required = _pathEntries(
+          File('$root/.planning/audit/coverage-gate-required-files.txt'),
+        );
+        const highRisk = {
+          'lib/application/settings/export_backup_use_case.dart',
+          'lib/application/settings/import_backup_use_case.dart',
+          'lib/application/settings/restore_backup_use_case.dart',
+          'lib/infrastructure/crypto/services/backup_crypto_service.dart',
+          'lib/infrastructure/sync/relay_api_client.dart',
+          'lib/infrastructure/sync/websocket_service.dart',
+          'lib/infrastructure/sync/push_notification_service.dart',
+          'lib/application/family_sync/sync_engine.dart',
+          'lib/application/family_sync/sync_orchestrator.dart',
+        };
+
+        expect(required, containsAll(highRisk));
+        expect(required, hasLength(15));
+        for (final path in required) {
+          expect(File('$root/$path').existsSync(), isTrue, reason: path);
+          expect(path, endsWith('.dart'));
+          expect(path, isNot(endsWith('.g.dart')));
+          expect(path, isNot(endsWith('.freezed.dart')));
+        }
+
+        final deferred = _pathEntries(
+          File('$root/.planning/audit/coverage-gate-deferred.txt'),
+          hasRationale: true,
+        );
+        expect(deferred, isEmpty);
+        expect(required, containsAll(deferred));
+
+        final auditWorkflow = File(
+          '$root/.github/workflows/audit.yml',
+        ).readAsStringSync();
+        expect(
+          auditWorkflow,
+          contains('.planning/audit/coverage-gate-required-files.txt'),
+        );
+        expect(
+          auditWorkflow,
+          isNot(contains('--list .planning/audit/cleanup-touched-files.txt')),
+        );
       },
     );
   });

@@ -6,54 +6,10 @@
 # Format: <relative_path>  # <rationale>
 # Rationale is REQUIRED — entries without it cause the gate to exit 2.
 #
-# Created: 2026-04-28 by Phase 8 amendment after Plan 08-06 surfaced 10 real
-# <70% files. User decision: explicit, reasoned, file-scoped deferral
-# (option B from Wave-2 review). The 80→70 threshold change brought 1 file
-# from FAIL to PASS; these 10 remain. Discipline is preserved by the rule
-# that CI still hard-fails on any failure NOT listed here, and each entry
-# below carries a written rationale.
-#
-# All entries are tracked under FUTURE-TOOL-03 (coverage-baseline-review)
-# in .planning/REQUIREMENTS.md — at the post-feature-work review either fix
-# them or formalize a per-area threshold split that retires the deferral.
-
-# --- Application provider-wiring files (3) ----------------------------------
-# These are hand-written wrappers around `.g.dart` provider definitions.
-# coverde correctly filters the .g.dart side from lcov_clean.info; the
-# remaining hand-written part is mostly plumbing with minimal branching,
-# so coverage signal is low. Tests for these would mock the providers,
-# adding noise without catching real bugs.
-
-lib/application/ml/repository_providers.dart       # 40% — provider wrapper, .g.dart filtered; hand-written part is plumbing — review under FUTURE-TOOL-03
-lib/application/profile/repository_providers.dart  # 0%  — provider wrapper, .g.dart filtered; hand-written part is plumbing — review under FUTURE-TOOL-03
-lib/application/voice/repository_providers.dart    # 40% — provider wrapper, .g.dart filtered; hand-written part is plumbing — review under FUTURE-TOOL-03
-
-# --- Large UI screens (4) ---------------------------------------------------
-# Real coverage gaps. These need widget/integration tests beyond the scope
-# of the cleanup initiative (which focused on refactor, not test creation
-# for previously-untested surfaces). FUTURE-TOOL-03 is the bring-up bucket.
-
-lib/features/accounting/presentation/screens/transaction_confirm_screen.dart  # 63% — needs widget test for confirm flow with various ledger/category permutations — FUTURE-TOOL-03
-lib/features/accounting/presentation/screens/transaction_entry_screen.dart    # 46% — needs widget test covering keypad input + category select + ledger toggle — FUTURE-TOOL-03
-lib/features/analytics/presentation/screens/analytics_screen.dart             # 53% — needs widget test for chart-data flow + period switching — FUTURE-TOOL-03
-lib/features/family_sync/presentation/screens/create_group_screen.dart        # 18% — needs widget test for invite-code generation + share flow — FUTURE-TOOL-03
-
-# --- State notifiers / widget sections (3) ----------------------------------
-# Moderate coverage gaps in widget-adjacent state code. Scoped for
-# FUTURE-TOOL-03; lift either by adding notifier tests or by shrinking the
-# active gate's scope under a per-area threshold split.
-
-lib/features/family_sync/presentation/providers/state_sync.dart      # 62% — needs notifier test for online/offline sync transitions — FUTURE-TOOL-03
-lib/features/home/presentation/providers/state_shadow_books.dart     # 35% — needs notifier test for book-switch flow — FUTURE-TOOL-03
-lib/features/settings/presentation/widgets/appearance_section.dart   # 60% — needs widget test for theme/locale toggles — FUTURE-TOOL-03
-
-# --- Added 2026-07-07 (quick 260707-wq1) ------------------------------------
-# CI run 28872322982 (main) surfaced this file at 68.97% (40/58), one line
-# under the 70 threshold. It is pure provider-wiring — 20 @riverpod use-case
-# getters, zero branching — structurally identical to the application/*/
-# repository_providers.dart entries above. The gap cascades from the
-# already-deferred analytics_screen.dart (53%): these providers are exercised
-# only transitively by that screen's (deferred) widget test, so lifting the
-# screen's coverage under FUTURE-TOOL-03 lifts this file with it. Same bucket.
-
-lib/features/analytics/presentation/providers/repository_providers.dart  # 69% — provider wrapper, .g.dart filtered; 20 use-case getters, no branching; gap cascades from deferred analytics_screen — FUTURE-TOOL-03
+# Retired 2026-08-05: the 11 historical entries were paired with the old
+# cleanup-touched-files.txt input. Nine point to removed paths; the remaining
+# two are unrelated provider-wiring debt. Keeping any of them in a current
+# trust-boundary gate would be a silent scope waiver. The active risk manifest
+# has zero deferred files. New entries require a tracked, hand-written Dart
+# path and a file-specific rationale; do not add generated/non-executable
+# paths here — keep them out of coverage-gate-required-files.txt instead.

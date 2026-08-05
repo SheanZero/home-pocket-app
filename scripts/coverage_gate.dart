@@ -23,18 +23,16 @@
 //
 // Exit codes (D-04, amended 2026-04-28):
 //   0 — every supplied file present in lcov met threshold
-//   1 — at least one file present in lcov fell below threshold (gate failure)
+//   1 — a required file fell below threshold or is absent from lcov (gate failure)
 //   2 — invocation error (missing lcov, unknown flag, no files supplied)
 //
-// Files supplied to the gate but NOT present in the lcov source are reported
-// as MISSING (separate from real failures). They emit a WARNING line on stderr
-// and appear in JSON output under the `missing` key, but do NOT influence
-// exit code. Rationale: cleanup-touched-files.txt is generated from PLAN.md
-// `files_modified:` frontmatter and includes generated/non-Dart entries
-// (`.g.dart`, `.freezed.dart`, `import_guard.yaml`) that coverde filters
-// from lcov_clean.info. Those are scope boundary issues, not coverage
-// failures. Real <threshold% files (in lcov but below threshold) still
-// fail exit code as before — see Phase 8 amendment in REPO-LOCK-POLICY.md.
+// Files supplied to the gate but NOT present in the lcov source are MISSING
+// coverage and fail the gate. A required manifest is deliberately limited to
+// hand-written executable production files, so silently skipping an absent
+// file would turn a stale LCOV input into a coverage bypass. Generated and
+// non-executable entries must never be placed in that manifest; when a
+// temporary exception is unavoidable, put the exact path and rationale in
+// `--deferred` instead. See coverage-gate-scope.md.
 
 import 'dart:convert';
 import 'dart:io';
@@ -111,14 +109,12 @@ Future<void> main(List<String> args) async {
       stderr.writeln('[coverage:gate] ERROR: --list path not found: $listPath');
       exit(2);
     }
-    files.addAll(f.readAsLinesSync().where((l) => l.trim().isNotEmpty));
+    files.addAll(_readPathList(f));
   }
   if (files.isEmpty) {
     final fallback = File(_fallbackList);
     if (fallback.existsSync()) {
-      files.addAll(
-        fallback.readAsLinesSync().where((l) => l.trim().isNotEmpty),
-      );
+      files.addAll(_readPathList(fallback));
     }
   }
   if (files.isEmpty) {
@@ -193,6 +189,19 @@ Future<void> main(List<String> args) async {
     }
   }
 
+  // A deferral that is not part of this invocation is dead configuration, not
+  // a harmless note. Reject it so a retired file cannot remain pre-approved
+  // until a future manifest expansion accidentally reactivates the waiver.
+  final staleDeferred =
+      deferredByPath.keys.where((path) => !files.contains(path)).toList()
+        ..sort();
+  if (staleDeferred.isNotEmpty) {
+    stderr.writeln(
+      '[coverage:gate] ERROR: deferred path not present in required input: ${staleDeferred.join(', ')}',
+    );
+    exit(2);
+  }
+
   // Parse lcov once → map by file_path for O(1) lookup.
   final raw = File(lcovPath).readAsStringSync();
   final records = parseLcov(raw);
@@ -201,8 +210,7 @@ Future<void> main(List<String> args) async {
   // For each input file, classify as one of:
   //   - deferred : in --deferred list → SKIP threshold check, record reasoning
   //   - checked  : present in lcov  → contributes to threshold gate + exit code
-  //   - missing  : not in lcov      → WARN-only (scope boundary)
-  // Phase 8 amendment 2026-04-28: missing + deferred no longer fail exit code.
+  //   - missing  : not in lcov      → gate failure (coverage input drift)
   final checked = <_GateRow>[];
   final missing = <String>[];
   final deferredHits = <_DeferredEntry>[];
@@ -219,7 +227,7 @@ Future<void> main(List<String> args) async {
     if (found == null) {
       missing.add(path);
       stderr.writeln(
-        '[coverage:gate] WARNING: $path not in lcov source — skipped (likely generated or filtered)',
+        '[coverage:gate] MISSING: $path not in lcov source — required coverage input drift',
       );
       continue;
     }
@@ -258,11 +266,19 @@ Future<void> main(List<String> args) async {
       );
     }
     stdout.writeln(
-      '[coverage:gate] ${checked.length} checked, ${failures.length} failed, ${missing.length} missing-from-lcov (skipped), ${deferredHits.length} deferred (skipped) (threshold: $threshold)',
+      '[coverage:gate] ${checked.length} checked, ${failures.length} below-threshold, ${missing.length} missing-from-lcov (fails), ${deferredHits.length} deferred (skipped) (threshold: $threshold)',
     );
   }
 
-  exit(failures.isEmpty ? 0 : 1);
+  exit(failures.isEmpty && missing.isEmpty ? 0 : 1);
+}
+
+Iterable<String> _readPathList(File file) sync* {
+  for (final raw in file.readAsLinesSync()) {
+    final path = raw.trim();
+    if (path.isEmpty || path.startsWith('#')) continue;
+    yield path;
+  }
 }
 
 class _DeferredEntry {
