@@ -402,6 +402,33 @@ void main() {
       expect(service.connectionState, WebSocketConnectionState.connecting);
     });
 
+    for (final malformedFrame in <({String name, String raw})>[
+      (
+        name: 'a non-string type',
+        raw: jsonEncode({'type': 1}),
+      ),
+      (
+        name: 'a non-string group id',
+        raw: jsonEncode({'type': 'sync_available', 'groupId': 1}),
+      ),
+      (
+        name: 'a non-map data payload',
+        raw: jsonEncode({'type': 'group_status', 'data': []}),
+      ),
+    ]) {
+      test(
+        'rejects a control frame with ${malformedFrame.name}',
+        () async {
+          await expectUnsafeControlMessageIsRejected(
+            service: service,
+            incomingController: incomingController,
+            sink: sink,
+            raw: malformedFrame.raw,
+          );
+        },
+      );
+    }
+
     test(
       'rejects oversized raw control messages before JSON decoding',
       () async {
@@ -467,7 +494,7 @@ void main() {
     });
 
     test(
-      'rejecting an unsafe frame does not close its replacement generation',
+      'rejecting a malformed schema frame does not close its replacement generation',
       () async {
         final controllers = <StreamController<dynamic>>[];
         final sinks = <MockWebSocketSink>[];
@@ -498,9 +525,7 @@ void main() {
           deviceId: 'device-a',
           signMessage: (_) async => 'signature-a',
         );
-        controllers.first.add(
-          jsonEncode({'type': 'sync_available', 'padding': 'x' * (64 * 1024)}),
-        );
+        controllers.first.add(jsonEncode({'type': 1}));
         await Future<void>.delayed(Duration.zero);
         await Future<void>.delayed(Duration.zero);
 
