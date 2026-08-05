@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,28 @@ void main() {
       hasLength(2),
     );
   });
+
+  test(
+    'HP-05 keeps every device E2E Flutter pin aligned with the selected Stable baseline',
+    () {
+      final baseline = jsonDecode(
+        File('docs/testing/STABLE_BASELINE.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final toolchains = baseline['toolchains'] as Map<String, dynamic>;
+      final flutter = toolchains['flutter'] as Map<String, dynamic>;
+      final selectedStable = flutter['selected_current'] as String;
+      final workflow = File(
+        '.github/workflows/device-e2e.yml',
+      ).readAsStringSync();
+      final flutterPins = RegExp(
+        r'^\s*flutter-version:\s*([^\s#]+)\s*$',
+        multiLine: true,
+      ).allMatches(workflow).map((match) => match.group(1)).toList();
+
+      expect(flutterPins, hasLength(2));
+      expect(flutterPins, everyElement(selectedStable));
+    },
+  );
 
   test(
     'P2-03 critical device matrix cannot collapse back to one migration',

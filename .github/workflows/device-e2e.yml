@@ -46,7 +46,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.0
+          flutter-version: 3.44.8
           cache: true
       - run: flutter pub get
       - name: Enable KVM for the Android emulator
@@ -79,7 +79,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.0
+          flutter-version: 3.44.8
           cache: true
       - run: flutter pub get
       - name: Boot an available iPhone simulator
