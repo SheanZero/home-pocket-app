@@ -21,6 +21,33 @@ int _onlyIndexOf(String source, String value) {
 int _countOf(String source, String value) =>
     RegExp(RegExp.escape(value)).allMatches(source).length;
 
+List<String> _generatedOutputGuardViolations(String source) {
+  final violations = <String>[];
+
+  if (!source.contains('untracked_generation_outputs()')) {
+    violations.add('the generated-output guard must enumerate untracked files');
+  }
+  if (_countOf(source, 'git ls-files --others --exclude-standard --') != 1) {
+    violations.add('the generated-output guard must include non-ignored files');
+  }
+  if (_countOf(source, 'git ls-files --others --ignored --exclude-standard --') !=
+      1) {
+    violations.add('the generated-output guard must include ignored files');
+  }
+  if (!source.contains("':(glob)lib/**/*.g.dart'")) {
+    violations.add('the generated-output guard must include all .g.dart files');
+  }
+  if (!source.contains("':(glob)lib/**/*.freezed.dart'")) {
+    violations.add(
+      'the generated-output guard must include all .freezed.dart files',
+    );
+  }
+  if (source.contains('done < <(git ls-files')) {
+    violations.add('the generated scope must not be fixed before generation');
+  }
+  return violations;
+}
+
 List<String> _twoPassContractViolations(String source) {
   final executable = _executableSource(source);
   final violations = <String>[];
@@ -110,12 +137,12 @@ void main() {
     expect(source, contains('set -euo pipefail'));
     expect(source, contains('BASH_SOURCE[0]'));
     expect(source, contains('pwd -P'));
-    expect(source, contains('git ls-files'));
     expect(source, contains('git diff --exit-code HEAD --'));
     expect(source, contains('pubspec.yaml'));
     expect(source, contains('pubspec.lock'));
     expect(source, contains('lib/generated/'));
-    expect(source, contains("'lib/**/*.g.dart' 'lib/**/*.freezed.dart'"));
+    expect(source, contains("':(glob)lib/**/*.g.dart'"));
+    expect(source, contains("':(glob)lib/**/*.freezed.dart'"));
 
     final dirtyPreflight = source.indexOf(
       "assert_clean_generation_scope 'before generation'",
@@ -189,10 +216,10 @@ void main() {
     expect(
       _twoPassContractViolations(
         source.replaceFirst(
-          "assert_clean_generation_scope 'after generation pass 2'\n\n"
-          'flutter analyze --no-fatal-infos',
-          'flutter analyze --no-fatal-infos\n\n'
-          "assert_clean_generation_scope 'after generation pass 2'",
+          "  assert_clean_generation_scope 'after generation pass 2'\n\n"
+          '  flutter analyze --no-fatal-infos',
+          '  flutter analyze --no-fatal-infos\n\n'
+          "  assert_clean_generation_scope 'after generation pass 2'",
         ),
       ),
       isNotEmpty,
@@ -235,6 +262,120 @@ void main() {
       ),
       isNotEmpty,
       reason: 'comment-only quality commands do not count',
+    );
+  });
+
+  test('each generation boundary rejects untracked generated output', () {
+    final source = File(_scriptPath).readAsStringSync();
+
+    expect(_generatedOutputGuardViolations(source), isEmpty);
+    expect(
+      _generatedOutputGuardViolations(
+        source.replaceFirst(
+          'git ls-files --others --ignored --exclude-standard --',
+          'git ls-files --others --exclude-standard --',
+        ),
+      ),
+      isNotEmpty,
+      reason: 'ignored generated output must not bypass the reproducibility gate',
+    );
+    expect(
+      _generatedOutputGuardViolations(
+        source.replaceFirst(
+          "':(glob)lib/**/*.freezed.dart'",
+          "':(glob)lib/**/*.not-generated.dart'",
+        ),
+      ),
+      isNotEmpty,
+      reason: 'new Freezed outputs must be rejected even when untracked',
+    );
+    expect(
+      _generatedOutputGuardViolations(
+        source.replaceFirst(
+          'untracked_generation_outputs() {',
+          r'''while IFS= read -r generated_file; do
+  generation_scope+=("$generated_file")
+done < <(git ls-files -- 'lib/**/*.g.dart')
+
+untracked_generation_outputs() {''',
+        ),
+      ),
+      isNotEmpty,
+      reason: 'the generation scope cannot be captured before either pass runs',
+    );
+  });
+
+  test('untracked-output probe catches ignored and non-ignored artifacts', () async {
+    final fixture = await Directory.systemTemp.createTemp('codegen-output-');
+    addTearDown(() => fixture.delete(recursive: true));
+
+    await File('${fixture.path}/.gitignore').writeAsString('lib/generated/\n');
+    for (final path in [
+      'lib/generated/new_localization.dart',
+      'lib/feature/new_provider.g.dart',
+      'lib/feature/new_model.freezed.dart',
+    ]) {
+      final file = File('${fixture.path}/$path');
+      await file.parent.create(recursive: true);
+      await file.writeAsString('// fixture\n');
+    }
+    final init = await Process.run('git', ['init', '-q'], workingDirectory: fixture.path);
+    expect(init.exitCode, 0, reason: init.stderr);
+    final email = await Process.run(
+      'git',
+      ['config', 'user.email', 'codegen-fixture@example.invalid'],
+      workingDirectory: fixture.path,
+    );
+    final name = await Process.run(
+      'git',
+      ['config', 'user.name', 'Codegen Fixture'],
+      workingDirectory: fixture.path,
+    );
+    final add = await Process.run(
+      'git',
+      ['add', '.gitignore'],
+      workingDirectory: fixture.path,
+    );
+    final commit = await Process.run(
+      'git',
+      ['commit', '-qm', 'fixture baseline'],
+      workingDirectory: fixture.path,
+    );
+    expect(email.exitCode, 0, reason: email.stderr);
+    expect(name.exitCode, 0, reason: name.stderr);
+    expect(add.exitCode, 0, reason: add.stderr);
+    expect(commit.exitCode, 0, reason: commit.stderr);
+
+    final result = await Process.run('bash', [
+      '-c',
+      r'source "$1"; cd "$2"; untracked_generation_outputs',
+      'codegen-output-probe',
+      File(_scriptPath).absolute.path,
+      fixture.path,
+    ]);
+
+    expect(result.exitCode, 0, reason: result.stderr);
+    expect(
+      result.stdout,
+      contains('lib/generated/new_localization.dart'),
+      reason: 'ignored localization output must still be reported',
+    );
+    expect(result.stdout, contains('lib/feature/new_provider.g.dart'));
+    expect(result.stdout, contains('lib/feature/new_model.freezed.dart'));
+
+    final gateResult = await Process.run('bash', [
+      '-c',
+      r'source "$1"; cd "$2"; assert_clean_generation_scope "after generation pass 2"',
+      'codegen-gate-fixture',
+      File(_scriptPath).absolute.path,
+      fixture.path,
+    ]);
+
+    expect(gateResult.exitCode, 1);
+    expect(gateResult.stderr, contains('Untracked generated output'));
+    expect(
+      gateResult.stderr,
+      contains('Generator nondeterminism occurred on the second pass.'),
     );
   });
 }
