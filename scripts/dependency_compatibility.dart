@@ -246,7 +246,9 @@ CompatibilityReport validateDependencyCompatibility({
   final lock = _map(loadYaml(lockYaml));
   final packages = _map(lock['packages']);
   final baselineDependencies = _map(baseline.data['direct_dependencies']);
-  final flutterToolchain = _map(_map(baseline.data['toolchains'])['flutter']);
+  final toolchains = _map(baseline.data['toolchains']);
+  final flutterToolchain = _map(toolchains['flutter']);
+  final dartToolchain = _map(toolchains['dart']);
 
   _validateManifestPolicy(issues: issues, baseline: baseline.data);
 
@@ -407,6 +409,7 @@ CompatibilityReport validateDependencyCompatibility({
   _validateFlutterIdentity(
     issues: issues,
     flutterToolchain: flutterToolchain,
+    dartToolchain: dartToolchain,
     metadataYaml: metadataYaml,
     machineJson: runningFlutterMachineJson,
     auditWorkflow: auditWorkflow,
@@ -605,6 +608,7 @@ void _validateTrackedInputs({
 void _validateFlutterIdentity({
   required List<String> issues,
   required Map<Object?, Object?> flutterToolchain,
+  required Map<Object?, Object?> dartToolchain,
   required String metadataYaml,
   required String machineJson,
   required String auditWorkflow,
@@ -612,6 +616,7 @@ void _validateFlutterIdentity({
   required DependencyCompatibilityMode mode,
 }) {
   final selected = flutterToolchain['selected_current']?.toString();
+  final selectedDart = dartToolchain['selected_current']?.toString();
   final channel = flutterToolchain['channel']?.toString();
   final revision = flutterToolchain['framework_revision']?.toString();
   final metadata = _map(loadYaml(metadataYaml));
@@ -647,6 +652,7 @@ void _validateFlutterIdentity({
       'flutterVersion',
       'channel',
       'frameworkRevision',
+      'dartSdkVersion',
     }.every((field) => !_isBlank(machine[field]));
     if (!hasIdentity) {
       issues.add(
@@ -657,12 +663,17 @@ void _validateFlutterIdentity({
       issues.add(
         'running Flutter beta SDK differs from the selected Stable identity',
       );
-    } else if (machine['flutterVersion']?.toString() != selected ||
-        machine['channel']?.toString() != channel ||
-        machine['frameworkRevision']?.toString() != revision) {
-      issues.add(
-        'running Flutter SDK must match the selected current identity',
-      );
+    } else {
+      if (machine['flutterVersion']?.toString() != selected ||
+          machine['channel']?.toString() != channel ||
+          machine['frameworkRevision']?.toString() != revision) {
+        issues.add(
+          'running Flutter SDK must match the selected current identity',
+        );
+      }
+      if (machine['dartSdkVersion']?.toString() != selectedDart) {
+        issues.add('running Dart SDK must match the selected current identity');
+      }
     }
   }
   if (flutterExtensionSource.isEmpty && machineJson.isNotEmpty) {

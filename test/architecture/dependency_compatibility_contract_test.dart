@@ -8,7 +8,8 @@ const _runningFlutterMachineJson = '''
 {
   "flutterVersion": "3.44.8",
   "channel": "stable",
-  "frameworkRevision": "058e0af2c2b57e369d905a03ac9748b0ebf543c6"
+  "frameworkRevision": "058e0af2c2b57e369d905a03ac9748b0ebf543c6",
+  "dartSdkVersion": "3.12.2"
 }
 ''';
 
@@ -16,7 +17,8 @@ const _betaFlutterMachineJson = '''
 {
   "flutterVersion": "3.45.0-0.1.pre",
   "channel": "beta",
-  "frameworkRevision": "aabbccddeeff00112233445566778899aabbccdd"
+  "frameworkRevision": "aabbccddeeff00112233445566778899aabbccdd",
+  "dartSdkVersion": "3.13.0-0.1.pre"
 }
 ''';
 
@@ -360,6 +362,19 @@ void main() {
         contains(
           'running Flutter SDK must match the selected current identity',
         ),
+      );
+    });
+
+    test('rejects a running Dart SDK version outside the Stable baseline', () {
+      expect(
+        validate(
+          currentInputs(),
+          runningFlutterMachineJson: _runningFlutterMachineJson.replaceFirst(
+            '"dartSdkVersion": "3.12.2"',
+            '"dartSdkVersion": "3.13.0"',
+          ),
+        ),
+        contains('running Dart SDK must match the selected current identity'),
       );
     });
 
