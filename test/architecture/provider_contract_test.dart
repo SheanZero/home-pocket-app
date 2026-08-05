@@ -53,6 +53,89 @@ void main() => runApp(UncontrolledProviderScope(
       },
     );
 
+    test('only Riverpod-resolved root scope constructors pass', () async {
+      final cases = <({String name, String source, bool passes})>[
+        (
+          name: 'local ProviderScope name collision',
+          source: '''
+import 'package:flutter/widgets.dart';
+
+class ProviderScope extends Widget {
+  const ProviderScope({required this.child});
+  final Widget child;
+
+  @override
+  Element createElement() => throw UnimplementedError();
+}
+
+void main() => runApp(const ProviderScope(child: Placeholder()));
+''',
+          passes: false,
+        ),
+        (
+          name: 'comment lookalike',
+          source: '''
+import 'package:flutter/widgets.dart';
+
+void main() => runApp(/* ProviderScope(child: Placeholder()) */ const Placeholder());
+''',
+          passes: false,
+        ),
+        (
+          name: 'string lookalike',
+          source: '''
+import 'package:flutter/widgets.dart';
+
+void main() => runApp(const Placeholder(key: ValueKey('ProviderScope(')));
+''',
+          passes: false,
+        ),
+        (
+          name: 'unrelated import alias',
+          source: '''
+import 'package:flutter/widgets.dart';
+import 'package:unrelated/scopes.dart' as riverpod;
+
+void main() => runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+          passes: false,
+        ),
+        (
+          name: 'Riverpod import alias',
+          source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+void main() => runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+          passes: true,
+        ),
+        (
+          name: 'Riverpod show import',
+          source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+
+void main() => runApp(const ProviderScope(child: Placeholder()));
+''',
+          passes: true,
+        ),
+      ];
+
+      for (final fixture in cases) {
+        final root = await _createFixtureRoot(appSource: fixture.source);
+        addTearDown(() => root.delete(recursive: true));
+
+        final report = checkProviderContract(root.path);
+
+        expect(
+          report.isPassing,
+          fixture.passes,
+          reason: '${fixture.name}: ${report.describe()}',
+        );
+      }
+    });
+
     test('the production lib tree satisfies the owned provider contract', () {
       final report = checkProviderContract('.');
 

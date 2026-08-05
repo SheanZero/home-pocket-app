@@ -27,6 +27,31 @@ void main() {
       },
     );
 
+    test(
+      'provider scope lookalike fixtures are rejected and cleaned',
+      () async {
+        const cases = <tooling.ToolingGuardCase>[
+          tooling.ToolingGuardCase.providerScopeLocalCollision(),
+          tooling.ToolingGuardCase.providerScopeCommentLookalike(),
+          tooling.ToolingGuardCase.providerScopeStringLookalike(),
+          tooling.ToolingGuardCase.providerScopeUnrelatedAlias(),
+        ];
+
+        final result = await tooling.verifyToolingGuards(
+          cases: cases,
+          runCommand: tooling.runToolingGuardCommand,
+          runValidTreeChecks: false,
+        );
+
+        expect(result.isPassing, isTrue, reason: result.describe());
+        expect(result.cases, hasLength(cases.length));
+        for (final caseResult in result.cases) {
+          expect(caseResult.output, contains('missing_provider_scope'));
+          expect(File(caseResult.guardCase.fixturePath).existsSync(), isFalse);
+        }
+      },
+    );
+
     test('pre-existing sentinel is refused without deleting it', () async {
       final fixture = File(_packageFixturePath);
       await fixture.writeAsString('// preserved stale sentinel\n');

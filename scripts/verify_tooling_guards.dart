@@ -97,6 +97,65 @@ class ToolingGuardCase {
         expectsFixturePath: false,
       );
 
+  const ToolingGuardCase.providerScopeLocalCollision()
+    : this(
+        name: 'provider app root local ProviderScope collision',
+        fixturePath: 'lib/phase58_provider_scope_local_collision_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n\n"
+            'class ProviderScope extends Widget {\n'
+            '  const ProviderScope({required this.child});\n'
+            '  final Widget child;\n'
+            '  @override\n'
+            '  Element createElement() => throw UnimplementedError();\n'
+            '}\n\n'
+            'void phase58LocalCollision() =>\n'
+            '    runApp(const ProviderScope(child: Placeholder()));\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
+  const ToolingGuardCase.providerScopeCommentLookalike()
+    : this(
+        name: 'provider app root comment lookalike',
+        fixturePath: 'lib/phase58_provider_scope_comment_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n\n"
+            'void phase58CommentLookalike() =>\n'
+            '    runApp(/* ProviderScope(child: Placeholder()) */ const Placeholder());\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
+  const ToolingGuardCase.providerScopeStringLookalike()
+    : this(
+        name: 'provider app root string lookalike',
+        fixturePath: 'lib/phase58_provider_scope_string_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n\n"
+            'void phase58StringLookalike() =>\n'
+            "    runApp(const Placeholder(key: ValueKey('ProviderScope(')));\n",
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
+  const ToolingGuardCase.providerScopeUnrelatedAlias()
+    : this(
+        name: 'provider app root unrelated import alias',
+        fixturePath: 'lib/phase58_provider_scope_unrelated_alias_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n"
+            "import 'package:unrelated/scopes.dart' as riverpod;\n\n"
+            'void phase58UnrelatedAlias() =>\n'
+            '    runApp(riverpod.ProviderScope(child: const Placeholder()));\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
   const ToolingGuardCase.validProductionAnalyzer()
     : this(
         name: 'valid production flutter analyze',
@@ -219,6 +278,10 @@ Future<ToolingGuardResult> verifyToolingGuards({
     ToolingGuardCase.layerScannerRelative(),
     ToolingGuardCase.providerScopeMissing(),
     ToolingGuardCase.providerScopeControl(),
+    ToolingGuardCase.providerScopeLocalCollision(),
+    ToolingGuardCase.providerScopeCommentLookalike(),
+    ToolingGuardCase.providerScopeStringLookalike(),
+    ToolingGuardCase.providerScopeUnrelatedAlias(),
   ],
   ToolingGuardCommand runCommand = runToolingGuardCommand,
   bool runValidTreeChecks = true,

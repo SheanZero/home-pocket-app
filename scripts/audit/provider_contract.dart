@@ -68,8 +68,9 @@ void _checkAppRoots(
     }
     final source = file.readAsStringSync();
     final path = _relativePath(root, file);
+    final scopeBindings = _riverpodScopeBindings(source);
     for (final call in _findCalls(source, 'runApp')) {
-      if (_isScopedRoot(call.argument)) continue;
+      if (_isScopedRoot(call, scopeBindings)) continue;
       violations.add(
         ProviderContractViolation(
           code: 'missing_provider_scope',
@@ -85,7 +86,7 @@ void _checkAppRoots(
     // its app-root seam is the AppRunner callback rather than a direct runApp.
     if (path == 'lib/main.dart' &&
         source.contains('typedef AppRunner') &&
-        !_hasScopedAppRunner(source)) {
+        !_hasScopedAppRunner(source, scopeBindings)) {
       violations.add(
         const ProviderContractViolation(
           code: 'missing_provider_scope',
@@ -186,40 +187,210 @@ void _checkRiverpodLintHold(
   }
 }
 
-bool _hasScopedAppRunner(String source) {
+bool _hasScopedAppRunner(String source, _RiverpodScopeBindings bindings) {
   for (final call in _findCalls(source, 'appRunner')) {
-    if (call.argument.contains('UncontrolledProviderScope(')) return true;
+    if (_isScopedRoot(
+      call,
+      bindings,
+      requiredConstructor: 'UncontrolledProviderScope',
+    )) {
+      return true;
+    }
   }
   return false;
 }
 
-bool _isScopedRoot(String argument) =>
-    argument.contains('ProviderScope(') ||
-    argument.contains('UncontrolledProviderScope(');
+bool _isScopedRoot(
+  _Call call,
+  _RiverpodScopeBindings bindings, {
+  String? requiredConstructor,
+}) {
+  final tokens = call.arguments;
+  var index = 0;
+  while (index < tokens.length &&
+      (tokens[index].text == 'const' || tokens[index].text == 'new')) {
+    index++;
+  }
+  if (index >= tokens.length || tokens[index].kind != _TokenKind.identifier) {
+    return false;
+  }
+
+  final first = tokens[index].text;
+  String? constructor;
+  String? importAlias;
+  if (index + 1 < tokens.length && tokens[index + 1].text == '(') {
+    constructor = first;
+  } else if (index + 3 < tokens.length &&
+      tokens[index + 1].text == '.' &&
+      tokens[index + 2].kind == _TokenKind.identifier &&
+      tokens[index + 3].text == '(') {
+    importAlias = first;
+    constructor = tokens[index + 2].text;
+  }
+  if (constructor == null ||
+      (constructor != 'ProviderScope' &&
+          constructor != 'UncontrolledProviderScope') ||
+      (requiredConstructor != null && constructor != requiredConstructor)) {
+    return false;
+  }
+
+  return importAlias == null
+      ? bindings.allowsUnqualified(constructor)
+      : bindings.allowsQualified(importAlias, constructor);
+}
+
+_RiverpodScopeBindings _riverpodScopeBindings(String source) {
+  final tokens = _tokens(source);
+  final unqualified = <String>{};
+  final qualified = <String, Set<String>>{};
+  for (var index = 0; index < tokens.length; index++) {
+    if (tokens[index].text != 'import' ||
+        index + 1 >= tokens.length ||
+        tokens[index + 1].kind != _TokenKind.string ||
+        tokens[index + 1].text !=
+            'package:flutter_riverpod/flutter_riverpod.dart') {
+      continue;
+    }
+
+    String? alias;
+    final shown = <String>{};
+    final hidden = <String>{};
+    var hasShow = false;
+    for (
+      index += 2;
+      index < tokens.length && tokens[index].text != ';';
+      index++
+    ) {
+      final token = tokens[index];
+      if (token.text == 'as' &&
+          index + 1 < tokens.length &&
+          tokens[index + 1].kind == _TokenKind.identifier) {
+        alias = tokens[++index].text;
+      } else if (token.text == 'show' || token.text == 'hide') {
+        final target = token.text == 'show' ? shown : hidden;
+        hasShow |= token.text == 'show';
+        while (index + 1 < tokens.length && tokens[index + 1].text != ';') {
+          final candidate = tokens[++index];
+          if (candidate.kind == _TokenKind.identifier) {
+            target.add(candidate.text);
+          }
+          if (candidate.text == 'show' || candidate.text == 'hide') {
+            index--;
+            break;
+          }
+        }
+      }
+    }
+
+    const constructors = {'ProviderScope', 'UncontrolledProviderScope'};
+    final allowed = constructors
+        .where(
+          (name) =>
+              (!hasShow || shown.contains(name)) && !hidden.contains(name),
+        )
+        .toSet();
+    if (alias == null) {
+      unqualified.addAll(allowed);
+    } else {
+      qualified[alias] = allowed;
+    }
+  }
+  return _RiverpodScopeBindings(unqualified, qualified);
+}
 
 List<_Call> _findCalls(String source, String name) {
   final calls = <_Call>[];
-  final matcher = RegExp('\\b$name\\s*\\(');
-  for (final match in matcher.allMatches(source)) {
-    final open = source.indexOf('(', match.start);
-    final close = _matchingParen(source, open);
-    if (close == null) continue;
-    calls.add(_Call(match.start, source.substring(open + 1, close)));
+  final tokens = _tokens(source);
+  for (var index = 0; index + 1 < tokens.length; index++) {
+    if (tokens[index].text != name || tokens[index + 1].text != '(') continue;
+    if (index > 0 && tokens[index - 1].text == '.') continue;
+    var depth = 1;
+    var close = index + 2;
+    for (; close < tokens.length; close++) {
+      if (tokens[close].text == '(') depth++;
+      if (tokens[close].text == ')' && --depth == 0) break;
+    }
+    if (close == tokens.length) continue;
+    calls.add(_Call(tokens[index].offset, tokens.sublist(index + 2, close)));
   }
   return calls;
 }
 
-int? _matchingParen(String source, int open) {
-  var depth = 0;
-  for (var index = open; index < source.length; index++) {
+List<_Token> _tokens(String source) {
+  final tokens = <_Token>[];
+  for (var index = 0; index < source.length;) {
     final char = source[index];
-    if (char == '(') depth++;
-    if (char == ')') {
-      depth--;
-      if (depth == 0) return index;
+    if (char.trim().isEmpty) {
+      index++;
+    } else if (char == '/' &&
+        index + 1 < source.length &&
+        source[index + 1] == '/') {
+      final newline = source.indexOf('\n', index + 2);
+      index = newline == -1 ? source.length : newline + 1;
+    } else if (char == '/' &&
+        index + 1 < source.length &&
+        source[index + 1] == '*') {
+      var depth = 1;
+      index += 2;
+      while (index + 1 < source.length && depth > 0) {
+        if (source[index] == '/' && source[index + 1] == '*') {
+          depth++;
+          index += 2;
+        } else if (source[index] == '*' && source[index + 1] == '/') {
+          depth--;
+          index += 2;
+        } else {
+          index++;
+        }
+      }
+      if (depth != 0) return const [];
+    } else if (char == "'" || char == '"') {
+      final start = index;
+      final quote = char;
+      final triple =
+          index + 2 < source.length &&
+          source[index + 1] == quote &&
+          source[index + 2] == quote;
+      index += triple ? 3 : 1;
+      final contentStart = index;
+      while (index < source.length) {
+        if (triple &&
+            index + 2 < source.length &&
+            source[index] == quote &&
+            source[index + 1] == quote &&
+            source[index + 2] == quote) {
+          break;
+        }
+        if (!triple && source[index] == '\\') {
+          index += 2;
+        } else if (!triple && source[index] == quote) {
+          break;
+        } else {
+          index++;
+        }
+      }
+      if (index >= source.length) {
+        return const [];
+      }
+      tokens.add(
+        _Token(_TokenKind.string, source.substring(contentStart, index), start),
+      );
+      index += triple ? 3 : 1;
+    } else if (RegExp(r'[A-Za-z_$]').hasMatch(char)) {
+      final start = index++;
+      while (index < source.length &&
+          RegExp(r'[A-Za-z0-9_$]').hasMatch(source[index])) {
+        index++;
+      }
+      tokens.add(
+        _Token(_TokenKind.identifier, source.substring(start, index), start),
+      );
+    } else {
+      tokens.add(_Token(_TokenKind.punctuation, char, index));
+      index++;
     }
   }
-  return null;
+  return tokens;
 }
 
 int _lineAt(String source, int offset) =>
@@ -233,10 +404,33 @@ String _relativePath(Directory root, File file) {
 }
 
 class _Call {
-  const _Call(this.offset, this.argument);
+  const _Call(this.offset, this.arguments);
 
   final int offset;
-  final String argument;
+  final List<_Token> arguments;
+}
+
+class _RiverpodScopeBindings {
+  const _RiverpodScopeBindings(this.unqualified, this.qualified);
+
+  final Set<String> unqualified;
+  final Map<String, Set<String>> qualified;
+
+  bool allowsUnqualified(String constructor) =>
+      unqualified.contains(constructor);
+
+  bool allowsQualified(String alias, String constructor) =>
+      qualified[alias]?.contains(constructor) ?? false;
+}
+
+enum _TokenKind { identifier, string, punctuation }
+
+class _Token {
+  const _Token(this.kind, this.text, this.offset);
+
+  final _TokenKind kind;
+  final String text;
+  final int offset;
 }
 
 void main() {
