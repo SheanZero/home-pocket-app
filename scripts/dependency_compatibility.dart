@@ -502,7 +502,7 @@ CompatibilitySeverity _severityFor(
 ) {
   if (mode == DependencyCompatibilityMode.futureProbe &&
       (RegExp(
-            r'^dependency (?!sqlcipher_flutter_libs )[^ ]+ candidate must be production stable$',
+            r'^dependency [^ ]+ selected value must not be lower than its candidate$',
           ).hasMatch(message) ||
           message ==
               'running Flutter beta SDK differs from the selected Stable identity')) {
@@ -549,10 +549,13 @@ void _validateManifestPolicy({
     if (_isUnsafeRelease(selected)) {
       issues.add('toolchain $id selects forbidden prerelease or EOL value');
     }
-    if (decision == 'already_current' && _isUnsafeRelease(candidate)) {
+    if (decision == 'already_current' &&
+        !_isProductionStableVersion(candidate)) {
       issues.add('toolchain $id candidate must be production stable');
     }
     if (decision == 'already_current' &&
+        _isProductionStableVersion(selected) &&
+        _isProductionStableVersion(candidate) &&
         _compareVersion(selected, candidate) < 0) {
       issues.add(
         'toolchain $id selected value must not be lower than its candidate',
@@ -570,11 +573,14 @@ void _validateManifestPolicy({
     if (_isUnsafeRelease(selected)) {
       issues.add('dependency $id selects forbidden prerelease or EOL value');
     }
-    if (decision == 'already_current' && _isUnsafeRelease(candidate)) {
+    if (decision == 'already_current' &&
+        !_isProductionStableVersion(candidate)) {
       issues.add('dependency $id candidate must be production stable');
     }
     if (row['kind']?.toString().contains('sdk') != true &&
         decision == 'already_current' &&
+        _isProductionStableVersion(selected) &&
+        _isProductionStableVersion(candidate) &&
         _compareVersion(selected, candidate) < 0) {
       issues.add(
         'dependency $id selected value must not be lower than its candidate',
@@ -604,6 +610,9 @@ bool _isUnsafeRelease(String value) => RegExp(
   r'(?:^|[-+._])(?:beta|rc|dev|eol)(?:[+._-]|$)',
   caseSensitive: false,
 ).hasMatch(value);
+
+bool _isProductionStableVersion(String value) =>
+    RegExp(r'^\d+(?:\.\d+){0,3}(?:\+\d+)?$').hasMatch(value);
 
 int _compareVersion(String left, String right) {
   final leftParts = RegExp(

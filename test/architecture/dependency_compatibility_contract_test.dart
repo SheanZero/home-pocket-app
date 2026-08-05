@@ -495,7 +495,10 @@ void main() {
   test('future probe demotes only ordinary candidate drift', () {
     final baseline = File('docs/testing/STABLE_BASELINE.json')
         .readAsStringSync()
-        .replaceFirst('"candidate": "3.44.8"', '"candidate": "3.45.0-beta.1"');
+        .replaceFirst(
+          '"resolved": "1.0.9", "candidate": "1.0.9"',
+          '"resolved": "1.0.9", "candidate": "1.0.10"',
+        );
     final stable = validateReport(
       currentInputs(),
       baselineJson: baseline,
@@ -511,6 +514,33 @@ void main() {
     expect(probe.errors, isEmpty);
     expect(probe.warnings, hasLength(1));
     expect(probe.isPassing, isTrue);
+  });
+
+  test('future probe keeps prerelease and EOL candidates blocking', () {
+    final productionBaseline = File(
+      'docs/testing/STABLE_BASELINE.json',
+    ).readAsStringSync();
+    final invalidCandidates = ['1.0.10-beta.1', '1.0.10+eol'];
+
+    for (final candidate in invalidCandidates) {
+      final probe = validateReport(
+        currentInputs(),
+        baselineJson: productionBaseline.replaceFirst(
+          '"resolved": "1.0.9", "candidate": "1.0.9"',
+          '"resolved": "1.0.9", "candidate": "$candidate"',
+        ),
+        mode: compatibility.DependencyCompatibilityMode.futureProbe,
+      );
+
+      expect(probe.errors, isNotEmpty);
+      expect(
+        probe.errors.map((issue) => issue.message),
+        contains(
+          'dependency cupertino_icons candidate must be production stable',
+        ),
+      );
+      expect(probe.isPassing, isFalse);
+    }
   });
 
   test('future probe keeps security and platform-floor failures blocking', () {
