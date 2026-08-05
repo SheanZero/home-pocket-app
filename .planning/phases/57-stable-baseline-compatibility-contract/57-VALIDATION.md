@@ -1,9 +1,9 @@
 ---
 phase: 57
 slug: stable-baseline-compatibility-contract
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-05
 ---
 
@@ -65,11 +65,24 @@ All Phase 57 behaviors have automated or source-evidence verification. Native en
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30 seconds for targeted checks
-- [ ] `nyquist_compliant: true` set in frontmatter after executed evidence is complete
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30 seconds for targeted checks
+- [x] `nyquist_compliant: true` set in frontmatter after executed evidence is complete
 
-**Approval:** pending
+## Executed Phase-Final Evidence
+
+- `flutter pub get --enforce-lockfile` — passed without mutating the committed graph.
+- `flutter test test/architecture/dependency_compatibility_contract_test.dart` — passed.
+- `dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk` — passed; verified Flutter 3.44.8 / Dart 3.12.2 Stable identity and effective Android API 24.
+- `flutter analyze` — passed with 0 issues.
+- `flutter test --coverage --concurrency=1` — passed.
+- `coverde filter ...` followed by `dart run scripts/coverage_gate.dart ... --threshold 70` — passed.
+- `git diff --check` — passed.
+
+No simulator, device, native-encryption, or production-data proof is claimed;
+those remain deferred to their owning phases.
+
+**Approval:** automated evidence complete
