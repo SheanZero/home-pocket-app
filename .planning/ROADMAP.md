@@ -66,10 +66,10 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
   3. The executable compatibility contract rejects beta/RC/dev, EOL SQLCipher packaging, unapproved overrides, and a partially upgraded dependency lane.
   4. Every intentional hold has recorded official evidence, a compatibility reason, and an exit condition while iOS 15 and Android API 24 remain supported.
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 - [x] 57-01-PLAN.md
-- [ ] 57-02-PLAN.md
+- [x] 57-02-PLAN.md
 - [ ] 57-03-PLAN.md
 
 ### Phase 58: Flutter, Analyzer & Code Generation Lane
@@ -164,7 +164,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 57. Stable Baseline & Compatibility Contract | 1/3 | In Progress|  |
+| 57. Stable Baseline & Compatibility Contract | 2/3 | In Progress|  |
 | 58. Flutter, Analyzer & Code Generation Lane | 0/TBD | Not started | - |
 | 59. Controlled Platform Plugin Cohorts | 0/TBD | Not started | - |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |

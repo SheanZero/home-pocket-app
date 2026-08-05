@@ -11,8 +11,8 @@
 
 - [x] **BASE-01**: 执行升级前重新查询官方来源，记录 Flutter/Dart、Xcode、CocoaPods、JDK、Gradle、AGP、Android SDK 及所有直接依赖的当前版本、最新 production-stable 候选和查询日期
 - [x] **BASE-02**: 最终 `pubspec.yaml`、`pubspec.lock`、Gradle wrapper/project、Podfile/Podfile.lock、SwiftPM/Xcode 配置与一份可审计版本决策清单一致，干净 checkout 可重复解析
-- [ ] **BASE-03**: `docs/testing/DEPENDENCY_COMPATIBILITY.md`、`scripts/dependency_compatibility.dart` 及其正/负合同测试与最终组合同步，自动拒绝被禁止或只升级一半的依赖 lane
-- [ ] **BASE-04**: 每个未采用表面最新版本的项目都有官方证据、兼容性理由和解除条件；最终基线不含 beta/RC/dev、EOL 空壳、未批准 `dependency_overrides`，且保持 iOS 15 / Android API 24 最低支持
+- [x] **BASE-03**: `docs/testing/DEPENDENCY_COMPATIBILITY.md`、`scripts/dependency_compatibility.dart` 及其正/负合同测试与最终组合同步，自动拒绝被禁止或只升级一半的依赖 lane
+- [x] **BASE-04**: 每个未采用表面最新版本的项目都有官方证据、兼容性理由和解除条件；最终基线不含 beta/RC/dev、EOL 空壳、未批准 `dependency_overrides`，且保持 iOS 15 / Android API 24 最低支持
 
 ### Flutter, Analyzer & Code Generation（SDK、分析器与代码生成）
 
@@ -90,8 +90,8 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 |-------------|-------|--------|
 | BASE-01 | Phase 57 | Complete |
 | BASE-02 | Phase 57 | Complete |
-| BASE-03 | Phase 57 | Pending |
-| BASE-04 | Phase 57 | Pending |
+| BASE-03 | Phase 57 | Complete |
+| BASE-04 | Phase 57 | Complete |
 | GEN-01 | Phase 58 | Pending |
 | GEN-02 | Phase 58 | Pending |
 | GEN-03 | Phase 58 | Pending |
