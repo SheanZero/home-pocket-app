@@ -28,6 +28,9 @@ assert_clean_generation_scope() {
   if ! git diff --exit-code HEAD -- "${generation_scope[@]}"; then
     printf 'Generated scope changed at %s:\n' "$boundary" >&2
     git diff --name-only HEAD -- "${generation_scope[@]}" >&2
+    if [[ "$boundary" == 'after generation pass 2' ]]; then
+      printf 'Generator nondeterminism occurred on the second pass.\n' >&2
+    fi
     fail 'commit the reviewed handwritten input and generated output together, then rerun from a clean scope'
   fi
 }
