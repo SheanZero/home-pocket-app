@@ -283,6 +283,18 @@ class SyncEngine {
     _updateStatus(const SyncStatus(state: SyncState.noGroup));
   }
 
+  /// Reopens the existing local-data write barrier after a backup restore.
+  ///
+  /// Unlike a privacy wipe, restore preserves the device identity and current
+  /// family membership. It therefore runs normal foreground reconciliation so
+  /// the retained family state is refreshed only after the restored database
+  /// transaction and its stale outgoing sync state have settled.
+  Future<void> resumeAfterLocalDataRestore() async {
+    _scheduler.resetAfterLocalDataWipe();
+    _localDataWipeSuspended = false;
+    await initialize();
+  }
+
   bool get isLocalDataWipeSuspended => _localDataWipeSuspended;
 
   // --- WebSocket ---

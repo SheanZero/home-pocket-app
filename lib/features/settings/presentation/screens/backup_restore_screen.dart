@@ -120,6 +120,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
   }
 
   Future<void> _importBackup() async {
+    if (_busy) return;
     final picked = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['hpb'],
@@ -137,7 +138,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
 
     setState(() => _busy = true);
     final result = await ref
-        .read(importBackupUseCaseProvider)
+        .read(restoreBackupUseCaseProvider)
         .execute(
           backupFile: File(picked.files.single.path!),
           password: password,
