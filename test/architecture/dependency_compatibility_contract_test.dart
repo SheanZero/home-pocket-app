@@ -467,6 +467,22 @@ void main() {
     );
   });
 
+  test('CLI success summary is mode-aware', () {
+    final baselineSummary = compatibility.successSummary(
+      compatibility.DependencyCompatibilityMode.baseline,
+    );
+    final futureProbeSummary = compatibility.successSummary(
+      compatibility.DependencyCompatibilityMode.futureProbe,
+    );
+
+    expect(baselineSummary, contains('Flutter Stable identity'));
+    expect(futureProbeSummary, contains('Flutter beta identity parsed'));
+    expect(futureProbeSummary, contains('SQLCipher'));
+    expect(futureProbeSummary, contains('iOS 15'));
+    expect(futureProbeSummary, contains('Android minSdk >= 24'));
+    expect(futureProbeSummary, isNot(contains('Stable identity')));
+  });
+
   test('future probe demotes only ordinary candidate drift', () {
     final baseline = File('docs/testing/STABLE_BASELINE.json')
         .readAsStringSync()

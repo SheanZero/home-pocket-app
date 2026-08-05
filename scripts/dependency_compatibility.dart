@@ -66,6 +66,13 @@ DependencyCompatibilityMode parseDependencyCompatibilityMode(
   return mode;
 }
 
+String successSummary(DependencyCompatibilityMode mode) => switch (mode) {
+  DependencyCompatibilityMode.baseline =>
+    'Flutter Stable identity and effective Android minSdk >= 24 verified',
+  DependencyCompatibilityMode.futureProbe =>
+    'Flutter beta identity parsed; SQLCipher, iOS 15, and Android minSdk >= 24 invariants verified',
+};
+
 /// Parsed, versioned policy for the reviewed production-stable baseline.
 ///
 /// The parser deliberately accumulates diagnostics so a malformed policy cannot
@@ -953,7 +960,5 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln('  - [${warning.code}] ${warning.message}');
   }
   stdout.writeln('  SQLCipher 0.6.8 / sqlite3 2.9.4 / pod 4.10.0');
-  stdout.writeln(
-    '  Flutter Stable identity and effective Android minSdk >= 24 verified',
-  );
+  stdout.writeln('  ${successSummary(mode)}');
 }
