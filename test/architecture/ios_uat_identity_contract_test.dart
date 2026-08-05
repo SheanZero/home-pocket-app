@@ -79,6 +79,24 @@ void main() {
         expect(scheme, contains('buildConfiguration="Profile-uat"'));
         expect(scheme, contains('buildConfiguration="Release-uat"'));
         expect(scheme, contains('BlueprintName="Runner"'));
+        expect(
+          scheme,
+          contains(
+            '<TestAction buildConfiguration="Debug-uat" '
+            'selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" '
+            'selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" '
+            r'customLLDBInitFile="$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
+          ),
+        );
+        expect(
+          scheme,
+          contains(
+            '<LaunchAction buildConfiguration="Debug-uat" '
+            'selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" '
+            'selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" '
+            r'customLLDBInitFile="$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
+          ),
+        );
         expect(benchmark, contains(r'--flavor) flavor="${2:-}"'));
         expect(benchmark, contains(r'flavor_args=(--flavor "$flavor")'));
       },
