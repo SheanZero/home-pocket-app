@@ -1,4 +1,4 @@
-# Home Pocket MVP - 安全架构设计
+# Happy Pocket MVP - 安全架构设计
 
 **文档版本:** 1.0
 **创建日期:** 2026-02-03
@@ -26,7 +26,7 @@
 
 ### 安全目标
 
-Home Pocket的安全架构遵循以下目标：
+Happy Pocket的安全架构遵循以下目标：
 
 | 目标 | 说明 | 实现方式 |
 |------|------|---------|
@@ -1310,7 +1310,7 @@ class BiometricAuthService {
     }
 
     return await authenticate(
-      reason: '验证您的身份以访问Home Pocket',
+      reason: '验证您的身份以访问Happy Pocket',
       biometricOnly: true,
     );
   }
@@ -1878,7 +1878,7 @@ class KeyRotationService {
 | **PBKDF2** | 密码派生 | 慢速，适合从用户密码派生密钥 |
 | **scrypt** | 密码派生 | 内存困难，抗ASIC攻击 |
 
-**Home Pocket的选择**:
+**Happy Pocket的选择**:
 - 主密钥→子密钥: **HKDF** ✅（主密钥已经是强随机密钥）
 - SQLCipher内部KDF: **PBKDF2** ✅（SQLCipher默认配置）
 
@@ -1911,7 +1911,7 @@ class KeyRotationService {
 
 ## 总结
 
-Home Pocket安全架构的核心特点：
+Happy Pocket安全架构的核心特点：
 
 1. **多层防御**: 数据库、字段、文件、传输四层加密
 2. **密钥管理**: HKDF派生专用密钥，安全存储

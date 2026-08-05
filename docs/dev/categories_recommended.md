@@ -26,8 +26,8 @@ Source: 从 `docs/dev/categories.md` 基线推导，综合采纳 `categories_jap
 1. **`cat_special`（特別な支出）保留为 L1**，接受其 L2 与 `cat_housing`/`cat_car`/`cat_hobbies` 的设计性重复——日本家計簿伝統按"频率"切分是 intentional。替代方案（降级为 Transaction tag）见 `categories_japan_proposal.md` §8.4。
 2. **`cat_allowance`（お小遣い）作为独立 L1**，默认 **soul** 账本——对齐日本家計簿伝統的"固定費 top-level"认知。
 3. **`cat_pet`（ペット）作为独立 L1**，默认 **soul** 账本——从原 `cat_daily_pets` L2 提升。日本养宠家庭比例持续上升，ペット関連支出细分度高（フード・おやつ/用品/医療/トリミング/保険/ホテル 等），独立 L1 可独立追踪年度预算与长期项（医療/保険）。
-4. **`cat_asset`（資産形成）保留为 Home Pocket 独有 soul L1**，追加 8 个日本实用 L2（NISA / iDeCo 等）。
-5. **`cat_cash_card` 完全移除**——MF ME 的 workaround 在有 Account 原语的 Home Pocket 中是反模式，用账户间转账记录替代。
+4. **`cat_asset`（資産形成）保留为 Happy Pocket 独有 soul L1**，追加 8 个日本实用 L2（NISA / iDeCo 等）。
+5. **`cat_cash_card` 完全移除**——MF ME 的 workaround 在有 Account 原语的 Happy Pocket 中是反模式，用账户间转账记录替代。
 6. **L2 ledger 允许覆盖 L1 默认**——`category_ledger_configs_table` schema 已支持，新增 L2 覆盖条目见 §L2 Ledger Overrides。
 
 ---
@@ -279,7 +279,7 @@ Source: 从 `docs/dev/categories.md` 基线推导，综合采纳 `categories_jap
 
 ### Asset Building (`cat_asset`, #1B5E20) — 8 L2 **[新增 L2 全部，现状为空]**
 
-> **说明**: Home Pocket 独有 soul L1。**与日本主流 app 的差异点**：Zaim / MF ME 把投资/储蓄视为账户间转账不计入消费，Home Pocket 将其视为"自我投资型 soul 支出"。使用此类目时，用户同时在现金账户记账户间转账，是 intentional 的双重记录。
+> **说明**: Happy Pocket 独有 soul L1。**与日本主流 app 的差异点**：Zaim / MF ME 把投资/储蓄视为账户间转账不计入消费，Happy Pocket 将其视为"自我投资型 soul 支出"。使用此类目时，用户同时在现金账户记账户间转账，是 intentional 的双重记录。
 
 | ID | Icon | EN | JA | ZH |
 |----|------|----|----|-----|

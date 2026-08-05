@@ -1,6 +1,6 @@
 # Terms of Use
 
-**Home Pocket (まもる家計簿)**
+**Happy Pocket (ハピポケ家族家計簿)**
 
 Last updated: July 1, 2026 (Draft)
 
@@ -10,7 +10,7 @@ Last updated: July 1, 2026 (Draft)
 
 ## Article 1 (Application and Acceptance)
 
-These Terms of Use govern the conditions of use of Home Pocket (the "App") between the user and the developer. By downloading or using the App, the user is deemed to have accepted these terms.
+These Terms of Use govern the conditions of use of Happy Pocket (the "App") between the user and the developer. By downloading or using the App, the user is deemed to have accepted these terms.
 
 ## Article 2 (License to Use)
 

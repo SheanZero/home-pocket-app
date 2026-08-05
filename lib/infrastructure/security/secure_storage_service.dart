@@ -175,7 +175,7 @@ class SecureStorageService {
     }
   }
 
-  /// Delete only Home Pocket user/device material.
+  /// Delete only Happy Pocket user/device material.
   ///
   /// The operation is intentionally precise rather than delegating to the
   /// platform-wide `deleteAll`. Each delete is idempotent, so a later retry can

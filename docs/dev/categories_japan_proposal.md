@@ -20,8 +20,8 @@
 
 1. **现有 `cat_*` L1 中 16 个与 Money Forward ME 16 大項目一一对应**（连顺序都高度近似）。日文名与主流 app 完全一致，并非需要"日本化"的翻译问题，而是结构精修问题。
 2. **三个结构性怪味**:
-   - `cat_cash_card` (現金・カード) 是 MF ME 对缺乏「口座間振替」原语的 workaround，在拥有 Account/Book 模型的 Home Pocket 中是反模式
-   - `cat_asset` (資産形成) 作为支出类目在主流日本 app 里不存在，是 Home Pocket 灵魂账本的独有设计——需要明确声明为 intentional，不要误以为可以对标
+   - `cat_cash_card` (現金・カード) 是 MF ME 对缺乏「口座間振替」原语的 workaround，在拥有 Account/Book 模型的 Happy Pocket 中是反模式
+   - `cat_asset` (資産形成) 作为支出类目在主流日本 app 里不存在，是 Happy Pocket 灵魂账本的独有设计——需要明确声明为 intentional，不要误以为可以对标
    - `cat_special` (特別な支出) 的 L2 与 住宅/車/趣味 有设计性重复（这是日本家計簿传统，但必须给用户清晰指引）
 3. **L2 层的 `*_general` 占位符（8 处）是反模式**: Zaim/MF ME 都不用，应删除
 4. **缺失的日本高频 L2**: `ふるさと納税`、`学資保険`、`受験料`、`火災・地震保険`、`NHK受信料`、`NISA・iDeCo`、`人間ドック`、`免許教習`——每一个都在 Zaim / MF ME 清单里出现
@@ -50,7 +50,7 @@
 
 ### 1.1 为什么要做
 
-Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，产品名自身即日文）。但当前的 `docs/dev/categories.md` 基线（19 L1 支出 + 103 L2 + 4 L1 收入）虽然 L1 的日文名贴近主流，却存在以下未经对照验证的问题:
+Happy Pocket 的首发市场定位是日本家庭（「ハピポケ家族家計簿」，产品名自身即日文）。但当前的 `docs/dev/categories.md` 基线（19 L1 支出 + 103 L2 + 4 L1 收入）虽然 L1 的日文名贴近主流，却存在以下未经对照验证的问题:
 
 - 结构是否真的对齐日本主流 app？还是只是"翻译对齐"而结构还是英美式？
 - L2 数量 103 偏多，冗余与缺失分布如何？
@@ -75,8 +75,8 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 - **L1** = 大分類 / 大項目 / 親カテゴリ（parent）
 - **L2** = 中分類 / 中項目 / 子カテゴリ（child）
 - **日文名** = 指向日本用户显示的字面名称
-- **Code** = Home Pocket 内部 ID (`cat_food` 等)
-- **生存 / 灵魂** = Home Pocket 双账本术语 (`LedgerType.survival` / `LedgerType.soul`)
+- **Code** = Happy Pocket 内部 ID (`cat_food` 等)
+- **生存 / 灵魂** = Happy Pocket 双账本术语 (`LedgerType.survival` / `LedgerType.soul`)
 
 ---
 
@@ -141,7 +141,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 **独特设计**:
 
-- **`現金・カード` 是 MF ME 特色**: 它存在的唯一理由是捕获"现金 ATM 提取"和"不明カード支払"——因为 MF ME 早期不支持账户间转账原语，用这个伪类目顶替。现代账户模型（Home Pocket 已有）不需要此 workaround。
+- **`現金・カード` 是 MF ME 特色**: 它存在的唯一理由是捕获"现金 ATM 提取"和"不明カード支払"——因为 MF ME 早期不支持账户间转账原语，用这个伪类目顶替。现代账户模型（Happy Pocket 已有）不需要此 workaround。
 - **`冠婚葬祭` 放在 `交際費` 下**（L2 而非 L1），这是 MF ME 的决定
 - **`特別な支出` 承载"年度性大型支出"**: L2 与 `住宅`、`自動車` 有设计性重复
 - **大項目不可编辑**: 用户只能在 中項目 层添加自定义（最多 100 个）
@@ -160,9 +160,9 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 - 父类示例（已确认）: `給与`、`収入`、`交際費`、`税金`、`その他の口座`
 - **三大顶层类**: Income（收入）/ Expense（支出）/ Other（转账、还款、投资）
 
-**对 Home Pocket 的参考价值**:
-- **反面教材**: 不要把父类锁死。Home Pocket 已允许用户自定义类目（`isSystem=false`），优于 Moneytree
-- **正面借鉴**: 把"转账、还款、投资"明确归入 **Other** 顶层类而非硬塞进 Expense，这是 Home Pocket 应该学的架构
+**对 Happy Pocket 的参考价值**:
+- **反面教材**: 不要把父类锁死。Happy Pocket 已允许用户自定义类目（`isSystem=false`），优于 Moneytree
+- **正面借鉴**: 把"转账、还款、投资"明确归入 **Other** 顶层类而非硬塞进 Expense，这是 Happy Pocket 应该学的架构
 
 ### 2.4 おカネレコ（15 flat，无 L2）
 
@@ -177,9 +177,9 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 - 特有类目示例: `ママ費`（妈妈专属费用）、`ペット`、`ライブ`、`スマホゲーム` ——面向年轻用户的自定义文化
 - 收入侧初始设定不支持（仅可在设置中开启）
 
-**对 Home Pocket 的参考价值**:
+**对 Happy Pocket 的参考价值**:
 - **反面教材**: 扁平结构不适合家庭预算（无法分组统计）
-- **正面启示**: 日本部分用户偏好**极简**而非 MF ME/Zaim 的复杂层级——Home Pocket 应在首次引导中提供"最小化模式"选项
+- **正面启示**: 日本部分用户偏好**极简**而非 MF ME/Zaim 的复杂层级——Happy Pocket 应在首次引导中提供"最小化模式"选项
 
 ### 2.5 総務省「家計調査」10 大費目（日本政府权威基准）
 
@@ -202,11 +202,11 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 **关键观察**:
 
-- **交通・通信** 是合并大費目（Zaim/MF ME/Home Pocket 都拆成两个）
+- **交通・通信** 是合并大費目（Zaim/MF ME/Happy Pocket 都拆成两个）
 - **家具・家事用品** 在消费 app 中通常归入 `日用品` 或 `住宅`，家計調査 独立成 L1
 - **被服及び履物** 独立（Zaim/MF ME 合并成 衣服・美容）
 - **交際費** 和 **こづかい** 都归入"その他の消費支出"下——这意味着政府统计视角下它们都是非主流
-- **税金・社会保险料・貯蓄・投資** 都**不是**消費支出，而是"非消費支出"。Home Pocket 的 `cat_asset` (資産形成) 与这个定义严格冲突——是 intentional divergence
+- **税金・社会保险料・貯蓄・投資** 都**不是**消費支出，而是"非消費支出"。Happy Pocket 的 `cat_asset` (資産形成) 与这个定义严格冲突——是 intentional divergence
 
 ### 2.6 日本家計簿伝統: 固定費 / 変動費 / 特別費 三分法
 
@@ -222,8 +222,8 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 **关键观察**:
 
-- **お小遣い（个人零花钱）是固定費** —— 日本家計簿文化把给自己/配偶/孩子的每月 spending 视为"固定"预算条目。现有 Home Pocket 把 `cat_other_allowance` 放 L2，降格了
-- **ふるさと納税是特別費的标志性项** —— 日本家庭每年 10-12 月集中发生，金额大，**必须在类目里显式存在**（现有 Home Pocket 完全没有）
+- **お小遣い（个人零花钱）是固定費** —— 日本家計簿文化把给自己/配偶/孩子的每月 spending 视为"固定"预算条目。现有 Happy Pocket 把 `cat_other_allowance` 放 L2，降格了
+- **ふるさと納税是特別費的标志性项** —— 日本家庭每年 10-12 月集中发生，金额大，**必须在类目里显式存在**（现有 Happy Pocket 完全没有）
 - **冠婚葬祭** —— 频率低、金额大，日本家計簿伝統归"特別費"。MF ME 把它放 `交際費` L2 是信息损失
 - 三分法是**正交于 L1 类目**的维度：同一个 L1（例如 `住宅`）内，家賃 是固定費、リフォーム 是特別費
 - 推荐做法: **作为 Transaction 的 tag** 或 **Budget 维度**，而不是 Category 的层级
@@ -236,7 +236,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 行 = 语义类目，列 = 各 app 的对应 L1。✓ = 存在，✗ = 无，→ = 作为 L2 存在。
 
-| 语义 | 家計調査 | Zaim | MF ME | Moneytree | おカネレコ | **Home Pocket** | 备注 |
+| 语义 | 家計調査 | Zaim | MF ME | Moneytree | おカネレコ | **Happy Pocket** | 备注 |
 |------|---------|------|-------|-----------|------------|----------------|------|
 | 食品 | 食料 | 食費 | 食費 | 食費* | 食費* | **食費 ✓** | 5/5 全球共识 |
 | 日用品 | → (家具家事) | 日用雑貨 | 日用品 | 日用品* | 日用品* | **日用品 ✓** | app 共识，家計調査散入家具 |
@@ -249,26 +249,26 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 | 水电燃气 | 光熱・水道 | 水道・光熱 | 水道・光熱費 | 光熱費* | 光熱* | **水道・光熱費 ✓** | 共识 |
 | 通信 | → (交通通信) | 通信 | 通信費 | 通信費* | 通信* | **通信費 ✓** | 共识 |
 | 住宅 | 住居 | 住まい | 住宅 | 住宅* | 住居* | **住宅 ✓** | 共识 |
-| 车 | → (交通通信>自動車等) | クルマ | 自動車 | 車* | 車* | **車・バイク ✓** | Home Pocket 加"バイク"是额外 |
+| 车 | → (交通通信>自動車等) | クルマ | 自動車 | 車* | 車* | **車・バイク ✓** | Happy Pocket 加"バイク"是额外 |
 | 税金・社会保障 | ✗（非消費支出） | 税金 | 税・社会保障 | 税金 | ✗ | **税・社会保障 ✓** | 家計調査明确不视为消费 |
 | 保険 | ✗（非消費支出） | → (医療内) | 保険 | - | ✗ | **保険 ✓** | Zaim 合并 |
 | 大型/特別支出 | ✗ | 大型支出 | 特別な支出 | - | ✗ | **特別な支出 ✓** | 日本 app 特色 |
-| 現金・カード | ✗ | → (その他内) | 現金・カード | - | ✗ | **現金・カード ✓** | 只有 MF ME 和 Home Pocket 明显设 |
+| 現金・カード | ✗ | → (その他内) | 現金・カード | - | ✗ | **現金・カード ✓** | 只有 MF ME 和 Happy Pocket 明显设 |
 | 家具・家事 | 家具・家事用品 | → (大型支出+住まい) | → (住宅+日用品) | - | ✗ | → (住宅+日用品) | 家計調査独立，app 散入 |
 | お小遣い | → (その他内) | → (その他内) | → (中項目) | - | ✗ | → (L2 `cat_other_allowance`) | **无人把它当 L1** 但家計簿三分法当固定費 |
 | 仕送り | → (その他内) | → (その他内) | - | - | ✗ | → (L2 `cat_other_remittance`) | 家計調査明设 |
-| 資産形成/投資 | **非消費支出** | ✗（用 転送扱い）| ✗（用 転送扱い） | 投資系 app | ✗ | **資産形成 ✓** | **Home Pocket 独有** |
+| 資産形成/投資 | **非消費支出** | ✗（用 転送扱い）| ✗（用 転送扱い） | 投資系 app | ✗ | **資産形成 ✓** | **Happy Pocket 独有** |
 | ふるさと納税 | → (税以外) | → (税金 L2?) | → (特別の L2?) | - | ✗ | **✗ 缺失** | 必需追加 |
 
 \* 表示基于公开资料推断，未 100% 确认完整清单
 
-**共识类目（6/6）**: 食費、教育・教養、水道・光熱費、通信費、住宅、趣味・娯楽 — 这些是全球记账共识，现有 Home Pocket 都已覆盖。
+**共识类目（6/6）**: 食費、教育・教養、水道・光熱費、通信費、住宅、趣味・娯楽 — 这些是全球记账共识，现有 Happy Pocket 都已覆盖。
 
 **日本特色类目**: `特別な支出`、`現金・カード`、`冠婚葬祭` — 前两者只在 Zaim/MF ME 类日本 app 存在。
 
-**Home Pocket 独有类目**: `資産形成`（双账本哲学的体现）—— 明确为 **intentional divergence**，并非错误。
+**Happy Pocket 独有类目**: `資産形成`（双账本哲学的体现）—— 明确为 **intentional divergence**，并非错误。
 
-**现有 Home Pocket 的缺失**: `ふるさと納税`（即使作为 L2 也没有）、`学資保険`（Zaim L2 有）、`NHK受信料`（Zaim L2 有独立的"放送サービス料金"但现有 `cat_communication_broadcast` 语义等同，OK）、`人間ドック`（Zaim 隐含在 医療 L2）、`免許教習`（Zaim 车 L2）
+**现有 Happy Pocket 的缺失**: `ふるさと納税`（即使作为 L2 也没有）、`学資保険`（Zaim L2 有）、`NHK受信料`（Zaim L2 有独立的"放送サービス料金"但现有 `cat_communication_broadcast` 语义等同，OK）、`人間ドック`（Zaim 隐含在 医療 L2）、`免許教習`（Zaim 车 L2）
 
 ### 3.2 L2 数量横向对比
 
@@ -280,19 +280,19 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 | Moneytree | 20+ | 不详 | 有限 | L1 严格锁死 |
 | おカネレコ (free) | 15 | 0 (扁平) | 3 (共 18) | 无层级 |
 | おカネレコ (paid) | 15 | 0 (扁平) | 最多 90 | 无层级 |
-| **Home Pocket** | **19** | **103** | **无上限** | 用户自定义无限制 |
+| **Happy Pocket** | **19** | **103** | **无上限** | 用户自定义无限制 |
 
-**结论**: Home Pocket 的 19×103 配置**略超 MF ME**，符合"主流日本家計簿"的规模，不需要大幅精简 L2 数量——**精确度需要提高，而不是删减**。
+**结论**: Happy Pocket 的 19×103 配置**略超 MF ME**，符合"主流日本家計簿"的规模，不需要大幅精简 L2 数量——**精确度需要提高，而不是删减**。
 
 ---
 
-## 4. 现有 Home Pocket 类目体系评估
+## 4. 现有 Happy Pocket 类目体系评估
 
 ### 4.1 与 Money Forward ME 的同源关系
 
 **关键事实**: 现有 19 个 L1 中，16 个与 MF ME 16 大項目一一对应（顺序甚至接近）。
 
-| Home Pocket L1 | MF ME 对应 | 状态 |
+| Happy Pocket L1 | MF ME 对应 | 状态 |
 |----------------|-----------|------|
 | `cat_food` 食費 | 食費 | 一致 |
 | `cat_daily` 日用品 | 日用品 | 一致 |
@@ -306,17 +306,17 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 | `cat_utilities` 水道・光熱費 | 水道・光熱費 | 一致 |
 | `cat_communication` 通信費 | 通信費 | 一致 |
 | `cat_housing` 住宅 | 住宅 | 一致 |
-| `cat_car` 車・バイク | 自動車 | Home Pocket 含"バイク" |
+| `cat_car` 車・バイク | 自動車 | Happy Pocket 含"バイク" |
 | `cat_tax` 税・社会保障 | 税・社会保障 | 一致 |
 | `cat_insurance` 保険 | 保険 | 一致 |
 | `cat_special` 特別な支出 | 特別な支出 | 一致 |
-| `cat_asset` 資産形成 | **无** | **Home Pocket 独有** |
-| `cat_other_expense` その他 | （MF ME 在 中項目 层处理） | Home Pocket 提为 L1 |
-| `cat_uncategorized` 未分類 | （技术兜底） | Home Pocket 独有 |
+| `cat_asset` 資産形成 | **无** | **Happy Pocket 独有** |
+| `cat_other_expense` その他 | （MF ME 在 中項目 层处理） | Happy Pocket 提为 L1 |
+| `cat_uncategorized` 未分類 | （技术兜底） | Happy Pocket 独有 |
 
-**结论**: **Home Pocket 类目体系 = Money Forward ME + 3 个追加**。MF ME 是日本市占率最高的记账 app（15M+ 用户），以它为基准意味着现有体系**在日本用户的认知负担上很轻**——学习成本几乎为零。
+**结论**: **Happy Pocket 类目体系 = Money Forward ME + 3 个追加**。MF ME 是日本市占率最高的记账 app（15M+ 用户），以它为基准意味着现有体系**在日本用户的认知负担上很轻**——学习成本几乎为零。
 
-**但是**这也意味着 Home Pocket **继承了 MF ME 的所有结构性缺陷**，尤其是 `現金・カード` 这个反模式。
+**但是**这也意味着 Happy Pocket **继承了 MF ME 的所有结构性缺陷**，尤其是 `現金・カード` 这个反模式。
 
 ### 4.2 L1 层面的具体问题
 
@@ -327,24 +327,24 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 **为什么是反模式**:
 - 从语义上看，"现金"和"卡"不是消费类别，而是**支付方式**或**账户**
 - MF ME 用这个类目承载 ATM 提款/不明カード支出——一种**对缺失「账户间转账」原语的 workaround**
-- Home Pocket 已有 `AccountsTable` 和 `BooksTable`，原生支持账户概念。只需要一个 `Transfer` 原语（`from_account_id` + `to_account_id`）即可正确处理"从银行提现金"这类操作
+- Happy Pocket 已有 `AccountsTable` 和 `BooksTable`，原生支持账户概念。只需要一个 `Transfer` 原语（`from_account_id` + `to_account_id`）即可正确处理"从银行提现金"这类操作
 - 保留此类目会引导用户把真正的账户转账记为"消费"，污染统计
 
 **推荐**: **删除 `cat_cash_card`**，同步在产品端提供"账户间转账"功能。如果暂时保留，需要在产品内部显著提示：仅在无法用转账替代时使用。
 
 **风险**: 从 MF ME 迁移来的用户可能期待此类目存在。过渡期可保留，但在 settings 中可选隐藏。
 
-#### 问题 #2: `cat_asset`（資産形成）是 Home Pocket 独有设计
+#### 问题 #2: `cat_asset`（資産形成）是 Happy Pocket 独有设计
 
 **现状**: L1 类目 `cat_asset`，icon `savings`，色 `#1B5E20`，**ledger `soul`**，无 L2。
 
 **为什么特殊**:
 - **家計調査** 明确把「貯蓄・投資」列为"非消費支出"——即不是 `消費支出` 的一部分
 - **Zaim / MF ME** 都没有此类目，投资/储蓄视为账户间转账
-- **Home Pocket** 把它提升为 L1 且归入 **灵魂账本**，体现"自我投资即灵魂支出"的产品哲学——这是**产品差异化的核心**之一
+- **Happy Pocket** 把它提升为 L1 且归入 **灵魂账本**，体现"自我投资即灵魂支出"的产品哲学——这是**产品差异化的核心**之一
 
 **推荐**: **保留但明确声明为 intentional**，并做三件事:
-1. 在 `categories.md` 的头部添加 "Asset Building as Soul Ledger — Home Pocket's Unique Design" 一节说明
+1. 在 `categories.md` 的头部添加 "Asset Building as Soul Ledger — Happy Pocket's Unique Design" 一节说明
 2. 追加缺失的 L2: `NISA`、`iDeCo`、`積立投資`、`貯蓄`、`定期預金`、`外貨`、`不動産投資`、`その他`（共 8 个）
 3. 在应用首次引导中，解释此类目与"银行转账到储蓄账户"的差别——前者是记在账面上的"soul spending"，后者是纯财务调整
 
@@ -392,7 +392,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 1. **`立替金` 移出到 Account Transfer 原语** —— 不是支出，是应收
 2. **`仕送り` 保留但提升到 L1 或移到"家族への支出"新 L1**（日本家庭高频项）
 3. **`お小遣い` 强烈推荐提升为 L1** `cat_allowance`（日本家計簿伝統的固定費核心）
-4. **`事業費` 移出**到专门的"事業簿"或单独账簿逻辑——Home Pocket 已有 `Book` 概念，应使用 book 分离而非类目
+4. **`事業費` 移出**到专门的"事業簿"或单独账簿逻辑——Happy Pocket 已有 `Book` 概念，应使用 book 分离而非类目
 5. **`返済` 移出到 Liability/Loan 原语**——与 `cat_asset` 的"资产流动"对称
 6. **保留 `雑費`、`使途不明金`、`その他`** 作为真正的兜底 L2
 
@@ -694,7 +694,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 | `cat_clothing` | soul | **⚠️ 讨论**：衣服是必需品（survival），美容是灵魂（soul）——全归 soul 偏激 |
 | `cat_social` | survival | **⚠️ 讨论**：飲み会 是 soul，冠婚葬祭 是 survival |
 | `cat_health` | survival | ✓ 正确 |
-| `cat_education` | soul | ✓ 正确（Home Pocket 核心哲学） |
+| `cat_education` | soul | ✓ 正确（Happy Pocket 核心哲学） |
 | `cat_cash_card` | survival | **移除**（按 §4.2 #1） |
 | `cat_utilities` | survival | ✓ 正确 |
 | `cat_communication` | survival | ✓ 正确 |
@@ -703,7 +703,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 | `cat_tax` | survival | ✓ 正确 |
 | `cat_insurance` | survival | ✓ 正确 |
 | `cat_special` | survival | **⚠️ 讨论**：旅行/結婚 更像 soul |
-| `cat_asset` | soul | ✓ 正确（Home Pocket 核心哲学） |
+| `cat_asset` | soul | ✓ 正确（Happy Pocket 核心哲学） |
 | `cat_other_expense` | survival | ✓ 默认合理 |
 | `cat_uncategorized` | survival | ✓ 默认合理 |
 
@@ -774,7 +774,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 ### 5.4 双账本归属推荐
 
-遵循"生存 = 活下去必需，灵魂 = 自我实现与价值投资"的 Home Pocket 哲学:
+遵循"生存 = 活下去必需，灵魂 = 自我实现与价值投资"的 Happy Pocket 哲学:
 
 **Survival L1（13 个）**: 食費、日用品、交通費、健康・医療、水道・光熱費、通信費、住宅、車・バイク、税・社会保障、保険、特別な支出、その他、未分類(合并到 其他)
 
@@ -808,7 +808,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 | **保持** | `cat_tax` 税・社会保障 | `cat_tax` 税・社会保障 | MF ME 一致 |
 | **保持** | `cat_insurance` 保険 | `cat_insurance` 保険 | MF ME 一致 |
 | **保持** | `cat_special` 特別な支出 | `cat_special` 特別な支出 | 日本家計簿 特色 (或降级为 tag) |
-| **保持** | `cat_asset` 資産形成 | `cat_asset` 資産形成 | Home Pocket 独有 soul 设计 |
+| **保持** | `cat_asset` 資産形成 | `cat_asset` 資産形成 | Happy Pocket 独有 soul 设计 |
 | **保持** | `cat_other_expense` その他 | `cat_other_expense` その他 | L2 需大改 |
 | **合并** | `cat_uncategorized` 未分類 | → `cat_other_expense > cat_other_unclassified` | 技术兜底不必 L1 |
 | **移除** | `cat_cash_card` 現金・カード | — | 使用 Account Transfer 原语替代 |
@@ -937,7 +937,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 ### 8.1 「固定費 / 変動費 / 特別費」三分法的位置
 
-**问题**: 日本家計簿伝統把所有支出划分成这三类，与 L1 类目是**正交维度**。Home Pocket 当前完全缺失这个维度。
+**问题**: 日本家計簿伝統把所有支出划分成这三类，与 L1 类目是**正交维度**。Happy Pocket 当前完全缺失这个维度。
 
 **方案 A**: **作为 Transaction tag**。数据库层添加 `expense_type ENUM('fixed', 'variable', 'special') NULL`。用户在记账时选填。
 
@@ -958,11 +958,11 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 ### 8.3 `cat_allowance` (お小遣い) 作为 L1 的决定
 
-**赞成**: 日本家計簿伝統是固定費 top-level，Home Pocket 双账本把它作为 soul L1 有强语义。
+**赞成**: 日本家計簿伝統是固定費 top-level，Happy Pocket 双账本把它作为 soul L1 有强语义。
 
-**反对**: 只有 Home Pocket 会这么做，其他日本 app（Zaim/MF ME）都放 L2——可能造成日本用户困惑。
+**反对**: 只有 Happy Pocket 会这么做，其他日本 app（Zaim/MF ME）都放 L2——可能造成日本用户困惑。
 
-**折中**: 作为 L1 提供，但在首次 onboarding 中说明 "お小遣いは Home Pocket では独立した大分類です"。
+**折中**: 作为 L1 提供，但在首次 onboarding 中说明 "お小遣いは Happy Pocket では独立した大分類です"。
 
 **推荐**: 提升为 L1（坚决），配合 onboarding 文案。
 
@@ -986,7 +986,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 ### 8.6 家計調査 "家具・家事用品" 独立 L1 的必要性
 
-日本政府 taxonomy 把它独立成 L1，但主流 app 都散入 `住宅` + `日用品`。Home Pocket 当前随主流做法。
+日本政府 taxonomy 把它独立成 L1，但主流 app 都散入 `住宅` + `日用品`。Happy Pocket 当前随主流做法。
 
 **问题**: 用户在做年度大清仓（换洗衣机/换床垫/购家具）时，希望有独立统计视图吗？
 
@@ -994,7 +994,7 @@ Home Pocket 的首发市场定位是日本家庭（「まもる家計簿」，�
 
 ### 8.7 `推し活` 与 `サブスク` 作为 L2 的激进性
 
-Home Pocket 如果面向 Z 世代家庭，`推し活`、`グッズ`、`サブスク` 是强卖点。但如果主要用户是 35+ 家庭主妇，这些会显得 cringe。
+Happy Pocket 如果面向 Z 世代家庭，`推し活`、`グッズ`、`サブスク` 是强卖点。但如果主要用户是 35+ 家庭主妇，这些会显得 cringe。
 
 **推荐**: 作为**隐藏默认 L2**，在 onboarding 让用户选"ライフステージ"后自动开启对应 L2 集合。
 

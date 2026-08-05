@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>Home Pocket｜上线前全面 UAT 进度表</title>
+  <title>Happy Pocket｜上线前全面 UAT 进度表</title>
   <style>
     :root {
       --bg: #f7f4ee;
@@ -124,7 +124,7 @@
     <header class="hero">
       <div>
         <p class="eyebrow">Release Readiness · Japan</p>
-        <h1>Home Pocket 上线前全面 UAT</h1>
+        <h1>Happy Pocket 上线前全面 UAT</h1>
         <p class="subtitle">覆盖核心账务、悦己体验、家庭同步、隐私安全、多币种、语音、法务合规及 iOS / Android 真机发布链路。状态修改会自动保存在当前浏览器。</p>
       </div>
       <div class="hero-meta">
@@ -187,7 +187,7 @@
         </section>
       </aside>
     </div>
-    <footer>Home Pocket（まもる家計簿）· Local-first · Privacy-focused · UAT 数据仅保存在本机浏览器 localStorage</footer>
+    <footer>Happy Pocket（ハピポケ家族家計簿）· Local-first · Privacy-focused · UAT 数据仅保存在本机浏览器 localStorage</footer>
   </main>
 
   <script>
@@ -305,7 +305,7 @@
       reader.onload = () => {
         try {
           const backup = JSON.parse(reader.result);
-          if (backup.format !== 'home-pocket-uat-backup' || backup.version !== BACKUP_VERSION || !backup.summary?.tests) throw new Error('不是有效的 Home Pocket UAT 备份文件');
+          if (backup.format !== 'home-pocket-uat-backup' || backup.version !== BACKUP_VERSION || !backup.summary?.tests) throw new Error('不是有效的 Happy Pocket UAT 备份文件');
           const knownIds = new Set(TESTS.map(t => t[0]));
           const importedTests = Object.fromEntries(Object.entries(backup.summary.tests).filter(([id]) => knownIds.has(id)));
           if (!Object.keys(importedTests).length) throw new Error('备份中没有可识别的 UAT 数据');

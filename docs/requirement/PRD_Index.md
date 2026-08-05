@@ -1,4 +1,4 @@
-# Home Pocket MVP - PRD文档体系索引
+# Happy Pocket MVP - PRD文档体系索引
 
 **创建日期:** 2026年2月3日
 **文档版本:** 1.0

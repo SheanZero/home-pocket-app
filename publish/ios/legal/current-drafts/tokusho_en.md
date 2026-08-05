@@ -1,6 +1,6 @@
 # Notation Based on the Act on Specified Commercial Transactions
 
-**Home Pocket (まもる家計簿)**
+**Happy Pocket (ハピポケ家族家計簿)**
 
 Last updated: July 1, 2026 (Draft)
 

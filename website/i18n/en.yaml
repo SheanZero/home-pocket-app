@@ -5,11 +5,11 @@ meta_description:
 skip_to_content:
   other: "Skip to content"
 brand_home_label:
-  other: "Home Pocket home"
+  other: "Happy Pocket home"
 brand_name:
-  other: "Home Pocket"
+  other: "Happy Pocket"
 brand_subtitle:
-  other: "まもる家計簿"
+  other: "Family Budget"
 primary_navigation:
   other: "Primary navigation"
 nav_philosophy:
@@ -22,6 +22,8 @@ nav_faq:
   other: "Questions"
 nav_download:
   other: "Get the app"
+nav_support:
+  other: "Support"
 language_switcher:
   other: "Choose language"
 menu_label:
@@ -57,7 +59,7 @@ screen_month:
 screen_local:
   other: "Stored on this device"
 home_screenshot_alt:
-  other: "Home Pocket home screen showing everyday spending and Joy records"
+  other: "Happy Pocket home screen showing everyday spending and Joy records"
 philosophy_eyebrow:
   other: "What money makes possible"
 philosophy_title_line_1:
@@ -114,7 +116,7 @@ features_eyebrow:
 features_title:
   other: "Ease, clarity, and privacy in one calm flow."
 features_body:
-  other: "Rather than piling on features, Home Pocket connects three everyday actions: record it, see it together, and keep what is personal close."
+  other: "Rather than piling on features, Happy Pocket connects three everyday actions: record it, see it together, and keep what is personal close."
 family_kicker:
   other: "For the household"
 family_title:
@@ -184,7 +186,7 @@ faq_body:
 faq_1_question:
   other: "When can I download it?"
 faq_1_answer:
-  other: "Home Pocket is preparing for release on the App Store and Google Play. After store review, the buttons on this site will point to the official product listings."
+  other: "Happy Pocket is preparing for release on the App Store and Google Play. After store review, the buttons on this site will point to the official product listings."
 faq_2_question:
   other: "Does my financial data go to the cloud?"
 faq_2_answer:
@@ -196,14 +198,14 @@ faq_3_answer:
 faq_4_question:
   other: "Which languages and devices are supported?"
 faq_4_answer:
-  other: "The app targets Japanese, English, and Chinese on iOS 15+ and Android 7+. This website is available in Japanese and English."
+  other: "The app targets Japanese, English, and Chinese on iOS 15+ and Android 7+. This website is available in all three languages."
 faq_5_question:
   other: "Are there ads or usage analytics?"
 faq_5_answer:
   other: "There are no ads and no third-party advertising or behavioral analytics SDK. The privacy page explains each limited external connection separately."
 
 download_eyebrow:
-  other: "HOME POCKET FOR YOUR FAMILY"
+  other: "HAPPY POCKET FOR YOUR FAMILY"
 download_title:
   other: "Keep today’s spending as part of today’s happiness."
 download_body:
@@ -220,7 +222,7 @@ footer_support:
 footer_release_note:
   other: "Preparing for release · Open source"
 inner_eyebrow:
-  other: "HOME POCKET PRIVACY"
+  other: "HAPPY POCKET PRIVACY"
 inner_summary_label:
   other: "On this page"
 inner_summary:
@@ -265,7 +267,7 @@ route_faq_body:
 route_cta:
   other: "Read this page"
 home_dark_screenshot_alt:
-  other: "Home Pocket home screen showing everyday spending and Joy records in dark mode"
+  other: "Happy Pocket home screen showing everyday spending and Joy records in dark mode"
 philosophy_next:
   other: "Explore the everyday features"
 feature_ledger_kicker:
@@ -285,7 +287,7 @@ feature_joy_kicker:
 feature_joy_title:
   other: "Reflect on satisfaction—never compete over it."
 feature_joy_body:
-  other: "Record how a purchase left you feeling. Home Pocket avoids rankings, streak pressure, and achievement events so the result stays a private reflection on your own patterns."
+  other: "Record how a purchase left you feeling. Happy Pocket avoids rankings, streak pressure, and achievement events so the result stays a private reflection on your own patterns."
 feature_joy_point_1:
   other: "One simple Joy expression"
 feature_joy_point_2:

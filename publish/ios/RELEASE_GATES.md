@@ -1,12 +1,12 @@
 # iOS 发布门禁（当前：NO-GO）
 
-以下结论基于 2026-08-04 的工作区快照。P0 未全部关闭前，不要上传生产候选包或点击 Submit for Review。
+以下结论基于 2026-08-05 的工作区快照。P0 未全部关闭前，不要上传生产候选包或点击 Submit for Review。
 
 ## P0 — 必须关闭
 
 - [ ] **法律文本定稿。** `legal/current-drafts/` 的 9 份文件仍含“草案”、`support@example.com`、`[上线前填真实值]` 等内容。完成日本法务复核，替换真实主体、地址、电话、邮箱、生效日期，并同步回 `assets/legal/`。
-- [ ] **托管隐私政策 URL 上线。** App Store Connect 要求 iOS App 提供可公开访问的 Privacy Policy URL。当前仓库没有已验证的正式 URL；App 内离线文档不能替代托管 URL。
-- [ ] **App 专用 Support URL 上线。** `https://www.sheanzero.com/#contact` 在 2026-08-04 可访问且有联系表单，但不是 Home Pocket 专用支持页，主页仍显示 “Home Pocket is in Development”，也没有清晰的 app 支持邮箱/必要运营信息。建立正式支持页并核对各地区法律要求。
+- [ ] **托管隐私政策 URL 上线。** 三语页面已配置为 `https://happypocket.app/{locale}/privacy/`，但仍需确认正式 DNS、TLS、目标地区可访问性和法务定稿；App 内离线文档不能替代已验证的公开 URL。
+- [ ] **App 专用 Support URL 上线。** 三语页面已配置为 `https://happypocket.app/{locale}/support/`，但正式 DNS 尚待验证，页面也仍需补齐已确认的运营方邮箱与隐私请求流程。
 - [ ] **隐私政策与 relay 实际行为一致。** 当前政策写“设备直连、服务器不保存”，而客户端使用 `sync.happypocket.app` 中继，并在服务端暂存加密消息直至 ACK/过期；服务端还接收 device ID、公钥、设备名、显示名、组名、头像摘要和 APNs token。必须改为真实、可验证的保留与删除口径。
 - [ ] **修正 onboarding 的绝对隐私声明。** `onboardingPrivacySubtitle` / `onboardingPrivacyCardLocalBody` 仍含“Everything stays on your device / Never sent to the cloud”等绝对表述，与家庭同步、汇率请求及可选云端语音识别不一致。
 - [ ] **披露语音识别降级路径。** 代码优先使用 on-device speech recognition，但允许在设备侧识别失败时降级到网络识别。最终隐私政策、权限前置说明和 App Review Notes 必须与最终开关一致。
@@ -22,7 +22,7 @@
 
 ## P1 — 强烈建议首发前关闭
 
-- [x] `CFBundleDisplayName` 和麦克风、语音识别、Face ID 权限说明已通过 `InfoPlist.strings` 完成 `ja`、`zh-Hans`、`en` 本地化，并由架构测试锁定 key parity 与 Xcode Resources 引用。
+- [x] `CFBundleDisplayName` 三语统一为 `Happy Pocket`；麦克风、语音识别、Face ID 权限说明保持 `ja`、`zh-Hans`、`en` 本地化，并由架构测试锁定 key parity 与 Xcode Resources 引用。
 - [x] iOS 最低版本已统一为 15.0：Podfile、Xcode、项目文档、官网、商店介绍和真机测试矩阵口径一致。
 - [ ] 在真机验证 Face ID、麦克风、语音识别、照片选择、APNs、后台推送、加密数据库、备份导入导出、家庭加入/退出/删除。
 - [ ] 若在 EU 上架，完成 Digital Services Act trader/non-trader 状态与展示信息；若首发不需要，先缩小地区范围。

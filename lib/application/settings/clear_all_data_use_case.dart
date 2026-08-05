@@ -21,7 +21,7 @@ enum ClearAllDataStage {
   failed,
 }
 
-/// Erases all local Home Pocket user data without sending a server operation.
+/// Erases all local Happy Pocket user data without sending a server operation.
 class ClearAllDataUseCase {
   ClearAllDataUseCase({
     required ClearAllDataStep suspendSync,

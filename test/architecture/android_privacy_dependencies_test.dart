@@ -46,7 +46,7 @@ void main() {
       findings,
       isEmpty,
       reason:
-          'Home Pocket does not use behavioral analytics or advertising IDs. '
+          'Happy Pocket does not use behavioral analytics or advertising IDs. '
           'Remove these dependencies/permissions or amend the privacy contract '
           'before shipping:\n${findings.join('\n')}',
     );

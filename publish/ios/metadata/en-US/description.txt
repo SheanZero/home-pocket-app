@@ -1,4 +1,4 @@
-Home Pocket is a local-first family budgeting app that makes room for both everyday needs and the spending that genuinely brings you joy.
+Happy Pocket is a local-first family budgeting app that makes room for both everyday needs and the spending that genuinely brings you joy.
 
 Separate expenses into Daily and Joy ledgers. Along with the amount, record categories, notes, and satisfaction so you can understand what supported your household and what made life feel better.
 
@@ -19,4 +19,4 @@ Create a family group with an invite code and sync shared ledgers and shopping i
 PRIVACY AT THE CENTER
 Budget data is encrypted on your device and is not used for advertising or behavioral tracking. Network communication needed for family sync, notifications, and exchange rates is explained in the privacy policy.
 
-Budgeting does not have to be only about restriction. Home Pocket helps you and your family understand what matters in everyday life.
+Budgeting does not have to be only about restriction. Happy Pocket helps you and your family understand what matters in everyday life.

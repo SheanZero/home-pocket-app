@@ -94,7 +94,7 @@ output-dir: lib/generated
 
 | キー | 日本語 (ja) | 中国語 (zh) | 英語 (en) |
 |------|------------|------------|-----------|
-| `appName` | まもる家計簿 | 守护家计簿 | Home Pocket |
+| `appName` | ハピポケ家族家計簿 | Happy Pocket 家庭账本 | Happy Pocket |
 | `home` | ホーム | 首页 | Home |
 | `transactions` | 取引 | 交易 | Transactions |
 | `analytics` | 分析 | 分析 | Analytics |
@@ -206,7 +206,7 @@ output-dir: lib/generated
 ```json
 {
   "@@locale": "en",
-  "appName": "Home Pocket",
+  "appName": "Happy Pocket",
   "@appName": {
     "description": "The application name"
   },
@@ -830,7 +830,7 @@ class TransactionCard extends ConsumerWidget {
 
 ### 8.1 目的
 
-ランタイム言語切替、ロケール対応フォーマット、3 言語翻訳（ja/zh/en）を提供し、Home Pocket の多言語 UX を一貫して保証する。
+ランタイム言語切替、ロケール対応フォーマット、3 言語翻訳（ja/zh/en）を提供し、Happy Pocket の多言語 UX を一貫して保証する。
 
 ### 8.2 スコープ
 

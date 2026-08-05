@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADR) 索引
 
-**项目:** Home Pocket MVP
+**项目:** Happy Pocket MVP
 **最后更新:** 2026-06-01
 
 ---

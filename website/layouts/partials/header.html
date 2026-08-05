@@ -19,7 +19,7 @@
     <div class="header-actions">
       <div class="language-switcher" aria-label="{{ i18n "language_switcher" }}">
         {{ range .AllTranslations }}
-          <a href="{{ .RelPermalink }}" hreflang="{{ .Language.LanguageCode }}" lang="{{ .Language.LanguageCode }}"{{ if eq $.Lang .Lang }} aria-current="page"{{ end }}>{{ if eq .Lang "ja" }}JP{{ else }}EN{{ end }}</a>
+          <a href="{{ .RelPermalink }}" hreflang="{{ .Language.LanguageCode }}" lang="{{ .Language.LanguageCode }}"{{ if eq $.Lang .Lang }} aria-current="page"{{ end }}>{{ if eq .Lang "ja" }}JP{{ else if eq .Lang "zh" }}CN{{ else }}EN{{ end }}</a>
         {{ end }}
       </div>
       <a class="header-download" href="{{ .Site.Home.RelPermalink }}#download">{{ i18n "nav_download" }}</a>

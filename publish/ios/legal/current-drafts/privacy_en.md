@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Home Pocket (まもる家計簿)**
+**Happy Pocket (ハピポケ家族家計簿)**
 
 Last updated: August 4, 2026 (Draft)
 
@@ -10,7 +10,7 @@ Last updated: August 4, 2026 (Draft)
 
 ## 1. Our Approach
 
-Home Pocket (the "App") is a local-first, privacy-focused family accounting app. The App is designed with a zero-knowledge architecture, meaning the developer and any external server cannot read your financial data.
+Happy Pocket (the "App") is a local-first, privacy-focused family accounting app. The App is designed with a zero-knowledge architecture, meaning the developer and any external server cannot read your financial data.
 
 This policy honestly describes how the App handles your information, based on the App's actual behavior.
 

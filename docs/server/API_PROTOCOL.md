@@ -1,4 +1,4 @@
-# Home Pocket Relay — API & WebSocket Protocol
+# Happy Pocket Relay — API & WebSocket Protocol
 
 > Version: 2026-04-05  
 > Base URL: `https://sync.happypocket.app/api/v1`  

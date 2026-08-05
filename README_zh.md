@@ -1,4 +1,4 @@
-# Home Pocket (まもる家計簿)
+# Happy Pocket (ハピポケ家族家計簿)
 
 **[English](README.md) | [中文](README_zh.md) | [日本語](README_ja.md)**
 
@@ -46,9 +46,9 @@
 ## 🌟 核心差异化
 
 ### 市场定位
-**Home Pocket 的位置：** 高隐私 + 适度自动化 + 趣味化
+**Happy Pocket 的位置：** 高隐私 + 适度自动化 + 趣味化
 
-| 维度 | 竞品现状 | Home Pocket 差异化 |
+| 维度 | 竞品现状 | Happy Pocket 差异化 |
 |------|---------|-------------------|
 | **信任** | 云端存储，公司可见数据 | E2EE加密，防篡改哈希链 |
 | **体验** | 功能导向，枯燥记账 | 游戏化，社交货币式反馈 |
@@ -317,7 +317,7 @@ flutter run -d <device_id>
 
 ### 完全开源承诺
 
-**Home Pocket 采用完全开源模式：**
+**Happy Pocket 采用完全开源模式：**
 
 - **许可证：** Apache License 2.0
 - **代码仓库：** GitHub公开仓库
@@ -369,7 +369,7 @@ flutter run -d <device_id>
 详情请查看 [LICENSE](LICENSE) 文件。
 
 ```
-Copyright 2026 Home Pocket Team
+Copyright 2026 Happy Pocket Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

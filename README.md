@@ -1,4 +1,4 @@
-# Home Pocket (まもる家計簿)
+# Happy Pocket (ハピポケ家族家計簿)
 
 **[English](README.md) | [中文](README_zh.md) | [日本語](README_ja.md)**
 
@@ -46,9 +46,9 @@ To become the guardian of family financial trust and joy, transforming every acc
 ## 🌟 Core Differentiation
 
 ### Market Positioning
-**Home Pocket's Position:** High Privacy + Moderate Automation + Gamification
+**Happy Pocket's Position:** High Privacy + Moderate Automation + Gamification
 
-| Dimension | Competitor Status | Home Pocket Differentiation |
+| Dimension | Competitor Status | Happy Pocket Differentiation |
 |------|---------|-------------------|
 | **Trust** | Cloud storage, companies can access data | E2EE encryption, tamper-proof hash chain |
 | **Experience** | Feature-oriented, tedious accounting | Gamification, social currency-style feedback |
@@ -317,7 +317,7 @@ If you encounter SQLCipher conflicts or ML Kit build errors, please refer to the
 
 ### Fully Open Source Commitment
 
-**Home Pocket adopts a fully open source model:**
+**Happy Pocket adopts a fully open source model:**
 
 - **License:** Apache License 2.0
 - **Code Repository:** Public GitHub repository
@@ -369,7 +369,7 @@ This project is licensed under the **Apache License 2.0**.
 For details, please see the [LICENSE](LICENSE) file.
 
 ```
-Copyright 2026 Home Pocket Team
+Copyright 2026 Happy Pocket Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

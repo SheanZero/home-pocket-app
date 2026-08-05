@@ -1,6 +1,6 @@
 # Architecture Research
 
-**Domain:** Pre-launch gating + lock + compliance integration into a shipped local-first Flutter app (Home Pocket v2.0)
+**Domain:** Pre-launch gating + lock + compliance integration into a shipped local-first Flutter app (Happy Pocket v2.0)
 **Researched:** 2026-06-28
 **Confidence:** HIGH (all integration points read directly from current source — main.dart, app_initializer.dart, secure_storage_service.dart, settings_repository_impl.dart, about_section.dart, security_section.dart, state_locale.dart, state_settings.dart)
 
@@ -240,5 +240,5 @@ Legal text (Privacy / Terms / 特商法) ships as bundled localized assets and r
 - `pubspec.yaml` — `local_auth ^3.0.1`, `flutter_secure_storage ^10.2.0`, `shared_preferences ^2.3.4` present; `url_launcher` absent (HIGH)
 
 ---
-*Architecture research for: pre-launch gating/lock/compliance integration into Home Pocket v2.0*
+*Architecture research for: pre-launch gating/lock/compliance integration into Happy Pocket v2.0*
 *Researched: 2026-06-28*

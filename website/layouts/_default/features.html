@@ -9,7 +9,7 @@
     <div class="screen-stage page-hero-screen">
       <div class="screen-meta"><span>{{ i18n "screen_month" }}</span><span>{{ i18n "screen_local" }}</span></div>
       <div class="product-screen">
-        <img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" fetchpriority="high">
+        <img src="{{ (printf "images/home-light-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" fetchpriority="high">
       </div>
     </div>
   </div>
@@ -69,11 +69,11 @@
     <div class="app-view-pair">
       <figure class="app-view-card">
         <figcaption>{{ i18n "light_mode_label" }}</figcaption>
-        <img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="lazy">
+        <img src="{{ (printf "images/home-light-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="lazy">
       </figure>
       <figure class="app-view-card app-view-card-dark">
         <figcaption>{{ i18n "dark_mode_label" }}</figcaption>
-        <img src="{{ (printf "images/home-dark-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_dark_screenshot_alt" }}" loading="lazy">
+        <img src="{{ (printf "images/home-dark-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1200" alt="{{ i18n "home_dark_screenshot_alt" }}" loading="lazy">
       </figure>
     </div>
   </div>

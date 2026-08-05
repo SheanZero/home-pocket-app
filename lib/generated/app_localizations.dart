@@ -102,7 +102,7 @@ abstract class S {
   /// App title
   ///
   /// In en, this message translates to:
-  /// **'Home Pocket'**
+  /// **'Happy Pocket'**
   String get appName;
 
   /// Home tab label
@@ -900,7 +900,7 @@ abstract class S {
   /// Delete all confirmation
   ///
   /// In en, this message translates to:
-  /// **'This permanently deletes Home Pocket data on this device. It does not delete family data from other devices or send a server deletion request.'**
+  /// **'This permanently deletes Happy Pocket data on this device. It does not delete family data from other devices or send a server deletion request.'**
   String get deleteAllDataConfirmation;
 
   /// Delete all success
@@ -1092,7 +1092,7 @@ abstract class S {
   /// No description provided for @profileSetupSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Home Pocket'**
+  /// **'Welcome to Happy Pocket'**
   String get profileSetupSubtitle;
 
   /// No description provided for @profileNickname.
@@ -1170,7 +1170,7 @@ abstract class S {
   /// No description provided for @welcomeTo.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Home Pocket'**
+  /// **'Welcome to Happy Pocket'**
   String get welcomeTo;
 
   /// No description provided for @profileNameRequired.
@@ -2706,7 +2706,7 @@ abstract class S {
   /// Friendly guidance shown when a family-sync operation cannot reach the relay
   ///
   /// In en, this message translates to:
-  /// **'Family sharing needs an internet connection. Check your connection and make sure Home Pocket can use mobile data, then try again.'**
+  /// **'Family sharing needs an internet connection. Check your connection and make sure Happy Pocket can use mobile data, then try again.'**
   String get familySyncNetworkUnavailableMessage;
 
   /// No description provided for @groupName.
@@ -5654,7 +5654,7 @@ abstract class S {
   /// Onboarding intro screen: app title
   ///
   /// In en, this message translates to:
-  /// **'Home Pocket'**
+  /// **'Happy Pocket'**
   String get onboardingIntroTitle;
 
   /// Welcome A intro page 1: joy pill badge text
@@ -5666,7 +5666,7 @@ abstract class S {
   /// Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)
   ///
   /// In en, this message translates to:
-  /// **'HOME POCKET'**
+  /// **'HAPPY POCKET'**
   String get onboardingWelcomeBrand;
 
   /// Welcome A intro page 1: two-line tagline
@@ -6056,7 +6056,7 @@ abstract class S {
   /// Set-PIN flow: supporting copy for the first passcode entry
   ///
   /// In en, this message translates to:
-  /// **'Choose four digits you\'ll remember to unlock Home Pocket.'**
+  /// **'Choose four digits you\'ll remember to unlock Happy Pocket.'**
   String get appLockSetPinDescription;
 
   /// Set-PIN flow: title for the second (confirmation) passcode entry — double-entry (D-03)

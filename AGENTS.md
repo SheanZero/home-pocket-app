@@ -1,4 +1,4 @@
-# AGENTS.md — Home Pocket (まもる家計簿)
+# AGENTS.md — Happy Pocket (ハピポケ家族家計簿)
 
 > Local-first, privacy-focused family accounting app with a dual-ledger system.
 > Flutter · iOS 15+ / Android 7+ · SQLCipher · Riverpod 3 · Drift

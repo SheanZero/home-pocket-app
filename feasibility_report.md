@@ -1,4 +1,4 @@
-# Home Pocket (まもる家計簿) — Feasibility Report
+# Happy Pocket (ハピポケ家族家計簿) — Feasibility Report
 
 **Date:** 2026-02-10
 **Version:** 0.1.0 (Phase 1 — Infrastructure Layer)
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-Home Pocket is a local-first, privacy-focused family accounting app with a dual-ledger system, 4-layer encryption, and offline-first design. The project is in early Phase 1 with a solid architectural foundation. **The core infrastructure (crypto, database, data layer) is production-quality and well-tested.** The feature layer has working accounting, analytics, and a partial dual-ledger. Several planned capabilities (i18n, routing, sync, OCR) are not yet started.
+Happy Pocket is a local-first, privacy-focused family accounting app with a dual-ledger system, 4-layer encryption, and offline-first design. The project is in early Phase 1 with a solid architectural foundation. **The core infrastructure (crypto, database, data layer) is production-quality and well-tested.** The feature layer has working accounting, analytics, and a partial dual-ledger. Several planned capabilities (i18n, routing, sync, OCR) are not yet started.
 
 **Overall feasibility: HIGH** — The foundations are sound, the architecture is well-designed, and the implemented code is high quality. The remaining work is execution, not design uncertainty.
 

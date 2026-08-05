@@ -12,7 +12,7 @@
 
 继 `20260518_1421_fix_ios_sqlcipher_load_conflict.md` 之后，用户在 iPhone 真机执行 `flutter run`，install 阶段被 iOS 拒绝：
 
-> 无法安装 "Home Pocket"
+> 无法安装 "Happy Pocket"
 > Failed to verify code signature of /var/installd/Library/Caches/com.apple.mobile.installd.staging/temp.o0FBbl/extracted/Runner.app/Frameworks/objective_c.framework : 0xe8008014 (The executable contains an invalid signature.)
 
 附带的 terminal 还显示 "Flutter could not access the local network" + `SocketException: No route to host, port = 5353` — 这是 macOS Local Network 权限提示，独立的 dev-tooling 问题，不阻塞 install。

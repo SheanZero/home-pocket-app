@@ -1,6 +1,6 @@
 # Device E2E Matrix
 
-This matrix is the release-facing device test contract for Home Pocket. The
+This matrix is the release-facing device test contract for Happy Pocket. The
 automated lane runs inside a booted iOS simulator and Android emulator; host VM
 tests remain useful but do not count as device coverage.
 

@@ -9,7 +9,7 @@ class SJa extends S {
   SJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get appName => 'まもる家計簿';
+  String get appName => 'Happy Pocket';
 
   @override
   String get home => 'ホーム';
@@ -425,7 +425,7 @@ class SJa extends S {
 
   @override
   String get deleteAllDataConfirmation =>
-      'この端末のまもる家計簿データを完全に削除します。他の家族の端末上のデータは削除されず、サーバーへの削除要求も送信されません。';
+      'この端末のHappy Pocketデータを完全に削除します。他の家族の端末上のデータは削除されず、サーバーへの削除要求も送信されません。';
 
   @override
   String get allDataDeleted => '端末内のデータを削除しました';
@@ -523,7 +523,7 @@ class SJa extends S {
   String get profileSetup => 'はじめまして！';
 
   @override
-  String get profileSetupSubtitle => 'まもる家計簿へようこそ';
+  String get profileSetupSubtitle => 'Happy Pocketへようこそ';
 
   @override
   String get profileNickname => 'あなたの呼び名';
@@ -562,7 +562,7 @@ class SJa extends S {
   String get profilePreview => 'プレビュー';
 
   @override
-  String get welcomeTo => 'まもる家計簿へようこそ';
+  String get welcomeTo => 'Happy Pocketへようこそ';
 
   @override
   String get profileNameRequired => 'ニックネームを入力してください';
@@ -1402,7 +1402,7 @@ class SJa extends S {
 
   @override
   String get familySyncNetworkUnavailableMessage =>
-      '家族共有にはネットワーク接続が必要です。通信状況と、まもる家計簿のモバイルデータ通信が許可されているかを確認して、もう一度お試しください。';
+      '家族共有にはネットワーク接続が必要です。通信状況と、Happy Pocketのモバイルデータ通信が許可されているかを確認して、もう一度お試しください。';
 
   @override
   String get groupName => 'グループ名';
@@ -3026,13 +3026,13 @@ class SJa extends S {
   String get recognitionAlternatesMore => 'もっと';
 
   @override
-  String get onboardingIntroTitle => 'まもる家計簿';
+  String get onboardingIntroTitle => 'Happy Pocket';
 
   @override
   String get onboardingWelcomeBadge => 'たのしく、つづく家計簿';
 
   @override
-  String get onboardingWelcomeBrand => 'HOME POCKET';
+  String get onboardingWelcomeBrand => 'HAPPY POCKET';
 
   @override
   String get onboardingWelcomeTagline =>
@@ -3230,7 +3230,7 @@ class SJa extends S {
 
   @override
   String get appLockSetPinDescription =>
-      'Home Pocket のロック解除に使う、覚えやすい4桁を選んでください。';
+      'Happy Pocket のロック解除に使う、覚えやすい4桁を選んでください。';
 
   @override
   String get appLockConfirmPinTitle => 'パスコードを再入力';

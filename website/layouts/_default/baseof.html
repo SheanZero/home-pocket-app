@@ -14,9 +14,15 @@
   <meta property="og:title" content="{{ if .IsHome }}{{ .Title }} — {{ i18n "meta_tagline" }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
   <meta property="og:description" content="{{ .Params.description | default (i18n "meta_description") }}">
   <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:site_name" content="Happy Pocket">
   <meta property="og:locale" content="{{ .Site.Language.LanguageCode | replaceRE "-" "_" }}">
-  <meta property="og:image" content="{{ "images/hero-family.jpg" | absURL }}">
+  {{ range .Translations }}<meta property="og:locale:alternate" content="{{ .Language.LanguageCode | replaceRE "-" "_" }}">{{ end }}
+  <meta property="og:image" content="{{ "images/og-happy-pocket.png" | absURL }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Happy Pocket — Family Budget">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ "images/og-happy-pocket.png" | absURL }}">
   {{ $style := resources.Get "css/main.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
   {{ $script := resources.Get "js/main.js" | minify | fingerprint }}

@@ -1,8 +1,8 @@
-# Home Pocket Server-App 交互协议 v1
+# Happy Pocket Server-App 交互协议 v1
 
 ## 概述
 
-Home Pocket 采用零知识加密中继架构。服务器仅存储和转发不透明的加密数据（opaque encrypted blobs），不接触明文数据或密钥。Push 通知用于实时通知客户端有新事件，客户端收到通知后通过 API 拉取详细数据。
+Happy Pocket 采用零知识加密中继架构。服务器仅存储和转发不透明的加密数据（opaque encrypted blobs），不接触明文数据或密钥。Push 通知用于实时通知客户端有新事件，客户端收到通知后通过 API 拉取详细数据。
 
 > **当前状态 vs 目标状态**: 本文档同时描述了当前已实现的行为和计划改进的目标行为。
 > 所有标记为 **🔜 待实现** 的内容表示尚未在服务器端实现，需要代码修改后才能生效。

@@ -1,1 +1,1 @@
-__REQUIRED_APP_SPECIFIC_SUPPORT_URL__
+https://happypocket.app/ja/support/

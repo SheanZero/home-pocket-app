@@ -1,8 +1,8 @@
-# Home Pocket — iOS App Store 发布包
+# Happy Pocket — iOS App Store 发布包
 
 生成日期：2026-08-04（Asia/Tokyo）
 
-这个目录是 Home Pocket（まもる家計簿）首次 App Store 发布的统一交付入口。它包含发布步骤、App Store Connect 三语文案、审核说明、隐私与加密答题稿、App Icon、法律文本快照、截图采集规范和自动校验脚本。
+这个目录是 Happy Pocket（ハピポケ家族家計簿）首次 App Store 发布的统一交付入口。它包含发布步骤、App Store Connect 三语文案、审核说明、隐私与加密答题稿、App Icon、法律文本快照、截图采集规范和自动校验脚本。
 
 ## 当前结论
 

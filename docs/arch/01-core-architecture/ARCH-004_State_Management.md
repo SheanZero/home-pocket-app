@@ -1,4 +1,4 @@
-# Home Pocket MVP - 状态管理架构
+# Happy Pocket MVP - 状态管理架构
 
 **文档版本:** 1.0
 **创建日期:** 2026-02-03
@@ -195,7 +195,7 @@ class TransactionList extends _$TransactionList {
 
 ## Provider层次结构
 
-Home Pocket的Provider组织结构：
+Happy Pocket的Provider组织结构：
 
 ```
 lib/
@@ -1018,7 +1018,7 @@ void main() {
 
 ## 总结
 
-Home Pocket状态管理架构的核心特点：
+Happy Pocket状态管理架构的核心特点：
 
 1. **类型安全**: Riverpod提供编译时类型检查
 2. **自动依赖注入**: 简化代码，提高可测试性

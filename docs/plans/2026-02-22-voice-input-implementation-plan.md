@@ -9,7 +9,7 @@
 
 ## Overview
 
-This plan implements the MOD-009 Voice Input module for the Home Pocket accounting app. The module allows users to create transactions through natural language voice input, extracting amounts, merchants, and categories automatically. The implementation builds on several existing components:
+This plan implements the MOD-009 Voice Input module for the Happy Pocket accounting app. The module allows users to create transactions through natural language voice input, extracting amounts, merchants, and categories automatically. The implementation builds on several existing components:
 
 - `VoiceInputScreen` already exists as a static stub at `lib/features/accounting/presentation/screens/voice_input_screen.dart` — it will be replaced with the full implementation
 - `CategoryService` at `lib/application/accounting/category_service.dart` provides `resolveLedgerType()` — reused by `CategoryMatcher`

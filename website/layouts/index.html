@@ -51,7 +51,7 @@
         <p>{{ i18n "route_features_body" }}</p>
         <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
       </div>
-      <figure class="home-route-screen"><img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="lazy"></figure>
+      <figure class="home-route-screen"><img src="{{ (printf "images/home-light-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="lazy"></figure>
     </a>
     {{ end }}
 
@@ -64,7 +64,7 @@
         <p>{{ i18n "route_family_body" }}</p>
         <strong>{{ i18n "route_cta" }} <span aria-hidden="true">→</span></strong>
       </div>
-      <figure class="home-route-screen"><img src="{{ (printf "images/family-management-%s.png" .Lang) | relURL }}" width="780" height="1560" alt="{{ i18n "family_screenshot_alt" }}" loading="lazy"></figure>
+      <figure class="home-route-screen"><img src="{{ (printf "images/family-management-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1560" alt="{{ i18n "family_screenshot_alt" }}" loading="lazy"></figure>
     </a>
     {{ end }}
 

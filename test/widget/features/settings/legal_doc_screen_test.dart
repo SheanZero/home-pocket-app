@@ -26,9 +26,7 @@ void main() {
       createLocalizedWidget(
         LegalDocScreen(doc: doc),
         locale: locale,
-        overrides: [
-          currentLocaleProvider.overrideWith((ref) async => locale),
-        ],
+        overrides: [currentLocaleProvider.overrideWith((ref) async => locale)],
       ),
     );
     await tester.pumpAndSettle();
@@ -39,7 +37,9 @@ void main() {
 
   /// The full asset text rendered inside the single [SelectableText].
   String bodyText(WidgetTester tester) {
-    final selectable = tester.widget<SelectableText>(find.byType(SelectableText));
+    final selectable = tester.widget<SelectableText>(
+      find.byType(SelectableText),
+    );
     return selectable.data ?? '';
   }
 
@@ -51,7 +51,7 @@ void main() {
       expect(find.byType(SelectableText), findsOneWidget);
       // Body-only marker present in the ja privacy asset.
       expect(bodyText(tester), contains('プライバシーポリシー'));
-      expect(bodyText(tester), contains('まもる家計簿'));
+      expect(bodyText(tester), contains('Happy Pocket'));
     });
 
     testWidgets('terms (ja) renders terms content (LEGAL-02)', (tester) async {
@@ -61,8 +61,7 @@ void main() {
       expect(bodyText(tester), contains('利用規約'));
     });
 
-    testWidgets(
-        'tokusho (ja) renders published operator fields '
+    testWidgets('tokusho (ja) renders published operator fields '
         '(full 表記型 — LEGAL-04 / D-06 supersedes D-03)', (tester) async {
       await pump(tester, doc: LegalDoc.tokusho, locale: const Locale('ja'));
 
@@ -89,27 +88,27 @@ void main() {
       expect(bodyText(tester), contains('プライバシーポリシー'));
     });
 
-    testWidgets('AppBar title comes from S per doc (privacyPolicy)',
-        (tester) async {
+    testWidgets('AppBar title comes from S per doc (privacyPolicy)', (
+      tester,
+    ) async {
       await pump(tester, doc: LegalDoc.privacy, locale: const Locale('ja'));
 
       final l10n = l10nOf(tester);
-      expect(
-        find.widgetWithText(AppBar, l10n.privacyPolicy),
-        findsOneWidget,
-      );
+      expect(find.widgetWithText(AppBar, l10n.privacyPolicy), findsOneWidget);
     });
 
-    testWidgets('AppBar title comes from S per doc (termsOfUse)',
-        (tester) async {
+    testWidgets('AppBar title comes from S per doc (termsOfUse)', (
+      tester,
+    ) async {
       await pump(tester, doc: LegalDoc.terms, locale: const Locale('ja'));
 
       final l10n = l10nOf(tester);
       expect(find.widgetWithText(AppBar, l10n.termsOfUse), findsOneWidget);
     });
 
-    testWidgets('AppBar title comes from S per doc (tokushoNotice)',
-        (tester) async {
+    testWidgets('AppBar title comes from S per doc (tokushoNotice)', (
+      tester,
+    ) async {
       await pump(tester, doc: LegalDoc.tokusho, locale: const Locale('ja'));
 
       final l10n = l10nOf(tester);

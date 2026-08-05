@@ -1,0 +1,340 @@
+meta_tagline:
+  other: "把每一笔支出，记成生活的幸福"
+meta_description:
+  other: "兼顾日常所需与悦己消费，不责备、不比较、无行为追踪的本地优先家庭账本。"
+skip_to_content:
+  other: "跳到正文"
+brand_home_label:
+  other: "Happy Pocket 首页"
+brand_name:
+  other: "Happy Pocket"
+brand_subtitle:
+  other: "家庭账本"
+primary_navigation:
+  other: "主导航"
+nav_philosophy:
+  other: "产品理念"
+nav_features:
+  other: "主要功能"
+nav_privacy:
+  other: "隐私设计"
+nav_faq:
+  other: "常见问题"
+nav_download:
+  other: "获取应用"
+nav_support:
+  other: "支持与联系"
+language_switcher:
+  other: "选择语言"
+menu_label:
+  other: "打开菜单"
+
+hero_eyebrow:
+  other: "照顾家庭，也照顾自己的账本"
+hero_title_line_1:
+  other: "把花出去的钱，"
+hero_title_line_2_before:
+  other: "记成生活里的"
+hero_title_accent:
+  other: "幸福"
+hero_title_line_2_after:
+  other: "。"
+hero_body:
+  other: "生活必需与让自己恢复能量的消费，都值得被好好记录。不责备，也不和别人比较。"
+store_links_label:
+  other: "应用商店链接"
+store_open_on:
+  other: "前往商店"
+store_release_note:
+  other: "正在准备发布，审核完成后将更新为正式商店页面"
+hero_privacy_link:
+  other: "了解隐私设计"
+hero_photo_alt:
+  other: "一家人在明亮的餐桌旁共同查看账本"
+hero_photo_caption:
+  other: "聊起家庭收支，也可以像围坐餐桌一样平静。"
+
+screen_month:
+  other: "2026年8月"
+screen_local:
+  other: "保存在此设备"
+home_screenshot_alt:
+  other: "Happy Pocket 展示日常支出与悦己记录的首页"
+philosophy_eyebrow:
+  other: "金钱所支持的生活"
+philosophy_title_line_1:
+  other: "记录生活所需，"
+philosophy_title_accent:
+  other: "也记录悦己"
+philosophy_title_line_2:
+  other: "。"
+philosophy_body:
+  other: "日常账记录支撑生活的开销，悦己账记录让自己感到值得的小选择。同样的金额可以有不同意义，不必都归进一个令人内疚的总数。"
+philosophy_quote:
+  other: "记账不是训诫，而是照顾今天的自己。"
+boundary_title:
+  other: "哪些记录让家人看到，由你决定。"
+boundary_body:
+  other: "家庭的清晰与个人的空间可以同时存在。"
+
+trust_label:
+  other: "隐私要点"
+trust_local_title:
+  other: "优先保存在设备上"
+trust_local_body:
+  other: "明文财务数据和加密密钥留在你的设备中。"
+trust_e2ee_title:
+  other: "只同步选定的家庭记录"
+trust_e2ee_body:
+  other: "共享记录在设备上端到端加密后再同步。"
+trust_clean_title:
+  other: "无广告与行为分析 SDK"
+trust_clean_body:
+  other: "不投放广告，也不进行跨应用行为追踪。"
+
+joy_story_eyebrow:
+  other: "记住微小的幸福"
+joy_story_title_line_1:
+  other: "让账本成为"
+joy_story_title_accent:
+  other: "发现幸福"
+joy_story_title_line_2:
+  other: "的地方。"
+joy_story_body:
+  other: "一杯喜欢的饮料、一本书、一段独处时间。这些微小的悦己并不是浪费，而是支撑你度过一天的生活记录。"
+joy_story_point_1:
+  other: "满意度不会用于排名或评价"
+joy_story_point_2:
+  other: "没有连续打卡压力或成就徽章"
+joy_story_point_3:
+  other: "安静回顾真正适合自己的选择"
+joy_photo_alt:
+  other: "阳光木桌上的陶瓷杯、鲜花和植物画"
+
+features_eyebrow:
+  other: "为真实的家庭日常设计"
+features_title:
+  other: "轻松记录、共同看见，也保留个人空间。"
+features_body:
+  other: "Happy Pocket 不堆砌功能，而是连接三个日常动作：快速记下、和家人一起看、把私人的部分留在自己手中。"
+family_kicker:
+  other: "家庭使用"
+family_title:
+  other: "看见同一个家，也保留不同的自己。"
+family_body:
+  other: "只有家庭账本会在家人的设备之间同步。可以看到是谁记录了什么，个人账本仍留在自己的设备上。"
+family_point_1:
+  other: "通过简单的邀请码添加家人"
+family_point_2:
+  other: "共享记录采用端到端加密"
+family_point_3:
+  other: "家庭账本与个人账本彼此分开"
+family_screenshot_alt:
+  other: "显示家庭成员和同步状态的管理页面"
+capture_kicker:
+  other: "轻松录入"
+capture_title:
+  other: "选择适合当下的记录方式。"
+capture_body:
+  other: "键盘、票据或语音。识别结果会在保存前由你确认，商家和分类学习也在设备上逐步适应你的习惯。"
+capture_methods_label:
+  other: "记录方式"
+capture_method_1:
+  other: "键盘"
+capture_method_2:
+  other: "票据"
+capture_method_3:
+  other: "语音"
+private_kicker:
+  other: "把安心做进系统"
+private_title:
+  other: "依靠真实实现，而不是模糊承诺。"
+private_body:
+  other: "数据库、敏感字段、照片文件和家庭同步分别采用独立加密层；必要的外部连接也会明确披露。"
+
+privacy_eyebrow:
+  other: "PRIVACY BY ARCHITECTURE"
+privacy_title:
+  other: "财务映照生活，因此用四层机制保护。"
+privacy_body:
+  other: "财务数据可能反映习惯与家庭关系。我们依据当前实现，分别说明存储位置、加密方式和外部连接。"
+privacy_cta:
+  other: "阅读隐私设计"
+privacy_layer_1_title:
+  other: "设备内数据库"
+privacy_layer_1_body:
+  other: "SQLCipher / AES-256"
+privacy_layer_2_title:
+  other: "敏感字段"
+privacy_layer_2_body:
+  other: "ChaCha20-Poly1305"
+privacy_layer_3_title:
+  other: "照片与文件"
+privacy_layer_3_body:
+  other: "AES-256-GCM"
+privacy_layer_4_title:
+  other: "家庭同步"
+privacy_layer_4_body:
+  other: "TLS + 端到端加密"
+
+faq_eyebrow:
+  other: "常见问题"
+faq_title:
+  other: "开始之前，你应该清楚了解这些。"
+faq_body:
+  other: "如实说明发布状态、家庭共享边界和数据处理方式。"
+faq_1_question:
+  other: "什么时候可以下载？"
+faq_1_answer:
+  other: "Happy Pocket 正在准备 App Store 和 Google Play 发布。商店审核完成后，本站按钮会更新为正式产品页面。"
+faq_2_question:
+  other: "我的财务数据会进入云端吗？"
+faq_2_answer:
+  other: "明文财务数据保存在设备上。汇率获取、可选通知和家庭同步会产生网络连接；共享记录会在发送前于设备上加密。"
+faq_3_question:
+  other: "家人能看到我的每一笔消费吗？"
+faq_3_answer:
+  other: "不能。家庭账本和个人账本相互分开。由你选择哪些记录进入家庭视图，私人记录仍保存在自己的设备上。"
+faq_4_question:
+  other: "支持哪些语言和设备？"
+faq_4_answer:
+  other: "应用支持日语、英语和简体中文，目标平台为 iOS 15 及以上和 Android 7 及以上；网站也提供这三种语言。"
+faq_5_question:
+  other: "是否有广告或使用情况分析？"
+faq_5_answer:
+  other: "没有广告，也没有第三方广告或行为分析 SDK。隐私设计页面会分别解释必要且有限的外部连接。"
+
+download_eyebrow:
+  other: "HAPPY POCKET FOR YOUR FAMILY"
+download_title:
+  other: "把今天的支出，也留作今天的幸福。"
+download_body:
+  other: "计划支持 iPhone、iPad 和 Android；商店链接与发布状态会在这里持续更新。"
+
+footer_statement:
+  other: "本地优先的家庭账本，兼顾共同安心与属于自己的悦己消费。"
+footer_product:
+  other: "产品"
+footer_project:
+  other: "项目"
+footer_support:
+  other: "支持"
+footer_release_note:
+  other: "正在准备发布 · 开源"
+inner_eyebrow:
+  other: "HAPPY POCKET 隐私设计"
+inner_summary_label:
+  other: "本页内容"
+inner_summary:
+  other: "分别说明存储、加密、家庭同步和必要的外部连接。"
+inner_source_link:
+  other: "查看实际实现"
+not_found_title:
+  other: "找不到页面"
+not_found_body:
+  other: "页面可能已经移动，或尚未公开。"
+not_found_cta:
+  other: "返回首页"
+
+nav_family:
+  other: "家庭使用"
+home_routes_eyebrow:
+  other: "从你最关心的内容开始"
+home_routes_title:
+  other: "五个清晰入口，而不是一张过长的首页。"
+home_routes_body:
+  other: "分别了解产品理念、日常功能、家庭边界、隐私架构和常见问题，让每个主题都有足够空间。"
+route_philosophy_title:
+  other: "把支出记成美好生活的回忆。"
+route_philosophy_body:
+  other: "为什么账本可以关照自己，而不是责备或比较。"
+route_features_title:
+  other: "让每天的记录更轻松。"
+route_features_body:
+  other: "双账本、安静的悦己回顾，以及键盘、票据和语音录入。"
+route_family_title:
+  other: "一起看见，也各自保留。"
+route_family_body:
+  other: "把家庭共享记录与仍属于个人的消费分开。"
+route_privacy_title:
+  other: "让安全成为系统，而不是口号。"
+route_privacy_body:
+  other: "设备存储、四层加密与如实披露的外部连接。"
+route_faq_title:
+  other: "开始之前，先获得明确答案。"
+route_faq_body:
+  other: "发布状态、支持设备、同步边界与广告政策。"
+route_cta:
+  other: "阅读此页"
+home_dark_screenshot_alt:
+  other: "深色模式下展示日常支出与悦己记录的 Happy Pocket 首页"
+philosophy_next:
+  other: "了解日常功能"
+feature_ledger_kicker:
+  other: "两种账本"
+feature_ledger_title:
+  other: "分开记录维持生活与恢复自己的支出。"
+feature_ledger_body:
+  other: "同样的金额可以维持家庭，也可以让艰难的一天轻松一些。日常与悦己保留这些不同意义，而不是把它们压缩成一个令人内疚的数字。"
+feature_ledger_point_1:
+  other: "日常账呈现完整家庭收支"
+feature_ledger_point_2:
+  other: "悦己账记录对自己有意义的选择"
+feature_ledger_point_3:
+  other: "家庭记录与个人记录相互分开"
+feature_joy_kicker:
+  other: "今天的悦己"
+feature_joy_title:
+  other: "回顾满意度，而不是参与竞争。"
+feature_joy_body:
+  other: "记录一次消费留下的感受。Happy Pocket 不设置排名、连续打卡压力或成就事件，让结果只用于理解自己的选择。"
+feature_joy_point_1:
+  other: "以一个清晰的悦己指标呈现"
+feature_joy_point_2:
+  other: "没有排名、连续打卡或成就徽章"
+feature_joy_point_3:
+  other: "按照自己的节奏查看月度变化"
+features_showcase_eyebrow:
+  other: "适应一天中的不同光线"
+features_showcase_title:
+  other: "明亮清晨与安静夜晚，都清晰易读。"
+features_showcase_body:
+  other: "浅色和深色模式都让金额与情绪信息保持平静、清楚。产品图片来自真实的 iOS 模拟器。"
+light_mode_label:
+  other: "浅色模式"
+dark_mode_label:
+  other: "深色模式"
+features_next:
+  other: "了解家庭共享"
+family_story_eyebrow:
+  other: "同一个家庭，不同的每个人"
+family_values_label:
+  other: "家庭使用的三个原则"
+family_value_1_title:
+  other: "只共享选定的记录"
+family_value_1_body:
+  other: "个人账本的记录不会进入家庭同步。"
+family_value_2_title:
+  other: "看得见是谁记录"
+family_value_2_body:
+  other: "不带责备地查看家庭开销。"
+family_value_3_title:
+  other: "离开设备前完成加密"
+family_value_3_body:
+  other: "共享数据通过端到端加密在家庭设备间传递。"
+family_boundary_eyebrow:
+  other: "SHARED, NOT EXPOSED"
+family_boundary_1_title:
+  other: "家庭账本"
+family_boundary_1_body:
+  other: "只共享明确选择进入家庭视图的记录。"
+family_boundary_2_title:
+  other: "个人账本"
+family_boundary_2_body:
+  other: "只属于你的消费仍留在自己的设备上。"
+family_boundary_3_title:
+  other: "同步中继"
+family_boundary_3_body:
+  other: "中继服务器不持有解密财务数据所需的密钥。"
+family_next:
+  other: "阅读隐私架构"

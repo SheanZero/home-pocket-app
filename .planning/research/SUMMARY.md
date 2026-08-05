@@ -1,6 +1,6 @@
 # Project Research Summary
 
-**Project:** Home Pocket (まもる家計簿) — v2.0 pre-launch capstone
+**Project:** Happy Pocket (ハピポケ家族家計簿) — v2.0 pre-launch capstone
 **Domain:** Pre-launch gating/lock/compliance for a shipped local-first encrypted Flutter family-accounting app (Japan market, iOS 15+/Android 7+)
 **Researched:** 2026-06-28
 **Confidence:** HIGH (integration/stack/architecture grounded in current source; store-policy/JP-legal specifics MEDIUM, flagged for legal review)

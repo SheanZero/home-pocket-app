@@ -1584,7 +1584,7 @@ final result: passed
 
 ---
 
-# Home Pocket Design QA
+# Happy Pocket Design QA
 
 ## 2026-07-16 — 编辑交易与统一记账视觉收敛
 

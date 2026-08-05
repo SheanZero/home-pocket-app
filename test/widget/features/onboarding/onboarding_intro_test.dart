@@ -31,8 +31,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('たのしく、つづく家計簿'), findsOneWidget); // joy pill badge
-      expect(find.text('まもる家計簿'), findsOneWidget); // title
-      expect(find.text('HOME POCKET'), findsOneWidget); // brand line
+      expect(find.text('Happy Pocket'), findsOneWidget); // title
+      expect(find.text('HAPPY POCKET'), findsOneWidget); // brand line
       expect(
         find.text('記録するたびに、ちょっと、しあわせ。\nお金とのつきあいを、もっと前向きに。'),
         findsOneWidget,
@@ -107,7 +107,7 @@ void main() {
       await tester.tap(find.widgetWithText(TextButton, '戻る'));
       await tester.pumpAndSettle();
 
-      expect(find.text('まもる家計簿'), findsOneWidget);
+      expect(find.text('Happy Pocket'), findsOneWidget);
       expect(find.widgetWithText(TextButton, '次へ'), findsOneWidget);
     });
 

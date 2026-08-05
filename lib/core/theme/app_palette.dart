@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Semantic color token system for Home Pocket — V15 warm-Japanese palette.
+/// Semantic color token system for Happy Pocket — V15 warm-Japanese palette.
 ///
 /// Use [AppPalette.light] and [AppPalette.dark] as the authoritative source
 /// for all color tokens. Access via [BuildContext.palette] in widget trees.

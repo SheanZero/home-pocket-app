@@ -104,7 +104,7 @@
 | [n8n GPT-4o 模板](https://n8n.io/workflows/11368-track-expenses-automatically-with-telegram-bot-using-gpt-4o-ocr-and-voice-recognition/) 等大量 Telegram bot | 模板 | Whisper (cloud) → GPT-4o JSON | **第三代 STT + cloud LLM slot-filling，2024 起主流** |
 | 商业闭源：[Vocash](https://www.vocash.app/voice-expense-tracker)、[ExpenseEasy](https://www.expenseeasy.app/voice-expense-tracking) | 闭源 | 云端 | 佐证「语音记账」是独立卖点 |
 
-**结论（多组关键词交叉验证）：** 无成熟 Flutter 开源语音记账实现；**无任何设备端 LLM slot-filling 的开源记账项目**——第三代全部依赖云端。Home Pocket 走 on-device LLM 路线属差异化空间。
+**结论（多组关键词交叉验证）：** 无成熟 Flutter 开源语音记账实现；**无任何设备端 LLM slot-filling 的开源记账项目**——第三代全部依赖云端。Happy Pocket 走 on-device LLM 路线属差异化空间。
 
 ## 5. 设备端 LLM NLU 路线
 

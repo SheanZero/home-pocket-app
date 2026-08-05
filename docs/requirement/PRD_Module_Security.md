@@ -13,7 +13,7 @@
 
 ### 1.1 功能定义
 
-安全与隐私模块是Home Pocket的核心竞争力,实现完整的端到端加密（E2EE）和防篡改机制。包括:
+安全与隐私模块是Happy Pocket的核心竞争力,实现完整的端到端加密（E2EE）和防篡改机制。包括:
 
 - **密钥管理（E02）:** 设备密钥对生成、Recovery Kit备份、密钥恢复
 - **生物识别锁（E03）:** Face ID/Touch ID/指纹识别启动认证
@@ -22,7 +22,7 @@
 - **数据加密:** SQLCipher数据库加密、备注字段加密、照片加密
 
 **核心价值主张:**
-在隐私泄露频发的时代,Home Pocket承诺"你的数据只属于你"。通过开源代码、E2EE架构、哈希链审计,建立用户信任。
+在隐私泄露频发的时代,Happy Pocket承诺"你的数据只属于你"。通过开源代码、E2EE架构、哈希链审计,建立用户信任。
 
 ### 1.2 用户场景与痛点
 
@@ -37,7 +37,7 @@
 3. **篡改担忧:** "伴侣会偷偷删除TA的消费记录吗?"
 4. **设备丢失恐慌:** "手机丢了,所有记账数据都没了怎么办?"
 
-**Home Pocket解决方案:**
+**Happy Pocket解决方案:**
 - 本地优先架构,数据不上传服务器
 - 端到端加密,即使同步也无法被中间人窃取
 - 区块链式哈希链,任何篡改都会被检测
@@ -283,7 +283,7 @@ class RecoveryKitService {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Home Pocket Recovery Kit',
+                'Happy Pocket Recovery Kit',
                 style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 20),
@@ -486,7 +486,7 @@ class BiometricLock {
         localizedReason: reason,
         authMessages: [
           AndroidAuthMessages(
-            signInTitle: 'Home Pocket 認証',
+            signInTitle: 'Happy Pocket 認証',
             cancelButton: 'キャンセル',
             biometricHint: '指紋または顔で認証',
           ),
@@ -605,7 +605,7 @@ class _BiometricLockScreenState extends ConsumerState<BiometricLockScreen> {
     final biometricLock = ref.read(biometricLockProvider);
 
     final result = await biometricLock.authenticate(
-      reason: 'Home Pocketを開くには認証が必要です',
+      reason: 'Happy Pocketを開くには認証が必要です',
     );
 
     if (!mounted) return;
@@ -656,7 +656,7 @@ class _BiometricLockScreenState extends ConsumerState<BiometricLockScreen> {
             Icon(Icons.lock, size: 80, color: Theme.of(context).primaryColor),
             SizedBox(height: 24),
             Text(
-              'Home Pocket',
+              'Happy Pocket',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 12),
@@ -994,7 +994,7 @@ class ExportAuditReportUseCase {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'Home Pocket 審計報告',
+          'Happy Pocket 審計報告',
           style: pw.TextStyle(fontSize: 28, fontWeight: pw.FontWeight.bold),
         ),
         pw.Text(
@@ -2074,7 +2074,7 @@ void main() {
 
     // Then
     verify(mockBiometricLock.authenticate(
-      reason: 'Home Pocketを開くには認証が必要です',
+      reason: 'Happy Pocketを開くには認証が必要です',
     ));
   });
 

@@ -4,7 +4,7 @@
 
 ## 已确认的加密能力
 
-Home Pocket 不只使用 Apple 系统提供的 TLS：
+Happy Pocket 不只使用 Apple 系统提供的 TLS：
 
 - SQLCipher database encryption（AES-256 系列）
 - ChaCha20-Poly1305 field/E2EE encryption

@@ -9,7 +9,7 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Home Pocket';
+  String get appName => 'Happy Pocket';
 
   @override
   String get home => 'Home';
@@ -433,7 +433,7 @@ class SEn extends S {
 
   @override
   String get deleteAllDataConfirmation =>
-      'This permanently deletes Home Pocket data on this device. It does not delete family data from other devices or send a server deletion request.';
+      'This permanently deletes Happy Pocket data on this device. It does not delete family data from other devices or send a server deletion request.';
 
   @override
   String get allDataDeleted => 'Local data deleted';
@@ -533,7 +533,7 @@ class SEn extends S {
   String get profileSetup => 'Nice to meet you!';
 
   @override
-  String get profileSetupSubtitle => 'Welcome to Home Pocket';
+  String get profileSetupSubtitle => 'Welcome to Happy Pocket';
 
   @override
   String get profileNickname => 'Your nickname';
@@ -572,7 +572,7 @@ class SEn extends S {
   String get profilePreview => 'Preview';
 
   @override
-  String get welcomeTo => 'Welcome to Home Pocket';
+  String get welcomeTo => 'Welcome to Happy Pocket';
 
   @override
   String get profileNameRequired => 'Please enter a nickname';
@@ -1428,7 +1428,7 @@ class SEn extends S {
 
   @override
   String get familySyncNetworkUnavailableMessage =>
-      'Family sharing needs an internet connection. Check your connection and make sure Home Pocket can use mobile data, then try again.';
+      'Family sharing needs an internet connection. Check your connection and make sure Happy Pocket can use mobile data, then try again.';
 
   @override
   String get groupName => 'Group Name';
@@ -3104,13 +3104,13 @@ class SEn extends S {
   String get recognitionAlternatesMore => 'More';
 
   @override
-  String get onboardingIntroTitle => 'Home Pocket';
+  String get onboardingIntroTitle => 'Happy Pocket';
 
   @override
   String get onboardingWelcomeBadge => 'Budgeting that keeps you smiling';
 
   @override
-  String get onboardingWelcomeBrand => 'HOME POCKET';
+  String get onboardingWelcomeBrand => 'HAPPY POCKET';
 
   @override
   String get onboardingWelcomeTagline =>
@@ -3318,7 +3318,7 @@ class SEn extends S {
 
   @override
   String get appLockSetPinDescription =>
-      'Choose four digits you\'ll remember to unlock Home Pocket.';
+      'Choose four digits you\'ll remember to unlock Happy Pocket.';
 
   @override
   String get appLockConfirmPinTitle => 'Re-enter passcode';

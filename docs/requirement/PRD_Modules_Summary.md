@@ -1,4 +1,4 @@
-# Home Pocket MVP - 剩余模块PRD内容框架
+# Happy Pocket MVP - 剩余模块PRD内容框架
 
 **文档版本:** 1.0
 **创建日期:** 2026年2月3日
@@ -784,7 +784,7 @@ class BiometricLock {
 
 **PDF审计报告内容:**
 ```
-Home Pocket 审计报告
+Happy Pocket 审计报告
 生成时间：2026年2月3日 14:30
 
 账本信息：

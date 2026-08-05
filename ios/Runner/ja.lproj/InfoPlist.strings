@@ -1,4 +1,4 @@
-"CFBundleDisplayName" = "まもる家計簿";
+"CFBundleDisplayName" = "Happy Pocket";
 "NSMicrophoneUsageDescription" = "音声入力のためにマイクを使用します。";
 "NSSpeechRecognitionUsageDescription" = "音声で金額や取引内容を入力するために音声認識を使用します。";
 "NSFaceIDUsageDescription" = "アプリロックを解除するために Face ID を使用します。";

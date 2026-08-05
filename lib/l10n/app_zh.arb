@@ -1,5 +1,5 @@
 {
-  "appName": "守护家计簿",
+  "appName": "Happy Pocket",
   "@appName": {
     "description": "App title"
   },
@@ -498,7 +498,7 @@
   "@deleteAllDataDescription": {
     "description": "Delete all subtitle"
   },
-  "deleteAllDataConfirmation": "这会永久删除此设备上的家庭口袋数据，但不会删除其他家庭成员设备上的数据，也不会向服务器发送删除请求。",
+  "deleteAllDataConfirmation": "这会永久删除此设备上的Happy Pocket数据，但不会删除其他家庭成员设备上的数据，也不会向服务器发送删除请求。",
   "@deleteAllDataConfirmation": {
     "description": "Delete all confirmation"
   },
@@ -628,7 +628,7 @@
     }
   },
   "profileSetup": "初次见面！",
-  "profileSetupSubtitle": "欢迎使用守护家计簿",
+  "profileSetupSubtitle": "欢迎使用Happy Pocket",
   "profileNickname": "你的昵称",
   "profileNicknamePlaceholder": "请输入昵称",
   "profileStart": "开始",
@@ -641,7 +641,7 @@
   "profileCancel": "取消",
   "profileDone": "完成",
   "profilePreview": "预览",
-  "welcomeTo": "欢迎使用守护家计簿",
+  "welcomeTo": "欢迎使用Happy Pocket",
   "profileNameRequired": "请输入昵称",
   "profileSave": "保存",
   "profileChangeAvatar": "点击更换头像",
@@ -3602,7 +3602,7 @@
   "@recognitionAlternatesMore": {
     "description": "Exit chip label on the alternate-category chip row; opens the full category selector (D-04)"
   },
-  "onboardingIntroTitle": "守护家计簿",
+  "onboardingIntroTitle": "Happy Pocket",
   "@onboardingIntroTitle": {
     "description": "Onboarding intro screen: app title"
   },
@@ -3610,7 +3610,7 @@
   "@onboardingWelcomeBadge": {
     "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingWelcomeBrand": "HOME POCKET",
+  "onboardingWelcomeBrand": "HAPPY POCKET",
   "@onboardingWelcomeBrand": {
     "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
   },
@@ -3789,7 +3789,7 @@
   "@appLockUpdatePinTitle": {
     "description": "Set-PIN flow: first-step title when replacing an existing passcode"
   },
-  "appLockSetPinDescription": "选择一组容易记住的4位数字，用于解锁 Home Pocket。",
+  "appLockSetPinDescription": "选择一组容易记住的4位数字，用于解锁 Happy Pocket。",
   "@appLockSetPinDescription": {
     "description": "Set-PIN flow: supporting copy for the first passcode entry"
   },

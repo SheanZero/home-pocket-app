@@ -1,4 +1,4 @@
-# Claude Code Rules for Home Pocket Project
+# Claude Code Rules for Happy Pocket Project
 
 ## 开发前必读规则 (CRITICAL)
 

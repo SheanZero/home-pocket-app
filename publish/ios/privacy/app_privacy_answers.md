@@ -2,7 +2,7 @@
 
 状态：**Draft / 必须由生产后端负责人和法务复核。**
 
-Apple 将“Collect”定义为：数据被传出设备，并允许开发者或第三方在完成实时请求所需时间之外访问。Home Pocket 的 family relay 会保留设备/组元数据，并暂存消息，因此总问题应答 **Yes, we collect data from this app**。旧清单中仅因 FCM token 而回答 Yes 的逻辑已不适用于当前 iOS 实现：iOS 使用原生 APNs，且开发者 relay 本身接收更多数据。
+Apple 将“Collect”定义为：数据被传出设备，并允许开发者或第三方在完成实时请求所需时间之外访问。Happy Pocket 的 family relay 会保留设备/组元数据，并暂存消息，因此总问题应答 **Yes, we collect data from this app**。旧清单中仅因 FCM token 而回答 Yes 的逻辑已不适用于当前 iOS 实现：iOS 使用原生 APNs，且开发者 relay 本身接收更多数据。
 
 ## 已从客户端代码确认的数据流
 

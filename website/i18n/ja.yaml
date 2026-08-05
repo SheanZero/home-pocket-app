@@ -5,11 +5,11 @@ meta_description:
 skip_to_content:
   other: "本文へ移動"
 brand_home_label:
-  other: "まもる家計簿 ホーム"
+  other: "Happy Pocket ホーム"
 brand_name:
-  other: "まもる家計簿"
+  other: "Happy Pocket"
 brand_subtitle:
-  other: "Home Pocket"
+  other: "ハピポケ家族家計簿"
 primary_navigation:
   other: "メインナビゲーション"
 nav_philosophy:
@@ -22,6 +22,8 @@ nav_faq:
   other: "よくある質問"
 nav_download:
   other: "アプリを入手"
+nav_support:
+  other: "お問い合わせ"
 language_switcher:
   other: "言語を選択"
 menu_label:
@@ -57,7 +59,7 @@ screen_month:
 screen_local:
   other: "この端末に保存"
 home_screenshot_alt:
-  other: "日常の支出と、ときめきの記録を表示するまもる家計簿のホーム画面"
+  other: "日常の支出と、ときめきの記録を表示するハピポケ家族家計簿のホーム画面"
 philosophy_eyebrow:
   other: "お金の先にあるもの"
 philosophy_title_line_1:
@@ -196,14 +198,14 @@ faq_3_answer:
 faq_4_question:
   other: "どの言語と端末に対応しますか？"
 faq_4_answer:
-  other: "アプリは日本語・英語・中国語、iOS 15 以降と Android 7 以降を対象にしています。このサイトは日本語と英語で提供します。"
+  other: "アプリは日本語・英語・中国語、iOS 15 以降と Android 7 以降を対象にしています。このサイトも三言語で提供します。"
 faq_5_question:
   other: "広告や利用状況の解析はありますか？"
 faq_5_answer:
   other: "広告は表示せず、第三者の広告・行動解析SDKも組み込みません。必要な外部通信はプライバシー設計ページで個別に説明します。"
 
 download_eyebrow:
-  other: "HOME POCKET FOR YOUR FAMILY"
+  other: "HAPPY POCKET FOR YOUR FAMILY"
 download_title:
   other: "今日の支出を、今日のしあわせとして残そう。"
 download_body:
@@ -220,7 +222,7 @@ footer_support:
 footer_release_note:
   other: "公開準備中 · オープンソース"
 inner_eyebrow:
-  other: "まもる家計簿の安心設計"
+  other: "ハピポケ家族家計簿の安心設計"
 inner_summary_label:
   other: "このページで分かること"
 inner_summary:
@@ -241,7 +243,7 @@ home_routes_eyebrow:
 home_routes_title:
   other: "ひとつの長い説明ではなく、五つの入口に分けました。"
 home_routes_body:
-  other: "まもる家計簿の想い、毎日に寄り添う機能、家族との使い方、安心設計、よくある質問。それぞれのページで、必要なことを落ち着いて読めます。"
+  other: "ハピポケ家族家計簿の想い、毎日に寄り添う機能、家族との使い方、安心設計、よくある質問。それぞれのページで、必要なことを落ち着いて読めます。"
 route_philosophy_title:
   other: "支出を、しあわせの記憶に。"
 route_philosophy_body:
@@ -265,7 +267,7 @@ route_faq_body:
 route_cta:
   other: "このページを読む"
 home_dark_screenshot_alt:
-  other: "ダークモードで日常の支出と、ときめきの記録を表示するまもる家計簿のホーム画面"
+  other: "ダークモードで日常の支出と、ときめきの記録を表示するハピポケ家族家計簿のホーム画面"
 philosophy_next:
   other: "毎日の機能を見る"
 feature_ledger_kicker:

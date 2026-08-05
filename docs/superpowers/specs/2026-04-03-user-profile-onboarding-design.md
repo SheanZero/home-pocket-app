@@ -147,7 +147,7 @@ main.dart 初始化完成
 │   ┌─ 渐变背景欢迎区 ──────────────┐  │
 │   │      🏠✨                     │  │
 │   │    ようこそ！/ 欢迎！          │  │
-│   │    まもる家計簿へ              │  │
+│   │    ハピポケ家族家計簿へ              │  │
 │   └────────────────────────────────┘  │
 │                                      │
 │   ┌─ 白色 Profile 卡片 ───────────┐  │
@@ -273,7 +273,7 @@ const warmEmojis = [
 | `profileCancel` | キャンセル | 取消 | Cancel |
 | `profileDone` | 完了 | 完成 | Done |
 | `profilePreview` | プレビュー | 预览 | Preview |
-| `welcomeTo` | まもる家計簿へ | 欢迎使用守护家计簿 | Welcome to Home Pocket |
+| `welcomeTo` | ハピポケ家族家計簿へ | 欢迎使用Happy Pocket 家庭账本 | Welcome to Happy Pocket |
 | `profileNameRequired` | ニックネームを入力してください | 请输入昵称 | Please enter a nickname |
 | `profileSave` | 保存 | 保存 | Save |
 | `profileChangeAvatar` | タップしてアバターを変更 | 点击更换头像 | Tap to change avatar |

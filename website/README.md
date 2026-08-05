@@ -1,6 +1,6 @@
-# Home Pocket website
+# Happy Pocket website
 
-The official Home Pocket marketing site is a dependency-free, multi-page Hugo project with native Japanese and English routes.
+The official Happy Pocket marketing site is a dependency-free, multi-page Hugo project with native Japanese, Simplified Chinese, and English routes at `https://happypocket.app/`.
 
 ## Local preview
 
@@ -8,7 +8,7 @@ The official Home Pocket marketing site is a dependency-free, multi-page Hugo pr
 hugo server --source website --disableFastRender
 ```
 
-Open the local URL printed by Hugo. Japanese is served under `/ja/` and English under `/en/`.
+Open the local URL printed by Hugo. Japanese is served under `/ja/`, Simplified Chinese under `/zh/`, and English under `/en/`.
 
 ## Production build
 
@@ -18,13 +18,13 @@ hugo --source website --minify
 
 The generated static site is written to `website/public/` by default. Product screens under `website/static/images/` are first-party captures from the iOS Simulator, with separate Japanese and English variants; refresh those captures when the app UI changes materially. The family and still-life photographs are generated project assets with no embedded copy, logos, or financial documents.
 
-The App Store and Google Play destinations are configured in `[params]` inside `website/hugo.toml`. Until the official listings are live, the page shows a localized release-status note next to both platform links; replace the temporary iOS search destination with the direct product URL after App Store Connect assigns it.
+The App Store and Google Play destinations are configured in `[params]` inside `website/hugo.toml`. Until the official listings are live, the page shows a localized release-status note next to both platform links; replace the temporary iOS search destination with the direct product URL after App Store Connect assigns it. Marketing, privacy, and support metadata use the matching `/ja/`, `/zh/`, and `/en/` routes on the production domain.
 
 For the private Sites preview, Hugo output is staged under `website/dist/client/` and the minimal worker in `website/worker/index.js` serves those static files. This hosting adapter does not replace Hugo or add an application runtime to the site.
 
 ## Structure
 
-- `content/ja/` and `content/en/` contain the localized home, philosophy, features, family, privacy, and FAQ pages.
+- `content/ja/`, `content/zh/`, and `content/en/` contain the localized home, philosophy, features, family, privacy, FAQ, and support pages.
 - `i18n/` contains the shared interface and component copy.
 - `layouts/` contains the Hugo templates and partials.
 - `assets/css/main.css` contains the responsive visual system.

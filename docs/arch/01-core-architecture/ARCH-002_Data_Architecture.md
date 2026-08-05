@@ -1,4 +1,4 @@
-# Home Pocket MVP - 数据架构设计
+# Happy Pocket MVP - 数据架构设计
 
 **文档版本:** 1.0
 **创建日期:** 2026-02-03
@@ -25,7 +25,7 @@
 
 ### 设计原则
 
-Home Pocket的数据架构遵循以下核心原则：
+Happy Pocket的数据架构遵循以下核心原则：
 
 1. **Local-First（本地优先）**
    - 所有数据默认存储在本地SQLite数据库
@@ -62,7 +62,7 @@ Home Pocket的数据架构遵循以下核心原则：
 
 ### 架构设计原则
 
-Home Pocket 采用 Clean Architecture 的 Repository 模式，**接口与实现分离**：
+Happy Pocket 采用 Clean Architecture 的 Repository 模式，**接口与实现分离**：
 
 > **核心规则:**
 > - **Repository 接口** 定义在 **Domain 层**（`lib/features/*/domain/repositories/`）
@@ -978,7 +978,7 @@ class AppDatabase extends _$AppDatabase {
 
 ### 多层加密设计
 
-Home Pocket采用四层加密设计：
+Happy Pocket采用四层加密设计：
 
 ```
 Layer 4: 传输层加密（TLS 1.3 + E2EE）
@@ -1394,7 +1394,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
 ### CRDT（Conflict-free Replicated Data Type）
 
-Home Pocket使用CRDT协议实现设备间同步，确保最终一致性。
+Happy Pocket使用CRDT协议实现设备间同步，确保最终一致性。
 
 **核心概念**:
 
@@ -1602,7 +1602,7 @@ await db.batch((batch) {
 
 ## 总结
 
-Home Pocket的数据架构设计核心特点：
+Happy Pocket的数据架构设计核心特点：
 
 1. **类型安全**: 使用Drift+Freezed确保编译时类型检查
 2. **多层加密**: 数据库、字段、文件、传输四层保护

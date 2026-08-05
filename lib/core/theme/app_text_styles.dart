@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Global typography geometry for Home Pocket.
+/// Global typography geometry for Happy Pocket.
 ///
 /// The short semantic names are font sizes in logical pixels. Each has a
 /// matching `*LineHeight` value so Flutter styles and the V15 mockup can share
@@ -66,7 +66,7 @@ abstract final class AppTypography {
   static const FontWeight microWeight = FontWeight.w600;
 }
 
-/// Color-neutral text styles for Home Pocket.
+/// Color-neutral text styles for Happy Pocket.
 ///
 /// Every style names a numeral-only Roboto Mono subset. That asset intentionally
 /// contains no alphabetic or CJK glyphs, so Flutter falls back to the native UI

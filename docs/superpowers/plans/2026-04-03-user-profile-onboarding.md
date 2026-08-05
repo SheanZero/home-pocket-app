@@ -776,7 +776,7 @@ Add these keys to each ARB file (inside the existing JSON object, before the clo
 **app_ja.arb:**
 ```json
   "profileSetup": "はじめまして！",
-  "profileSetupSubtitle": "まもる家計簿へようこそ",
+  "profileSetupSubtitle": "ハピポケ家族家計簿へようこそ",
   "profileNickname": "あなたの呼び名",
   "profileNicknamePlaceholder": "ニックネームを入力",
   "profileStart": "はじめる",
@@ -787,7 +787,7 @@ Add these keys to each ARB file (inside the existing JSON object, before the clo
   "profileCancel": "キャンセル",
   "profileDone": "完了",
   "profilePreview": "プレビュー",
-  "welcomeTo": "まもる家計簿へようこそ",
+  "welcomeTo": "ハピポケ家族家計簿へようこそ",
   "profileNameRequired": "ニックネームを入力してください",
   "profileSave": "保存",
   "profileChangeAvatar": "タップしてアバターを変更",
@@ -801,7 +801,7 @@ Add these keys to each ARB file (inside the existing JSON object, before the clo
 **app_en.arb:**
 ```json
   "profileSetup": "Nice to meet you!",
-  "profileSetupSubtitle": "Welcome to Home Pocket",
+  "profileSetupSubtitle": "Welcome to Happy Pocket",
   "profileNickname": "Your nickname",
   "profileNicknamePlaceholder": "Enter your nickname",
   "profileStart": "Get Started",
@@ -812,7 +812,7 @@ Add these keys to each ARB file (inside the existing JSON object, before the clo
   "profileCancel": "Cancel",
   "profileDone": "Done",
   "profilePreview": "Preview",
-  "welcomeTo": "Welcome to Home Pocket",
+  "welcomeTo": "Welcome to Happy Pocket",
   "profileNameRequired": "Please enter a nickname",
   "profileSave": "Save",
   "profileChangeAvatar": "Tap to change avatar",
@@ -826,7 +826,7 @@ Add these keys to each ARB file (inside the existing JSON object, before the clo
 **app_zh.arb:**
 ```json
   "profileSetup": "初次见面！",
-  "profileSetupSubtitle": "欢迎使用守护家计簿",
+  "profileSetupSubtitle": "欢迎使用Happy Pocket 家庭账本",
   "profileNickname": "你的昵称",
   "profileNicknamePlaceholder": "请输入昵称",
   "profileStart": "开始",
@@ -837,7 +837,7 @@ Add these keys to each ARB file (inside the existing JSON object, before the clo
   "profileCancel": "取消",
   "profileDone": "完成",
   "profilePreview": "预览",
-  "welcomeTo": "欢迎使用守护家计簿",
+  "welcomeTo": "欢迎使用Happy Pocket 家庭账本",
   "profileNameRequired": "请输入昵称",
   "profileSave": "保存",
   "profileChangeAvatar": "点击更换头像",

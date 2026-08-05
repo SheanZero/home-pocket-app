@@ -1,4 +1,4 @@
-# Home Pocket MVP - 错误边界与异常处理架构
+# Happy Pocket MVP - 错误边界与异常处理架构
 
 **文档版本:** 1.0
 **创建日期:** 2026-02-03
@@ -26,7 +26,7 @@
 
 ### 设计原则
 
-Home Pocket的错误处理遵循以下核心原则：
+Happy Pocket的错误处理遵循以下核心原则：
 
 1. **分层责任（Layered Responsibility）**
    - 每层只处理该层的职责

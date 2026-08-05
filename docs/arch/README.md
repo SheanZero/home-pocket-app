@@ -1,4 +1,4 @@
-# Home Pocket MVP - 架构技术文档 (docs/arch/)
+# Happy Pocket MVP - 架构技术文档 (docs/arch/)
 
 **文档版本:** 2.0
 **更新日期:** 2026-02-03

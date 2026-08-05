@@ -1,4 +1,4 @@
-# Home Pocket website research
+# Happy Pocket website research
 
 Research date: 2026-08-05
 

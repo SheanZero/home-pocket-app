@@ -1,4 +1,4 @@
-# Home Pocket MVP - Server端总体PRD
+# Happy Pocket MVP - Server端总体PRD
 
 **文档版本:** 1.0
 **创建日期:** 2026年2月3日

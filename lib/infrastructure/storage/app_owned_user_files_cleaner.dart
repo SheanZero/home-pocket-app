@@ -4,7 +4,7 @@ import 'package:path/path.dart' as path_lib;
 
 typedef UserDataDirectoryResolver = Future<String> Function();
 
-/// Deletes only directories whose ownership is established by Home Pocket.
+/// Deletes only directories whose ownership is established by Happy Pocket.
 ///
 /// Current shipped user-image roots:
 /// - Documents/avatars: local profile and received member avatars.

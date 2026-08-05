@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build a zero-knowledge Go relay server that mediates device pairing and encrypted sync message delivery for the Home Pocket family sync feature.
+**Goal:** Build a zero-knowledge Go relay server that mediates device pairing and encrypted sync message delivery for the Happy Pocket family sync feature.
 
 **Scope:** Server-side only. This is a standalone Go project, deployed independently. Client implementation is in `2026-02-28-mod003-family-sync-client.md`.
 

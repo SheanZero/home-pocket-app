@@ -1,4 +1,4 @@
-# Home Pocket bilingual introduction kit
+# Happy Pocket bilingual introduction kit
 
 This directory contains Japanese and English product-introduction copy plus matching feature visuals.
 

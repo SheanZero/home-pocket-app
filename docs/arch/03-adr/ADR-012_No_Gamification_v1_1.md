@@ -25,7 +25,7 @@ v1.1 milestone 引入 4 个个人幸福度指标与 2 个家庭合作型聚合�
 
 行业中的常见做法是把指标包装成 gamification surface：streaks、badges、daily targets、排行榜、跨周期涨跌提示。它们通常能抬高短期 engagement，却会损害长期指标有效性。Goodhart's Law 指出："When a measure becomes a target, it ceases to be a good measure." 如果 satisfaction score 变成徽章、连续打卡或每日目标的触发器，用户优化的对象会从"真实满足感"转向"保持指标漂亮"。
 
-Home Pocket 的场景比普通单用户 habit app 更敏感。它处理的是家庭财务数据，而家庭成员之间的金钱、快乐和贡献感本就容易被误读。任何 per-member breakdown、leaderboard、公开分享或跨周期 delta surface 都可能把合作型洞察变成比较型压力，尤其是在家庭模式下。
+Happy Pocket 的场景比普通单用户 habit app 更敏感。它处理的是家庭财务数据，而家庭成员之间的金钱、快乐和贡献感本就容易被误读。任何 per-member breakdown、leaderboard、公开分享或跨周期 delta surface 都可能把合作型洞察变成比较型压力，尤其是在家庭模式下。
 
 用户约束来自 Phase 9 CONTEXT.md 的 specifics 部分："让用户的每一笔灵魂支出都是幸福的"。这句话定义了 v1.1 幸福指标的产品伦理：celebrating, not grading。悦己账本应该帮助用户看见哪些支出真正滋养自己，而不是要求用户每天达标、连续打卡或证明自己比上月更快乐。
 

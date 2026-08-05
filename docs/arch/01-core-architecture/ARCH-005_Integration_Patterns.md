@@ -1,4 +1,4 @@
-# Home Pocket MVP - 集成模式设计
+# Happy Pocket MVP - 集成模式设计
 
 **文档版本:** 1.0
 **创建日期:** 2026-02-03
@@ -23,7 +23,7 @@
 
 ### 集成模式目标
 
-Home Pocket的集成模式设计旨在：
+Happy Pocket的集成模式设计旨在：
 
 1. **解耦**: 各层之间低耦合，高内聚
 2. **可测试**: 易于Mock和单元测试
@@ -1511,7 +1511,7 @@ class SearchProvider extends _$SearchProvider {
 
 ## 总结
 
-Home Pocket集成模式设计的核心特点：
+Happy Pocket集成模式设计的核心特点：
 
 1. **Repository模式**: 抽象数据访问，易于测试和切换实现
 2. **Use Case模式**: 封装业务逻辑，单一职责

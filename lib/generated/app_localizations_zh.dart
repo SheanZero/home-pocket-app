@@ -9,7 +9,7 @@ class SZh extends S {
   SZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appName => '守护家计簿';
+  String get appName => 'Happy Pocket';
 
   @override
   String get home => '首页';
@@ -423,7 +423,7 @@ class SZh extends S {
 
   @override
   String get deleteAllDataConfirmation =>
-      '这会永久删除此设备上的家庭口袋数据，但不会删除其他家庭成员设备上的数据，也不会向服务器发送删除请求。';
+      '这会永久删除此设备上的Happy Pocket数据，但不会删除其他家庭成员设备上的数据，也不会向服务器发送删除请求。';
 
   @override
   String get allDataDeleted => '本地数据已删除';
@@ -521,7 +521,7 @@ class SZh extends S {
   String get profileSetup => '初次见面！';
 
   @override
-  String get profileSetupSubtitle => '欢迎使用守护家计簿';
+  String get profileSetupSubtitle => '欢迎使用Happy Pocket';
 
   @override
   String get profileNickname => '你的昵称';
@@ -560,7 +560,7 @@ class SZh extends S {
   String get profilePreview => '预览';
 
   @override
-  String get welcomeTo => '欢迎使用守护家计簿';
+  String get welcomeTo => '欢迎使用Happy Pocket';
 
   @override
   String get profileNameRequired => '请输入昵称';
@@ -3010,13 +3010,13 @@ class SZh extends S {
   String get recognitionAlternatesMore => '其他';
 
   @override
-  String get onboardingIntroTitle => '守护家计簿';
+  String get onboardingIntroTitle => 'Happy Pocket';
 
   @override
   String get onboardingWelcomeBadge => '快乐记账，轻松坚持';
 
   @override
-  String get onboardingWelcomeBrand => 'HOME POCKET';
+  String get onboardingWelcomeBrand => 'HAPPY POCKET';
 
   @override
   String get onboardingWelcomeTagline => '每一次记录，都有一点小幸福。\n让你与金钱的关系，更加积极。';
@@ -3212,7 +3212,7 @@ class SZh extends S {
   String get appLockUpdatePinTitle => '更新密码';
 
   @override
-  String get appLockSetPinDescription => '选择一组容易记住的4位数字，用于解锁 Home Pocket。';
+  String get appLockSetPinDescription => '选择一组容易记住的4位数字，用于解锁 Happy Pocket。';
 
   @override
   String get appLockConfirmPinTitle => '再次输入密码';

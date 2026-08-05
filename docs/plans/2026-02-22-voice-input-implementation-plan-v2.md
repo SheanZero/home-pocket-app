@@ -129,7 +129,7 @@ Agent A's plan says "Create worklog at `docs/worklog/YYYYMMDD_HHMM_implement_voi
 
 ## Overview
 
-This plan implements the MOD-009 Voice Input module for the Home Pocket accounting app. The module allows users to create transactions through natural language voice input, extracting amounts, merchants, and categories automatically.
+This plan implements the MOD-009 Voice Input module for the Happy Pocket accounting app. The module allows users to create transactions through natural language voice input, extracting amounts, merchants, and categories automatically.
 
 **Key architecture decisions:**
 

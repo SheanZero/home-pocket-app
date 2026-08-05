@@ -280,7 +280,7 @@ L4 采用阶梯（`_adoptByMagnitude`，只采位数==期望的候选，precisio
 
 ### 9.4 语音记账开源实现
 
-三代演变：cloud NLU SaaS（Speechly，已随收购关停）→ 本地 regex（简陋无多语）→ **STT + cloud LLM slot-filling（2024 起主流，全部依赖云端）**。**未找到任何设备端 LLM slot-filling 的开源记账实现**——Home Pocket 若走该路线属差异化空间，无先例可抄也无隐私妥协先例。
+三代演变：cloud NLU SaaS（Speechly，已随收购关停）→ 本地 regex（简陋无多语）→ **STT + cloud LLM slot-filling（2024 起主流，全部依赖云端）**。**未找到任何设备端 LLM slot-filling 的开源记账实现**——Happy Pocket 若走该路线属差异化空间，无先例可抄也无隐私妥协先例。
 
 ### 9.5 设备端 LLM NLU（兜底层候选）
 

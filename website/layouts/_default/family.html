@@ -7,7 +7,7 @@
       <p>{{ .Params.description }}</p>
     </div>
     <div class="family-screen family-hero-screen">
-      <img src="{{ (printf "images/family-management-%s.png" .Lang) | relURL }}" width="780" height="1560" alt="{{ i18n "family_screenshot_alt" }}" fetchpriority="high">
+      <img src="{{ (printf "images/family-management-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1560" alt="{{ i18n "family_screenshot_alt" }}" fetchpriority="high">
     </div>
   </div>
 </section>

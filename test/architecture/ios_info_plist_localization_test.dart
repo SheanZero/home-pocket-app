@@ -16,9 +16,9 @@ const _localizedFiles = <String, String>{
 };
 
 const _expectedDisplayNames = <String, String>{
-  'en': 'Home Pocket',
-  'ja': 'まもる家計簿',
-  'zh-Hans': '家庭口袋',
+  'en': 'Happy Pocket',
+  'ja': 'Happy Pocket',
+  'zh-Hans': 'Happy Pocket',
 };
 
 void main() {

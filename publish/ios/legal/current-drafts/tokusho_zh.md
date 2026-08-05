@@ -1,6 +1,6 @@
 # 基于特定商取引法的表记
 
-**守护家计簿（Home Pocket）**
+**Happy Pocket 家庭账本（Happy Pocket）**
 
 最后更新日期：2026年7月1日（草案）
 

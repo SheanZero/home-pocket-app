@@ -7,7 +7,7 @@
 
 ## Overview
 
-Home Pocket (まもる家計簿) design system using the **Wa-Modern (和モダン)** style — Japanese zen meets Swiss precision.
+Happy Pocket (ハピポケ家族家計簿) design system using the **Wa-Modern (和モダン)** style — Japanese zen meets Swiss precision.
 
 ## Files
 

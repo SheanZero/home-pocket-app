@@ -20,13 +20,14 @@
       <div>
         <strong>{{ i18n "footer_project" }}</strong>
         <a href="{{ .Site.Params.githubURL }}" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
-        <a href="{{ .Site.Params.githubURL }}/issues" target="_blank" rel="noreferrer">{{ i18n "footer_support" }} <span aria-hidden="true">↗</span></a>
+        {{ with .Site.GetPage "/support" }}<a href="{{ .RelPermalink }}">{{ i18n "nav_support" }}</a>{{ end }}
+        <a href="{{ .Site.Params.githubURL }}/issues" target="_blank" rel="noreferrer">GitHub Issues <span aria-hidden="true">↗</span></a>
         <a href="{{ .Site.Params.githubURL }}/blob/main/LICENSE" target="_blank" rel="noreferrer">Apache 2.0 <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </div>
   <div class="shell footer-bottom">
-    <p>© {{ now.Year }} Home Pocket.</p>
+    <p>© {{ now.Year }} Happy Pocket.</p>
     <p>{{ i18n "footer_release_note" }}</p>
   </div>
 </footer>

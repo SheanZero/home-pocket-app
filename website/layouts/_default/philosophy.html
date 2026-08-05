@@ -15,7 +15,7 @@
     <div class="screen-stage">
       <div class="screen-meta"><span>{{ i18n "screen_month" }}</span><span>{{ i18n "screen_local" }}</span></div>
       <div class="product-screen">
-        <img src="{{ (printf "images/home-light-%s.png" .Lang) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="eager">
+        <img src="{{ (printf "images/home-light-%s.png" (.Site.Language.Params.screenshotlanguage | default .Lang)) | relURL }}" width="780" height="1200" alt="{{ i18n "home_screenshot_alt" }}" loading="eager">
       </div>
     </div>
     <div class="proof-copy">

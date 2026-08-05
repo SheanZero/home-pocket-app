@@ -6,7 +6,7 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Project Overview
 
-**Home Pocket (まもる家計簿)** is a local-first, privacy-focused family accounting app with a dual-ledger system. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design.
+**Happy Pocket (ハピポケ家族家計簿)** is a local-first, privacy-focused family accounting app with a dual-ledger system. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design.
 
 **Current Phase:** None — v2.0 (Phases 53-56) shipped and archived on 2026-08-05; awaiting next-milestone definition
 **Target:** iOS 15+ / Android 7+ (API 24+)

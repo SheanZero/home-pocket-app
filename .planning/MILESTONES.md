@@ -1,4 +1,4 @@
-# Milestones — Home Pocket
+# Milestones — Happy Pocket
 
 ## v2.0 完成第一版上线前最后的功能开发 (Shipped: 2026-08-05)
 
@@ -102,7 +102,7 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ### Delivered
 
-Home Pocket ledger entry now supports foreign-currency input end to end while leaving the JPY-only path byte-for-byte unchanged. On the SmartKeyboard a user taps the currency symbol beside the amount to open a JPY-first selector (common currencies re-ordered by recent use, "more" expanding the full ISO 4217 list with code/name search), or speaks the currency in zh/ja (「五十美元」/「50ドル」). The app fetches the exchange rate **for the transaction date** (historical, not today's) from a free no-key API (Frankfurter primary, fawazahmed0 fallback), caches it per (date, currency) in an encrypted Drift table, and shows a live JPY conversion preview that updates on every keypad tap and currency/rate/date change — with weekend/holiday actual-date transparency and offline fallback to the most recent cached rate. The JPY-converted integer is stored in the existing `amount` column (driving all lists/analytics/sorting unchanged); the original currency, original amount, and applied rate ride along as three nullable fields that transit family sync null-safely in both directions. Foreign rows show a secondary annotation in the list; the detail/edit view shows the full original record with a two-input/one-derived editor (original amount + rate editable, JPY read-only derived via the single conversion site — ADR-022 D-01). Saving is **never** blocked on the network. Drift schema v20→v21.
+Happy Pocket ledger entry now supports foreign-currency input end to end while leaving the JPY-only path byte-for-byte unchanged. On the SmartKeyboard a user taps the currency symbol beside the amount to open a JPY-first selector (common currencies re-ordered by recent use, "more" expanding the full ISO 4217 list with code/name search), or speaks the currency in zh/ja (「五十美元」/「50ドル」). The app fetches the exchange rate **for the transaction date** (historical, not today's) from a free no-key API (Frankfurter primary, fawazahmed0 fallback), caches it per (date, currency) in an encrypted Drift table, and shows a live JPY conversion preview that updates on every keypad tap and currency/rate/date change — with weekend/holiday actual-date transparency and offline fallback to the most recent cached rate. The JPY-converted integer is stored in the existing `amount` column (driving all lists/analytics/sorting unchanged); the original currency, original amount, and applied rate ride along as three nullable fields that transit family sync null-safely in both directions. Foreign rows show a secondary annotation in the list; the detail/edit view shows the full original record with a two-input/one-derived editor (original amount + rate editable, JPY read-only derived via the single conversion site — ADR-022 D-01). Saving is **never** blocked on the network. Drift schema v20→v21.
 
 ### Key Accomplishments
 
@@ -250,7 +250,7 @@ Plus, at milestone close: **GAP-1 closed** (quick task 260531-u34) — `calendar
 
 ### Delivered
 
-Home Pocket ledger entry now lives on a single screen for both manual and voice flows. A single shared `TransactionDetailsForm` widget powers four hosts: manual entry, voice entry, edit-existing, and OCR-review (architectural slot reserved for MOD-005). The numeric keypad enforces a 48dp touch-target floor across iOS HIG / Material guidance; six light/dark × ja/zh/en golden baselines lock visual discriminability. Voice number parsing now correctly combines 千/百/十/零/万 across zh + ja, including intra-pause merges via a `VoiceChunkMerger` 2.5s continued-listening window — corpora pass at zh 48/50 (96%) + ja 50/50 (100%). Voice category resolution always lands on an L2 category via a 3-stage fallback (override → `${l1Id}_other` convention → `findByParent.first`) consulting both merchant DB and an extensible synonym dictionary. The record button uses a hold-to-record gesture with AnimatedContainer shape morph + caption swap to "录音中…" — Stopwatch-verified perceived state change `<100ms`. Edit-from-list opens the shared form pre-populated; `entry_source` is preserved verbatim through edits.
+Happy Pocket ledger entry now lives on a single screen for both manual and voice flows. A single shared `TransactionDetailsForm` widget powers four hosts: manual entry, voice entry, edit-existing, and OCR-review (architectural slot reserved for MOD-005). The numeric keypad enforces a 48dp touch-target floor across iOS HIG / Material guidance; six light/dark × ja/zh/en golden baselines lock visual discriminability. Voice number parsing now correctly combines 千/百/十/零/万 across zh + ja, including intra-pause merges via a `VoiceChunkMerger` 2.5s continued-listening window — corpora pass at zh 48/50 (96%) + ja 50/50 (100%). Voice category resolution always lands on an L2 category via a 3-stage fallback (override → `${l1Id}_other` convention → `findByParent.first`) consulting both merchant DB and an extensible synonym dictionary. The record button uses a hold-to-record gesture with AnimatedContainer shape morph + caption swap to "录音中…" — Stopwatch-verified perceived state change `<100ms`. Edit-from-list opens the shared form pre-populated; `entry_source` is preserved verbatim through edits.
 
 ### Key Accomplishments
 
@@ -303,7 +303,7 @@ Home Pocket ledger entry now lives on a single screen for both manual and voice 
 
 ### Delivered
 
-The Home Pocket Joy metric is now expressed as `Σ joy_contribution` (cumulative per-month) per ADR-016, superseding the v1.1 density (Joy/¥) formulation. HomeHero shows a single-month accumulation ring against a user-configurable `monthly_joy_target` with sage-green→gold color interpolation; AnalyticsScreen Variant ε retired density and added Custom Time Windows, Per-Category breakdown, Soul-vs-Survival comparison (anti-toxicity framed), and a Manual-Only Joy audit-lens variant. Drift schema migrated to v17 (`transactions.entry_source` column). HomeHero isolation invariant (ADR-016 §3) is structurally enforced by test guards across Phases 15-17.
+The Happy Pocket Joy metric is now expressed as `Σ joy_contribution` (cumulative per-month) per ADR-016, superseding the v1.1 density (Joy/¥) formulation. HomeHero shows a single-month accumulation ring against a user-configurable `monthly_joy_target` with sage-green→gold color interpolation; AnalyticsScreen Variant ε retired density and added Custom Time Windows, Per-Category breakdown, Soul-vs-Survival comparison (anti-toxicity framed), and a Manual-Only Joy audit-lens variant. Drift schema migrated to v17 (`transactions.entry_source` column). HomeHero isolation invariant (ADR-016 §3) is structurally enforced by test guards across Phases 15-17.
 
 ### Key Accomplishments
 
@@ -352,7 +352,7 @@ The Home Pocket Joy metric is now expressed as `Σ joy_contribution` (cumulative
 
 ### Delivered
 
-Home Pocket now has a v1.1 happiness metric layer and UI surface: personal Joy metrics, aggregate-only family Joy insights, an integrated HomeHeroCard, a unified AnalyticsScreen dashboard, and final ja/zh/en product copy aligned to the 悦己 / ときめき / Joy lexical hierarchy.
+Happy Pocket now has a v1.1 happiness metric layer and UI surface: personal Joy metrics, aggregate-only family Joy insights, an integrated HomeHeroCard, a unified AnalyticsScreen dashboard, and final ja/zh/en product copy aligned to the 悦己 / ときめき / Joy lexical hierarchy.
 
 ### Key Accomplishments
 
@@ -395,7 +395,7 @@ Home Pocket now has a v1.1 happiness metric layer and UI surface: personal Joy m
 
 ### Delivered
 
-An audit-driven, severity-ordered refactor of the Home Pocket Flutter codebase that established a hybrid (automated + AI semantic) audit pipeline, eliminated all 50 known findings across the 4 categories (layer violations, redundant code, dead code, Riverpod hygiene), added characterization-test coverage on touched files, swept architecture documentation, and re-ran the full audit pipeline to verify zero remaining violations. Result: `REAUDIT-DIFF.json` reports `resolved=50, regression=0, new=0, open_in_baseline=0`.
+An audit-driven, severity-ordered refactor of the Happy Pocket Flutter codebase that established a hybrid (automated + AI semantic) audit pipeline, eliminated all 50 known findings across the 4 categories (layer violations, redundant code, dead code, Riverpod hygiene), added characterization-test coverage on touched files, swept architecture documentation, and re-ran the full audit pipeline to verify zero remaining violations. Result: `REAUDIT-DIFF.json` reports `resolved=50, regression=0, new=0, open_in_baseline=0`.
 
 ### Key Accomplishments
 

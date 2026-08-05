@@ -1,5 +1,5 @@
 {
-  "appName": "まもる家計簿",
+  "appName": "Happy Pocket",
   "@appName": {
     "description": "App title"
   },
@@ -498,7 +498,7 @@
   "@deleteAllDataDescription": {
     "description": "Delete all subtitle"
   },
-  "deleteAllDataConfirmation": "この端末のまもる家計簿データを完全に削除します。他の家族の端末上のデータは削除されず、サーバーへの削除要求も送信されません。",
+  "deleteAllDataConfirmation": "この端末のHappy Pocketデータを完全に削除します。他の家族の端末上のデータは削除されず、サーバーへの削除要求も送信されません。",
   "@deleteAllDataConfirmation": {
     "description": "Delete all confirmation"
   },
@@ -628,7 +628,7 @@
     }
   },
   "profileSetup": "はじめまして！",
-  "profileSetupSubtitle": "まもる家計簿へようこそ",
+  "profileSetupSubtitle": "Happy Pocketへようこそ",
   "profileNickname": "あなたの呼び名",
   "profileNicknamePlaceholder": "ニックネームを入力",
   "profileStart": "はじめる",
@@ -641,7 +641,7 @@
   "profileCancel": "キャンセル",
   "profileDone": "完了",
   "profilePreview": "プレビュー",
-  "welcomeTo": "まもる家計簿へようこそ",
+  "welcomeTo": "Happy Pocketへようこそ",
   "profileNameRequired": "ニックネームを入力してください",
   "profileSave": "保存",
   "profileChangeAvatar": "タップしてアバターを変更",
@@ -1792,7 +1792,7 @@
   "@familySyncNetworkUnavailableTitle": {
     "description": "Title for the family-sync network unavailable dialog"
   },
-  "familySyncNetworkUnavailableMessage": "家族共有にはネットワーク接続が必要です。通信状況と、まもる家計簿のモバイルデータ通信が許可されているかを確認して、もう一度お試しください。",
+  "familySyncNetworkUnavailableMessage": "家族共有にはネットワーク接続が必要です。通信状況と、Happy Pocketのモバイルデータ通信が許可されているかを確認して、もう一度お試しください。",
   "@familySyncNetworkUnavailableMessage": {
     "description": "Friendly guidance shown when a family-sync operation cannot reach the relay"
   },
@@ -3602,7 +3602,7 @@
   "@recognitionAlternatesMore": {
     "description": "Exit chip label on the alternate-category chip row; opens the full category selector (D-04)"
   },
-  "onboardingIntroTitle": "まもる家計簿",
+  "onboardingIntroTitle": "Happy Pocket",
   "@onboardingIntroTitle": {
     "description": "Onboarding intro screen: app title"
   },
@@ -3610,7 +3610,7 @@
   "@onboardingWelcomeBadge": {
     "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingWelcomeBrand": "HOME POCKET",
+  "onboardingWelcomeBrand": "HAPPY POCKET",
   "@onboardingWelcomeBrand": {
     "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
   },
@@ -3789,7 +3789,7 @@
   "@appLockUpdatePinTitle": {
     "description": "Set-PIN flow: first-step title when replacing an existing passcode"
   },
-  "appLockSetPinDescription": "Home Pocket のロック解除に使う、覚えやすい4桁を選んでください。",
+  "appLockSetPinDescription": "Happy Pocket のロック解除に使う、覚えやすい4桁を選んでください。",
   "@appLockSetPinDescription": {
     "description": "Set-PIN flow: supporting copy for the first passcode entry"
   },

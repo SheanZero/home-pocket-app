@@ -1,4 +1,4 @@
-# Home Pocket website — Design QA
+# Happy Pocket website — Design QA
 
 Date: 2026-08-05
 
@@ -110,7 +110,7 @@ Scope: Japanese and English multi-page Hugo website, concise homepage, philosoph
 
 ## Verification
 
-- `hugo --source website --minify`: passed for Japanese and English.
+- `hugo --source website --minify`: passed for Japanese, Simplified Chinese, and English.
 - Japanese/English translation-key parity: 113 / 113 keys.
 - `node --check website/assets/js/main.js`: passed.
 - `git diff --check -- website`: passed.

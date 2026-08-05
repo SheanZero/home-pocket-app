@@ -3,7 +3,7 @@
 > `docs/arch/03-adr/ADR-018_Palette_Selection_v1_5.md` (ADR-018「Teal Clarity」).
 > The canonical token system is `lib/core/theme/app_palette.dart` (AppPalette.light / AppPalette.dark).
 
-# Home Pocket Design System — Wa-Modern (和モダン)
+# Happy Pocket Design System — Wa-Modern (和モダン)
 
 **Version:** 2.0
 **Date:** 2026-04-01

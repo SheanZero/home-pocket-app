@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Home Pocket — V16 Whole App Mockup</title>
-<style>/* Home Pocket V16 theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
+  <title>Happy Pocket — V16 Whole App Mockup</title>
+<style>/* Happy Pocket V16 theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
    Mirrors the current lib/core/theme/app_palette.dart values. */
 @font-face {
-  font-family: "Home Pocket Numerals";
+  font-family: "Happy Pocket Numerals";
   src:
     local("SFMono-Regular"),
     local("SF Mono Regular"),
@@ -31,7 +31,7 @@
     U+FFE5;
 }
 @font-face {
-  font-family: "Home Pocket Numerals";
+  font-family: "Happy Pocket Numerals";
   src:
     local("SFMono-Semibold"),
     local("SF Mono Semibold"),
@@ -89,7 +89,7 @@
   --shadow-card: 0 2px 10px rgba(120,90,70,0.07);
   --gap: 16px;
 
-  --font: "Home Pocket Numerals", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "PingFang SC", system-ui, -apple-system, sans-serif;
+  --font: "Happy Pocket Numerals", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "PingFang SC", system-ui, -apple-system, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -184,8 +184,8 @@ body {
   --hp-info: #4f7186;
   --hp-shadow-soft: 0 8px 30px rgba(75, 57, 40, .11);
   --hp-shadow-card: 0 2px 12px rgba(75, 57, 40, .07);
-  --hp-font-body: "Home Pocket Numerals", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
-  --hp-font-display: "Home Pocket Numerals", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --hp-font-body: "Happy Pocket Numerals", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --hp-font-display: "Happy Pocket Numerals", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --hp-font-number: "SFMono-Regular", "SF Mono", "Roboto Mono", "Noto Sans Mono", ui-monospace, Menlo, Consolas, monospace;
   /* Semantic type scale — 1:1 with Flutter AppTypography. */
   --type-page-title: 20px;
@@ -1695,7 +1695,7 @@ body {
 </head>
 <body>
   <header class="hub-bar">
-    <div class="hub-title">Home Pocket · V16 整 App Mockup</div>
+    <div class="hub-title">Happy Pocket · V16 整 App Mockup</div>
     <button class="preset active" data-preset="solo-light"><span class="material-symbols-rounded">person</span>A1 个人 · 浅色</button>
     <button class="preset" data-preset="family-light"><span class="material-symbols-rounded">group</span>A2 家庭 · 浅色</button>
     <button class="preset" data-preset="solo-dark"><span class="material-symbols-rounded">dark_mode</span>A3 个人 · 深色</button>
@@ -2717,7 +2717,7 @@ body {
   const onboardingAmbience = variant => `<div class="onboarding-ambience ${variant}" aria-hidden="true"><span class="material-symbols-rounded pressed-motif">eco</span><span class="material-symbols-rounded pressed-motif">spa</span><span class="material-symbols-rounded pressed-motif">eco</span><span class="material-symbols-rounded pressed-motif">spa</span></div>`;
 
   function onboarding() {
-    return `<section class="onboarding-screen" lang="ja">${onboardingAmbience('welcome')}<div class="onboarding-topbar"><span class="onboarding-topbar-spacer"></span><button class="onboarding-text-action" data-screen="preferences">スキップ</button></div><div class="onboarding-content"><div class="onboarding-hero-cluster" role="img" aria-label="家と芽を囲む、日常と悦己の表情"><span class="material-symbols-rounded onboarding-petal one" aria-hidden="true">eco</span><span class="material-symbols-rounded onboarding-petal two" aria-hidden="true">eco</span><span class="onboarding-hero-main"><img class="onboarding-source-icon welcome" src="assets/onboarding-existing-house.svg" alt=""></span><span class="onboarding-satellite joy" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_04.svg')"></i></span><span class="onboarding-satellite daily" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_02.svg')"></i></span></div><span class="onboarding-badge">たのしく、つづく家計簿</span><h1>まもる家計簿</h1><span class="onboarding-brand">HOME POCKET</span><p class="onboarding-lead">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</p><div class="onboarding-value-pills"><span>日々の帳</span><span>ときめき帳</span><span>満足度</span></div></div><div class="onboarding-dock">${onboardingDots(0)}<button class="onboarding-primary" data-screen="onboarding-privacy">次へ</button></div></section>`;
+    return `<section class="onboarding-screen" lang="ja">${onboardingAmbience('welcome')}<div class="onboarding-topbar"><span class="onboarding-topbar-spacer"></span><button class="onboarding-text-action" data-screen="preferences">スキップ</button></div><div class="onboarding-content"><div class="onboarding-hero-cluster" role="img" aria-label="家と芽を囲む、日常と悦己の表情"><span class="material-symbols-rounded onboarding-petal one" aria-hidden="true">eco</span><span class="material-symbols-rounded onboarding-petal two" aria-hidden="true">eco</span><span class="onboarding-hero-main"><img class="onboarding-source-icon welcome" src="assets/onboarding-existing-house.svg" alt=""></span><span class="onboarding-satellite joy" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_04.svg')"></i></span><span class="onboarding-satellite daily" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_02.svg')"></i></span></div><span class="onboarding-badge">たのしく、つづく家計簿</span><h1>ハピポケ家族家計簿</h1><span class="onboarding-brand">HAPPY POCKET</span><p class="onboarding-lead">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</p><div class="onboarding-value-pills"><span>日々の帳</span><span>ときめき帳</span><span>満足度</span></div></div><div class="onboarding-dock">${onboardingDots(0)}<button class="onboarding-primary" data-screen="onboarding-privacy">次へ</button></div></section>`;
   }
 
   function onboardingPrivacy() {
@@ -2767,7 +2767,7 @@ body {
     const confirming=state.onboardingPinStage==='confirm';
     const updating=state.onboardingPinConfigured||state.onboardingPinIntent==='change-pin';
     const step=confirming?2:1;
-    return `<section class="setup-pin-screen" lang="ja"><div class="onboarding-topbar"><button class="onboarding-text-action" data-action="onboarding-pin-cancel" aria-label="閉じる">${icon('close')}</button><span class="onboarding-topbar-spacer"></span></div><div class="setup-pin-body"><div class="setup-pin-mark">${icon('password')}</div><h1>${confirming?'パスコードを再入力':(updating?'パスコードを更新':'パスコードを設定')}</h1><p>${confirming?'確認のため、同じ4桁をもう一度入力してください。':'Home Pocket のロック解除に使う、覚えやすい4桁を選んでください。'}</p><div class="setup-pin-progress" aria-label="ステップ ${step} / 2"><span class="setup-pin-progress-track"><i class="active"></i><i class="${confirming?'active':''}"></i></span><span>${step} / 2</span></div><div class="pin-dots" aria-label="${state.onboardingPinDraft.length}桁入力済み">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.onboardingPinDraft.length?'filled':''}"></i>`).join('')}</div><div class="setup-pin-error" role="alert">${escapeHtml(state.onboardingPinError)}</div><div class="setup-pin-keypad"><div class="pinpad">${['1','2','3','4','5','6','7','8','9','blank','0','backspace'].map(k=>k==='blank'?'<span></span>':`<button class="key" data-onboarding-pin-key="${k}" aria-label="${k==='backspace'?'1文字削除':k}">${k==='backspace'?icon('backspace'):k}</button>`).join('')}</div></div></div></section>`;
+    return `<section class="setup-pin-screen" lang="ja"><div class="onboarding-topbar"><button class="onboarding-text-action" data-action="onboarding-pin-cancel" aria-label="閉じる">${icon('close')}</button><span class="onboarding-topbar-spacer"></span></div><div class="setup-pin-body"><div class="setup-pin-mark">${icon('password')}</div><h1>${confirming?'パスコードを再入力':(updating?'パスコードを更新':'パスコードを設定')}</h1><p>${confirming?'確認のため、同じ4桁をもう一度入力してください。':'Happy Pocket のロック解除に使う、覚えやすい4桁を選んでください。'}</p><div class="setup-pin-progress" aria-label="ステップ ${step} / 2"><span class="setup-pin-progress-track"><i class="active"></i><i class="${confirming?'active':''}"></i></span><span>${step} / 2</span></div><div class="pin-dots" aria-label="${state.onboardingPinDraft.length}桁入力済み">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.onboardingPinDraft.length?'filled':''}"></i>`).join('')}</div><div class="setup-pin-error" role="alert">${escapeHtml(state.onboardingPinError)}</div><div class="setup-pin-keypad"><div class="pinpad">${['1','2','3','4','5','6','7','8','9','blank','0','backspace'].map(k=>k==='blank'?'<span></span>':`<button class="key" data-onboarding-pin-key="${k}" aria-label="${k==='backspace'?'1文字削除':k}">${k==='backspace'?icon('backspace'):k}</button>`).join('')}</div></div></div></section>`;
   }
 
   function lock() { return `<section class="screen"><div class="intro-hero" style="padding-top:46px"><div class="intro-mark" style="border-radius:50%">${icon('fingerprint')}</div><h1>おかえりなさい</h1><p class="hint">Face ID または PIN でロックを解除</p></div><div class="pin-dots">${[0,1,2,3].map(i=>`<i class="pin-dot ${i<state.pin.length?'filled':''}"></i>`).join('')}</div><div class="pinpad">${['1','2','3','4','5','6','7','8','9','fingerprint','0','backspace'].map(k=>`<button class="key" data-lock-key="${k}">${isNaN(k)?icon(k):k}</button>`).join('')}</div><button class="ghost-btn" data-action="forgot-pin">PINを忘れた場合</button></section>`; }
@@ -2799,7 +2799,7 @@ body {
       row('database','バックアップと復元','暗号化ファイル',{screen:'backup'}));
     const about=section('このアプリ',row('policy','法的情報・応援','プライバシー、規約、OSS',{screen:'legal'}));
     const danger=section('データ管理',row('delete_forever','全データを削除','すべての記録を完全に削除',{action:'settings-delete-all',danger:true}),{danger:true});
-    return `<section class="screen settings-screen">${backHeader('設定')}${profileCard}${general}${familySync}${security}${notifications}${data}${about}${danger}<p class="hint settings-footer">Home Pocket 2.0.0 · データは端末内で保護</p></section>`;
+    return `<section class="screen settings-screen">${backHeader('設定')}${profileCard}${general}${familySync}${security}${notifications}${data}${about}${danger}<p class="hint settings-footer">Happy Pocket 2.0.0 · データは端末内で保護</p></section>`;
   }
 
   function backupStatusCard(){
@@ -2836,7 +2836,7 @@ body {
       ['homepocket_backup_2026-05-10.hpb','5月10日 · 1.6 MB','legacy'],
       ['homepocket_backup_broken.hpb','読み取りテスト用 · 24 KB','broken'],
     ];
-    return `<h3>バックアップを選択</h3><p class="hint">Home Pocket の .hpb ファイルだけを表示しています。</p><div class="flat-card">${files.map(([name,meta,kind],index)=>`<button class="tap-row ${index<files.length-1?'row-divider':''}" data-backup-file="${name}" data-backup-file-kind="${kind}"><span class="row-icon">${icon('draft')}</span><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span>${icon('chevron_right')}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`;
+    return `<h3>バックアップを選択</h3><p class="hint">Happy Pocket の .hpb ファイルだけを表示しています。</p><div class="flat-card">${files.map(([name,meta,kind],index)=>`<button class="tap-row ${index<files.length-1?'row-divider':''}" data-backup-file="${name}" data-backup-file-kind="${kind}"><span class="row-icon">${icon('draft')}</span><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span>${icon('chevron_right')}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`;
   }
 
   function backupRestoreDialog(){

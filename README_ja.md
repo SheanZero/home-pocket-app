@@ -1,4 +1,4 @@
-# Home Pocket (まもる家計簿)
+# Happy Pocket (ハピポケ家族家計簿)
 
 **[English](README.md) | [中文](README_zh.md) | [日本語](README_ja.md)**
 
@@ -46,9 +46,9 @@
 ## 🌟 コア差別化要素
 
 ### 市場ポジショニング
-**Home Pocketの位置付け：** 高プライバシー + 適度な自動化 + ゲーミフィケーション
+**Happy Pocketの位置付け：** 高プライバシー + 適度な自動化 + ゲーミフィケーション
 
-| 項目 | 競合製品の現状 | Home Pocketの差別化 |
+| 項目 | 競合製品の現状 | Happy Pocketの差別化 |
 |------|---------|-------------------|
 | **信頼** | クラウドストレージ、企業がデータを閲覧可能 | E2EE暗号化、改ざん防止ハッシュチェーン |
 | **体験** | 機能重視、退屈な記帳作業 | ゲーミフィケーション、ソーシャルカレンシー式フィードバック |
@@ -317,7 +317,7 @@ SQLCipherの競合やML Kitのビルドエラーが発生した場合は、[CLAU
 
 ### 完全オープンソースコミットメント
 
-**Home Pocketは完全オープンソースモデルを採用しています：**
+**Happy Pocketは完全オープンソースモデルを採用しています：**
 
 - **ライセンス：** Apache License 2.0
 - **コードリポジトリ：** GitHub公開リポジトリ
@@ -369,7 +369,7 @@ SQLCipherの競合やML Kitのビルドエラーが発生した場合は、[CLAU
 詳細は[LICENSE](LICENSE)ファイルをご参照ください。
 
 ```
-Copyright 2026 Home Pocket Team
+Copyright 2026 Happy Pocket Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
