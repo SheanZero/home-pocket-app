@@ -60,15 +60,12 @@ Future<void> _waitFor(
   }
 }
 
-List<FileSystemEntity> _pairTransactionArtifacts(Directory root) => root
-    .listSync()
-    .where(
-      (entity) => entity.path
-          .split(Platform.pathSeparator)
-          .last
-          .startsWith('.merge-findings-'),
-    )
-    .toList();
+List<FileSystemEntity> _pairTransactionArtifacts(Directory root) =>
+    root.listSync().where((entity) {
+      final name = entity.path.split(Platform.pathSeparator).last;
+      return name.startsWith('.merge-findings-') &&
+          name != '.merge-findings.lock';
+    }).toList();
 
 File _transactionArtifact(Directory root, String suffix) {
   final matches = root
@@ -1594,57 +1591,70 @@ void main() {
     );
 
     test(
-      'recovers a dead stale lock but never steals a live owner lock',
+      'kernel lock serializes the owner-record window and keeps one inode',
       () async {
-        final lock = File('${shardRoot.path}/.merge-findings.lock')
-          ..writeAsStringSync(
-            jsonEncode({
-              'schema_version': 1,
-              'pid': 99999999,
-              'token': 'dead-owner-token',
-              'created_at_micros': 1,
-            }),
-          )
-          ..setLastModifiedSync(
-            DateTime.now().subtract(const Duration(minutes: 1)),
-          );
-
-        final recovered = await _runMerger(
-          tmp,
-          environment: {'AUDIT_MERGE_LOCK_GRACE_MS': '0'},
-        );
-        expect(recovered.exitCode, equals(0), reason: recovered.stderr);
-        expect(
-          lock.existsSync(),
-          isFalse,
-          reason: 'new owner releases its lock',
-        );
-
-        lock.writeAsStringSync(
-          jsonEncode({
-            'schema_version': 1,
-            'pid': pid,
-            'token': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            'created_at_micros': 1,
-          }),
-        );
-        lock.setLastModifiedSync(
-          DateTime.now().subtract(const Duration(minutes: 1)),
-        );
-        final liveOwner = await _runMerger(
+        final lock = File('${shardRoot.path}/.merge-findings.lock');
+        final first = await _startMerger(
           tmp,
           environment: {
-            'AUDIT_MERGE_LOCK_GRACE_MS': '0',
-            'AUDIT_MERGE_LOCK_WAIT_MS': '25',
+            'AUDIT_MERGE_HOLDPOINT': 'after_lock_acquired_before_owner',
+            'AUDIT_MERGE_HOLD_MS': '1000',
           },
         );
-        expect(liveOwner.exitCode, equals(1));
-        expect(
-          liveOwner.stderr,
-          contains('another merger holds the audit lock'),
+        await _waitFor(lock.existsSync);
+        final second = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_LOCK_WAIT_MS': '50'},
         );
-        expect(lock.existsSync(), isTrue);
-        lock.deleteSync();
+        expect(second.exitCode, equals(1));
+        expect(second.stderr, contains('another merger holds the audit lock'));
+        expect(await first.exitCode, equals(0));
+
+        expect(
+          lock.existsSync(),
+          isTrue,
+          reason: 'release must not unlink the shared lock inode',
+        );
+        final third = await _runMerger(tmp);
+        expect(third.exitCode, equals(0), reason: third.stderr);
+        expect(
+          shardRoot
+              .listSync()
+              .map((entity) => entity.path.split(Platform.pathSeparator).last)
+              .where((name) => name.startsWith('.merge-findings')),
+          equals(['.merge-findings.lock']),
+          reason: 'a completed merger leaves only its permanent ignored lock',
+        );
+      },
+    );
+
+    test(
+      'kernel automatically releases a crashed SIGSTOP lock holder',
+      () async {
+        if (Platform.isWindows) return;
+        final lock = File('${shardRoot.path}/.merge-findings.lock');
+        final holder = await _startMerger(
+          tmp,
+          environment: {
+            'AUDIT_MERGE_HOLDPOINT': 'after_lock_owner',
+            'AUDIT_MERGE_HOLD_MS': '10000',
+          },
+        );
+        await _waitFor(
+          () => lock.existsSync() && lock.readAsStringSync().contains('pid'),
+        );
+        expect(holder.kill(ProcessSignal.sigstop), isTrue);
+        final blocked = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_LOCK_WAIT_MS': '50'},
+        );
+        expect(blocked.exitCode, equals(1));
+        expect(blocked.stderr, contains('another merger holds the audit lock'));
+        expect(holder.kill(ProcessSignal.sigkill), isTrue);
+        await holder.exitCode;
+
+        final recovered = await _runMerger(tmp);
+        expect(recovered.exitCode, equals(0), reason: recovered.stderr);
       },
     );
 
@@ -1753,5 +1763,251 @@ void main() {
         hasLength(1),
       );
     });
+
+    test(
+      'resumes a crash during forensic moves without a second repair opt-in',
+      () async {
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync('{corrupt journal');
+        File(
+          '${shardRoot.path}/.merge-findings-tmp-1-1-issues-next',
+        ).writeAsStringSync('staged bytes');
+
+        final interrupted = await _runMerger(
+          tmp,
+          repairPairTransaction: true,
+          environment: {'AUDIT_MERGE_FAILPOINT': 'repair_after_move'},
+        );
+        expect(interrupted.exitCode, 91);
+
+        final restarted = await _runMerger(tmp);
+        expect(restarted.exitCode, 0, reason: restarted.stderr);
+        final manifest =
+            Directory('${shardRoot.path}/.merge-findings-forensics')
+                .listSync(recursive: true)
+                .whereType<File>()
+                .singleWhere((file) => file.path.endsWith('/manifest.json'));
+        expect(
+          (jsonDecode(manifest.readAsStringSync()) as Map)['state'],
+          'complete',
+        );
+      },
+    );
+
+    test('repair manifest transitions survive every crash boundary', () async {
+      const points = [
+        'repair_after_move_.merge-findings-pair.json',
+        'repair_after_move_.merge-findings-tmp-1-1-issues-next',
+        'repair_after_move_.merge-findings-tmp-1-1-markdown-next',
+        'repair_after_manifest_rename_isolating',
+        'repair_before_manifest_rename_isolated_pending_rebuild',
+        'repair_after_manifest_rename_isolated_pending_rebuild',
+        'repair_before_complete_manifest',
+        'repair_after_complete_manifest',
+      ];
+      for (final point in points) {
+        final caseTmp = Directory.systemTemp.createTempSync('merger_repair_');
+        addTearDown(() {
+          if (caseTmp.existsSync()) caseTmp.deleteSync(recursive: true);
+        });
+        final caseRoot = _initShardLayout(caseTmp);
+        Directory('${caseTmp.path}/scripts/audit').createSync(recursive: true);
+        File(
+          '${_absoluteProjectRoot()}/scripts/audit/finding.dart',
+        ).copySync('${caseTmp.path}/scripts/audit/finding.dart');
+        File(
+          '${_absoluteProjectRoot()}/scripts/merge_findings.dart',
+        ).copySync('${caseTmp.path}/scripts/merge_findings.dart');
+        File(
+          '${_absoluteProjectRoot()}/pubspec.yaml',
+        ).copySync('${caseTmp.path}/pubspec.yaml');
+        Link(
+          '${caseTmp.path}/.dart_tool',
+        ).createSync('${_absoluteProjectRoot()}/.dart_tool', recursive: true);
+        for (final name in [
+          '.merge-findings-pair.json',
+          '.merge-findings-tmp-1-1-issues-next',
+          '.merge-findings-tmp-1-1-markdown-next',
+        ]) {
+          File('${caseRoot.path}/$name').writeAsStringSync(
+            name == '.merge-findings-pair.json' ? '{corrupt' : name,
+          );
+        }
+        final interrupted = await _runMerger(
+          caseTmp,
+          repairPairTransaction: true,
+          environment: {'AUDIT_MERGE_FAILPOINT': point},
+        );
+        expect(interrupted.exitCode, 91, reason: point);
+
+        final restarted = await _runMerger(caseTmp);
+        expect(restarted.exitCode, 0, reason: '$point: ${restarted.stderr}');
+        final manifest = Directory('${caseRoot.path}/.merge-findings-forensics')
+            .listSync(recursive: true)
+            .whereType<File>()
+            .singleWhere((file) => file.path.endsWith('/manifest.json'));
+        expect(
+          (jsonDecode(manifest.readAsStringSync()) as Map)['state'],
+          'complete',
+          reason: point,
+        );
+      }
+    });
+
+    test(
+      'a crash before initial repair intent remains opt-in and fail-closed',
+      () async {
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync('{corrupt journal');
+        final interrupted = await _runMerger(
+          tmp,
+          repairPairTransaction: true,
+          environment: {
+            'AUDIT_MERGE_FAILPOINT': 'repair_before_manifest_rename_isolating',
+          },
+        );
+        expect(interrupted.exitCode, 91);
+        final normal = await _runMerger(tmp);
+        expect(normal.exitCode, 1);
+        expect(normal.stderr, contains('pair transaction journal'));
+        final explicit = await _runMerger(tmp, repairPairTransaction: true);
+        expect(explicit.exitCode, 0, reason: explicit.stderr);
+      },
+    );
+
+    test(
+      'pending forensic rebuild remains durable until complete canonical evidence',
+      () async {
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync('{corrupt journal');
+        final interrupted = await _runMerger(
+          tmp,
+          repairPairTransaction: true,
+          environment: {
+            'AUDIT_MERGE_FAILPOINT': 'repair_after_pending_manifest',
+          },
+        );
+        expect(interrupted.exitCode, 91);
+        File('${shardRoot.path}/shards/layer.json').deleteSync();
+
+        final incomplete = await _runMerger(tmp);
+        expect(incomplete.exitCode, 1);
+        expect(
+          incomplete.stderr,
+          contains('repair requires every canonical shard'),
+        );
+        final pendingManifest =
+            Directory('${shardRoot.path}/.merge-findings-forensics')
+                .listSync(recursive: true)
+                .whereType<File>()
+                .singleWhere((file) => file.path.endsWith('/manifest.json'));
+        expect(
+          (jsonDecode(pendingManifest.readAsStringSync()) as Map)['state'],
+          'isolated_pending_rebuild',
+        );
+
+        File(
+          '${shardRoot.path}/shards/layer.json',
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_guard')));
+        final resumed = await _runMerger(tmp);
+        expect(resumed.exitCode, 0, reason: resumed.stderr);
+        expect(
+          (jsonDecode(pendingManifest.readAsStringSync()) as Map)['state'],
+          'complete',
+        );
+      },
+    );
+
+    test(
+      'fails closed on malformed, traversal, missing, or duplicate repair intent',
+      () async {
+        final forensic = Directory(
+          '${shardRoot.path}/.merge-findings-forensics',
+        )..createSync(recursive: true);
+        final digest = List.filled(64, 'a').join();
+        final cases = <String, Map<String, Object?>>{
+          'malformed': {'not': 'a valid manifest'},
+          'traversal': {
+            'schema_version': 2,
+            'state': 'isolating',
+            'reason': 'fixture',
+            'files': [
+              {'name': '../issues.json', 'sha256': digest},
+            ],
+          },
+          'missing': {
+            'schema_version': 2,
+            'state': 'isolating',
+            'reason': 'fixture',
+            'files': [
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+            ],
+          },
+        };
+        for (final entry in cases.entries) {
+          final runDir = Directory('${forensic.path}/${entry.key}')
+            ..createSync(recursive: true);
+          File(
+            '${runDir.path}/manifest.json',
+          ).writeAsStringSync(jsonEncode(entry.value));
+          final result = await _runMerger(tmp);
+          expect(result.exitCode, 1, reason: entry.key);
+          expect(result.stderr, contains('forensic repair'));
+          runDir.deleteSync(recursive: true);
+        }
+
+        for (final name in ['one', 'two']) {
+          final runDir = Directory('${forensic.path}/$name')
+            ..createSync(recursive: true);
+          File('${runDir.path}/manifest.json').writeAsStringSync(
+            jsonEncode({
+              'schema_version': 2,
+              'state': 'isolated_pending_rebuild',
+              'reason': 'fixture',
+              'files': [
+                {'name': '.merge-findings-pair.json', 'sha256': digest},
+              ],
+            }),
+          );
+        }
+        final duplicate = await _runMerger(tmp);
+        expect(duplicate.exitCode, 1);
+        expect(duplicate.stderr, contains('multiple pending forensic repair'));
+      },
+    );
+
+    test(
+      'fails closed when resumable repair artifact digest changes',
+      () async {
+        final digest = List.filled(64, 'a').join();
+        final repair = Directory(
+          '${shardRoot.path}/.merge-findings-forensics/digest-mismatch',
+        )..createSync(recursive: true);
+        File('${repair.path}/manifest.json').writeAsStringSync(
+          jsonEncode({
+            'schema_version': 2,
+            'state': 'isolating',
+            'reason': 'fixture',
+            'files': [
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+            ],
+          }),
+        );
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync('tampered bytes');
+
+        final result = await _runMerger(tmp);
+        expect(result.exitCode, 1);
+        expect(result.stderr, contains('source digest mismatch'));
+        expect(
+          File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
+          isTrue,
+        );
+      },
+    );
   });
 }

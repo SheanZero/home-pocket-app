@@ -125,23 +125,34 @@ staged file or backup was deleted. Normal invocations leave no transaction artif
 behind. The journal is deliberately ephemeral, so stable output byte determinism
 remains limited to the two catalogue files.
 
-Every merger invocation first obtains a root-local, cross-process exclusive
-`.merge-findings.lock` and holds it through recovery, transient cleanup,
-history reading, validation, and publication. The lock owner carries a random
-token, PID, and creation time. A competing process never reclaims a lock held
-by a live PID, even after its age exceeds the recovery grace window. A lock
-left by a crashed process (including the short create-to-owner-record window)
-may be atomically renamed away only after that grace period and a dead/absent
-owner check; release deletes only a record with the caller's token.
+Every merger invocation first opens the permanent root-local
+`.merge-findings.lock`, obtains an OS kernel-held exclusive `RandomAccessFile`
+lock, and keeps that file handle through recovery, transient cleanup, history
+reading, validation, and publication. The lock path is never unlinked or
+renamed: replacing it could split waiters across two inodes. The PID/token JSON
+is diagnostic-only and is written after the kernel lock is acquired; it is
+never used for lease expiry, PID reuse, `EPERM`, or stale-lock takeover.
+Release only unlocks and closes the held handle. A crash releases the kernel
+lock while leaving the ignored path/inode available for later waiters.
 
 Malformed or otherwise untrusted journals still fail closed by default. An
-operator may opt in to `dart run scripts/merge_findings.dart
---repair-pair-transaction` to quarantine the journal and only recognised
-transaction staging files beneath `.merge-findings-forensics/`. Each repair
-writes a manifest containing the UTC time, failure reason, original filenames,
-and SHA-256 values. Repair never deletes catalogue outputs or unrecognised
-files. After isolation, the merger rebuilds a pair only if existing lifecycle
-history and all canonical shards validate; otherwise it remains fail-closed.
+operator may opt in once to `dart run scripts/merge_findings.dart
+--repair-pair-transaction`. Before moving any root artifact, the merger writes
+an atomically replaced (temp + flush + rename) forensic manifest in
+`.merge-findings-forensics/` with a whitelist basename and SHA-256 for every
+artifact. `isolating` resumes deterministically after a crash: an artifact is
+either still at root and verified before moving, or is already in the
+quarantine destination and verified there. Missing, duplicate, digest-mismatched,
+path-traversing, malformed, or multiple pending manifests fail closed; unknown
+root files are never moved.
+
+After all verified moves, the manifest atomically transitions to
+`isolated_pending_rebuild`. Ordinary later starts resume that pending repair
+without a second opt-in, but must validate existing lifecycle history and every
+canonical shard before rebuilding. Only after the durable catalogue pair commit
+does the manifest atomically become `complete`. Thus a crash before or after
+any move, manifest transition, or rebuild cannot silently discard repair
+intent; catalogue outputs and unrelated files remain untouched on failure.
 
 ---
 

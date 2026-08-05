@@ -77,6 +77,7 @@ lib/features/accounting/presentation/providers/voice_providers_part*
 
 # Claude Code runtime artifacts (per-machine; never commit)
 .claude/scheduled_tasks.lock
+.planning/audit/.merge-findings.lock
 
 # Local planning debug artifacts
 .planning/debug/

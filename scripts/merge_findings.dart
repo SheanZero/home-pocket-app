@@ -63,7 +63,6 @@ const _legacyMarkdownBackupName = '.merge-findings-markdown.backup';
 const _pairFailureInjectionEnv = 'AUDIT_MERGE_FAILPOINT';
 const _lockName = '.merge-findings.lock';
 const _lockWaitEnv = 'AUDIT_MERGE_LOCK_WAIT_MS';
-const _lockGraceEnv = 'AUDIT_MERGE_LOCK_GRACE_MS';
 const _holdpointEnv = 'AUDIT_MERGE_HOLDPOINT';
 const _holdMsEnv = 'AUDIT_MERGE_HOLD_MS';
 const _forensicsDirectoryName = '.merge-findings-forensics';
@@ -121,21 +120,41 @@ Future<void> main(List<String> args) async {
     return;
   }
   try {
-    var repairedTransaction = false;
-    final recoveryError = await _recoverPairTransaction(root);
-    if (recoveryError != null) {
-      if (!invocation.repairPairTransaction) {
+    // A forensic repair manifest is durable intent, so it must be discovered
+    // before any normal recovery or orphan cleanup can touch root artifacts.
+    // Once an operator opted in once, later starts resume it automatically.
+    final pendingRepair = await _resumePendingForensicRepair(root);
+    if (pendingRepair.error != null) {
+      stderr.writeln('[audit:merge] ERROR: ${pendingRepair.error}');
+      exitCode = 1;
+      return;
+    }
+    var repairManifest = pendingRepair.manifest;
+    if (repairManifest == null) {
+      final recoveryError = await _recoverPairTransaction(root);
+      if (recoveryError != null) {
+        if (!invocation.repairPairTransaction) {
+          stderr.writeln('[audit:merge] ERROR: $recoveryError');
+          exitCode = 1;
+          return;
+        }
+        final startedRepair = await _startForensicRepair(root, recoveryError);
+        if (startedRepair.error != null) {
+          stderr.writeln('[audit:merge] ERROR: ${startedRepair.error}');
+          exitCode = 1;
+          return;
+        }
+        repairManifest = startedRepair.manifest;
+      }
+    } else {
+      // The repair may have isolated a corrupt root journal. Only after the
+      // manifest proves every expected byte has moved may normal cleanup run.
+      final recoveryError = await _recoverPairTransaction(root);
+      if (recoveryError != null) {
         stderr.writeln('[audit:merge] ERROR: $recoveryError');
         exitCode = 1;
         return;
       }
-      final repairError = await _repairPairTransaction(root, recoveryError);
-      if (repairError != null) {
-        stderr.writeln('[audit:merge] ERROR: $repairError');
-        exitCode = 1;
-        return;
-      }
-      repairedTransaction = true;
     }
     final history = await _readExistingFindings(root);
     if (history.error != null) {
@@ -273,7 +292,7 @@ Future<void> main(List<String> args) async {
 
     // Explicit repair may discard an untrusted transaction journal, but never
     // grants a partial scanner run authority to rewrite the catalogue pair.
-    if (repairedTransaction && incompleteScans.isNotEmpty) {
+    if (repairManifest != null && incompleteScans.isNotEmpty) {
       stderr.writeln(
         '[audit:merge] ERROR: repair requires every canonical shard to be valid before rebuilding catalogue outputs',
       );
@@ -408,6 +427,11 @@ Future<void> main(List<String> args) async {
         issuesContent: issuesContent,
         markdown: md,
       );
+      if (repairManifest != null) {
+        _injectFailure('repair_before_complete_manifest');
+        await _writeForensicManifest(repairManifest.withState('complete'));
+        _injectFailure('repair_after_complete_manifest');
+      }
     } catch (error) {
       stderr.writeln(
         '[audit:merge] ERROR: failed to commit catalogue pair: $error',
@@ -807,44 +831,21 @@ class _AuditLockOwner {
     'token': token,
     'created_at_micros': createdAtMicros,
   };
-
-  static _AuditLockOwner? fromJson(Object? value) {
-    if (value is! Map) return null;
-    final data = value.cast<String, dynamic>();
-    final pid = data['pid'];
-    final token = data['token'];
-    final createdAtMicros = data['created_at_micros'];
-    if (data['schema_version'] != 1 ||
-        pid is! int ||
-        pid <= 0 ||
-        token is! String ||
-        !RegExp(r'^[0-9a-f]{32}$').hasMatch(token) ||
-        createdAtMicros is! int ||
-        createdAtMicros <= 0) {
-      return null;
-    }
-    return _AuditLockOwner(
-      pid: pid,
-      token: token,
-      createdAtMicros: createdAtMicros,
-    );
-  }
 }
 
 class _AuditLock {
-  const _AuditLock(this.file, this.owner);
+  const _AuditLock(this.handle);
 
-  final File file;
-  final _AuditLockOwner owner;
+  final RandomAccessFile handle;
 
   Future<void> release() async {
-    if (!file.existsSync()) return;
     try {
-      final decoded = jsonDecode(await file.readAsString());
-      final current = _AuditLockOwner.fromJson(decoded);
-      if (current?.token == owner.token) await file.delete();
-    } catch (_) {
-      // A lock owner must never delete a lock it cannot prove is its own.
+      // The kernel-held handle, rather than the diagnostic owner bytes, is
+      // the sole source of mutual-exclusion correctness. Never unlink this
+      // path: unlinking can split waiters across two lock inodes.
+      await handle.unlock();
+    } finally {
+      await handle.close();
     }
   }
 }
@@ -864,81 +865,51 @@ Future<_AuditLock?> _acquireAuditLock(String root) async {
   if (!directory.existsSync()) directory.createSync(recursive: true);
   final lock = File(_transactionPath(root, _lockName));
   final wait = Duration(milliseconds: _positiveEnvMillis(_lockWaitEnv, 10000));
-  final grace = Duration(milliseconds: _positiveEnvMillis(_lockGraceEnv, 250));
   final deadline = DateTime.now().add(wait);
-
-  while (true) {
-    final owner = _AuditLockOwner(
-      pid: pid,
-      token: _newLockToken(),
-      createdAtMicros: DateTime.now().microsecondsSinceEpoch,
-    );
-    try {
-      await lock.create(exclusive: true);
+  // FileMode.append preserves the permanent inode. Every contender locks the
+  // same OS object; a crash or SIGSTOP is handled by the kernel, not PID/mtime
+  // guessing. The owner record below is diagnostics only and is written only
+  // after the lock is held with this same handle.
+  final handle = await lock.open(mode: FileMode.append);
+  try {
+    while (true) {
       try {
-        await _writeBytesDurably(lock, utf8.encode(jsonEncode(owner.toJson())));
-        return _AuditLock(lock, owner);
+        await handle.lock(FileLock.exclusive);
+      } on FileSystemException {
+        if (DateTime.now().isAfter(deadline)) {
+          await handle.close();
+          return null;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+        continue;
+      }
+      await _holdAt('after_lock_acquired_before_owner');
+      final owner = _AuditLockOwner(
+        pid: pid,
+        token: _newLockToken(),
+        createdAtMicros: DateTime.now().microsecondsSinceEpoch,
+      );
+      try {
+        await handle.setPosition(0);
+        await handle.truncate(0);
+        await handle.writeFrom(utf8.encode(jsonEncode(owner.toJson())));
+        await handle.flush();
       } catch (_) {
-        // This process owns the just-created inode but did not establish an
-        // owner record. Remove it immediately; another process still waits
-        // through the create→owner-write grace window if we crash here.
-        if (lock.existsSync()) await lock.delete();
+        // We still own the kernel lock. Releasing the handle is sufficient;
+        // stale/partial diagnostic JSON can never be mistaken for ownership.
+        await handle.unlock();
         rethrow;
       }
-    } on FileSystemException {
-      await _claimStaleAuditLock(lock, grace);
-      if (DateTime.now().isAfter(deadline)) return null;
-      await Future<void>.delayed(const Duration(milliseconds: 25));
+      await _holdAt('after_lock_owner');
+      return _AuditLock(handle);
     }
-  }
-}
-
-Future<void> _claimStaleAuditLock(File lock, Duration grace) async {
-  if (!lock.existsSync()) return;
-  final stat = await lock.stat();
-  if (DateTime.now().difference(stat.modified) < grace) return;
-
-  List<int> firstBytes;
-  try {
-    firstBytes = await lock.readAsBytes();
-  } on FileSystemException {
-    return;
-  }
-  _AuditLockOwner? owner;
-  try {
-    owner = _AuditLockOwner.fromJson(jsonDecode(utf8.decode(firstBytes)));
   } catch (_) {
-    // An empty/corrupt record can be the create→owner-write crash window.
-    // It is reclaimable only after the same mtime grace as a dead owner.
-  }
-  if (owner != null && await _isPidAlive(owner.pid)) return;
-
-  // Re-read immediately before the atomic rename. This prevents a contender
-  // from taking an owner record that changed while it was being inspected.
-  try {
-    if (!lock.existsSync() ||
-        _digest(await lock.readAsBytes()) != _digest(firstBytes)) {
-      return;
+    try {
+      await handle.close();
+    } catch (_) {
+      // Preserve the original lock/write failure.
     }
-    final claimed = File(
-      '${lock.path}.stale-${DateTime.now().microsecondsSinceEpoch}-${_newLockToken()}',
-    );
-    await lock.rename(claimed.path);
-    await claimed.delete();
-  } on FileSystemException {
-    // Another contender won the atomic hand-off; retry normal acquisition.
-  }
-}
-
-Future<bool> _isPidAlive(int candidatePid) async {
-  if (candidatePid == pid) return true;
-  if (Platform.isWindows) return true;
-  try {
-    final result = await Process.run('kill', ['-0', '$candidatePid']);
-    return result.exitCode == 0;
-  } on ProcessException {
-    // Fail closed on platforms without a non-destructive liveness probe.
-    return true;
+    rethrow;
   }
 }
 
@@ -1175,10 +1146,225 @@ Future<void> _cleanupUnjournaledTransientArtifacts(String root) async {
   }
 }
 
-Future<String?> _repairPairTransaction(String root, String reason) async {
+class _ForensicRepairFile {
+  const _ForensicRepairFile({required this.name, required this.digest});
+
+  final String name;
+  final String digest;
+
+  Map<String, String> toJson() => {'name': name, 'sha256': digest};
+
+  static _ForensicRepairFile? fromJson(Object? value) {
+    if (value is! Map) return null;
+    final data = value.cast<String, dynamic>();
+    final name = data['name'];
+    final digest = data['sha256'];
+    if (name is! String ||
+        digest is! String ||
+        !_isRepairArtifactName(name) ||
+        !_isDigest(digest)) {
+      return null;
+    }
+    return _ForensicRepairFile(name: name, digest: digest);
+  }
+}
+
+class _ForensicRepairManifest {
+  const _ForensicRepairManifest({
+    required this.file,
+    required this.state,
+    required this.reason,
+    required this.files,
+  });
+
+  final File file;
+  final String state;
+  final String reason;
+  final List<_ForensicRepairFile> files;
+
+  Map<String, Object?> toJson() => {
+    'schema_version': 2,
+    'state': state,
+    'reason': reason,
+    'files': files.map((entry) => entry.toJson()).toList(),
+  };
+
+  _ForensicRepairManifest withState(String value) => _ForensicRepairManifest(
+    file: file,
+    state: value,
+    reason: reason,
+    files: files,
+  );
+
+  static _ForensicRepairManifest? fromFile(File file, Object? value) {
+    if (value is! Map) return null;
+    final data = value.cast<String, dynamic>();
+    final state = data['state'];
+    final reason = data['reason'];
+    final rawFiles = data['files'];
+    if (data['schema_version'] != 2 ||
+        state is! String ||
+        !{
+          'isolating',
+          'isolated_pending_rebuild',
+          'complete',
+        }.contains(state) ||
+        reason is! String ||
+        reason.trim().isEmpty ||
+        rawFiles is! List ||
+        rawFiles.isEmpty) {
+      return null;
+    }
+    final files = rawFiles.map(_ForensicRepairFile.fromJson).toList();
+    if (files.any((entry) => entry == null)) return null;
+    final normalized = files.cast<_ForensicRepairFile>();
+    if (normalized.map((entry) => entry.name).toSet().length !=
+        normalized.length) {
+      return null;
+    }
+    return _ForensicRepairManifest(
+      file: file,
+      state: state,
+      reason: reason,
+      files: normalized,
+    );
+  }
+}
+
+class _RepairResumeResult {
+  const _RepairResumeResult({this.manifest, this.error});
+
+  final _ForensicRepairManifest? manifest;
+  final String? error;
+}
+
+bool _isRepairArtifactName(String name) =>
+    name == _pairJournalName || _isTransientArtifactName(name);
+
+Future<void> _writeForensicManifest(_ForensicRepairManifest manifest) async {
+  final directory = manifest.file.parent;
+  final temp = File(
+    '${directory.path}/.manifest-${DateTime.now().microsecondsSinceEpoch}-${_newLockToken()}.tmp',
+  );
+  try {
+    await _writeBytesDurably(
+      temp,
+      utf8.encode(
+        const JsonEncoder.withIndent('  ').convert(manifest.toJson()),
+      ),
+    );
+    _injectFailure('repair_before_manifest_rename_${manifest.state}');
+    await _replaceFrom(temp, manifest.file);
+    _injectFailure('repair_after_manifest_rename_${manifest.state}');
+  } finally {
+    if (temp.existsSync()) await temp.delete();
+  }
+}
+
+Future<_RepairResumeResult> _resumePendingForensicRepair(String root) async {
+  final forensicRoot = Directory(
+    _transactionPath(root, _forensicsDirectoryName),
+  );
+  if (!forensicRoot.existsSync()) return const _RepairResumeResult();
+  final manifests = <_ForensicRepairManifest>[];
+  try {
+    for (final entity in await forensicRoot.list().toList()) {
+      if (entity is! Directory) continue;
+      final manifestFile = File('${entity.path}/manifest.json');
+      if (!manifestFile.existsSync()) continue;
+      final decoded = jsonDecode(await manifestFile.readAsString());
+      final manifest = _ForensicRepairManifest.fromFile(manifestFile, decoded);
+      if (manifest == null) {
+        return _RepairResumeResult(
+          error: 'forensic repair manifest is corrupt: ${manifestFile.path}',
+        );
+      }
+      manifests.add(manifest);
+    }
+  } catch (error) {
+    return _RepairResumeResult(
+      error: 'could not read forensic repair manifests ($error)',
+    );
+  }
+  final pending = manifests
+      .where((entry) => entry.state != 'complete')
+      .toList();
+  if (pending.length > 1) {
+    return const _RepairResumeResult(
+      error:
+          'multiple pending forensic repair manifests; refusing ambiguous recovery',
+    );
+  }
+  if (pending.isEmpty) return const _RepairResumeResult();
+  var manifest = pending.single;
+  if (manifest.state == 'isolating') {
+    final resumed = await _isolateForensicRepair(root, manifest);
+    if (resumed.error != null) return resumed;
+    manifest = resumed.manifest!;
+  }
+  return _RepairResumeResult(manifest: manifest);
+}
+
+Future<_RepairResumeResult> _isolateForensicRepair(
+  String root,
+  _ForensicRepairManifest manifest,
+) async {
+  final quarantine = manifest.file.parent;
+  try {
+    for (final entry in manifest.files) {
+      final source = File(_transactionPath(root, entry.name));
+      final destination = File('${quarantine.path}/${entry.name}');
+      final sourceExists = source.existsSync();
+      final destinationExists = destination.existsSync();
+      if (sourceExists && destinationExists) {
+        return _RepairResumeResult(
+          error:
+              'forensic repair has duplicate source and quarantine bytes for ${entry.name}',
+        );
+      }
+      if (sourceExists) {
+        if (!await _matchesDigest(source, entry.digest)) {
+          return _RepairResumeResult(
+            error: 'forensic repair source digest mismatch for ${entry.name}',
+          );
+        }
+        await source.rename(destination.path);
+        _injectFailure('repair_after_move');
+        _injectFailure('repair_after_move_${entry.name}');
+      } else if (destinationExists) {
+        if (!await _matchesDigest(destination, entry.digest)) {
+          return _RepairResumeResult(
+            error:
+                'forensic repair quarantine digest mismatch for ${entry.name}',
+          );
+        }
+      } else {
+        return _RepairResumeResult(
+          error: 'forensic repair artifact disappeared: ${entry.name}',
+        );
+      }
+    }
+    final pending = manifest.withState('isolated_pending_rebuild');
+    _injectFailure('repair_before_pending_manifest');
+    await _writeForensicManifest(pending);
+    _injectFailure('repair_after_pending_manifest');
+    return _RepairResumeResult(manifest: pending);
+  } catch (error) {
+    return _RepairResumeResult(
+      error: 'could not continue forensic repair isolation ($error)',
+    );
+  }
+}
+
+Future<_RepairResumeResult> _startForensicRepair(
+  String root,
+  String reason,
+) async {
   final journal = File(_transactionPath(root, _pairJournalName));
   if (!journal.existsSync()) {
-    return 'no pair transaction journal is present to repair';
+    return const _RepairResumeResult(
+      error: 'no pair transaction journal is present to repair',
+    );
   }
   final candidates = <File>[journal];
   final directory = Directory(root);
@@ -1195,48 +1381,45 @@ Future<String?> _repairPairTransaction(String root, String reason) async {
   );
   try {
     await quarantine.create(recursive: true);
-    final manifestFiles = <Map<String, Object?>>[];
+    final manifestFiles = <_ForensicRepairFile>[];
     for (final file in candidates) {
-      if (!file.existsSync()) continue;
+      if (!file.existsSync()) {
+        return const _RepairResumeResult(
+          error: 'pair transaction disappeared before it could be repaired',
+        );
+      }
       final bytes = await file.readAsBytes();
       final name = file.uri.pathSegments.last;
-      manifestFiles.add({'name': name, 'sha256': _digest(bytes)});
+      if (!_isRepairArtifactName(name)) {
+        return _RepairResumeResult(
+          error: 'refusing to repair unrecognised artifact name: $name',
+        );
+      }
+      manifestFiles.add(
+        _ForensicRepairFile(name: name, digest: _digest(bytes)),
+      );
     }
     if (manifestFiles.isEmpty) {
-      return 'pair transaction disappeared before it could be repaired';
+      return const _RepairResumeResult(
+        error: 'pair transaction disappeared before it could be repaired',
+      );
     }
     final manifest = File('${quarantine.path}/manifest.json');
-    Map<String, Object?> manifestData(String state) => {
-      'schema_version': 1,
-      'state': state,
-      'repaired_at': DateTime.now().toUtc().toIso8601String(),
-      'reason': reason,
-      'files': manifestFiles,
-    };
-    // The manifest exists before the first rename. A crash during quarantine
-    // therefore leaves evidence of the intended set rather than silently
-    // losing the only journal that described it.
-    await _writeBytesDurably(
-      manifest,
-      utf8.encode(
-        const JsonEncoder.withIndent('  ').convert(manifestData('isolating')),
-      ),
+    final started = _ForensicRepairManifest(
+      file: manifest,
+      state: 'isolating',
+      reason: reason,
+      files: manifestFiles,
     );
-    for (final file in candidates) {
-      if (!file.existsSync()) continue;
-      final name = file.uri.pathSegments.last;
-      final destination = File('${quarantine.path}/$name');
-      await file.rename(destination.path);
-    }
-    await _writeBytesDurably(
-      manifest,
-      utf8.encode(
-        const JsonEncoder.withIndent('  ').convert(manifestData('isolated')),
-      ),
-    );
-    return null;
+    // The manifest becomes durable before the first root rename. Any crash
+    // can resume exact basename+digest moves rather than guessing cleanup.
+    await _writeForensicManifest(started);
+    return _isolateForensicRepair(root, started);
   } catch (error) {
-    return 'could not quarantine untrusted pair transaction for forensic repair ($error)';
+    return _RepairResumeResult(
+      error:
+          'could not quarantine untrusted pair transaction for forensic repair ($error)',
+    );
   }
 }
 
