@@ -13,6 +13,29 @@ class MockWebSocketChannel extends Mock implements WebSocketChannel {}
 
 class MockWebSocketSink extends Mock implements WebSocketSink {}
 
+Future<void> expectUnsafeControlMessageIsRejected({
+  required WebSocketService service,
+  required StreamController<dynamic> incomingController,
+  required MockWebSocketSink sink,
+  required String raw,
+}) async {
+  final events = <WebSocketEvent>[];
+  service.eventStream.listen(events.add);
+  service.connect(
+    groupId: 'group-1',
+    deviceId: 'device-1',
+    signMessage: (_) async => 'mock-signature',
+  );
+
+  incomingController.add(raw);
+  await Future<void>.delayed(Duration.zero);
+  await Future<void>.delayed(Duration.zero);
+
+  expect(events, isEmpty);
+  expect(service.connectionState, WebSocketConnectionState.disconnected);
+  verify(() => sink.close(any(), any())).called(1);
+}
+
 void main() {
   group('WebSocketService', () {
     late WebSocketService service;
@@ -377,6 +400,70 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(service.connectionState, WebSocketConnectionState.connecting);
+    });
+
+    test('rejects oversized raw control messages before JSON decoding', () async {
+      await expectUnsafeControlMessageIsRejected(
+        service: service,
+        incomingController: incomingController,
+        sink: sink,
+        raw: jsonEncode({
+          'type': 'sync_available',
+          'padding': 'x' * (64 * 1024),
+        }),
+      );
+    });
+
+    test('rejects excessively nested control JSON', () async {
+      Object nested = 'leaf';
+      for (var index = 0; index < 32; index++) {
+        nested = {'child': nested};
+      }
+
+      await expectUnsafeControlMessageIsRejected(
+        service: service,
+        incomingController: incomingController,
+        sink: sink,
+        raw: jsonEncode({'type': 'sync_available', 'data': nested}),
+      );
+    });
+
+    test('rejects oversized data maps in control messages', () async {
+      await expectUnsafeControlMessageIsRejected(
+        service: service,
+        incomingController: incomingController,
+        sink: sink,
+        raw: jsonEncode({
+          'type': 'group_status',
+          'data': {
+            for (var index = 0; index < 128; index++) 'field$index': index,
+          },
+        }),
+      );
+    });
+
+    test('rejects oversized control-message collections', () async {
+      await expectUnsafeControlMessageIsRejected(
+        service: service,
+        incomingController: incomingController,
+        sink: sink,
+        raw: jsonEncode({
+          'type': 'group_status',
+          'data': List<int>.generate(128, (index) => index),
+        }),
+      );
+    });
+
+    test('rejects control messages with oversized field names', () async {
+      await expectUnsafeControlMessageIsRejected(
+        service: service,
+        incomingController: incomingController,
+        sink: sink,
+        raw: jsonEncode({
+          'type': 'sync_available',
+          'f' * 512: 'value',
+        }),
+      );
     });
 
     test('parses group_status event with data payload', () async {
