@@ -422,7 +422,11 @@ CompatibilityReport validateDependencyCompatibility({
     mode: mode,
   );
 
-  if (!auditWorkflow.contains('--verify-running-flutter-sdk')) {
+  final hasStableSdkVerificationCommand = RegExp(
+    r'^\s*run:\s+dart run scripts/dependency_compatibility\.dart --mode=baseline --verify-running-flutter-sdk[ \t]*$',
+    multiLine: true,
+  ).hasMatch(auditWorkflow);
+  if (!hasStableSdkVerificationCommand) {
     issues.add('audit workflow must invoke SDK verification');
   }
   expectText('future workflow', futureWorkflow, 'channel: beta');

@@ -348,11 +348,11 @@ void main() {
       );
     });
 
-    test('rejects missing Stable CI mode contract marker', () {
+    test('rejects a comment-only Stable CI SDK verification marker', () {
       final input = currentInputs();
       input['audit'] = input['audit']!.replaceFirst(
-        '--verify-running-flutter-sdk',
-        '',
+        '        run: dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk\n',
+        '        # dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk\n',
       );
       expect(
         validate(input),
