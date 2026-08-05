@@ -5,6 +5,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/widgets/app_sheet_frame.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../providers/state_recent_currency.dart';
 
@@ -194,22 +195,22 @@ class CurrencySelectorSheet extends ConsumerStatefulWidget {
       _CurrencySelectorSheetState();
 }
 
-class _CurrencySelectorSheetState
-    extends ConsumerState<CurrencySelectorSheet> {
+class _CurrencySelectorSheetState extends ConsumerState<CurrencySelectorSheet> {
   String _query = '';
   bool _showAll = false;
 
   /// Common-zone codes (JPY pinned first), then the rest re-ordered by recent
   /// use. Long-tail entries are appended only when "more" is expanded.
   List<_CurrencyEntry> _entries(S s) {
-    final orderedCommon =
-        ref.read(recentCurrencyProvider.notifier).orderedCommonZone();
+    final orderedCommon = ref
+        .read(recentCurrencyProvider.notifier)
+        .orderedCommonZone();
 
     _CurrencyEntry entryFor(String code) => _CurrencyEntry(
-          code: code,
-          flag: _flagByCode[code] ?? _fallbackFlag,
-          englishName: code,
-        );
+      code: code,
+      flag: _flagByCode[code] ?? _fallbackFlag,
+      englishName: code,
+    );
 
     final common = <_CurrencyEntry>[
       // JPY ALWAYS first; never participates in recent-use reordering.
@@ -220,17 +221,17 @@ class _CurrencySelectorSheetState
     if (!_showAll) return common;
 
     final commonCodes = common.map((e) => e.code).toSet();
-    final longTail =
-        _fullIsoList.where((e) => !commonCodes.contains(e.code)).toList();
+    final longTail = _fullIsoList
+        .where((e) => !commonCodes.contains(e.code))
+        .toList();
     return <_CurrencyEntry>[...common, ...longTail];
   }
 
   bool _matches(S s, _CurrencyEntry entry) {
     if (_query.isEmpty) return true;
     final q = _query.toLowerCase();
-    final name =
-        (_localizedCommonZoneName(s, entry.code) ?? entry.englishName)
-            .toLowerCase();
+    final name = (_localizedCommonZoneName(s, entry.code) ?? entry.englishName)
+        .toLowerCase();
     return entry.code.toLowerCase().contains(q) || name.contains(q);
   }
 
@@ -245,43 +246,21 @@ class _CurrencySelectorSheetState
     final s = S.of(context);
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
     final palette = context.palette;
-    final screenHeight = MediaQuery.of(context).size.height;
 
-    final visible =
-        _entries(s).where((e) => _matches(s, e)).toList(growable: false);
+    final visible = _entries(
+      s,
+    ).where((e) => _matches(s, e)).toList(growable: false);
 
-    return Container(
-      height: screenHeight * 0.65,
-      decoration: BoxDecoration(
-        color: palette.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+    return AppSheetFrame(
       child: Column(
         children: [
-          // Drag handle
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: palette.borderDivider,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-          ),
           // Header row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  s.currencySelectorTitle,
-                  style: AppTextStyles.titleMedium,
-                ),
+                Text(s.currencySelectorTitle, style: AppTextStyles.titleMedium),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
@@ -404,8 +383,11 @@ class _CurrencyRow extends StatelessWidget {
     final palette = context.palette;
     final name = localizedName ?? entry.englishName;
     // Symbol from the shared NumberFormatter map (ISO-code fallback inside).
-    final symbol = NumberFormatter.formatCurrency(0, entry.code, locale)
-        .replaceAll(RegExp(r'[\d.,\s]'), '');
+    final symbol = NumberFormatter.formatCurrency(
+      0,
+      entry.code,
+      locale,
+    ).replaceAll(RegExp(r'[\d.,\s]'), '');
 
     return InkWell(
       key: ValueKey('currency-row-${entry.code}'),

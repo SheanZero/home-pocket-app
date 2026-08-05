@@ -5,6 +5,7 @@ import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/app_sheet_frame.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show categoryRepositoryProvider;
@@ -111,35 +112,13 @@ class _ShoppingCategoryFilterSheetState
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
-    final screenHeight = MediaQuery.of(context).size.height;
-
     final palette = context.palette;
-    return Container(
-      height: screenHeight * 0.65,
-      decoration: BoxDecoration(
-        color: palette.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+    return AppSheetFrame(
       child: Column(
         children: [
-          // Drag handle
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: palette.borderDivider,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-          ),
           // Header row
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -161,11 +140,7 @@ class _ShoppingCategoryFilterSheetState
               ],
             ),
           ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: palette.borderDivider,
-          ),
+          Divider(height: 1, thickness: 1, color: palette.borderDivider),
           // Category list — L1 rows only (D-4)
           Expanded(
             child: _isLoading
@@ -227,50 +202,16 @@ class _ShoppingCategoryFilterSheetState
                     },
                   ),
           ),
-          // Apply bar
-          Container(
-            height: 56,
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: palette.borderDivider, width: 1),
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    S.of(context).listDeleteCancelButton,
-                    style: AppTextStyles.titleSmall.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: palette.accentPrimary,
-                    ),
-                    onPressed: () {
-                      widget.onApply(Set<String>.unmodifiable(_localSelected));
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      _localSelected.isEmpty
-                          ? S.of(context).listCategorySheetApply
-                          : S
-                              .of(context)
-                              .listCategorySheetApplyN(_localSelected.length),
-                      style: AppTextStyles.titleSmall.copyWith(
-                        color: palette.card,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          AppSheetActionBar(
+            cancelLabel: S.of(context).listDeleteCancelButton,
+            applyLabel: _localSelected.isEmpty
+                ? S.of(context).listCategorySheetApply
+                : S.of(context).listCategorySheetApplyN(_localSelected.length),
+            onCancel: () => Navigator.pop(context),
+            onApply: () {
+              widget.onApply(Set<String>.unmodifiable(_localSelected));
+              Navigator.pop(context);
+            },
           ),
         ],
       ),

@@ -24,6 +24,30 @@
       ],
       "fingerprint": "99481b7d8b5a4094",
       "rationale": "RD-012 intentional duplication: shopping is L1-only and callback-owned; list supports L1 plus L2 and provider-owned selection."
+    },
+    {
+      "files": [
+        "lib/features/list/presentation/widgets/list_category_filter_sheet.dart",
+        "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart"
+      ],
+      "fingerprint": "29a2ba6994375ba9",
+      "rationale": "RD-021 accepted: header copy and clear action remain feature-owned beside distinct list selection contracts; only the shared sheet frame is reusable."
+    },
+    {
+      "files": [
+        "lib/features/list/presentation/widgets/list_category_filter_sheet.dart",
+        "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart"
+      ],
+      "fingerprint": "daf4c4ae74961eb3",
+      "rationale": "RD-022 accepted: the similarly shaped list boundary encloses different selection semantics (list L1+L2 tristate versus shopping L1-to-leaf union)."
+    },
+    {
+      "files": [
+        "lib/features/list/presentation/widgets/list_category_filter_sheet.dart",
+        "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart"
+      ],
+      "fingerprint": "54dae5bdb0525daf",
+      "rationale": "RD-023 accepted: AppSheetActionBar owns the identical stateless rendering; the matching caller setup must retain each feature's independent apply ownership."
     }
   ]
 }
