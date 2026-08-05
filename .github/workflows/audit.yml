@@ -35,12 +35,12 @@ jobs:
             ~/.pub-cache
             .dart_tool/
           key: pub-${{ hashFiles('pubspec.lock') }}
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       # P2-04 — a hard-failing coordinated dependency/native-toolchain
       # contract. It includes the verified analyzer 8.x line and must run
       # before static analysis instead of a warning-only version probe.
       - name: Dependency compatibility contract
-        run: dart run scripts/dependency_compatibility.dart --verify-running-flutter-sdk
+        run: dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk
       - run: dart pub global activate coverde 0.3.0+1
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos

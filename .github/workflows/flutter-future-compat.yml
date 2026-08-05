@@ -32,7 +32,7 @@ jobs:
           cache: true
       - run: flutter --version
       - run: flutter pub get
-      - run: dart run scripts/dependency_compatibility.dart
+      - run: dart run scripts/dependency_compatibility.dart --mode=future-probe --verify-running-flutter-sdk
       - run: flutter analyze --no-fatal-infos
       - run: flutter build apk --debug
 
@@ -48,6 +48,6 @@ jobs:
           cache: true
       - run: flutter --version
       - run: flutter pub get
-      - run: dart run scripts/dependency_compatibility.dart
+      - run: dart run scripts/dependency_compatibility.dart --mode=future-probe --verify-running-flutter-sdk
       - run: flutter analyze --no-fatal-infos
       - run: flutter build ios --simulator --debug
