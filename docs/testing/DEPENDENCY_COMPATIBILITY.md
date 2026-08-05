@@ -1,44 +1,66 @@
-# Dependency and future Flutter compatibility
+# Dependency compatibility contract
 
-P2-04 is managed as coordinated native dependency lanes, not as a blanket
-`pub upgrade --major-versions`. The blocking contract is
-`dart run scripts/dependency_compatibility.dart`; the weekly
-`flutter-future-compat` workflow builds Android and iOS with Flutter beta.
+[`STABLE_BASELINE.json`](./STABLE_BASELINE.json) is the canonical,
+machine-readable production baseline. It records the execution-date toolchain
+identity, every direct main/dev/SDK/path dependency, reviewed candidates,
+official sources, decisions, holds, platform floors, prohibitions, and tracked
+input digests. This document is deliberately a readable guide to that data; it
+does not duplicate the JSON as a second source of truth.
 
-## Current compatibility matrix
+Phase 57 selected Flutter `3.44.8` / Dart `3.12.2` on the Stable channel on
+2026-08-05. The direct-dependency inventory and toolchain rows in the canonical
+manifest distinguish `already_current` selections from owner-phase holds. A
+hold is a successful safety decision, not a silent upgrade failure.
 
-| Lane | Verified versions | Why this is intentional | Unblock condition |
-|---|---|---|---|
-| Encrypted database | `sqlcipher_flutter_libs 0.6.8`, `sqlite3 2.9.4`, SQLCipher pod `4.10.0` | `sqlcipher_flutter_libs 0.7.0+eol` contains no native library. sqlite3 3.x is outside the proven encrypted path. | An ADR-approved replacement or maintained plugin with iOS SwiftPM support, followed by real-device `PRAGMA cipher_version`, encrypted reopen, migration, and backup/restore evidence. |
-| iOS dependency manager | Flutter SwiftPM for supported plugins; CocoaPods only for SQLCipher | Flutter 3.44 still falls back for the one plugin without a package manifest. The Podfile strip prevents system sqlite3 from winning linker symbols. | Move SQLCipher to its official Swift package through a reviewed plugin/fork, then repeat iOS simulator and signed-device SQLCipher tests. Do not disable SwiftPM project-wide. |
-| File/share/package metadata | `file_picker 11.0.3`, `share_plus 12.0.2`, `package_info_plus 9.0.1`, `win32 5.15.0` | New plus plugins require win32 6.x; the latest stable file_picker 11 requires win32 5.x. file_picker 12 is currently prerelease and changes selection defaults. | A stable file_picker 12+ release. Upgrade all four packages together and explicitly keep single-file backup import semantics. |
-| Speech | exact `speech_to_text 7.3.0` | 7.4.0 was published from a beta line and changes the adapter/test API. Native version switching also requires a clean build to avoid stale Kotlin symbols. | A stable compatible release plus voice adapter, Android microphone, and iOS speech tests. |
-| Riverpod / serializer tooling | `analyzer 8.4.0` (verified 8.x line), `flutter_riverpod 3.1.0`, `riverpod_annotation 4.0.0`, `riverpod_generator 4.0.0+1`, `riverpod_lint 3.1.0`, `json_annotation 4.9.0`, `json_serializable 6.11.2` | `custom_lint 0.8.1` and `import_guard_custom_lint 1.0.0` require analyzer 8.x. Riverpod runtime 3.4, generator 4.0.6+, Riverpod lint 3.1.1+, and JSON annotation 4.12 drive analyzer 9+/13+, so the resolver rejects every partial update. The CI contract fails closed if the resolved analyzer leaves 8.x. | A reviewed custom-lint and import-boundary-linter upgrade that supports a common analyzer line; then update the Riverpod and JSON generator stacks together, regenerate outputs, and run architecture/custom-lint/full test gates. |
-| Android toolchain | Flutter `3.44.0`, AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, `android.builtInKotlin=false`, `android.newDsl=false` | Flutter's migration guide requires Flutter 3.47+ before enabling Built-in Kotlin. Current compatible package refresh reduced KGP warnings from seven plugins to four. | On Flutter 3.47+, migrate the app and every remaining plugin together, set Built-in Kotlin only after both debug/release builds and device E2E pass. |
-| Notifications and compatible plugins | `flutter_local_notifications 22.2.0`, Firebase Core `4.13.0`, Firebase Messaging `16.5.0`, plus the versions in `pubspec.lock` | These upgrades resolve within current stable constraints and passed host tests plus Android/iOS builds. | Continue ordinary compatible refreshes; any native plugin version switch starts with `flutter clean`. |
+## Compatibility matrix
 
-The current Flutter warning names `file_picker`, `package_info_plus`,
-`share_plus`, and `speech_to_text`. It is not suppressed. The file picker
-stable line is already conditional for AGP 9; the other packages remain held by
-the coordinated constraints above. The beta workflow becomes the early failure
-signal when Flutter changes a warning into an error.
+| Lane | Selected baseline | Candidate | Decision | Reason | Exit condition |
+|---|---|---|---|---|---|
+| Stable Flutter/Dart | Flutter `3.44.8`, Dart `3.12.2`, revision `058e0af2c2b57e369d905a03ac9748b0ebf543c6` | same | already current | The committed manifest, `.metadata`, Stable CI pin, running machine identity, and Flutter SDK source must agree. | Phase 58 rechecks and approves one coherent SDK/analyzer/codegen graph. |
+| Encrypted storage | `sqlcipher_flutter_libs 0.6.8`, `sqlite3 2.9.4`, SQLCipher Pod `4.10.0` | `0.7.0+eol` / sqlite3 3.x | hold — Phase 60 | The EOL package ships no native SQLCipher library; the proven path needs the held Pod and linker strip. | Phase 60 proves a coordinated native upgrade on iOS and Android without system SQLite fallback. |
+| iOS dependency manager | Flutter SwiftPM where supported; CocoaPods for SQLCipher | native-package replacement | hold — Phase 60 | The Podfile strip prevents system `sqlite3` from winning linker symbols. | Reviewed SQLCipher Swift package/plugin plus simulator and signed-device encryption evidence. |
+| Analyzer/codegen | analyzer 8.x, Riverpod 3.1/4.0 generation stack, JSON tooling 4.9/6.11 | reviewed analyzer 9+/compatible stack | hold — Phase 58 | `custom_lint` and the import-boundary gate require one compatible analyzer line; partial updates are forbidden. | Upgrade lint/runtime/generators together, regenerate outputs, and pass architecture/custom-lint/full gates. |
+| File/share/metadata | `file_picker 11.0.3`, `share_plus 12.0.2`, `package_info_plus 9.0.1`, `win32 5.15.0` | stable compatible cohort | hold — Phase 59 | New plus-plugin lines and file-picker behavior must be verified as one native cohort. | Upgrade the cohort together and preserve single-file backup import and platform sharing behavior. |
+| Speech | `speech_to_text 7.3.0` | stable compatible release | hold — Phase 59 | The candidate changes adapter/test API and native symbols. | Clean native build plus Android microphone and iOS speech evidence. |
+| Android host | AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, JDK 17 | AGP `9.0.1`, Gradle `9.1` | hold — Phase 61 | Built-in Kotlin/new DSL need a complete app and plugin migration. | Debug/release builds and emulator evidence after the all-or-hold migration. |
+| Notifications/plugins | `flutter_local_notifications 22.2.0`, Firebase Core `4.13.0`, Messaging `16.5.0` | reviewed compatible cohort | hold — Phase 59 | Native plugin changes require coordinated behavior and clean-build evidence. | Registration, routing, cold-start tap, and signed APNs/FCM evidence. |
 
-## Required upgrade procedure
+The effective Android floor has two corroborating levels: `android/app/build.gradle.kts`
+inherits `minSdk = flutter.minSdkVersion`, while the selected Stable
+`.metadata`/CI pin identifies the same running SDK whose machine JSON and
+`FlutterExtension.kt` declare the parsed default API `24`. iOS remains at
+`15.0`. Baseline mode fails on any identity mismatch or lower effective floor.
 
-1. Upgrade one compatibility lane at a time; never replace SQLCipher with
-   `sqlite3_flutter_libs` or the `0.7.0+eol` placeholder.
-2. Keep the analyzer-bound Riverpod and serializer packages on their proven
-   versions until the custom-lint/import-boundary lane is upgraded together.
-   Do not override `analyzer` to force a partial resolver result.
-3. Run `flutter clean` after changing a native plugin version, then
-   `flutter pub get` and `dart run scripts/dependency_compatibility.dart`.
-4. Run `flutter analyze`, custom lint, affected tests, and the full host suite.
-5. Build Android and iOS. For database or linker changes, run device E2E on
-   both platforms and confirm a non-empty `PRAGMA cipher_version` after closing
-   and reopening the encrypted file.
-6. For the file/share group, verify backup import selects exactly one `.hpb`
-   file and export still opens the platform share sheet.
-7. For notifications, verify registration, foreground routing, cold-start tap,
-   and signed APNs/FCM delivery evidence before release.
-8. Update this matrix and the executable contract in the same commit. A version
-   change without updated rationale is expected to fail CI.
+## CI modes
+
+Stable CI is the blocking production contract. Its static-analysis job pins the
+manifest Flutter version, runs `flutter pub get --enforce-lockfile`, then runs:
+
+```bash
+dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk
+```
+
+The weekly beta workflow is visibly a non-production future probe. Both Android
+and iOS beta jobs retain ordinary `flutter pub get` and real build commands, but
+use `--mode=future-probe --verify-running-flutter-sdk`. That mode may report
+ordinary direct-dependency candidate drift as a warning only. It never demotes
+overrides, prerelease/EOL or plaintext SQLCipher states, partial lanes, or iOS/
+Android floor failures: those remain blocking errors.
+
+## Refresh transaction
+
+For an owner-phase upgrade, perform this transaction as one reviewed change:
+
+1. Recheck the candidate only at its official source and update the canonical
+   manifest with the actual query date, decision, reason, and exit condition.
+2. Update only the owning manifest/dependency/native inputs; do not use
+   `dependency_overrides`, plaintext SQLite, `sqlite3_flutter_libs`, or
+   `sqlcipher_flutter_libs 0.7.0+eol` as a workaround.
+3. Run `flutter pub get --enforce-lockfile` to retrieve the committed graph.
+4. Run the running-SDK baseline validator, targeted contract tests, then the
+   phase-final analysis, full-suite, coverage, and whitespace gates.
+
+Phase 57 makes no dependency, lockfile, native configuration, generated Dart,
+application behavior, or Drift schema/migration change. Phases 58–61 own the
+Flutter/analyzer/codegen, plugin, SQLCipher/iOS, and Android migrations
+respectively.

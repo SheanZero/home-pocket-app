@@ -38,11 +38,12 @@ created: 2026-08-05
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 57-01-01 | 01 | 1 | BASE-01, BASE-02 | T-57-01 | Official-source inventory and selected/held values are complete and reproducible | contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ❌ W0 extension | ⬜ pending |
-| 57-01-02 | 01 | 1 | BASE-02 | T-57-02 | The committed lockfile resolves without mutation or override | smoke | `flutter pub get --enforce-lockfile` | ✅ command | ⬜ pending |
-| 57-02-01 | 02 | 2 | BASE-03, BASE-04 | T-57-03 | Pre-release, EOL, plaintext, override, floor-drift, and partial-lane fixtures fail closed | negative contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ❌ W0 extension | ⬜ pending |
-| 57-02-02 | 02 | 2 | BASE-03 | T-57-04 | Stable CI executes enforced resolution and the compatibility contract; beta remains warning-only | source contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ❌ W0 extension | ⬜ pending |
-| 57-03-01 | 03 | 3 | BASE-01–04 | T-57-05 | Human-readable matrix, executable manifest, resolved inputs, and evidence report agree | integration | `dart run scripts/dependency_compatibility.dart && flutter analyze` | ❌ W0 | ⬜ pending |
+| 57-01-01 | 01 | 1 | BASE-01, BASE-02 | T-57-01 | Official-source inventory and selected/held values are complete and reproducible | contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ✅ | ✅ green |
+| 57-01-02 | 01 | 1 | BASE-02 | T-57-02 | The committed lockfile resolves without mutation or override | smoke | `flutter pub get --enforce-lockfile` | ✅ | ✅ green |
+| 57-02-01 | 02 | 2 | BASE-03, BASE-04 | T-57-03 | Pre-release, EOL, plaintext, override, floor-drift, and partial-lane fixtures fail closed | negative contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ✅ | ✅ green |
+| 57-02-02 | 02 | 2 | BASE-03, BASE-04 | T-57-04 | Baseline defaults to blocking; future-probe warns only for ordinary candidate drift | source contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ✅ | ✅ green |
+| 57-03-01 | 03 | 3 | BASE-02, BASE-03, BASE-04 | T-57-10, T-57-11 | Stable uses the enforced lock/baseline call; both beta jobs use explicit future-probe mode without losing real builds | integration | `flutter test test/architecture/dependency_compatibility_contract_test.dart test/architecture/audit_yml_invariants_test.dart && dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk` | ✅ | ✅ green |
+| 57-03-02 | 03 | 3 | BASE-03, BASE-04 | T-57-12 | Canonical JSON, human matrix, workflow modes, and validation evidence agree without a native/device claim | contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,9 +51,9 @@ created: 2026-08-05
 
 ## Wave 0 Requirements
 
-- [ ] Add the machine-readable baseline manifest selected by the plan.
-- [ ] Extend `test/architecture/dependency_compatibility_contract_test.dart` with in-memory negative fixtures for missing inventory, prerelease, EOL/plaintext SQLite, overrides, partial lanes, platform floors, and CI semantics.
-- [ ] Add validator support for manifest completeness and actual-input comparison without adding a new test framework.
+- [x] Add the machine-readable baseline manifest selected by the plan.
+- [x] Extend `test/architecture/dependency_compatibility_contract_test.dart` with in-memory negative fixtures for missing inventory, prerelease, EOL/plaintext SQLite, overrides, partial lanes, platform floors, and CI semantics.
+- [x] Add validator support for manifest completeness and actual-input comparison without adding a new test framework.
 
 ---
 
