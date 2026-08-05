@@ -358,4 +358,16 @@ void main() {
       );
     });
   });
+
+  test('CLI reserves exit 2 and usage text for malformed mode arguments',
+      () async {
+    final result = await Process.run(Platform.resolvedExecutable, [
+      'run',
+      'scripts/dependency_compatibility.dart',
+      '--mode=unknown',
+    ]);
+
+    expect(result.exitCode, 2);
+    expect(result.stderr.toString(), contains('Usage:'));
+  });
 }
