@@ -13,6 +13,7 @@ const _projectRoot = '.';
 
 Map<String, dynamic> _shardWith(List<Finding> findings, String toolSource) => {
   'tool_source': toolSource,
+  'scan_state': 'ran',
   'generated_at': '2026-04-25T00:00:00.000Z',
   'findings': findings.map((f) => f.toJson()).toList(),
 };
@@ -28,8 +29,19 @@ Future<ProcessResult> _runMerger(Directory cwd) async {
 
 Directory _initShardLayout(Directory tmp) {
   final root = Directory('${tmp.path}/.planning/audit');
-  Directory('${root.path}/shards').createSync(recursive: true);
+  final shards = Directory('${root.path}/shards')..createSync(recursive: true);
   Directory('${root.path}/agent-shards').createSync(recursive: true);
+  const canonicalTools = {
+    'layer.json': 'import_guard',
+    'dead_code.json': 'dart_code_linter',
+    'providers.json': 'riverpod_lint',
+    'duplication.json': 'owned_duplication_detector',
+  };
+  for (final entry in canonicalTools.entries) {
+    File('${shards.path}/${entry.key}').writeAsStringSync(
+      jsonEncode(_shardWith([], entry.value)),
+    );
+  }
   return root;
 }
 
@@ -689,6 +701,107 @@ void main() {
         File('${shardRoot.path}/ISSUES.md').readAsStringSync(),
         contains('## Scan Status: INCOMPLETE'),
       );
+    });
+
+    test('fails closed when a required canonical shard is missing', () async {
+      File('${shardRoot.path}/shards/layer.json').deleteSync();
+
+      final result = await _runMerger(tmp);
+
+      expect(result.exitCode, equals(1));
+      expect(result.stderr, contains('missing required canonical shard'));
+      expect(result.stderr, contains('layer.json'));
+      expect(
+        File('${shardRoot.path}/ISSUES.md').readAsStringSync(),
+        contains('## Scan Status: INCOMPLETE'),
+      );
+    });
+
+    test('fails closed on malformed canonical JSON without closing lifecycle', () async {
+      final open = _f(
+        filePath: 'lib/open.dart',
+        line: 7,
+        category: 'dead_code',
+        severity: 'LOW',
+        toolSource: 'dart_code_linter',
+        description: 'stale dead code',
+      );
+      File('${shardRoot.path}/issues.json').writeAsStringSync(
+        jsonEncode({
+          'findings': [
+            {...open.toJson(), 'id': 'DC-001'},
+          ],
+        }),
+      );
+      File(
+        '${shardRoot.path}/shards/dead_code.json',
+      ).writeAsStringSync('{not valid json');
+
+      final result = await _runMerger(tmp);
+
+      expect(result.exitCode, equals(1));
+      expect(result.stderr, contains('failed to parse'));
+      final finding = ((jsonDecode(
+                    File(
+                      '${shardRoot.path}/issues.json',
+                    ).readAsStringSync(),
+                  )['findings']
+                  as List)
+              .single
+          as Map);
+      expect(finding['status'], equals('open'));
+    });
+
+    test('fails closed when canonical scan_state is absent', () async {
+      File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+        jsonEncode({
+          'tool_source': 'import_guard',
+          'findings': [],
+        }),
+      );
+
+      final result = await _runMerger(tmp);
+
+      expect(result.exitCode, equals(1));
+      expect(result.stderr, contains('layer.json has invalid scan_state'));
+    });
+
+    test('uses an explicit successful canonical scan as lifecycle evidence', () async {
+      final open = _f(
+        filePath: 'lib/open.dart',
+        line: 7,
+        category: 'dead_code',
+        severity: 'LOW',
+        toolSource: 'dart_code_linter',
+        description: 'stale dead code',
+      );
+      File('${shardRoot.path}/issues.json').writeAsStringSync(
+        jsonEncode({
+          'findings': [
+            {...open.toJson(), 'id': 'DC-001'},
+          ],
+        }),
+      );
+      File('${shardRoot.path}/shards/dead_code.json').writeAsStringSync(
+        jsonEncode({
+          'tool_source': 'dart_code_linter',
+          'scan_state': 'ran',
+          'findings': [],
+        }),
+      );
+
+      final result = await _runMerger(tmp);
+
+      expect(result.exitCode, equals(0), reason: result.stderr.toString());
+      final finding = ((jsonDecode(
+                    File(
+                      '${shardRoot.path}/issues.json',
+                    ).readAsStringSync(),
+                  )['findings']
+                  as List)
+              .single
+          as Map);
+      expect(finding['status'], equals('closed'));
     });
   });
 }

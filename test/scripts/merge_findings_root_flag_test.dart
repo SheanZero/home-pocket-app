@@ -29,9 +29,24 @@ String _absoluteProjectRoot() => Directory.current.path;
 
 Map<String, dynamic> _shardWith(List<Finding> findings, String toolSource) => {
   'tool_source': toolSource,
+  'scan_state': 'ran',
   'generated_at': '2026-04-25T00:00:00.000Z',
   'findings': findings.map((f) => f.toJson()).toList(),
 };
+
+void _writeSuccessfulCanonicalShards(String root) {
+  const canonicalTools = {
+    'layer.json': 'import_guard',
+    'dead_code.json': 'dart_code_linter',
+    'providers.json': 'riverpod_lint',
+    'duplication.json': 'owned_duplication_detector',
+  };
+  for (final entry in canonicalTools.entries) {
+    File('$root/shards/${entry.key}').writeAsStringSync(
+      jsonEncode(_shardWith([], entry.value)),
+    );
+  }
+}
 
 Finding _f({
   required String filePath,
@@ -109,6 +124,7 @@ void main() {
         final reauditRoot = '${tmp.path}/.planning/audit/re-audit';
         Directory('$reauditRoot/shards').createSync(recursive: true);
         Directory('$reauditRoot/agent-shards').createSync(recursive: true);
+        _writeSuccessfulCanonicalShards(reauditRoot);
 
         File('$reauditRoot/shards/layer.json').writeAsStringSync(
           jsonEncode(
