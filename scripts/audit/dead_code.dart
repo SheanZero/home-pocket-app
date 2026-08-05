@@ -11,6 +11,27 @@ bool _isGenerated(String path) =>
     _generatedFileSuffixes.any(path.endsWith) ||
     path.contains('lib/generated/');
 
+typedef DeadCodeCommandRunner =
+    Future<ProcessResult> Function(String executable, List<String> arguments);
+
+class DeadCodeAuditRun {
+  const DeadCodeAuditRun({required this.envelope, required this.exitCode});
+
+  final Map<String, dynamic> envelope;
+  final int exitCode;
+}
+
+class _UnusedScan {
+  const _UnusedScan.success(this.findings) : diagnostic = null;
+
+  const _UnusedScan.failure(this.diagnostic) : findings = const [];
+
+  final List<Finding> findings;
+  final String? diagnostic;
+
+  bool get failed => diagnostic != null;
+}
+
 String _relPath(String absPath) {
   final cwd = Directory.current.path;
   if (absPath.startsWith('$cwd/')) {
@@ -19,54 +40,56 @@ String _relPath(String absPath) {
   return absPath;
 }
 
-Future<List<Finding>> _runUnused(String mode) async {
+Future<_UnusedScan> _runUnused(
+  String mode,
+  DeadCodeCommandRunner commandRunner,
+) async {
   // mode: 'check-unused-code' | 'check-unused-files'
   final findings = <Finding>[];
-  try {
-    final result = await Process.run('dart', [
-      'run',
-      'dart_code_linter:metrics',
-      mode,
-      'lib',
-      '--reporter=json',
-    ], runInShell: true);
 
-    final stdoutText = _extractJsonPayload((result.stdout as String).trim());
+  final arguments = [
+    'run',
+    'dart_code_linter:metrics',
+    mode,
+    'lib',
+    '--reporter=json',
+  ];
+  ProcessResult result;
+  try {
+    result = await commandRunner('dart', arguments);
+  } on ProcessException {
+    return _UnusedScan.failure('$mode could not be run');
+  } catch (_) {
+    return _UnusedScan.failure('$mode could not be run');
+  }
+
+  if (result.exitCode != 0) {
+    return _UnusedScan.failure('$mode exited with status ${result.exitCode}');
+  }
+
+  try {
+    final stdout = result.stdout;
+    final normalizedOutput = _stripAnsi(
+      stdout is String ? stdout : '',
+    ).replaceAll('\r', '\n').trim();
+    if (_isConfirmedZeroFindingOutput(normalizedOutput)) {
+      return _UnusedScan.success(findings);
+    }
+    final stdoutText = _extractJsonPayload(normalizedOutput);
     if (stdoutText.isEmpty) {
-      if (result.exitCode != 0) {
-        throw ProcessException(
-          'dart',
-          [
-            'run',
-            'dart_code_linter:metrics',
-            mode,
-            'lib',
-            '--reporter=json',
-          ],
-          (result.stderr as String).trim(),
-          result.exitCode,
-        );
-      }
-      stderr.writeln(
-        '[audit:dead_code] WARNING: $mode produced empty stdout; skipping',
-      );
-      return findings;
+      return _UnusedScan.failure('$mode emitted empty output');
     }
 
     dynamic decoded;
     try {
       decoded = jsonDecode(stdoutText);
-    } catch (e) {
-      if (result.exitCode == 0 ||
-          (result.stdout as String).contains('no unused')) {
-        return findings;
-      }
-      throw FormatException(
-        '$mode emitted non-JSON output with exit code ${result.exitCode}: $e',
-      );
+    } on FormatException {
+      return _UnusedScan.failure('$mode emitted malformed JSON');
+    } catch (_) {
+      return _UnusedScan.failure('$mode emitted malformed JSON');
     }
 
-    Iterable<dynamic> records = const [];
+    Iterable<dynamic>? records;
     if (decoded is List) {
       records = decoded;
     } else if (decoded is Map) {
@@ -84,6 +107,10 @@ Future<List<Finding>> _runUnused(String mode) async {
           break;
         }
       }
+    }
+
+    if (records == null) {
+      return _UnusedScan.failure('$mode emitted an unrecognized JSON report');
     }
 
     for (final r in records) {
@@ -154,19 +181,40 @@ Future<List<Finding>> _runUnused(String mode) async {
         );
       }
     }
-  } catch (e, st) {
-    stderr.writeln('[audit:dead_code] WARNING: $mode failed: $e\n$st');
+  } catch (_) {
+    return _UnusedScan.failure('$mode report could not be processed');
   }
-  return findings;
+  return _UnusedScan.success(findings);
 }
 
 String _extractJsonPayload(String output) {
-  final firstBrace = output.indexOf('{');
-  final lastBrace = output.lastIndexOf('}');
-  if (firstBrace == -1 || lastBrace == -1 || lastBrace < firstBrace) {
+  final firstObject = output.indexOf('{');
+  final firstArray = output.indexOf('[');
+  final starts = [firstObject, firstArray].where((index) => index >= 0);
+  if (starts.isEmpty) {
     return output;
   }
-  return output.substring(firstBrace, lastBrace + 1);
+  final start = starts.reduce((a, b) => a < b ? a : b);
+  final end = output[start] == '{'
+      ? output.lastIndexOf('}')
+      : output.lastIndexOf(']');
+  if (end < start) return output;
+  return output.substring(start, end + 1);
+}
+
+String _stripAnsi(String output) =>
+    output.replaceAll(RegExp('\u001b\\[[0-?]*[ -/]*[@-~]'), '');
+
+bool _isConfirmedZeroFindingOutput(String output) {
+  // dart_code_linter 3.x ignores --reporter=json for a clean scan and emits
+  // only this completion line (plus optional update notices). Treat that exact
+  // tool-owned success signal as zero findings; arbitrary non-JSON output is
+  // still a failed scan.
+  return !output.contains('{') &&
+      !output.contains('[') &&
+      RegExp(
+        r'(^|\n)✔ Analysis is completed\. Preparing the results: [^\n]+',
+      ).hasMatch(output);
 }
 
 String? _formatUnusedDeclaration(Map<dynamic, dynamic> issue) {
@@ -178,34 +226,61 @@ String? _formatUnusedDeclaration(Map<dynamic, dynamic> issue) {
   return 'Unused $type `$name`';
 }
 
+Future<DeadCodeAuditRun> runDeadCodeAudit({
+  DeadCodeCommandRunner? commandRunner,
+  DateTime? generatedAt,
+}) async {
+  final runCommand =
+      commandRunner ??
+      (executable, arguments) =>
+          Process.run(executable, arguments, runInShell: true);
+  final envelope = <String, dynamic>{
+    'tool_source': 'dart_code_linter',
+    'scan_state': 'ran',
+    'generated_at': (generatedAt ?? DateTime.now()).toUtc().toIso8601String(),
+    'findings': <Map<String, dynamic>>[],
+  };
+
+  try {
+    final unusedCode = await _runUnused('check-unused-code', runCommand);
+    if (unusedCode.failed) {
+      return _failedRun(envelope, unusedCode.diagnostic!);
+    }
+    final unusedFiles = await _runUnused('check-unused-files', runCommand);
+    if (unusedFiles.failed) {
+      return _failedRun(envelope, unusedFiles.diagnostic!);
+    }
+    final all = [...unusedCode.findings, ...unusedFiles.findings];
+    envelope['findings'] = all.map((f) => f.toJson()).toList();
+  } catch (_) {
+    return _failedRun(envelope, 'dead-code scan could not be completed');
+  }
+  return DeadCodeAuditRun(envelope: envelope, exitCode: 0);
+}
+
+DeadCodeAuditRun _failedRun(Map<String, dynamic> envelope, String diagnostic) {
+  envelope['scan_state'] = 'not_run';
+  envelope['scan_failed'] = true;
+  // Never include scanner stdout/stderr or exception text in the shard: source
+  // scans can encounter sensitive user-facing literals.
+  envelope['error'] = diagnostic;
+  return DeadCodeAuditRun(envelope: envelope, exitCode: 1);
+}
+
 Future<void> main(List<String> args) async {
   final shardDir = Directory('.planning/audit/shards');
   if (!shardDir.existsSync()) shardDir.createSync(recursive: true);
 
   final shardPath = '.planning/audit/shards/dead_code.json';
-  Map<String, dynamic> envelope = {
-    'tool_source': 'dart_code_linter',
-    'scan_state': 'ran',
-    'generated_at': DateTime.now().toUtc().toIso8601String(),
-    'findings': <Map<String, dynamic>>[],
-  };
-
-  try {
-    final unusedCode = await _runUnused('check-unused-code');
-    final unusedFiles = await _runUnused('check-unused-files');
-    final all = [...unusedCode, ...unusedFiles];
-    envelope['findings'] = all.map((f) => f.toJson()).toList();
-  } catch (e, st) {
-    envelope['scan_state'] = 'not_run';
-    envelope['scan_failed'] = true;
-    envelope['error'] = e.toString();
-    stderr.writeln('[audit:dead_code] WARNING: scan failed: $e\n$st');
-    exitCode = 1;
-  }
+  final run = await runDeadCodeAudit();
 
   await File(
     shardPath,
-  ).writeAsString(const JsonEncoder.withIndent('  ').convert(envelope));
-  final n = (envelope['findings'] as List).length;
+  ).writeAsString(const JsonEncoder.withIndent('  ').convert(run.envelope));
+  final n = (run.envelope['findings'] as List).length;
   stdout.writeln('[audit:dead_code] wrote $n findings to $shardPath');
+  if (run.exitCode != 0) {
+    stderr.writeln('[audit:dead_code] ERROR: ${run.envelope['error']}');
+    exitCode = run.exitCode;
+  }
 }
