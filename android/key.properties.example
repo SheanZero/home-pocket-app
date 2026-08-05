@@ -1,0 +1,8 @@
+# Copy this file to android/key.properties. That file is intentionally ignored.
+# Do not commit a keystore or real credential values.
+#
+# `storeFile` is resolved relative to android/app (or may be an absolute path).
+storeFile=../app/upload-keystore.jks
+storePassword=REPLACE_WITH_SECRET
+keyAlias=REPLACE_WITH_UPLOAD_KEY_ALIAS
+keyPassword=REPLACE_WITH_SECRET
