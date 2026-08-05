@@ -234,6 +234,10 @@ APNs/FCM 真实送达、通知点击冷启和两台物理设备的真实 relay �
 
 **建议：** 保持 `sqlcipher_flutter_libs ^0.6.x` 和 sqlite3 2.x 的既定安全约束，不做盲目大版本升级；建立分组升级计划并要求 iOS 真机 SQLCipher、Android migration、签名和全量测试共同通过。
 
+**修复状态（2026-08-05）：已完成。** 依赖已按兼容组刷新：50 个 lockfile 包发生受控升级/替换，Firebase Core/Messaging、通知、secure storage、local auth、file/image picker、connectivity 等直接依赖均提升到当前可验证稳定线；`flutter_local_notifications` 已升至 22.2.0。`speech_to_text 7.4.0` 的实际 analyzer/API 回归被验证后精确回退到 7.3.0，避免把“最新版”误当成“可用版”。最终 analyzer 与 custom_lint 均为 0 issue，受影响测试 59/59、全量 host 测试 4256 通过/12 跳过，通过 Android debug APK、iOS simulator 构建及 iOS 真实 SQLCipher/加密备份/冷启动锁设备旅程。
+
+剩余项均是当前无法安全单独消除的上游约束，现已从隐式警告转为阻断式契约：SQLCipher 固定在仍提供原生库的 0.6.8 + sqlite3 2.9.4 + iOS pod 4.10.0；file_picker/share_plus/package_info_plus/win32 必须在稳定版 file_picker 12 发布后整组升级；Flutter 3.44 保留 Built-in Kotlin/new DSL 的 false 标志，待官方要求的 Flutter 3.47+ 再迁移。[`scripts/dependency_compatibility.dart`](../scripts/dependency_compatibility.dart) 已接入主分支 audit 门禁，[`flutter-future-compat.yml`](../.github/workflows/flutter-future-compat.yml) 每周用 Flutter beta 分别构建 Android/iOS，使未来的 SwiftPM fallback 或 KGP hard-error 在进入 stable 前暴露。完整矩阵与升级证据要求见 [`DEPENDENCY_COMPATIBILITY.md`](testing/DEPENDENCY_COMPATIBILITY.md)。
+
 ### P2-05：发布元数据仍是开发默认值
 
 - [`pubspec.yaml:4`](../pubspec.yaml#L4) 为 `0.1.0+1`，与规划中的 v2.0/首次公开发布口径不一致；

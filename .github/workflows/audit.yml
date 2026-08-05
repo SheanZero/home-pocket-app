@@ -80,6 +80,12 @@ jobs:
           flutter-version: 3.44.0
       - run: flutter pub get
 
+      # P2-04 — coordinated dependency/native-toolchain contract. This blocks
+      # unsafe SQLCipher EOL upgrades, partial win32 plugin upgrades, and
+      # premature Built-in Kotlin switches on the Flutter 3.44 baseline.
+      - name: Dependency compatibility contract
+        run: dart run scripts/dependency_compatibility.dart
+
       # AUDIT-09 — sqlite3_flutter_libs reject. BLOCKING from end of Phase 1.
       - name: Reject sqlite3_flutter_libs in pubspec.lock
         run: |
