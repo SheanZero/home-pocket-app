@@ -55,82 +55,107 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 ## Phase Details
 
 ### Phase 57: Stable Baseline & Compatibility Contract
+
 **Goal**: Maintainers have one auditable, official-source production-stable baseline that prevents unsafe or partial dependency upgrades before any compatibility lane changes.
 **Depends on**: Nothing (first v2.1 phase)
 **Requirements**: BASE-01, BASE-02, BASE-03, BASE-04
 **Success Criteria** (what must be TRUE):
+
   1. A reviewer can see the query date, official source, current value, and production-stable candidate for every required SDK, native tool, and direct dependency.
   2. A clean checkout resolves the reviewed Dart, Flutter, native-project, and lockfile combination reproducibly.
   3. The executable compatibility contract rejects beta/RC/dev, EOL SQLCipher packaging, unapproved overrides, and a partially upgraded dependency lane.
   4. Every intentional hold has recorded official evidence, a compatibility reason, and an exit condition while iOS 15 and Android API 24 remain supported.
-**Plans**: TBD
+
+**Plans**: 1/3 plans executed
+
+- [x] 57-01-PLAN.md
+- [ ] 57-02-PLAN.md
+- [ ] 57-03-PLAN.md
 
 ### Phase 58: Flutter, Analyzer & Code Generation Lane
+
 **Goal**: The project uses a single production-stable Flutter/Dart and code-generation compatibility graph without losing Clean Architecture or lint protection.
 **Depends on**: Phase 57
 **Requirements**: GEN-01, GEN-02, GEN-03, GEN-04
 **Success Criteria** (what must be TRUE):
+
   1. Developers and CI use the same officially verified Flutter/Dart stable toolchain and declared Dart SDK range.
   2. Deliberately invalid imports still fail the architecture import guard, custom lint, and Riverpod lint after the analyzer decision; if analyzer 8 is the safe hold, that hold is explicit and enforced.
   3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one compatible stable graph with no forced override or split runtime/generator lane.
   4. From a clean generation state, dependency resolution, localization generation, and code generation finish with no unexpected tracked generated-file diff or hand-edited output.
+
 **Plans**: TBD
 
 ### Phase 59: Controlled Platform Plugin Cohorts
+
 **Goal**: Users retain working file, share, speech, notification, biometric, and secure-storage behavior while each plugin cohort is either safely modernized or evidence-held.
 **Depends on**: Phase 58
 **Requirements**: PLUG-01, PLUG-02, PLUG-03, PLUG-04
 **Success Criteria** (what must be TRUE):
+
   1. Each direct or significant native/transitive plugin is independently recorded as the latest safe production-stable version or as an evidence-backed hold.
   2. Users can still select and import a `.hpb` backup and invoke the supported system share flow with the file/share/package-info/win32 cohort treated atomically.
   3. Japanese, Chinese, and English voice entry retain parsing, permission, cancellation, and error behavior after a stable speech upgrade; otherwise version 7.3.0 remains with the failed acceptance evidence recorded.
   4. Firebase/notification, biometric, and secure-storage initialization still works without resurfacing the intentionally hidden notification setting or changing the disclosed cloud-fallback behavior.
+
 **Plans**: TBD
 
 ### Phase 60: SQLCipher & iOS Native Safety Lane
+
 **Goal**: Users' local financial data remains encrypted, readable, migratable, and recoverable through the clean iOS native dependency path.
 **Depends on**: Phase 58
 **Requirements**: SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06
 **Success Criteria** (what must be TRUE):
+
   1. The selected native graph keeps the proven `sqlcipher_flutter_libs 0.6.8` / `sqlite3 2.9.4` / SQLCipher Pod 4.10.0 lane unless a separately approved, equivalently evidenced replacement exists; EOL, `sqlite3_flutter_libs`, and plaintext/system-SQLite paths are rejected.
   2. Clean SwiftPM plus SQLCipher-only CocoaPods resolution builds the supported simulator/device and debug/profile/release configurations while retaining the Podfile system-`sqlite3` linker protection.
   3. An encrypted database returns a non-empty `PRAGMA cipher_version` on initial open and after close/reopen, and its sentinel data remains readable.
   4. A previous released encrypted schema migrates through the real upgrade path with its version, tables, indices, defaults, and representative data intact.
   5. Test-only `.hpb` export, clear, and password restore preserve current and supported legacy backups atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.
+
 **Plans**: TBD
 
 ### Phase 61: Android Toolchain & Emulator Lane
+
 **Goal**: The supported Android build is either fully migrated as one production-stable AGP lane or safely held at the last green AGP 8 lane, with no partial toolchain state.
 **Depends on**: Phase 58
 **Requirements**: AND-01, AND-02, AND-03, AND-04
 **Success Criteria** (what must be TRUE):
+
   1. The AGP 9.0.1 / Gradle 9.1 / JDK 17 / API 36 candidate is evaluated as a single lane while preserving minSdk 24.
   2. If AGP 9 is compatible, built-in Kotlin/new DSL adoption, legacy KGP removal, and temporary Flutter opt-out cleanup are complete across the app and plugin graph; if it is not, the entire lane is held at the last green AGP 8 combination with its blocker recorded.
   3. The final Android combination produces a non-debug-signed release AAB/APK that the signing contract accepts and that contains no test-only registrar or plugin.
   4. Key integration journeys pass on a supported Android Emulator, and the final evidence explicitly says Android physical-device acceptance was not performed or claimed.
+
 **Plans**: TBD
 
 ### Phase 62: Automated Release-Gate Lock
+
 **Goal**: The exact final compatibility graph can be reproduced from clean state and passes all automated release prerequisites before it reaches a physical phone.
 **Depends on**: Phase 59, Phase 60, Phase 61
 **Requirements**: QA-01, QA-02, QA-03, QA-04
 **Success Criteria** (what must be TRUE):
+
   1. The final lockfile passes analyze, custom lint/import guard, architecture, privacy, dependency, and whitespace contracts with zero issues and no new unjustified ignore.
   2. Target regressions, the full test suite, coverage gate, and any necessary single-concurrency confirmation pass for the selected graph.
   3. A clean release preflight regenerates native registrants and proves the production Runner excludes development-only plugins while CI pins the same Flutter stable, lockfile, and generation steps.
   4. iPhone Simulator and Android Emulator prerequisites pass, and a compatibility report records exact commands, environment, commit, version deltas, intentional holds, fixes, residual debt, and the absence of Android physical-device validation.
+
 **Plans**: TBD
 
 ### Phase 63: Isolated Wired-iPhone Acceptance
+
 **Goal**: The final signed candidate is accepted on the currently wired iPhone without touching the production app, its financial data, or its credentials.
 **Depends on**: Phase 62
 **Requirements**: DEVICE-01, DEVICE-02, DEVICE-03, DEVICE-04, DEVICE-05, DEVICE-06, DEVICE-07
 **Success Criteria** (what must be TRUE):
+
   1. The UAT app uses an additive, test-only Bundle ID/App ID, container, Keychain group, entitlements, notification/Firebase configuration, and test keys; automated checks prove it is not the production identity.
   2. Install, uninstall, clear-data, and destructive backup/restore exercises use only synthetic UAT data, while the production app, database, Keychain, and backups on the phone remain untouched and records redact device/sensitive financial material.
   3. The current wired `“Xin Zhang”的 iPhone` installs the exact signed profile- or release-compatible artifact for the final commit/lockfile, with model, iOS, Xcode, Flutter, build mode, install, and cold-start evidence recorded.
   4. On that phone, SQLCipher open/reopen, released-schema migration, and encrypted backup clear/restore preserve the sentinel and schema invariants; first-run initialization, daily and joy manual entries, cold-restart persistence, and App Lock PIN/Face ID/fallback/relock all work.
   5. The encrypted sync queue/E2EE smoke is redacted and passes only when the required test environment exists; otherwise it is explicitly limited or blocked, and profile/release performance evidence uses a same-device baseline rather than marking `baseline_required` as passed.
+
 **Plans**: TBD
 
 ## Progress
@@ -139,7 +164,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 57. Stable Baseline & Compatibility Contract | 0/TBD | Not started | - |
+| 57. Stable Baseline & Compatibility Contract | 1/3 | In Progress|  |
 | 58. Flutter, Analyzer & Code Generation Lane | 0/TBD | Not started | - |
 | 59. Controlled Platform Plugin Cohorts | 0/TBD | Not started | - |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
