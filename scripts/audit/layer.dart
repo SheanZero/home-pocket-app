@@ -238,7 +238,10 @@ Future<_LayerScan> _runTextReporter(LayerCommandRunner commandRunner) async {
 }
 
 _LayerScan _parseTextReporter(String output) {
-  if (output == 'No issues found!') return const _LayerScan.success([]);
+  if (output == 'No issues found!' ||
+      output == 'Analyzing...\n\nNo issues found!') {
+    return const _LayerScan.success([]);
+  }
   if (output.isEmpty) {
     return const _LayerScan.failure('layer text reporter emitted no output');
   }

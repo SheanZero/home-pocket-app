@@ -117,6 +117,38 @@ void main() {
       expect(run.envelope['findings'], isEmpty);
     });
 
+    test(
+      'accepts the custom_lint clean signature with its analyzer preamble',
+      () async {
+        final run = await layer.runLayerAudit(
+          commandRunner: (_, arguments) async =>
+              arguments.contains('--reporter=json')
+              ? result(stdout: '')
+              : result(stdout: 'Analyzing...\n\nNo issues found!'),
+        );
+
+        expect(run.exitCode, 0);
+        expect(run.envelope['scan_state'], 'ran');
+        expect(run.envelope['findings'], isEmpty);
+      },
+    );
+
+    test('rejects near-miss clean text output with an extra line', () async {
+      final run = await layer.runLayerAudit(
+        commandRunner: (_, arguments) async =>
+            arguments.contains('--reporter=json')
+            ? result(stdout: '')
+            : result(
+                stdout: 'Analyzing...\n\nNo issues found!\nUnexpected detail',
+              ),
+      );
+
+      expect(run.exitCode, 1);
+      expect(run.envelope['scan_state'], 'not_run');
+      expect(run.envelope['scan_failed'], isTrue);
+      expect(run.envelope['findings'], isEmpty);
+    });
+
     test('parses the exact text-reporter finding format in fallback', () async {
       final run = await layer.runLayerAudit(
         commandRunner: (_, arguments) async =>
