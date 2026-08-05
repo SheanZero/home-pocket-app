@@ -104,6 +104,30 @@ void main() {
         }
       }
     });
+
+    test('App Review contact uses the approved operator details', () {
+      const name = '張欣';
+      const company = 'ナープ株式会社';
+      const email = 'support@napu.co.jp';
+      const phone = '03-6859-7235';
+      final reviewNotes = File(
+        'publish/ios/review/app_review_notes_en.txt',
+      ).readAsStringSync();
+      final requiredValues = File(
+        'publish/ios/REQUIRED_VALUES.env.example',
+      ).readAsStringSync();
+
+      for (final value in [name, company, email, phone]) {
+        expect(reviewNotes, contains(value));
+      }
+      expect(reviewNotes, isNot(contains('__REQUIRED_REVIEW_CONTACT_')));
+      expect(requiredValues, contains('REVIEW_FIRST_NAME="欣"'));
+      expect(requiredValues, contains('REVIEW_LAST_NAME="張"'));
+      expect(requiredValues, contains('REVIEW_COMPANY="$company"'));
+      expect(requiredValues, contains('REVIEW_EMAIL="$email"'));
+      expect(requiredValues, contains('REVIEW_PHONE="$phone"'));
+      expect(requiredValues, isNot(contains('__REQUIRED_REVIEW_CONTACT_')));
+    });
   });
 }
 

@@ -25,7 +25,7 @@
 ## P1 — 强烈建议首发前关闭
 
 - [x] `CFBundleDisplayName` 三语统一为 `Happy Pocket`；麦克风、语音识别、Face ID 权限说明保持 `ja`、`zh-Hans`、`en` 本地化，并由架构测试锁定 key parity 与 Xcode Resources 引用。
-- [x] iOS 最低版本已统一为 15.0：Podfile、Xcode、项目文档、官网、商店介绍和真机测试矩阵口径一致。
+- [x] iOS 最低版本已统一为 iOS 15.0：Podfile、Xcode、项目文档、官网、商店介绍和真机测试矩阵口径一致。
 - [ ] 在真机验证 Face ID、麦克风、语音识别、照片选择、加密数据库、备份导入导出、家庭加入/退出/删除；APNs/FCM 延至后续版本。
 - [ ] 若在 EU 上架，完成 Digital Services Act trader/non-trader 状态与展示信息；若首发不需要，先缩小地区范围。
 - [x] 首版隐藏“开发を応援する”入口，且不提供付费、捐助、赞助、数字商品或功能解锁。

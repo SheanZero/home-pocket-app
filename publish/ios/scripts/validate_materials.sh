@@ -66,13 +66,25 @@ else
   block "Podfile and Xcode deployment targets must both be iOS 15.0"
 fi
 
-if rg -q 'iOS 15' "$PUBLISH_DIR/RELEASE_GATES.md" \
-  && rg -q 'iOS 15' "$PUBLISH_DIR/intro/en/app-introduction.md" \
-  && rg -q 'iOS 15' "$PUBLISH_DIR/intro/ja/app-introduction.md" \
-  && ! rg -q 'iOS 14' "$PUBLISH_DIR/RELEASE_GATES.md" "$PUBLISH_DIR/intro"; then
-  pass "iOS release materials declare iOS 15 and contain no iOS 14 support claim"
-else
-  block "iOS release materials must consistently declare iOS 15"
+IOS_RELEASE_MATERIALS=(
+  "$PUBLISH_DIR/README.md"
+  "$PUBLISH_DIR/RELEASE_GATES.md"
+  "$PUBLISH_DIR/RELEASE_STEPS.md"
+  "$PUBLISH_DIR/intro/en/app-introduction.md"
+  "$PUBLISH_DIR/intro/ja/app-introduction.md"
+)
+IOS_VERSION_MISMATCH=0
+for material in "${IOS_RELEASE_MATERIALS[@]}"; do
+  if rg -q 'iOS 15' "$material" && ! rg -q 'iOS 14' "$material"; then
+    pass "$(basename "$material") declares iOS 15 and no iOS 14 support claim"
+  else
+    block "iOS release material must declare iOS 15 and contain no iOS 14 support claim: $material"
+    IOS_VERSION_MISMATCH=1
+  fi
+done
+
+if [ "$IOS_VERSION_MISMATCH" -eq 0 ]; then
+  pass "iOS release materials consistently declare iOS 15"
 fi
 
 if rg -q 'TARGETED_DEVICE_FAMILY = "1,2";' ios/Runner.xcodeproj/project.pbxproj; then
@@ -202,8 +214,19 @@ else
   block "expected 30 final screenshots; found $READY_IMAGE_COUNT"
 fi
 
-if rg -n '__REQUIRED_' "$PUBLISH_DIR/review/app_review_notes_en.txt" >/dev/null; then
-  block "App Review notes still contain required contact placeholders"
+REVIEW_NOTES="$PUBLISH_DIR/review/app_review_notes_en.txt"
+REVIEW_VALUES="$PUBLISH_DIR/REQUIRED_VALUES.env.example"
+if rg -n '__REQUIRED_REVIEW_CONTACT_' "$REVIEW_NOTES" "$REVIEW_VALUES" >/dev/null; then
+  block "App Review contact still contains required placeholders"
+elif rg -q 'Representative 張欣, ナープ株式会社, support@napu\.co\.jp, 03-6859-7235\.' "$REVIEW_NOTES" \
+  && rg -q '^REVIEW_FIRST_NAME="欣"$' "$REVIEW_VALUES" \
+  && rg -q '^REVIEW_LAST_NAME="張"$' "$REVIEW_VALUES" \
+  && rg -q '^REVIEW_COMPANY="ナープ株式会社"$' "$REVIEW_VALUES" \
+  && rg -q '^REVIEW_EMAIL="support@napu\.co\.jp"$' "$REVIEW_VALUES" \
+  && rg -q '^REVIEW_PHONE="03-6859-7235"$' "$REVIEW_VALUES"; then
+  pass "App Review contact uses approved operator details"
+else
+  block "App Review contact does not match approved operator details"
 fi
 
 echo "Result: $BLOCKERS blocker(s), $WARNINGS warning(s)"

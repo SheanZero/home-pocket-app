@@ -10,4 +10,4 @@ The sponsorship entry is hidden in this release. The app has no in-app purchases
 
 OCR/receipt scanning is intentionally disabled in this release and is not represented in the store metadata or screenshots.
 
-Review contact: __REQUIRED_REVIEW_CONTACT_NAME__, __REQUIRED_REVIEW_CONTACT_EMAIL__, __REQUIRED_REVIEW_CONTACT_PHONE__.
+Review contact: Representative 張欣, ナープ株式会社, support@napu.co.jp, 03-6859-7235.

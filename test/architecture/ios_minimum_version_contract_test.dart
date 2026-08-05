@@ -16,6 +16,11 @@ const _currentPlatformDeclarationFiles = <String>[
   'docs/arch/01-core-architecture/ARCH-001_Complete_Guide.md',
   'docs/arch/01-core-architecture/ARCH-007_Architecture_Diagram_I18N.md',
   'docs/reports/family-management-real-device-uat.html',
+  'publish/ios/README.md',
+  'publish/ios/RELEASE_GATES.md',
+  'publish/ios/RELEASE_STEPS.md',
+  'publish/ios/intro/en/app-introduction.md',
+  'publish/ios/intro/ja/app-introduction.md',
 ];
 
 void main() {
