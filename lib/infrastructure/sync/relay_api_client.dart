@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as hash_lib;
@@ -74,7 +75,12 @@ class RelayPullResponse {
 /// `Ed25519 <deviceId>:<timestamp>:<base64Signature>`
 ///
 /// Signature message format:
-/// `<method>:<path>:<timestamp>:<SHA256(body)>`
+/// `<method>:<path>:<timestamp>:<nonce>:<SHA256(body)>`
+///
+/// Every authenticated HTTP request carries the same cryptographically random
+/// nonce in its `X-Request-Nonce` header. The relay consumes a nonce once per
+/// device, so a captured signed request cannot be replayed inside the
+/// timestamp acceptance window.
 ///
 /// **IMPORTANT:** `path` must be the full URL path including the API version
 /// prefix (e.g., `/api/v1/group/create`), not just the relative path.
@@ -83,11 +89,25 @@ class RequestSigner {
 
   final KeyManager _keyManager;
 
+  static const int requestNonceBytes = 32;
+
+  /// Generates a URL-safe, 256-bit request nonce for one authenticated call.
+  static String generateRequestNonce() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(
+      requestNonceBytes,
+      (_) => random.nextInt(256),
+      growable: false,
+    );
+    return base64UrlEncode(bytes).replaceAll('=', '');
+  }
+
   /// Generate signed Authorization header.
   Future<String> signRequest({
     required String method,
     required String path,
     required String body,
+    required String nonce,
   }) async {
     final deviceId = await _keyManager.getDeviceId();
     if (deviceId == null) {
@@ -98,7 +118,7 @@ class RequestSigner {
 
     // SHA-256 hash of request body (lowercase hex)
     final bodyHash = hash_lib.sha256.convert(utf8.encode(body));
-    final message = '$method:$path:$timestamp:$bodyHash';
+    final message = '$method:$path:$timestamp:$nonce:$bodyHash';
 
     // Ed25519 sign
     final signature = await _keyManager.signData(utf8.encode(message));
@@ -119,17 +139,21 @@ class RelayApiClient {
     required RequestSigner signer,
     http.Client? httpClient,
     NetworkStatusChecker? networkStatusChecker,
+    String Function()? requestNonceGenerator,
     Duration requestTimeout = const Duration(seconds: 15),
   }) : _signer = signer,
        _httpClient = httpClient ?? http.Client(),
        _networkStatusChecker =
            networkStatusChecker ?? ConnectivityNetworkStatusChecker(),
+       _requestNonceGenerator =
+           requestNonceGenerator ?? RequestSigner.generateRequestNonce,
        _requestTimeout = requestTimeout;
 
   final String baseUrl;
   final RequestSigner _signer;
   final http.Client _httpClient;
   final NetworkStatusChecker _networkStatusChecker;
+  final String Function() _requestNonceGenerator;
   final Duration _requestTimeout;
 
   /// The relay accepts a maximum 2 MiB API body. A pull response is limited to
@@ -495,7 +519,8 @@ class RelayApiClient {
     _logRequest('GET', path, '');
     final url = Uri.parse('$baseUrl$path');
     final headers = <String, String>{'Content-Type': 'application/json'};
-    headers['Authorization'] = await _signer.signRequest(
+    await _addAuthentication(
+      headers,
       method: 'GET',
       path: _signingPath(path),
       body: '',
@@ -547,7 +572,8 @@ class RelayApiClient {
     if (authenticated) {
       // Sign with path only (no query string) — server uses r.URL.Path
       final pathOnly = path.split('?').first;
-      headers['Authorization'] = await _signer.signRequest(
+      await _addAuthentication(
+        headers,
         method: 'GET',
         path: _signingPath(pathOnly),
         body: '',
@@ -571,7 +597,8 @@ class RelayApiClient {
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
-      headers['Authorization'] = await _signer.signRequest(
+      await _addAuthentication(
+        headers,
         method: 'POST',
         path: _signingPath(path),
         body: body,
@@ -595,7 +622,8 @@ class RelayApiClient {
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
-      headers['Authorization'] = await _signer.signRequest(
+      await _addAuthentication(
+        headers,
         method: 'PUT',
         path: _signingPath(path),
         body: body,
@@ -618,7 +646,8 @@ class RelayApiClient {
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
-      headers['Authorization'] = await _signer.signRequest(
+      await _addAuthentication(
+        headers,
         method: 'DELETE',
         path: _signingPath(path),
         body: '',
@@ -630,6 +659,22 @@ class RelayApiClient {
     );
     _logResponse('DELETE', path, response);
     return response;
+  }
+
+  Future<void> _addAuthentication(
+    Map<String, String> headers, {
+    required String method,
+    required String path,
+    required String body,
+  }) async {
+    final nonce = _requestNonceGenerator();
+    headers['X-Request-Nonce'] = nonce;
+    headers['Authorization'] = await _signer.signRequest(
+      method: method,
+      path: path,
+      body: body,
+      nonce: nonce,
+    );
   }
 
   Future<http.Response> _sendHttp(

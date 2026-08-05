@@ -45,6 +45,7 @@ void main() {
       signer: signer,
       httpClient: httpClient,
       networkStatusChecker: networkStatusChecker,
+      requestNonceGenerator: () => 'A' * 43,
     );
 
     when(
@@ -52,6 +53,7 @@ void main() {
         method: any(named: 'method'),
         path: any(named: 'path'),
         body: any(named: 'body'),
+        nonce: any(named: 'nonce'),
       ),
     ).thenAnswer((_) async => 'Ed25519 signed');
   });
@@ -365,11 +367,52 @@ void main() {
       method: 'POST',
       path: '/api/v1/sync/push',
       body: '{"ok":true}',
+      nonce: 'A' * 43,
     );
 
     expect(header, startsWith('Ed25519 device-1:'));
     expect(header, endsWith(':AQID'));
-    verify(() => keyManager.signData(any())).called(1);
+    final signedMessage =
+        verify(() => keyManager.signData(captureAny())).captured.single
+            as List<int>;
+    expect(utf8.decode(signedMessage), startsWith('POST:/api/v1/sync/push:'));
+    expect(utf8.decode(signedMessage), contains(':${'A' * 43}:'));
+  });
+
+  test(
+    'uses a signed request nonce header on every authenticated REST call',
+    () async {
+      _stubGet(httpClient, '/group/check', {'groupExisted': false});
+
+      await apiClient.checkGroup();
+
+      final headers =
+          verify(
+                () => httpClient.get(
+                  Uri.parse('https://example.com/api/v1/group/check'),
+                  headers: captureAny(named: 'headers'),
+                ),
+              ).captured.single
+              as Map<String, String>;
+      expect(headers['X-Request-Nonce'], 'A' * 43);
+      verify(
+        () => signer.signRequest(
+          method: 'GET',
+          path: '/api/v1/group/check',
+          body: '',
+          nonce: 'A' * 43,
+        ),
+      ).called(1);
+    },
+  );
+
+  test('generates URL-safe 256-bit request nonces', () {
+    final first = RequestSigner.generateRequestNonce();
+    final second = RequestSigner.generateRequestNonce();
+
+    expect(first, matches(RegExp(r'^[A-Za-z0-9_-]{43}$')));
+    expect(second, matches(RegExp(r'^[A-Za-z0-9_-]{43}$')));
+    expect(second, isNot(first));
   });
 
   test('RequestSigner fails when device id is missing', () async {
@@ -377,9 +420,12 @@ void main() {
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => null);
 
     expect(
-      () => RequestSigner(
-        keyManager: keyManager,
-      ).signRequest(method: 'GET', path: '/api/v1/group/check', body: ''),
+      () => RequestSigner(keyManager: keyManager).signRequest(
+        method: 'GET',
+        path: '/api/v1/group/check',
+        body: '',
+        nonce: 'A' * 43,
+      ),
       throwsStateError,
     );
   });
@@ -456,6 +502,7 @@ void main() {
           method: 'POST',
           path: '/api/v1/device/register',
           body: any(named: 'body'),
+          nonce: any(named: 'nonce'),
         ),
       );
     },

@@ -1,6 +1,6 @@
 # Happy Pocket Relay — API & WebSocket Protocol
 
-> Version: 2026-04-05  
+> Version: 2026-08-05 (CR-05 relay contract; requires coordinated server deployment)
 > Base URL: `https://sync.happypocket.app/api/v1`  
 > WebSocket URL: `wss://sync.happypocket.app/ws`
 
@@ -46,26 +46,61 @@ All `/api/v1` endpoints except `/health`, `/push/stats`, and `/device/register` 
 Authorization: Ed25519 <deviceId>:<timestamp>:<signature>
 ```
 
+Every authenticated REST request also sends:
+
+```
+X-Request-Nonce: <base64url nonce>
+```
+
 | Component | Description |
 |---|---|
 | `deviceId` | The registered device ID |
 | `timestamp` | Current Unix epoch seconds (integer) |
 | `signature` | Base64-encoded Ed25519 signature of the signed message |
 
+| Request header | Description |
+|---|---|
+| `X-Request-Nonce` | Unpadded base64url encoding of 32 cryptographically random bytes (exactly 43 characters, `[A-Za-z0-9_-]`) generated once per request |
+
 ### Signed Message Construction
 
 ```
-<HTTP_METHOD>:<PATH>:<timestamp>:<SHA256_HEX(body)>
+<HTTP_METHOD>:<PATH>:<timestamp>:<nonce>:<SHA256_HEX(body)>
 ```
 
 - `HTTP_METHOD`: uppercase (`GET`, `POST`, `PUT`, `DELETE`)
 - `PATH`: full path including prefix, e.g. `/api/v1/sync/push`
 - `timestamp`: same value as in the header
+- `nonce`: exact `X-Request-Nonce` header value
 - `SHA256_HEX(body)`: lowercase hex SHA-256 of the raw request body (empty body → SHA-256 of empty bytes)
 
 ### Timestamp Window
 
 Server accepts timestamps within **±300 seconds** (5 minutes) of server time.
+
+### Replay Protection (Required Server Behavior)
+
+After timestamp and Ed25519 verification, the server must atomically consume
+the `(deviceId, nonce)` pair before dispatching the handler. A second use of a
+live pair returns **409** with `{"error":"request replayed"}` and must not
+invoke route side effects. Missing or malformed nonces return **401** with
+`{"error":"invalid request nonce"}`. If durable replay protection is
+unavailable, the server must fail closed with **503** rather than accepting the
+request.
+
+The replay lifetime is **10 minutes**, which exceeds the ±300-second timestamp
+acceptance window. Production relays must persist the ledger in the shared
+PostgreSQL database (for example, a `signed_request_nonces` table with a
+primary key on `(device_id, nonce)`, an atomic `INSERT … ON CONFLICT` claim,
+and an `expires_at` cleanup index). This gives cross-instance protection only
+when every relay instance uses that same database. An in-memory nonce cache is
+not an acceptable production implementation; bounded TTL cleanup is required
+to prevent replay-ledger growth.
+
+This is a fail-closed protocol revision: the relay must deploy the durable
+claim/migration and its tests before clients that sign this canonical form are
+released. The prior three-field canonical form is not a secure fallback and is
+not accepted by this revision.
 
 ### Signature Verification
 
@@ -115,6 +150,10 @@ All errors return:
   "error": "<human-readable message>"
 }
 ```
+
+Authentication/replay errors additionally use: **401** for missing or invalid
+authorization/nonces, **409** for a consumed request nonce, and **503** when
+the relay cannot access its durable replay ledger.
 
 ---
 
@@ -888,6 +927,10 @@ GET /ws/group/{groupId}
 ```
 
 Upgrade to WebSocket. No HTTP `Authorization` header is needed — authentication is performed in-band.
+
+WebSocket authentication remains a separate protocol with its own signed
+message and short timestamp tolerance; `X-Request-Nonce` applies only to
+signed REST requests and is not reused for the WebSocket handshake.
 
 #### 2. Client sends Auth Message (within 5 seconds)
 
