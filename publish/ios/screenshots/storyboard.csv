@@ -1,0 +1,16 @@
+locale,index,filename,screen,headline,subheadline,data_notes
+ja,1,01-home.png,Home,暮らしと「ときめき」をひとつに,日常と自分らしい喜びを分けて記録,JPY・個人モード・100%未満
+ja,2,02-entry.png,One-step entry,思いついたら、すぐ記録,手入力も音声入力もひとつの画面で,架空の店名・権限許可済み
+ja,3,03-analytics.png,Analytics,数字の先にある暮らしが見える,月の推移とカテゴリをやさしく振り返る,通常月・過度な達成演出なし
+ja,4,04-family.png,Family management,家族で共有、私らしさは守る,必要な台帳だけを端末間暗号化で同期,失効済みinvite・架空member
+ja,5,05-shopping.png,Shopping list,買い物も家族とスムーズに,共有リストと自分だけのリストを使い分け,一般商品・private例1件
+zh-Hans,1,01-home.png,Home,把生活与“悦己”放在一起,日常支出和让自己开心的花费分开记录,JPY・个人模式・未到100%
+zh-Hans,2,02-entry.png,One-step entry,想到就能马上记,手动和语音录入都在一个页面完成,虚构商户・权限已允许
+zh-Hans,3,03-analytics.png,Analytics,看见数字背后的生活,轻松回顾月度趋势与分类构成,普通月份・无达成庆祝
+zh-Hans,4,04-family.png,Family management,家庭共享，也保留自己的空间,只同步需要共享的加密账本,已失效邀请码・虚构成员
+zh-Hans,5,05-shopping.png,Shopping list,全家的购物更顺手,共享清单与私人清单自由切换,普通商品・1条私人示例
+en-US,1,01-home.png,Home,Everyday needs and Joy together,Keep Daily and Joy spending clear without losing context,JPY・personal mode・below 100%
+en-US,2,02-entry.png,One-step entry,Capture it while it is fresh,Manual and voice entry in one focused flow,Fictional merchant・permissions granted
+en-US,3,03-analytics.png,Analytics,See the life behind the numbers,Review monthly trends and categories with clarity,Normal month・no achievement effects
+en-US,4,04-family.png,Family management,Share as a family, keep privacy personal,Sync only the ledgers you choose with end-to-end encryption,Expired invite・fictional members
+en-US,5,05-shopping.png,Shopping list,Make household shopping flow,Switch between shared and private lists,Everyday items・one private example

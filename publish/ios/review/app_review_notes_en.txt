@@ -1,0 +1,13 @@
+Home Pocket is a local-first household budgeting app. No sign-in or demo account is required. On first launch, tap “Get started,” complete Initial Setup with any nickname, language, and currency, and optionally skip app-lock setup. The core ledger, analytics, shopping list, backup, and settings features are then available on one device.
+
+Family Sync is optional and requires two app installations. On device A, open Settings > Family > Create a new family and generate an invite code. On device B, open the same section, choose Join family, enter the six-digit code, and confirm. Approve the request on device A. Shared data is encrypted on device and transferred through our zero-knowledge relay at https://sync.happypocket.app. The relay temporarily stores opaque encrypted messages until acknowledgement or expiry; it cannot decrypt ledger contents. The backend will remain available during review. A two-device demonstration video is attached if requested.
+
+Voice entry first requests microphone and speech-recognition permissions. The app prefers on-device recognition. If the device cannot provide on-device recognition, a user-controlled fallback may use the system network speech-recognition service. No audio is stored by the developer.
+
+The app uses native APNs for optional family notifications. It also contacts public exchange-rate providers when the user requests a currency conversion; no transaction amount, note, or identity is included in that rate request.
+
+The “Support development” row in Settings opens an external contact/support page. It is optional, unlocks no app functionality, and does not sell digital goods or services. The app has no in-app purchases, subscriptions, advertising, or behavioral tracking.
+
+OCR/receipt scanning is intentionally disabled in this release and is not represented in the store metadata or screenshots.
+
+Review contact: __REQUIRED_REVIEW_CONTACT_NAME__, __REQUIRED_REVIEW_CONTACT_EMAIL__, __REQUIRED_REVIEW_CONTACT_PHONE__.

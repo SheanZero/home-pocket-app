@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "purpose": "Bilingual product-introduction visuals; not final App Store device screenshots.",
+  "canvas": {
+    "width": 1600,
+    "height": 1000,
+    "mode": "RGB",
+    "format": "PNG"
+  },
+  "locales": {
+    "ja": {
+      "visuals": [
+        {
+          "file": "images/ja/01-dual-ledger.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "42ca52ef8cff5149711d9df619365b4ffdb635308de09f6b9d6ab9d55e4cfe5a",
+          "copy": {
+            "label": "01 ・ デュアル台帳",
+            "title": "暮らしと「ときめき」を、\nひとつの家計簿に。",
+            "body": "日常の支出と、自分らしい喜びを分けて記録。"
+          },
+          "sources": [
+            "assets/branding/home_pocket_app_icon_transparent.png"
+          ]
+        },
+        {
+          "file": "images/ja/02-reflection.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "cd7401257fcdc4d2d2ca4cf988034a7df7dd67c69f32c609a35100da8ba4d904",
+          "copy": {
+            "label": "02 ・ 振り返り",
+            "title": "数字の先にある\n暮らしが見える。",
+            "body": "月の推移とカテゴリ内訳を、やさしく振り返れます。"
+          },
+          "sources": [
+            "test/golden/goldens/category_donut_card_light_ja.png",
+            "test/golden/goldens/within_month_trend_card_light_ja.png"
+          ]
+        },
+        {
+          "file": "images/ja/03-joy.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "b3394005f3af44cce8191c874b950dd7402a04a08e397e9dacc7b0ba8e8a7f76",
+          "copy": {
+            "label": "03 ・ ときめき",
+            "title": "「使ってよかった」\n気持ちも残す。",
+            "body": "満足度とときめきの記録から、自分らしい選択を振り返ります。"
+          },
+          "sources": [
+            "test/golden/goldens/joy_calendar_card_light_ja.png",
+            "test/golden/goldens/satisfaction_histogram_card_light_ja.png"
+          ]
+        },
+        {
+          "file": "images/ja/04-family-privacy.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "52a790cf01b9e589faf09d0e9ed9b8b32960b0b7001588d04076ffd0dcee7e10",
+          "copy": {
+            "label": "04 ・ 家族とプライバシー",
+            "title": "家族で共有。\n私らしさは守る。",
+            "body": "共有内容を端末で暗号化し、家族と同期。"
+          },
+          "sources": [
+            "docs/mockup/v16/assets/onboarding-privacy-warm-v1.png",
+            "docs/mockup/v16/assets/family-entry-create-warm-v1.png"
+          ]
+        },
+        {
+          "file": "images/ja/05-everyday-tools.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "f1a59373eb6e4c41e6022a53635f7b0d9336a0be4f7f65a77f344d5b9a57e4a9",
+          "copy": {
+            "label": "05 ・ 毎日の道具",
+            "title": "買い物も、旅先の支出も\nスムーズに。",
+            "body": "共有・非公開の買い物リストと、複数通貨の入力に対応。"
+          },
+          "sources": [
+            "test/golden/goldens/shopping_item_tile_active_ja.png",
+            "test/golden/goldens/currency_selector_sheet_ja.png"
+          ]
+        }
+      ],
+      "preview": {
+        "file": "preview-ja.png",
+        "width": 1388,
+        "height": 1344,
+        "sha256": "30e0c8eb412e0f4ea90aef038d36f2df74acf00e664ace7309fe675291b02045"
+      }
+    },
+    "en": {
+      "visuals": [
+        {
+          "file": "images/en/01-dual-ledger.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "9042cf7c2a4e944dd8fc5c9f4b60e2c823f43fd138933b97cb648067df9ba27a",
+          "copy": {
+            "label": "01 · DUAL LEDGER",
+            "title": "Everyday needs\nand Joy, together.",
+            "body": "Separate Daily and Joy spending without losing the bigger picture."
+          },
+          "sources": [
+            "assets/branding/home_pocket_app_icon_transparent.png"
+          ]
+        },
+        {
+          "file": "images/en/02-reflection.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "31b2f581364b0ddcc9607a28d294468134c906929317e85638dd3683caddb720",
+          "copy": {
+            "label": "02 · REFLECTION",
+            "title": "See the life behind\nthe numbers.",
+            "body": "Review monthly trends and category breakdowns with clarity."
+          },
+          "sources": [
+            "test/golden/goldens/category_donut_card_light_en.png",
+            "test/golden/goldens/within_month_trend_card_light_en.png"
+          ]
+        },
+        {
+          "file": "images/en/03-joy.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "c080f19cd7e2c5ae1da175b54b9af1fccd9c6e3b503a30a91c20be208aa90a7a",
+          "copy": {
+            "label": "03 · JOY",
+            "title": "Remember what\nfelt worthwhile.",
+            "body": "Use satisfaction and Joy reflections to understand what matters to you."
+          },
+          "sources": [
+            "test/golden/goldens/joy_calendar_card_light_en.png",
+            "test/golden/goldens/satisfaction_histogram_card_light_en.png"
+          ]
+        },
+        {
+          "file": "images/en/04-family-privacy.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "15bf6fbe9e8eb4cadd37e3df2e04990bb7f571a2d6f9cd9caf67167b50ad4574",
+          "copy": {
+            "label": "04 · FAMILY & PRIVACY",
+            "title": "Share as a family.\nKeep privacy personal.",
+            "body": "Encrypt shared content on device and sync only what you choose."
+          },
+          "sources": [
+            "docs/mockup/v16/assets/onboarding-privacy-warm-v1.png",
+            "docs/mockup/v16/assets/family-entry-create-warm-v1.png"
+          ]
+        },
+        {
+          "file": "images/en/05-everyday-tools.png",
+          "width": 1600,
+          "height": 1000,
+          "sha256": "6abd72dcbfc27567b868b219ce347a747bf2bd078a37e2688755ef748364f399",
+          "copy": {
+            "label": "05 · EVERYDAY TOOLS",
+            "title": "Household lists and travel\nspending, simplified.",
+            "body": "Use shared or private shopping lists and record multiple currencies."
+          },
+          "sources": [
+            "test/golden/goldens/shopping_item_tile_active_en.png",
+            "test/golden/goldens/currency_selector_sheet_en.png"
+          ]
+        }
+      ],
+      "preview": {
+        "file": "preview-en.png",
+        "width": 1388,
+        "height": 1344,
+        "sha256": "7930f061dfe134d67adeeabf3cefa2bc0f5403883ce3c37bb0ad8dcafe1f0573"
+      }
+    }
+  }
+}
