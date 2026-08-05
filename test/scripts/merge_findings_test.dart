@@ -149,7 +149,7 @@ void main() {
     );
 
     test(
-      'dedupe: same (file,line,category) collapses; tool > agent on tie',
+      'ignores agent-shard findings when an authoritative shard reports the same candidate',
       () async {
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
@@ -365,6 +365,54 @@ void main() {
         expect(findings.single['status'], equals('open'));
         expect(findings.single.containsKey('closed_in_phase'), isFalse);
         expect(findings.single.containsKey('closed_commit'), isFalse);
+      },
+    );
+
+    test(
+      'does not reopen a closed historical agent finding from an agent shard',
+      () async {
+        final historical = _f(
+          filePath: 'lib/historical.dart',
+          line: 12,
+          toolSource: 'agent:layer',
+          confidence: 'medium',
+          description: 'historical semantic finding',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {
+                ...historical.toJson(),
+                'id': 'LV-001',
+                'status': 'closed',
+                'closed_in_phase': 3,
+                'closed_commit': 'abc123',
+              },
+            ],
+          }),
+        );
+        File(
+          '${shardRoot.path}/shards/layer.json',
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_guard')));
+        File('${shardRoot.path}/agent-shards/layer.json').writeAsStringSync(
+          jsonEncode(_shardWith([historical], 'agent:layer')),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final finding =
+            ((jsonDecode(
+                          File(
+                            '${shardRoot.path}/issues.json',
+                          ).readAsStringSync(),
+                        )['findings']
+                        as List)
+                    .single
+                as Map);
+        expect(finding['id'], 'LV-001');
+        expect(finding['status'], 'closed');
+        expect(finding['closed_commit'], 'abc123');
       },
     );
 
