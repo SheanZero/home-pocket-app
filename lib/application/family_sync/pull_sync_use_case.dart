@@ -170,230 +170,21 @@ class PullSyncUseCase {
   final int _maxPagesPerExecution;
 
   Future<PullSyncResult> execute() async {
-    var appliedCount = 0;
-    var ackedCount = 0;
-    var pageCount = 0;
+    final progress = _PullProgress();
     try {
-      final activeGroup = await _groupRepo.getActiveGroup();
-      final pendingGroup = activeGroup == null
-          ? await _groupRepo.getPendingGroup()
-          : null;
-      final resolvedGroup = activeGroup ?? pendingGroup;
-      if (resolvedGroup == null) return const PullSyncResult.noPair();
-      var group = resolvedGroup;
-
-      final deviceId = await _keyManager.getDeviceId();
-      var unsupportedEnvelopeSeen = false;
-      while (pageCount < _maxPagesPerExecution) {
-        // Pull returns only messages that have not been ACKed. ACKing each page
-        // advances the server-side window without a separate cursor.
-        final response = RelayPullResponse.fromJson(
-          await _apiClient.pullSync(),
-        );
-        pageCount++;
-
-        if (kDebugMode) {
-          debugPrint(
-            '[PullSync] Received ${response.messages.length} messages on page $pageCount',
-          );
-        }
-
-        if (response.messages.isEmpty) {
-          if (response.hasMore) {
-            return PullSyncResult.error(
-              'Relay returned an empty page with hasMore=true',
-              appliedCount: appliedCount,
-              ackedCount: ackedCount,
-              pageCount: pageCount,
-            );
-          }
-          if (ackedCount == 0) {
-            return PullSyncResult.noNewData(pageCount: pageCount);
-          }
-          await _queueManager.drainQueue();
-          return PullSyncResult.success(
-            appliedCount,
-            ackedCount: ackedCount,
-            pageCount: pageCount,
-          );
-        }
-
-        final ackedMessageIds = <String>[];
-        final unacknowledgedMessageIds = <String>[];
-        for (final msg in response.messages) {
-          final messageId = msg['messageId'] as String;
-          final fromDeviceId = msg['fromDeviceId'] as String?;
-          final payload = msg['payload'] as String;
-          final messageKeyEpoch = (msg['keyEpoch'] as num?)?.toInt() ?? 1;
-          final messageKind = msg['messageKind'] as String? ?? 'data';
-          final payloadType = E2EEService.detectPayloadType(payload);
-
-          switch (payloadType) {
-            case 'v2_key':
-              final processed = await _handleGroupKeyMessage(
-                group: group,
-                payload: payload,
-                fromDeviceId: fromDeviceId,
-                localDeviceId: deviceId,
-                messageKeyEpoch: messageKeyEpoch,
-                messageKind: messageKind,
-              );
-              if (processed) {
-                ackedMessageIds.add(messageId);
-                group = await _groupRepo.getGroupById(group.groupId) ?? group;
-              } else {
-                unacknowledgedMessageIds.add(messageId);
-              }
-              break;
-            case 'v2_data':
-              if (group.groupKey == null ||
-                  messageKeyEpoch != group.keyEpoch ||
-                  !_payloadMatchesEpoch(payload, messageKeyEpoch)) {
-                unacknowledgedMessageIds.add(messageId);
-                continue;
-              }
-
-              final plaintext = _e2eeService.decryptFromGroup(
-                encryptedPayload: payload,
-                groupKeyBase64: group.groupKey!,
-              );
-              try {
-                final decoded = jsonDecode(plaintext);
-                final envelope = _decodeOperationsEnvelope(
-                  decoded,
-                  fromDeviceId: fromDeviceId,
-                  createdAt: msg['createdAt'],
-                );
-                final operations = envelope.operations.indexed.map((entry) {
-                  return _normalizeOperation(
-                    entry.$2,
-                    fromDeviceId: fromDeviceId,
-                    transportKeyEpoch: messageKeyEpoch,
-                    transportMessageId: messageId,
-                    envelopeVersion: envelope.version,
-                    operationIndex: entry.$1,
-                  );
-                }).toList();
-                final applyResult = await _applyOperations(
-                  operations,
-                  groupId: group.groupId,
-                );
-                if (applyResult is ApplySyncOperationsResult) {
-                  if (!applyResult.isAckSafe) {
-                    unacknowledgedMessageIds.add(messageId);
-                    continue;
-                  }
-                  appliedCount += applyResult.appliedCount;
-                } else {
-                  // Compatibility seam for callers that still expose the old
-                  // Future<void> callback. Production always returns the
-                  // structured result above.
-                  appliedCount += operations.length;
-                }
-                ackedMessageIds.add(messageId);
-              } on _InboundOperationLimitExceeded {
-                final rejectOperationsBatch = _rejectOperationsBatch;
-                if (rejectOperationsBatch == null) {
-                  unacknowledgedMessageIds.add(messageId);
-                  break;
-                }
-                final plaintextBytes = utf8.encode(plaintext);
-                final rejectResult = await rejectOperationsBatch(
-                  groupId: group.groupId,
-                  messageId: messageId,
-                  sourceBytes: plaintextBytes.length,
-                  digest: sha256.convert(plaintextBytes).toString(),
-                );
-                if (rejectResult.isAckSafe) {
-                  ackedMessageIds.add(messageId);
-                } else {
-                  unacknowledgedMessageIds.add(messageId);
-                }
-              } on _UnsupportedSyncEnvelopeException {
-                unsupportedEnvelopeSeen = true;
-                unacknowledgedMessageIds.add(messageId);
-              } on FormatException {
-                unsupportedEnvelopeSeen = true;
-                unacknowledgedMessageIds.add(messageId);
-              }
-              break;
-            case 'v1':
-              unacknowledgedMessageIds.add(messageId);
-          }
-        }
-
-        if (ackedMessageIds.isEmpty) {
-          return PullSyncResult.deferred(
-            reason: unsupportedEnvelopeSeen
-                ? PullSyncDeferredReason.unsupportedEnvelope
-                : PullSyncDeferredReason.noProgress,
-            message: 'Pull page contains no currently ACKable messages',
-            appliedCount: appliedCount,
-            ackedCount: ackedCount,
-            pageCount: pageCount,
-            unacknowledgedMessageIds: unacknowledgedMessageIds,
-          );
-        }
-
-        await _apiClient.ackSync(messageIds: ackedMessageIds);
-        ackedCount += ackedMessageIds.length;
-
-        if (unacknowledgedMessageIds.isNotEmpty && !response.hasMore) {
-          return PullSyncResult.deferred(
-            reason: unsupportedEnvelopeSeen
-                ? PullSyncDeferredReason.unsupportedEnvelope
-                : PullSyncDeferredReason.noProgress,
-            message: 'Pull page contains deferred messages',
-            appliedCount: appliedCount,
-            ackedCount: ackedCount,
-            pageCount: pageCount,
-            unacknowledgedMessageIds: unacknowledgedMessageIds,
-          );
-        }
-
-        if (!response.hasMore) {
-          await _queueManager.drainQueue();
-          if (kDebugMode) {
-            debugPrint(
-              '[PullSync] Applied $appliedCount ops, ACK\'d $ackedCount messages across $pageCount pages',
-            );
-          }
-          return PullSyncResult.success(
-            appliedCount,
-            ackedCount: ackedCount,
-            pageCount: pageCount,
-          );
-        }
-
-        if (pageCount >= _maxPagesPerExecution) {
-          return PullSyncResult.deferred(
-            reason: PullSyncDeferredReason.pageLimitReached,
-            message: 'Pull stopped at the $_maxPagesPerExecution-page limit',
-            appliedCount: appliedCount,
-            ackedCount: ackedCount,
-            pageCount: pageCount,
-            unacknowledgedMessageIds: unacknowledgedMessageIds,
-          );
-        }
-
-        // A large backlog must not monopolize the UI isolate between pages.
-        await Future<void>.delayed(Duration.zero);
-      }
-
-      return PullSyncResult.deferred(
-        reason: PullSyncDeferredReason.pageLimitReached,
-        message: 'Pull stopped at the $_maxPagesPerExecution-page limit',
-        appliedCount: appliedCount,
-        ackedCount: ackedCount,
-        pageCount: pageCount,
-      );
+      final group = await _resolveGroup();
+      if (group == null) return const PullSyncResult.noPair();
+      progress
+        ..group = group
+        ..deviceId = await _keyManager.getDeviceId();
+      return await _pullPages(progress);
     } on RelayApiException catch (e) {
       return PullSyncResult.error(
         e.message,
         statusCode: e.statusCode,
-        appliedCount: appliedCount,
-        ackedCount: ackedCount,
-        pageCount: pageCount,
+        appliedCount: progress.appliedCount,
+        ackedCount: progress.ackedCount,
+        pageCount: progress.pageCount,
       );
     } catch (e) {
       final failure = groupOperationFailureFrom(
@@ -402,11 +193,305 @@ class PullSyncUseCase {
       );
       return PullSyncResult.error(
         failure.message,
-        appliedCount: appliedCount,
-        ackedCount: ackedCount,
-        pageCount: pageCount,
+        appliedCount: progress.appliedCount,
+        ackedCount: progress.ackedCount,
+        pageCount: progress.pageCount,
       );
     }
+  }
+
+  Future<GroupInfo?> _resolveGroup() async =>
+      await _groupRepo.getActiveGroup() ?? await _groupRepo.getPendingGroup();
+
+  Future<PullSyncResult> _pullPages(_PullProgress progress) async {
+    while (progress.pageCount < _maxPagesPerExecution) {
+      final response = RelayPullResponse.fromJson(await _apiClient.pullSync());
+      progress.pageCount++;
+      _logReceivedPage(response, progress.pageCount);
+
+      if (response.messages.isEmpty) {
+        return _finishEmptyPage(response, progress);
+      }
+      final page = await _processMessages(response.messages, progress);
+      final result = await _finishPage(response, page, progress);
+      if (result != null) return result;
+
+      // A large backlog must not monopolize the UI isolate between pages.
+      await Future<void>.delayed(Duration.zero);
+    }
+    return _pageLimitResult(progress);
+  }
+
+  Future<PullSyncResult> _finishEmptyPage(
+    RelayPullResponse response,
+    _PullProgress progress,
+  ) async {
+    if (response.hasMore) {
+      return PullSyncResult.error(
+        'Relay returned an empty page with hasMore=true',
+        appliedCount: progress.appliedCount,
+        ackedCount: progress.ackedCount,
+        pageCount: progress.pageCount,
+      );
+    }
+    if (progress.ackedCount == 0) {
+      return PullSyncResult.noNewData(pageCount: progress.pageCount);
+    }
+    return _complete(progress);
+  }
+
+  Future<_ProcessedPage> _processMessages(
+    List<Map<String, dynamic>> messages,
+    _PullProgress progress,
+  ) async {
+    final page = _ProcessedPage();
+    for (final message in messages) {
+      final result = await _processMessage(message, progress);
+      progress.appliedCount += result.appliedCount;
+      progress.unsupportedEnvelopeSeen |= result.unsupportedEnvelope;
+      if (result.acknowledge) {
+        page.ackedMessageIds.add(result.messageId);
+      } else {
+        page.unacknowledgedMessageIds.add(result.messageId);
+      }
+      if (result.refreshGroup) {
+        progress.group =
+            await _groupRepo.getGroupById(progress.group!.groupId) ??
+            progress.group;
+      }
+    }
+    return page;
+  }
+
+  Future<_MessageResult> _processMessage(
+    Map<String, dynamic> message,
+    _PullProgress progress,
+  ) async {
+    final messageId = message['messageId'] as String;
+    final payload = message['payload'] as String;
+    final fromDeviceId = message['fromDeviceId'] as String?;
+    final keyEpoch = (message['keyEpoch'] as num?)?.toInt() ?? 1;
+    return switch (E2EEService.detectPayloadType(payload)) {
+      'v2_key' => _processKeyMessage(
+        messageId: messageId,
+        payload: payload,
+        fromDeviceId: fromDeviceId,
+        keyEpoch: keyEpoch,
+        messageKind: message['messageKind'] as String? ?? 'data',
+        progress: progress,
+      ),
+      'v2_data' => _processDataMessage(
+        message: message,
+        messageId: messageId,
+        payload: payload,
+        fromDeviceId: fromDeviceId,
+        keyEpoch: keyEpoch,
+        progress: progress,
+      ),
+      _ => Future.value(_MessageResult.deferred(messageId)),
+    };
+  }
+
+  Future<_MessageResult> _processKeyMessage({
+    required String messageId,
+    required String payload,
+    required String? fromDeviceId,
+    required int keyEpoch,
+    required String messageKind,
+    required _PullProgress progress,
+  }) async {
+    final processed = await _handleGroupKeyMessage(
+      group: progress.group!,
+      payload: payload,
+      fromDeviceId: fromDeviceId,
+      localDeviceId: progress.deviceId,
+      messageKeyEpoch: keyEpoch,
+      messageKind: messageKind,
+    );
+    return processed
+        ? _MessageResult.acknowledged(messageId, refreshGroup: true)
+        : _MessageResult.deferred(messageId);
+  }
+
+  Future<_MessageResult> _processDataMessage({
+    required Map<String, dynamic> message,
+    required String messageId,
+    required String payload,
+    required String? fromDeviceId,
+    required int keyEpoch,
+    required _PullProgress progress,
+  }) async {
+    final group = progress.group!;
+    if (!_canDecryptDataMessage(group, payload, keyEpoch)) {
+      return _MessageResult.deferred(messageId);
+    }
+    final plaintext = _e2eeService.decryptFromGroup(
+      encryptedPayload: payload,
+      groupKeyBase64: group.groupKey!,
+    );
+    try {
+      final operations = _decodeAndNormalizeOperations(
+        plaintext,
+        message: message,
+        messageId: messageId,
+        fromDeviceId: fromDeviceId,
+        keyEpoch: keyEpoch,
+      );
+      final result = await _applyOperations(operations, groupId: group.groupId);
+      if (result is ApplySyncOperationsResult) {
+        return result.isAckSafe
+            ? _MessageResult.acknowledged(
+                messageId,
+                appliedCount: result.appliedCount,
+              )
+            : _MessageResult.deferred(messageId);
+      }
+      return _MessageResult.acknowledged(
+        messageId,
+        appliedCount: operations.length,
+      );
+    } on _InboundOperationLimitExceeded {
+      return _rejectOversizedMessage(
+        groupId: group.groupId,
+        messageId: messageId,
+        plaintext: plaintext,
+      );
+    } on _UnsupportedSyncEnvelopeException {
+      return _MessageResult.unsupported(messageId);
+    } on FormatException {
+      return _MessageResult.unsupported(messageId);
+    }
+  }
+
+  bool _canDecryptDataMessage(GroupInfo group, String payload, int keyEpoch) =>
+      group.groupKey != null &&
+      keyEpoch == group.keyEpoch &&
+      _payloadMatchesEpoch(payload, keyEpoch);
+
+  List<Map<String, dynamic>> _decodeAndNormalizeOperations(
+    String plaintext, {
+    required Map<String, dynamic> message,
+    required String messageId,
+    required String? fromDeviceId,
+    required int keyEpoch,
+  }) {
+    final envelope = _decodeOperationsEnvelope(
+      jsonDecode(plaintext),
+      fromDeviceId: fromDeviceId,
+      createdAt: message['createdAt'],
+    );
+    return envelope.operations.indexed.map((entry) {
+      return _normalizeOperation(
+        entry.$2,
+        fromDeviceId: fromDeviceId,
+        transportKeyEpoch: keyEpoch,
+        transportMessageId: messageId,
+        envelopeVersion: envelope.version,
+        operationIndex: entry.$1,
+      );
+    }).toList();
+  }
+
+  Future<_MessageResult> _rejectOversizedMessage({
+    required String groupId,
+    required String messageId,
+    required String plaintext,
+  }) async {
+    final reject = _rejectOperationsBatch;
+    if (reject == null) return _MessageResult.deferred(messageId);
+    final bytes = utf8.encode(plaintext);
+    final result = await reject(
+      groupId: groupId,
+      messageId: messageId,
+      sourceBytes: bytes.length,
+      digest: sha256.convert(bytes).toString(),
+    );
+    return result.isAckSafe
+        ? _MessageResult.acknowledged(messageId)
+        : _MessageResult.deferred(messageId);
+  }
+
+  Future<PullSyncResult?> _finishPage(
+    RelayPullResponse response,
+    _ProcessedPage page,
+    _PullProgress progress,
+  ) async {
+    if (page.ackedMessageIds.isEmpty) {
+      return _deferredPageResult(
+        progress,
+        'Pull page contains no currently ACKable messages',
+        page.unacknowledgedMessageIds,
+      );
+    }
+    await _apiClient.ackSync(messageIds: page.ackedMessageIds);
+    progress.ackedCount += page.ackedMessageIds.length;
+
+    if (page.unacknowledgedMessageIds.isNotEmpty && !response.hasMore) {
+      return _deferredPageResult(
+        progress,
+        'Pull page contains deferred messages',
+        page.unacknowledgedMessageIds,
+      );
+    }
+    if (!response.hasMore) return _complete(progress);
+    if (progress.pageCount >= _maxPagesPerExecution) {
+      return _pageLimitResult(
+        progress,
+        unacknowledgedMessageIds: page.unacknowledgedMessageIds,
+      );
+    }
+    return null;
+  }
+
+  PullSyncResult _deferredPageResult(
+    _PullProgress progress,
+    String message,
+    List<String> unacknowledgedMessageIds,
+  ) => PullSyncResult.deferred(
+    reason: progress.unsupportedEnvelopeSeen
+        ? PullSyncDeferredReason.unsupportedEnvelope
+        : PullSyncDeferredReason.noProgress,
+    message: message,
+    appliedCount: progress.appliedCount,
+    ackedCount: progress.ackedCount,
+    pageCount: progress.pageCount,
+    unacknowledgedMessageIds: unacknowledgedMessageIds,
+  );
+
+  PullSyncResult _pageLimitResult(
+    _PullProgress progress, {
+    List<String> unacknowledgedMessageIds = const [],
+  }) => PullSyncResult.deferred(
+    reason: PullSyncDeferredReason.pageLimitReached,
+    message: 'Pull stopped at the $_maxPagesPerExecution-page limit',
+    appliedCount: progress.appliedCount,
+    ackedCount: progress.ackedCount,
+    pageCount: progress.pageCount,
+    unacknowledgedMessageIds: unacknowledgedMessageIds,
+  );
+
+  Future<PullSyncResult> _complete(_PullProgress progress) async {
+    await _queueManager.drainQueue();
+    if (kDebugMode) {
+      debugPrint(
+        '[PullSync] Applied ${progress.appliedCount} ops, '
+        "ACK'd ${progress.ackedCount} messages across "
+        '${progress.pageCount} pages',
+      );
+    }
+    return PullSyncResult.success(
+      progress.appliedCount,
+      ackedCount: progress.ackedCount,
+      pageCount: progress.pageCount,
+    );
+  }
+
+  void _logReceivedPage(RelayPullResponse response, int pageCount) {
+    if (!kDebugMode) return;
+    debugPrint(
+      '[PullSync] Received ${response.messages.length} messages '
+      'on page $pageCount',
+    );
   }
 
   Future<bool> _handleGroupKeyMessage({
@@ -418,16 +503,13 @@ class PullSyncUseCase {
     required String messageKind,
   }) async {
     final envelope = jsonDecode(payload) as Map<String, dynamic>;
-    final envelopeEpoch = (envelope['e'] as num?)?.toInt() ?? 1;
-    if (envelopeEpoch != messageKeyEpoch) {
-      return false;
-    }
     final targetDeviceId = envelope['toDeviceId'] as String?;
-    if (targetDeviceId == null) {
-      return false;
-    }
-
-    if (targetDeviceId != localDeviceId) {
+    if (!_keyEnvelopeMatchesTransport(
+      envelope: envelope,
+      messageKeyEpoch: messageKeyEpoch,
+      targetDeviceId: targetDeviceId,
+      localDeviceId: localDeviceId,
+    )) {
       // A relay-routing error must not destroy another device's only copy of
       // the key envelope. Leave it unacknowledged for server-side recovery.
       return false;
@@ -443,34 +525,19 @@ class PullSyncUseCase {
     final sender = _findGroupMember(group.members, fromDeviceId);
     final requestId = envelope['requestId'] as String?;
     final purpose = envelope['purpose'] as String?;
-    final isRecoveryResponse =
-        messageKind == 'group_key_response' &&
-        requestId != null &&
-        requestId.isNotEmpty;
-    final isOwnerTransfer =
-        messageKind == 'owner_transfer_key' &&
-        requestId != null &&
-        requestId.isNotEmpty &&
-        purpose == OwnerTransferUseCase.envelopePurpose;
-    final isMembershipRotation =
-        messageKind == 'member_rotation_key' &&
-        requestId != null &&
-        requestId.isNotEmpty &&
-        (purpose == 'member_remove' || purpose == 'member_leave_rotation');
-    if (sender == null ||
-        sender.status != 'active' ||
-        (!isRecoveryResponse &&
-            !isOwnerTransfer &&
-            !isMembershipRotation &&
-            sender.role != 'owner') ||
-        (isMembershipRotation && sender.role != 'owner')) {
+    if (!_isAuthorizedKeySender(
+      sender: sender,
+      messageKind: messageKind,
+      requestId: requestId,
+      purpose: purpose,
+    )) {
       return false;
     }
 
     try {
       final groupKey = await _e2eeService.decryptGroupKeyFromOwner(
         encryptedPayload: payload,
-        ownerPublicKey: sender.publicKey,
+        ownerPublicKey: sender!.publicKey,
       );
       await _groupRepo.storeGroupKeyForEpoch(
         group.groupId,
@@ -481,6 +548,36 @@ class PullSyncUseCase {
     } catch (_) {
       return false;
     }
+  }
+
+  bool _keyEnvelopeMatchesTransport({
+    required Map<String, dynamic> envelope,
+    required int messageKeyEpoch,
+    required String? targetDeviceId,
+    required String? localDeviceId,
+  }) =>
+      ((envelope['e'] as num?)?.toInt() ?? 1) == messageKeyEpoch &&
+      targetDeviceId != null &&
+      targetDeviceId == localDeviceId;
+
+  bool _isAuthorizedKeySender({
+    required GroupMember? sender,
+    required String messageKind,
+    required String? requestId,
+    required String? purpose,
+  }) {
+    if (sender == null || sender.status != 'active') return false;
+    final hasRequestId = requestId != null && requestId.isNotEmpty;
+    return switch (messageKind) {
+      'group_key_response' => hasRequestId,
+      'owner_transfer_key' =>
+        hasRequestId && purpose == OwnerTransferUseCase.envelopePurpose,
+      'member_rotation_key' =>
+        hasRequestId &&
+            sender.role == 'owner' &&
+            (purpose == 'member_remove' || purpose == 'member_leave_rotation'),
+      _ => sender.role == 'owner',
+    };
   }
 
   bool _payloadMatchesEpoch(String payload, int messageKeyEpoch) {
@@ -676,36 +773,89 @@ class PullSyncUseCase {
   }
 
   String? _detectLegacyAvatarMime(List<int> bytes) {
-    if (bytes.length >= 3 &&
-        bytes[0] == 0xff &&
-        bytes[1] == 0xd8 &&
-        bytes[2] == 0xff) {
+    if (_hasByteSignature(bytes, const [0xff, 0xd8, 0xff])) {
       return 'image/jpeg';
     }
-    if (bytes.length >= 8 &&
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4e &&
-        bytes[3] == 0x47 &&
-        bytes[4] == 0x0d &&
-        bytes[5] == 0x0a &&
-        bytes[6] == 0x1a &&
-        bytes[7] == 0x0a) {
+    if (_hasByteSignature(bytes, const [
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+    ])) {
       return 'image/png';
     }
-    if (bytes.length >= 12 &&
-        bytes[0] == 0x52 &&
-        bytes[1] == 0x49 &&
-        bytes[2] == 0x46 &&
-        bytes[3] == 0x46 &&
-        bytes[8] == 0x57 &&
-        bytes[9] == 0x45 &&
-        bytes[10] == 0x42 &&
-        bytes[11] == 0x50) {
+    if (_hasByteSignature(bytes, const [0x52, 0x49, 0x46, 0x46]) &&
+        _hasByteSignature(bytes, const [0x57, 0x45, 0x42, 0x50], offset: 8)) {
       return 'image/webp';
     }
     return null;
   }
+
+  bool _hasByteSignature(
+    List<int> bytes,
+    List<int> signature, {
+    int offset = 0,
+  }) {
+    if (bytes.length < offset + signature.length) return false;
+    for (var index = 0; index < signature.length; index++) {
+      if (bytes[offset + index] != signature[index]) return false;
+    }
+    return true;
+  }
+}
+
+class _PullProgress {
+  GroupInfo? group;
+  String? deviceId;
+  int appliedCount = 0;
+  int ackedCount = 0;
+  int pageCount = 0;
+  bool unsupportedEnvelopeSeen = false;
+}
+
+class _ProcessedPage {
+  final List<String> ackedMessageIds = [];
+  final List<String> unacknowledgedMessageIds = [];
+}
+
+class _MessageResult {
+  const _MessageResult._({
+    required this.messageId,
+    required this.acknowledge,
+    this.appliedCount = 0,
+    this.unsupportedEnvelope = false,
+    this.refreshGroup = false,
+  });
+
+  factory _MessageResult.acknowledged(
+    String messageId, {
+    int appliedCount = 0,
+    bool refreshGroup = false,
+  }) => _MessageResult._(
+    messageId: messageId,
+    acknowledge: true,
+    appliedCount: appliedCount,
+    refreshGroup: refreshGroup,
+  );
+
+  factory _MessageResult.deferred(String messageId) =>
+      _MessageResult._(messageId: messageId, acknowledge: false);
+
+  factory _MessageResult.unsupported(String messageId) => _MessageResult._(
+    messageId: messageId,
+    acknowledge: false,
+    unsupportedEnvelope: true,
+  );
+
+  final String messageId;
+  final bool acknowledge;
+  final int appliedCount;
+  final bool unsupportedEnvelope;
+  final bool refreshGroup;
 }
 
 class _DecodedSyncEnvelope {
