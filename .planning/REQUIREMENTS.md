@@ -84,48 +84,48 @@
 
 ## Traceability
 
-Roadmap 批准后由 roadmapper 填充；每条当前 requirement 必须恰好映射一个 phase。
+Every current requirement maps to exactly one v2.1 roadmap phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BASE-01 | TBD | Pending |
-| BASE-02 | TBD | Pending |
-| BASE-03 | TBD | Pending |
-| BASE-04 | TBD | Pending |
-| GEN-01 | TBD | Pending |
-| GEN-02 | TBD | Pending |
-| GEN-03 | TBD | Pending |
-| GEN-04 | TBD | Pending |
-| PLUG-01 | TBD | Pending |
-| PLUG-02 | TBD | Pending |
-| PLUG-03 | TBD | Pending |
-| PLUG-04 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| SEC-02 | TBD | Pending |
-| SEC-03 | TBD | Pending |
-| SEC-04 | TBD | Pending |
-| SEC-05 | TBD | Pending |
-| SEC-06 | TBD | Pending |
-| AND-01 | TBD | Pending |
-| AND-02 | TBD | Pending |
-| AND-03 | TBD | Pending |
-| AND-04 | TBD | Pending |
-| QA-01 | TBD | Pending |
-| QA-02 | TBD | Pending |
-| QA-03 | TBD | Pending |
-| QA-04 | TBD | Pending |
-| DEVICE-01 | TBD | Pending |
-| DEVICE-02 | TBD | Pending |
-| DEVICE-03 | TBD | Pending |
-| DEVICE-04 | TBD | Pending |
-| DEVICE-05 | TBD | Pending |
-| DEVICE-06 | TBD | Pending |
-| DEVICE-07 | TBD | Pending |
+| BASE-01 | Phase 57 | Pending |
+| BASE-02 | Phase 57 | Pending |
+| BASE-03 | Phase 57 | Pending |
+| BASE-04 | Phase 57 | Pending |
+| GEN-01 | Phase 58 | Pending |
+| GEN-02 | Phase 58 | Pending |
+| GEN-03 | Phase 58 | Pending |
+| GEN-04 | Phase 58 | Pending |
+| PLUG-01 | Phase 59 | Pending |
+| PLUG-02 | Phase 59 | Pending |
+| PLUG-03 | Phase 59 | Pending |
+| PLUG-04 | Phase 59 | Pending |
+| SEC-01 | Phase 60 | Pending |
+| SEC-02 | Phase 60 | Pending |
+| SEC-03 | Phase 60 | Pending |
+| SEC-04 | Phase 60 | Pending |
+| SEC-05 | Phase 60 | Pending |
+| SEC-06 | Phase 60 | Pending |
+| AND-01 | Phase 61 | Pending |
+| AND-02 | Phase 61 | Pending |
+| AND-03 | Phase 61 | Pending |
+| AND-04 | Phase 61 | Pending |
+| QA-01 | Phase 62 | Pending |
+| QA-02 | Phase 62 | Pending |
+| QA-03 | Phase 62 | Pending |
+| QA-04 | Phase 62 | Pending |
+| DEVICE-01 | Phase 63 | Pending |
+| DEVICE-02 | Phase 63 | Pending |
+| DEVICE-03 | Phase 63 | Pending |
+| DEVICE-04 | Phase 63 | Pending |
+| DEVICE-05 | Phase 63 | Pending |
+| DEVICE-06 | Phase 63 | Pending |
+| DEVICE-07 | Phase 63 | Pending |
 
 **Coverage:**
 - v1 requirements: 33 total (BASE 4 · GEN 4 · PLUG 4 · SEC 6 · AND 4 · QA 4 · DEVICE 7)
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 33
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-08-05*

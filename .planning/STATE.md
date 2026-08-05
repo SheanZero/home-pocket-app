@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-08-05T12:37:34.292Z"
 last_activity: 2026-08-05
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,18 +20,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Define the next milestone and resolve or schedule the remaining store-release owner values
+**Current focus:** Phase 57 — establish the official production-stable baseline and compatibility contract for v2.1
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 57 of 63 (Stable Baseline & Compatibility Contract)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-08-05 — Milestone v2.1 started
+Status: Ready to plan
+Last activity: 2026-08-05 — v2.1 roadmap created; 33 requirements mapped across Phases 57-63
+
+Progress: [░░░░░░░░░░] 0%
 
 ### Decisions
 
 v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.planning/PROJECT.md` Key Decisions and the v1.9 milestone archive. No decisions are pending for the next milestone.
+
+- [v2.1 roadmap, 2026-08-05]: Use seven atomic compatibility lanes: baseline/contract → Flutter/analyzer/codegen → controlled plugins → SQLCipher/iOS → Android → automated release gates → isolated wired-iPhone UAT. A documented safe hold is successful; partial upgrades and security fallbacks are not.
+- [v2.1 roadmap, 2026-08-05]: Android physical-device testing is unavailable and out of scope. The only device acceptance is the current wired `“Xin Zhang”的 iPhone`, under an additive test-only app identity that cannot touch production financial data, containers, Keychain, backups, or credentials.
 
 - [P1-06, 2026-08-05]: `InfoPlist.strings` is the single localization surface for the iOS display name and microphone, speech-recognition, and Face ID usage descriptions; Runner bundles ja, zh-Hans, and en variants, while the Japanese `Info.plist` values remain the fallback.
 - [P1-05, 2026-08-05]: Minimum supported iOS version is iOS 15.0; Podfile/Xcode, product docs, website/store copy, release gates, and device UAT use this single floor. Historical ADR/research references to iOS 14 remain historical context, not current support declarations.
@@ -144,11 +149,19 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 
 ### Roadmap Evolution
 
-v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/v1.9-ROADMAP.md`, `.planning/MILESTONES.md`, and `.planning/PROJECT.md`. The per-milestone roadmap evolution, locked constraints, open design questions, and pending todos for v1.9 and earlier milestones live in those archives. **v2.0 roadmap created 2026-06-28** — 4 phases (53-56) covering 31 requirements (DESIGN 4 · ONBOARD 7 · LOCK 10 · DONATE 4 · LEGAL 6), 100% mapped, 0 orphaned. Design-gate-first (Phase 53, no production code, sequels v1.8 Phase 43) → Onboarding gate (54) → App-lock (55, highest-risk, own security review) → Settings legal/donation/JP-compliance (56, launch gate with store-review slack). Integration milestone; only new runtime dep is `url_launcher`. See `.planning/ROADMAP.md` + `.planning/REQUIREMENTS.md`.
+v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/v1.9-ROADMAP.md`, `.planning/MILESTONES.md`, and `.planning/PROJECT.md`. The per-milestone roadmap evolution, locked constraints, open design questions, and pending todos for v1.9 and earlier milestones live in those archives. **v2.0 roadmap created 2026-06-28** — 4 phases (53-56) covering 31 requirements (DESIGN 4 · ONBOARD 7 · LOCK 10 · DONATE 4 · LEGAL 6), 100% mapped, 0 orphaned. Design-gate-first (Phase 53, no production code, sequels v1.8 Phase 43) → Onboarding gate (54) → App-lock (55, highest-risk, own security review) → Settings legal/donation/JP-compliance (56, launch gate with store-review slack). Integration milestone; only new runtime dep is `url_launcher`. **v2.1 roadmap created 2026-08-05** — Phases 57-63 map all 33 requirements exactly once: baseline/contract (4) → SDK/analyzer/codegen (4) → plugin cohorts (4) → SQLCipher/iOS (6) → Android (4) → automated gates (4) → isolated wired-iPhone UAT (7). Phase 62 can converge only the identical final lockfile from the compatibility lanes; Phase 63 never uses a production app identity or production data. See `.planning/ROADMAP.md` + `.planning/REQUIREMENTS.md`.
 
 ### Blockers / Concerns
 
-No active blockers. Pre-existing carried debt carried forward to the next milestone (unchanged):
+No active execution blocker. v2.1 planning constraints that must remain explicit:
+
+- **Official stable recheck:** Phase 57 re-queries only primary sources before changing candidates; beta/RC/dev and unapproved `dependency_overrides` are not fallback options.
+- **Analyzer gate:** `import_guard_custom_lint` currently constrains analyzer `<9`; an analyzer-8 hold is valid, disabling/replacing architecture enforcement without a negative test is not.
+- **SQLCipher safety:** retaining `sqlcipher_flutter_libs 0.6.8 + sqlite3 2.9.4 + SQLCipher Pod 4.10.0` is a successful safe hold; `0.7.0+eol`, `sqlite3_flutter_libs`, system SQLite, plaintext fallback, or an upgrade-only schema bump are prohibited.
+- **AGP outcome:** AGP 9 is all-or-hold. Plugin incompatibility requires a documented green AGP 8 recovery point, never a half-migrated Android lane.
+- **Device evidence:** Android has emulator-only acceptance. iPhone UAT is limited to the current wired phone and must use a separate UAT identity with synthetic data; unavailable relay/APNs/FCM or a `baseline_required` performance result remains a limitation/blocker, never a pass.
+
+Pre-existing carried debt carried forward to the next milestone (unchanged):
 
 - **v1.5 a11y UAT:** Phase 35 W1 on-device screen-reader announcement of localized ledger-chip labels — human_needed
 - **v1.5 vocab residual:** `Book.survivalBalance`/`soulBalance` DB columns need future DB-migration phase before public release
@@ -243,9 +256,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-07-02T03:09:09Z
-Stopped at: Completed 56-07-PLAN.md gap-closure (特商法 full 表記型); phase 56 re-verified passed
-Resume file: .planning/phases/56-setting/56-CONTEXT.md
+Last session: 2026-08-05
+Stopped at: Created v2.1 roadmap and requirement traceability; Phase 57 is ready for planning
+Resume file: .planning/ROADMAP.md
 
 ## Performance Metrics
 
