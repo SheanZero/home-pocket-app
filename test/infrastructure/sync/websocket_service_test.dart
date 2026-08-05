@@ -402,17 +402,20 @@ void main() {
       expect(service.connectionState, WebSocketConnectionState.connecting);
     });
 
-    test('rejects oversized raw control messages before JSON decoding', () async {
-      await expectUnsafeControlMessageIsRejected(
-        service: service,
-        incomingController: incomingController,
-        sink: sink,
-        raw: jsonEncode({
-          'type': 'sync_available',
-          'padding': 'x' * (64 * 1024),
-        }),
-      );
-    });
+    test(
+      'rejects oversized raw control messages before JSON decoding',
+      () async {
+        await expectUnsafeControlMessageIsRejected(
+          service: service,
+          incomingController: incomingController,
+          sink: sink,
+          raw: jsonEncode({
+            'type': 'sync_available',
+            'padding': 'x' * (64 * 1024),
+          }),
+        );
+      },
+    );
 
     test('rejects excessively nested control JSON', () async {
       Object nested = 'leaf';
@@ -459,12 +462,69 @@ void main() {
         service: service,
         incomingController: incomingController,
         sink: sink,
-        raw: jsonEncode({
-          'type': 'sync_available',
-          'f' * 512: 'value',
-        }),
+        raw: jsonEncode({'type': 'sync_available', 'f' * 512: 'value'}),
       );
     });
+
+    test(
+      'rejecting an unsafe frame does not close its replacement generation',
+      () async {
+        final controllers = <StreamController<dynamic>>[];
+        final sinks = <MockWebSocketSink>[];
+        final replacementService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            final controller = StreamController<dynamic>.broadcast();
+            final localSink = MockWebSocketSink();
+            when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+            when(() => localSink.add(any())).thenReturn(null);
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            controllers.add(controller);
+            sinks.add(localSink);
+            return channel;
+          },
+        );
+        addTearDown(() async {
+          replacementService.dispose();
+          for (final controller in controllers) {
+            await controller.close();
+          }
+        });
+
+        replacementService.connect(
+          groupId: 'group-a',
+          deviceId: 'device-a',
+          signMessage: (_) async => 'signature-a',
+        );
+        controllers.first.add(
+          jsonEncode({'type': 'sync_available', 'padding': 'x' * (64 * 1024)}),
+        );
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          replacementService.connectionState,
+          WebSocketConnectionState.disconnected,
+        );
+        verify(() => sinks.first.close(any(), any())).called(1);
+
+        replacementService.connect(
+          groupId: 'group-b',
+          deviceId: 'device-b',
+          signMessage: (_) async => 'signature-b',
+        );
+        controllers.last.add(jsonEncode({'type': 'auth_success'}));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          replacementService.connectionState,
+          WebSocketConnectionState.connected,
+        );
+        verifyNever(() => sinks.last.close(any(), any()));
+      },
+    );
 
     test('parses group_status event with data payload', () async {
       final events = <WebSocketEvent>[];

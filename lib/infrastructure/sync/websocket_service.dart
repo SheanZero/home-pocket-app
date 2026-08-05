@@ -88,6 +88,20 @@ class WebSocketService with WidgetsBindingObserver {
   int _reconnectAttempts = 0;
   static const _maxReconnectDelay = Duration(seconds: 30);
 
+  // The relay WebSocket carries control-plane invalidations, not sync data.
+  // A 16 KiB frame leaves room for a complete group-status hint while keeping
+  // accidental or hostile payloads bounded; authoritative sync data is fetched
+  // through the regular sync path. The remaining limits intentionally exceed
+  // the current control schema while preventing parser and allocation abuse.
+  static const _maxControlMessageBytes = 16 * 1024;
+  static const _maxJsonNestingDepth = 12;
+  static const _maxMapEntries = 64;
+  static const _maxDataMapEntries = 32;
+  static const _maxListEntries = 64;
+  static const _maxFieldNameBytes = 128;
+  static const _maxStringValueBytes = 4 * 1024;
+  static const _maxValueNodes = 256;
+
   var _connectionState = WebSocketConnectionState.disconnected;
   final _connectionStateController =
       StreamController<WebSocketConnectionState>.broadcast(sync: true);
@@ -222,10 +236,20 @@ class WebSocketService with WidgetsBindingObserver {
     if (!_isCurrentConnection(generation, channel)) return;
     if (raw is! String) return;
 
+    if (!_isRawControlMessageWithinBudget(raw)) {
+      _rejectControlMessage(generation, channel);
+      return;
+    }
+
     Map<String, dynamic> data;
     try {
       data = jsonDecode(raw) as Map<String, dynamic>;
     } catch (_) {
+      return;
+    }
+
+    if (!_isDecodedControlMessageWithinBudget(data)) {
+      _rejectControlMessage(generation, channel);
       return;
     }
 
@@ -262,6 +286,114 @@ class WebSocketService with WidgetsBindingObserver {
     if (event != null && !_eventController.isClosed) {
       _eventController.add(event);
     }
+  }
+
+  /// Reject a malformed or over-budget control frame without exposing it in
+  /// logs. The current-generation guard prevents a stale frame from closing a
+  /// replacement connection; [_handleDisconnect] performs the normal bounded
+  /// reconnection flow for the rejected transport.
+  void _rejectControlMessage(int generation, WebSocketChannel channel) {
+    if (!_isCurrentConnection(generation, channel)) return;
+    _handleDisconnect(generation, channel);
+  }
+
+  static bool _isRawControlMessageWithinBudget(String raw) {
+    if (!_isWithinUtf8ByteBudget(raw, _maxControlMessageBytes)) return false;
+
+    // Count structure before jsonDecode so deeply nested JSON never reaches
+    // the decoder. String and escape handling prevents quoted brackets from
+    // contributing to the nesting count. Invalid JSON is still left for the
+    // decoder's normal non-dispatch path to preserve existing behaviour.
+    var depth = 0;
+    var isInString = false;
+    var isEscaped = false;
+    for (var index = 0; index < raw.length; index++) {
+      final codeUnit = raw.codeUnitAt(index);
+      if (isInString) {
+        if (isEscaped) {
+          isEscaped = false;
+        } else if (codeUnit == 0x5c) {
+          isEscaped = true;
+        } else if (codeUnit == 0x22) {
+          isInString = false;
+        }
+        continue;
+      }
+
+      if (codeUnit == 0x22) {
+        isInString = true;
+      } else if (codeUnit == 0x7b || codeUnit == 0x5b) {
+        depth++;
+        if (depth > _maxJsonNestingDepth) return false;
+      } else if (codeUnit == 0x7d || codeUnit == 0x5d) {
+        depth--;
+      }
+    }
+    return true;
+  }
+
+  static bool _isDecodedControlMessageWithinBudget(Object? value) {
+    var visitedNodes = 0;
+
+    bool isWithinBudget(Object? node, int depth, {bool isDataMap = false}) {
+      if (depth > _maxJsonNestingDepth || ++visitedNodes > _maxValueNodes) {
+        return false;
+      }
+      if (node is String) {
+        return _isWithinUtf8ByteBudget(node, _maxStringValueBytes);
+      }
+      if (node is num || node is bool || node == null) return true;
+      if (node is List<dynamic>) {
+        if (node.length > _maxListEntries) return false;
+        return node.every((item) => isWithinBudget(item, depth + 1));
+      }
+      if (node is Map<dynamic, dynamic>) {
+        final entryLimit = isDataMap ? _maxDataMapEntries : _maxMapEntries;
+        if (node.length > entryLimit) return false;
+        for (final entry in node.entries) {
+          final key = entry.key;
+          if (key is! String ||
+              !_isWithinUtf8ByteBudget(key, _maxFieldNameBytes) ||
+              !isWithinBudget(
+                entry.value,
+                depth + 1,
+                isDataMap: key == 'data',
+              )) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return false;
+    }
+
+    return isWithinBudget(value, 0);
+  }
+
+  /// Counts UTF-8 bytes without allocating an encoded copy of [value].
+  static bool _isWithinUtf8ByteBudget(String value, int maxBytes) {
+    if (value.length > maxBytes) return false;
+
+    var byteCount = 0;
+    for (var index = 0; index < value.length; index++) {
+      final codeUnit = value.codeUnitAt(index);
+      if (codeUnit <= 0x7f) {
+        byteCount++;
+      } else if (codeUnit <= 0x7ff) {
+        byteCount += 2;
+      } else if (codeUnit >= 0xd800 &&
+          codeUnit <= 0xdbff &&
+          index + 1 < value.length &&
+          value.codeUnitAt(index + 1) >= 0xdc00 &&
+          value.codeUnitAt(index + 1) <= 0xdfff) {
+        byteCount += 4;
+        index++;
+      } else {
+        byteCount += 3;
+      }
+      if (byteCount > maxBytes) return false;
+    }
+    return true;
   }
 
   WebSocketEvent? _parseEvent(String type, Map<String, dynamic> data) {
