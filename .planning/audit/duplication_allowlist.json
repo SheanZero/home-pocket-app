@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "accepted": [
+    {
+      "files": [
+        "lib/features/home/presentation/widgets/home_transaction_tile.dart",
+        "lib/features/list/presentation/widgets/list_transaction_tile.dart"
+      ],
+      "fingerprint": "4ab15c617e695916",
+      "rationale": "RD-009 reviewed false positive: the overlap is shared transaction-tile rendering structure, while each feature owns its screen-specific behavior."
+    },
+    {
+      "files": [
+        "lib/features/applock/presentation/widgets/face_id_panel.dart",
+        "lib/features/onboarding/presentation/screens/onboarding_intro_screen.dart"
+      ],
+      "fingerprint": "0abac625ca682687",
+      "rationale": "RD-010 reviewed false positive: the overlap is a framework/UI window, not a shared domain responsibility."
+    },
+    {
+      "files": [
+        "lib/features/list/presentation/widgets/list_category_filter_sheet.dart",
+        "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart"
+      ],
+      "fingerprint": "99481b7d8b5a4094",
+      "rationale": "RD-012 intentional duplication: shopping is L1-only and callback-owned; list supports L1 plus L2 and provider-owned selection."
+    }
+  ]
+}

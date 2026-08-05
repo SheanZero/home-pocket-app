@@ -37,7 +37,7 @@ Every finding tracks open/closed status for Phase-8 re-audit reconciliation.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `status` | string | `open` (default at Phase 1) / `closed` (Phases 3–6 update on resolution). Phase 1 emits `open` for every finding. |
+| `status` | string | `open` (active), `closed` (resolved), or `accepted` (reviewed intentional / false positive). Phase 1 emits `open` for every finding. |
 | `closed_in_phase` | string? | null until `status` flips to `closed`; e.g., `"3"` when CRIT items are closed in Phase 3. |
 | `closed_commit` | string? | null until `status` flips to `closed`; full git SHA of the commit that closed the finding. Enables drilldown from `issues.json` to the fix diff. |
 
@@ -80,6 +80,29 @@ Stable IDs are essential for the Phase-8 re-audit critical path: a fix phase clo
 This guarantees `LV-001`..`LV-NNN` are always assigned in the same order across re-runs given the same input shards.
 
 **Permanence (D-07):** IDs are PERMANENT once assigned. Fix phases update the `status` / `closed_in_phase` / `closed_commit` fields on the existing entry; they do NOT re-issue IDs. Phase-8 re-audit produces a fresh shard set; `scripts/reaudit_diff.dart` matches new findings against Phase-1 IDs by the `(category, normalized_file_path, description)` triple, NOT by ID. A re-audit finding without a Phase-1 match = a regression / new finding.
+
+### 4.1 Current observation and lifecycle reconciliation (HP-08)
+
+`shards/` contains the authoritative current scanner observations. `agent-shards/`
+is a historical semantic baseline and is never treated as a current observation.
+The merger retains every historical finding: a closed finding remains auditable when
+absent, and an open finding is changed to `closed` only when its owning
+authoritative scanner completed successfully and no longer reports it. An incomplete
+scanner run never changes lifecycle state. If a closed finding reappears in an
+authoritative shard, it is reopened as `open` and stale closure metadata is removed.
+
+`ISSUES.md` renders three separate catalogues: Active (`open`), Resolved
+(`closed`), and Accepted (`accepted`), with counts at the top. Only the Active
+catalogue is the remediation queue.
+
+### 4.2 Duplication acceptance fingerprints (HP-08)
+
+`duplication_allowlist.json` is a reviewable, narrow exception list for structural
+clone findings. Each entry has exactly two repo-relative `files`, a detector-emitted
+64-bit normalized clone `fingerprint`, and a human review `rationale`. A match marks
+only that exact pair and content as `accepted`; changing either clone's normalized
+source produces a new fingerprint and re-reports the finding as `open`. Directory or
+path-wide ignores are prohibited.
 
 ---
 

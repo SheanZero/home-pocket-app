@@ -60,6 +60,7 @@ Future<void> main(List<String> args) async {
   final existingFindings = await _readExistingFindings(root);
   final shards = <Finding>[];
   final incompleteScans = <String>[];
+  final completedAuthoritativeTools = <String>{};
   for (final dir in const ['shards', 'agent-shards']) {
     final shardDir = Directory('$root/$dir');
     if (!shardDir.existsSync()) continue;
@@ -81,6 +82,15 @@ Future<void> main(List<String> args) async {
           '[audit:merge] ERROR: ${f.path} was not run successfully',
         );
       }
+      final completed =
+          data['scan_state'] != 'not_run' && data['scan_failed'] != true;
+      if (dir == 'shards' && completed && data['tool_source'] is String) {
+        completedAuthoritativeTools.add(data['tool_source'] as String);
+      }
+      // Agent shards established the historical baseline. They are deliberately
+      // not current observations: otherwise a stale agent report can reopen a
+      // resolved finding after the authoritative tool scan is clean.
+      if (dir == 'agent-shards') continue;
       final findingsRaw = data['findings'];
       if (findingsRaw is! List) continue;
       for (final entry in findingsRaw) {
@@ -100,11 +110,12 @@ Future<void> main(List<String> args) async {
   // 1. Drop generated-file findings (defense-in-depth — Pitfall P1-6 echo).
   final filtered = shards.where((f) => !_isGenerated(f.filePath)).toList();
 
-  // 2. Dedupe by (file_path, line_start, category) — prefer high confidence;
-  //    tool > agent on tie.
+  // 2. Dedupe exact candidates — prefer high confidence; tool > agent on tie.
+  // Clone relationships can share a file/line while referring to different
+  // counterpart files, so collapsing solely by location loses real evidence.
   final byKey = <String, Finding>{};
   for (final f in filtered) {
-    final k = '${f.filePath}|${f.lineStart}|${f.category}';
+    final k = _lifecycleKey(f);
     final existing = byKey[k];
     if (existing == null || _isPreferred(f, over: existing)) {
       byKey[k] = f;
@@ -123,12 +134,30 @@ Future<void> main(List<String> args) async {
       );
     });
 
-  // 4. Compute retainedClosed first so we can reserve their IDs and avoid
-  //    duplicate-ID collisions with freshly stamped findings (WR-06).
-  final sortedKeys = sorted.map(_lifecycleKey).toSet();
-  final retainedClosed = existingFindings.values
-      .where((finding) => !sortedKeys.contains(_lifecycleKey(finding)))
-      .where((finding) => finding.status == 'closed')
+  // 4. Reconcile lifecycle against only successful authoritative observations.
+  // Closed/accepted history is retained even when absent. An open finding is
+  // resolved only when its own detector completed cleanly; a failed or missing
+  // scan is never evidence of a fix.
+  final observedExistingIds = sorted
+      .map((finding) => _previousFor(finding, existingFindings)?.id)
+      .whereType<String>()
+      .toSet();
+  final retainedHistory = existingFindings.values
+      .where(
+        (finding) =>
+            finding.id == null || !observedExistingIds.contains(finding.id),
+      )
+      .map((finding) {
+        if (finding.status == 'open' &&
+            completedAuthoritativeTools.contains(finding.toolSource)) {
+          return _withLifecycle(
+            finding,
+            status: 'closed',
+            closedInPhase: 'audit',
+          );
+        }
+        return finding;
+      })
       .toList();
   // IDs are permanent for open findings too. Reserve every existing ID before
   // allocating new findings so an inserted shard cannot renumber prior work.
@@ -138,7 +167,7 @@ Future<void> main(List<String> args) async {
       .toSet();
 
   // 5. Stamp IDs per category in sort order, skipping any IDs already
-  //    reserved by retainedClosed so the merged catalogue has unique IDs.
+  //    reserved by retained history so the merged catalogue has unique IDs.
   final counters = <String, int>{};
   String nextId(String prefix) {
     while (true) {
@@ -150,7 +179,10 @@ Future<void> main(List<String> args) async {
 
   final stamped = sorted.map((f) {
     final prefix = _categoryPrefix[f.category]!;
-    final previous = existingFindings[_lifecycleKey(f)];
+    final previous = _previousFor(f, existingFindings);
+    final isAcceptedObservation = f.status == 'accepted';
+    final isReopened =
+        previous != null && !isAcceptedObservation && previous.status != 'open';
     return Finding(
       id: previous?.id ?? nextId(prefix),
       category: f.category,
@@ -163,12 +195,21 @@ Future<void> main(List<String> args) async {
       suggestedFix: f.suggestedFix,
       toolSource: f.toolSource,
       confidence: f.confidence,
-      status: previous?.status ?? f.status,
-      closedInPhase: previous?.closedInPhase ?? f.closedInPhase,
-      closedCommit: previous?.closedCommit ?? f.closedCommit,
+      // Exact allowlist entries are accepted observations. Any non-accepted
+      // reappearance reopens closed/accepted history, including source drift
+      // that invalidates an allowlist fingerprint.
+      status: isAcceptedObservation
+          ? 'accepted'
+          : (isReopened ? 'open' : f.status),
+      closedInPhase: isAcceptedObservation || isReopened
+          ? null
+          : previous?.closedInPhase ?? f.closedInPhase,
+      closedCommit: isAcceptedObservation || isReopened
+          ? null
+          : previous?.closedCommit ?? f.closedCommit,
     );
   }).toList();
-  final catalogue = [...stamped, ...retainedClosed]..sort(_compareFindings);
+  final catalogue = [...stamped, ...retainedHistory]..sort(_compareFindings);
 
   // 5. Emit issues.json (machine-readable; no top-level timestamp so the
   //    file is byte-identical across re-runs — see merger_findings_test.dart).
@@ -225,6 +266,66 @@ Future<Map<String, Finding>> _readExistingFindings(String root) async {
 String _lifecycleKey(Finding finding) =>
     '${finding.category}|${finding.filePath}|${finding.lineStart}|${finding.description}';
 
+Finding? _previousFor(Finding incoming, Map<String, Finding> existing) {
+  final exact = existing[_lifecycleKey(incoming)];
+  if (exact != null) return exact;
+  if (incoming.toolSource != 'owned_duplication_detector') return null;
+
+  final counterpart = _cloneCounterpart(incoming);
+  if (counterpart == null) return null;
+  final candidates = existing.values
+      .where(
+        (existingFinding) =>
+            existingFinding.toolSource == 'owned_duplication_detector' &&
+            existingFinding.filePath == incoming.filePath &&
+            _cloneCounterpart(existingFinding) == counterpart,
+      )
+      .toList();
+  if (candidates.isEmpty) return null;
+
+  // A same-line candidate is the same clone after source drift, including a
+  // changed fingerprint. Historical detector records lack fingerprints, so a
+  // sole pair candidate remains the stable ID when window clustering corrects
+  // its start line.
+  for (final candidate in candidates) {
+    if (candidate.lineStart == incoming.lineStart) return candidate;
+  }
+  if (candidates.length == 1 && !_hasFingerprint(candidates.single)) {
+    return candidates.single;
+  }
+  return null;
+}
+
+String? _cloneCounterpart(Finding finding) {
+  final match = RegExp(
+    r'also appears at ([^:]+):\d+\.$',
+  ).firstMatch(finding.description);
+  return match?[1];
+}
+
+bool _hasFingerprint(Finding finding) =>
+    finding.rationale.contains('Fingerprint:');
+
+Finding _withLifecycle(
+  Finding finding, {
+  required String status,
+  String? closedInPhase,
+}) => Finding(
+  id: finding.id,
+  category: finding.category,
+  severity: finding.severity,
+  filePath: finding.filePath,
+  lineStart: finding.lineStart,
+  lineEnd: finding.lineEnd,
+  description: finding.description,
+  rationale: finding.rationale,
+  suggestedFix: finding.suggestedFix,
+  toolSource: finding.toolSource,
+  confidence: finding.confidence,
+  status: status,
+  closedInPhase: closedInPhase,
+);
+
 int _compareFindings(Finding a, Finding b) {
   final fp = a.filePath.compareTo(b.filePath);
   if (fp != 0) return fp;
@@ -251,9 +352,15 @@ String _renderMarkdown(
   List<String> incompleteScans = const [],
 }) {
   final buf = StringBuffer();
+  final active = findings.where((f) => f.status == 'open').toList();
+  final resolved = findings.where((f) => f.status == 'closed').toList();
+  final accepted = findings.where((f) => f.status == 'accepted').toList();
   buf.writeln('# Audit Findings');
   buf.writeln();
   buf.writeln('**Total findings:** ${findings.length}');
+  buf.writeln('**Active findings:** ${active.length}');
+  buf.writeln('**Resolved findings:** ${resolved.length}');
+  buf.writeln('**Accepted findings:** ${accepted.length}');
   buf.writeln();
 
   if (incompleteScans.isNotEmpty) {
@@ -282,30 +389,38 @@ String _renderMarkdown(
     'redundant_code',
   ];
 
-  for (final sev in severities) {
-    final inSev = findings.where((f) => f.severity == sev).toList();
-    if (inSev.isEmpty) continue;
-    buf.writeln('## $sev');
+  void renderCatalogue(String title, List<Finding> catalogue) {
+    buf.writeln('## $title');
     buf.writeln();
-    for (final cat in categoryOrder) {
-      final inCat = inSev.where((f) => f.category == cat).toList();
-      if (inCat.isEmpty) continue;
-      buf.writeln('### ${categoryLabels[cat]}');
+    for (final sev in severities) {
+      final inSev = catalogue.where((f) => f.severity == sev).toList();
+      if (inSev.isEmpty) continue;
+      buf.writeln('### $sev');
       buf.writeln();
-      buf.writeln(
-        '| ID | File:Line | Description | Suggested Fix | tool_source |',
-      );
-      buf.writeln(
-        '|----|-----------|-------------|---------------|-------------|',
-      );
-      for (final f in inCat) {
+      for (final cat in categoryOrder) {
+        final inCat = inSev.where((f) => f.category == cat).toList();
+        if (inCat.isEmpty) continue;
+        buf.writeln('#### ${categoryLabels[cat]}');
+        buf.writeln();
         buf.writeln(
-          '| ${f.id} | ${f.filePath}:${f.lineStart} | ${_md(f.description)} | ${_md(f.suggestedFix)} | ${f.toolSource} |',
+          '| ID | File:Line | Description | Suggested Fix | tool_source |',
         );
+        buf.writeln(
+          '|----|-----------|-------------|---------------|-------------|',
+        );
+        for (final f in inCat) {
+          buf.writeln(
+            '| ${f.id} | ${f.filePath}:${f.lineStart} | ${_md(f.description)} | ${_md(f.suggestedFix)} | ${f.toolSource} |',
+          );
+        }
+        buf.writeln();
       }
-      buf.writeln();
     }
   }
+
+  renderCatalogue('Active Findings', active);
+  renderCatalogue('Resolved Findings', resolved);
+  renderCatalogue('Accepted Findings', accepted);
 
   return buf.toString();
 }

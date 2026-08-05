@@ -1,10 +1,37 @@
 # Audit Findings
 
-**Total findings:** 62
+**Total findings:** 66
+**Active findings:** 13
+**Resolved findings:** 50
+**Accepted findings:** 3
 
-## CRITICAL
+## Active Findings
 
-### Layer Violations
+### LOW
+
+#### Redundant Code
+
+| ID | File:Line | Description | Suggested Fix | tool_source |
+|----|-----------|-------------|---------------|-------------|
+| RD-003 | lib/application/family_sync/create_group_use_case.dart:358 | Exact 16-line structural clone also appears at lib/application/family_sync/check_group_use_case.dart:335. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-004 | lib/application/family_sync/join_group_use_case.dart:146 | Exact 16-line structural clone also appears at lib/application/family_sync/check_group_use_case.dart:335. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-005 | lib/application/family_sync/join_group_use_case.dart:146 | Exact 16-line structural clone also appears at lib/application/family_sync/create_group_use_case.dart:358. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-006 | lib/application/shopping_list/update_shopping_item_use_case.dart:130 | Exact 16-line structural clone also appears at lib/application/shopping_list/toggle_item_completed_use_case.dart:65. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-007 | lib/features/list/presentation/screens/list_screen.dart:370 | Exact 16-line structural clone also appears at lib/features/analytics/presentation/screens/category_drill_down_screen.dart:170. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-008 | lib/features/list/presentation/widgets/list_category_filter_sheet.dart:131 | Exact 16-line structural clone also appears at lib/features/accounting/presentation/widgets/currency_selector_sheet.dart:253. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-015 | lib/features/list/presentation/widgets/list_transaction_tile.dart:283 | Exact 16-line structural clone also appears at lib/features/home/presentation/widgets/home_transaction_tile.dart:185. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-011 | lib/features/profile/presentation/screens/profile_edit_screen.dart:48 | Exact 16-line structural clone also appears at lib/features/onboarding/presentation/screens/onboarding_settings_screen.dart:130. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-016 | lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart:106 | Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:120. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-013 | lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart:117 | Exact 16-line structural clone also appears at lib/features/accounting/presentation/widgets/currency_selector_sheet.dart:253. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-017 | lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart:178 | Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:193. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-018 | lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart:217 | Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:262. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+| RD-014 | lib/infrastructure/sync/avatar_semantic_staging_store.dart:409 | Exact 16-line structural clone also appears at lib/application/family_sync/sync_avatar_use_case.dart:714. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
+
+## Resolved Findings
+
+### CRITICAL
+
+#### Layer Violations
 
 | ID | File:Line | Description | Suggested Fix | tool_source |
 |----|-----------|-------------|---------------|-------------|
@@ -33,18 +60,18 @@
 | LV-023 | lib/features/profile/domain/repositories/user_profile_repository.dart:1 | Import of '../models/user_profile.dart' is not allowed by '/Users/xinz/Development/home-pocket-app/lib/features/profile/domain/import_guard.yaml'. | Move/refactor to satisfy the layer rule. | import_guard |
 | LV-024 | lib/features/settings/domain/repositories/settings_repository.dart:1 | Import of '../models/app_settings.dart' is not allowed by '/Users/xinz/Development/home-pocket-app/lib/features/settings/domain/import_guard.yaml'. | Move/refactor to satisfy the layer rule. | import_guard |
 
-## MEDIUM
+### MEDIUM
 
-### Redundant Code
+#### Redundant Code
 
 | ID | File:Line | Description | Suggested Fix | tool_source |
 |----|-----------|-------------|---------------|-------------|
 | RD-001 | lib/application/accounting/category_service.dart:1 | Duplicate CategoryService class — parallel implementation at lib/infrastructure/category/category_service.dart | See companion finding on lib/infrastructure/category/category_service.dart. Phase 6 fix. | agent:duplication |
 | RD-002 | lib/infrastructure/category/category_service.dart:1 | Duplicate CategoryService class — parallel implementation also exists at lib/application/accounting/category_service.dart with overlapping responsibilities | Rename one of the two to reflect its actual concern (e.g., CategoryLocaleFormatter vs CategoryClassifier), or consolidate. Phase 6 fix. | agent:duplication |
 
-## LOW
+### LOW
 
-### Dead Code
+#### Dead Code
 
 | ID | File:Line | Description | Suggested Fix | tool_source |
 |----|-----------|-------------|---------------|-------------|
@@ -73,20 +100,15 @@
 | DC-023 | lib/features/home/presentation/widgets/group_bar.dart:8 | Unused class `GroupBar` | Remove the unused declaration or export it. | dart_code_linter |
 | DC-024 | lib/infrastructure/crypto/repositories/master_key_repository.dart:14 | Unused class `KeyDerivationException` | Remove the unused declaration or export it. | dart_code_linter |
 
-### Redundant Code
+## Accepted Findings
+
+### LOW
+
+#### Redundant Code
 
 | ID | File:Line | Description | Suggested Fix | tool_source |
 |----|-----------|-------------|---------------|-------------|
-| RD-003 | lib/application/family_sync/create_group_use_case.dart:358 | Exact 16-line structural clone also appears at lib/application/family_sync/check_group_use_case.dart:335. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-004 | lib/application/family_sync/join_group_use_case.dart:146 | Exact 16-line structural clone also appears at lib/application/family_sync/check_group_use_case.dart:335. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-005 | lib/application/family_sync/join_group_use_case.dart:149 | Exact 16-line structural clone also appears at lib/application/family_sync/create_group_use_case.dart:361. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-006 | lib/application/shopping_list/update_shopping_item_use_case.dart:130 | Exact 16-line structural clone also appears at lib/application/shopping_list/toggle_item_completed_use_case.dart:65. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-007 | lib/features/list/presentation/screens/list_screen.dart:370 | Exact 16-line structural clone also appears at lib/features/analytics/presentation/screens/category_drill_down_screen.dart:170. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-008 | lib/features/list/presentation/widgets/list_category_filter_sheet.dart:131 | Exact 16-line structural clone also appears at lib/features/accounting/presentation/widgets/currency_selector_sheet.dart:253. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
 | RD-009 | lib/features/list/presentation/widgets/list_transaction_tile.dart:228 | Exact 16-line structural clone also appears at lib/features/home/presentation/widgets/home_transaction_tile.dart:130. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
 | RD-010 | lib/features/onboarding/presentation/screens/onboarding_intro_screen.dart:912 | Exact 16-line structural clone also appears at lib/features/applock/presentation/widgets/face_id_panel.dart:113. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-011 | lib/features/profile/presentation/screens/profile_edit_screen.dart:48 | Exact 16-line structural clone also appears at lib/features/onboarding/presentation/screens/onboarding_settings_screen.dart:130. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
 | RD-012 | lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart:50 | Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:48. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-013 | lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart:117 | Exact 16-line structural clone also appears at lib/features/accounting/presentation/widgets/currency_selector_sheet.dart:253. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
-| RD-014 | lib/infrastructure/sync/avatar_semantic_staging_store.dart:409 | Exact 16-line structural clone also appears at lib/application/family_sync/sync_avatar_use_case.dart:714. | Extract a shared helper only if the duplicated behavior has the same domain responsibility. | owned_duplication_detector |
 

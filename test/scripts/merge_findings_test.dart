@@ -189,6 +189,48 @@ void main() {
     );
 
     test(
+      'keeps distinct clone relationships that share a file and line',
+      () async {
+        File('${shardRoot.path}/shards/duplication.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([
+              _f(
+                filePath: 'lib/shared.dart',
+                line: 10,
+                category: 'redundant_code',
+                severity: 'LOW',
+                toolSource: 'owned_duplication_detector',
+                confidence: 'medium',
+                description: 'clone also appears at lib/first.dart:1.',
+              ),
+              _f(
+                filePath: 'lib/shared.dart',
+                line: 10,
+                category: 'redundant_code',
+                severity: 'LOW',
+                toolSource: 'owned_duplication_detector',
+                confidence: 'medium',
+                description: 'clone also appears at lib/second.dart:1.',
+              ),
+            ], 'owned_duplication_detector'),
+          ),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final findings =
+            (jsonDecode(
+                      File('${shardRoot.path}/issues.json').readAsStringSync(),
+                    )['findings']
+                    as List)
+                .cast<Map>();
+        expect(findings, hasLength(2));
+        expect(findings.map((finding) => finding['id']), ['RD-001', 'RD-002']);
+      },
+    );
+
+    test(
       'sort determinism: scrambled inputs produce same ordered IDs',
       () async {
         // Three findings out of order in input; sort by (file_path, line,
@@ -289,7 +331,7 @@ void main() {
     );
 
     test(
-      'preserves closed lifecycle metadata across shard regeneration',
+      'reopens a closed finding when a successful authoritative scan reports it again',
       () async {
         final original = _f(
           filePath: 'lib/closed.dart',
@@ -320,9 +362,64 @@ void main() {
         );
         final findings = (issues['findings'] as List).cast<Map>();
 
-        expect(findings.single['status'], equals('closed'));
-        expect(findings.single['closed_in_phase'], equals('3'));
-        expect(findings.single['closed_commit'], equals('abc123'));
+        expect(findings.single['status'], equals('open'));
+        expect(findings.single.containsKey('closed_in_phase'), isFalse);
+        expect(findings.single.containsKey('closed_commit'), isFalse);
+      },
+    );
+
+    test(
+      'reopens an accepted clone when its fingerprint no longer matches',
+      () async {
+        final clone = _f(
+          filePath: 'lib/clone.dart',
+          line: 12,
+          category: 'redundant_code',
+          severity: 'LOW',
+          toolSource: 'owned_duplication_detector',
+          confidence: 'medium',
+          description: 'clone also appears at lib/source.dart:4.',
+          rationale: 'Accepted duplicate clone. Fingerprint: 1111111111111111.',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...clone.toJson(), 'id': 'RD-001', 'status': 'accepted'},
+            ],
+          }),
+        );
+        File('${shardRoot.path}/shards/duplication.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([
+              _f(
+                filePath: clone.filePath,
+                line: clone.lineStart,
+                category: clone.category,
+                severity: clone.severity,
+                toolSource: clone.toolSource,
+                confidence: clone.confidence,
+                description: clone.description,
+                rationale:
+                    'Detector re-reported. Fingerprint: 2222222222222222.',
+              ),
+            ], 'owned_duplication_detector'),
+          ),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final finding =
+            ((jsonDecode(
+                          File(
+                            '${shardRoot.path}/issues.json',
+                          ).readAsStringSync(),
+                        )['findings']
+                        as List)
+                    .single
+                as Map);
+        expect(finding['id'], 'RD-001');
+        expect(finding['status'], 'open');
       },
     );
 
@@ -363,6 +460,119 @@ void main() {
       expect(findings.single['status'], equals('closed'));
       expect(findings.single['closed_commit'], equals('def456'));
     });
+
+    test(
+      'closes an absent open finding only after its authoritative shard ran',
+      () async {
+        final open = _f(
+          filePath: 'lib/open.dart',
+          line: 7,
+          category: 'dead_code',
+          severity: 'LOW',
+          toolSource: 'dart_code_linter',
+          description: 'stale dead code',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...open.toJson(), 'id': 'DC-001'},
+            ],
+          }),
+        );
+        File(
+          '${shardRoot.path}/shards/dead_code.json',
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'dart_code_linter')));
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final finding =
+            ((jsonDecode(
+                          File(
+                            '${shardRoot.path}/issues.json',
+                          ).readAsStringSync(),
+                        )['findings']
+                        as List)
+                    .single
+                as Map);
+        expect(finding['status'], equals('closed'));
+        expect(finding['closed_in_phase'], equals('audit'));
+      },
+    );
+
+    test(
+      'does not transition missing open findings after an incomplete scan',
+      () async {
+        final open = _f(
+          filePath: 'lib/open.dart',
+          line: 7,
+          category: 'dead_code',
+          severity: 'LOW',
+          toolSource: 'dart_code_linter',
+          description: 'stale dead code',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...open.toJson(), 'id': 'DC-001'},
+            ],
+          }),
+        );
+        File('${shardRoot.path}/shards/dead_code.json').writeAsStringSync(
+          jsonEncode({
+            'tool_source': 'dart_code_linter',
+            'scan_state': 'not_run',
+            'findings': [],
+          }),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(1));
+        final finding =
+            ((jsonDecode(
+                          File(
+                            '${shardRoot.path}/issues.json',
+                          ).readAsStringSync(),
+                        )['findings']
+                        as List)
+                    .single
+                as Map);
+        expect(finding['status'], equals('open'));
+      },
+    );
+
+    test(
+      'renders separate active, resolved, and accepted catalogues',
+      () async {
+        final active = _f(filePath: 'lib/active.dart');
+        final resolved = _f(filePath: 'lib/resolved.dart');
+        final accepted = _f(filePath: 'lib/accepted.dart');
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...active.toJson(), 'id': 'LV-001'},
+              {...resolved.toJson(), 'id': 'LV-002', 'status': 'closed'},
+              {...accepted.toJson(), 'id': 'LV-003', 'status': 'accepted'},
+            ],
+          }),
+        );
+        File(
+          '${shardRoot.path}/shards/layer.json',
+        ).writeAsStringSync(jsonEncode(_shardWith([active], 'import_guard')));
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final markdown = File('${shardRoot.path}/ISSUES.md').readAsStringSync();
+        expect(markdown, contains('**Active findings:** 1'));
+        expect(markdown, contains('**Resolved findings:** 1'));
+        expect(markdown, contains('**Accepted findings:** 1'));
+        expect(markdown, contains('## Active Findings'));
+        expect(markdown, contains('## Resolved Findings'));
+        expect(markdown, contains('## Accepted Findings'));
+      },
+    );
 
     test(
       'preserves an open finding ID when new findings sort before it',
