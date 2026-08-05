@@ -13,6 +13,15 @@ void main() {
   String metricsJson(Map<String, dynamic> report) =>
       '$metricsCompletionLine\n\n${jsonEncode(report)}';
 
+  String metricsUpdateFooter({
+    String currentVersion = '3.2.0',
+    String targetVersion = '4.1.9',
+    String? changelogTagVersion,
+  }) =>
+      '\n\n\n🆕 Update available! $currentVersion -> $targetVersion\n'
+      '🆕 Changelog: https://github.com/bancolombia/dart-code-linter/'
+      'releases/tag/v${changelogTagVersion ?? targetVersion}';
+
   ProcessResult result({
     int exitCode = 0,
     String stdout = '✔ Analysis is completed. Preparing the results: 7.3s',
@@ -88,6 +97,20 @@ void main() {
       expect(run.envelope['scan_state'], 'ran');
       expect(run.envelope['findings'], isEmpty);
     });
+
+    test(
+      'recognizes only the metrics-owned update footer after a clean scan',
+      () async {
+        final run = await dead_code.runDeadCodeAudit(
+          commandRunner: (_, _) async =>
+              result(stdout: '$metricsCompletionLine${metricsUpdateFooter()}'),
+        );
+
+        expect(run.exitCode, 0);
+        expect(run.envelope['scan_state'], 'ran');
+        expect(run.envelope['findings'], isEmpty);
+      },
+    );
 
     test(
       'fails closed when a mixed report contains a malformed record',
@@ -217,6 +240,25 @@ void main() {
       },
     );
 
+    test(
+      'recognizes only the metrics-owned update footer after a JSON report',
+      () async {
+        final run = await dead_code.runDeadCodeAudit(
+          commandRunner: (_, arguments) async =>
+              arguments.contains('check-unused-files')
+              ? result()
+              : result(
+                  stdout:
+                      '${metricsJson({'formatVersion': 2, 'timestamp': '2026-08-06T00:00:00.000Z', 'unusedCode': const []})}${metricsUpdateFooter()}',
+                ),
+        );
+
+        expect(run.exitCode, 0);
+        expect(run.envelope['scan_state'], 'ran');
+        expect(run.envelope['findings'], isEmpty);
+      },
+    );
+
     test('parses a nonempty unused-files metrics report', () async {
       final run = await dead_code.runDeadCodeAudit(
         commandRunner: (_, arguments) async =>
@@ -256,6 +298,15 @@ void main() {
           '$metricsCompletionLine\n\n$report\n$report',
           '$metricsCompletionLine\n\n{"formatVersion":2',
           'unexpected completion\n$report',
+          '$metricsCompletionLine${metricsUpdateFooter()}\ntrailing text',
+          '$metricsCompletionLine${metricsUpdateFooter(changelogTagVersion: '4.1.8')}',
+          '$metricsCompletionLine\n\n\n🆕 Update available! 3.2 -> 4.1.9\n'
+              '🆕 Changelog: https://github.com/bancolombia/dart-code-linter/releases/tag/v4.1.9',
+          '$metricsCompletionLine\n\n\n🆕 Update available! 3.2.0 -> 4.1.9\n'
+              '🆕 Changelog: https://example.com/releases/tag/v4.1.9',
+          '$metricsCompletionLine\n\n\n🆕 Update available! 3.2.0 -> 4.1.9\n'
+              '🆕 Changelog: https://github.com/bancolombia/dart-code-linter/releases/tag/v4.1.9\n'
+              'notice',
         ];
 
         for (final stdout in invalidOutputs) {

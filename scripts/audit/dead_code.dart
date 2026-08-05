@@ -71,14 +71,15 @@ Future<_UnusedScan> _runUnused(
     final normalizedOutput = _normalizeMetricsOutput(
       stdout is String ? stdout : '',
     );
-    if (_isConfirmedZeroFindingOutput(normalizedOutput)) {
+    final metricsOutput = _stripVerifiedMetricsUpdateFooter(normalizedOutput);
+    if (_isConfirmedZeroFindingOutput(metricsOutput)) {
       return const _UnusedScan.success([]);
     }
-    if (normalizedOutput.isEmpty) {
+    if (metricsOutput.isEmpty) {
       return _UnusedScan.failure('$mode emitted empty output');
     }
 
-    final reportPayload = _metricsJsonPayload(normalizedOutput);
+    final reportPayload = _metricsJsonPayload(metricsOutput);
     if (reportPayload == null) {
       return _UnusedScan.failure('$mode emitted malformed JSON');
     }
@@ -215,6 +216,26 @@ final _metricsReportOutput = RegExp(
   '^${RegExp.escape(_metricsCompletionPrefix)}(?:[0-9]+ms|[0-9]+\\.[0-9]s)\\n\\n(.+)\$',
   dotAll: true,
 );
+
+final _metricsUpdateFooter = RegExp(
+  r'^(.+)\n\n\n🆕 Update available! '
+  r'([0-9]+\.[0-9]+\.[0-9]+) -> ([0-9]+\.[0-9]+\.[0-9]+)\n'
+  r'🆕 Changelog: https://github\.com/bancolombia/dart-code-linter/'
+  r'releases/tag/v([0-9]+\.[0-9]+\.[0-9]+)$',
+  dotAll: true,
+);
+
+String _stripVerifiedMetricsUpdateFooter(String output) {
+  final match = _metricsUpdateFooter.firstMatch(output);
+  if (match == null || match.group(3) != match.group(4)) return output;
+
+  // This footer is produced by dart_code_linter itself. It is deliberately
+  // recognized only when it is the exact terminal footer, has the official
+  // changelog URL, and repeats the advertised target version in that URL.
+  // Any other trailing text remains part of the scanner payload and fails
+  // the strict completion/JSON parsing below.
+  return match.group(1)!;
+}
 
 bool _isConfirmedZeroFindingOutput(String output) {
   // dart_code_linter 3.2.1 emits exactly this progress completion line for a
