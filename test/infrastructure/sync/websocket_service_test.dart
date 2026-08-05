@@ -152,6 +152,104 @@ void main() {
       verify(() => sink.close(any(), any())).called(greaterThanOrEqualTo(1));
     });
 
+    test(
+      'repeated connect for the same identity reuses the active transport',
+      () {
+        var connectionAttempts = 0;
+        final reusedService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            connectionAttempts++;
+            final channel = MockWebSocketChannel();
+            when(
+              () => channel.stream,
+            ).thenAnswer((_) => incomingController.stream);
+            when(() => channel.sink).thenReturn(sink);
+            return channel;
+          },
+        );
+        addTearDown(reusedService.dispose);
+
+        reusedService.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (msg) async => 'mock-signature',
+        );
+        reusedService.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (msg) async => 'mock-signature',
+        );
+
+        expect(connectionAttempts, 1);
+        verifyNever(() => sink.close(any(), any()));
+      },
+    );
+
+    test('identity change replaces the transport exactly once', () {
+      var connectionAttempts = 0;
+      final identityService = WebSocketService(
+        baseUrl: 'wss://sync.happypocket.app',
+        channelFactory: ({required String url}) {
+          connectionAttempts++;
+          final channel = MockWebSocketChannel();
+          when(
+            () => channel.stream,
+          ).thenAnswer((_) => incomingController.stream);
+          when(() => channel.sink).thenReturn(sink);
+          return channel;
+        },
+      );
+      addTearDown(identityService.dispose);
+
+      identityService.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-signature',
+      );
+      identityService.connect(
+        groupId: 'group-2',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-signature',
+      );
+
+      expect(connectionAttempts, 2);
+      verify(() => sink.close(any(), any())).called(1);
+    });
+
+    test('same identity does not replace a scheduled reconnect', () async {
+      var connectionAttempts = 0;
+      final reconnectingService = WebSocketService(
+        baseUrl: 'wss://sync.happypocket.app',
+        channelFactory: ({required String url}) {
+          connectionAttempts++;
+          final channel = MockWebSocketChannel();
+          when(
+            () => channel.stream,
+          ).thenAnswer((_) => incomingController.stream);
+          when(() => channel.sink).thenReturn(sink);
+          return channel;
+        },
+      );
+      addTearDown(reconnectingService.dispose);
+
+      reconnectingService.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-signature',
+      );
+      incomingController.addError(StateError('socket failed'));
+      await Future<void>.delayed(Duration.zero);
+
+      reconnectingService.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-signature',
+      );
+
+      expect(connectionAttempts, 1);
+    });
+
     test('parses member_confirmed event from WebSocket', () async {
       final events = <WebSocketEvent>[];
       service.eventStream.listen(events.add);
@@ -599,6 +697,28 @@ void main() {
 
       expect(service.connectionState, WebSocketConnectionState.connected);
       service.disconnect();
+    });
+
+    testWidgets('lifecycle observation is a single active registration', (
+      tester,
+    ) async {
+      service.startLifecycleObservation();
+      service.startLifecycleObservation();
+
+      expect(service.isLifecycleObservationActive, isTrue);
+
+      service.stopLifecycleObservation();
+      service.stopLifecycleObservation();
+
+      expect(service.isLifecycleObservationActive, isFalse);
+    });
+
+    testWidgets('dispose stops its one lifecycle registration', (tester) async {
+      service.startLifecycleObservation();
+
+      service.dispose();
+
+      expect(service.isLifecycleObservationActive, isFalse);
     });
 
     test('sends auth message on connect', () async {

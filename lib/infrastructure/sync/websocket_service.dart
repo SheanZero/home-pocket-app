@@ -78,6 +78,7 @@ class WebSocketService with WidgetsBindingObserver {
   Timer? _pongTimeoutTimer;
   Timer? _reconnectTimer;
   Timer? _backgroundDisconnectTimer;
+  bool _isLifecycleObservationActive = false;
 
   String? _groupId;
   String? _deviceId;
@@ -101,6 +102,13 @@ class WebSocketService with WidgetsBindingObserver {
   /// Stream of parsed events from the WebSocket.
   Stream<WebSocketEvent> get eventStream => _eventController.stream;
 
+  /// Whether this service currently owns one app lifecycle registration.
+  ///
+  /// Exposed so callers and tests can reason about lifecycle ownership without
+  /// reaching into [WidgetsBinding]'s observer collection.
+  @visibleForTesting
+  bool get isLifecycleObservationActive => _isLifecycleObservationActive;
+
   /// Connect to the relay server WebSocket for a specific group.
   ///
   /// [signMessage] is called with the auth payload string and must return
@@ -110,7 +118,18 @@ class WebSocketService with WidgetsBindingObserver {
     required String deviceId,
     required SignMessageFn signMessage,
   }) {
-    if (_connectionState != WebSocketConnectionState.disconnected) {
+    final hasSameIdentity = _groupId == groupId && _deviceId == deviceId;
+    if (hasSameIdentity &&
+        (_connectionState != WebSocketConnectionState.disconnected ||
+            _reconnectTimer != null)) {
+      return;
+    }
+
+    if (!hasSameIdentity &&
+        (_connectionState != WebSocketConnectionState.disconnected ||
+            _groupId != null ||
+            _deviceId != null ||
+            _reconnectTimer != null)) {
       disconnect();
     }
 
@@ -335,6 +354,7 @@ class WebSocketService with WidgetsBindingObserver {
 
   /// Dispose the service and close all streams.
   void dispose() {
+    stopLifecycleObservation();
     disconnect();
     unawaited(_connectionStateController.close());
     unawaited(_eventController.close());
@@ -352,12 +372,16 @@ class WebSocketService with WidgetsBindingObserver {
 
   /// Start observing app lifecycle for background disconnect.
   void startLifecycleObservation() {
+    if (_isLifecycleObservationActive) return;
     WidgetsBinding.instance.addObserver(this);
+    _isLifecycleObservationActive = true;
   }
 
   /// Stop observing app lifecycle.
   void stopLifecycleObservation() {
+    if (!_isLifecycleObservationActive) return;
     WidgetsBinding.instance.removeObserver(this);
+    _isLifecycleObservationActive = false;
     _backgroundDisconnectTimer?.cancel();
     _backgroundDisconnectTimer = null;
   }
@@ -379,7 +403,8 @@ class WebSocketService with WidgetsBindingObserver {
       _backgroundDisconnectTimer = null;
       // Reconnect if we were previously connected
       if (_groupId != null &&
-          _connectionState == WebSocketConnectionState.disconnected) {
+          _connectionState == WebSocketConnectionState.disconnected &&
+          _reconnectTimer == null) {
         _doConnect();
       }
     }
