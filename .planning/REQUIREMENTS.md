@@ -19,7 +19,7 @@
 - [ ] **GEN-01**: Flutter 升级到执行时官方最新 production-stable（2026-08-05 已确认并安装 3.44.8 / Dart 3.12.2），Dart SDK 约束、CI 与开发命令使用同一版本
 - [ ] **GEN-02**: `import_guard_custom_lint` 的 analyzer `<9` 阻塞被安全解决或明确保留 analyzer 8；无论选择哪条路径，Clean Architecture import guard、custom lint 和 Riverpod lint 均持续启用且有负向测试
 - [ ] **GEN-03**: analyzer/build_runner、Riverpod runtime/annotation/generator/lint、Freezed、JSON、Drift generator 作为一个兼容 lane 解析到最新可安全稳定组合，禁止以 override、禁用 lint 或拆分 runtime/annotation/generator 版本来强推升级
-- [ ] **GEN-04**: 在干净生成状态执行 `flutter pub get`、`flutter gen-l10n`、build_runner 后无非预期生成差异，所有跟踪生成物均由选定工具链重建且未手工编辑
+- [x] **GEN-04**: 在干净生成状态执行 `flutter pub get`、`flutter gen-l10n`、build_runner 后无非预期生成差异，所有跟踪生成物均由选定工具链重建且未手工编辑
 
 ### Platform Plugin Cohorts（平台插件组）
 
@@ -95,7 +95,7 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 | GEN-01 | Phase 58 | Pending |
 | GEN-02 | Phase 58 | Pending |
 | GEN-03 | Phase 58 | Pending |
-| GEN-04 | Phase 58 | Pending |
+| GEN-04 | Phase 58 | Complete |
 | PLUG-01 | Phase 59 | Pending |
 | PLUG-02 | Phase 59 | Pending |
 | PLUG-03 | Phase 59 | Pending |

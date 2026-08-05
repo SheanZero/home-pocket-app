@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 0
+open_count: 1
 waived_count: 0
 fixed_count: 1
-total_count: 1
-last_updated: 2026-08-05T14:18:19.498Z
+total_count: 2
+last_updated: 2026-08-05T16:52:20.549Z
 ---
 
 # Broken Windows Ledger
@@ -16,6 +16,7 @@ last_updated: 2026-08-05T14:18:19.498Z
 | id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 57 | deviation | scripts/dependency_compatibility.dart |  | Repaired interrupted manifest validator and portable test fixture before baseline verification. | fixed |  | 2026-08-05T14:17:34.534Z | 2026-08-05T14:18:19.498Z |
+| 2 | 58 | deviation | scripts/verify_codegen_reproducibility.sh |  | Added explicit second-pass nondeterminism diagnostic required by the D-09 fail-closed wrapper. | open |  | 2026-08-05T16:52:20.549Z |  |
 
 ````json
 [
@@ -30,6 +31,18 @@ last_updated: 2026-08-05T14:18:19.498Z
     "reason": "",
     "recorded_at": "2026-08-05T14:17:34.534Z",
     "resolved_at": "2026-08-05T14:18:19.498Z"
+  },
+  {
+    "id": 2,
+    "kind": "deviation",
+    "phase": "58",
+    "file": "scripts/verify_codegen_reproducibility.sh",
+    "line": null,
+    "description": "Added explicit second-pass nondeterminism diagnostic required by the D-09 fail-closed wrapper.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-05T16:52:20.549Z",
+    "resolved_at": null
   }
 ]
 ````
