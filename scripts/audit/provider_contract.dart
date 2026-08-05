@@ -313,11 +313,77 @@ Set<String> _scopeShadows(List<_Token> tokens) {
   for (var index = 0; index < tokens.length; index++) {
     final name = tokens[index].text;
     if (_isScopeDeclaration(tokens, index) ||
-        _isFormalParameterDeclaration(tokens, index)) {
+        _isFormalParameterDeclaration(tokens, index) ||
+        _isPatternBinding(tokens, index)) {
       shadows.add(name);
     }
   }
   return shadows;
+}
+
+/// Detects names introduced by Dart's destructuring patterns without trying to
+/// resolve an entire Dart AST. This is deliberately conservative: the contract
+/// must never accept a locally bound value as a Riverpod constructor or import
+/// prefix. It still distinguishes bindings from initializers, comments,
+/// strings, and import directives so ordinary occurrences do not shadow an
+/// import.
+bool _isPatternBinding(List<_Token> tokens, int index) {
+  if (_isImportOrExportDirective(tokens, index) ||
+      !_isPatternBindingPosition(tokens, index)) {
+    return false;
+  }
+  return _isDeclarationPatternBinding(tokens, index) ||
+      _isCasePatternBinding(tokens, index);
+}
+
+bool _isPatternBindingPosition(List<_Token> tokens, int index) {
+  if (index == 0 || index + 1 >= tokens.length) return false;
+  const leadingPatternTokens = {'(', '[', '{', ',', ':'};
+  const trailingPatternTokens = {',', ')', ']', '}', ':', '='};
+  return leadingPatternTokens.contains(tokens[index - 1].text) &&
+      trailingPatternTokens.contains(tokens[index + 1].text);
+}
+
+bool _isDeclarationPatternBinding(List<_Token> tokens, int index) {
+  final declaration = _nearestStatementDeclaration(tokens, index);
+  if (declaration == null) return false;
+
+  // A binding lives on the left side of its declaration assignment. This keeps
+  // `final value = (ProviderScope, other);` an ordinary use instead of a
+  // false-positive shadow.
+  return !_hasAssignmentBetween(tokens, declaration, index);
+}
+
+int? _nearestStatementDeclaration(List<_Token> tokens, int index) {
+  for (var cursor = index - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    // Braces can be part of an object or map pattern, so only a statement
+    // terminator conclusively ends the declaration search.
+    if (token == ';') return null;
+    if (token == 'final' || token == 'var') return cursor;
+  }
+  return null;
+}
+
+bool _hasAssignmentBetween(List<_Token> tokens, int start, int end) {
+  for (var cursor = start + 1; cursor < end; cursor++) {
+    if (tokens[cursor].text != '=') continue;
+    final previous = cursor == 0 ? null : tokens[cursor - 1].text;
+    final next = cursor + 1 < tokens.length ? tokens[cursor + 1].text : null;
+    if (previous != '=' && previous != '!' && previous != '>' && next != '=') {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _isCasePatternBinding(List<_Token> tokens, int index) {
+  for (var cursor = index - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    if (token == ';' || token == '{' || token == '}') return false;
+    if (token == 'case') return true;
+  }
+  return false;
 }
 
 bool _isScopeDeclaration(List<_Token> tokens, int index) {

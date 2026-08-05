@@ -54,6 +54,43 @@ void main() {
       },
     );
 
+    test(
+      'record-pattern alias shadow fixture is rejected and cleaned',
+      () async {
+        const guardCase =
+            tooling.ToolingGuardCase.providerScopeRecordPatternAliasShadow();
+
+        final result = await tooling.verifyToolingGuards(
+          cases: const [guardCase],
+          runCommand: tooling.runToolingGuardCommand,
+          runValidTreeChecks: false,
+        );
+
+        expect(result.isPassing, isTrue, reason: result.describe());
+        expect(result.cases, hasLength(1));
+        expect(result.cases.single.output, contains('missing_provider_scope'));
+        expect(File(guardCase.fixturePath).existsSync(), isFalse);
+      },
+    );
+
+    test('record-pattern alias shadow fixture compiles as Dart', () async {
+      const guardCase =
+          tooling.ToolingGuardCase.providerScopeRecordPatternAliasShadow();
+      final fixture = File(guardCase.fixturePath);
+      await fixture.writeAsString(guardCase.source!);
+      addTearDown(() async {
+        if (fixture.existsSync()) await fixture.delete();
+      });
+
+      final result = await Process.run('flutter', [
+        'analyze',
+        '--no-fatal-infos',
+        guardCase.fixturePath,
+      ], workingDirectory: Directory.current.path);
+
+      expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+    });
+
     test('pre-existing sentinel is refused without deleting it', () async {
       final fixture = File(_packageFixturePath);
       await fixture.writeAsString('// preserved stale sentinel\n');

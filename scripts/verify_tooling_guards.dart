@@ -187,6 +187,27 @@ class ToolingGuardCase {
         diagnosticCode: 'missing_provider_scope',
       );
 
+  const ToolingGuardCase.providerScopeRecordPatternAliasShadow()
+    : this(
+        name: 'provider app root record-pattern alias shadow',
+        fixturePath:
+            'lib/phase58_provider_scope_record_pattern_alias_shadow_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n"
+            "import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;\n\n"
+            'final Type importedProviderScopeType = riverpod.ProviderScope;\n\n'
+            'class FakeNamespace {\n'
+            '  Widget ProviderScope({required Widget child}) => child;\n'
+            '}\n\n'
+            'void phase58RecordPatternAliasShadow() {\n'
+            '  final (riverpod, _) = (FakeNamespace(), 0);\n'
+            '  runApp(riverpod.ProviderScope(child: const Placeholder()));\n'
+            '}\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
   const ToolingGuardCase.validProductionAnalyzer()
     : this(
         name: 'valid production flutter analyze',
@@ -315,6 +336,7 @@ Future<ToolingGuardResult> verifyToolingGuards({
     ToolingGuardCase.providerScopeStringLookalike(),
     ToolingGuardCase.providerScopeUnrelatedAlias(),
     ToolingGuardCase.providerScopeQualifiedAliasShadow(),
+    ToolingGuardCase.providerScopeRecordPatternAliasShadow(),
   ],
   ToolingGuardCommand runCommand = runToolingGuardCommand,
   bool runValidTreeChecks = true,

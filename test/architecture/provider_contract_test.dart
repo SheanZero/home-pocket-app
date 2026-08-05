@@ -266,6 +266,120 @@ void main() =>
       },
     );
 
+    test(
+      'Riverpod scope constructors fail closed when pattern bindings shadow them',
+      () async {
+        final cases = <({String name, String source})>[
+          (
+            name: 'record declaration shadows qualified alias',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+class FakeNamespace {
+  Widget ProviderScope({required Widget child}) => child;
+}
+
+void main() {
+  final (riverpod, _) = (FakeNamespace(), 0);
+  runApp(riverpod.ProviderScope(child: const Placeholder()));
+}
+''',
+          ),
+          (
+            name: 'list declaration shadows unqualified constructor',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {
+  final [ProviderScope, _] = [
+    ({required Widget child}) => child,
+    0,
+  ];
+  runApp(ProviderScope(child: const Placeholder()));
+}
+''',
+          ),
+          (
+            name: 'object declaration shadows qualified alias',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+class Holder {
+  const Holder(this.riverpod);
+  final Object riverpod;
+}
+
+void main() {
+  final Holder(:riverpod) = Holder(Object());
+  runApp(riverpod.ProviderScope(child: const Placeholder()));
+}
+''',
+          ),
+          (
+            name: 'map declaration shadows unqualified constructor',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {
+  final {'scope': ProviderScope} = {
+    'scope': ({required Widget child}) => child,
+  };
+  runApp(ProviderScope(child: const Placeholder()));
+}
+''',
+          ),
+          (
+            name: 'if-case binding shadows qualified alias',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+class FakeNamespace {
+  Widget ProviderScope({required Widget child}) => child;
+}
+
+void main() {
+  if ((FakeNamespace(), 0) case (final riverpod, _)) {
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          ),
+          (
+            name: 'switch-case binding shadows unqualified constructor',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {
+  switch ((({required Widget child}) => child, 0)) {
+    case (final ProviderScope, _):
+      runApp(ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          ),
+        ];
+
+        for (final fixture in cases) {
+          final root = await _createFixtureRoot(appSource: fixture.source);
+          addTearDown(() => root.delete(recursive: true));
+
+          final report = checkProviderContract(root.path);
+
+          expect(
+            report.isPassing,
+            isFalse,
+            reason: '${fixture.name}: ${report.describe()}',
+          );
+        }
+      },
+    );
+
     test('the production lib tree satisfies the owned provider contract', () {
       final report = checkProviderContract('.');
 
