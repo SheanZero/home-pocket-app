@@ -206,9 +206,13 @@ CI 在 [`.github/workflows/audit.yml:49`](../.github/workflows/audit.yml#L49) �
 
 ### P2-02：生产目录有 25 个疑似未使用文件
 
-静态扫描识别出 25 个生产侧未被引用文件，主要包括旧 OCR/Voice 页面、旧 Analytics cards、Settings 旧 section、Shopping 批量/选择组件和 demo service。另有约 28 个疑似未使用声明。
+静态扫描识别出 25 个生产侧未被引用文件，主要包括旧 OCR/Voice 页面、旧 Analytics cards、Settings 旧 section、Shopping 批量/选择组件和 demo service。另有 29 个疑似未使用声明。
 
 **建议：** 先区分“被测试直接引用但运行时未接线”“feature flag 保留”“真实废弃”三类；真实废弃内容用小批次删除并跑全量测试，不直接依据扫描结果批量删除。
+
+**修复状态（2026-08-05）：已完成。** 已用同一 `dart_code_linter` 扫描器逐项核对生产入站引用：25 个首轮候选均无任何 `lib/` 引用，其中 17 个仅被测试直接引用、8 个完全零引用，未发现仍接入运行时的 feature-flag 或动态入口。按 Accounting、Analytics、Settings/Home/Onboarding、Shopping 四个功能域分批删除后，又清除了 7 个级联暴露的孤立源文件；合计删除 32 个不可达生产源文件、5 个对应生成文件以及只验证死代码的测试/golden。
+
+仍有价值的测试能力未被删除：`MemoryInboundSyncOperationRepository` 与 `InMemoryPrivacyWipeJournalStore` 已从生产目录下沉到 `test/helpers/`；Settings wrapper 只删除不可达外壳，当前页面使用的 tile 继续保留并由页面测试覆盖。最终 `check-unused-files` 与 `check-unused-code` 均为 **0 findings**，扫描结果已写回 `.planning/audit/shards/dead_code.json`。
 
 ### P2-03：设备级 E2E 覆盖面过窄
 
