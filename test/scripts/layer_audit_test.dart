@@ -13,14 +13,21 @@ void main() {
   }) => ProcessResult(1, exitCode, stdout, stderr);
 
   group('layer audit', () {
-    test('records an exact JSON clean result', () async {
+    test('uses custom_lint 0.8.1 JSON arguments for a clean result', () async {
+      final invocations = <List<String>>[];
       final run = await layer.runLayerAudit(
-        commandRunner: (_, _) async => result(),
+        commandRunner: (_, arguments) async {
+          invocations.add(arguments);
+          return result();
+        },
       );
 
       expect(run.exitCode, 0);
       expect(run.envelope['scan_state'], 'ran');
       expect(run.envelope['findings'], isEmpty);
+      expect(invocations, [
+        ['run', 'custom_lint', '--format=json', '--no-fatal-infos'],
+      ]);
     });
 
     test('parses a valid import_guard JSON diagnostic', () async {
@@ -87,82 +94,28 @@ void main() {
     );
 
     test(
-      'fails closed for unrecognized text reporter output without leaking it',
+      'fails closed instead of falling back after the old flag signature',
       () async {
+        final invocations = <List<String>>[];
         final run = await layer.runLayerAudit(
-          commandRunner: (_, arguments) async =>
-              arguments.contains('--reporter=json')
-              ? result(stdout: '')
-              : result(stdout: 'unexpected SECRET_TOKEN=must-not-be-recorded'),
+          commandRunner: (_, arguments) async {
+            invocations.add(arguments);
+            // `custom_lint --reporter=json` on 0.8.1 exits successfully without
+            // output. Treat the matching absence as a scanner failure, never as
+            // a reason to run the text command and hide the contract problem.
+            return result(stdout: '');
+          },
         );
 
         expect(run.exitCode, 1);
         expect(run.envelope['scan_state'], 'not_run');
         expect(run.envelope['scan_failed'], isTrue);
         expect(run.envelope['findings'], isEmpty);
-        expect(run.envelope['error'], isNot(contains('SECRET_TOKEN')));
+        expect(invocations, [
+          ['run', 'custom_lint', '--format=json', '--no-fatal-infos'],
+        ]);
       },
     );
-
-    test('preserves the text fallback for the exact clean signature', () async {
-      final run = await layer.runLayerAudit(
-        commandRunner: (_, arguments) async =>
-            arguments.contains('--reporter=json')
-            ? result(stdout: '')
-            : result(stdout: 'No issues found!'),
-      );
-
-      expect(run.exitCode, 0);
-      expect(run.envelope['scan_state'], 'ran');
-      expect(run.envelope['findings'], isEmpty);
-    });
-
-    test(
-      'accepts the custom_lint clean signature with its analyzer preamble',
-      () async {
-        final run = await layer.runLayerAudit(
-          commandRunner: (_, arguments) async =>
-              arguments.contains('--reporter=json')
-              ? result(stdout: '')
-              : result(stdout: 'Analyzing...\n\nNo issues found!'),
-        );
-
-        expect(run.exitCode, 0);
-        expect(run.envelope['scan_state'], 'ran');
-        expect(run.envelope['findings'], isEmpty);
-      },
-    );
-
-    test('rejects near-miss clean text output with an extra line', () async {
-      final run = await layer.runLayerAudit(
-        commandRunner: (_, arguments) async =>
-            arguments.contains('--reporter=json')
-            ? result(stdout: '')
-            : result(
-                stdout: 'Analyzing...\n\nNo issues found!\nUnexpected detail',
-              ),
-      );
-
-      expect(run.exitCode, 1);
-      expect(run.envelope['scan_state'], 'not_run');
-      expect(run.envelope['scan_failed'], isTrue);
-      expect(run.envelope['findings'], isEmpty);
-    });
-
-    test('parses the exact text-reporter finding format in fallback', () async {
-      final run = await layer.runLayerAudit(
-        commandRunner: (_, arguments) async =>
-            arguments.contains('--reporter=json')
-            ? result(stdout: '')
-            : result(
-                stdout:
-                    '  lib/example.dart:4:2 • Invalid import • import_guard.domain • WARNING\n\n1 issue found.',
-              ),
-      );
-
-      expect(run.exitCode, 0);
-      expect(run.envelope['findings'], hasLength(1));
-    });
 
     test(
       'fails closed for truncated JSON without leaking scanner output',

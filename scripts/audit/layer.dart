@@ -19,11 +19,6 @@ String _relPath(String absPath) {
   return absPath;
 }
 
-// Text-reporter line: "  <relpath>:<line>:<col> • <message> • <code> • <SEVERITY>"
-final _textLine = RegExp(
-  r'^\s*([^:]+\.dart):(\d+):(\d+)\s+•\s+(.+?)\s+•\s+(\S+)\s+•\s+(INFO|WARNING|ERROR)\s*$',
-);
-
 typedef LayerCommandRunner =
     Future<ProcessResult> Function(String executable, List<String> arguments);
 
@@ -54,7 +49,7 @@ Future<_LayerScan> _runJsonReporter(LayerCommandRunner commandRunner) async {
   final result = await commandRunner('dart', [
     'run',
     'custom_lint',
-    '--reporter=json',
+    '--format=json',
     '--no-fatal-infos',
   ]);
   if (result.exitCode > 1) {
@@ -65,8 +60,9 @@ Future<_LayerScan> _runJsonReporter(LayerCommandRunner commandRunner) async {
 
   final output = _normalizeOutput(result.stdout);
   if (output.isEmpty) {
-    // custom_lint's JSON reporter normally emits a versioned envelope. Retain
-    // the legacy text fallback only for this precise absent-output condition.
+    // custom_lint 0.8.1 documents --format=json and emits a versioned envelope
+    // for clean scans. Do not fall back: its unsupported --reporter=json flag
+    // also exits successfully with no output, which must fail closed.
     return const _LayerScan.failure('layer JSON reporter emitted no output');
   }
 
@@ -223,84 +219,6 @@ bool _areContextMessagesValid(dynamic value) {
   );
 }
 
-Future<_LayerScan> _runTextReporter(LayerCommandRunner commandRunner) async {
-  final result = await commandRunner('dart', [
-    'run',
-    'custom_lint',
-    '--no-fatal-infos',
-  ]);
-  if (result.exitCode > 1) {
-    return const _LayerScan.failure(
-      'layer text reporter exited unsuccessfully',
-    );
-  }
-  return _parseTextReporter(_normalizeOutput(result.stdout));
-}
-
-_LayerScan _parseTextReporter(String output) {
-  if (output == 'No issues found!' ||
-      output == 'Analyzing...\n\nNo issues found!') {
-    return const _LayerScan.success([]);
-  }
-  if (output.isEmpty) {
-    return const _LayerScan.failure('layer text reporter emitted no output');
-  }
-
-  final lines = const LineSplitter().convert(output);
-  if (lines.length < 3 || lines[lines.length - 2].isNotEmpty) {
-    return const _LayerScan.failure(
-      'layer text reporter emitted an unrecognized report',
-    );
-  }
-  final summary = RegExp(r'^(\d+) issue(s)? found\.$').firstMatch(lines.last);
-  if (summary == null) {
-    return const _LayerScan.failure(
-      'layer text reporter emitted an unrecognized report',
-    );
-  }
-  final declaredCount = int.parse(summary.group(1)!);
-  final usesPlural = summary.group(2) != null;
-  final diagnosticLines = lines.sublist(0, lines.length - 2);
-  if (declaredCount != diagnosticLines.length ||
-      (declaredCount == 1 && usesPlural) ||
-      (declaredCount != 1 && !usesPlural)) {
-    return const _LayerScan.failure(
-      'layer text reporter emitted an unrecognized report',
-    );
-  }
-
-  final findings = <Finding>[];
-  for (final line in diagnosticLines) {
-    final match = _textLine.firstMatch(line);
-    if (match == null ||
-        int.parse(match.group(2)!) < 1 ||
-        int.parse(match.group(3)!) < 1) {
-      return const _LayerScan.failure(
-        'layer text reporter emitted a malformed diagnostic',
-      );
-    }
-    final code = match.group(5)!;
-    final file = match.group(1)!;
-    if (!code.startsWith('import_guard') || _isGenerated(file)) continue;
-    final lineNumber = int.parse(match.group(2)!);
-    findings.add(
-      Finding(
-        category: 'layer_violation',
-        severity: 'CRITICAL',
-        filePath: file,
-        lineStart: lineNumber,
-        lineEnd: lineNumber,
-        description: match.group(4)!,
-        rationale: 'Layer violation flagged by $code',
-        suggestedFix: 'Move/refactor to satisfy the layer rule.',
-        toolSource: 'import_guard',
-        confidence: 'high',
-      ),
-    );
-  }
-  return _LayerScan.success(findings);
-}
-
 Future<LayerAuditRun> runLayerAudit({
   LayerCommandRunner? commandRunner,
   DateTime? generatedAt,
@@ -317,10 +235,7 @@ Future<LayerAuditRun> runLayerAudit({
   };
 
   try {
-    final json = await _runJsonReporter(runCommand);
-    final scan = json.diagnostic == 'layer JSON reporter emitted no output'
-        ? await _runTextReporter(runCommand)
-        : json;
+    final scan = await _runJsonReporter(runCommand);
     if (scan.failed) {
       return _failedRun(envelope, scan.diagnostic!);
     }
