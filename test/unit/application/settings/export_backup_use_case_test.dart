@@ -244,6 +244,68 @@ void main() {
     },
   );
 
+  test(
+    'keeps two same-instant exports as distinct readable files without temp files',
+    () async {
+      final exportedAt = DateTime.utc(2026, 8, 5, 12, 34, 56, 789);
+      useCase = ExportBackupUseCase(
+        transactionRepo: mockTransactionRepo,
+        categoryRepo: mockCategoryRepo,
+        bookRepo: mockBookRepo,
+        settingsRepo: mockSettingsRepo,
+        exchangeRateRepo: mockExchangeRateRepo,
+        unitOfWork: _FakeUnitOfWork(),
+        backupCrypto: backupCrypto,
+        clock: () => exportedAt,
+        backupIdGenerator: () => 'fixed-token',
+      );
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
+      when(
+        () => mockSettingsRepo.getSettings(),
+      ).thenAnswer((_) async => const AppSettings());
+      when(() => mockExchangeRateRepo.findAll()).thenAnswer((_) async => []);
+
+      final first = await useCase.execute(
+        bookId: 'book-1',
+        password: 'test-password-123',
+        outputDirectory: tempDir,
+      );
+      final second = await useCase.execute(
+        bookId: 'book-1',
+        password: 'test-password-123',
+        outputDirectory: tempDir,
+      );
+
+      expect(first.isSuccess, isTrue);
+      expect(second.isSuccess, isTrue);
+      expect(first.data!.path, isNot(second.data!.path));
+      expect(
+        first.data!.uri.pathSegments.last,
+        'homepocket_backup_20260805T123456789Z_fixed-token.hpb',
+      );
+      expect(
+        second.data!.uri.pathSegments.last,
+        'homepocket_backup_20260805T123456789Z_fixed-token-1.hpb',
+      );
+
+      for (final file in [first.data!, second.data!]) {
+        final plaintext = await backupCrypto.decrypt(
+          await file.readAsBytes(),
+          'test-password-123',
+        );
+        expect(jsonDecode(utf8.decode(gzip.decode(plaintext))), isA<Map>());
+      }
+      final leftovers = await tempDir
+          .list()
+          .where((entity) => entity.path.endsWith('.tmp'))
+          .toList();
+      expect(leftovers, isEmpty);
+    },
+  );
+
   test('D-10: includes exchange rates in epoch-seconds backup shape', () async {
     when(
       () => mockTransactionRepo.findAllByBook('book-1'),

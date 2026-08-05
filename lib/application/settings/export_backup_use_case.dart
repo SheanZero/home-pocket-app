@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
@@ -32,13 +33,17 @@ class ExportBackupUseCase {
     required ExchangeRateRepository exchangeRateRepo,
     required UnitOfWork unitOfWork,
     required BackupCryptoService backupCrypto,
+    DateTime Function()? clock,
+    String Function()? backupIdGenerator,
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
        _settingsRepo = settingsRepo,
        _exchangeRateRepo = exchangeRateRepo,
        _unitOfWork = unitOfWork,
-       _backupCrypto = backupCrypto;
+       _backupCrypto = backupCrypto,
+       _clock = clock ?? DateTime.now,
+       _backupIdGenerator = backupIdGenerator ?? _generateBackupId;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
@@ -47,6 +52,8 @@ class ExportBackupUseCase {
   final ExchangeRateRepository _exchangeRateRepo;
   final UnitOfWork _unitOfWork;
   final BackupCryptoService _backupCrypto;
+  final DateTime Function() _clock;
+  final String Function() _backupIdGenerator;
 
   Future<Result<File>> execute({
     required String bookId,
@@ -128,14 +135,108 @@ class ExportBackupUseCase {
       // 6. Save to file
       final directory =
           outputDirectory ?? await getApplicationDocumentsDirectory();
-      final timestamp = DateTime.now().toIso8601String().substring(0, 10);
-      final file = File('${directory.path}/homepocket_backup_$timestamp.hpb');
-      await file.writeAsBytes(encryptedData);
+      final file = await _writeBackupAtomically(
+        directory: directory,
+        encryptedData: encryptedData,
+        exportedAt: _clock().toUtc(),
+      );
 
       return Result.success(file);
     } catch (e) {
       return Result.error('Backup export failed: $e');
     }
+  }
+
+  /// Publishes a fully flushed backup by renaming a sibling temporary file.
+  ///
+  /// Dart's [File.rename] replaces an existing destination on some platforms,
+  /// so a per-candidate exclusive reservation prevents app writers from ever
+  /// publishing over a completed backup. Numeric suffixes make a rare token
+  /// collision deterministic instead of discarding an earlier export.
+  Future<File> _writeBackupAtomically({
+    required Directory directory,
+    required Uint8List encryptedData,
+    required DateTime exportedAt,
+  }) async {
+    await directory.create(recursive: true);
+
+    final timestamp = _formatUtcTimestamp(exportedAt);
+    final identifier = _backupIdGenerator();
+    const maxCollisions = 10000;
+    for (var collision = 0; collision < maxCollisions; collision++) {
+      final suffix = collision == 0 ? '' : '-$collision';
+      final fileName = 'homepocket_backup_${timestamp}_$identifier$suffix.hpb';
+      final destination = File(
+        '${directory.path}${Platform.pathSeparator}$fileName',
+      );
+      if (await destination.exists()) continue;
+
+      // `File.create(exclusive: true)` is the cross-platform primitive Dart
+      // exposes for atomic name reservation. All application exporters honor
+      // this sibling reservation until the completed temporary file is renamed.
+      final reservation = File(
+        '${directory.path}${Platform.pathSeparator}.$fileName.lock',
+      );
+      try {
+        await reservation.create(exclusive: true);
+      } on PathExistsException {
+        continue;
+      }
+
+      final temporary = File(
+        '${directory.path}${Platform.pathSeparator}.$fileName.tmp',
+      );
+      var temporaryCreated = false;
+      try {
+        // Recheck after acquiring the reservation to protect pre-existing
+        // completed backups that may have appeared between the first check.
+        if (await destination.exists()) continue;
+
+        try {
+          await temporary.create(exclusive: true);
+          temporaryCreated = true;
+        } on PathExistsException {
+          continue;
+        }
+        await temporary.writeAsBytes(encryptedData, flush: true);
+
+        // File.rename can replace its destination on POSIX. The reservation
+        // serializes app exporters; this additional check protects a completed
+        // file created outside that protocol before publication.
+        if (await destination.exists()) continue;
+        await temporary.rename(destination.path);
+        return destination;
+      } finally {
+        try {
+          if (temporaryCreated && await temporary.exists()) {
+            await temporary.delete();
+          }
+        } finally {
+          if (await reservation.exists()) {
+            await reservation.delete();
+          }
+        }
+      }
+    }
+
+    throw StateError('Unable to reserve a unique backup filename');
+  }
+
+  static String _formatUtcTimestamp(DateTime value) {
+    String padded(int number, int width) =>
+        number.toString().padLeft(width, '0');
+    return '${padded(value.year, 4)}${padded(value.month, 2)}${padded(value.day, 2)}'
+        'T${padded(value.hour, 2)}${padded(value.minute, 2)}${padded(value.second, 2)}'
+        '${padded(value.millisecond, 3)}Z';
+  }
+
+  static String _generateBackupId() {
+    final random = Random.secure();
+    return List<String>.generate(
+      12,
+      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+      growable: false,
+    ).join();
   }
 }
 
