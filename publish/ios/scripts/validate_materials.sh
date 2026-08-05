@@ -159,6 +159,30 @@ else
   block "Runner has no app-level PrivacyInfo.xcprivacy; finalize from Xcode Privacy Report"
 fi
 
+if rg -q 'PrivacyInfo\.xcprivacy in Resources' ios/Runner.xcodeproj/project.pbxproj; then
+  pass "Runner target bundles the privacy manifest"
+else
+  block "Runner target does not bundle PrivacyInfo.xcprivacy"
+fi
+
+MANIFEST_DUMP="$(plutil -p ios/Runner/PrivacyInfo.xcprivacy 2>/dev/null)"
+if echo "$MANIFEST_DUMP" | rg -q '"NSPrivacyTracking" => false' \
+  && echo "$MANIFEST_DUMP" | rg -q '"NSPrivacyAccessedAPITypes" => \['; then
+  pass "Runner privacy manifest declares no tracking or app-owned Required Reason API"
+else
+  block "Runner privacy manifest must explicitly disable tracking and keep app-owned Required Reason APIs evidence-based"
+fi
+
+for data_type in Name UserID DeviceID OtherUserContent; do
+  if ! echo "$MANIFEST_DUMP" | rg -q "NSPrivacyCollectedDataType${data_type}"; then
+    block "Runner privacy manifest is missing evidenced collected data type: $data_type"
+  fi
+done
+
+if echo "$MANIFEST_DUMP" | rg -q 'NSPrivacyCollectedDataType(PhotosorVideos|PurchaseHistory|OtherFinancialInfo)'; then
+  block "Runner privacy manifest overdeclares unsupported photo or financial collection"
+fi
+
 if plutil -lint "$PUBLISH_DIR/privacy/PrivacyInfo.xcprivacy.template" >/dev/null; then
   pass "privacy manifest template is valid plist"
 else

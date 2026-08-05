@@ -17,8 +17,8 @@
 - [ ] **版本号定版。** 当前 `pubspec.yaml` 为 `0.1.0+1`，而项目文档描述多个已完成里程碑。发布负责人需决定首发 Marketing Version 与递增 Build Number，并让 pubspec、归档和 App Store Connect 一致。
 - [ ] **iPad 发布策略定版。** 当前 target 同时支持 iPhone 和 iPad，因此 App Store 必须提交 13 英寸 iPad 截图。若产品未做 iPad 真机/模拟器验收，先决定是完成适配和截图，还是在代码变更中正式改为 iPhone-only。
 - [ ] **最终商店截图。** 现有 golden 使用测试字体/图标替身，只能作布局参考，不能上传。必须从最终 Release build 采集无敏感数据的 iPhone 6.9 英寸和 iPad 13 英寸截图。
-- [ ] **照片权限核对。** App 的头像选择使用 `ImageSource.gallery`，但 `Info.plist` 当前没有 `NSPhotoLibraryUsageDescription`。以最终 `image_picker` 行为在 iOS 15+/iOS 26 真机验证；如果系统请求权限，补齐三语用途说明后再构建。
-- [ ] **Xcode Privacy Report / manifest 通过。** `ios/Runner/` 当前没有 app-level `PrivacyInfo.xcprivacy`。先从 Archive 生成 Privacy Report，核对所有 SDK manifest、Required Reason API 和收集类型；`privacy/PrivacyInfo.xcprivacy.template` 只能作为初稿，不能直接复制后送审。
+- [x] **照片权限说明。** App 的头像选择使用 `ImageSource.gallery`；`Info.plist` 和 `ja` / `zh-Hans` / `en` `InfoPlist.strings` 均已提供最小化的 `NSPhotoLibraryUsageDescription`。不请求 add-only 权限；照片选择真机验证仍属于下方 P1 设备验收。
+- [ ] **Xcode Privacy Report / manifest 通过。** `ios/Runner/PrivacyInfo.xcprivacy` 已作为 Runner resource 打包，且仅声明代码证实的 relay 元数据、无 tracking 和无 app-owned Required Reason API。仍须从最终 Archive 生成 Privacy Report，核对 SDK manifests、最终服务端保留和 App Store Connect 收集口径；不要仅凭 E2EE 密文推测 Financial Info 申报。
 - [ ] **全量质量门禁绿色。** 当前代码健康报告记录全量测试、golden/架构契约和部分 lint/覆盖率门禁仍有失败。发布候选 commit 必须通过 `flutter analyze`、目标测试、全量测试及 iOS Release 构建。
 - [ ] **生产后端可审核。** `https://sync.happypocket.app` 和汇率服务在审核期间稳定可用；准备双设备操作视频或审核附件说明家庭同步流程。首版不使用推送。
 

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 const _localizedInfoPlistKeys = <String>{
   'CFBundleDisplayName',
   'NSMicrophoneUsageDescription',
+  'NSPhotoLibraryUsageDescription',
   'NSSpeechRecognitionUsageDescription',
   'NSFaceIDUsageDescription',
 };
@@ -54,6 +55,57 @@ void main() {
       expect(knownRegions, contains('ja,'));
       expect(knownRegions, contains('"zh-Hans",'));
     });
+
+    test(
+      'privacy configuration is bundled and declares only evidenced data',
+      () {
+        final infoPlist = File('ios/Runner/Info.plist').readAsStringSync();
+        expect(
+          infoPlist,
+          contains('<key>NSPhotoLibraryUsageDescription</key>'),
+        );
+        expect(
+          infoPlist,
+          isNot(contains('<key>NSPhotoLibraryAddUsageDescription</key>')),
+        );
+
+        final manifest = File('ios/Runner/PrivacyInfo.xcprivacy');
+        expect(manifest.existsSync(), isTrue);
+        final privacy = manifest.readAsStringSync();
+        expect(privacy, contains('<key>NSPrivacyTracking</key>\n\t<false/>'));
+        expect(
+          privacy,
+          contains('<key>NSPrivacyTrackingDomains</key>\n\t<array/>'),
+        );
+        expect(
+          privacy,
+          contains('<key>NSPrivacyAccessedAPITypes</key>\n\t<array/>'),
+        );
+        expect(privacy, contains('NSPrivacyCollectedDataTypeName'));
+        expect(privacy, contains('NSPrivacyCollectedDataTypeUserID'));
+        expect(privacy, contains('NSPrivacyCollectedDataTypeDeviceID'));
+        expect(privacy, contains('NSPrivacyCollectedDataTypeOtherUserContent'));
+        expect(
+          privacy,
+          isNot(contains('NSPrivacyCollectedDataTypePhotosorVideos')),
+        );
+        expect(
+          privacy,
+          isNot(contains('NSPrivacyCollectedDataTypePurchaseHistory')),
+        );
+        expect(
+          privacy,
+          isNot(contains('NSPrivacyCollectedDataTypeOtherFinancialInfo')),
+        );
+
+        final project = File(
+          'ios/Runner.xcodeproj/project.pbxproj',
+        ).readAsStringSync();
+        expect(project, contains('PrivacyInfo.xcprivacy in Resources'));
+        expect(project, contains('lastKnownFileType = text.xml;'));
+        expect(project, contains('path = PrivacyInfo.xcprivacy;'));
+      },
+    );
   });
 }
 
