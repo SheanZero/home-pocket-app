@@ -143,6 +143,7 @@ class HomeBottomNavBar extends StatelessWidget {
       onTap: onFabTap,
       onLongPress: onFabLongPress,
       child: Container(
+        key: const ValueKey('home-bottom-nav-fab'),
         width: 62,
         height: 62,
         decoration: BoxDecoration(

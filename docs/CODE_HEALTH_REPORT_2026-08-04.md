@@ -220,6 +220,12 @@ CI 在 [`.github/workflows/audit.yml:49`](../.github/workflows/audit.yml#L49) �
 
 **建议：** 建立最小设备 smoke：全新安装→onboarding→创建账目→冷启动锁→导出/恢复→家庭同步 push/pull/ACK；iOS/Android 至少各一条 CI 或发布前自动化路径。
 
+**修复状态（2026-08-05）：已完成。** `integration_test/` 已从单一商户迁移测试扩展为 3 个设备测试文件、10 个设备用例：完整应用旅程覆盖 onboarding、真实记账、HPB 加密导出/恢复、SQLCipher 文件关闭重开与冷启动 PIN 门禁；同步旅程覆盖 SQLCipher 离线队列重启、relay 接收后清理、withdrawal ACK、pull 持久化先于 ACK，以及 push token 注册/前台路由。原商户迁移测试同时移除了陈旧的 schema v22 硬编码，现校验磁盘 `user_version` 与当前 Drift schema 一致。
+
+新增 [`.github/workflows/device-e2e.yml`](../.github/workflows/device-e2e.yml)，对相关 PR 与 `main` push 分别启动 Android API 35 emulator 和 iPhone simulator，执行完整 `integration_test/`；另有 host 架构契约锁定双平台 job 与关键旅程标记，防止覆盖面退回。完整目录已在 iPhone simulator 与 Android API 36 emulator 分别实跑，均为 **10/10 通过**；CI 固定的 Android API 35 路径将在 PR/push 时继续执行。
+
+APNs/FCM 真实送达、通知点击冷启和两台物理设备的真实 relay 收敛需要签名、push entitlement、服务端环境与注册设备，因此没有用 mock 冒充已自动化；发布前证据要求已明确保留在 [`docs/testing/DEVICE_E2E_MATRIX.md`](testing/DEVICE_E2E_MATRIX.md) 的 provider-backed UAT lane。
+
 ### P2-04：依赖与未来 Flutter 兼容债
 
 - `flutter pub outdated`：44 个 lockfile 包可升级，12 个直接依赖受约束；

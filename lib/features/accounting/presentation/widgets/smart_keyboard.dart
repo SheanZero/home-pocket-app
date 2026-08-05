@@ -288,6 +288,7 @@ class _DigitKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: ValueKey('smart-key-$label'),
       color: palette.backgroundMuted,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -463,6 +464,7 @@ class _GradientKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: const ValueKey('smart-key-action'),
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(

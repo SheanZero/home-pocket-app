@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
@@ -34,6 +35,29 @@ Future<QueryExecutor> createEncryptedExecutor(
 
   final file = await _getDatabaseFile();
 
+  return NativeDatabase(file, setup: (db) => _setupEncryption(db, dbKey));
+}
+
+/// Opens the production SQLCipher executor against an isolated test file.
+///
+/// Device integration tests need to close and reopen the same encrypted file
+/// without touching the installed app's real `home_pocket.db`. Keeping this
+/// entry point here ensures those tests exercise the exact production key
+/// derivation and SQLCipher setup rather than introducing a second cipher path.
+@visibleForTesting
+Future<QueryExecutor> createEncryptedExecutorAtFileForTesting(
+  MasterKeyRepository masterKeyRepository,
+  File file,
+) async {
+  if (!await masterKeyRepository.hasMasterKey()) {
+    throw MasterKeyNotInitializedException();
+  }
+
+  final dbKey = await _deriveDatabaseKey(masterKeyRepository);
+  final parent = file.parent;
+  if (!await parent.exists()) {
+    await parent.create(recursive: true);
+  }
   return NativeDatabase(file, setup: (db) => _setupEncryption(db, dbKey));
 }
 

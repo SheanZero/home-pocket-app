@@ -12,9 +12,9 @@
 //   flutter test integration_test/merchant_migration_ladder_test.dart
 //
 // COVERAGE SPLIT (RESEARCH-recommended):
-//   - This integration test proves the SQLCipher path for FRESH v22 and v21→v22
-//     (the real v1.8-user upgrade) — the only paths that matter for at-rest
-//     encryption of merchant data.
+//   - This integration test proves the SQLCipher path for the CURRENT schema and
+//     v21→current (the real v1.8-user upgrade) — the paths that matter for
+//     at-rest encryption of merchant data.
 //   - Deep-history v3→v22 / v17→v22 index/column assertions are covered by the
 //     host-VM ladder `test/unit/data/migrations/merchant_v22_migration_test.dart`
 //     (plain libsqlite3 is adequate there — those assertions are about DDL shape,
@@ -144,7 +144,7 @@ void main() {
     await ensureNativeLibrary();
   });
 
-  group('encrypted ladder — FRESH v22 (onCreate under SQLCipher)', () {
+  group('encrypted ladder — FRESH current schema (SQLCipher)', () {
     late MasterKeyRepository keyRepo;
     late AppDatabase db;
 
@@ -165,9 +165,13 @@ void main() {
       await _assertCipherActive(db);
     });
 
-    testWidgets('schemaVersion is 22 on the encrypted executor',
-        (tester) async {
-      expect(db.schemaVersion, equals(22));
+    testWidgets('disk user_version matches the current Drift schema', (
+      tester,
+    ) async {
+      final rows = await db.customSelect('PRAGMA user_version').get();
+      final diskVersion = rows.single.data.values.single;
+      expect(db.schemaVersion, greaterThanOrEqualTo(22));
+      expect(diskVersion, db.schemaVersion);
     });
 
     testWidgets('merchant indexes exist + PRAGMA index_list non-empty',
@@ -221,14 +225,14 @@ void main() {
     });
   });
 
-  group('encrypted ladder — v21→v22 (onUpgrade under SQLCipher)', () {
+  group('encrypted ladder — v21→current (onUpgrade under SQLCipher)', () {
     testWidgets(
         'onUpgrade fires under SQLCipher: tables + 4 indexes built, '
         'cipher_version non-empty', (tester) async {
       final keyRepo = _FixedKeyMasterKeyRepository();
 
       // STAGE A — stamp an encrypted DB at v21 (the real v1.8-user state):
-      // open at v22, then simulate a pre-v22 DB by dropping what onCreate built
+      // open at current, then simulate a pre-v22 DB by dropping what onCreate built
       // for merchants and rewinding user_version to 21. This is the same
       // "drop what onCreate built" technique as the host-VM ladder, but here on
       // the ENCRYPTED executor so the rewound file is genuinely SQLCipher at v21.
@@ -239,9 +243,9 @@ void main() {
       await staged.customStatement('PRAGMA user_version = 21');
       await staged.close();
 
-      // STAGE B — reopen as AppDatabase (schemaVersion 22) on the SAME encrypted
-      // file → Drift's migrator sees user_version 21 < 22 and runs the
-      // `from < 22` onUpgrade step under SQLCipher.
+      // STAGE B — reopen as the current AppDatabase on the SAME encrypted file.
+      // Drift sees user_version 21 and runs the merchant `from < 22` step plus
+      // every later migration under SQLCipher.
       final upgraded = await _openEncrypted(keyRepo);
       addTearDown(upgraded.close);
 
