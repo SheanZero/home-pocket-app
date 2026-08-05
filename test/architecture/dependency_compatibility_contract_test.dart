@@ -151,4 +151,19 @@ void main() {
       isNotEmpty,
     );
   });
+
+  test('BASE-02 rejects a Stable CI job without an explicit Flutter pin', () {
+    final input = currentInputs();
+    input['audit'] = input['audit']!.replaceFirst(
+      '          flutter-version: 3.44.8\n',
+      '',
+    );
+
+    expect(
+      validate(input),
+      contains(
+        'every Stable CI Flutter pin must match the selected current identity',
+      ),
+    );
+  });
 }

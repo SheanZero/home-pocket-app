@@ -407,7 +407,12 @@ void _validateFlutterIdentity({
       .map((match) => match.group(1))
       .whereType<String>()
       .toList();
-  if (pins.isEmpty || pins.any((pin) => pin != selected)) {
+  final stableChannels = RegExp(
+    r'channel:\s*stable',
+  ).allMatches(auditWorkflow).length;
+  if (pins.isEmpty ||
+      pins.length != stableChannels ||
+      pins.any((pin) => pin != selected)) {
     issues.add(
       'every Stable CI Flutter pin must match the selected current identity',
     );
