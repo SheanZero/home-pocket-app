@@ -10,8 +10,6 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_joy_
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_primary_tabs.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart'
-    show joySpendRefreshTargets;
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/satisfaction_histogram_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
@@ -354,18 +352,6 @@ void main() {
         // 260622-d5i / D3: the drawer's 成员-dimension joy split, folded in so
         // pull-to-refresh covers the by-member joy path (unfiltered key).
         joyMemberAmountsProvider(
-          bookId: ctx.bookId,
-          startDate: ctx.startDate,
-          endDate: ctx.endDate,
-          joyMetricVariant: ctx.joyMetricVariant,
-        ),
-      ]);
-
-      // The de-registered JoySpendCard's single-source function is retained (its
-      // wrapper + tests still consume it) and returns its joyCategoryAmounts
-      // target — the SAME provider instance now folded into the donut's targets.
-      expect(joySpendRefreshTargets(ctx), <ProviderBase<Object?>>[
-        joyCategoryAmountsProvider(
           bookId: ctx.bookId,
           startDate: ctx.startDate,
           endDate: ctx.endDate,

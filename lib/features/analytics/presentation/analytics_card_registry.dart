@@ -186,10 +186,8 @@ List<ProviderBase<Object?>> shellRefreshTargets(AnalyticsCardContext ctx) => [
 ///      appended after the 4 always-visible cards, gated by
 ///      `isVisible: (ctx) => ctx.isGroupMode`.
 ///
-/// `JoySpendCard` is DE-REGISTERED here (its joybar moved into the donut card,
-/// D2) but its file is retained as a thin wrapper for its golden / anti-toxicity
-/// tests. The `daily_vs_joy_card`/`per_category_breakdown_card` widget files are
-/// likewise RETAINED (own tests) but not in this lineup.
+/// Retired standalone cards are removed from production; the category donut's
+/// nested joy drawer is the single reachable joy-spend surface.
 final List<AnalyticsCardSpec> analyticsCardRegistry = <AnalyticsCardSpec>[
   // 1. 支出趋势 (实用) — within-month per-day-cumulative spend LineChart (D-E1).
   //    Spend tabs draw 本月 solid + 上月 dashed; the 悦己 tab is a

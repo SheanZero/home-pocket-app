@@ -17,7 +17,6 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_happ
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/satisfaction_histogram_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
@@ -26,8 +25,8 @@ import 'package:home_pocket/features/settings/presentation/providers/state_local
 import '../../../../../helpers/test_localizations.dart';
 
 /// D-14 anti-toxicity widget sweep — Phase 47 (GUARD-02 wording-layer +
-/// GUARD-03). Verifies that the FIVE round-5 B AnalyticsScreen cards
-/// (WithinMonthTrendCard / CategoryDonutCard / JoySpendCard / JoyCalendarCard /
+/// GUARD-03). Verifies that the four reachable round-5 B AnalyticsScreen cards
+/// (WithinMonthTrendCard / CategoryDonutCard / JoyCalendarCard /
 /// SatisfactionHistogramCard) never leak forbidden value-judgment / comparison /
 /// ranking / streak / target substrings into rendered output in any of the
 /// three supported locales (en / ja / zh) across the canonical user-visible
@@ -293,15 +292,6 @@ Widget _categoryDonutCard() => _scrollable(
   ),
 );
 
-Widget _joySpendCard() => _scrollable(
-  JoySpendCard(
-    bookId: _bookId,
-    startDate: _startDate,
-    endDate: _endDate,
-    joyMetricVariant: _variant,
-  ),
-);
-
 Widget _joyCalendarCard() => _scrollable(
   JoyCalendarCard(
     bookId: _bookId,
@@ -416,26 +406,6 @@ List<Override> _donutOtherOverrides(Locale locale) => [
     endDate: _endDate,
     joyMetricVariant: _variant,
   ).overrideWith((_) async => _joyAmountsValue()),
-];
-
-List<Override> _joySpendValueOverrides(Locale locale) => [
-  _localeOverride(locale),
-  joyCategoryAmountsProvider(
-    bookId: _bookId,
-    startDate: _startDate,
-    endDate: _endDate,
-    joyMetricVariant: _variant,
-  ).overrideWith((_) async => _joyAmountsValue()),
-];
-
-List<Override> _joySpendEmptyOverrides(Locale locale) => [
-  _localeOverride(locale),
-  joyCategoryAmountsProvider(
-    bookId: _bookId,
-    startDate: _startDate,
-    endDate: _endDate,
-    joyMetricVariant: _variant,
-  ).overrideWith((_) async => const <JoyCategoryAmount>[]),
 ];
 
 List<Override> _joyCalendarValueOverrides(Locale locale) => [
@@ -670,53 +640,6 @@ void main() {
           locale: locale,
           card: 'CategoryDonutCard',
           state: 'other_rollup',
-        );
-      });
-    }
-  });
-
-  // -------------------------------------------------------------------------
-  // JoySpendCard — 3 locales × {value, empty}.
-  // -------------------------------------------------------------------------
-  group('D-14 / JoySpendCard / forbidden substring sweep', () {
-    for (final locale in locales) {
-      testWidgets('JoySpendCard / ${locale.languageCode} / value', (
-        tester,
-      ) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(
-            _joySpendCard(),
-            locale: locale,
-            overrides: _joySpendValueOverrides(locale),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        _expectRenderedText();
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          card: 'JoySpendCard',
-          state: 'value',
-        );
-      });
-
-      testWidgets('JoySpendCard / ${locale.languageCode} / empty', (
-        tester,
-      ) async {
-        await tester.pumpWidget(
-          createLocalizedWidget(
-            _joySpendCard(),
-            locale: locale,
-            overrides: _joySpendEmptyOverrides(locale),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        _expectRenderedText();
-        _sweepForbiddenSubstrings(
-          locale: locale,
-          card: 'JoySpendCard',
-          state: 'empty',
         );
       });
     }

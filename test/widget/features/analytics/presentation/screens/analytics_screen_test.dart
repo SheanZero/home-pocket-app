@@ -35,7 +35,6 @@ import 'package:home_pocket/features/analytics/presentation/widgets/analytics_ca
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_section_header.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/joy_spend_drawer.dart';
@@ -280,7 +279,6 @@ void main() {
           find.byKey(const Key('analytics-primary-tab-spending-bookmark')),
           findsNothing,
         );
-        expect(find.byType(JoySpendCard), findsNothing);
       },
     );
 

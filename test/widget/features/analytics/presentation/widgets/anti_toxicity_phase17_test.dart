@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/analytics/domain/models/joy_category_amount.dart';
 import 'package:home_pocket/features/analytics/domain/models/per_day_joy_count.dart';
 import 'package:home_pocket/features/analytics/domain/models/within_month_cumulative_trend.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
@@ -85,12 +83,6 @@ void main() {
       endDate: _end,
       joyMetricVariant: JoyMetricVariant.all,
     );
-    Widget joySpendCard() => JoySpendCard(
-      bookId: _bookId,
-      startDate: _start,
-      endDate: _end,
-      joyMetricVariant: JoyMetricVariant.all,
-    );
     Widget joyCalendarCard() => JoyCalendarCard(
       bookId: _bookId,
       startDate: _start,
@@ -107,15 +99,6 @@ void main() {
             bookId: _bookId,
             anchor: _anchor,
           ).overrideWith((_) async => _emptyTrend),
-        ),
-        'JoySpendCard': () => _buildCardSubject(
-          locale: locale,
-          card: joySpendCard(),
-          providerOverride: joyCategoryAmountsProvider(
-            bookId: _bookId,
-            startDate: _start,
-            endDate: _end,
-          ).overrideWith((_) async => const <JoyCategoryAmount>[]),
         ),
         'JoyCalendarCard': () => _buildCardSubject(
           locale: locale,

@@ -126,10 +126,7 @@ class JoySpendDrawer extends ConsumerWidget {
           locale: locale,
           total: total,
           countText: l10n.analyticsJoyDrawerCount(amounts.length),
-          activeBar: JoySpendDrawerBody(
-            amounts: amounts,
-            showTotalHeader: false,
-          ),
+          activeBar: JoySpendDrawerBody(amounts: amounts),
         );
       },
       loading: () => const SizedBox(height: 120),
