@@ -52,3 +52,56 @@ abstract class SettingsRepository {
   /// Persists the week start day selection.
   Future<void> setWeekStartDay(WeekStartDay day);
 }
+
+/// Applies an old settings snapshot after a cross-store operation fails.
+///
+/// Settings persistence is not transactional with Drift. This journal-style
+/// compensation therefore attempts every setting independently instead of
+/// stopping at the first failed preference write. A caller must surface
+/// [SettingsRestorationException] because the database may already have rolled
+/// back while one or more preferences remain restored only partially.
+extension SettingsRepositoryRestoreJournal on SettingsRepository {
+  Future<void> restoreSettingsBestEffort(AppSettings settings) async {
+    final failures = <Object>[];
+
+    Future<void> restore(Future<void> Function() write) async {
+      try {
+        await write();
+      } catch (error) {
+        failures.add(error);
+      }
+    }
+
+    await restore(() => setThemeMode(settings.themeMode));
+    await restore(() => setLanguage(settings.language));
+    await restore(() => setNotificationsEnabled(settings.notificationsEnabled));
+    await restore(() => setBiometricLock(settings.biometricLockEnabled));
+    await restore(() => setAppLockEnabled(settings.appLockEnabled));
+    await restore(
+      () => setBiometricUnlockEnabled(settings.biometricUnlockEnabled),
+    );
+    await restore(() => setOnboardingComplete(settings.onboardingComplete));
+    await restore(() => setVoiceLanguage(settings.voiceLanguage));
+    await restore(
+      () => setVoiceAllowOnDeviceFallback(settings.voiceAllowOnDeviceFallback),
+    );
+    await restore(() => setMonthlyJoyTarget(settings.monthlyJoyTarget));
+    await restore(() => setWeekStartDay(settings.weekStartDay));
+
+    if (failures.isNotEmpty) {
+      throw SettingsRestorationException(failures);
+    }
+  }
+}
+
+/// Signals that a settings compensation was attempted for every key but at
+/// least one preference write still failed.
+class SettingsRestorationException implements Exception {
+  SettingsRestorationException(this.failures);
+
+  final List<Object> failures;
+
+  @override
+  String toString() =>
+      'Settings restoration failed for ${failures.length} preference write(s).';
+}

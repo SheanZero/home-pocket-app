@@ -23,6 +23,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/models/backup_data.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -31,6 +32,139 @@ class _MockFieldEncryptionService extends Mock
     implements FieldEncryptionService {}
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
+
+/// A stateful preferences double. [updateSettings] deliberately applies one
+/// setting at a time so a test can reproduce a SharedPreferences failure after
+/// some keys have already changed.
+class _JournalSettingsRepository implements SettingsRepository {
+  _JournalSettingsRepository({
+    required AppSettings initialSettings,
+    this.failUpdateAfterWrite,
+    this.failCompensationWrite,
+  }) : _settings = initialSettings;
+
+  AppSettings _settings;
+  final int? failUpdateAfterWrite;
+  final int? failCompensationWrite;
+  int _updateWrites = 0;
+  int compensationWrites = 0;
+
+  AppSettings get currentSettings => _settings;
+
+  @override
+  Future<AppSettings> getSettings() async => _settings;
+
+  @override
+  Future<void> updateSettings(AppSettings settings) async {
+    final writes = <AppSettings Function(AppSettings)>[
+      (current) => current.copyWith(themeMode: settings.themeMode),
+      (current) => current.copyWith(language: settings.language),
+      (current) =>
+          current.copyWith(notificationsEnabled: settings.notificationsEnabled),
+      (current) =>
+          current.copyWith(biometricLockEnabled: settings.biometricLockEnabled),
+      (current) => current.copyWith(appLockEnabled: settings.appLockEnabled),
+      (current) => current.copyWith(
+        biometricUnlockEnabled: settings.biometricUnlockEnabled,
+      ),
+      (current) =>
+          current.copyWith(onboardingComplete: settings.onboardingComplete),
+      (current) => current.copyWith(voiceLanguage: settings.voiceLanguage),
+      (current) => current.copyWith(
+        voiceAllowOnDeviceFallback: settings.voiceAllowOnDeviceFallback,
+      ),
+      (current) =>
+          current.copyWith(monthlyJoyTarget: settings.monthlyJoyTarget),
+      (current) => current.copyWith(weekStartDay: settings.weekStartDay),
+    ];
+
+    for (final write in writes) {
+      _settings = write(_settings);
+      _updateWrites += 1;
+      if (_updateWrites == failUpdateAfterWrite) {
+        throw StateError('injected preferences write failure');
+      }
+    }
+  }
+
+  Future<void> _restoreField(AppSettings Function(AppSettings) update) async {
+    compensationWrites += 1;
+    if (compensationWrites == failCompensationWrite) {
+      throw StateError('injected compensation write failure');
+    }
+    _settings = update(_settings);
+  }
+
+  @override
+  Future<void> setThemeMode(AppThemeMode themeMode) =>
+      _restoreField((current) => current.copyWith(themeMode: themeMode));
+
+  @override
+  Future<void> setLanguage(String language) =>
+      _restoreField((current) => current.copyWith(language: language));
+
+  @override
+  Future<void> setNotificationsEnabled(bool enabled) => _restoreField(
+    (current) => current.copyWith(notificationsEnabled: enabled),
+  );
+
+  @override
+  Future<void> setBiometricLock(bool enabled) => _restoreField(
+    (current) => current.copyWith(biometricLockEnabled: enabled),
+  );
+
+  @override
+  Future<void> setAppLockEnabled(bool enabled) =>
+      _restoreField((current) => current.copyWith(appLockEnabled: enabled));
+
+  @override
+  Future<void> setBiometricUnlockEnabled(bool enabled) => _restoreField(
+    (current) => current.copyWith(biometricUnlockEnabled: enabled),
+  );
+
+  @override
+  Future<void> setOnboardingComplete(bool enabled) =>
+      _restoreField((current) => current.copyWith(onboardingComplete: enabled));
+
+  @override
+  Future<void> setVoiceLanguage(String languageCode) =>
+      _restoreField((current) => current.copyWith(voiceLanguage: languageCode));
+
+  @override
+  Future<void> setVoiceAllowOnDeviceFallback(bool enabled) => _restoreField(
+    (current) => current.copyWith(voiceAllowOnDeviceFallback: enabled),
+  );
+
+  @override
+  Future<int?> getMonthlyJoyTarget() async => _settings.monthlyJoyTarget;
+
+  @override
+  Future<void> setMonthlyJoyTarget(int? value) =>
+      _restoreField((current) => current.copyWith(monthlyJoyTarget: value));
+
+  @override
+  Future<WeekStartDay> getWeekStartDay() async => _settings.weekStartDay;
+
+  @override
+  Future<void> setWeekStartDay(WeekStartDay day) =>
+      _restoreField((current) => current.copyWith(weekStartDay: day));
+}
+
+/// Throws after the callback has applied settings, mirroring a transaction
+/// that fails while committing its database changes.
+class _CommitFailingUnitOfWork implements UnitOfWork {
+  _CommitFailingUnitOfWork(this._db);
+
+  final AppDatabase _db;
+
+  @override
+  Future<T> run<T>(Future<T> Function() action) {
+    return _db.transaction(() async {
+      await action();
+      throw StateError('injected database commit failure');
+    });
+  }
+}
 
 /// Encrypts [backupData] into a valid `.hpb` file (same binary format the
 /// export use case produces: salt(16) + nonce(12) + ciphertext + mac(16)).
@@ -135,6 +269,9 @@ void main() {
     );
     exchangeRateRepo = ExchangeRateRepositoryImpl(dao: ExchangeRateDao(db));
     settingsRepo = _MockSettingsRepository();
+    when(
+      () => settingsRepo.getSettings(),
+    ).thenAnswer((_) async => const AppSettings());
     when(() => settingsRepo.updateSettings(any())).thenAnswer((_) async {});
 
     useCase = ImportBackupUseCase(
@@ -161,6 +298,207 @@ void main() {
   });
 
   group('ImportBackupUseCase atomicity', () {
+    Future<File> createJournalBackup() {
+      final newBook = Book(
+        id: 'book_new',
+        name: 'New Book',
+        currency: 'USD',
+        deviceId: 'dev_002',
+        createdAt: DateTime(2026, 6, 1),
+      );
+      final restoredSettings = const AppSettings(
+        themeMode: AppThemeMode.dark,
+        language: 'en',
+        notificationsEnabled: false,
+        biometricLockEnabled: false,
+        appLockEnabled: true,
+        biometricUnlockEnabled: true,
+        onboardingComplete: false,
+        voiceLanguage: 'ja',
+        voiceAllowOnDeviceFallback: false,
+        monthlyJoyTarget: 500,
+        weekStartDay: WeekStartDay.sunday,
+      );
+      return _createEncryptedBackup(
+        password: 'password123',
+        backupData: BackupData(
+          metadata: const BackupMetadata(
+            version: '1.0',
+            createdAt: 1750000000000,
+            deviceId: 'dev_002',
+            appVersion: '0.1.0',
+          ),
+          transactions: const [],
+          categories: const [],
+          books: [newBook.toJson()],
+          settings: restoredSettings.toJson(),
+        ),
+        filePath: '${tempDir.path}/journal.hpb',
+      );
+    }
+
+    Future<void> expectPreImportDbState() async {
+      final books = await bookRepo.findAll(
+        includeArchived: true,
+        includeShadow: true,
+      );
+      expect(books.map((book) => book.id), contains('book_old'));
+      expect(books.map((book) => book.id), isNot(contains('book_new')));
+      expect((await categoryRepo.findAll()).map((category) => category.id), [
+        'cat_old',
+      ]);
+      expect(
+        (await transactionRepo.findAllByBook('book_old')).map((tx) => tx.id),
+        ['tx_old'],
+      );
+    }
+
+    test(
+      'preferences failure mid-apply restores the old settings and database',
+      () async {
+        const oldSettings = AppSettings(
+          language: 'ja',
+          appLockEnabled: true,
+          monthlyJoyTarget: 75,
+          weekStartDay: WeekStartDay.sunday,
+        );
+        final journalSettings = _JournalSettingsRepository(
+          initialSettings: oldSettings,
+          failUpdateAfterWrite: 2,
+        );
+        final journalUseCase = ImportBackupUseCase(
+          transactionRepo: transactionRepo,
+          categoryRepo: categoryRepo,
+          bookRepo: bookRepo,
+          settingsRepo: journalSettings,
+          exchangeRateRepo: exchangeRateRepo,
+          unitOfWork: UnitOfWorkImpl(db: db),
+          backupCrypto: BackupCryptoService(),
+        );
+
+        final result = await journalUseCase.execute(
+          backupFile: await createJournalBackup(),
+          password: 'password123',
+        );
+
+        expect(result.isError, isTrue);
+        expect(journalSettings.currentSettings, oldSettings);
+        expect(journalSettings.compensationWrites, 11);
+        await expectPreImportDbState();
+      },
+    );
+
+    test(
+      'database commit failure after settings apply restores both stores',
+      () async {
+        const oldSettings = AppSettings(
+          language: 'zh',
+          biometricUnlockEnabled: true,
+          monthlyJoyTarget: 95,
+        );
+        final journalSettings = _JournalSettingsRepository(
+          initialSettings: oldSettings,
+        );
+        final journalUseCase = ImportBackupUseCase(
+          transactionRepo: transactionRepo,
+          categoryRepo: categoryRepo,
+          bookRepo: bookRepo,
+          settingsRepo: journalSettings,
+          exchangeRateRepo: exchangeRateRepo,
+          unitOfWork: _CommitFailingUnitOfWork(db),
+          backupCrypto: BackupCryptoService(),
+        );
+
+        final result = await journalUseCase.execute(
+          backupFile: await createJournalBackup(),
+          password: 'password123',
+        );
+
+        expect(result.isError, isTrue);
+        expect(journalSettings.currentSettings, oldSettings);
+        expect(journalSettings.compensationWrites, 11);
+        await expectPreImportDbState();
+      },
+    );
+
+    test(
+      'successful restore commits the new database and settings together',
+      () async {
+        const oldSettings = AppSettings(language: 'ja', monthlyJoyTarget: 75);
+        final journalSettings = _JournalSettingsRepository(
+          initialSettings: oldSettings,
+        );
+        final journalUseCase = ImportBackupUseCase(
+          transactionRepo: transactionRepo,
+          categoryRepo: categoryRepo,
+          bookRepo: bookRepo,
+          settingsRepo: journalSettings,
+          exchangeRateRepo: exchangeRateRepo,
+          unitOfWork: UnitOfWorkImpl(db: db),
+          backupCrypto: BackupCryptoService(),
+        );
+
+        final result = await journalUseCase.execute(
+          backupFile: await createJournalBackup(),
+          password: 'password123',
+        );
+
+        expect(result.isSuccess, isTrue, reason: result.error ?? '');
+        expect(
+          journalSettings.currentSettings,
+          const AppSettings(
+            themeMode: AppThemeMode.dark,
+            language: 'en',
+            notificationsEnabled: false,
+            biometricLockEnabled: false,
+            appLockEnabled: true,
+            biometricUnlockEnabled: true,
+            onboardingComplete: true,
+            voiceLanguage: 'ja',
+            voiceAllowOnDeviceFallback: false,
+            monthlyJoyTarget: 500,
+            weekStartDay: WeekStartDay.sunday,
+          ),
+        );
+        final books = await bookRepo.findAll(
+          includeArchived: true,
+          includeShadow: true,
+        );
+        expect(books.map((book) => book.id), ['book_new']);
+      },
+    );
+
+    test(
+      'reports incomplete compensation after attempting every old setting',
+      () async {
+        const oldSettings = AppSettings(language: 'ja', monthlyJoyTarget: 75);
+        final journalSettings = _JournalSettingsRepository(
+          initialSettings: oldSettings,
+          failUpdateAfterWrite: 2,
+          failCompensationWrite: 1,
+        );
+        final journalUseCase = ImportBackupUseCase(
+          transactionRepo: transactionRepo,
+          categoryRepo: categoryRepo,
+          bookRepo: bookRepo,
+          settingsRepo: journalSettings,
+          exchangeRateRepo: exchangeRateRepo,
+          unitOfWork: UnitOfWorkImpl(db: db),
+          backupCrypto: BackupCryptoService(),
+        );
+
+        final result = await journalUseCase.execute(
+          backupFile: await createJournalBackup(),
+          password: 'password123',
+        );
+
+        expect(result.isError, isTrue);
+        expect(result.error, contains('settings compensation incomplete'));
+        expect(journalSettings.compensationWrites, 11);
+        await expectPreImportDbState();
+      },
+    );
+
     test(
       'failed restore (corrupt transaction row) leaves existing data intact',
       () async {

@@ -42,69 +42,91 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> updateSettings(AppSettings settings) async {
-    await _prefs.setString(_themeModeKey, settings.themeMode.name);
-    await _prefs.setString(_languageKey, settings.language);
-    await _prefs.setBool(_notificationsKey, settings.notificationsEnabled);
-    await _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled);
-    await _prefs.setBool(_appLockEnabledKey, settings.appLockEnabled);
-    await _prefs.setBool(_biometricUnlockKey, settings.biometricUnlockEnabled);
-    await _prefs.setBool(_onboardingCompleteKey, settings.onboardingComplete);
-    await _prefs.setString(_voiceLanguageKey, settings.voiceLanguage);
-    await _prefs.setBool(
-      _voiceAllowOnDeviceFallbackKey,
-      settings.voiceAllowOnDeviceFallback,
+    await _requireWrite(
+      _prefs.setString(_themeModeKey, settings.themeMode.name),
     );
-    await _prefs.setString(_weekStartDayKey, settings.weekStartDay.name);
+    await _requireWrite(_prefs.setString(_languageKey, settings.language));
+    await _requireWrite(
+      _prefs.setBool(_notificationsKey, settings.notificationsEnabled),
+    );
+    await _requireWrite(
+      _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled),
+    );
+    await _requireWrite(
+      _prefs.setBool(_appLockEnabledKey, settings.appLockEnabled),
+    );
+    await _requireWrite(
+      _prefs.setBool(_biometricUnlockKey, settings.biometricUnlockEnabled),
+    );
+    await _requireWrite(
+      _prefs.setBool(_onboardingCompleteKey, settings.onboardingComplete),
+    );
+    await _requireWrite(
+      _prefs.setString(_voiceLanguageKey, settings.voiceLanguage),
+    );
+    await _requireWrite(
+      _prefs.setBool(
+        _voiceAllowOnDeviceFallbackKey,
+        settings.voiceAllowOnDeviceFallback,
+      ),
+    );
+    await _requireWrite(
+      _prefs.setString(_weekStartDayKey, settings.weekStartDay.name),
+    );
     if (settings.monthlyJoyTarget == null) {
-      await _prefs.remove(_monthlyJoyTargetKey);
+      await _requireWrite(_prefs.remove(_monthlyJoyTargetKey));
     } else {
-      await _prefs.setInt(_monthlyJoyTargetKey, settings.monthlyJoyTarget!);
+      await _requireWrite(
+        _prefs.setInt(_monthlyJoyTargetKey, settings.monthlyJoyTarget!),
+      );
     }
   }
 
   @override
   Future<void> setThemeMode(AppThemeMode themeMode) async {
-    await _prefs.setString(_themeModeKey, themeMode.name);
+    await _requireWrite(_prefs.setString(_themeModeKey, themeMode.name));
   }
 
   @override
   Future<void> setLanguage(String language) async {
-    await _prefs.setString(_languageKey, language);
+    await _requireWrite(_prefs.setString(_languageKey, language));
   }
 
   @override
   Future<void> setBiometricLock(bool enabled) async {
-    await _prefs.setBool(_biometricLockKey, enabled);
+    await _requireWrite(_prefs.setBool(_biometricLockKey, enabled));
   }
 
   @override
   Future<void> setAppLockEnabled(bool enabled) async {
-    await _prefs.setBool(_appLockEnabledKey, enabled);
+    await _requireWrite(_prefs.setBool(_appLockEnabledKey, enabled));
   }
 
   @override
   Future<void> setBiometricUnlockEnabled(bool enabled) async {
-    await _prefs.setBool(_biometricUnlockKey, enabled);
+    await _requireWrite(_prefs.setBool(_biometricUnlockKey, enabled));
   }
 
   @override
   Future<void> setOnboardingComplete(bool enabled) async {
-    await _prefs.setBool(_onboardingCompleteKey, enabled);
+    await _requireWrite(_prefs.setBool(_onboardingCompleteKey, enabled));
   }
 
   @override
   Future<void> setNotificationsEnabled(bool enabled) async {
-    await _prefs.setBool(_notificationsKey, enabled);
+    await _requireWrite(_prefs.setBool(_notificationsKey, enabled));
   }
 
   @override
   Future<void> setVoiceLanguage(String languageCode) async {
-    await _prefs.setString(_voiceLanguageKey, languageCode);
+    await _requireWrite(_prefs.setString(_voiceLanguageKey, languageCode));
   }
 
   @override
   Future<void> setVoiceAllowOnDeviceFallback(bool enabled) async {
-    await _prefs.setBool(_voiceAllowOnDeviceFallbackKey, enabled);
+    await _requireWrite(
+      _prefs.setBool(_voiceAllowOnDeviceFallbackKey, enabled),
+    );
   }
 
   @override
@@ -115,9 +137,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setMonthlyJoyTarget(int? value) async {
     if (value == null) {
-      await _prefs.remove(_monthlyJoyTargetKey);
+      await _requireWrite(_prefs.remove(_monthlyJoyTargetKey));
     } else {
-      await _prefs.setInt(_monthlyJoyTargetKey, value);
+      await _requireWrite(_prefs.setInt(_monthlyJoyTargetKey, value));
     }
   }
 
@@ -128,7 +150,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> setWeekStartDay(WeekStartDay day) async {
-    await _prefs.setString(_weekStartDayKey, day.name);
+    await _requireWrite(_prefs.setString(_weekStartDayKey, day.name));
+  }
+
+  Future<void> _requireWrite(Future<bool> write) async {
+    if (!await write) {
+      throw StateError('Failed to persist app settings.');
+    }
   }
 
   AppThemeMode _getThemeMode() {

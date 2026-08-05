@@ -98,6 +98,9 @@ void main() {
     mockCategoryRepo = MockCategoryRepository();
     mockBookRepo = MockBookRepository();
     mockSettingsRepo = MockSettingsRepository();
+    when(
+      () => mockSettingsRepo.getSettings(),
+    ).thenAnswer((_) async => const AppSettings());
     mockExchangeRateRepo = MockExchangeRateRepository();
     useCase = ImportBackupUseCase(
       transactionRepo: mockTransactionRepo,
