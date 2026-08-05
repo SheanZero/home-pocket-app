@@ -79,7 +79,11 @@ dependencies:
   http: ^1.6.0
   uuid: ^4.6.0
   qr_flutter: ^4.1.0
-  lucide_icons_flutter: ^3.1.15
+  # The upstream package declares six unused variable-weight fonts in addition
+  # to the static Lucide font. Keep the compatible package API, but resolve it
+  # to the reviewed static-only subset in third_party/ (see its README).
+  lucide_icons_flutter:
+    path: third_party/lucide_icons_flutter
   web_socket_channel: ^3.0.0
   connectivity_plus: ^7.3.1
   collection: ^1.19.1

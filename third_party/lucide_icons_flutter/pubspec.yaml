@@ -1,0 +1,17 @@
+name: lucide_icons_flutter
+description: Reviewed static-only Lucide subset for Happy Pocket.
+version: 3.1.15+homepocket.1
+homepage: https://lucide.dev
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  fonts:
+    - family: Lucide
+      fonts:
+        - asset: assets/lucide.ttf

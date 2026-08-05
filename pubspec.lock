@@ -943,11 +943,10 @@ packages:
   lucide_icons_flutter:
     dependency: "direct main"
     description:
-      name: lucide_icons_flutter
-      sha256: "234155b10641b8ef7bab8a077b93ea6c92fe849c06740cf89dcd86dcf350934f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.15"
+      path: "third_party/lucide_icons_flutter"
+      relative: true
+    source: path
+    version: "3.1.15+homepocket.1"
   matcher:
     dependency: transitive
     description:
