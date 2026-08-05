@@ -383,9 +383,7 @@ CompatibilityReport validateDependencyCompatibility({
     'FlutterGeneratedPluginSwiftPackage',
   );
   expectText('ios/Podfile.lock', podfileLock, 'SQLCipher (4.10.0)');
-  if (!podfile.contains('original.gsub') ||
-      !podfile.contains('sqlite3') ||
-      !podfile.contains('stripped')) {
+  if (!_hasActiveSqlCipherLinkerStrip(podfile)) {
     issues.add(
       'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
     );
@@ -428,6 +426,11 @@ CompatibilityReport validateDependencyCompatibility({
   );
   return _reportFromMessages(issues, mode);
 }
+
+bool _hasActiveSqlCipherLinkerStrip(String podfile) => RegExp(
+  r'''installer\.pods_project\.targets\.each do \|target\|[\s\S]*?target\.build_configurations\.each do \|config\|[\s\S]*?^\s*stripped\s*=\s*original\.gsub\(/\\s-l"\?sqlite3"\?/,\s*''\)\s*$[\s\S]*?^\s*File\.write\(xcconfig_path,\s*stripped\)\s+if\s+stripped\s+!=\s+original\s*$''',
+  multiLine: true,
+).hasMatch(podfile);
 
 CompatibilityReport _reportFromMessages(
   Iterable<String> messages,

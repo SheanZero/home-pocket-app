@@ -290,11 +290,15 @@ void main() {
       );
     });
 
-    test('rejects a missing SQLCipher linker strip', () {
+    test('rejects a comment-only SQLCipher linker strip', () {
       final input = currentInputs();
       input['podfile'] = input['podfile']!.replaceFirst(
-        'original.gsub',
-        'original.sub',
+        "stripped = original.gsub(/\\s-l\"?sqlite3\"?/, '')",
+        "# original.gsub(/\\s-l\"?sqlite3\"?/, '')",
+      );
+      input['podfile'] = input['podfile']!.replaceFirst(
+        'File.write(xcconfig_path, stripped) if stripped != original',
+        '# stripped is intentionally not written',
       );
       expect(
         validate(input),
