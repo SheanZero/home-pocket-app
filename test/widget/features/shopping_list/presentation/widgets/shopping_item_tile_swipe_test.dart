@@ -12,7 +12,6 @@ import 'package:home_pocket/application/shopping_list/toggle_item_completed_use_
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_item_tile.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
@@ -52,7 +51,6 @@ Future<void> _pumpTile(
         shadowBooksProvider.overrideWith(
           (ref) async => const <ShadowBookInfo>[],
         ),
-        batchSelectModeProvider.overrideWith(() => _InactiveBatchSelectMode()),
       ],
       child: MaterialApp(
         localizationsDelegates: S.localizationsDelegates,
@@ -80,11 +78,6 @@ Future<void> _pumpTile(
     ),
   );
   await tester.pump();
-}
-
-class _InactiveBatchSelectMode extends BatchSelectMode {
-  @override
-  BatchSelectModeState build() => BatchSelectModeState.inactive();
 }
 
 void main() {

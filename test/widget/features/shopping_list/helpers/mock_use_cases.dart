@@ -12,8 +12,6 @@ import 'package:mocktail/mocktail.dart';
 // TODO(Wave-1): Uncomment once state_shopping_filter.dart lands in Phase 38 Wave 1.
 // import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_filter.dart';
 
-// TODO(Wave-1): Uncomment once state_shopping_batch.dart lands in Phase 38 Wave 1.
-// import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
 
 // TODO(Wave-1): Uncomment provider overrides once use-case providers land in Phase 38 Wave 1.
 // import 'package:home_pocket/features/shopping_list/presentation/providers/use_case_providers.dart';

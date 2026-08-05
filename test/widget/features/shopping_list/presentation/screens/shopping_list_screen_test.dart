@@ -20,10 +20,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_ac
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_list_screen.dart';
-import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_batch_action_bar.dart';
-import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_selection_header.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
@@ -342,29 +339,6 @@ void main() {
       expect(find.text('Active 2'), findsOneWidget);
     });
 
-    testWidgets(
-      'legacy batch state never exposes selection header or delete bar',
-      (tester) async {
-        final activeItem = _makeItem(id: 'a-1', isCompleted: false);
-        await _pumpScreen(
-          tester,
-          items: [activeItem],
-          extraOverrides: [
-            batchSelectModeProvider.overrideWith(
-              () => _FixedBatchNotifier(
-                BatchSelectModeState(
-                  isActive: true,
-                  selectedIds: const {'a-1'},
-                ),
-              ),
-            ),
-          ],
-        );
-
-        expect(find.byType(ShoppingBatchActionBar), findsNothing);
-        expect(find.byType(ShoppingSelectionHeader), findsNothing);
-      },
-    );
   });
 
   group('ShoppingListScreen — reorderable list (D38-02)', () {
@@ -433,13 +407,4 @@ void main() {
       verify(() => reorder.applyOrder(['a-2', 'a-1'])).called(1);
     });
   });
-}
-
-/// Fixed-state [BatchSelectMode] notifier for use in tests.
-class _FixedBatchNotifier extends BatchSelectMode {
-  _FixedBatchNotifier(this._fixedState);
-  final BatchSelectModeState _fixedState;
-
-  @override
-  BatchSelectModeState build() => _fixedState;
 }
