@@ -104,6 +104,19 @@ only that exact pair and content as `accepted`; changing either clone's normaliz
 source produces a new fingerprint and re-reports the finding as `open`. Directory or
 path-wide ignores are prohibited.
 
+### 4.3 Catalogue-pair transaction and recovery (HP-32)
+
+`issues.json` and `ISSUES.md` are one catalogue generation. The merger prepares
+both exact byte streams plus old-output backups and SHA-256 digests, then writes a
+flushed sibling transaction journal before replacing either destination. On every
+start, it recovers a valid journal before reading lifecycle history: it completes the
+new pair only when every remaining new byte stream is verified, otherwise restores
+the old pair from verified backups. A malformed journal, unknown output digest, or
+bad backup fails closed without overwriting either catalogue. After verification, the
+merger deletes the journal, staged files, and backups; normal invocations leave no
+transaction artifacts behind. The journal is deliberately ephemeral, so stable output
+byte determinism remains limited to the two catalogue files.
+
 ---
 
 ## 5. Splits & Merges (D-08)

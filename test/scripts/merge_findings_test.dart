@@ -18,14 +18,28 @@ Map<String, dynamic> _shardWith(List<Finding> findings, String toolSource) => {
   'findings': findings.map((f) => f.toJson()).toList(),
 };
 
-Future<ProcessResult> _runMerger(Directory cwd) async {
+Future<ProcessResult> _runMerger(
+  Directory cwd, {
+  Map<String, String>? environment,
+}) async {
   return Process.run(
     'dart',
     ['run', '$_projectRoot/scripts/merge_findings.dart'],
     runInShell: true,
     workingDirectory: cwd.path,
+    environment: environment,
   );
 }
+
+List<FileSystemEntity> _pairTransactionArtifacts(Directory root) => root
+    .listSync()
+    .where(
+      (entity) => entity.path
+          .split(Platform.pathSeparator)
+          .last
+          .startsWith('.merge-findings-'),
+    )
+    .toList();
 
 Directory _initShardLayout(Directory tmp) {
   final root = Directory('${tmp.path}/.planning/audit');
@@ -157,6 +171,11 @@ void main() {
         final out2 = File('${shardRoot.path}/issues.json').readAsStringSync();
 
         expect(out2, equals(out1));
+        expect(
+          _pairTransactionArtifacts(shardRoot),
+          isEmpty,
+          reason: 'a successful merge must not leave pair journal artifacts',
+        );
       },
     );
 
@@ -941,6 +960,150 @@ void main() {
             reason: '${entry.key} must not rewrite ISSUES.md',
           );
         }
+      },
+    );
+
+    test(
+      'recovers a journal prepared before the first replacement as one new pair',
+      () async {
+        const oldIssues = '{"findings":[]}';
+        const oldMarkdown = '# Old report\n';
+        final issuesFile = File('${shardRoot.path}/issues.json')
+          ..writeAsStringSync(oldIssues);
+        final markdownFile = File('${shardRoot.path}/ISSUES.md')
+          ..writeAsStringSync(oldMarkdown);
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+          ),
+        );
+
+        final interrupted = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_FAILPOINT': 'before_first_replace'},
+        );
+
+        expect(interrupted.exitCode, equals(91));
+        expect(issuesFile.readAsStringSync(), oldIssues);
+        expect(markdownFile.readAsStringSync(), oldMarkdown);
+
+        final recovered = await _runMerger(tmp);
+        expect(
+          recovered.exitCode,
+          equals(0),
+          reason: recovered.stderr.toString(),
+        );
+        expect(issuesFile.readAsStringSync(), contains('lib/new.dart'));
+        expect(markdownFile.readAsStringSync(), contains('lib/new.dart'));
+        expect(_pairTransactionArtifacts(shardRoot), isEmpty);
+      },
+    );
+
+    test(
+      'recovers an interruption after JSON replacement without mixing generations',
+      () async {
+        const oldIssues = '{"findings":[]}';
+        const oldMarkdown = '# Old report\n';
+        final issuesFile = File('${shardRoot.path}/issues.json')
+          ..writeAsStringSync(oldIssues);
+        final markdownFile = File('${shardRoot.path}/ISSUES.md')
+          ..writeAsStringSync(oldMarkdown);
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+          ),
+        );
+
+        final interrupted = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_FAILPOINT': 'after_json_replace'},
+        );
+
+        expect(interrupted.exitCode, equals(91));
+        expect(issuesFile.readAsStringSync(), isNot(oldIssues));
+        expect(markdownFile.readAsStringSync(), oldMarkdown);
+
+        final recovered = await _runMerger(tmp);
+        expect(
+          recovered.exitCode,
+          equals(0),
+          reason: recovered.stderr.toString(),
+        );
+        expect(issuesFile.readAsStringSync(), contains('lib/new.dart'));
+        expect(markdownFile.readAsStringSync(), contains('lib/new.dart'));
+        expect(_pairTransactionArtifacts(shardRoot), isEmpty);
+      },
+    );
+
+    test(
+      'rolls back both outputs when a torn transaction is missing its markdown temp',
+      () async {
+        const oldIssues = '{"findings":[]}';
+        const oldMarkdown = '# Old report\n';
+        final issuesFile = File('${shardRoot.path}/issues.json')
+          ..writeAsStringSync(oldIssues);
+        final markdownFile = File('${shardRoot.path}/ISSUES.md')
+          ..writeAsStringSync(oldMarkdown);
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+          ),
+        );
+
+        final interrupted = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_FAILPOINT': 'after_json_replace'},
+        );
+        expect(interrupted.exitCode, equals(91));
+        File('${shardRoot.path}/.merge-findings-markdown.next').deleteSync();
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode({
+            ..._shardWith([], 'import_guard'),
+            'findings': [
+              _f(
+                filePath: 'lib/invalid.dart',
+                toolSource: 'dart_code_linter',
+              ).toJson(),
+            ],
+          }),
+        );
+
+        final recovered = await _runMerger(tmp);
+        expect(recovered.exitCode, equals(1));
+        expect(issuesFile.readAsStringSync(), oldIssues);
+        expect(markdownFile.readAsStringSync(), oldMarkdown);
+        expect(_pairTransactionArtifacts(shardRoot), isEmpty);
+      },
+    );
+
+    test(
+      'fails closed on a corrupt pair journal without overwriting outputs',
+      () async {
+        const oldIssues = '{"findings":[]}';
+        const oldMarkdown = '# Old report\n';
+        final issuesFile = File('${shardRoot.path}/issues.json')
+          ..writeAsStringSync(oldIssues);
+        final markdownFile = File('${shardRoot.path}/ISSUES.md')
+          ..writeAsStringSync(oldMarkdown);
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync('{corrupt journal');
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+          ),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(1));
+        expect(result.stderr, contains('pair transaction journal'));
+        expect(issuesFile.readAsStringSync(), oldIssues);
+        expect(markdownFile.readAsStringSync(), oldMarkdown);
+        expect(
+          File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
+          isTrue,
+        );
       },
     );
 
