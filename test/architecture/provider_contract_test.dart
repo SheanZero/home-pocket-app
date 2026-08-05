@@ -48,8 +48,20 @@ void main() => runApp(UncontrolledProviderScope(
         );
         addTearDown(() => uncontrolledRoot.delete(recursive: true));
 
-        expect(checkProviderContract(providerScopeRoot.path).isPassing, isTrue);
-        expect(checkProviderContract(uncontrolledRoot.path).isPassing, isTrue);
+        final providerScopeReport = checkProviderContract(
+          providerScopeRoot.path,
+        );
+        final uncontrolledReport = checkProviderContract(uncontrolledRoot.path);
+        expect(
+          providerScopeReport.isPassing,
+          isTrue,
+          reason: providerScopeReport.describe(),
+        );
+        expect(
+          uncontrolledReport.isPassing,
+          isTrue,
+          reason: uncontrolledReport.describe(),
+        );
       },
     );
 
@@ -135,6 +147,124 @@ void main() => runApp(const ProviderScope(child: Placeholder()));
         );
       }
     });
+
+    test(
+      'unqualified Riverpod scopes fail closed when locally shadowed',
+      () async {
+        final cases = <({String name, String source})>[
+          (
+            name: 'top-level final variable',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final ProviderScope = ({required Widget child}) => child;
+
+void main() => runApp(ProviderScope(child: const Placeholder()));
+''',
+          ),
+          (
+            name: 'typed local variable',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {
+  dynamic ProviderScope = ({required Widget child}) => child;
+  runApp(ProviderScope(child: const Placeholder()));
+}
+''',
+          ),
+          (
+            name: 'top-level function',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+Widget ProviderScope({required Widget child}) => child;
+
+void main() => runApp(ProviderScope(child: const Placeholder()));
+''',
+          ),
+          (
+            name: 'local class',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class ProviderScope extends Widget {
+  const ProviderScope({required this.child});
+  final Widget child;
+
+  @override
+  Element createElement() => throw UnimplementedError();
+}
+
+void main() => runApp(const ProviderScope(child: Placeholder()));
+''',
+          ),
+          (
+            name: 'typedef',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+typedef ProviderScope = Widget Function({required Widget child});
+
+void main() => runApp(ProviderScope(child: const Placeholder()));
+''',
+          ),
+          (
+            name: 'lexical parameter',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {
+  root(ProviderScope) {
+    runApp(ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          ),
+        ];
+
+        for (final fixture in cases) {
+          final root = await _createFixtureRoot(appSource: fixture.source);
+          addTearDown(() => root.delete(recursive: true));
+
+          final report = checkProviderContract(root.path);
+
+          expect(
+            report.isPassing,
+            isFalse,
+            reason: '${fixture.name}: ${report.describe()}',
+          );
+        }
+      },
+    );
+
+    test(
+      'qualified Riverpod scopes ignore unqualified local shadows',
+      () async {
+        final root = await _createFixtureRoot(
+          appSource: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+final ProviderScope = ({required Widget child}) => child;
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+        );
+        addTearDown(() => root.delete(recursive: true));
+
+        final report = checkProviderContract(root.path);
+
+        expect(report.isPassing, isTrue, reason: report.describe());
+      },
+    );
 
     test('the production lib tree satisfies the owned provider contract', () {
       final report = checkProviderContract('.');

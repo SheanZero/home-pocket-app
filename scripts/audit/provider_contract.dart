@@ -295,7 +295,126 @@ _RiverpodScopeBindings _riverpodScopeBindings(String source) {
       qualified[alias] = allowed;
     }
   }
+  // Imports are not enough to establish an unqualified binding. A declaration
+  // in the library or an enclosing lexical scope wins over an imported name.
+  // This scanner intentionally fails closed for those declarations instead of
+  // attempting analyzer-style resolution from a standalone Dart script.
+  unqualified.removeAll(_unqualifiedScopeShadows(tokens));
   return _RiverpodScopeBindings(unqualified, qualified);
+}
+
+Set<String> _unqualifiedScopeShadows(List<_Token> tokens) {
+  const constructors = {'ProviderScope', 'UncontrolledProviderScope'};
+  final shadows = <String>{};
+  for (var index = 0; index < tokens.length; index++) {
+    final name = tokens[index].text;
+    if (!constructors.contains(name)) continue;
+    if (_isScopeDeclaration(tokens, index) ||
+        _isFormalParameterDeclaration(tokens, index)) {
+      shadows.add(name);
+    }
+  }
+  return shadows;
+}
+
+bool _isScopeDeclaration(List<_Token> tokens, int index) {
+  if (_isImportOrExportDirective(tokens, index)) return false;
+  final previous = index == 0 ? null : tokens[index - 1].text;
+  if (const {
+    'class',
+    'mixin',
+    'enum',
+    'extension',
+    'typedef',
+    'var',
+    'final',
+  }.contains(previous)) {
+    return true;
+  }
+
+  if (_isTypedVariableDeclaration(tokens, index)) return true;
+
+  if (index + 1 >= tokens.length || tokens[index + 1].text != '(') {
+    return false;
+  }
+  final close = _matchingParenthesis(tokens, index + 1);
+  if (close == null || close + 1 >= tokens.length) return false;
+  return _isFunctionBodyStart(tokens, close + 1);
+}
+
+bool _isImportOrExportDirective(List<_Token> tokens, int index) {
+  for (var cursor = index - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    if (token == ';') return false;
+    if (token == 'import' || token == 'export') return true;
+  }
+  return false;
+}
+
+bool _isTypedVariableDeclaration(List<_Token> tokens, int index) {
+  if (index == 0 || index + 1 >= tokens.length) return false;
+  final previous = tokens[index - 1];
+  final next = tokens[index + 1];
+  final couldEndType =
+      previous.kind == _TokenKind.identifier ||
+      previous.text == '?' ||
+      previous.text == '>';
+  if (!couldEndType || previous.text == '.') return false;
+
+  return next.text == ';' ||
+      next.text == ',' ||
+      (next.text == '=' &&
+          (index + 2 >= tokens.length || tokens[index + 2].text != '='));
+}
+
+bool _isFormalParameterDeclaration(List<_Token> tokens, int index) {
+  final open = _enclosingParenthesis(tokens, index);
+  if (open == null) return false;
+  final close = _matchingParenthesis(tokens, open);
+  if (close == null || index >= close || close + 1 >= tokens.length) {
+    return false;
+  }
+
+  if (!_isFunctionBodyStart(tokens, close + 1)) {
+    return false;
+  }
+
+  final next = tokens[index + 1].text;
+  return next == ',' ||
+      next == ')' ||
+      next == ']' ||
+      next == '}' ||
+      next == '=';
+}
+
+bool _isFunctionBodyStart(List<_Token> tokens, int index) {
+  final token = tokens[index].text;
+  return token == '{' ||
+      token == 'async' ||
+      (token == '=' &&
+          index + 1 < tokens.length &&
+          tokens[index + 1].text == '>');
+}
+
+int? _enclosingParenthesis(List<_Token> tokens, int index) {
+  final opens = <int>[];
+  for (var cursor = 0; cursor < index; cursor++) {
+    if (tokens[cursor].text == '(') {
+      opens.add(cursor);
+    } else if (tokens[cursor].text == ')' && opens.isNotEmpty) {
+      opens.removeLast();
+    }
+  }
+  return opens.isEmpty ? null : opens.last;
+}
+
+int? _matchingParenthesis(List<_Token> tokens, int open) {
+  var depth = 0;
+  for (var index = open; index < tokens.length; index++) {
+    if (tokens[index].text == '(') depth++;
+    if (tokens[index].text == ')' && --depth == 0) return index;
+  }
+  return null;
 }
 
 List<_Call> _findCalls(String source, String name) {

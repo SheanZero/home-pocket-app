@@ -32,6 +32,7 @@ void main() {
       () async {
         const cases = <tooling.ToolingGuardCase>[
           tooling.ToolingGuardCase.providerScopeLocalCollision(),
+          tooling.ToolingGuardCase.providerScopeImportedShadow(),
           tooling.ToolingGuardCase.providerScopeCommentLookalike(),
           tooling.ToolingGuardCase.providerScopeStringLookalike(),
           tooling.ToolingGuardCase.providerScopeUnrelatedAlias(),

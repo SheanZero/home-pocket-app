@@ -116,6 +116,21 @@ class ToolingGuardCase {
         diagnosticCode: 'missing_provider_scope',
       );
 
+  const ToolingGuardCase.providerScopeImportedShadow()
+    : this(
+        name: 'provider app root imported ProviderScope shadow',
+        fixturePath: 'lib/phase58_provider_scope_imported_shadow_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n"
+            "import 'package:flutter_riverpod/flutter_riverpod.dart';\n\n"
+            'final ProviderScope = ({required Widget child}) => child;\n\n'
+            'void phase58ImportedShadow() =>\n'
+            '    runApp(ProviderScope(child: const Placeholder()));\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
   const ToolingGuardCase.providerScopeCommentLookalike()
     : this(
         name: 'provider app root comment lookalike',
@@ -279,6 +294,7 @@ Future<ToolingGuardResult> verifyToolingGuards({
     ToolingGuardCase.providerScopeMissing(),
     ToolingGuardCase.providerScopeControl(),
     ToolingGuardCase.providerScopeLocalCollision(),
+    ToolingGuardCase.providerScopeImportedShadow(),
     ToolingGuardCase.providerScopeCommentLookalike(),
     ToolingGuardCase.providerScopeStringLookalike(),
     ToolingGuardCase.providerScopeUnrelatedAlias(),
