@@ -186,8 +186,8 @@
     "android/app/build.gradle.kts": { "role": "inherited Android floor", "sha256": "0dfbe0c6a66a1212a5eb9d26c3ff0b03cf622c63711419fcf0fb9fcbcc81d717" },
     "android/gradle.properties": { "role": "legacy Android DSL controls", "sha256": "4922e39cd2ea910bd97156fd4320b0be9217df262fc45435ce408bad534a20d0" },
     "android/gradle/wrapper/gradle-wrapper.properties": { "role": "Gradle distribution", "sha256": "297c9e63b6fa6e7e8b221900fa1787c1a0e38869d8957da66389fd0f6b00f78e" },
-    "ios/Podfile": { "role": "SQLCipher system-SQLite linker strip", "sha256": "f96ea85dd6383b9de0c56ff17ced4f1626cc78800ee4c8ec409e940b898fcaa4" },
-    "ios/Podfile.lock": { "role": "resolved SQLCipher Pod", "sha256": "1cb5407a419245e46e39ec26b5fb18a74c7104f5fc3d1ff333b5e32291335c2d" },
-    "ios/Runner.xcodeproj/project.pbxproj": { "role": "SwiftPM/Xcode state", "sha256": "24f1f3a27294dd2a88f75137615c67911e06352561d662885bf7adc84c561067" }
+    "ios/Podfile": { "role": "SQLCipher system-SQLite linker strip", "sha256": "6e9a688f518e67a27dafa2e5f2d445d2a8d195c1c0d1f7166d235f10f933b8ba" },
+    "ios/Podfile.lock": { "role": "resolved SQLCipher Pod", "sha256": "2c9a2f15b11b27e0688ea2445961d7eba432c47deebc5fc007afd6dc2ebb006b" },
+    "ios/Runner.xcodeproj/project.pbxproj": { "role": "SwiftPM/Xcode state", "sha256": "76ee67cfa238968661d05de0464848c7c8a09f69bb646092d9d6f4cdd1981cdb" }
   }
 }
