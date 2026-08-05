@@ -7,6 +7,7 @@ import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
+import '../../../../shared/widgets/transaction_ledger_detail.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     show deleteTransactionUseCaseProvider;
@@ -267,38 +268,14 @@ class ListTransactionTile extends ConsumerWidget {
                         ),
                       ),
                     ],
-                  ] else ...[
-                    Container(
-                      decoration: BoxDecoration(
-                        color: tagBgColor,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
-                      ),
-                      child: Text(
-                        tagText,
-                        style: AppTextStyles.compact.copyWith(
-                          color: tagTextColor,
-                        ),
-                        maxLines: 1,
-                      ),
+                  ] else
+                    TransactionLedgerDetail(
+                      tagText: tagText,
+                      tagBackgroundColor: tagBgColor,
+                      tagTextColor: tagTextColor,
+                      supportingTextColor: palette.textSecondary,
+                      merchant: merchant,
                     ),
-                    if (merchant != null) ...[
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          merchant!,
-                          style: AppTextStyles.supporting.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ],
                 ],
               ),
             ],

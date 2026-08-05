@@ -17,10 +17,9 @@ import '../../../../features/profile/presentation/providers/state_user_profile.d
 import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
-import '../../../../shared/utils/currency_conversion.dart';
 import '../../../../shared/constants/sort_config.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
+import '../../../../shared/utils/transaction_display_amounts.dart';
 import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
 import '../../domain/models/list_filter_state.dart';
@@ -369,35 +368,13 @@ class ListScreen extends ConsumerWidget {
       isLoading: customCategoryAsync?.isLoading ?? false,
     );
 
-    // Formatted amount with currency symbol (SC#1 — amountSmall tabular figures applied by tile)
-    final formattedAmount = NumberFormatter.formatCurrency(
-      transaction.amount,
-      'JPY',
-      locale,
+    final displayAmounts = formatTransactionDisplayAmounts(
+      amountMinorUnits: transaction.amount,
+      amountCurrencyCode: 'JPY',
+      originalCurrencyCode: transaction.originalCurrency,
+      originalAmountMinorUnits: transaction.originalAmount,
+      locale: locale,
     );
-
-    // DISP-02 / CURR-04: original-currency annotation for FOREIGN rows only.
-    // Computed here (pure-UI tile contract — the tile never fetches/formats).
-    // Null for JPY/domestic rows → the tile renders the amount block
-    // byte-identically (CURR-04 regression protection). The annotation amount is
-    // the stored original MINOR units rendered via NumberFormatter with
-    // trimWholeFraction (260614-dx1): whole amounts drop ".00" ($12,211), real
-    // fractions keep their decimals (USD 5050 minor → "$50.50").
-    final originalCurrency = transaction.originalCurrency;
-    final originalAmount = transaction.originalAmount;
-    final String? foreignAnnotation =
-        (originalCurrency != null &&
-            originalCurrency.toUpperCase() != 'JPY' &&
-            originalAmount != null)
-        ? NumberFormatter.formatCurrency(
-            originalAmount / subunitToUnitFor(originalCurrency),
-            originalCurrency,
-            locale,
-            // 260614-dx1: whole foreign amounts drop ".00" ($12,211.00 → $12,211);
-            // real fractions (kr12.50) keep their decimals.
-            trimWholeFraction: true,
-          )
-        : null;
 
     final l1Icon = displayCategory == null
         ? Icons.category
@@ -462,13 +439,13 @@ class ListScreen extends ConsumerWidget {
       tagTextColor: tagTextColor,
       category: category,
       categoryColor: categoryColor,
-      formattedAmount: formattedAmount,
+      formattedAmount: displayAmounts.primaryAmount,
       l1Icon: l1Icon,
       locale: locale,
       merchant: transaction.merchant,
       satisfactionValue: satisfactionValue,
       showDate: showDate,
-      foreignAnnotation: foreignAnnotation,
+      foreignAnnotation: displayAmounts.foreignAnnotation,
       familyPayerLabel: familyPayer?.label,
       familyPayerTone: familyPayer?.tone ?? FamilyPayerTone.primary,
       familyPayerAvatarEmoji: familyPayer?.avatarEmoji,

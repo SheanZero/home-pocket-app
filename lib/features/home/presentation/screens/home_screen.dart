@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
-import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/book.dart';
@@ -22,9 +21,8 @@ import '../../../../features/family_sync/presentation/providers/state_active_gro
 import '../../../../features/profile/domain/models/user_profile.dart';
 import '../../../../features/profile/presentation/providers/state_user_profile.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../shared/utils/currency_conversion.dart'
-    show subunitToUnitFor;
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
+import '../../../../shared/utils/transaction_display_amounts.dart';
 import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
 import '../../../list/presentation/providers/state_list_filter.dart';
@@ -41,8 +39,6 @@ import '../widgets/home_joy_prompt.dart';
 import '../widgets/home_transaction_tile.dart';
 import '../widgets/month_picker_dialog.dart';
 import '../widgets/transaction_list_card.dart';
-
-const _formatter = FormatterService();
 
 /// Home tab content (Tab 0 inside MainShellScreen).
 ///
@@ -563,8 +559,15 @@ class _RecentTransactionTile extends ConsumerWidget {
     final category = _categoryPresentation(ref);
     final visuals = _visuals(context, l10n);
     final payer = _payer(l10n);
+    final displayAmounts = formatTransactionDisplayAmounts(
+      amountMinorUnits: transaction.amount,
+      amountCurrencyCode: currencyCode,
+      originalCurrencyCode: transaction.originalCurrency,
+      originalAmountMinorUnits: transaction.originalAmount,
+      locale: locale,
+    );
     return HomeTransactionTile(
-      foreignAnnotation: _foreignAnnotation(transaction, locale),
+      foreignAnnotation: displayAmounts.foreignAnnotation,
       l1Icon: category.icon,
       tagText: visuals.tagText,
       tagBgColor: visuals.tagBackground,
@@ -576,11 +579,7 @@ class _RecentTransactionTile extends ConsumerWidget {
       payerAvatarImagePath: payer?.avatarImagePath,
       category: category.name,
       categoryColor: visuals.categoryColor,
-      formattedAmount: _formatter.formatCurrency(
-        transaction.amount,
-        currencyCode,
-        locale,
-      ),
+      formattedAmount: displayAmounts.primaryAmount,
       amountColor: visuals.amountColor,
       satisfactionValue: visuals.satisfactionValue,
       onTap: _editCallback(context, ref),
@@ -687,20 +686,6 @@ Widget? _asyncGate(Iterable<AsyncValue<dynamic>> values) {
     }
   }
   return null;
-}
-
-String? _foreignAnnotation(Transaction transaction, Locale locale) {
-  final currency = transaction.originalCurrency;
-  final amount = transaction.originalAmount;
-  if (currency == null || currency.toUpperCase() == 'JPY' || amount == null) {
-    return null;
-  }
-  return _formatter.formatCurrency(
-    amount / subunitToUnitFor(currency),
-    currency,
-    locale,
-    trimWholeFraction: true,
-  );
 }
 
 _FamilyPayer _familyPayer(

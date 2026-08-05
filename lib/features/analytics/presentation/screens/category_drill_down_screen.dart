@@ -5,7 +5,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
-import '../../../../shared/utils/currency_conversion.dart';
+import '../../../../shared/utils/transaction_display_amounts.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
@@ -169,25 +169,13 @@ class _DrillBody extends StatelessWidget {
       locale: locale,
     );
 
-    final formattedAmount = NumberFormatter.formatCurrency(
-      transaction.amount,
-      'JPY',
-      locale,
+    final displayAmounts = formatTransactionDisplayAmounts(
+      amountMinorUnits: transaction.amount,
+      amountCurrencyCode: 'JPY',
+      originalCurrencyCode: transaction.originalCurrency,
+      originalAmountMinorUnits: transaction.originalAmount,
+      locale: locale,
     );
-
-    final originalCurrency = transaction.originalCurrency;
-    final originalAmount = transaction.originalAmount;
-    final String? foreignAnnotation =
-        (originalCurrency != null &&
-            originalCurrency.toUpperCase() != 'JPY' &&
-            originalAmount != null)
-        ? NumberFormatter.formatCurrency(
-            originalAmount / subunitToUnitFor(originalCurrency),
-            originalCurrency,
-            locale,
-            trimWholeFraction: true,
-          )
-        : null;
 
     final l1Icon = parentCategory != null
         ? resolveCategoryIcon(parentCategory.icon)
@@ -209,13 +197,13 @@ class _DrillBody extends StatelessWidget {
       tagTextColor: tagTextColor,
       category: category,
       categoryColor: categoryColor,
-      formattedAmount: formattedAmount,
+      formattedAmount: displayAmounts.primaryAmount,
       l1Icon: l1Icon,
       locale: locale,
       merchant: transaction.merchant,
       satisfactionValue: satisfactionValue,
       showDate: true,
-      foreignAnnotation: foreignAnnotation,
+      foreignAnnotation: displayAmounts.foreignAnnotation,
       readOnly: true,
     );
   }

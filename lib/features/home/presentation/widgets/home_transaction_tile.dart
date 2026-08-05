@@ -4,6 +4,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/family_transaction_attribution.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
+import '../../../../shared/widgets/transaction_ledger_detail.dart';
 
 /// Read-only home recent-transaction row mirroring the monthly list tile
 /// (`ListTransactionTile`) layout: a leading L1 category icon, an info column
@@ -168,39 +169,15 @@ class HomeTransactionTile extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                        ] else ...[
-                          Container(
-                            decoration: BoxDecoration(
-                              color: tagBgColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1,
-                            ),
-                            child: Text(
-                              tagText,
-                              style: AppTextStyles.compact.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: tagTextColor,
-                              ),
-                              maxLines: 1,
-                            ),
+                        ] else
+                          TransactionLedgerDetail(
+                            tagText: tagText,
+                            tagBackgroundColor: tagBgColor,
+                            tagTextColor: tagTextColor,
+                            supportingTextColor: palette.textSecondary,
+                            merchant: merchant,
+                            tagFontWeight: FontWeight.w700,
                           ),
-                          if (merchant != null) ...[
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                merchant!,
-                                style: AppTextStyles.supporting.copyWith(
-                                  color: palette.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ],
                       ],
                     ),
                   ],
