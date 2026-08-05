@@ -20,11 +20,13 @@ List<String> validateDependencyCompatibility({
   final issues = <String>[];
   final pubspec = _map(loadYaml(pubspecYaml));
   final dependencies = _map(pubspec['dependencies']);
+  final devDependencies = _map(pubspec['dev_dependencies']);
   final lock = _map(loadYaml(lockYaml));
   final packages = _map(lock['packages']);
 
   void expectConstraint(String package, String expected) {
-    final actual = dependencies[package]?.toString();
+    final actual = (dependencies[package] ?? devDependencies[package])
+        ?.toString();
     if (actual != expected) {
       issues.add('$package constraint must be $expected (found $actual)');
     }
@@ -73,6 +75,26 @@ List<String> validateDependencyCompatibility({
   expectLocked('speech_to_text', '7.3.0');
   expectConstraint('flutter_local_notifications', '^22.2.0');
   expectLocked('flutter_local_notifications', '22.2.0');
+
+  // The architecture lint and code-generation toolchains are collectively
+  // constrained by analyzer 8.x. Newer Riverpod and JSON releases require
+  // analyzer 9+/13+, so they cannot be advanced independently.
+  expectConstraint('flutter_riverpod', '^3.1.0');
+  expectLocked('flutter_riverpod', '3.1.0');
+  expectConstraint('riverpod_annotation', '^4.0.0');
+  expectLocked('riverpod_annotation', '4.0.0');
+  expectConstraint('json_annotation', '^4.9.0');
+  expectLocked('json_annotation', '4.9.0');
+  expectConstraint('json_serializable', '^6.9.4');
+  expectLocked('json_serializable', '6.11.2');
+  expectConstraint('riverpod_generator', '^4.0.0+1');
+  expectLocked('riverpod_generator', '4.0.0+1');
+  expectConstraint('riverpod_lint', '^3.1.0');
+  expectLocked('riverpod_lint', '3.1.0');
+  expectConstraint('custom_lint', '^0.8.1');
+  expectLocked('custom_lint', '0.8.1');
+  expectConstraint('import_guard_custom_lint', '^1.0.0');
+  expectLocked('import_guard_custom_lint', '1.0.0');
 
   // Flutter 3.44 must remain on the legacy Android DSL. Flutter's official
   // migration guide requires Flutter 3.47+ before Built-in Kotlin is enabled.

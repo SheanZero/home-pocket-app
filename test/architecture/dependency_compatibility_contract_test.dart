@@ -66,6 +66,16 @@ void main() {
     expect(validate(input), contains(contains('share_plus constraint')));
   });
 
+  test('P2-04 rejects an analyzer-incompatible Riverpod upgrade', () {
+    final input = currentInputs();
+    input['pubspec'] = input['pubspec']!.replaceFirst(
+      'flutter_riverpod: ^3.1.0',
+      'flutter_riverpod: ^3.4.2',
+    );
+
+    expect(validate(input), contains(contains('flutter_riverpod constraint')));
+  });
+
   test('P2-04 rejects premature Built-in Kotlin enablement', () {
     final input = currentInputs();
     input['properties'] = input['properties']!.replaceFirst(
