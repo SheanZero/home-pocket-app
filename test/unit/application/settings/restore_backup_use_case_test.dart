@@ -135,4 +135,134 @@ void main() {
       expect(resumes, 1);
     },
   );
+
+  test('recovers the barrier when sync suspension fails', () async {
+    var imports = 0;
+    var resumes = 0;
+    final useCase = RestoreBackupUseCase(
+      suspendSync: () async => throw StateError('scheduler unavailable'),
+      importBackup: ({required backupFile, required password}) async {
+        imports++;
+        return Result.success(null);
+      },
+      resetFamilySyncState: () async {},
+      resumeSync: () async => resumes++,
+    );
+
+    final result = await useCase.execute(
+      backupFile: File('unused.hpb'),
+      password: 'password',
+    );
+
+    expect(result.isError, isTrue);
+    expect(result.error, contains('scheduler unavailable'));
+    expect(imports, 0);
+    expect(resumes, 1);
+  });
+
+  test('resumes the barrier when the importer throws', () async {
+    var cleanupAttempts = 0;
+    var resumes = 0;
+    final useCase = RestoreBackupUseCase(
+      suspendSync: () async {},
+      importBackup: ({required backupFile, required password}) async =>
+          throw StateError('unreadable backup'),
+      resetFamilySyncState: () async => cleanupAttempts++,
+      resumeSync: () async => resumes++,
+    );
+
+    final result = await useCase.execute(
+      backupFile: File('unused.hpb'),
+      password: 'password',
+    );
+
+    expect(result.isError, isTrue);
+    expect(result.error, contains('unreadable backup'));
+    expect(cleanupAttempts, 0);
+    expect(resumes, 1);
+  });
+
+  test(
+    'keeps sync suspended when post-import sync cleanup fails, then retries cleanup safely',
+    () async {
+      var suspensions = 0;
+      var imports = 0;
+      var cleanupAttempts = 0;
+      var resumes = 0;
+      final useCase = RestoreBackupUseCase(
+        suspendSync: () async => suspensions++,
+        importBackup: ({required backupFile, required password}) async {
+          imports++;
+          return Result.success(null);
+        },
+        resetFamilySyncState: () async {
+          cleanupAttempts++;
+          if (cleanupAttempts == 1) {
+            throw StateError('sync queue unavailable');
+          }
+        },
+        resumeSync: () async => resumes++,
+      );
+
+      final first = await useCase.execute(
+        backupFile: File('unused.hpb'),
+        password: 'password',
+      );
+
+      expect(first.isError, isTrue);
+      expect(first.error, contains('cleanup incomplete'));
+      expect(suspensions, 1);
+      expect(imports, 1);
+      expect(cleanupAttempts, 1);
+      expect(resumes, 0);
+
+      final retry = await useCase.execute(
+        backupFile: File('unused.hpb'),
+        password: 'password',
+      );
+
+      expect(retry.isSuccess, isTrue);
+      expect(suspensions, 1);
+      expect(imports, 1);
+      expect(cleanupAttempts, 2);
+      expect(resumes, 1);
+    },
+  );
+
+  test(
+    'does not repeat cleanup while retrying a failed sync resumption',
+    () async {
+      var cleanupAttempts = 0;
+      var resumeAttempts = 0;
+      final useCase = RestoreBackupUseCase(
+        suspendSync: () async {},
+        importBackup: ({required backupFile, required password}) async =>
+            Result.success(null),
+        resetFamilySyncState: () async => cleanupAttempts++,
+        resumeSync: () async {
+          resumeAttempts++;
+          if (resumeAttempts == 1) {
+            throw StateError('push registration unavailable');
+          }
+        },
+      );
+
+      final first = await useCase.execute(
+        backupFile: File('unused.hpb'),
+        password: 'password',
+      );
+      expect(first.isError, isTrue);
+      expect(first.error, contains('resumed incompletely'));
+      expect(cleanupAttempts, 1);
+      expect(resumeAttempts, 1);
+
+      final retry = await useCase.execute(
+        backupFile: File('unused.hpb'),
+        password: 'password',
+      );
+      expect(retry.isSuccess, isTrue);
+      expect(cleanupAttempts, 1);
+      expect(resumeAttempts, 2);
+    },
+  );
 }

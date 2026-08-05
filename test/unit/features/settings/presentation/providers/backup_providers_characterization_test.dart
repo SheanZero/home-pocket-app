@@ -10,6 +10,7 @@ import 'package:home_pocket/application/currency/repository_providers.dart';
 import 'package:home_pocket/application/settings/clear_all_data_use_case.dart';
 import 'package:home_pocket/application/settings/export_backup_use_case.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
+import 'package:home_pocket/application/settings/restore_backup_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
@@ -63,6 +64,8 @@ void main() {
   late _MockSettingsRepository mockSettingsRepo;
   late _MockExchangeRateRepository mockExchangeRateRepo;
   late _MockUserProfileRepository mockUserProfileRepo;
+  late _MockPushNotificationService mockPushNotificationService;
+  late _MockSyncEngine mockSyncEngine;
   late AppDatabase testDb;
   late ProviderContainer container;
 
@@ -73,6 +76,8 @@ void main() {
     mockSettingsRepo = _MockSettingsRepository();
     mockExchangeRateRepo = _MockExchangeRateRepository();
     mockUserProfileRepo = _MockUserProfileRepository();
+    mockPushNotificationService = _MockPushNotificationService();
+    mockSyncEngine = _MockSyncEngine();
     testDb = AppDatabase.forTesting();
 
     container = ProviderContainer(
@@ -88,6 +93,10 @@ void main() {
         // unitOfWorkProvider reaches the shared AppDatabase for its Drift
         // transaction scope.
         appDatabaseProvider.overrideWithValue(testDb),
+        pushNotificationServiceProvider.overrideWithValue(
+          mockPushNotificationService,
+        ),
+        syncEngineProvider.overrideWithValue(mockSyncEngine),
       ],
     );
   });
@@ -108,6 +117,11 @@ void main() {
       test('importBackupUseCaseProvider constructs ImportBackupUseCase', () {
         final uc = container.read(importBackupUseCaseProvider);
         expect(uc, isA<ImportBackupUseCase>());
+      });
+
+      test('restoreBackupUseCaseProvider constructs RestoreBackupUseCase', () {
+        final uc = container.read(restoreBackupUseCaseProvider);
+        expect(uc, isA<RestoreBackupUseCase>());
       });
 
       test('clearAllDataUseCaseProvider constructs ClearAllDataUseCase', () {

@@ -94,15 +94,37 @@ ImportBackupUseCase importBackupUseCase(Ref ref) {
 final restoreBackupUseCaseProvider = Provider<RestoreBackupUseCase>((ref) {
   final pushNotifications = ref.watch(pushNotificationServiceProvider);
   final syncEngine = ref.watch(syncEngineProvider);
+  Future<void> suspendFamilySync() {
+    // Keep the clear-all ordering: push revocation happens synchronously
+    // before either asynchronous suspension path can yield.
+    final pushSuspension = pushNotifications.clearIdentityBoundState();
+    final syncSuspension = syncEngine.suspendForLocalDataWipe();
+    return Future.wait<void>([pushSuspension, syncSuspension]);
+  }
+
+  Future<void> resumeFamilySync() async {
+    try {
+      // A token registration failure must not reopen pull/push scheduling.
+      // If engine initialization fails after registration, close both ingress
+      // paths again before exposing the error to RestoreBackupUseCase.
+      await pushNotifications.registerCurrentToken();
+      await syncEngine.resumeAfterLocalDataRestore();
+    } catch (error, stackTrace) {
+      try {
+        await suspendFamilySync();
+      } catch (suspensionError) {
+        throw StateError(
+          'Sync resumption failed and the restore barrier could not be '
+          're-closed: $error; $suspensionError',
+        );
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+  }
+
   return RestoreBackupUseCase(
     importBackup: ref.watch(importBackupUseCaseProvider).execute,
-    suspendSync: () {
-      // Keep the clear-all ordering: push revocation happens synchronously
-      // before either asynchronous suspension path can yield.
-      final pushSuspension = pushNotifications.clearIdentityBoundState();
-      final syncSuspension = syncEngine.suspendForLocalDataWipe();
-      return Future.wait<void>([pushSuspension, syncSuspension]);
-    },
+    suspendSync: suspendFamilySync,
     resetFamilySyncState: () async {
       final currentGroup = await ref
           .read(groupRepositoryProvider)
@@ -117,10 +139,7 @@ final restoreBackupUseCaseProvider = Provider<RestoreBackupUseCase>((ref) {
       ref.read(shoppingItemChangeTrackerProvider).clear();
       ref.read(familySyncNotificationNavigationProvider.notifier).clear();
     },
-    resumeSync: () => Future.wait<void>([
-      syncEngine.resumeAfterLocalDataRestore(),
-      pushNotifications.registerCurrentToken(),
-    ]),
+    resumeSync: resumeFamilySync,
   );
 });
 

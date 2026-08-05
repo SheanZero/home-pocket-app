@@ -9,6 +9,19 @@ typedef BackupRestoreImport =
       required String password,
     });
 
+/// The outstanding post-restore action while the sync barrier is held.
+///
+/// A cleanup retry must not re-import the backup, and a resumption retry must
+/// not rerun cleanup. Both operations are intentionally idempotent, but the
+/// distinction prevents accidental work and makes the failure state explicit.
+enum _RestoreBarrierState {
+  idle,
+  recoverFailedSuspension,
+  cleanupPending,
+  resumeAfterSuccessfulRestore,
+  resumeAfterFailedRestore,
+}
+
 /// Coordinates an encrypted backup import with the family-sync write barrier.
 ///
 /// The importer remains responsible for decrypting, validating, and atomically
@@ -30,6 +43,8 @@ class RestoreBackupUseCase {
   final Future<void> Function() _suspendSync;
   final Future<void> Function() _resetFamilySyncState;
   final Future<void> Function() _resumeSync;
+
+  _RestoreBarrierState _barrierState = _RestoreBarrierState.idle;
 
   // A backup screen cannot normally be opened twice, but this makes the
   // database boundary safe across duplicate taps and independently mounted
@@ -58,35 +73,107 @@ class RestoreBackupUseCase {
     required File backupFile,
     required String password,
   }) async {
-    var barrierEntered = false;
-    late Result<void> result;
+    switch (_barrierState) {
+      case _RestoreBarrierState.cleanupPending:
+        return _retryCleanupAndResume();
+      case _RestoreBarrierState.resumeAfterSuccessfulRestore:
+        return _resumeAfterSuccessfulRestore();
+      case _RestoreBarrierState.resumeAfterFailedRestore:
+        return _resumeAfterFailedRestore();
+      case _RestoreBarrierState.recoverFailedSuspension:
+        return _recoverFailedSuspension();
+      case _RestoreBarrierState.idle:
+        return _beginRestore(backupFile: backupFile, password: password);
+    }
+  }
+
+  Future<Result<void>> _beginRestore({
+    required File backupFile,
+    required String password,
+  }) async {
+    // Set this before awaiting so a partial suspension is always recovered if
+    // one ingress shutdown operation reports an error.
+    _barrierState = _RestoreBarrierState.recoverFailedSuspension;
 
     try {
-      // Set this before awaiting so a partially completed suspension is always
-      // unwound if one of its ingress shutdown operations reports an error.
-      barrierEntered = true;
       await _suspendSync();
-
-      result = await _importBackup(backupFile: backupFile, password: password);
-      if (result.isSuccess) {
-        // Restored transactions are imported local-only. Remove stale
-        // ciphertext and semantic operations from the pre-restore family
-        // state so a resumed push cannot publish the replaced ledger.
-        await _resetFamilySyncState();
-      }
     } catch (error) {
-      result = Result.error('Backup restore failed: $error');
+      return _recoverFailedSuspension(failure: 'Backup restore failed: $error');
     }
 
-    if (barrierEntered) {
-      try {
-        await _resumeSync();
-      } catch (error) {
-        if (result.isSuccess) {
-          result = Result.error('Backup restore resumed incompletely: $error');
-        }
-      }
+    late final Result<void> result;
+    try {
+      result = await _importBackup(backupFile: backupFile, password: password);
+    } catch (error) {
+      _barrierState = _RestoreBarrierState.resumeAfterFailedRestore;
+      return _resumeAfterFailedRestore(
+        originalFailure: Result.error('Backup restore failed: $error'),
+      );
     }
-    return result;
+    if (result.isError) {
+      _barrierState = _RestoreBarrierState.resumeAfterFailedRestore;
+      return _resumeAfterFailedRestore(originalFailure: result);
+    }
+
+    // Restored transactions are imported local-only. Remove stale ciphertext
+    // and semantic operations from the pre-restore family state before a push
+    // can run. If any cleanup step fails, the barrier deliberately remains
+    // closed; a retry resumes at cleanup instead of re-importing data.
+    _barrierState = _RestoreBarrierState.cleanupPending;
+    return _retryCleanupAndResume();
+  }
+
+  Future<Result<void>> _retryCleanupAndResume() async {
+    try {
+      await _resetFamilySyncState();
+    } catch (error) {
+      return Result.error(
+        'Backup restore cleanup incomplete; sync remains paused. '
+        'Retry the restore to finish cleanup: $error',
+      );
+    }
+
+    _barrierState = _RestoreBarrierState.resumeAfterSuccessfulRestore;
+    return _resumeAfterSuccessfulRestore();
+  }
+
+  Future<Result<void>> _resumeAfterSuccessfulRestore() async {
+    final resumed = await _resumeBarrier();
+    return resumed ?? Result.success(null);
+  }
+
+  Future<Result<void>> _resumeAfterFailedRestore({
+    Result<void>? originalFailure,
+  }) async {
+    final resumed = await _resumeBarrier();
+    if (resumed != null) return resumed;
+    return originalFailure ??
+        Result.error(
+          'Backup restore did not complete; sync is available again. '
+          'Retry the restore.',
+        );
+  }
+
+  Future<Result<void>> _recoverFailedSuspension({String? failure}) async {
+    final resumed = await _resumeBarrier();
+    if (resumed != null) return resumed;
+    return Result.error(
+      failure ??
+          'Backup restore did not begin; sync is available again. '
+              'Retry the restore.',
+    );
+  }
+
+  /// Resumes at most once per execution. A failure deliberately leaves the
+  /// corresponding pending state in place, so the next user retry only
+  /// retries the unsafe boundary instead of replaying the completed step.
+  Future<Result<void>?> _resumeBarrier() async {
+    try {
+      await _resumeSync();
+      _barrierState = _RestoreBarrierState.idle;
+      return null;
+    } catch (error) {
+      return Result.error('Backup restore resumed incompletely: $error');
+    }
   }
 }
