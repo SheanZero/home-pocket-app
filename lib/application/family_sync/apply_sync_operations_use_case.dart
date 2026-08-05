@@ -23,6 +23,16 @@ import 'transaction_sync_version.dart';
 
 typedef AppDirectoryResolver = Future<String> Function();
 
+typedef _OperationInspection = ({
+  String operationJson,
+  String operationId,
+  String messageId,
+  String safeEntityType,
+  String digest,
+  int sourceBytes,
+  String? resourceError,
+});
+
 enum SyncOperationApplyStatus { applied, alreadyApplied, quarantined, failed }
 
 class SyncOperationApplyResult {
@@ -94,6 +104,7 @@ class ApplySyncOperationsUseCase {
   final SyncAvatarUseCase? _syncAvatarUseCase;
   final CategoryReferenceSyncService? _categoryReferenceSyncService;
   final AppDirectoryResolver? _appDirectoryResolver;
+
   Future<ApplySyncOperationsResult> execute(
     List<Map<String, dynamic>> operations, {
     String? groupId,
@@ -101,194 +112,193 @@ class ApplySyncOperationsUseCase {
     final resolvedGroupId =
         groupId ?? (await _groupRepository.getActiveGroup())?.groupId;
     if (operations.length > InboundSyncResourcePolicy.maxOperationsPerMessage) {
-      if (resolvedGroupId == null || resolvedGroupId.isEmpty) {
-        return const ApplySyncOperationsResult([
-          SyncOperationApplyResult(
-            operationId: 'rejected-batch:group-context-unavailable',
-            status: SyncOperationApplyStatus.failed,
-            errorCode: 'group_context_unavailable',
-          ),
-        ]);
-      }
-      final result = await _quarantineBatchSummary(
-        operations: operations,
-        groupId: resolvedGroupId,
-      );
-      return ApplySyncOperationsResult([result]);
+      return _rejectOversizedOperations(operations, resolvedGroupId);
     }
     if (resolvedGroupId == null || resolvedGroupId.isEmpty) {
-      return ApplySyncOperationsResult(
-        operations
-            .map(
-              (operation) => SyncOperationApplyResult(
-                operationId: _operationId(operation),
-                status: SyncOperationApplyStatus.failed,
-                errorCode: 'group_context_unavailable',
-              ),
-            )
-            .toList(growable: false),
-      );
+      return _missingGroupResults(operations);
     }
     final results = <SyncOperationApplyResult>[];
     for (final operation in operations) {
-      final inspection = _inspectOperation(operation);
-      final rawEntityType = operation['entityType'];
-      final entityType = rawEntityType is String ? rawEntityType : null;
-      final operationId = inspection.operationId;
-      final messageId = inspection.messageId;
-      if (inspection.resourceError != null) {
-        results.add(
-          await _quarantineSafeSummary(
-            operationId: operationId,
-            groupId: resolvedGroupId,
-            messageId: messageId,
-            entityType: inspection.safeEntityType,
-            sourceBytes: inspection.sourceBytes,
-            digest: inspection.digest,
-            errorCode: inspection.resourceError!,
-          ),
-        );
-        continue;
-      }
-      try {
-        if (await _inboundRepository.isApplied(
-          groupId: resolvedGroupId,
-          operationId: operationId,
-        )) {
-          // If the process crashed after marking applied but before removing an
-          // older quarantine row, converge the UI ledger on redelivery.
-          await _inboundRepository.discardQuarantine(
-            groupId: resolvedGroupId,
-            operationId: operationId,
-          );
-          results.add(
-            SyncOperationApplyResult(
-              operationId: operationId,
-              status: SyncOperationApplyStatus.alreadyApplied,
-            ),
-          );
-          continue;
-        }
-      } catch (_) {
-        results.add(
-          SyncOperationApplyResult(
-            operationId: operationId,
-            status: SyncOperationApplyStatus.failed,
-            errorCode: 'applied_ledger_read_failed',
-          ),
-        );
-        continue;
-      }
-
-      try {
-        final protocolError = operation['_protocolErrorCode'];
-        if (protocolError is String && protocolError.isNotEmpty) {
-          throw SyncOperationPermanentException(
-            protocolError == 'operation_not_object'
-                ? protocolError
-                : 'invalid_operation_payload',
-          );
-        }
-        switch (entityType) {
-          case 'bill':
-            await _applyBillOperation(operation);
-          case 'profile':
-            await _applyProfileOperation(operation, groupId: resolvedGroupId);
-          case 'avatar':
-            await _applyAvatarOperation(operation, groupId: resolvedGroupId);
-          case 'shopping_item':
-            await _applyShoppingItemOp(operation);
-          default:
-            throw const SyncOperationPermanentException(
-              'unsupported_entity_type',
-            );
-        }
-        await _inboundRepository.markApplied(
-          operationId: operationId,
-          groupId: resolvedGroupId,
-          messageId: messageId,
-        );
-        results.add(
-          SyncOperationApplyResult(
-            operationId: operationId,
-            status: SyncOperationApplyStatus.applied,
-          ),
-        );
-      } on SyncOperationPermanentException catch (error) {
-        results.add(
-          await _quarantine(
-            operationId: operationId,
-            groupId: resolvedGroupId,
-            messageId: messageId,
-            errorCode: error.errorCode,
-            operationJson: inspection.operationJson,
-          ),
-        );
-      } on AvatarSyncValidationException {
-        results.add(
-          await _quarantine(
-            operationId: operationId,
-            groupId: resolvedGroupId,
-            messageId: messageId,
-            errorCode: 'avatar_validation_failed',
-            operationJson: inspection.operationJson,
-          ),
-        );
-      } on FormatException {
-        results.add(
-          await _quarantine(
-            operationId: operationId,
-            groupId: resolvedGroupId,
-            messageId: messageId,
-            errorCode: 'invalid_operation_payload',
-            operationJson: inspection.operationJson,
-          ),
-        );
-      } on ArgumentError {
-        results.add(
-          await _quarantine(
-            operationId: operationId,
-            groupId: resolvedGroupId,
-            messageId: messageId,
-            errorCode: 'invalid_operation_payload',
-            operationJson: inspection.operationJson,
-          ),
-        );
-      } on TypeError {
-        results.add(
-          await _quarantine(
-            operationId: operationId,
-            groupId: resolvedGroupId,
-            messageId: messageId,
-            errorCode: 'invalid_operation_payload',
-            operationJson: inspection.operationJson,
-          ),
-        );
-      } on SyncOperationTransientException catch (error) {
-        results.add(
-          SyncOperationApplyResult(
-            operationId: operationId,
-            status: SyncOperationApplyStatus.failed,
-            errorCode: error.errorCode,
-          ),
-        );
-      } catch (_) {
-        if (kDebugMode) {
-          debugPrint(
-            '[ApplySyncOps] operation failed: apply_temporary_failure',
-          );
-        }
-        results.add(
-          SyncOperationApplyResult(
-            operationId: operationId,
-            status: SyncOperationApplyStatus.failed,
-            errorCode: 'apply_temporary_failure',
-          ),
-        );
-      }
+      results.add(await _applyOne(operation, resolvedGroupId));
     }
     _logQuarantineCounts(results);
     return ApplySyncOperationsResult(results);
+  }
+
+  Future<ApplySyncOperationsResult> _rejectOversizedOperations(
+    List<Map<String, dynamic>> operations,
+    String? groupId,
+  ) async {
+    if (groupId == null || groupId.isEmpty) {
+      return const ApplySyncOperationsResult([
+        SyncOperationApplyResult(
+          operationId: 'rejected-batch:group-context-unavailable',
+          status: SyncOperationApplyStatus.failed,
+          errorCode: 'group_context_unavailable',
+        ),
+      ]);
+    }
+    final result = await _quarantineBatchSummary(
+      operations: operations,
+      groupId: groupId,
+    );
+    return ApplySyncOperationsResult([result]);
+  }
+
+  ApplySyncOperationsResult _missingGroupResults(
+    List<Map<String, dynamic>> operations,
+  ) => ApplySyncOperationsResult(
+    operations
+        .map(
+          (operation) => SyncOperationApplyResult(
+            operationId: _operationId(operation),
+            status: SyncOperationApplyStatus.failed,
+            errorCode: 'group_context_unavailable',
+          ),
+        )
+        .toList(growable: false),
+  );
+
+  Future<SyncOperationApplyResult> _applyOne(
+    Map<String, dynamic> operation,
+    String groupId,
+  ) async {
+    final inspection = _inspectOperation(operation);
+    if (inspection.resourceError != null) {
+      return _quarantineSafeSummary(
+        operationId: inspection.operationId,
+        groupId: groupId,
+        messageId: inspection.messageId,
+        entityType: inspection.safeEntityType,
+        sourceBytes: inspection.sourceBytes,
+        digest: inspection.digest,
+        errorCode: inspection.resourceError!,
+      );
+    }
+    final prior = await _priorApplicationResult(
+      groupId: groupId,
+      operationId: inspection.operationId,
+    );
+    if (prior != null) return prior;
+
+    try {
+      await _dispatchOperation(operation, groupId);
+      await _inboundRepository.markApplied(
+        operationId: inspection.operationId,
+        groupId: groupId,
+        messageId: inspection.messageId,
+      );
+      return SyncOperationApplyResult(
+        operationId: inspection.operationId,
+        status: SyncOperationApplyStatus.applied,
+      );
+    } catch (error) {
+      return _applicationFailureResult(
+        error: error,
+        inspection: inspection,
+        groupId: groupId,
+      );
+    }
+  }
+
+  Future<SyncOperationApplyResult?> _priorApplicationResult({
+    required String groupId,
+    required String operationId,
+  }) async {
+    try {
+      final isApplied = await _inboundRepository.isApplied(
+        groupId: groupId,
+        operationId: operationId,
+      );
+      if (!isApplied) return null;
+      // If the process crashed after marking applied but before removing an
+      // older quarantine row, converge the UI ledger on redelivery.
+      await _inboundRepository.discardQuarantine(
+        groupId: groupId,
+        operationId: operationId,
+      );
+      return SyncOperationApplyResult(
+        operationId: operationId,
+        status: SyncOperationApplyStatus.alreadyApplied,
+      );
+    } catch (_) {
+      return SyncOperationApplyResult(
+        operationId: operationId,
+        status: SyncOperationApplyStatus.failed,
+        errorCode: 'applied_ledger_read_failed',
+      );
+    }
+  }
+
+  Future<void> _dispatchOperation(
+    Map<String, dynamic> operation,
+    String groupId,
+  ) async {
+    final protocolError = operation['_protocolErrorCode'];
+    if (protocolError is String && protocolError.isNotEmpty) {
+      throw SyncOperationPermanentException(
+        protocolError == 'operation_not_object'
+            ? protocolError
+            : 'invalid_operation_payload',
+      );
+    }
+    switch (operation['entityType']) {
+      case 'bill':
+        await _applyBillOperation(operation);
+      case 'profile':
+        await _applyProfileOperation(operation, groupId: groupId);
+      case 'avatar':
+        await _applyAvatarOperation(operation, groupId: groupId);
+      case 'shopping_item':
+        await _applyShoppingItemOp(operation);
+      default:
+        throw const SyncOperationPermanentException('unsupported_entity_type');
+    }
+  }
+
+  Future<SyncOperationApplyResult> _applicationFailureResult({
+    required Object error,
+    required _OperationInspection inspection,
+    required String groupId,
+  }) async {
+    if (error is SyncOperationTransientException) {
+      return SyncOperationApplyResult(
+        operationId: inspection.operationId,
+        status: SyncOperationApplyStatus.failed,
+        errorCode: error.errorCode,
+      );
+    }
+    final quarantineCode = _quarantineCodeFor(error);
+    if (quarantineCode != null) {
+      return _quarantine(
+        operationId: inspection.operationId,
+        groupId: groupId,
+        messageId: inspection.messageId,
+        errorCode: quarantineCode,
+        operationJson: inspection.operationJson,
+      );
+    }
+    if (kDebugMode) {
+      debugPrint('[ApplySyncOps] operation failed: apply_temporary_failure');
+    }
+    return SyncOperationApplyResult(
+      operationId: inspection.operationId,
+      status: SyncOperationApplyStatus.failed,
+      errorCode: 'apply_temporary_failure',
+    );
+  }
+
+  String? _quarantineCodeFor(Object error) {
+    if (error is SyncOperationPermanentException) return error.errorCode;
+    if (error is AvatarSyncValidationException) {
+      return 'avatar_validation_failed';
+    }
+    if (error is FormatException ||
+        error is ArgumentError ||
+        error is TypeError) {
+      return 'invalid_operation_payload';
+    }
+    return null;
   }
 
   String _operationId(Map<String, dynamic> operation, {String? digest}) {
@@ -414,16 +424,7 @@ class ApplySyncOperationsUseCase {
     }
   }
 
-  ({
-    String operationJson,
-    String operationId,
-    String messageId,
-    String safeEntityType,
-    String digest,
-    int sourceBytes,
-    String? resourceError,
-  })
-  _inspectOperation(Map<String, dynamic> operation) {
+  _OperationInspection _inspectOperation(Map<String, dynamic> operation) {
     final operationJson = jsonEncode(operation);
     final bytes = utf8.encode(operationJson);
     final digest = sha256.convert(bytes).toString();
@@ -506,9 +507,24 @@ class ApplySyncOperationsUseCase {
   }
 
   Future<void> _applyBillOperation(Map<String, dynamic> operation) async {
+    final envelope = _parseBillEnvelope(operation);
+    final existing = await _transactionRepository.findById(envelope.entityId);
+    final revision = _operationRevision(operation, envelope.data);
+    final originDeviceId = _billOriginDeviceId(operation, envelope);
+    final incoming = await _buildIncomingBill(
+      operation: operation,
+      envelope: envelope,
+      existing: existing,
+      revision: revision,
+      originDeviceId: originDeviceId,
+    );
+    if (!_incomingBillIsNewer(incoming, existing)) return;
+    await _persistIncomingBill(incoming, existing);
+  }
+
+  _BillEnvelope _parseBillEnvelope(Map<String, dynamic> operation) {
     final op = operation['op'] as String?;
     final entityId = operation['entityId'] as String?;
-    final fromDeviceId = operation['fromDeviceId'] as String?;
     final data = operation['data'] as Map<String, dynamic>?;
     if (op == null || entityId == null || entityId.isEmpty) {
       throw const SyncOperationPermanentException('invalid_bill_envelope');
@@ -523,100 +539,175 @@ class ApplySyncOperationsUseCase {
       throw const SyncOperationPermanentException('unsupported_bill_operation');
     }
     if (data != null) {
-      final privacyViolation = TransactionFamilySyncPolicy.inboundViolation(
-        data,
-      );
-      if (privacyViolation != null) {
-        throw SyncOperationPermanentException(privacyViolation);
-      }
+      final violation = TransactionFamilySyncPolicy.inboundViolation(data);
+      if (violation != null) throw SyncOperationPermanentException(violation);
     }
-
-    final existing = await _transactionRepository.findById(entityId);
-    final revision = _operationRevision(operation, data);
-    final originDeviceId =
-        operation['originDeviceId'] as String? ??
-        data?['syncOriginDeviceId'] as String? ??
-        fromDeviceId ??
-        '';
-    final isDeleted = op == 'delete' || data?['isDeleted'] == true;
-
-    final Transaction incoming;
-    if (data != null && _hasCompleteBillState(data)) {
-      final sourceDeviceId = fromDeviceId ?? originDeviceId;
-      if (sourceDeviceId.isEmpty) {
-        throw const SyncOperationPermanentException('missing_bill_sender');
-      }
-      final bookId =
-          existing?.bookId ?? (await _resolveShadowBook(sourceDeviceId))?.id;
-      if (bookId == null) {
-        throw const SyncOperationTransientException('shadow_book_unavailable');
-      }
-
-      // Custom category semantics travel inside the same opaque E2EE bill.
-      // Apply them before the bill so a committed transaction is immediately
-      // renderable. The merge is idempotent and versioned independently.
-      await _categoryReferenceSyncService?.applyFromBillData(data);
-
-      final normalizedData = Map<String, dynamic>.of(data)
-        ..['id'] = entityId
-        ..['isDeleted'] = isDeleted
-        ..['syncRevision'] = revision
-        ..['syncOriginDeviceId'] = originDeviceId;
-      if (op != 'create' &&
-          op != 'insert' &&
-          normalizedData['updatedAt'] == null) {
-        normalizedData['updatedAt'] = _operationTime(
-          operation,
-          data,
-        ).toUtc().toIso8601String();
-      }
-      incoming = TransactionSyncMapper.fromSyncMap(
-        normalizedData,
-        bookId: bookId,
-        deviceId: sourceDeviceId,
-      );
-    } else {
-      // Legacy delete operations did not carry complete entity state. They can
-      // still advance an existing row, but an unknown legacy delete cannot
-      // materialize a safe tombstone. Current producers always send full data.
-      if (op != 'delete' || existing == null) {
-        throw const SyncOperationPermanentException('incomplete_bill_state');
-      }
-      final legacyRevision = revision > 0
-          ? revision
-          : effectiveSyncRevision(existing) + 1;
-      final operationTime = _operationTime(operation, data);
-      incoming = existing.copyWith(
-        isDeleted: true,
-        updatedAt: operationTime.millisecondsSinceEpoch == 0
-            ? DateTime.fromMicrosecondsSinceEpoch(legacyRevision, isUtc: true)
-            : operationTime,
-        syncRevision: legacyRevision,
-        syncOriginDeviceId: originDeviceId.isEmpty
-            ? effectiveSyncOriginDeviceId(existing)
-            : originDeviceId,
-      );
-    }
-
-    if (existing != null &&
-        TransactionSyncVersion.fromTransaction(
-              incoming,
-            ).compareTo(TransactionSyncVersion.fromTransaction(existing)) <=
-            0) {
-      return;
-    }
-
-    if (existing == null) {
-      await _transactionRepository.insert(incoming);
-    } else {
-      await _transactionRepository.update(incoming);
-    }
+    return _BillEnvelope(
+      op: op,
+      entityId: entityId,
+      fromDeviceId: operation['fromDeviceId'] as String?,
+      data: data,
+    );
   }
+
+  String _billOriginDeviceId(
+    Map<String, dynamic> operation,
+    _BillEnvelope envelope,
+  ) =>
+      operation['originDeviceId'] as String? ??
+      envelope.data?['syncOriginDeviceId'] as String? ??
+      envelope.fromDeviceId ??
+      '';
+
+  Future<Transaction> _buildIncomingBill({
+    required Map<String, dynamic> operation,
+    required _BillEnvelope envelope,
+    required Transaction? existing,
+    required int revision,
+    required String originDeviceId,
+  }) {
+    final data = envelope.data;
+    if (data != null && _hasCompleteBillState(data)) {
+      return _buildCompleteBill(
+        operation: operation,
+        envelope: envelope,
+        existing: existing,
+        revision: revision,
+        originDeviceId: originDeviceId,
+      );
+    }
+    return Future.value(
+      _buildLegacyBill(
+        operation: operation,
+        envelope: envelope,
+        existing: existing,
+        revision: revision,
+        originDeviceId: originDeviceId,
+      ),
+    );
+  }
+
+  Future<Transaction> _buildCompleteBill({
+    required Map<String, dynamic> operation,
+    required _BillEnvelope envelope,
+    required Transaction? existing,
+    required int revision,
+    required String originDeviceId,
+  }) async {
+    final data = envelope.data!;
+    final sourceDeviceId = envelope.fromDeviceId ?? originDeviceId;
+    if (sourceDeviceId.isEmpty) {
+      throw const SyncOperationPermanentException('missing_bill_sender');
+    }
+    final bookId =
+        existing?.bookId ?? (await _resolveShadowBook(sourceDeviceId))?.id;
+    if (bookId == null) {
+      throw const SyncOperationTransientException('shadow_book_unavailable');
+    }
+
+    // Category semantics must be committed before the referencing bill.
+    await _categoryReferenceSyncService?.applyFromBillData(data);
+    final normalizedData = Map<String, dynamic>.of(data)
+      ..['id'] = envelope.entityId
+      ..['isDeleted'] = envelope.op == 'delete' || data['isDeleted'] == true
+      ..['syncRevision'] = revision
+      ..['syncOriginDeviceId'] = originDeviceId;
+    if (_billNeedsUpdatedAt(envelope.op, normalizedData)) {
+      normalizedData['updatedAt'] = _operationTime(
+        operation,
+        data,
+      ).toUtc().toIso8601String();
+    }
+    return TransactionSyncMapper.fromSyncMap(
+      normalizedData,
+      bookId: bookId,
+      deviceId: sourceDeviceId,
+    );
+  }
+
+  bool _billNeedsUpdatedAt(String op, Map<String, dynamic> data) =>
+      op != 'create' && op != 'insert' && data['updatedAt'] == null;
+
+  Transaction _buildLegacyBill({
+    required Map<String, dynamic> operation,
+    required _BillEnvelope envelope,
+    required Transaction? existing,
+    required int revision,
+    required String originDeviceId,
+  }) {
+    // Legacy deletes can advance an existing row but cannot safely create an
+    // unknown tombstone. Current producers always carry the complete state.
+    if (envelope.op != 'delete' || existing == null) {
+      throw const SyncOperationPermanentException('incomplete_bill_state');
+    }
+    final legacyRevision = revision > 0
+        ? revision
+        : effectiveSyncRevision(existing) + 1;
+    final operationTime = _operationTime(operation, envelope.data);
+    return existing.copyWith(
+      isDeleted: true,
+      updatedAt: operationTime.millisecondsSinceEpoch == 0
+          ? DateTime.fromMicrosecondsSinceEpoch(legacyRevision, isUtc: true)
+          : operationTime,
+      syncRevision: legacyRevision,
+      syncOriginDeviceId: originDeviceId.isEmpty
+          ? effectiveSyncOriginDeviceId(existing)
+          : originDeviceId,
+    );
+  }
+
+  bool _incomingBillIsNewer(Transaction incoming, Transaction? existing) =>
+      existing == null ||
+      TransactionSyncVersion.fromTransaction(
+            incoming,
+          ).compareTo(TransactionSyncVersion.fromTransaction(existing)) >
+          0;
+
+  Future<void> _persistIncomingBill(
+    Transaction incoming,
+    Transaction? existing,
+  ) => existing == null
+      ? _transactionRepository.insert(incoming)
+      : _transactionRepository.update(incoming);
 
   Future<void> _applyProfileOperation(
     Map<String, dynamic> operation, {
     String? groupId,
   }) async {
+    final profile = _parseProfileOperation(operation, groupId);
+    final versionedRepository =
+        _groupRepository is VersionedGroupMemberRepository
+        ? _groupRepository as VersionedGroupMemberRepository
+        : null;
+    if (versionedRepository != null) {
+      if (!await _profileSenderIsActive(profile)) {
+        throw const SyncOperationPermanentException('invalid_profile_sender');
+      }
+      await versionedRepository.applyMemberIdentityVersioned(
+        groupId: profile.groupId,
+        deviceId: profile.fromDeviceId,
+        displayName: profile.validDisplayName,
+        avatarEmoji: profile.validAvatarEmoji,
+        version: MemberContentVersion(
+          revision: profile.revision,
+          originDeviceId: profile.originDeviceId,
+          contentDigest: profile.digest,
+        ),
+      );
+    } else {
+      await _groupRepository.updateMemberIdentity(
+        groupId: profile.groupId,
+        deviceId: profile.fromDeviceId,
+        displayName: profile.validDisplayName,
+        avatarEmoji: profile.validAvatarEmoji,
+      );
+    }
+  }
+
+  _ProfileOperation _parseProfileOperation(
+    Map<String, dynamic> operation,
+    String? groupId,
+  ) {
     if (operation['op'] != 'update') {
       throw const SyncOperationPermanentException(
         'unsupported_profile_operation',
@@ -626,76 +717,78 @@ class ApplySyncOperationsUseCase {
       throw const SyncOperationTransientException('group_context_unavailable');
     }
     final fromDeviceId = operation['fromDeviceId'] as String?;
-    final entityId = operation['entityId'] as String?;
     final data = operation['data'] as Map<String, dynamic>?;
     if (fromDeviceId == null || fromDeviceId.isEmpty || data == null) {
       throw const SyncOperationPermanentException('invalid_profile_envelope');
     }
-    final schemaVersion = (data['schemaVersion'] as num?)?.toInt();
-    final ownerDeviceId = data['ownerDeviceId'] as String?;
+    final profile = _profileFields(operation, groupId, fromDeviceId, data);
+    if (_profilePayloadIsInvalid(operation, data, profile)) {
+      throw const SyncOperationPermanentException('invalid_profile_payload');
+    }
+    final declaredDigest = data['profileDigest'];
+    if (declaredDigest != null && declaredDigest != profile.digest) {
+      throw const SyncOperationPermanentException('invalid_profile_payload');
+    }
+    return profile;
+  }
+
+  _ProfileOperation _profileFields(
+    Map<String, dynamic> operation,
+    String groupId,
+    String fromDeviceId,
+    Map<String, dynamic> data,
+  ) {
     final envelopeRevision = (operation['revision'] as num?)?.toInt();
     final payloadRevision = (data['revision'] as num?)?.toInt();
-    final revision = envelopeRevision ?? payloadRevision ?? 0;
-    final originDeviceId =
-        operation['originDeviceId'] as String? ?? fromDeviceId;
     final displayName = data['displayName'];
     final avatarEmoji = data['avatarEmoji'];
-    if ((schemaVersion != null && schemaVersion != 1) ||
-        (entityId != null && entityId != fromDeviceId) ||
-        (ownerDeviceId != null && ownerDeviceId != fromDeviceId) ||
-        revision < 0 ||
-        (envelopeRevision != null &&
-            payloadRevision != null &&
-            envelopeRevision != payloadRevision) ||
-        originDeviceId != fromDeviceId ||
-        displayName is! String ||
-        avatarEmoji is! String) {
-      throw const SyncOperationPermanentException('invalid_profile_payload');
-    }
+    return _ProfileOperation(
+      groupId: groupId,
+      fromDeviceId: fromDeviceId,
+      displayName: displayName,
+      avatarEmoji: avatarEmoji,
+      envelopeRevision: envelopeRevision,
+      payloadRevision: payloadRevision,
+      revision: envelopeRevision ?? payloadRevision ?? 0,
+      originDeviceId: operation['originDeviceId'] as String? ?? fromDeviceId,
+      digest: sha256
+          .convert(utf8.encode(jsonEncode([displayName, avatarEmoji])))
+          .toString(),
+    );
+  }
 
-    final digest = sha256
-        .convert(utf8.encode(jsonEncode([displayName, avatarEmoji])))
-        .toString();
-    final declaredDigest = data['profileDigest'];
-    if (declaredDigest != null && declaredDigest != digest) {
-      throw const SyncOperationPermanentException('invalid_profile_payload');
+  bool _profilePayloadIsInvalid(
+    Map<String, dynamic> operation,
+    Map<String, dynamic> data,
+    _ProfileOperation profile,
+  ) {
+    final schemaVersion = (data['schemaVersion'] as num?)?.toInt();
+    if (schemaVersion != null && schemaVersion != 1) return true;
+    final entityId = operation['entityId'] as String?;
+    if (entityId != null && entityId != profile.fromDeviceId) return true;
+    final ownerDeviceId = data['ownerDeviceId'] as String?;
+    if (ownerDeviceId != null && ownerDeviceId != profile.fromDeviceId) {
+      return true;
     }
+    if (profile.revision < 0) return true;
+    if (profile.envelopeRevision != null &&
+        profile.payloadRevision != null &&
+        profile.envelopeRevision != profile.payloadRevision) {
+      return true;
+    }
+    if (profile.originDeviceId != profile.fromDeviceId) return true;
+    return profile.displayName is! String || profile.avatarEmoji is! String;
+  }
 
-    final versionedRepository =
-        _groupRepository is VersionedGroupMemberRepository
-        ? _groupRepository as VersionedGroupMemberRepository
-        : null;
-    if (versionedRepository != null) {
-      final group = await _groupRepository.getGroupById(groupId);
-      final senderIsActive =
-          group != null &&
-          group.status == GroupStatus.active &&
-          group.members.any(
-            (member) =>
-                member.deviceId == fromDeviceId && member.status == 'active',
-          );
-      if (!senderIsActive) {
-        throw const SyncOperationPermanentException('invalid_profile_sender');
-      }
-      await versionedRepository.applyMemberIdentityVersioned(
-        groupId: groupId,
-        deviceId: fromDeviceId,
-        displayName: displayName,
-        avatarEmoji: avatarEmoji,
-        version: MemberContentVersion(
-          revision: revision,
-          originDeviceId: originDeviceId,
-          contentDigest: digest,
-        ),
-      );
-    } else {
-      await _groupRepository.updateMemberIdentity(
-        groupId: groupId,
-        deviceId: fromDeviceId,
-        displayName: displayName,
-        avatarEmoji: avatarEmoji,
-      );
-    }
+  Future<bool> _profileSenderIsActive(_ProfileOperation profile) async {
+    final group = await _groupRepository.getGroupById(profile.groupId);
+    return group != null &&
+        group.status == GroupStatus.active &&
+        group.members.any(
+          (member) =>
+              member.deviceId == profile.fromDeviceId &&
+              member.status == 'active',
+        );
   }
 
   Future<void> _applyAvatarOperation(
@@ -988,4 +1081,45 @@ class ApplySyncOperationsUseCase {
     );
     return _shadowBookService.findShadowBook(fromDeviceId);
   }
+}
+
+class _BillEnvelope {
+  const _BillEnvelope({
+    required this.op,
+    required this.entityId,
+    required this.fromDeviceId,
+    required this.data,
+  });
+
+  final String op;
+  final String entityId;
+  final String? fromDeviceId;
+  final Map<String, dynamic>? data;
+}
+
+class _ProfileOperation {
+  const _ProfileOperation({
+    required this.groupId,
+    required this.fromDeviceId,
+    required this.displayName,
+    required this.avatarEmoji,
+    required this.envelopeRevision,
+    required this.payloadRevision,
+    required this.revision,
+    required this.originDeviceId,
+    required this.digest,
+  });
+
+  final String groupId;
+  final String fromDeviceId;
+  final Object? displayName;
+  final Object? avatarEmoji;
+  final int? envelopeRevision;
+  final int? payloadRevision;
+  final int revision;
+  final String originDeviceId;
+  final String digest;
+
+  String get validDisplayName => displayName as String;
+  String get validAvatarEmoji => avatarEmoji as String;
 }
