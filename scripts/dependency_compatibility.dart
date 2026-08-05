@@ -413,6 +413,7 @@ CompatibilityReport validateDependencyCompatibility({
     machineJson: runningFlutterMachineJson,
     auditWorkflow: auditWorkflow,
     flutterExtensionSource: flutterExtensionSource,
+    mode: mode,
   );
 
   if (!auditWorkflow.contains('--verify-running-flutter-sdk')) {
@@ -446,9 +447,11 @@ CompatibilitySeverity _severityFor(
   DependencyCompatibilityMode mode,
 ) {
   if (mode == DependencyCompatibilityMode.futureProbe &&
-      RegExp(
-        r'^dependency (?!sqlcipher_flutter_libs )[^ ]+ candidate must be production stable$',
-      ).hasMatch(message)) {
+      (RegExp(
+            r'^dependency (?!sqlcipher_flutter_libs )[^ ]+ candidate must be production stable$',
+          ).hasMatch(message) ||
+          message ==
+              'running Flutter beta SDK differs from the selected Stable identity')) {
     return CompatibilitySeverity.warning;
   }
   return CompatibilitySeverity.error;
@@ -603,6 +606,7 @@ void _validateFlutterIdentity({
   required String machineJson,
   required String auditWorkflow,
   required String flutterExtensionSource,
+  required DependencyCompatibilityMode mode,
 }) {
   final selected = flutterToolchain['selected_current']?.toString();
   final channel = flutterToolchain['channel']?.toString();
@@ -636,7 +640,21 @@ void _validateFlutterIdentity({
   }
   if (machineJson.isNotEmpty) {
     final machine = _parseMachineJson(machineJson, issues);
-    if (machine['flutterVersion']?.toString() != selected ||
+    final hasIdentity = {
+      'flutterVersion',
+      'channel',
+      'frameworkRevision',
+    }.every((field) => !_isBlank(machine[field]));
+    if (!hasIdentity) {
+      issues.add(
+        'running Flutter --version --machine output must include Flutter identity fields',
+      );
+    } else if (mode == DependencyCompatibilityMode.futureProbe &&
+        machine['channel'] == 'beta') {
+      issues.add(
+        'running Flutter beta SDK differs from the selected Stable identity',
+      );
+    } else if (machine['flutterVersion']?.toString() != selected ||
         machine['channel']?.toString() != channel ||
         machine['frameworkRevision']?.toString() != revision) {
       issues.add(

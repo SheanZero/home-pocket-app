@@ -12,6 +12,14 @@ const _runningFlutterMachineJson = '''
 }
 ''';
 
+const _betaFlutterMachineJson = '''
+{
+  "flutterVersion": "3.45.0-0.1.pre",
+  "channel": "beta",
+  "frameworkRevision": "aabbccddeeff00112233445566778899aabbccdd"
+}
+''';
+
 const _flutterExtensionFixture = 'val minSdkVersion: Int = 24';
 
 void main() {
@@ -82,6 +90,8 @@ void main() {
     Map<String, String> input, {
     required String baselineJson,
     required compatibility.DependencyCompatibilityMode mode,
+    String? extensionSource,
+    String? runningFlutterMachineJson,
   }) => compatibility.validateDependencyCompatibility(
     pubspecYaml: input['pubspec']!,
     lockYaml: input['lock']!,
@@ -96,8 +106,9 @@ void main() {
     futureWorkflow: input['future']!,
     baselineJson: baselineJson,
     metadataYaml: input['metadata']!,
-    flutterExtensionSource: _flutterExtensionFixture,
-    runningFlutterMachineJson: _runningFlutterMachineJson,
+    flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
+    runningFlutterMachineJson:
+        runningFlutterMachineJson ?? _runningFlutterMachineJson,
     pubspecOverridesPresent: false,
     trackedInputContents: trackedInputs(input),
     mode: mode,
@@ -447,6 +458,47 @@ void main() {
 
     expect(probe.errors, isNotEmpty);
     expect(probe.warnings, isEmpty);
+  });
+
+  test(
+    'future probe reports expected beta SDK identity drift as a warning',
+    () {
+      final probe = validateReport(
+        currentInputs(),
+        baselineJson: File(
+          'docs/testing/STABLE_BASELINE.json',
+        ).readAsStringSync(),
+        mode: compatibility.DependencyCompatibilityMode.futureProbe,
+        runningFlutterMachineJson: _betaFlutterMachineJson,
+      );
+
+      expect(probe.errors, isEmpty);
+      expect(
+        probe.warnings.map((issue) => issue.message),
+        contains(
+          'running Flutter beta SDK differs from the selected Stable identity',
+        ),
+      );
+    },
+  );
+
+  test('future probe keeps beta Android floor regression blocking', () {
+    final probe = validateReport(
+      currentInputs(),
+      baselineJson: File(
+        'docs/testing/STABLE_BASELINE.json',
+      ).readAsStringSync(),
+      mode: compatibility.DependencyCompatibilityMode.futureProbe,
+      runningFlutterMachineJson: _betaFlutterMachineJson,
+      extensionSource: 'val minSdkVersion: Int = 23',
+    );
+
+    expect(
+      probe.errors.map((issue) => issue.message),
+      contains(
+        'FlutterExtension.kt minSdkVersion must match the manifest and be >= 24',
+      ),
+    );
   });
 
   group('CI workflow source contracts', () {
