@@ -67,7 +67,7 @@ The selected production toolchain is still Flutter **3.44.8 Stable** with Dart *
 
 The newest mutually compatible, production-stable no-override graph is the graph already resolved in `pubspec.lock`, with one critical clarification: analyzer must be **exactly 8.4.0**. `import_guard_custom_lint` 1.0.0 requires analyzer `>=7.0.0 <9.0.0`; `custom_lint` 0.8.1 permits analyzer 8; but its permitted `analyzer_plugin` 0.13.10 requires analyzer 8.4.0 exactly, while 0.13.11 requires analyzer 9.0.0. Therefore analyzer 8.4.1 is not a viable patch upgrade in this graph. [CITED: https://pub.dev/api/packages/import_guard_custom_lint] [CITED: https://pub.dev/api/packages/custom_lint] [CITED: https://pub.dev/api/packages/analyzer_plugin]
 
-**Primary recommendation:** Keep the current resolved analyzer-8 cohort, change `environment.sdk` to `^3.12.2`, convert the broad analyzer-8 assertion into an exact graph contract, re-query and record the current candidates/holds, and prove the guardrails with reversible negative fixtures before doing the clean two-pass generation proof.
+**Primary recommendation:** Keep the current resolved analyzer-8 cohort, change `environment.sdk` to `^3.12.2`, explicitly register `riverpod_lint` as an analysis-server plugin, convert the broad analyzer-8 assertion into an exact graph contract, re-query and record the current candidates/holds, and prove the guardrails with reversible negative fixtures before doing the clean two-pass generation proof.
 
 DATA_N9K4Q2VA_START
 > `sdk: ^3.10.8`
@@ -253,6 +253,20 @@ The analyzer enables custom_lint, and the architecture test documents why the in
 
 **When to use:** This phase’s explicit proof that the tools still reject invalid code after the analyzer decision.
 
+Before executing a Riverpod negative fixture, add the selected plugin alongside custom_lint and retain its package-specific configuration key:
+
+```yaml
+analyzer:
+  plugins:
+    - custom_lint
+    - riverpod_lint
+
+plugins:
+  riverpod_lint: 3.1.0
+```
+
+Riverpod’s official 3.1.0 package README requires both entries for its analysis-server plugin. The current repository enables only `custom_lint`, so this is a required Phase 58 configuration correction rather than a source-model migration. [CITED: https://pub.dev/api/archives/riverpod_lint-3.1.0.tar.gz] [VERIFIED: analysis_options.yaml:3-17]
+
 **Fixture matrix:**
 
 | Fixture | Command | Required evidence |
@@ -260,9 +274,9 @@ The analyzer enables custom_lint, and the architecture test documents why the in
 | Domain file importing `package:home_pocket/data/...` | `dart run custom_lint --reporter=json --no-fatal-infos` | nonzero status and an `import_guard` diagnostic |
 | Same domain package-import fixture | `flutter test test/architecture/layer_import_rules_test.dart` | nonzero status and the domain-independence failure |
 | Domain file using a relative forbidden data import | `flutter test test/architecture/layer_import_rules_test.dart` | nonzero status; proves the scanner is not redundant with import_guard |
-| Minimal `runApp(const Placeholder())` fixture without `ProviderScope` | `flutter analyze --format machine` | nonzero status and the Riverpod `missing_provider_scope` diagnostic |
+| Minimal `runApp(const Placeholder())` fixture without `ProviderScope` | `flutter analyze --format machine` | nonzero status and the Riverpod `missing_provider_scope` warning at the fixture `runApp` invocation |
 
-Riverpod lint 3.1.0 is an analysis-server plugin, so its negative proof belongs to `flutter analyze`, not merely `dart run custom_lint`. [CITED: https://pub.dev/packages/riverpod_lint] The existing CI already runs analyzer and custom_lint as separate hard gates. [VERIFIED: .github/workflows/audit.yml:38-53]
+Riverpod lint 3.1.0 is an analysis-server plugin, so its negative proof belongs to `flutter analyze`, not merely `dart run custom_lint`. Its published source defines `missing_provider_scope` as a WARNING and reports it on a `runApp` whose first widget is neither `ProviderScope` nor `UncontrolledProviderScope`. [CITED: https://pub.dev/api/archives/riverpod_lint-3.1.0.tar.gz] The existing CI already runs analyzer and custom_lint as separate hard gates. [VERIFIED: .github/workflows/audit.yml:38-53]
 
 ### Anti-patterns to avoid
 
@@ -382,17 +396,21 @@ This is a project constraint, not an instruction to change sources now. [VERIFIE
 |---|-------|---------|---------------|
 | — | None. Current-version and constraint claims were checked against official Flutter/Pub sources; implementation-time re-query remains a locked requirement. | — | — |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does `import_guard_custom_lint` have an analyzer-9-compatible released successor at execution time?**
-   - What we know: version 1.0.0 is the latest official Pub release observed and caps analyzer below 9.
-   - What's unclear: a release can occur after this research date.
-   - Recommendation: re-query the official Pub API before editing; if a successor exists, solve and test the whole graph in a separate candidate worktree before replacing the hold.
+### 1. Analyzer-9-compatible import guard successor
 
-2. **Which Riverpod diagnostic is most stable for the negative fixture?**
-   - What we know: Riverpod lint’s documented `missing_provider_scope` rule catches `runApp` without a root `ProviderScope`.
-   - What's unclear: exact machine-format wording may change even when the rule name is retained.
-   - Recommendation: assert the diagnostic code, not prose, and pin it with the selected Riverpod lint version.
+**Result:** No officially released successor exists as of the 2026-08-06 re-check. Pub’s full release history reports `import_guard_custom_lint` **1.0.0** as latest, published 2026-02-27, with `analyzer: >=7.0.0 <9.0.0`; every prior release also caps analyzer below 9. [CITED: https://pub.dev/api/packages/import_guard_custom_lint]
+
+**Exact decision rule:** Enforce analyzer **8.4.0** unless all four conditions are met in one candidate transaction: (1) Pub officially publishes an import-guard successor whose published constraint accepts the intended analyzer major; (2) `flutter pub get` resolves the entire SDK/Riverpod/Freezed/JSON/Drift/build_runner/custom-lint graph without `dependency_overrides` or `pubspec_overrides.yaml`; (3) D-04 negative fixtures prove import_guard, the relative-import scanner, and Riverpod lint still reject invalid source; and (4) D-08/D-09 complete two clean generation passes with no unexplained tracked diff. **Confidence: MEDIUM** — current publisher metadata is authoritative at query time; a future release requires the locked execution-time re-query.
+
+### 2. Riverpod negative-fixture diagnostic and stable fallback
+
+**Result:** With selected `riverpod_lint` **3.1.0**, assert machine diagnostic code **`missing_provider_scope`** at the fixture `runApp` invocation. The official Pub archive defines that code as a WARNING and emits it when `runApp` is not rooted by `ProviderScope` or `UncontrolledProviderScope`. [CITED: https://pub.dev/api/archives/riverpod_lint-3.1.0.tar.gz]
+
+**Required enablement:** Add `riverpod_lint` to `analyzer.plugins` and add the top-level `plugins: riverpod_lint: 3.1.0` configuration. The existing configuration contains only `custom_lint`, so the plugin is not presently configured for analyzer execution. [CITED: https://pub.dev/api/archives/riverpod_lint-3.1.0.tar.gz] [VERIFIED: analysis_options.yaml:3-17]
+
+**Robust fallback if output text or the selected future lint code changes:** keep the fixture compilable apart from its deliberately missing root scope; compare it to a paired `ProviderScope(child: const Placeholder())` control; require a non-info analyzer diagnostic on the bad fixture’s `runApp` line and no corresponding diagnostic on the control; archive `--format machine` output; then update the asserted code only after inspecting the official Pub archive/source for the exact locked `riverpod_lint` version. This differential evidence protects D-04 without relying on mutable prose. **Confidence: HIGH** for the selected 3.1.0 code path; MEDIUM for any future version.
 
 ## Environment Availability
 
@@ -434,6 +452,7 @@ The Flutter machine output and repository metadata agree on the production ident
 ### Wave 0 Gaps
 
 - [ ] Add a reversible negative-fixture harness that proves package-import `import_guard`, relative-import source scanner, and Riverpod analyzer diagnostics independently fail.
+- [ ] Register `riverpod_lint` in `analysis_options.yaml` using its selected `3.1.0` analysis-server-plugin configuration before asserting its fixture diagnostic.
 - [ ] Extend `scripts/dependency_compatibility.dart` and its contract test to require exact analyzer 8.4.0 and its analyzer-plugin pair, and to reject analyzer 8.4.1/9+ drift.
 - [ ] Add the complete two-pass localization-plus-build-runner clean-diff command to CI or a tested phase-owned verification script; the existing CI covers only build_runner clean output. [VERIFIED: .github/workflows/audit.yml:95-102]
 

@@ -84,7 +84,26 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
   3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one compatible stable graph with no forced override or split runtime/generator lane.
   4. From a clean generation state, dependency resolution, localization generation, and code generation finish with no unexpected tracked generated-file diff or hand-edited output.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+
+**Wave 0**
+- [ ] 58-01-PLAN.md — Create fail-first import_guard, source-scanning architecture, and Riverpod lint test infrastructure.
+- [ ] 58-03-PLAN.md — Create the source-tested authoritative locked-resolution, two-pass generation, then lint/architecture wrapper.
+
+**Wave 1** *(blocked on Wave 0 completion)*
+- [ ] 58-02-PLAN.md — Enforce Flutter 3.44.8/Dart 3.12.2 and the exact analyzer 8.4.0 coherent generator graph.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 58-04-PLAN.md — Make Stable CI call the authoritative wrapper once and remove pre-generation/inline duplicate gates.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 58-05-PLAN.md — Execute and record the full targeted, full-suite, coverage, and clean-generation evidence matrix.
+
+Cross-cutting constraints:
+- Flutter 3.44.8 Stable / Dart 3.12.2 and exact analyzer 8.4.0 remain one no-override graph.
+- One authoritative local/Stable-CI wrapper enforces locked resolution → two clean l10n/build_runner passes → analyzer → custom_lint/import_guard → layer/domain/presentation architecture tests → Riverpod/import-guard negative proof; no Stable pre-generation analysis duplicate remains.
 
 ### Phase 59: Controlled Platform Plugin Cohorts
 
@@ -165,7 +184,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
-| 58. Flutter, Analyzer & Code Generation Lane | 0/TBD | Not started | - |
+| 58. Flutter, Analyzer & Code Generation Lane | 0/5 | Planned | - |
 | 59. Controlled Platform Plugin Cohorts | 0/TBD | Not started | - |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |
