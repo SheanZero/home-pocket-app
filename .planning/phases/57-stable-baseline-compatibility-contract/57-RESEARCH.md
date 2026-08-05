@@ -103,11 +103,20 @@ Use JSON, parsed by `dart:convert`; this is a proposed repository design, not a 
 | Field | Required content / validation |
 |---|---|
 | `schema_version`, `queried_on`, `official_source_policy` | Supported schema and ISO date; official-primary-source policy. [ASSUMED] |
-| `toolchains[]` | Flutter/Dart, Xcode, CocoaPods, JDK, Gradle, AGP and Android SDK rows: `current`, `latest_stable_candidate`, `decision`, source URL, date. [ASSUMED] |
+| `toolchains[]` | Flutter/Dart, Xcode, CocoaPods, JDK, Gradle, AGP and Android SDK rows: `current`, `latest_stable_candidate`, `decision`, source URL, date. The Flutter row also stores `framework_revision`, `channel`, and `flutter_extension_defaults.min_sdk`. [ASSUMED] |
 | `direct_dependencies[]` | Exact inventory of each direct main/dev/SDK/path dependency with declared constraint, resolved value when applicable, candidate, source/date, decision. [ASSUMED] |
 | `lanes[]` | All-or-hold members for SQLCipher, analyzer/codegen, file/share/metadata, speech, iOS manager, Android toolchain. [ASSUMED] |
 | `holds[]` | `selected`, candidate, official URL, compatibility reason, exit condition, owner phase; validator rejects missing field. [ASSUMED] |
 | `prohibitions`, `platform_floors` | Overrides, beta/RC/dev, EOL SQLCipher packages, iOS `15.0`, Android API `24`. [ASSUMED] |
+
+### Deterministic Android API-24 proof
+
+Use a two-level contract without changing `android/app/build.gradle.kts`:
+
+1. **Hermetic source contract:** require `android/app/build.gradle.kts` to retain `minSdk = flutter.minSdkVersion`; require `.metadata` to contain the manifest's exact Stable channel and framework revision; require every pinned-Stable CI job to use the manifest's Flutter version. The current project contains `channel: "stable"` and revision `67323de285b00232883f53b84095eb72be97d35c`. [VERIFIED: .metadata:6-20] The current Android input is `minSdk = flutter.minSdkVersion`. [VERIFIED: android/app/build.gradle.kts:68-76]
+2. **SDK-effective contract:** in `--mode=baseline`, run the discovered Flutter executable as `flutter --version --machine` and compare its framework revision/channel/version with the manifest; then parse `<flutter-root>/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt`. Fail if either command/file is missing, values do not match, `val minSdkVersion: Int = <n>` cannot be parsed, or `<n> < 24`. The installed SDK source currently declares `val minSdkVersion: Int = 24`, with compile/target defaults `36`. [VERIFIED: /Users/xinz/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt:21-34]
+
+This avoids a Gradle build and generated native artifacts, while checking the exact SDK source that supplies the inherited value. The architecture test injects fixture text for `FlutterExtension.kt` so it is fully hermetic; Stable CI exercises the real resolved SDK. [ASSUMED]
 
 ### Anti-Patterns to Avoid
 
@@ -146,7 +155,7 @@ Use JSON, parsed by `dart:convert`; this is a proposed repository design, not a 
 
 ### Beta lane corrupts Stable contract
 
-**Avoid:** Keep security prohibitions blocking, but give the existing `channel: beta` workflow a distinct future-probe mode/report rather than treating expected candidate drift as a Stable baseline pass. [VERIFIED: .github/workflows/flutter-future-compat.yml:19-37] [ASSUMED]
+**Avoid:** Keep security prohibitions blocking, but give the existing `channel: beta` workflow a distinct future-probe mode. `--mode=future-probe` exits nonzero for security failures (override, EOL/plain SQLite, missing linker safeguard, effective floor below 24), but emits a JSON/step-summary drift report and exits zero for expected version/SDK mismatch. It is an early warning, never baseline approval. [VERIFIED: .github/workflows/flutter-future-compat.yml:19-37] [ASSUMED]
 
 ### Linker safeguard removed as cleanup
 
@@ -173,7 +182,7 @@ Schema skeleton only; it does not prescribe a new baseline value. [ASSUMED]
 
 ```bash
 flutter pub get --enforce-lockfile
-dart run scripts/dependency_compatibility.dart --mode=baseline
+dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk
 git diff --check
 ```
 
@@ -184,14 +193,12 @@ git diff --check
 | # | Claim | Section | Risk if Wrong |
 |---|---|---|---|
 | A1 | JSON file name/schema is the right canonical form. | Architecture | Low; planner can rename, but retain one source of truth. |
-| A2 | Stable CI needs baseline mode and beta needs future-probe mode. | Pitfalls | Medium; exact warning/report wiring needs planning. |
-| A3 | Android API 24 can be proven from effective build output rather than changing the inherited `minSdk` source text. | Schema | Medium; choose the proof method before implementation. |
 
-## Open Questions
+## Resolved Execution Decisions (formerly Open Questions)
 
-1. **Exact package candidates at execution:** Re-run official maintainer/release sources for every direct package; registry presence alone is insufficient. Current direct inputs are in `pubspec.yaml`. [VERIFIED: pubspec.yaml:9-124]
-2. **Beta workflow output:** Decide whether future-probe produces a GitHub warning/summary or a separate non-blocking artifact; do not weaken Stable security failures. [ASSUMED]
-3. **Android API-24 proof:** App currently uses `minSdk = flutter.minSdkVersion`, while the installed Flutter source states `val minSdkVersion: Int = 24`. [VERIFIED: android/app/build.gradle.kts:68-76] [VERIFIED: /Users/xinz/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt:21-34] Validate effective output instead of making unrelated Phase-57 native edits.
+1. **Official-version refresh — resolved:** Phase 57 has one first task: on its execution date, enumerate every direct dependency from `pubspec.yaml`, run `flutter pub outdated --json`, re-check each candidate only against its official maintainer/release source, and write `current`, candidate, URL and the actual `queried_on` date into the manifest. [VERIFIED: pubspec.yaml:9-124] [CITED: https://docs.flutter.dev/reference/flutter-cli] The normal checker never scrapes the network. Before any Phase 58–61 version-changing task, its preflight runs `--require-source-date YYYY-MM-DD` with that task's execution date; missing/mismatched source dates fail closed. [ASSUMED]
+2. **Future probe — resolved:** Change the weekly beta workflow to call `--mode=future-probe --report <workspace-report-path>`. Security and floor violations remain hard failures; baseline-version drift produces a GitHub step summary plus uploaded JSON artifact and exits zero. Stable `audit.yml` alone runs `--mode=baseline --verify-running-flutter-sdk` and is the release-blocking contract. [VERIFIED: .github/workflows/audit.yml:38-46] [VERIFIED: .github/workflows/flutter-future-compat.yml:29-37] [ASSUMED]
+3. **Android API-24 — resolved:** Do not edit the inherited `minSdk` declaration. Baseline mode verifies the tracked `.metadata` Stable revision/channel, the `minSdk = flutter.minSdkVersion` declaration, the pinned CI Flutter version, and the running SDK's `FlutterExtension.kt` parsed default. It fails closed on missing/mismatched SDK source or a value below `24`; unit fixtures cover all branches. [VERIFIED: .metadata:6-20] [VERIFIED: android/app/build.gradle.kts:68-76] [VERIFIED: /Users/xinz/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt:21-34]
 
 ## Environment Availability
 
@@ -217,7 +224,7 @@ git diff --check
 | Req ID | Behavior | Test Type | Command | File Exists? |
 |---|---|---|---|---|
 | BASE-01 | Complete evidence/hold/direct-inventory validation | Contract | targeted test | ❌ extend current |
-| BASE-02 | Actual inputs match manifest; enforced lock cannot mutate graph | contract + smoke | `flutter pub get --enforce-lockfile && dart run scripts/dependency_compatibility.dart --mode=baseline` | ❌ |
+| BASE-02 | Inputs match manifest; Pub cannot mutate lock; effective inherited Android floor is at least API 24 under the pinned SDK. | contract + smoke | `flutter pub get --enforce-lockfile && dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk` | ❌ |
 | BASE-03 | Green current state plus invalid lanes rejected | Contract | targeted test | ✅ extend current |
 | BASE-04 | prerelease/EOL/overrides/floor drift rejected | Contract | targeted test | ❌ extend current |
 
@@ -231,19 +238,20 @@ Keep fixture mutations in-memory, matching the current test pattern. [VERIFIED: 
 4. `dependency_overrides` and present `pubspec_overrides.yaml`.
 5. One changed member of file/share or analyzer/codegen lane.
 6. Missing Podfile strip/SwiftPM marker, changed SQLCipher Pod, iOS floor or Android floor below policy.
-7. Missing Stable CI call and beta workflow mistakenly treated as baseline mode.
+7. Missing/mismatched `.metadata` revision/channel, missing SDK `FlutterExtension.kt`, malformed `minSdkVersion`, and SDK `minSdkVersion` below `24`.
+8. Missing Stable CI call, or future beta job using baseline mode rather than `future-probe` report mode.
 
 ### Sampling Rate
 
 - **Per commit:** targeted contract test.
-- **Per wave:** enforced Pub resolution, checker, `flutter analyze`.
+- **Per wave:** enforced Pub resolution, running-SDK floor checker, `flutter analyze`.
 - **Phase gate:** full suite plus `git diff --check`; do not claim native/device proof here.
 
 ### Wave 0 Gaps
 
 - [ ] New baseline manifest.
 - [ ] Manifest-aware validator and test fixtures.
-- [ ] Stable-CI enforced-lockfile step and explicit future-probe semantics.
+- [ ] Stable-CI enforced-lockfile/running-SDK step and future-probe JSON/step-summary/artifact semantics.
 
 ## Security Domain
 
