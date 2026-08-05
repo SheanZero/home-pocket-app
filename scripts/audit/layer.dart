@@ -60,6 +60,7 @@ Future<void> main(List<String> args) async {
   final shardPath = '.planning/audit/shards/layer.json';
   Map<String, dynamic> envelope = {
     'tool_source': 'import_guard',
+    'scan_state': 'ran',
     'generated_at': DateTime.now().toUtc().toIso8601String(),
     'findings': <Map<String, dynamic>>[],
   };
@@ -72,6 +73,14 @@ Future<void> main(List<String> args) async {
       '--reporter=json',
       '--no-fatal-infos',
     ], runInShell: true);
+    if (jsonResult.exitCode > 1) {
+      throw ProcessException(
+        'dart',
+        ['run', 'custom_lint', '--reporter=json', '--no-fatal-infos'],
+        (jsonResult.stderr as String).trim(),
+        jsonResult.exitCode,
+      );
+    }
 
     final jsonOut = (jsonResult.stdout as String).trim();
     final findings = <Finding>[];
@@ -150,14 +159,24 @@ Future<void> main(List<String> args) async {
         '--no-fatal-infos',
       ], runInShell: true);
       // Default reporter exits 1 when findings are present — that's expected.
+      if (textResult.exitCode > 1) {
+        throw ProcessException(
+          'dart',
+          ['run', 'custom_lint', '--no-fatal-infos'],
+          (textResult.stderr as String).trim(),
+          textResult.exitCode,
+        );
+      }
       findings.addAll(_parseTextReporter(textResult.stdout as String));
     }
 
     envelope['findings'] = findings.map((f) => f.toJson()).toList();
   } catch (e, st) {
+    envelope['scan_state'] = 'not_run';
     envelope['scan_failed'] = true;
     envelope['error'] = e.toString();
     stderr.writeln('[audit:layer] WARNING: scan failed: $e\n$st');
+    exitCode = 1;
   }
 
   await File(

@@ -33,6 +33,20 @@ Future<List<Finding>> _runUnused(String mode) async {
 
     final stdoutText = _extractJsonPayload((result.stdout as String).trim());
     if (stdoutText.isEmpty) {
+      if (result.exitCode != 0) {
+        throw ProcessException(
+          'dart',
+          [
+            'run',
+            'dart_code_linter:metrics',
+            mode,
+            'lib',
+            '--reporter=json',
+          ],
+          (result.stderr as String).trim(),
+          result.exitCode,
+        );
+      }
       stderr.writeln(
         '[audit:dead_code] WARNING: $mode produced empty stdout; skipping',
       );
@@ -47,11 +61,9 @@ Future<List<Finding>> _runUnused(String mode) async {
           (result.stdout as String).contains('no unused')) {
         return findings;
       }
-      // Assumption A3 fallback: non-JSON output. Skip and return empty.
-      stderr.writeln(
-        '[audit:dead_code] WARNING: $mode emitted non-JSON output; skipping ($e)',
+      throw FormatException(
+        '$mode emitted non-JSON output with exit code ${result.exitCode}: $e',
       );
-      return findings;
     }
 
     Iterable<dynamic> records = const [];
@@ -173,6 +185,7 @@ Future<void> main(List<String> args) async {
   final shardPath = '.planning/audit/shards/dead_code.json';
   Map<String, dynamic> envelope = {
     'tool_source': 'dart_code_linter',
+    'scan_state': 'ran',
     'generated_at': DateTime.now().toUtc().toIso8601String(),
     'findings': <Map<String, dynamic>>[],
   };
@@ -183,9 +196,11 @@ Future<void> main(List<String> args) async {
     final all = [...unusedCode, ...unusedFiles];
     envelope['findings'] = all.map((f) => f.toJson()).toList();
   } catch (e, st) {
+    envelope['scan_state'] = 'not_run';
     envelope['scan_failed'] = true;
     envelope['error'] = e.toString();
     stderr.writeln('[audit:dead_code] WARNING: scan failed: $e\n$st');
+    exitCode = 1;
   }
 
   await File(

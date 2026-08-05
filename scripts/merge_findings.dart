@@ -23,6 +23,16 @@ const _categoryPrefix = {
   'redundant_code': 'RD',
 };
 
+/// Only these scanner outputs are fresh, authoritative lifecycle evidence.
+/// Agent shards intentionally remain historical context; a stale semantic
+/// report must never close or reopen a finding.
+const _canonicalShardTools = {
+  'layer.json': 'import_guard',
+  'dead_code.json': 'dart_code_linter',
+  'providers.json': 'owned_provider_contract',
+  'duplication.json': 'owned_duplication_detector',
+};
+
 const _generatedFileGlobs = ['.g.dart', '.freezed.dart', '.mocks.dart'];
 
 bool _isGenerated(String path) =>
@@ -61,48 +71,76 @@ Future<void> main(List<String> args) async {
   final shards = <Finding>[];
   final incompleteScans = <String>[];
   final completedAuthoritativeTools = <String>{};
-  for (final dir in const ['shards', 'agent-shards']) {
-    final shardDir = Directory('$root/$dir');
-    if (!shardDir.existsSync()) continue;
-    final files = shardDir.listSync().whereType<File>().toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
-    for (final f in files) {
-      if (!f.path.endsWith('.json')) continue;
-      final raw = await f.readAsString();
-      Map<String, dynamic> data;
-      try {
-        data = jsonDecode(raw) as Map<String, dynamic>;
-      } catch (e) {
-        stderr.writeln('[audit:merge] WARNING: failed to parse ${f.path}: $e');
+
+  for (final entry in _canonicalShardTools.entries) {
+    final shardPath = '$root/shards/${entry.key}';
+    final shardFile = File(shardPath);
+    if (!shardFile.existsSync()) {
+      _recordIncompleteScan(
+        incompleteScans,
+        '$shardPath (missing required canonical shard)',
+      );
+      continue;
+    }
+
+    Map<String, dynamic> data;
+    try {
+      final decoded = jsonDecode(await shardFile.readAsString());
+      if (decoded is! Map) throw const FormatException('expected JSON object');
+      data = decoded.cast<String, dynamic>();
+    } catch (error) {
+      stderr.writeln(
+        '[audit:merge] WARNING: failed to parse $shardPath: $error',
+      );
+      _recordIncompleteScan(
+        incompleteScans,
+        '$shardPath (malformed canonical JSON)',
+      );
+      continue;
+    }
+
+    if (data['tool_source'] != entry.value) {
+      _recordIncompleteScan(
+        incompleteScans,
+        '$shardPath (unexpected tool_source)',
+      );
+      continue;
+    }
+    if (data['scan_state'] != 'ran') {
+      _recordIncompleteScan(
+        incompleteScans,
+        '$shardPath was not run successfully (invalid scan_state)',
+      );
+      continue;
+    }
+    if (data['scan_failed'] == true) {
+      _recordIncompleteScan(incompleteScans, '$shardPath (scan failed)');
+      continue;
+    }
+    final findingsRaw = data['findings'];
+    if (findingsRaw is! List) {
+      _recordIncompleteScan(
+        incompleteScans,
+        '$shardPath (missing findings list)',
+      );
+      continue;
+    }
+
+    completedAuthoritativeTools.add(entry.value);
+    for (final findingRaw in findingsRaw) {
+      if (findingRaw is! Map) {
+        stderr.writeln(
+          '[audit:merge] WARNING: malformed finding in $shardPath',
+        );
         continue;
       }
-      if (data['scan_state'] == 'not_run' || data['scan_failed'] == true) {
-        incompleteScans.add(f.path);
+      try {
+        shards.add(Finding.fromJson(findingRaw.cast<String, dynamic>()));
+      } catch (error) {
+        // Pitfall P1-10: skip malformed entries with stderr warning.
         stderr.writeln(
-          '[audit:merge] ERROR: ${f.path} was not run successfully',
+          '[audit:merge] WARNING: malformed finding in $shardPath: $error',
         );
-      }
-      final completed =
-          data['scan_state'] != 'not_run' && data['scan_failed'] != true;
-      if (dir == 'shards' && completed && data['tool_source'] is String) {
-        completedAuthoritativeTools.add(data['tool_source'] as String);
-      }
-      // Agent shards established the historical baseline. They are deliberately
-      // not current observations: otherwise a stale agent report can reopen a
-      // resolved finding after the authoritative tool scan is clean.
-      if (dir == 'agent-shards') continue;
-      final findingsRaw = data['findings'];
-      if (findingsRaw is! List) continue;
-      for (final entry in findingsRaw) {
-        if (entry is! Map) continue;
-        try {
-          shards.add(Finding.fromJson(entry.cast<String, dynamic>()));
-        } catch (e) {
-          // Pitfall P1-10: skip malformed entries with stderr warning.
-          stderr.writeln(
-            '[audit:merge] WARNING: malformed finding in ${f.path}: $e',
-          );
-        }
       }
     }
   }
@@ -231,6 +269,11 @@ Future<void> main(List<String> args) async {
     '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
   );
   if (incompleteScans.isNotEmpty) exitCode = 1;
+}
+
+void _recordIncompleteScan(List<String> incompleteScans, String detail) {
+  incompleteScans.add(detail);
+  stderr.writeln('[audit:merge] ERROR: $detail');
 }
 
 Future<Map<String, Finding>> _readExistingFindings(String root) async {

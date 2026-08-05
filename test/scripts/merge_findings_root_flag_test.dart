@@ -38,13 +38,13 @@ void _writeSuccessfulCanonicalShards(String root) {
   const canonicalTools = {
     'layer.json': 'import_guard',
     'dead_code.json': 'dart_code_linter',
-    'providers.json': 'riverpod_lint',
+    'providers.json': 'owned_provider_contract',
     'duplication.json': 'owned_duplication_detector',
   };
   for (final entry in canonicalTools.entries) {
-    File('$root/shards/${entry.key}').writeAsStringSync(
-      jsonEncode(_shardWith([], entry.value)),
-    );
+    File(
+      '$root/shards/${entry.key}',
+    ).writeAsStringSync(jsonEncode(_shardWith([], entry.value)));
   }
 }
 
