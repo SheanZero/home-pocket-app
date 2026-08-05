@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as hash_lib;
 import 'package:flutter/foundation.dart';
@@ -6,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../crypto/services/key_manager.dart';
 import '../network/network_status_checker.dart';
+import 'e2ee_service.dart';
 
 /// A bounded page returned by the relay pull endpoint.
 ///
@@ -36,7 +38,21 @@ class RelayPullResponse {
       if (rawMessage is! Map) {
         throw const FormatException('Relay pull message must be an object');
       }
-      messages.add(Map<String, dynamic>.from(rawMessage));
+      final message = Map<String, dynamic>.from(rawMessage);
+      final payload = message['payload'];
+      if (payload is! String) {
+        throw const FormatException(
+          'Relay pull message payload must be a string',
+        );
+      }
+      try {
+        E2EEService.validateInboundPayloadSize(payload);
+      } on ArgumentError {
+        throw const FormatException(
+          'Relay pull message payload exceeds limits',
+        );
+      }
+      messages.add(message);
     }
 
     final rawHasMore = json['hasMore'];
@@ -115,6 +131,12 @@ class RelayApiClient {
   final http.Client _httpClient;
   final NetworkStatusChecker _networkStatusChecker;
   final Duration _requestTimeout;
+
+  /// The relay accepts a maximum 2 MiB API body. A pull response is limited to
+  /// one maximum-size opaque message plus bounded envelope metadata until the
+  /// server enforces an equivalent page budget.
+  static const int maxPullResponseBytes =
+      E2EEService.maxInboundPayloadBytes + 64 * 1024;
 
   static String get defaultBaseUrl {
     const url = String.fromEnvironment('SYNC_SERVER_URL', defaultValue: '');
@@ -469,8 +491,21 @@ class RelayApiClient {
   ///
   /// Returns: {messages: SyncMessage[]}
   Future<Map<String, dynamic>> pullSync() async {
-    final response = await _get('/sync/pull');
-    return _parseResponse(response);
+    const path = '/sync/pull';
+    _logRequest('GET', path, '');
+    final url = Uri.parse('$baseUrl$path');
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    headers['Authorization'] = await _signer.signRequest(
+      method: 'GET',
+      path: _signingPath(path),
+      body: '',
+    );
+
+    final request = http.Request('GET', url)..headers.addAll(headers);
+    final response = await _sendStreamedHttp(() => _httpClient.send(request));
+    _logResponse('GET', path, response);
+    final body = await _readBoundedPullResponse(response);
+    return _parseResponseBody(response.statusCode, body);
   }
 
   /// ACK received messages (triggers server-side deletion).
@@ -496,7 +531,7 @@ class RelayApiClient {
     }
   }
 
-  void _logResponse(String method, String path, http.Response response) {
+  void _logResponse(String method, String path, http.BaseResponse response) {
     if (kDebugMode) {
       debugPrint(
         '[RelayAPI] response received: $method ${response.statusCode}',
@@ -614,16 +649,70 @@ class RelayApiClient {
     }
   }
 
+  Future<http.StreamedResponse> _sendStreamedHttp(
+    Future<http.StreamedResponse> Function() request,
+  ) async {
+    if (!await _networkStatusChecker.isNetworkAvailable) {
+      throw const NetworkUnavailableException();
+    }
+
+    try {
+      return await request().timeout(_requestTimeout);
+    } catch (error) {
+      if (isNetworkUnavailableError(error)) {
+        throw const NetworkUnavailableException();
+      }
+      rethrow;
+    }
+  }
+
+  Future<String> _readBoundedPullResponse(
+    http.StreamedResponse response,
+  ) async {
+    final contentLength = response.contentLength;
+    if (contentLength != null && contentLength > maxPullResponseBytes) {
+      throw const RelayApiException(
+        statusCode: 413,
+        message: 'Relay pull response exceeds the client byte limit',
+      );
+    }
+
+    final bytes = BytesBuilder(copy: false);
+    var receivedBytes = 0;
+    try {
+      await for (final chunk in response.stream.timeout(_requestTimeout)) {
+        if (chunk.length > maxPullResponseBytes - receivedBytes) {
+          throw const RelayApiException(
+            statusCode: 413,
+            message: 'Relay pull response exceeds the client byte limit',
+          );
+        }
+        receivedBytes += chunk.length;
+        bytes.add(chunk);
+      }
+    } catch (error) {
+      if (isNetworkUnavailableError(error)) {
+        throw const NetworkUnavailableException();
+      }
+      rethrow;
+    }
+    return utf8.decode(bytes.takeBytes());
+  }
+
   Map<String, dynamic> _parseResponse(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return {};
-      return jsonDecode(response.body) as Map<String, dynamic>;
+    return _parseResponseBody(response.statusCode, response.body);
+  }
+
+  Map<String, dynamic> _parseResponseBody(int statusCode, String body) {
+    if (statusCode >= 200 && statusCode < 300) {
+      if (body.isEmpty) return {};
+      return jsonDecode(body) as Map<String, dynamic>;
     }
 
     Map<String, dynamic> errorBody;
     try {
-      errorBody = response.body.isNotEmpty
-          ? jsonDecode(response.body) as Map<String, dynamic>
+      errorBody = body.isNotEmpty
+          ? jsonDecode(body) as Map<String, dynamic>
           : <String, dynamic>{};
     } catch (_) {
       errorBody = <String, dynamic>{};
@@ -632,10 +721,10 @@ class RelayApiClient {
     // Server may use "error" or "message" key for the error description.
     final errorMessage =
         (errorBody['error'] ?? errorBody['message'])?.toString() ??
-        'HTTP ${response.statusCode}';
+        'HTTP $statusCode';
 
     throw RelayApiException(
-      statusCode: response.statusCode,
+      statusCode: statusCode,
       message: errorMessage,
       code: errorBody['code']?.toString(),
     );

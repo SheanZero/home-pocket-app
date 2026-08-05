@@ -18,6 +18,13 @@ class E2EEService {
 
   final KeyManager _keyManager;
 
+  /// The relay's documented API body ceiling. These bounds are checked before
+  /// decoding base64 and before materializing decrypted UTF-8 strings.
+  static const int maxInboundPayloadBytes = 2 * 1024 * 1024;
+  static const int maxInboundEncodedCiphertextBytes = maxInboundPayloadBytes;
+  static const int maxInboundCiphertextBytes = 2 * 1024 * 1024;
+  static const int maxInboundPlaintextBytes = 2 * 1024 * 1024;
+
   String generateGroupKey() {
     final random = Random.secure();
     final key = Uint8List(32);
@@ -71,7 +78,15 @@ class E2EEService {
       throw StateError('Device private key not found');
     }
 
+    _validateEncodedCiphertextSize(ciphertext);
     final raw = base64Decode(ciphertext);
+    if (raw.length > maxInboundCiphertextBytes) {
+      throw ArgumentError.value(
+        raw.length,
+        'ciphertext',
+        'exceeds the inbound ciphertext byte limit',
+      );
+    }
     if (raw.length <= EncryptedMessage.nonceLength) {
       throw ArgumentError('Ciphertext too short');
     }
@@ -91,6 +106,13 @@ class E2EEService {
 
     final encryptedMessage = EncryptedMessage.fromList(Uint8List.fromList(raw));
     final plainBytes = box.decrypt(encryptedMessage);
+    if (plainBytes.length > maxInboundPlaintextBytes) {
+      throw ArgumentError.value(
+        plainBytes.length,
+        'plaintext',
+        'exceeds the inbound plaintext byte limit',
+      );
+    }
     return utf8.decode(plainBytes);
   }
 
@@ -119,13 +141,36 @@ class E2EEService {
     required String encryptedPayload,
     required String groupKeyBase64,
   }) {
+    validateInboundPayloadSize(encryptedPayload);
     final envelope = jsonDecode(encryptedPayload) as Map<String, dynamic>;
-    final raw = base64Decode(envelope['p'] as String);
+    final encodedCiphertext = envelope['p'];
+    if (encodedCiphertext is! String) {
+      throw const FormatException('Group ciphertext is missing');
+    }
+    _validateEncodedCiphertextSize(encodedCiphertext);
+    final raw = base64Decode(encodedCiphertext);
+    if (raw.length > maxInboundCiphertextBytes) {
+      throw ArgumentError.value(
+        raw.length,
+        'ciphertext',
+        'exceeds the inbound ciphertext byte limit',
+      );
+    }
+    if (raw.length <= 24) {
+      throw ArgumentError('Ciphertext too short');
+    }
     final nonce = Uint8List.fromList(raw.sublist(0, 24));
     final cipherText = Uint8List.fromList(raw.sublist(24));
     final groupKey = base64Decode(groupKeyBase64);
     final box = SecretBox(Uint8List.fromList(groupKey));
     final decrypted = box.decrypt(ByteList(cipherText), nonce: nonce);
+    if (decrypted.length > maxInboundPlaintextBytes) {
+      throw ArgumentError.value(
+        decrypted.length,
+        'plaintext',
+        'exceeds the inbound plaintext byte limit',
+      );
+    }
     return utf8.decode(decrypted);
   }
 
@@ -175,6 +220,27 @@ class E2EEService {
       }
     }
     return 'v1';
+  }
+
+  static void validateInboundPayloadSize(String payload) {
+    if (payload.length > maxInboundPayloadBytes ||
+        utf8.encode(payload).length > maxInboundPayloadBytes) {
+      throw ArgumentError.value(
+        payload.length,
+        'payload',
+        'exceeds the inbound encoded payload byte limit',
+      );
+    }
+  }
+
+  static void _validateEncodedCiphertextSize(String ciphertext) {
+    if (ciphertext.length > maxInboundEncodedCiphertextBytes) {
+      throw ArgumentError.value(
+        ciphertext.length,
+        'ciphertext',
+        'exceeds the inbound encoded ciphertext byte limit',
+      );
+    }
   }
 
   /// Convert Ed25519 seed (32 bytes) to X25519 private key (32 bytes).

@@ -876,6 +876,42 @@ void main() {
     verifyNever(() => apiClient.ackSync(messageIds: any(named: 'messageIds')));
   });
 
+  test('does not decrypt or ACK an oversized encrypted payload', () async {
+    when(() => groupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        groupName: 'Test Family',
+        status: GroupStatus.active,
+        role: 'member',
+        groupKey: 'group-key',
+        members: const [],
+        createdAt: DateTime(2026),
+      ),
+    );
+    when(() => apiClient.pullSync()).thenAnswer(
+      (_) async => {
+        'messages': [
+          {
+            'messageId': 'oversized-payload',
+            'fromDeviceId': 'owner-1',
+            'payload': 'x' * (E2EEService.maxInboundPayloadBytes + 1),
+          },
+        ],
+      },
+    );
+
+    final result = await useCase.execute();
+
+    expect(result, isA<PullSyncError>());
+    verifyNever(
+      () => e2eeService.decryptFromGroup(
+        encryptedPayload: any(named: 'encryptedPayload'),
+        groupKeyBase64: any(named: 'groupKeyBase64'),
+      ),
+    );
+    verifyNever(() => apiClient.ackSync(messageIds: any(named: 'messageIds')));
+  });
+
   test('accepts and persists the owner key for a newer server epoch', () async {
     final waitingGroup = GroupInfo(
       groupId: 'group-1',

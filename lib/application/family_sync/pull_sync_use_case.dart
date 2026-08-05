@@ -269,6 +269,7 @@ class PullSyncUseCase {
   ) async {
     final messageId = message['messageId'] as String;
     final payload = message['payload'] as String;
+    E2EEService.validateInboundPayloadSize(payload);
     final fromDeviceId = message['fromDeviceId'] as String?;
     final keyEpoch = (message['keyEpoch'] as num?)?.toInt() ?? 1;
     return switch (E2EEService.detectPayloadType(payload)) {

@@ -15,6 +15,8 @@ class MockKeyManager extends Mock implements KeyManager {}
 
 class MockHttpClient extends Mock implements http.Client {}
 
+class FakeBaseRequest extends Fake implements http.BaseRequest {}
+
 class FakeNetworkStatusChecker implements NetworkStatusChecker {
   FakeNetworkStatusChecker(this.isAvailable);
 
@@ -29,6 +31,10 @@ void main() {
   late MockHttpClient httpClient;
   late FakeNetworkStatusChecker networkStatusChecker;
   late RelayApiClient apiClient;
+
+  setUpAll(() {
+    registerFallbackValue(FakeBaseRequest());
+  });
 
   setUp(() {
     signer = MockRequestSigner();
@@ -426,7 +432,7 @@ void main() {
     () async {
       _stubPost(httpClient, '/device/register', {'deviceId': 'device-1'});
       _stubPut(httpClient, '/device/push-token', {});
-      _stubGet(httpClient, '/sync/pull', {'messages': <Object>[]});
+      _stubPull(httpClient, {'messages': <Object>[]});
       _stubPost(httpClient, '/sync/ack', {'acked': true});
 
       expect(
@@ -454,6 +460,63 @@ void main() {
       );
     },
   );
+
+  test(
+    'rejects an oversized pull response from Content-Length before reading it',
+    () async {
+      var streamListened = false;
+      when(() => httpClient.send(any())).thenAnswer(
+        (_) async => http.StreamedResponse(
+          Stream<List<int>>.multi((controller) {
+            streamListened = true;
+            controller.close();
+          }),
+          200,
+          contentLength: RelayApiClient.maxPullResponseBytes + 1,
+        ),
+      );
+
+      await expectLater(
+        apiClient.pullSync(),
+        throwsA(
+          isA<RelayApiException>()
+              .having((error) => error.statusCode, 'statusCode', 413)
+              .having(
+                (error) => error.message,
+                'message',
+                contains('response exceeds'),
+              ),
+        ),
+      );
+
+      expect(streamListened, isFalse);
+    },
+  );
+
+  test('rejects a chunked oversized pull response while streaming', () async {
+    final firstChunk = List<int>.filled(
+      RelayApiClient.maxPullResponseBytes - 16,
+      0x20,
+    );
+    final overflowChunk = List<int>.filled(17, 0x20);
+    when(() => httpClient.send(any())).thenAnswer(
+      (_) async => http.StreamedResponse(
+        Stream<List<int>>.fromIterable([firstChunk, overflowChunk]),
+        200,
+      ),
+    );
+
+    await expectLater(
+      apiClient.pullSync(),
+      throwsA(
+        isA<RelayApiException>().having(
+          (error) => error.statusCode,
+          'statusCode',
+          413,
+        ),
+      ),
+    );
+  });
 
   test(
     'error responses parse error, message, fallback, and malformed bodies',
@@ -523,6 +586,15 @@ void _stubGet(
       headers: any(named: 'headers'),
     ),
   ).thenAnswer((_) async => http.Response(jsonEncode(body), status));
+}
+
+void _stubPull(MockHttpClient httpClient, Map<String, dynamic> body) {
+  when(() => httpClient.send(any())).thenAnswer(
+    (_) async => http.StreamedResponse(
+      Stream<List<int>>.value(utf8.encode(jsonEncode(body))),
+      200,
+    ),
+  );
 }
 
 void _stubPost(
