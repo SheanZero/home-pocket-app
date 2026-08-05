@@ -13,6 +13,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 
@@ -55,10 +56,10 @@ const _statuses = {'open', 'closed', 'accepted'};
 const _generatedFileGlobs = ['.g.dart', '.freezed.dart', '.mocks.dart'];
 
 const _pairJournalName = '.merge-findings-pair.json';
-const _issuesNextName = '.merge-findings-issues.next';
-const _markdownNextName = '.merge-findings-markdown.next';
-const _issuesBackupName = '.merge-findings-issues.backup';
-const _markdownBackupName = '.merge-findings-markdown.backup';
+const _legacyIssuesNextName = '.merge-findings-issues.next';
+const _legacyMarkdownNextName = '.merge-findings-markdown.next';
+const _legacyIssuesBackupName = '.merge-findings-issues.backup';
+const _legacyMarkdownBackupName = '.merge-findings-markdown.backup';
 const _pairFailureInjectionEnv = 'AUDIT_MERGE_FAILPOINT';
 
 bool _isGenerated(String path) =>
@@ -611,20 +612,20 @@ class _PairFile {
     'new_digest': newDigest,
   };
 
-  static _PairFile? fromJson(
-    Object? value, {
-    required String targetName,
-    required String nextName,
-    required String backupName,
-  }) {
+  static _PairFile? fromJson(Object? value, {required String targetName}) {
     if (value is! Map) return null;
     final data = value.cast<String, dynamic>();
     final oldExists = data['old_exists'];
     final oldDigest = data['old_digest'];
     final newDigest = data['new_digest'];
+    final nextName = data['next'];
+    final backupName = data['backup'];
     if (data['target'] != targetName ||
-        data['next'] != nextName ||
-        data['backup'] != backupName ||
+        nextName is! String ||
+        backupName is! String ||
+        !_isStageArtifactName(nextName, targetName, 'next') ||
+        !_isStageArtifactName(backupName, targetName, 'backup') ||
+        nextName == backupName ||
         oldExists is! bool ||
         newDigest is! String ||
         !_isDigest(newDigest) ||
@@ -670,20 +671,22 @@ class _PairTransaction {
     final state = data['state'];
     if (data['schema_version'] != 1 ||
         state is! String ||
-        !{'prepared', 'json_replaced', 'markdown_replaced'}.contains(state)) {
+        !{
+          'prepared',
+          'json_replaced',
+          'markdown_replaced',
+          'committed_new',
+          'committed_old',
+        }.contains(state)) {
       return null;
     }
     final issues = _PairFile.fromJson(
       data['issues'],
       targetName: 'issues.json',
-      nextName: _issuesNextName,
-      backupName: _issuesBackupName,
     );
     final markdown = _PairFile.fromJson(
       data['markdown'],
       targetName: 'ISSUES.md',
-      nextName: _markdownNextName,
-      backupName: _markdownBackupName,
     );
     if (issues == null || markdown == null) return null;
     return _PairTransaction(state: state, issues: issues, markdown: markdown);
@@ -707,11 +710,43 @@ Future<bool> _matchesDigest(File file, String digest) async {
 Future<void> _writeBytesDurably(File file, List<int> bytes) =>
     file.writeAsBytes(bytes, flush: true);
 
-Future<void> _writeJournal(String root, _PairTransaction transaction) =>
-    File(_transactionPath(root, _pairJournalName)).writeAsString(
-      const JsonEncoder.withIndent('  ').convert(transaction.toJson()),
-      flush: true,
+String _newArtifactName(String targetName, String kind) {
+  final stamp = DateTime.now().microsecondsSinceEpoch;
+  final random = Random.secure().nextInt(1 << 32);
+  final encodedTarget = targetName == 'issues.json' ? 'issues' : 'markdown';
+  return '.merge-findings-tmp-$stamp-$random-$encodedTarget-$kind';
+}
+
+bool _isStageArtifactName(String name, String targetName, String kind) {
+  final encodedTarget = targetName == 'issues.json' ? 'issues' : 'markdown';
+  return RegExp(
+    '^\\.merge-findings-tmp-[0-9]+-[0-9]+-$encodedTarget-$kind\$',
+  ).hasMatch(name);
+}
+
+bool _isTransientArtifactName(String name) => RegExp(
+  r'^\.merge-findings-tmp-[0-9]+-[0-9]+-(?:issues|markdown)-(?:next|backup|journal)$',
+).hasMatch(name);
+
+Future<void> _writeJournal(String root, _PairTransaction transaction) async {
+  final journal = File(_transactionPath(root, _pairJournalName));
+  final temp = File(
+    _transactionPath(root, _newArtifactName('issues.json', 'journal')),
+  );
+  try {
+    await _writeBytesDurably(
+      temp,
+      utf8.encode(
+        const JsonEncoder.withIndent('  ').convert(transaction.toJson()),
+      ),
     );
+    _injectFailure('journal_before_rename_${transaction.state}');
+    await _replaceFrom(temp, journal);
+    _injectFailure('journal_after_rename_${transaction.state}');
+  } finally {
+    if (temp.existsSync()) await temp.delete();
+  }
+}
 
 Future<void> _replaceFrom(File source, File destination) async {
   await source.rename(destination.path);
@@ -740,7 +775,10 @@ void _injectFailure(String point) {
 
 Future<String?> _recoverPairTransaction(String root) async {
   final journal = File(_transactionPath(root, _pairJournalName));
-  if (!journal.existsSync()) return null;
+  if (!journal.existsSync()) {
+    await _cleanupUnjournaledTransientArtifacts(root);
+    return null;
+  }
 
   _PairTransaction transaction;
   try {
@@ -749,6 +787,16 @@ Future<String?> _recoverPairTransaction(String root) async {
         (throw const FormatException('invalid transaction schema'));
   } catch (error) {
     return 'pair transaction journal is corrupt; refusing to overwrite catalogue outputs ($error)';
+  }
+
+  if (transaction.state == 'committed_new' ||
+      transaction.state == 'committed_old') {
+    final expected = transaction.state == 'committed_new' ? 'new' : 'old';
+    if (!await _pairMatches(root, transaction, version: expected)) {
+      return 'terminal pair transaction journal does not match its committed generation; refusing to overwrite catalogue outputs';
+    }
+    await _cleanupTransactionFiles(root, transaction);
+    return null;
   }
 
   final validationError = await _validateTransactionFiles(root, transaction);
@@ -786,13 +834,15 @@ Future<String?> _recoverPairTransaction(String root) async {
   if (!recoveredNew && !recoveredOld) {
     return 'pair transaction recovery left mixed catalogue generations; refusing to continue';
   }
-  final verified = recoveredNew
-      ? await _pairMatches(root, transaction, version: 'new')
-      : await _pairMatches(root, transaction, version: 'old');
-  if (!verified) {
+  final expected = recoveredNew ? 'new' : 'old';
+  if (!await _pairMatches(root, transaction, version: expected)) {
     return 'pair transaction recovery verification failed; refusing to continue';
   }
-  await _cleanupTransactionFiles(root);
+  await _writeJournal(
+    root,
+    transaction.withState(recoveredNew ? 'committed_new' : 'committed_old'),
+  );
+  await _cleanupTransactionFiles(root, transaction);
   return null;
 }
 
@@ -875,15 +925,33 @@ Future<bool> _pairMatches(
   return true;
 }
 
-Future<void> _cleanupTransactionFiles(String root) async {
-  for (final name in [
-    _issuesNextName,
-    _markdownNextName,
-    _issuesBackupName,
-    _markdownBackupName,
-    _pairJournalName,
-  ]) {
-    await _deleteIfPresent(File(_transactionPath(root, name)));
+Future<void> _cleanupTransactionFiles(
+  String root,
+  _PairTransaction transaction,
+) async {
+  final entries = [
+    ('issues_next', transaction.issues.nextName),
+    ('markdown_next', transaction.markdown.nextName),
+    ('issues_backup', transaction.issues.backupName),
+    ('markdown_backup', transaction.markdown.backupName),
+  ];
+  for (final entry in entries) {
+    await _deleteIfPresent(File(_transactionPath(root, entry.$2)));
+    _injectFailure('cleanup_after_${entry.$1}');
+  }
+  await _deleteIfPresent(File(_transactionPath(root, _pairJournalName)));
+  _injectFailure('cleanup_after_journal');
+  await _cleanupUnjournaledTransientArtifacts(root);
+}
+
+Future<void> _cleanupUnjournaledTransientArtifacts(String root) async {
+  final directory = Directory(root);
+  if (!directory.existsSync()) return;
+  for (final entity in await directory.list().toList()) {
+    if (entity is File &&
+        _isTransientArtifactName(entity.uri.pathSegments.last)) {
+      await _deleteIfPresent(entity);
+    }
   }
 }
 
@@ -901,21 +969,17 @@ Future<void> _writeCataloguePair(
     issues = await _preparePairFile(
       root,
       targetName: 'issues.json',
-      nextName: _issuesNextName,
-      backupName: _issuesBackupName,
       content: utf8.encode(issuesContent),
     );
     markdownFile = await _preparePairFile(
       root,
       targetName: 'ISSUES.md',
-      nextName: _markdownNextName,
-      backupName: _markdownBackupName,
       content: utf8.encode(markdown),
     );
   } catch (_) {
     // No journal exists yet, so these files cannot be recovered on a future
     // invocation. Remove only the transaction artifacts we created.
-    await _cleanupTransactionFiles(root);
+    await _cleanupUnjournaledTransientArtifacts(root);
     rethrow;
   }
   final transaction = _PairTransaction(
@@ -923,6 +987,7 @@ Future<void> _writeCataloguePair(
     issues: issues,
     markdown: markdownFile,
   );
+  _injectFailure('before_journal_publish');
   await _writeJournal(root, transaction);
   _injectFailure('before_first_replace');
   await _finishNewPair(root, issues, 'old');
@@ -933,26 +998,34 @@ Future<void> _writeCataloguePair(
   if (!await _pairMatches(root, transaction, version: 'new')) {
     throw const FileSystemException('pair commit verification failed');
   }
-  await _cleanupTransactionFiles(root);
+  await _writeJournal(root, transaction.withState('committed_new'));
+  _injectFailure('after_committed_new_journal');
+  await _cleanupTransactionFiles(root, transaction);
 }
 
 Future<_PairFile> _preparePairFile(
   String root, {
   required String targetName,
-  required String nextName,
-  required String backupName,
   required List<int> content,
 }) async {
   final target = File(_transactionPath(root, targetName));
   final previous = await _readBytesIfPresent(target);
+  final nextName = _newArtifactName(targetName, 'next');
+  final backupName = _newArtifactName(targetName, 'backup');
   final next = File(_transactionPath(root, nextName));
   await _writeBytesDurably(next, content);
+  _injectFailure(
+    'prepare_${targetName == 'issues.json' ? 'issues' : 'markdown'}_next',
+  );
   if (!await _matchesDigest(next, _digest(content))) {
     throw FileSystemException('could not verify prepared $nextName');
   }
   if (previous != null) {
     final backup = File(_transactionPath(root, backupName));
     await _writeBytesDurably(backup, previous);
+    _injectFailure(
+      'prepare_${targetName == 'issues.json' ? 'issues' : 'markdown'}_backup',
+    );
     if (!await _matchesDigest(backup, _digest(previous))) {
       throw FileSystemException('could not verify backup $backupName');
     }
@@ -969,10 +1042,10 @@ Future<_PairFile> _preparePairFile(
 
 String? _orphanedTransactionArtifactError(String root) {
   for (final name in [
-    _issuesNextName,
-    _markdownNextName,
-    _issuesBackupName,
-    _markdownBackupName,
+    _legacyIssuesNextName,
+    _legacyMarkdownNextName,
+    _legacyIssuesBackupName,
+    _legacyMarkdownBackupName,
   ]) {
     if (File(_transactionPath(root, name)).existsSync()) {
       return 'orphaned pair transaction artifact $name without a journal';

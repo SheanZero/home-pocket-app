@@ -41,6 +41,26 @@ List<FileSystemEntity> _pairTransactionArtifacts(Directory root) => root
     )
     .toList();
 
+File _transactionArtifact(Directory root, String suffix) {
+  final matches = root
+      .listSync()
+      .whereType<File>()
+      .where(
+        (file) =>
+            file.path.endsWith(suffix) ||
+            file.path.endsWith(
+              '.merge-findings-${suffix.substring(1).replaceAll('-', '.')}',
+            ),
+      )
+      .toList();
+  expect(
+    matches,
+    hasLength(1),
+    reason: 'expected one transaction artifact $suffix',
+  );
+  return matches.single;
+}
+
 Directory _initShardLayout(Directory tmp) {
   final root = Directory('${tmp.path}/.planning/audit');
   final shards = Directory('${root.path}/shards')..createSync(recursive: true);
@@ -1055,7 +1075,7 @@ void main() {
           environment: {'AUDIT_MERGE_FAILPOINT': 'after_json_replace'},
         );
         expect(interrupted.exitCode, equals(91));
-        File('${shardRoot.path}/.merge-findings-markdown.next').deleteSync();
+        _transactionArtifact(shardRoot, '-markdown-next').deleteSync();
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode({
             ..._shardWith([], 'import_guard'),
@@ -1104,6 +1124,173 @@ void main() {
           File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
           isTrue,
         );
+      },
+    );
+
+    test(
+      'recovers every interruption before the initial journal rename',
+      () async {
+        const failpoints = [
+          'prepare_issues_next',
+          'prepare_issues_backup',
+          'prepare_markdown_next',
+          'prepare_markdown_backup',
+          'before_journal_publish',
+          'journal_before_rename_prepared',
+        ];
+
+        for (final point in failpoints) {
+          final caseTmp = Directory.systemTemp.createTempSync('merger_crash_');
+          addTearDown(() {
+            if (caseTmp.existsSync()) caseTmp.deleteSync(recursive: true);
+          });
+          final caseRoot = _initShardLayout(caseTmp);
+          Directory(
+            '${caseTmp.path}/scripts/audit',
+          ).createSync(recursive: true);
+          File(
+            '${_absoluteProjectRoot()}/scripts/audit/finding.dart',
+          ).copySync('${caseTmp.path}/scripts/audit/finding.dart');
+          File(
+            '${_absoluteProjectRoot()}/scripts/merge_findings.dart',
+          ).copySync('${caseTmp.path}/scripts/merge_findings.dart');
+          File(
+            '${_absoluteProjectRoot()}/pubspec.yaml',
+          ).copySync('${caseTmp.path}/pubspec.yaml');
+          Link(
+            '${caseTmp.path}/.dart_tool',
+          ).createSync('${_absoluteProjectRoot()}/.dart_tool', recursive: true);
+          File(
+            '${caseRoot.path}/issues.json',
+          ).writeAsStringSync('{"findings":[]}');
+          File(
+            '${caseRoot.path}/ISSUES.md',
+          ).writeAsStringSync('# Old report\n');
+          File('${caseRoot.path}/shards/layer.json').writeAsStringSync(
+            jsonEncode(
+              _shardWith([_f(filePath: 'lib/$point.dart')], 'import_guard'),
+            ),
+          );
+
+          final interrupted = await _runMerger(
+            caseTmp,
+            environment: {'AUDIT_MERGE_FAILPOINT': point},
+          );
+          expect(interrupted.exitCode, 91, reason: point);
+
+          final restarted = await _runMerger(caseTmp);
+          expect(restarted.exitCode, 0, reason: '$point: ${restarted.stderr}');
+          expect(
+            _pairTransactionArtifacts(caseRoot),
+            isEmpty,
+            reason: '$point must not permanently strand preparation files',
+          );
+        }
+      },
+    );
+
+    test(
+      'recovers journal publication updates without self-corruption',
+      () async {
+        File(
+          '${shardRoot.path}/issues.json',
+        ).writeAsStringSync('{"findings":[]}');
+        File('${shardRoot.path}/ISSUES.md').writeAsStringSync('# Old report\n');
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([_f(filePath: 'lib/journal.dart')], 'import_guard'),
+          ),
+        );
+
+        final interrupted = await _runMerger(
+          tmp,
+          environment: {
+            'AUDIT_MERGE_FAILPOINT': 'journal_before_rename_json_replaced',
+          },
+        );
+        expect(interrupted.exitCode, 91);
+
+        final restarted = await _runMerger(tmp);
+        expect(restarted.exitCode, 0, reason: restarted.stderr.toString());
+        expect(_pairTransactionArtifacts(shardRoot), isEmpty);
+      },
+    );
+
+    test(
+      'recovers a committed pair across every cleanup interruption',
+      () async {
+        const failpoints = [
+          'after_committed_new_journal',
+          'cleanup_after_issues_next',
+          'cleanup_after_markdown_next',
+          'cleanup_after_issues_backup',
+          'cleanup_after_markdown_backup',
+          'cleanup_after_journal',
+        ];
+
+        for (final point in failpoints) {
+          final caseTmp = Directory.systemTemp.createTempSync(
+            'merger_cleanup_',
+          );
+          addTearDown(() {
+            if (caseTmp.existsSync()) caseTmp.deleteSync(recursive: true);
+          });
+          final caseRoot = _initShardLayout(caseTmp);
+          Directory(
+            '${caseTmp.path}/scripts/audit',
+          ).createSync(recursive: true);
+          File(
+            '${_absoluteProjectRoot()}/scripts/audit/finding.dart',
+          ).copySync('${caseTmp.path}/scripts/audit/finding.dart');
+          File(
+            '${_absoluteProjectRoot()}/scripts/merge_findings.dart',
+          ).copySync('${caseTmp.path}/scripts/merge_findings.dart');
+          File(
+            '${_absoluteProjectRoot()}/pubspec.yaml',
+          ).copySync('${caseTmp.path}/pubspec.yaml');
+          Link(
+            '${caseTmp.path}/.dart_tool',
+          ).createSync('${_absoluteProjectRoot()}/.dart_tool', recursive: true);
+          File(
+            '${caseRoot.path}/issues.json',
+          ).writeAsStringSync('{"findings":[]}');
+          File(
+            '${caseRoot.path}/ISSUES.md',
+          ).writeAsStringSync('# Old report\n');
+          File('${caseRoot.path}/shards/layer.json').writeAsStringSync(
+            jsonEncode(
+              _shardWith([_f(filePath: 'lib/$point.dart')], 'import_guard'),
+            ),
+          );
+
+          final interrupted = await _runMerger(
+            caseTmp,
+            environment: {'AUDIT_MERGE_FAILPOINT': point},
+          );
+          expect(interrupted.exitCode, 91, reason: point);
+          expect(
+            File('${caseRoot.path}/issues.json').readAsStringSync(),
+            contains('lib/$point.dart'),
+          );
+          expect(
+            File('${caseRoot.path}/ISSUES.md').readAsStringSync(),
+            contains('lib/$point.dart'),
+          );
+          if (point != 'cleanup_after_journal') {
+            final journal =
+                jsonDecode(
+                      File(
+                        '${caseRoot.path}/.merge-findings-pair.json',
+                      ).readAsStringSync(),
+                    )
+                    as Map<String, dynamic>;
+            expect(journal['state'], 'committed_new');
+          }
+
+          final restarted = await _runMerger(caseTmp);
+          expect(restarted.exitCode, 0, reason: '$point: ${restarted.stderr}');
+          expect(_pairTransactionArtifacts(caseRoot), isEmpty);
+        }
       },
     );
 

@@ -104,18 +104,26 @@ only that exact pair and content as `accepted`; changing either clone's normaliz
 source produces a new fingerprint and re-reports the finding as `open`. Directory or
 path-wide ignores are prohibited.
 
-### 4.3 Catalogue-pair transaction and recovery (HP-32)
+### 4.3 Catalogue-pair transaction and recovery (HP-32 / HP-33)
 
 `issues.json` and `ISSUES.md` are one catalogue generation. The merger prepares
-both exact byte streams plus old-output backups and SHA-256 digests, then writes a
-flushed sibling transaction journal before replacing either destination. On every
-start, it recovers a valid journal before reading lifecycle history: it completes the
-new pair only when every remaining new byte stream is verified, otherwise restores
-the old pair from verified backups. A malformed journal, unknown output digest, or
-bad backup fails closed without overwriting either catalogue. After verification, the
-merger deletes the journal, staged files, and backups; normal invocations leave no
-transaction artifacts behind. The journal is deliberately ephemeral, so stable output
-byte determinism remains limited to the two catalogue files.
+both exact byte streams plus old-output backups and SHA-256 digests in uniquely named
+sibling temporary files. A restart with no journal may discard only those recognised
+temporary names, so an interruption during preparation cannot strand a fixed-name
+artifact or block the next audit. Before replacing either destination, the merger
+publishes a flushed transaction journal by writing a separate temporary journal and
+atomically renaming it; every journal state update uses the same protocol.
+
+On every start, the merger recovers a valid journal before reading lifecycle history:
+it completes the new pair only when every remaining new byte stream is verified,
+otherwise restores the old pair from verified backups. A malformed journal, unknown
+output digest, or bad backup fails closed without overwriting either catalogue. Once
+the pair is verified, the merger atomically records the terminal `committed_new` or
+`committed_old` state before deleting any recovery material. Terminal recovery first
+verifies the committed pair and can therefore finish a cleanup interrupted after any
+staged file or backup was deleted. Normal invocations leave no transaction artifacts
+behind. The journal is deliberately ephemeral, so stable output byte determinism
+remains limited to the two catalogue files.
 
 ---
 
