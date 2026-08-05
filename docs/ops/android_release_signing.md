@@ -25,9 +25,15 @@ ANDROID_KEY_PASSWORD
 Before publishing, run:
 
 ```bash
-cd android
-./gradlew :app:verifyReleaseSigning
-./gradlew :app:bundleRelease
+# Performs clean -> pub get -> profile smoke -> registrant scan first.
+bash scripts/release_preflight.sh --platform android
+
+# Creates a signed AAB only after the preflight has passed.
+bash scripts/release_preflight.sh --platform android --package
 ```
 
 `verifyReleaseSigning` rejects missing values, a missing keystore, a non-X.509 alias, and the `CN=Android Debug` certificate. It never prints passwords. `assembleRelease`, `bundleRelease`, and release packaging tasks depend on this validation automatically.
+
+See [release build preflight](release_build_preflight.md) for why the
+credential-free profile smoke build is intentionally separate from signed
+artifact creation.

@@ -64,6 +64,11 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: flutter test integration_test/ -d emulator-5554 -r expanded
+      - name: Rebuild a clean Android profile candidate after integration tests
+        # This proves an integration-test registrant cannot contaminate the
+        # next release candidate. It is intentionally profile/unsigned and
+        # therefore does not consume production signing credentials.
+        run: bash scripts/release_preflight.sh --platform android
 
   ios-device-e2e:
     name: iOS device smoke (simulator)
@@ -92,3 +97,7 @@ jobs:
           echo "IOS_DEVICE_ID=$device_id" >> "$GITHUB_ENV"
       - name: Run device integration suite
         run: flutter test integration_test/ -d "$IOS_DEVICE_ID" -r expanded
+      - name: Rebuild a clean iOS profile candidate after integration tests
+        # The script uses --no-codesign for smoke compilation; signed IPA
+        # creation remains a separately credentialed release action.
+        run: bash scripts/release_preflight.sh --platform ios

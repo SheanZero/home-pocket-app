@@ -59,7 +59,13 @@
    flutter test --concurrency=1
    ```
 
-5. iOS 原生依赖/签名曾切换时按项目说明先 `flutter clean`。
+5. 先运行确定性的 clean preflight；它会重新生成 plugin registrant、用
+   `--no-codesign` 做 profile smoke compile，并拒绝残留的
+   `integration_test` dev plugin：
+
+   ```bash
+   bash scripts/release_preflight.sh --platform ios
+   ```
 6. 在 iOS 15 与 iOS 26、iPhone 与 iPad 上完成关键路径真机/模拟器测试。
 7. 用最终 Release build、固定演示数据采集 `screenshots/` 要求的三语截图。
 
@@ -84,12 +90,9 @@
 在版本号已定版后运行：
 
 ```bash
-flutter clean
-flutter pub get
-flutter build ipa \
-  --release \
-  --build-name <MARKETING_VERSION> \
-  --build-number <BUILD_NUMBER>
+# Preflight first; add --regenerate if this release changed ARB/Riverpod/
+# Freezed/Drift generator inputs. --package is the separately signed IPA step.
+bash scripts/release_preflight.sh --platform ios --package
 ```
 
 上传前仍需在 Xcode Organizer 或 `xcrun altool`/Transporter 中验证签名和合规结果。不要把无签名的 `--no-codesign` 产物用于 App Store。

@@ -83,6 +83,9 @@ jobs:
       - name: Android release signing contract
         run: flutter test test/architecture/android_release_signing_contract_test.dart
 
+      - name: Release preflight contract
+        run: flutter test test/scripts/release_preflight_test.dart
+
       # P2-04 — coordinated dependency/native-toolchain contract. This blocks
       # unsafe SQLCipher EOL upgrades, partial win32 plugin upgrades, and
       # premature Built-in Kotlin switches on the Flutter 3.44 baseline.
