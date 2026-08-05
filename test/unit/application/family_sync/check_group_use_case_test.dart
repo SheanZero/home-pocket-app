@@ -4,6 +4,7 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/group_operation_error.dart';
+import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:http/http.dart' as http;
@@ -100,6 +101,38 @@ void main() {
     verify(() => apiClient.checkGroup()).called(1);
     verifyNever(() => apiClient.getGroupStatus(any()));
   });
+
+  test(
+    'generates and registers a missing device identity before checking',
+    () async {
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => null);
+      when(() => keyManager.getPublicKey()).thenAnswer((_) async => null);
+      when(() => keyManager.hasKeyPair()).thenAnswer((_) async => false);
+      when(() => keyManager.generateDeviceKeyPair()).thenAnswer(
+        (_) async => DeviceKeyPair(
+          publicKey: 'generated-public-key',
+          deviceId: 'generated-device',
+          createdAt: DateTime(2026, 8, 6),
+        ),
+      );
+      when(
+        () => apiClient.checkGroup(),
+      ).thenAnswer((_) async => {'groupExisted': false});
+
+      final result = await useCase.execute();
+
+      expect(result, isA<CheckGroupNotInGroup>());
+      verify(() => keyManager.generateDeviceKeyPair()).called(1);
+      verify(
+        () => apiClient.registerDevice(
+          deviceId: 'generated-device',
+          publicKey: 'generated-public-key',
+          deviceName: any(named: 'deviceName'),
+          platform: any(named: 'platform'),
+        ),
+      ).called(1);
+    },
+  );
 
   test('server none deactivates a stale local membership', () async {
     when(() => apiClient.checkGroup()).thenAnswer(

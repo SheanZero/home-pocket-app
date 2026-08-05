@@ -7,6 +7,7 @@ import '../../features/family_sync/domain/models/group_info.dart';
 import '../../features/family_sync/domain/models/group_member.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import 'control_snapshot_digest.dart';
+import 'device_identity_resolver.dart';
 import 'group_operation_error.dart';
 import 'membership_rotation_coordinator.dart';
 
@@ -61,20 +62,20 @@ class CheckGroupUseCase {
     MembershipRotationCoordinator? membershipRotation,
     Future<void> Function()? onDeviceRegistered,
   }) : _apiClient = apiClient,
-       _keyManager = keyManager,
+       _deviceIdentityResolver = DeviceIdentityResolver(keyManager),
        _groupRepository = groupRepository,
        _membershipRotation = membershipRotation,
        _onDeviceRegistered = onDeviceRegistered;
 
   final RelayApiClient _apiClient;
-  final KeyManager _keyManager;
+  final DeviceIdentityResolver _deviceIdentityResolver;
   final GroupRepository _groupRepository;
   final MembershipRotationCoordinator? _membershipRotation;
   final Future<void> Function()? _onDeviceRegistered;
 
   Future<CheckGroupResult> execute() async {
     try {
-      final identity = await _ensureDeviceIdentity();
+      final identity = await _deviceIdentityResolver.resolve();
       if (identity == null) {
         return const CheckGroupError('Device key not initialized');
       }
@@ -333,25 +334,6 @@ class CheckGroupUseCase {
     if (localGroup != null) {
       await _groupRepository.deactivateGroup(localGroup.groupId);
     }
-  }
-
-  Future<DeviceKeyPair?> _ensureDeviceIdentity() async {
-    final existingDeviceId = await _keyManager.getDeviceId();
-    final existingPublicKey = await _keyManager.getPublicKey();
-
-    if (existingDeviceId != null && existingPublicKey != null) {
-      return DeviceKeyPair(
-        publicKey: existingPublicKey,
-        deviceId: existingDeviceId,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-      );
-    }
-
-    if (!await _keyManager.hasKeyPair()) {
-      return _keyManager.generateDeviceKeyPair();
-    }
-
-    return null;
   }
 
   DateTime? _parseInviteExpiry(Object? rawValue) {

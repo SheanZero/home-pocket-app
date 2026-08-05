@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import '../../infrastructure/crypto/models/device_key_pair.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
+import 'device_identity_resolver.dart';
 import 'group_operation_error.dart';
 
 sealed class JoinGroupResult {
@@ -69,11 +69,11 @@ class JoinGroupUseCase {
     required KeyManager keyManager,
     Future<void> Function()? onDeviceRegistered,
   }) : _apiClient = apiClient,
-       _keyManager = keyManager,
+       _deviceIdentityResolver = DeviceIdentityResolver(keyManager),
        _onDeviceRegistered = onDeviceRegistered;
 
   final RelayApiClient _apiClient;
-  final KeyManager _keyManager;
+  final DeviceIdentityResolver _deviceIdentityResolver;
   final Future<void> Function()? _onDeviceRegistered;
 
   Future<JoinGroupResult> execute({
@@ -83,7 +83,7 @@ class JoinGroupUseCase {
     String? avatarImageHash,
   }) async {
     try {
-      final identity = await _ensureDeviceIdentity();
+      final identity = await _deviceIdentityResolver.resolve();
       if (identity == null) {
         return const JoinGroupResult.error('Device key not initialized');
       }
@@ -144,24 +144,5 @@ class JoinGroupUseCase {
       );
       return JoinGroupResult.error(failure.message, kind: failure.kind);
     }
-  }
-
-  Future<DeviceKeyPair?> _ensureDeviceIdentity() async {
-    final existingDeviceId = await _keyManager.getDeviceId();
-    final existingPublicKey = await _keyManager.getPublicKey();
-
-    if (existingDeviceId != null && existingPublicKey != null) {
-      return DeviceKeyPair(
-        publicKey: existingPublicKey,
-        deviceId: existingDeviceId,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-      );
-    }
-
-    if (!await _keyManager.hasKeyPair()) {
-      return _keyManager.generateDeviceKeyPair();
-    }
-
-    return null;
   }
 }
