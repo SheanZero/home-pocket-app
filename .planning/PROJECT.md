@@ -1,5 +1,18 @@
 # Happy Pocket — ハピポケ家族家計簿
 
+## Current Milestone: v2.1 依赖与原生工具链现代化
+
+**Goal:** 将 Flutter/Dart、代码生成、原生构建工具链与依赖组合升级到截至 2026-08-05 的最新生产稳定版本，并通过自动化门禁及一台有线 iPhone 真机验收，证明升级不损害本地加密、数据迁移、备份恢复和核心记账流程。
+
+**Target features:**
+- **生产稳定版升级** — 仅采用官方已发布的 stable/GA 版本；不采用 beta、RC 或仅剩 EOL 空壳的包，并记录无法升级到表面“最新”版本的兼容性理由。
+- **联动升级原生与代码生成链** — 协调 Flutter/Dart、Riverpod/Freezed/Drift、analyzer/lints、Android Gradle/Kotlin/SDK、iOS CocoaPods/SwiftPM 与受约束插件，避免逐包自动升级造成不可复现组合。
+- **SQLCipher 安全不回退** — 保持加密数据库、密钥初始化顺序和现有数据可读；禁止引入 `sqlite3_flutter_libs`、系统明文 SQLite 或 `sqlcipher_flutter_libs 0.7.0+eol` 空壳。
+- **全量自动化验收** — 重新生成代码与本地化资源，完成 analyze、测试、覆盖率、架构/依赖门禁以及 Android release 构建和模拟器验证。
+- **iPhone 真机验收** — 在一台有线 iPhone 上使用隔离测试 Bundle ID 验证安装/启动、SQLCipher reopen、历史 schema 迁移、加密备份恢复、应用锁、关键记账/同步相关流程与启动/交互性能；不要求 iPad 或 Android 真机验收。
+
+**Out of scope:** 新产品功能、UI 重设计、beta/RC 试用、Android 真机验收，以及为追求版本号而降低加密或最低系统兼容性。
+
 ## Latest Shipped Milestone: v2.0 完成第一版上线前最后的功能开发
 
 **Goal:** 在首次公开上线前补齐欢迎引导、应用锁、合规三块「上线必备」能力，使 app 可面向日本市场发布。
@@ -16,7 +29,7 @@
 
 **v2.0 shipped and archived on 2026-08-05.** All 32 requirements are covered; Phases 53-56 passed verification; 12/12 integration seams and 6/6 E2E flows are complete. The close audit status is `tech_debt`, with no broken runtime seam or critical requirement gap.
 
-There is **no active milestone or phase**. `.planning/codebase/` was refreshed on 2026-08-05 against the post-P1/P2 working tree (map base `7b4f1bac`), so the next planning action is `/gsd-new-milestone`; refresh again only if the remaining working tree changes materially first. Release-owner values remain mandatory before store submission: hosted Privacy/Terms URLs, app-specific support and sponsor destinations, Tokusho operator identity/contact details, and final legal review. The 38 historical artifact records accepted at close are documented in `.planning/STATE.md` and do not represent v2.0 functional failures.
+**v2.1 is active as of 2026-08-05.** The milestone modernizes dependencies and native build tooling as one verified compatibility window. Planning begins with official-source version research, then requirements and roadmap creation. Release-owner legal review remains outside this technical milestone. The 38 historical artifact records accepted at v2.0 close remain documented in `.planning/STATE.md` and do not represent runtime failures.
 
 Current sources of truth: `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and the v2.0 archive under `.planning/milestones/`.
 
@@ -323,6 +336,15 @@ Happy Pocket (ハピポケ家族家計簿) is a local-first, privacy-focused fam
 A family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, with a dual-ledger system that distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations.
 
 ## Requirements
+
+### Active
+
+<!-- Detailed v2.1 requirement IDs will be created in .planning/REQUIREMENTS.md after official-source research. -->
+
+- Upgrade all in-scope Flutter/Dart, dependency, code-generation, Android and iOS toolchain lanes to the newest mutually compatible production-stable set.
+- Preserve SQLCipher-backed encryption, existing encrypted data readability, migrations, backups, secure key handling, architecture boundaries, locale generation and the current user-visible behavior.
+- Complete automated quality gates plus Android build/simulator validation and one isolated, wired-iPhone physical-device acceptance run.
+- Document intentional pins, incompatibilities, device evidence, performance observations and any remaining upgrade debt.
 
 ### Validated
 
@@ -714,3 +736,6 @@ This document evolves at phase transitions and milestone boundaries.
 *Prior: 2026-06-02 — Phase 35 (Close vocab leaks) complete: W1 a11y Semantics labels → l10n, W2 totalSoulTx→totalJoyTx. Prior: Phase 34 golden re-baseline (teal), Phase 33 AppPalette token system, Phase 32 palette ADR-018, Phase 31 terminology + v18 migration. Started 2026-05-31.*
 
 *Prior: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt.*
+
+---
+*Last updated: 2026-08-05 after starting milestone v2.1 依赖与原生工具链现代化.*

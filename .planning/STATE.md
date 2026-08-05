@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: 完成第一版上线前最后的功能开发
-status: Awaiting next milestone
-stopped_at: Milestone v2.0 archived; awaiting next milestone definition
-last_updated: "2026-08-05T02:03:20.037Z"
+milestone: v2.1
+milestone_name: 依赖与原生工具链现代化
+status: planning
+last_updated: "2026-08-05T12:37:34.292Z"
 last_activity: 2026-08-05
-last_activity_desc: P2-06 fixed — v2.0 archived, planning sources reconciled, and codebase map refreshed
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 30
-  completed_plans: 30
-  percent: 100
-current_phase: null
-current_phase_name: null
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 
 ## Current Position
 
-Phase: None — v2.0 archived
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-05 — P2-06 fixed: v2.0 archived, planning sources reconciled, codebase map refreshed, and GSD health returned healthy
+Status: Defining requirements
+Last activity: 2026-08-05 — Milestone v2.1 started
 
 ### Decisions
 
