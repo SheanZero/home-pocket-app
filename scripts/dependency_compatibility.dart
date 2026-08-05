@@ -4,6 +4,68 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:yaml/yaml.dart';
 
+enum DependencyCompatibilityMode { baseline, futureProbe }
+
+enum CompatibilitySeverity { error, warning }
+
+class CompatibilityIssue {
+  const CompatibilityIssue({
+    required this.code,
+    required this.severity,
+    required this.message,
+  });
+
+  final String code;
+  final CompatibilitySeverity severity;
+  final String message;
+}
+
+class CompatibilityReport {
+  CompatibilityReport(Iterable<CompatibilityIssue> issues)
+    : issues = List.unmodifiable(issues);
+
+  final List<CompatibilityIssue> issues;
+
+  Iterable<CompatibilityIssue> get errors =>
+      issues.where((issue) => issue.severity == CompatibilitySeverity.error);
+  Iterable<CompatibilityIssue> get warnings =>
+      issues.where((issue) => issue.severity == CompatibilitySeverity.warning);
+  List<String> get messages =>
+      List.unmodifiable(issues.map((issue) => issue.message));
+  bool get isPassing => errors.isEmpty;
+}
+
+DependencyCompatibilityMode parseDependencyCompatibilityMode(
+  List<String> arguments,
+) {
+  var mode = DependencyCompatibilityMode.baseline;
+  var sawMode = false;
+  var sawVerification = false;
+  for (final argument in arguments) {
+    switch (argument) {
+      case '--mode=baseline':
+        if (sawMode) throw ArgumentError('mode supplied more than once');
+        mode = DependencyCompatibilityMode.baseline;
+        sawMode = true;
+        break;
+      case '--mode=future-probe':
+        if (sawMode) throw ArgumentError('mode supplied more than once');
+        mode = DependencyCompatibilityMode.futureProbe;
+        sawMode = true;
+        break;
+      case '--verify-running-flutter-sdk':
+        if (sawVerification) {
+          throw ArgumentError('SDK verification supplied more than once');
+        }
+        sawVerification = true;
+        break;
+      default:
+        throw ArgumentError('unknown argument: $argument');
+    }
+  }
+  return mode;
+}
+
 /// Parsed, versioned policy for the reviewed production-stable baseline.
 ///
 /// The parser deliberately accumulates diagnostics so a malformed policy cannot
@@ -151,7 +213,7 @@ class StableBaselineManifest {
   }
 }
 
-List<String> validateDependencyCompatibility({
+CompatibilityReport validateDependencyCompatibility({
   required String pubspecYaml,
   required String lockYaml,
   required String androidSettings,
@@ -169,6 +231,7 @@ List<String> validateDependencyCompatibility({
   required String runningFlutterMachineJson,
   required bool pubspecOverridesPresent,
   required Map<String, String> trackedInputContents,
+  DependencyCompatibilityMode mode = DependencyCompatibilityMode.baseline,
 }) {
   final issues = <String>[];
   final baseline = StableBaselineManifest.parse(baselineJson);
@@ -362,7 +425,48 @@ List<String> validateDependencyCompatibility({
     futureWorkflow,
     'flutter build ios --simulator --debug',
   );
-  return issues;
+  return _reportFromMessages(issues, mode);
+}
+
+CompatibilityReport _reportFromMessages(
+  Iterable<String> messages,
+  DependencyCompatibilityMode mode,
+) => CompatibilityReport(
+  messages.map(
+    (message) => CompatibilityIssue(
+      code: _diagnosticCode(message),
+      severity: _severityFor(message, mode),
+      message: message,
+    ),
+  ),
+);
+
+CompatibilitySeverity _severityFor(
+  String message,
+  DependencyCompatibilityMode mode,
+) {
+  if (mode == DependencyCompatibilityMode.futureProbe &&
+      RegExp(
+        r'^dependency (?!sqlcipher_flutter_libs )[^ ]+ candidate must be production stable$',
+      ).hasMatch(message)) {
+    return CompatibilitySeverity.warning;
+  }
+  return CompatibilitySeverity.error;
+}
+
+String _diagnosticCode(String message) {
+  if (message.contains('override')) return 'OVERRIDE_FORBIDDEN';
+  if (message.contains('sqlite3_flutter_libs')) return 'PLAINTEXT_SQLITE';
+  if (message.contains('SQLCipher') || message.contains('sqlcipher')) {
+    return 'SQLCIPHER_INVARIANT';
+  }
+  if (message.contains('minSdk') || message.contains('support floor')) {
+    return 'PLATFORM_FLOOR';
+  }
+  if (message.contains('candidate')) return 'CANDIDATE_DRIFT';
+  if (message.contains('lane')) return 'PARTIAL_LANE';
+  if (message.contains('digest')) return 'TRACKED_INPUT_DRIFT';
+  return 'BASELINE_CONTRACT';
 }
 
 void _validateManifestPolicy({
@@ -680,6 +784,19 @@ bool _pubspecOverridesPresent(String pubspecYaml) =>
     File('pubspec_overrides.yaml').existsSync();
 
 Future<void> main(List<String> arguments) async {
+  late final DependencyCompatibilityMode mode;
+  try {
+    mode = parseDependencyCompatibilityMode(arguments);
+  } on ArgumentError catch (error) {
+    stderr.writeln(
+      'Usage: dependency_compatibility.dart '
+      '[--mode=baseline|future-probe] [--verify-running-flutter-sdk]',
+    );
+    stderr.writeln('[dependency-compat] ERROR: ${error.message}');
+    exitCode = 2;
+    return;
+  }
+
   String read(String path) {
     final file = File(path);
     if (!file.existsSync()) {
@@ -700,37 +817,49 @@ Future<void> main(List<String> arguments) async {
           errors: [],
         );
   final pubspec = read('pubspec.yaml');
-  final issues = <String>[...running.errors];
-  issues.addAll(
-    validateDependencyCompatibility(
-      pubspecYaml: pubspec,
-      lockYaml: read('pubspec.lock'),
-      androidSettings: read('android/settings.gradle.kts'),
-      androidAppBuild: read('android/app/build.gradle.kts'),
-      androidProperties: read('android/gradle.properties'),
-      gradleWrapper: read('android/gradle/wrapper/gradle-wrapper.properties'),
-      podfile: read('ios/Podfile'),
-      podfileLock: read('ios/Podfile.lock'),
-      xcodeProject: read('ios/Runner.xcodeproj/project.pbxproj'),
-      auditWorkflow: read('.github/workflows/audit.yml'),
-      futureWorkflow: read('.github/workflows/flutter-future-compat.yml'),
-      baselineJson: read('docs/testing/STABLE_BASELINE.json'),
-      metadataYaml: read('.metadata'),
-      flutterExtensionSource: running.extensionSource,
-      runningFlutterMachineJson: running.machineJson,
-      pubspecOverridesPresent: _pubspecOverridesPresent(pubspec),
-      trackedInputContents: _trackedInputContents(read),
-    ),
+  final report = validateDependencyCompatibility(
+    pubspecYaml: pubspec,
+    lockYaml: read('pubspec.lock'),
+    androidSettings: read('android/settings.gradle.kts'),
+    androidAppBuild: read('android/app/build.gradle.kts'),
+    androidProperties: read('android/gradle.properties'),
+    gradleWrapper: read('android/gradle/wrapper/gradle-wrapper.properties'),
+    podfile: read('ios/Podfile'),
+    podfileLock: read('ios/Podfile.lock'),
+    xcodeProject: read('ios/Runner.xcodeproj/project.pbxproj'),
+    auditWorkflow: read('.github/workflows/audit.yml'),
+    futureWorkflow: read('.github/workflows/flutter-future-compat.yml'),
+    baselineJson: read('docs/testing/STABLE_BASELINE.json'),
+    metadataYaml: read('.metadata'),
+    flutterExtensionSource: running.extensionSource,
+    runningFlutterMachineJson: running.machineJson,
+    pubspecOverridesPresent: _pubspecOverridesPresent(pubspec),
+    trackedInputContents: _trackedInputContents(read),
+    mode: mode,
   );
-  if (issues.isNotEmpty) {
-    stderr.writeln('[dependency-compat] FAIL (${issues.length} issue(s))');
-    for (final issue in issues) {
-      stderr.writeln('  - $issue');
+  final completeReport = _reportFromMessages([
+    ...running.errors,
+    ...report.messages,
+  ], mode);
+  if (!completeReport.isPassing) {
+    stderr.writeln(
+      '[dependency-compat] FAIL (${completeReport.errors.length} error(s), '
+      '${completeReport.warnings.length} warning(s))',
+    );
+    for (final issue in completeReport.issues) {
+      stderr.writeln('  - [${issue.code}] ${issue.message}');
     }
     exitCode = 1;
     return;
   }
-  stdout.writeln('[dependency-compat] PASS');
+  final status = completeReport.warnings.isEmpty ? 'PASS' : 'WARN';
+  stdout.writeln(
+    '[dependency-compat] $status (0 error(s), '
+    '${completeReport.warnings.length} warning(s))',
+  );
+  for (final warning in completeReport.warnings) {
+    stdout.writeln('  - [${warning.code}] ${warning.message}');
+  }
   stdout.writeln('  SQLCipher 0.6.8 / sqlite3 2.9.4 / pod 4.10.0');
   stdout.writeln(
     '  Flutter Stable identity and effective Android minSdk >= 24 verified',

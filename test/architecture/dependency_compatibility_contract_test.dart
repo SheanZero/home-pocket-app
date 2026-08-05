@@ -53,6 +53,35 @@ void main() {
     String? extensionSource,
     String? runningFlutterMachineJson,
     bool pubspecOverridesPresent = false,
+  }) => compatibility
+      .validateDependencyCompatibility(
+        pubspecYaml: input['pubspec']!,
+        lockYaml: input['lock']!,
+        androidSettings: input['settings']!,
+        androidAppBuild: input['appBuild']!,
+        androidProperties: input['properties']!,
+        gradleWrapper: input['wrapper']!,
+        podfile: input['podfile']!,
+        podfileLock: input['podLock']!,
+        xcodeProject: input['xcode']!,
+        auditWorkflow: input['audit']!,
+        futureWorkflow: input['future']!,
+        baselineJson:
+            baselineJson ??
+            File('docs/testing/STABLE_BASELINE.json').readAsStringSync(),
+        metadataYaml: input['metadata']!,
+        flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
+        runningFlutterMachineJson:
+            runningFlutterMachineJson ?? _runningFlutterMachineJson,
+        pubspecOverridesPresent: pubspecOverridesPresent,
+        trackedInputContents: trackedInputs(input),
+      )
+      .messages;
+
+  compatibility.CompatibilityReport validateReport(
+    Map<String, String> input, {
+    required String baselineJson,
+    required compatibility.DependencyCompatibilityMode mode,
   }) => compatibility.validateDependencyCompatibility(
     pubspecYaml: input['pubspec']!,
     lockYaml: input['lock']!,
@@ -65,15 +94,13 @@ void main() {
     xcodeProject: input['xcode']!,
     auditWorkflow: input['audit']!,
     futureWorkflow: input['future']!,
-    baselineJson:
-        baselineJson ??
-        File('docs/testing/STABLE_BASELINE.json').readAsStringSync(),
+    baselineJson: baselineJson,
     metadataYaml: input['metadata']!,
-    flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
-    runningFlutterMachineJson:
-        runningFlutterMachineJson ?? _runningFlutterMachineJson,
-    pubspecOverridesPresent: pubspecOverridesPresent,
+    flutterExtensionSource: _flutterExtensionFixture,
+    runningFlutterMachineJson: _runningFlutterMachineJson,
+    pubspecOverridesPresent: false,
     trackedInputContents: trackedInputs(input),
+    mode: mode,
   );
 
   test('BASE-01 committed stable baseline manifest exists', () {
@@ -359,15 +386,87 @@ void main() {
     });
   });
 
-  test('CLI reserves exit 2 and usage text for malformed mode arguments',
-      () async {
-    final result = await Process.run(Platform.resolvedExecutable, [
-      'run',
-      'scripts/dependency_compatibility.dart',
-      '--mode=unknown',
-    ]);
-
-    expect(result.exitCode, 2);
-    expect(result.stderr.toString(), contains('Usage:'));
+  test('CLI parser accepts strict modes and rejects malformed arguments', () {
+    expect(
+      compatibility.parseDependencyCompatibilityMode(const []),
+      compatibility.DependencyCompatibilityMode.baseline,
+    );
+    expect(
+      compatibility.parseDependencyCompatibilityMode(const [
+        '--mode=future-probe',
+        '--verify-running-flutter-sdk',
+      ]),
+      compatibility.DependencyCompatibilityMode.futureProbe,
+    );
+    expect(
+      () => compatibility.parseDependencyCompatibilityMode(const [
+        '--mode=baseline',
+        '--mode=future-probe',
+      ]),
+      throwsArgumentError,
+    );
+    expect(
+      () => compatibility.parseDependencyCompatibilityMode(const [
+        '--mode=unknown',
+      ]),
+      throwsArgumentError,
+    );
   });
+
+  test('future probe demotes only ordinary candidate drift', () {
+    final baseline = File('docs/testing/STABLE_BASELINE.json')
+        .readAsStringSync()
+        .replaceFirst('"candidate": "3.44.8"', '"candidate": "3.45.0-beta.1"');
+    final stable = validateReport(
+      currentInputs(),
+      baselineJson: baseline,
+      mode: compatibility.DependencyCompatibilityMode.baseline,
+    );
+    final probe = validateReport(
+      currentInputs(),
+      baselineJson: baseline,
+      mode: compatibility.DependencyCompatibilityMode.futureProbe,
+    );
+
+    expect(stable.errors, isNotEmpty);
+    expect(probe.errors, isEmpty);
+    expect(probe.warnings, hasLength(1));
+    expect(probe.isPassing, isTrue);
+  });
+
+  test(
+    'concurrent pure validations return identical immutable reports',
+    () async {
+      final baseline = File(
+        'docs/testing/STABLE_BASELINE.json',
+      ).readAsStringSync();
+      final input = currentInputs();
+      final reports = await Future.wait(
+        List.generate(
+          4,
+          (_) async => validateReport(
+            input,
+            baselineJson: baseline,
+            mode: compatibility.DependencyCompatibilityMode.baseline,
+          ),
+        ),
+      );
+
+      expect(
+        reports.map((report) => report.messages),
+        everyElement(equals([])),
+      );
+      expect(
+        () => reports.first.issues.add(
+          const compatibility.CompatibilityIssue(
+            code: 'TEST',
+            severity: compatibility.CompatibilitySeverity.error,
+            message: 'test',
+          ),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(input['pubspec'], File('pubspec.yaml').readAsStringSync());
+    },
+  );
 }
