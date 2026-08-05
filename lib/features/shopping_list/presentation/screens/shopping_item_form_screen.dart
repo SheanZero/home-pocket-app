@@ -649,260 +649,6 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     return ref.read(categoryRepositoryProvider).findById(parentId);
   }
 
-  Widget _buildSaveButton(S l) {
-    final palette = context.palette;
-    final enabled = !_isSubmitting && !_isVoiceTransient;
-    final actionLabel = _isSubmitting
-        ? l.shoppingFormSaving
-        : l.shoppingFormSave;
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: actionLabel,
-      child: Opacity(
-        opacity: enabled ? 1 : 0.46,
-        child: SizedBox(
-          key: const Key('shopping_form_save_button'),
-          width: 72,
-          height: 44,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: palette.accentPrimary,
-              borderRadius: BorderRadius.circular(999),
-              boxShadow: enabled
-                  ? [
-                      BoxShadow(
-                        color: palette.accentPrimary.withValues(alpha: 0.2),
-                        blurRadius: 13,
-                        offset: const Offset(0, 5),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(999),
-                onTap: enabled ? _save : null,
-                child: Center(
-                  child: Text(
-                    actionLabel,
-                    style: AppTextStyles.button.copyWith(color: palette.card),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuantitySection(S l, List<ShoppingUnitSuggestion> suggestions) {
-    final palette = context.palette;
-    final selection = ShoppingUnitSelection(
-      _selectedUnit,
-      customLabel: _customUnit,
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 68,
-                child: Text(
-                  l.shoppingFormQuantityLabel,
-                  style: AppTextStyles.label.copyWith(
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        key: const Key('shopping_form_quantity_input_box'),
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: palette.card,
-                          border: Border.all(color: palette.borderDefault),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: TextField(
-                          key: const Key('shopping_form_quantity_field'),
-                          controller: _quantityController,
-                          textAlign: TextAlign.center,
-                          textAlignVertical: TextAlignVertical.center,
-                          minLines: null,
-                          maxLines: null,
-                          expands: true,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9.,]'),
-                            ),
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                            isDense: true,
-                          ),
-                          style: AppTextStyles.amountLarge.copyWith(
-                            color: palette.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildUnitSelect(l, palette, selection),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (suggestions.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Row(
-              key: const Key('shopping_unit_suggestions'),
-              children: [
-                for (var index = 0; index < suggestions.length; index++) ...[
-                  if (index > 0) const SizedBox(width: 6),
-                  Expanded(
-                    child: _buildUnitSuggestionChip(l, suggestions[index]),
-                  ),
-                ],
-              ],
-            ),
-          ],
-          const SizedBox(height: 7),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 15,
-                  color: palette.textTertiary,
-                ),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    l.shoppingFormQuantityHint,
-                    textAlign: TextAlign.right,
-                    style: AppTextStyles.supporting.copyWith(
-                      color: palette.textTertiary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUnitSelect(
-    S l,
-    AppPalette palette,
-    ShoppingUnitSelection selection,
-  ) {
-    return Semantics(
-      button: true,
-      label: l.shoppingUnitPickerTitle,
-      child: SizedBox(
-        key: const Key('shopping_form_unit_select'),
-        width: 76,
-        height: 48,
-        child: Material(
-          color: palette.backgroundMuted,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: palette.borderDefault),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => unawaited(_showUnitPicker()),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Text(
-                    shoppingUnitLabel(l, selection),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.itemTitle.copyWith(
-                      color: palette.dailyText,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 4,
-                  child: Icon(
-                    Icons.expand_more_rounded,
-                    size: 16,
-                    color: palette.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUnitSuggestionChip(S l, ShoppingUnitSuggestion suggestion) {
-    final palette = context.palette;
-    final selected =
-        suggestion.selection ==
-        ShoppingUnitSelection(_selectedUnit, customLabel: _customUnit);
-    return SizedBox(
-      height: 36,
-      child: Material(
-        color: selected ? palette.dailyLight : palette.backgroundMuted,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-          side: BorderSide(
-            color: selected ? palette.daily : palette.borderDefault,
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => setState(() {
-            _selectedUnit = suggestion.selection.unit;
-            _customUnit = suggestion.selection.unit == ShoppingUnit.custom
-                ? suggestion.selection.normalizedCustomLabel
-                : null;
-          }),
-          child: Center(
-            child: Text(
-              shoppingUnitLabel(l, suggestion.selection),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.label.copyWith(
-                color: selected ? palette.dailyText : palette.textSecondary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _showUnitPicker() async {
     FocusScope.of(context).unfocus();
     var draftUnit = _selectedUnit;
@@ -1066,26 +812,6 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     });
   }
 
-  Widget _divider(AppPalette palette) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(height: 1, color: palette.backgroundDivider),
-    );
-  }
-
-  BoxDecoration _cardDecoration(AppPalette palette) => BoxDecoration(
-    color: palette.card,
-    borderRadius: BorderRadius.circular(14),
-    border: Border.all(color: palette.borderDefault),
-    boxShadow: [
-      BoxShadow(
-        color: palette.navShadow,
-        blurRadius: 12,
-        offset: const Offset(0, 3),
-      ),
-    ],
-  );
-
   ShoppingVoiceDraftCopy _voiceCopy(S l) => ShoppingVoiceDraftCopy(
     manualTitle: l.shoppingVoiceManualTitle,
     manualHelp: l.shoppingVoiceManualHelp,
@@ -1117,21 +843,20 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     final l = S.of(context);
     final palette = context.palette;
     final isEditMode = widget.item != null;
-    final unitSuggestions =
-        widget.unitSuggestions ??
-        ref.watch(shoppingUnitSuggestionsProvider).value ??
-        const <ShoppingUnitSuggestion>[];
-    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
-    // Render the full "parent > child" localized path at build time (mirrors
-    // transaction_details_form — never render the raw key/id).
-    final categoryDisplay = _category == null
-        ? null
-        : formatCategoryPath(
-            category: _category!,
-            parentCategory: _parentCategory,
-            locale: locale,
-          );
+    return _buildFormLayout(
+      context,
+      l: l,
+      palette: palette,
+      isEditMode: isEditMode,
+    );
+  }
 
+  Widget _buildFormLayout(
+    BuildContext context, {
+    required S l,
+    required AppPalette palette,
+    required bool isEditMode,
+  }) {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 52,
@@ -1149,7 +874,13 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: _buildSaveButton(l),
+            child: _ShoppingSaveButton(
+              l: l,
+              palette: palette,
+              isSubmitting: _isSubmitting,
+              isVoiceTransient: _isVoiceTransient,
+              onSave: _save,
+            ),
           ),
         ],
       ),
@@ -1159,60 +890,14 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
           children: [
-            Container(
-              key: const Key('shopping_form_name_card'),
-              height: 58,
-              decoration: _cardDecoration(palette).copyWith(
-                border: Border.all(
-                  color: _showNameError ? palette.error : palette.borderDefault,
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-              child: TextFormField(
-                key: const Key('shopping_form_name_field'),
-                controller: _nameController,
-                focusNode: _nameFocusNode,
-                autofocus: !isEditMode,
-                maxLength: 200,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  counterText: '',
-                  hintText: l.shoppingFormNameLabel,
-                  hintStyle: AppTextStyles.amountMedium.copyWith(
-                    color: palette.textTertiary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                style: AppTextStyles.amountMedium.copyWith(
-                  color: palette.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-                textInputAction: TextInputAction.next,
-                onChanged: (value) {
-                  if (_showNameError && value.trim().isNotEmpty) {
-                    setState(() => _showNameError = false);
-                  }
-                },
-              ),
-            ),
-            SizedBox(
-              key: const Key('shopping_form_name_error_slot'),
-              height: 22,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(3, 4, 3, 0),
-                child: Semantics(
-                  liveRegion: _showNameError,
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      _showNameError ? l.shoppingFormNameRequired : '',
-                      style: AppTextStyles.supporting.copyWith(
-                        color: palette.error,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            _ShoppingNameSection(
+              l: l,
+              palette: palette,
+              controller: _nameController,
+              focusNode: _nameFocusNode,
+              autofocus: !isEditMode,
+              showError: _showNameError,
+              onValidNameEntered: () => setState(() => _showNameError = false),
             ),
             if (!isEditMode && _shoppingVoiceInputEnabledForMvp) ...[
               const SizedBox(height: 10),
@@ -1229,255 +914,36 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
               ),
             ],
             const SizedBox(height: 14),
-            Container(
-              key: const Key('shopping_form_primary_card'),
-              decoration: _cardDecoration(palette),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildQuantitySection(l, unitSuggestions),
-                  _divider(palette),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 11,
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          l.expenseClassification,
-                          style: AppTextStyles.label.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                        const Spacer(),
-                        LedgerTypeSelector(
-                          key: const Key('shopping_form_ledger_selector'),
-                          selected: _ledgerType,
-                          onChanged: (type) =>
-                              setState(() => _ledgerType = type),
-                          dailyLabel: l.shoppingFormLedgerDaily,
-                          joyLabel: l.shoppingFormLedgerJoy,
-                          showIcons: false,
-                          chipMinHeight: 44,
-                          chipMinWidth: 84,
-                        ),
-                      ],
-                    ),
-                  ),
-                  _divider(palette),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
-                    child: Row(
-                      children: [
-                        Text(
-                          l.shoppingFormListTypeLabel,
-                          style: AppTextStyles.label.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                        const Spacer(),
-                        ListTypeSelector(
-                          key: const Key('shopping_form_list_type_selector'),
-                          selected: _listType == 'public'
-                              ? 'public'
-                              : 'private',
-                          onChanged: (value) =>
-                              setState(() => _listType = value),
-                          publicLabel: l.shoppingSegmentPublic,
-                          privateLabel: l.shoppingSegmentPrivate,
-                          enabled: !isEditMode,
-                          showIcons: false,
-                          chipMinHeight: 40,
-                          chipMinWidth: 84,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    key: const Key('shopping_form_list_type_hint'),
-                    padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(
-                          isEditMode ? Icons.lock_outline : Icons.info_outline,
-                          size: 15,
-                          color: isEditMode
-                              ? palette.error
-                              : palette.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            isEditMode
-                                ? l.shoppingListTypeLockedHint
-                                : l.shoppingListTypeCreateHint,
-                            textAlign: TextAlign.end,
-                            style: AppTextStyles.supporting.copyWith(
-                              color: isEditMode
-                                  ? palette.error
-                                  : palette.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            _ShoppingPrimaryCard(
+              l: l,
+              palette: palette,
+              quantityController: _quantityController,
+              selectedUnit: _selectedUnit,
+              customUnit: _customUnit,
+              unitSuggestionsOverride: widget.unitSuggestions,
+              ledgerType: _ledgerType,
+              listType: _listType,
+              isEditMode: isEditMode,
+              onShowUnitPicker: () => unawaited(_showUnitPicker()),
+              onUnitSelected: (selection) => setState(() {
+                _selectedUnit = selection.unit;
+                _customUnit = selection.unit == ShoppingUnit.custom
+                    ? selection.normalizedCustomLabel
+                    : null;
+              }),
+              onLedgerChanged: (type) => setState(() => _ledgerType = type),
+              onListTypeChanged: (value) => setState(() => _listType = value),
             ),
             const SizedBox(height: 14),
-            Container(
-              key: const Key('shopping_form_secondary_card'),
-              decoration: _cardDecoration(palette),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    onTap: _pickCategory,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 62),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Row(
-                          children: [
-                            Text(
-                              l.shoppingFormCategoryLabel,
-                              style: AppTextStyles.label.copyWith(
-                                color: palette.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                categoryDisplay ??
-                                    l.shoppingFormNoCategorySelected,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.end,
-                                style: AppTextStyles.label.copyWith(
-                                  color: categoryDisplay != null
-                                      ? palette.textPrimary
-                                      : palette.textSecondary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              size: 19,
-                              color: palette.textTertiary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  _divider(palette),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 62),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: Row(
-                        children: [
-                          Text(
-                            l.shoppingFormPrice,
-                            style: AppTextStyles.label.copyWith(
-                              color: palette.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '¥',
-                            style: AppTextStyles.itemTitle.copyWith(
-                              color: palette.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: TextField(
-                              key: const Key('shopping_form_price_field'),
-                              controller: _priceController,
-                              textAlign: TextAlign.right,
-                              keyboardType: TextInputType.number,
-                              style: AppTextStyles.itemTitle.copyWith(
-                                color: palette.textPrimary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                                isDense: true,
-                                hintText: l.shoppingFormPricePlaceholder,
-                                hintStyle: AppTextStyles.itemTitle.copyWith(
-                                  color: palette.textTertiary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              onSubmitted: (_) => unawaited(_save()),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  _divider(palette),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 10, 24, 12),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: SizedBox(
-                            width: 63,
-                            child: Text(
-                              l.shoppingFormNoteLabel,
-                              style: AppTextStyles.label.copyWith(
-                                color: palette.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            key: const Key('shopping_form_note_field'),
-                            controller: _noteController,
-                            minLines: 3,
-                            maxLines: 5,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: l.shoppingFormNotePlaceholder,
-                              hintStyle: AppTextStyles.label.copyWith(
-                                color: palette.textTertiary,
-                              ),
-                              filled: true,
-                              fillColor: palette.backgroundMuted,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 9,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(11),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(11),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            _ShoppingSecondaryCard(
+              l: l,
+              palette: palette,
+              category: _category,
+              parentCategory: _parentCategory,
+              priceController: _priceController,
+              noteController: _noteController,
+              onPickCategory: _pickCategory,
+              onSave: _save,
             ),
           ],
         ),
@@ -1485,6 +951,747 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
     );
   }
 }
+
+class _ShoppingSaveButton extends StatelessWidget {
+  const _ShoppingSaveButton({
+    required this.l,
+    required this.palette,
+    required this.isSubmitting,
+    required this.isVoiceTransient,
+    required this.onSave,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final bool isSubmitting;
+  final bool isVoiceTransient;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = !isSubmitting && !isVoiceTransient;
+    final actionLabel = isSubmitting
+        ? l.shoppingFormSaving
+        : l.shoppingFormSave;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: actionLabel,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.46,
+        child: SizedBox(
+          key: const Key('shopping_form_save_button'),
+          width: 72,
+          height: 44,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: palette.accentPrimary,
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: enabled
+                  ? [
+                      BoxShadow(
+                        color: palette.accentPrimary.withValues(alpha: 0.2),
+                        blurRadius: 13,
+                        offset: const Offset(0, 5),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: enabled ? onSave : null,
+                child: Center(
+                  child: Text(
+                    actionLabel,
+                    style: AppTextStyles.button.copyWith(color: palette.card),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShoppingNameSection extends StatelessWidget {
+  const _ShoppingNameSection({
+    required this.l,
+    required this.palette,
+    required this.controller,
+    required this.focusNode,
+    required this.autofocus,
+    required this.showError,
+    required this.onValidNameEntered,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool autofocus;
+  final bool showError;
+  final VoidCallback onValidNameEntered;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          key: const Key('shopping_form_name_card'),
+          height: 58,
+          decoration: _shoppingFormCardDecoration(palette).copyWith(
+            border: Border.all(
+              color: showError ? palette.error : palette.borderDefault,
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+          child: TextFormField(
+            key: const Key('shopping_form_name_field'),
+            controller: controller,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            maxLength: 200,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              counterText: '',
+              hintText: l.shoppingFormNameLabel,
+              hintStyle: AppTextStyles.amountMedium.copyWith(
+                color: palette.textTertiary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            style: AppTextStyles.amountMedium.copyWith(
+              color: palette.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              if (showError && value.trim().isNotEmpty) onValidNameEntered();
+            },
+          ),
+        ),
+        SizedBox(
+          key: const Key('shopping_form_name_error_slot'),
+          height: 22,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(3, 4, 3, 0),
+            child: Semantics(
+              liveRegion: showError,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  showError ? l.shoppingFormNameRequired : '',
+                  style: AppTextStyles.supporting.copyWith(
+                    color: palette.error,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ShoppingPrimaryCard extends ConsumerWidget {
+  const _ShoppingPrimaryCard({
+    required this.l,
+    required this.palette,
+    required this.quantityController,
+    required this.selectedUnit,
+    required this.customUnit,
+    required this.unitSuggestionsOverride,
+    required this.ledgerType,
+    required this.listType,
+    required this.isEditMode,
+    required this.onShowUnitPicker,
+    required this.onUnitSelected,
+    required this.onLedgerChanged,
+    required this.onListTypeChanged,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final TextEditingController quantityController;
+  final ShoppingUnit selectedUnit;
+  final String? customUnit;
+  final List<ShoppingUnitSuggestion>? unitSuggestionsOverride;
+  final LedgerType ledgerType;
+  final String listType;
+  final bool isEditMode;
+  final VoidCallback onShowUnitPicker;
+  final ValueChanged<ShoppingUnitSelection> onUnitSelected;
+  final ValueChanged<LedgerType> onLedgerChanged;
+  final ValueChanged<String> onListTypeChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final suggestions =
+        unitSuggestionsOverride ??
+        ref.watch(shoppingUnitSuggestionsProvider).value ??
+        const <ShoppingUnitSuggestion>[];
+    return Container(
+      key: const Key('shopping_form_primary_card'),
+      decoration: _shoppingFormCardDecoration(palette),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ShoppingQuantitySection(
+            l: l,
+            palette: palette,
+            controller: quantityController,
+            selection: ShoppingUnitSelection(
+              selectedUnit,
+              customLabel: customUnit,
+            ),
+            suggestions: suggestions,
+            onShowUnitPicker: onShowUnitPicker,
+            onUnitSelected: onUnitSelected,
+          ),
+          _shoppingFormDivider(palette),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            child: Row(
+              children: [
+                Text(
+                  l.expenseClassification,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                LedgerTypeSelector(
+                  key: const Key('shopping_form_ledger_selector'),
+                  selected: ledgerType,
+                  onChanged: onLedgerChanged,
+                  dailyLabel: l.shoppingFormLedgerDaily,
+                  joyLabel: l.shoppingFormLedgerJoy,
+                  showIcons: false,
+                  chipMinHeight: 44,
+                  chipMinWidth: 84,
+                ),
+              ],
+            ),
+          ),
+          _shoppingFormDivider(palette),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+            child: Row(
+              children: [
+                Text(
+                  l.shoppingFormListTypeLabel,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                ListTypeSelector(
+                  key: const Key('shopping_form_list_type_selector'),
+                  selected: listType == 'public' ? 'public' : 'private',
+                  onChanged: onListTypeChanged,
+                  publicLabel: l.shoppingSegmentPublic,
+                  privateLabel: l.shoppingSegmentPrivate,
+                  enabled: !isEditMode,
+                  showIcons: false,
+                  chipMinHeight: 40,
+                  chipMinWidth: 84,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            key: const Key('shopping_form_list_type_hint'),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  isEditMode ? Icons.lock_outline : Icons.info_outline,
+                  size: 15,
+                  color: isEditMode ? palette.error : palette.textSecondary,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    isEditMode
+                        ? l.shoppingListTypeLockedHint
+                        : l.shoppingListTypeCreateHint,
+                    textAlign: TextAlign.end,
+                    style: AppTextStyles.supporting.copyWith(
+                      color: isEditMode ? palette.error : palette.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShoppingQuantitySection extends StatelessWidget {
+  const _ShoppingQuantitySection({
+    required this.l,
+    required this.palette,
+    required this.controller,
+    required this.selection,
+    required this.suggestions,
+    required this.onShowUnitPicker,
+    required this.onUnitSelected,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final TextEditingController controller;
+  final ShoppingUnitSelection selection;
+  final List<ShoppingUnitSuggestion> suggestions;
+  final VoidCallback onShowUnitPicker;
+  final ValueChanged<ShoppingUnitSelection> onUnitSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 68,
+                child: Text(
+                  l.shoppingFormQuantityLabel,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        key: const Key('shopping_form_quantity_input_box'),
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: palette.card,
+                          border: Border.all(color: palette.borderDefault),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextField(
+                          key: const Key('shopping_form_quantity_field'),
+                          controller: controller,
+                          textAlign: TextAlign.center,
+                          textAlignVertical: TextAlignVertical.center,
+                          minLines: null,
+                          maxLines: null,
+                          expands: true,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9.,]'),
+                            ),
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            isDense: true,
+                          ),
+                          style: AppTextStyles.amountLarge.copyWith(
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _ShoppingUnitSelect(
+                      l: l,
+                      palette: palette,
+                      selection: selection,
+                      onTap: onShowUnitPicker,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (suggestions.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              key: const Key('shopping_unit_suggestions'),
+              children: [
+                for (var index = 0; index < suggestions.length; index++) ...[
+                  if (index > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: _ShoppingUnitSuggestionChip(
+                      l: l,
+                      palette: palette,
+                      selection: selection,
+                      suggestion: suggestions[index],
+                      onSelected: onUnitSelected,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+          const SizedBox(height: 7),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 15,
+                  color: palette.textTertiary,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    l.shoppingFormQuantityHint,
+                    textAlign: TextAlign.right,
+                    style: AppTextStyles.supporting.copyWith(
+                      color: palette.textTertiary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShoppingUnitSelect extends StatelessWidget {
+  const _ShoppingUnitSelect({
+    required this.l,
+    required this.palette,
+    required this.selection,
+    required this.onTap,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final ShoppingUnitSelection selection;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: l.shoppingUnitPickerTitle,
+      child: SizedBox(
+        key: const Key('shopping_form_unit_select'),
+        width: 76,
+        height: 48,
+        child: Material(
+          color: palette.backgroundMuted,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: palette.borderDefault),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Text(
+                    shoppingUnitLabel(l, selection),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.itemTitle.copyWith(
+                      color: palette.dailyText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 4,
+                  child: Icon(
+                    Icons.expand_more_rounded,
+                    size: 16,
+                    color: palette.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShoppingUnitSuggestionChip extends StatelessWidget {
+  const _ShoppingUnitSuggestionChip({
+    required this.l,
+    required this.palette,
+    required this.selection,
+    required this.suggestion,
+    required this.onSelected,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final ShoppingUnitSelection selection;
+  final ShoppingUnitSuggestion suggestion;
+  final ValueChanged<ShoppingUnitSelection> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = suggestion.selection == selection;
+    return SizedBox(
+      height: 36,
+      child: Material(
+        color: selected ? palette.dailyLight : palette.backgroundMuted,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+          side: BorderSide(
+            color: selected ? palette.daily : palette.borderDefault,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => onSelected(suggestion.selection),
+          child: Center(
+            child: Text(
+              shoppingUnitLabel(l, suggestion.selection),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.label.copyWith(
+                color: selected ? palette.dailyText : palette.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShoppingSecondaryCard extends ConsumerWidget {
+  const _ShoppingSecondaryCard({
+    required this.l,
+    required this.palette,
+    required this.category,
+    required this.parentCategory,
+    required this.priceController,
+    required this.noteController,
+    required this.onPickCategory,
+    required this.onSave,
+  });
+
+  final S l;
+  final AppPalette palette;
+  final Category? category;
+  final Category? parentCategory;
+  final TextEditingController priceController;
+  final TextEditingController noteController;
+  final VoidCallback onPickCategory;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final categoryDisplay = category == null
+        ? null
+        : formatCategoryPath(
+            category: category!,
+            parentCategory: parentCategory,
+            locale: locale,
+          );
+    return Container(
+      key: const Key('shopping_form_secondary_card'),
+      decoration: _shoppingFormCardDecoration(palette),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: onPickCategory,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 62),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    Text(
+                      l.shoppingFormCategoryLabel,
+                      style: AppTextStyles.label.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        categoryDisplay ?? l.shoppingFormNoCategorySelected,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: AppTextStyles.label.copyWith(
+                          color: categoryDisplay != null
+                              ? palette.textPrimary
+                              : palette.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 19,
+                      color: palette.textTertiary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          _shoppingFormDivider(palette),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 62),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  Text(
+                    l.shoppingFormPrice,
+                    style: AppTextStyles.label.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '¥',
+                    style: AppTextStyles.itemTitle.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: TextField(
+                      key: const Key('shopping_form_price_field'),
+                      controller: priceController,
+                      textAlign: TextAlign.right,
+                      keyboardType: TextInputType.number,
+                      style: AppTextStyles.itemTitle.copyWith(
+                        color: palette.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                        hintText: l.shoppingFormPricePlaceholder,
+                        hintStyle: AppTextStyles.itemTitle.copyWith(
+                          color: palette.textTertiary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onSubmitted: (_) => onSave(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          _shoppingFormDivider(palette),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 24, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SizedBox(
+                    width: 63,
+                    child: Text(
+                      l.shoppingFormNoteLabel,
+                      style: AppTextStyles.label.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    key: const Key('shopping_form_note_field'),
+                    controller: noteController,
+                    minLines: 3,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: l.shoppingFormNotePlaceholder,
+                      hintStyle: AppTextStyles.label.copyWith(
+                        color: palette.textTertiary,
+                      ),
+                      filled: true,
+                      fillColor: palette.backgroundMuted,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(11),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(11),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _shoppingFormDivider(AppPalette palette) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Container(height: 1, color: palette.backgroundDivider),
+  );
+}
+
+BoxDecoration _shoppingFormCardDecoration(AppPalette palette) => BoxDecoration(
+  color: palette.card,
+  borderRadius: BorderRadius.circular(14),
+  border: Border.all(color: palette.borderDefault),
+  boxShadow: [
+    BoxShadow(
+      color: palette.navShadow,
+      blurRadius: 12,
+      offset: const Offset(0, 3),
+    ),
+  ],
+);
 
 @immutable
 class _ShoppingFormSnapshot {
