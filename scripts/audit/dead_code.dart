@@ -68,9 +68,9 @@ Future<_UnusedScan> _runUnused(
 
   try {
     final stdout = result.stdout;
-    final normalizedOutput = _stripAnsi(
+    final normalizedOutput = _normalizeMetricsOutput(
       stdout is String ? stdout : '',
-    ).replaceAll('\r', '\n').trim();
+    );
     if (_isConfirmedZeroFindingOutput(normalizedOutput)) {
       return const _UnusedScan.success([]);
     }
@@ -78,9 +78,14 @@ Future<_UnusedScan> _runUnused(
       return _UnusedScan.failure('$mode emitted empty output');
     }
 
+    final reportPayload = _metricsJsonPayload(normalizedOutput);
+    if (reportPayload == null) {
+      return _UnusedScan.failure('$mode emitted malformed JSON');
+    }
+
     dynamic decoded;
     try {
-      decoded = jsonDecode(normalizedOutput);
+      decoded = jsonDecode(reportPayload);
     } on FormatException {
       return _UnusedScan.failure('$mode emitted malformed JSON');
     } catch (_) {
@@ -186,17 +191,39 @@ List<dynamic>? _strictUnusedRecords(dynamic decoded, String mode) {
 String _stripAnsi(String output) =>
     output.replaceAll(RegExp('\u001b\\[[0-?]*[ -/]*[@-~]'), '');
 
-bool _isConfirmedZeroFindingOutput(String output) {
-  // dart_code_linter 3.x ignores --reporter=json for a clean scan and emits
-  // only this completion line (plus optional update notices). Treat that exact
-  // tool-owned success signal as zero findings; arbitrary non-JSON output is
-  // still a failed scan.
-  return !output.contains('{') &&
-      !output.contains('[') &&
-      RegExp(
-        r'(^|\n)✔ Analysis is completed\. Preparing the results: [^\n]+',
-      ).hasMatch(output);
+String _normalizeMetricsOutput(String output) {
+  // The 3.2.1 progress logger repeatedly clears the current terminal line
+  // before writing its final completion record. Preserve that terminal
+  // behavior instead of turning every carriage return into visible output.
+  final frames = output.replaceAll('\r\n', '\n').split('\u001b[2K\r');
+  var rendered = frames.first;
+  for (final frame in frames.skip(1)) {
+    final lineStart = rendered.lastIndexOf('\n') + 1;
+    rendered = '${rendered.substring(0, lineStart)}$frame';
+  }
+  return _stripAnsi(rendered).replaceAll('\r', '\n').trim();
 }
+
+const _metricsCompletionPrefix =
+    '✔ Analysis is completed. Preparing the results: ';
+
+final _metricsCompletionLine = RegExp(
+  '^${RegExp.escape(_metricsCompletionPrefix)}(?:[0-9]+ms|[0-9]+\\.[0-9]s)\$',
+);
+
+final _metricsReportOutput = RegExp(
+  '^${RegExp.escape(_metricsCompletionPrefix)}(?:[0-9]+ms|[0-9]+\\.[0-9]s)\\n\\n(.+)\$',
+  dotAll: true,
+);
+
+bool _isConfirmedZeroFindingOutput(String output) {
+  // dart_code_linter 3.2.1 emits exactly this progress completion line for a
+  // clean scan, because its JSON reporters print nothing for an empty report.
+  return _metricsCompletionLine.hasMatch(output);
+}
+
+String? _metricsJsonPayload(String output) =>
+    _metricsReportOutput.firstMatch(output)?.group(1);
 
 String? _formatUnusedDeclaration(Map<dynamic, dynamic> issue) {
   final type = issue['declarationType'] as String?;

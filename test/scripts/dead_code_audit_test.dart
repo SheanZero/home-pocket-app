@@ -7,6 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../scripts/audit/dead_code.dart' as dead_code;
 
 void main() {
+  const metricsCompletionLine =
+      '✔ Analysis is completed. Preparing the results: 7.3s';
+
+  String metricsJson(Map<String, dynamic> report) =>
+      '$metricsCompletionLine\n\n${jsonEncode(report)}';
+
   ProcessResult result({
     int exitCode = 0,
     String stdout = '✔ Analysis is completed. Preparing the results: 7.3s',
@@ -88,7 +94,7 @@ void main() {
       () async {
         final run = await dead_code.runDeadCodeAudit(
           commandRunner: (_, _) async => result(
-            stdout: jsonEncode({
+            stdout: metricsJson({
               'formatVersion': 2,
               'timestamp': '2026-08-06T00:00:00.000Z',
               'unusedCode': [
@@ -116,7 +122,7 @@ void main() {
       () async {
         final run = await dead_code.runDeadCodeAudit(
           commandRunner: (_, _) async => result(
-            stdout: jsonEncode({
+            stdout: metricsJson({
               'formatVersion': 2,
               'timestamp': '2026-08-06T00:00:00.000Z',
               'unusedCode': [
@@ -142,7 +148,7 @@ void main() {
             arguments.contains('check-unused-files')
             ? result()
             : result(
-                stdout: jsonEncode({
+                stdout: metricsJson({
                   'formatVersion': 2,
                   'timestamp': '2026-08-06T00:00:00.000Z',
                   'unusedCode': [
@@ -166,5 +172,116 @@ void main() {
       expect(run.exitCode, 0);
       expect(run.envelope['findings'], hasLength(1));
     });
+
+    test(
+      'parses the captured metrics completion line followed by one report',
+      () async {
+        final report = jsonEncode({
+          'formatVersion': 2,
+          'timestamp': '2026-08-06T00:00:00.000Z',
+          'unusedCode': [
+            {
+              'path': 'lib/real_unused.dart',
+              'issues': [
+                {
+                  'declarationName': 'realUnused',
+                  'declarationType': 'function',
+                  'column': 1,
+                  'line': 2,
+                  'offset': 14,
+                },
+              ],
+            },
+          ],
+        });
+        final run = await dead_code.runDeadCodeAudit(
+          commandRunner: (_, arguments) async =>
+              arguments.contains('check-unused-files')
+              ? result()
+              : result(
+                  stdout:
+                      '\u001b[2K\r⠙ Checking unused code...'
+                      '\u001b[2K\r'
+                      '\u001b[2K\r⠹ Checking unused code for 1 file(s)... 0.1s'
+                      '\u001b[2K\r$metricsCompletionLine\n\n$report',
+                ),
+        );
+
+        expect(run.exitCode, 0);
+        expect(run.envelope['scan_state'], 'ran');
+        expect(run.envelope['findings'], hasLength(1));
+        expect(
+          (run.envelope['findings'] as List).single['file_path'],
+          'lib/real_unused.dart',
+        );
+      },
+    );
+
+    test('parses a nonempty unused-files metrics report', () async {
+      final run = await dead_code.runDeadCodeAudit(
+        commandRunner: (_, arguments) async =>
+            arguments.contains('check-unused-files')
+            ? result(
+                stdout: metricsJson({
+                  'formatVersion': 2,
+                  'timestamp': '2026-08-06T00:00:00.000Z',
+                  'unusedFiles': [
+                    {'path': 'lib/real_unused_file.dart'},
+                  ],
+                  'automaticallyDeleted': false,
+                }),
+              )
+            : result(),
+      );
+
+      expect(run.exitCode, 0);
+      expect(run.envelope['findings'], hasLength(1));
+      final finding = (run.envelope['findings'] as List).single as Map;
+      expect(finding['file_path'], 'lib/real_unused_file.dart');
+      expect(finding['line_start'], 1);
+      expect(finding['description'], contains('Unused file'));
+    });
+
+    test(
+      'fails closed for noncanonical or mixed completion-plus-report output',
+      () async {
+        final report = jsonEncode({
+          'formatVersion': 2,
+          'timestamp': '2026-08-06T00:00:00.000Z',
+          'unusedCode': const [],
+        });
+        final invalidOutputs = [
+          'notice\n$metricsCompletionLine\n\n$report',
+          '$metricsCompletionLine\n\n$report\ntrailing text',
+          '$metricsCompletionLine\n\n$report\n$report',
+          '$metricsCompletionLine\n\n{"formatVersion":2',
+          'unexpected completion\n$report',
+        ];
+
+        for (final stdout in invalidOutputs) {
+          final run = await dead_code.runDeadCodeAudit(
+            commandRunner: (_, _) async => result(stdout: stdout),
+          );
+
+          expect(run.exitCode, 1, reason: stdout);
+          expect(run.envelope['scan_state'], 'not_run', reason: stdout);
+          expect(run.envelope['findings'], isEmpty, reason: stdout);
+        }
+      },
+    );
+
+    test(
+      'accepts completion-only output only when it is the whole output',
+      () async {
+        final run = await dead_code.runDeadCodeAudit(
+          commandRunner: (_, _) async =>
+              result(stdout: 'notice\n$metricsCompletionLine'),
+        );
+
+        expect(run.exitCode, 1);
+        expect(run.envelope['scan_state'], 'not_run');
+        expect(run.envelope['findings'], isEmpty);
+      },
+    );
   });
 }
