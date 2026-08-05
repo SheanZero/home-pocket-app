@@ -158,6 +158,15 @@ class StableBaselineManifest {
       if (!_isIsoDate(row['queried_on'])) {
         diagnostics.add('toolchain $id queried_on must be an ISO date');
       }
+      if (row['decision'] == 'hold') {
+        for (final field in {'compatibility_reason', 'exit_condition'}) {
+          if (_isBlank(row[field])) {
+            diagnostics.add(
+              'toolchain $id hold is missing required field: $field',
+            );
+          }
+        }
+      }
     }
     final flutter = _map(toolchains['flutter']);
     for (final field in {'framework_revision', 'channel'}) {
@@ -197,6 +206,15 @@ class StableBaselineManifest {
         diagnostics.add(
           'dependency ${entry.key} queried_on must be an ISO date',
         );
+      }
+      if (row['decision'] == 'hold') {
+        for (final field in {'compatibility_reason', 'exit_condition'}) {
+          if (_isBlank(row[field])) {
+            diagnostics.add(
+              'dependency ${entry.key} hold is missing required field: $field',
+            );
+          }
+        }
       }
     }
 

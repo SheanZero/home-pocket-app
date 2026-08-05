@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -228,6 +229,32 @@ void main() {
           '"source": "https://pub.dev/packages/file_picker"',
         ),
         'dependency file_picker is missing required field: official_source',
+      );
+    });
+
+    test('rejects a direct-dependency hold without a compatibility reason', () {
+      final manifest = jsonDecode(baseline()) as Map<String, dynamic>;
+      final dependencies =
+          manifest['direct_dependencies'] as Map<String, dynamic>;
+      final riverpod = dependencies['flutter_riverpod'] as Map<String, dynamic>;
+      riverpod.remove('compatibility_reason');
+
+      expectIssue(
+        jsonEncode(manifest),
+        'dependency flutter_riverpod hold is missing required field: '
+        'compatibility_reason',
+      );
+    });
+
+    test('rejects a toolchain hold with a blank exit condition', () {
+      final manifest = jsonDecode(baseline()) as Map<String, dynamic>;
+      final toolchains = manifest['toolchains'] as Map<String, dynamic>;
+      final xcode = toolchains['xcode'] as Map<String, dynamic>;
+      xcode['exit_condition'] = '   ';
+
+      expectIssue(
+        jsonEncode(manifest),
+        'toolchain xcode hold is missing required field: exit_condition',
       );
     });
 
