@@ -23,10 +23,7 @@ void main() {
     test('accentPrimary is V15 deep green #456B59', () {
       expect(AppPalette.light.accentPrimary, const Color(0xFF456B59));
       expect(AppPalette.light.accentPrimaryText, const Color(0xFF456B59));
-      expect(
-        AppPalette.light.primaryActionForeground,
-        const Color(0xFFFFFFFF),
-      );
+      expect(AppPalette.light.primaryActionForeground, const Color(0xFFFFFFFF));
     });
 
     test('shared and info use the V15 information blue #4F7186', () {
@@ -82,10 +79,7 @@ void main() {
       expect(AppPalette.dark.accentPrimary, const Color(0xFF99BCA5));
       expect(AppPalette.dark.accentPrimaryText, const Color(0xFFB4D2BC));
       expect(AppPalette.dark.accentPrimaryLight, const Color(0xFF293B30));
-      expect(
-        AppPalette.dark.primaryActionForeground,
-        const Color(0xFF222923),
-      );
+      expect(AppPalette.dark.primaryActionForeground, const Color(0xFF222923));
       expect(AppPalette.dark.daily, const Color(0xFF7DC88D));
       expect(AppPalette.dark.dailyLight, const Color(0xFF1A2E1A));
       expect(AppPalette.dark.joy, const Color(0xFFE89BB0));
