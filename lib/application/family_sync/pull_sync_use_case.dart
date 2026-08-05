@@ -487,11 +487,12 @@ class PullSyncUseCase {
   }
 
   void _logReceivedPage(RelayPullResponse response, int pageCount) {
-    if (!kDebugMode) return;
-    debugPrint(
-      '[PullSync] Received ${response.messages.length} messages '
-      'on page $pageCount',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '[PullSync] Received ${response.messages.length} messages '
+        'on page $pageCount',
+      );
+    }
   }
 
   Future<bool> _handleGroupKeyMessage({
