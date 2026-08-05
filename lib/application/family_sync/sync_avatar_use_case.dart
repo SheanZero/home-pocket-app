@@ -12,6 +12,7 @@ import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../features/profile/domain/models/user_profile.dart';
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
+import '../../infrastructure/sync/avatar_mime_type.dart';
 import '../../infrastructure/sync/avatar_semantic_staging_store.dart';
 import 'avatar_semantic_staging_maintenance.dart';
 import 'profile_sync_operation_mapper.dart';
@@ -148,7 +149,7 @@ class SyncAvatarUseCase {
       );
     }
     final bytes = await file.readAsBytes();
-    final mimeType = _detectMimeType(bytes);
+    final mimeType = detectAvatarMimeType(bytes);
     final actualHash = hash_lib.sha256.convert(bytes).toString();
     if (mimeType == null || actualHash != expectedHash) {
       throw const AvatarSyncValidationException(
@@ -333,7 +334,7 @@ class SyncAvatarUseCase {
         );
       }
       final bytes = await avatarFile.readAsBytes();
-      final mimeType = _detectMimeType(bytes);
+      final mimeType = detectAvatarMimeType(bytes);
       if (mimeType == null) {
         throw const AvatarSyncValidationException(
           'local avatar format is not supported',
@@ -585,7 +586,7 @@ class SyncAvatarUseCase {
       );
     }
     if (bytes.length != declaredLength ||
-        _detectMimeType(bytes) != mimeType ||
+        detectAvatarMimeType(bytes) != mimeType ||
         hash_lib.sha256.convert(bytes).toString() != declaredHash) {
       throw const AvatarSyncValidationException(
         'avatar content integrity check failed',
@@ -709,38 +710,6 @@ class SyncAvatarUseCase {
   };
 
   static int get _maxEncodedLength => ((maxAvatarBytes + 2) ~/ 3) * 4 + 4;
-
-  static String? _detectMimeType(List<int> bytes) {
-    if (bytes.length >= 3 &&
-        bytes[0] == 0xff &&
-        bytes[1] == 0xd8 &&
-        bytes[2] == 0xff) {
-      return 'image/jpeg';
-    }
-    if (bytes.length >= 8 &&
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4e &&
-        bytes[3] == 0x47 &&
-        bytes[4] == 0x0d &&
-        bytes[5] == 0x0a &&
-        bytes[6] == 0x1a &&
-        bytes[7] == 0x0a) {
-      return 'image/png';
-    }
-    if (bytes.length >= 12 &&
-        bytes[0] == 0x52 &&
-        bytes[1] == 0x49 &&
-        bytes[2] == 0x46 &&
-        bytes[3] == 0x46 &&
-        bytes[8] == 0x57 &&
-        bytes[9] == 0x45 &&
-        bytes[10] == 0x42 &&
-        bytes[11] == 0x50) {
-      return 'image/webp';
-    }
-    return null;
-  }
 
   Future<void> _deleteReplacedAvatarBestEffort({
     required String? previousPath,
