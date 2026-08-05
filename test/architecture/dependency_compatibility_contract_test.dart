@@ -324,6 +324,30 @@ void main() {
       );
     });
 
+    test('rejects native iOS deployment targets below 15.0', () {
+      final podfileInput = currentInputs();
+      podfileInput['podfile'] = podfileInput['podfile']!.replaceFirst(
+        "platform :ios, '15.0'",
+        "platform :ios, '14.0'",
+      );
+      expect(
+        validate(podfileInput),
+        contains('ios/Podfile platform must declare iOS 15.0 or later'),
+      );
+
+      final xcodeInput = currentInputs();
+      xcodeInput['xcode'] = xcodeInput['xcode']!.replaceFirst(
+        'IPHONEOS_DEPLOYMENT_TARGET = 15.0;',
+        'IPHONEOS_DEPLOYMENT_TARGET = 14.0;',
+      );
+      expect(
+        validate(xcodeInput),
+        contains(
+          'every Xcode IPHONEOS_DEPLOYMENT_TARGET must be iOS 15.0 or later',
+        ),
+      );
+    });
+
     test('rejects missing Stable CI mode contract marker', () {
       final input = currentInputs();
       input['audit'] = input['audit']!.replaceFirst(

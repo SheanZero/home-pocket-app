@@ -390,6 +390,11 @@ CompatibilityReport validateDependencyCompatibility({
       'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
     );
   }
+  _validateIosDeploymentTargets(
+    issues: issues,
+    podfile: podfile,
+    xcodeProject: xcodeProject,
+  );
   if (pubspecOverridesPresent) {
     issues.add('pubspec_overrides.yaml must not be present');
   }
@@ -434,6 +439,35 @@ bool _hasActiveSqlCipherLinkerStrip(String podfile) => RegExp(
   r'''installer\.pods_project\.targets\.each do \|target\|[\s\S]*?target\.build_configurations\.each do \|config\|[\s\S]*?^\s*stripped\s*=\s*original\.gsub\(/\\s-l"\?sqlite3"\?/,\s*''\)\s*$[\s\S]*?^\s*File\.write\(xcconfig_path,\s*stripped\)\s+if\s+stripped\s+!=\s+original\s*$''',
   multiLine: true,
 ).hasMatch(podfile);
+
+void _validateIosDeploymentTargets({
+  required List<String> issues,
+  required String podfile,
+  required String xcodeProject,
+}) {
+  final podfileVersion = RegExp(
+    r'''^\s*platform\s+:ios\s*,\s*['"]([^'"]+)['"]''',
+    multiLine: true,
+  ).firstMatch(podfile)?.group(1);
+  if (!_isAtLeastIos15(podfileVersion)) {
+    issues.add('ios/Podfile platform must declare iOS 15.0 or later');
+  }
+
+  final xcodeVersions = RegExp(
+    r'IPHONEOS_DEPLOYMENT_TARGET\s*=\s*([^;]+);',
+  ).allMatches(xcodeProject).map((match) => match.group(1)?.trim());
+  if (xcodeVersions.isEmpty ||
+      xcodeVersions.any((value) => !_isAtLeastIos15(value))) {
+    issues.add(
+      'every Xcode IPHONEOS_DEPLOYMENT_TARGET must be iOS 15.0 or later',
+    );
+  }
+}
+
+bool _isAtLeastIos15(String? version) =>
+    version != null &&
+    RegExp(r'^\d+(?:\.\d+){0,2}$').hasMatch(version) &&
+    _compareVersion(version, '15.0') >= 0;
 
 CompatibilityReport _reportFromMessages(
   Iterable<String> messages,
