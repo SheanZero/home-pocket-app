@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/settings/export_backup_use_case.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/book_dao.dart';
@@ -286,5 +287,100 @@ void main() {
       expect(transactions.map((t) => t.id), ['tx_new']);
       expect(await transactionRepo.findAllByBook('book_old'), isEmpty);
     });
+
+    test(
+      'full-application backup round trip preserves transactions for both books',
+      () async {
+        final bookA = Book(
+          id: 'book_a',
+          name: 'Household',
+          currency: 'JPY',
+          deviceId: 'dev_001',
+          createdAt: DateTime.utc(2026, 8, 1),
+        );
+        final bookB = Book(
+          id: 'book_b',
+          name: 'Travel',
+          currency: 'JPY',
+          deviceId: 'dev_001',
+          createdAt: DateTime.utc(2026, 8, 1),
+        );
+        final transactionA = Transaction(
+          id: 'tx_a',
+          bookId: bookA.id,
+          deviceId: 'dev_001',
+          amount: 1000,
+          type: TransactionType.expense,
+          categoryId: oldCategory.id,
+          ledgerType: LedgerType.daily,
+          timestamp: DateTime.utc(2026, 8, 2),
+          currentHash: 'hash_a',
+          createdAt: DateTime.utc(2026, 8, 2),
+        );
+        final transactionB = Transaction(
+          id: 'tx_b',
+          bookId: bookB.id,
+          deviceId: 'dev_001',
+          amount: 2000,
+          type: TransactionType.expense,
+          categoryId: oldCategory.id,
+          ledgerType: LedgerType.daily,
+          timestamp: DateTime.utc(2026, 8, 3),
+          currentHash: 'hash_b',
+          createdAt: DateTime.utc(2026, 8, 3),
+        );
+        await bookRepo.insert(bookA);
+        await bookRepo.insert(bookB);
+        await transactionRepo.insert(transactionA);
+        await transactionRepo.insert(transactionB);
+
+        final exportUseCase = ExportBackupUseCase(
+          transactionRepo: transactionRepo,
+          categoryRepo: categoryRepo,
+          bookRepo: bookRepo,
+          settingsRepo: settingsRepo,
+          exchangeRateRepo: exchangeRateRepo,
+          unitOfWork: UnitOfWorkImpl(db: db),
+          backupCrypto: BackupCryptoService(),
+        );
+        when(
+          () => settingsRepo.getSettings(),
+        ).thenAnswer((_) async => const AppSettings());
+
+        final exported = await exportUseCase.execute(
+          bookId: bookA.id,
+          password: 'password123',
+          outputDirectory: tempDir,
+        );
+        expect(exported.isSuccess, isTrue, reason: exported.error ?? '');
+
+        // A post-backup write confirms import replaces book B with its
+        // archived transaction rather than silently leaving it empty.
+        await transactionRepo.insert(
+          transactionB.copyWith(
+            id: 'tx_b_after_backup',
+            timestamp: DateTime.utc(2026, 8, 4),
+            createdAt: DateTime.utc(2026, 8, 4),
+            currentHash: 'hash_b_after_backup',
+          ),
+        );
+
+        final restored = await useCase.execute(
+          backupFile: exported.data!,
+          password: 'password123',
+        );
+
+        expect(restored.isSuccess, isTrue, reason: restored.error ?? '');
+        expect(
+          (await transactionRepo.findAllByBook(bookA.id)).map((tx) => tx.id),
+          ['tx_a'],
+        );
+        expect(
+          (await transactionRepo.findAllByBook(bookB.id)).map((tx) => tx.id),
+          ['tx_b'],
+          reason: 'restoring a full archive must not empty a second book',
+        );
+      },
+    );
   });
 }

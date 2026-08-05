@@ -62,6 +62,7 @@ ExportBackupUseCase exportBackupUseCase(Ref ref) {
     bookRepo: ref.watch(bookRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
     exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
+    unitOfWork: ref.watch(unitOfWorkProvider),
     backupCrypto: ref.watch(app_settings.appBackupCryptoServiceProvider),
   );
 }

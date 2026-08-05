@@ -16,6 +16,12 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
+
+class _FakeUnitOfWork implements UnitOfWork {
+  @override
+  Future<T> run<T>(Future<T> Function() action) => action();
+}
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
@@ -50,6 +56,7 @@ void main() {
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
+      unitOfWork: _FakeUnitOfWork(),
       backupCrypto: backupCrypto,
     );
 
@@ -157,6 +164,86 @@ void main() {
     await file.delete();
   });
 
+  test(
+    'exports transactions for every retained book, not only the selected book',
+    () async {
+      final now = DateTime.utc(2026, 8, 5);
+      final bookA = Book(
+        id: 'book-a',
+        name: 'Household',
+        currency: 'JPY',
+        deviceId: 'dev',
+        createdAt: now,
+      );
+      final bookB = Book(
+        id: 'book-b',
+        name: 'Travel',
+        currency: 'JPY',
+        deviceId: 'dev',
+        createdAt: now,
+      );
+      final transactionA = Transaction(
+        id: 'tx-a',
+        bookId: bookA.id,
+        deviceId: 'dev',
+        amount: 1000,
+        type: TransactionType.expense,
+        categoryId: 'cat-1',
+        ledgerType: LedgerType.daily,
+        timestamp: now,
+        currentHash: 'hash-a',
+        createdAt: now,
+      );
+      final transactionB = Transaction(
+        id: 'tx-b',
+        bookId: bookB.id,
+        deviceId: 'dev',
+        amount: 2000,
+        type: TransactionType.expense,
+        categoryId: 'cat-1',
+        ledgerType: LedgerType.daily,
+        timestamp: now,
+        currentHash: 'hash-b',
+        createdAt: now,
+      );
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => [bookA, bookB]);
+      when(
+        () => mockTransactionRepo.findAllByBook(bookA.id),
+      ).thenAnswer((_) async => [transactionA]);
+      when(
+        () => mockTransactionRepo.findAllByBook(bookB.id),
+      ).thenAnswer((_) async => [transactionB]);
+      when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
+      when(
+        () => mockSettingsRepo.getSettings(),
+      ).thenAnswer((_) async => const AppSettings());
+      when(() => mockExchangeRateRepo.findAll()).thenAnswer((_) async => []);
+
+      final result = await useCase.execute(
+        bookId: bookA.id,
+        password: 'test-password-123',
+        outputDirectory: tempDir,
+      );
+
+      expect(result.isSuccess, isTrue);
+      final encrypted = await result.data!.readAsBytes();
+      final plaintext = await backupCrypto.decrypt(
+        encrypted,
+        'test-password-123',
+      );
+      final root =
+          jsonDecode(utf8.decode(gzip.decode(plaintext)))
+              as Map<String, dynamic>;
+      final transactions = root['transactions'] as List<dynamic>;
+      expect(
+        transactions.map((entry) => (entry as Map<String, dynamic>)['bookId']),
+        containsAllInOrder([bookA.id, bookB.id]),
+      );
+    },
+  );
+
   test('D-10: includes exchange rates in epoch-seconds backup shape', () async {
     when(
       () => mockTransactionRepo.findAllByBook('book-1'),
@@ -239,7 +326,17 @@ void main() {
       when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
       when(
         () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
-      ).thenAnswer((_) async => []);
+      ).thenAnswer(
+        (_) async => [
+          Book(
+            id: 'book-1',
+            name: 'Default',
+            currency: 'JPY',
+            deviceId: 'dev',
+            createdAt: now,
+          ),
+        ],
+      );
       when(
         () => mockSettingsRepo.getSettings(),
       ).thenAnswer((_) async => const AppSettings());
