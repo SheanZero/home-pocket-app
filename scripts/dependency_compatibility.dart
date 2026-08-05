@@ -452,7 +452,21 @@ CompatibilityReport validateDependencyCompatibility({
 bool _hasActiveSqlCipherLinkerStrip(String podfile) => RegExp(
   r'''installer\.pods_project\.targets\.each do \|target\|[\s\S]*?target\.build_configurations\.each do \|config\|[\s\S]*?^\s*stripped\s*=\s*original\.gsub\(/\\s-l"\?sqlite3"\?/,\s*''\)\s*$[\s\S]*?^\s*File\.write\(xcconfig_path,\s*stripped\)\s+if\s+stripped\s+!=\s+original\s*$''',
   multiLine: true,
-).hasMatch(podfile);
+).hasMatch(_withoutRubyComments(podfile));
+
+String _withoutRubyComments(String source) {
+  final withoutBlockComments = source.replaceAll(
+    RegExp(
+      r'^[ \t]*=begin[ \t]*(?:\r?\n|$)[\s\S]*?^[ \t]*=end[ \t]*(?:\r?\n|$)',
+      multiLine: true,
+    ),
+    '',
+  );
+  return withoutBlockComments.replaceAll(
+    RegExp(r'^[ \t]*#.*(?:\r?\n|$)', multiLine: true),
+    '',
+  );
+}
 
 void _validateIosDeploymentTargets({
   required List<String> issues,

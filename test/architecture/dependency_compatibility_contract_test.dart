@@ -310,6 +310,25 @@ void main() {
       );
     });
 
+    test('rejects a SQLCipher linker strip inside a Ruby block comment', () {
+      final input = currentInputs();
+      input['podfile'] = input['podfile']!.replaceFirst(
+        '''      stripped = original.gsub(/\\s-l"?sqlite3"?/, '')
+      File.write(xcconfig_path, stripped) if stripped != original''',
+        '''      =begin
+      stripped = original.gsub(/\\s-l"?sqlite3"?/, '')
+      File.write(xcconfig_path, stripped) if stripped != original
+      =end''',
+      );
+
+      expect(
+        validate(input),
+        contains(
+          'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
+        ),
+      );
+    });
+
     test('rejects an incomplete atomic compatibility lane', () {
       expectIssue(
         baseline().replaceFirst(' + sqlite3 2.9.4', ''),
