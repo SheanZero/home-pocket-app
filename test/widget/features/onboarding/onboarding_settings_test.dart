@@ -17,6 +17,7 @@ import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/profile/presentation/screens/avatar_picker_screen.dart';
 import 'package:home_pocket/features/profile/presentation/widgets/avatar_display.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -66,6 +67,15 @@ class _FakeUserProfileRepository implements UserProfileRepository {
 class _MockAppLockService extends Mock implements AppLockService {}
 
 class _MockBiometricService extends Mock implements BiometricService {}
+
+class _CapturingNavigatorObserver extends NavigatorObserver {
+  final List<Route<dynamic>> pushed = [];
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    pushed.add(route);
+  }
+}
 
 class _SuccessfulBiometricService extends Fake implements BiometricService {
   @override
@@ -155,6 +165,7 @@ Widget _host({
   VoidCallback? onConfirmed,
   BiometricAvailability biometricAvailability = BiometricAvailability.faceId,
   BiometricService? biometricService,
+  List<NavigatorObserver> navigatorObservers = const [],
 }) {
   return ProviderScope(
     overrides: [
@@ -168,6 +179,7 @@ Widget _host({
     ],
     child: MaterialApp(
       locale: const Locale('ja'),
+      navigatorObservers: navigatorObservers,
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -244,6 +256,44 @@ void main() {
         expect(find.widgetWithText(TextButton, 'この設定ではじめる'), findsOneWidget);
       },
     );
+  });
+
+  group('OnboardingSettingsScreen — avatar picker result', () {
+    testWidgets('applies a selected emoji and image path', (tester) async {
+      await tester.pumpWidget(_host());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('onboarding-avatar-block')));
+      await tester.pumpAndSettle();
+      Navigator.of(tester.element(find.byType(AvatarPickerScreen))).pop(
+        const AvatarPickerResult(emoji: '🌻', imagePath: '/avatars/new.jpg'),
+      );
+      await tester.pumpAndSettle();
+
+      final avatar = tester.widget<AvatarDisplay>(find.byType(AvatarDisplay));
+      expect(avatar.emoji, '🌻');
+      expect(avatar.imagePath, '/avatars/new.jpg');
+    });
+
+    testWidgets('ignores a picker result after the host is disposed', (
+      tester,
+    ) async {
+      final observer = _CapturingNavigatorObserver();
+      await tester.pumpWidget(_host(navigatorObservers: [observer]));
+      await tester.pumpAndSettle();
+
+      final onboardingRoute = observer.pushed.single;
+      await tester.tap(find.byKey(const ValueKey('onboarding-avatar-block')));
+      await tester.pumpAndSettle();
+
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      navigator.removeRoute(onboardingRoute);
+      await tester.pump();
+      navigator.pop(const AvatarPickerResult(emoji: '🌻'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('OnboardingSettingsScreen — D-14 nickname gate', () {

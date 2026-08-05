@@ -28,6 +28,22 @@ class AvatarPickerScreen extends StatefulWidget {
   final String currentEmoji;
   final String? currentImagePath;
 
+  /// Opens the picker and returns the saved avatar selection, if any.
+  static Future<AvatarPickerResult?> show(
+    BuildContext context, {
+    required String currentEmoji,
+    String? currentImagePath,
+  }) {
+    return Navigator.of(context).push<AvatarPickerResult>(
+      MaterialPageRoute(
+        builder: (_) => AvatarPickerScreen(
+          currentEmoji: currentEmoji,
+          currentImagePath: currentImagePath,
+        ),
+      ),
+    );
+  }
+
   @override
   State<AvatarPickerScreen> createState() => _AvatarPickerScreenState();
 }

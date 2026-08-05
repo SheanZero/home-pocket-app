@@ -128,13 +128,10 @@ class _OnboardingSettingsScreenState
   // ── Editors ───────────────────────────────────────────────────────────────
 
   Future<void> _openAvatarPicker() async {
-    final result = await Navigator.of(context).push<AvatarPickerResult>(
-      MaterialPageRoute(
-        builder: (_) => AvatarPickerScreen(
-          currentEmoji: _selectedEmoji,
-          currentImagePath: _selectedImagePath,
-        ),
-      ),
+    final result = await AvatarPickerScreen.show(
+      context,
+      currentEmoji: _selectedEmoji,
+      currentImagePath: _selectedImagePath,
     );
     if (result == null || !mounted) {
       return;
