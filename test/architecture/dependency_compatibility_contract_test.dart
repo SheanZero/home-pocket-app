@@ -525,6 +525,43 @@ void main() {
     },
   );
 
+  test('future probe rejects malformed beta SDK machine identities', () {
+    const nonStringMachineJson = '''
+{
+  "flutterVersion": 1,
+  "channel": "beta",
+  "frameworkRevision": "aabbccddeeff00112233445566778899aabbccdd",
+  "dartSdkVersion": false
+}
+''';
+    final malformedMachineJsons = [
+      nonStringMachineJson,
+      _betaFlutterMachineJson.replaceFirst('3.45.0-0.1.pre', 'not-a-version'),
+      _betaFlutterMachineJson.replaceFirst(
+        'aabbccddeeff00112233445566778899aabbccdd',
+        'not-a-revision',
+      ),
+    ];
+    for (final machineJson in malformedMachineJsons) {
+      final probe = validateReport(
+        currentInputs(),
+        baselineJson: File(
+          'docs/testing/STABLE_BASELINE.json',
+        ).readAsStringSync(),
+        mode: compatibility.DependencyCompatibilityMode.futureProbe,
+        runningFlutterMachineJson: machineJson,
+      );
+
+      expect(
+        probe.errors.map((issue) => issue.message),
+        contains(
+          'running Flutter --version --machine output must contain well-formed string Flutter identity fields',
+        ),
+      );
+      expect(probe.warnings, isEmpty);
+    }
+  });
+
   test('future probe keeps beta Android floor regression blocking', () {
     final probe = validateReport(
       currentInputs(),
@@ -552,31 +589,38 @@ void main() {
         'dart run scripts/dependency_compatibility.dart '
         '--mode=future-probe --verify-running-flutter-sdk';
 
-    test('Stable analysis pins, locks, and verifies the baseline before analyze',
-        () {
-      final audit = currentInputs()['audit']!;
-      expect(audit, contains('flutter-version: 3.44.8'));
-      expect(audit, contains('flutter pub get --enforce-lockfile'));
-      expect(audit, contains(baselineCommand));
-      expect(
-        audit.indexOf('flutter pub get --enforce-lockfile'),
-        lessThan(audit.indexOf(baselineCommand)),
-      );
-      expect(
-        audit.indexOf(baselineCommand),
-        lessThan(audit.indexOf('run: flutter analyze')),
-      );
-    });
+    test(
+      'Stable analysis pins, locks, and verifies the baseline before analyze',
+      () {
+        final audit = currentInputs()['audit']!;
+        expect(audit, contains('flutter-version: 3.44.8'));
+        expect(audit, contains('flutter pub get --enforce-lockfile'));
+        expect(audit, contains(baselineCommand));
+        expect(
+          audit.indexOf('flutter pub get --enforce-lockfile'),
+          lessThan(audit.indexOf(baselineCommand)),
+        );
+        expect(
+          audit.indexOf(baselineCommand),
+          lessThan(audit.indexOf('run: flutter analyze')),
+        );
+      },
+    );
 
-    test('both beta jobs are explicit future probes that keep their builds', () {
-      final future = currentInputs()['future']!;
-      expect(RegExp(r'channel: beta').allMatches(future), hasLength(2));
-      expect(RegExp(RegExp.escape(futureProbeCommand)).allMatches(future),
-          hasLength(2));
-      expect(future, contains('flutter build apk --debug'));
-      expect(future, contains('flutter build ios --simulator --debug'));
-      expect(future, isNot(contains('--mode=baseline')));
-    });
+    test(
+      'both beta jobs are explicit future probes that keep their builds',
+      () {
+        final future = currentInputs()['future']!;
+        expect(RegExp(r'channel: beta').allMatches(future), hasLength(2));
+        expect(
+          RegExp(RegExp.escape(futureProbeCommand)).allMatches(future),
+          hasLength(2),
+        );
+        expect(future, contains('flutter build apk --debug'));
+        expect(future, contains('flutter build ios --simulator --debug'));
+        expect(future, isNot(contains('--mode=baseline')));
+      },
+    );
   });
 
   test(

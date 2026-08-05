@@ -692,6 +692,10 @@ void _validateFlutterIdentity({
       issues.add(
         'running Flutter --version --machine output must include Flutter identity fields',
       );
+    } else if (!_hasWellFormedMachineIdentity(machine)) {
+      issues.add(
+        'running Flutter --version --machine output must contain well-formed string Flutter identity fields',
+      );
     } else if (mode == DependencyCompatibilityMode.futureProbe &&
         machine['channel'] == 'beta') {
       issues.add(
@@ -727,6 +731,24 @@ void _validateFlutterIdentity({
       );
     }
   }
+}
+
+bool _hasWellFormedMachineIdentity(Map<String, Object?> machine) {
+  final flutterVersion = machine['flutterVersion'];
+  final channel = machine['channel'];
+  final frameworkRevision = machine['frameworkRevision'];
+  final dartSdkVersion = machine['dartSdkVersion'];
+  final version = RegExp(
+    r'^\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?(?:\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$',
+  );
+  return flutterVersion is String &&
+      channel is String &&
+      frameworkRevision is String &&
+      dartSdkVersion is String &&
+      channel.trim().isNotEmpty &&
+      version.hasMatch(flutterVersion) &&
+      version.hasMatch(dartSdkVersion) &&
+      RegExp(r'^[0-9a-fA-F]{40}$').hasMatch(frameworkRevision);
 }
 
 Map<String, Object?> _parseMachineJson(String source, List<String> issues) {
