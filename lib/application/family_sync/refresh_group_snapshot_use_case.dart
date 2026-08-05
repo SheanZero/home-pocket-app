@@ -88,137 +88,35 @@ class RefreshGroupSnapshotUseCase {
     final generation = (_requestGeneration[groupId] ?? 0) + 1;
     _requestGeneration[groupId] = generation;
 
-    final localGroup = await _groupRepository.getActiveGroup();
-    if (localGroup == null || localGroup.groupId != groupId) {
+    final preparation = await _prepareRefresh(
+      groupId: groupId,
+      controlEvent: controlEvent,
+      controlEvents: controlEvents,
+    );
+    if (preparation case _RefreshIgnored()) {
       return const RefreshGroupSnapshotIgnored();
     }
-
-    final revisionedRepository = _groupRepository is RevisionedGroupRepository
-        ? _groupRepository as RevisionedGroupRepository
-        : null;
-    final eventId = _nonEmptyString(controlEvent?['eventId']);
-    if (controlEvents.isEmpty &&
-        eventId != null &&
-        revisionedRepository != null &&
-        await revisionedRepository.hasProcessedControlEvent(eventId)) {
-      return const RefreshGroupSnapshotIgnored();
+    if (preparation case _RefreshFailed(:final message)) {
+      return RefreshGroupSnapshotFailed(message);
     }
-
-    final deviceId = await _keyManager.getDeviceId();
-    if (deviceId == null || deviceId.isEmpty) {
-      return const RefreshGroupSnapshotFailed('Device identity unavailable');
-    }
+    final context = preparation as _RefreshReady;
 
     try {
-      var snapshot = await _apiClient.getGroupStatus(groupId);
-      if (await _membershipRotation?.recoverFromSnapshot(snapshot) == true) {
-        snapshot = await _apiClient.getGroupStatus(groupId);
-      }
-      if (_requestGeneration[groupId] != generation) {
+      final snapshot = await _fetchSnapshot(groupId);
+      if (!_isCurrentRequest(groupId, generation)) {
         return const RefreshGroupSnapshotIgnored();
       }
-
-      if (snapshot['groupId'] != groupId) {
-        return const RefreshGroupSnapshotFailed(
-          'Authoritative group snapshot has a mismatched group id',
-        );
-      }
-      if (snapshot['status'] != 'active') {
-        return const RefreshGroupSnapshotMembershipInvalid(
-          'Group is inactive',
-          statusCode: 404,
-        );
-      }
-
-      final members = _parseMembers(snapshot['members']);
-      final isActiveMember = members.any(
-        (member) => member.deviceId == deviceId && member.status == 'active',
-      );
-      if (!isActiveMember) {
-        return const RefreshGroupSnapshotMembershipInvalid(
-          'Device is no longer an active group member',
-        );
-      }
-
-      final localMember = members.firstWhere(
-        (member) => member.deviceId == deviceId,
-      );
-      final keyEpoch = (snapshot['keyEpoch'] as num?)?.toInt();
-      if (keyEpoch == null || keyEpoch < 1) {
-        return const RefreshGroupSnapshotFailed(
-          'Authoritative group snapshot has an invalid key epoch',
-        );
-      }
-
-      final groupName = snapshot['groupName'];
-      if (groupName is! String || groupName.trim().isEmpty) {
-        return const RefreshGroupSnapshotFailed(
-          'Authoritative group snapshot has an invalid name',
-        );
-      }
-
-      // Re-check after the network boundary. The repository update also uses
-      // `status = active` in its WHERE clause, closing the remaining race.
-      final currentGroup = await _groupRepository.getActiveGroup();
-      if (_requestGeneration[groupId] != generation ||
-          currentGroup == null ||
-          currentGroup.groupId != groupId) {
+      final validation = _validateSnapshot(snapshot, context);
+      if (validation case _InvalidSnapshot(:final result)) return result;
+      if (!await _isCurrentActiveGroup(groupId, generation)) {
         return const RefreshGroupSnapshotIgnored();
       }
-
-      final revision = (snapshot['revision'] as num?)?.toInt();
-      final eventMetadata = _parseControlEvents(controlEvents);
-      if (eventMetadata.isNotEmpty && revision == null) {
-        return const RefreshGroupSnapshotFailed(
-          'Authoritative snapshot does not cover fetched control events',
-        );
-      }
-      if (revision != null &&
-          eventMetadata.any((event) => event.revision > revision)) {
-        return const RefreshGroupSnapshotFailed(
-          'Authoritative snapshot revision is behind the control feed',
-        );
-      }
-      final updatedAt = DateTime.tryParse(
-        snapshot['updatedAt'] as String? ?? '',
+      return await _applySnapshot(
+        context: context,
+        validation: validation as _ValidSnapshot,
+        controlEvent: controlEvent,
+        controlEvents: controlEvents,
       );
-      final updated = revisionedRepository != null && revision != null
-          ? await revisionedRepository.applyRevisionedAuthoritativeSnapshot(
-              groupId: groupId,
-              groupName: groupName,
-              role: localMember.role,
-              keyEpoch: keyEpoch,
-              members: members,
-              revision: revision,
-              updatedAt: updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
-              snapshotDigest: controlSnapshotDigest(
-                groupId: groupId,
-                groupName: groupName,
-                role: localMember.role,
-                keyEpoch: keyEpoch,
-                members: members,
-              ),
-              eventId: eventId,
-              eventRevision: _intValue(controlEvent?['revision']),
-              eventType:
-                  _nonEmptyString(controlEvent?['controlEventType']) ??
-                  _nonEmptyString(controlEvent?['type']),
-              eventOccurredAt: DateTime.tryParse(
-                _nonEmptyString(controlEvent?['occurredAt']) ?? '',
-              ),
-              controlEvents: eventMetadata,
-            )
-          : await _groupRepository.applyAuthoritativeSnapshot(
-              groupId: groupId,
-              groupName: groupName,
-              role: localMember.role,
-              keyEpoch: keyEpoch,
-              members: members,
-            );
-      if (!updated) {
-        return const RefreshGroupSnapshotIgnored();
-      }
-      return RefreshGroupSnapshotApplied(groupName: groupName);
     } on RelayApiException catch (error) {
       if (error.isForbidden || error.isNotFound) {
         return RefreshGroupSnapshotMembershipInvalid(
@@ -241,6 +139,184 @@ class RefreshGroupSnapshotUseCase {
       );
       return RefreshGroupSnapshotFailed(failure.message, kind: failure.kind);
     }
+  }
+
+  Future<_RefreshPreparation> _prepareRefresh({
+    required String groupId,
+    required Map<String, dynamic>? controlEvent,
+    required List<Map<String, dynamic>> controlEvents,
+  }) async {
+    final localGroup = await _groupRepository.getActiveGroup();
+    if (localGroup == null || localGroup.groupId != groupId) {
+      return const _RefreshIgnored();
+    }
+    final revisioned = _groupRepository is RevisionedGroupRepository
+        ? _groupRepository as RevisionedGroupRepository
+        : null;
+    final eventId = _nonEmptyString(controlEvent?['eventId']);
+    if (controlEvents.isEmpty &&
+        eventId != null &&
+        revisioned != null &&
+        await revisioned.hasProcessedControlEvent(eventId)) {
+      return const _RefreshIgnored();
+    }
+    final deviceId = await _keyManager.getDeviceId();
+    if (deviceId == null || deviceId.isEmpty) {
+      return const _RefreshFailed('Device identity unavailable');
+    }
+    return _RefreshReady(
+      groupId: groupId,
+      deviceId: deviceId,
+      eventId: eventId,
+      revisionedRepository: revisioned,
+    );
+  }
+
+  Future<Map<String, dynamic>> _fetchSnapshot(String groupId) async {
+    var snapshot = await _apiClient.getGroupStatus(groupId);
+    if (await _membershipRotation?.recoverFromSnapshot(snapshot) == true) {
+      snapshot = await _apiClient.getGroupStatus(groupId);
+    }
+    return snapshot;
+  }
+
+  bool _isCurrentRequest(String groupId, int generation) =>
+      _requestGeneration[groupId] == generation;
+
+  Future<bool> _isCurrentActiveGroup(String groupId, int generation) async {
+    // Re-check after the network boundary. The repository update also uses
+    // `status = active` in its WHERE clause, closing the remaining race.
+    final currentGroup = await _groupRepository.getActiveGroup();
+    return _isCurrentRequest(groupId, generation) &&
+        currentGroup != null &&
+        currentGroup.groupId == groupId;
+  }
+
+  _SnapshotValidation _validateSnapshot(
+    Map<String, dynamic> snapshot,
+    _RefreshReady context,
+  ) {
+    if (snapshot['groupId'] != context.groupId) {
+      return const _InvalidSnapshot(
+        RefreshGroupSnapshotFailed(
+          'Authoritative group snapshot has a mismatched group id',
+        ),
+      );
+    }
+    if (snapshot['status'] != 'active') {
+      return const _InvalidSnapshot(
+        RefreshGroupSnapshotMembershipInvalid(
+          'Group is inactive',
+          statusCode: 404,
+        ),
+      );
+    }
+    final members = _parseMembers(snapshot['members']);
+    final localMember = _memberForDevice(members, context.deviceId);
+    if (localMember == null || localMember.status != 'active') {
+      return const _InvalidSnapshot(
+        RefreshGroupSnapshotMembershipInvalid(
+          'Device is no longer an active group member',
+        ),
+      );
+    }
+    final keyEpoch = (snapshot['keyEpoch'] as num?)?.toInt();
+    if (keyEpoch == null || keyEpoch < 1) {
+      return const _InvalidSnapshot(
+        RefreshGroupSnapshotFailed(
+          'Authoritative group snapshot has an invalid key epoch',
+        ),
+      );
+    }
+    final groupName = snapshot['groupName'];
+    if (groupName is! String || groupName.trim().isEmpty) {
+      return const _InvalidSnapshot(
+        RefreshGroupSnapshotFailed(
+          'Authoritative group snapshot has an invalid name',
+        ),
+      );
+    }
+    return _ValidSnapshot(
+      groupName: groupName,
+      keyEpoch: keyEpoch,
+      members: members,
+      localMember: localMember,
+      revision: (snapshot['revision'] as num?)?.toInt(),
+      updatedAt: DateTime.tryParse(snapshot['updatedAt'] as String? ?? ''),
+    );
+  }
+
+  Future<RefreshGroupSnapshotResult> _applySnapshot({
+    required _RefreshReady context,
+    required _ValidSnapshot validation,
+    required Map<String, dynamic>? controlEvent,
+    required List<Map<String, dynamic>> controlEvents,
+  }) async {
+    final eventMetadata = _parseControlEvents(controlEvents);
+    if (eventMetadata.isNotEmpty && validation.revision == null) {
+      return const RefreshGroupSnapshotFailed(
+        'Authoritative snapshot does not cover fetched control events',
+      );
+    }
+    if (validation.revision != null &&
+        eventMetadata.any((event) => event.revision > validation.revision!)) {
+      return const RefreshGroupSnapshotFailed(
+        'Authoritative snapshot revision is behind the control feed',
+      );
+    }
+    final updated = await _applyAuthoritativeSnapshot(
+      context: context,
+      validation: validation,
+      controlEvent: controlEvent,
+      eventMetadata: eventMetadata,
+    );
+    return updated
+        ? RefreshGroupSnapshotApplied(groupName: validation.groupName)
+        : const RefreshGroupSnapshotIgnored();
+  }
+
+  Future<bool> _applyAuthoritativeSnapshot({
+    required _RefreshReady context,
+    required _ValidSnapshot validation,
+    required Map<String, dynamic>? controlEvent,
+    required List<ControlEventMetadata> eventMetadata,
+  }) {
+    final revisioned = context.revisionedRepository;
+    if (revisioned != null && validation.revision != null) {
+      return revisioned.applyRevisionedAuthoritativeSnapshot(
+        groupId: context.groupId,
+        groupName: validation.groupName,
+        role: validation.localMember.role,
+        keyEpoch: validation.keyEpoch,
+        members: validation.members,
+        revision: validation.revision!,
+        updatedAt:
+            validation.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+        snapshotDigest: controlSnapshotDigest(
+          groupId: context.groupId,
+          groupName: validation.groupName,
+          role: validation.localMember.role,
+          keyEpoch: validation.keyEpoch,
+          members: validation.members,
+        ),
+        eventId: context.eventId,
+        eventRevision: _intValue(controlEvent?['revision']),
+        eventType:
+            _nonEmptyString(controlEvent?['controlEventType']) ??
+            _nonEmptyString(controlEvent?['type']),
+        eventOccurredAt: DateTime.tryParse(
+          _nonEmptyString(controlEvent?['occurredAt']) ?? '',
+        ),
+        controlEvents: eventMetadata,
+      );
+    }
+    return _groupRepository.applyAuthoritativeSnapshot(
+      groupId: context.groupId,
+      groupName: validation.groupName,
+      role: validation.localMember.role,
+      keyEpoch: validation.keyEpoch,
+      members: validation.members,
+    );
   }
 
   String? _nonEmptyString(Object? value) =>
@@ -292,4 +368,67 @@ class RefreshGroupSnapshotUseCase {
         )
         .toList();
   }
+
+  GroupMember? _memberForDevice(List<GroupMember> members, String deviceId) {
+    for (final member in members) {
+      if (member.deviceId == deviceId) return member;
+    }
+    return null;
+  }
+}
+
+sealed class _RefreshPreparation {
+  const _RefreshPreparation();
+}
+
+class _RefreshIgnored extends _RefreshPreparation {
+  const _RefreshIgnored();
+}
+
+class _RefreshFailed extends _RefreshPreparation {
+  const _RefreshFailed(this.message);
+
+  final String message;
+}
+
+class _RefreshReady extends _RefreshPreparation {
+  const _RefreshReady({
+    required this.groupId,
+    required this.deviceId,
+    required this.eventId,
+    required this.revisionedRepository,
+  });
+
+  final String groupId;
+  final String deviceId;
+  final String? eventId;
+  final RevisionedGroupRepository? revisionedRepository;
+}
+
+sealed class _SnapshotValidation {
+  const _SnapshotValidation();
+}
+
+class _InvalidSnapshot extends _SnapshotValidation {
+  const _InvalidSnapshot(this.result);
+
+  final RefreshGroupSnapshotResult result;
+}
+
+class _ValidSnapshot extends _SnapshotValidation {
+  const _ValidSnapshot({
+    required this.groupName,
+    required this.keyEpoch,
+    required this.members,
+    required this.localMember,
+    required this.revision,
+    required this.updatedAt,
+  });
+
+  final String groupName;
+  final int keyEpoch;
+  final List<GroupMember> members;
+  final GroupMember localMember;
+  final int? revision;
+  final DateTime? updatedAt;
 }

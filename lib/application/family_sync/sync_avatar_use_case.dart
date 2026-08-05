@@ -404,6 +404,46 @@ class SyncAvatarUseCase {
     int? envelopeRevision,
     String? originDeviceId,
   }) async {
+    final context = await _validateIncomingAvatarContext(
+      groupId: groupId,
+      senderDeviceId: senderDeviceId,
+      messageKeyEpoch: messageKeyEpoch,
+      payload: payload,
+      envelopeRevision: envelopeRevision,
+      originDeviceId: originDeviceId,
+    );
+    final candidate = _validateAvatarCandidate(payload, context);
+    if (context.versionedRepository != null &&
+        !candidate.isNewerThan(context.sender)) {
+      return;
+    }
+    final stored = await _storeIncomingAvatar(
+      payload: payload,
+      senderDeviceId: senderDeviceId,
+      appDirectory: appDirectory,
+      removed: candidate.removed,
+    );
+    final applied = await _applyIncomingAvatar(
+      context: context,
+      candidate: candidate,
+      stored: stored,
+    );
+    if (!applied) return;
+    await _deleteReplacedAvatarBestEffort(
+      previousPath: context.sender.avatarImagePath,
+      currentPath: stored.path,
+      appDirectory: appDirectory,
+    );
+  }
+
+  Future<_IncomingAvatarContext> _validateIncomingAvatarContext({
+    required String groupId,
+    required String senderDeviceId,
+    required int messageKeyEpoch,
+    required Map<String, dynamic> payload,
+    required int? envelopeRevision,
+    required String? originDeviceId,
+  }) async {
     final group = await _groupRepository.getGroupById(groupId);
     if (!_isActiveKeyedGroup(group) || group!.keyEpoch != messageKeyEpoch) {
       throw const AvatarSyncValidationException(
@@ -429,9 +469,9 @@ class SyncAvatarUseCase {
     final payloadRevision = (payload['revision'] as num?)?.toInt();
     final revision = envelopeRevision ?? payloadRevision ?? 0;
     if (revision < 0 ||
-        (envelopeRevision != null &&
+        envelopeRevision != null &&
             payloadRevision != null &&
-            envelopeRevision != payloadRevision)) {
+            envelopeRevision != payloadRevision) {
       throw const AvatarSyncValidationException('invalid avatar revision');
     }
     final resolvedOrigin = originDeviceId ?? senderDeviceId;
@@ -440,7 +480,22 @@ class SyncAvatarUseCase {
         'avatar origin does not match the authenticated sender',
       );
     }
+    return _IncomingAvatarContext(
+      groupId: groupId,
+      senderDeviceId: senderDeviceId,
+      sender: sender,
+      revision: revision,
+      originDeviceId: resolvedOrigin,
+      versionedRepository: _groupRepository is VersionedGroupMemberRepository
+          ? _groupRepository as VersionedGroupMemberRepository
+          : null,
+    );
+  }
 
+  _AvatarCandidate _validateAvatarCandidate(
+    Map<String, dynamic> payload,
+    _IncomingAvatarContext context,
+  ) {
     final displayName = payload['displayName'];
     final avatarEmoji = payload['avatarEmoji'];
     if (displayName is! String || avatarEmoji is! String) {
@@ -448,163 +503,188 @@ class SyncAvatarUseCase {
         'avatar identity fields are invalid',
       );
     }
-
     final removed = payload['removed'] == true;
-    final declaredContentHash = payload['avatarContentHash'];
-    final candidateDigest = removed
+    final digest = removed
         ? 'removed'
         : payload['sha256'] is String
         ? payload['sha256'] as String
         : '';
-    if (declaredContentHash != null && declaredContentHash != candidateDigest) {
+    if (payload['avatarContentHash'] case final declared?
+        when declared != digest) {
       throw const AvatarSyncValidationException(
         'avatar content identity is invalid',
       );
     }
-    final candidateVersion = MemberContentVersion(
-      revision: revision,
-      originDeviceId: resolvedOrigin,
-      contentDigest: candidateDigest,
+    return _AvatarCandidate(
+      displayName: displayName,
+      avatarEmoji: avatarEmoji,
+      removed: removed,
+      version: MemberContentVersion(
+        revision: context.revision,
+        originDeviceId: context.originDeviceId,
+        contentDigest: digest,
+      ),
     );
-    final currentVersion = MemberContentVersion(
-      revision: sender.avatarRevision,
-      originDeviceId: sender.avatarOriginDeviceId,
-      contentDigest: sender.avatarContentHash,
+  }
+
+  Future<_StoredAvatar> _storeIncomingAvatar({
+    required Map<String, dynamic> payload,
+    required String senderDeviceId,
+    required String appDirectory,
+    required bool removed,
+  }) async {
+    if (removed) return const _StoredAvatar();
+    final mimeType = payload['mimeType'];
+    final declaredLength = (payload['byteLength'] as num?)?.toInt();
+    final declaredHash = payload['sha256'];
+    final encodedBytes = payload['bytesBase64'];
+    if (mimeType is! String ||
+        !_extensionByMime.containsKey(mimeType) ||
+        declaredLength == null ||
+        declaredLength <= 0 ||
+        declaredLength > maxAvatarBytes ||
+        declaredHash is! String ||
+        !RegExp(r'^[0-9a-f]{64}$').hasMatch(declaredHash) ||
+        encodedBytes is! String ||
+        encodedBytes.length > _maxEncodedLength) {
+      throw const AvatarSyncValidationException('avatar metadata is invalid');
+    }
+    final bytes = _decodeAndVerifyAvatar(
+      encodedBytes: encodedBytes,
+      declaredLength: declaredLength,
+      declaredHash: declaredHash,
+      mimeType: mimeType,
     );
-    final versionedRepository =
-        _groupRepository is VersionedGroupMemberRepository
-        ? _groupRepository as VersionedGroupMemberRepository
-        : null;
-    if (versionedRepository != null &&
-        !candidateVersion.isStrictlyNewerThan(currentVersion)) {
-      return;
-    }
-
-    String? savedPath;
-    String? verifiedHash;
-    File? newlyCreatedAvatar;
-    if (!removed) {
-      final mimeType = payload['mimeType'];
-      final declaredLength = (payload['byteLength'] as num?)?.toInt();
-      final declaredHash = payload['sha256'];
-      final encodedBytes = payload['bytesBase64'];
-      if (mimeType is! String ||
-          !_extensionByMime.containsKey(mimeType) ||
-          declaredLength == null ||
-          declaredLength <= 0 ||
-          declaredLength > maxAvatarBytes ||
-          declaredHash is! String ||
-          !RegExp(r'^[0-9a-f]{64}$').hasMatch(declaredHash) ||
-          encodedBytes is! String ||
-          encodedBytes.length > _maxEncodedLength) {
-        throw const AvatarSyncValidationException('avatar metadata is invalid');
-      }
-
-      final List<int> avatarBytes;
-      try {
-        avatarBytes = base64Decode(encodedBytes);
-      } on FormatException {
-        throw const AvatarSyncValidationException(
-          'avatar bytes are not valid base64',
-        );
-      }
-      if (avatarBytes.length != declaredLength ||
-          _detectMimeType(avatarBytes) != mimeType ||
-          hash_lib.sha256.convert(avatarBytes).toString() != declaredHash) {
-        throw const AvatarSyncValidationException(
-          'avatar content integrity check failed',
-        );
-      }
-
-      final avatarsDir = Directory(path_lib.join(appDirectory, 'avatars'));
-      await avatarsDir.create(recursive: true);
-      final ownerToken = hash_lib.sha256
-          .convert(utf8.encode(senderDeviceId))
-          .toString();
-      final extension = _extensionByMime[mimeType]!;
-      final destination = File(
-        path_lib.join(
-          avatarsDir.path,
-          '${ownerToken}_${declaredHash.substring(0, 16)}.$extension',
-        ),
-      );
-      if (!path_lib.isWithin(avatarsDir.path, destination.path)) {
-        throw const AvatarSyncValidationException(
-          'avatar destination escaped its storage directory',
-        );
-      }
-
-      if (await destination.exists()) {
-        final existingBytes = await destination.readAsBytes();
-        if (existingBytes.length != declaredLength ||
-            hash_lib.sha256.convert(existingBytes).toString() != declaredHash) {
-          throw const AvatarSyncValidationException(
-            'existing avatar file failed integrity verification',
-          );
-        }
-      } else {
-        final temporary = File(
-          path_lib.join(
-            avatarsDir.path,
-            '.$ownerToken.${DateTime.now().microsecondsSinceEpoch}.tmp',
-          ),
-        );
-        try {
-          await temporary.writeAsBytes(avatarBytes, flush: true);
-          if (await temporary.length() != declaredLength) {
-            throw const AvatarSyncValidationException(
-              'temporary avatar write was incomplete',
-            );
-          }
-          await temporary.rename(destination.path);
-          newlyCreatedAvatar = destination;
-        } finally {
-          if (await temporary.exists()) {
-            try {
-              await temporary.delete();
-            } catch (_) {
-              // Best-effort cleanup; never expose the temporary path to UI.
-            }
-          }
-        }
-      }
-      savedPath = destination.path;
-      verifiedHash = declaredHash;
-    }
-
-    if (versionedRepository != null) {
-      try {
-        final applied = await versionedRepository.applyMemberAvatarVersioned(
-          groupId: groupId,
-          deviceId: senderDeviceId,
-          avatarImagePath: savedPath,
-          avatarImageHash: verifiedHash,
-          version: candidateVersion,
-        );
-        if (!applied) {
-          await _deleteFileBestEffort(newlyCreatedAvatar);
-          return;
-        }
-      } catch (_) {
-        await _deleteFileBestEffort(newlyCreatedAvatar);
-        rethrow;
-      }
-    } else {
-      await _groupRepository.updateMemberProfile(
-        groupId: groupId,
-        deviceId: senderDeviceId,
-        displayName: displayName,
-        avatarEmoji: avatarEmoji,
-        avatarImagePath: savedPath,
-        avatarImageHash: verifiedHash,
-      );
-    }
-
-    await _deleteReplacedAvatarBestEffort(
-      previousPath: sender.avatarImagePath,
-      currentPath: savedPath,
+    final avatarFile = await _writeVerifiedAvatar(
       appDirectory: appDirectory,
+      senderDeviceId: senderDeviceId,
+      mimeType: mimeType,
+      declaredLength: declaredLength,
+      declaredHash: declaredHash,
+      bytes: bytes,
     );
+    return _StoredAvatar(
+      path: avatarFile.file.path,
+      hash: declaredHash,
+      newlyCreated: avatarFile.newlyCreated,
+    );
+  }
+
+  List<int> _decodeAndVerifyAvatar({
+    required String encodedBytes,
+    required int declaredLength,
+    required String declaredHash,
+    required String mimeType,
+  }) {
+    final List<int> bytes;
+    try {
+      bytes = base64Decode(encodedBytes);
+    } on FormatException {
+      throw const AvatarSyncValidationException(
+        'avatar bytes are not valid base64',
+      );
+    }
+    if (bytes.length != declaredLength ||
+        _detectMimeType(bytes) != mimeType ||
+        hash_lib.sha256.convert(bytes).toString() != declaredHash) {
+      throw const AvatarSyncValidationException(
+        'avatar content integrity check failed',
+      );
+    }
+    return bytes;
+  }
+
+  Future<_WrittenAvatar> _writeVerifiedAvatar({
+    required String appDirectory,
+    required String senderDeviceId,
+    required String mimeType,
+    required int declaredLength,
+    required String declaredHash,
+    required List<int> bytes,
+  }) async {
+    final avatarsDir = Directory(path_lib.join(appDirectory, 'avatars'));
+    await avatarsDir.create(recursive: true);
+    final ownerToken = hash_lib.sha256
+        .convert(utf8.encode(senderDeviceId))
+        .toString();
+    final destination = File(
+      path_lib.join(
+        avatarsDir.path,
+        '${ownerToken}_${declaredHash.substring(0, 16)}.${_extensionByMime[mimeType]!}',
+      ),
+    );
+    if (!path_lib.isWithin(avatarsDir.path, destination.path)) {
+      throw const AvatarSyncValidationException(
+        'avatar destination escaped its storage directory',
+      );
+    }
+    if (await destination.exists()) {
+      final existingBytes = await destination.readAsBytes();
+      if (existingBytes.length != declaredLength ||
+          hash_lib.sha256.convert(existingBytes).toString() != declaredHash) {
+        throw const AvatarSyncValidationException(
+          'existing avatar file failed integrity verification',
+        );
+      }
+      return _WrittenAvatar(destination, newlyCreated: null);
+    }
+    final temporary = File(
+      path_lib.join(
+        avatarsDir.path,
+        '.$ownerToken.${DateTime.now().microsecondsSinceEpoch}.tmp',
+      ),
+    );
+    try {
+      await temporary.writeAsBytes(bytes, flush: true);
+      if (await temporary.length() != declaredLength) {
+        throw const AvatarSyncValidationException(
+          'temporary avatar write was incomplete',
+        );
+      }
+      await temporary.rename(destination.path);
+      return _WrittenAvatar(destination, newlyCreated: destination);
+    } finally {
+      if (await temporary.exists()) {
+        try {
+          await temporary.delete();
+        } catch (_) {
+          // Best-effort cleanup; never expose the temporary path to UI.
+        }
+      }
+    }
+  }
+
+  Future<bool> _applyIncomingAvatar({
+    required _IncomingAvatarContext context,
+    required _AvatarCandidate candidate,
+    required _StoredAvatar stored,
+  }) async {
+    final versioned = context.versionedRepository;
+    if (versioned == null) {
+      await _groupRepository.updateMemberProfile(
+        groupId: context.groupId,
+        deviceId: context.senderDeviceId,
+        displayName: candidate.displayName,
+        avatarEmoji: candidate.avatarEmoji,
+        avatarImagePath: stored.path,
+        avatarImageHash: stored.hash,
+      );
+      return true;
+    }
+    try {
+      final applied = await versioned.applyMemberAvatarVersioned(
+        groupId: context.groupId,
+        deviceId: context.senderDeviceId,
+        avatarImagePath: stored.path,
+        avatarImageHash: stored.hash,
+        version: candidate.version,
+      );
+      if (!applied) await _deleteFileBestEffort(stored.newlyCreated);
+      return applied;
+    } catch (_) {
+      await _deleteFileBestEffort(stored.newlyCreated);
+      rethrow;
+    }
   }
 
   bool _isActiveKeyedGroup(GroupInfo? group) =>
@@ -691,4 +771,59 @@ class SyncAvatarUseCase {
       // Orphan cleanup must never roll back a successfully resolved merge.
     }
   }
+}
+
+class _IncomingAvatarContext {
+  const _IncomingAvatarContext({
+    required this.groupId,
+    required this.senderDeviceId,
+    required this.sender,
+    required this.revision,
+    required this.originDeviceId,
+    required this.versionedRepository,
+  });
+
+  final String groupId;
+  final String senderDeviceId;
+  final GroupMember sender;
+  final int revision;
+  final String originDeviceId;
+  final VersionedGroupMemberRepository? versionedRepository;
+}
+
+class _AvatarCandidate {
+  const _AvatarCandidate({
+    required this.displayName,
+    required this.avatarEmoji,
+    required this.removed,
+    required this.version,
+  });
+
+  final String displayName;
+  final String avatarEmoji;
+  final bool removed;
+  final MemberContentVersion version;
+
+  bool isNewerThan(GroupMember sender) => version.isStrictlyNewerThan(
+    MemberContentVersion(
+      revision: sender.avatarRevision,
+      originDeviceId: sender.avatarOriginDeviceId,
+      contentDigest: sender.avatarContentHash,
+    ),
+  );
+}
+
+class _StoredAvatar {
+  const _StoredAvatar({this.path, this.hash, this.newlyCreated});
+
+  final String? path;
+  final String? hash;
+  final File? newlyCreated;
+}
+
+class _WrittenAvatar {
+  const _WrittenAvatar(this.file, {required this.newlyCreated});
+
+  final File file;
+  final File? newlyCreated;
 }

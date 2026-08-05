@@ -78,180 +78,12 @@ class CheckGroupUseCase {
       if (identity == null) {
         return const CheckGroupError('Device key not initialized');
       }
-
-      await _apiClient.registerDevice(
-        deviceId: identity.deviceId,
-        publicKey: identity.publicKey,
-        deviceName: Platform.localHostname,
-        platform: Platform.isIOS ? 'ios' : 'android',
+      await _register(identity);
+      return await _checkMembership(identity.deviceId);
+    } on _LocalSnapshotRace {
+      return const CheckGroupError(
+        'Local group changed while applying server snapshot',
       );
-      await _onDeviceRegistered?.call();
-
-      final checkResult = await _apiClient.checkGroup();
-      final groupExisted = checkResult['groupExisted'] as bool? ?? false;
-      final membershipStatus = checkResult['membershipStatus'] as String?;
-      if (membershipStatus != null &&
-          membershipStatus != 'none' &&
-          membershipStatus != 'pending' &&
-          membershipStatus != 'active') {
-        return const CheckGroupError(
-          'Server returned an invalid membership status',
-        );
-      }
-
-      if (membershipStatus == 'none') {
-        if (await _membershipRotation?.resumeSelfLeaveIfPending() == true) {
-          return const CheckGroupNotInGroup();
-        }
-        await _deactivateStaleLocalGroup();
-        return const CheckGroupNotInGroup();
-      }
-
-      // Compatibility with servers deployed before membershipStatus was
-      // introduced. New responses are authoritative; only legacy responses
-      // fall back to a locally persisted pending request.
-      if (membershipStatus == null && !groupExisted) {
-        if (await _membershipRotation?.resumeSelfLeaveIfPending() == true) {
-          return const CheckGroupNotInGroup();
-        }
-        final pendingGroup = await _groupRepository.getPendingGroup();
-        if (pendingGroup?.status == GroupStatus.confirming &&
-            pendingGroup?.role == 'member') {
-          return CheckGroupPendingApproval(groupId: pendingGroup!.groupId);
-        }
-        return const CheckGroupNotInGroup();
-      }
-
-      final groupId = checkResult['groupId'] as String?;
-      if (groupId == null || groupId.isEmpty) {
-        return const CheckGroupError('Server returned an invalid group ID');
-      }
-
-      var statusResult = await _apiClient.getGroupStatus(groupId);
-      if (await _membershipRotation?.recoverFromSnapshot(statusResult) ==
-          true) {
-        statusResult = await _apiClient.getGroupStatus(groupId);
-      }
-      final members = (statusResult['members'] as List<dynamic>? ?? const [])
-          .map((member) => GroupMember.fromJson(member as Map<String, dynamic>))
-          .toList();
-      final inviteCode = statusResult['inviteCode'] as String?;
-      final inviteExpiresAt = _parseInviteExpiry(
-        statusResult['inviteExpiresAt'],
-      );
-
-      final localMember = _findLocalMember(
-        members: members,
-        deviceId: identity.deviceId,
-      );
-      if (localMember == null) {
-        return const CheckGroupError(
-          'Server group snapshot missing local member',
-        );
-      }
-
-      final existingGroup = await _groupRepository.getGroupById(groupId);
-      final authoritativeName = statusResult['groupName'] as String? ?? '';
-      final authoritativeEpoch =
-          (statusResult['keyEpoch'] as num?)?.toInt() ??
-          existingGroup?.keyEpoch ??
-          1;
-      var effectiveGroup = existingGroup;
-      if (existingGroup != null) {
-        if (existingGroup.status == GroupStatus.active &&
-            localMember.status == 'active') {
-          final resolvedName = authoritativeName.trim().isEmpty
-              ? existingGroup.groupName
-              : authoritativeName;
-          final revision = (statusResult['revision'] as num?)?.toInt();
-          final revisioned = _groupRepository is RevisionedGroupRepository
-              ? _groupRepository as RevisionedGroupRepository
-              : null;
-          final applied = revisioned != null && revision != null
-              ? await revisioned.applyRevisionedAuthoritativeSnapshot(
-                  groupId: groupId,
-                  groupName: resolvedName,
-                  role: localMember.role,
-                  keyEpoch: authoritativeEpoch,
-                  members: members,
-                  revision: revision,
-                  updatedAt:
-                      DateTime.tryParse(
-                        statusResult['updatedAt'] as String? ?? '',
-                      ) ??
-                      DateTime.fromMillisecondsSinceEpoch(0),
-                  snapshotDigest: controlSnapshotDigest(
-                    groupId: groupId,
-                    groupName: resolvedName,
-                    role: localMember.role,
-                    keyEpoch: authoritativeEpoch,
-                    members: members,
-                  ),
-                )
-              : await _groupRepository.applyAuthoritativeSnapshot(
-                  groupId: groupId,
-                  groupName: resolvedName,
-                  role: localMember.role,
-                  keyEpoch: authoritativeEpoch,
-                  members: members,
-                );
-          if (!applied && revisioned == null) {
-            return const CheckGroupError(
-              'Local group changed while applying server snapshot',
-            );
-          }
-          effectiveGroup = existingGroup.copyWith(
-            groupName: resolvedName,
-            role: localMember.role,
-            keyEpoch: authoritativeEpoch,
-            groupKey: existingGroup.keyEpoch == authoritativeEpoch
-                ? existingGroup.groupKey
-                : null,
-            members: members,
-          );
-        } else {
-          if (authoritativeName.trim().isNotEmpty) {
-            await _groupRepository.updateGroupName(groupId, authoritativeName);
-          }
-          await _groupRepository.updateMembers(groupId, members);
-        }
-        if (inviteCode != null && inviteExpiresAt != null) {
-          await _groupRepository.updateInviteCode(
-            groupId,
-            inviteCode,
-            inviteExpiresAt,
-          );
-        }
-      } else {
-        await _groupRepository.saveConfirmingGroup(
-          groupId: groupId,
-          groupName: statusResult['groupName'] as String? ?? '',
-          members: members,
-          role: localMember.role,
-          keyEpoch: authoritativeEpoch,
-        );
-      }
-
-      if (localMember.status != 'active') {
-        if (existingGroup?.status == GroupStatus.active) {
-          await _groupRepository.markGroupConfirming(groupId);
-        }
-        return CheckGroupPendingApproval(groupId: groupId);
-      }
-
-      final groupKey = effectiveGroup?.groupKey;
-      if (groupKey == null || groupKey.isEmpty) {
-        if (existingGroup?.status == GroupStatus.active) {
-          await _groupRepository.markGroupConfirming(groupId);
-        }
-        return CheckGroupAwaitingKey(groupId: groupId);
-      }
-
-      if (effectiveGroup!.status != GroupStatus.active) {
-        await _groupRepository.confirmLocalGroup(groupId);
-      }
-
-      return CheckGroupInGroup(groupId: groupId);
     } on RelayApiException catch (error) {
       return CheckGroupError(error.message);
     } catch (error) {
@@ -261,6 +93,239 @@ class CheckGroupUseCase {
       );
       return CheckGroupError(failure.message, kind: failure.kind);
     }
+  }
+
+  Future<void> _register(DeviceKeyPair identity) async {
+    await _apiClient.registerDevice(
+      deviceId: identity.deviceId,
+      publicKey: identity.publicKey,
+      deviceName: Platform.localHostname,
+      platform: Platform.isIOS ? 'ios' : 'android',
+    );
+    await _onDeviceRegistered?.call();
+  }
+
+  Future<CheckGroupResult> _checkMembership(String deviceId) async {
+    final checkResult = await _apiClient.checkGroup();
+    final membershipStatus = checkResult['membershipStatus'] as String?;
+    if (!_isKnownMembershipStatus(membershipStatus)) {
+      return const CheckGroupError(
+        'Server returned an invalid membership status',
+      );
+    }
+    if (membershipStatus == 'none') return _handleNoMembership();
+
+    // Compatibility with servers deployed before membershipStatus was
+    // introduced. New responses are authoritative; only legacy responses
+    // fall back to a locally persisted pending request.
+    final groupExisted = checkResult['groupExisted'] as bool? ?? false;
+    if (membershipStatus == null && !groupExisted) {
+      return _handleLegacyNoGroup();
+    }
+
+    final groupId = checkResult['groupId'] as String?;
+    if (groupId == null || groupId.isEmpty) {
+      return const CheckGroupError('Server returned an invalid group ID');
+    }
+    return _syncMembership(groupId: groupId, deviceId: deviceId);
+  }
+
+  bool _isKnownMembershipStatus(String? status) =>
+      status == null ||
+      status == 'none' ||
+      status == 'pending' ||
+      status == 'active';
+
+  Future<CheckGroupResult> _handleNoMembership() async {
+    if (await _membershipRotation?.resumeSelfLeaveIfPending() == true) {
+      return const CheckGroupNotInGroup();
+    }
+    await _deactivateStaleLocalGroup();
+    return const CheckGroupNotInGroup();
+  }
+
+  Future<CheckGroupResult> _handleLegacyNoGroup() async {
+    if (await _membershipRotation?.resumeSelfLeaveIfPending() == true) {
+      return const CheckGroupNotInGroup();
+    }
+    final pendingGroup = await _groupRepository.getPendingGroup();
+    if (pendingGroup?.status == GroupStatus.confirming &&
+        pendingGroup?.role == 'member') {
+      return CheckGroupPendingApproval(groupId: pendingGroup!.groupId);
+    }
+    return const CheckGroupNotInGroup();
+  }
+
+  Future<CheckGroupResult> _syncMembership({
+    required String groupId,
+    required String deviceId,
+  }) async {
+    final statusResult = await _fetchGroupStatus(groupId);
+    final members = _membersFrom(statusResult);
+    final localMember = _findLocalMember(members: members, deviceId: deviceId);
+    if (localMember == null) {
+      return const CheckGroupError(
+        'Server group snapshot missing local member',
+      );
+    }
+
+    final existingGroup = await _groupRepository.getGroupById(groupId);
+    final snapshot = _GroupMembershipSnapshot(
+      groupId: groupId,
+      groupName: statusResult['groupName'] as String? ?? '',
+      keyEpoch:
+          (statusResult['keyEpoch'] as num?)?.toInt() ??
+          existingGroup?.keyEpoch ??
+          1,
+      members: members,
+      localMember: localMember,
+      inviteCode: statusResult['inviteCode'] as String?,
+      inviteExpiresAt: _parseInviteExpiry(statusResult['inviteExpiresAt']),
+      revision: (statusResult['revision'] as num?)?.toInt(),
+      updatedAt: DateTime.tryParse(statusResult['updatedAt'] as String? ?? ''),
+    );
+    final effectiveGroup = await _persistSnapshot(
+      snapshot: snapshot,
+      existingGroup: existingGroup,
+    );
+    return _membershipResult(
+      snapshot: snapshot,
+      existingGroup: existingGroup,
+      effectiveGroup: effectiveGroup,
+    );
+  }
+
+  Future<Map<String, dynamic>> _fetchGroupStatus(String groupId) async {
+    var status = await _apiClient.getGroupStatus(groupId);
+    if (await _membershipRotation?.recoverFromSnapshot(status) == true) {
+      status = await _apiClient.getGroupStatus(groupId);
+    }
+    return status;
+  }
+
+  List<GroupMember> _membersFrom(Map<String, dynamic> status) =>
+      (status['members'] as List<dynamic>? ?? const [])
+          .map((member) => GroupMember.fromJson(member as Map<String, dynamic>))
+          .toList();
+
+  Future<GroupInfo?> _persistSnapshot({
+    required _GroupMembershipSnapshot snapshot,
+    required GroupInfo? existingGroup,
+  }) async {
+    if (existingGroup == null) {
+      await _groupRepository.saveConfirmingGroup(
+        groupId: snapshot.groupId,
+        groupName: snapshot.groupName,
+        members: snapshot.members,
+        role: snapshot.localMember.role,
+        keyEpoch: snapshot.keyEpoch,
+      );
+      return null;
+    }
+
+    final effectiveGroup = await _updateExistingGroup(
+      existingGroup: existingGroup,
+      snapshot: snapshot,
+    );
+    if (snapshot.inviteCode != null && snapshot.inviteExpiresAt != null) {
+      await _groupRepository.updateInviteCode(
+        snapshot.groupId,
+        snapshot.inviteCode!,
+        snapshot.inviteExpiresAt!,
+      );
+    }
+    return effectiveGroup;
+  }
+
+  Future<GroupInfo> _updateExistingGroup({
+    required GroupInfo existingGroup,
+    required _GroupMembershipSnapshot snapshot,
+  }) async {
+    if (existingGroup.status != GroupStatus.active ||
+        snapshot.localMember.status != 'active') {
+      if (snapshot.groupName.trim().isNotEmpty) {
+        await _groupRepository.updateGroupName(
+          snapshot.groupId,
+          snapshot.groupName,
+        );
+      }
+      await _groupRepository.updateMembers(snapshot.groupId, snapshot.members);
+      return existingGroup;
+    }
+
+    final resolvedName = snapshot.groupName.trim().isEmpty
+        ? existingGroup.groupName
+        : snapshot.groupName;
+    final applied = await _applyActiveSnapshot(
+      snapshot.copyWith(groupName: resolvedName),
+    );
+    final revisioned = _groupRepository is RevisionedGroupRepository;
+    if (!applied && !revisioned) {
+      throw const _LocalSnapshotRace();
+    }
+    return existingGroup.copyWith(
+      groupName: resolvedName,
+      role: snapshot.localMember.role,
+      keyEpoch: snapshot.keyEpoch,
+      groupKey: existingGroup.keyEpoch == snapshot.keyEpoch
+          ? existingGroup.groupKey
+          : null,
+      members: snapshot.members,
+    );
+  }
+
+  Future<bool> _applyActiveSnapshot(_GroupMembershipSnapshot snapshot) async {
+    final revisioned = _groupRepository is RevisionedGroupRepository
+        ? _groupRepository as RevisionedGroupRepository
+        : null;
+    if (revisioned != null && snapshot.revision != null) {
+      return revisioned.applyRevisionedAuthoritativeSnapshot(
+        groupId: snapshot.groupId,
+        groupName: snapshot.groupName,
+        role: snapshot.localMember.role,
+        keyEpoch: snapshot.keyEpoch,
+        members: snapshot.members,
+        revision: snapshot.revision!,
+        updatedAt: snapshot.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+        snapshotDigest: controlSnapshotDigest(
+          groupId: snapshot.groupId,
+          groupName: snapshot.groupName,
+          role: snapshot.localMember.role,
+          keyEpoch: snapshot.keyEpoch,
+          members: snapshot.members,
+        ),
+      );
+    }
+    return _groupRepository.applyAuthoritativeSnapshot(
+      groupId: snapshot.groupId,
+      groupName: snapshot.groupName,
+      role: snapshot.localMember.role,
+      keyEpoch: snapshot.keyEpoch,
+      members: snapshot.members,
+    );
+  }
+
+  Future<CheckGroupResult> _membershipResult({
+    required _GroupMembershipSnapshot snapshot,
+    required GroupInfo? existingGroup,
+    required GroupInfo? effectiveGroup,
+  }) async {
+    if (snapshot.localMember.status != 'active') {
+      if (existingGroup?.status == GroupStatus.active) {
+        await _groupRepository.markGroupConfirming(snapshot.groupId);
+      }
+      return CheckGroupPendingApproval(groupId: snapshot.groupId);
+    }
+    if (effectiveGroup?.groupKey case final key? when key.isNotEmpty) {
+      if (effectiveGroup!.status != GroupStatus.active) {
+        await _groupRepository.confirmLocalGroup(snapshot.groupId);
+      }
+      return CheckGroupInGroup(groupId: snapshot.groupId);
+    }
+    if (existingGroup?.status == GroupStatus.active) {
+      await _groupRepository.markGroupConfirming(snapshot.groupId);
+    }
+    return CheckGroupAwaitingKey(groupId: snapshot.groupId);
   }
 
   Future<void> _deactivateStaleLocalGroup() async {
@@ -310,4 +375,45 @@ class CheckGroupUseCase {
 
     return null;
   }
+}
+
+class _GroupMembershipSnapshot {
+  const _GroupMembershipSnapshot({
+    required this.groupId,
+    required this.groupName,
+    required this.keyEpoch,
+    required this.members,
+    required this.localMember,
+    required this.inviteCode,
+    required this.inviteExpiresAt,
+    required this.revision,
+    required this.updatedAt,
+  });
+
+  final String groupId;
+  final String groupName;
+  final int keyEpoch;
+  final List<GroupMember> members;
+  final GroupMember localMember;
+  final String? inviteCode;
+  final DateTime? inviteExpiresAt;
+  final int? revision;
+  final DateTime? updatedAt;
+
+  _GroupMembershipSnapshot copyWith({String? groupName}) =>
+      _GroupMembershipSnapshot(
+        groupId: groupId,
+        groupName: groupName ?? this.groupName,
+        keyEpoch: keyEpoch,
+        members: members,
+        localMember: localMember,
+        inviteCode: inviteCode,
+        inviteExpiresAt: inviteExpiresAt,
+        revision: revision,
+        updatedAt: updatedAt,
+      );
+}
+
+class _LocalSnapshotRace implements Exception {
+  const _LocalSnapshotRace();
 }

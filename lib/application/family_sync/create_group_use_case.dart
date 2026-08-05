@@ -80,123 +80,22 @@ class CreateGroupUseCase {
     String? avatarImageHash,
   }) async {
     try {
-      GroupInfo? currentGroup;
-      try {
-        currentGroup = await _groupRepository.getCurrentGroup();
-        if (currentGroup != null && currentGroup.role != 'owner') {
-          return const CreateGroupResult.error(
-            'A family group is already active or awaiting confirmation',
-            kind: GroupOperationErrorKind.membershipConflict,
-          );
-        }
-      } on StateError {
-        return const CreateGroupResult.error(
-          'Conflicting local family groups require recovery',
-          kind: GroupOperationErrorKind.membershipConflict,
-        );
-      }
-
-      final identity = await _ensureDeviceIdentity();
-      if (identity == null) {
-        return const CreateGroupResult.error('Device key not initialized');
-      }
-
-      await _apiClient.registerDevice(
-        deviceId: identity.deviceId,
-        publicKey: identity.publicKey,
-        deviceName: Platform.localHostname,
-        platform: Platform.isIOS ? 'ios' : 'android',
+      final eligibility = await _localEligibility();
+      if (eligibility case _CreateBlocked(:final result)) return result;
+      return await _createForEligibleGroup(
+        currentGroup: (eligibility as _CreateEligible).currentGroup,
+        displayName: displayName,
+        avatarEmoji: avatarEmoji,
+        groupName: groupName,
+        avatarImageHash: avatarImageHash,
       );
-      await _onDeviceRegistered?.call();
-
-      // A prior create request may have reached the server while its response
-      // was lost. Recover that owner group before issuing another mutation.
-      var recovered = await _recoverExistingOwnerGroup(
-        deviceId: identity.deviceId,
-        expectedGroupId: currentGroup?.groupId,
+    } on _ExistingOwnerGroupNotRecovered {
+      return const CreateGroupResult.error(
+        'The existing owner group could not be recovered',
+        kind: GroupOperationErrorKind.membershipConflict,
       );
-      if (currentGroup != null && recovered == null) {
-        return const CreateGroupResult.error(
-          'The existing owner group could not be recovered',
-          kind: GroupOperationErrorKind.membershipConflict,
-        );
-      }
-      Map<String, dynamic>? response;
-      if (recovered == null) {
-        try {
-          response = await _apiClient.createGroup(
-            groupName: groupName,
-            displayName: displayName,
-            avatarEmoji: avatarEmoji,
-            avatarImageHash: avatarImageHash,
-          );
-        } on RelayApiException {
-          rethrow;
-        } catch (_) {
-          // Transport failures are ambiguous: the server may already have
-          // committed the request. Resolve the authoritative state first.
-          recovered = await _recoverExistingOwnerGroup(
-            deviceId: identity.deviceId,
-          );
-          if (recovered == null) rethrow;
-        }
-      }
-
-      final groupId = recovered?.groupId ?? response?['groupId'] as String?;
-      final inviteCode =
-          recovered?.inviteCode ?? response?['inviteCode'] as String?;
-      final expiresAt =
-          recovered?.expiresAt ?? (response?['expiresAt'] as num?)?.toInt();
-
-      if (groupId == null || inviteCode == null || expiresAt == null) {
-        return CreateGroupResult.error(
-          'Server returned incomplete response: '
-          'groupId=$groupId, inviteCode=$inviteCode, expiresAt=$expiresAt',
-        );
-      }
-
-      var authoritativeGroupName = recovered?.groupName ?? groupName;
-      if (recovered == null) {
-        authoritativeGroupName =
-            await _readServerGroupName(groupId) ?? groupName;
-      }
-
-      final existingLocalGroup = await _groupRepository.getGroupById(groupId);
-      final groupKey = existingLocalGroup?.groupKey?.isNotEmpty == true
-          ? existingLocalGroup!.groupKey!
-          : _e2eeService.generateGroupKey();
-
-      final inviteExpiresAt = DateTime.fromMillisecondsSinceEpoch(
-        expiresAt * 1000,
-      );
-      if (existingLocalGroup?.status == GroupStatus.active) {
-        await _groupRepository.updateInviteCode(
-          groupId,
-          inviteCode,
-          inviteExpiresAt,
-        );
-        if (existingLocalGroup!.groupName != authoritativeGroupName) {
-          await _groupRepository.updateGroupName(
-            groupId,
-            authoritativeGroupName,
-          );
-        }
-      } else {
-        await _groupRepository.savePendingGroup(
-          groupId: groupId,
-          groupName: authoritativeGroupName,
-          inviteCode: inviteCode,
-          inviteExpiresAt: inviteExpiresAt,
-          groupKey: groupKey,
-        );
-      }
-
-      return CreateGroupResult.success(
-        groupId: groupId,
-        inviteCode: inviteCode,
-        expiresAt: expiresAt,
-        groupName: authoritativeGroupName,
-      );
+    } on _IncompleteServerGroupResponse catch (error) {
+      return CreateGroupResult.error(error.message);
     } on _ExistingGroupNotOwned {
       return const CreateGroupResult.error(
         'A family group is already active or awaiting confirmation',
@@ -217,6 +116,178 @@ class CreateGroupUseCase {
       );
       return CreateGroupResult.error(failure.message, kind: failure.kind);
     }
+  }
+
+  Future<_CreateEligibility> _localEligibility() async {
+    try {
+      final currentGroup = await _groupRepository.getCurrentGroup();
+      if (currentGroup != null && currentGroup.role != 'owner') {
+        return const _CreateBlocked(
+          CreateGroupResult.error(
+            'A family group is already active or awaiting confirmation',
+            kind: GroupOperationErrorKind.membershipConflict,
+          ),
+        );
+      }
+      return _CreateEligible(currentGroup);
+    } on StateError {
+      return const _CreateBlocked(
+        CreateGroupResult.error(
+          'Conflicting local family groups require recovery',
+          kind: GroupOperationErrorKind.membershipConflict,
+        ),
+      );
+    }
+  }
+
+  Future<CreateGroupResult> _createForEligibleGroup({
+    required GroupInfo? currentGroup,
+    required String displayName,
+    required String avatarEmoji,
+    required String groupName,
+    required String? avatarImageHash,
+  }) async {
+    final identity = await _ensureDeviceIdentity();
+    if (identity == null) {
+      return const CreateGroupResult.error('Device key not initialized');
+    }
+    await _registerDevice(identity);
+    final serverGroup = await _resolveServerGroup(
+      currentGroup: currentGroup,
+      deviceId: identity.deviceId,
+      displayName: displayName,
+      avatarEmoji: avatarEmoji,
+      groupName: groupName,
+      avatarImageHash: avatarImageHash,
+    );
+    final authoritativeGroupName = serverGroup.recovered
+        ? serverGroup.groupName
+        : await _readServerGroupName(serverGroup.groupId) ?? groupName;
+    await _persistGroup(
+      serverGroup: serverGroup,
+      groupName: authoritativeGroupName,
+    );
+    return CreateGroupResult.success(
+      groupId: serverGroup.groupId,
+      inviteCode: serverGroup.inviteCode,
+      expiresAt: serverGroup.expiresAt,
+      groupName: authoritativeGroupName,
+    );
+  }
+
+  Future<void> _registerDevice(DeviceKeyPair identity) async {
+    await _apiClient.registerDevice(
+      deviceId: identity.deviceId,
+      publicKey: identity.publicKey,
+      deviceName: Platform.localHostname,
+      platform: Platform.isIOS ? 'ios' : 'android',
+    );
+    await _onDeviceRegistered?.call();
+  }
+
+  Future<_ResolvedServerGroup> _resolveServerGroup({
+    required GroupInfo? currentGroup,
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+    required String groupName,
+    required String? avatarImageHash,
+  }) async {
+    var recovered = await _recoverExistingOwnerGroup(
+      deviceId: deviceId,
+      expectedGroupId: currentGroup?.groupId,
+    );
+    if (currentGroup != null && recovered == null) {
+      throw const _ExistingOwnerGroupNotRecovered();
+    }
+    Map<String, dynamic>? response;
+    if (recovered == null) {
+      final attempt = await _createOrRecoverAfterTransportFailure(
+        deviceId: deviceId,
+        displayName: displayName,
+        avatarEmoji: avatarEmoji,
+        groupName: groupName,
+        avatarImageHash: avatarImageHash,
+      );
+      response = attempt.response;
+      recovered = attempt.recovered;
+    }
+    final groupId = recovered?.groupId ?? response?['groupId'] as String?;
+    final inviteCode =
+        recovered?.inviteCode ?? response?['inviteCode'] as String?;
+    final expiresAt =
+        recovered?.expiresAt ?? (response?['expiresAt'] as num?)?.toInt();
+    if (groupId == null || inviteCode == null || expiresAt == null) {
+      throw _IncompleteServerGroupResponse(
+        groupId: groupId,
+        inviteCode: inviteCode,
+        expiresAt: expiresAt,
+      );
+    }
+    return _ResolvedServerGroup(
+      groupId: groupId,
+      groupName: recovered?.groupName ?? groupName,
+      inviteCode: inviteCode,
+      expiresAt: expiresAt,
+      recovered: recovered != null,
+    );
+  }
+
+  Future<_CreateAttempt> _createOrRecoverAfterTransportFailure({
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+    required String groupName,
+    required String? avatarImageHash,
+  }) async {
+    try {
+      return _CreateAttempt.response(
+        await _apiClient.createGroup(
+          groupName: groupName,
+          displayName: displayName,
+          avatarEmoji: avatarEmoji,
+          avatarImageHash: avatarImageHash,
+        ),
+      );
+    } on RelayApiException {
+      rethrow;
+    } catch (_) {
+      // Transport failures are ambiguous: the server may already have
+      // committed the request. Resolve the authoritative state first.
+      final recovered = await _recoverExistingOwnerGroup(deviceId: deviceId);
+      if (recovered == null) rethrow;
+      return _CreateAttempt.recovered(recovered);
+    }
+  }
+
+  Future<void> _persistGroup({
+    required _ResolvedServerGroup serverGroup,
+    required String groupName,
+  }) async {
+    final existing = await _groupRepository.getGroupById(serverGroup.groupId);
+    final expiresAt = DateTime.fromMillisecondsSinceEpoch(
+      serverGroup.expiresAt * 1000,
+    );
+    if (existing?.status == GroupStatus.active) {
+      await _groupRepository.updateInviteCode(
+        serverGroup.groupId,
+        serverGroup.inviteCode,
+        expiresAt,
+      );
+      if (existing!.groupName != groupName) {
+        await _groupRepository.updateGroupName(serverGroup.groupId, groupName);
+      }
+      return;
+    }
+    await _groupRepository.savePendingGroup(
+      groupId: serverGroup.groupId,
+      groupName: groupName,
+      inviteCode: serverGroup.inviteCode,
+      inviteExpiresAt: expiresAt,
+      groupKey: existing?.groupKey?.isNotEmpty == true
+          ? existing!.groupKey!
+          : _e2eeService.generateGroupKey(),
+    );
   }
 
   Future<_RecoveredOwnerGroup?> _recoverExistingOwnerGroup({
@@ -309,6 +380,66 @@ class CreateGroupUseCase {
 
 class _ExistingGroupNotOwned implements Exception {
   const _ExistingGroupNotOwned();
+}
+
+sealed class _CreateEligibility {
+  const _CreateEligibility();
+}
+
+class _CreateEligible extends _CreateEligibility {
+  const _CreateEligible(this.currentGroup);
+
+  final GroupInfo? currentGroup;
+}
+
+class _CreateBlocked extends _CreateEligibility {
+  const _CreateBlocked(this.result);
+
+  final CreateGroupResult result;
+}
+
+class _ExistingOwnerGroupNotRecovered implements Exception {
+  const _ExistingOwnerGroupNotRecovered();
+}
+
+class _IncompleteServerGroupResponse implements Exception {
+  const _IncompleteServerGroupResponse({
+    required this.groupId,
+    required this.inviteCode,
+    required this.expiresAt,
+  });
+
+  final String? groupId;
+  final String? inviteCode;
+  final int? expiresAt;
+
+  String get message =>
+      'Server returned incomplete response: '
+      'groupId=$groupId, inviteCode=$inviteCode, expiresAt=$expiresAt';
+}
+
+class _CreateAttempt {
+  const _CreateAttempt.response(this.response) : recovered = null;
+  const _CreateAttempt.recovered(this.recovered) : response = null;
+
+  final Map<String, dynamic>? response;
+  final _RecoveredOwnerGroup? recovered;
+}
+
+class _ResolvedServerGroup {
+  const _ResolvedServerGroup({
+    required this.groupId,
+    required this.groupName,
+    required this.inviteCode,
+    required this.expiresAt,
+    required this.recovered,
+  });
+
+  final String groupId;
+  final String groupName;
+  final String inviteCode;
+  final int expiresAt;
+  final bool recovered;
 }
 
 class _RecoveredOwnerGroup {
