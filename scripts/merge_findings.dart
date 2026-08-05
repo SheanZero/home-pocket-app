@@ -57,8 +57,9 @@ String _resolveRoot(List<String> args) {
 
 Future<void> main(List<String> args) async {
   final root = _resolveRoot(args);
-  final existingLifecycle = await _readExistingLifecycle(root);
+  final existingFindings = await _readExistingFindings(root);
   final shards = <Finding>[];
+  final incompleteScans = <String>[];
   for (final dir in const ['shards', 'agent-shards']) {
     final shardDir = Directory('$root/$dir');
     if (!shardDir.existsSync()) continue;
@@ -73,6 +74,12 @@ Future<void> main(List<String> args) async {
       } catch (e) {
         stderr.writeln('[audit:merge] WARNING: failed to parse ${f.path}: $e');
         continue;
+      }
+      if (data['scan_state'] == 'not_run' || data['scan_failed'] == true) {
+        incompleteScans.add(f.path);
+        stderr.writeln(
+          '[audit:merge] ERROR: ${f.path} was not run successfully',
+        );
       }
       final findingsRaw = data['findings'];
       if (findingsRaw is! List) continue;
@@ -119,10 +126,13 @@ Future<void> main(List<String> args) async {
   // 4. Compute retainedClosed first so we can reserve their IDs and avoid
   //    duplicate-ID collisions with freshly stamped findings (WR-06).
   final sortedKeys = sorted.map(_lifecycleKey).toSet();
-  final retainedClosed = existingLifecycle.values
+  final retainedClosed = existingFindings.values
       .where((finding) => !sortedKeys.contains(_lifecycleKey(finding)))
+      .where((finding) => finding.status == 'closed')
       .toList();
-  final reservedIds = retainedClosed
+  // IDs are permanent for open findings too. Reserve every existing ID before
+  // allocating new findings so an inserted shard cannot renumber prior work.
+  final reservedIds = existingFindings.values
       .where((f) => f.id != null)
       .map((f) => f.id!)
       .toSet();
@@ -140,9 +150,9 @@ Future<void> main(List<String> args) async {
 
   final stamped = sorted.map((f) {
     final prefix = _categoryPrefix[f.category]!;
-    final previous = existingLifecycle[_lifecycleKey(f)];
+    final previous = existingFindings[_lifecycleKey(f)];
     return Finding(
-      id: nextId(prefix),
+      id: previous?.id ?? nextId(prefix),
       category: f.category,
       severity: f.severity,
       filePath: f.filePath,
@@ -172,15 +182,17 @@ Future<void> main(List<String> args) async {
   );
 
   // 6. Emit ISSUES.md (human-readable, severity-then-category, table per group).
-  final md = _renderMarkdown(catalogue);
+  // A non-empty catalogue is never evidence that every scanner completed.
+  final md = _renderMarkdown(catalogue, incompleteScans: incompleteScans);
   await File('$root/ISSUES.md').writeAsString(md);
 
   stdout.writeln(
     '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
   );
+  if (incompleteScans.isNotEmpty) exitCode = 1;
 }
 
-Future<Map<String, Finding>> _readExistingLifecycle(String root) async {
+Future<Map<String, Finding>> _readExistingFindings(String root) async {
   final file = File('$root/issues.json');
   if (!file.existsSync()) return const {};
 
@@ -190,12 +202,18 @@ Future<Map<String, Finding>> _readExistingLifecycle(String root) async {
     final findings = decoded['findings'];
     if (findings is! List) return const {};
 
-    return {
-      for (final entry in findings.whereType<Map>())
-        if (_hasLifecycle(entry))
-          _lifecycleKey(Finding.fromJson(entry.cast<String, dynamic>())):
-              Finding.fromJson(entry.cast<String, dynamic>()),
-    };
+    final existing = <String, Finding>{};
+    for (final entry in findings.whereType<Map>()) {
+      try {
+        final finding = Finding.fromJson(entry.cast<String, dynamic>());
+        existing[_lifecycleKey(finding)] = finding;
+      } catch (error) {
+        stderr.writeln(
+          '[audit:merge] WARNING: malformed existing finding in $root/issues.json: $error',
+        );
+      }
+    }
+    return existing;
   } catch (e) {
     stderr.writeln(
       '[audit:merge] WARNING: failed to read existing lifecycle metadata: $e',
@@ -203,11 +221,6 @@ Future<Map<String, Finding>> _readExistingLifecycle(String root) async {
     return const {};
   }
 }
-
-bool _hasLifecycle(Map<dynamic, dynamic> entry) =>
-    entry['status'] == 'closed' ||
-    entry['closed_in_phase'] != null ||
-    entry['closed_commit'] != null;
 
 String _lifecycleKey(Finding finding) =>
     '${finding.category}|${finding.filePath}|${finding.lineStart}|${finding.description}';
@@ -233,12 +246,27 @@ bool _isPreferred(Finding a, {required Finding over}) {
   return false;
 }
 
-String _renderMarkdown(List<Finding> findings) {
+String _renderMarkdown(
+  List<Finding> findings, {
+  List<String> incompleteScans = const [],
+}) {
   final buf = StringBuffer();
   buf.writeln('# Audit Findings');
   buf.writeln();
   buf.writeln('**Total findings:** ${findings.length}');
   buf.writeln();
+
+  if (incompleteScans.isNotEmpty) {
+    buf.writeln('## Scan Status: INCOMPLETE');
+    buf.writeln();
+    buf.writeln(
+      'The following scanner shards were not run successfully; this report must not be interpreted as a clean audit:',
+    );
+    for (final scan in incompleteScans) {
+      buf.writeln('- `$scan`');
+    }
+    buf.writeln();
+  }
 
   const severities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
   const categoryLabels = {

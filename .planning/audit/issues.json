@@ -17,6 +17,48 @@
       "closed_commit": "a66c625cd252705a4579c1728e992928370505d7"
     },
     {
+      "id": "RD-003",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/application/family_sync/create_group_use_case.dart",
+      "line_start": 358,
+      "line_end": 373,
+      "description": "Exact 16-line structural clone also appears at lib/application/family_sync/check_group_use_case.dart:335.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
+      "id": "RD-004",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/application/family_sync/join_group_use_case.dart",
+      "line_start": 146,
+      "line_end": 161,
+      "description": "Exact 16-line structural clone also appears at lib/application/family_sync/check_group_use_case.dart:335.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
+      "id": "RD-005",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/application/family_sync/join_group_use_case.dart",
+      "line_start": 149,
+      "line_end": 164,
+      "description": "Exact 16-line structural clone also appears at lib/application/family_sync/create_group_use_case.dart:361.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
       "id": "DC-001",
       "category": "dead_code",
       "severity": "LOW",
@@ -47,6 +89,20 @@
       "status": "closed",
       "closed_in_phase": "6",
       "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
+    },
+    {
+      "id": "RD-006",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/application/shopping_list/update_shopping_item_use_case.dart",
+      "line_start": 130,
+      "line_end": 145,
+      "description": "Exact 16-line structural clone also appears at lib/application/shopping_list/toggle_item_completed_use_case.dart:65.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
     },
     {
       "id": "LV-001",
@@ -737,6 +793,62 @@
       "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
+      "id": "RD-007",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/list/presentation/screens/list_screen.dart",
+      "line_start": 370,
+      "line_end": 385,
+      "description": "Exact 16-line structural clone also appears at lib/features/analytics/presentation/screens/category_drill_down_screen.dart:170.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
+      "id": "RD-008",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/list/presentation/widgets/list_category_filter_sheet.dart",
+      "line_start": 131,
+      "line_end": 146,
+      "description": "Exact 16-line structural clone also appears at lib/features/accounting/presentation/widgets/currency_selector_sheet.dart:253.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
+      "id": "RD-009",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/list/presentation/widgets/list_transaction_tile.dart",
+      "line_start": 228,
+      "line_end": 243,
+      "description": "Exact 16-line structural clone also appears at lib/features/home/presentation/widgets/home_transaction_tile.dart:130.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
+      "id": "RD-010",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/onboarding/presentation/screens/onboarding_intro_screen.dart",
+      "line_start": 912,
+      "line_end": 927,
+      "description": "Exact 16-line structural clone also appears at lib/features/applock/presentation/widgets/face_id_panel.dart:113.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
       "id": "LV-023",
       "category": "layer_violation",
       "severity": "CRITICAL",
@@ -753,6 +865,20 @@
       "closed_commit": "d6509c9"
     },
     {
+      "id": "RD-011",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/profile/presentation/screens/profile_edit_screen.dart",
+      "line_start": 48,
+      "line_end": 63,
+      "description": "Exact 16-line structural clone also appears at lib/features/onboarding/presentation/screens/onboarding_settings_screen.dart:130.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
       "id": "LV-024",
       "category": "layer_violation",
       "severity": "CRITICAL",
@@ -767,6 +893,34 @@
       "status": "closed",
       "closed_in_phase": "3",
       "closed_commit": "d6509c9"
+    },
+    {
+      "id": "RD-012",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart",
+      "line_start": 50,
+      "line_end": 65,
+      "description": "Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:48.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
+    },
+    {
+      "id": "RD-013",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart",
+      "line_start": 117,
+      "line_end": 132,
+      "description": "Exact 16-line structural clone also appears at lib/features/accounting/presentation/widgets/currency_selector_sheet.dart:253.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
     },
     {
       "id": "RD-002",
@@ -799,6 +953,20 @@
       "status": "closed",
       "closed_in_phase": "6",
       "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
+    },
+    {
+      "id": "RD-014",
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/infrastructure/sync/avatar_semantic_staging_store.dart",
+      "line_start": 409,
+      "line_end": 424,
+      "description": "Exact 16-line structural clone also appears at lib/application/family_sync/sync_avatar_use_case.dart:714.",
+      "rationale": "Repository-owned duplication detector found identical normalized Dart source across files.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "open"
     }
   ]
 }

@@ -24,8 +24,8 @@ Every finding MUST include all 11 fields below (with the exception of `id`, whic
 | `description` | string | required | One-sentence statement of what's wrong. Imperative-mood, no leading hedge ("Possibly…"). | `use_cases/ inside features/ violates Thin Feature rule` |
 | `rationale` | string | required | Why it matters. References `CLAUDE.md` "Common Pitfalls" or `.planning/codebase/CONCERNS.md` when applicable. | `Thin Feature rule (CLAUDE.md): features must not contain application/use_cases.` |
 | `suggested_fix` | string | required | Concrete remediation step. Names the destination file/dir and the target Phase by number. | `Move to lib/application/family_sync/. Phase 3 fix.` |
-| `tool_source` | string | required | One of the seven legal producer values (see §6). Drives dedupe priority in the merger. | `import_guard` |
-| `confidence` | string | required | `high` (tool-flagged + structural rule match) / `medium` (AI-agent + strong code-anchored evidence) / `low` (AI-agent inference / pattern-similarity). Drives planner auto-accept vs triage-batch behavior. | `high` |
+| `tool_source` | string | required | One of the approved producer values (see §6). Drives dedupe priority in the merger. | `import_guard` |
+| `confidence` | string | required | `high` (tool-flagged + structural rule match) / `medium` (conservative structural detection or strong code-anchored evidence) / `low` (AI-agent inference / pattern-similarity). Drives planner auto-accept vs triage-batch behavior. | `high` |
 
 **Notes on `file_path`:** Audit scope is `lib/` Dart code only. No secrets, API keys, or PII enter findings (T-1-A phase-level threat-model carry-over). The merger normalizes any absolute path to repo-relative before writing `issues.json` (T-1-03-02 mitigation).
 
@@ -103,19 +103,20 @@ Both `split_from` and `closed_as_duplicate_of` are OPTIONAL fields on the findin
 
 ## 6. Tool-Source Inventory
 
-`tool_source` is the producer that emitted the finding. Seven legal values, four from automated tooling (Phase 1 Plan 04) and four from AI semantic-scan agents (Plan 06). The merger uses `tool_source` for dedupe priority: when the same `(category, file_path, line_start)` triple is reported by both tooling and an agent, the tooling entry wins (higher confidence).
+`tool_source` is the producer that emitted the finding. The merger uses `tool_source` for dedupe priority: when the same `(category, file_path, line_start)` triple is reported by both tooling and an agent, the tooling entry wins (higher confidence).
 
 | `tool_source` | Producer | Confidence default | Phase / Plan |
 |---------------|----------|--------------------|--------------|
 | `import_guard` | `dart run custom_lint` (`import_guard_custom_lint` plugin) → `audit_layer.sh` | `high` | Phase 1 Plan 04 |
 | `riverpod_lint` | `dart run custom_lint` (`riverpod_lint` plugin) → `audit_providers.sh` | `high` | Phase 1 Plan 04 |
 | `dart_code_linter` | `dart_code_linter:metrics check-unused-{code,files}` → `audit_dead_code.sh` | `high` | Phase 1 Plan 04 |
+| `owned_duplication_detector` | Repository-owned exact 16-line cross-file Dart clone detector → `audit_duplication.sh` | `medium` | HP-07 |
 | `agent:layer` | AI subagent for indirect layer violations (transitive imports, type-alias smuggling) | `medium` | Phase 1 Plan 06 |
 | `agent:duplication` | AI subagent for semantic duplication / parallel implementations | `low` | Phase 1 Plan 06 |
 | `agent:transitive` | AI subagent for transitive imports across boundary layers | `medium` | Phase 1 Plan 06 |
 | `agent:drift_col` | AI subagent for Drift unused-column detection | `low` | Phase 1 Plan 06 |
 
-The fourth tooling scanner (`audit_duplication.sh`) is reserved for jscpd-style structural duplication and emits `tool_source: dart_code_linter` (Plan 04 will reconcile if a separate value becomes necessary).
+`audit_duplication.sh` emits `owned_duplication_detector` only after its detector runs. A failed or skipped run records `scan_state: not_run`; `merge_findings.dart` then exits non-zero and marks the report incomplete rather than treating its empty findings array as a clean result.
 
 ---
 

@@ -363,5 +363,74 @@ void main() {
       expect(findings.single['status'], equals('closed'));
       expect(findings.single['closed_commit'], equals('def456'));
     });
+
+    test(
+      'preserves an open finding ID when new findings sort before it',
+      () async {
+        final existing = _f(
+          filePath: 'lib/z_existing.dart',
+          line: 7,
+          description: 'existing open finding',
+        );
+        final inserted = _f(
+          filePath: 'lib/a_inserted.dart',
+          line: 1,
+          description: 'new finding',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {...existing.toJson(), 'id': 'LV-001'},
+            ],
+          }),
+        );
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(_shardWith([inserted, existing], 'import_guard')),
+        );
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final findings =
+            (jsonDecode(
+                      File('${shardRoot.path}/issues.json').readAsStringSync(),
+                    )['findings']
+                    as List)
+                .cast<Map>();
+        expect(
+          findings.singleWhere(
+            (finding) => finding['description'] == 'existing open finding',
+          )['id'],
+          'LV-001',
+        );
+        expect(
+          findings.singleWhere(
+            (finding) => finding['description'] == 'new finding',
+          )['id'],
+          'LV-002',
+        );
+      },
+    );
+
+    test('fails explicitly when a scanner shard says it was not run', () async {
+      File('${shardRoot.path}/shards/duplication.json').writeAsStringSync(
+        jsonEncode({
+          'tool_source': 'owned_duplication_detector',
+          'scan_state': 'not_run',
+          'scan_failed': true,
+          'findings': [],
+          'error': 'fixture scanner failure',
+        }),
+      );
+
+      final result = await _runMerger(tmp);
+
+      expect(result.exitCode, equals(1));
+      expect(result.stderr, contains('duplication.json was not run'));
+      expect(
+        File('${shardRoot.path}/ISSUES.md').readAsStringSync(),
+        contains('## Scan Status: INCOMPLETE'),
+      );
+    });
   });
 }
