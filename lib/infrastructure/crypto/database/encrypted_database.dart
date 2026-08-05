@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
@@ -22,7 +21,16 @@ import '../repositories/master_key_repository.dart';
 Future<QueryExecutor> createEncryptedExecutor(
   MasterKeyRepository masterKeyRepository, {
   bool inMemory = false,
+  File? databaseFile,
 }) async {
+  if (inMemory && databaseFile != null) {
+    throw ArgumentError.value(
+      databaseFile,
+      'databaseFile',
+      'Cannot provide a database file for an in-memory database.',
+    );
+  }
+
   if (!await masterKeyRepository.hasMasterKey()) {
     throw MasterKeyNotInitializedException();
   }
@@ -33,31 +41,9 @@ Future<QueryExecutor> createEncryptedExecutor(
     return NativeDatabase.memory(setup: (db) => _setupEncryption(db, dbKey));
   }
 
-  final file = await _getDatabaseFile();
+  final file = databaseFile ?? await _getDatabaseFile();
+  await _ensureDatabaseParentExists(file);
 
-  return NativeDatabase(file, setup: (db) => _setupEncryption(db, dbKey));
-}
-
-/// Opens the production SQLCipher executor against an isolated test file.
-///
-/// Device integration tests need to close and reopen the same encrypted file
-/// without touching the installed app's real `home_pocket.db`. Keeping this
-/// entry point here ensures those tests exercise the exact production key
-/// derivation and SQLCipher setup rather than introducing a second cipher path.
-@visibleForTesting
-Future<QueryExecutor> createEncryptedExecutorAtFileForTesting(
-  MasterKeyRepository masterKeyRepository,
-  File file,
-) async {
-  if (!await masterKeyRepository.hasMasterKey()) {
-    throw MasterKeyNotInitializedException();
-  }
-
-  final dbKey = await _deriveDatabaseKey(masterKeyRepository);
-  final parent = file.parent;
-  if (!await parent.exists()) {
-    await parent.create(recursive: true);
-  }
   return NativeDatabase(file, setup: (db) => _setupEncryption(db, dbKey));
 }
 
@@ -92,11 +78,14 @@ Future<String> _databaseFilePath() async {
 
 Future<File> _getDatabaseFile() async {
   final path = await _databaseFilePath();
-  final dbDir = Directory(p.dirname(path));
-  if (!await dbDir.exists()) {
-    await dbDir.create(recursive: true);
-  }
   return File(path);
+}
+
+Future<void> _ensureDatabaseParentExists(File file) async {
+  final parent = file.parent;
+  if (!await parent.exists()) {
+    await parent.create(recursive: true);
+  }
 }
 
 /// Whether the on-disk encrypted database file already exists.

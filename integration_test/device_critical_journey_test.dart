@@ -22,7 +22,8 @@ import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_settings_screen.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
-import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart';
+import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart'
+    show ensureNativeLibrary;
 import 'package:home_pocket/infrastructure/crypto/providers.dart' as crypto;
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
@@ -193,10 +194,7 @@ void main() {
       ProviderContainer? container;
       try {
         database = AppDatabase(
-          await createEncryptedExecutorAtFileForTesting(
-            masterKey,
-            databaseFile,
-          ),
+          await createDeviceTestEncryptedExecutor(masterKey, databaseFile),
         );
         container = _createContainer(
           database: database,
@@ -284,10 +282,7 @@ void main() {
         database = null;
 
         database = AppDatabase(
-          await createEncryptedExecutorAtFileForTesting(
-            masterKey,
-            databaseFile,
-          ),
+          await createDeviceTestEncryptedExecutor(masterKey, databaseFile),
         );
         final cipherRows = await database
             .customSelect('PRAGMA cipher_version')

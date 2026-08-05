@@ -10,7 +10,8 @@ import 'package:home_pocket/data/repositories/sync_repository_impl.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart';
+import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart'
+    show ensureNativeLibrary;
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
@@ -127,10 +128,7 @@ void main() {
       AppDatabase? database;
       try {
         database = AppDatabase(
-          await createEncryptedExecutorAtFileForTesting(
-            masterKey,
-            databaseFile,
-          ),
+          await createDeviceTestEncryptedExecutor(masterKey, databaseFile),
         );
         var repository = SyncRepositoryImpl(dao: SyncQueueDao(database));
         final failedRelay = _MockRelayApiClient();
@@ -163,10 +161,7 @@ void main() {
 
         await database.close();
         database = AppDatabase(
-          await createEncryptedExecutorAtFileForTesting(
-            masterKey,
-            databaseFile,
-          ),
+          await createDeviceTestEncryptedExecutor(masterKey, databaseFile),
         );
         repository = SyncRepositoryImpl(dao: SyncQueueDao(database));
         final relay = _MockRelayApiClient();
@@ -213,10 +208,7 @@ void main() {
       AppDatabase? database;
       try {
         database = AppDatabase(
-          await createEncryptedExecutorAtFileForTesting(
-            masterKey,
-            databaseFile,
-          ),
+          await createDeviceTestEncryptedExecutor(masterKey, databaseFile),
         );
         await database.customStatement(
           'CREATE TABLE device_e2e_pull_apply ('

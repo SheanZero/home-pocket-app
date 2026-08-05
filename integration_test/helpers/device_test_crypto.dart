@@ -1,6 +1,8 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:drift/drift.dart';
+import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/master_key_repository.dart';
 
 /// Deterministic, non-production master key for isolated device test databases.
@@ -42,4 +44,19 @@ class DeviceTestMasterKeyRepository implements MasterKeyRepository {
 
   @override
   Future<void> clearMasterKey() async => _cache.clear();
+}
+
+/// Opens an isolated device-test database through the production executor.
+///
+/// The supplied file keeps integration tests away from the installed app's
+/// database, while [createEncryptedExecutor] retains the production HKDF and
+/// SQLCipher configuration path.
+Future<QueryExecutor> createDeviceTestEncryptedExecutor(
+  MasterKeyRepository masterKeyRepository,
+  File databaseFile,
+) {
+  return createEncryptedExecutor(
+    masterKeyRepository,
+    databaseFile: databaseFile,
+  );
 }
