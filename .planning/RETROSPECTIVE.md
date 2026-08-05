@@ -428,6 +428,54 @@
 
 ---
 
+## Milestone: v2.0 — 完成第一版上线前最后的功能开发
+
+**Shipped:** 2026-08-05
+**Phases:** 4 (53-56) | **Plans:** 30 | **Task blocks:** 98 | **Audit:** `tech_debt`
+
+### What Was Built
+
+- A user-approved HTML design gate for onboarding, app lock, and legal/sponsor settings, with a zero-production-code exit contract.
+- A trilingual first-run onboarding flow covering profile identity, UI language, accounting currency, and voice locale, including correct import/reset behavior.
+- Face ID/PIN app lock using Argon2id PIN storage, a single effective-lock predicate, lifecycle relock, an opaque privacy mask, and re-authenticated security settings changes.
+- Offline ja/zh/en privacy, terms, Tokusho, and OSS surfaces, plus externally configurable support/sponsor destinations and store privacy documentation aligned with real FCM/exchange-rate behavior.
+
+### What Worked
+
+- **Design before implementation** kept three cross-cutting launch surfaces aligned with the chosen interaction direction before Dart work began.
+- **Security behavior was closed with real-device UAT**: 6/6 Phase 55 scenarios completed and G1-G4 were fixed/verified, allowing stale debug metadata to be classified accurately at close.
+- **Cross-phase audit used runtime seams, not document status alone**: all 12 seams and 6 E2E flows were traced; no broken runtime path or critical requirement gap remained.
+- **Release-owner values were not fabricated**: hosted URLs, operator identity/contact information, sponsor/support destinations, and legal review remain explicit pre-store gates.
+
+### What Was Inefficient
+
+- PROJECT, ROADMAP, STATE, AGENTS, and CLAUDE diverged badly after implementation: some claimed v2.0 complete, others still pointed to v1.2 or unplanned Phase 56. P2-06 required a dedicated GSD health/audit/close pass.
+- The close CLI undercounted 98 task blocks as 37 and extracted deviation notes as accomplishments. MILESTONES and STATE again needed manual reconciliation against disk, making this the fifth consecutive unreliable close extraction.
+- Nyquist artifacts remained missing/draft/stale across all four phases. This is still documentation-grade, but recurrence is now structural rather than accidental.
+- 38 historical artifacts surfaced at close because debug and quick-task frontmatter was never normalized when work completed; most were metadata drift, not unresolved runtime behavior.
+
+### Patterns Established
+
+- **Three-source close proof**: requirement traceability + per-phase verification/UAT + integration/E2E tracing must agree before a milestone is eligible to close.
+- **Override closeout needs structured debt**: record count, category, evidence, risk, and release timing in STATE; never reduce the choice to an untraceable blanket acceptance.
+- **Archive first, delete active requirements second**: a safety commit proves the archive exists before removing the active `REQUIREMENTS.md`.
+- **Treat GSD close output as a draft** until phase/plan/task counts, accomplishments, STATE frontmatter, and archive paths are checked against disk.
+
+### Key Lessons
+
+1. Planning-state drift is a product risk because future agents act on it; AGENTS and CLAUDE belong in the same close transaction as PROJECT/ROADMAP/STATE.
+2. Human/UAT evidence must update canonical verification metadata immediately, or resolved behavior returns later as a false open gap.
+3. Legal content and legal deployment are separate deliverables: offline documents can be complete while hosted URLs, operator values, and counsel review remain release blockers.
+4. Repeated metadata drift should be automated at artifact creation/close, not repeatedly accepted at milestone close.
+
+### Cost Observations
+
+- Git range `e4f21be^..0b0ac6c`: 168 commits, 184 files, +22,523 / -665 LOC.
+- One new runtime dependency (`url_launcher`); app-lock and onboarding reused existing security, settings, localization, and initialization layers.
+- Close audit: 32/32 requirements covered, 4/4 phases passed, 12/12 integration seams wired, 6/6 E2E flows complete.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -444,6 +492,7 @@
 | v1.7 | multi-session, ~2 days + long quick-task tail | 3 | User-directed 6→3 phase consolidation; three blocking ADRs before migration code; first external network dependency introduced with structural privacy/offline invariants (single `convertToJpy()` site, never-block-save, no user data in URLs); Wave-0 RED scaffolds as executable acceptance specs; heavy 06-13/14 quick-task UX-polish tail signals Phase-42 plans under-specified edit/display. |
 | v1.8 | multi-session, ~1 week incl. design gate | 6 (43-48) | First **design-gate-first** milestone — a hard no-production-code HTML exploration phase (43) gated the build; reuse-first build (0 schema migration, 0 new deps, no fl_chart bump); registry as single source of render order AND refresh union (HomeHero isolation structural); descope-at-gate (JOY-03/04 in the requirements ledger); a post-audit quick-task reintroduced debt → appended Phase 48 to clear it inline. |
 | v1.9 | multi-session + long quick-task tail | 4 (49-52) | User-directed 6→4 phase merge (two logic-pairs = same code surgery / shared surface); **decouple-then-arbitrate** with a pure-function reconciler (3×3 truth table as the test spec); single ledger-derivation site + on-every-path invariant (retired `dual_ledger/`); zero new heavy deps for a recognition rebuild (drift stays 2.31.0); carried voice backlog resolved by **supersession** at close; T-01 (flag-hidden confidence band) caught by audit and re-enabled before ship. |
+| v2.0 | multi-session + delayed close audit | 4 (53-56) | Reused the v1.8 design-gate pattern for onboarding/app-lock/legal surfaces; real-device app-lock closure; three-source close proof (requirements + verification/UAT + integration); explicit release-owner gates; P2-06 planning drift repaired through GSD health → audit → override close → archive. |
 
 ### Cumulative Quality
 
@@ -459,6 +508,7 @@
 | v1.7 | 2786/2786 tests pass at close (full suite incl. goldens); voice currency corpus ≥5 cases/currency/locale; CNY symbol goldens re-baselined; `flutter analyze` 0 issues; v21 migration + null-safe sync round-trip + partial-triple invariant tests green; 6/6 cross-phase integration seams verified at audit; Phase 42 4/4 device UAT passed | not recomputed at milestone close | 1 new pub dependency (`connectivity_plus ^7.1.1`, iOS-build-green) |
 | v1.8 | 3090/3090 tests pass at close (full suite incl. goldens); 48 macOS chart golden baselines authored from scratch (zero-golden gap closed); 36-case anti-toxicity sweep (5 cards × ja/zh/en × states); `flutter analyze` 0 issues; 9/9 cross-phase integration flows + 10/10 on-device UAT verified at audit | 80.48% cleaned-lcov (≥70% gate) | 0 new pub dependencies; 0 schema migration (stays v21); fl_chart stays ^1.2.0 (no bump) |
 | v1.9 | 3352/3353 tests pass at close (full suite; 51 ran 3270/3270, 52 ran 3353 with the chips test); `merchant_false_positive` adversarial corpus + `cross_validation_test` 3×3 spec + ledger invariant (D-20) + en-never-CJK isolation tests green; `flutter analyze` 0 issues; v22 encrypted migration ladder (v3/v17/v21→v22 + fresh) verified; 5/5 cross-phase seams + 4/4 E2E flows verified at audit; Phase 49 MERCH-04 on-device verified | not recomputed at milestone close | 0 new pub dependencies; schema v21→v22 (Phase 49); drift stays 2.31.0 (no bump) |
+| v2.0 | Phase 55 device UAT 6/6 complete; close integration audit executed 52 targeted tests with 12/12 seams and 6/6 flows complete; all four phase verification documents reconciled to passed | not recomputed at milestone close; P1 coverage gates tracked separately | 1 runtime dependency (`url_launcher`); app-lock/onboarding reuse existing layers |
 
 ### Top Lessons
 
@@ -501,3 +551,6 @@
 37. **(v1.9)** Carried backlog must be re-examined against current code at each close — four voice items rode through six closes as "VOICE-POLISH-V2" while their target pipeline had already been deleted/rebuilt; **resolve-by-supersession** (mark complete + evidence) beats perpetual auto-deferral.
 38. **(v1.9)** "Built, wired, tested, but flag-hidden in production" is a real divergence (capability ≠ shipped) — the audit caught the hidden confidence band (T-01); decide consciously at close whether to enable, don't ship the divergence silently.
 39. **(v1.9)** The milestone-close CLI is now a 4×-recurring liability — this time it garbled accomplishments AND mangled STATE.md frontmatter (`current_phase: 9`, stale `stopped_at`); treat ALL its output (MILESTONES entry, STATE fields, counts) as a draft to verify against disk.
+40. **(v2.0)** Planning-state drift is executable risk — PROJECT/ROADMAP/STATE/AGENTS/CLAUDE must be reconciled in the same milestone-close transaction.
+41. **(v2.0)** Legal document completion is not release completion — hosted URLs, operator data, sponsor/support destinations, and legal review remain separate pre-store gates.
+42. **(v2.0)** Repeated close-artifact metadata drift should be fixed at artifact creation time; a fifth round of hand-curating counts and accomplishments is no longer an isolated inconvenience.
