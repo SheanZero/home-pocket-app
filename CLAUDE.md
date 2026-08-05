@@ -11,7 +11,7 @@ This file provides guidance to Claude Code when working with this repository.
 **Current Phase:** None — v2.0 (Phases 53-56) shipped and archived on 2026-08-05; awaiting next-milestone definition
 **Target:** iOS 15+ / Android 7+ (API 24+)
 
-**Planning sources:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and `.planning/milestones/v2.0-*`. Refresh `.planning/codebase/` before the next milestone, then run `$gsd-new-milestone`.
+**Planning sources:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and `.planning/milestones/v2.0-*`. `.planning/codebase/` was refreshed 2026-08-05; run `$gsd-new-milestone` next unless later code changes require another map refresh.
 
 ---
 

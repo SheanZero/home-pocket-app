@@ -16,7 +16,7 @@
 
 **v2.0 shipped and archived on 2026-08-05.** All 32 requirements are covered; Phases 53-56 passed verification; 12/12 integration seams and 6/6 E2E flows are complete. The close audit status is `tech_debt`, with no broken runtime seam or critical requirement gap.
 
-There is **no active milestone or phase**. Before defining the next milestone, refresh `.planning/codebase/` against the post-P1/P2 working tree, then use `/gsd-new-milestone`. Release-owner values remain mandatory before store submission: hosted Privacy/Terms URLs, app-specific support and sponsor destinations, Tokusho operator identity/contact details, and final legal review. The 38 historical artifact records accepted at close are documented in `.planning/STATE.md` and do not represent v2.0 functional failures.
+There is **no active milestone or phase**. `.planning/codebase/` was refreshed on 2026-08-05 against the post-P1/P2 working tree (map base `7b4f1bac`), so the next planning action is `/gsd-new-milestone`; refresh again only if the remaining working tree changes materially first. Release-owner values remain mandatory before store submission: hosted Privacy/Terms URLs, app-specific support and sponsor destinations, Tokusho operator identity/contact details, and final legal review. The 38 historical artifact records accepted at close are documented in `.planning/STATE.md` and do not represent v2.0 functional failures.
 
 Current sources of truth: `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and the v2.0 archive under `.planning/milestones/`.
 

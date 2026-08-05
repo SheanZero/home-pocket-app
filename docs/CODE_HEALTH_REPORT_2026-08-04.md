@@ -222,7 +222,7 @@ CI 在 [`.github/workflows/audit.yml:49`](../.github/workflows/audit.yml#L49) �
 
 ### P2-06：规划状态存在漂移
 
-**状态：已修复（2026-08-05）。** v2.0 已通过 GSD 完成审计并以 `tech_debt` override closeout 归档；PROJECT、ROADMAP、STATE、MILESTONES、AGENTS 与 CLAUDE 的当前状态已统一。32/32 需求覆盖、4/4 phase 验证通过、12/12 集成接缝连通、6/6 E2E 流完整。38 个历史 artifact 与上线前 release-owner 配置已由用户选择 A 明确认领并记录到 STATE Deferred Items；完成态需求与 phase 资料位于 `.planning/milestones/v2.0-*`。下一里程碑前仍需刷新 codebase map。
+**状态：已修复（2026-08-05）。** v2.0 已通过 GSD 完成审计并以 `tech_debt` override closeout 归档；PROJECT、ROADMAP、STATE、MILESTONES、AGENTS 与 CLAUDE 的当前状态已统一。32/32 需求覆盖、4/4 phase 验证通过、12/12 集成接缝连通、6/6 E2E 流完整。38 个历史 artifact 与上线前 release-owner 配置已由用户选择 A 明确认领并记录到 STATE Deferred Items；完成态需求与 phase 资料位于 `.planning/milestones/v2.0-*`。`.planning/codebase/` 已按当前工作树刷新，最终 `gsd-health` 为 `healthy`（0 error / 0 warning）。
 
 - [`.planning/STATE.md:6`](../.planning/STATE.md#L6) 标记 Phase 56 / v2.0 `complete`；
 - [`.planning/ROADMAP.md:15`](../.planning/ROADMAP.md#L15) 和 [`:326`](../.planning/ROADMAP.md#L326) 仍标记 v2.0 `in progress`、P56 unplanned；

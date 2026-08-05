@@ -12,13 +12,13 @@
 - **v1.2-v1.9 shipped:** See `.planning/MILESTONES.md` and archived roadmaps.
 - **v2.0 shipped:** First-public-release feature foundation (Phases 53-56), archived 2026-08-05.
 - **Current milestone:** None; the project is awaiting next-milestone definition.
-- **Current focus:** Refresh the post-P1/P2 codebase map, then use `$gsd-new-milestone`.
+- **Current focus:** Codebase map refreshed 2026-08-05; use `$gsd-new-milestone` when ready to define the next milestone.
 - **Current source of truth:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, plus the v2.0 archive under `.planning/milestones/`.
 
 Known close debt:
 - v2.0 closed with `tech_debt`: 38 historical artifact records were explicitly acknowledged; no broken runtime seam or critical requirement gap was found.
 - Hosted Privacy/Terms URLs, app-specific support/sponsor destinations, Tokusho operator identity/contact values, and final legal review are mandatory pre-store release gates.
-- Refresh `.planning/codebase/` after the current P1/P2 working tree is committed and before major planning.
+- `.planning/codebase/` was refreshed against the 2026-08-05 post-P1/P2 working tree; refresh again if later uncommitted changes materially alter architecture before planning.
 
 ---
 
@@ -230,7 +230,7 @@ Dependency pins to leave alone unless upgraded together with iOS build verificat
 - Completed milestones are archived under `.planning/milestones/`.
 - Completed v2.0 requirements live in `.planning/milestones/v2.0-REQUIREMENTS.md`; there is no active `REQUIREMENTS.md` until the next milestone is created.
 - Use `$gsd-progress` to inspect current status.
-- Current recommended sequence: `$gsd-map-codebase`, then `$gsd-new-milestone`.
+- Current recommended command: `$gsd-new-milestone` (rerun `$gsd-map-codebase` first only if the codebase materially changes).
 - Use `$gsd-cleanup` later if phase directories should be archived out of `.planning/phases/`.
 
 When editing planning files:

@@ -6,7 +6,7 @@ status: Awaiting next milestone
 stopped_at: Milestone v2.0 archived; awaiting next milestone definition
 last_updated: "2026-08-05T02:03:20.037Z"
 last_activity: 2026-08-05
-last_activity_desc: Milestone v2.0 completed and archived
+last_activity_desc: P2-06 fixed — v2.0 archived, planning sources reconciled, and codebase map refreshed
 progress:
   total_phases: 4
   completed_phases: 4
@@ -24,14 +24,14 @@ current_phase_name: null
 See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Refresh the post-close codebase map, resolve store-release owner values, and define the next milestone
+**Current focus:** Define the next milestone and resolve or schedule the remaining store-release owner values
 
 ## Current Position
 
 Phase: None — v2.0 archived
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-05 — Milestone v2.0 completed and archived
+Last activity: 2026-08-05 — P2-06 fixed: v2.0 archived, planning sources reconciled, codebase map refreshed, and GSD health returned healthy
 
 ### Decisions
 
@@ -135,13 +135,13 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 ## Previous Milestone Snapshots
 
 - **v1.8** (6 phases 43-48, 32 plans, `tech_debt`) — 统计页面重设计（实用化 × 悦己情感化）; round-5 B 5-card analytics rebuild; schema v21
-- **v1.7** (3 phases 40-42, 20 plans, `tech_debt`) — 多币种支持 foreign-currency entry; schema v20→v21
+- **v1.7** (3 stages numbered 40-42, 20 plans, `tech_debt`) — 多币种支持 foreign-currency entry; schema v20→v21
 - **v1.6** (4 phases 36-39, 27 plans, `tech_debt`) — 购物清单 family shopping list; schema v19→v20
 - **v1.5** (5 phases 31-35, 24 plans, `tech_debt`) — 文案与配色统一; ADR-019 "Sakura Mochi × Wakaba" palette
 - **v1.4** (7 phases 24-30, 29 plans, `tech_debt`) — 列表功能 kakeibo-style List tab
 - **v1.3** (6 phases 18-23, 47 plans, `tech_debt`) — 迭代帐本输入 single-screen voice entry
 - **v1.2** (5 phases 13-17, 37 plans, `tech_debt`) — Happiness Metric Refresh (ADR-016, Σ joy_contribution)
-- **v1.1** (4 phases 9-12, 40 plans, `known_debt`) — Happiness Metric & Display
+- **v1.1** (stages 9-12; plan count 40; `known_debt`) — Happiness Metric & Display
 - **v1.0** (8 phases 1-8, 48 plans, `passed`) — Codebase Cleanup Initiative
 
 ## Accumulated Context
@@ -203,8 +203,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| nyquist_gap | Phases 40/41/42 VALIDATION.md draft + `nyquist_compliant: false`. Documentation-grade; underlying suite 2786/2786 green. Mirrors accepted v1.2–v1.6 pattern. To clear: `/gsd-validate-phase 40/41/42` | accept (documentation-grade) | v1.7 close |
-| verification_flag | Phase 42 `42-VERIFICATION.md [human_needed]` flag never flipped — RESOLVED by `42-UAT.md` (2026-06-14, 4/4 pass, 0 issues) covering exactly the 4 flagged device items (D-02 dialog, D-03 toast, flag-emoji render, live-preview behavior) | resolved (flag stale) | v1.7 close |
+| nyquist_gap | v1.7 stages 40/41/42 had draft VALIDATION.md artifacts with `nyquist_compliant: false`. Documentation-grade; underlying suite 2786/2786 green. Mirrors accepted v1.2–v1.6 pattern. To clear, restore the archived v1.7 validation context and validate stages 40/41/42. | accept (documentation-grade) | v1.7 close |
+| verification_flag | v1.7 stage 42 `42-VERIFICATION.md [human_needed]` flag never flipped — RESOLVED by `42-UAT.md` (2026-06-14, 4/4 pass, 0 issues) covering exactly the 4 flagged device items (D-02 dialog, D-03 toast, flag-emoji render, live-preview behavior) | resolved (flag stale) | v1.7 close |
 | metadata_drift | `audit-open` reports 33 quick tasks as incomplete/unknown (SUMMARY.md lack `status: complete` frontmatter). All recorded in the Quick Tasks Completed table. Same cosmetic pattern as v1.5 (17) / v1.6 (38) | cosmetic, no functional gap | v1.7 close |
 | voice_backlog | 260526-k92/l0o/n7b/pg6 voice-tab/active-learning follow-ups — genuinely incomplete; carried as the v1.3 VOICE-POLISH-V2 backlog | defer to VOICE-POLISH-V2 | v1.7 close |
 | advisory | Pre-existing no-rehash-on-edit policy (ADR-021): editing an amount re-derives JPY but flows `currentHash` through `copyWith` unchanged. Intentional, not multi-currency-specific | accept (awareness only) | v1.7 close |
@@ -336,7 +336,7 @@ Resume file: .planning/phases/56-setting/56-CONTEXT.md
 
 ## Decisions
 
-- [v1.8 roadmap]: Phase numbering continues from Phase 42 → v1.8 = Phases 43-47 (no reset).
+- [v1.8 roadmap]: Stage numbering continues from v1.7 stage 42 → v1.8 = stages 43-47 (no reset).
 - [v1.8 roadmap]: Phase 43 is a standalone hard DESIGN GATE with NO production code (user "未获批前不进入开发"); build phases 44-47 follow only after the gate closes on user approval.
 - [v1.8 roadmap]: Build half kept at 4 sequentially-dependent phases (data → shell → cards → validation) rather than consolidated, because the full-screen rebuild under tight ADR-012/ADR-016 invariants benefits from a clean shell-before-cards contract and a dedicated macOS-golden/full-suite gate.
 - [v1.8 roadmap]: Overview reframed expense-side only (no income path exists; savings-rate would be meaningless); real savings-rate → INCOME-V2-01.
@@ -413,7 +413,7 @@ Resume file: .planning/phases/56-setting/56-CONTEXT.md
 - [Phase ?]: 51-03: category fill gated to first end-of-speech final (resolve-on-final hysteresis, XVAL-03); partials still fill amount/text/merchant/date live; no new timer (D-03).
 - [Phase 51]: 51-04: CreateTransactionUseCase ledger derives from CategoryService.resolveLedgerType(categoryId) ?? daily (D-14/D-16) — single source = category_ledger_configs, never a merchant ledger hint.
 - [Phase 51]: 51-04: lib/application/dual_ledger/ retired (LEDGER-02, D-15) — second divergent hardcoded daily/joy map (RuleEngine, dead ids cat_entertainment/cat_shopping) deleted; ledger_hint_deriver + features/dual_ledger untouched.
-- [quick 260703]: **Phase 42 D-08 zh-branch SUPERSEDED (user-directed)** — bare 「元」 in zh locale no longer resolves to CNY; it is native/null in EVERY locale (aligned with 块/块钱), so no CNY→JPY rate fetch fires on ordinary zh utterances. Explicit 人民币/中国元/RMB/chinese yuan/yuan keep mapping to CNY. `bareYuanToken` removed from voice_currency_suffixes.dart; currency_detection_test locks the new behavior. Same task also shipped the BUG-1 ITN-concat defenses: scan() positional Digit merge, merger space-join + round-Arabic open gate + full-parser commits, spaced-group parser routing, `detectConcatRepairCandidate` + `VoiceParseResult.amountRepairCandidate` + alternates auto-adopt, conversion gated to resolve-on-final with an undo SnackBar, repair-adopt + large-amount (≥¥1M) notices.
+- [quick 260703]: **v1.7 stage 42 D-08 zh-branch SUPERSEDED (user-directed)** — bare 「元」 in zh locale no longer resolves to CNY; it is native/null in EVERY locale (aligned with 块/块钱), so no CNY→JPY rate fetch fires on ordinary zh utterances. Explicit 人民币/中国元/RMB/chinese yuan/yuan keep mapping to CNY. `bareYuanToken` removed from voice_currency_suffixes.dart; currency_detection_test locks the new behavior. Same task also shipped the BUG-1 ITN-concat defenses: scan() positional Digit merge, merger space-join + round-Arabic open gate + full-parser commits, spaced-group parser routing, `detectConcatRepairCandidate` + `VoiceParseResult.amountRepairCandidate` + alternates auto-adopt, conversion gated to resolve-on-final with an undo SnackBar, repair-adopt + large-amount (≥¥1M) notices.
 
 ## Operator Next Steps
 

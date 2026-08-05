@@ -14,13 +14,25 @@
 - ✅ **v1.9 语音类目与商家识别系统重构** — Phases 49-52 (shipped 2026-06-25) — [archive](milestones/v1.9-ROADMAP.md)
 - ✅ **v2.0 完成第一版上线前最后的功能开发** — Phases 53-56 (shipped and archived 2026-08-05) — [roadmap](milestones/v2.0-ROADMAP.md) · [requirements](milestones/v2.0-REQUIREMENTS.md) · [audit](milestones/v2.0-MILESTONE-AUDIT.md)
 
+<details>
+<summary>✅ v2.0 archived phase index (Phases 53-56)</summary>
+
+- [x] **Phase 53: HTML Design Gate** — 4/4 plans complete; three design directions approved; zero-production-code gate passed.
+- [x] **Phase 54: Onboarding Flow** — 7/7 plans complete; canonical close verification reconciled to the live V16 intro → settings flow with inline optional security.
+- [x] **Phase 55: App Lock (Face ID + PIN)** — 12/12 plans complete; 6/6 device UAT complete; G1-G4 fixed and verified.
+- [x] **Phase 56: Legal, Sponsor, and Release Settings** — 7/7 plans complete; offline trilingual legal surfaces and release documentation verified.
+
+Full plan and verification history: `.planning/milestones/v2.0-phases/`.
+
+</details>
+
 ## Current Planning State
 
 No milestone or phase is active. v2.0 closed with audit status `tech_debt`: 32/32 requirements covered, 4/4 phases passed, 12/12 integration seams wired, and 6/6 E2E flows complete. The user explicitly accepted the documented historical artifact and release-configuration debt at close; see `.planning/STATE.md` Deferred Items §v2.0.
 
 Before creating the next roadmap:
 
-1. Refresh `.planning/codebase/` against the post-P1/P2 committed tree.
+1. ✅ `.planning/codebase/` refreshed 2026-08-05 against the post-P1/P2 working tree (map base `7b4f1bac`).
 2. Resolve or explicitly schedule the release-owner values listed in STATE: hosted Privacy/Terms URLs, app-specific support/sponsor destinations, Tokusho operator identity/contact information, and legal review.
 3. Run `$gsd-new-milestone`; that workflow will create the next active `REQUIREMENTS.md` and phase roadmap.
 
