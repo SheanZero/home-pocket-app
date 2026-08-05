@@ -1,6 +1,6 @@
 # Feature Landscape — v2.1 Dependency & Native Toolchain Modernization
 
-**Domain:** Local-first, privacy-first Flutter family-accounting app (SQLCipher, Drift, Riverpod) undergoing a coordinated production-stable upgrade.
+**Domain:** Local-first, privacy-first Flutter family-accounting app (SQLCipher, Drift, Riverpod) targeting iOS 15+ and Android 7+, undergoing a coordinated production-stable upgrade.
 **Researched:** 2026-08-05
 **Confidence:** MEDIUM — platform/tool expectations are cross-checked against official Flutter, Apple, and Android documentation; exact final version choices remain a phase-1 compatibility investigation.
 
