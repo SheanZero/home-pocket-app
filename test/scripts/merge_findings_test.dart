@@ -21,14 +21,43 @@ Map<String, dynamic> _shardWith(List<Finding> findings, String toolSource) => {
 Future<ProcessResult> _runMerger(
   Directory cwd, {
   Map<String, String>? environment,
+  bool repairPairTransaction = false,
 }) async {
   return Process.run(
     'dart',
-    ['run', '$_projectRoot/scripts/merge_findings.dart'],
+    [
+      'run',
+      '$_projectRoot/scripts/merge_findings.dart',
+      if (repairPairTransaction) '--repair-pair-transaction',
+    ],
     runInShell: true,
     workingDirectory: cwd.path,
     environment: environment,
   );
+}
+
+Future<Process> _startMerger(
+  Directory cwd, {
+  Map<String, String>? environment,
+}) => Process.start(
+  'dart',
+  ['run', '$_projectRoot/scripts/merge_findings.dart'],
+  runInShell: true,
+  workingDirectory: cwd.path,
+  environment: environment,
+);
+
+Future<void> _waitFor(
+  bool Function() condition, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (!condition()) {
+    if (DateTime.now().isAfter(deadline)) {
+      fail('timed out waiting for subprocess state');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
 }
 
 List<FileSystemEntity> _pairTransactionArtifacts(Directory root) => root
@@ -1525,5 +1554,204 @@ void main() {
         expect(finding['status'], equals('closed'));
       },
     );
+
+    test(
+      'serializes real merger subprocesses before unjournaled cleanup',
+      () async {
+        File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
+          jsonEncode(
+            _shardWith([_f(filePath: 'lib/locked.dart')], 'import_guard'),
+          ),
+        );
+        final first = await _startMerger(
+          tmp,
+          environment: {
+            'AUDIT_MERGE_HOLDPOINT': 'after_prepare_before_journal',
+            'AUDIT_MERGE_HOLD_MS': '1200',
+          },
+        );
+        await _waitFor(() => _pairTransactionArtifacts(shardRoot).isNotEmpty);
+        final transientBefore = _pairTransactionArtifacts(
+          shardRoot,
+        ).map((entity) => entity.path).toSet();
+
+        final second = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_LOCK_WAIT_MS': '50'},
+        );
+        expect(second.exitCode, equals(1));
+        expect(second.stderr, contains('another merger holds the audit lock'));
+        expect(
+          _pairTransactionArtifacts(shardRoot).map((entity) => entity.path),
+          containsAll(transientBefore),
+          reason:
+              'a concurrent merger must not clean another process artifacts',
+        );
+        expect(await first.exitCode, equals(0));
+        final restarted = await _runMerger(tmp);
+        expect(restarted.exitCode, equals(0), reason: restarted.stderr);
+      },
+    );
+
+    test(
+      'recovers a dead stale lock but never steals a live owner lock',
+      () async {
+        final lock = File('${shardRoot.path}/.merge-findings.lock')
+          ..writeAsStringSync(
+            jsonEncode({
+              'schema_version': 1,
+              'pid': 99999999,
+              'token': 'dead-owner-token',
+              'created_at_micros': 1,
+            }),
+          )
+          ..setLastModifiedSync(
+            DateTime.now().subtract(const Duration(minutes: 1)),
+          );
+
+        final recovered = await _runMerger(
+          tmp,
+          environment: {'AUDIT_MERGE_LOCK_GRACE_MS': '0'},
+        );
+        expect(recovered.exitCode, equals(0), reason: recovered.stderr);
+        expect(
+          lock.existsSync(),
+          isFalse,
+          reason: 'new owner releases its lock',
+        );
+
+        lock.writeAsStringSync(
+          jsonEncode({
+            'schema_version': 1,
+            'pid': pid,
+            'token': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            'created_at_micros': 1,
+          }),
+        );
+        lock.setLastModifiedSync(
+          DateTime.now().subtract(const Duration(minutes: 1)),
+        );
+        final liveOwner = await _runMerger(
+          tmp,
+          environment: {
+            'AUDIT_MERGE_LOCK_GRACE_MS': '0',
+            'AUDIT_MERGE_LOCK_WAIT_MS': '25',
+          },
+        );
+        expect(liveOwner.exitCode, equals(1));
+        expect(
+          liveOwner.stderr,
+          contains('another merger holds the audit lock'),
+        );
+        expect(lock.existsSync(), isTrue);
+        lock.deleteSync();
+      },
+    );
+
+    test(
+      'quarantines a corrupt transaction only with explicit repair and is idempotent',
+      () async {
+        const oldIssues = '{"findings":[]}';
+        const oldMarkdown = '# Old report\n';
+        File('${shardRoot.path}/issues.json').writeAsStringSync(oldIssues);
+        File('${shardRoot.path}/ISSUES.md').writeAsStringSync(oldMarkdown);
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync('{corrupt journal');
+        File(
+          '${shardRoot.path}/.merge-findings-tmp-1-1-issues-next',
+        ).writeAsStringSync('recognised staged bytes');
+        final unrecognised = File('${shardRoot.path}/.merge-findings-unrelated')
+          ..writeAsStringSync('do not delete');
+
+        final closed = await _runMerger(tmp);
+        expect(closed.exitCode, equals(1));
+        expect(
+          File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
+          isTrue,
+        );
+        expect(unrecognised.existsSync(), isTrue);
+
+        final repaired = await _runMerger(tmp, repairPairTransaction: true);
+        expect(repaired.exitCode, equals(0), reason: repaired.stderr);
+        expect(unrecognised.existsSync(), isTrue);
+        final forensicRoot = Directory(
+          '${shardRoot.path}/.merge-findings-forensics',
+        );
+        final manifests = forensicRoot
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((file) => file.path.endsWith('/manifest.json'))
+            .toList();
+        expect(manifests, hasLength(1));
+        final manifest = jsonDecode(manifests.single.readAsStringSync()) as Map;
+        expect(manifest['reason'], contains('pair transaction journal'));
+        expect(
+          (manifest['files'] as List)
+              .map((entry) => (entry as Map)['name'])
+              .toList(),
+          containsAll([
+            '.merge-findings-pair.json',
+            '.merge-findings-tmp-1-1-issues-next',
+          ]),
+        );
+        expect(
+          File('${shardRoot.path}/issues.json').readAsStringSync(),
+          isNot(oldIssues),
+        );
+        expect(
+          File('${shardRoot.path}/ISSUES.md').readAsStringSync(),
+          isNot(oldMarkdown),
+        );
+
+        final repeated = await _runMerger(tmp, repairPairTransaction: true);
+        expect(repeated.exitCode, equals(0), reason: repeated.stderr);
+        expect(
+          forensicRoot
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((file) => file.path.endsWith('/manifest.json')),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('repair never rebuilds from incomplete canonical evidence', () async {
+      const oldIssues = '{"findings":[]}';
+      const oldMarkdown = '# Old report\n';
+      File('${shardRoot.path}/issues.json').writeAsStringSync(oldIssues);
+      File('${shardRoot.path}/ISSUES.md').writeAsStringSync(oldMarkdown);
+      File(
+        '${shardRoot.path}/.merge-findings-pair.json',
+      ).writeAsStringSync('{corrupt journal');
+      File('${shardRoot.path}/shards/layer.json').deleteSync();
+
+      final repaired = await _runMerger(tmp, repairPairTransaction: true);
+
+      expect(repaired.exitCode, equals(1));
+      expect(
+        repaired.stderr,
+        contains('repair requires every canonical shard'),
+      );
+      expect(
+        File('${shardRoot.path}/issues.json').readAsStringSync(),
+        oldIssues,
+      );
+      expect(
+        File('${shardRoot.path}/ISSUES.md').readAsStringSync(),
+        oldMarkdown,
+      );
+      expect(
+        File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
+        isFalse,
+      );
+      expect(
+        Directory('${shardRoot.path}/.merge-findings-forensics')
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((file) => file.path.endsWith('/manifest.json')),
+        hasLength(1),
+      );
+    });
   });
 }

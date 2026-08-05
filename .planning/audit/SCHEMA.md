@@ -104,7 +104,7 @@ only that exact pair and content as `accepted`; changing either clone's normaliz
 source produces a new fingerprint and re-reports the finding as `open`. Directory or
 path-wide ignores are prohibited.
 
-### 4.3 Catalogue-pair transaction and recovery (HP-32 / HP-33)
+### 4.3 Catalogue-pair transaction, recovery, and forensic repair (HP-32 / HP-33 / HP-36)
 
 `issues.json` and `ISSUES.md` are one catalogue generation. The merger prepares
 both exact byte streams plus old-output backups and SHA-256 digests in uniquely named
@@ -124,6 +124,24 @@ verifies the committed pair and can therefore finish a cleanup interrupted after
 staged file or backup was deleted. Normal invocations leave no transaction artifacts
 behind. The journal is deliberately ephemeral, so stable output byte determinism
 remains limited to the two catalogue files.
+
+Every merger invocation first obtains a root-local, cross-process exclusive
+`.merge-findings.lock` and holds it through recovery, transient cleanup,
+history reading, validation, and publication. The lock owner carries a random
+token, PID, and creation time. A competing process never reclaims a lock held
+by a live PID, even after its age exceeds the recovery grace window. A lock
+left by a crashed process (including the short create-to-owner-record window)
+may be atomically renamed away only after that grace period and a dead/absent
+owner check; release deletes only a record with the caller's token.
+
+Malformed or otherwise untrusted journals still fail closed by default. An
+operator may opt in to `dart run scripts/merge_findings.dart
+--repair-pair-transaction` to quarantine the journal and only recognised
+transaction staging files beneath `.merge-findings-forensics/`. Each repair
+writes a manifest containing the UTC time, failure reason, original filenames,
+and SHA-256 values. Repair never deletes catalogue outputs or unrecognised
+files. After isolation, the merger rebuilds a pair only if existing lifecycle
+history and all canonical shards validate; otherwise it remains fail-closed.
 
 ---
 

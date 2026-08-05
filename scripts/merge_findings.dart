@@ -61,12 +61,26 @@ const _legacyMarkdownNextName = '.merge-findings-markdown.next';
 const _legacyIssuesBackupName = '.merge-findings-issues.backup';
 const _legacyMarkdownBackupName = '.merge-findings-markdown.backup';
 const _pairFailureInjectionEnv = 'AUDIT_MERGE_FAILPOINT';
+const _lockName = '.merge-findings.lock';
+const _lockWaitEnv = 'AUDIT_MERGE_LOCK_WAIT_MS';
+const _lockGraceEnv = 'AUDIT_MERGE_LOCK_GRACE_MS';
+const _holdpointEnv = 'AUDIT_MERGE_HOLDPOINT';
+const _holdMsEnv = 'AUDIT_MERGE_HOLD_MS';
+const _forensicsDirectoryName = '.merge-findings-forensics';
 
 bool _isGenerated(String path) =>
     _generatedFileGlobs.any(path.endsWith) || path.contains('lib/generated/');
 
-String _resolveRoot(List<String> args) {
+class _Invocation {
+  const _Invocation({required this.root, required this.repairPairTransaction});
+
+  final String root;
+  final bool repairPairTransaction;
+}
+
+_Invocation _resolveInvocation(List<String> args) {
   var root = '.planning/audit';
+  var repairPairTransaction = false;
   for (var i = 0; i < args.length; i++) {
     final a = args[i];
     switch (a) {
@@ -80,6 +94,9 @@ String _resolveRoot(List<String> args) {
         root = args[i + 1];
         i++;
         break;
+      case '--repair-pair-transaction':
+        repairPairTransaction = true;
+        break;
       default:
         if (a.startsWith('--')) {
           stderr.writeln('[audit:merge] ERROR: unknown flag: $a');
@@ -89,278 +106,323 @@ String _resolveRoot(List<String> args) {
         exit(2);
     }
   }
-  return root;
+  return _Invocation(root: root, repairPairTransaction: repairPairTransaction);
 }
 
 Future<void> main(List<String> args) async {
-  final root = _resolveRoot(args);
-  final recoveryError = await _recoverPairTransaction(root);
-  if (recoveryError != null) {
-    stderr.writeln('[audit:merge] ERROR: $recoveryError');
+  final invocation = _resolveInvocation(args);
+  final root = invocation.root;
+  final lock = await _acquireAuditLock(root);
+  if (lock == null) {
+    stderr.writeln(
+      '[audit:merge] ERROR: another merger holds the audit lock; refusing concurrent recovery or cleanup',
+    );
     exitCode = 1;
     return;
   }
-  final history = await _readExistingFindings(root);
-  if (history.error != null) {
-    stderr.writeln('[audit:merge] ERROR: ${history.error}');
-    exitCode = 1;
-    return;
-  }
-  final existingFindings = history.findings;
-  final acceptedDuplicationAllowlist = _readDuplicationAllowlist();
-  final shards = <Finding>[];
-  final incompleteScans = <String>[];
-  final completedAuthoritativeTools = <String>{};
-  final semanticErrors = <String>[];
-
-  for (final entry in _canonicalShardTools.entries) {
-    final shardPath = '$root/shards/${entry.key}';
-    final shardFile = File(shardPath);
-    if (!shardFile.existsSync()) {
-      _recordIncompleteScan(
-        incompleteScans,
-        '$shardPath (missing required canonical shard)',
-      );
-      continue;
-    }
-
-    Map<String, dynamic> data;
-    try {
-      final decoded = jsonDecode(await shardFile.readAsString());
-      if (decoded is! Map) throw const FormatException('expected JSON object');
-      data = decoded.cast<String, dynamic>();
-    } catch (error) {
-      stderr.writeln(
-        '[audit:merge] WARNING: failed to parse $shardPath: $error',
-      );
-      _recordIncompleteScan(
-        incompleteScans,
-        '$shardPath (malformed canonical JSON)',
-      );
-      continue;
-    }
-
-    if (data['tool_source'] != entry.value) {
-      _recordIncompleteScan(
-        incompleteScans,
-        '$shardPath (unexpected tool_source)',
-      );
-      continue;
-    }
-    if (data['scan_state'] != 'ran') {
-      _recordIncompleteScan(
-        incompleteScans,
-        '$shardPath was not run successfully (invalid scan_state)',
-      );
-      continue;
-    }
-    if (data['scan_failed'] == true) {
-      _recordIncompleteScan(incompleteScans, '$shardPath (scan failed)');
-      continue;
-    }
-    final findingsRaw = data['findings'];
-    if (findingsRaw is! List) {
-      _recordIncompleteScan(
-        incompleteScans,
-        '$shardPath (missing findings list)',
-      );
-      continue;
-    }
-
-    // A canonical shard is lifecycle evidence only if every finding in it is
-    // valid. Accepting its tool identity before validating individual entries
-    // would let a truncated/corrupt shard close unrelated historical findings.
-    final validatedFindings = <Finding>[];
-    var hasMalformedFinding = false;
-    for (final findingRaw in findingsRaw) {
-      if (findingRaw is! Map) {
-        stderr.writeln(
-          '[audit:merge] WARNING: malformed finding in $shardPath',
-        );
-        hasMalformedFinding = true;
-        break;
+  try {
+    var repairedTransaction = false;
+    final recoveryError = await _recoverPairTransaction(root);
+    if (recoveryError != null) {
+      if (!invocation.repairPairTransaction) {
+        stderr.writeln('[audit:merge] ERROR: $recoveryError');
+        exitCode = 1;
+        return;
       }
-      try {
-        final finding = Finding.fromJson(findingRaw.cast<String, dynamic>());
-        final semanticError = _validateCanonicalFinding(
-          finding,
-          expectedToolSource: entry.value,
-          expectedCategory: _canonicalShardCategories[entry.key]!,
-          acceptedDuplicationAllowlist: acceptedDuplicationAllowlist,
+      final repairError = await _repairPairTransaction(root, recoveryError);
+      if (repairError != null) {
+        stderr.writeln('[audit:merge] ERROR: $repairError');
+        exitCode = 1;
+        return;
+      }
+      repairedTransaction = true;
+    }
+    final history = await _readExistingFindings(root);
+    if (history.error != null) {
+      stderr.writeln('[audit:merge] ERROR: ${history.error}');
+      exitCode = 1;
+      return;
+    }
+    final existingFindings = history.findings;
+    final acceptedDuplicationAllowlist = _readDuplicationAllowlist();
+    final shards = <Finding>[];
+    final incompleteScans = <String>[];
+    final completedAuthoritativeTools = <String>{};
+    final semanticErrors = <String>[];
+
+    for (final entry in _canonicalShardTools.entries) {
+      final shardPath = '$root/shards/${entry.key}';
+      final shardFile = File(shardPath);
+      if (!shardFile.existsSync()) {
+        _recordIncompleteScan(
+          incompleteScans,
+          '$shardPath (missing required canonical shard)',
         );
-        if (semanticError != null) {
-          semanticErrors.add('$shardPath ($semanticError)');
-          break;
+        continue;
+      }
+
+      Map<String, dynamic> data;
+      try {
+        final decoded = jsonDecode(await shardFile.readAsString());
+        if (decoded is! Map) {
+          throw const FormatException('expected JSON object');
         }
-        validatedFindings.add(finding);
+        data = decoded.cast<String, dynamic>();
       } catch (error) {
         stderr.writeln(
-          '[audit:merge] WARNING: malformed finding in $shardPath: $error',
+          '[audit:merge] WARNING: failed to parse $shardPath: $error',
         );
-        hasMalformedFinding = true;
-        break;
+        _recordIncompleteScan(
+          incompleteScans,
+          '$shardPath (malformed canonical JSON)',
+        );
+        continue;
+      }
+
+      if (data['tool_source'] != entry.value) {
+        _recordIncompleteScan(
+          incompleteScans,
+          '$shardPath (unexpected tool_source)',
+        );
+        continue;
+      }
+      if (data['scan_state'] != 'ran') {
+        _recordIncompleteScan(
+          incompleteScans,
+          '$shardPath was not run successfully (invalid scan_state)',
+        );
+        continue;
+      }
+      if (data['scan_failed'] == true) {
+        _recordIncompleteScan(incompleteScans, '$shardPath (scan failed)');
+        continue;
+      }
+      final findingsRaw = data['findings'];
+      if (findingsRaw is! List) {
+        _recordIncompleteScan(
+          incompleteScans,
+          '$shardPath (missing findings list)',
+        );
+        continue;
+      }
+
+      // A canonical shard is lifecycle evidence only if every finding in it is
+      // valid. Accepting its tool identity before validating individual entries
+      // would let a truncated/corrupt shard close unrelated historical findings.
+      final validatedFindings = <Finding>[];
+      var hasMalformedFinding = false;
+      for (final findingRaw in findingsRaw) {
+        if (findingRaw is! Map) {
+          stderr.writeln(
+            '[audit:merge] WARNING: malformed finding in $shardPath',
+          );
+          hasMalformedFinding = true;
+          break;
+        }
+        try {
+          final finding = Finding.fromJson(findingRaw.cast<String, dynamic>());
+          final semanticError = _validateCanonicalFinding(
+            finding,
+            expectedToolSource: entry.value,
+            expectedCategory: _canonicalShardCategories[entry.key]!,
+            acceptedDuplicationAllowlist: acceptedDuplicationAllowlist,
+          );
+          if (semanticError != null) {
+            semanticErrors.add('$shardPath ($semanticError)');
+            break;
+          }
+          validatedFindings.add(finding);
+        } catch (error) {
+          stderr.writeln(
+            '[audit:merge] WARNING: malformed finding in $shardPath: $error',
+          );
+          hasMalformedFinding = true;
+          break;
+        }
+      }
+      if (hasMalformedFinding) {
+        _recordIncompleteScan(
+          incompleteScans,
+          '$shardPath (malformed finding entry)',
+        );
+        continue;
+      }
+      if (semanticErrors.isNotEmpty &&
+          semanticErrors.last.startsWith('$shardPath (')) {
+        continue;
+      }
+
+      completedAuthoritativeTools.add(entry.value);
+      shards.addAll(validatedFindings);
+    }
+
+    // Semantic corruption is a global transaction failure. Unlike a scanner
+    // that merely did not run, a shard with an invalid observation cannot be
+    // safely merged alongside the valid shards: doing so could write lifecycle
+    // transitions while concealing tampered evidence. Leave both outputs byte
+    // for byte unchanged until a complete valid input set is available.
+    if (semanticErrors.isNotEmpty) {
+      for (final error in semanticErrors) {
+        stderr.writeln(
+          '[audit:merge] ERROR: invalid canonical finding: $error',
+        );
+      }
+      exitCode = 1;
+      return;
+    }
+
+    // Explicit repair may discard an untrusted transaction journal, but never
+    // grants a partial scanner run authority to rewrite the catalogue pair.
+    if (repairedTransaction && incompleteScans.isNotEmpty) {
+      stderr.writeln(
+        '[audit:merge] ERROR: repair requires every canonical shard to be valid before rebuilding catalogue outputs',
+      );
+      exitCode = 1;
+      return;
+    }
+
+    // 1. Drop generated-file findings (defense-in-depth — Pitfall P1-6 echo).
+    final filtered = shards.where((f) => !_isGenerated(f.filePath)).toList();
+
+    // 2. Dedupe exact candidates — prefer high confidence; tool > agent on tie.
+    // Clone relationships can share a file/line while referring to different
+    // counterpart files, so collapsing solely by location loses real evidence.
+    final byKey = <String, Finding>{};
+    for (final f in filtered) {
+      final k = _lifecycleKey(f);
+      final existing = byKey[k];
+      if (existing == null || _isPreferred(f, over: existing)) {
+        byKey[k] = f;
       }
     }
-    if (hasMalformedFinding) {
-      _recordIncompleteScan(
-        incompleteScans,
-        '$shardPath (malformed finding entry)',
+
+    // 3. Sort deterministically: file_path asc, line_start asc, category prefix.
+    final sorted = byKey.values.toList()
+      ..sort((a, b) {
+        final fp = a.filePath.compareTo(b.filePath);
+        if (fp != 0) return fp;
+        final ln = a.lineStart.compareTo(b.lineStart);
+        if (ln != 0) return ln;
+        return _categoryPrefix[a.category]!.compareTo(
+          _categoryPrefix[b.category]!,
+        );
+      });
+
+    // 4. Reconcile lifecycle against only successful authoritative observations.
+    // Closed/accepted history is retained even when absent. An open finding is
+    // resolved only when its own detector completed cleanly; a failed or missing
+    // scan is never evidence of a fix.
+    final observedExistingIds = sorted
+        .map((finding) => _previousFor(finding, existingFindings)?.id)
+        .whereType<String>()
+        .toSet();
+    final retainedHistory = existingFindings.values
+        .where(
+          (finding) =>
+              finding.id == null || !observedExistingIds.contains(finding.id),
+        )
+        .map((finding) {
+          if (finding.status == 'open' &&
+              completedAuthoritativeTools.contains(finding.toolSource)) {
+            return _withLifecycle(
+              finding,
+              status: 'closed',
+              closedInPhase: 'audit',
+            );
+          }
+          return finding;
+        })
+        .toList();
+    // IDs are permanent for open findings too. Reserve every existing ID before
+    // allocating new findings so an inserted shard cannot renumber prior work.
+    final reservedIds = existingFindings.values
+        .where((f) => f.id != null)
+        .map((f) => f.id!)
+        .toSet();
+
+    // 5. Stamp IDs per category in sort order, skipping any IDs already
+    //    reserved by retained history so the merged catalogue has unique IDs.
+    final counters = <String, int>{};
+    String nextId(String prefix) {
+      while (true) {
+        final n = (counters[prefix] = (counters[prefix] ?? 0) + 1);
+        final candidate = '$prefix-${n.toString().padLeft(3, '0')}';
+        if (!reservedIds.contains(candidate)) return candidate;
+      }
+    }
+
+    final stamped = sorted.map((f) {
+      final prefix = _categoryPrefix[f.category]!;
+      final previous = _previousFor(f, existingFindings);
+      final isAcceptedObservation = f.status == 'accepted';
+      final isReopened =
+          previous != null &&
+          !isAcceptedObservation &&
+          previous.status != 'open';
+      return Finding(
+        id: previous?.id ?? nextId(prefix),
+        category: f.category,
+        severity: f.severity,
+        filePath: f.filePath,
+        lineStart: f.lineStart,
+        lineEnd: f.lineEnd,
+        description: f.description,
+        rationale: f.rationale,
+        suggestedFix: f.suggestedFix,
+        toolSource: f.toolSource,
+        confidence: f.confidence,
+        // Exact allowlist entries are accepted observations. Any non-accepted
+        // reappearance reopens closed/accepted history, including source drift
+        // that invalidates an allowlist fingerprint.
+        status: isAcceptedObservation
+            ? 'accepted'
+            : (isReopened ? 'open' : f.status),
+        closedInPhase: isAcceptedObservation || isReopened
+            ? null
+            : previous?.closedInPhase ?? f.closedInPhase,
+        closedCommit: isAcceptedObservation || isReopened
+            ? null
+            : previous?.closedCommit ?? f.closedCommit,
       );
-      continue;
+    }).toList();
+    final catalogue = [...stamped, ...retainedHistory]..sort(_compareFindings);
+
+    // 5. Emit issues.json (machine-readable; no top-level timestamp so the
+    //    file is byte-identical across re-runs — see merger_findings_test.dart).
+    final issuesPath = '$root/issues.json';
+    final issuesContent = const JsonEncoder.withIndent(
+      '  ',
+    ).convert({'findings': catalogue.map((f) => f.toJson()).toList()});
+
+    // Validation above completes before this point. Commit both catalogue views
+    // as a durable pair so lifecycle readers never advance from one generation
+    // of issues.json and another generation of ISSUES.md.
+    final issuesDir = Directory(root);
+    if (!issuesDir.existsSync()) {
+      issuesDir.createSync(recursive: true);
     }
-    if (semanticErrors.isNotEmpty &&
-        semanticErrors.last.startsWith('$shardPath (')) {
-      continue;
-    }
-
-    completedAuthoritativeTools.add(entry.value);
-    shards.addAll(validatedFindings);
-  }
-
-  // Semantic corruption is a global transaction failure. Unlike a scanner
-  // that merely did not run, a shard with an invalid observation cannot be
-  // safely merged alongside the valid shards: doing so could write lifecycle
-  // transitions while concealing tampered evidence. Leave both outputs byte
-  // for byte unchanged until a complete valid input set is available.
-  if (semanticErrors.isNotEmpty) {
-    for (final error in semanticErrors) {
-      stderr.writeln('[audit:merge] ERROR: invalid canonical finding: $error');
-    }
-    exitCode = 1;
-    return;
-  }
-
-  // 1. Drop generated-file findings (defense-in-depth — Pitfall P1-6 echo).
-  final filtered = shards.where((f) => !_isGenerated(f.filePath)).toList();
-
-  // 2. Dedupe exact candidates — prefer high confidence; tool > agent on tie.
-  // Clone relationships can share a file/line while referring to different
-  // counterpart files, so collapsing solely by location loses real evidence.
-  final byKey = <String, Finding>{};
-  for (final f in filtered) {
-    final k = _lifecycleKey(f);
-    final existing = byKey[k];
-    if (existing == null || _isPreferred(f, over: existing)) {
-      byKey[k] = f;
-    }
-  }
-
-  // 3. Sort deterministically: file_path asc, line_start asc, category prefix.
-  final sorted = byKey.values.toList()
-    ..sort((a, b) {
-      final fp = a.filePath.compareTo(b.filePath);
-      if (fp != 0) return fp;
-      final ln = a.lineStart.compareTo(b.lineStart);
-      if (ln != 0) return ln;
-      return _categoryPrefix[a.category]!.compareTo(
-        _categoryPrefix[b.category]!,
+    final md = _renderMarkdown(catalogue, incompleteScans: incompleteScans);
+    try {
+      await _writeCataloguePair(
+        root,
+        issuesContent: issuesContent,
+        markdown: md,
       );
-    });
-
-  // 4. Reconcile lifecycle against only successful authoritative observations.
-  // Closed/accepted history is retained even when absent. An open finding is
-  // resolved only when its own detector completed cleanly; a failed or missing
-  // scan is never evidence of a fix.
-  final observedExistingIds = sorted
-      .map((finding) => _previousFor(finding, existingFindings)?.id)
-      .whereType<String>()
-      .toSet();
-  final retainedHistory = existingFindings.values
-      .where(
-        (finding) =>
-            finding.id == null || !observedExistingIds.contains(finding.id),
-      )
-      .map((finding) {
-        if (finding.status == 'open' &&
-            completedAuthoritativeTools.contains(finding.toolSource)) {
-          return _withLifecycle(
-            finding,
-            status: 'closed',
-            closedInPhase: 'audit',
-          );
-        }
-        return finding;
-      })
-      .toList();
-  // IDs are permanent for open findings too. Reserve every existing ID before
-  // allocating new findings so an inserted shard cannot renumber prior work.
-  final reservedIds = existingFindings.values
-      .where((f) => f.id != null)
-      .map((f) => f.id!)
-      .toSet();
-
-  // 5. Stamp IDs per category in sort order, skipping any IDs already
-  //    reserved by retained history so the merged catalogue has unique IDs.
-  final counters = <String, int>{};
-  String nextId(String prefix) {
-    while (true) {
-      final n = (counters[prefix] = (counters[prefix] ?? 0) + 1);
-      final candidate = '$prefix-${n.toString().padLeft(3, '0')}';
-      if (!reservedIds.contains(candidate)) return candidate;
+    } catch (error) {
+      stderr.writeln(
+        '[audit:merge] ERROR: failed to commit catalogue pair: $error',
+      );
+      exitCode = 1;
+      return;
     }
-  }
 
-  final stamped = sorted.map((f) {
-    final prefix = _categoryPrefix[f.category]!;
-    final previous = _previousFor(f, existingFindings);
-    final isAcceptedObservation = f.status == 'accepted';
-    final isReopened =
-        previous != null && !isAcceptedObservation && previous.status != 'open';
-    return Finding(
-      id: previous?.id ?? nextId(prefix),
-      category: f.category,
-      severity: f.severity,
-      filePath: f.filePath,
-      lineStart: f.lineStart,
-      lineEnd: f.lineEnd,
-      description: f.description,
-      rationale: f.rationale,
-      suggestedFix: f.suggestedFix,
-      toolSource: f.toolSource,
-      confidence: f.confidence,
-      // Exact allowlist entries are accepted observations. Any non-accepted
-      // reappearance reopens closed/accepted history, including source drift
-      // that invalidates an allowlist fingerprint.
-      status: isAcceptedObservation
-          ? 'accepted'
-          : (isReopened ? 'open' : f.status),
-      closedInPhase: isAcceptedObservation || isReopened
-          ? null
-          : previous?.closedInPhase ?? f.closedInPhase,
-      closedCommit: isAcceptedObservation || isReopened
-          ? null
-          : previous?.closedCommit ?? f.closedCommit,
+    stdout.writeln(
+      '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
     );
-  }).toList();
-  final catalogue = [...stamped, ...retainedHistory]..sort(_compareFindings);
-
-  // 5. Emit issues.json (machine-readable; no top-level timestamp so the
-  //    file is byte-identical across re-runs — see merger_findings_test.dart).
-  final issuesPath = '$root/issues.json';
-  final issuesContent = const JsonEncoder.withIndent(
-    '  ',
-  ).convert({'findings': catalogue.map((f) => f.toJson()).toList()});
-
-  // Validation above completes before this point. Commit both catalogue views
-  // as a durable pair so lifecycle readers never advance from one generation
-  // of issues.json and another generation of ISSUES.md.
-  final issuesDir = Directory(root);
-  if (!issuesDir.existsSync()) issuesDir.createSync(recursive: true);
-  final md = _renderMarkdown(catalogue, incompleteScans: incompleteScans);
-  try {
-    await _writeCataloguePair(root, issuesContent: issuesContent, markdown: md);
-  } catch (error) {
-    stderr.writeln(
-      '[audit:merge] ERROR: failed to commit catalogue pair: $error',
-    );
-    exitCode = 1;
-    return;
+    if (incompleteScans.isNotEmpty) exitCode = 1;
+  } finally {
+    await lock.release();
   }
-
-  stdout.writeln(
-    '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
-  );
-  if (incompleteScans.isNotEmpty) exitCode = 1;
 }
 
 void _recordIncompleteScan(List<String> incompleteScans, String detail) {
@@ -728,6 +790,164 @@ bool _isTransientArtifactName(String name) => RegExp(
   r'^\.merge-findings-tmp-[0-9]+-[0-9]+-(?:issues|markdown)-(?:next|backup|journal)$',
 ).hasMatch(name);
 
+class _AuditLockOwner {
+  const _AuditLockOwner({
+    required this.pid,
+    required this.token,
+    required this.createdAtMicros,
+  });
+
+  final int pid;
+  final String token;
+  final int createdAtMicros;
+
+  Map<String, Object> toJson() => {
+    'schema_version': 1,
+    'pid': pid,
+    'token': token,
+    'created_at_micros': createdAtMicros,
+  };
+
+  static _AuditLockOwner? fromJson(Object? value) {
+    if (value is! Map) return null;
+    final data = value.cast<String, dynamic>();
+    final pid = data['pid'];
+    final token = data['token'];
+    final createdAtMicros = data['created_at_micros'];
+    if (data['schema_version'] != 1 ||
+        pid is! int ||
+        pid <= 0 ||
+        token is! String ||
+        !RegExp(r'^[0-9a-f]{32}$').hasMatch(token) ||
+        createdAtMicros is! int ||
+        createdAtMicros <= 0) {
+      return null;
+    }
+    return _AuditLockOwner(
+      pid: pid,
+      token: token,
+      createdAtMicros: createdAtMicros,
+    );
+  }
+}
+
+class _AuditLock {
+  const _AuditLock(this.file, this.owner);
+
+  final File file;
+  final _AuditLockOwner owner;
+
+  Future<void> release() async {
+    if (!file.existsSync()) return;
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      final current = _AuditLockOwner.fromJson(decoded);
+      if (current?.token == owner.token) await file.delete();
+    } catch (_) {
+      // A lock owner must never delete a lock it cannot prove is its own.
+    }
+  }
+}
+
+int _positiveEnvMillis(String name, int fallback) {
+  final value = int.tryParse(Platform.environment[name] ?? '');
+  return value == null || value < 0 ? fallback : value;
+}
+
+String _newLockToken() => List<int>.generate(
+  16,
+  (_) => Random.secure().nextInt(256),
+).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+
+Future<_AuditLock?> _acquireAuditLock(String root) async {
+  final directory = Directory(root);
+  if (!directory.existsSync()) directory.createSync(recursive: true);
+  final lock = File(_transactionPath(root, _lockName));
+  final wait = Duration(milliseconds: _positiveEnvMillis(_lockWaitEnv, 10000));
+  final grace = Duration(milliseconds: _positiveEnvMillis(_lockGraceEnv, 250));
+  final deadline = DateTime.now().add(wait);
+
+  while (true) {
+    final owner = _AuditLockOwner(
+      pid: pid,
+      token: _newLockToken(),
+      createdAtMicros: DateTime.now().microsecondsSinceEpoch,
+    );
+    try {
+      await lock.create(exclusive: true);
+      try {
+        await _writeBytesDurably(lock, utf8.encode(jsonEncode(owner.toJson())));
+        return _AuditLock(lock, owner);
+      } catch (_) {
+        // This process owns the just-created inode but did not establish an
+        // owner record. Remove it immediately; another process still waits
+        // through the create→owner-write grace window if we crash here.
+        if (lock.existsSync()) await lock.delete();
+        rethrow;
+      }
+    } on FileSystemException {
+      await _claimStaleAuditLock(lock, grace);
+      if (DateTime.now().isAfter(deadline)) return null;
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+    }
+  }
+}
+
+Future<void> _claimStaleAuditLock(File lock, Duration grace) async {
+  if (!lock.existsSync()) return;
+  final stat = await lock.stat();
+  if (DateTime.now().difference(stat.modified) < grace) return;
+
+  List<int> firstBytes;
+  try {
+    firstBytes = await lock.readAsBytes();
+  } on FileSystemException {
+    return;
+  }
+  _AuditLockOwner? owner;
+  try {
+    owner = _AuditLockOwner.fromJson(jsonDecode(utf8.decode(firstBytes)));
+  } catch (_) {
+    // An empty/corrupt record can be the create→owner-write crash window.
+    // It is reclaimable only after the same mtime grace as a dead owner.
+  }
+  if (owner != null && await _isPidAlive(owner.pid)) return;
+
+  // Re-read immediately before the atomic rename. This prevents a contender
+  // from taking an owner record that changed while it was being inspected.
+  try {
+    if (!lock.existsSync() ||
+        _digest(await lock.readAsBytes()) != _digest(firstBytes)) {
+      return;
+    }
+    final claimed = File(
+      '${lock.path}.stale-${DateTime.now().microsecondsSinceEpoch}-${_newLockToken()}',
+    );
+    await lock.rename(claimed.path);
+    await claimed.delete();
+  } on FileSystemException {
+    // Another contender won the atomic hand-off; retry normal acquisition.
+  }
+}
+
+Future<bool> _isPidAlive(int candidatePid) async {
+  if (candidatePid == pid) return true;
+  if (Platform.isWindows) return true;
+  try {
+    final result = await Process.run('kill', ['-0', '$candidatePid']);
+    return result.exitCode == 0;
+  } on ProcessException {
+    // Fail closed on platforms without a non-destructive liveness probe.
+    return true;
+  }
+}
+
+Future<void> _holdAt(String point) async {
+  if (Platform.environment[_holdpointEnv] != point) return;
+  final milliseconds = _positiveEnvMillis(_holdMsEnv, 1000);
+  await Future<void>.delayed(Duration(milliseconds: milliseconds));
+}
+
 Future<void> _writeJournal(String root, _PairTransaction transaction) async {
   final journal = File(_transactionPath(root, _pairJournalName));
   final temp = File(
@@ -955,6 +1175,71 @@ Future<void> _cleanupUnjournaledTransientArtifacts(String root) async {
   }
 }
 
+Future<String?> _repairPairTransaction(String root, String reason) async {
+  final journal = File(_transactionPath(root, _pairJournalName));
+  if (!journal.existsSync()) {
+    return 'no pair transaction journal is present to repair';
+  }
+  final candidates = <File>[journal];
+  final directory = Directory(root);
+  for (final entity in await directory.list().toList()) {
+    if (entity is File &&
+        entity.path != journal.path &&
+        _isTransientArtifactName(entity.uri.pathSegments.last)) {
+      candidates.add(entity);
+    }
+  }
+  final stamp = '${DateTime.now().microsecondsSinceEpoch}-${_newLockToken()}';
+  final quarantine = Directory(
+    '${_transactionPath(root, _forensicsDirectoryName)}/$stamp',
+  );
+  try {
+    await quarantine.create(recursive: true);
+    final manifestFiles = <Map<String, Object?>>[];
+    for (final file in candidates) {
+      if (!file.existsSync()) continue;
+      final bytes = await file.readAsBytes();
+      final name = file.uri.pathSegments.last;
+      manifestFiles.add({'name': name, 'sha256': _digest(bytes)});
+    }
+    if (manifestFiles.isEmpty) {
+      return 'pair transaction disappeared before it could be repaired';
+    }
+    final manifest = File('${quarantine.path}/manifest.json');
+    Map<String, Object?> manifestData(String state) => {
+      'schema_version': 1,
+      'state': state,
+      'repaired_at': DateTime.now().toUtc().toIso8601String(),
+      'reason': reason,
+      'files': manifestFiles,
+    };
+    // The manifest exists before the first rename. A crash during quarantine
+    // therefore leaves evidence of the intended set rather than silently
+    // losing the only journal that described it.
+    await _writeBytesDurably(
+      manifest,
+      utf8.encode(
+        const JsonEncoder.withIndent('  ').convert(manifestData('isolating')),
+      ),
+    );
+    for (final file in candidates) {
+      if (!file.existsSync()) continue;
+      final name = file.uri.pathSegments.last;
+      final destination = File('${quarantine.path}/$name');
+      await file.rename(destination.path);
+    }
+    await _writeBytesDurably(
+      manifest,
+      utf8.encode(
+        const JsonEncoder.withIndent('  ').convert(manifestData('isolated')),
+      ),
+    );
+    return null;
+  } catch (error) {
+    return 'could not quarantine untrusted pair transaction for forensic repair ($error)';
+  }
+}
+
 Future<void> _writeCataloguePair(
   String root, {
   required String issuesContent,
@@ -987,6 +1272,7 @@ Future<void> _writeCataloguePair(
     issues: issues,
     markdown: markdownFile,
   );
+  await _holdAt('after_prepare_before_journal');
   _injectFailure('before_journal_publish');
   await _writeJournal(root, transaction);
   _injectFailure('before_first_replace');
