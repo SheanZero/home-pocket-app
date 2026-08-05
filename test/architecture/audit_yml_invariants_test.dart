@@ -16,8 +16,9 @@
 //      gate).
 //   4. `dart run custom_lint` invocation includes `--no-fatal-infos` flag (per
 //      08-06 amendment #2).
-//   5. `coverage_gate.dart --list .planning/audit/cleanup-touched-files.txt`
-//      (Plan 08-02 swap; not phase6-touched-files.txt).
+//   5. `coverage_gate.dart --list
+//      .planning/audit/coverage-gate-required-files.txt` (the current
+//      risk-boundary manifest; not either retired historical manifest).
 //   6. `coverage_gate.dart` invocation includes
 //      `--deferred .planning/audit/coverage-gate-deferred.txt` (per 08-06
 //      amendment #2).
@@ -156,36 +157,39 @@ void main() {
     });
 
     test('Invariant 5: coverage_gate.dart `--list` argument points at '
-        '.planning/audit/cleanup-touched-files.txt (Plan 08-02 swap)', () {
-      // After Plan 08-02, coverage_gate.dart must read the Phase 3-6 union
-      // list, NOT the legacy phase6-touched-files.txt (which would let
-      // regressions in Phase 3-5 files slip through).
+        '.planning/audit/coverage-gate-required-files.txt', () {
+      // The gate must read the curated risk-boundary manifest, rather than a
+      // historical phase-union list whose stale paths weaken the invariant.
       final regex = RegExp(
-        r'coverage_gate\.dart\s+--list\s+\.planning/audit/cleanup-touched-files\.txt',
+        r'coverage_gate\.dart\s+--list\s+\.planning/audit/coverage-gate-required-files\.txt',
       );
       expect(
         regex.hasMatch(content),
         isTrue,
         reason:
             'audit.yml must invoke `coverage_gate.dart --list '
-            '.planning/audit/cleanup-touched-files.txt` (Plan 08-02 D-04). '
-            'Reverting to phase6-touched-files.txt would re-introduce the '
-            'gap that Phase 8 D-04 closed.',
+            '.planning/audit/coverage-gate-required-files.txt`. Reverting to '
+            'a retired historical manifest would weaken the active coverage '
+            'obligation.',
       );
 
-      // Negative invariant: phase6-touched-files.txt must NOT appear as a
-      // gate-input argument anywhere in audit.yml.
-      final legacy = RegExp(
-        r'coverage_gate\.dart\s+--list\s+\.planning/audit/phase6-touched-files\.txt',
-      );
-      expect(
-        legacy.hasMatch(content),
-        isFalse,
-        reason:
-            'Legacy `--list .planning/audit/phase6-touched-files.txt` must '
-            'NOT appear in audit.yml. Plan 08-02 D-04 swapped it for '
-            'cleanup-touched-files.txt; reverting would weaken the gate.',
-      );
+      for (final retiredManifest in [
+        'cleanup-touched-files.txt',
+        'phase6-touched-files.txt',
+      ]) {
+        final retired = RegExp(
+          'coverage_gate\\.dart\\s+--list\\s+\\.planning/audit/'
+          '${RegExp.escape(retiredManifest)}',
+        );
+        expect(
+          retired.hasMatch(content),
+          isFalse,
+          reason:
+              'Retired `--list .planning/audit/$retiredManifest` must NOT '
+              'appear in audit.yml. The risk-boundary manifest is the active '
+              'coverage gate input.',
+        );
+      }
     });
 
     test('Invariant 6: coverage_gate.dart invocation includes '
