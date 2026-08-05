@@ -236,7 +236,7 @@ bool _isScopedRoot(
 
   return importAlias == null
       ? bindings.allowsUnqualified(constructor)
-      : bindings.allowsQualified(importAlias, constructor);
+      : bindings.allowsQualified(importAlias, constructor, call.offset);
 }
 
 _RiverpodScopeBindings _riverpodScopeBindings(String source) {
@@ -299,16 +299,19 @@ _RiverpodScopeBindings _riverpodScopeBindings(String source) {
   // in the library or an enclosing lexical scope wins over an imported name.
   // This scanner intentionally fails closed for those declarations instead of
   // attempting analyzer-style resolution from a standalone Dart script.
-  unqualified.removeAll(_unqualifiedScopeShadows(tokens));
-  return _RiverpodScopeBindings(unqualified, qualified);
+  final scopeShadows = _scopeShadows(tokens);
+  unqualified.removeAll(scopeShadows);
+  return _RiverpodScopeBindings(
+    unqualified,
+    qualified,
+    qualifiedAliasShadows: scopeShadows,
+  );
 }
 
-Set<String> _unqualifiedScopeShadows(List<_Token> tokens) {
-  const constructors = {'ProviderScope', 'UncontrolledProviderScope'};
+Set<String> _scopeShadows(List<_Token> tokens) {
   final shadows = <String>{};
   for (var index = 0; index < tokens.length; index++) {
     final name = tokens[index].text;
-    if (!constructors.contains(name)) continue;
     if (_isScopeDeclaration(tokens, index) ||
         _isFormalParameterDeclaration(tokens, index)) {
       shadows.add(name);
@@ -530,16 +533,32 @@ class _Call {
 }
 
 class _RiverpodScopeBindings {
-  const _RiverpodScopeBindings(this.unqualified, this.qualified);
+  const _RiverpodScopeBindings(
+    this.unqualified,
+    this.qualified, {
+    required this.qualifiedAliasShadows,
+  });
 
   final Set<String> unqualified;
   final Map<String, Set<String>> qualified;
+  final Set<String> qualifiedAliasShadows;
 
   bool allowsUnqualified(String constructor) =>
       unqualified.contains(constructor);
 
-  bool allowsQualified(String alias, String constructor) =>
-      qualified[alias]?.contains(constructor) ?? false;
+  bool allowsQualified(String alias, String constructor, int callOffset) {
+    if (qualified[alias]?.contains(constructor) != true) return false;
+    // This lightweight scanner cannot resolve every Dart lexical scope. At a
+    // qualified root call, any declaration of the import prefix is therefore
+    // treated as a shadow, even when the declaration may be in a sibling or
+    // later scope. That deliberate false-positive bias prevents a local value
+    // from impersonating Riverpod's import prefix. Comments, strings, and the
+    // import declaration itself never enter `qualifiedAliasShadows`.
+    return !_isAliasShadowedAtCall(alias, callOffset);
+  }
+
+  bool _isAliasShadowedAtCall(String alias, int _) =>
+      qualifiedAliasShadows.contains(alias);
 }
 
 enum _TokenKind { identifier, string, punctuation }

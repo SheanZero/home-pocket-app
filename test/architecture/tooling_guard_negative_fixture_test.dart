@@ -36,6 +36,7 @@ void main() {
           tooling.ToolingGuardCase.providerScopeCommentLookalike(),
           tooling.ToolingGuardCase.providerScopeStringLookalike(),
           tooling.ToolingGuardCase.providerScopeUnrelatedAlias(),
+          tooling.ToolingGuardCase.providerScopeQualifiedAliasShadow(),
         ];
 
         final result = await tooling.verifyToolingGuards(
