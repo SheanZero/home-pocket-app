@@ -95,6 +95,14 @@ List<String> validateDependencyCompatibility({
   expectLocked('custom_lint', '0.8.1');
   expectConstraint('import_guard_custom_lint', '^1.0.0');
   expectLocked('import_guard_custom_lint', '1.0.0');
+  final analyzerVersion = _map(packages['analyzer'])['version']?.toString();
+  if (analyzerVersion == null ||
+      !RegExp(r'^8\.\d+\.\d+$').hasMatch(analyzerVersion)) {
+    issues.add(
+      'analyzer lock must stay on the verified 8.x line '
+      '(found $analyzerVersion)',
+    );
+  }
 
   // Flutter 3.44 must remain on the legacy Android DSL. Flutter's official
   // migration guide requires Flutter 3.47+ before Built-in Kotlin is enabled.
@@ -147,6 +155,14 @@ List<String> validateDependencyCompatibility({
     auditWorkflow,
     'dart run scripts/dependency_compatibility.dart',
   );
+  if (auditWorkflow.contains('Verify analyzer pin (smoke check)') ||
+      auditWorkflow.contains('analyzer 7.x confirmed') ||
+      auditWorkflow.contains('FUTURE-TOOL-01 readiness')) {
+    issues.add(
+      'audit workflow must use the blocking dependency compatibility contract '
+      'instead of the legacy analyzer 7.x smoke check',
+    );
+  }
   expectText('future workflow', futureWorkflow, 'channel: beta');
   expectText('future workflow', futureWorkflow, 'flutter build apk --debug');
   expectText(

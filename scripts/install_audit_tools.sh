@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # scripts/install_audit_tools.sh
-# Bootstrap audit tools that cannot live in pubspec.yaml due to analyzer-7 lock.
-# See .planning/phases/01-audit-pipeline-tooling-setup/01-RESEARCH.md Pitfall P1-3:
-# all coverde versions require analyzer >=8.0.0, which would break the project's
-# analyzer-7 pin (json_serializable + riverpod_lint). Global-activate sidesteps it.
+# Bootstrap audit tools separately from the application's analyzer-8 resolver.
+# Global activation keeps coverde's dependency graph out of the checked-in app
+# lockfile; the blocking dependency compatibility contract validates that lock.
 set -euo pipefail
 
 echo "[audit:install] Activating coverde globally (pinned to 0.3.0+1)..."

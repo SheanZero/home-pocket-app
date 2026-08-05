@@ -76,6 +76,16 @@ void main() {
     expect(validate(input), contains(contains('flutter_riverpod constraint')));
   });
 
+  test('P2-04 rejects analyzer versions outside the verified 8.x line', () {
+    final input = currentInputs();
+    input['lock'] = input['lock']!.replaceFirst(
+      'version: "8.4.0"',
+      'version: "9.0.0"',
+    );
+
+    expect(validate(input), contains(contains('analyzer lock')));
+  });
+
   test('P2-04 rejects premature Built-in Kotlin enablement', () {
     final input = currentInputs();
     input['properties'] = input['properties']!.replaceFirst(
