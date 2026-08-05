@@ -44,7 +44,7 @@ gaps:
 
 **Phase Goal:** 在 Setting 补齐日本市场上线必备的合规与赞助——隐私政策/利用規約（内置三语离线文本 + 托管 URL 占位）、OSS 许可证（showLicensePage）、特商法表記页，以及一个不打扰、中性非交易性的外链赞助入口（url_launcher 外部浏览器，绝不 WebView/IAP）；对齐商店隐私表单。
 **Verified:** 2026-07-02T03:13:07Z
-**Status:** gaps_found (1 documentation-traceability gap; all functional deliverables verified)
+**Status:** passed (the former LEGAL-V2-01 documentation-traceability gap is resolved)
 **Re-verification:** Yes — after plan 56-07 gap-closure (tokusho reversed to full 表記型, D-06 supersedes D-03)
 
 ## Re-verification Scope
@@ -107,7 +107,7 @@ The initial 2026-07-01 verification (covering 56-01..56-06) passed 5/5. UAT Test
 | LEGAL-04 | 56-02/04/07 | ✓ SATISFIED | line 124; now full 表記型 (D-06) — re-verified above |
 | LEGAL-05 | 56-06 | ✓ SATISFIED | line 125; store-form checklist, fx 口径 |
 | LEGAL-06 | 56-01/03/07 | ✓ SATISFIED | line 126; ARB parity + asset gate + section-count parity |
-| LEGAL-V2-01 | 56-07 (pulled fwd) | ⚠️ TRACEABILITY GAP | Declared in 56-07-PLAN frontmatter + CONTEXT D-06/line103 as pulled-forward & implemented, but REQUIREMENTS.md still lists it in the deferred v2 section (line 73) with no superseded note and omits it from the Traceability table/Coverage. See gaps. |
+| LEGAL-V2-01 | 56-07 (pulled fwd) | ✓ SATISFIED | REQUIREMENTS.md marks it implemented early, maps it to Phase 56, and counts it in coverage; full 表記型 assets and rendering test provide implementation evidence. |
 
 All 10 primary phase requirement IDs are present in every relevant PLAN frontmatter and traced Complete in REQUIREMENTS.md. No orphaned primary requirements.
 
@@ -133,7 +133,7 @@ None mandatory. All behavior-dependent truths have passing behavioral tests. The
 
 The phase's functional goal is fully achieved: all five ROADMAP success criteria hold in the codebase, all ten primary requirement IDs are satisfied and traced Complete, the tokusho reversal to full 表記型 is correctly implemented across all three locales (8-header parity, placeholders, preserved legal-review marker, forbidden clauses removed), the test surface enforces the new contract, and all declared non-goals are untouched.
 
-One narrow, documentation-only gap remains: **REQUIREMENTS.md was not reconciled with the LEGAL-V2-01 pull-forward.** D-06 (CONTEXT), deferred-items framing, and the 56-07-PLAN frontmatter all treat LEGAL-V2-01 as pulled-forward and implemented, but REQUIREMENTS.md still carries it in the deferred "Legal v2" section (line 73) with no superseded/implemented annotation and omits it from both the Traceability table and Coverage tally. This does not affect the shipped compliance pages — it is a bookkeeping inconsistency that leaves the requirements ledger self-contradictory. Fix is a one-to-three-line REQUIREMENTS.md edit (mirror the LOCK-08 → v2 annotation style already used at line 114).
+The former LEGAL-V2-01 traceability gap is closed: REQUIREMENTS.md now annotates the pull-forward, includes the Phase 56 traceability row, and counts it in coverage. Remaining real operator values, hosted store URLs, and the final sponsor destination are explicit pre-launch operator gates rather than untracked phase gaps.
 
 ---
 

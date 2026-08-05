@@ -1,5 +1,28 @@
 # Milestones — Home Pocket
 
+## v2.0 完成第一版上线前最后的功能开发 (Shipped: 2026-08-05)
+
+**Shipped:** 2026-08-05
+
+**Phases:** 53-56 (4 phases, 30 plans, 98 task blocks) — HTML design gate + onboarding + app lock + legal/sponsor settings
+
+**Execution:** 2026-06-28 → 2026-07-02; audit and closeout completed 2026-08-05
+
+**Git range:** `e4f21be^..0b0ac6c` = 168 commits, 184 files, +22,523 / -665 LOC
+
+**Audit Status at Close:** `tech_debt` — 32/32 requirements covered, 4/4 phases passed, 12/12 cross-phase seams wired, and 6/6 E2E flows complete. No broken runtime seam or critical requirement gap.
+**Known verification overrides:** 38 historical artifacts acknowledged by the user under closeout option A (6 debug sessions + 32 quick-task metadata records), plus release-owner configuration and Nyquist documentation debt. See `.planning/STATE.md` Deferred Items §v2.0 and `.planning/milestones/v2.0-MILESTONE-AUDIT.md`.
+
+**Key accomplishments:**
+
+- Completed and user-approved three HTML design directions before production implementation, preserving the zero-production-code design gate.
+- Shipped a trilingual first-run flow for language, currency, voice locale, and profile setup; destructive reset/import paths now preserve the onboarding contract.
+- Shipped Face ID/PIN app lock with Argon2id PIN storage, lifecycle relock, opaque privacy masking, re-authenticated settings changes, and completed 6/6 device UAT with G1-G4 fixed and verified.
+- Added offline ja/zh/en privacy, terms, Tokusho, and OSS surfaces plus externally configurable support/sponsor destinations; store privacy documentation records FCM token and exchange-rate network behavior truthfully.
+- Reconciled all four phase verifications at close. Hosted legal URLs, support/sponsor destinations, Tokusho operator values, and legal review remain explicit pre-store release gates.
+
+---
+
 ## v1.9 语音类目与商家识别系统重构（解耦 · 交叉验证 · 日本商家库） (Shipped: 2026-06-25)
 
 **Shipped:** 2026-06-25

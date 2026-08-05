@@ -8,8 +8,10 @@ This file provides guidance to Claude Code when working with this repository.
 
 **Home Pocket (まもる家計簿)** is a local-first, privacy-focused family accounting app with a dual-ledger system. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design.
 
-**Current Phase:** Phase 1 - Infrastructure Layer (v0.1.0)
-**Target:** iOS 14+ / Android 7+ (API 24+)
+**Current Phase:** None — v2.0 (Phases 53-56) shipped and archived on 2026-08-05; awaiting next-milestone definition
+**Target:** iOS 15+ / Android 7+ (API 24+)
+
+**Planning sources:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and `.planning/milestones/v2.0-*`. Refresh `.planning/codebase/` before the next milestone, then run `$gsd-new-milestone`.
 
 ---
 

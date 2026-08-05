@@ -2,45 +2,43 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 完成第一版上线前最后的功能开发
-current_phase: 56
-status: complete
-stopped_at: Phase 56 complete — milestone v2.0 all 4 phases done
-last_updated: "2026-07-02T03:09:09Z"
-last_activity: 2026-07-02
-last_activity_desc: Phase 56 gap-closure 56-07 (特商法 full 表記型) complete — UAT Test 4 closed, phase re-verified passed
+status: Awaiting next milestone
+stopped_at: Milestone v2.0 archived; awaiting next milestone definition
+last_updated: "2026-08-05T02:03:20.037Z"
+last_activity: 2026-08-05
+last_activity_desc: Milestone v2.0 completed and archived
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 30
   completed_plans: 30
   percent: 100
-current_phase_name: setting
+current_phase: null
+current_phase_name: null
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-25 after v1.9 milestone close)
+See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 56 — setting
+**Current focus:** Refresh the post-close codebase map, resolve store-release owner values, and define the next milestone
 
 ## Current Position
 
-Phase: 56 — setting (COMPLETE)
-Plan: 7/7 executed (56-01..56-07; 56-07 gap-closure)
-Status: Phase 56 complete & re-verified (5/5 success criteria; 10/10 req IDs + LEGAL-V2-01 traced) — 56-07 closed UAT Test 4; milestone v2.0 ready to close
-Last activity: 2026-08-05 - Completed quick task 260805-cgj: 修复 P1-01 主分支 CI custom_lint 门禁
-
-Progress: Phase 56 COMPLETE (7/7: 56-01..56-07, re-verified 5/5 SC); Phase 55 COMPLETE (12/12); Phase 54 complete; Phase 53 complete. Milestone v2.0 = 4/4 phases (100%).
-
-> **Planning gate note (Phase 56):** §13a decision-coverage-plan gate evaluated cleanly this time — `passed:true, total:5, covered:5` (D-01..D-05). No CJK false-negative and no override needed (contrast Phase 55). §13 requirements coverage = all 10 IDs covered. `state.planned-phase` CLI no-op'd (`updated:[]`, known on this STATE.md) → STATE hand-updated here.
+Phase: None — v2.0 archived
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-05 — Milestone v2.0 completed and archived
 
 ### Decisions
 
 v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.planning/PROJECT.md` Key Decisions and the v1.9 milestone archive. No decisions are pending for the next milestone.
 
+- [P1-06, 2026-08-05]: `InfoPlist.strings` is the single localization surface for the iOS display name and microphone, speech-recognition, and Face ID usage descriptions; Runner bundles ja, zh-Hans, and en variants, while the Japanese `Info.plist` values remain the fallback.
+- [P1-05, 2026-08-05]: Minimum supported iOS version is iOS 15.0; Podfile/Xcode, product docs, website/store copy, release gates, and device UAT use this single floor. Historical ADR/research references to iOS 14 remain historical context, not current support declarations.
 - [Phase 53]: 53-01: onboarding sketch 001 tone A satisfies DESIGN-01, zero HTML edits (design-gate record-not-recreate)
 - [Phase 53]: app-lock sketch 002 tone B (Face ID + PIN, light+dark) satisfies DESIGN-02 with zero HTML edits
 - [Phase 53]: 53-04: user approved all three designs (001/A, 002/B, 003/C) — DESIGN-01/02/03 经用户确认 completed; DESIGN-04 zero-Dart gate-exit verified, gate closed
@@ -163,6 +161,19 @@ No active blockers. Pre-existing carried debt carried forward to the next milest
 - **MOD-005 OCR slot:** OCR ledger entry hidden behind reversible `kOcrEntryEnabled` flag (260614-iww); flip when MOD-005 writer lands
 
 ## Deferred Items
+
+### Items acknowledged and deferred at v2.0 milestone close on 2026-08-05
+
+The pre-close GSD audit reported **38 historical artifacts** (6 debug sessions and 32 quick tasks). The user explicitly selected override closeout option **A** on 2026-08-05. The milestone audit found no broken runtime seam or failed requirement; these entries are retained as traceable documentation/release debt rather than treated as functional blockers.
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| debug_session | `55-g2-auth-device-passcode`, `55-g3-faceid-tcc-crash`, `55-g4-biometric-toggle-ignored` — Phase 55 device issues whose debug metadata remains `unknown`; the canonical `55-UAT.md` records 6/6 device scenarios complete and G1-G4 fixed/verified | resolved behavior; historical metadata drift accepted | v2.0 close |
+| debug_session | `ci-validation-failures`, `ios-spm-app-check-missing`, `statistics-category-joy-score` remain `awaiting_human_verify` in old debug-session metadata | accepted historical verification metadata; re-audit if the affected surface changes | v2.0 close |
+| quick_task_metadata | `audit-open` reports 32 quick-task directories as missing/unknown or complete-with-comment because their SUMMARY frontmatter lacks the canonical completion status. Their work is already represented in the completed quick-task ledger and current code/tests | cosmetic metadata drift; no v2.0 functional gap | v2.0 close |
+| nyquist_gap | Phase 53 has no `VALIDATION.md`; Phase 54 and 56 validation artifacts remain draft; Phase 55 is ready but not recorded as the current validated contract | accepted documentation-grade debt; run `/gsd-validate-phase 53/54/55/56` before relying on Nyquist status | v2.0 close |
+| release_configuration | Public production Privacy Policy / Terms URLs, app-specific support destination, sponsor destination, and Tokusho operator identity/contact fields still require release-owner values and legal review | accepted pre-release gate; must be resolved before store submission, not fabricated at milestone close | v2.0 close |
+| documentation_drift | Phase 54 narrative still describes the retired lock-entry flow; live V16 onboarding is intro → settings with inline optional security. Verification was reconciled at close; descriptive phase docs remain historical | accepted historical documentation drift | v2.0 close |
 
 ### Items acknowledged and deferred at v1.9 milestone close on 2026-06-25
 

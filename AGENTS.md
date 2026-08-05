@@ -1,7 +1,7 @@
 # AGENTS.md — Home Pocket (まもる家計簿)
 
 > Local-first, privacy-focused family accounting app with a dual-ledger system.
-> Flutter · iOS 14+ / Android 7+ · SQLCipher · Riverpod 3 · Drift
+> Flutter · iOS 15+ / Android 7+ · SQLCipher · Riverpod 3 · Drift
 
 ---
 
@@ -9,14 +9,16 @@
 
 - **v1.0 shipped:** Codebase Cleanup Initiative (2026-04-29)
 - **v1.1 shipped:** Happiness Metric & Display (2026-05-05)
-- **Current milestone:** v1.2 Happiness Metric Refresh
-- **Completed in v1.2:** Phase 13 ADR-016 Backend Foundation; Phase 14 ADR-016 Frontend + ARB Reconciliation
-- **Current focus:** Phase 15 — Custom Time Windows (`HAPPY-V2-02`), ready to discuss before planning
-- **Current source of truth:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/REQUIREMENTS.md`
+- **v1.2-v1.9 shipped:** See `.planning/MILESTONES.md` and archived roadmaps.
+- **v2.0 shipped:** First-public-release feature foundation (Phases 53-56), archived 2026-08-05.
+- **Current milestone:** None; the project is awaiting next-milestone definition.
+- **Current focus:** Refresh the post-P1/P2 codebase map, then use `$gsd-new-milestone`.
+- **Current source of truth:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, plus the v2.0 archive under `.planning/milestones/`.
 
 Known close debt:
-- Phase 11 has one human/device UAT item accepted as deferred debt in `.planning/STATE.md`.
-- Codebase map in `.planning/codebase/` predates v1.0 cleanup and v1.1 feature work; refresh before major planning.
+- v2.0 closed with `tech_debt`: 38 historical artifact records were explicitly acknowledged; no broken runtime seam or critical requirement gap was found.
+- Hosted Privacy/Terms URLs, app-specific support/sponsor destinations, Tokusho operator identity/contact values, and final legal review are mandatory pre-store release gates.
+- Refresh `.planning/codebase/` after the current P1/P2 working tree is committed and before major planning.
 
 ---
 
@@ -226,9 +228,9 @@ Dependency pins to leave alone unless upgraded together with iOS build verificat
 
 - Planning state lives in `.planning/`.
 - Completed milestones are archived under `.planning/milestones/`.
-- v1.2 active requirements live in `.planning/REQUIREMENTS.md`.
+- Completed v2.0 requirements live in `.planning/milestones/v2.0-REQUIREMENTS.md`; there is no active `REQUIREMENTS.md` until the next milestone is created.
 - Use `$gsd-progress` to inspect current status.
-- Current recommended next command: `$gsd-discuss-phase 15`.
+- Current recommended sequence: `$gsd-map-codebase`, then `$gsd-new-milestone`.
 - Use `$gsd-cleanup` later if phase directories should be archived out of `.planning/phases/`.
 
 When editing planning files:
