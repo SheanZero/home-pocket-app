@@ -412,6 +412,33 @@ This is a project constraint, not an instruction to change sources now. [VERIFIE
 
 **Robust fallback if output text or the selected future lint code changes:** keep the fixture compilable apart from its deliberately missing root scope; compare it to a paired `ProviderScope(child: const Placeholder())` control; require a non-info analyzer diagnostic on the bad fixture’s `runApp` line and no corresponding diagnostic on the control; archive `--format machine` output; then update the asserted code only after inspecting the official Pub archive/source for the exact locked `riverpod_lint` version. This differential evidence protects D-04 without relying on mutable prose. **Confidence: HIGH** for the selected 3.1.0 code path; MEDIUM for any future version.
 
+### 2A. HP-06 execution correction: Riverpod analysis-server plugin is held inactive
+
+**Result:** The planned `riverpod_lint 3.1.0` activation is not valid evidence
+on the selected Flutter `3.44.8` / analyzer `8.4.0` production graph. Its
+analysis-server route does not pass the required missing-scope bad-example plus
+ProviderScope/UncontrolledProviderScope control probe. The single runnable
+graph therefore remains analyzer `8.4.0` + `custom_lint` +
+`import_guard_custom_lint`; `riverpod_lint` stays locked as an **inactive
+hold**, not an active analyzer plugin.
+
+**Replacement enforcement:** `scripts/audit/provider_contract.dart` is the
+repository-owned, fail-closed Riverpod app-root contract. It rejects direct
+`runApp` roots without `ProviderScope` or `UncontrolledProviderScope`, checks
+the initialized `AppRunner` success root, rejects unexpected active
+`riverpod_lint` configuration, and rejects a missing/unparseable held lockfile
+version. `scripts/verify_tooling_guards.dart` runs real bad and control
+fixtures, retains independent package and relative import coverage, runs the
+production tree checks when `runValidTreeChecks` is true, and fails on
+`PluginException`, `PluginEx`, `UNKNOWN_REQUEST`, or version-parse output.
+
+**Exit condition:** Reactivate the upstream plugin only after an official
+same-graph compatibility probe has no plugin-protocol/version failures, the
+expected upstream Riverpod bad diagnostic appears, both controls are clean,
+and two clean generation passes plus analyzer/custom-lint/architecture/full
+gates pass without overrides. This amendment supersedes the activation advice
+in §2 while preserving the original bad-versus-control requirement.
+
 ## Environment Availability
 
 | Dependency | Required by | Available | Version | Fallback |

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 # scripts/audit_providers.sh
-# Runs custom_lint, filters to riverpod_lint codes, emits .planning/audit/shards/providers.json
+# Runs the repository-owned provider contract and emits provider-hygiene findings.
 set -euo pipefail
 exec dart run scripts/audit/providers.dart "$@"

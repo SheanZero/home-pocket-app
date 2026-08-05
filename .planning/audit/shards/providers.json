@@ -1,5 +1,6 @@
 {
-  "tool_source": "riverpod_lint",
-  "generated_at": "2026-08-05T17:29:20.264328Z",
+  "tool_source": "owned_provider_contract",
+  "scan_state": "ran",
+  "generated_at": "2026-08-05T18:22:02.118809Z",
   "findings": []
 }

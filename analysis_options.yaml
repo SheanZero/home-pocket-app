@@ -10,6 +10,10 @@ analyzer:
   plugins:
     - custom_lint
 
+# riverpod_lint 3.1.0 is deliberately held, not activated, on the selected
+# Flutter 3.44.8 / analyzer 8 production graph. See the owned provider
+# contract and docs/testing/DEPENDENCY_COMPATIBILITY.md for re-enable proof.
+
 linter:
   rules:
     prefer_single_quotes: true

@@ -39,7 +39,7 @@ created: 2026-08-06
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 58-01-01 | 01 | 0 | GEN-02 | T-58-01, T-58-02 | Package import is rejected by import_guard and exact fixture is cleaned | negative integration | `flutter test test/architecture/tooling_guard_negative_fixture_test.dart --plain-name 'package import fixture is rejected by import_guard and cleaned'` | ❌ W0 creator | ⬜ pending |
-| 58-01-02 | 01 | 0 | GEN-02 | T-58-03, T-58-04 | Package/relative scanner and Riverpod diagnostics fail independently; valid tree passes | negative integration | `dart run scripts/verify_tooling_guards.dart` | ❌ W0 creator | ⬜ pending |
+| 58-01-02 / HP-06 | 01 | 0 | GEN-02 | T-58-03, T-58-04 | Package/relative scanner and owned Riverpod app-root bad/control contract fail independently; valid tree passes | negative integration | `dart run scripts/verify_tooling_guards.dart` | ✅ owned contract | ✅ green |
 | 58-02-01 | 02 | 1 | GEN-02, GEN-03 | T-58-06, T-58-07 | Exact analyzer 8.4.0 and complete cohort reject every partial mutation | contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart --plain-name 'GEN-02/GEN-03 exact analyzer and code-generation graph fails closed'` | ✅ extend | ⬜ pending |
 | 58-02-02 | 02 | 1 | GEN-01, GEN-02, GEN-03 | T-58-05, T-58-08 | SDK declaration, lock, manifest, policy, and running identity agree without native drift | contract/smoke | `flutter pub get --enforce-lockfile && flutter test test/architecture/dependency_compatibility_contract_test.dart && dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk` | ✅ extend | ⬜ pending |
 | 58-03-01 | 03 | 0 | GEN-04 | T-58-09, T-58-11 | Source contract fixes locked resolution → first clean generation pass → analyzer/custom_lint/three architecture tests | source contract | `flutter test test/architecture/codegen_reproducibility_contract_test.dart --plain-name 'first pass is locked and diff-scoped'` | ❌ W0 creator | ⬜ pending |
@@ -55,7 +55,7 @@ created: 2026-08-06
 
 ## Wave 0 Requirements
 
-- [ ] `analysis_options.yaml`, `scripts/verify_tooling_guards.dart`, and `test/architecture/tooling_guard_negative_fixture_test.dart` — register Riverpod lint 3.1.0 and create fail-first import_guard/source-scanner/`missing_provider_scope` proof with its ProviderScope control for GEN-02.
+- [x] `analysis_options.yaml`, `scripts/verify_tooling_guards.dart`, `scripts/audit/provider_contract.dart`, and their architecture tests — hold the currently unprovable `riverpod_lint 3.1.0` plugin inactive, prove package/relative import guards, prove missing ProviderScope rejection with ProviderScope and UncontrolledProviderScope controls, and fail closed on active-plugin/protocol/version states for GEN-02 (HP-06).
 - [ ] `scripts/verify_codegen_reproducibility.sh` and `test/architecture/codegen_reproducibility_contract_test.dart` — source-tested authoritative GEN-04 wrapper for locked resolution, two l10n/build_runner clean passes, then analyzer, custom_lint, layer/domain/presentation architecture tests, and tooling-guard proof.
 
 Plans `58-01` and `58-03` create these gaps in Wave 0. Wave 1 plan `58-02` explicitly depends on both creators before it mutates the selected graph, and Wave 2 plan `58-04` consumes their executable contracts in Stable CI.

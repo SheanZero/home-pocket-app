@@ -14,7 +14,10 @@ class ToolingGuardCase {
     required this.source,
     required this.command,
     required this.arguments,
-    required this.diagnosticCode,
+    this.diagnosticCode,
+    this.expectFailure = true,
+    this.expectsFixturePath = true,
+    this.detectPluginFailure = false,
   });
 
   const ToolingGuardCase.importGuardPackage()
@@ -35,12 +38,124 @@ class ToolingGuardCase {
         diagnosticCode: 'import_guard',
       );
 
+  const ToolingGuardCase.layerScannerPackage()
+    : this(
+        name: 'layer scanner package import',
+        fixturePath:
+            'lib/features/accounting/domain/phase58_scanner_package_import_fixture.dart',
+        source:
+            "import 'package:home_pocket/data/app_database.dart';\n\n"
+            'void phase58ForbiddenScannerPackageImport(AppDatabase database) {}\n',
+        command: 'flutter',
+        arguments: const [
+          'test',
+          'test/architecture/layer_import_rules_test.dart',
+        ],
+        diagnosticCode: 'domain must be independent',
+      );
+
+  const ToolingGuardCase.layerScannerRelative()
+    : this(
+        name: 'layer scanner relative import',
+        fixturePath:
+            'lib/features/accounting/domain/phase58_scanner_relative_import_fixture.dart',
+        source:
+            "import '../../../data/app_database.dart';\n\n"
+            'void phase58ForbiddenScannerRelativeImport(AppDatabase database) {}\n',
+        command: 'flutter',
+        arguments: const [
+          'test',
+          'test/architecture/layer_import_rules_test.dart',
+        ],
+        diagnosticCode: 'domain must be independent',
+      );
+
+  const ToolingGuardCase.providerScopeMissing()
+    : this(
+        name: 'provider app root without scope',
+        fixturePath: 'lib/phase58_provider_scope_bad_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n\n"
+            'void phase58BadProviderRoot() => runApp(const Placeholder());\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
+  const ToolingGuardCase.providerScopeControl()
+    : this(
+        name: 'provider app root scope control',
+        fixturePath: 'lib/phase58_provider_scope_control_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart';\n"
+            "import 'package:flutter_riverpod/flutter_riverpod.dart';\n\n"
+            'void phase58ProviderRootControl() =>\n'
+            '    runApp(const ProviderScope(child: Placeholder()));\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        expectFailure: false,
+        expectsFixturePath: false,
+      );
+
+  const ToolingGuardCase.validProductionAnalyzer()
+    : this(
+        name: 'valid production flutter analyze',
+        fixturePath: '',
+        source: null,
+        command: 'flutter',
+        arguments: const ['analyze', '--no-fatal-infos'],
+        expectFailure: false,
+        expectsFixturePath: false,
+        detectPluginFailure: true,
+      );
+
+  const ToolingGuardCase.validProductionCustomLint()
+    : this(
+        name: 'valid production custom_lint',
+        fixturePath: '',
+        source: null,
+        command: 'dart',
+        arguments: const ['run', 'custom_lint', '--no-fatal-infos'],
+        expectFailure: false,
+        expectsFixturePath: false,
+        detectPluginFailure: true,
+      );
+
+  const ToolingGuardCase.validProductionLayerScanner()
+    : this(
+        name: 'valid production layer scanner',
+        fixturePath: '',
+        source: null,
+        command: 'flutter',
+        arguments: const [
+          'test',
+          'test/architecture/layer_import_rules_test.dart',
+        ],
+        expectFailure: false,
+        expectsFixturePath: false,
+      );
+
+  const ToolingGuardCase.validProductionProviderContract()
+    : this(
+        name: 'valid production provider contract',
+        fixturePath: '',
+        source: null,
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        expectFailure: false,
+        expectsFixturePath: false,
+        detectPluginFailure: true,
+      );
+
   final String name;
   final String fixturePath;
-  final String source;
+  final String? source;
   final String command;
   final List<String> arguments;
-  final String diagnosticCode;
+  final String? diagnosticCode;
+  final bool expectFailure;
+  final bool expectsFixturePath;
+  final bool detectPluginFailure;
 }
 
 class ToolingGuardCommandResult {
@@ -98,7 +213,13 @@ Future<ToolingGuardCommandResult> runToolingGuardCommand(
 }
 
 Future<ToolingGuardResult> verifyToolingGuards({
-  List<ToolingGuardCase> cases = const [ToolingGuardCase.importGuardPackage()],
+  List<ToolingGuardCase> cases = const [
+    ToolingGuardCase.importGuardPackage(),
+    ToolingGuardCase.layerScannerPackage(),
+    ToolingGuardCase.layerScannerRelative(),
+    ToolingGuardCase.providerScopeMissing(),
+    ToolingGuardCase.providerScopeControl(),
+  ],
   ToolingGuardCommand runCommand = runToolingGuardCommand,
   bool runValidTreeChecks = true,
   String workingDirectory = '.',
@@ -106,7 +227,8 @@ Future<ToolingGuardResult> verifyToolingGuards({
   final root = Directory(workingDirectory).absolute;
   final stale = <ToolingGuardCaseResult>[];
   for (final guardCase in cases) {
-    if (File('${root.path}/${guardCase.fixturePath}').existsSync()) {
+    if (guardCase.source != null &&
+        File('${root.path}/${guardCase.fixturePath}').existsSync()) {
       stale.add(
         ToolingGuardCaseResult(
           guardCase: guardCase,
@@ -122,33 +244,59 @@ Future<ToolingGuardResult> verifyToolingGuards({
   for (final guardCase in cases) {
     results.add(await _verifyCase(guardCase, root.path, runCommand));
   }
+  if (runValidTreeChecks) {
+    for (final guardCase in _validProductionCases) {
+      results.add(await _verifyCase(guardCase, root.path, runCommand));
+    }
+  }
   return ToolingGuardResult(results);
 }
+
+const _validProductionCases = [
+  ToolingGuardCase.validProductionAnalyzer(),
+  ToolingGuardCase.validProductionCustomLint(),
+  ToolingGuardCase.validProductionLayerScanner(),
+  ToolingGuardCase.validProductionProviderContract(),
+];
 
 Future<ToolingGuardCaseResult> _verifyCase(
   ToolingGuardCase guardCase,
   String workingDirectory,
   ToolingGuardCommand runCommand,
 ) async {
-  final fixture = File('$workingDirectory/${guardCase.fixturePath}');
+  final fixture = guardCase.source == null
+      ? null
+      : File('$workingDirectory/${guardCase.fixturePath}');
   final messages = <String>[];
   var output = '';
   try {
-    await fixture.writeAsString(guardCase.source, flush: true);
+    if (fixture != null) {
+      await fixture.writeAsString(guardCase.source!, flush: true);
+    }
     final commandResult = await runCommand(guardCase, workingDirectory);
     output = commandResult.combinedOutput;
-    if (commandResult.exitCode == 0) {
+    if (guardCase.expectFailure && commandResult.exitCode == 0) {
       messages.add('${guardCase.name}: expected a nonzero exit');
     }
-    if (!_hasDiagnostic(output, guardCase.diagnosticCode)) {
+    if (!guardCase.expectFailure && commandResult.exitCode != 0) {
+      messages.add(
+        '${guardCase.name}: expected a zero exit, got ${commandResult.exitCode}',
+      );
+    }
+    if (guardCase.diagnosticCode != null &&
+        !_hasDiagnostic(output, guardCase.diagnosticCode!)) {
       messages.add(
         '${guardCase.name}: missing diagnostic ${guardCase.diagnosticCode}',
       );
     }
-    if (!_hasFixturePath(output, guardCase.fixturePath)) {
+    if (guardCase.expectsFixturePath &&
+        !_hasFixturePath(output, guardCase.fixturePath)) {
       messages.add(
         '${guardCase.name}: missing fixture ${guardCase.fixturePath}',
       );
+    }
+    if (guardCase.detectPluginFailure && _hasPluginFailure(output)) {
+      messages.add('${guardCase.name}: analyzer plugin failure detected');
     }
   } on ProcessException catch (error) {
     messages.add('${guardCase.name}: command spawn failed: ${error.message}');
@@ -156,7 +304,7 @@ Future<ToolingGuardCaseResult> _verifyCase(
     messages.add('${guardCase.name}: fixture write failed: ${error.message}');
   } finally {
     try {
-      if (fixture.existsSync()) await fixture.delete();
+      if (fixture?.existsSync() ?? false) await fixture!.delete();
     } on FileSystemException catch (error) {
       messages.add('${guardCase.name}: cleanup failed: ${error.message}');
     }
@@ -181,16 +329,22 @@ bool _hasDiagnostic(String output, String diagnosticCode) {
       );
     }
   } on FormatException {
-    // The expected custom_lint JSON was not emitted, so the stable code check
-    // below will correctly fail.
+    // The repository-owned scanner and Flutter test use text output instead
+    // of custom_lint's JSON reporter. Their stable diagnostic code is still
+    // required, so fall through to the text check below.
   }
-  return false;
+  return output.contains(diagnosticCode);
 }
 
 bool _hasFixturePath(String output, String fixturePath) {
   final normalizedPath = fixturePath.replaceAll('\\', '/');
   return output.replaceAll('\\', '/').contains(normalizedPath);
 }
+
+bool _hasPluginFailure(String output) => RegExp(
+  r'PluginException|PluginEx|UNKNOWN_REQUEST|(?:unable|failed)\s+to\s+parse[^\n]*version',
+  caseSensitive: false,
+).hasMatch(output);
 
 Future<void> main() async {
   final result = await verifyToolingGuards();

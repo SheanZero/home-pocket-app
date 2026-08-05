@@ -64,5 +64,61 @@ void main() {
         expect(File(_packageFixturePath).existsSync(), isFalse);
       },
     );
+
+    test(
+      'runValidTreeChecks runs the owned production checks only when set',
+      () async {
+        final skipped = await tooling.verifyToolingGuards(
+          cases: const [],
+          runCommand: (guardCase, workingDirectory) async =>
+              const tooling.ToolingGuardCommandResult(
+                exitCode: 0,
+                stdout: 'valid tree',
+                stderr: '',
+              ),
+          runValidTreeChecks: false,
+        );
+        final checked = await tooling.verifyToolingGuards(
+          cases: const [],
+          runCommand: (guardCase, workingDirectory) async =>
+              const tooling.ToolingGuardCommandResult(
+                exitCode: 0,
+                stdout: 'valid tree',
+                stderr: '',
+              ),
+          runValidTreeChecks: true,
+        );
+
+        expect(skipped.cases, isEmpty);
+        expect(checked.isPassing, isTrue, reason: checked.describe());
+        expect(
+          checked.cases.map((result) => result.guardCase.name),
+          containsAll(<String>[
+            'valid production flutter analyze',
+            'valid production custom_lint',
+            'valid production layer scanner',
+            'valid production provider contract',
+          ]),
+        );
+      },
+    );
+
+    test(
+      'valid tree checks fail closed on analyzer plugin protocol output',
+      () async {
+        final result = await tooling.verifyToolingGuards(
+          cases: const [],
+          runCommand: (guardCase, workingDirectory) async =>
+              const tooling.ToolingGuardCommandResult(
+                exitCode: 0,
+                stdout: 'PluginEx: UNKNOWN_REQUEST while parsing version',
+                stderr: '',
+              ),
+        );
+
+        expect(result.isPassing, isFalse);
+        expect(result.describe(), contains('analyzer plugin failure detected'));
+      },
+    );
   });
 }
