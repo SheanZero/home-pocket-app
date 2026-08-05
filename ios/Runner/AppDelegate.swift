@@ -48,10 +48,21 @@ private extension Data {
   private var apnsToken: String?
   private var pendingInitialMessage: [String: Any]?
 
+  /// UAT uses a separately signed app identity and must never register with
+  /// production APNs/Firebase credentials or present a remote-push prompt.
+  private var isUatBuild: Bool {
+    (Bundle.main.object(forInfoDictionaryKey: "HPUATBuild") as? String)?
+      .caseInsensitiveCompare("YES") == .orderedSame
+  }
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    guard !isUatBuild else {
+      return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
     if let remoteNotification = launchOptions?[.remoteNotification] as? [AnyHashable: Any] {
       pendingInitialMessage = normalize(userInfo: remoteNotification)
     }
@@ -90,6 +101,8 @@ private extension Data {
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
+    guard !isUatBuild else { return }
+
     let token = deviceToken.hexEncodedString
     apnsToken = token
     tokenStreamHandler.emit(token)
@@ -100,6 +113,8 @@ private extension Data {
     _ application: UIApplication,
     didFailToRegisterForRemoteNotificationsWithError error: Error
   ) {
+    guard !isUatBuild else { return }
+
     NSLog("APNs registration failed: \(error.localizedDescription)")
     super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
   }
@@ -109,6 +124,11 @@ private extension Data {
     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
   ) {
+    guard !isUatBuild else {
+      completionHandler(.noData)
+      return
+    }
+
     let payload = normalize(userInfo: userInfo)
     if !payload.isEmpty {
       foregroundStreamHandler.emit(payload)
@@ -121,6 +141,11 @@ private extension Data {
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
+    guard !isUatBuild else {
+      completionHandler([])
+      return
+    }
+
     if notification.request.trigger is UNPushNotificationTrigger {
       let payload = normalize(userInfo: notification.request.content.userInfo)
       if !payload.isEmpty {
@@ -142,6 +167,11 @@ private extension Data {
     didReceive response: UNNotificationResponse,
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
+    guard !isUatBuild else {
+      completionHandler()
+      return
+    }
+
     let payload = normalize(userInfo: response.notification.request.content.userInfo)
     if !payload.isEmpty {
       if openedStreamHandler.hasListener {
@@ -169,6 +199,17 @@ private extension Data {
   }
 
   private func requestPermission(result: @escaping FlutterResult) {
+    guard !isUatBuild else {
+      result(
+        FlutterError(
+          code: "apns_unavailable_in_uat",
+          message: "Remote notifications are disabled in the UAT app.",
+          details: nil
+        )
+      )
+      return
+    }
+
     let center = UNUserNotificationCenter.current()
     center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
       if let error {

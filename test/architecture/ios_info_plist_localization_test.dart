@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const _localizedInfoPlistKeys = <String>{
-  'CFBundleDisplayName',
   'NSMicrophoneUsageDescription',
   'NSPhotoLibraryUsageDescription',
   'NSSpeechRecognitionUsageDescription',
@@ -16,12 +15,6 @@ const _localizedFiles = <String, String>{
   'zh-Hans': 'ios/Runner/zh-Hans.lproj/InfoPlist.strings',
 };
 
-const _expectedDisplayNames = <String, String>{
-  'en': 'Happy Pocket',
-  'ja': 'Happy Pocket',
-  'zh-Hans': 'Happy Pocket',
-};
-
 void main() {
   group('iOS InfoPlist localization contract', () {
     for (final entry in _localizedFiles.entries) {
@@ -29,7 +22,6 @@ void main() {
         final values = _parseStringsFile(File(entry.value));
 
         expect(values.keys.toSet(), _localizedInfoPlistKeys);
-        expect(values['CFBundleDisplayName'], _expectedDisplayNames[entry.key]);
         for (final key in _localizedInfoPlistKeys) {
           expect(values[key], isNotEmpty, reason: '${entry.key}: $key');
         }

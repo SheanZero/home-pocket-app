@@ -1,4 +1,3 @@
-"CFBundleDisplayName" = "Happy Pocket";
 "NSMicrophoneUsageDescription" = "Happy Pocket 使用麦克风进行语音记账。";
 "NSPhotoLibraryUsageDescription" = "Happy Pocket 使用您的照片图库以选择个人资料照片。";
 "NSSpeechRecognitionUsageDescription" = "Happy Pocket 使用语音识别输入金额和交易内容。";
