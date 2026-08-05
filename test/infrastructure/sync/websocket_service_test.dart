@@ -741,6 +741,90 @@ void main() {
       expect(authMessage, contains('signature'));
     });
 
+    test('signer failures close the current connection and retry', () {
+      fakeAsync((async) {
+        final controller = StreamController<dynamic>.broadcast(sync: true);
+        final localSink = MockWebSocketSink();
+        var connectionAttempts = 0;
+        when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+        when(() => localSink.add(any())).thenReturn(null);
+        final localService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            connectionAttempts++;
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            return channel;
+          },
+        );
+        addTearDown(() {
+          localService.dispose();
+          unawaited(controller.close());
+        });
+
+        localService.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (_) => Future<String>.error(StateError('sign failed')),
+        );
+        async.flushMicrotasks();
+
+        expect(
+          localService.connectionState,
+          WebSocketConnectionState.disconnected,
+        );
+        verify(() => localSink.close(any(), any())).called(1);
+
+        async.elapse(const Duration(seconds: 1));
+        async.flushMicrotasks();
+
+        expect(connectionAttempts, 2);
+      });
+    });
+
+    test('auth sink failures close the current connection and retry', () {
+      fakeAsync((async) {
+        final controller = StreamController<dynamic>.broadcast(sync: true);
+        final localSink = MockWebSocketSink();
+        var connectionAttempts = 0;
+        when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+        when(() => localSink.add(any())).thenThrow(StateError('sink failed'));
+        final localService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            connectionAttempts++;
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            return channel;
+          },
+        );
+        addTearDown(() {
+          localService.dispose();
+          unawaited(controller.close());
+        });
+
+        localService.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (_) async => 'signature',
+        );
+        async.flushMicrotasks();
+
+        expect(
+          localService.connectionState,
+          WebSocketConnectionState.disconnected,
+        );
+        verify(() => localSink.close(any(), any())).called(1);
+
+        async.elapse(const Duration(seconds: 1));
+        async.flushMicrotasks();
+
+        expect(connectionAttempts, 2);
+      });
+    });
+
     test(
       'stale authentication never writes to a replacement channel',
       () async {
@@ -788,6 +872,56 @@ void main() {
         verify(() => sinks[1].add(any())).called(1);
       },
     );
+
+    test('a stale signer failure cannot disconnect a replacement connection',
+        () async {
+      final delayedSignature = Completer<String>();
+      final sinks = <MockWebSocketSink>[];
+      final controllers = <StreamController<dynamic>>[];
+      final replacementService = WebSocketService(
+        baseUrl: 'wss://sync.happypocket.app',
+        channelFactory: ({required String url}) {
+          final controller = StreamController<dynamic>.broadcast();
+          final localSink = MockWebSocketSink();
+          when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+          when(() => localSink.add(any())).thenReturn(null);
+          final channel = MockWebSocketChannel();
+          when(() => channel.stream).thenAnswer((_) => controller.stream);
+          when(() => channel.sink).thenReturn(localSink);
+          controllers.add(controller);
+          sinks.add(localSink);
+          return channel;
+        },
+      );
+      addTearDown(() async {
+        replacementService.dispose();
+        for (final controller in controllers) {
+          await controller.close();
+        }
+      });
+
+      replacementService.connect(
+        groupId: 'group-a',
+        deviceId: 'device-a',
+        signMessage: (_) => delayedSignature.future,
+      );
+      replacementService.connect(
+        groupId: 'group-b',
+        deviceId: 'device-b',
+        signMessage: (_) async => 'signature-b',
+      );
+      controllers[1].add(jsonEncode({'type': 'auth_success'}));
+      await Future<void>.delayed(Duration.zero);
+
+      delayedSignature.completeError(StateError('old sign failed'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        replacementService.connectionState,
+        WebSocketConnectionState.connected,
+      );
+      verifyNever(() => sinks[1].close(any(), any()));
+    });
 
     test('disconnect invalidates pending authentication', () async {
       final delayedSignature = Completer<String>();

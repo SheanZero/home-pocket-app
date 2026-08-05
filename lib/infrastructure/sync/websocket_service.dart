@@ -169,7 +169,9 @@ class WebSocketService with WidgetsBindingObserver {
         groupId: groupId,
         deviceId: deviceId,
         signMessage: signMessage,
-      ),
+      ).catchError((Object error, StackTrace stackTrace) {
+        _onAuthenticationError(error, generation, channel);
+      }),
     );
   }
 
@@ -193,6 +195,18 @@ class WebSocketService with WidgetsBindingObserver {
     });
 
     channel.sink.add(authMessage);
+  }
+
+  void _onAuthenticationError(
+    Object error,
+    int generation,
+    WebSocketChannel channel,
+  ) {
+    if (!_isCurrentConnection(generation, channel)) return;
+    if (kDebugMode) {
+      debugPrint('WebSocketService: authentication failed: $error');
+    }
+    _handleDisconnect(generation, channel);
   }
 
   bool _isCurrentConnection(int generation, WebSocketChannel channel) {
