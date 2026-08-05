@@ -20,6 +20,51 @@ import 'package:flutter_test/flutter_test.dart';
 const _docs = ['privacy', 'terms', 'tokusho'];
 const _langs = ['ja', 'zh', 'en'];
 
+const _privacyRelayContract = <String, List<String>>{
+  'ja': [
+    '中継サーバーに一時的に保存・転送',
+    '復号鍵を保持しない',
+    '7日間',
+    '受信確認',
+    '1時間ごと',
+    '90日間',
+    '14日間',
+    'PostgreSQL',
+    '固定のログ保存期間を設定していません',
+  ],
+  'zh': [
+    '由中继服务器临时存储和转发',
+    '不持有解密密钥',
+    '7天',
+    '接收确认',
+    '每小时',
+    '90天',
+    '14天',
+    'PostgreSQL',
+    '未设定固定的日志保留期限',
+  ],
+  'en': [
+    'temporarily stored and forwarded by the relay server',
+    'does not hold decryption keys',
+    '7 days',
+    'receipt acknowledgement',
+    'every hour',
+    '90 days',
+    '14 days',
+    'PostgreSQL',
+    'does not set a fixed log-retention period',
+  ],
+};
+
+const _obsoletePrivacyClaims = <String, List<String>>{
+  'ja': ['端末間で直接行われる', 'サーバーに保存されることはありません'],
+  'zh': ['设备之间直接进行', '不会保存至开发者的服务器'],
+  'en': [
+    'takes place directly between devices',
+    'never stored on the developer',
+  ],
+};
+
 int _countSectionHeaders(List<String> lines) =>
     lines.where((l) => l.startsWith('## ')).length;
 
@@ -59,7 +104,8 @@ void main() {
           expect(
             firstLine != null && firstLine.startsWith('# '),
             isTrue,
-            reason: 'legal asset $path must start with a top-level # heading, '
+            reason:
+                'legal asset $path must start with a top-level # heading, '
                 'got: ${firstLine ?? '<none>'}',
           );
         }
@@ -84,8 +130,33 @@ void main() {
           expect(
             counts[lang],
             reference,
-            reason: 'section-header count for $doc mismatch: '
+            reason:
+                'section-header count for $doc mismatch: '
                 '${counts.toString()}',
+          );
+        }
+      }
+    });
+
+    test('privacy policies match the encrypted relay retention contract', () {
+      for (final lang in _langs) {
+        final path = 'assets/legal/privacy_$lang.md';
+        final content = File(path).readAsStringSync();
+
+        for (final requiredText in _privacyRelayContract[lang]!) {
+          expect(
+            content,
+            contains(requiredText),
+            reason: '$path must disclose relay behavior: $requiredText',
+          );
+        }
+        for (final obsoleteText in _obsoletePrivacyClaims[lang]!) {
+          expect(
+            content,
+            isNot(contains(obsoleteText)),
+            reason:
+                '$path still contains obsolete direct-sync claim: '
+                '$obsoleteText',
           );
         }
       }
