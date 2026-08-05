@@ -1,10 +1,10 @@
 import '../../features/shopping_list/domain/models/shopping_item.dart';
-import '../../features/shopping_list/domain/models/shopping_item_sync_mapper.dart';
 import '../../features/shopping_list/domain/models/shopping_unit.dart';
 import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import '../../shared/utils/result.dart';
 import '../family_sync/shopping_item_change_tracker.dart';
 import '../family_sync/sync_engine.dart';
+import 'shopping_item_update_persistence.dart';
 
 /// Parameters for updating an existing shopping item.
 ///
@@ -65,14 +65,15 @@ class UpdateShoppingItemUseCase {
     SyncEngine? syncEngine, // nullable — fire-and-forget
     Future<String?> Function()? deviceIdResolver,
   }) : _repo = shoppingItemRepository,
-       _changeTracker = changeTracker,
-       _syncEngine = syncEngine,
-       _deviceIdResolver = deviceIdResolver;
+       _persistence = ShoppingItemUpdatePersistence(
+         shoppingItemRepository: shoppingItemRepository,
+         changeTracker: changeTracker,
+         syncEngine: syncEngine,
+         deviceIdResolver: deviceIdResolver,
+       );
 
   final ShoppingItemRepository _repo;
-  final ShoppingItemChangeTracker? _changeTracker;
-  final SyncEngine? _syncEngine;
-  final Future<String?> Function()? _deviceIdResolver;
+  final ShoppingItemUpdatePersistence _persistence;
 
   Future<Result<ShoppingItem>> execute(UpdateShoppingItemParams params) async {
     // 1. Verify item exists and is not already tombstoned (MGMT-02, WR-02).
@@ -126,29 +127,8 @@ class UpdateShoppingItemUseCase {
       // addedByBookId, createdAt, isDeleted, isSynced: all preserved by default.
     );
 
-    // 3. Persist (note encryption handled at repo boundary)
-    final durable = _repo is DurableFamilySyncShoppingItemRepository
-        ? _repo
-        : null;
-    final originDeviceId = await _deviceIdResolver?.call() ?? existing.deviceId;
-    final persisted = durable != null
-        ? await durable.updateWithFamilySyncOutbox(
-            updated,
-            originDeviceId: originDeviceId,
-          )
-        : updated;
-    if (durable == null) await _repo.update(updated);
-
-    // 4. Privacy gate (D37-06): listType is immutable (D37-04), so existing.listType
-    //    is the authoritative source — no need to re-read.
-    if (existing.listType == 'public' && durable == null) {
-      _changeTracker?.trackUpdate(
-        ShoppingItemSyncMapper.toUpdateOperation(updated),
-      );
-    }
-
-    // 5. Fire-and-forget sync trigger — SyncEngine handles debounce (D-20).
-    _syncEngine?.onTransactionChanged();
+    // 3. Persist (note encryption handled at repo boundary).
+    final persisted = await _persistence.persist(updated);
 
     return Result.success(persisted);
   }
