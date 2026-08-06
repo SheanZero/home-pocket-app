@@ -253,7 +253,7 @@ void main() {
     });
 
     tearDown(() {
-      rawDb.dispose();
+      rawDb.close();
     });
 
     // Test 2: transactions.ledger_type value rewrite (D-02)
@@ -499,7 +499,7 @@ void main() {
     });
 
     tearDown(() {
-      rawDb.dispose();
+      rawDb.close();
     });
 
     test(

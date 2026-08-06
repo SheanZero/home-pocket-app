@@ -261,10 +261,10 @@ void main() {
     test('rejects an EOL SQLCipher selection', () {
       expectIssue(
         baseline().replaceFirst(
-          '"resolved": "0.6.8"',
-          '"resolved": "0.7.0+eol"',
+          '"resolved": "3.5.1"',
+          '"resolved": "3.5.1+eol"',
         ),
-        'dependency sqlcipher_flutter_libs selects forbidden prerelease or EOL value',
+        'dependency sqlite3 selects forbidden prerelease or EOL value',
       );
     });
 
@@ -308,8 +308,8 @@ void main() {
     test('rejects plaintext sqlite3_flutter_libs', () {
       final input = currentInputs();
       input['pubspec'] = input['pubspec']!.replaceFirst(
-        '  sqlite3: ^2.9.4',
-        '  sqlite3: ^2.9.4\n  sqlite3_flutter_libs: ^0.5.0',
+        '  sqlite3: ^3.3.1',
+        '  sqlite3: ^3.3.1\n  sqlite3_flutter_libs: ^0.5.0',
       );
       expect(
         validate(input),
@@ -319,46 +319,54 @@ void main() {
       );
     });
 
-    test('rejects a comment-only SQLCipher linker strip', () {
+    test('rejects an active legacy SQLCipher linker strip', () {
       final input = currentInputs();
-      input['podfile'] = input['podfile']!.replaceFirst(
-        "stripped = original.gsub(/\\s-l\"?sqlite3\"?/, '')",
-        "# original.gsub(/\\s-l\"?sqlite3\"?/, '')",
-      );
-      input['podfile'] = input['podfile']!.replaceFirst(
-        'File.write(xcconfig_path, stripped) if stripped != original',
-        '# stripped is intentionally not written',
-      );
+      input['podfile'] = '''${input['podfile']}
+installer.pods_project.targets.each do |target|
+  target.build_configurations.each do |config|
+    ref = config.base_configuration_reference
+    next if ref.nil?
+    xcconfig_path = ref.real_path
+    original = File.read(xcconfig_path)
+    stripped = original.gsub(/\\s-l"?sqlite3"?/, '')
+    File.write(xcconfig_path, stripped) if stripped != original
+  end
+end
+''';
       expect(
         validate(input),
         contains(
-          'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
+          'ios/Podfile must not retain the obsolete sqlite3 linker strip',
         ),
       );
     });
 
-    test('rejects a SQLCipher linker strip inside a Ruby block comment', () {
+    test('ignores an obsolete linker strip inside a Ruby block comment', () {
       final input = currentInputs();
-      input['podfile'] = input['podfile']!.replaceFirst(
-        '''      stripped = original.gsub(/\\s-l"?sqlite3"?/, '')
-      File.write(xcconfig_path, stripped) if stripped != original''',
-        '''      =begin
-      stripped = original.gsub(/\\s-l"?sqlite3"?/, '')
-      File.write(xcconfig_path, stripped) if stripped != original
-      =end''',
-      );
+      input['podfile'] = '''${input['podfile']}
+=begin
+installer.pods_project.targets.each do |target|
+  target.build_configurations.each do |config|
+    stripped = original.gsub(/\\s-l"?sqlite3"?/, '')
+    File.write(xcconfig_path, stripped) if stripped != original
+  end
+end
+=end
+''';
 
       expect(
         validate(input),
-        contains(
-          'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
+        isNot(
+          contains(
+            'ios/Podfile must not retain the obsolete sqlite3 linker strip',
+          ),
         ),
       );
     });
 
     test('rejects an incomplete atomic compatibility lane', () {
       expectIssue(
-        baseline().replaceFirst(' + sqlite3 2.9.4', ''),
+        baseline().replaceFirst(' + sqlite3 3.5.1', ''),
         'compatibility lane encrypted_storage is incomplete',
       );
     });

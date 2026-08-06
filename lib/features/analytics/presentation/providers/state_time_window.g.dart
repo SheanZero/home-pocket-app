@@ -61,7 +61,7 @@ abstract class _$SelectedTimeWindow extends $Notifier<TimeWindow> {
   TimeWindow build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TimeWindow, TimeWindow>;
     final element =
         ref.element
@@ -71,6 +71,6 @@ abstract class _$SelectedTimeWindow extends $Notifier<TimeWindow> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

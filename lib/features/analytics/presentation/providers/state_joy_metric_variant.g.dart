@@ -48,7 +48,7 @@ abstract class _$SelectedJoyMetricVariant extends $Notifier<JoyMetricVariant> {
   JoyMetricVariant build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<JoyMetricVariant, JoyMetricVariant>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$SelectedJoyMetricVariant extends $Notifier<JoyMetricVariant> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

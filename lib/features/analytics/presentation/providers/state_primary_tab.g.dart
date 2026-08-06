@@ -76,7 +76,7 @@ abstract class _$SelectedAnalyticsPrimaryTab
   AnalyticsPrimaryTab build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AnalyticsPrimaryTab, AnalyticsPrimaryTab>;
     final element =
         ref.element
@@ -86,6 +86,6 @@ abstract class _$SelectedAnalyticsPrimaryTab
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

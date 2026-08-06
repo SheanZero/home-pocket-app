@@ -58,16 +58,16 @@ main() {
 
   printf 'Running generation pass 1.\n'
   flutter gen-l10n
-  flutter pub run build_runner build --delete-conflicting-outputs
+  flutter pub run build_runner build
   assert_clean_generation_scope 'after generation pass 1'
 
   printf 'Running generation pass 2.\n'
   flutter gen-l10n
-  flutter pub run build_runner build --delete-conflicting-outputs
+  flutter pub run build_runner build
   assert_clean_generation_scope 'after generation pass 2'
 
   flutter analyze --no-fatal-infos
-  dart run custom_lint --no-fatal-infos
+  dart run import_lint
   flutter test \
     test/architecture/layer_import_rules_test.dart \
     test/architecture/domain_import_rules_test.dart \

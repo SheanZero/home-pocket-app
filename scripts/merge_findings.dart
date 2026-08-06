@@ -30,7 +30,7 @@ const _categoryPrefix = {
 /// Agent shards intentionally remain historical context; a stale semantic
 /// report must never close or reopen a finding.
 const _canonicalShardTools = {
-  'layer.json': 'import_guard',
+  'layer.json': 'import_lint',
   'dead_code.json': 'dart_code_linter',
   'providers.json': 'owned_provider_contract',
   'duplication.json': 'owned_duplication_detector',

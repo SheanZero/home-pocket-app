@@ -1,6 +1,6 @@
 # Permanent gate — do not weaken without ADR amendment.
 # See docs/arch/03-adr/ADR-011_Codebase_Cleanup_Initiative_Outcome.md.
-# Phase 8 D-05: the four guardrails below (import_guard / custom_lint /
+# Phase 8 D-05: the four guardrails below (import_lint / analyzer plugins /
 # coverde per-file >=70% / sqlite3_flutter_libs reject) are blocking on
 # every PR + push to main. The coverage job intentionally has no PR-only
 # guard, and every guardrail step is hard-failing by design.
@@ -37,20 +37,17 @@ jobs:
           key: pub-${{ hashFiles('pubspec.lock') }}
       - run: flutter pub get --enforce-lockfile
       # P2-04 — a hard-failing coordinated dependency/native-toolchain
-      # contract. It includes the verified analyzer 8.x line and must run
+      # contract. It includes the verified analyzer 12.x line and must run
       # before static analysis instead of a warning-only version probe.
       - name: Dependency compatibility contract
         run: dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk
       - run: dart pub global activate coverde 0.3.0+1
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
-      - name: dart run custom_lint
-        # Made blocking at Phase 3 close per D-17 (previously non-blocking).
-        # Phase 8 amendment 2026-04-28: --no-fatal-infos so riverpod_lint INFOs
-        # don't block CI — parity with scripts/audit/{layer,providers}.dart which
-        # already use this flag. import_guard (load-bearing rule) still hard-fails
-        # on errors regardless. Tracked as the riverpod_lint INFO half of FUTURE-TOOL-03.
-        run: dart run custom_lint --no-fatal-infos
+      - name: dart run import_lint
+        # Blocking CLI companion to the active analysis-server plugin. Rules
+        # use severity:error, so any forbidden dependency exits non-zero.
+        run: dart run import_lint
       - name: Audit scanners
         run: |
           bash scripts/audit_layer.sh
@@ -84,18 +81,18 @@ jobs:
       - name: Release preflight contract
         run: flutter test test/scripts/release_preflight_test.dart
 
-      # AUDIT-09 — sqlite3_flutter_libs reject. BLOCKING from end of Phase 1.
-      - name: Reject sqlite3_flutter_libs in pubspec.lock
+      # AUDIT-09 — obsolete/plaintext native SQLite packages are forbidden.
+      - name: Reject legacy SQLite Flutter libraries
         run: |
-          if grep -q sqlite3_flutter_libs pubspec.lock; then
-            echo "::error::sqlite3_flutter_libs detected in pubspec.lock — conflicts with sqlcipher_flutter_libs"
+          if grep -Eq 'sqlite3_flutter_libs|sqlcipher_flutter_libs' pubspec.lock; then
+            echo "::error::legacy SQLite Flutter library detected — sqlite3 Native Assets must provide SQLCipher"
             exit 1
           fi
 
       # AUDIT-10 — build_runner stale-diff. BLOCKING from end of Phase 1.
       - name: Build runner clean diff
         run: |
-          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter pub run build_runner build
           if ! git diff --exit-code lib/; then
             echo "::error::Generated files in lib/ are stale — run build_runner locally and commit"
             exit 1

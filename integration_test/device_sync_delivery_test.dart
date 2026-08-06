@@ -10,8 +10,6 @@ import 'package:home_pocket/data/repositories/sync_repository_impl.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart'
-    show ensureNativeLibrary;
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
@@ -112,8 +110,6 @@ Map<String, dynamic> _dataMessage(String messageId) => {
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  setUpAll(ensureNativeLibrary);
 
   testWidgets(
     'offline ciphertext survives SQLCipher reopen and settles only on relay ACK',

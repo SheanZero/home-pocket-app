@@ -57,7 +57,7 @@ void main() {
          '{"entityType":"future"}', 'unsupported_entity_type', 20, 21)
     ''');
     staged.execute('PRAGMA user_version = 33');
-    staged.dispose();
+    staged.close();
 
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);

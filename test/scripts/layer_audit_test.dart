@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -8,12 +7,12 @@ import '../../scripts/audit/layer.dart' as layer;
 void main() {
   ProcessResult result({
     int exitCode = 0,
-    String stdout = '{"version":1,"diagnostics":[]}',
+    String stdout = 'Analyzing...\nNo issues found! 🎉',
     String stderr = '',
   }) => ProcessResult(1, exitCode, stdout, stderr);
 
   group('layer audit', () {
-    test('uses custom_lint 0.8.1 JSON arguments for a clean result', () async {
+    test('uses import_lint CLI for a clean result', () async {
       final invocations = <List<String>>[];
       final run = await layer.runLayerAudit(
         commandRunner: (_, arguments) async {
@@ -26,32 +25,19 @@ void main() {
       expect(run.envelope['scan_state'], 'ran');
       expect(run.envelope['findings'], isEmpty);
       expect(invocations, [
-        ['run', 'custom_lint', '--format=json', '--no-fatal-infos'],
+        ['run', 'import_lint'],
       ]);
     });
 
-    test('parses a valid import_guard JSON diagnostic', () async {
+    test('parses a valid import_lint diagnostic', () async {
       final run = await layer.runLayerAudit(
         commandRunner: (_, _) async => result(
-          stdout: jsonEncode({
-            'version': 1,
-            'diagnostics': [
-              {
-                'code': 'import_guard.domain',
-                'severity': 'WARNING',
-                'type': 'LINT',
-                'location': {
-                  'file': '/repo/lib/features/example/domain/value.dart',
-                  'range': {
-                    'start': {'offset': 1, 'line': 3, 'column': 1},
-                    'end': {'offset': 2, 'line': 3, 'column': 2},
-                  },
-                },
-                'problemMessage': 'Domain imports data.',
-                'correctionMessage': 'Remove the data import.',
-              },
-            ],
-          }),
+          exitCode: 1,
+          stdout:
+              'Analyzing...\n'
+              ' error • /repo/lib/features/example/domain/value.dart:4:2 '
+              '• package:home_pocket/data/app_database.dart • domain_to_data\n'
+              '1 issue found.',
         ),
       );
 
@@ -60,29 +46,15 @@ void main() {
     });
 
     test(
-      'fails closed for mixed valid and malformed JSON diagnostics',
+      'fails closed when the issue summary exceeds parsed diagnostics',
       () async {
         final run = await layer.runLayerAudit(
           commandRunner: (_, _) async => result(
-            stdout: jsonEncode({
-              'version': 1,
-              'diagnostics': [
-                {
-                  'code': 'import_guard.domain',
-                  'severity': 'WARNING',
-                  'type': 'LINT',
-                  'location': {
-                    'file': 'lib/valid.dart',
-                    'range': {
-                      'start': {'offset': 1, 'line': 0, 'column': 1},
-                      'end': {'offset': 2, 'line': 0, 'column': 2},
-                    },
-                  },
-                  'problemMessage': 'Valid.',
-                },
-                'not a diagnostic',
-              ],
-            }),
+            exitCode: 1,
+            stdout:
+                'Analyzing...\n'
+                ' error • lib/valid.dart:1:1 • package:x/y.dart • rule\n'
+                '2 issues found.',
           ),
         );
 
@@ -93,36 +65,32 @@ void main() {
       },
     );
 
-    test(
-      'fails closed instead of falling back after the old flag signature',
-      () async {
-        final invocations = <List<String>>[];
-        final run = await layer.runLayerAudit(
-          commandRunner: (_, arguments) async {
-            invocations.add(arguments);
-            // `custom_lint --reporter=json` on 0.8.1 exits successfully without
-            // output. Treat the matching absence as a scanner failure, never as
-            // a reason to run the text command and hide the contract problem.
-            return result(stdout: '');
-          },
-        );
+    test('fails closed when import_lint emits no output', () async {
+      final invocations = <List<String>>[];
+      final run = await layer.runLayerAudit(
+        commandRunner: (_, arguments) async {
+          invocations.add(arguments);
+          return result(stdout: '');
+        },
+      );
 
-        expect(run.exitCode, 1);
-        expect(run.envelope['scan_state'], 'not_run');
-        expect(run.envelope['scan_failed'], isTrue);
-        expect(run.envelope['findings'], isEmpty);
-        expect(invocations, [
-          ['run', 'custom_lint', '--format=json', '--no-fatal-infos'],
-        ]);
-      },
-    );
+      expect(run.exitCode, 1);
+      expect(run.envelope['scan_state'], 'not_run');
+      expect(run.envelope['scan_failed'], isTrue);
+      expect(run.envelope['findings'], isEmpty);
+      expect(invocations, [
+        ['run', 'import_lint'],
+      ]);
+    });
 
     test(
-      'fails closed for truncated JSON without leaking scanner output',
+      'fails closed for malformed output without leaking scanner output',
       () async {
         final run = await layer.runLayerAudit(
-          commandRunner: (_, _) async =>
-              result(stdout: '{"version":1,"diagnostics":["SECRET_TOKEN'),
+          commandRunner: (_, _) async => result(
+            exitCode: 1,
+            stdout: 'Analyzing...\nSECRET_TOKEN\n1 issue found.',
+          ),
         );
 
         expect(run.exitCode, 1);

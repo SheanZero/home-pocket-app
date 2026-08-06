@@ -43,7 +43,7 @@ void main() {
       _createV20ShoppingItemsTable(rawDb);
     });
 
-    tearDown(() => rawDb.dispose());
+    tearDown(() => rawDb.close());
 
     test('shopping_items table has correct column names', () {
       final cols = rawDb

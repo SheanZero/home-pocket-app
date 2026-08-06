@@ -20,37 +20,26 @@ mixin _$Transaction {
   TransactionType get type;
   String get categoryId;
   LedgerType get ledgerType;
-  DateTime get timestamp; // Optional fields
+  DateTime get timestamp;
   String? get note;
   String? get photoHash;
   String? get merchant;
-  Map<String, dynamic>?
-  get metadata; // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
-  String? get originalCurrency; // ISO 4217 code, e.g. 'USD'; null = native JPY
-  int?
-  get originalAmount; // minor units (cents for USD: $12.50 → 1250); null = native JPY
-  String?
-  get appliedRate; // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
-  // Hash chain
+  Map<String, dynamic>? get metadata;
+  String? get originalCurrency;
+  int? get originalAmount;
+  String? get appliedRate;
   String? get prevHash;
-  String get currentHash; // Timestamps
+  String get currentHash;
   DateTime get createdAt;
-  DateTime? get updatedAt; // Flags
+  DateTime? get updatedAt;
   bool get isPrivate;
   bool get isSynced;
-  bool
-  get isDeleted; // Deterministic family-sync version. Local mutations advance this Lamport
-  // value monotonically; remote peers compare it before applying state.
+  bool get isDeleted;
   int get syncRevision;
-  String
-  get syncOriginDeviceId; // Local privacy ledger. These fields are persisted in the encrypted app
-  // database, but are never serialized into the family wire payload.
+  String get syncOriginDeviceId;
   FamilySyncVisibility get familySyncVisibility;
-  int get familySharedRevision; // Joy ledger fullness score (1-10, default 2)
-  int
-  get joyFullness; // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
-  // sync payloads / DB rows where the column DEFAULT triggered.
-  // CreateTransactionParams enforces required-no-default (D-06, Plan 04).
+  int get familySharedRevision;
+  int get joyFullness;
   EntrySource get entrySource;
 
   /// Create a copy of Transaction
@@ -745,7 +734,6 @@ class _Transaction implements Transaction {
   final LedgerType ledgerType;
   @override
   final DateTime timestamp;
-  // Optional fields
   @override
   final String? note;
   @override
@@ -762,27 +750,20 @@ class _Transaction implements Transaction {
     return EqualUnmodifiableMapView(value);
   }
 
-  // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
   @override
   final String? originalCurrency;
-  // ISO 4217 code, e.g. 'USD'; null = native JPY
   @override
   final int? originalAmount;
-  // minor units (cents for USD: $12.50 → 1250); null = native JPY
   @override
   final String? appliedRate;
-  // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
-  // Hash chain
   @override
   final String? prevHash;
   @override
   final String currentHash;
-  // Timestamps
   @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
-  // Flags
   @override
   @JsonKey()
   final bool isPrivate;
@@ -792,29 +773,21 @@ class _Transaction implements Transaction {
   @override
   @JsonKey()
   final bool isDeleted;
-  // Deterministic family-sync version. Local mutations advance this Lamport
-  // value monotonically; remote peers compare it before applying state.
   @override
   @JsonKey()
   final int syncRevision;
   @override
   @JsonKey()
   final String syncOriginDeviceId;
-  // Local privacy ledger. These fields are persisted in the encrypted app
-  // database, but are never serialized into the family wire payload.
   @override
   @JsonKey()
   final FamilySyncVisibility familySyncVisibility;
   @override
   @JsonKey()
   final int familySharedRevision;
-  // Joy ledger fullness score (1-10, default 2)
   @override
   @JsonKey()
   final int joyFullness;
-  // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
-  // sync payloads / DB rows where the column DEFAULT triggered.
-  // CreateTransactionParams enforces required-no-default (D-06, Plan 04).
   @override
   @JsonKey()
   final EntrySource entrySource;

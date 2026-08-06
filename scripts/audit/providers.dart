@@ -1,8 +1,7 @@
 // Emits provider-hygiene findings from the repository-owned Riverpod contract.
 //
-// riverpod_lint 3.1.0 stays locked as a hold for the analyzer-8 graph, but is
-// intentionally not invoked here: an unloaded analysis-server plugin cannot
-// justify a clean audit shard.
+// riverpod_lint 3.1.4 is active on analyzer 12; this scanner supplies the
+// repository-owned app-root contract as defense in depth.
 import 'dart:convert';
 import 'dart:io';
 
@@ -38,9 +37,9 @@ Finding _toFinding(ProviderContractViolation violation) => Finding(
 String _suggestedFix(String code) => switch (code) {
   'missing_provider_scope' =>
     'Wrap the app root in ProviderScope or UncontrolledProviderScope.',
-  'riverpod_lint_active' =>
-    'Remove the active riverpod_lint plugin configuration until its bad/control probe passes on the selected graph.',
-  _ => 'Restore the documented riverpod_lint hold and lockfile contract.',
+  'riverpod_lint_plugin_missing' =>
+    'Restore the active riverpod_lint 3.1.4 analysis-server plugin.',
+  _ => 'Restore the documented active riverpod_lint lockfile contract.',
 };
 
 Future<void> main(List<String> args) async {

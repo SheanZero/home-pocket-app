@@ -55,7 +55,7 @@ void main() {
       ) VALUES ('group-a', 'device-a', 'Alice', '🌱', 'legacy-hash')
     ''');
     staged.execute('PRAGMA user_version = 32');
-    staged.dispose();
+    staged.close();
 
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);

@@ -7342,379 +7342,6 @@ class MerchantCategoryPreferencesCompanion
   }
 }
 
-class $MerchantMatchKeysTable extends MerchantMatchKeys
-    with TableInfo<$MerchantMatchKeysTable, MerchantMatchKeyRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $MerchantMatchKeysTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _merchantIdMeta = const VerificationMeta(
-    'merchantId',
-  );
-  @override
-  late final GeneratedColumn<String> merchantId = GeneratedColumn<String>(
-    'merchant_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL REFERENCES merchants(id)',
-  );
-  static const VerificationMeta _surfaceMeta = const VerificationMeta(
-    'surface',
-  );
-  @override
-  late final GeneratedColumn<String> surface = GeneratedColumn<String>(
-    'surface',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _matchKeyMeta = const VerificationMeta(
-    'matchKey',
-  );
-  @override
-  late final GeneratedColumn<String> matchKey = GeneratedColumn<String>(
-    'match_key',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
-  @override
-  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
-    'kind',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    merchantId,
-    surface,
-    matchKey,
-    kind,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'merchant_match_keys';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<MerchantMatchKeyRow> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('merchant_id')) {
-      context.handle(
-        _merchantIdMeta,
-        merchantId.isAcceptableOrUnknown(data['merchant_id']!, _merchantIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_merchantIdMeta);
-    }
-    if (data.containsKey('surface')) {
-      context.handle(
-        _surfaceMeta,
-        surface.isAcceptableOrUnknown(data['surface']!, _surfaceMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_surfaceMeta);
-    }
-    if (data.containsKey('match_key')) {
-      context.handle(
-        _matchKeyMeta,
-        matchKey.isAcceptableOrUnknown(data['match_key']!, _matchKeyMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_matchKeyMeta);
-    }
-    if (data.containsKey('kind')) {
-      context.handle(
-        _kindMeta,
-        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_kindMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  MerchantMatchKeyRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MerchantMatchKeyRow(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      merchantId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}merchant_id'],
-      )!,
-      surface: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}surface'],
-      )!,
-      matchKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}match_key'],
-      )!,
-      kind: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}kind'],
-      )!,
-    );
-  }
-
-  @override
-  $MerchantMatchKeysTable createAlias(String alias) {
-    return $MerchantMatchKeysTable(attachedDatabase, alias);
-  }
-}
-
-class MerchantMatchKeyRow extends DataClass
-    implements Insertable<MerchantMatchKeyRow> {
-  /// Stable string PK — so a re-seed INSERT OR IGNORE is idempotent.
-  final String id;
-
-  /// FK → merchants.id (raw-SQL reference; no Drift relation generated).
-  final String merchantId;
-
-  /// Original surface form (display/diagnostic; the form before normalization).
-  final String surface;
-
-  /// Seed-normalized lookup key — INDEXED, NON-UNIQUE. Recognizers query on this.
-  final String matchKey;
-
-  /// One of 'name' | 'alias' | 'locale' — the provenance of this surface form.
-  final String kind;
-  const MerchantMatchKeyRow({
-    required this.id,
-    required this.merchantId,
-    required this.surface,
-    required this.matchKey,
-    required this.kind,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['merchant_id'] = Variable<String>(merchantId);
-    map['surface'] = Variable<String>(surface);
-    map['match_key'] = Variable<String>(matchKey);
-    map['kind'] = Variable<String>(kind);
-    return map;
-  }
-
-  MerchantMatchKeysCompanion toCompanion(bool nullToAbsent) {
-    return MerchantMatchKeysCompanion(
-      id: Value(id),
-      merchantId: Value(merchantId),
-      surface: Value(surface),
-      matchKey: Value(matchKey),
-      kind: Value(kind),
-    );
-  }
-
-  factory MerchantMatchKeyRow.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MerchantMatchKeyRow(
-      id: serializer.fromJson<String>(json['id']),
-      merchantId: serializer.fromJson<String>(json['merchantId']),
-      surface: serializer.fromJson<String>(json['surface']),
-      matchKey: serializer.fromJson<String>(json['matchKey']),
-      kind: serializer.fromJson<String>(json['kind']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'merchantId': serializer.toJson<String>(merchantId),
-      'surface': serializer.toJson<String>(surface),
-      'matchKey': serializer.toJson<String>(matchKey),
-      'kind': serializer.toJson<String>(kind),
-    };
-  }
-
-  MerchantMatchKeyRow copyWith({
-    String? id,
-    String? merchantId,
-    String? surface,
-    String? matchKey,
-    String? kind,
-  }) => MerchantMatchKeyRow(
-    id: id ?? this.id,
-    merchantId: merchantId ?? this.merchantId,
-    surface: surface ?? this.surface,
-    matchKey: matchKey ?? this.matchKey,
-    kind: kind ?? this.kind,
-  );
-  MerchantMatchKeyRow copyWithCompanion(MerchantMatchKeysCompanion data) {
-    return MerchantMatchKeyRow(
-      id: data.id.present ? data.id.value : this.id,
-      merchantId: data.merchantId.present
-          ? data.merchantId.value
-          : this.merchantId,
-      surface: data.surface.present ? data.surface.value : this.surface,
-      matchKey: data.matchKey.present ? data.matchKey.value : this.matchKey,
-      kind: data.kind.present ? data.kind.value : this.kind,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('MerchantMatchKeyRow(')
-          ..write('id: $id, ')
-          ..write('merchantId: $merchantId, ')
-          ..write('surface: $surface, ')
-          ..write('matchKey: $matchKey, ')
-          ..write('kind: $kind')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, merchantId, surface, matchKey, kind);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MerchantMatchKeyRow &&
-          other.id == this.id &&
-          other.merchantId == this.merchantId &&
-          other.surface == this.surface &&
-          other.matchKey == this.matchKey &&
-          other.kind == this.kind);
-}
-
-class MerchantMatchKeysCompanion extends UpdateCompanion<MerchantMatchKeyRow> {
-  final Value<String> id;
-  final Value<String> merchantId;
-  final Value<String> surface;
-  final Value<String> matchKey;
-  final Value<String> kind;
-  final Value<int> rowid;
-  const MerchantMatchKeysCompanion({
-    this.id = const Value.absent(),
-    this.merchantId = const Value.absent(),
-    this.surface = const Value.absent(),
-    this.matchKey = const Value.absent(),
-    this.kind = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  MerchantMatchKeysCompanion.insert({
-    required String id,
-    required String merchantId,
-    required String surface,
-    required String matchKey,
-    required String kind,
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       merchantId = Value(merchantId),
-       surface = Value(surface),
-       matchKey = Value(matchKey),
-       kind = Value(kind);
-  static Insertable<MerchantMatchKeyRow> custom({
-    Expression<String>? id,
-    Expression<String>? merchantId,
-    Expression<String>? surface,
-    Expression<String>? matchKey,
-    Expression<String>? kind,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (merchantId != null) 'merchant_id': merchantId,
-      if (surface != null) 'surface': surface,
-      if (matchKey != null) 'match_key': matchKey,
-      if (kind != null) 'kind': kind,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  MerchantMatchKeysCompanion copyWith({
-    Value<String>? id,
-    Value<String>? merchantId,
-    Value<String>? surface,
-    Value<String>? matchKey,
-    Value<String>? kind,
-    Value<int>? rowid,
-  }) {
-    return MerchantMatchKeysCompanion(
-      id: id ?? this.id,
-      merchantId: merchantId ?? this.merchantId,
-      surface: surface ?? this.surface,
-      matchKey: matchKey ?? this.matchKey,
-      kind: kind ?? this.kind,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (merchantId.present) {
-      map['merchant_id'] = Variable<String>(merchantId.value);
-    }
-    if (surface.present) {
-      map['surface'] = Variable<String>(surface.value);
-    }
-    if (matchKey.present) {
-      map['match_key'] = Variable<String>(matchKey.value);
-    }
-    if (kind.present) {
-      map['kind'] = Variable<String>(kind.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('MerchantMatchKeysCompanion(')
-          ..write('id: $id, ')
-          ..write('merchantId: $merchantId, ')
-          ..write('surface: $surface, ')
-          ..write('matchKey: $matchKey, ')
-          ..write('kind: $kind, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $MerchantsTable extends Merchants
     with TableInfo<$MerchantsTable, MerchantRow> {
   @override
@@ -8180,6 +7807,381 @@ class MerchantsCompanion extends UpdateCompanion<MerchantRow> {
           ..write('region: $region, ')
           ..write('categoryId: $categoryId, ')
           ..write('ledgerHint: $ledgerHint, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MerchantMatchKeysTable extends MerchantMatchKeys
+    with TableInfo<$MerchantMatchKeysTable, MerchantMatchKeyRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MerchantMatchKeysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _merchantIdMeta = const VerificationMeta(
+    'merchantId',
+  );
+  @override
+  late final GeneratedColumn<String> merchantId = GeneratedColumn<String>(
+    'merchant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES merchants (id)',
+    ),
+  );
+  static const VerificationMeta _surfaceMeta = const VerificationMeta(
+    'surface',
+  );
+  @override
+  late final GeneratedColumn<String> surface = GeneratedColumn<String>(
+    'surface',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _matchKeyMeta = const VerificationMeta(
+    'matchKey',
+  );
+  @override
+  late final GeneratedColumn<String> matchKey = GeneratedColumn<String>(
+    'match_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    merchantId,
+    surface,
+    matchKey,
+    kind,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'merchant_match_keys';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MerchantMatchKeyRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('merchant_id')) {
+      context.handle(
+        _merchantIdMeta,
+        merchantId.isAcceptableOrUnknown(data['merchant_id']!, _merchantIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_merchantIdMeta);
+    }
+    if (data.containsKey('surface')) {
+      context.handle(
+        _surfaceMeta,
+        surface.isAcceptableOrUnknown(data['surface']!, _surfaceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_surfaceMeta);
+    }
+    if (data.containsKey('match_key')) {
+      context.handle(
+        _matchKeyMeta,
+        matchKey.isAcceptableOrUnknown(data['match_key']!, _matchKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_matchKeyMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MerchantMatchKeyRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MerchantMatchKeyRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      merchantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}merchant_id'],
+      )!,
+      surface: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}surface'],
+      )!,
+      matchKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}match_key'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+    );
+  }
+
+  @override
+  $MerchantMatchKeysTable createAlias(String alias) {
+    return $MerchantMatchKeysTable(attachedDatabase, alias);
+  }
+}
+
+class MerchantMatchKeyRow extends DataClass
+    implements Insertable<MerchantMatchKeyRow> {
+  /// Stable string PK — so a re-seed INSERT OR IGNORE is idempotent.
+  final String id;
+
+  /// FK → merchants.id.
+  final String merchantId;
+
+  /// Original surface form (display/diagnostic; the form before normalization).
+  final String surface;
+
+  /// Seed-normalized lookup key — INDEXED, NON-UNIQUE. Recognizers query on this.
+  final String matchKey;
+
+  /// One of 'name' | 'alias' | 'locale' — the provenance of this surface form.
+  final String kind;
+  const MerchantMatchKeyRow({
+    required this.id,
+    required this.merchantId,
+    required this.surface,
+    required this.matchKey,
+    required this.kind,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['merchant_id'] = Variable<String>(merchantId);
+    map['surface'] = Variable<String>(surface);
+    map['match_key'] = Variable<String>(matchKey);
+    map['kind'] = Variable<String>(kind);
+    return map;
+  }
+
+  MerchantMatchKeysCompanion toCompanion(bool nullToAbsent) {
+    return MerchantMatchKeysCompanion(
+      id: Value(id),
+      merchantId: Value(merchantId),
+      surface: Value(surface),
+      matchKey: Value(matchKey),
+      kind: Value(kind),
+    );
+  }
+
+  factory MerchantMatchKeyRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MerchantMatchKeyRow(
+      id: serializer.fromJson<String>(json['id']),
+      merchantId: serializer.fromJson<String>(json['merchantId']),
+      surface: serializer.fromJson<String>(json['surface']),
+      matchKey: serializer.fromJson<String>(json['matchKey']),
+      kind: serializer.fromJson<String>(json['kind']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'merchantId': serializer.toJson<String>(merchantId),
+      'surface': serializer.toJson<String>(surface),
+      'matchKey': serializer.toJson<String>(matchKey),
+      'kind': serializer.toJson<String>(kind),
+    };
+  }
+
+  MerchantMatchKeyRow copyWith({
+    String? id,
+    String? merchantId,
+    String? surface,
+    String? matchKey,
+    String? kind,
+  }) => MerchantMatchKeyRow(
+    id: id ?? this.id,
+    merchantId: merchantId ?? this.merchantId,
+    surface: surface ?? this.surface,
+    matchKey: matchKey ?? this.matchKey,
+    kind: kind ?? this.kind,
+  );
+  MerchantMatchKeyRow copyWithCompanion(MerchantMatchKeysCompanion data) {
+    return MerchantMatchKeyRow(
+      id: data.id.present ? data.id.value : this.id,
+      merchantId: data.merchantId.present
+          ? data.merchantId.value
+          : this.merchantId,
+      surface: data.surface.present ? data.surface.value : this.surface,
+      matchKey: data.matchKey.present ? data.matchKey.value : this.matchKey,
+      kind: data.kind.present ? data.kind.value : this.kind,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MerchantMatchKeyRow(')
+          ..write('id: $id, ')
+          ..write('merchantId: $merchantId, ')
+          ..write('surface: $surface, ')
+          ..write('matchKey: $matchKey, ')
+          ..write('kind: $kind')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, merchantId, surface, matchKey, kind);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MerchantMatchKeyRow &&
+          other.id == this.id &&
+          other.merchantId == this.merchantId &&
+          other.surface == this.surface &&
+          other.matchKey == this.matchKey &&
+          other.kind == this.kind);
+}
+
+class MerchantMatchKeysCompanion extends UpdateCompanion<MerchantMatchKeyRow> {
+  final Value<String> id;
+  final Value<String> merchantId;
+  final Value<String> surface;
+  final Value<String> matchKey;
+  final Value<String> kind;
+  final Value<int> rowid;
+  const MerchantMatchKeysCompanion({
+    this.id = const Value.absent(),
+    this.merchantId = const Value.absent(),
+    this.surface = const Value.absent(),
+    this.matchKey = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MerchantMatchKeysCompanion.insert({
+    required String id,
+    required String merchantId,
+    required String surface,
+    required String matchKey,
+    required String kind,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       merchantId = Value(merchantId),
+       surface = Value(surface),
+       matchKey = Value(matchKey),
+       kind = Value(kind);
+  static Insertable<MerchantMatchKeyRow> custom({
+    Expression<String>? id,
+    Expression<String>? merchantId,
+    Expression<String>? surface,
+    Expression<String>? matchKey,
+    Expression<String>? kind,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (merchantId != null) 'merchant_id': merchantId,
+      if (surface != null) 'surface': surface,
+      if (matchKey != null) 'match_key': matchKey,
+      if (kind != null) 'kind': kind,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MerchantMatchKeysCompanion copyWith({
+    Value<String>? id,
+    Value<String>? merchantId,
+    Value<String>? surface,
+    Value<String>? matchKey,
+    Value<String>? kind,
+    Value<int>? rowid,
+  }) {
+    return MerchantMatchKeysCompanion(
+      id: id ?? this.id,
+      merchantId: merchantId ?? this.merchantId,
+      surface: surface ?? this.surface,
+      matchKey: matchKey ?? this.matchKey,
+      kind: kind ?? this.kind,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (merchantId.present) {
+      map['merchant_id'] = Variable<String>(merchantId.value);
+    }
+    if (surface.present) {
+      map['surface'] = Variable<String>(surface.value);
+    }
+    if (matchKey.present) {
+      map['match_key'] = Variable<String>(matchKey.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MerchantMatchKeysCompanion(')
+          ..write('id: $id, ')
+          ..write('merchantId: $merchantId, ')
+          ..write('surface: $surface, ')
+          ..write('matchKey: $matchKey, ')
+          ..write('kind: $kind, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -12659,9 +12661,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $InboundSyncOperationsTable(this);
   late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
       $MerchantCategoryPreferencesTable(this);
+  late final $MerchantsTable merchants = $MerchantsTable(this);
   late final $MerchantMatchKeysTable merchantMatchKeys =
       $MerchantMatchKeysTable(this);
-  late final $MerchantsTable merchants = $MerchantsTable(this);
   late final $ShoppingItemsTable shoppingItems = $ShoppingItemsTable(this);
   late final $ShoppingUnitUsagesTable shoppingUnitUsages =
       $ShoppingUnitUsagesTable(this);
@@ -12685,8 +12687,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     groups,
     inboundSyncOperations,
     merchantCategoryPreferences,
-    merchantMatchKeys,
     merchants,
+    merchantMatchKeys,
     shoppingItems,
     shoppingUnitUsages,
     syncQueue,
@@ -13347,9 +13349,7 @@ final class $$CategoriesTableReferences
   $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $CategoriesTable _parentIdTable(_$AppDatabase db) =>
-      db.categories.createAlias(
-        $_aliasNameGenerator(db.categories.parentId, db.categories.id),
-      );
+      db.categories.createAlias('categories__parent_id__categories__id');
 
   $$CategoriesTableProcessedTableManager? get parentId {
     final $_column = $_itemColumn<String>('parent_id');
@@ -13372,10 +13372,7 @@ final class $$CategoriesTableReferences
   _categoryLedgerConfigsRefsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.categoryLedgerConfigs,
-        aliasName: $_aliasNameGenerator(
-          db.categories.id,
-          db.categoryLedgerConfigs.categoryId,
-        ),
+        aliasName: 'categories__id__category_ledger_configs__category_id',
       );
 
   $$CategoryLedgerConfigsTableProcessedTableManager
@@ -14142,13 +14139,8 @@ final class $$CategoryLedgerConfigsTableReferences
     super.$_typedResult,
   );
 
-  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias(
-        $_aliasNameGenerator(
-          db.categoryLedgerConfigs.categoryId,
-          db.categories.id,
-        ),
-      );
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) => db.categories
+      .createAlias('category_ledger_configs__category_id__categories__id');
 
   $$CategoriesTableProcessedTableManager get categoryId {
     final $_column = $_itemColumn<String>('category_id')!;
@@ -16628,221 +16620,6 @@ typedef $$MerchantCategoryPreferencesTableProcessedTableManager =
       MerchantCategoryPreferenceRow,
       PrefetchHooks Function()
     >;
-typedef $$MerchantMatchKeysTableCreateCompanionBuilder =
-    MerchantMatchKeysCompanion Function({
-      required String id,
-      required String merchantId,
-      required String surface,
-      required String matchKey,
-      required String kind,
-      Value<int> rowid,
-    });
-typedef $$MerchantMatchKeysTableUpdateCompanionBuilder =
-    MerchantMatchKeysCompanion Function({
-      Value<String> id,
-      Value<String> merchantId,
-      Value<String> surface,
-      Value<String> matchKey,
-      Value<String> kind,
-      Value<int> rowid,
-    });
-
-class $$MerchantMatchKeysTableFilterComposer
-    extends Composer<_$AppDatabase, $MerchantMatchKeysTable> {
-  $$MerchantMatchKeysTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get merchantId => $composableBuilder(
-    column: $table.merchantId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get surface => $composableBuilder(
-    column: $table.surface,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get matchKey => $composableBuilder(
-    column: $table.matchKey,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get kind => $composableBuilder(
-    column: $table.kind,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$MerchantMatchKeysTableOrderingComposer
-    extends Composer<_$AppDatabase, $MerchantMatchKeysTable> {
-  $$MerchantMatchKeysTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get merchantId => $composableBuilder(
-    column: $table.merchantId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get surface => $composableBuilder(
-    column: $table.surface,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get matchKey => $composableBuilder(
-    column: $table.matchKey,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get kind => $composableBuilder(
-    column: $table.kind,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$MerchantMatchKeysTableAnnotationComposer
-    extends Composer<_$AppDatabase, $MerchantMatchKeysTable> {
-  $$MerchantMatchKeysTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get merchantId => $composableBuilder(
-    column: $table.merchantId,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get surface =>
-      $composableBuilder(column: $table.surface, builder: (column) => column);
-
-  GeneratedColumn<String> get matchKey =>
-      $composableBuilder(column: $table.matchKey, builder: (column) => column);
-
-  GeneratedColumn<String> get kind =>
-      $composableBuilder(column: $table.kind, builder: (column) => column);
-}
-
-class $$MerchantMatchKeysTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $MerchantMatchKeysTable,
-          MerchantMatchKeyRow,
-          $$MerchantMatchKeysTableFilterComposer,
-          $$MerchantMatchKeysTableOrderingComposer,
-          $$MerchantMatchKeysTableAnnotationComposer,
-          $$MerchantMatchKeysTableCreateCompanionBuilder,
-          $$MerchantMatchKeysTableUpdateCompanionBuilder,
-          (
-            MerchantMatchKeyRow,
-            BaseReferences<
-              _$AppDatabase,
-              $MerchantMatchKeysTable,
-              MerchantMatchKeyRow
-            >,
-          ),
-          MerchantMatchKeyRow,
-          PrefetchHooks Function()
-        > {
-  $$MerchantMatchKeysTableTableManager(
-    _$AppDatabase db,
-    $MerchantMatchKeysTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$MerchantMatchKeysTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$MerchantMatchKeysTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$MerchantMatchKeysTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> merchantId = const Value.absent(),
-                Value<String> surface = const Value.absent(),
-                Value<String> matchKey = const Value.absent(),
-                Value<String> kind = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => MerchantMatchKeysCompanion(
-                id: id,
-                merchantId: merchantId,
-                surface: surface,
-                matchKey: matchKey,
-                kind: kind,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String merchantId,
-                required String surface,
-                required String matchKey,
-                required String kind,
-                Value<int> rowid = const Value.absent(),
-              }) => MerchantMatchKeysCompanion.insert(
-                id: id,
-                merchantId: merchantId,
-                surface: surface,
-                matchKey: matchKey,
-                kind: kind,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$MerchantMatchKeysTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $MerchantMatchKeysTable,
-      MerchantMatchKeyRow,
-      $$MerchantMatchKeysTableFilterComposer,
-      $$MerchantMatchKeysTableOrderingComposer,
-      $$MerchantMatchKeysTableAnnotationComposer,
-      $$MerchantMatchKeysTableCreateCompanionBuilder,
-      $$MerchantMatchKeysTableUpdateCompanionBuilder,
-      (
-        MerchantMatchKeyRow,
-        BaseReferences<
-          _$AppDatabase,
-          $MerchantMatchKeysTable,
-          MerchantMatchKeyRow
-        >,
-      ),
-      MerchantMatchKeyRow,
-      PrefetchHooks Function()
-    >;
 typedef $$MerchantsTableCreateCompanionBuilder =
     MerchantsCompanion Function({
       required String id,
@@ -16865,6 +16642,32 @@ typedef $$MerchantsTableUpdateCompanionBuilder =
       Value<String> ledgerHint,
       Value<int> rowid,
     });
+
+final class $$MerchantsTableReferences
+    extends BaseReferences<_$AppDatabase, $MerchantsTable, MerchantRow> {
+  $$MerchantsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$MerchantMatchKeysTable, List<MerchantMatchKeyRow>>
+  _merchantMatchKeysRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.merchantMatchKeys,
+        aliasName: 'merchants__id__merchant_match_keys__merchant_id',
+      );
+
+  $$MerchantMatchKeysTableProcessedTableManager get merchantMatchKeysRefs {
+    final manager = $$MerchantMatchKeysTableTableManager(
+      $_db,
+      $_db.merchantMatchKeys,
+    ).filter((f) => f.merchantId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _merchantMatchKeysRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$MerchantsTableFilterComposer
     extends Composer<_$AppDatabase, $MerchantsTable> {
@@ -16909,6 +16712,31 @@ class $$MerchantsTableFilterComposer
     column: $table.ledgerHint,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> merchantMatchKeysRefs(
+    Expression<bool> Function($$MerchantMatchKeysTableFilterComposer f) f,
+  ) {
+    final $$MerchantMatchKeysTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.merchantMatchKeys,
+      getReferencedColumn: (t) => t.merchantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MerchantMatchKeysTableFilterComposer(
+            $db: $db,
+            $table: $db.merchantMatchKeys,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MerchantsTableOrderingComposer
@@ -16989,6 +16817,32 @@ class $$MerchantsTableAnnotationComposer
     column: $table.ledgerHint,
     builder: (column) => column,
   );
+
+  Expression<T> merchantMatchKeysRefs<T extends Object>(
+    Expression<T> Function($$MerchantMatchKeysTableAnnotationComposer a) f,
+  ) {
+    final $$MerchantMatchKeysTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.merchantMatchKeys,
+          getReferencedColumn: (t) => t.merchantId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$MerchantMatchKeysTableAnnotationComposer(
+                $db: $db,
+                $table: $db.merchantMatchKeys,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$MerchantsTableTableManager
@@ -17002,12 +16856,9 @@ class $$MerchantsTableTableManager
           $$MerchantsTableAnnotationComposer,
           $$MerchantsTableCreateCompanionBuilder,
           $$MerchantsTableUpdateCompanionBuilder,
-          (
-            MerchantRow,
-            BaseReferences<_$AppDatabase, $MerchantsTable, MerchantRow>,
-          ),
+          (MerchantRow, $$MerchantsTableReferences),
           MerchantRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool merchantMatchKeysRefs})
         > {
   $$MerchantsTableTableManager(_$AppDatabase db, $MerchantsTable table)
     : super(
@@ -17061,9 +16912,45 @@ class $$MerchantsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$MerchantsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({merchantMatchKeysRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (merchantMatchKeysRefs) db.merchantMatchKeys,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (merchantMatchKeysRefs)
+                    await $_getPrefetchedData<
+                      MerchantRow,
+                      $MerchantsTable,
+                      MerchantMatchKeyRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$MerchantsTableReferences
+                          ._merchantMatchKeysRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$MerchantsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).merchantMatchKeysRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.merchantId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -17078,12 +16965,342 @@ typedef $$MerchantsTableProcessedTableManager =
       $$MerchantsTableAnnotationComposer,
       $$MerchantsTableCreateCompanionBuilder,
       $$MerchantsTableUpdateCompanionBuilder,
-      (
-        MerchantRow,
-        BaseReferences<_$AppDatabase, $MerchantsTable, MerchantRow>,
-      ),
+      (MerchantRow, $$MerchantsTableReferences),
       MerchantRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool merchantMatchKeysRefs})
+    >;
+typedef $$MerchantMatchKeysTableCreateCompanionBuilder =
+    MerchantMatchKeysCompanion Function({
+      required String id,
+      required String merchantId,
+      required String surface,
+      required String matchKey,
+      required String kind,
+      Value<int> rowid,
+    });
+typedef $$MerchantMatchKeysTableUpdateCompanionBuilder =
+    MerchantMatchKeysCompanion Function({
+      Value<String> id,
+      Value<String> merchantId,
+      Value<String> surface,
+      Value<String> matchKey,
+      Value<String> kind,
+      Value<int> rowid,
+    });
+
+final class $$MerchantMatchKeysTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $MerchantMatchKeysTable,
+          MerchantMatchKeyRow
+        > {
+  $$MerchantMatchKeysTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $MerchantsTable _merchantIdTable(_$AppDatabase db) => db.merchants
+      .createAlias('merchant_match_keys__merchant_id__merchants__id');
+
+  $$MerchantsTableProcessedTableManager get merchantId {
+    final $_column = $_itemColumn<String>('merchant_id')!;
+
+    final manager = $$MerchantsTableTableManager(
+      $_db,
+      $_db.merchants,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_merchantIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MerchantMatchKeysTableFilterComposer
+    extends Composer<_$AppDatabase, $MerchantMatchKeysTable> {
+  $$MerchantMatchKeysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get surface => $composableBuilder(
+    column: $table.surface,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get matchKey => $composableBuilder(
+    column: $table.matchKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$MerchantsTableFilterComposer get merchantId {
+    final $$MerchantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.merchantId,
+      referencedTable: $db.merchants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MerchantsTableFilterComposer(
+            $db: $db,
+            $table: $db.merchants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MerchantMatchKeysTableOrderingComposer
+    extends Composer<_$AppDatabase, $MerchantMatchKeysTable> {
+  $$MerchantMatchKeysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get surface => $composableBuilder(
+    column: $table.surface,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get matchKey => $composableBuilder(
+    column: $table.matchKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$MerchantsTableOrderingComposer get merchantId {
+    final $$MerchantsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.merchantId,
+      referencedTable: $db.merchants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MerchantsTableOrderingComposer(
+            $db: $db,
+            $table: $db.merchants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MerchantMatchKeysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MerchantMatchKeysTable> {
+  $$MerchantMatchKeysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get surface =>
+      $composableBuilder(column: $table.surface, builder: (column) => column);
+
+  GeneratedColumn<String> get matchKey =>
+      $composableBuilder(column: $table.matchKey, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  $$MerchantsTableAnnotationComposer get merchantId {
+    final $$MerchantsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.merchantId,
+      referencedTable: $db.merchants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MerchantsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.merchants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MerchantMatchKeysTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MerchantMatchKeysTable,
+          MerchantMatchKeyRow,
+          $$MerchantMatchKeysTableFilterComposer,
+          $$MerchantMatchKeysTableOrderingComposer,
+          $$MerchantMatchKeysTableAnnotationComposer,
+          $$MerchantMatchKeysTableCreateCompanionBuilder,
+          $$MerchantMatchKeysTableUpdateCompanionBuilder,
+          (MerchantMatchKeyRow, $$MerchantMatchKeysTableReferences),
+          MerchantMatchKeyRow,
+          PrefetchHooks Function({bool merchantId})
+        > {
+  $$MerchantMatchKeysTableTableManager(
+    _$AppDatabase db,
+    $MerchantMatchKeysTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MerchantMatchKeysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MerchantMatchKeysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MerchantMatchKeysTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> merchantId = const Value.absent(),
+                Value<String> surface = const Value.absent(),
+                Value<String> matchKey = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MerchantMatchKeysCompanion(
+                id: id,
+                merchantId: merchantId,
+                surface: surface,
+                matchKey: matchKey,
+                kind: kind,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String merchantId,
+                required String surface,
+                required String matchKey,
+                required String kind,
+                Value<int> rowid = const Value.absent(),
+              }) => MerchantMatchKeysCompanion.insert(
+                id: id,
+                merchantId: merchantId,
+                surface: surface,
+                matchKey: matchKey,
+                kind: kind,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$MerchantMatchKeysTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({merchantId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (merchantId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.merchantId,
+                                referencedTable:
+                                    $$MerchantMatchKeysTableReferences
+                                        ._merchantIdTable(db),
+                                referencedColumn:
+                                    $$MerchantMatchKeysTableReferences
+                                        ._merchantIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MerchantMatchKeysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MerchantMatchKeysTable,
+      MerchantMatchKeyRow,
+      $$MerchantMatchKeysTableFilterComposer,
+      $$MerchantMatchKeysTableOrderingComposer,
+      $$MerchantMatchKeysTableAnnotationComposer,
+      $$MerchantMatchKeysTableCreateCompanionBuilder,
+      $$MerchantMatchKeysTableUpdateCompanionBuilder,
+      (MerchantMatchKeyRow, $$MerchantMatchKeysTableReferences),
+      MerchantMatchKeyRow,
+      PrefetchHooks Function({bool merchantId})
     >;
 typedef $$ShoppingItemsTableCreateCompanionBuilder =
     ShoppingItemsCompanion Function({
@@ -19173,10 +19390,10 @@ class $AppDatabaseManager {
         _db,
         _db.merchantCategoryPreferences,
       );
-  $$MerchantMatchKeysTableTableManager get merchantMatchKeys =>
-      $$MerchantMatchKeysTableTableManager(_db, _db.merchantMatchKeys);
   $$MerchantsTableTableManager get merchants =>
       $$MerchantsTableTableManager(_db, _db.merchants);
+  $$MerchantMatchKeysTableTableManager get merchantMatchKeys =>
+      $$MerchantMatchKeysTableTableManager(_db, _db.merchantMatchKeys);
   $$ShoppingItemsTableTableManager get shoppingItems =>
       $$ShoppingItemsTableTableManager(_db, _db.shoppingItems);
   $$ShoppingUnitUsagesTableTableManager get shoppingUnitUsages =>

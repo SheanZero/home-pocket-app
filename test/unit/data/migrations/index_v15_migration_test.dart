@@ -24,7 +24,7 @@ void main() {
     });
 
     tearDown(() {
-      rawDb.dispose();
+      rawDb.close();
     });
 
     test('creates audit log indices', () {

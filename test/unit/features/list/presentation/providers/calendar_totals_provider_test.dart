@@ -171,7 +171,7 @@ void main() {
 
       final container = _makeContainer(mockRepo);
 
-      // For @riverpod Future<T> providers in Riverpod 3.1.0, errors thrown
+      // For @riverpod Future<T> providers in Riverpod 3.3.2, errors thrown
       // by the async function are stored in AsyncValue.error as-is (the raw
       // error, not wrapped in ProviderException).
       // ProviderException wrapping applies to synchronous provider reads only.

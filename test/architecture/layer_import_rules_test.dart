@@ -4,10 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Layer-dependency rules enforced on REAL import statements.
 ///
-/// The import_guard custom_lint deny rules match import URIs against
-/// `package:home_pocket/...` prefixes verbatim, but this repo enforces
-/// `prefer_relative_imports` — so every deny-mode guard is inert for
-/// intra-project imports (quality report P1-2). This test closes that hole:
+/// The active import_lint plugin normalizes package and relative imports. This
+/// repository-owned scanner remains defense in depth and independently:
 /// it scans every hand-written file under lib/, resolves relative imports to
 /// lib-rooted paths, and asserts the dependency directions from CLAUDE.md
 /// (Presentation → Application → Domain ← Data ← Infrastructure).

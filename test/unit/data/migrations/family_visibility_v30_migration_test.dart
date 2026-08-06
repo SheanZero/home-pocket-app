@@ -50,7 +50,7 @@ void main() {
         ('private', 1, 42)
     ''');
     staged.execute('PRAGMA user_version = 29');
-    staged.dispose();
+    staged.close();
 
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);

@@ -14,8 +14,7 @@
 //   3. Zero `if: ${{ github.event_name == 'pull_request' }}` lines (the Phase 8
 //      D-05 #3 lift; restoring it would let direct-to-main bypass the coverage
 //      gate).
-//   4. `dart run custom_lint` invocation includes `--no-fatal-infos` flag (per
-//      08-06 amendment #2).
+//   4. `dart run import_lint` is present as a blocking architecture gate.
 //   5. `coverage_gate.dart --list
 //      .planning/audit/coverage-gate-required-files.txt` (the current
 //      risk-boundary manifest; not either retired historical manifest).
@@ -119,41 +118,15 @@ void main() {
       }
     });
 
-    test('Invariant 4: `dart run custom_lint` invocation includes '
-        '`--no-fatal-infos` flag (08-06 amendment #2)', () {
-      // The amendment adds --no-fatal-infos so riverpod_lint INFO findings
-      // don't block CI; import_guard remains hard-failing on errors.
-      // Match: `dart run custom_lint --no-fatal-infos` (with arbitrary
-      // whitespace + optional trailing args).
-      final regex = RegExp(r'dart\s+run\s+custom_lint\s+--no-fatal-infos\b');
+    test('Invariant 4: `dart run import_lint` is a blocking gate', () {
+      final regex = RegExp(r'dart\s+run\s+import_lint\s*$', multiLine: true);
       expect(
         regex.hasMatch(content),
         isTrue,
         reason:
-            'audit.yml must invoke `dart run custom_lint` with '
-            '`--no-fatal-infos` (Phase 8 amendment 2026-04-28 / 08-06 #2). '
-            'Without this flag the gate hard-fails on INFO-level findings '
-            'and Gate 2 cannot pass.',
+            'audit.yml must invoke the active import_lint architecture gate.',
       );
-
-      // Defense-in-depth: there must NOT be a bare `dart run custom_lint`
-      // invocation anywhere in the file (i.e. one without --no-fatal-infos).
-      // Scan line by line.
-      for (final line in content.split('\n')) {
-        final trimmed = line.trim();
-        // Look only at run-step shell commands ("run: dart run custom_lint ...").
-        // A bare "dart run custom_lint" line WITHOUT --no-fatal-infos is the
-        // regression we want to catch.
-        if (RegExp(r'^run:\s*dart\s+run\s+custom_lint\b').hasMatch(trimmed)) {
-          expect(
-            trimmed.contains('--no-fatal-infos'),
-            isTrue,
-            reason:
-                'Found `run: dart run custom_lint` invocation WITHOUT '
-                '`--no-fatal-infos`. Line: `$trimmed`',
-          );
-        }
-      }
+      expect(content, isNot(contains('dart run custom_lint')));
     });
 
     test('Invariant 5: coverage_gate.dart `--list` argument points at '

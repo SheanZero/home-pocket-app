@@ -46,7 +46,7 @@ void main() {
       staged.execute('CREATE TABLE sentinel (value TEXT NOT NULL)');
       staged.execute("INSERT INTO sentinel (value) VALUES ('preserved')");
       staged.execute('PRAGMA user_version = 31');
-      staged.dispose();
+      staged.close();
 
       final upgraded = AppDatabase(NativeDatabase(file));
       addTearDown(upgraded.close);

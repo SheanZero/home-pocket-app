@@ -49,7 +49,7 @@ void main() {
          NULL, 'invalid_operation_payload', 30, 31)
     ''');
     staged.execute('PRAGMA user_version = 34');
-    staged.dispose();
+    staged.close();
 
     final upgraded = AppDatabase(NativeDatabase(file));
     addTearDown(upgraded.close);

@@ -129,7 +129,7 @@ abstract class _$DonutDimensionState extends $Notifier<DonutDimensionView> {
   DonutDimensionView build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DonutDimensionView, DonutDimensionView>;
     final element =
         ref.element
@@ -139,6 +139,6 @@ abstract class _$DonutDimensionState extends $Notifier<DonutDimensionView> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

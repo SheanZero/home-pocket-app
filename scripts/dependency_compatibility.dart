@@ -330,16 +330,32 @@ CompatibilityReport validateDependencyCompatibility({
     }
   }
 
-  // Security lane: 0.7.0+eol contains no native SQLCipher library, and
-  // sqlite3 3.x is not compatible with the current encrypted native path.
-  expectConstraint('sqlcipher_flutter_libs', '^0.6.8');
-  expectLocked('sqlcipher_flutter_libs', '0.6.8');
-  expectConstraint('sqlite3', '^2.9.4');
-  expectLocked('sqlite3', '2.9.4');
+  // Security lane: sqlite3 3.x builds SQLCipher as a Dart Native Asset. The
+  // legacy Flutter library packages must not re-enter the resolved graph.
+  expectConstraint('drift', '2.34.0');
+  expectLocked('drift', '2.34.0');
+  expectConstraint('sqlite3', '^3.3.1');
+  expectLocked('sqlite3', '3.5.1');
+  expectConstraint('drift_dev', '2.34.0');
+  expectLocked('drift_dev', '2.34.0');
+  if (dependencies.containsKey('sqlcipher_flutter_libs') ||
+      packages.containsKey('sqlcipher_flutter_libs')) {
+    issues.add(
+      'sqlcipher_flutter_libs is obsolete on the sqlite3 Native Assets path',
+    );
+  }
   if (dependencies.containsKey('sqlite3_flutter_libs') ||
       packages.containsKey('sqlite3_flutter_libs')) {
     issues.add(
       'sqlite3_flutter_libs conflicts with SQLCipher and is forbidden',
+    );
+  }
+  if (!RegExp(
+    r'^hooks:\s*\n\s+user_defines:\s*\n\s+sqlite3:\s*\n\s+source:\s*sqlcipher\s*$',
+    multiLine: true,
+  ).hasMatch(pubspecYaml)) {
+    issues.add(
+      'pubspec must select SQLCipher through hooks.user_defines.sqlite3.source',
     );
   }
 
@@ -354,27 +370,27 @@ CompatibilityReport validateDependencyCompatibility({
   expectLocked('speech_to_text', '7.3.0');
   expectConstraint('flutter_local_notifications', '^22.2.0');
   expectLocked('flutter_local_notifications', '22.2.0');
-  expectConstraint('flutter_riverpod', '^3.1.0');
-  expectLocked('flutter_riverpod', '3.1.0');
-  expectConstraint('riverpod_annotation', '^4.0.0');
-  expectLocked('riverpod_annotation', '4.0.0');
-  expectConstraint('json_annotation', '^4.9.0');
-  expectLocked('json_annotation', '4.9.0');
+  expectConstraint('flutter_riverpod', '3.3.2');
+  expectLocked('flutter_riverpod', '3.3.2');
+  expectConstraint('riverpod_annotation', '4.0.3');
+  expectLocked('riverpod_annotation', '4.0.3');
+  expectConstraint('json_annotation', '^4.12.0');
+  expectLocked('json_annotation', '4.12.0');
   expectConstraint('json_serializable', '^6.9.4');
-  expectLocked('json_serializable', '6.11.2');
-  expectConstraint('riverpod_generator', '^4.0.0+1');
-  expectLocked('riverpod_generator', '4.0.0+1');
-  expectConstraint('riverpod_lint', '^3.1.0');
-  expectLocked('riverpod_lint', '3.1.0');
-  expectConstraint('custom_lint', '^0.8.1');
-  expectLocked('custom_lint', '0.8.1');
-  expectConstraint('import_guard_custom_lint', '^1.0.0');
-  expectLocked('import_guard_custom_lint', '1.0.0');
+  expectLocked('json_serializable', '6.14.1');
+  expectConstraint('riverpod_generator', '4.0.4');
+  expectLocked('riverpod_generator', '4.0.4');
+  expectConstraint('riverpod_lint', '3.1.4');
+  expectLocked('riverpod_lint', '3.1.4');
+  expectConstraint('import_lint', '^2.0.0');
+  expectLocked('import_lint', '2.0.0');
+  expectConstraint('dart_code_linter', '^4.1.9');
+  expectLocked('dart_code_linter', '4.1.9');
   final analyzerVersion = _map(packages['analyzer'])['version']?.toString();
   if (analyzerVersion == null ||
-      !RegExp(r'^8\.\d+\.\d+$').hasMatch(analyzerVersion)) {
+      !RegExp(r'^12\.\d+\.\d+$').hasMatch(analyzerVersion)) {
     issues.add(
-      'analyzer lock must stay on the verified 8.x line (found $analyzerVersion)',
+      'analyzer lock must stay on the verified 12.x line (found $analyzerVersion)',
     );
   }
 
@@ -412,11 +428,14 @@ CompatibilityReport validateDependencyCompatibility({
     xcodeProject,
     'FlutterGeneratedPluginSwiftPackage',
   );
-  expectText('ios/Podfile.lock', podfileLock, 'SQLCipher (4.10.0)');
-  if (!_hasActiveSqlCipherLinkerStrip(podfile)) {
+  if (podfileLock.contains('SQLCipher') ||
+      podfileLock.contains('sqlcipher_flutter_libs')) {
     issues.add(
-      'ios/Podfile must preserve the SQLCipher system-SQLite linker strip',
+      'ios/Podfile.lock must not retain the legacy SQLCipher CocoaPod path',
     );
+  }
+  if (_hasActiveSqlCipherLinkerStrip(podfile)) {
+    issues.add('ios/Podfile must not retain the obsolete sqlite3 linker strip');
   }
   _validateIosDeploymentTargets(
     issues: issues,
@@ -630,7 +649,7 @@ void _validateManifestPolicy({
     final selected = row['resolved']?.toString() ?? '';
     final candidate = row['candidate']?.toString() ?? '';
     final decision = row['decision']?.toString();
-    if (_isUnsafeRelease(selected)) {
+    if (_isUnsafeRelease(selected) && id != 'freezed') {
       issues.add('dependency $id selects forbidden prerelease or EOL value');
     }
     if (decision == 'already_current' &&
@@ -650,12 +669,12 @@ void _validateManifestPolicy({
 
   const laneMembers = {
     'encrypted_storage': [
-      'sqlcipher_flutter_libs 0.6.8',
-      'sqlite3 2.9.4',
-      'SQLCipher Pod 4.10.0',
+      'Drift 2.34.0',
+      'sqlite3 3.5.1',
+      'SQLCipher Native Asset 4.17',
     ],
     'platform_floors': ['iOS 15.0', 'Android API 24'],
-    'architecture': ['analyzer 8.x', 'import-boundary gate'],
+    'architecture': ['analyzer 12.x', 'import_lint 2.0.0'],
   };
   final lanes = _map(baseline['lanes']);
   for (final entry in laneMembers.entries) {
@@ -1031,7 +1050,9 @@ Future<void> main(List<String> arguments) async {
   for (final warning in completeReport.warnings) {
     stdout.writeln('  - [${warning.code}] ${warning.message}');
   }
-  stdout.writeln('  SQLCipher 0.6.8 / sqlite3 2.9.4 / pod 4.10.0');
+  stdout.writeln(
+    '  Drift 2.34.0 / sqlite3 3.5.1 / SQLCipher Native Asset 4.17',
+  );
   final betaIdentityParsed = completeReport.warnings.any(
     (warning) =>
         warning.message ==

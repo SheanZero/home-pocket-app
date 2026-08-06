@@ -23,7 +23,7 @@ mixin _$Book {
   bool get isShadow;
   String? get groupId;
   String? get ownerDeviceId;
-  String? get ownerDeviceName; // Denormalized stats for performance
+  String? get ownerDeviceName;
   int get transactionCount;
   int get survivalBalance;
   int get soulBalance;
@@ -502,7 +502,6 @@ class _Book implements Book {
   final String? ownerDeviceId;
   @override
   final String? ownerDeviceName;
-  // Denormalized stats for performance
   @override
   @JsonKey()
   final int transactionCount;

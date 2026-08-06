@@ -116,3 +116,13 @@ After the 80→70 amendment, two EXIT-04 gates were still red and required addit
 10 files were initially listed as deferred (3 application provider-wrappers; 4 large UI screens; 3 state notifiers / widget sections). Each entry carries written rationale tying it to FUTURE-TOOL-03 (coverage-baseline-review). The discipline contract: at the post-feature-work review, each deferral is either retired (tests added) or formalized into a per-area threshold split that subsumes it.
 
 Final EXIT-04 status: **8/8 gates pass simultaneously** — `coverage_gate` reports `64 checked / 0 failed / 96 missing-from-lcov (skipped) / 10 deferred (skipped)` at threshold 70.
+
+## Update 2026-08-06 — Analyzer 12 architecture gate
+
+The permanent architecture guard now runs `import_lint 2.0.0` directly from
+`analysis_options.yaml`; the retired `custom_lint` / `import_guard_custom_lint`
+host is no longer part of the dependency graph. The canonical layer shard and
+merger source identity is `import_lint`. `riverpod_lint 3.1.4` is active as an
+analysis-server plugin, while the repository-owned Provider contract remains a
+separate defense-in-depth gate. CI rejects both legacy SQLite native packages:
+`sqlcipher_flutter_libs` and `sqlite3_flutter_libs`.

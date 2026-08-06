@@ -21,7 +21,7 @@ void main() {
     });
 
     tearDown(() {
-      rawDb.dispose();
+      rawDb.close();
     });
 
     test(

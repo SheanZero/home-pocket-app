@@ -24,7 +24,7 @@ Every finding MUST include all 11 fields below (with the exception of `id`, whic
 | `description` | string | required | One-sentence statement of what's wrong. Imperative-mood, no leading hedge ("Possibly…"). | `use_cases/ inside features/ violates Thin Feature rule` |
 | `rationale` | string | required | Why it matters. References `CLAUDE.md` "Common Pitfalls" or `.planning/codebase/CONCERNS.md` when applicable. | `Thin Feature rule (CLAUDE.md): features must not contain application/use_cases.` |
 | `suggested_fix` | string | required | Concrete remediation step. Names the destination file/dir and the target Phase by number. | `Move to lib/application/family_sync/. Phase 3 fix.` |
-| `tool_source` | string | required | One of the approved producer values (see §6). Drives dedupe priority in the merger. | `import_guard` |
+| `tool_source` | string | required | One of the approved producer values (see §6). Drives dedupe priority in the merger. | `import_lint` |
 | `confidence` | string | required | `high` (tool-flagged + structural rule match) / `medium` (conservative structural detection or strong code-anchored evidence) / `low` (AI-agent inference / pattern-similarity). Drives planner auto-accept vs triage-batch behavior. | `high` |
 
 **Notes on `file_path`:** Audit scope is `lib/` Dart code only. No secrets, API keys, or PII enter findings (T-1-A phase-level threat-model carry-over). The merger normalizes any absolute path to repo-relative before writing `issues.json` (T-1-03-02 mitigation).
@@ -201,7 +201,7 @@ Both `split_from` and `closed_as_duplicate_of` are OPTIONAL fields on the findin
 
 | `tool_source` | Producer | Confidence default | Phase / Plan |
 |---------------|----------|--------------------|--------------|
-| `import_guard` | `dart run custom_lint` (`import_guard_custom_lint` plugin) → `audit_layer.sh` | `high` | Phase 1 Plan 04 |
+| `import_lint` | `dart run import_lint` (analysis-server plugin plus CLI) → `audit_layer.sh` | `high` | 2026-08-06 Native Assets/toolchain upgrade |
 | `owned_provider_contract` | Repository-owned provider app-root and held-lint contract (`scripts/audit/providers.dart` / `provider_contract.dart`) → `audit_providers.sh` | `high` | Phase 58 HP-06 |
 | `dart_code_linter` | `dart_code_linter:metrics check-unused-{code,files}` → `audit_dead_code.sh` | `high` | Phase 1 Plan 04 |
 | `owned_duplication_detector` | Repository-owned exact 16-line cross-file Dart clone detector → `audit_duplication.sh` | `medium` | HP-07 |
@@ -245,7 +245,7 @@ A representative pair of findings — one CRITICAL `LV-001` for the live `lib/fe
     "description": "use_cases/ inside features/ violates Thin Feature rule",
     "rationale": "Thin Feature rule (CLAUDE.md): features must not contain application/use_cases. Use cases live at lib/application/{domain}/.",
     "suggested_fix": "Move to lib/application/family_sync/sync_now_use_case.dart and rewire wiring provider in features/family_sync/presentation/providers/. Phase 3 fix.",
-    "tool_source": "import_guard",
+    "tool_source": "import_lint",
     "confidence": "high",
     "status": "open",
     "closed_in_phase": null,
@@ -376,7 +376,7 @@ The Phase-2 JSON artifacts do NOT carry `issue_ids` cross-references to `issues.
 
 - `scripts/audit/finding.dart` — Dart code mirror; field names match this doc 1:1
 - `.planning/codebase/CONCERNS.md` — Source of truth for confirmed live violations
-- `.planning/codebase/STRUCTURE.md` — 5-layer architecture file layout encoded by `import_guard.yaml`
+- `.planning/codebase/STRUCTURE.md` — 5-layer architecture file layout encoded by `analysis_options.yaml` import-lint rules
 - `analysis_options.yaml` — `analyzer.exclude` baseline that §7 extends with `.mocks.dart`
 - `CLAUDE.md` — "Common Pitfalls" list whose 13 categories the audit pipeline catches
 - `scripts/coverage_baseline.dart` — Producer of the four §9 artifacts (Phase 2)

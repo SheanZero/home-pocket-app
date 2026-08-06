@@ -22,20 +22,15 @@ class ToolingGuardCase {
 
   const ToolingGuardCase.importGuardPackage()
     : this(
-        name: 'import_guard package import',
+        name: 'import_lint package import',
         fixturePath:
-            'lib/features/accounting/domain/phase58_package_import_fixture.dart',
+            'lib/features/accounting/domain/models/phase58_package_import_fixture.dart',
         source:
             "import 'package:home_pocket/data/app_database.dart';\n\n"
             'void phase58ForbiddenPackageImport(AppDatabase database) {}\n',
         command: 'dart',
-        arguments: const [
-          'run',
-          'custom_lint',
-          '--format=json',
-          '--no-fatal-infos',
-        ],
-        diagnosticCode: 'import_guard',
+        arguments: const ['run', 'import_lint'],
+        diagnosticCode: 'domain_to_data',
       );
 
   const ToolingGuardCase.layerScannerPackage()
@@ -258,13 +253,13 @@ class ToolingGuardCase {
         detectPluginFailure: true,
       );
 
-  const ToolingGuardCase.validProductionCustomLint()
+  const ToolingGuardCase.validProductionImportLint()
     : this(
-        name: 'valid production custom_lint',
+        name: 'valid production import_lint',
         fixturePath: '',
         source: null,
         command: 'dart',
-        arguments: const ['run', 'custom_lint', '--no-fatal-infos'],
+        arguments: const ['run', 'import_lint'],
         expectFailure: false,
         expectsFixturePath: false,
         detectPluginFailure: true,
@@ -412,7 +407,7 @@ Future<ToolingGuardResult> verifyToolingGuards({
 
 const _validProductionCases = [
   ToolingGuardCase.validProductionAnalyzer(),
-  ToolingGuardCase.validProductionCustomLint(),
+  ToolingGuardCase.validProductionImportLint(),
   ToolingGuardCase.validProductionLayerScanner(),
   ToolingGuardCase.validProductionProviderContract(),
 ];
@@ -487,9 +482,8 @@ bool _hasDiagnostic(String output, String diagnosticCode) {
       );
     }
   } on FormatException {
-    // The repository-owned scanner and Flutter test use text output instead
-    // of custom_lint's JSON reporter. Their stable diagnostic code is still
-    // required, so fall through to the text check below.
+    // import_lint, the repository-owned scanner, and Flutter tests use text
+    // output. Their stable rule/diagnostic code is still required below.
   }
   return output.contains(diagnosticCode);
 }

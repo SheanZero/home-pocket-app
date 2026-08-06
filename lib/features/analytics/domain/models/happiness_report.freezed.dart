@@ -13,7 +13,6 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$HappinessReport {
-  // aux (flat)
   /// Display anchor: the year of the active window's endDate (Phase 15+).
   /// Source-of-truth date range is the use-case (startDate, endDate) input.
   int get year;
@@ -22,7 +21,7 @@ mixin _$HappinessReport {
   /// See use-case (startDate, endDate) for the queried range.
   int get month;
   String get bookId;
-  int get totalJoyTx; // main metrics (MetricResult-wrapped)
+  int get totalJoyTx;
   MetricResult<double> get avgSatisfaction;
   MetricResult<double> get joyContribution;
   MetricResult<double> get medianSatisfaction;
@@ -401,7 +400,6 @@ class _HappinessReport implements HappinessReport {
     required this.topJoy,
   });
 
-  // aux (flat)
   /// Display anchor: the year of the active window's endDate (Phase 15+).
   /// Source-of-truth date range is the use-case (startDate, endDate) input.
   @override
@@ -415,7 +413,6 @@ class _HappinessReport implements HappinessReport {
   final String bookId;
   @override
   final int totalJoyTx;
-  // main metrics (MetricResult-wrapped)
   @override
   final MetricResult<double> avgSatisfaction;
   @override

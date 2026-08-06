@@ -61,11 +61,11 @@ List<String> _twoPassContractViolations(String source) {
   expectCount('Running generation pass 1.', 1);
   expectCount('Running generation pass 2.', 1);
   expectCount('flutter gen-l10n', 2);
-  expectCount('flutter pub run build_runner build --delete-conflicting-outputs', 2);
+  expectCount('flutter pub run build_runner build', 2);
   expectCount("assert_clean_generation_scope 'after generation pass 1'", 1);
   expectCount("assert_clean_generation_scope 'after generation pass 2'", 1);
   expectCount('flutter analyze --no-fatal-infos', 1);
-  expectCount('dart run custom_lint --no-fatal-infos', 1);
+  expectCount('dart run import_lint', 1);
   expectCount('test/architecture/layer_import_rules_test.dart', 1);
   expectCount('test/architecture/domain_import_rules_test.dart', 1);
   expectCount('test/architecture/presentation_layer_rules_test.dart', 1);
@@ -80,7 +80,7 @@ List<String> _twoPassContractViolations(String source) {
     "assert_clean_generation_scope 'after generation pass 2'",
   );
   final analyzer = executable.indexOf('flutter analyze --no-fatal-infos');
-  final customLint = executable.indexOf('dart run custom_lint --no-fatal-infos');
+  final importLint = executable.indexOf('dart run import_lint');
   final layer = executable.indexOf(
     'test/architecture/layer_import_rules_test.dart',
   );
@@ -98,7 +98,7 @@ List<String> _twoPassContractViolations(String source) {
     RegExp.escape('flutter gen-l10n'),
   ).allMatches(executable).toList();
   final buildRunnerMatches = RegExp(
-    RegExp.escape('flutter pub run build_runner build --delete-conflicting-outputs'),
+    RegExp.escape('flutter pub run build_runner build'),
   ).allMatches(executable).toList();
 
   if (pass1Diff < 0 ||
@@ -114,8 +114,8 @@ List<String> _twoPassContractViolations(String source) {
     violations.add('each clean generation boundary must follow l10n then build_runner');
   }
   if (analyzer < pass2Diff ||
-      customLint < analyzer ||
-      layer < customLint ||
+      importLint < analyzer ||
+      layer < importLint ||
       domain < layer ||
       presentation < domain ||
       toolingGuards < presentation ||
@@ -154,17 +154,12 @@ void main() {
       '--mode=baseline --verify-running-flutter-sdk',
     );
     final l10n = source.indexOf('flutter gen-l10n');
-    final buildRunner = source.indexOf(
-      'flutter pub run build_runner build --delete-conflicting-outputs',
-    );
+    final buildRunner = source.indexOf('flutter pub run build_runner build');
     final firstPassDiff = source.indexOf(
       "assert_clean_generation_scope 'after generation pass 1'",
     );
     final analyzer = _onlyIndexOf(source, 'flutter analyze --no-fatal-infos');
-    final customLint = _onlyIndexOf(
-      source,
-      'dart run custom_lint --no-fatal-infos',
-    );
+    final importLint = _onlyIndexOf(source, 'dart run import_lint');
     final layer = _onlyIndexOf(
       source,
       'test/architecture/layer_import_rules_test.dart',
@@ -189,8 +184,8 @@ void main() {
     expect(buildRunner, greaterThan(l10n));
     expect(firstPassDiff, greaterThan(buildRunner));
     expect(analyzer, greaterThan(firstPassDiff));
-    expect(customLint, greaterThan(analyzer));
-    expect(layer, greaterThan(customLint));
+    expect(importLint, greaterThan(analyzer));
+    expect(layer, greaterThan(importLint));
     expect(domain, greaterThan(layer));
     expect(presentation, greaterThan(domain));
     expect(toolingGuards, greaterThan(presentation));
@@ -238,9 +233,9 @@ void main() {
     expect(
       _twoPassContractViolations(
         source.replaceFirst(
-          'dart run custom_lint --no-fatal-infos',
-          'dart run custom_lint --no-fatal-infos\n'
-          'dart run custom_lint --no-fatal-infos',
+          'dart run import_lint',
+          'dart run import_lint\n'
+          'dart run import_lint',
         ),
       ),
       isNotEmpty,

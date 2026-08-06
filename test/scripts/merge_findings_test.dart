@@ -95,7 +95,7 @@ Directory _initShardLayout(Directory tmp) {
   final shards = Directory('${root.path}/shards')..createSync(recursive: true);
   Directory('${root.path}/agent-shards').createSync(recursive: true);
   const canonicalTools = {
-    'layer.json': 'import_guard',
+    'layer.json': 'import_lint',
     'dead_code.json': 'dart_code_linter',
     'providers.json': 'owned_provider_contract',
     'duplication.json': 'owned_duplication_detector',
@@ -113,7 +113,7 @@ Finding _f({
   int line = 1,
   String category = 'layer_violation',
   String severity = 'CRITICAL',
-  String toolSource = 'import_guard',
+  String toolSource = 'import_lint',
   String confidence = 'high',
   String description = 'desc',
   String rationale = 'why',
@@ -221,7 +221,7 @@ void main() {
             _shardWith([
               _f(filePath: 'lib/a.dart', line: 1),
               _f(filePath: 'lib/b.dart', line: 5),
-            ], 'import_guard'),
+            ], 'import_lint'),
           ),
         );
         File('${shardRoot.path}/shards/providers.json').writeAsStringSync(
@@ -264,10 +264,10 @@ void main() {
               _f(
                 filePath: 'lib/foo.dart',
                 line: 10,
-                toolSource: 'import_guard',
+                toolSource: 'import_lint',
                 confidence: 'high',
               ),
-            ], 'import_guard'),
+            ], 'import_lint'),
           ),
         );
         File('${shardRoot.path}/agent-shards/layer.json').writeAsStringSync(
@@ -290,7 +290,7 @@ void main() {
         );
         final findings = (issues['findings'] as List).cast<Map>();
         expect(findings.length, equals(1));
-        expect(findings.first['tool_source'], equals('import_guard'));
+        expect(findings.first['tool_source'], equals('import_lint'));
         expect(findings.first['id'], equals('LV-001'));
       },
     );
@@ -348,7 +348,7 @@ void main() {
               _f(filePath: 'lib/b.dart', line: 1),
               _f(filePath: 'lib/a.dart', line: 2),
               _f(filePath: 'lib/a.dart', line: 1),
-            ], 'import_guard'),
+            ], 'import_lint'),
           ),
         );
         final r = await _runMerger(tmp);
@@ -377,7 +377,7 @@ void main() {
             _shardWith([
               _f(filePath: 'lib/a.dart', line: 1),
               _f(filePath: 'lib/b.dart', line: 1),
-            ], 'import_guard'),
+            ], 'import_lint'),
           ),
         );
         File('${shardRoot.path}/shards/providers.json').writeAsStringSync(
@@ -422,7 +422,7 @@ void main() {
               _f(filePath: 'lib/foo.freezed.dart', line: 1),
               _f(filePath: 'lib/generated/bar.dart', line: 1),
               _f(filePath: 'lib/bar.dart', line: 1),
-            ], 'import_guard'),
+            ], 'import_lint'),
           ),
         );
         final r = await _runMerger(tmp);
@@ -460,7 +460,7 @@ void main() {
         );
         File(
           '${shardRoot.path}/shards/layer.json',
-        ).writeAsStringSync(jsonEncode(_shardWith([original], 'import_guard')));
+        ).writeAsStringSync(jsonEncode(_shardWith([original], 'import_lint')));
 
         final r = await _runMerger(tmp);
         expect(r.exitCode, equals(0), reason: r.stderr.toString());
@@ -500,7 +500,7 @@ void main() {
         );
         File(
           '${shardRoot.path}/shards/layer.json',
-        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_guard')));
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_lint')));
         File('${shardRoot.path}/agent-shards/layer.json').writeAsStringSync(
           jsonEncode(_shardWith([historical], 'agent:layer')),
         );
@@ -714,7 +714,7 @@ void main() {
         );
         File(
           '${shardRoot.path}/shards/layer.json',
-        ).writeAsStringSync(jsonEncode(_shardWith([active], 'import_guard')));
+        ).writeAsStringSync(jsonEncode(_shardWith([active], 'import_lint')));
 
         final result = await _runMerger(tmp);
 
@@ -750,7 +750,7 @@ void main() {
           }),
         );
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-          jsonEncode(_shardWith([inserted, existing], 'import_guard')),
+          jsonEncode(_shardWith([inserted, existing], 'import_lint')),
         );
 
         final result = await _runMerger(tmp);
@@ -946,7 +946,7 @@ void main() {
         );
         File(
           '${shardRoot.path}/shards/layer.json',
-        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_guard')));
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_lint')));
 
         final result = await _runMerger(tmp);
 
@@ -1017,7 +1017,7 @@ void main() {
         for (final entry in invalidFindings.entries) {
           File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
             jsonEncode({
-              ..._shardWith([], 'import_guard'),
+              ..._shardWith([], 'import_lint'),
               'findings': [entry.value],
             }),
           );
@@ -1050,7 +1050,7 @@ void main() {
           ..writeAsStringSync(oldMarkdown);
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
           ),
         );
 
@@ -1086,7 +1086,7 @@ void main() {
           ..writeAsStringSync(oldMarkdown);
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
           ),
         );
 
@@ -1122,7 +1122,7 @@ void main() {
           ..writeAsStringSync(oldMarkdown);
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
           ),
         );
 
@@ -1134,7 +1134,7 @@ void main() {
         _transactionArtifact(shardRoot, '-markdown-next').deleteSync();
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode({
-            ..._shardWith([], 'import_guard'),
+            ..._shardWith([], 'import_lint'),
             'findings': [
               _f(
                 filePath: 'lib/invalid.dart',
@@ -1166,7 +1166,7 @@ void main() {
         ).writeAsStringSync('{corrupt journal');
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
           ),
         );
 
@@ -1224,7 +1224,7 @@ void main() {
           ).writeAsStringSync('# Old report\n');
           File('${caseRoot.path}/shards/layer.json').writeAsStringSync(
             jsonEncode(
-              _shardWith([_f(filePath: 'lib/$point.dart')], 'import_guard'),
+              _shardWith([_f(filePath: 'lib/$point.dart')], 'import_lint'),
             ),
           );
 
@@ -1254,7 +1254,7 @@ void main() {
         File('${shardRoot.path}/ISSUES.md').writeAsStringSync('# Old report\n');
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/journal.dart')], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/journal.dart')], 'import_lint'),
           ),
         );
 
@@ -1315,7 +1315,7 @@ void main() {
           ).writeAsStringSync('# Old report\n');
           File('${caseRoot.path}/shards/layer.json').writeAsStringSync(
             jsonEncode(
-              _shardWith([_f(filePath: 'lib/$point.dart')], 'import_guard'),
+              _shardWith([_f(filePath: 'lib/$point.dart')], 'import_lint'),
             ),
           );
 
@@ -1495,7 +1495,7 @@ void main() {
           final markdownFile = File('${shardRoot.path}/ISSUES.md')
             ..writeAsStringSync(existingMarkdown);
           File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-            jsonEncode(_shardWith([validLayer], 'import_guard')),
+            jsonEncode(_shardWith([validLayer], 'import_lint')),
           );
 
           final result = await _runMerger(tmp);
@@ -1530,7 +1530,7 @@ void main() {
 
     test('fails closed when canonical scan_state is absent', () async {
       File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-        jsonEncode({'tool_source': 'import_guard', 'findings': []}),
+        jsonEncode({'tool_source': 'import_lint', 'findings': []}),
       );
 
       final result = await _runMerger(tmp);
@@ -1587,7 +1587,7 @@ void main() {
       () async {
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/locked.dart')], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/locked.dart')], 'import_lint'),
           ),
         );
         final first = await _startMerger(
@@ -1994,7 +1994,7 @@ void main() {
 
         File(
           '${shardRoot.path}/shards/layer.json',
-        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_guard')));
+        ).writeAsStringSync(jsonEncode(_shardWith([], 'import_lint')));
         final resumed = await _runMerger(tmp);
         expect(resumed.exitCode, 0, reason: resumed.stderr);
         expect(

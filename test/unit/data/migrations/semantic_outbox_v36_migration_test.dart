@@ -67,7 +67,7 @@ void main() {
           ('profile-a', 'Alice', '🐱', NULL, 100, 300)
       ''');
       staged.execute('PRAGMA user_version = 35');
-      staged.dispose();
+      staged.close();
 
       final upgraded = AppDatabase(NativeDatabase(file));
       addTearDown(upgraded.close);

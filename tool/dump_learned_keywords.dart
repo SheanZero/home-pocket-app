@@ -33,9 +33,8 @@
 // Platform support:
 //   macOS / Linux dev box only. Requires libsqlcipher to be resolvable via
 //   the system dynamic-library loader (e.g. `brew install sqlcipher` on
-//   macOS). Android is rejected at startup — the in-app SQLCipher path
-//   uses sqlcipher_flutter_libs which is incompatible with standalone
-//   Dart compilation.
+//   macOS). Android is rejected at startup because this host-oriented Dart CLI
+//   is not packaged with the mobile application's Native Asset runtime.
 //
 // Output: an aligned plain-text table to stdout, English only (no ARB).
 // Exits 0 on success, 1 on any error (with the error written to stderr).
@@ -88,10 +87,9 @@ void main(List<String> argv) async {
     //   - macOS / Linux dev: SQLCipher loaded via the system dyld lookup
     //     (e.g. Homebrew sqlcipher or libcrypto_sqlcipher). Run from a
     //     shell where `sqlcipher` is on the dynamic-library path.
-    //   - Android: NOT supported standalone — the production app uses
-    //     sqlcipher_flutter_libs which transitively pulls Flutter, defeating
-    //     standalone Dart compilation. Run the script from a macOS/Linux
-    //     dev box pointing at a sqlite-encrypted copy of the device DB.
+    //   - Android: NOT supported by this host-oriented CLI. The production app
+    //     receives SQLCipher through sqlite3 Native Assets; run this tool from
+    //     a macOS/Linux dev box against an encrypted copy of the device DB.
     if (Platform.isAndroid) {
       stderr.writeln(
         'Error: this script is not supported on Android. Copy the DB file '

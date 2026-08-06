@@ -5,12 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../scripts/verify_tooling_guards.dart' as tooling;
 
 const _packageFixturePath =
-    'lib/features/accounting/domain/phase58_package_import_fixture.dart';
+    'lib/features/accounting/domain/models/phase58_package_import_fixture.dart';
 
 void main() {
   group('tooling guard negative fixtures', () {
     test(
-      'package import fixture is rejected by import_guard and cleaned',
+      'package import fixture is rejected by import_lint and cleaned',
       () async {
         final result = await tooling.verifyToolingGuards(
           cases: const [tooling.ToolingGuardCase.importGuardPackage()],
@@ -21,7 +21,7 @@ void main() {
         expect(result.isPassing, isTrue, reason: result.describe());
         expect(result.cases, hasLength(1));
         expect(result.cases.single.isPassing, isTrue);
-        expect(result.cases.single.output, contains('import_guard'));
+        expect(result.cases.single.output, contains('domain_to_data'));
         expect(result.cases.single.output, contains(_packageFixturePath));
         expect(File(_packageFixturePath).existsSync(), isFalse);
       },
@@ -216,7 +216,7 @@ void main() {
           checked.cases.map((result) => result.guardCase.name),
           containsAll(<String>[
             'valid production flutter analyze',
-            'valid production custom_lint',
+            'valid production import_lint',
             'valid production layer scanner',
             'valid production provider contract',
           ]),

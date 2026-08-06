@@ -22,8 +22,6 @@ import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_settings_screen.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
-import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart'
-    show ensureNativeLibrary;
 import 'package:home_pocket/infrastructure/crypto/providers.dart' as crypto;
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
@@ -173,8 +171,6 @@ Future<void> _unmountApp(WidgetTester tester) async {
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  setUpAll(ensureNativeLibrary);
 
   testWidgets(
     'fresh onboarding -> ledger -> encrypted backup restore -> cold PIN boot',

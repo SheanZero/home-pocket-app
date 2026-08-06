@@ -11,7 +11,7 @@ part 'state_locale.g.dart';
 ///
 /// Reads persisted language from [SettingsRepository] on startup.
 /// Persists changes via [SettingsRepository.setLanguage()].
-@riverpod
+@Riverpod(keepAlive: true)
 class LocaleNotifier extends _$LocaleNotifier {
   @override
   Future<LocaleSettings> build() async {

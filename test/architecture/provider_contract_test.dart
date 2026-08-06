@@ -420,7 +420,7 @@ void main() {
       expect(report.isPassing, isTrue, reason: report.describe());
     });
 
-    test('active or unparseable riverpod_lint state fails closed', () async {
+    test('missing or unparseable riverpod_lint state fails closed', () async {
       final root = await _createFixtureRoot(
         appSource: '''
 import 'package:flutter/widgets.dart';
@@ -430,9 +430,8 @@ void main() => runApp(const ProviderScope(child: Placeholder()));
 ''',
         analysisOptions: '''
 analyzer:
-  plugins:
-    - custom_lint
-    - riverpod_lint
+plugins:
+  import_lint: 2.0.0
 ''',
         lockfile: 'packages:\n  riverpod_lint:\n    version: "bad"\n',
       );
@@ -441,7 +440,7 @@ analyzer:
       final report = checkProviderContract(root.path);
 
       expect(report.isPassing, isFalse);
-      expect(report.describe(), contains('riverpod_lint_active'));
+      expect(report.describe(), contains('riverpod_lint_plugin_missing'));
       expect(report.describe(), contains('riverpod_lint_version_unparseable'));
     });
   });
@@ -450,14 +449,13 @@ analyzer:
 Future<Directory> _createFixtureRoot({
   required String appSource,
   String analysisOptions = '''
-analyzer:
-  plugins:
-    - custom_lint
+plugins:
+  riverpod_lint: 3.1.4
 ''',
   String lockfile = '''
 packages:
   riverpod_lint:
-    version: "3.1.0"
+    version: "3.1.4"
 ''',
 }) async {
   final root = await Directory.systemTemp.createTemp('provider_contract_test_');

@@ -64,11 +64,10 @@ void _reportInitFailure(InitFailure failure) {
 const _useInMemoryDatabase = false;
 
 // coverage:ignore-start
-// Platform bootstrap loads native database libraries and encrypted storage.
+// Native Assets load the SQLCipher library selected by pubspec build hooks.
 // Tests exercise the branch logic through bootWithInitializerForTesting below.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ensureNativeLibrary();
   await _boot();
 }
 

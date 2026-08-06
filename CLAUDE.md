@@ -20,7 +20,7 @@ This file provides guidance to Claude Code when working with this repository.
 ```bash
 # Setup & code generation
 flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 flutter gen-l10n
 
 # Development
@@ -247,9 +247,9 @@ final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
 
 ## iOS Build
 
-- Use `sqlcipher_flutter_libs` at `^0.6.x` — NEVER `sqlite3_flutter_libs` (conflicts). `0.7.0+eol` is intentionally a do-nothing package; the project hasn't migrated to `sqlite3` 3.x yet.
-- Drift schema is at **v23** (`schemaVersion => 23` in `lib/data/app_database.dart`). v22→v23 backfilled every `customIndices`-declared index (the getter is decorative — see `_createAllDeclaredIndexes()`); v21→v22 added `merchants` + `merchant_match_keys` (Phase 49); v20→v21 in Phase 40-04 (`exchange_rates` table + transaction currency columns; commit `adb2311a`); v19→v20 in Phase 36 added `shopping_items`.
-- `ios/Podfile` `post_install` strips `-l"sqlite3"` from every Pod xcconfig. **Do not remove this.** `FirebaseMessaging` (and any pod declaring `s.libraries = 'sqlite3'`) otherwise pulls in the system `libsqlite3.tbd`, which wins `dlsym(RTLD_DEFAULT, "sqlite3_open")` over SQLCipher at runtime — `PRAGMA cipher_version` then returns empty and `encrypted_database.dart` throws `Bad state: SQLCipher not loaded - encryption unavailable`. SQLCipher's symbols are ABI-compatible, so stripping `-lsqlite3` doesn't break those pods.
+- Use sqlite3 3.x Native Assets with `hooks.user_defines.sqlite3.source: sqlcipher`; never add `sqlcipher_flutter_libs` or `sqlite3_flutter_libs`.
+- Drift schema is at **v36** (`schemaVersion => 36` in `lib/data/app_database.dart`).
+- `sqlcipher.framework` is embedded by the sqlite3 Native Assets hook. Do not reintroduce the old Podfile `-lsqlite3` strip; the real SQLCipher 4.10 fixture gate detects system-SQLite fallback.
 - `ios/Podfile` has `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64` fix for ML Kit
 - Clean rebuild: `flutter clean && cd ios && rm -rf Pods Podfile.lock .symlinks && cd .. && flutter pub get && cd ios && pod install`
 
@@ -316,17 +316,17 @@ Always check max number before creating, use next sequential, update INDEX.md. S
 1. Don't modify generated files (`.g.dart`, `.freezed.dart`)
    *[Partially enforced — AUDIT-10 catches stale committed files; hand-edits matching generator output go undetected]*
 2. Don't violate layer dependencies (Domain must not import Data)
-   *[Structurally enforced — arch test layer_import_rules_test.dart scans REAL imports (relative-safe) for the domain/application/infrastructure directions AND the application→data direction (only composition-root `*_providers.dart` may import lib/data/; demo_data_service.dart is an explicit `_allowlist` exemption); domain_import_rules_test.dart guards the yaml text. CAVEAT: import_guard deny-mode yamls are inert for intra-project imports (the lint matches `package:` prefixes verbatim but this repo enforces prefer_relative_imports) — the layer-boundary yamls (application/data/infrastructure) now carry INERT headers pointing to the arch test; only allow-mode subdirectory yamls actually enforce via custom_lint. Do not treat a green `dart run custom_lint` as layer-compliance evidence]*
+   *[Structurally enforced — active import_lint rules plus relative-safe architecture tests]*
 3. Don't skip code generation after modifying annotated classes
    *[Structurally enforced — AUDIT-10 CI guardrail blocks PRs with stale generated files]*
 4. Don't mutate objects — always use `copyWith`
    *[Manually-checked only — freezed enforces it on @freezed classes; general mutation undetected]*
 5. Don't use `intl` version other than 0.20.2 (pinned by flutter_localizations)
    *[Structurally enforced — exact pin in pubspec.yaml line 18]*
-6. Don't add `sqlite3_flutter_libs` (use only `sqlcipher_flutter_libs`)
-   *[Structurally enforced — import_guard deny rule + AUDIT-09 CI guardrail]*
-7. Don't modify Podfile `post_install` without preserving EXCLUDED_ARCHS fix AND the `-lsqlite3` strip
-   *[Manually-checked only — no Podfile lint; relies on reviewer + iOS runtime verification (PRAGMA cipher_version returns empty if strip is removed)]*
+6. Don't add `sqlite3_flutter_libs` or `sqlcipher_flutter_libs`
+   *[Structurally enforced — dependency compatibility contract + AUDIT-09 CI guardrail]*
+7. Don't reintroduce the Android loader override or iOS `-lsqlite3` strip
+   *[Structurally enforced — dependency contract and cross-platform real-fixture integration test]*
 8. Don't commit with analyzer warnings
    *[Structurally enforced — flutter analyze CI step (audit.yml line 34)]*
 9. Don't hardcode widget parameter defaults — use nullable + provider fallback

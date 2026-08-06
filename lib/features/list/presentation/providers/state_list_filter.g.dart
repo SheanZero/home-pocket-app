@@ -76,7 +76,7 @@ abstract class _$ListFilter extends $Notifier<ListFilterState> {
   ListFilterState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ListFilterState, ListFilterState>;
     final element =
         ref.element
@@ -86,6 +86,6 @@ abstract class _$ListFilter extends $Notifier<ListFilterState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

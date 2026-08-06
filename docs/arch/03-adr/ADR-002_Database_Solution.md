@@ -650,3 +650,26 @@ in production:
 
 The original decision body above is preserved verbatim per ADR append-only convention
 (`.claude/rules/arch.md:157-162`).
+
+---
+
+## Update 2026-08-06: sqlite3 Native Assets + SQLCipher 4.17
+
+The native distribution decision is superseded while the original body remains
+historical context:
+
+- Drift is locked to `2.34.0` and sqlite3 resolves to `3.5.1`.
+- `pubspec.yaml` selects `hooks.user_defines.sqlite3.source: sqlcipher`; both
+  `sqlcipher_flutter_libs` and `sqlite3_flutter_libs` are forbidden.
+- The Android `open.overrideFor` loader and the iOS Podfile `-lsqlite3` strip
+  were removed after clean Android/iOS Native Asset builds.
+- Database startup requires SQLCipher `4.17.x`, `cipher_status == 1`, a readable
+  `sqlite_master`, and a non-plaintext file header.
+- A committed database created with genuine SQLCipher `4.10.0 community`
+  verifies in-place v35→v36 migration, write, close, and cold reopen on Android
+  and iOS. Its current `journal_mode` is `delete`; if device evidence changes to
+  WAL, SQLCipher 4.10 must not remain a long-term public-release baseline.
+
+The signed iOS device app builds with the embedded `sqlcipher.framework`; the
+runtime integration test must be rerun whenever the physical device allows the
+installation prompt.

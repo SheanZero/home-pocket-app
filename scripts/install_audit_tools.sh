@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/install_audit_tools.sh
-# Bootstrap audit tools separately from the application's analyzer-8 resolver.
+# Bootstrap audit tools separately from the application's analyzer-12 resolver.
 # Global activation keeps coverde's dependency graph out of the checked-in app
 # lockfile; the blocking dependency compatibility contract validates that lock.
 set -euo pipefail

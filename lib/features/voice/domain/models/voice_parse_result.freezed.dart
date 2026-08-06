@@ -14,75 +14,19 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VoiceParseResult {
   String get rawText;
-  int?
-  get amount; // Parsed date from voice text (null = not mentioned, default to today)
-  DateTime?
-  get parsedDate; // Merchant fields stored as primitives (no MerchantMatch reference)
+  int? get amount;
+  DateTime? get parsedDate;
   String? get merchantName;
-  String? get merchantCategoryId; // Category keyword match
-  CategoryMatchResult?
-  get categoryMatch; // Resolved ledger type (from merchant or category)
-  LedgerType? get ledgerType; // Quick task 260526-pg6 (Option F — Task 1):
-  // Canonical keyword string used internally by the resolver (post-strip:
-  // amount/currency suffix stripped, particles stripped per `localeId`).
-  // Surfaced here so the form-side write path (`recordCorrection`) can
-  // persist the SAME string the resolver will later look up — closing
-  // the silent-orphan bug where a divergent re-extractor wrote keys that
-  // never matched the resolver's lookup key.
-  //
-  // Null when no extraction occurred (e.g. caller did not provide enough
-  // context, or amount-only utterances). Consumers MUST treat null/empty
-  // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
-  String?
-  get resolvedKeyword; // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
-  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「一百人民币」 →
-  // 'CNY'). Null means native (「昼ごはんに680円」, bare 円/元/块) — no
-  // foreign conversion, preserving the pre-Phase-42 default. 260703 BUG-2:
-  // bare 元 is native in EVERY locale (D-08's zh→CNY branch superseded) —
-  // only the explicit 人民币/RMB/yuan words map to CNY. The shared form reads
-  // this to trigger the normal rate-fetch flow; null skips it entirely
-  // (Pitfall 1: JPY path must stay byte-identical).
-  String?
-  get detectedCurrency; // 260703 BUG-1 / 260706-kzr: the OTHER plausible reading of the amount,
-  // one tap away. Two producers share the field (unified semantics —
-  // "candidate = an alternative reading, reachable in one tap"):
-  //   - 1a concat suspect (260703): the Arabic-path amount matches the
-  //     ITN-concat signature and no alternate transcript confirmed the
-  //     repair (transcript "250046元" → amount 250046, candidate 2546).
-  //     Tapping ADOPTS the repair. A confirmed repair is adopted into
-  //     [amount] directly and this stays null.
-  //   - magnitude arbitration (260706-kzr): a spoken magnitude word
-  //     (千/万/thousand) pinned an expected digit count, the resolved
-  //     amount violated it, and a real re-parse (repair candidate /
-  //     state-machine re-read / alternate transcript) was adopted into
-  //     [amount]; the ORIGINAL reading swaps in here so tapping UNDOES
-  //     the arbitration back to the raw reading.
-  // Either way it must NEVER be applied silently. Always null on
-  // kanji-parsed, comma-grouped, and manual/OCR-constructed results.
-  int?
-  get amountRepairCandidate; // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
-  // the MerchantRecognizer produced for this utterance, recall-first (score
-  // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
-  // can offer below-floor candidates as manual picks. Empty when no merchant
-  // surface matched (or the utterance had no recognizable merchant token).
+  String? get merchantCategoryId;
+  CategoryMatchResult? get categoryMatch;
+  LedgerType? get ledgerType;
+  String? get resolvedKeyword;
+  String? get detectedCurrency;
+  int? get amountRepairCandidate;
   List<MerchantCandidate> get merchantCandidates;
-  int
-  get estimatedSatisfaction; // Phase 52 (RECUX-01/02 / D-11): mirror of the three Phase-51
-  // RecognitionOutcome fields the use case already computes, threaded here so
-  // the form can render the confidence band + alternate-category chips. These
-  // are descriptive only — the ledger never derives from them.
-  //
-  // [band] is the qualitative confidence band (ADR-012: 3-tier, never a
-  // number). Null for a manual/OCR-constructed VPR (no outcome → D-10
-  // no-affordance correct-by-construction).
-  ConfidenceBand?
-  get band; // [alternates] is the outcome's ranked alternate categories for the
-  // Phase-52 chips (keyword's category first, then merchant-derived in rank
-  // order, de-duplicated by L2 id). Empty on manual/OCR entry.
-  List<CategoryMatchResult>
-  get alternates; // [keywordMerchantConflict] is true when the keyword verdict won over a
-  // strong (>=0.85) merchant whose L2 differs (XVAL-02 conflict). False on
-  // manual/OCR entry.
+  int get estimatedSatisfaction;
+  ConfidenceBand? get band;
+  List<CategoryMatchResult> get alternates;
   bool get keywordMerchantConflict;
 
   /// Create a copy of VoiceParseResult
@@ -583,72 +527,23 @@ class _VoiceParseResult implements VoiceParseResult {
   final String rawText;
   @override
   final int? amount;
-  // Parsed date from voice text (null = not mentioned, default to today)
   @override
   final DateTime? parsedDate;
-  // Merchant fields stored as primitives (no MerchantMatch reference)
   @override
   final String? merchantName;
   @override
   final String? merchantCategoryId;
-  // Category keyword match
   @override
   final CategoryMatchResult? categoryMatch;
-  // Resolved ledger type (from merchant or category)
   @override
   final LedgerType? ledgerType;
-  // Quick task 260526-pg6 (Option F — Task 1):
-  // Canonical keyword string used internally by the resolver (post-strip:
-  // amount/currency suffix stripped, particles stripped per `localeId`).
-  // Surfaced here so the form-side write path (`recordCorrection`) can
-  // persist the SAME string the resolver will later look up — closing
-  // the silent-orphan bug where a divergent re-extractor wrote keys that
-  // never matched the resolver's lookup key.
-  //
-  // Null when no extraction occurred (e.g. caller did not provide enough
-  // context, or amount-only utterances). Consumers MUST treat null/empty
-  // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
   @override
   final String? resolvedKeyword;
-  // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
-  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「一百人民币」 →
-  // 'CNY'). Null means native (「昼ごはんに680円」, bare 円/元/块) — no
-  // foreign conversion, preserving the pre-Phase-42 default. 260703 BUG-2:
-  // bare 元 is native in EVERY locale (D-08's zh→CNY branch superseded) —
-  // only the explicit 人民币/RMB/yuan words map to CNY. The shared form reads
-  // this to trigger the normal rate-fetch flow; null skips it entirely
-  // (Pitfall 1: JPY path must stay byte-identical).
   @override
   final String? detectedCurrency;
-  // 260703 BUG-1 / 260706-kzr: the OTHER plausible reading of the amount,
-  // one tap away. Two producers share the field (unified semantics —
-  // "candidate = an alternative reading, reachable in one tap"):
-  //   - 1a concat suspect (260703): the Arabic-path amount matches the
-  //     ITN-concat signature and no alternate transcript confirmed the
-  //     repair (transcript "250046元" → amount 250046, candidate 2546).
-  //     Tapping ADOPTS the repair. A confirmed repair is adopted into
-  //     [amount] directly and this stays null.
-  //   - magnitude arbitration (260706-kzr): a spoken magnitude word
-  //     (千/万/thousand) pinned an expected digit count, the resolved
-  //     amount violated it, and a real re-parse (repair candidate /
-  //     state-machine re-read / alternate transcript) was adopted into
-  //     [amount]; the ORIGINAL reading swaps in here so tapping UNDOES
-  //     the arbitration back to the raw reading.
-  // Either way it must NEVER be applied silently. Always null on
-  // kanji-parsed, comma-grouped, and manual/OCR-constructed results.
   @override
   final int? amountRepairCandidate;
-  // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
-  // the MerchantRecognizer produced for this utterance, recall-first (score
-  // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
-  // can offer below-floor candidates as manual picks. Empty when no merchant
-  // surface matched (or the utterance had no recognizable merchant token).
   final List<MerchantCandidate> _merchantCandidates;
-  // Phase 50 (DECOUP-03 / D-01): the full ranked list of merchant candidates
-  // the MerchantRecognizer produced for this utterance, recall-first (score
-  // DESC). Surfaced regardless of the 0.85 auto-fill floor so Phase-52 chips
-  // can offer below-floor candidates as manual picks. Empty when no merchant
-  // surface matched (or the utterance had no recognizable merchant token).
   @override
   @JsonKey()
   List<MerchantCandidate> get merchantCandidates {
@@ -661,23 +556,9 @@ class _VoiceParseResult implements VoiceParseResult {
   @override
   @JsonKey()
   final int estimatedSatisfaction;
-  // Phase 52 (RECUX-01/02 / D-11): mirror of the three Phase-51
-  // RecognitionOutcome fields the use case already computes, threaded here so
-  // the form can render the confidence band + alternate-category chips. These
-  // are descriptive only — the ledger never derives from them.
-  //
-  // [band] is the qualitative confidence band (ADR-012: 3-tier, never a
-  // number). Null for a manual/OCR-constructed VPR (no outcome → D-10
-  // no-affordance correct-by-construction).
   @override
   final ConfidenceBand? band;
-  // [alternates] is the outcome's ranked alternate categories for the
-  // Phase-52 chips (keyword's category first, then merchant-derived in rank
-  // order, de-duplicated by L2 id). Empty on manual/OCR entry.
   final List<CategoryMatchResult> _alternates;
-  // [alternates] is the outcome's ranked alternate categories for the
-  // Phase-52 chips (keyword's category first, then merchant-derived in rank
-  // order, de-duplicated by L2 id). Empty on manual/OCR entry.
   @override
   @JsonKey()
   List<CategoryMatchResult> get alternates {
@@ -686,9 +567,6 @@ class _VoiceParseResult implements VoiceParseResult {
     return EqualUnmodifiableListView(_alternates);
   }
 
-  // [keywordMerchantConflict] is true when the keyword verdict won over a
-  // strong (>=0.85) merchant whose L2 differs (XVAL-02 conflict). False on
-  // manual/OCR entry.
   @override
   @JsonKey()
   final bool keywordMerchantConflict;

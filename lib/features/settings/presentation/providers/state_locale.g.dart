@@ -32,7 +32,7 @@ final class LocaleNotifierProvider
         argument: null,
         retry: null,
         name: r'localeProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -45,7 +45,7 @@ final class LocaleNotifierProvider
   LocaleNotifier create() => LocaleNotifier();
 }
 
-String _$localeNotifierHash() => r'72397db5879bab4bff692ee5e8d5e37294b8cbf2';
+String _$localeNotifierHash() => r'37b410d23e908044021771c0162e02f25c0049c5';
 
 /// Manages the current locale settings for the app.
 ///
@@ -56,7 +56,7 @@ abstract class _$LocaleNotifier extends $AsyncNotifier<LocaleSettings> {
   FutureOr<LocaleSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<LocaleSettings>, LocaleSettings>;
     final element =
         ref.element
@@ -66,7 +66,7 @@ abstract class _$LocaleNotifier extends $AsyncNotifier<LocaleSettings> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

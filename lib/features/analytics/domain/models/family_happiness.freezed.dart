@@ -13,7 +13,6 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$FamilyHappiness {
-  // aux (flat)
   /// Display anchor: the year of the active window's endDate (Phase 15+).
   /// Source-of-truth date range is the use-case (startDate, endDate) input.
   int get year;
@@ -21,7 +20,7 @@ mixin _$FamilyHappiness {
   /// Display anchor: the month of the active window's endDate (Phase 15+).
   /// See use-case (startDate, endDate) for the queried range.
   int get month;
-  int get totalGroupJoyTx; // main metrics
+  int get totalGroupJoyTx;
   MetricResult<int> get familyHighlightsSum;
   MetricResult<SharedJoyInsight> get sharedJoyInsight;
   MetricResult<double> get medianSatisfaction;
@@ -352,7 +351,6 @@ class _FamilyHappiness implements FamilyHappiness {
     required this.medianSatisfaction,
   });
 
-  // aux (flat)
   /// Display anchor: the year of the active window's endDate (Phase 15+).
   /// Source-of-truth date range is the use-case (startDate, endDate) input.
   @override
@@ -364,7 +362,6 @@ class _FamilyHappiness implements FamilyHappiness {
   final int month;
   @override
   final int totalGroupJoyTx;
-  // main metrics
   @override
   final MetricResult<int> familyHighlightsSum;
   @override

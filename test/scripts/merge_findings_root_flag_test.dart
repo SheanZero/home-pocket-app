@@ -36,7 +36,7 @@ Map<String, dynamic> _shardWith(List<Finding> findings, String toolSource) => {
 
 void _writeSuccessfulCanonicalShards(String root) {
   const canonicalTools = {
-    'layer.json': 'import_guard',
+    'layer.json': 'import_lint',
     'dead_code.json': 'dart_code_linter',
     'providers.json': 'owned_provider_contract',
     'duplication.json': 'owned_duplication_detector',
@@ -53,7 +53,7 @@ Finding _f({
   int line = 1,
   String category = 'layer_violation',
   String severity = 'CRITICAL',
-  String toolSource = 'import_guard',
+  String toolSource = 'import_lint',
   String confidence = 'high',
   String description = 'desc',
   String rationale = 'why',
@@ -128,7 +128,7 @@ void main() {
 
         File('$reauditRoot/shards/layer.json').writeAsStringSync(
           jsonEncode(
-            _shardWith([_f(filePath: 'lib/foo.dart', line: 7)], 'import_guard'),
+            _shardWith([_f(filePath: 'lib/foo.dart', line: 7)], 'import_lint'),
           ),
         );
         File('$reauditRoot/agent-shards/layer.json').writeAsStringSync(

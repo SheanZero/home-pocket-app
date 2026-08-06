@@ -198,7 +198,7 @@ assert_expected_registrants_exist() {
 regenerate_if_required() {
   if "$REGENERATE"; then
     run_flutter gen-l10n
-    run_flutter pub run build_runner build --delete-conflicting-outputs
+    run_flutter pub run build_runner build
   else
     log 'Skipping Dart code generation (pass --regenerate only when generator inputs changed).'
   fi

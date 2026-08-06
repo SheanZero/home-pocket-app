@@ -29,7 +29,7 @@ void main() {
     final raw = sqlite.sqlite3.open(dbFile.path);
     _createV6Schema(raw);
     raw.execute('PRAGMA user_version = 6');
-    raw.dispose();
+    raw.close();
   });
 
   tearDown(() async {

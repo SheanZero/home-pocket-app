@@ -7,7 +7,7 @@ import '../../scripts/audit/providers.dart' as providers;
 
 void main() {
   test(
-    'provider audit reports the owned contract rather than riverpod_lint',
+    'provider audit reports the owned defense-in-depth contract',
     () {
       final envelope = providers.buildProviderAuditEnvelope(
         const ProviderContractReport([]),
@@ -87,7 +87,10 @@ ProviderContractReport _checkSource(String source) {
   final root = Directory.systemTemp.createTempSync('provider_contract_test_');
   addTearDown(() => root.deleteSync(recursive: true));
   Directory('${root.path}/lib').createSync();
-  File('${root.path}/analysis_options.yaml').writeAsStringSync('# fixture\n');
+  File('${root.path}/analysis_options.yaml').writeAsStringSync('''
+plugins:
+  riverpod_lint: 3.1.4
+''');
   File('${root.path}/pubspec.lock').writeAsStringSync('''
 packages:
   riverpod_lint:
@@ -96,7 +99,7 @@ packages:
       name: riverpod_lint
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.4"
 ''');
   File('${root.path}/lib/fixture.dart').writeAsStringSync(source);
   return checkProviderContract(root.path);

@@ -1,12 +1,9 @@
 // Encrypted-executor migration ladder — Phase 49 Plan 06 (Crit #4, MERCH-04).
 //
 // WHY THIS LIVES IN integration_test/ (not test/):
-// The host `flutter test` runner links plain libsqlite3, so `createEncryptedExecutor`
-// would throw `StateError('SQLCipher not loaded')` (encrypted_database.dart:48-50)
-// — or, worse, silently open a PLAINTEXT db and mask a cipher regression (Pitfall #2).
-// Only a booted simulator/device loads `sqlcipher_flutter_libs` natives. This test
-// therefore runs ONLY on-device and asserts `PRAGMA cipher_version` is NON-EMPTY
-// inside the test, proving the schema/seed actually applied on the SQLCipher path.
+// sqlite3 3.x loads the SQLCipher build selected by the pubspec Native Assets
+// hook. This test runs on-device and proves the schema/seed against the exact
+// native path shipped by Android and iOS.
 //
 // HOW TO RUN (cannot run in headless CI without a booted simulator):
 //   flutter test integration_test/merchant_migration_ladder_test.dart
@@ -138,11 +135,6 @@ void main() {
       .where((c) => c.level == 2)
       .map((c) => c.id)
       .toSet();
-
-  setUpAll(() async {
-    // Load SQLCipher natives for the current platform (Android override / iOS).
-    await ensureNativeLibrary();
-  });
 
   group('encrypted ladder — FRESH current schema (SQLCipher)', () {
     late MasterKeyRepository keyRepo;

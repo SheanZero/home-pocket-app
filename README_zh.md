@@ -242,7 +242,7 @@ cd home-pocket-app
 flutter pub get
 
 # 3. 代码生成 (Riverpod, Freezed, Drift)
-flutter pub run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 
 # 4. 生成多语言文件
 flutter gen-l10n

@@ -13,7 +13,7 @@ class Finding {
   final String rationale;
   final String suggestedFix;
   final String
-  toolSource; // 'import_guard' | 'riverpod_lint' | 'dart_code_linter' | 'agent:layer' | ...
+  toolSource; // 'import_lint' | 'owned_provider_contract' | 'dart_code_linter' | ...
   final String confidence; // 'high' | 'medium' | 'low'
   final String status; // 'open' | 'closed' (Phase 1 emits 'open')
   final String? closedInPhase; // null in Phase 1

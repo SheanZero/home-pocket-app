@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
-import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -51,8 +50,6 @@ class _Recorder {
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(ensureNativeLibrary);
-
   testWidgets('emits reproducible performance measurements', (tester) async {
     if (!const {1000, 10000, 50000}.contains(_datasetSize)) {
       throw ArgumentError('PERF_DATASET_SIZE must be 1000, 10000, or 50000');

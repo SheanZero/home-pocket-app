@@ -365,7 +365,7 @@ class AppDatabase extends _$AppDatabase {
 
 ```bash
 # 一次性生成
-flutter pub run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 
 # 持续监听
 flutter pub run build_runner watch

@@ -7,12 +7,58 @@ analyzer:
     - "build/**"
   errors:
     invalid_annotation_target: ignore
-  plugins:
-    - custom_lint
 
-# riverpod_lint 3.1.0 is deliberately held, not activated, on the selected
-# Flutter 3.44.8 / analyzer 8 production graph. See the owned provider
-# contract and docs/testing/DEPENDENCY_COMPATIBILITY.md for re-enable proof.
+plugins:
+  riverpod_lint: 3.1.4
+  import_lint: 2.0.0
+
+import_lint:
+  severity: error
+  rules:
+    plaintext_sqlite_forbidden:
+      target: "package:home_pocket/**"
+      from: "package:sqlite3_flutter_libs/**"
+      except: []
+    infrastructure_to_application:
+      target: "package:home_pocket/infrastructure/**"
+      from: "package:home_pocket/application/**"
+      except: []
+    infrastructure_to_presentation:
+      target: "package:home_pocket/infrastructure/**"
+      from: "package:home_pocket/features/*/presentation/**"
+      except: []
+    application_to_presentation:
+      target: "package:home_pocket/application/**"
+      from: "package:home_pocket/features/*/presentation/**"
+      except: []
+    domain_to_data:
+      target: "package:home_pocket/features/*/domain/**"
+      from: "package:home_pocket/data/**"
+      except: []
+    domain_to_infrastructure:
+      target: "package:home_pocket/features/*/domain/**"
+      from: "package:home_pocket/infrastructure/**"
+      except: []
+    domain_to_application:
+      target: "package:home_pocket/features/*/domain/**"
+      from: "package:home_pocket/application/**"
+      except: []
+    domain_to_presentation:
+      target: "package:home_pocket/features/*/domain/**"
+      from: "package:home_pocket/features/*/presentation/**"
+      except: []
+    domain_to_flutter:
+      target: "package:home_pocket/features/*/domain/**"
+      from: "package:flutter/**"
+      except: []
+    presentation_ui_to_data_daos:
+      target: "package:home_pocket/features/*/presentation/{navigation,screens,theme,utils,widgets}/**"
+      from: "package:home_pocket/data/daos/**"
+      except: []
+    presentation_ui_to_data_tables:
+      target: "package:home_pocket/features/*/presentation/{navigation,screens,theme,utils,widgets}/**"
+      from: "package:home_pocket/data/tables/**"
+      except: []
 
 linter:
   rules:

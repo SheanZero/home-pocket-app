@@ -242,7 +242,7 @@ cd home-pocket-app
 flutter pub get
 
 # 3. Code generation (Riverpod, Freezed, Drift)
-flutter pub run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 
 # 4. Generate localization files
 flutter gen-l10n

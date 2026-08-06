@@ -64,7 +64,7 @@ Capability placement:
 
 ```bash
 flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 flutter gen-l10n
 flutter analyze
 dart format .
@@ -120,7 +120,10 @@ Mandatory rules:
 - Use `lib/infrastructure/crypto/` and existing security services for crypto operations.
 - Never access `flutter_secure_storage` directly for keys outside the established secure-storage/key-manager layer.
 - Sensitive fields such as amounts, notes, merchant names, keys, tokens, recovery material, and sync payload details must not be logged.
-- Use `sqlcipher_flutter_libs`; never add or reintroduce `sqlite3_flutter_libs`.
+- Use sqlite3 3.x Native Assets with `hooks.user_defines.sqlite3.source: sqlcipher`.
+- Never add or reintroduce `sqlcipher_flutter_libs` or `sqlite3_flutter_libs`.
+- Database startup must verify SQLCipher 4.17.x, `cipher_status == 1`, readable
+  `sqlite_master`, and a non-plaintext file header.
 - Preserve local-first and zero-knowledge assumptions in new features.
 
 Initialization:
@@ -199,10 +202,12 @@ Note: `dart format .` may touch unrelated legacy files depending on formatter ve
 
 ## iOS Build Notes
 
-- Keep `sqlcipher_flutter_libs` at the current `^0.6.x` line; `0.7.0+eol` is intentionally a no-op package and this project has not migrated to `sqlite3` 3.x.
-- Never add `sqlite3_flutter_libs`.
+- SQLCipher is embedded as `sqlcipher.framework` by the sqlite3 Native Assets
+  hook; CocoaPods must not resolve a separate SQLCipher pod.
+- Never add `sqlcipher_flutter_libs` or `sqlite3_flutter_libs`.
 - Preserve the Podfile ML Kit simulator `EXCLUDED_ARCHS` fix if present.
-- Preserve the `ios/Podfile` `post_install` strip that removes `-l"sqlite3"` from Pod xcconfig files. FirebaseMessaging and other pods can otherwise pull in system `libsqlite3.tbd`, causing `PRAGMA cipher_version` to return empty and SQLCipher initialization to fail.
+- Do not reintroduce the old Podfile `-l"sqlite3"` strip; the Native Asset is
+  loaded explicitly and the encrypted fixture gate detects system-SQLite fallback.
 - Switching between simulator/device or `--no-codesign` and signed builds can leave native-asset framework artifacts behind; run `flutter clean` before iOS device verification when signatures look stale.
 
 Clean rebuild:

@@ -15,17 +15,17 @@ T _$identity<T>(T value) => value;
 mixin _$ShoppingItem {
   String get id;
   String get deviceId;
-  String get listType; // 'public' | 'private'
+  String get listType;
   String get name;
   LedgerType? get ledgerType;
   String? get categoryId;
-  List<String> get tags; // D-01: JSON-encoded at repo boundary
-  String? get note; // decrypted plaintext
+  List<String> get tags;
+  String? get note;
   double get quantity;
   ShoppingUnit get unit;
   String? get customUnit;
-  int? get estimatedPrice; // ITEM-05
-  DateTime? get completedAt; // D-03
+  int? get estimatedPrice;
+  DateTime? get completedAt;
   bool get isCompleted;
   int get sortOrder;
   bool get isSynced;
@@ -621,7 +621,6 @@ class _ShoppingItem extends ShoppingItem {
   final String deviceId;
   @override
   final String listType;
-  // 'public' | 'private'
   @override
   final String name;
   @override
@@ -637,10 +636,8 @@ class _ShoppingItem extends ShoppingItem {
     return EqualUnmodifiableListView(_tags);
   }
 
-  // D-01: JSON-encoded at repo boundary
   @override
   final String? note;
-  // decrypted plaintext
   @override
   @JsonKey()
   final double quantity;
@@ -651,10 +648,8 @@ class _ShoppingItem extends ShoppingItem {
   final String? customUnit;
   @override
   final int? estimatedPrice;
-  // ITEM-05
   @override
   final DateTime? completedAt;
-  // D-03
   @override
   @JsonKey()
   final bool isCompleted;

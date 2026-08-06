@@ -1,10 +1,9 @@
 import 'dart:io';
 
-/// Repository-owned Riverpod checks for the analyzer-8 production graph.
+/// Repository-owned Riverpod checks for the analyzer-12 production graph.
 ///
-/// `riverpod_lint` 3.1.0 remains locked as a compatibility hold, but is not an
-/// active analysis-server plugin on Flutter 3.44.8. This contract protects the
-/// app-root invariant without treating an unloaded upstream plugin as green.
+/// `riverpod_lint` 3.1.4 is active through the analysis-server plugin protocol.
+/// This defense-in-depth contract also protects the app-root invariant.
 class ProviderContractViolation {
   const ProviderContractViolation({
     required this.code,
@@ -36,7 +35,7 @@ ProviderContractReport checkProviderContract(String rootPath) {
   final root = Directory(rootPath).absolute;
   final violations = <ProviderContractViolation>[];
   _checkAppRoots(root, violations);
-  _checkRiverpodLintHold(root, violations);
+  _checkRiverpodLintConfiguration(root, violations);
   return ProviderContractReport(violations);
 }
 
@@ -100,7 +99,7 @@ void _checkAppRoots(
   }
 }
 
-void _checkRiverpodLintHold(
+void _checkRiverpodLintConfiguration(
   Directory root,
   List<ProviderContractViolation> violations,
 ) {
@@ -108,27 +107,27 @@ void _checkRiverpodLintHold(
   if (!options.existsSync()) {
     violations.add(
       const ProviderContractViolation(
-        code: 'riverpod_lint_hold_unverifiable',
+        code: 'riverpod_lint_plugin_unverifiable',
         path: 'analysis_options.yaml',
         line: 1,
         message:
-            'Missing analysis options; cannot verify the riverpod_lint hold.',
+            'Missing analysis options; cannot verify the riverpod_lint plugin.',
       ),
     );
   } else {
     final source = options.readAsStringSync();
     final activePlugin = RegExp(
-      r'^\s*(?:-\s*riverpod_lint|riverpod_lint\s*:)\s*(?:#.*)?$',
+      r'^\s*riverpod_lint\s*:\s*3\.1\.4\s*(?:#.*)?$',
       multiLine: true,
     ).firstMatch(source);
-    if (activePlugin != null) {
+    if (activePlugin == null) {
       violations.add(
-        ProviderContractViolation(
-          code: 'riverpod_lint_active',
+        const ProviderContractViolation(
+          code: 'riverpod_lint_plugin_missing',
           path: 'analysis_options.yaml',
-          line: _lineAt(source, activePlugin.start),
+          line: 1,
           message:
-              'riverpod_lint is held on Flutter 3.44.8/analyzer 8 and must not be configured as an active plugin without a passing bad/control probe.',
+              'riverpod_lint 3.1.4 must remain active on the analyzer-12 graph.',
         ),
       );
     }
@@ -142,7 +141,7 @@ void _checkRiverpodLintHold(
         path: 'pubspec.lock',
         line: 1,
         message:
-            'Missing lockfile; cannot verify the held riverpod_lint version.',
+            'Missing lockfile; cannot verify the active riverpod_lint version.',
       ),
     );
     return;
@@ -171,17 +170,17 @@ void _checkRiverpodLintHold(
         code: 'riverpod_lint_version_unparseable',
         path: 'pubspec.lock',
         line: 1,
-        message: 'Held riverpod_lint version is missing or not parseable.',
+        message: 'Active riverpod_lint version is missing or not parseable.',
       ),
     );
-  } else if (version != '3.1.0') {
+  } else if (version != '3.1.4') {
     violations.add(
       ProviderContractViolation(
         code: 'riverpod_lint_version_mismatch',
         path: 'pubspec.lock',
         line: _lineAt(lockSource, package!.start),
         message:
-            'Expected held riverpod_lint 3.1.0 for the analyzer-8 graph, found $version.',
+            'Expected active riverpod_lint 3.1.4 for the analyzer-12 graph, found $version.',
       ),
     );
   }

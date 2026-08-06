@@ -294,7 +294,6 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
   final int? initialSatisfaction;
   final DateTime? initialDate;
   final EntrySource entrySource;
-  // Voice-correction keyword — present only in .new mode (D-09).
   final String? voiceKeyword;
 
   /// Create a copy of TransactionDetailsFormConfig
