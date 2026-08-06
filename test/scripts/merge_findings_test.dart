@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../scripts/audit/finding.dart';
@@ -132,6 +133,33 @@ String _absoluteProjectRoot() {
   // Tests run with cwd at project root via flutter test; resolve scripts/ as
   // an absolute path so the subprocess can find it from a temp cwd.
   return Directory.current.path;
+}
+
+String _fixtureDigest(String value) =>
+    sha256.convert(utf8.encode(value)).toString();
+
+File _writeForensicManifest(
+  Directory root, {
+  required String run,
+  required int schemaVersion,
+  required String state,
+  required List<Map<String, String>> files,
+  bool includeRepairedAt = false,
+}) {
+  final repair = Directory('${root.path}/.merge-findings-forensics/$run')
+    ..createSync(recursive: true);
+  final manifest = <String, Object?>{
+    'schema_version': schemaVersion,
+    'state': state,
+    'reason': 'fixture repair intent',
+    'files': files,
+  };
+  if (includeRepairedAt) {
+    manifest['repaired_at'] = '2026-08-06T00:00:00.000Z';
+  }
+  final file = File('${repair.path}/manifest.json');
+  file.writeAsStringSync(jsonEncode(manifest));
+  return file;
 }
 
 void main() {
@@ -2007,6 +2035,261 @@ void main() {
           File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
           isTrue,
         );
+      },
+    );
+
+    test(
+      'pending forensic rebuild requires complete quarantine-exclusive bytes',
+      () async {
+        const oldIssues = '{"findings":[]}';
+        const oldMarkdown = '# Old report\n';
+        const artifactName = '.merge-findings-pair.json';
+        const expectedBytes = 'trusted repair artifact';
+        final expectedDigest = _fixtureDigest(expectedBytes);
+
+        for (final caseName in ['missing', 'tampered', 'duplicate']) {
+          final caseTmp = Directory.systemTemp.createTempSync(
+            'merger_pending_integrity_',
+          );
+          addTearDown(() {
+            if (caseTmp.existsSync()) caseTmp.deleteSync(recursive: true);
+          });
+          final caseRoot = _initShardLayout(caseTmp);
+          Directory(
+            '${caseTmp.path}/scripts/audit',
+          ).createSync(recursive: true);
+          File(
+            '${_absoluteProjectRoot()}/scripts/audit/finding.dart',
+          ).copySync('${caseTmp.path}/scripts/audit/finding.dart');
+          File(
+            '${_absoluteProjectRoot()}/scripts/merge_findings.dart',
+          ).copySync('${caseTmp.path}/scripts/merge_findings.dart');
+          File(
+            '${_absoluteProjectRoot()}/pubspec.yaml',
+          ).copySync('${caseTmp.path}/pubspec.yaml');
+          Link(
+            '${caseTmp.path}/.dart_tool',
+          ).createSync('${_absoluteProjectRoot()}/.dart_tool', recursive: true);
+
+          File('${caseRoot.path}/issues.json').writeAsStringSync(oldIssues);
+          File('${caseRoot.path}/ISSUES.md').writeAsStringSync(oldMarkdown);
+          final manifest = _writeForensicManifest(
+            caseRoot,
+            run: caseName,
+            schemaVersion: 2,
+            state: 'isolated_pending_rebuild',
+            files: [
+              {'name': artifactName, 'sha256': expectedDigest},
+            ],
+          );
+          final quarantine = manifest.parent;
+          if (caseName == 'tampered') {
+            File(
+              '${quarantine.path}/$artifactName',
+            ).writeAsStringSync('tampered repair artifact');
+          } else if (caseName == 'duplicate') {
+            File(
+              '${quarantine.path}/$artifactName',
+            ).writeAsStringSync(expectedBytes);
+            File(
+              '${caseRoot.path}/$artifactName',
+            ).writeAsStringSync(expectedBytes);
+          }
+
+          final result = await _runMerger(caseTmp);
+          expect(result.exitCode, 1, reason: '$caseName: ${result.stderr}');
+          expect(result.stderr, contains('forensic repair'));
+          expect(
+            File('${caseRoot.path}/issues.json').readAsStringSync(),
+            oldIssues,
+            reason: '$caseName must not rebuild output history',
+          );
+          expect(
+            File('${caseRoot.path}/ISSUES.md').readAsStringSync(),
+            oldMarkdown,
+            reason: '$caseName must not rebuild rendered output',
+          );
+          expect(
+            (jsonDecode(manifest.readAsStringSync()) as Map)['state'],
+            'isolated_pending_rebuild',
+            reason: '$caseName must not mark repair complete',
+          );
+        }
+      },
+    );
+
+    test(
+      'resumes schema-v1 isolating repair with mixed root and quarantine bytes',
+      () async {
+        const rootArtifact = '{corrupt journal';
+        const quarantinedArtifact = 'staged bytes';
+        final manifest = _writeForensicManifest(
+          shardRoot,
+          run: 'v1-isolating',
+          schemaVersion: 1,
+          state: 'isolating',
+          includeRepairedAt: true,
+          files: [
+            {
+              'name': '.merge-findings-pair.json',
+              'sha256': _fixtureDigest(rootArtifact),
+            },
+            {
+              'name': '.merge-findings-tmp-1-1-issues-next',
+              'sha256': _fixtureDigest(quarantinedArtifact),
+            },
+          ],
+        );
+        File(
+          '${shardRoot.path}/.merge-findings-pair.json',
+        ).writeAsStringSync(rootArtifact);
+        File(
+          '${manifest.parent.path}/.merge-findings-tmp-1-1-issues-next',
+        ).writeAsStringSync(quarantinedArtifact);
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, 0, reason: result.stderr);
+        final decoded = jsonDecode(manifest.readAsStringSync()) as Map;
+        expect(decoded['schema_version'], 2);
+        expect(decoded['state'], 'complete');
+        expect(
+          File('${shardRoot.path}/.merge-findings-pair.json').existsSync(),
+          isFalse,
+        );
+        expect(
+          File(
+            '${manifest.parent.path}/.merge-findings-pair.json',
+          ).readAsStringSync(),
+          rootArtifact,
+        );
+      },
+    );
+
+    test(
+      'migrates schema-v1 isolated repair only after verified rebuild',
+      () async {
+        const artifact = 'quarantined corrupt journal';
+        final manifest = _writeForensicManifest(
+          shardRoot,
+          run: 'v1-isolated',
+          schemaVersion: 1,
+          state: 'isolated',
+          includeRepairedAt: true,
+          files: [
+            {
+              'name': '.merge-findings-pair.json',
+              'sha256': _fixtureDigest(artifact),
+            },
+          ],
+        );
+        File(
+          '${manifest.parent.path}/.merge-findings-pair.json',
+        ).writeAsStringSync(artifact);
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, 0, reason: result.stderr);
+        final decoded = jsonDecode(manifest.readAsStringSync()) as Map;
+        expect(decoded['schema_version'], 2);
+        expect(decoded['state'], 'complete');
+      },
+    );
+
+    test(
+      'schema-v1 isolated repair stays pending when canonical evidence is incomplete',
+      () async {
+        const artifact = 'quarantined corrupt journal';
+        final manifest = _writeForensicManifest(
+          shardRoot,
+          run: 'v1-pending-canonical',
+          schemaVersion: 1,
+          state: 'isolated',
+          files: [
+            {
+              'name': '.merge-findings-pair.json',
+              'sha256': _fixtureDigest(artifact),
+            },
+          ],
+        );
+        File(
+          '${manifest.parent.path}/.merge-findings-pair.json',
+        ).writeAsStringSync(artifact);
+        File('${shardRoot.path}/shards/layer.json').deleteSync();
+
+        final result = await _runMerger(tmp);
+
+        expect(result.exitCode, 1);
+        expect(
+          result.stderr,
+          contains('repair requires every canonical shard'),
+        );
+        final decoded = jsonDecode(manifest.readAsStringSync()) as Map;
+        expect(decoded['schema_version'], 2);
+        expect(decoded['state'], 'isolated_pending_rebuild');
+      },
+    );
+
+    test(
+      'fails closed on malformed schema-v1 forensic repair intent',
+      () async {
+        const digest =
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        final forensic = Directory(
+          '${shardRoot.path}/.merge-findings-forensics',
+        )..createSync(recursive: true);
+        final cases = <String, Map<String, Object?>>{
+          'unknown-state': {
+            'schema_version': 1,
+            'state': 'complete',
+            'reason': 'fixture',
+            'files': [
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+            ],
+          },
+          'non-integral-schema-version': {
+            'schema_version': 1.0,
+            'state': 'isolated',
+            'reason': 'fixture',
+            'files': [
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+            ],
+          },
+          'duplicate-entry': {
+            'schema_version': 1,
+            'state': 'isolated',
+            'reason': 'fixture',
+            'files': [
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+            ],
+          },
+          'invalid-repaired-at': {
+            'schema_version': 1,
+            'state': 'isolated',
+            'reason': 'fixture',
+            'repaired_at': 'not-a-timestamp',
+            'files': [
+              {'name': '.merge-findings-pair.json', 'sha256': digest},
+            ],
+          },
+        };
+        for (final entry in cases.entries) {
+          final repair = Directory('${forensic.path}/${entry.key}')
+            ..createSync(recursive: true);
+          File(
+            '${repair.path}/manifest.json',
+          ).writeAsStringSync(jsonEncode(entry.value));
+
+          final result = await _runMerger(tmp);
+
+          expect(result.exitCode, 1, reason: entry.key);
+          expect(
+            result.stderr,
+            contains('forensic repair manifest is corrupt'),
+          );
+          repair.deleteSync(recursive: true);
+        }
       },
     );
   });

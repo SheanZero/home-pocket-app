@@ -104,7 +104,7 @@ only that exact pair and content as `accepted`; changing either clone's normaliz
 source produces a new fingerprint and re-reports the finding as `open`. Directory or
 path-wide ignores are prohibited.
 
-### 4.3 Catalogue-pair transaction, recovery, and forensic repair (HP-32 / HP-33 / HP-36)
+### 4.3 Catalogue-pair transaction, recovery, and forensic repair (HP-32 / HP-33 / HP-36 / HP-38)
 
 `issues.json` and `ISSUES.md` are one catalogue generation. The merger prepares
 both exact byte streams plus old-output backups and SHA-256 digests in uniquely named
@@ -148,11 +148,25 @@ root files are never moved.
 
 After all verified moves, the manifest atomically transitions to
 `isolated_pending_rebuild`. Ordinary later starts resume that pending repair
-without a second opt-in, but must validate existing lifecycle history and every
-canonical shard before rebuilding. Only after the durable catalogue pair commit
-does the manifest atomically become `complete`. Thus a crash before or after
-any move, manifest transition, or rebuild cannot silently discard repair
-intent; catalogue outputs and unrelated files remain untouched on failure.
+without a second opt-in. Before every rebuild attempt, each manifest entry must
+exist only at its quarantine destination with its recorded SHA-256; the same
+basename must be absent from the audit root. A missing, modified, or duplicate
+entry fails closed and leaves the manifest pending. The merger then validates
+existing lifecycle history and every canonical shard before rebuilding. Only
+after the durable catalogue pair commit does the manifest atomically become
+`complete`. Thus a crash before or after any move, manifest transition, or
+rebuild cannot silently discard repair intent; catalogue outputs and unrelated
+files remain untouched on failure.
+
+For compatibility with HP-36 repair runs, schema version 1 manifests are read
+only when they use the original `isolating` or `isolated` states, nonempty
+reason, and a nonempty, unique list of whitelisted basename/SHA-256 entries.
+An optional ISO-8601 `repaired_at` is accepted. Version-1 `isolating` resumes
+the verified move state machine. Version-1 `isolated` is not treated as a
+completed repair: the merger first proves the same quarantine-exclusive
+invariant, then atomically rewrites it as version 2
+`isolated_pending_rebuild`. Unknown, malformed, duplicate, or tampered version
+1 intent fails closed.
 
 ---
 

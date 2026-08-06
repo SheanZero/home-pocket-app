@@ -146,12 +146,19 @@ Future<void> main(List<String> args) async {
         }
         repairManifest = startedRepair.manifest;
       }
-    } else {
-      // The repair may have isolated a corrupt root journal. Only after the
-      // manifest proves every expected byte has moved may normal cleanup run.
-      final recoveryError = await _recoverPairTransaction(root);
-      if (recoveryError != null) {
-        stderr.writeln('[audit:merge] ERROR: $recoveryError');
+    }
+    // A pending forensic repair is durable intent, not merely a marker that
+    // quarantine once succeeded. Re-verify every quarantined artifact before
+    // touching recovery/history or attempting a catalogue rebuild: otherwise a
+    // crash followed by deletion/tampering could incorrectly mark the repair
+    // complete while silently losing the evidence that justified it.
+    if (repairManifest != null) {
+      final integrityError = await _validateIsolatedForensicRepair(
+        root,
+        repairManifest,
+      );
+      if (integrityError != null) {
+        stderr.writeln('[audit:merge] ERROR: $integrityError');
         exitCode = 1;
         return;
       }
@@ -1156,6 +1163,12 @@ class _ForensicRepairFile {
 
   static _ForensicRepairFile? fromJson(Object? value) {
     if (value is! Map) return null;
+    if (value.keys.any((key) => key is! String) ||
+        value.length != 2 ||
+        !value.containsKey('name') ||
+        !value.containsKey('sha256')) {
+      return null;
+    }
     final data = value.cast<String, dynamic>();
     final name = data['name'];
     final digest = data['sha256'];
@@ -1172,18 +1185,20 @@ class _ForensicRepairFile {
 class _ForensicRepairManifest {
   const _ForensicRepairManifest({
     required this.file,
+    required this.schemaVersion,
     required this.state,
     required this.reason,
     required this.files,
   });
 
   final File file;
+  final int schemaVersion;
   final String state;
   final String reason;
   final List<_ForensicRepairFile> files;
 
   Map<String, Object?> toJson() => {
-    'schema_version': 2,
+    'schema_version': schemaVersion,
     'state': state,
     'reason': reason,
     'files': files.map((entry) => entry.toJson()).toList(),
@@ -1191,6 +1206,9 @@ class _ForensicRepairManifest {
 
   _ForensicRepairManifest withState(String value) => _ForensicRepairManifest(
     file: file,
+    // Any successful transition writes the current durable schema. This is
+    // also the atomic migration path for the HP-36 version-1 format.
+    schemaVersion: 2,
     state: value,
     reason: reason,
     files: files,
@@ -1198,17 +1216,30 @@ class _ForensicRepairManifest {
 
   static _ForensicRepairManifest? fromFile(File file, Object? value) {
     if (value is! Map) return null;
+    if (value.keys.any((key) => key is! String)) return null;
     final data = value.cast<String, dynamic>();
+    final schemaVersion = data['schema_version'];
     final state = data['state'];
     final reason = data['reason'];
     final rawFiles = data['files'];
-    if (data['schema_version'] != 2 ||
+    final supportedSchema = schemaVersion == 1 || schemaVersion == 2;
+    final allowedKeys = schemaVersion == 1
+        ? {'schema_version', 'state', 'reason', 'files', 'repaired_at'}
+        : {'schema_version', 'state', 'reason', 'files'};
+    final allowedStates = schemaVersion == 1
+        ? {'isolating', 'isolated'}
+        : {'isolating', 'isolated_pending_rebuild', 'complete'};
+    final repairedAt = data['repaired_at'];
+    if (schemaVersion is! int ||
+        !supportedSchema ||
+        data.keys.any((key) => !allowedKeys.contains(key)) ||
+        (schemaVersion == 1 &&
+            repairedAt != null &&
+            (repairedAt is! String ||
+                repairedAt.trim().isEmpty ||
+                DateTime.tryParse(repairedAt) == null)) ||
         state is! String ||
-        !{
-          'isolating',
-          'isolated_pending_rebuild',
-          'complete',
-        }.contains(state) ||
+        !allowedStates.contains(state) ||
         reason is! String ||
         reason.trim().isEmpty ||
         rawFiles is! List ||
@@ -1224,6 +1255,7 @@ class _ForensicRepairManifest {
     }
     return _ForensicRepairManifest(
       file: file,
+      schemaVersion: schemaVersion,
       state: state,
       reason: reason,
       files: normalized,
@@ -1301,8 +1333,57 @@ Future<_RepairResumeResult> _resumePendingForensicRepair(String root) async {
     final resumed = await _isolateForensicRepair(root, manifest);
     if (resumed.error != null) return resumed;
     manifest = resumed.manifest!;
+  } else if (manifest.schemaVersion == 1 && manifest.state == 'isolated') {
+    // Version 1 marked the move phase as `isolated`, but did not record a
+    // separate rebuild-pending state. Never treat it as a completed repair:
+    // establish the same exclusive quarantine invariant first, then atomically
+    // migrate it into the version-2 state machine.
+    final integrityError = await _validateIsolatedForensicRepair(
+      root,
+      manifest,
+    );
+    if (integrityError != null) {
+      return _RepairResumeResult(error: integrityError);
+    }
+    final migrated = manifest.withState('isolated_pending_rebuild');
+    try {
+      await _writeForensicManifest(migrated);
+    } catch (error) {
+      return _RepairResumeResult(
+        error: 'could not migrate forensic repair manifest ($error)',
+      );
+    }
+    manifest = migrated;
   }
   return _RepairResumeResult(manifest: manifest);
+}
+
+/// The only valid pending-rebuild topology is one verified copy of every
+/// manifest artifact under that manifest's quarantine directory, and no copy
+/// at the audit root. Checking it on every start prevents a later interruption
+/// or external mutation from turning an incomplete repair into `complete`.
+Future<String?> _validateIsolatedForensicRepair(
+  String root,
+  _ForensicRepairManifest manifest,
+) async {
+  final quarantine = manifest.file.parent;
+  for (final entry in manifest.files) {
+    final source = File(_transactionPath(root, entry.name));
+    final destination = File('${quarantine.path}/${entry.name}');
+    if (source.existsSync() && destination.existsSync()) {
+      return 'forensic repair has duplicate source and quarantine bytes for ${entry.name}';
+    }
+    if (source.existsSync()) {
+      return 'forensic repair has unisolated root artifact for ${entry.name}';
+    }
+    if (!destination.existsSync()) {
+      return 'forensic repair quarantine artifact is missing: ${entry.name}';
+    }
+    if (!await _matchesDigest(destination, entry.digest)) {
+      return 'forensic repair quarantine digest mismatch for ${entry.name}';
+    }
+  }
+  return null;
 }
 
 Future<_RepairResumeResult> _isolateForensicRepair(
@@ -1345,6 +1426,10 @@ Future<_RepairResumeResult> _isolateForensicRepair(
       }
     }
     final pending = manifest.withState('isolated_pending_rebuild');
+    final integrityError = await _validateIsolatedForensicRepair(root, pending);
+    if (integrityError != null) {
+      return _RepairResumeResult(error: integrityError);
+    }
     _injectFailure('repair_before_pending_manifest');
     await _writeForensicManifest(pending);
     _injectFailure('repair_after_pending_manifest');
@@ -1407,6 +1492,7 @@ Future<_RepairResumeResult> _startForensicRepair(
     final manifest = File('${quarantine.path}/manifest.json');
     final started = _ForensicRepairManifest(
       file: manifest,
+      schemaVersion: 2,
       state: 'isolating',
       reason: reason,
       files: manifestFiles,
