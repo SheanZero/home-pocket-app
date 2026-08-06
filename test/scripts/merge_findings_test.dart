@@ -23,12 +23,14 @@ Future<ProcessResult> _runMerger(
   Directory cwd, {
   Map<String, String>? environment,
   bool repairPairTransaction = false,
+  String? root,
 }) async {
   return Process.run(
     'dart',
     [
       'run',
       '$_projectRoot/scripts/merge_findings.dart',
+      if (root != null) ...['--root', root],
       if (repairPairTransaction) '--repair-pair-transaction',
     ],
     runInShell: true,
@@ -1751,6 +1753,59 @@ void main() {
               .where((file) => file.path.endsWith('/manifest.json')),
           hasLength(1),
         );
+      },
+    );
+
+    test(
+      'dedupes forensic repair candidates for noncanonical root spellings',
+      () async {
+        final rootLink = Link('${tmp.path}/audit-link')
+          ..createSync(shardRoot.path);
+        final rootSpellings = <String>[
+          '.planning/audit/',
+          '.planning/audit/.',
+          'audit-link/',
+        ];
+
+        for (final rootSpelling in rootSpellings) {
+          File(
+            '${shardRoot.path}/.merge-findings-pair.json',
+          ).writeAsStringSync('{corrupt journal');
+          File(
+            '${shardRoot.path}/.merge-findings-tmp-1-1-issues-next',
+          ).writeAsStringSync('recognised staged bytes');
+
+          final repaired = await _runMerger(
+            tmp,
+            root: rootSpelling,
+            repairPairTransaction: true,
+          );
+          expect(repaired.exitCode, equals(0), reason: repaired.stderr);
+
+          final manifests =
+              Directory('${shardRoot.path}/.merge-findings-forensics')
+                  .listSync(recursive: true)
+                  .whereType<File>()
+                  .where((file) => file.path.endsWith('/manifest.json'));
+          final latest = manifests.reduce(
+            (newest, candidate) =>
+                candidate.statSync().modified.isAfter(
+                  newest.statSync().modified,
+                )
+                ? candidate
+                : newest,
+          );
+          final manifest = jsonDecode(latest.readAsStringSync()) as Map;
+          final names = (manifest['files'] as List)
+              .map((entry) => (entry as Map)['name'] as String)
+              .toList();
+          expect(names.toSet(), hasLength(names.length));
+          expect(names, contains('.merge-findings-pair.json'));
+
+          final ordinary = await _runMerger(tmp, root: rootSpelling);
+          expect(ordinary.exitCode, equals(0), reason: ordinary.stderr);
+        }
+        rootLink.deleteSync();
       },
     );
 

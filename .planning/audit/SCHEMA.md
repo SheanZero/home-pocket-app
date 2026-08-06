@@ -146,6 +146,13 @@ quarantine destination and verified there. Missing, duplicate, digest-mismatched
 path-traversing, malformed, or multiple pending manifests fail closed; unknown
 root files are never moved.
 
+Repair candidate discovery is keyed by the whitelisted artifact basename, rather
+than a raw filesystem path string. The preselected pair journal is skipped while
+enumerating the root, and manifest construction rejects a repeated basename as a
+defense in depth. Therefore equivalent `--root` spellings (including a trailing
+slash, `/.`, relative path, or symlink) cannot add a second record for the same
+root artifact and leave a self-invalidating repair manifest.
+
 After all verified moves, the manifest atomically transitions to
 `isolated_pending_rebuild`. Ordinary later starts resume that pending repair
 without a second opt-in. Before every rebuild attempt, each manifest entry must

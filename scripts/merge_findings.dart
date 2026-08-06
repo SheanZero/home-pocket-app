@@ -1451,14 +1451,17 @@ Future<_RepairResumeResult> _startForensicRepair(
       error: 'no pair transaction journal is present to repair',
     );
   }
-  final candidates = <File>[journal];
+  // Root spellings such as `audit/`, `audit/.`, and a symlink can make the
+  // journal's path string differ from `Directory.list` entries for the same
+  // file. Select candidates by their whitelisted basename, never by a raw
+  // path-string comparison, so the journal can occur exactly once.
+  final candidatesByName = <String, File>{_pairJournalName: journal};
   final directory = Directory(root);
   for (final entity in await directory.list().toList()) {
-    if (entity is File &&
-        entity.path != journal.path &&
-        _isTransientArtifactName(entity.uri.pathSegments.last)) {
-      candidates.add(entity);
-    }
+    if (entity is! File) continue;
+    final name = entity.uri.pathSegments.last;
+    if (name == _pairJournalName || !_isTransientArtifactName(name)) continue;
+    candidatesByName.putIfAbsent(name, () => entity);
   }
   final stamp = '${DateTime.now().microsecondsSinceEpoch}-${_newLockToken()}';
   final quarantine = Directory(
@@ -1467,7 +1470,8 @@ Future<_RepairResumeResult> _startForensicRepair(
   try {
     await quarantine.create(recursive: true);
     final manifestFiles = <_ForensicRepairFile>[];
-    for (final file in candidates) {
+    final manifestNames = <String>{};
+    for (final file in candidatesByName.values) {
       if (!file.existsSync()) {
         return const _RepairResumeResult(
           error: 'pair transaction disappeared before it could be repaired',
@@ -1478,6 +1482,11 @@ Future<_RepairResumeResult> _startForensicRepair(
       if (!_isRepairArtifactName(name)) {
         return _RepairResumeResult(
           error: 'refusing to repair unrecognised artifact name: $name',
+        );
+      }
+      if (!manifestNames.add(name)) {
+        return _RepairResumeResult(
+          error: 'forensic repair candidates contain duplicate basename: $name',
         );
       }
       manifestFiles.add(
