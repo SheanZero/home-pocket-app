@@ -1,5 +1,6 @@
 {
   "tool_source": "import_guard",
-  "generated_at": "2026-08-05T17:28:52.148287Z",
+  "scan_state": "ran",
+  "generated_at": "2026-08-06T00:14:16.573718Z",
   "findings": []
 }
