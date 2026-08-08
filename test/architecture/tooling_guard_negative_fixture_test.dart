@@ -183,6 +183,42 @@ void main() {
       expect(await fixture.readAsString(), '// preserved stale sentinel\n');
     });
 
+    test('concurrent guard invocations serialize fixture ownership', () async {
+      var active = 0;
+      var maximumActive = 0;
+      Future<tooling.ToolingGuardCommandResult> delayedFailure(
+        tooling.ToolingGuardCase guardCase,
+        String workingDirectory,
+      ) async {
+        active++;
+        maximumActive = maximumActive < active ? active : maximumActive;
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+        active--;
+        return tooling.ToolingGuardCommandResult(
+          exitCode: 1,
+          stdout: '${guardCase.diagnosticCode} ${guardCase.fixturePath}',
+          stderr: '',
+        );
+      }
+
+      final results = await Future.wait([
+        tooling.verifyToolingGuards(
+          cases: const [tooling.ToolingGuardCase.importGuardPackage()],
+          runCommand: delayedFailure,
+          runValidTreeChecks: false,
+        ),
+        tooling.verifyToolingGuards(
+          cases: const [tooling.ToolingGuardCase.importGuardPackage()],
+          runCommand: delayedFailure,
+          runValidTreeChecks: false,
+        ),
+      ]);
+
+      expect(results.every((result) => result.isPassing), isTrue);
+      expect(maximumActive, 1);
+      expect(File(_packageFixturePath).existsSync(), isFalse);
+    });
+
     test(
       'finally cleanup runs when a command returns unexpected success',
       () async {

@@ -308,6 +308,68 @@ void main() =>
     );
 
     test(
+      'qualified Riverpod alias shadows are lexical at the root call',
+      () async {
+        final cases = <({String name, String source, bool passes})>[
+          (
+            name: 'sibling parameter does not enclose root',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+void sibling(dynamic riverpod) {}
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+            passes: true,
+          ),
+          (
+            name: 'later sibling local does not enclose root',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+
+void later() {
+  final riverpod = Object();
+}
+''',
+            passes: true,
+          ),
+          (
+            name: 'enclosing parameter shadows root',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+class FakeNamespace {
+  Widget ProviderScope({required Widget child}) => child;
+}
+
+void main(FakeNamespace riverpod) =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+            passes: false,
+          ),
+        ];
+
+        for (final fixture in cases) {
+          final root = await _createFixtureRoot(appSource: fixture.source);
+          addTearDown(() => root.delete(recursive: true));
+          final report = checkProviderContract(root.path);
+          expect(
+            report.isPassing,
+            fixture.passes,
+            reason: '${fixture.name}: ${report.describe()}',
+          );
+        }
+      },
+    );
+
+    test(
       'qualified Riverpod aliases stay valid beside an extension-type declaration',
       () async {
         final root = await _createFixtureRoot(
