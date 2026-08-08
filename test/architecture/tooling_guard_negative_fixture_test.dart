@@ -105,6 +105,90 @@ void main() {
     });
 
     test(
+      'parenthesized runApp fixtures reject bad roots and clean controls',
+      () async {
+        const cases = <tooling.ToolingGuardCase>[
+          tooling.ToolingGuardCase(
+            name: 'provider app root parenthesized runApp without scope',
+            fixturePath:
+                'lib/phase58_provider_scope_parenthesized_run_app_fixture.dart',
+            source:
+                "import 'package:flutter/widgets.dart';\n"
+                'void phase58BadProviderRoot() => '
+                '(runApp)(const Placeholder());\n',
+            command: 'dart',
+            arguments: ['run', 'scripts/audit/provider_contract.dart'],
+            diagnosticCode: 'missing_provider_scope',
+          ),
+          tooling.ToolingGuardCase(
+            name: 'qualified Flutter parenthesized runApp without scope',
+            fixturePath:
+                'lib/phase58_provider_scope_qualified_parenthesized_run_app_fixture.dart',
+            source:
+                "import 'package:flutter/widgets.dart' as widgets;\n"
+                'void phase58BadProviderRoot() => '
+                '(widgets.runApp)(const widgets.Placeholder());\n',
+            command: 'dart',
+            arguments: ['run', 'scripts/audit/provider_contract.dart'],
+            diagnosticCode: 'missing_provider_scope',
+          ),
+          tooling.ToolingGuardCase(
+            name: 'provider app root parenthesized runApp control',
+            fixturePath:
+                'lib/phase58_provider_scope_parenthesized_run_app_control.dart',
+            source:
+                "import 'package:flutter/widgets.dart';\n"
+                "import 'package:flutter_riverpod/flutter_riverpod.dart';\n"
+                'void phase58ProviderRoot() => '
+                '(runApp)(const ProviderScope(child: Placeholder()));\n',
+            command: 'dart',
+            arguments: ['run', 'scripts/audit/provider_contract.dart'],
+            expectFailure: false,
+            expectsFixturePath: false,
+          ),
+          tooling.ToolingGuardCase(
+            name: 'qualified Flutter parenthesized runApp control',
+            fixturePath:
+                'lib/phase58_provider_scope_qualified_parenthesized_run_app_control.dart',
+            source:
+                "import 'package:flutter/widgets.dart' as widgets;\n"
+                "import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;\n"
+                'void phase58ProviderRoot() => (widgets.runApp)(\n'
+                '  const riverpod.ProviderScope(child: widgets.Placeholder()),\n'
+                ');\n',
+            command: 'dart',
+            arguments: ['run', 'scripts/audit/provider_contract.dart'],
+            expectFailure: false,
+            expectsFixturePath: false,
+          ),
+        ];
+
+        final result = await tooling.verifyToolingGuards(
+          cases: cases,
+          runCommand: tooling.runToolingGuardCommand,
+          runValidTreeChecks: false,
+        );
+
+        expect(result.isPassing, isTrue, reason: result.describe());
+        expect(result.cases, hasLength(cases.length));
+        for (final caseResult in result.cases.take(2)) {
+          expect(caseResult.output, contains('missing_provider_scope'));
+          expect(caseResult.output, contains(caseResult.guardCase.fixturePath));
+        }
+        for (final caseResult in result.cases.skip(2)) {
+          expect(caseResult.output, contains('PASS owned provider contract'));
+          expect(
+            caseResult.output,
+            isNot(contains(caseResult.guardCase.fixturePath)),
+          );
+        }
+        for (final caseResult in result.cases) {
+          expect(File(caseResult.guardCase.fixturePath).existsSync(), isFalse);
+        }
+      },
+    );
+
+    test(
       'record-pattern alias shadow fixture is rejected and cleaned',
       () async {
         const guardCase =

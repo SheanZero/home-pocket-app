@@ -120,6 +120,117 @@ void main() => widgets.runApp.call(
     });
 
     test(
+      'parenthesized runApp roots use the provider-scope contract',
+      () async {
+        final cases = <({String name, String source, bool passes})>[
+          (
+            name: 'unqualified root without scope',
+            source: '''
+import 'package:flutter/widgets.dart';
+
+void main() => (runApp)(const Placeholder());
+''',
+            passes: false,
+          ),
+          (
+            name: 'qualified Flutter root without scope',
+            source: '''
+import 'package:flutter/widgets.dart' as widgets;
+
+void main() => (widgets.runApp)(const widgets.Placeholder());
+''',
+            passes: false,
+          ),
+          (
+            name: 'unqualified ProviderScope control',
+            source: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() => (runApp)(const ProviderScope(child: Placeholder()));
+''',
+            passes: true,
+          ),
+          (
+            name: 'qualified Riverpod ProviderScope control',
+            source: '''
+import 'package:flutter/widgets.dart' as widgets;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+void main() => (widgets.runApp)(
+  const riverpod.ProviderScope(child: widgets.Placeholder()),
+);
+''',
+            passes: true,
+          ),
+          (
+            name: 'unverified receiver remains excluded',
+            source: '''
+void main() => (unverified.runApp)(Object());
+''',
+            passes: true,
+          ),
+          (
+            name: 'long receiver chain remains excluded',
+            source: '''
+void main() => (widgets.framework.runApp)(Object());
+''',
+            passes: true,
+          ),
+          (
+            name: 'parenthesized direct .call remains excluded',
+            source: '''
+void main() => (runApp.call)(Object());
+''',
+            passes: true,
+          ),
+          (
+            name: 'double grouping remains excluded',
+            source: '''
+void main() => ((runApp))(Object());
+''',
+            passes: true,
+          ),
+          (
+            name: 'comment lookalike remains excluded',
+            source: '''
+// (runApp)(Object())
+void main() {}
+''',
+            passes: true,
+          ),
+          (
+            name: 'string lookalike remains excluded',
+            source: '''
+const source = '(runApp)(Object())';
+void main() {}
+''',
+            passes: true,
+          ),
+        ];
+
+        for (final fixture in cases) {
+          final root = await _createFixtureRoot(appSource: fixture.source);
+          addTearDown(() => root.delete(recursive: true));
+
+          final report = checkProviderContract(root.path);
+
+          expect(
+            report.isPassing,
+            fixture.passes,
+            reason: '${fixture.name}: ${report.describe()}',
+          );
+          if (!fixture.passes) {
+            expect(
+              report.describe(),
+              contains('lib/main.dart:3:8 [missing_provider_scope]'),
+            );
+          }
+        }
+      },
+    );
+
+    test(
       'ProviderScope and UncontrolledProviderScope app roots pass',
       () async {
         final providerScopeRoot = await _createFixtureRoot(
