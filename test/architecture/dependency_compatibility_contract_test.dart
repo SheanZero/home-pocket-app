@@ -98,6 +98,7 @@ List<String> _stableWorkflowWrapperUniquenessViolations(String workflow) {
   const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
   final staticAnalysis = _workflowJobSource(workflow, 'static-analysis');
   final guardrails = _workflowJobSource(workflow, 'guardrails');
+  final coverage = _workflowJobSource(workflow, 'coverage');
   final violations = <String>[];
 
   if (RegExp(
@@ -116,6 +117,11 @@ List<String> _stableWorkflowWrapperUniquenessViolations(String workflow) {
   }
   if (!guardrails.contains('flutter pub get --enforce-lockfile')) {
     violations.add('guardrails must use enforced dependency retrieval');
+  }
+  if (coverage == null) {
+    violations.add('Stable coverage job is missing');
+  } else if (!coverage.contains('flutter pub get --enforce-lockfile')) {
+    violations.add('coverage must use enforced dependency retrieval');
   }
 
   const duplicateCommands = [
@@ -1061,12 +1067,12 @@ end
         expect(coverage, contains('flutter pub get --enforce-lockfile'));
         expect(
           _stableWorkflowWrapperUniquenessViolations(
-            audit
-                .replaceFirst('  coverage:\n', '  coverage:\n')
-                .replaceFirst(
-                  '      - run: flutter pub get\n',
-                  '      - run: flutter pub get --enforce-lockfile\n',
-                ),
+            audit.replaceFirst(
+              '      - run: flutter pub get --enforce-lockfile\n'
+                  '      - run: dart pub global activate coverde 0.3.0+1',
+              '      - run: flutter pub get\n'
+                  '      - run: dart pub global activate coverde 0.3.0+1',
+            ),
           ),
           isNotEmpty,
           reason: 'ordinary coverage retrieval must fail the Stable contract',

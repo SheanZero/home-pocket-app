@@ -61,12 +61,20 @@ met in one review:
 
 ## CI modes
 
-Stable CI is the blocking production contract. Its static-analysis job pins the
-manifest Flutter version, runs `flutter pub get --enforce-lockfile`, then runs:
+Stable CI is the blocking production contract. The static-analysis job has one
+sole Stable static-analysis entry:
 
 ```bash
-dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk
+bash scripts/verify_codegen_reproducibility.sh
 ```
+
+The wrapper owns locked resolution, baseline validation, two clean generation passes
+(localization and build-runner), then analyzer, active import/Riverpod lint,
+architecture contracts, reversible negative-tooling checks, and whitespace
+verification. Run direct validator commands only for local diagnosis; they are
+not an alternate Stable CI path. The separate guardrails and coverage jobs each
+run `flutter pub get --enforce-lockfile` before their own checks because every
+independent Stable Flutter job must retrieve the committed graph.
 
 The weekly beta workflow is visibly a non-production future probe. Both Android
 and iOS beta jobs retain ordinary `flutter pub get` and real build commands, but

@@ -91,7 +91,7 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.44.8
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: dart pub global activate coverde 0.3.0+1
       - run: flutter test --coverage
       - name: Strip generated files from lcov
