@@ -6,6 +6,7 @@ import '../../scripts/verify_tooling_guards.dart' as tooling;
 
 const _packageFixturePath =
     'lib/features/accounting/domain/models/phase58_package_import_fixture.dart';
+const _staleFixturePath = 'lib/phase58_stale_only_fixture.dart';
 
 void main() {
   group('tooling guard negative fixtures', () {
@@ -94,18 +95,24 @@ void main() {
       const guardCase =
           tooling.ToolingGuardCase.providerScopeRecordPatternAliasShadow();
       final fixture = File(guardCase.fixturePath);
-      await fixture.writeAsString(guardCase.source!);
-      addTearDown(() async {
-        if (fixture.existsSync()) await fixture.delete();
+      await tooling.withToolingGuardFixtureLock(() async {
+        await fixture.writeAsString(guardCase.source!);
+        try {
+          final result = await Process.run('flutter', [
+            'analyze',
+            '--no-fatal-infos',
+            guardCase.fixturePath,
+          ], workingDirectory: Directory.current.path);
+
+          expect(
+            result.exitCode,
+            0,
+            reason: '${result.stdout}\n${result.stderr}',
+          );
+        } finally {
+          if (fixture.existsSync()) await fixture.delete();
+        }
       });
-
-      final result = await Process.run('flutter', [
-        'analyze',
-        '--no-fatal-infos',
-        guardCase.fixturePath,
-      ], workingDirectory: Directory.current.path);
-
-      expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
     });
 
     test('extension-type shadow fixtures compile as Dart', () async {
@@ -116,27 +123,29 @@ void main() {
       final fixtures = cases
           .map((guardCase) => File(guardCase.fixturePath))
           .toList(growable: false);
-      for (var index = 0; index < cases.length; index++) {
-        await fixtures[index].writeAsString(cases[index].source!);
-      }
-      addTearDown(() async {
-        for (final fixture in fixtures) {
-          if (fixture.existsSync()) await fixture.delete();
+      await tooling.withToolingGuardFixtureLock(() async {
+        for (var index = 0; index < cases.length; index++) {
+          await fixtures[index].writeAsString(cases[index].source!);
+        }
+        try {
+          for (final fixture in fixtures) {
+            final result = await Process.run('flutter', [
+              'analyze',
+              '--no-fatal-infos',
+              fixture.path,
+            ], workingDirectory: Directory.current.path);
+            expect(
+              result.exitCode,
+              0,
+              reason: '${fixture.path}: ${result.stdout}\n${result.stderr}',
+            );
+          }
+        } finally {
+          for (final fixture in fixtures) {
+            if (fixture.existsSync()) await fixture.delete();
+          }
         }
       });
-
-      for (final fixture in fixtures) {
-        final result = await Process.run('flutter', [
-          'analyze',
-          '--no-fatal-infos',
-          fixture.path,
-        ], workingDirectory: Directory.current.path);
-        expect(
-          result.exitCode,
-          0,
-          reason: '${fixture.path}: ${result.stdout}\n${result.stderr}',
-        );
-      }
     });
 
     test(
@@ -166,14 +175,23 @@ void main() {
     );
 
     test('pre-existing sentinel is refused without deleting it', () async {
-      final fixture = File(_packageFixturePath);
-      await fixture.writeAsString('// preserved stale sentinel\n');
+      const staleCase = tooling.ToolingGuardCase(
+        name: 'stale fixture control',
+        fixturePath: _staleFixturePath,
+        source: '// stale-only fixture\n',
+        command: 'dart',
+        arguments: const [],
+      );
+      final fixture = File(_staleFixturePath);
+      await tooling.withToolingGuardFixtureLock(
+        () => fixture.writeAsString('// preserved stale sentinel\n'),
+      );
       addTearDown(() async {
         if (fixture.existsSync()) await fixture.delete();
       });
 
       final result = await tooling.verifyToolingGuards(
-        cases: const [tooling.ToolingGuardCase.importGuardPackage()],
+        cases: const [staleCase],
         runCommand: tooling.runToolingGuardCommand,
         runValidTreeChecks: false,
       );

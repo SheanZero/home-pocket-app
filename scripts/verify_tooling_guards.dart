@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,6 +7,37 @@ typedef ToolingGuardCommand =
       ToolingGuardCase guardCase,
       String workingDirectory,
     );
+
+Future<void> _toolingGuardFixtureQueue = Future<void>.value();
+
+/// Serializes complete fixture transactions in-process and across processes.
+/// The persistent lock coordinate is intentionally kept under ignored
+/// `.dart_tool`; ownership of scanned `lib/` sentinels never escapes this
+/// callback.
+Future<T> withToolingGuardFixtureLock<T>(
+  Future<T> Function() action, {
+  String workingDirectory = '.',
+}) async {
+  final previous = _toolingGuardFixtureQueue;
+  final releaseQueue = Completer<void>();
+  _toolingGuardFixtureQueue = releaseQueue.future;
+  await previous;
+
+  final root = Directory(workingDirectory).absolute;
+  final lock = File('${root.path}/.dart_tool/phase58_tooling_guard.lock');
+  final handle = await lock.open(mode: FileMode.append);
+  try {
+    await handle.lock(FileLock.blockingExclusive);
+    return await action();
+  } finally {
+    try {
+      await handle.unlock();
+    } finally {
+      await handle.close();
+      releaseQueue.complete();
+    }
+  }
+}
 
 class ToolingGuardCase {
   const ToolingGuardCase({
@@ -392,32 +424,34 @@ Future<ToolingGuardResult> verifyToolingGuards({
   bool runValidTreeChecks = true,
   String workingDirectory = '.',
 }) async {
-  final root = Directory(workingDirectory).absolute;
-  final stale = <ToolingGuardCaseResult>[];
-  for (final guardCase in cases) {
-    if (guardCase.source != null &&
-        File('${root.path}/${guardCase.fixturePath}').existsSync()) {
-      stale.add(
-        ToolingGuardCaseResult(
-          guardCase: guardCase,
-          messages: ['pre-existing fixture: ${guardCase.fixturePath}'],
-          output: '',
-        ),
-      );
+  return withToolingGuardFixtureLock(() async {
+    final root = Directory(workingDirectory).absolute;
+    final stale = <ToolingGuardCaseResult>[];
+    for (final guardCase in cases) {
+      if (guardCase.source != null &&
+          File('${root.path}/${guardCase.fixturePath}').existsSync()) {
+        stale.add(
+          ToolingGuardCaseResult(
+            guardCase: guardCase,
+            messages: ['pre-existing fixture: ${guardCase.fixturePath}'],
+            output: '',
+          ),
+        );
+      }
     }
-  }
-  if (stale.isNotEmpty) return ToolingGuardResult(stale);
+    if (stale.isNotEmpty) return ToolingGuardResult(stale);
 
-  final results = <ToolingGuardCaseResult>[];
-  for (final guardCase in cases) {
-    results.add(await _verifyCase(guardCase, root.path, runCommand));
-  }
-  if (runValidTreeChecks) {
-    for (final guardCase in _validProductionCases) {
+    final results = <ToolingGuardCaseResult>[];
+    for (final guardCase in cases) {
       results.add(await _verifyCase(guardCase, root.path, runCommand));
     }
-  }
-  return ToolingGuardResult(results);
+    if (runValidTreeChecks) {
+      for (final guardCase in _validProductionCases) {
+        results.add(await _verifyCase(guardCase, root.path, runCommand));
+      }
+    }
+    return ToolingGuardResult(results);
+  }, workingDirectory: workingDirectory);
 }
 
 const _validProductionCases = [

@@ -239,7 +239,7 @@ bool _isScopedRoot(
   }
 
   return importAlias == null
-      ? bindings.allowsUnqualified(constructor)
+      ? bindings.allowsUnqualified(constructor, call.offset)
       : bindings.allowsQualified(importAlias, constructor, call.offset);
 }
 
@@ -304,7 +304,6 @@ _RiverpodScopeBindings _riverpodScopeBindings(String source) {
   // This scanner intentionally fails closed for those declarations instead of
   // attempting analyzer-style resolution from a standalone Dart script.
   final scopeShadows = _scopeShadows(tokens);
-  unqualified.removeAll(scopeShadows);
   return _RiverpodScopeBindings(
     unqualified,
     qualified,
@@ -312,17 +311,96 @@ _RiverpodScopeBindings _riverpodScopeBindings(String source) {
   );
 }
 
-Set<String> _scopeShadows(List<_Token> tokens) {
+List<_ScopeShadow> _scopeShadows(List<_Token> tokens) {
   final shadows = <String>{};
+  final records = <_ScopeShadow>[];
   for (var index = 0; index < tokens.length; index++) {
     final name = tokens[index].text;
     if (_isScopeDeclaration(tokens, index) ||
         _isFormalParameterDeclaration(tokens, index) ||
         _isPatternBinding(tokens, index)) {
-      shadows.add(name);
+      if (!shadows.add('${tokens[index].offset}:$name')) continue;
+      records.add(_scopeShadowFor(tokens, index));
     }
   }
-  return shadows;
+  return records;
+}
+
+_ScopeShadow _scopeShadowFor(List<_Token> tokens, int declaration) {
+  final token = tokens[declaration];
+  if (_isFormalParameterDeclaration(tokens, declaration)) {
+    final open = _enclosingParenthesis(tokens, declaration)!;
+    final close = _matchingParenthesis(tokens, open)!;
+    return _ScopeShadow(
+      name: token.text,
+      offset: token.offset,
+      start: tokens[close].offset,
+      end: _functionBodyEnd(tokens, close),
+    );
+  }
+  if (_isAtLibraryScope(tokens, declaration)) {
+    return _ScopeShadow.libraryWide(name: token.text, offset: token.offset);
+  }
+  final block = _enclosingBlock(tokens, declaration);
+  return _ScopeShadow(
+    name: token.text,
+    offset: token.offset,
+    start: token.offset,
+    end: block == null ? token.offset : tokens[block.$2].offset,
+  );
+}
+
+bool _isAtLibraryScope(List<_Token> tokens, int index) {
+  final braces = <bool>[];
+  for (var cursor = 0; cursor < index; cursor++) {
+    if (tokens[cursor].text == '{') braces.add(_isScopeBrace(tokens, cursor));
+    if (tokens[cursor].text == '}' && braces.isNotEmpty) braces.removeLast();
+  }
+  return !braces.contains(true);
+}
+
+(int, int)? _enclosingBlock(List<_Token> tokens, int index) {
+  final braces = <int>[];
+  final opens = <int>[];
+  for (var cursor = 0; cursor < index; cursor++) {
+    if (tokens[cursor].text == '{') {
+      braces.add(cursor);
+      if (_isScopeBrace(tokens, cursor)) opens.add(cursor);
+    }
+    if (tokens[cursor].text == '}' && braces.isNotEmpty) {
+      final open = braces.removeLast();
+      if (opens.isNotEmpty && opens.last == open) opens.removeLast();
+    }
+  }
+  if (opens.isEmpty) return null;
+  final open = opens.last;
+  final close = _matchingBrace(tokens, open);
+  return close == null ? null : (open, close);
+}
+
+bool _isScopeBrace(List<_Token> tokens, int index) {
+  if (tokens[index].text != '{' || index == 0) return false;
+  final previous = tokens[index - 1].text;
+  return previous == ')' ||
+      previous == 'else' ||
+      previous == 'try' ||
+      previous == 'finally' ||
+      previous == 'do';
+}
+
+int _functionBodyEnd(List<_Token> tokens, int close) {
+  var index = close + 1;
+  while (index < tokens.length &&
+      (tokens[index].text == 'async' || tokens[index].text == '*')) {
+    index++;
+  }
+  if (index < tokens.length && tokens[index].text == '{') {
+    return tokens[_matchingBrace(tokens, index) ?? index].offset;
+  }
+  for (; index < tokens.length; index++) {
+    if (tokens[index].text == ';') return tokens[index].offset;
+  }
+  return tokens.last.offset;
 }
 
 /// Detects names introduced by Dart's destructuring patterns without trying to
@@ -501,6 +579,15 @@ int? _matchingParenthesis(List<_Token> tokens, int open) {
   return null;
 }
 
+int? _matchingBrace(List<_Token> tokens, int open) {
+  var depth = 0;
+  for (var index = open; index < tokens.length; index++) {
+    if (tokens[index].text == '{') depth++;
+    if (tokens[index].text == '}' && --depth == 0) return index;
+  }
+  return null;
+}
+
 List<_Call> _findCalls(
   String source,
   String name, {
@@ -664,24 +751,41 @@ class _RiverpodScopeBindings {
 
   final Set<String> unqualified;
   final Map<String, Set<String>> qualified;
-  final Set<String> qualifiedAliasShadows;
+  final List<_ScopeShadow> qualifiedAliasShadows;
 
-  bool allowsUnqualified(String constructor) =>
-      unqualified.contains(constructor);
+  bool allowsUnqualified(String constructor, int callOffset) =>
+      unqualified.contains(constructor) &&
+      !_isShadowedAtCall(constructor, callOffset);
 
   bool allowsQualified(String alias, String constructor, int callOffset) {
     if (qualified[alias]?.contains(constructor) != true) return false;
-    // This lightweight scanner cannot resolve every Dart lexical scope. At a
-    // qualified root call, any declaration of the import prefix is therefore
-    // treated as a shadow, even when the declaration may be in a sibling or
-    // later scope. That deliberate false-positive bias prevents a local value
-    // from impersonating Riverpod's import prefix. Comments, strings, and the
-    // import declaration itself never enter `qualifiedAliasShadows`.
-    return !_isAliasShadowedAtCall(alias, callOffset);
+    return !_isShadowedAtCall(alias, callOffset);
   }
 
-  bool _isAliasShadowedAtCall(String alias, int _) =>
-      qualifiedAliasShadows.contains(alias);
+  bool _isShadowedAtCall(String name, int callOffset) => qualifiedAliasShadows
+      .any((shadow) => shadow.name == name && shadow.contains(callOffset));
+}
+
+class _ScopeShadow {
+  const _ScopeShadow({
+    required this.name,
+    required this.offset,
+    required this.start,
+    required this.end,
+    this.libraryWide = false,
+  });
+
+  const _ScopeShadow.libraryWide({required String name, required int offset})
+    : this(name: name, offset: offset, start: 0, end: 0, libraryWide: true);
+
+  final String name;
+  final int offset;
+  final int start;
+  final int end;
+  final bool libraryWide;
+
+  bool contains(int callOffset) =>
+      libraryWide || (start <= callOffset && callOffset <= end);
 }
 
 enum _TokenKind { identifier, string, punctuation }
