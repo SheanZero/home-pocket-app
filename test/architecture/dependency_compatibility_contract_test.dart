@@ -1053,6 +1053,39 @@ end
     );
 
     test(
+      'coverage retrieves the exact reviewed graph and docs name the wrapper',
+      () {
+        final audit = currentInputs()['audit']!;
+        final coverage = _workflowJobSource(audit, 'coverage');
+        expect(coverage, isNotNull);
+        expect(coverage, contains('flutter pub get --enforce-lockfile'));
+        expect(
+          _stableWorkflowWrapperUniquenessViolations(
+            audit
+                .replaceFirst('  coverage:\n', '  coverage:\n')
+                .replaceFirst(
+                  '      - run: flutter pub get\n',
+                  '      - run: flutter pub get --enforce-lockfile\n',
+                ),
+          ),
+          isNotEmpty,
+          reason: 'ordinary coverage retrieval must fail the Stable contract',
+        );
+
+        final guide = File(
+          'docs/testing/DEPENDENCY_COMPATIBILITY.md',
+        ).readAsStringSync();
+        expect(
+          guide,
+          contains('bash scripts/verify_codegen_reproducibility.sh'),
+        );
+        expect(guide, contains('sole Stable static-analysis entry'));
+        expect(guide, contains('locked resolution'));
+        expect(guide, contains('two clean generation passes'));
+      },
+    );
+
+    test(
       'both beta jobs are explicit future probes that keep their builds',
       () {
         final future = currentInputs()['future']!;

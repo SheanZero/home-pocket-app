@@ -211,5 +211,31 @@ void main() {
             'by audit.yml --deferred argument).',
       );
     });
+
+    test(
+      'Invariant 7: every Stable Flutter job retrieves the committed lock',
+      () {
+        final coverage = RegExp(
+          r'^  coverage:\n([\s\S]*?)(?=^  [a-z][a-z0-9-]*:\n|\z)',
+          multiLine: true,
+        ).firstMatch(content)?.group(1);
+        expect(coverage, isNotNull, reason: 'audit.yml must retain coverage');
+        expect(
+          coverage,
+          contains('flutter pub get --enforce-lockfile'),
+          reason:
+              'coverage is an independent Stable Flutter job and must retrieve '
+              'the committed dependency graph with lock enforcement.',
+        );
+        expect(
+          RegExp(
+            r'^\s*-\s*run:\s*flutter pub get\s*$',
+            multiLine: true,
+          ).hasMatch(coverage!),
+          isFalse,
+          reason: 'coverage must not retain ordinary unlocked Pub retrieval.',
+        );
+      },
+    );
   });
 }
