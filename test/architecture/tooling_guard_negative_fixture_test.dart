@@ -54,6 +54,23 @@ void main() {
       },
     );
 
+    test('qualified Flutter runApp fixture is rejected and cleaned', () async {
+      const guardCase =
+          tooling.ToolingGuardCase.providerScopeQualifiedRunAppMissing();
+
+      final result = await tooling.verifyToolingGuards(
+        cases: const [guardCase],
+        runCommand: tooling.runToolingGuardCommand,
+        runValidTreeChecks: false,
+      );
+
+      expect(result.isPassing, isTrue, reason: result.describe());
+      expect(result.cases, hasLength(1));
+      expect(result.cases.single.output, contains('missing_provider_scope'));
+      expect(result.cases.single.output, contains(guardCase.fixturePath));
+      expect(File(guardCase.fixturePath).existsSync(), isFalse);
+    });
+
     test(
       'record-pattern alias shadow fixture is rejected and cleaned',
       () async {

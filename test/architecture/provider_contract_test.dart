@@ -23,6 +23,35 @@ void main() => runApp(const Placeholder());
       expect(report.describe(), contains('lib/main.dart:3'));
     });
 
+    test('qualified Flutter runApp roots are checked', () async {
+      final badRoot = await _createFixtureRoot(
+        appSource: '''
+import 'package:flutter/widgets.dart' as widgets;
+
+void main() => widgets.runApp(const widgets.Placeholder());
+''',
+      );
+      addTearDown(() => badRoot.delete(recursive: true));
+      final scopedRoot = await _createFixtureRoot(
+        appSource: '''
+import 'package:flutter/widgets.dart' as widgets;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+void main() => widgets.runApp(
+  const riverpod.ProviderScope(child: widgets.Placeholder()),
+);
+''',
+      );
+      addTearDown(() => scopedRoot.delete(recursive: true));
+
+      final badReport = checkProviderContract(badRoot.path);
+      final scopedReport = checkProviderContract(scopedRoot.path);
+
+      expect(badReport.isPassing, isFalse, reason: badReport.describe());
+      expect(badReport.describe(), contains('missing_provider_scope'));
+      expect(scopedReport.isPassing, isTrue, reason: scopedReport.describe());
+    });
+
     test(
       'ProviderScope and UncontrolledProviderScope app roots pass',
       () async {
