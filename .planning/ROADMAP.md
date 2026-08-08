@@ -84,7 +84,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
   3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one exact compatible graph with no forced override, removed guard, or split runtime/generator lane.
   4. From a clean generation state, dependency resolution, localization generation, and code generation finish with no unexpected tracked generated-file diff or hand-edited output.
 
-**Plans**: 5/5 plans executed
+**Plans**: 5/6 plans executed
 
 Plans:
 
@@ -104,6 +104,10 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 58-05-PLAN.md — Execute and record the full targeted, full-suite, coverage, and clean-generation evidence matrix.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 58-06-PLAN.md — Close the qualified `runApp` guard bypass and default-concurrency fixture collision, then re-prove the lock-enforced coverage lane.
 
 Cross-cutting constraints:
 
