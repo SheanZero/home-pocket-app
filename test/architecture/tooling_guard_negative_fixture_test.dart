@@ -72,6 +72,38 @@ void main() {
       expect(File(guardCase.fixturePath).existsSync(), isFalse);
     });
 
+    test('runApp.call fixtures reject bad roots and clean controls', () async {
+      const cases = <tooling.ToolingGuardCase>[
+        tooling.ToolingGuardCase.providerScopeRunAppCallMissing(),
+        tooling.ToolingGuardCase.providerScopeQualifiedRunAppCallMissing(),
+        tooling.ToolingGuardCase.providerScopeRunAppCallControl(),
+        tooling.ToolingGuardCase.providerScopeQualifiedRunAppCallControl(),
+      ];
+
+      final result = await tooling.verifyToolingGuards(
+        cases: cases,
+        runCommand: tooling.runToolingGuardCommand,
+        runValidTreeChecks: false,
+      );
+
+      expect(result.isPassing, isTrue, reason: result.describe());
+      expect(result.cases, hasLength(cases.length));
+      for (final caseResult in result.cases.take(2)) {
+        expect(caseResult.output, contains('missing_provider_scope'));
+        expect(caseResult.output, contains(caseResult.guardCase.fixturePath));
+      }
+      for (final caseResult in result.cases.skip(2)) {
+        expect(caseResult.output, contains('PASS owned provider contract'));
+        expect(
+          caseResult.output,
+          isNot(contains(caseResult.guardCase.fixturePath)),
+        );
+      }
+      for (final caseResult in result.cases) {
+        expect(File(caseResult.guardCase.fixturePath).existsSync(), isFalse);
+      }
+    });
+
     test(
       'record-pattern alias shadow fixture is rejected and cleaned',
       () async {

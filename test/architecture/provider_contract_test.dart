@@ -52,6 +52,73 @@ void main() => widgets.runApp(
       expect(scopedReport.isPassing, isTrue, reason: scopedReport.describe());
     });
 
+    test('runApp.call roots use the same provider-scope contract', () async {
+      final missingRoot = await _createFixtureRoot(
+        appSource: '''
+import 'package:flutter/widgets.dart';
+
+void main() => runApp.call(const Placeholder());
+''',
+      );
+      final qualifiedMissingRoot = await _createFixtureRoot(
+        appSource: '''
+import 'package:flutter/widgets.dart' as widgets;
+
+void main() => widgets.runApp.call(const widgets.Placeholder());
+''',
+      );
+      final scopedRoot = await _createFixtureRoot(
+        appSource: '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() => runApp.call(
+  const ProviderScope(child: Placeholder()),
+);
+''',
+      );
+      final qualifiedScopedRoot = await _createFixtureRoot(
+        appSource: '''
+import 'package:flutter/widgets.dart' as widgets;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+void main() => widgets.runApp.call(
+  const riverpod.ProviderScope(child: widgets.Placeholder()),
+);
+''',
+      );
+      addTearDown(() => missingRoot.delete(recursive: true));
+      addTearDown(() => qualifiedMissingRoot.delete(recursive: true));
+      addTearDown(() => scopedRoot.delete(recursive: true));
+      addTearDown(() => qualifiedScopedRoot.delete(recursive: true));
+
+      final missingReport = checkProviderContract(missingRoot.path);
+      final qualifiedMissingReport = checkProviderContract(
+        qualifiedMissingRoot.path,
+      );
+      final scopedReport = checkProviderContract(scopedRoot.path);
+      final qualifiedScopedReport = checkProviderContract(
+        qualifiedScopedRoot.path,
+      );
+
+      expect(
+        missingReport.violations.map((violation) => violation.code),
+        contains('missing_provider_scope'),
+        reason: missingReport.describe(),
+      );
+      expect(
+        qualifiedMissingReport.violations.map((violation) => violation.code),
+        contains('missing_provider_scope'),
+        reason: qualifiedMissingReport.describe(),
+      );
+      expect(scopedReport.isPassing, isTrue, reason: scopedReport.describe());
+      expect(
+        qualifiedScopedReport.isPassing,
+        isTrue,
+        reason: qualifiedScopedReport.describe(),
+      );
+    });
+
     test(
       'ProviderScope and UncontrolledProviderScope app roots pass',
       () async {
