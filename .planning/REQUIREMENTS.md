@@ -16,10 +16,10 @@
 
 ### Flutter, Analyzer & Code Generation（SDK、分析器与代码生成）
 
-- [x] **GEN-01**: 选择并固定 Flutter 3.44.8 / Dart 3.12.2 的 Stable 身份，Dart SDK 约束、CI 与开发命令使用同一版本；2026-08-08 官方复核的 Flutter 3.44.9 作为待完整身份事务验证的 hold（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
-- [x] **GEN-02**: 以 analyzer 12.1.0、import_lint 2.0.0 与 active riverpod_lint 3.1.4 安全替代旧 analyzer-8/custom_lint 提案；Clean Architecture import guard、Riverpod lint 和仓库自有守卫持续启用并有负向测试（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
-- [x] **GEN-03**: analyzer/build_runner、Riverpod runtime/annotation/generator/lint、Freezed、JSON、Drift generator 作为一个兼容 lane 解析到最新可安全稳定组合，禁止以 override、禁用 lint 或拆分 runtime/annotation/generator 版本来强推升级（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
-- [x] **GEN-04**: 在干净生成状态执行 `flutter pub get`、`flutter gen-l10n`、build_runner 后无非预期生成差异，所有跟踪生成物均由选定工具链重建且未手工编辑
+- [ ] **GEN-01**: 选择并固定 Flutter 3.44.8 / Dart 3.12.2 的 Stable 身份，Dart SDK 约束、CI 与开发命令使用同一版本；2026-08-08 官方复核的 Flutter 3.44.9 作为待完整身份事务验证的 hold（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
+- [ ] **GEN-02**: 以 analyzer 12.1.0、import_lint 2.0.0 与 active riverpod_lint 3.1.4 安全替代旧 analyzer-8/custom_lint 提案；Clean Architecture import guard、Riverpod lint 和仓库自有守卫持续启用并有负向测试（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
+- [ ] **GEN-03**: analyzer/build_runner、Riverpod runtime/annotation/generator/lint、Freezed、JSON、Drift generator 作为一个兼容 lane 解析到最新可安全稳定组合，禁止以 override、禁用 lint 或拆分 runtime/annotation/generator 版本来强推升级（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
+- [ ] **GEN-04**: 在干净生成状态执行 `flutter pub get`、`flutter gen-l10n`、build_runner 后无非预期生成差异，所有跟踪生成物均由选定工具链重建且未手工编辑
 
 ### Platform Plugin Cohorts（平台插件组）
 
@@ -92,10 +92,10 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 | BASE-02 | Phase 57 | Complete |
 | BASE-03 | Phase 57 | Complete |
 | BASE-04 | Phase 57 | Complete |
-| GEN-01 | Phase 58 | Complete |
-| GEN-02 | Phase 58 | Complete |
-| GEN-03 | Phase 58 | Complete |
-| GEN-04 | Phase 58 | Complete |
+| GEN-01 | Phase 58 | Gaps Found |
+| GEN-02 | Phase 58 | Gaps Found |
+| GEN-03 | Phase 58 | Gaps Found |
+| GEN-04 | Phase 58 | Gaps Found |
 | PLUG-01 | Phase 59 | Pending |
 | PLUG-02 | Phase 59 | Pending |
 | PLUG-03 | Phase 59 | Pending |
