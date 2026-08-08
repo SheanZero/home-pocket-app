@@ -338,6 +338,15 @@ _ScopeShadow _scopeShadowFor(List<_Token> tokens, int declaration) {
       end: _functionBodyEnd(tokens, close),
     );
   }
+  final forHeaderEnd = _forHeaderShadowEnd(tokens, declaration);
+  if (forHeaderEnd != null) {
+    return _ScopeShadow(
+      name: token.text,
+      offset: token.offset,
+      start: token.offset,
+      end: forHeaderEnd,
+    );
+  }
   final ifCaseEnd = _ifCaseShadowEnd(tokens, declaration);
   if (ifCaseEnd != null) {
     return _ScopeShadow(
@@ -712,6 +721,26 @@ int? _enclosingParenthesis(List<_Token> tokens, int index) {
     }
   }
   return opens.isEmpty ? null : opens.last;
+}
+
+int? _forHeaderShadowEnd(List<_Token> tokens, int declaration) {
+  final openings = <int>[];
+  for (var cursor = 0; cursor < declaration; cursor++) {
+    if (tokens[cursor].text == '(') {
+      openings.add(cursor);
+    } else if (tokens[cursor].text == ')' && openings.isNotEmpty) {
+      openings.removeLast();
+    }
+  }
+  for (final open in openings.reversed) {
+    if (open == 0 || tokens[open - 1].text != 'for') continue;
+    final close = _matchingParenthesis(tokens, open);
+    if (close == null || declaration >= close || close + 1 >= tokens.length) {
+      continue;
+    }
+    return _statementEnd(tokens, close + 1);
+  }
+  return null;
 }
 
 int? _matchingParenthesis(List<_Token> tokens, int open) {
