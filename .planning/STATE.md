@@ -5,16 +5,16 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 58
 current_phase_name: Flutter, Analyzer & Code Generation Lane
 status: executing
-stopped_at: Completed 58-04-PLAN.md
-last_updated: "2026-08-08T08:55:50.189Z"
+stopped_at: Completed 58-05-PLAN.md
+last_updated: "2026-08-08T09:39:34.764Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 58 execution started
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 7
-  percent: 14
+  completed_plans: 8
+  percent: 29
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 ## Current Position
 
 Phase: 58 (Flutter, Analyzer & Code Generation Lane) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-08 — Phase 58 execution started
 
-Progress: [█████████░] 88%
+Progress: [██████████] 100%
 
 ### Decisions
 
@@ -87,6 +87,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 58-02: GEN-01/02/03 local contract evidence is complete, but their shared requirement IDs remain pending until 58-04 installs the authoritative wrapper in Stable CI.
 - [Phase ?]: 58-04: Stable static-analysis calls verify_codegen_reproducibility.sh exactly once after the Flutter 3.44.8 setup; audit-only scanners remain afterward.
 - [Phase ?]: 58-04: Guardrails keeps lock-enforced retrieval plus release/security checks, with no duplicate generation or lint path; baseline validation requires the active wrapper.
+- [Phase ?]: Phase 58 final acceptance keeps import_lint inside the single post-generation wrapper; the permanent CI invariant rejects a parallel inline lint path.
+- [Phase ?]: Phase 58 final evidence is automated-only for Dart/analyzer/codegen; the SwiftPM iOS deployment mismatch remains deferred to Phase 60 under D-10.
 
 ### Quick Tasks Completed
 
@@ -272,9 +274,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-08T08:55:50.178Z
-Stopped at: Completed 58-04-PLAN.md
-Resume file: .planning/phases/58-flutter-analyzer-code-generation-lane/58-05-PLAN.md
+Last session: 2026-08-08T09:39:34.751Z
+Stopped at: Completed 58-05-PLAN.md
+Resume file: None
 
 ## Performance Metrics
 
@@ -369,6 +371,7 @@ Resume file: .planning/phases/58-flutter-analyzer-code-generation-lane/58-05-PLA
 | Phase 58 P01 | 8min | 2 tasks | 8 files |
 | Phase 58 P02 | 22min | 2 tasks | 6 files |
 | Phase 58 P04 | 6min | 2 tasks | 3 files |
+| Phase 58 P05 | 18min | 2 tasks | 3 files |
 
 ## Decisions
 

@@ -1,8 +1,8 @@
 ---
 phase: 58
 slug: flutter-analyzer-code-generation-lane
-status: in_progress
-nyquist_compliant: false
+status: validated
+nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-06
 ---
@@ -47,7 +47,7 @@ created: 2026-08-06
 | 58-04-01 | 04 | 2 | GEN-01, GEN-02 | T-58-13, T-58-14 | Stable CI invokes one wrapper after SDK setup and has no pre-generation analysis duplicate | workflow contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart --plain-name 'Stable CI routes post-generation lint and architecture gates through one wrapper'` | ✅ extended | ✅ green |
 | 58-04-02 | 04 | 2 | GEN-03, GEN-04 | T-58-14, T-58-15 | Stable CI has exactly one wrapper call and no inline generator/lint alternate | workflow + wrapper contract | `flutter test test/architecture/dependency_compatibility_contract_test.dart test/architecture/codegen_reproducibility_contract_test.dart && dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk` | ✅ extended | ✅ green |
 | 58-05-01 | 05 | 3 | GEN-01, GEN-02, GEN-03, GEN-04 | T-58-17, T-58-18 | The authoritative wrapper executes the complete targeted matrix in D-08 order | integration | `bash scripts/verify_codegen_reproducibility.sh && flutter test test/architecture/dependency_compatibility_contract_test.dart test/architecture/tooling_guard_negative_fixture_test.dart test/architecture/codegen_reproducibility_contract_test.dart` | ✅ executed 2026-08-08: wrapper twice; targeted contracts green | ✅ green |
-| 58-05-02 | 05 | 3 | GEN-01, GEN-02, GEN-03, GEN-04 | T-58-19, T-58-20 | Authoritative wrapper, full suite, coverage, and whitespace remain green without later-lane claims | phase gate | `bash scripts/verify_codegen_reproducibility.sh && flutter test --coverage --concurrency=1 && git diff --check` | ✅ infrastructure | ⬜ pending |
+| 58-05-02 | 05 | 3 | GEN-01, GEN-02, GEN-03, GEN-04 | T-58-19, T-58-20 | Authoritative wrapper, full suite, coverage, and whitespace remain green without later-lane claims | phase gate | `bash scripts/verify_codegen_reproducibility.sh && flutter test --coverage --concurrency=1 && git diff --check` | ✅ executed 2026-08-08: final wrapper green; full suite 4541 passed/12 expected skips; coverde filter + 70% gate (15 checked) + diff check green | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -70,11 +70,11 @@ All Phase 58 behaviors have automated verification. This strategy intentionally 
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Targeted feedback latency is bounded; long subprocess/full-suite gates occur only at plan/phase boundaries
-- [ ] `nyquist_compliant: true` set in frontmatter after executed evidence is complete
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Targeted feedback latency is bounded; long subprocess/full-suite gates occur only at plan/phase boundaries
+- [x] `nyquist_compliant: true` set in frontmatter after executed evidence is complete
 
-**Approval:** pending
+**Approval:** approved — final 2026-08-08 automated evidence is green for the wrapper, targeted contracts, serial full suite, filtered 70% coverage gate, and whitespace check. This approval covers only the Phase 58 Dart/analyzer/code-generation lane; it makes no native, platform-plugin, SQLCipher, host, simulator, or physical-device claim.
