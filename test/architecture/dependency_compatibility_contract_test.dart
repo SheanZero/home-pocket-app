@@ -125,6 +125,56 @@ void main() {
     expect(validate(currentInputs()), isEmpty);
   });
 
+  test(
+    'GEN-02/GEN-03 exact analyzer and code-generation graph fails closed',
+    () {
+      final expectedLockVersions = <String, String>{
+        'analyzer': '12.1.0',
+        'analyzer_plugin': '0.14.8',
+        'build': '4.0.7',
+        'source_gen': '4.2.4',
+        'flutter_riverpod': '3.3.2',
+        'riverpod': '3.3.2',
+        'riverpod_annotation': '4.0.3',
+        'riverpod_generator': '4.0.4',
+        'riverpod_lint': '3.1.4',
+        'freezed_annotation': '3.1.0',
+        'freezed': '3.2.6-dev.1',
+        'json_annotation': '4.12.0',
+        'json_serializable': '6.14.1',
+        'drift': '2.34.0',
+        'drift_dev': '2.34.0',
+        'build_runner': '2.15.1',
+        'import_lint': '2.0.0',
+        'dart_code_linter': '4.1.9',
+      };
+
+      for (final entry in expectedLockVersions.entries) {
+        final input = currentInputs();
+        final matcher = RegExp(
+          '(^  ${RegExp.escape(entry.key)}:\\n'
+          r'(?:^(?:    |      ).*\n)*?^    version: )"'
+          '${RegExp.escape(entry.value)}"',
+          multiLine: true,
+        );
+        expect(matcher.hasMatch(input['lock']!), isTrue, reason: entry.key);
+        input['lock'] = input['lock']!.replaceFirstMapped(
+          matcher,
+          (match) => '${match.group(1)}${entry.value}.drift"',
+        );
+
+        expect(
+          validate(input),
+          contains(
+            '${entry.key} lock must be ${entry.value} '
+            '(found ${entry.value}.drift)',
+          ),
+          reason: entry.key,
+        );
+      }
+    },
+  );
+
   test('BASE-01 returns diagnostics for malformed baseline JSON', () {
     expect(validate(currentInputs(), baselineJson: '{'), isNotEmpty);
   });
