@@ -212,7 +212,7 @@ void main() {
         fixturePath: _staleFixturePath,
         source: '// stale-only fixture\n',
         command: 'dart',
-        arguments: const [],
+        arguments: [],
       );
       final fixture = File(_staleFixturePath);
       await tooling.withToolingGuardFixtureLock(
