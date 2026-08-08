@@ -17,7 +17,7 @@
 ### Flutter, Analyzer & Code Generation（SDK、分析器与代码生成）
 
 - [ ] **GEN-01**: 选择并固定 Flutter 3.44.8 / Dart 3.12.2 的 Stable 身份，Dart SDK 约束、CI 与开发命令使用同一版本；2026-08-08 官方复核的 Flutter 3.44.9 作为待完整身份事务验证的 hold（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
-- [ ] **GEN-02**: 以 analyzer 12.1.0、import_lint 2.0.0 与 active riverpod_lint 3.1.4 安全替代旧 analyzer-8/custom_lint 提案；Clean Architecture import guard、Riverpod lint 和仓库自有守卫持续启用并有负向测试（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
+- [ ] **GEN-02**: 以 analyzer 12.1.0、import_lint 2.0.0 与 active riverpod_lint 3.1.4 安全替代旧 analyzer-8/custom_lint 提案；当前生产入口与项目约定支持的语法由 Clean Architecture import guard、Riverpod lint 和仓库自有守卫持续保护并有负向测试。仓库自有 token 守卫定位为 defense-in-depth，不承诺解析任意合法 Dart 控制流或局部同名符号；当前未采用的嵌套无花括号控制流与局部 `runApp` 同名边界作为已接受技术债，不阻塞发布
 - [ ] **GEN-03**: analyzer/build_runner、Riverpod runtime/annotation/generator/lint、Freezed、JSON、Drift generator 作为一个兼容 lane 解析到最新可安全稳定组合，禁止以 override、禁用 lint 或拆分 runtime/annotation/generator 版本来强推升级（58-05 最终 wrapper、完整测试与覆盖率证据已完成）
 - [ ] **GEN-04**: 在干净生成状态执行 `flutter pub get`、`flutter gen-l10n`、build_runner 后无非预期生成差异，所有跟踪生成物均由选定工具链重建且未手工编辑
 
