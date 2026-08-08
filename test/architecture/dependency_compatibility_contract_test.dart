@@ -176,6 +176,44 @@ void main() {
     },
   );
 
+  test(
+    'GEN-01/GEN-03 requires the canonical exact graph in the architecture lane',
+    () {
+      const laneMembers = [
+        'analyzer 12.1.0',
+        'analyzer_plugin 0.14.8',
+        'build 4.0.7',
+        'source_gen 4.2.4',
+        'flutter_riverpod 3.3.2',
+        'riverpod_annotation 4.0.3',
+        'riverpod_generator 4.0.4',
+        'riverpod_lint 3.1.4',
+        'freezed_annotation 3.1.0',
+        'freezed 3.2.6-dev.1',
+        'json_annotation 4.12.0',
+        'json_serializable 6.14.1',
+        'drift 2.34.0',
+        'drift_dev 2.34.0',
+        'build_runner 2.15.1',
+        'import_lint 2.0.0',
+        'dart_code_linter 4.1.9',
+      ];
+      final baseline = File('docs/testing/STABLE_BASELINE.json')
+          .readAsStringSync();
+
+      for (final member in laneMembers) {
+        expect(
+          validate(
+            currentInputs(),
+            baselineJson: baseline.replaceFirst(member, ''),
+          ),
+          contains('compatibility lane architecture is incomplete'),
+          reason: member,
+        );
+      }
+    },
+  );
+
   test('BASE-01 returns diagnostics for malformed baseline JSON', () {
     expect(validate(currentInputs(), baselineJson: '{'), isNotEmpty);
   });
