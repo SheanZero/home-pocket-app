@@ -14,7 +14,8 @@
 //   3. Zero `if: ${{ github.event_name == 'pull_request' }}` lines (the Phase 8
 //      D-05 #3 lift; restoring it would let direct-to-main bypass the coverage
 //      gate).
-//   4. `dart run import_lint` is present as a blocking architecture gate.
+//   4. The authoritative reproducibility wrapper is present as a blocking
+//      architecture gate; it owns import_lint after two clean generation passes.
 //   5. `coverage_gate.dart --list
 //      .planning/audit/coverage-gate-required-files.txt` (the current
 //      risk-boundary manifest; not either retired historical manifest).
@@ -118,15 +119,28 @@ void main() {
       }
     });
 
-    test('Invariant 4: `dart run import_lint` is a blocking gate', () {
-      final regex = RegExp(r'dart\s+run\s+import_lint\s*$', multiLine: true);
+    test('Invariant 4: the authoritative wrapper is a blocking architecture '
+        'gate', () {
+      final regex = RegExp(
+        r'^\s*run:\s+bash\s+scripts/verify_codegen_reproducibility\.sh\s*$',
+        multiLine: true,
+      );
       expect(
         regex.hasMatch(content),
         isTrue,
         reason:
-            'audit.yml must invoke the active import_lint architecture gate.',
+            'audit.yml must invoke the authoritative wrapper that runs '
+            'import_lint after locked resolution and two clean generation '
+            'passes.',
       );
       expect(content, isNot(contains('dart run custom_lint')));
+      expect(
+        content,
+        isNot(contains('dart run import_lint')),
+        reason:
+            'audit.yml must not restore a parallel inline import_lint path; '
+            'the sole wrapper owns the ordered architecture gate.',
+      );
     });
 
     test('Invariant 5: coverage_gate.dart `--list` argument points at '
