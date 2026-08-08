@@ -1,6 +1,6 @@
 ---
 phase: 58-flutter-analyzer-code-generation-lane
-reviewed: 2026-08-08T11:06:32Z
+reviewed: 2026-08-08T12:29:47Z
 depth: standard
 files_reviewed: 16
 files_reviewed_list:
@@ -30,47 +30,45 @@ status: issues_found
 
 # Phase 58: Code Review Report
 
-**Reviewed:** 2026-08-08T11:06:32Z
+**Reviewed:** 2026-08-08T12:29:47Z
 **Depth:** standard
 **Files Reviewed:** 16
 **Status:** issues_found
 
 ## Summary
 
-The dependency and CI contracts are tightly specified, and the focused contract matrix passed. However, the repository-owned provider-root guard can be bypassed with a valid Dart invocation form, while its new lexical-shadow model still misclassifies several valid lexical scopes. The cross-process fixture lock also leaves the in-process queue permanently blocked if opening the lock fails.
-
-## Narrative Findings (AI reviewer)
+The selected Flutter/Dart dependency graph, lockfile enforcement, and fixture-lock recovery path were reviewed together with their architecture contracts. The native/plugin/device boundary deferred by D-10 was not treated as a defect. However, the repository-owned ProviderScope guard still has a valid Dart call form that bypasses enforcement; its lexical-shadow scanner also rejects valid code after a loop-local alias. Separately, the authoritative code-generation wrapper does not run the mandated conflict-deleting build step, so valid generator-input changes can fail before reproducibility is checked.
 
 ## Critical Issues
 
-### CR-01: Provider-root contract misses `runApp.call(...)`
+### CR-01: Parenthesized `runApp` invocation bypasses the owned ProviderScope guard
 
-**File:** `/Users/xinz/Development/home-pocket-app/scripts/audit/provider_contract.dart:599-607`
+**File:** `scripts/audit/provider_contract.dart:742-759`
 
-**Issue:** `_findCalls` records `runApp` only when its next token is `(`. Dart functions can also be invoked through their `call` member, so `runApp.call(const Placeholder())` (and `widgets.runApp.call(...)`) is a real Flutter application root but is silently ignored. An unscoped root written this way passes the owned provider contract and the negative tooling proof, defeating the Phase 58 D-04 guard.
+**Issue:** `_findCalls` accepts only `runApp(...)` and `runApp.call(...)` (plus approved import-prefix variants). Dart also permits invoking the function tear-off as `(runApp)(const Placeholder())` and `(widgets.runApp)(...)`. Those token sequences have `)` immediately after `runApp`, so they are ignored and an unscoped application root passes `checkProviderContract`. The new negative fixtures cover only `.call` forms (`test/architecture/provider_contract_test.dart:55-120` and `test/architecture/tooling_guard_negative_fixture_test.dart:75-105`), leaving this D-04 enforcement bypass untested.
 
-**Fix:** Recognize the exact direct-function `.call(...)` form for both unqualified and verified Flutter import-prefix references, then run it through the same `_isScopedRoot` validation. Add unscoped and scoped `.call` fixtures for unqualified and qualified Flutter imports; continue to reject arbitrary receiver/member chains.
+**Fix:** Extend `_findCalls` to recognize a single parenthesized direct function reference, preserving the same verified-prefix rule, then add unit and live-harness bad/control cases. For example, recognize `(` + `runApp` + `)` + `(` and `(` + verified-prefix + `.` + `runApp` + `)` + `(`, while continuing to reject arbitrary receiver chains.
 
 ## Warnings
 
-### WR-01: Lexical shadow ranges include unrelated class members and branches
+### WR-01: `for`-header bindings shadow Riverpod import aliases past the loop
 
-**File:** `/Users/xinz/Development/home-pocket-app/scripts/audit/provider_contract.dart:329-389`
+**File:** `scripts/audit/provider_contract.dart:362-368, 615-648`
 
-**Issue:** `_isScopeBrace` does not recognize class/mixin/extension bodies, so a member named `ProviderScope` or `riverpod` is treated as a library-wide declaration by `_isAtLibraryScope`. Separately, a pattern bound in an `if` condition is assigned the enclosing function block by `_scopeShadowFor`, and a `switch` case binding extends through later cases. Those names do not shadow an import outside their class/member, then-branch, or individual case. Consequently, valid Riverpod-wrapped roots can be rejected by CI merely because an unrelated member or earlier branch uses the same name.
+**Issue:** A `final`/`var` binding in a `for` header is classified as a normal declaration, then `_scopeShadowFor` extends its range to `_enclosingBlock`—the surrounding function body. Consequently, a valid qualified root after a loop, such as `for (final riverpod in values) {} runApp(riverpod.ProviderScope(...));`, is rejected even though the loop variable is out of scope. The lexical-boundary tests cover type, if-case, and switch-case scopes but have no loop-header control (`test/architecture/provider_contract_test.dart:461-590`). This can block otherwise valid application code in CI.
 
-**Fix:** Build scope records from declaration context rather than only the nearest recognized brace: classify type bodies as non-library scopes, bind `if`-case variables to the then statement/block, and terminate `switch` pattern bindings at the next `case`/`default` (or switch close). Add passing controls for a class member, a post-`if` root, and a later switch case.
+**Fix:** Detect declarations inside `for (...)` headers and bound their shadow range to that loop statement/body (including the condition/update area as appropriate). Add passing controls for roots after `for-in` and C-style loops, and a failing control for a root inside the loop body.
 
-### WR-02: Lock-acquisition failure poisons the fixture queue
+### WR-02: The reproducibility wrapper omits `--delete-conflicting-outputs`
 
-**File:** `/Users/xinz/Development/home-pocket-app/scripts/verify_tooling_guards.dart:17-39`
+**File:** `scripts/verify_codegen_reproducibility.sh:61,66`
 
-**Issue:** The lock file is opened before the `try`/`finally`. If `.dart_tool` is absent or `lock.open` fails, `releaseQueue.complete()` is never reached. The initiating invocation throws and every later same-process invocation waits indefinitely at `await previous`. This makes the exported helper non-recoverable for a fresh/custom `workingDirectory` and can hang a test process after a transient filesystem failure.
+**Issue:** Both generation passes run `flutter pub run build_runner build` without `--delete-conflicting-outputs`, contrary to the Phase 58 D-08 sequence. After a legitimate annotated-source or generator configuration change, stale committed outputs can make build_runner stop on a conflict instead of regenerating them for the two-pass diff oracle. The source contract only checks the shorter command (`test/architecture/codegen_reproducibility_contract_test.dart:64,101`), so it cannot catch the omission.
 
-**Fix:** Create `lock.parent` first, and put opening, locking, unlocking, closing, and `releaseQueue.complete()` under an outer `try`/`finally` that always releases the in-process queue. Add a test using a directory without `.dart_tool` and an injected/open-failure seam, followed by a second invocation that proves the queue remains usable.
+**Fix:** Run both passes as `flutter pub run build_runner build --delete-conflicting-outputs` and update the contract test to assert that complete command exactly twice and in the same order relative to localization and the clean-scope checks.
 
 ---
 
-_Reviewed: 2026-08-08T11:06:32Z_
+_Reviewed: 2026-08-08T12:29:47Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
