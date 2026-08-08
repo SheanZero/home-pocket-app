@@ -66,7 +66,7 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.44.8
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
 
       - name: Android release signing contract
         run: flutter test test/architecture/android_release_signing_contract_test.dart
@@ -79,15 +79,6 @@ jobs:
         run: |
           if grep -Eq 'sqlite3_flutter_libs|sqlcipher_flutter_libs' pubspec.lock; then
             echo "::error::legacy SQLite Flutter library detected — sqlite3 Native Assets must provide SQLCipher"
-            exit 1
-          fi
-
-      # AUDIT-10 — build_runner stale-diff. BLOCKING from end of Phase 1.
-      - name: Build runner clean diff
-        run: |
-          flutter pub run build_runner build
-          if ! git diff --exit-code lib/; then
-            echo "::error::Generated files in lib/ are stale — run build_runner locally and commit"
             exit 1
           fi
 

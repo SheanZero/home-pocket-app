@@ -609,15 +609,17 @@ end
       );
     });
 
-    test('rejects a comment-only Stable CI SDK verification marker', () {
+    test('rejects a comment-only Stable CI wrapper marker', () {
       final input = currentInputs();
       input['audit'] = input['audit']!.replaceFirst(
-        '        run: dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk\n',
-        '        # dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk\n',
+        '        run: bash scripts/verify_codegen_reproducibility.sh\n',
+        '        # run: bash scripts/verify_codegen_reproducibility.sh\n',
       );
       expect(
         validate(input),
-        contains('audit workflow must invoke SDK verification'),
+        contains(
+          'audit workflow must invoke SDK verification through the authoritative wrapper',
+        ),
       );
     });
 

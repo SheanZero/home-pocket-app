@@ -508,11 +508,13 @@ CompatibilityReport validateDependencyCompatibility({
   );
 
   final hasStableSdkVerificationCommand = RegExp(
-    r'^\s*run:\s+dart run scripts/dependency_compatibility\.dart --mode=baseline --verify-running-flutter-sdk[ \t]*$',
+    r'^\s*run:\s+bash scripts/verify_codegen_reproducibility\.sh[ \t]*$',
     multiLine: true,
-  ).hasMatch(auditWorkflow);
+  ).hasMatch(_withoutYamlComments(auditWorkflow));
   if (!hasStableSdkVerificationCommand) {
-    issues.add('audit workflow must invoke SDK verification');
+    issues.add(
+      'audit workflow must invoke SDK verification through the authoritative wrapper',
+    );
   }
   expectText('future workflow', futureWorkflow, 'channel: beta');
   expectText('future workflow', futureWorkflow, 'flutter build apk --debug');
@@ -551,6 +553,11 @@ String _workflowJobBody(String workflow, String job) {
       : workflow.length;
   return workflow.substring(headers[index].end, end);
 }
+
+String _withoutYamlComments(String source) => source.replaceAll(
+  RegExp(r'^[ \t]*#.*(?:\r?\n|$)', multiLine: true),
+  '',
+);
 
 bool _hasActiveSqlCipherLinkerStrip(String podfile) => RegExp(
   r'''installer\.pods_project\.targets\.each do \|target\|[\s\S]*?target\.build_configurations\.each do \|config\|[\s\S]*?^\s*stripped\s*=\s*original\.gsub\(/\\s-l"\?sqlite3"\?/,\s*''\)\s*$[\s\S]*?^\s*File\.write\(xcconfig_path,\s*stripped\)\s+if\s+stripped\s+!=\s+original\s*$''',
