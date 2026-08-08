@@ -198,15 +198,18 @@ void main() {
         'import_lint 2.0.0',
         'dart_code_linter 4.1.9',
       ];
-      final baseline = File('docs/testing/STABLE_BASELINE.json')
-          .readAsStringSync();
+      final baseline = File(
+        'docs/testing/STABLE_BASELINE.json',
+      ).readAsStringSync();
 
       for (final member in laneMembers) {
+        final manifest = jsonDecode(baseline) as Map<String, dynamic>;
+        final lanes = manifest['lanes'] as Map<String, dynamic>;
+        final architecture = lanes['architecture'] as Map<String, dynamic>;
+        architecture['selected'] = (architecture['selected'] as String)
+            .replaceFirst(member, '');
         expect(
-          validate(
-            currentInputs(),
-            baselineJson: baseline.replaceFirst(member, ''),
-          ),
+          validate(currentInputs(), baselineJson: jsonEncode(manifest)),
           contains('compatibility lane architecture is incomplete'),
           reason: member,
         );
@@ -358,11 +361,13 @@ void main() {
     });
 
     test('rejects prerelease candidates presented as production stable', () {
+      final manifest = jsonDecode(baseline()) as Map<String, dynamic>;
+      final dependencies =
+          manifest['direct_dependencies'] as Map<String, dynamic>;
+      final flutter = dependencies['flutter'] as Map<String, dynamic>;
+      flutter['candidate'] = '3.45.0-beta.1';
       expectIssue(
-        baseline().replaceFirst(
-          '"candidate": "3.44.8"',
-          '"candidate": "3.45.0-beta.1"',
-        ),
+        jsonEncode(manifest),
         'dependency flutter candidate must be production stable',
       );
     });
@@ -370,10 +375,10 @@ void main() {
     test('rejects a selected value below its reviewed candidate', () {
       expectIssue(
         baseline().replaceFirst(
-          '"selected_current": "3.44.8"',
-          '"selected_current": "3.44.7"',
+          '"selected_current": "36"',
+          '"selected_current": "35"',
         ),
-        'toolchain flutter selected value must not be lower than its candidate',
+        'toolchain android_sdk selected value must not be lower than its candidate',
       );
     });
 

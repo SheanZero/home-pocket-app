@@ -666,8 +666,7 @@ void _validateManifestPolicy({
     if (_isUnsafeRelease(selected)) {
       issues.add('toolchain $id selects forbidden prerelease or EOL value');
     }
-    if (decision == 'already_current' &&
-        !_isProductionStableVersion(candidate)) {
+    if (!_isProductionStableVersion(candidate)) {
       issues.add('toolchain $id candidate must be production stable');
     }
     if (decision == 'already_current' &&
@@ -690,7 +689,7 @@ void _validateManifestPolicy({
     if (_isUnsafeRelease(selected) && id != 'freezed') {
       issues.add('dependency $id selects forbidden prerelease or EOL value');
     }
-    if (decision == 'already_current' &&
+    if (!row['kind'].toString().contains('path') &&
         !_isProductionStableVersion(candidate)) {
       issues.add('dependency $id candidate must be production stable');
     }
@@ -712,7 +711,25 @@ void _validateManifestPolicy({
       'SQLCipher Native Asset 4.17',
     ],
     'platform_floors': ['iOS 15.0', 'Android API 24'],
-    'architecture': ['analyzer 12.x', 'import_lint 2.0.0'],
+    'architecture': [
+      'analyzer 12.1.0',
+      'analyzer_plugin 0.14.8',
+      'build 4.0.7',
+      'source_gen 4.2.4',
+      'flutter_riverpod 3.3.2',
+      'riverpod_annotation 4.0.3',
+      'riverpod_generator 4.0.4',
+      'riverpod_lint 3.1.4',
+      'freezed_annotation 3.1.0',
+      'freezed 3.2.6-dev.1',
+      'json_annotation 4.12.0',
+      'json_serializable 6.14.1',
+      'drift 2.34.0',
+      'drift_dev 2.34.0',
+      'build_runner 2.15.1',
+      'import_lint 2.0.0',
+      'dart_code_linter 4.1.9',
+    ],
   };
   final lanes = _map(baseline['lanes']);
   for (final entry in laneMembers.entries) {
