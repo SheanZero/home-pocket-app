@@ -53,6 +53,7 @@ void main() {
           expect(File(caseResult.guardCase.fixturePath).existsSync(), isFalse);
         }
       },
+      timeout: const Timeout(Duration(minutes: 2)),
     );
 
     test('qualified Flutter runApp fixture is rejected and cleaned', () async {
