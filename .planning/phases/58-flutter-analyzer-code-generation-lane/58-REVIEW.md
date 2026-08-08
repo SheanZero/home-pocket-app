@@ -1,80 +1,76 @@
 ---
 phase: 58-flutter-analyzer-code-generation-lane
-reviewed: 2026-08-08T00:00:00Z
+reviewed: 2026-08-08T11:06:32Z
 depth: standard
 files_reviewed: 16
 files_reviewed_list:
+  - .github/workflows/audit.yml
   - analysis_options.yaml
-  - scripts/verify_tooling_guards.dart
+  - docs/testing/DEPENDENCY_COMPATIBILITY.md
+  - docs/testing/STABLE_BASELINE.json
+  - pubspec.lock
+  - pubspec.yaml
   - scripts/audit/provider_contract.dart
-  - test/architecture/tooling_guard_negative_fixture_test.dart
+  - scripts/dependency_compatibility.dart
+  - scripts/verify_codegen_reproducibility.sh
+  - scripts/verify_tooling_guards.dart
+  - test/architecture/audit_yml_invariants_test.dart
+  - test/architecture/codegen_reproducibility_contract_test.dart
+  - test/architecture/dependency_compatibility_contract_test.dart
   - test/architecture/provider_contract_test.dart
   - test/architecture/providers_audit_contract_test.dart
-  - pubspec.yaml
-  - pubspec.lock
-  - scripts/dependency_compatibility.dart
-  - test/architecture/dependency_compatibility_contract_test.dart
-  - docs/testing/STABLE_BASELINE.json
-  - docs/testing/DEPENDENCY_COMPATIBILITY.md
-  - scripts/verify_codegen_reproducibility.sh
-  - test/architecture/codegen_reproducibility_contract_test.dart
-  - .github/workflows/audit.yml
-  - test/architecture/audit_yml_invariants_test.dart
+  - test/architecture/tooling_guard_negative_fixture_test.dart
 findings:
-  critical: 0
-  warning: 4
+  critical: 1
+  warning: 2
   info: 0
-  total: 4
+  total: 3
 status: issues_found
 ---
 
 # Phase 58: Code Review Report
 
-**Reviewed:** 2026-08-08T00:00:00Z
+**Reviewed:** 2026-08-08T11:06:32Z
 **Depth:** standard
 **Files Reviewed:** 16
 **Status:** issues_found
 
 ## Summary
 
-The selected Flutter 3.44.8/Dart 3.12.2, analyzer 12.1.0, import_lint 2.0.0, and Riverpod lint 3.1.4 graph is consistently declared, and the reviewed source-contract suite passed. However, the repository-owned provider-root guard can be bypassed through a qualified Flutter call and can reject valid code due to file-global shadow tracking. Stable coverage also resolves dependencies without enforcing the committed lock, and the human contract documents a CI sequence the workflow no longer executes.
+The dependency and CI contracts are tightly specified, and the focused contract matrix passed. However, the repository-owned provider-root guard can be bypassed with a valid Dart invocation form, while its new lexical-shadow model still misclassifies several valid lexical scopes. The cross-process fixture lock also leaves the in-process queue permanently blocked if opening the lock fails.
+
+## Narrative Findings (AI reviewer)
+
+## Critical Issues
+
+### CR-01: Provider-root contract misses `runApp.call(...)`
+
+**File:** `/Users/xinz/Development/home-pocket-app/scripts/audit/provider_contract.dart:599-607`
+
+**Issue:** `_findCalls` records `runApp` only when its next token is `(`. Dart functions can also be invoked through their `call` member, so `runApp.call(const Placeholder())` (and `widgets.runApp.call(...)`) is a real Flutter application root but is silently ignored. An unscoped root written this way passes the owned provider contract and the negative tooling proof, defeating the Phase 58 D-04 guard.
+
+**Fix:** Recognize the exact direct-function `.call(...)` form for both unqualified and verified Flutter import-prefix references, then run it through the same `_isScopedRoot` validation. Add unscoped and scoped `.call` fixtures for unqualified and qualified Flutter imports; continue to reject arbitrary receiver/member chains.
 
 ## Warnings
 
-### WR-01: Qualified `runApp` calls bypass the provider-root contract
+### WR-01: Lexical shadow ranges include unrelated class members and branches
 
-**File:** `scripts/audit/provider_contract.dart:503`
+**File:** `/Users/xinz/Development/home-pocket-app/scripts/audit/provider_contract.dart:329-389`
 
-**Issue:** `_findCalls` skips every call whose preceding token is `.`. Consequently, valid Dart such as `import 'package:flutter/widgets.dart' as widgets;` followed by `widgets.runApp(const Placeholder())` is never checked. A production app root can therefore omit `ProviderScope` while both `provider_contract.dart` and the Phase 58 negative guards report success.
+**Issue:** `_isScopeBrace` does not recognize class/mixin/extension bodies, so a member named `ProviderScope` or `riverpod` is treated as a library-wide declaration by `_isAtLibraryScope`. Separately, a pattern bound in an `if` condition is assigned the enclosing function block by `_scopeShadowFor`, and a `switch` case binding extends through later cases. Those names do not shadow an import outside their class/member, then-branch, or individual case. Consequently, valid Riverpod-wrapped roots can be rejected by CI merely because an unrelated member or earlier branch uses the same name.
 
-**Fix:** Track Flutter widgets import prefixes and treat `<verified-widgets-prefix>.runApp(...)` as an app-root call. Add a negative fixture for the qualified form and retain the existing exclusion for arbitrary instance-method calls.
+**Fix:** Build scope records from declaration context rather than only the nearest recognized brace: classify type bodies as non-library scopes, bind `if`-case variables to the then statement/block, and terminate `switch` pattern bindings at the next `case`/`default` (or switch close). Add passing controls for a class member, a post-`if` root, and a later switch case.
 
-### WR-02: Provider import aliases are treated as shadowed anywhere in a file
+### WR-02: Lock-acquisition failure poisons the fixture queue
 
-**File:** `scripts/audit/provider_contract.dart:301`
+**File:** `/Users/xinz/Development/home-pocket-app/scripts/verify_tooling_guards.dart:17-39`
 
-**Issue:** `_riverpodScopeBindings` builds one file-wide `scopeShadows` set, and `allowsQualified` ignores its `callOffset` parameter at lines 625-637. Thus a valid root such as `runApp(riverpod.ProviderScope(...))` in `main` is rejected if an unrelated or later helper has a parameter/local named `riverpod`. This false positive can break analysis/CI without any bad app root.
+**Issue:** The lock file is opened before the `try`/`finally`. If `.dart_tool` is absent or `lock.open` fails, `releaseQueue.complete()` is never reached. The initiating invocation throws and every later same-process invocation waits indefinitely at `await previous`. This makes the exported helper non-recoverable for a fresh/custom `workingDirectory` and can hang a test process after a transient filesystem failure.
 
-**Fix:** Make shadow detection lexical and call-site-aware (or use analyzer resolution). At minimum, only consider declarations whose lexical scope encloses the call, and add fixtures for a valid root plus a sibling/later function that declares `riverpod`.
-
-### WR-03: The coverage job can resolve a graph different from the reviewed lockfile
-
-**File:** `.github/workflows/audit.yml:94`
-
-**Issue:** The independent `coverage` job uses `flutter pub get` without `--enforce-lockfile`. Unlike static analysis and guardrails, it can rewrite or re-resolve the dependency graph when a PR changes constraints without an updated lockfile. Coverage may then execute against packages that were not accepted by the Phase 58 compatibility/reproducibility gate.
-
-**Fix:** Replace the command with `flutter pub get --enforce-lockfile` and extend `audit_yml_invariants_test.dart` (or the dependency workflow contract) to require lock enforcement in every Stable CI job that runs Flutter code.
-
-### WR-04: The compatibility guide documents a retired inline Stable-CI path
-
-**File:** `docs/testing/DEPENDENCY_COMPATIBILITY.md:64`
-
-**Issue:** The guide says Stable static analysis runs `flutter pub get --enforce-lockfile` followed by the inline `dependency_compatibility.dart` command (lines 64-70). The actual authoritative path is the single `bash scripts/verify_codegen_reproducibility.sh` invocation at `audit.yml:42`, which owns both commands plus generation and architecture checks. The stale instructions invite a future duplicate or out-of-order CI gate.
-
-**Fix:** Document the wrapper as the sole Stable static-analysis command and describe its ordered internals; retain direct validator commands only where they are explicitly intended for local diagnosis or beta probes.
+**Fix:** Create `lock.parent` first, and put opening, locking, unlocking, closing, and `releaseQueue.complete()` under an outer `try`/`finally` that always releases the in-process queue. Add a test using a directory without `.dart_tool` and an injected/open-failure seam, followed by a second invocation that proves the queue remains usable.
 
 ---
 
-_Reviewed: 2026-08-08T00:00:00Z_
+_Reviewed: 2026-08-08T11:06:32Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
