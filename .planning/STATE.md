@@ -5,16 +5,16 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 58
 current_phase_name: flutter-analyzer-code-generation-lane
 status: executing
-stopped_at: Ready to execute 58-09-PLAN.md
-last_updated: "2026-08-08T13:01:17.863Z"
+stopped_at: Completed 58-09-PLAN.md
+last_updated: "2026-08-08T13:32:27.203Z"
 last_activity: 2026-08-08
-last_activity_desc: Planned Phase 58 gap closure plans 58-09 and 58-10
+last_activity_desc: Phase 58 execution started
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 1
   total_plans: 13
-  completed_plans: 11
-  percent: 29
+  completed_plans: 12
+  percent: 14
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 ## Current Position
 
 Phase: 58 (flutter-analyzer-code-generation-lane) — EXECUTING
-Plan: 8 of 10
+Plan: 2 of 10
 Status: Ready to execute
-Last activity: 2026-08-08 — Planned Phase 58 gap closure plans 58-09 and 58-10
+Last activity: 2026-08-08 — Phase 58 execution started
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 92%
 
 ### Decisions
 
@@ -95,6 +95,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 58-07: Exact runApp.call matching preserves verified Flutter-prefix boundaries while lexical shadows end at type, then-branch, and switch-case scopes.
 - [Phase ?]: Fixture-lock recovery creates only the ignored parent, preserving its shared blocking lock coordinate.
 - [Phase ?]: Fixture-lock cleanup preserves the first failure while always releasing queued successors.
+- [Phase ?]: 58-09: Restrict parenthesized runApp matching to exact single groups around an unqualified or verified Flutter-prefix direct function.
+- [Phase ?]: 58-09: Bound C-style and for-in Riverpod alias shadows to the complete loop statement.
 
 ### Quick Tasks Completed
 
@@ -280,8 +282,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-08T12:22:49.727Z
-Stopped at: Completed 58-08-PLAN.md
+Last session: 2026-08-08T13:32:27.190Z
+Stopped at: Completed 58-09-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -381,6 +383,7 @@ Resume file: None
 | Phase 58-flutter-analyzer-code-generation-lane P06 | 55m | 3 tasks | 8 files |
 | Phase 58-flutter-analyzer-code-generation-lane P07 | 15min | 2 tasks | 4 files |
 | Phase 58 P08 | 7 min | 1 tasks | 2 files |
+| Phase 58-flutter-analyzer-code-generation-lane P09 | 18min | 2 tasks | 4 files |
 
 ## Decisions
 
