@@ -6,14 +6,14 @@ current_phase: 58
 current_phase_name: Flutter, Analyzer & Code Generation Lane
 status: executing
 stopped_at: Completed 58-02-PLAN.md
-last_updated: "2026-08-08T08:41:30.229Z"
+last_updated: "2026-08-08T08:45:46.172Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 58 execution started
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 14
 ---
 
@@ -84,6 +84,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 58-03: Generation verification uses two explicit l10n/build_runner passes with HEAD-scoped diffs before all quality gates.
 - [Phase ?]: 58-03: Live codegen wrapper execution is deferred to 58-05 after dependency graph and CI wiring land.
 - [Phase ?]: 58-02: Keep the exact analyzer 12.1.0/import_lint 2.0.0/Riverpod 3.3.2 cohort; exit only after the documented four-condition no-override transaction.
+- [Phase ?]: 58-02: GEN-01/02/03 local contract evidence is complete, but their shared requirement IDs remain pending until 58-04 installs the authoritative wrapper in Stable CI.
 
 ### Quick Tasks Completed
 
@@ -169,7 +170,7 @@ v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/
 No active execution blocker. v2.1 planning constraints that must remain explicit:
 
 - **Official stable recheck:** Phase 57 re-queries only primary sources before changing candidates; beta/RC/dev and unapproved `dependency_overrides` are not fallback options.
-- **Analyzer gate:** `import_guard_custom_lint` currently constrains analyzer `<9`; an analyzer-8 hold is valid, disabling/replacing architecture enforcement without a negative test is not.
+- **Analyzer gate:** analyzer 12.1.0 / import_lint 2.0.0 / active riverpod_lint 3.1.4 is the exact no-override graph; an analyzer/import-boundary upgrade requires the documented four-condition transaction, and disabling architecture enforcement without a negative test is not allowed.
 - **SQLCipher safety:** retaining `sqlcipher_flutter_libs 0.6.8 + sqlite3 2.9.4 + SQLCipher Pod 4.10.0` is a successful safe hold; `0.7.0+eol`, `sqlite3_flutter_libs`, system SQLite, plaintext fallback, or an upgrade-only schema bump are prohibited.
 - **AGP outcome:** AGP 9 is all-or-hold. Plugin incompatibility requires a documented green AGP 8 recovery point, never a half-migrated Android lane.
 - **Device evidence:** Android has emulator-only acceptance. iPhone UAT is limited to the current wired phone and must use a separate UAT identity with synthetic data; unavailable relay/APNs/FCM or a `baseline_required` performance result remains a limitation/blocker, never a pass.

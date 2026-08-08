@@ -107,8 +107,8 @@ Plans:
 
 Cross-cutting constraints:
 
-- Flutter 3.44.8 Stable / Dart 3.12.2 and exact analyzer 8.4.0 remain one no-override graph.
-- One authoritative local/Stable-CI wrapper enforces locked resolution → two clean l10n/build_runner passes → analyzer → custom_lint/import_guard → layer/domain/presentation architecture tests → Riverpod/import-guard negative proof; no Stable pre-generation analysis duplicate remains.
+- Flutter 3.44.8 Stable / Dart 3.12.2 and the exact analyzer 12.1.0 / import_lint 2.0.0 / active riverpod_lint 3.1.4 cohort remain one no-override graph.
+- One authoritative local/Stable-CI wrapper enforces locked resolution → two clean l10n/build_runner passes → analyzer → active import_lint/Riverpod lint → layer/domain/presentation architecture tests → Riverpod/import-boundary negative proof; no Stable pre-generation analysis duplicate remains.
 
 ### Phase 59: Controlled Platform Plugin Cohorts
 

@@ -29,19 +29,53 @@ key-files:
     - test/architecture/dependency_compatibility_contract_test.dart
     - docs/testing/STABLE_BASELINE.json
     - docs/testing/DEPENDENCY_COMPATIBILITY.md
-decisions:
+key-decisions:
   - Keep the exact analyzer 12.1.0/import_lint 2.0.0/Riverpod 3.3.2 cohort; do not restore the superseded analyzer-8/custom_lint proposal.
   - Hold Flutter 3.44.9 until a single reviewed identity transaction passes the no-override, negative-fixture, and two-pass-generation conditions.
-metrics:
-  duration: 22min
-  completed: 2026-08-08
-  tasks: 2
-  files: 6
-status: complete
+patterns-established:
+  - Exact solver selections and the manifest architecture lane must fail closed together.
+  - A newer Stable Flutter patch remains a hold until all identity surfaces and two-pass generation evidence move in one transaction.
+requirements-completed: [GEN-01, GEN-02, GEN-03]
+coverage:
+  - id: D1
+    description: Exact analyzer 12.1.0 and analyzer_plugin 0.14.8 lock selections reject independent graph drift.
+    requirement: GEN-02
+    verification:
+      - kind: unit
+        ref: "test/architecture/dependency_compatibility_contract_test.dart#GEN-02/GEN-03 exact analyzer and code-generation graph fails closed"
+        status: pass
+    human_judgment: false
+  - id: D2
+    description: Riverpod, Freezed, JSON, Drift, build_runner, lint, and analyzer-facing support packages are one exact no-override solver cohort.
+    requirement: GEN-03
+    verification:
+      - kind: unit
+        ref: "test/architecture/dependency_compatibility_contract_test.dart#GEN-01/GEN-03 requires the canonical exact graph in the architecture lane"
+        status: pass
+    human_judgment: false
+  - id: D3
+    description: Dart ^3.12.2, locked SDK metadata, Stable identity, manifest, and policy agree while Flutter 3.44.9 remains an explicit hold.
+    requirement: GEN-01
+    verification:
+      - kind: integration
+        ref: "dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk"
+        status: pass
+    human_judgment: false
+  - id: D4
+    description: The complete compatibility contract passes with no dependency overrides or native/platform edits.
+    requirement: GEN-01
+    verification:
+      - kind: integration
+        ref: "flutter pub get --enforce-lockfile && flutter test test/architecture/dependency_compatibility_contract_test.dart"
+        status: pass
+    human_judgment: false
 actuals:
   tokens: 7305
   tasks: 2
   commits: 4
+duration: 22min
+completed: 2026-08-08
+status: complete
 ---
 
 # Phase 58 Plan 02: Exact Analyzer and Code-Generation Graph Summary
