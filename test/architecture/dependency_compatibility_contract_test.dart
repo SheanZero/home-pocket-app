@@ -1145,4 +1145,83 @@ end
       expect(input['pubspec'], File('pubspec.yaml').readAsStringSync());
     },
   );
+
+  group('PLUG-03 speech_to_text hold contract', () {
+    Map<String, dynamic> speechManifest() => jsonDecode(
+      File('docs/testing/STABLE_BASELINE.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+
+    Map<String, dynamic> speechRow(Map<String, dynamic> manifest) =>
+        (manifest['direct_dependencies'] as Map<String, dynamic>)
+            ['speech_to_text'] as Map<String, dynamic>;
+
+    test('rejects every missing speech evidence field with a lane diagnostic', () {
+      const fields = <String>[
+        'queried_on',
+        'candidate',
+        'decision',
+        'compatibility_reason',
+        'exit_condition',
+        'owner_phase',
+      ];
+
+      for (final field in fields) {
+        final manifest = speechManifest();
+        speechRow(manifest).remove(field);
+
+        expect(
+          validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+          contains(
+            'PLUG-03 speech_to_text is missing required evidence field: $field',
+          ),
+          reason: field,
+        );
+      }
+    });
+
+    test('rejects declaration-only and lock-only speech drift before acceptance', () {
+      final declarationInput = currentInputs();
+      declarationInput['pubspec'] = declarationInput['pubspec']!.replaceFirst(
+        'speech_to_text: 7.3.0',
+        'speech_to_text: 7.4.0',
+      );
+      expect(
+        validate(declarationInput),
+        contains(
+          'PLUG-03 speech_to_text declaration must remain 7.3.0 (found 7.4.0)',
+        ),
+      );
+
+      final lockInput = currentInputs();
+      lockInput['lock'] = lockInput['lock']!.replaceFirst(
+        '  speech_to_text:\n    dependency: "direct main"\n    description:\n      name: speech_to_text\n      sha256:',
+        '  speech_to_text:\n    dependency: "direct main"\n    description:\n      name: speech_to_text\n      sha256:',
+      );
+      lockInput['lock'] = lockInput['lock']!.replaceFirst(
+        RegExp(
+          r'(^  speech_to_text:\n(?:^(?:    |      ).*\n)*?^    version: )"7\.3\.0"',
+          multiLine: true,
+        ),
+        r'$1"7.4.0"',
+      );
+      expect(
+        validate(lockInput),
+        contains(
+          'PLUG-03 speech_to_text resolution must remain 7.3.0 (found 7.4.0)',
+        ),
+      );
+    });
+
+    test('requires a hold while physical-iPhone evidence is unavailable', () {
+      final manifest = speechManifest();
+      speechRow(manifest)['decision'] = 'accepted';
+
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+        contains(
+          'PLUG-03 speech_to_text must remain hold until physical-iPhone evidence is recorded',
+        ),
+      );
+    });
+  });
 }
