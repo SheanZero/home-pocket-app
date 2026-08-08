@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 58
-current_phase_name: Flutter, Analyzer & Code Generation Lane
+current_phase_name: flutter-analyzer-code-generation-lane
 status: executing
-stopped_at: Planned 58-06 gap closure
-last_updated: "2026-08-08T10:29:05.910Z"
+stopped_at: Completed 58-06-PLAN.md
+last_updated: "2026-08-08T10:55:27.026Z"
 last_activity: 2026-08-08
-last_activity_desc: Phase 58 gap closure planning complete — 6 plans ready
+last_activity_desc: Phase 58 execution started
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 29
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 58 — Flutter, Analyzer & Code Generation Lane
+**Current focus:** Phase 58 — flutter-analyzer-code-generation-lane
 
 ## Current Position
 
-Phase: 58 (Flutter, Analyzer & Code Generation Lane) — EXECUTING
-Plan: 5 of 6
-Status: Ready to execute
-Last activity: 2026-08-08 — Phase 58 gap closure planning complete
+Phase: 58 (flutter-analyzer-code-generation-lane) — EXECUTING
+Plan: 6 of 6
+Status: Ready for phase verification
+Last activity: 2026-08-08 — Phase 58 execution started
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ### Decisions
 
@@ -89,6 +89,9 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 58-04: Guardrails keeps lock-enforced retrieval plus release/security checks, with no duplicate generation or lint path; baseline validation requires the active wrapper.
 - [Phase ?]: Phase 58 final acceptance keeps import_lint inside the single post-generation wrapper; the permanent CI invariant rejects a parallel inline lint path.
 - [Phase ?]: Phase 58 final evidence is automated-only for Dart/analyzer/codegen; the SwiftPM iOS deployment mismatch remains deferred to Phase 60 under D-10.
+- [Phase ?]: Qualified runApp matching is restricted to verified Flutter UI import prefixes.
+- [Phase ?]: Negative tooling fixtures serialize complete transactions with a blocking cross-process lock.
+- [Phase ?]: Every independent Stable Flutter CI job uses lock-enforced dependency retrieval.
 
 ### Quick Tasks Completed
 
@@ -274,8 +277,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-08T09:39:34.751Z
-Stopped at: Completed 58-05-PLAN.md
+Last session: 2026-08-08T10:55:27.014Z
+Stopped at: Completed 58-06-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -372,6 +375,7 @@ Resume file: None
 | Phase 58 P02 | 22min | 2 tasks | 6 files |
 | Phase 58 P04 | 6min | 2 tasks | 3 files |
 | Phase 58 P05 | 41min | 2 tasks | 3 files |
+| Phase 58-flutter-analyzer-code-generation-lane P06 | 55m | 3 tasks | 8 files |
 
 ## Decisions
 
