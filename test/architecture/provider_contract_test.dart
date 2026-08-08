@@ -701,6 +701,72 @@ void main() {
       }
     });
 
+    test('for-loop lexical shadow boundaries', () async {
+      const imports = '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+class FakeNamespace {
+  Widget ProviderScope({required Widget child}) => child;
+}
+''';
+      final cases = <({String name, String source, bool passes})>[
+        (
+          name: 'C-style alias encloses braced loop body root',
+          source: '''$imports
+void main() {
+  for (final riverpod = (FakeNamespace()); true;) {
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          passes: false,
+        ),
+        (
+          name: 'C-style alias does not enclose post-loop root',
+          source: '''$imports
+void main() {
+  for (final riverpod = (FakeNamespace()); false;)
+    Object();
+  runApp(riverpod.ProviderScope(child: const Placeholder()));
+}
+''',
+          passes: true,
+        ),
+        (
+          name: 'for-in alias encloses single-statement loop body root',
+          source: '''$imports
+void main() {
+  for (final riverpod in [FakeNamespace()])
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+}
+''',
+          passes: false,
+        ),
+        (
+          name: 'for-in alias does not enclose post-loop root',
+          source: '''$imports
+void main() {
+  for (final riverpod in [FakeNamespace()]) {}
+  runApp(riverpod.ProviderScope(child: const Placeholder()));
+}
+''',
+          passes: true,
+        ),
+      ];
+
+      for (final fixture in cases) {
+        final root = await _createFixtureRoot(appSource: fixture.source);
+        addTearDown(() => root.delete(recursive: true));
+        final report = checkProviderContract(root.path);
+        expect(
+          report.isPassing,
+          fixture.passes,
+          reason: '${fixture.name}: ${report.describe()}',
+        );
+      }
+    });
+
     test(
       'Riverpod scope constructors fail closed when pattern bindings shadow them',
       () async {
