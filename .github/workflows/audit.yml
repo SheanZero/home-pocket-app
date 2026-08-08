@@ -35,19 +35,12 @@ jobs:
             ~/.pub-cache
             .dart_tool/
           key: pub-${{ hashFiles('pubspec.lock') }}
-      - run: flutter pub get --enforce-lockfile
-      # P2-04 — a hard-failing coordinated dependency/native-toolchain
-      # contract. It includes the verified analyzer 12.x line and must run
-      # before static analysis instead of a warning-only version probe.
-      - name: Dependency compatibility contract
-        run: dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk
+      # Phase 58 D-08/D-09 — the sole Stable owner of locked retrieval,
+      # exact-baseline verification, two clean generation passes, analysis,
+      # architecture enforcement, and reversible negative tooling proof.
+      - name: Reproducible generation and architecture contract
+        run: bash scripts/verify_codegen_reproducibility.sh
       - run: dart pub global activate coverde 0.3.0+1
-      - name: flutter analyze
-        run: flutter analyze --no-fatal-infos
-      - name: dart run import_lint
-        # Blocking CLI companion to the active analysis-server plugin. Rules
-        # use severity:error, so any forbidden dependency exits non-zero.
-        run: dart run import_lint
       - name: Audit scanners
         run: |
           bash scripts/audit_layer.sh

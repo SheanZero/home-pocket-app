@@ -47,7 +47,7 @@ List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
   const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
   final wrapperMatches = RegExp(
     "^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: "
-    "${RegExp.escape(wrapperCommand)}${r'\\s*$'}",
+    "${RegExp.escape(wrapperCommand)}${r'\s*$'}",
     multiLine: true,
   ).allMatches(staticAnalysis);
   final violations = <String>[];
@@ -873,19 +873,17 @@ end
         '--mode=future-probe --verify-running-flutter-sdk';
 
     test(
-      'Stable analysis pins, locks, and verifies the baseline before analyze',
+      'Stable analysis invokes the authoritative wrapper after the exact SDK pin',
       () {
         final audit = currentInputs()['audit']!;
         expect(audit, contains('flutter-version: 3.44.8'));
-        expect(audit, contains('flutter pub get --enforce-lockfile'));
-        expect(audit, contains(baselineCommand));
         expect(
-          audit.indexOf('flutter pub get --enforce-lockfile'),
-          lessThan(audit.indexOf(baselineCommand)),
+          audit.indexOf('flutter-version: 3.44.8'),
+          lessThan(audit.indexOf('bash scripts/verify_codegen_reproducibility.sh')),
         );
         expect(
-          audit.indexOf(baselineCommand),
-          lessThan(audit.indexOf('run: flutter analyze')),
+          audit.indexOf('bash scripts/verify_codegen_reproducibility.sh'),
+          lessThan(audit.indexOf('bash scripts/audit_layer.sh')),
         );
       },
     );
