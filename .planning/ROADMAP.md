@@ -84,7 +84,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
   3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one exact compatible graph with no forced override, removed guard, or split runtime/generator lane.
   4. From a clean generation state, dependency resolution, localization generation, and code generation finish with no unexpected tracked generated-file diff or hand-edited output.
 
-**Plans**: 7/8 plans executed
+**Plans**: 8/8 plans executed
 
 Plans:
 
@@ -115,7 +115,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 58-08-PLAN.md — Make the tooling fixture lock recover from setup/resource failures and re-prove the final automated regression lane.
+- [x] 58-08-PLAN.md — Make the tooling fixture lock recover from setup/resource failures and re-prove the final automated regression lane.
 
 Cross-cutting constraints:
 
@@ -201,7 +201,7 @@ Cross-cutting constraints:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
-| 58. Flutter, Analyzer & Code Generation Lane | 7/8 | In Progress|  |
+| 58. Flutter, Analyzer & Code Generation Lane | 8/8 | In Progress|  |
 | 59. Controlled Platform Plugin Cohorts | 0/TBD | Not started | - |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |
