@@ -80,8 +80,8 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 **Success Criteria** (what must be TRUE):
 
   1. Developers and CI use the same officially verified Flutter/Dart stable toolchain and declared Dart SDK range.
-  2. Deliberately invalid imports still fail the architecture import guard, custom lint, and Riverpod lint after the analyzer decision; if analyzer 8 is the safe hold, that hold is explicit and enforced.
-  3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one compatible stable graph with no forced override or split runtime/generator lane.
+  2. Deliberately invalid imports and Riverpod roots still fail the active import_lint/Riverpod lint and repository-owned architecture guards after the analyzer decision; the exact analyzer 12 hold is explicit and enforced.
+  3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one exact compatible graph with no forced override, removed guard, or split runtime/generator lane.
   4. From a clean generation state, dependency resolution, localization generation, and code generation finish with no unexpected tracked generated-file diff or hand-edited output.
 
 **Plans**: 2/5 plans executed
@@ -95,7 +95,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0 completion)*
 
-- [ ] 58-02-PLAN.md — Enforce Flutter 3.44.8/Dart 3.12.2 and the exact analyzer 8.4.0 coherent generator graph.
+- [x] 58-02-PLAN.md — Enforce Flutter 3.44.8/Dart 3.12.2 and the exact analyzer 12.1.0 coherent generator graph; Flutter 3.44.9 is a documented hold pending a full identity transaction.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
