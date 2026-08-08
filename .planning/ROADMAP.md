@@ -45,7 +45,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 **Phase Numbering:** Continues from v2.0 Phase 56. Integer phases are planned milestone work; decimal phases, if urgently inserted, execute between their surrounding integers.
 
 - [x] **Phase 57: Stable Baseline & Compatibility Contract** - Establish the official-source stable decision and reproducible, machine-checked dependency policy. (completed 2026-08-06)
-- [ ] **Phase 58: Flutter, Analyzer & Code Generation Lane** - Select a coherent SDK, analyzer, lint, and generator graph without weakening architecture enforcement.
+- [x] **Phase 58: Flutter, Analyzer & Code Generation Lane** - Select a coherent SDK, analyzer, lint, and generator graph without weakening architecture enforcement. (completed 2026-08-08)
 - [ ] **Phase 59: Controlled Platform Plugin Cohorts** - Upgrade or evidence-hold native plugin groups through narrow behavioral compatibility lanes.
 - [ ] **Phase 60: SQLCipher & iOS Native Safety Lane** - Preserve and prove the encrypted iOS database, migration, and backup path from clean native artifacts.
 - [ ] **Phase 61: Android Toolchain & Emulator Lane** - Complete an all-or-hold AGP/Gradle/Kotlin migration with signed release and emulator evidence.
@@ -74,13 +74,13 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 
 ### Phase 58: Flutter, Analyzer & Code Generation Lane
 
-**Goal**: The project uses a single production-stable Flutter/Dart and code-generation compatibility graph without losing Clean Architecture or lint protection.
+**Goal**: The project uses a single production-stable Flutter/Dart and code-generation compatibility graph without losing Clean Architecture or lint protection for current production entrypoints and project-supported syntax.
 **Depends on**: Phase 57
 **Requirements**: GEN-01, GEN-02, GEN-03, GEN-04
 **Success Criteria** (what must be TRUE):
 
   1. Developers and CI use the same officially verified Flutter/Dart stable toolchain and declared Dart SDK range.
-  2. Deliberately invalid imports and Riverpod roots still fail the active import_lint/Riverpod lint and repository-owned architecture guards after the analyzer decision; the exact analyzer 12 hold is explicit and enforced.
+  2. Invalid imports and Riverpod roots in current production entrypoints and project-supported syntax fail the active import_lint/Riverpod lint and repository-owned architecture guards after the analyzer decision; the exact analyzer 12 hold is explicit and enforced. The token scanner is defense-in-depth, with complete Dart grammar parsing outside its contract.
   3. Riverpod, Freezed, JSON, Drift, build_runner, analyzer, and lints resolve as one exact compatible graph with no forced override, removed guard, or split runtime/generator lane.
   4. From a clean generation state, dependency resolution, localization generation, and code generation finish with no unexpected tracked generated-file diff or hand-edited output.
 
@@ -209,7 +209,7 @@ Cross-cutting constraints:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
-| 58. Flutter, Analyzer & Code Generation Lane | 10/10 | In Progress|  |
+| 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
 | 59. Controlled Platform Plugin Cohorts | 0/TBD | Not started | - |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |

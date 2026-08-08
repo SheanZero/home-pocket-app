@@ -29,7 +29,7 @@
 
 **v2.0 shipped and archived on 2026-08-05.** All 32 requirements are covered; Phases 53-56 passed verification; 12/12 integration seams and 6/6 E2E flows are complete. The close audit status is `tech_debt`, with no broken runtime seam or critical requirement gap.
 
-**v2.1 is active as of 2026-08-05.** The milestone modernizes dependencies and native build tooling as one verified compatibility window. Planning begins with official-source version research, then requirements and roadmap creation. Release-owner legal review remains outside this technical milestone. The 38 historical artifact records accepted at v2.0 close remain documented in `.planning/STATE.md` and do not represent runtime failures.
+**v2.1 is active as of 2026-08-05.** Phases 57 and 58 are complete; Phase 59 (Controlled Platform Plugin Cohorts) is next. Phase 58 fixed the production-stable Flutter/Dart, analyzer/lint, and code-generation compatibility graph. GEN-02 covers current production entrypoints and project-supported syntax; two unexposed token-scanner grammar edges are explicitly accepted as defense-in-depth technical debt. Release-owner legal review remains outside this technical milestone. The 38 historical artifact records accepted at v2.0 close remain documented in `.planning/STATE.md` and do not represent runtime failures.
 
 Current sources of truth: `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and the v2.0 archive under `.planning/milestones/`.
 
@@ -349,6 +349,8 @@ A family accounting app users can trust with sensitive financial data — local-
 ### Validated
 
 <!-- Capabilities shipped or confirmed stable. -->
+
+- **Validated in Phase 58: Flutter, Analyzer & Code Generation Lane** — Flutter 3.44.8 / Dart 3.12.2, analyzer 12.1.0, import_lint 2.0.0, riverpod_lint 3.1.4, and the Riverpod/Freezed/JSON/Drift generator cohort resolve as one exact no-override graph; Stable CI owns one locked two-pass generation wrapper. GEN-02 protects current production entrypoints and project-supported syntax, with the token scanner's nested unbraced-control-flow and local-`runApp` edges accepted as non-release-blocking defense-in-depth debt.
 
 **Existing app baseline (unchanged by milestone work):**
 
@@ -738,4 +740,4 @@ This document evolves at phase transitions and milestone boundaries.
 *Prior: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt.*
 
 ---
-*Last updated: 2026-08-05 after starting milestone v2.1 依赖与原生工具链现代化.*
+*Last updated: 2026-08-08 after completing Phase 58 and transitioning to Phase 59.*

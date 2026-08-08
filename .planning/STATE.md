@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
-current_phase: 58
-current_phase_name: flutter-analyzer-code-generation-lane
-status: executing
+current_phase: 59
+current_phase_name: Controlled Platform Plugin Cohorts
+status: planning
 stopped_at: Completed 58-10-PLAN.md
-last_updated: "2026-08-08T14:03:57.400Z"
+last_updated: "2026-08-08T14:29:28.918Z"
 last_activity: 2026-08-08
-last_activity_desc: Phase 58 execution started
+last_activity_desc: Phase 58 complete, transitioned to Phase 59
 progress:
   total_phases: 7
   completed_phases: 2
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 58 — flutter-analyzer-code-generation-lane
+**Current focus:** Phase 59 — Controlled Platform Plugin Cohorts
 
 ## Current Position
 
-Phase: 58 (flutter-analyzer-code-generation-lane) — EXECUTING
-Plan: 3 of 10
-Status: Ready to execute
-Last activity: 2026-08-08 — Phase 58 execution started
+Phase: 59 — Controlled Platform Plugin Cohorts
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-08 — Phase 58 complete, transitioned to Phase 59
 
-Progress: [██████████] 100%
+Progress: [███░░░░░░░] 29%
 
 ### Decisions
 
@@ -42,6 +42,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [v2.1 roadmap, 2026-08-05]: Use seven atomic compatibility lanes: baseline/contract → Flutter/analyzer/codegen → controlled plugins → SQLCipher/iOS → Android → automated release gates → isolated wired-iPhone UAT. A documented safe hold is successful; partial upgrades and security fallbacks are not.
 - [v2.1 roadmap, 2026-08-05]: Android physical-device testing is unavailable and out of scope. The only device acceptance is the current wired `“Xin Zhang”的 iPhone`, under an additive test-only app identity that cannot touch production financial data, containers, Keychain, backups, or credentials.
 - [Phase 58 execution, 2026-08-08]: The generic post-wave Xcode gate exposed `FlutterGeneratedPluginSwiftPackage` at iOS 13 while Firebase Swift packages require iOS 15. The working tree was clean and the user chose to continue Phase 58; defer this pre-existing native-platform mismatch to Phase 60 per D-10 rather than changing native tooling in the analyzer/codegen lane.
+- [Phase 58 close, 2026-08-08]: The owner narrowed GEN-02 to current production entrypoints and project-supported syntax. The repository-owned token scanner remains defense-in-depth rather than a complete Dart parser; nested unbraced-control-flow alias handling and locally shadowed `runApp` handling are accepted technical debt with no current production exposure found and do not block release.
 
 - [P1-06, 2026-08-05]: `InfoPlist.strings` is the single localization surface for the iOS display name and microphone, speech-recognition, and Face ID usage descriptions; Runner bundles ja, zh-Hans, and en variants, while the Japanese `Info.plist` values remain the fallback.
 - [P1-05, 2026-08-05]: Minimum supported iOS version is iOS 15.0; Podfile/Xcode, product docs, website/store copy, release gates, and device UAT use this single floor. Historical ADR/research references to iOS 14 remain historical context, not current support declarations.
