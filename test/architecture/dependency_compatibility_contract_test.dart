@@ -46,13 +46,14 @@ List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
 
   const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
   final wrapperMatches = RegExp(
-    "^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: "
-    "${RegExp.escape(wrapperCommand)}${r'\s*$'}",
+    '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: ${RegExp.escape(wrapperCommand)}${r'\s*$'}',
     multiLine: true,
   ).allMatches(staticAnalysis);
   final violations = <String>[];
   if (wrapperMatches.length != 1) {
-    violations.add('Stable static-analysis must invoke the wrapper exactly once');
+    violations.add(
+      'Stable static-analysis must invoke the wrapper exactly once',
+    );
   }
 
   final checkout = staticAnalysis.indexOf('uses: actions/checkout@v4');
@@ -60,7 +61,9 @@ List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
   final wrapper = staticAnalysis.indexOf(wrapperCommand);
   final auditScanners = staticAnalysis.indexOf('bash scripts/audit_layer.sh');
   if (checkout < 0 || flutterPin < checkout || wrapper < flutterPin) {
-    violations.add('wrapper must follow checkout and the exact Stable Flutter pin');
+    violations.add(
+      'wrapper must follow checkout and the exact Stable Flutter pin',
+    );
   }
   if (auditScanners < wrapper) {
     violations.add('audit-only scanners must follow the wrapper');
@@ -98,8 +101,7 @@ List<String> _stableWorkflowWrapperUniquenessViolations(String workflow) {
   final violations = <String>[];
 
   if (RegExp(
-        '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: '
-        "${RegExp.escape(wrapperCommand)}${r'\s*$'}",
+        '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: ${RegExp.escape(wrapperCommand)}${r'\s*$'}',
         multiLine: true,
       ).allMatches(activeWorkflow).length !=
       1) {
@@ -915,9 +917,6 @@ end
   });
 
   group('CI workflow source contracts', () {
-    const baselineCommand =
-        'dart run scripts/dependency_compatibility.dart '
-        '--mode=baseline --verify-running-flutter-sdk';
     const futureProbeCommand =
         'dart run scripts/dependency_compatibility.dart '
         '--mode=future-probe --verify-running-flutter-sdk';
@@ -929,7 +928,9 @@ end
         expect(audit, contains('flutter-version: 3.44.8'));
         expect(
           audit.indexOf('flutter-version: 3.44.8'),
-          lessThan(audit.indexOf('bash scripts/verify_codegen_reproducibility.sh')),
+          lessThan(
+            audit.indexOf('bash scripts/verify_codegen_reproducibility.sh'),
+          ),
         );
         expect(
           audit.indexOf('bash scripts/verify_codegen_reproducibility.sh'),
@@ -969,7 +970,7 @@ end
             audit.replaceFirst(
               'run: bash scripts/verify_codegen_reproducibility.sh',
               'run: bash scripts/verify_codegen_reproducibility.sh\n'
-              '      - run: bash scripts/verify_codegen_reproducibility.sh',
+                  '      - run: bash scripts/verify_codegen_reproducibility.sh',
             ),
           ),
           isNotEmpty,
@@ -980,7 +981,7 @@ end
             audit.replaceFirst(
               'run: bash scripts/verify_codegen_reproducibility.sh',
               'continue-on-error: true\n'
-              '        run: bash scripts/verify_codegen_reproducibility.sh || true',
+                  '        run: bash scripts/verify_codegen_reproducibility.sh || true',
             ),
           ),
           isNotEmpty,
@@ -1010,7 +1011,7 @@ end
             audit.replaceFirst(
               'run: bash scripts/verify_codegen_reproducibility.sh',
               'run: bash scripts/verify_codegen_reproducibility.sh\n'
-              '      - run: bash scripts/verify_codegen_reproducibility.sh',
+                  '      - run: bash scripts/verify_codegen_reproducibility.sh',
             ),
           ),
           isNotEmpty,
@@ -1031,7 +1032,7 @@ end
             audit.replaceFirst(
               'flutter pub get --enforce-lockfile',
               'flutter pub get --enforce-lockfile\n'
-              '          flutter pub run build_runner build',
+                  '          flutter pub run build_runner build',
             ),
           ),
           isNotEmpty,
@@ -1042,7 +1043,7 @@ end
             audit.replaceFirst(
               'run: bash scripts/verify_codegen_reproducibility.sh',
               'continue-on-error: true\n'
-              '        run: bash scripts/verify_codegen_reproducibility.sh || true',
+                  '        run: bash scripts/verify_codegen_reproducibility.sh || true',
             ),
           ),
           isNotEmpty,

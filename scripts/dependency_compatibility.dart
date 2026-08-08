@@ -554,10 +554,8 @@ String _workflowJobBody(String workflow, String job) {
   return workflow.substring(headers[index].end, end);
 }
 
-String _withoutYamlComments(String source) => source.replaceAll(
-  RegExp(r'^[ \t]*#.*(?:\r?\n|$)', multiLine: true),
-  '',
-);
+String _withoutYamlComments(String source) =>
+    source.replaceAll(RegExp(r'^[ \t]*#.*(?:\r?\n|$)', multiLine: true), '');
 
 bool _hasActiveSqlCipherLinkerStrip(String podfile) => RegExp(
   r'''installer\.pods_project\.targets\.each do \|target\|[\s\S]*?target\.build_configurations\.each do \|config\|[\s\S]*?^\s*stripped\s*=\s*original\.gsub\(/\\s-l"\?sqlite3"\?/,\s*''\)\s*$[\s\S]*?^\s*File\.write\(xcconfig_path,\s*stripped\)\s+if\s+stripped\s+!=\s+original\s*$''',
