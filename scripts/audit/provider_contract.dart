@@ -338,6 +338,24 @@ _ScopeShadow _scopeShadowFor(List<_Token> tokens, int declaration) {
       end: _functionBodyEnd(tokens, close),
     );
   }
+  final ifCaseEnd = _ifCaseShadowEnd(tokens, declaration);
+  if (ifCaseEnd != null) {
+    return _ScopeShadow(
+      name: token.text,
+      offset: token.offset,
+      start: token.offset,
+      end: ifCaseEnd,
+    );
+  }
+  final switchCaseEnd = _switchCaseShadowEnd(tokens, declaration);
+  if (switchCaseEnd != null) {
+    return _ScopeShadow(
+      name: token.text,
+      offset: token.offset,
+      start: token.offset,
+      end: switchCaseEnd,
+    );
+  }
   if (_isAtLibraryScope(tokens, declaration)) {
     return _ScopeShadow.libraryWide(name: token.text, offset: token.offset);
   }
@@ -380,12 +398,138 @@ bool _isAtLibraryScope(List<_Token> tokens, int index) {
 
 bool _isScopeBrace(List<_Token> tokens, int index) {
   if (tokens[index].text != '{' || index == 0) return false;
+  if (_isTypeBodyBrace(tokens, index)) return true;
   final previous = tokens[index - 1].text;
   return previous == ')' ||
       previous == 'else' ||
       previous == 'try' ||
       previous == 'finally' ||
       previous == 'do';
+}
+
+bool _isTypeBodyBrace(List<_Token> tokens, int index) {
+  var parentheses = 0;
+  var brackets = 0;
+  for (var cursor = index - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    if (token == ')') {
+      parentheses++;
+      continue;
+    }
+    if (token == '(') {
+      if (parentheses > 0) parentheses--;
+      continue;
+    }
+    if (token == ']') {
+      brackets++;
+      continue;
+    }
+    if (token == '[') {
+      if (brackets > 0) brackets--;
+      continue;
+    }
+    if (parentheses != 0 || brackets != 0) continue;
+    if (token == 'class' ||
+        token == 'mixin' ||
+        token == 'enum' ||
+        token == 'extension') {
+      return true;
+    }
+    if (token == ';' || token == '{' || token == '}') return false;
+  }
+  return false;
+}
+
+int? _ifCaseShadowEnd(List<_Token> tokens, int declaration) {
+  var caseIndex = -1;
+  for (var cursor = declaration - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    if (token == 'case') {
+      caseIndex = cursor;
+      break;
+    }
+    if (token == ';' || token == '{' || token == '}') return null;
+  }
+  if (caseIndex < 0) return null;
+
+  var ifIndex = -1;
+  for (var cursor = caseIndex - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    if (token == 'if') {
+      ifIndex = cursor;
+      break;
+    }
+    if (token == ';' || token == '{' || token == '}') return null;
+  }
+  if (ifIndex < 0 ||
+      ifIndex + 1 >= tokens.length ||
+      tokens[ifIndex + 1].text != '(') {
+    return null;
+  }
+  final close = _matchingParenthesis(tokens, ifIndex + 1);
+  if (close == null || close <= declaration || close + 1 >= tokens.length) {
+    return null;
+  }
+  return _statementEnd(tokens, close + 1);
+}
+
+int? _switchCaseShadowEnd(List<_Token> tokens, int declaration) {
+  var caseIndex = -1;
+  for (var cursor = declaration - 1; cursor >= 0; cursor--) {
+    final token = tokens[cursor].text;
+    if (token == 'case') {
+      caseIndex = cursor;
+      break;
+    }
+    if (token == ';' || token == '{' || token == '}') return null;
+  }
+  if (caseIndex < 0) return null;
+
+  final opens = <int>[];
+  for (var cursor = 0; cursor < caseIndex; cursor++) {
+    if (tokens[cursor].text == '{') opens.add(cursor);
+    if (tokens[cursor].text == '}' && opens.isNotEmpty) opens.removeLast();
+  }
+  if (opens.isEmpty) return null;
+  final body = opens.last;
+  var isSwitchBody = false;
+  for (var cursor = body - 1; cursor >= 0; cursor--) {
+    if (tokens[cursor].text == 'switch') {
+      isSwitchBody = true;
+      break;
+    }
+    if (tokens[cursor].text == ';' ||
+        tokens[cursor].text == '{' ||
+        tokens[cursor].text == '}') {
+      break;
+    }
+  }
+  if (!isSwitchBody) return null;
+
+  final close = _matchingBrace(tokens, body);
+  if (close == null) return null;
+  var depth = 0;
+  for (var cursor = caseIndex + 1; cursor < close; cursor++) {
+    final token = tokens[cursor].text;
+    if (token == '{') {
+      depth++;
+    } else if (token == '}' && depth > 0) {
+      depth--;
+    } else if (depth == 0 && (token == 'case' || token == 'default')) {
+      return tokens[cursor].offset - 1;
+    }
+  }
+  return tokens[close].offset;
+}
+
+int _statementEnd(List<_Token> tokens, int start) {
+  if (tokens[start].text == '{') {
+    return tokens[_matchingBrace(tokens, start) ?? start].offset;
+  }
+  for (var cursor = start; cursor < tokens.length; cursor++) {
+    if (tokens[cursor].text == ';') return tokens[cursor].offset;
+  }
+  return tokens.last.offset;
 }
 
 int _functionBodyEnd(List<_Token> tokens, int close) {
