@@ -4,10 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _scriptPath = 'scripts/verify_codegen_reproducibility.sh';
 
-String _executableSource(String source) => source
+List<String> _executableLines(String source) => source
     .split('\n')
     .where((line) => !line.trimLeft().startsWith('#'))
-    .join('\n');
+    .map((line) => line.trim())
+    .where((line) => line.isNotEmpty)
+    .toList();
+
+String _executableSource(String source) => _executableLines(source).join('\n');
 
 int _onlyIndexOf(String source, String value) {
   expect(
@@ -49,7 +53,10 @@ List<String> _generatedOutputGuardViolations(String source) {
 }
 
 List<String> _twoPassContractViolations(String source) {
-  final executable = _executableSource(source);
+  const buildRunner =
+      'flutter pub run build_runner build --delete-conflicting-outputs';
+  final executableLines = _executableLines(source);
+  final executable = executableLines.join('\n');
   final violations = <String>[];
 
   void expectCount(String value, int expected) {
@@ -58,10 +65,16 @@ List<String> _twoPassContractViolations(String source) {
     }
   }
 
+  void expectExecutableLineCount(String value, int expected) {
+    if (executableLines.where((line) => line == value).length != expected) {
+      violations.add('$value must appear $expected time(s)');
+    }
+  }
+
   expectCount('Running generation pass 1.', 1);
   expectCount('Running generation pass 2.', 1);
   expectCount('flutter gen-l10n', 2);
-  expectCount('flutter pub run build_runner build', 2);
+  expectExecutableLineCount(buildRunner, 2);
   expectCount("assert_clean_generation_scope 'after generation pass 1'", 1);
   expectCount("assert_clean_generation_scope 'after generation pass 2'", 1);
   expectCount('flutter analyze --no-fatal-infos', 1);
@@ -97,20 +110,23 @@ List<String> _twoPassContractViolations(String source) {
   final l10nMatches = RegExp(
     RegExp.escape('flutter gen-l10n'),
   ).allMatches(executable).toList();
-  final buildRunnerMatches = RegExp(
-    RegExp.escape('flutter pub run build_runner build'),
-  ).allMatches(executable).toList();
+  final buildRunnerMatches = executableLines
+      .asMap()
+      .entries
+      .where((entry) => entry.value == buildRunner)
+      .map((entry) => entry.key)
+      .toList();
 
   if (pass1Diff < 0 ||
       pass2 < pass1Diff ||
       pass2Diff < pass2 ||
       l10nMatches.length != 2 ||
       buildRunnerMatches.length != 2 ||
-      l10nMatches[0].start > buildRunnerMatches[0].start ||
-      buildRunnerMatches[0].start > pass1Diff ||
+      l10nMatches[0].start > executable.indexOf(buildRunner) ||
+      executable.indexOf(buildRunner) > pass1Diff ||
       l10nMatches[1].start < pass2 ||
-      l10nMatches[1].start > buildRunnerMatches[1].start ||
-      buildRunnerMatches[1].start > pass2Diff) {
+      l10nMatches[1].start > executable.lastIndexOf(buildRunner) ||
+      executable.lastIndexOf(buildRunner) > pass2Diff) {
     violations.add('each clean generation boundary must follow l10n then build_runner');
   }
   if (analyzer < pass2Diff ||
@@ -154,7 +170,9 @@ void main() {
       '--mode=baseline --verify-running-flutter-sdk',
     );
     final l10n = source.indexOf('flutter gen-l10n');
-    final buildRunner = source.indexOf('flutter pub run build_runner build');
+    final buildRunner = source.indexOf(
+      'flutter pub run build_runner build --delete-conflicting-outputs',
+    );
     final firstPassDiff = source.indexOf(
       "assert_clean_generation_scope 'after generation pass 1'",
     );
@@ -199,8 +217,11 @@ void main() {
     );
   });
 
-  test('two clean generation passes precede every lint and architecture gate', () {
+  test('build_runner command is exact on both D-08 passes', () {
     final source = File(_scriptPath).readAsStringSync();
+    const buildRunner =
+        'flutter pub run build_runner build --delete-conflicting-outputs';
+    const shortenedBuildRunner = 'flutter pub run build_runner build';
 
     expect(_twoPassContractViolations(source), isEmpty);
     expect(
@@ -219,6 +240,64 @@ void main() {
       ),
       isNotEmpty,
       reason: 'analyzer cannot move before the second clean diff gate',
+    );
+    expect(
+      _twoPassContractViolations(
+        source.replaceFirst(buildRunner, shortenedBuildRunner),
+      ),
+      isNotEmpty,
+      reason: 'pass 1 must use the complete conflict-deleting command',
+    );
+    expect(
+      _twoPassContractViolations(
+        source.replaceFirst(
+          buildRunner,
+          shortenedBuildRunner,
+          source.indexOf(buildRunner) + buildRunner.length,
+        ),
+      ),
+      isNotEmpty,
+      reason: 'pass 2 must use the complete conflict-deleting command',
+    );
+    expect(
+      _twoPassContractViolations(
+        source.replaceFirst(
+          '--delete-conflicting-outputs',
+          '--delete-conflicting-output',
+        ),
+      ),
+      isNotEmpty,
+      reason: 'the conflict-deletion flag must remain exactly spelled',
+    );
+    expect(
+      _twoPassContractViolations(
+        source.replaceFirst(
+          '  flutter gen-l10n\n  $buildRunner',
+          '  $buildRunner\n  flutter gen-l10n',
+        ),
+      ),
+      isNotEmpty,
+      reason: 'a build cannot move before its pass l10n command',
+    );
+    expect(
+      _twoPassContractViolations(
+        source.replaceFirst(
+          "  $buildRunner\n  assert_clean_generation_scope 'after generation pass 1'",
+          "  assert_clean_generation_scope 'after generation pass 1'\n  $buildRunner",
+        ),
+      ),
+      isNotEmpty,
+      reason: 'each build must precede its own clean-scope assertion',
+    );
+    expect(
+      _twoPassContractViolations(
+        source.replaceFirst(
+          "  assert_clean_generation_scope 'after generation pass 2'",
+          "  $buildRunner\n  assert_clean_generation_scope 'after generation pass 2'",
+        ),
+      ),
+      isNotEmpty,
+      reason: 'a third complete build command is forbidden',
     );
     expect(
       _twoPassContractViolations(
