@@ -5,16 +5,16 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 58
 current_phase_name: flutter-analyzer-code-generation-lane
 status: executing
-stopped_at: Gap-closure plans 58-07 and 58-08 ready to execute
-last_updated: "2026-08-08T11:47:46.000Z"
+stopped_at: Completed 58-07-PLAN.md
+last_updated: "2026-08-08T12:07:42.532Z"
 last_activity: 2026-08-08
-last_activity_desc: Phase 58 gap-closure planning complete — 2 new plans ready
+last_activity_desc: Phase 58 execution started
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 1
   total_plans: 11
-  completed_plans: 9
-  percent: 29
+  completed_plans: 10
+  percent: 14
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 ## Current Position
 
 Phase: 58 (flutter-analyzer-code-generation-lane) — EXECUTING
-Plan: 6 of 8
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-08-08 — Phase 58 gap-closure planning complete
+Last activity: 2026-08-08 — Phase 58 execution started
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 91%
 
 ### Decisions
 
@@ -92,6 +92,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: Qualified runApp matching is restricted to verified Flutter UI import prefixes.
 - [Phase ?]: Negative tooling fixtures serialize complete transactions with a blocking cross-process lock.
 - [Phase ?]: Every independent Stable Flutter CI job uses lock-enforced dependency retrieval.
+- [Phase ?]: 58-07: Exact runApp.call matching preserves verified Flutter-prefix boundaries while lexical shadows end at type, then-branch, and switch-case scopes.
 
 ### Quick Tasks Completed
 
@@ -277,8 +278,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-08T10:55:27.014Z
-Stopped at: Completed 58-06-PLAN.md
+Last session: 2026-08-08T12:07:42.519Z
+Stopped at: Completed 58-07-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -376,6 +377,7 @@ Resume file: None
 | Phase 58 P04 | 6min | 2 tasks | 3 files |
 | Phase 58 P05 | 41min | 2 tasks | 3 files |
 | Phase 58-flutter-analyzer-code-generation-lane P06 | 55m | 3 tasks | 8 files |
+| Phase 58-flutter-analyzer-code-generation-lane P07 | 15min | 2 tasks | 4 files |
 
 ## Decisions
 
