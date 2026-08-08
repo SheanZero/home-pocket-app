@@ -77,6 +77,20 @@ class ToolingGuardCase {
         diagnosticCode: 'missing_provider_scope',
       );
 
+  const ToolingGuardCase.providerScopeQualifiedRunAppMissing()
+    : this(
+        name: 'qualified Flutter provider app root without scope',
+        fixturePath:
+            'lib/phase58_provider_scope_qualified_run_app_fixture.dart',
+        source:
+            "import 'package:flutter/widgets.dart' as widgets;\n\n"
+            'void phase58QualifiedBadProviderRoot() =>\n'
+            '    widgets.runApp(const widgets.Placeholder());\n',
+        command: 'dart',
+        arguments: const ['run', 'scripts/audit/provider_contract.dart'],
+        diagnosticCode: 'missing_provider_scope',
+      );
+
   const ToolingGuardCase.providerScopeControl()
     : this(
         name: 'provider app root scope control',
@@ -362,6 +376,7 @@ Future<ToolingGuardResult> verifyToolingGuards({
     ToolingGuardCase.layerScannerPackage(),
     ToolingGuardCase.layerScannerRelative(),
     ToolingGuardCase.providerScopeMissing(),
+    ToolingGuardCase.providerScopeQualifiedRunAppMissing(),
     ToolingGuardCase.providerScopeControl(),
     ToolingGuardCase.providerScopeLocalCollision(),
     ToolingGuardCase.providerScopeImportedShadow(),

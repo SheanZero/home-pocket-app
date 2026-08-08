@@ -68,7 +68,12 @@ void _checkAppRoots(
     final source = file.readAsStringSync();
     final path = _relativePath(root, file);
     final scopeBindings = _riverpodScopeBindings(source);
-    for (final call in _findCalls(source, 'runApp')) {
+    final flutterRunAppPrefixes = _flutterRunAppPrefixes(source);
+    for (final call in _findCalls(
+      source,
+      'runApp',
+      allowedQualifiedPrefixes: flutterRunAppPrefixes,
+    )) {
       if (_isScopedRoot(call, scopeBindings)) continue;
       violations.add(
         ProviderContractViolation(
@@ -496,12 +501,23 @@ int? _matchingParenthesis(List<_Token> tokens, int open) {
   return null;
 }
 
-List<_Call> _findCalls(String source, String name) {
+List<_Call> _findCalls(
+  String source,
+  String name, {
+  Set<String> allowedQualifiedPrefixes = const {},
+}) {
   final calls = <_Call>[];
   final tokens = _tokens(source);
   for (var index = 0; index + 1 < tokens.length; index++) {
     if (tokens[index].text != name || tokens[index + 1].text != '(') continue;
-    if (index > 0 && tokens[index - 1].text == '.') continue;
+    if (index > 0 && tokens[index - 1].text == '.') {
+      final receiver = index >= 2 ? tokens[index - 2] : null;
+      final hasVerifiedReceiver =
+          receiver?.kind == _TokenKind.identifier &&
+          allowedQualifiedPrefixes.contains(receiver!.text) &&
+          (index < 3 || tokens[index - 3].text != '.');
+      if (!hasVerifiedReceiver) continue;
+    }
     var depth = 1;
     var close = index + 2;
     for (; close < tokens.length; close++) {
@@ -512,6 +528,37 @@ List<_Call> _findCalls(String source, String name) {
     calls.add(_Call(tokens[index].offset, tokens.sublist(index + 2, close)));
   }
   return calls;
+}
+
+/// Finds import prefixes explicitly attached to Flutter UI libraries exposing
+/// the framework app root. Other dotted receivers remain excluded.
+Set<String> _flutterRunAppPrefixes(String source) {
+  const uiLibraries = {
+    'package:flutter/widgets.dart',
+    'package:flutter/material.dart',
+    'package:flutter/cupertino.dart',
+  };
+  final tokens = _tokens(source);
+  final prefixes = <String>{};
+  for (var index = 0; index + 1 < tokens.length; index++) {
+    if (tokens[index].text != 'import' ||
+        tokens[index + 1].kind != _TokenKind.string ||
+        !uiLibraries.contains(tokens[index + 1].text)) {
+      continue;
+    }
+    for (
+      var cursor = index + 2;
+      cursor + 1 < tokens.length && tokens[cursor].text != ';';
+      cursor++
+    ) {
+      if (tokens[cursor].text == 'as' &&
+          tokens[cursor + 1].kind == _TokenKind.identifier) {
+        prefixes.add(tokens[cursor + 1].text);
+        break;
+      }
+    }
+  }
+  return prefixes;
 }
 
 List<_Token> _tokens(String source) {
