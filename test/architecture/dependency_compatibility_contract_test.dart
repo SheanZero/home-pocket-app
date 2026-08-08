@@ -25,6 +25,71 @@ const _betaFlutterMachineJson = '''
 
 const _flutterExtensionFixture = 'val minSdkVersion: Int = 24';
 
+String _activeWorkflowSource(String source) => source
+    .split('\n')
+    .where((line) => !line.trimLeft().startsWith('#'))
+    .join('\n');
+
+String? _workflowJobSource(String workflow, String jobName) {
+  final match = RegExp(
+    '^  ${RegExp.escape(jobName)}:\\n([\\s\\S]*?)(?=^  [a-z][a-z0-9-]*:\\n|\\z)',
+    multiLine: true,
+  ).firstMatch(_activeWorkflowSource(workflow));
+  return match?.group(1);
+}
+
+List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
+  final staticAnalysis = _workflowJobSource(workflow, 'static-analysis');
+  if (staticAnalysis == null) {
+    return ['Stable static-analysis job is missing'];
+  }
+
+  const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
+  final wrapperMatches = RegExp(
+    "^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: "
+    "${RegExp.escape(wrapperCommand)}${r'\\s*$'}",
+    multiLine: true,
+  ).allMatches(staticAnalysis);
+  final violations = <String>[];
+  if (wrapperMatches.length != 1) {
+    violations.add('Stable static-analysis must invoke the wrapper exactly once');
+  }
+
+  final checkout = staticAnalysis.indexOf('uses: actions/checkout@v4');
+  final flutterPin = staticAnalysis.indexOf('flutter-version: 3.44.8');
+  final wrapper = staticAnalysis.indexOf(wrapperCommand);
+  final auditScanners = staticAnalysis.indexOf('bash scripts/audit_layer.sh');
+  if (checkout < 0 || flutterPin < checkout || wrapper < flutterPin) {
+    violations.add('wrapper must follow checkout and the exact Stable Flutter pin');
+  }
+  if (auditScanners < wrapper) {
+    violations.add('audit-only scanners must follow the wrapper');
+  }
+
+  const directCommands = [
+    'flutter pub get',
+    'dart run scripts/dependency_compatibility.dart',
+    'flutter analyze',
+    'dart run import_lint',
+    'flutter gen-l10n',
+    'build_runner build',
+    'dart run scripts/verify_tooling_guards.dart',
+    'test/architecture/layer_import_rules_test.dart',
+    'test/architecture/domain_import_rules_test.dart',
+    'test/architecture/presentation_layer_rules_test.dart',
+  ];
+  for (final command in directCommands) {
+    if (staticAnalysis.contains(command)) {
+      violations.add('Stable static-analysis must not duplicate $command');
+    }
+  }
+  if (staticAnalysis.contains('continue-on-error: true') ||
+      staticAnalysis.contains('|| true')) {
+    violations.add('Stable static-analysis must not soften wrapper failures');
+  }
+  return violations;
+}
+
 void main() {
   Map<String, String> currentInputs() => {
     'pubspec': File('pubspec.yaml').readAsStringSync(),
@@ -821,6 +886,57 @@ end
         expect(
           audit.indexOf(baselineCommand),
           lessThan(audit.indexOf('run: flutter analyze')),
+        );
+      },
+    );
+
+    test(
+      'Stable CI routes post-generation lint and architecture gates through one wrapper',
+      () {
+        final audit = currentInputs()['audit']!;
+        expect(_stableStaticAnalysisWrapperViolations(audit), isEmpty);
+
+        expect(
+          _stableStaticAnalysisWrapperViolations(
+            audit.replaceFirst(
+              'bash scripts/verify_codegen_reproducibility.sh',
+              'flutter analyze --no-fatal-infos',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'omitting the wrapper must fail',
+        );
+        expect(
+          _stableStaticAnalysisWrapperViolations(
+            audit.replaceFirst(
+              'run: bash scripts/verify_codegen_reproducibility.sh',
+              '# run: bash scripts/verify_codegen_reproducibility.sh',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'comment-only wrapper presence must fail',
+        );
+        expect(
+          _stableStaticAnalysisWrapperViolations(
+            audit.replaceFirst(
+              'run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: bash scripts/verify_codegen_reproducibility.sh\n'
+              '      - run: bash scripts/verify_codegen_reproducibility.sh',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'duplicate wrapper calls must fail',
+        );
+        expect(
+          _stableStaticAnalysisWrapperViolations(
+            audit.replaceFirst(
+              'run: bash scripts/verify_codegen_reproducibility.sh',
+              'continue-on-error: true\n'
+              '        run: bash scripts/verify_codegen_reproducibility.sh || true',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'soft-failed wrapper calls must fail',
         );
       },
     );
