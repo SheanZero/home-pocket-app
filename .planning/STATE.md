@@ -371,7 +371,7 @@ Resume file: None
 | Phase 58 P01 | 8min | 2 tasks | 8 files |
 | Phase 58 P02 | 22min | 2 tasks | 6 files |
 | Phase 58 P04 | 6min | 2 tasks | 3 files |
-| Phase 58 P05 | 18min | 2 tasks | 3 files |
+| Phase 58 P05 | 41min | 2 tasks | 3 files |
 
 ## Decisions
 

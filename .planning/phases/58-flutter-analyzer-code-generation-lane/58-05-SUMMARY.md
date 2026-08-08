@@ -54,7 +54,7 @@ coverage:
         ref: git diff --check
         status: pass
     human_judgment: false
-duration: 18min
+duration: 41min
 completed: 2026-08-08
 status: complete
 ---
