@@ -596,7 +596,15 @@ List<_Call> _findCalls(
   final calls = <_Call>[];
   final tokens = _tokens(source);
   for (var index = 0; index + 1 < tokens.length; index++) {
-    if (tokens[index].text != name || tokens[index + 1].text != '(') continue;
+    if (tokens[index].text != name) continue;
+    final immediateCall = tokens[index + 1].text == '(';
+    final directFunctionCall =
+        index + 3 < tokens.length &&
+        tokens[index + 1].text == '.' &&
+        tokens[index + 2].kind == _TokenKind.identifier &&
+        tokens[index + 2].text == 'call' &&
+        tokens[index + 3].text == '(';
+    if (!immediateCall && !directFunctionCall) continue;
     if (index > 0 && tokens[index - 1].text == '.') {
       final receiver = index >= 2 ? tokens[index - 2] : null;
       final hasVerifiedReceiver =
@@ -605,14 +613,17 @@ List<_Call> _findCalls(
           (index < 3 || tokens[index - 3].text != '.');
       if (!hasVerifiedReceiver) continue;
     }
+    final argumentsOpen = index + (directFunctionCall ? 3 : 1);
     var depth = 1;
-    var close = index + 2;
+    var close = argumentsOpen + 1;
     for (; close < tokens.length; close++) {
       if (tokens[close].text == '(') depth++;
       if (tokens[close].text == ')' && --depth == 0) break;
     }
     if (close == tokens.length) continue;
-    calls.add(_Call(tokens[index].offset, tokens.sublist(index + 2, close)));
+    calls.add(
+      _Call(tokens[index].offset, tokens.sublist(argumentsOpen + 1, close)),
+    );
   }
   return calls;
 }
