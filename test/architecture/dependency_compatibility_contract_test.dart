@@ -160,7 +160,8 @@ void main() {
         expect(matcher.hasMatch(input['lock']!), isTrue, reason: entry.key);
         input['lock'] = input['lock']!.replaceFirstMapped(
           matcher,
-          (match) => '${match.group(1)}${entry.value}.drift"',
+          (match) =>
+              match.group(0)!.replaceFirst(entry.value, '${entry.value}.drift'),
         );
 
         expect(

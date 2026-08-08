@@ -294,6 +294,15 @@ CompatibilityReport validateDependencyCompatibility({
     }
   }
 
+  void expectSdkConstraint(String expected) {
+    final actual = _map(pubspec['environment'])['sdk']?.toString();
+    if (actual != expected) {
+      issues.add(
+        'environment.sdk constraint must be $expected (found $actual)',
+      );
+    }
+  }
+
   void expectText(String label, String contents, String marker) {
     if (!contents.contains(marker)) {
       issues.add('$label must contain: $marker');
@@ -370,28 +379,57 @@ CompatibilityReport validateDependencyCompatibility({
   expectLocked('speech_to_text', '7.3.0');
   expectConstraint('flutter_local_notifications', '^22.2.0');
   expectLocked('flutter_local_notifications', '22.2.0');
+  // The analyzer/plugin/generator cohort is a single solver-produced graph.
+  // Moving any member alone can silently invalidate code generation or the
+  // active architecture plugins, so both the declarations and lock selections
+  // intentionally fail closed on every reviewed member.
+  expectSdkConstraint('^3.12.2');
+
   expectConstraint('flutter_riverpod', '3.3.2');
   expectLocked('flutter_riverpod', '3.3.2');
+  expectLocked('riverpod', '3.3.2');
   expectConstraint('riverpod_annotation', '4.0.3');
   expectLocked('riverpod_annotation', '4.0.3');
-  expectConstraint('json_annotation', '^4.12.0');
-  expectLocked('json_annotation', '4.12.0');
-  expectConstraint('json_serializable', '^6.9.4');
-  expectLocked('json_serializable', '6.14.1');
   expectConstraint('riverpod_generator', '4.0.4');
   expectLocked('riverpod_generator', '4.0.4');
   expectConstraint('riverpod_lint', '3.1.4');
   expectLocked('riverpod_lint', '3.1.4');
+
+  expectConstraint('freezed_annotation', '^3.0.0');
+  expectLocked('freezed_annotation', '3.1.0');
+  expectConstraint('freezed', '3.2.6-dev.1');
+  expectLocked('freezed', '3.2.6-dev.1');
+  expectConstraint('json_annotation', '^4.12.0');
+  expectLocked('json_annotation', '4.12.0');
+  expectConstraint('json_serializable', '^6.9.4');
+  expectLocked('json_serializable', '6.14.1');
+
+  expectConstraint('drift', '2.34.0');
+  expectLocked('drift', '2.34.0');
+  expectConstraint('drift_dev', '2.34.0');
+  expectLocked('drift_dev', '2.34.0');
+  expectConstraint('build_runner', '^2.4.14');
+  expectLocked('build_runner', '2.15.1');
+  expectLocked('build', '4.0.7');
+  expectLocked('source_gen', '4.2.4');
   expectConstraint('import_lint', '^2.0.0');
   expectLocked('import_lint', '2.0.0');
   expectConstraint('dart_code_linter', '^4.1.9');
   expectLocked('dart_code_linter', '4.1.9');
-  final analyzerVersion = _map(packages['analyzer'])['version']?.toString();
-  if (analyzerVersion == null ||
-      !RegExp(r'^12\.\d+\.\d+$').hasMatch(analyzerVersion)) {
-    issues.add(
-      'analyzer lock must stay on the verified 12.x line (found $analyzerVersion)',
-    );
+  expectLocked('analyzer', '12.1.0');
+  expectLocked('analyzer_plugin', '0.14.8');
+
+  for (final obsoletePackage in {
+    'custom_lint',
+    'custom_lint_builder',
+    'import_guard_custom_lint',
+  }) {
+    if (allDirectDependencies.containsKey(obsoletePackage) ||
+        packages.containsKey(obsoletePackage)) {
+      issues.add(
+        '$obsoletePackage must stay absent from the active analyzer 12 graph',
+      );
+    }
   }
 
   expectText(
