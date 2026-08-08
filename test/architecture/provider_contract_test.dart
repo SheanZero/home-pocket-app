@@ -458,6 +458,137 @@ void main() =>
       },
     );
 
+    test('lexical shadow boundaries', () async {
+      const imports = '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
+class FakeNamespace {
+  Widget ProviderScope({required Widget child}) => child;
+}
+''';
+      final cases = <({String name, String source, bool passes})>[
+        (
+          name: 'unrelated class member stays type-local',
+          source: '''$imports
+class Helper {
+  void riverpod() {}
+}
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+          passes: true,
+        ),
+        (
+          name: 'unrelated mixin member stays type-local',
+          source: '''$imports
+mixin Helper {
+  void riverpod() {}
+}
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+          passes: true,
+        ),
+        (
+          name: 'unrelated extension member stays type-local',
+          source: '''$imports
+extension Helper on Object {
+  void riverpod() {}
+}
+
+void main() =>
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+''',
+          passes: true,
+        ),
+        (
+          name: 'same type member parameter encloses root',
+          source: '''$imports
+class Helper {
+  void build(FakeNamespace riverpod) {
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          passes: false,
+        ),
+        (
+          name: 'if-case binding encloses then root',
+          source: '''$imports
+void main() {
+  if ((FakeNamespace(), 0) case (final riverpod, _)) {
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          passes: false,
+        ),
+        (
+          name: 'if-case binding does not enclose else root',
+          source: '''$imports
+void main() {
+  if ((FakeNamespace(), 0) case (final riverpod, _)) {
+  } else {
+    runApp(riverpod.ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          passes: true,
+        ),
+        (
+          name: 'if-case binding does not enclose post-if root',
+          source: '''$imports
+void main() {
+  if ((FakeNamespace(), 0) case (final riverpod, _)) {}
+  runApp(riverpod.ProviderScope(child: const Placeholder()));
+}
+''',
+          passes: true,
+        ),
+        (
+          name: 'switch-case binding encloses same-case root',
+          source: '''$imports
+void main() {
+  switch ((FakeNamespace(), 0)) {
+    case (final riverpod, _):
+      runApp(riverpod.ProviderScope(child: const Placeholder()));
+      break;
+  }
+}
+''',
+          passes: false,
+        ),
+        (
+          name: 'switch-case binding does not enclose later-case root',
+          source: '''$imports
+void main() {
+  switch ((FakeNamespace(), 0)) {
+    case (final riverpod, _):
+      break;
+    case _:
+      runApp(riverpod.ProviderScope(child: const Placeholder()));
+  }
+}
+''',
+          passes: true,
+        ),
+      ];
+
+      for (final fixture in cases) {
+        final root = await _createFixtureRoot(appSource: fixture.source);
+        addTearDown(() => root.delete(recursive: true));
+        final report = checkProviderContract(root.path);
+        expect(
+          report.isPassing,
+          fixture.passes,
+          reason: '${fixture.name}: ${report.describe()}',
+        );
+      }
+    });
+
     test(
       'Riverpod scope constructors fail closed when pattern bindings shadow them',
       () async {
