@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../scripts/audit/provider_contract.dart';
+import '../../scripts/verify_tooling_guards.dart' as tooling;
 
 void main() {
   group('owned Riverpod provider contract', () {
@@ -223,7 +224,7 @@ void main() {}
           if (!fixture.passes) {
             expect(
               report.describe(),
-              contains('lib/main.dart:3:8 [missing_provider_scope]'),
+              contains('lib/main.dart:3 missing_provider_scope'),
             );
           }
         }
@@ -814,11 +815,16 @@ void main() {
       },
     );
 
-    test('the production lib tree satisfies the owned provider contract', () {
-      final report = checkProviderContract('.');
+    test(
+      'the production lib tree satisfies the owned provider contract',
+      () async {
+        await tooling.withToolingGuardFixtureLock(() async {
+          final report = checkProviderContract('.');
 
-      expect(report.isPassing, isTrue, reason: report.describe());
-    });
+          expect(report.isPassing, isTrue, reason: report.describe());
+        });
+      },
+    );
 
     test('missing or unparseable riverpod_lint state fails closed', () async {
       final root = await _createFixtureRoot(

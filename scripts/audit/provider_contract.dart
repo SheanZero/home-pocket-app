@@ -748,7 +748,20 @@ List<_Call> _findCalls(
         tokens[index + 2].kind == _TokenKind.identifier &&
         tokens[index + 2].text == 'call' &&
         tokens[index + 3].text == '(';
-    if (!immediateCall && !directFunctionCall) continue;
+    final parenthesizedDirectFunctionCall =
+        index + 2 < tokens.length &&
+        tokens[index + 1].text == ')' &&
+        tokens[index + 2].text == '(' &&
+        ((index > 0 && tokens[index - 1].text == '(') ||
+            (index > 2 &&
+                tokens[index - 3].text == '(' &&
+                tokens[index - 2].kind == _TokenKind.identifier &&
+                tokens[index - 1].text == '.'));
+    if (!immediateCall &&
+        !directFunctionCall &&
+        !parenthesizedDirectFunctionCall) {
+      continue;
+    }
     if (index > 0 && tokens[index - 1].text == '.') {
       final receiver = index >= 2 ? tokens[index - 2] : null;
       final hasVerifiedReceiver =
@@ -757,7 +770,13 @@ List<_Call> _findCalls(
           (index < 3 || tokens[index - 3].text != '.');
       if (!hasVerifiedReceiver) continue;
     }
-    final argumentsOpen = index + (directFunctionCall ? 3 : 1);
+    final argumentsOpen =
+        index +
+        (directFunctionCall
+            ? 3
+            : parenthesizedDirectFunctionCall
+            ? 2
+            : 1);
     var depth = 1;
     var close = argumentsOpen + 1;
     for (; close < tokens.length; close++) {
