@@ -25,7 +25,7 @@ successful safety decision, not a silent upgrade failure.
 | iOS dependency manager | Flutter SwiftPM plus sqlite3 Native Assets; CocoaPods has no SQLCipher pod | same | already current | `sqlcipher.framework` is embedded by the Native Assets hook and the fixture passes after removing the old `-lsqlite3` strip. | Re-run the signed physical-device runtime test after the device allows installation. |
 | Analyzer/codegen | analyzer `12.1.0`, analyzer_plugin `0.14.8`, build `4.0.7`, source_gen `4.2.4`, Riverpod `3.3.2`/`4.0.3`/`4.0.4`/`3.1.4`, Freezed `3.1.0`/`3.2.6-dev.1`, JSON `4.12.0`/`6.14.1`, Drift `2.34.0`, build_runner `2.15.1`, import_lint `2.0.0`, dart_code_linter `4.1.9` | analyzer-13-compatible cohort | hold | `import_lint 2.0.0` requires analyzer `^12.1.0`; current newer Riverpod/Drift generator lines require analyzer 13. | All four analyzer/import-boundary exit conditions below must pass in one no-override transaction. |
 | File/share/metadata | `file_picker 11.0.3`, `share_plus 12.0.2`, `package_info_plus 9.0.1`, `win32 5.15.0` | stable compatible cohort | hold — Phase 59 | New plus-plugin lines and file-picker behavior must be verified as one native cohort. | Upgrade the cohort together and preserve single-file backup import and platform sharing behavior. |
-| Speech | `speech_to_text 7.3.0` | stable compatible release | hold — Phase 59 | The candidate changes adapter/test API and native symbols. | Clean native build plus Android microphone and iOS speech evidence. |
+| Speech | `speech_to_text 7.3.0` | `7.4.0` Stable (the official page also lists `7.5.0-beta.1` as prerelease) | hold — Phase 59 | The 2026-08-09 official pub.dev query confirms the stable candidate, but resolver output cannot prove the adapter, ja/zh/en corpus, caller-controlled network fallback, or native speech lifecycle. | Keep `7.3.0` until adapter/corpus checks and physical-iPhone permission, recognition, cancellation, error, and fallback evidence pass. |
 | Android host | AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, JDK 17 | AGP `9.0.1`, Gradle `9.1` | hold — Phase 61 | Built-in Kotlin/new DSL need a complete app and plugin migration. | Debug/release builds and emulator evidence after the all-or-hold migration. |
 | Notifications/plugins | `flutter_local_notifications 22.2.0`, Firebase Core `4.13.0`, Messaging `16.5.0` | reviewed compatible cohort | hold — Phase 59 | Native plugin changes require coordinated behavior and clean-build evidence. | Registration, routing, cold-start tap, and signed APNs/FCM evidence. |
 | Local Lucide icon subset | `lucide_icons_flutter 3.1.15+homepocket.1` from `third_party/` | not applicable until the local fork is re-reviewed | hold — Phase 59 | The local package preserves the upstream API with one static font and the 37 used codepoints instead of six unused variable-weight assets. | Phase 59 replaces or refreshes it only after reviewing upstream source/license and every icon reference, with static-subset and release tree-shaken asset checks green. |
@@ -101,3 +101,15 @@ preserving the exact solver-produced lock graph. Native Asset configuration,
 generated Dart, and database bootstrap remain Phase 60-owned. The committed
 real SQLCipher 4.10 fixture is the regression baseline for future encryption
 upgrades.
+
+## Phase 59 speech evidence hold
+
+The Phase 59 validator treats the current speech decision as a fail-closed
+hold: its manifest row must retain execution-date `queried_on`, official source,
+stable candidate, decision, compatibility reason, exit condition, and owner
+phase, while the declared and resolved selection both remain exactly `7.3.0`.
+The package page queried on 2026-08-09 identifies `7.4.0` as stable and
+`7.5.0-beta.1` as a prerelease; the latter is ineligible for this production
+lane. The redacted Phase 59 acceptance ledger separates automated adapter and
+corpus evidence from the still-required physical-iPhone evidence rather than
+treating an unavailable device as acceptance.

@@ -379,6 +379,12 @@ CompatibilityReport validateDependencyCompatibility({
   expectLocked('speech_to_text', '7.3.0');
   expectConstraint('flutter_local_notifications', '^22.2.0');
   expectLocked('flutter_local_notifications', '22.2.0');
+  _validatePhase59PluginCohorts(
+    issues: issues,
+    baselineDependencies: baselineDependencies,
+    directDependencies: allDirectDependencies,
+    lockedPackages: packages,
+  );
   // The analyzer/plugin/generator cohort is a single solver-produced graph.
   // Moving any member alone can silently invalidate code generation or the
   // active architecture plugins, so both the declarations and lock selections
@@ -646,6 +652,64 @@ String _diagnosticCode(String message) {
   if (message.contains('lane')) return 'PARTIAL_LANE';
   if (message.contains('digest')) return 'TRACKED_INPUT_DRIFT';
   return 'BASELINE_CONTRACT';
+}
+
+/// Validates the Phase 59 speech hold before a package resolver can turn an
+/// execution-date candidate into an accepted graph. The explicit lane messages
+/// keep evidence failures attributable instead of relying on generic manifest
+/// diagnostics.
+void _validatePhase59PluginCohorts({
+  required List<String> issues,
+  required Map<Object?, Object?> baselineDependencies,
+  required Map<Object?, Object?> directDependencies,
+  required Map<Object?, Object?> lockedPackages,
+}) {
+  const speechPackage = 'speech_to_text';
+  const requiredSpeechEvidence = {
+    'queried_on',
+    'candidate',
+    'decision',
+    'compatibility_reason',
+    'exit_condition',
+    'owner_phase',
+  };
+  final speech = _map(baselineDependencies[speechPackage]);
+
+  for (final field in requiredSpeechEvidence) {
+    if (_isBlank(speech[field])) {
+      issues.add(
+        'PLUG-03 speech_to_text is missing required evidence field: $field',
+      );
+    }
+  }
+  if (speech['candidate']?.toString() != '7.4.0') {
+    issues.add('PLUG-03 speech_to_text candidate must be stable 7.4.0');
+  }
+  if (speech['owner_phase'] != 59) {
+    issues.add('PLUG-03 speech_to_text owner phase must be 59');
+  }
+  if (speech['official_source']?.toString() !=
+      'https://pub.dev/packages/speech_to_text') {
+    issues.add('PLUG-03 speech_to_text must cite the official pub.dev source');
+  }
+
+  final declared = _declaredDependency(directDependencies[speechPackage]);
+  if (declared != '7.3.0') {
+    issues.add(
+      'PLUG-03 speech_to_text declaration must remain 7.3.0 (found $declared)',
+    );
+  }
+  final resolved = _map(lockedPackages[speechPackage])['version']?.toString();
+  if (resolved != '7.3.0') {
+    issues.add(
+      'PLUG-03 speech_to_text resolution must remain 7.3.0 (found $resolved)',
+    );
+  }
+  if (speech['decision']?.toString() != 'hold') {
+    issues.add(
+      'PLUG-03 speech_to_text must remain hold until physical-iPhone evidence is recorded',
+    );
+  }
 }
 
 void _validateManifestPolicy({
