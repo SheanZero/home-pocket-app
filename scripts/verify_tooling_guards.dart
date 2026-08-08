@@ -25,18 +25,41 @@ Future<T> withToolingGuardFixtureLock<T>(
 
   final root = Directory(workingDirectory).absolute;
   final lock = File('${root.path}/.dart_tool/phase58_tooling_guard.lock');
-  final handle = await lock.open(mode: FileMode.append);
+  RandomAccessFile? handle;
+  var lockAcquired = false;
+  Object? firstError;
+  StackTrace? firstStackTrace;
+  late T result;
   try {
+    await lock.parent.create(recursive: true);
+    handle = await lock.open(mode: FileMode.append);
     await handle.lock(FileLock.blockingExclusive);
-    return await action();
+    lockAcquired = true;
+    result = await action();
+  } catch (error, stackTrace) {
+    firstError = error;
+    firstStackTrace = stackTrace;
   } finally {
     try {
-      await handle.unlock();
+      if (lockAcquired) await handle?.unlock();
+    } catch (error, stackTrace) {
+      firstError ??= error;
+      firstStackTrace ??= stackTrace;
     } finally {
-      await handle.close();
-      releaseQueue.complete();
+      try {
+        if (handle != null) await handle.close();
+      } catch (error, stackTrace) {
+        firstError ??= error;
+        firstStackTrace ??= stackTrace;
+      } finally {
+        releaseQueue.complete();
+      }
     }
   }
+  if (firstError != null) {
+    Error.throwWithStackTrace(firstError, firstStackTrace!);
+  }
+  return result;
 }
 
 class ToolingGuardCase {
