@@ -275,17 +275,15 @@ The exact source values are `FileType.custom` and `allowedExtensions: const ['hp
 
 All package-version, compatibility, and codebase behavior claims above are either sourced from the current repository or cited to official package/platform documentation.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Can the execution environment provide the required Android and iPhone evidence?**
    - What we know: Flutter 3.44.8/Dart 3.12.2, Xcode 26.2, and CocoaPods 1.16.2 are installed; no JDK, Android emulator, Android device, or iOS Simulator was detected. [VERIFIED: environment audit 2026-08-08]
-   - What's unclear: Whether a wired iPhone is available for the required speech acceptance and whether JDK 17/emulator access can be supplied for Android native validation.
-   - Recommendation: Make every candidate upgrade contingent on the missing evidence. If the prerequisite is unavailable, preserve the current lockfile and record an evidence-backed hold; do not claim device acceptance.
+   - **RESOLVED:** Required Android or physical-iPhone evidence that is unavailable, failed, incomplete, or not attributable to the exact candidate build is a mandatory exact hold: preserve the current declaration and lock selection, record the unavailable prerequisite and concrete exit condition, and do not claim native/device acceptance.
 
 2. **Should the project take the very recent `flutter_local_notifications` 22.3.0 patch?**
    - What we know: 22.3.0 was published hours before research, while the current app has 22.2.0 and a coupled notification lifecycle. [VERIFIED: pubspec.yaml:65-68] [CITED: https://pub.dev/packages/flutter_local_notifications]
-   - What's unclear: Its changelog impact on the app's Android/iOS initialization/tap route.
-   - Recommendation: Recheck the official changelog at execution, run the native/build and fake-client matrix first, and retain 22.2.0 if evidence is incomplete.
+   - **RESOLVED:** Hold `flutter_local_notifications` at exact selected 22.2.0 unless the official 22.3.0 changelog is reviewed and the named supported native-build, initialization/retry/foreground/opened/tap/cold-start lifecycle, hidden-release-policy, and attributable native-evidence gates all pass on the exact candidate graph. Any unavailable, failed, or incomplete gate retains 22.2.0 with a hold reason and exit condition.
 
 ## Environment Availability
 
