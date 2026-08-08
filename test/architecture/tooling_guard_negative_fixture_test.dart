@@ -269,6 +269,70 @@ void main() {
       expect(File(_packageFixturePath).existsSync(), isFalse);
     });
 
+    test('lock setup failures release the queue', () async {
+      final freshRoot = await Directory.systemTemp.createTemp(
+        'phase58_tooling_guard_fresh_',
+      );
+      final openFailureRoot = await Directory.systemTemp.createTemp(
+        'phase58_tooling_guard_open_failure_',
+      );
+      final actionFailureRoot = await Directory.systemTemp.createTemp(
+        'phase58_tooling_guard_action_failure_',
+      );
+      addTearDown(() async {
+        for (final root in [freshRoot, openFailureRoot, actionFailureRoot]) {
+          if (root.existsSync()) await root.delete(recursive: true);
+        }
+      });
+
+      var freshActionRan = false;
+      final freshResult = await tooling.withToolingGuardFixtureLock(() async {
+        freshActionRan = true;
+        return 'fresh';
+      }, workingDirectory: freshRoot.path);
+      expect(freshResult, 'fresh');
+      expect(freshActionRan, isTrue);
+
+      final obstruction = Directory(
+        '${openFailureRoot.path}/.dart_tool/phase58_tooling_guard.lock',
+      );
+      await obstruction.create(recursive: true);
+      await expectLater(
+        tooling.withToolingGuardFixtureLock(
+          () async => 'unreachable',
+          workingDirectory: openFailureRoot.path,
+        ),
+        throwsA(isA<FileSystemException>()),
+      );
+      await obstruction.delete(recursive: true);
+      expect(
+        await tooling
+            .withToolingGuardFixtureLock(
+              () async => 'open recovery',
+              workingDirectory: openFailureRoot.path,
+            )
+            .timeout(const Duration(seconds: 1)),
+        'open recovery',
+      );
+
+      await expectLater(
+        tooling.withToolingGuardFixtureLock(
+          () async => throw StateError('action failure'),
+          workingDirectory: actionFailureRoot.path,
+        ),
+        throwsA(isA<StateError>()),
+      );
+      expect(
+        await tooling
+            .withToolingGuardFixtureLock(
+              () async => 'action recovery',
+              workingDirectory: actionFailureRoot.path,
+            )
+            .timeout(const Duration(seconds: 1)),
+        'action recovery',
+      );
+    });
+
     test(
       'finally cleanup runs when a command returns unexpected success',
       () async {
