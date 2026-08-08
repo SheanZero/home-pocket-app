@@ -90,6 +90,54 @@ List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
   return violations;
 }
 
+List<String> _stableWorkflowWrapperUniquenessViolations(String workflow) {
+  final activeWorkflow = _activeWorkflowSource(workflow);
+  const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
+  final staticAnalysis = _workflowJobSource(workflow, 'static-analysis');
+  final guardrails = _workflowJobSource(workflow, 'guardrails');
+  final violations = <String>[];
+
+  if (RegExp(
+        '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: '
+        "${RegExp.escape(wrapperCommand)}${r'\s*$'}",
+        multiLine: true,
+      ).allMatches(activeWorkflow).length !=
+      1) {
+    violations.add('Stable workflow must invoke the wrapper exactly once');
+  }
+  if (staticAnalysis == null || !staticAnalysis.contains(wrapperCommand)) {
+    violations.add('the sole wrapper invocation must live in static-analysis');
+  }
+  if (guardrails == null) {
+    violations.add('Stable guardrails job is missing');
+    return violations;
+  }
+  if (!guardrails.contains('flutter pub get --enforce-lockfile')) {
+    violations.add('guardrails must use enforced dependency retrieval');
+  }
+
+  const duplicateCommands = [
+    'flutter gen-l10n',
+    'build_runner build',
+    'flutter analyze',
+    'dart run import_lint',
+    'dart run scripts/verify_tooling_guards.dart',
+    'test/architecture/layer_import_rules_test.dart',
+    'test/architecture/domain_import_rules_test.dart',
+    'test/architecture/presentation_layer_rules_test.dart',
+  ];
+  for (final command in duplicateCommands) {
+    if (activeWorkflow.contains(command)) {
+      violations.add('Stable workflow must not duplicate $command');
+    }
+  }
+  if (activeWorkflow.contains('continue-on-error: true') ||
+      activeWorkflow.contains('|| true')) {
+    violations.add('Stable workflow must not soften wrapper failures');
+  }
+  return violations;
+}
+
 void main() {
   Map<String, String> currentInputs() => {
     'pubspec': File('pubspec.yaml').readAsStringSync(),
@@ -927,6 +975,68 @@ end
         );
         expect(
           _stableStaticAnalysisWrapperViolations(
+            audit.replaceFirst(
+              'run: bash scripts/verify_codegen_reproducibility.sh',
+              'continue-on-error: true\n'
+              '        run: bash scripts/verify_codegen_reproducibility.sh || true',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'soft-failed wrapper calls must fail',
+        );
+      },
+    );
+
+    test(
+      'Stable CI keeps one authoritative codegen wrapper without guardrails duplicates',
+      () {
+        final audit = currentInputs()['audit']!;
+        expect(_stableWorkflowWrapperUniquenessViolations(audit), isEmpty);
+
+        expect(
+          _stableWorkflowWrapperUniquenessViolations(
+            audit.replaceFirst(
+              'run: bash scripts/verify_codegen_reproducibility.sh',
+              '# run: bash scripts/verify_codegen_reproducibility.sh',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'comment-only wrapper presence must fail',
+        );
+        expect(
+          _stableWorkflowWrapperUniquenessViolations(
+            audit.replaceFirst(
+              'run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: bash scripts/verify_codegen_reproducibility.sh\n'
+              '      - run: bash scripts/verify_codegen_reproducibility.sh',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'duplicate wrappers must fail',
+        );
+        expect(
+          _stableWorkflowWrapperUniquenessViolations(
+            audit.replaceFirst(
+              'flutter pub get --enforce-lockfile',
+              'flutter pub get',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'guardrails cannot use an unlocked dependency retrieval',
+        );
+        expect(
+          _stableWorkflowWrapperUniquenessViolations(
+            audit.replaceFirst(
+              'flutter pub get --enforce-lockfile',
+              'flutter pub get --enforce-lockfile\n'
+              '          flutter pub run build_runner build',
+            ),
+          ),
+          isNotEmpty,
+          reason: 'an inline guardrails generator must fail',
+        );
+        expect(
+          _stableWorkflowWrapperUniquenessViolations(
             audit.replaceFirst(
               'run: bash scripts/verify_codegen_reproducibility.sh',
               'continue-on-error: true\n'
