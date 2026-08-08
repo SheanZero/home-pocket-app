@@ -1,64 +1,73 @@
 # External Integrations
 
-**Analysis Date:** 2026-08-05
-**Last mapped commit:** `7b4f1bac44644ea821835e85d09d9571a601e82a`
+**Analysis Date:** 2026-08-08
 
 ## APIs & External Services
 
 **Family sync relay:**
-- Self-hosted REST endpoint defaults to `https://sync.happypocket.app/api/v1`; client `lib/infrastructure/sync/relay_api_client.dart` uses `http` and Ed25519-signed requests.
-- Realtime channel is WebSocket `{base}/ws/group/{groupId}` via `lib/infrastructure/sync/websocket_service.dart` and `web_socket_channel`.
-- Override with `--dart-define=SYNC_SERVER_URL`.
+- `https://sync.happypocket.app/api/v1` REST API and derived `wss://sync.happypocket.app` WebSocket in `lib/infrastructure/sync/relay_api_client.dart` and `websocket_service.dart`.
+  - SDK/Client: `http`, `web_socket_channel`
+  - Auth: device Ed25519 signatures (`Authorization`) and one-time `X-Request-Nonce`; endpoint override via `SYNC_SERVER_URL`.
+- Relay transports opaque E2EE payloads; encryption/key handling is in `lib/infrastructure/sync/e2ee_service.dart` and `lib/infrastructure/crypto/`.
 
 **Exchange rates:**
-- `lib/infrastructure/exchange_rate/exchange_rate_api_client.dart` queries Frankfurter, jsDelivr currency-api, then Cloudflare Pages currency-api; `exchange_rate_cache_service.dart` gates requests with `connectivity_plus` and caches through Drift.
-
-**Push messaging:**
-- Firebase Cloud Messaging (`firebase_core`, `firebase_messaging`) wakes sync; wrappers are `lib/infrastructure/sync/push_notification_service.dart` and `apns_push_messaging_client.dart`.
-- Android configuration is `android/app/google-services.json`; iOS uses APNs bridge (no `GoogleService-Info.plist` detected).
+- Frankfurter (`api.frankfurter.dev`), fawazahmed0 currency API via jsDelivr and Cloudflare Pages, chained in `lib/infrastructure/exchange_rate/exchange_rate_api_client.dart`.
+  - SDK/Client: `http`
+  - Auth: none; requests contain only date and ISO currency code.
 
 ## Data Storage
 
-**Databases:** SQLCipher-encrypted SQLite through Drift (`lib/data/app_database.dart`, schema v36), tables/DAOs under `lib/data/tables/` and `lib/data/daos/`, repository implementations under `lib/data/repositories/`. Encryption executor is in `lib/infrastructure/crypto/`.
+**Databases:**
+- Local encrypted SQLite/SQLCipher database managed by Drift (`lib/data/app_database.dart`, `lib/infrastructure/crypto/database/encrypted_database.dart`).
+  - Connection: app-private path from `path_provider`; encryption key from secure key manager.
+  - Client: `drift` 2.34.0 + `sqlite3` 3.3.1 Native Assets (SQLCipher 4.17.x verification).
 
-**File storage:** Local filesystem only via `path_provider`; app-owned files and encrypted receipt/photo data are managed by `lib/infrastructure/storage/`.
+**File Storage:**
+- Local app-owned files and encrypted attachments using `path_provider`, `file_picker`, and `image_picker`; privacy cleanup services live in `lib/infrastructure/storage/`.
 
-**Settings/cache:** `shared_preferences` stores non-database settings; exchange-rate and sync state are persisted locally in Drift. No cloud database or external cache detected.
+**Caching:**
+- Drift tables cache exchange rates and sync queues; `shared_preferences` stores non-sensitive settings. No remote cache detected.
 
 ## Authentication & Identity
 
-- No hosted account/auth provider. Device identity and sync authorization use Ed25519 keys in `lib/infrastructure/crypto/`.
-- Master/recovery material is protected by `secure_storage_service.dart` and application lock uses `biometric_service.dart` (`local_auth`) plus PIN KDF.
-- Sync payloads are end-to-end encrypted by `lib/infrastructure/sync/e2ee_service.dart`; relay does not receive plaintext ledger data.
+**Auth Provider:**
+- Custom device identity for relay authentication, with Ed25519 keys and E2EE (`lib/infrastructure/crypto/services/key_manager.dart`, `lib/infrastructure/sync/relay_api_client.dart`).
+- Local biometric/PIN lock uses `local_auth`, `flutter_secure_storage`, and `lib/application/security/app_lock_service.dart`.
 
 ## Monitoring & Observability
 
-**Error tracking:** None detected (no Sentry/Crashlytics dependency).
+**Error Tracking:**
+- None detected; Firebase Analytics is not configured.
 
-**Logs/audit:** Local security audit events use `lib/infrastructure/security/audit_logger.dart`; privacy rules prohibit sensitive payload logging.
+**Logs:**
+- `debugPrint` and custom privacy-aware audit logging (`lib/infrastructure/security/audit_logger.dart`); sensitive payloads are excluded from production logs.
 
 ## CI/CD & Deployment
 
-- GitHub Actions workflow `.github/workflows/audit.yml` runs Flutter analyze, custom/import audits, generation checks, and coverage gates on Flutter 3.44.0.
-- Distribution target is iOS App Store and Google Play; sync relay hosting/deployment is outside this repository.
+**Hosting:**
+- Mobile distribution targets iOS and Android; no web/backend deployment configuration is present in this repository.
 
-## Device Capabilities & Permissions
+**CI Pipeline:**
+- No CI provider workflow detected; release/preflight checks are implemented as Dart tests under `test/scripts/`.
 
-- Voice recognition: `speech_to_text` (`lib/infrastructure/speech/`), with microphone/speech usage strings in `ios/Runner/Info.plist` and localized `ios/Runner/*/InfoPlist.strings`.
-- Camera/files/sharing: `image_picker`, `file_picker`, `share_plus` in settings/accounting flows.
-- Face ID/fingerprint: `local_auth` with iOS Face ID usage description.
-- QR pairing: `qr_flutter`; network reachability: `connectivity_plus`; hosted legal/support links: `url_launcher` and `lib/core/config/legal_urls.dart`.
+## Environment Configuration
+
+**Required env vars:**
+- No runtime environment variables detected. Optional compile-time `SYNC_SERVER_URL` customizes the sync relay.
+
+**Secrets location:**
+- Device/database keys are generated and held through `flutter_secure_storage` abstraction; Firebase/APNs credentials are supplied by platform configuration outside Dart source.
 
 ## Webhooks & Callbacks
 
-**Incoming:** FCM/APNs push callbacks (`push_notification_service.dart`) and relay WebSocket events (`websocket_service.dart`).
+**Incoming:**
+- APNs/FCM push callbacks and opened-message events bridged through native channels (`lib/infrastructure/sync/apns_push_messaging_client.dart`, `ios/Runner/AppDelegate.swift`).
+- Relay WebSocket events are consumed by `lib/infrastructure/sync/websocket_service.dart`.
 
-**Outgoing:** Signed REST sync operations (`relay_api_client.dart`), WebSocket subscriptions, and exchange-rate HTTPS requests.
-
-## ML / OCR
-
-No external ML/OCR SDK is declared. Merchant normalization is rule-based in `lib/infrastructure/ml/merchant_name_normalizer.dart`; no `google_mlkit_*` or TFLite package is present.
+**Outgoing:**
+- Relay REST/WebSocket sync requests; push-token registration via `/device/push-token`.
+- External URL launches for hosted privacy/terms/support/sponsor destinations via `url_launcher`.
 
 ---
 
-*Integration audit: 2026-08-05*
+*Integration audit: 2026-08-08*

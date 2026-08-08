@@ -1,53 +1,110 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-08-05
-**Last mapped commit:** `7b4f1bac44644ea821835e85d09d9571a601e82a`
+**Analysis Date:** 2026-08-08
 
 ## Test Framework
 
-Flutter `flutter_test` is primary (564 test files); `integration_test` covers device/simulator flows. Dependencies include `mocktail`, `fake_async`, and platform-interface fakes. Global setup is `test/flutter_test_config.dart`.
+**Runner:**
+- Flutter's `flutter_test`/Dart test runner, with `integration_test` for device and migration journeys (`pubspec.yaml`).
+- Global bootstrap: `test/flutter_test_config.dart`.
 
-Run `flutter test`, `flutter test path/to/file_test.dart`, `flutter test --coverage`, and `flutter test integration_test/`; do not pipe output through `tail` because it can mask exit codes.
+**Assertion Library:**
+- `package:flutter_test/flutter_test.dart` matchers (`equals`, `isNull`, `hasLength`, `throwsA`, `contains`, `matchesGoldenFile`).
+- `mocktail` is available for interaction-based mocks; `fake_async` supports deterministic timer tests.
+
+**Run Commands:**
+```bash
+flutter test                 # all unit/widget/architecture tests
+flutter test --coverage     # generate coverage artifacts
+flutter test test/path.dart  # targeted file
+flutter test integration_test/ # device integration suite
+```
 
 ## Test File Organization
 
-Tests are separate from production and mirror domains:
+**Location:** Tests are separate from production code under `test/`, organized by concern: `unit/`, `data/`, `infrastructure/`, `widget/`, `golden/`, `architecture/`, and `scripts/`. Device journeys and fixtures live under `integration_test/`.
 
-```text
-test/unit/ (283)       pure logic, use cases, providers
-test/widget/ (139)     widget build and interaction
-test/golden/ (38)      pixel-baselined widgets
-test/architecture/ (23) structural contracts
-test/integration/ (18) cross-component/device flows
-test/helpers/          shared scaffolding
+**Naming:** Subject-based snake case with `_test.dart`; golden tests are explicitly grouped and tagged (`@Tags(['golden'])` in `test/golden/amount_display_golden_test.dart`).
+
+**Structure:**
+```
+test/{unit,data,infrastructure,widget,golden,architecture,scripts}/<subject>_test.dart
+test/helpers/                 # reusable provider, localization, fixture helpers
+integration_test/              # device/database/sync journeys and fixtures
 ```
 
-Use `{subject}_test.dart`; use `_characterization_test.dart` for pinned behavior. Place new tests in the closest mirrored `test/unit`, `test/widget`, `test/golden`, `test/architecture`, or `test/integration` subtree.
+## Test Structure
 
-## Test Structure and Riverpod
+**Suite Organization:**
+```dart
+void main() {
+  late AppDatabase database;
+  setUp(() { database = AppDatabase.forTesting(); });
+  tearDown(() async { await database.close(); });
 
-Organize with `group` and descriptive `test`/`testWidgets` names. Widget tests use a minimal `MaterialApp`, `_darkApp`, or `createLocalizedWidget` from `test/helpers/test_localizations.dart`, then pump before assertions. Use `ProviderContainer.test()` and `createTestProviderScope` from `test/helpers/test_provider_scope.dart`; override `appDatabaseProvider` with `AppDatabase.forTesting()`. Hold auto-dispose async providers with `waitForFirstValue(...)`, and inspect `ProviderException.exception` for failures.
+  test('describes one behavior', () async {
+    final value = await subject.call();
+    expect(value, isNotNull);
+  });
+}
+```
 
-## Mocking and Fixtures
+**Patterns:**
+- Use `group` for a feature/subject and `setUp`/`tearDown` for per-test resources (`test/data/repositories/group_repository_impl_test.dart`).
+- Prefer behavior-focused test names and one primary assertion set per behavior. Async tests return `Future` and await all I/O.
+- Architecture tests scan source/config contracts (layer imports, ARB parity, release metadata) in `test/architecture/`.
 
-Use mocktail (`class MockRepo extends Mock implements Repo {}`), `when(...).thenAnswer`, `verify`, and `registerFallbackValue` in `setUpAll`. Mock repositories, platform interfaces, and crypto boundaries; use real in-memory Drift instead of mocking the database. Temporary filesystem tests create and clean `Directory.systemTemp` fixtures (for example `test/unit/application/settings/import_backup_use_case_resource_limits_test.dart`).
+## Mocking
 
-## Golden Tests
+**Framework:** `mocktail` for mocks; provider overrides and in-memory implementations are preferred for Riverpod/database tests.
 
-Baselines live in `test/golden/goldens/` and feature widget golden directories. macOS updates with `flutter test --update-goldens`; non-macOS uses `BaselineExistenceGoldenComparator` from `test/flutter_test_config.dart`, checking files while still exercising widgets. The bootstrap disables looping onboarding animation via `OnboardingFloatDecor.animationsEnabled = false`.
+**Patterns:**
+```dart
+final container = ProviderContainer(
+  overrides: [appDatabaseProvider.overrideWithValue(testDatabase)],
+);
+addTearDown(container.dispose);
+```
+`test/helpers/test_provider_scope.dart` centralizes this setup and `ProviderContainer.test()`/`waitForFirstValue` are used for auto-dispose providers.
 
-## Architecture and Integration Contracts
+**What to Mock:** Platform plugins, network clients, secure storage, clocks, and external repositories when testing a single use case. Use `plugin_platform_interface` for platform singleton seams (URL launcher tests).
 
-Run the full suite after merges: architecture tests enforce layer imports, domain isolation, provider graph hygiene, ARB parity, hardcoded CJK, color literals, logging privacy, stale suppressions, legal assets, and related invariants. SQLCipher integration tests require a real device/simulator; host tests use test paths.
+**What NOT to Mock:** Pure domain models/formatters and Drift behavior when repository tests can use `AppDatabase.forTesting()`; those tests exercise real DAOs and migrations.
+
+## Fixtures and Factories
+
+**Test Data:**
+- Shared fixtures live in `test/fixtures/` (voice corpora, merchant false-positive corpus) and `integration_test/fixtures/` (SQLCipher database fixtures).
+- Reusable setup helpers live in `test/helpers/`, including localizations, golden comparators, provider scopes, and in-memory repositories.
+
+**Location:** Keep feature-specific builders near the tests unless reused across suites; put cross-suite fixtures/helpers under the directories above.
 
 ## Coverage
 
-CI enforces 70% global and cleanup-touched-file coverage. `.github/workflows/audit.yml` runs `flutter test --coverage`, filters via `coverde`, then `scripts/coverage_gate.dart` and VeryGoodOpenSource coverage. Deferred files are listed in planning audit configuration.
+**Requirements:** Global and configured cleanup-touched files target 70%; deferred exceptions are tracked by project tooling. Coverage baseline/gate behavior is tested in `test/scripts/coverage_baseline_test.dart` and `test/scripts/coverage_gate_test.dart`.
+
+**View Coverage:**
+```bash
+flutter test --coverage
+coverde filter --input coverage/lcov.info --output coverage/lcov_clean.info
+```
+
+## Test Types
+
+**Unit Tests:** Domain/application/infrastructure behavior, crypto, repositories, formatters, and scripts under `test/unit/`, `test/infrastructure/`, `test/data/`, and `test/scripts/`.
+
+**Integration Tests:** Real encrypted Drift/SQLCipher migration, backup/restore, sync delivery, and critical user journeys under `integration_test/`; these require a device/simulator.
+
+**E2E Tests:** Device critical journey coverage is implemented by `integration_test/device_critical_journey_test.dart`; no separate web E2E framework is detected.
 
 ## Common Patterns
 
-Use `fakeAsync` for deterministic timers; dismiss SnackBars by gesture when `runAsync` would escape the fake zone. Assert typed errors (`throwsArgumentError`, `throwsFormatException`) or structured result errors. Keep tests deterministic, localized through generated delegates, and free of sensitive fixture data.
+**Async Testing:** Await repository/platform calls; use `testWidgets` with `tester.pumpWidget`, `pump`, and explicit settle controls. Suite-wide onboarding animations are disabled in `test/flutter_test_config.dart` to prevent ticker hangs.
+
+**Error Testing:** Use `expectLater(future, throwsA(isA<StateError>()))` for invariant exceptions and inspect `Result.isError`/`Result.error` for expected use-case failures.
+
+**Golden Testing:** Wrap widgets in fixed-size `SizedBox`, set locale/theme explicitly, load deterministic fonts, and compare via `matchesGoldenFile`. `BaselineExistenceGoldenComparator` makes non-macOS runs verify baseline presence while macOS performs pixel comparison (`test/helpers/ci_golden_comparator.dart`).
 
 ---
 
-*Testing analysis: 2026-08-05*
+*Testing analysis: 2026-08-08*

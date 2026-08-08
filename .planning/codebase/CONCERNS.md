@@ -1,107 +1,117 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-08-05
-**Last mapped commit:** `7b4f1bac44644ea821835e85d09d9571a601e82a`
-
-This audit covers the committed tree and the current P1/P2 working tree. Core local-first storage and cryptographic boundaries are healthy; the largest remaining risks are release configuration, legal accuracy, CI drift, and concentrated complexity.
+**Analysis Date:** 2026-08-08
 
 ## Tech Debt
 
-**Release signing is still a debug configuration (HIGH):**
-- Issue: Release builds explicitly use the debug signing key.
-- Files: `android/app/build.gradle.kts:35-39`
-- Impact: A debug-signed APK cannot establish a production Play upgrade chain and creates supply-chain risk.
-- Fix approach: Inject a protected upload/app-signing configuration from CI secrets or an untracked `key.properties`; fail release builds when the certificate is debug.
+**Deferred budget tracking:**
+- Issue: `GetBudgetProgressUseCase` is a compilable placeholder that always returns an empty list; the domain model exists without a backing Budget table or repository.
+- Files: `lib/application/analytics/get_budget_progress_use_case.dart`, `lib/features/analytics/domain/models/budget_progress.dart`
+- Impact: Any budget UI or caller silently receives no progress rather than an explicit unsupported state.
+- Fix approach: Add a persisted Budget model/table, DAO and repository contract, then replace the placeholder with tested aggregation and a feature flag or explicit unavailable result during migration.
 
-**Legal content still contains launch placeholders (HIGH):**
-- Issue: Bundled Japanese, English, and Chinese legal documents retain `support@example.com`, draft wording, and Tokusho operator placeholders.
-- Files: `assets/legal/privacy_ja.md`, `assets/legal/privacy_en.md`, `assets/legal/privacy_zh.md`, `assets/legal/terms_ja.md`, `assets/legal/terms_en.md`, `assets/legal/terms_zh.md`, `assets/legal/tokusho_ja.md`, `assets/legal/tokusho_en.md`, `assets/legal/tokusho_zh.md`
-- Impact: Store review and Japanese compliance risk; users receive non-actionable support information.
-- Fix approach: Complete legal review, replace operator/contact values and effective dates, and add a build-time placeholder scan.
+**Historical test scaffolding:**
+- Issue: Shopping-list and analytics widget tests retain TODO-based mock providers and many `UnimplementedError` methods.
+- Files: `test/widget/features/shopping_list/helpers/mock_use_cases.dart`, `test/widget/features/analytics/presentation/screens/analytics_screen_test.dart`, `test/widget/features/analytics/presentation/screens/analytics_refresh_group_mode_test.dart`
+- Impact: Tests can pass while unexercised provider methods remain runtime traps; future refactors require maintaining brittle hand-written mocks.
+- Fix approach: Replace dynamic/partial mocks with focused fakes or generated mocks and add assertions for every provider method used by each screen.
 
-**Privacy policy wording must match relay behavior (HIGH):**
-- Issue: Policies describe direct device-to-device sync and no server retention, while the relay temporarily stores opaque encrypted messages until ACK/expiry.
-- Files: `assets/legal/privacy_ja.md`, `assets/legal/privacy_en.md`, `assets/legal/privacy_zh.md`, `lib/infrastructure/sync/relay_api_client.dart`, `docs/arch/server/SERVER-001_SyncRelay.md`
-- Impact: The zero-knowledge property remains, but absolute retention claims are inaccurate and may conflict with privacy disclosures.
-- Fix approach: Describe encrypted relay storage, deletion trigger/retention, and metadata handling consistently in all locales.
-
-**Dependency/toolchain migration debt (MEDIUM):**
-- Issue: `sqlcipher_flutter_libs ^0.6.x` remains tied to sqlite3 2.x; Flutter warns about future Swift Package Manager and built-in Kotlin migrations. `file_picker`, `package_info_plus`, and `share_plus` are constrained as a trio.
-- Files: `pubspec.yaml`, `ios/Podfile`, `android/settings.gradle.kts`
-- Impact: Future Flutter upgrades can turn warnings into build failures; isolated dependency bumps are not resolvable.
-- Fix approach: Plan a coordinated dependency/toolchain upgrade with SQLCipher device verification and both-platform release builds.
+**Generated-file bulk:**
+- Issue: Drift and localization/generated files dominate the tree (for example `lib/data/app_database.g.dart` is ~19k lines and generated localization is ~6.5k lines).
+- Files: `lib/data/app_database.g.dart`, `lib/generated/app_localizations.dart`
+- Impact: Slow analysis/code review and large diffs obscure source changes; regeneration can create unrelated churn.
+- Fix approach: Keep generated outputs out of manual review paths, regenerate only from pinned tool versions, and isolate schema/localization changes in separate commits.
 
 ## Known Bugs
 
-**Golden and architecture gates are not green (MEDIUM):**
-- Issue: Current working-tree test runs have known light-theme golden diffs and a mockup quantity-decrease contract failure; these are easy to mistake for intentional P1/P2 design changes.
-- Files: `test/golden/`, `test/widget/`, `docs/mockup/v16/index.html`, `test/architecture/`
-- Impact: CI remains red and visual regressions can be masked by bulk baseline updates.
-- Fix approach: Review each changed baseline, regenerate only approved goldens on macOS, and restore/synchronize the mockup contract.
+**Budget result ambiguity:**
+- Symptoms: Callers cannot distinguish “no budgets configured” from a calculation failure because the use case always returns `[]`.
+- Files: `lib/application/analytics/get_budget_progress_use_case.dart`
+- Trigger: Any request for monthly budget progress.
+- Workaround: None; callers must treat an empty result as absence of data.
 
 ## Security Considerations
 
-**SQLCipher linkage is build-sensitive (HIGH):**
-- Risk: A Podfile change can let system sqlite3 win symbol resolution and prevent encrypted database startup.
-- Files: `ios/Podfile`, `lib/infrastructure/crypto/database/encrypted_database.dart`
-- Current mitigation: Podfile strips `-l"sqlite3"`; runtime checks `PRAGMA cipher_version` and fails closed.
-- Recommendations: Preserve the post-install strip and run an iOS device smoke test asserting SQLCipher activation after native dependency changes.
+**Sensitive error propagation in debug logs:**
+- Risk: Several infrastructure/application paths interpolate exception objects or operation context into `debugPrint`; exception text from networking, platform SDKs, or sync parsing may include endpoints, tokens, identifiers, or payload metadata.
+- Files: `lib/application/currency/get_exchange_rate_use_case.dart`, `lib/infrastructure/exchange_rate/exchange_rate_cache_service.dart`, `lib/infrastructure/sync/sync_scheduler.dart`, `lib/infrastructure/sync/push_notification_service.dart`, `lib/infrastructure/sync/websocket_service.dart`
+- Current mitigation: Most logs are debug-only and sync request/response helpers avoid body logging.
+- Recommendations: Centralize privacy-filtered logging, redact exception text by default, and add architecture tests forbidding interpolation of raw exceptions in production logging.
 
-**Plaintext preferences must stay non-sensitive (MEDIUM):**
-- Risk: SharedPreferences is not SQLCipher-protected and is suitable only for non-secret flags.
-- Files: `lib/features/settings/`, `lib/core/`
-- Current mitigation: Keys and backup secrets use established secure-storage/crypto services.
-- Recommendations: Keep PINs, tokens, recovery material, and financial data out of SharedPreferences; retain the logging privacy architecture tests.
+**Third-party exchange-rate availability:**
+- Risk: Currency conversion depends on three public unauthenticated services and remote CDN content; outages, tampering, or stale responses can affect persisted financial amounts.
+- Files: `lib/infrastructure/exchange_rate/exchange_rate_api_client.dart`, `lib/infrastructure/exchange_rate/exchange_rate_cache_service.dart`, `lib/application/currency/get_exchange_rate_use_case.dart`
+- Current mitigation: Source fallback chain, short timeouts, finite/positive-rate validation, and cached rates.
+- Recommendations: Pin/verify response schemas, record freshness and provenance in UI, add maximum staleness policy, and consider signed/controlled upstream data for persisted conversions.
 
 ## Performance Bottlenecks
 
-**Migration and sync orchestration complexity (MEDIUM):**
-- Problem: Schema migration and family-sync execution concentrate many branches, retries, and entity cases.
-- Files: `lib/data/app_database.dart`, `lib/application/family_sync/check_group_validity_use_case.dart`, `lib/application/family_sync/pull_sync_use_case.dart`, `lib/application/family_sync/apply_sync_operations_use_case.dart`
-- Cause: Large methods and nested state/error handling increase review and regression cost.
-- Improvement path: Extract versioned migration steps and per-entity sync handlers behind characterization tests.
+**Unbounded transaction reads:**
+- Problem: Transaction DAO queries intentionally have no limit or pagination and materialize every matching row for a date range.
+- Files: `lib/data/daos/transaction_dao.dart` (`findByBookIds`, `watchByBookIds`)
+- Cause: Pagination is explicitly deferred; multi-book streams sort and map complete result sets on every invalidation.
+- Improvement path: Add indexed cursor pagination, bounded page sizes, and a lightweight summary stream for list screens; verify indexes for book/timestamp/ledger/category predicates.
+
+**Large analytics aggregation surface:**
+- Problem: `AnalyticsDao` contains many custom SQL aggregate methods over `transactions`, each potentially scanning broad ranges.
+- Files: `lib/data/daos/analytics_dao.dart`
+- Cause: Repeated ad-hoc aggregates and wide date ranges without a materialized monthly summary.
+- Improvement path: Benchmark representative datasets, inspect SQLite query plans, add composite indexes or precomputed summaries, and keep date/book predicates mandatory.
 
 ## Fragile Areas
 
-**Voice parsing across platform STT/ITN (HIGH):**
-- Files: `lib/application/voice/voice_text_parser.dart`, `lib/application/voice/voice_chunk_merger.dart`, `lib/features/accounting/presentation/screens/voice_ptt_session_mixin.dart`, `lib/features/accounting/presentation/screens/voice_input_screen.dart`
-- Why fragile: iOS Japanese/Chinese inverse text normalization can corrupt numeric speech before Dart receives it; several compensating parser paths must remain coordinated.
-- Safe modification: Run the full ja/zh/en unit matrix plus real-device voice UAT after any parser or PTT change.
-- Test coverage: Host tests cannot reproduce recognizer-side ITN corruption.
+**Sync orchestration and inbound processing:**
+- Files: `lib/application/family_sync/sync_engine.dart`, `lib/application/family_sync/sync_orchestrator.dart`, `lib/application/family_sync/apply_sync_operations_use_case.dart`, `lib/application/family_sync/pull_sync_use_case.dart`
+- Why fragile: Cross-device ordering, retries, quarantine, websocket events, push notifications, and local database writes are coordinated across very large modules; small lifecycle changes can create duplicate or lost operations.
+- Safe modification: Preserve idempotency/revision checks, add focused failure/reconnect tests, and change one sync path at a time with encrypted integration fixtures.
+- Test coverage: Broad unit coverage exists, but production timing, network interruption, and multi-device conflict scenarios remain difficult to exercise deterministically.
 
-**Oversized UI/data modules (MEDIUM):**
-- Files: `lib/features/accounting/presentation/widgets/transaction_details_form.dart`, `lib/features/home/presentation/widgets/home_hero_card.dart`, `lib/features/onboarding/presentation/screens/onboarding_settings_screen.dart`, `lib/features/shopping_list/presentation/screens/shopping_item_form_screen.dart`
-- Why fragile: Large build methods and mixed responsibilities make localized UI changes affect unrelated states and goldens.
-- Safe modification: Extract sections/sub-widgets incrementally with targeted widget and golden tests.
+**Very large presentation widgets:**
+- Files: `lib/features/accounting/presentation/widgets/transaction_details_form.dart`, `lib/features/shopping_list/presentation/screens/shopping_item_form_screen.dart`, `lib/features/family_sync/presentation/screens/group_management_screen.dart`
+- Why fragile: Files exceed 1,600–2,000 lines and combine validation, provider wiring, navigation, localization, and rendering.
+- Safe modification: Extract field sections/controllers and pure validation helpers before behavior changes; preserve golden/widget coverage for each extracted section.
+- Test coverage: Targeted tests exist, but large widget surfaces rely on extensive manual stubs and smoke paths.
+
+**Silent decryption/data-loss behavior:**
+- Files: `lib/data/repositories/shopping_item_repository_impl.dart`
+- Why fragile: Note decryption failures are intentionally swallowed and mapped to `null`, making wrong-key/corrupt-data indistinguishable from an empty note.
+- Safe modification: Keep ciphertext out of logs, but expose a typed recoverable-decryption status to the application/UI and add migration/key-rotation tests.
+- Test coverage: Failure handling is covered only indirectly; corrupt ciphertext and key-version transitions need explicit integration tests.
 
 ## Scaling Limits
 
-**Device-level E2E coverage is narrow (MEDIUM):**
-- Current capacity: `integration_test/merchant_migration_ladder_test.dart` is the only device integration test.
-- Limit: Onboarding, cold-start app lock, backup restore, relay ACK, push, and real SQLCipher initialization are not exercised end-to-end in CI.
-- Scaling path: Add a minimal iOS and Android smoke journey covering install, create transaction, lock/cold start, backup restore, and sync.
+**Relay and local sync payload limits:**
+- Current capacity: Relay pull pages are capped at 100 messages and response/body limits are roughly a few MiB.
+- Limit: Large families, offline periods, or avatar/file-heavy queues can exceed bounded pages and prolong catch-up/retry cycles.
+- Scaling path: Add server/client cursor checkpoints, backpressure metrics, resumable chunking for large artifacts, and load tests with worst-case queues.
 
 ## Dependencies at Risk
 
-**Coordinated package upgrades required (MEDIUM):**
-- Risk: Direct upgrades of `file_picker`, `package_info_plus`, or `share_plus` currently conflict through transitive `win32` constraints; `intl` is pinned by Flutter localization.
-- Impact: Ad hoc upgrades can break dependency resolution or native builds.
-- Migration plan: Upgrade the constrained trio together, retain SQLCipher 0.6.x until a tested sqlite3 3.x migration exists, and verify iOS/Android builds.
+**Public rate APIs and platform push/speech SDKs:**
+- Risk: Availability, schema, quota, or platform-policy changes are outside app control.
+- Impact: Currency entry, push-driven sync wakeups, or speech input may degrade without a release.
+- Migration plan: Keep adapters behind existing infrastructure interfaces, add contract fixtures, and define offline/manual fallback behavior.
 
 ## Missing Critical Features
 
-**Production release-owner configuration:**
-- Problem: Real legal/support destinations, production signing, and final store metadata are not represented as enforced release configuration.
-- Blocks: Public store submission despite a functioning application foundation.
+**Operational observability:**
+- Problem: No dedicated error-tracking/metrics integration is detected; failures are primarily debug logs.
+- Blocks: Diagnosing sync stalls, rate-source failures, and device-specific initialization errors in production.
 
 ## Test Coverage Gaps
 
-**Provider and device-path coverage (MEDIUM):**
-- What's not tested: Error/fallback branches in analytics/settings providers and full device lifecycle flows.
-- Files: `lib/features/analytics/presentation/providers/state_analytics.dart`, `lib/features/settings/presentation/providers/repository_providers.dart`, `integration_test/`
-- Risk: Global coverage can remain high while these operational paths regress unnoticed.
-- Priority: Medium; add provider characterization tests and the cross-platform smoke journey.
+**Realistic performance and resilience tests:**
+- What's not tested: Large transaction datasets, pagination behavior (none implemented), prolonged offline sync, and concurrent reconnect/conflict resolution.
+- Files: `lib/data/daos/transaction_dao.dart`, `lib/data/daos/analytics_dao.dart`, `lib/application/family_sync/`
+- Risk: Regressions appear only with real-world data volume or timing.
+- Priority: High
+
+**External-service contract failures:**
+- What's not tested: Malformed/changed exchange-rate schemas, CDN poisoning/staleness, and all-source outage UX beyond unit exceptions.
+- Files: `lib/infrastructure/exchange_rate/exchange_rate_api_client.dart`
+- Risk: Incorrect or unavailable conversion data reaches users without clear recovery guidance.
+- Priority: Medium
 
 ---
 
-*Concerns audit: 2026-08-05*
+*Concerns audit: 2026-08-08*

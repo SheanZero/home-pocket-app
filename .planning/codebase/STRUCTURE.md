@@ -1,83 +1,80 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-08-05
-**Last mapped commit:** `7b4f1bac44644ea821835e85d09d9571a601e82a`
+**Analysis Date:** 2026-08-08
 
 ## Directory Layout
 
 ```text
 home-pocket-app/
-├── lib/main.dart                 # Flutter entry point and boot gates
-├── lib/core/                     # initialization, config, constants, theme, state
-├── lib/features/                 # thin feature modules: domain + presentation
-├── lib/application/              # cross-feature use cases/services
-├── lib/data/                     # Drift database, tables, DAOs, repositories
-├── lib/infrastructure/           # crypto, sync, storage, ML, speech, i18n, platform
-├── lib/shared/                   # reusable widgets, utils and constants
-├── lib/l10n/                     # ja/zh/en ARB sources
-├── lib/generated/                # generated localization/provider/database outputs
-├── test/                         # unit, widget, golden and architecture tests
-├── integration_test/             # end-to-end device tests
-├── docs/arch/                    # architecture guides and ADRs
-├── assets/ android/ ios/         # resources and native platform projects
-└── pubspec.yaml                  # dependencies and Flutter metadata
+├── lib/                 # Flutter application source
+│   ├── application/     # Cross-feature use cases/services
+│   ├── core/            # Bootstrap, router, theme, config, state
+│   ├── data/            # Drift database, tables, DAOs, repositories
+│   ├── features/        # Feature domain and presentation slices
+│   ├── infrastructure/  # Crypto, storage, sync, network, platform adapters
+│   ├── l10n/             # ja/zh/en ARB sources
+│   ├── generated/        # Generated localization/provider outputs
+│   └── shared/           # Reusable widgets, constants, utilities
+├── test/                 # Unit, widget, integration, architecture, golden tests
+├── integration_test/     # Device-level integration scenarios
+├── docs/arch/            # Numbered architecture and ADR documents
+└── .planning/            # GSD planning, milestones and codebase maps
 ```
 
 ## Directory Purposes
 
-**`lib/core/`:** App-wide initialization/configuration (`lib/core/initialization/app_initializer.dart`), theme and constants.
+**`lib/features/`:** Each feature usually contains `domain/models`, `domain/repositories`, and `presentation` screens/widgets/providers. Add feature behavior here, keeping persistence in `lib/data`.
 
-**`lib/features/`:** Feature folders (`accounting`, `analytics`, `applock`, `currency`, `dual_ledger`, `family_sync`, `home`, `list`, `onboarding`, `profile`, `settings`, `shopping_list`, `voice`) with `domain/` and `presentation/`.
+**`lib/application/`:** Shared workflows such as accounting, family sync, security, settings, voice and seeding. Place orchestration spanning multiple features here.
 
-**`lib/application/`:** Domain-oriented use cases/services for accounting, analytics, currency, family sync, settings, security, seed, voice and shopping.
+**`lib/data/`:** `app_database.dart`, `tables/`, `daos/`, and `repositories/` form the Drift persistence layer. Add schema changes with migrations and tests.
 
-**`lib/data/`:** `app_database.dart` (schema 36), Drift `tables/`, `daos/`, and `*_repository_impl.dart` files.
+**`lib/infrastructure/`:** Technical implementations grouped by capability (`crypto`, `security`, `storage`, `sync`, `network`, `speech`, `voice`, `ml`, `i18n`).
 
-**`lib/infrastructure/`:** Technical adapters grouped by capability: `crypto/`, `sync/`, `security/`, `storage/`, `speech/`, `voice/`, `ml/`, `i18n/`, `exchange_rate/`, `category/`.
+**`lib/core/`:** Startup and app-wide concerns: `initialization/`, `config/`, `state/`, `theme/`, and constants.
 
-**`lib/shared/`:** Cross-feature helpers such as `lib/shared/utils/result.dart`, provider invalidation, constants and reusable widgets.
+**`lib/shared/`:** Cross-feature widgets/utilities that do not belong to a single domain.
 
-**`test/`:** `unit/`, `widget/`, `golden/`, `infrastructure/`, `architecture/`; architecture tests enforce layer and privacy contracts.
+**`test/`:** Mirrors source concerns across `unit/`, `widget/`, `integration/`, `infrastructure/`, `architecture/`, and `golden/`; shared fixtures/helpers live in `test/fixtures` and `test/helpers`.
 
 ## Key File Locations
 
-**Entry Points:** `lib/main.dart`; shell at `lib/features/home/presentation/screens/main_shell_screen.dart`.
+**Entry Points:** `lib/main.dart`; `lib/core/initialization/app_initializer.dart`; feature screens under `lib/features/*/presentation/screens`.
 
-**Configuration:** `pubspec.yaml`, `analysis_options.yaml`, `build.yaml`, `l10n.yaml`, and `lib/*/import_guard.yaml`.
+**Configuration:** `pubspec.yaml`, `analysis_options.yaml`, `lib/core/config`, `lib/l10n/*.arb`, and platform folders `ios/`/`android/`.
 
-**Core Logic:** `lib/application/`; database at `lib/data/app_database.dart`.
+**Core Logic:** `lib/application/`; domain contracts in `lib/features/*/domain`; `lib/data/repositories`.
 
-**Testing:** `test/` and `integration_test/`; import boundaries in `test/architecture/layer_import_rules_test.dart`.
+**Testing:** `test/unit`, `test/widget`, `test/integration`, `test/architecture`, `test/golden`, and `integration_test`.
 
 ## Naming Conventions
 
-**Files:** Dart files use `snake_case.dart`; use cases end `_use_case.dart`, services `_service.dart`, repository implementations `_repository_impl.dart`, DAOs `_dao.dart`, and tables `_table.dart`.
+**Files:** snake_case Dart filenames; suffixes communicate role (`*_screen.dart`, `*_widget.dart`, `*_repository.dart`, `*_use_case.dart`, `*_provider.dart`, `*_table.dart`, `*_dao.dart`). Generated siblings use `.g.dart`/`.freezed.dart`.
 
-**Directories:** `snake_case`, organized by feature/domain or technical capability.
+**Directories:** lowercase snake_case; feature directories are nouns (`accounting`, `family_sync`, `shopping_list`).
 
-**Generated:** `*.g.dart`, `*.freezed.dart`, and `lib/generated/` are generated and must not be hand-edited.
+**Types and providers:** PascalCase classes; camelCase methods/fields; Riverpod annotations generate lower camelCase provider names.
 
 ## Where to Add New Code
 
-**New feature UI:** `lib/features/{feature}/presentation/screens/` or `widgets/`; providers in `presentation/providers/`.
+**New Feature:** Create `lib/features/{feature}/domain/models`, `domain/repositories`, and `presentation/{screens,widgets,providers}`. Put cross-feature orchestration in `lib/application/{feature}`.
 
-**New use case:** `lib/application/{domain}/{name}_use_case.dart` with provider wiring in the owning feature's providers.
+**New Component/Module:** UI implementation belongs in the owning feature’s `presentation/widgets`; technical adapters belong in `lib/infrastructure/{capability}`; persistence belongs in `lib/data/tables`, `daos`, and `repositories`.
 
-**New domain contract:** `lib/features/{feature}/domain/models/` or `domain/repositories/`.
+**Utilities:** Feature-specific helpers stay beside the feature; broadly reusable helpers go in `lib/shared/utils` and constants in `lib/shared/constants`.
 
-**New persistence:** table in `lib/data/tables/`, DAO in `lib/data/daos/`, implementation in `lib/data/repositories/`; register/migrate in `lib/data/app_database.dart`.
-
-**New technical capability:** `lib/infrastructure/{capability}/`.
-
-**Tests:** mirror production concern under `test/unit/`, `test/widget/`, `test/infrastructure/`, or `test/architecture/`; add device flows under `integration_test/`.
+**Tests:** Co-locate by concern under matching `test/unit`, `test/widget`, `test/infrastructure`, or `test/integration` paths; add visual baselines under `test/golden/goldens`.
 
 ## Special Directories
 
-**`lib/l10n/`:** Source ARB translations for `ja`, `zh`, and `en`; update all locales together.
-**`lib/generated/`:** Generated localization and codegen outputs; committed, regenerated via Flutter/build_runner.
-**`assets/legal/`, `assets/fonts/`, `assets/ml/`:** Bundled legal documents, fonts and ML resources.
-**`build/`, `coverage/`:** Generated artifacts; do not place source code here.
+**`lib/generated/`:** Generated localization outputs; do not hand-edit. Regenerate via `flutter gen-l10n`.
+
+**`*.g.dart` / `*.freezed.dart`:** Generated Riverpod, Drift and Freezed artifacts; regenerate with build_runner after source changes.
+
+**`.planning/`:** Planning artifacts consumed by GSD; preserve milestone/state consistency.
+
+**`docs/arch/`:** Versioned architecture docs and ADR indexes; add new docs using the next sequential number.
 
 ---
 
-*Structure analysis: 2026-08-05*
+*Structure analysis: 2026-08-08*

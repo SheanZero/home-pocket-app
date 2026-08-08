@@ -1,133 +1,134 @@
-<!-- refreshed: 2026-08-05 -->
+<!-- refreshed: 2026-08-08 -->
 # Architecture
 
-**Analysis Date:** 2026-08-05
-**Last mapped commit:** `7b4f1bac44644ea821835e85d09d9571a601e82a`
+**Analysis Date:** 2026-08-08
 
 ## System Overview
 
 ```text
-Flutter runtime (`lib/main.dart`)
-        │ staged boot and ProviderContainer
-        ▼
-Presentation: `lib/features/*/presentation/`
-        │ Riverpod providers and UI invoke
-        ▼
-Application: `lib/application/`
-        │ use cases depend on domain contracts
-        ▼
-Domain: `lib/features/*/domain/` ◄── Data: `lib/data/`
-                                      │ Drift DAOs/repositories
-                                      ▼
-Infrastructure: `lib/infrastructure/`
- (crypto, sync, ML, speech, storage, i18n, platform APIs)
-                                      │
-                                      ▼
-                         SQLCipher-backed Drift database
-                         `lib/data/app_database.dart` (schema 36)
+┌─────────────────────────────────────────────────────────────┐
+│ Flutter UI / feature presentation                           │
+│ `lib/features/*/presentation`, `lib/shared/widgets`          │
+└───────────────┬─────────────────────────────────────────────┘
+                ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Riverpod providers and application use cases                 │
+│ `lib/application`, feature `presentation/providers`          │
+└───────────────┬─────────────────────────────────────────────┘
+                ▼
+┌──────────────────────┬──────────────────────────────────────┐
+│ Domain contracts      │ Infrastructure/platform services     │
+│ `lib/features/*/domain`│ `lib/infrastructure`               │
+└───────────────┬──────┴──────────────────────┬───────────────┘
+                ▼                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Drift repositories, DAOs and encrypted SQLCipher database    │
+│ `lib/data`                                                    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Responsibilities
 
 | Component | Responsibility | File |
-|---|---|---|
-| Runtime/bootstrap | Native library loading, staged initialization, root app and gate lifecycle | `lib/main.dart` |
-| Initialization | Master/device keys, encrypted database, seed and typed failure result | `lib/core/initialization/app_initializer.dart` |
-| Presentation shell | Indexed tab shell, navigation, FAB and feature screens/widgets | `lib/features/home/presentation/screens/main_shell_screen.dart` |
-| Application services | Cross-feature use cases and orchestration | `lib/application/{domain}/` |
-| Domain contracts | Framework-independent models and repository interfaces | `lib/features/{feature}/domain/` |
-| Persistence | Drift tables, DAOs, migrations and repository implementations | `lib/data/` |
-| Technical adapters | Encryption, secure storage, sync, speech, ML, exchange rates and formatters | `lib/infrastructure/` |
+|-----------|----------------|------|
+| Bootstrap | Initializes keys, database, recovery, providers, then mounts app | `lib/main.dart`, `lib/core/initialization/app_initializer.dart` |
+| Feature presentation | Screens, widgets, navigation-facing state and provider wiring | `lib/features/*/presentation` |
+| Application | Cross-feature orchestration and business use cases | `lib/application` |
+| Domain | Immutable models and repository interfaces independent of Flutter/Drift | `lib/features/*/domain` |
+| Data | Drift tables/DAOs and repository implementations | `lib/data` |
+| Infrastructure | Crypto, secure storage, networking, sync, speech and ML adapters | `lib/infrastructure` |
+| Core/shared | Router, theme, initialization, constants and reusable widgets/utilities | `lib/core`, `lib/shared` |
 
 ## Pattern Overview
 
-**Overall:** Clean Architecture with thin feature modules and a Riverpod composition root.
+**Overall:** Clean Architecture with feature vertical slices and Riverpod dependency injection.
 
 **Key Characteristics:**
-- Features contain domain contracts and presentation only; application, data and infrastructure remain global.
-- Repositories are interfaces in `lib/features/*/domain/repositories/` and implementations in `lib/data/repositories/`.
-- Riverpod 3 code generation wires providers; Freezed supplies immutable models; Drift provides typed encrypted persistence.
-- Import boundaries are verified by `test/architecture/layer_import_rules_test.dart`, `domain_import_rules_test.dart`, and `presentation_layer_rules_test.dart`.
+- Presentation depends on application/domain contracts through generated Riverpod providers.
+- Application coordinates use cases; data implements domain repositories using Drift DAOs.
+- Infrastructure is isolated from features and application; encrypted persistence is local-first.
+- Freezed models and generated Riverpod/Drift code are tracked outputs, not hand-edited.
 
 ## Layers
 
-**Presentation:** Flutter screens/widgets/providers under `lib/features/*/presentation/`; depends on application and domain.
+**Presentation:** Screens, widgets and state providers in `lib/features/{feature}/presentation`; depends on application/domain and localization.
 
-**Application:** Use cases and services under `lib/application/`; depends on domain contracts and composition-root provider wiring.
+**Application:** Use cases/services in `lib/application`; depends on domain contracts, repositories and infrastructure capabilities.
 
-**Domain:** Pure models, services and repository interfaces under `lib/features/*/domain/`; must not import Flutter, Drift or Riverpod.
+**Domain:** Models/repository interfaces in `lib/features/{feature}/domain`; no Flutter, Drift, Riverpod or platform SDK imports.
 
-**Data:** `lib/data/app_database.dart`, `tables/`, `daos/`, and `repositories/`; implements domain contracts and uses infrastructure encryption.
+**Data:** Tables, DAOs and repository implementations in `lib/data`; depends on domain and technical infrastructure, never presentation.
 
-**Infrastructure:** `lib/infrastructure/crypto/`, `sync/`, `security/`, `storage/`, `speech/`, `voice/`, `ml/`, `i18n/`, `exchange_rate/`; wraps platform/technical dependencies.
+**Infrastructure:** Technical adapters in `lib/infrastructure` (crypto, storage, sync, network, speech, ML); must not import features/application/data.
 
 ## Data Flow
 
-### Primary Transaction Request
+### Primary Request Path
 
-1. A screen such as `lib/features/accounting/presentation/screens/manual_one_step_screen.dart` invokes a provider.
-2. Provider resolves a use case such as `lib/application/accounting/create_transaction_use_case.dart`.
-3. Use case calls a domain repository contract.
-4. `lib/data/repositories/transaction_repository_impl.dart` delegates to `lib/data/daos/transaction_dao.dart` and `lib/data/app_database.dart`.
-5. SQLCipher and field encryption are supplied by `lib/infrastructure/crypto/`.
+1. `lib/main.dart` calls `AppInitializer.initialize()` before `runApp()`.
+2. `lib/core/initialization/app_initializer.dart` prepares master key, opens `AppDatabase`, resumes privacy wipe, creates device identity, and seeds data.
+3. `HomePocketApp` in `lib/main.dart` seeds/ensures a book and configures sync lifecycle.
+4. A feature screen reads a generated provider under `lib/features/*/presentation/providers`.
+5. The provider constructs an application use case/repository; DAOs in `lib/data/daos` query/write `lib/data/app_database.dart`.
+6. Riverpod invalidation/Drift streams rebuild widgets with localized output.
 
-### Boot Flow
+### Persistence and Sync Flow
 
-1. `main()` in `lib/main.dart` ensures Flutter/native libraries and calls `AppInitializer.initialize()`.
-2. `lib/core/initialization/app_initializer.dart` prepares keys, encrypted Drift executor and seed data.
-3. An `UncontrolledProviderScope` mounts the initialized container; onboarding and app-lock gates render before `MainShellScreen`.
-4. Data reset/import re-bootstrap the root and invalidate providers via `lib/shared/utils/invalidate_all_data_providers.dart`.
+Business mutations pass through application services and repository implementations such as `lib/data/repositories/transaction_repository_impl.dart`; family operations can be durably written to sync outbox tables in the same Drift transaction, then processed by `lib/infrastructure/sync`.
 
-**State Management:** Riverpod providers own feature/application state; boot-captured `bookId` is threaded through widget constructors. Side effects use `ref.listen`.
+**State Management:** Riverpod 3 generated providers; immutable Freezed state; database streams for reactive records; `ProviderContainer` is injected through `UncontrolledProviderScope`.
 
 ## Key Abstractions
 
-- **Use case:** `execute()` units in `lib/application/`.
-- **Repository:** interface/implementation pairs in `lib/features/*/domain/repositories/` and `lib/data/repositories/`.
-- **Result:** explicit success/error boundary type in `lib/shared/utils/result.dart`.
-- **Database/DAO:** encrypted Drift access through `lib/data/app_database.dart` and `lib/data/daos/`.
+**Repository contracts:** Interfaces such as `lib/features/accounting/domain/repositories/transaction_repository.dart` decouple use cases from Drift.
+
+**Generated provider graph:** Feature `repository_providers.dart` files (for example `lib/features/accounting/presentation/providers/repository_providers.dart`) compose DAOs, implementations and use cases.
+
+**Encrypted database:** `lib/data/app_database.dart` owns schema/migrations; `lib/infrastructure/crypto/database/encrypted_database.dart` creates the SQLCipher executor.
+
+**Result values:** `lib/shared/utils/result.dart` represents expected success/error outcomes without throwing through UI boundaries.
 
 ## Entry Points
 
-**App bootstrap:** `lib/main.dart` (`main`, `_boot`, `bootWithInitializerForTesting`).
+**Application entry:** `lib/main.dart`; initializes Flutter, boots dependencies and mounts `HomePocketApp`.
 
-**Feature shell:** `lib/features/home/presentation/screens/main_shell_screen.dart`.
+**Database entry:** `lib/data/app_database.dart`; Drift schema version 36 and migration strategy.
 
-**Test bootstrap:** `bootWithInitializerForTesting` in `lib/main.dart` allows injected initializer and runner.
+**Feature entry:** Screens under `lib/features/*/presentation/screens`, reached from the shell/router assembled by the home/settings flows.
 
 ## Architectural Constraints
 
-- Single-threaded Dart event loop; asynchronous I/O and native crypto/database work are awaited.
-- Infrastructure must not depend on features, application or data; domain remains framework-independent.
-- `bookId` is not a provider; pass it explicitly from the boot root.
-- Routing uses Flutter `Navigator` and an `IndexedStack`; no GoRouter dependency is present.
-- Generated `*.g.dart`/`*.freezed.dart` files are regenerated, never hand-edited.
+- **Threading:** Flutter UI isolate with asynchronous I/O; Drift/native database and platform services are awaited.
+- **Global state:** Provider graph is scoped to the initialized `ProviderContainer`; lifecycle observer state is held by `HomePocketApp`.
+- **Circular imports:** Layer import guards in `lib/*/import_guard.yaml` enforce boundaries.
+- **Security:** SQLCipher database plus field/file/transport crypto; keys go through established key-manager/secure-storage services.
 
 ## Anti-Patterns
 
-### Feature-owned persistence or infrastructure
-**What happens:** Tables, DAOs or adapters are added beneath `lib/features/`.
-**Why it's wrong:** Violates thin-feature and import-boundary tests.
-**Do this instead:** Put them in `lib/data/` or `lib/infrastructure/` and expose contracts from the feature domain.
+### UI-owned persistence
 
-### Provider-based active book identity
-**What happens:** Code invents `currentBookIdProvider`.
-**Why it's wrong:** Boot identity is captured in `lib/main.dart`.
-**Do this instead:** Thread `bookId` through constructors and re-bootstrap after full data reset.
+**What happens:** Widgets directly query Drift or construct infrastructure clients.
+**Why it's wrong:** Violates layer boundaries and makes state untestable.
+**Do this instead:** Add a domain contract, application use case, and provider in `lib/features/{feature}/presentation/providers`.
+
+### Hand-editing generated code
+
+**What happens:** Changes are made to `*.g.dart`, `*.freezed.dart`, or generated localization files.
+**Why it's wrong:** Regeneration discards edits and creates inconsistent providers/models.
+**Do this instead:** Edit source annotations/ARB and run build_runner or `flutter gen-l10n`.
 
 ## Error Handling
 
-**Strategy:** `Result<T>` for operation boundaries and typed `InitResult`/`InitFailureType` for boot failures. Provider failures are wrapped in Riverpod `ProviderException`.
+**Strategy:** Initialization returns typed `InitResult` failures; use cases return `Result` where expected errors are user-facing; unexpected failures propagate to provider error states.
 
-**Patterns:** Never mint a new master key when encrypted data exists; render `lib/core/initialization/init_failure_screen.dart` for unrecoverable boot errors; keep logs privacy-scrubbed.
+**Patterns:** Database/key failures are staged and dispose resources; UI uses Riverpod `AsyncValue` and dedicated error widgets; destructive wipe validates schema classification before deleting.
 
 ## Cross-Cutting Concerns
 
-**Logging:** Privacy checks in `test/architecture/production_logging_privacy_test.dart`.
-**Validation:** Boundary validation before persistence.
-**Authentication:** PIN/biometric app-lock in `lib/features/applock/` and `lib/infrastructure/security/`.
-**Encryption:** SQLCipher database, ChaCha20-Poly1305 fields, AES-GCM files and TLS/E2EE sync via `lib/infrastructure/crypto/` and `lib/infrastructure/sync/`.
+**Logging:** Debug-only diagnostic logging; sensitive values are excluded.
+**Validation:** Domain/application validation precedes repository writes; architecture tests enforce imports.
+**Authentication:** App lock and device identity live in `lib/infrastructure/security` and are initialized before normal routes/sync.
 
 ---
 
-*Architecture analysis: 2026-08-05*
+*Architecture analysis: 2026-08-08*
