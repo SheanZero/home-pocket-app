@@ -81,6 +81,11 @@ void main() {
           'disposable Flutter iOS package generation',
           'unsupported_configuration_reason',
           '_simulatorRuntimeConfigurations',
+          'on ProcessException',
+          'prepared-clean',
+          'before-status-sha256',
+          '_terminationObserved',
+          "'INCOMPLETE'",
         ]) {
           expect(
             runner,

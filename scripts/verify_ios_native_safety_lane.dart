@@ -12,6 +12,7 @@
 /// floor below iOS 15. It never writes a Package.swift manifest itself.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,13 +20,14 @@ import 'package:crypto/crypto.dart';
 
 enum NativeSafetyLane { tracer, full, runtime }
 
-enum EvidenceResult { compileOnly, runtimePass, runtimeFail, blocked }
+enum EvidenceResult { compileOnly, runtimePass, runtimeFail, notRun, blocked }
 
 extension on EvidenceResult {
   String get label => switch (this) {
     EvidenceResult.compileOnly => 'COMPILE_ONLY',
     EvidenceResult.runtimePass => 'RUNTIME_PASS',
     EvidenceResult.runtimeFail => 'RUNTIME_FAIL',
+    EvidenceResult.notRun => 'NOT_RUN',
     EvidenceResult.blocked => 'BLOCKED',
   };
 }
@@ -41,6 +43,7 @@ const _evidenceRelativePath = 'build/native_safety_evidence.json';
 const _buildTimeout = Duration(minutes: 15);
 const _simulatorCommandTimeout = Duration(seconds: 45);
 const _runtimeTestTimeout = Duration(minutes: 8);
+const _simulatorRuntimeConfigurations = <String>['Debug', 'Profile', 'Release'];
 
 class _RunRecord {
   const _RunRecord({
@@ -78,16 +81,24 @@ Future<void> main(List<String> arguments) async {
   final runner = _NativeSafetyRunner(
     lane: options.lane,
     runtimeTest: options.runtimeTest,
+    preparedClean: options.preparedClean,
+    expectedStatusDigest: options.expectedStatusDigest,
   );
   final exit = await runner.run();
   if (exit != 0) exitCode = exit;
 }
 
-({NativeSafetyLane lane, String runtimeTest}) _parseArguments(
-  List<String> arguments,
-) {
+({
+  NativeSafetyLane lane,
+  String runtimeTest,
+  bool preparedClean,
+  String? expectedStatusDigest,
+})
+_parseArguments(List<String> arguments) {
   NativeSafetyLane? lane;
   String? runtimeTest;
+  var preparedClean = false;
+  String? expectedStatusDigest;
   for (final argument in arguments) {
     if (argument.startsWith('--lane=')) {
       if (lane != null) {
@@ -106,42 +117,101 @@ Future<void> main(List<String> arguments) async {
         throw const _RunnerFailure('runtime test supplied more than once');
       }
       runtimeTest = argument.substring('--runtime-test='.length);
+    } else if (argument == '--prepared-clean') {
+      if (preparedClean) {
+        throw const _RunnerFailure('prepared-clean supplied more than once');
+      }
+      preparedClean = true;
+    } else if (argument.startsWith('--before-status-sha256=')) {
+      if (expectedStatusDigest != null) {
+        throw const _RunnerFailure(
+          'before-status-sha256 supplied more than once',
+        );
+      }
+      expectedStatusDigest = argument.substring(
+        '--before-status-sha256='.length,
+      );
     } else {
       throw _RunnerFailure('unknown argument: $argument');
     }
   }
   if (lane == null ||
       runtimeTest == null ||
+      (preparedClean && expectedStatusDigest == null) ||
+      (!preparedClean && expectedStatusDigest != null) ||
+      (expectedStatusDigest != null &&
+          !RegExp(r'^[0-9a-f]{64}$').hasMatch(expectedStatusDigest)) ||
       !runtimeTest.startsWith(_runtimePrefix) ||
       !_allowedRuntimeTests.contains(runtimeTest)) {
     throw const _RunnerFailure(
-      'usage: --lane=tracer|full|runtime --runtime-test=<approved SQLCipher integration test>',
+      'usage: --lane=tracer|full|runtime --runtime-test=<approved SQLCipher integration test> [--prepared-clean --before-status-sha256=<digest>]',
     );
   }
   if (!File(runtimeTest).existsSync()) {
     throw _RunnerFailure('runtime test does not exist: $runtimeTest');
   }
-  return (lane: lane, runtimeTest: runtimeTest);
+  return (
+    lane: lane,
+    runtimeTest: runtimeTest,
+    preparedClean: preparedClean,
+    expectedStatusDigest: expectedStatusDigest,
+  );
 }
 
 class _NativeSafetyRunner {
-  _NativeSafetyRunner({required this.lane, required this.runtimeTest});
+  _NativeSafetyRunner({
+    required this.lane,
+    required this.runtimeTest,
+    required this.preparedClean,
+    required this.expectedStatusDigest,
+  });
 
   final NativeSafetyLane lane;
   final String runtimeTest;
+  final bool preparedClean;
+  final String? expectedStatusDigest;
   final List<_RunRecord> _records = <_RunRecord>[];
   String? _beforeStatus;
   String? _firstFailure;
+  var _completed = false;
+  var _terminationObserved = false;
 
   Future<int> run() async {
+    final terminationSubscription = ProcessSignal.sigterm.watch().listen((_) {
+      if (_terminationObserved) {
+        return;
+      }
+      _terminationObserved = true;
+      _records.add(
+        const _RunRecord(
+          name: 'runner-termination',
+          result: EvidenceResult.blocked,
+          details: <String, Object?>{
+            'reason': 'runner received termination before completion',
+            'compile_is_not_runtime_acceptance': true,
+          },
+        ),
+      );
+      _fail('runner received termination before completion');
+    });
     try {
       _beforeStatus = await _statusSnapshot();
+      if (expectedStatusDigest != null &&
+          _statusDigest(_beforeStatus!) != expectedStatusDigest) {
+        throw const _RunnerFailure(
+          'main-tree status does not match prepared-clean preflight',
+        );
+      }
       await _runRetainedLockPreparation();
+      await _writeEvidence();
       if (lane == NativeSafetyLane.full) {
         await _runDisposableResolution();
+        await _writeEvidence();
         await _runBuildMatrix();
+        await _writeEvidence();
       }
       await _runSimulatorRuntime();
+      _completed = true;
     } on _RunnerFailure catch (error) {
       _fail(error.message);
     } finally {
@@ -150,13 +220,28 @@ class _NativeSafetyRunner {
       } on _RunnerFailure catch (error) {
         _fail(error.message);
       }
+      await terminationSubscription.cancel();
       await _writeEvidence();
     }
     return _firstFailure == null ? 0 : 1;
   }
 
   Future<void> _runRetainedLockPreparation() async {
-    await _requireSuccess('flutter clean', <String>['flutter', 'clean']);
+    if (preparedClean) {
+      _records.add(
+        const _RunRecord(
+          name: 'external-flutter-clean-preflight',
+          result: EvidenceResult.compileOnly,
+          details: <String, Object?>{
+            'prepared_clean': true,
+            'preflight_status_digest_redacted': true,
+            'outcome': 'PASS',
+          },
+        ),
+      );
+    } else {
+      await _requireSuccess('flutter clean', <String>['flutter', 'clean']);
+    }
     await _requireSuccess('locked pub resolution', <String>[
       'flutter',
       'pub',
@@ -181,7 +266,7 @@ class _NativeSafetyRunner {
       '--no-codesign',
     ]);
     _records.add(
-      const _RunRecord(
+      _RunRecord(
         name: 'flutter-supported-package-generation',
         result: EvidenceResult.compileOnly,
         details: <String, Object?>{
@@ -191,7 +276,10 @@ class _NativeSafetyRunner {
         },
       ),
     );
-    await _validateGeneratedManifest();
+    await _validateGeneratedManifest(
+      root: Directory.current.path,
+      floorRecordName: 'generated-swift-package-floor',
+    );
 
     await _runUnsignedBuild(
       configuration: 'Debug',
@@ -261,6 +349,7 @@ class _NativeSafetyRunner {
         },
       ),
     );
+    await _writeEvidence();
     if (result.exitCode != 0) {
       throw _RunnerFailure(
         '$label unsigned compile failed: ${_redact(result.output)}',
@@ -268,20 +357,24 @@ class _NativeSafetyRunner {
     }
   }
 
-  Future<void> _validateGeneratedManifest() async {
-    final manifest = File(_generatedManifestRelativePath);
+  Future<void> _validateGeneratedManifest({
+    required String root,
+    required String floorRecordName,
+  }) async {
+    final manifest = File('$root/$_generatedManifestRelativePath');
     if (!await manifest.exists()) {
       throw const _RunnerFailure(
         'supported Flutter generation did not produce Package.swift',
       );
     }
     final manifestContents = await manifest.readAsString();
-    final validator = await _run('dart', <String>[
+    final validator = await _run('flutter', <String>[
+      'pub',
       'run',
       'scripts/dependency_compatibility.dart',
       '--mode=baseline',
       '--generated-swift-package-manifest=$_generatedManifestRelativePath',
-    ]);
+    ], workingDirectory: root);
     if (validator.exitCode != 0 ||
         !RegExp(
           r'\.iOS\s*\(\s*"(?:15|1[6-9]|[2-9][0-9])(?:\.\d+)?"\s*\)',
@@ -292,8 +385,8 @@ class _NativeSafetyRunner {
       );
     }
     _records.add(
-      const _RunRecord(
-        name: 'generated-swift-package-floor',
+      _RunRecord(
+        name: floorRecordName,
         result: EvidenceResult.compileOnly,
         details: <String, Object?>{
           'floor': 'iOS 15+',
@@ -320,8 +413,24 @@ class _NativeSafetyRunner {
         'pod',
         'install',
       ], workingDirectory: '${root.path}/ios');
-      final retained = await _graphDigest(Directory.current.path);
-      final disposable = await _graphDigest(root.path);
+      await _requireSuccess(
+        'disposable Flutter iOS package generation',
+        <String>[
+          'flutter',
+          'build',
+          'ios',
+          '--simulator',
+          '--debug',
+          '--no-codesign',
+        ],
+        workingDirectory: root.path,
+      );
+      await _validateGeneratedManifest(
+        root: root.path,
+        floorRecordName: 'disposable-generated-swift-package-floor',
+      );
+      final retained = await _nativeGraphDigest(Directory.current.path);
+      final disposable = await _nativeGraphDigest(root.path);
       if (retained != disposable) {
         throw const _RunnerFailure(
           'from-zero Pub/Pod graph differs from retained locks',
@@ -368,10 +477,19 @@ class _NativeSafetyRunner {
     }
   }
 
-  Future<String> _graphDigest(String root) async {
-    final pub = await File('$root/pubspec.lock').readAsString();
-    final pod = await File('$root/ios/Podfile.lock').readAsString();
-    final selected = <String>[pub, pod]
+  Future<String> _nativeGraphDigest(String root) async {
+    const graphFiles = <String>[
+      'pubspec.yaml',
+      'pubspec.lock',
+      'ios/Podfile',
+      'ios/Podfile.lock',
+      'ios/Runner.xcodeproj/project.pbxproj',
+      _generatedManifestRelativePath,
+    ];
+    final selected = await Future.wait(
+      graphFiles.map((relative) => File('$root/$relative').readAsString()),
+    );
+    final normalized = selected
         .map(
           (text) => text
               .split('\n')
@@ -379,7 +497,7 @@ class _NativeSafetyRunner {
               .join('\n'),
         )
         .join('\n---\n');
-    return sha256.convert(utf8.encode(selected)).toString();
+    return sha256.convert(utf8.encode(normalized)).toString();
   }
 
   Future<void> _runSimulatorRuntime() async {
@@ -418,6 +536,7 @@ class _NativeSafetyRunner {
       _blockRuntime('Simulator bootstatus failed');
       return;
     }
+    _recordUnsupportedRuntimeConfigurations();
     final runtime = await _run('flutter', <String>[
       'test',
       runtimeTest,
@@ -443,6 +562,26 @@ class _NativeSafetyRunner {
     if (runtime.exitCode != 0) {
       throw _RunnerFailure(
         'Simulator SQLCipher runtime failed: ${_redact(runtime.output)}',
+      );
+    }
+  }
+
+  void _recordUnsupportedRuntimeConfigurations() {
+    for (final configuration in _simulatorRuntimeConfigurations) {
+      if (configuration == 'Debug') {
+        continue;
+      }
+      _records.add(
+        _RunRecord(
+          name: 'simulator-sqlcipher-runtime-${configuration.toLowerCase()}',
+          result: EvidenceResult.notRun,
+          details: <String, Object?>{
+            'configuration': configuration,
+            'destination_kind': 'BOOTED_SIMULATOR',
+            'unsupported_configuration_reason':
+                'Flutter integration_test runner has no Profile/Release execution mode',
+          },
+        ),
       );
     }
   }
@@ -507,12 +646,17 @@ class _NativeSafetyRunner {
     String? workingDirectory,
     Duration timeout = _buildTimeout,
   }) async {
-    final process = await Process.start(
-      executable,
-      arguments,
-      workingDirectory: workingDirectory,
-      runInShell: false,
-    );
+    final Process process;
+    try {
+      process = await Process.start(
+        executable,
+        arguments,
+        workingDirectory: workingDirectory,
+        runInShell: false,
+      );
+    } on ProcessException catch (error) {
+      return ProcessResult(-1, 127, '', error.message);
+    }
     final stdoutFuture = process.stdout.transform(utf8.decoder).join();
     final stderrFuture = process.stderr.transform(utf8.decoder).join();
     final commandExitCode = await process.exitCode.timeout(
@@ -535,7 +679,7 @@ class _NativeSafetyRunner {
     if (status.exitCode != 0) {
       throw const _RunnerFailure('cannot snapshot repository status');
     }
-    return status.output;
+    return status.stdout.toString();
   }
 
   Future<void> _assertStatusRestored() async {
@@ -547,6 +691,9 @@ class _NativeSafetyRunner {
     }
   }
 
+  String _statusDigest(String status) =>
+      sha256.convert(utf8.encode(status)).toString();
+
   Future<void> _writeEvidence() async {
     final evidence = File(_evidenceRelativePath);
     await evidence.parent.create(recursive: true);
@@ -554,7 +701,15 @@ class _NativeSafetyRunner {
       'lane': lane.name,
       'runtime_test': runtimeTest,
       'status_preserved': _beforeStatus != null,
-      'outcome': _firstFailure == null ? 'PASS' : 'FAIL',
+      'status_digest_redacted': _beforeStatus == null
+          ? null
+          : _statusDigest(_beforeStatus!),
+      'completed': _completed,
+      'outcome': _firstFailure != null
+          ? 'FAIL'
+          : _completed
+          ? 'PASS'
+          : 'INCOMPLETE',
       'failure': _firstFailure == null ? null : _redact(_firstFailure!),
       'records': _records.map((_RunRecord record) => record.toJson()).toList(),
     };
