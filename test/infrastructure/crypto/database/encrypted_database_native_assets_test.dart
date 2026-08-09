@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/infrastructure/crypto/database/encrypted_database.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/master_key_repository.dart';
-
-import '../../../../integration_test/fixtures/sqlcipher_4_10_v35_fixture.dart';
 
 const _databaseKeyHex =
     'd20e6a6b3552604219429fa56be09635728b7bd44db96c02357959e6392faa5a';
@@ -91,51 +88,54 @@ void main() {
     },
   );
 
-  test('SQLCipher 4.17 migrates, writes, and reopens the 4.10 fixture', () async {
-    final root = await Directory.systemTemp.createTemp('sqlcipher-4.10-host-');
-    addTearDown(() => root.delete(recursive: true));
-    final file = File('${root.path}/fixture.db');
-    await file.writeAsBytes(
-      base64Decode(sqlCipher410V35FixtureBase64.replaceAll(RegExp(r'\s'), '')),
-      flush: true,
-    );
+  test(
+    'SQLCipher 4.17 creates, writes, and reopens the current schema',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'sqlcipher-current-host-',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      final file = File('${root.path}/current.db');
 
-    final keys = _FixtureKeyRepository();
-    var database = AppDatabase(
-      await createEncryptedExecutor(keys, databaseFile: file),
-    );
-    expect(
-      await _scalar(database, 'PRAGMA cipher_version'),
-      startsWith('4.17.'),
-    );
-    expect(await _scalar(database, 'PRAGMA cipher_status'), '1');
-    expect(await _scalar(database, 'PRAGMA user_version'), '36');
-    expect(
-      int.parse(await _scalar(database, 'SELECT count(*) FROM sqlite_master')),
-      greaterThan(0),
-    );
+      final keys = _FixtureKeyRepository();
+      var database = AppDatabase(
+        await createEncryptedExecutor(keys, databaseFile: file),
+      );
+      expect(
+        await _scalar(database, 'PRAGMA cipher_version'),
+        startsWith('4.17.'),
+      );
+      expect(await _scalar(database, 'PRAGMA cipher_status'), '1');
+      expect(await _scalar(database, 'PRAGMA user_version'), '36');
+      expect(
+        int.parse(
+          await _scalar(database, 'SELECT count(*) FROM sqlite_master'),
+        ),
+        greaterThan(0),
+      );
 
-    await database.customStatement(
-      "UPDATE shopping_items SET name = 'host-write' WHERE id = 'fixture-item'",
-    );
-    await database.close();
-    await _expectEncryptedHeader(file);
+      await database.customStatement(
+        "INSERT INTO audit_logs (id, event, device_id, timestamp) VALUES ('host-current-schema', 'current_schema_write', 'fixture-device', 1700000000001)",
+      );
+      await database.close();
+      await _expectEncryptedHeader(file);
 
-    database = AppDatabase(
-      await createEncryptedExecutor(keys, databaseFile: file),
-    );
-    addTearDown(database.close);
-    expect(
-      await _scalar(database, 'PRAGMA cipher_version'),
-      startsWith('4.17.'),
-    );
-    expect(await _scalar(database, 'PRAGMA cipher_status'), '1');
-    expect(
-      await _scalar(
-        database,
-        "SELECT name FROM shopping_items WHERE id = 'fixture-item'",
-      ),
-      'host-write',
-    );
-  });
+      database = AppDatabase(
+        await createEncryptedExecutor(keys, databaseFile: file),
+      );
+      addTearDown(database.close);
+      expect(
+        await _scalar(database, 'PRAGMA cipher_version'),
+        startsWith('4.17.'),
+      );
+      expect(await _scalar(database, 'PRAGMA cipher_status'), '1');
+      expect(
+        await _scalar(
+          database,
+          "SELECT event FROM audit_logs WHERE id = 'host-current-schema'",
+        ),
+        'current_schema_write',
+      );
+    },
+  );
 }

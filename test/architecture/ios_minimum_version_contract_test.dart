@@ -69,7 +69,7 @@ void main() {
           'CODE_SIGNING_ALLOWED=NO',
           'generic/platform=iOS',
           'platform=iOS Simulator',
-          'sqlcipher_native_assets_migration_test.dart',
+          'sqlcipher_native_assets_lifecycle_test.dart',
           'CoreSimulator',
           'Process.start',
           '_simulatorCommandTimeout',

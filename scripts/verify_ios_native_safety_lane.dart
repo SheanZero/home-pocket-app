@@ -34,7 +34,7 @@ extension on EvidenceResult {
 
 const _runtimePrefix = 'integration_test/';
 const _allowedRuntimeTests = <String>{
-  'integration_test/sqlcipher_native_assets_migration_test.dart',
+  'integration_test/sqlcipher_native_assets_lifecycle_test.dart',
   'integration_test/sqlcipher_backup_recovery_test.dart',
 };
 const _generatedManifestRelativePath =
