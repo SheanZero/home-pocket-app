@@ -1075,6 +1075,132 @@ void _validatePhase59PluginCohorts({
     );
   }
 
+  const localAuthPackage = 'local_auth';
+  const localAuthCandidate = '3.0.2';
+  const localAuthHeldDeclaration = '^3.0.2';
+  const localAuthHeldResolution = '3.0.2';
+  const requiredLocalAuthEvidence = <String>{
+    'automated_policy_contract',
+    'supported_native_build',
+    'face_id_success',
+    'user_cancel_or_false_app_pin_fallback',
+    'temporary_lockout_app_pin_fallback',
+    'biometric_lockout_app_pin_fallback',
+    'platform_exception_app_pin_fallback',
+    'unknown_exception_app_pin_fallback',
+    'app_pin_fallback',
+  };
+  const requiredFallbackEvidence = <String>{
+    'temporary_lockout_app_pin_fallback',
+    'biometric_lockout_app_pin_fallback',
+    'platform_exception_app_pin_fallback',
+    'unknown_exception_app_pin_fallback',
+  };
+  final localAuth = pluginRows[localAuthPackage]!;
+  for (final field in {
+    'official_source',
+    'queried_on',
+    'candidate',
+    'decision',
+    'compatibility_reason',
+    'exit_condition',
+    'acceptance_evidence',
+  }) {
+    if (_isBlank(localAuth[field])) {
+      issues.add(
+        'PLUG-04 local_auth is missing biometric evidence field: $field',
+      );
+    }
+  }
+  if (localAuth['official_source']?.toString() !=
+      'https://pub.dev/packages/local_auth') {
+    issues.add('PLUG-04 local_auth must cite the official pub.dev source');
+  }
+  if (!_isProductionStableVersion(localAuth['candidate']?.toString() ?? '') ||
+      localAuth['candidate']?.toString() != localAuthCandidate) {
+    issues.add('PLUG-04 local_auth candidate must be stable $localAuthCandidate');
+  }
+  final localAuthEvidence = _map(localAuth['acceptance_evidence']);
+  for (final field in requiredLocalAuthEvidence) {
+    if (_isBlank(localAuthEvidence[field])) {
+      issues.add(
+        requiredFallbackEvidence.contains(field)
+            ? 'PLUG-04 local_auth is missing app-PIN fallback evidence: $field'
+            : 'PLUG-04 local_auth is missing native evidence: $field',
+      );
+    }
+  }
+
+  final biometricLane = _map(baselineLanes['phase59_biometric']);
+  for (final field in {
+    'decision',
+    'biometric_only',
+    'sensitive_transaction',
+    'persist_across_backgrounding',
+    'app_pin_fallback_required',
+    'device_passcode_accepted',
+    'compatibility_reason',
+    'exit_condition',
+  }) {
+    if (!biometricLane.containsKey(field) || _isBlank(biometricLane[field])) {
+      issues.add(
+        'PLUG-04 biometric app lock is missing secure-option proof: $field',
+      );
+    }
+  }
+  if (biometricLane['biometric_only'] != true ||
+      biometricLane['device_passcode_accepted'] != false) {
+    issues.add('PLUG-04 biometric app lock must remain biometric-only');
+  }
+  if (biometricLane['sensitive_transaction'] != true ||
+      biometricLane['persist_across_backgrounding'] != true ||
+      biometricLane['app_pin_fallback_required'] != true) {
+    issues.add('PLUG-04 biometric app lock must retain secure PIN-fallback policy');
+  }
+
+  final declaredLocalAuth = _declaredDependency(
+    directDependencies[localAuthPackage],
+  );
+  final resolvedLocalAuth =
+      _map(lockedPackages[localAuthPackage])['version']?.toString();
+  switch (localAuth['decision']?.toString()) {
+    case 'hold':
+      if (declaredLocalAuth != localAuthHeldDeclaration) {
+        issues.add(
+          'PLUG-04 local_auth declaration must remain $localAuthHeldDeclaration '
+          '(found $declaredLocalAuth)',
+        );
+      }
+      if (resolvedLocalAuth != localAuthHeldResolution) {
+        issues.add(
+          'PLUG-04 local_auth resolution must remain $localAuthHeldResolution '
+          '(found $resolvedLocalAuth)',
+        );
+      }
+    case 'accepted':
+      for (final field in requiredLocalAuthEvidence) {
+        if (localAuthEvidence[field]?.toString() != 'PASS') {
+          issues.add(
+            'PLUG-04 local_auth accepted decision requires PASS native evidence: $field',
+          );
+        }
+      }
+      if (declaredLocalAuth != '^$localAuthCandidate') {
+        issues.add(
+          'PLUG-04 local_auth accepted declaration must equal candidate '
+          '$localAuthCandidate (found $declaredLocalAuth)',
+        );
+      }
+      if (resolvedLocalAuth != localAuthCandidate) {
+        issues.add(
+          'PLUG-04 local_auth accepted resolution must equal candidate '
+          '$localAuthCandidate (found $resolvedLocalAuth)',
+        );
+      }
+    default:
+      issues.add('PLUG-04 local_auth decision must be exactly hold or accepted');
+  }
+
   const declarations = <String, String>{
     'file_picker': '^11.0.3',
     'share_plus': '^12.0.2',

@@ -28,6 +28,7 @@ successful safety decision, not a silent upgrade failure.
 | Speech | `speech_to_text 7.3.0` | `7.4.0` Stable (the official page also lists `7.5.0-beta.1` as prerelease) | hold — Phase 59 | The 2026-08-09 official pub.dev query confirms the stable candidate, but resolver output cannot prove the adapter, ja/zh/en corpus, caller-controlled network fallback, or native speech lifecycle. | Keep `7.3.0` until adapter/corpus checks and physical-iPhone permission, recognition, cancellation, error, and fallback evidence pass. |
 | Android host | AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, JDK 17 | AGP `9.0.1`, Gradle `9.1` | hold — Phase 61 | Built-in Kotlin/new DSL need a complete app and plugin migration. | Debug/release builds and emulator evidence after the all-or-hold migration. |
 | Notifications/plugins | `flutter_local_notifications 22.2.0`, Firebase Core `4.13.0`, Messaging `16.5.0` | Firebase rows already-current; local notifications `22.3.0` candidate | hold — Phase 59 | Android initializes Firebase for FCM; iOS skips Firebase and keeps the custom APNs bridge. Native plugin changes require complete attributable lifecycle evidence without exposing settings. | PASS automated lifecycle plus supported Android-FCM and custom-iOS-APNs builds for initialization/retry/foreground/opened/tap/cold-start, while auto-init, entitlements, hidden settings, and disclosed cloud fallback remain unchanged. |
+| Biometric app lock | `local_auth 3.0.2` | `3.0.2` Stable | hold — Phase 59 | The official package permits passcode fallback unless `biometricOnly` is true; this app owns its own Argon2id PIN and must never accept the OS device passcode as app-lock authentication. | Keep the exact graph until a safe non-production supported build records redacted Face ID success plus cancel/false, temporary-lockout, biometric-lockout, platform-error, unknown-error, and reachable app-PIN fallback observations. |
 | Local Lucide icon subset | `lucide_icons_flutter 3.1.15+homepocket.1` from `third_party/` | not applicable until the local fork is re-reviewed | hold — Phase 59 | The local package preserves the upstream API with one static font and the 37 used codepoints instead of six unused variable-weight assets. | Phase 59 replaces or refreshes it only after reviewing upstream source/license and every icon reference, with static-subset and release tree-shaken asset checks green. |
 
 The effective Android floor has two corroborating levels: `android/app/build.gradle.kts`
@@ -168,3 +169,31 @@ Lucide path fork has no registry candidate: its official upstream source and
 license, static subset, and used-codepoint contract remain mandatory evidence.
 No candidate is a resolver instruction, and missing JDK, Android, simulator,
 physical-iPhone, or existing-key evidence is always a hold rather than a pass.
+
+## Phase 59 biometric app-lock evidence hold
+
+The official `local_auth` package page and changelog were rechecked on
+2026-08-09. `3.0.2` remains the production-stable candidate and matches the
+selected declaration and lock resolution. The official usage documentation says
+that `authenticate` otherwise permits PIN, pattern, or passcode fallback, and
+requires `biometricOnly: true` to require biometrics. Its 3.0.0 changelog also
+records the direct `authenticate` parameters, `persistAcrossBackgrounding`, and
+structured `LocalAuthException` behavior used by the app boundary.
+
+This project therefore holds the exact `3.0.2` graph, rather than calling it
+accepted: `BiometricService` must forward `biometricOnly`,
+`sensitiveTransaction`, and `persistAcrossBackgrounding` as true; every
+unsupported, unenrolled, cancel/false, temporary-lockout, biometric-lockout,
+`LocalAuthException`, `PlatformException`, and residual exception path must
+leave the app PIN reachable. The machine contract rejects missing official
+source/query/candidate/decision data, missing secure-option proof, any
+passcode-policy mutation, incomplete fallback evidence, a selected declaration
+or lock drift, and an accepted decision without complete PASS native evidence.
+
+Native acceptance is deliberately `UNAVAILABLE` in this lane. No safe
+non-production supported iPhone identity and no Phase-59-attributable Face ID
+success/failure-to-app-PIN observation is available, and Phase 63 wired-iPhone
+UAT is not a substitute. Acceptance requires a redacted supported-build record
+for Face ID success, cancel/false, both lockouts, platform and unknown errors,
+and app-PIN fallback; it must never record a PIN, biometric material, device
+identifier, Keychain item, financial data, or production credential.
