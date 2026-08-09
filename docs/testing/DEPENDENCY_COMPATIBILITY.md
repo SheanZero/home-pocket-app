@@ -104,15 +104,21 @@ upgrades.
 
 ## Phase 59 speech evidence hold
 
-The Phase 59 validator treats the current speech decision as a fail-closed
-hold: its manifest row must retain execution-date `queried_on`, official source,
-stable candidate, decision, compatibility reason, exit condition, and owner
-phase, while the declared and resolved selection both remain exactly `7.3.0`.
-The package page queried on 2026-08-09 identifies `7.4.0` as stable and
-`7.5.0-beta.1` as a prerelease; the latter is ineligible for this production
-lane. The redacted Phase 59 acceptance ledger separates automated adapter and
-corpus evidence from the still-required physical-iPhone evidence rather than
-treating an unavailable device as acceptance.
+The Phase 59 validator makes the speech decision binary and fail closed. Its
+manifest row retains execution-date `queried_on`, official source, a
+production-stable candidate, decision, compatibility reason, exit condition,
+owner phase, and the complete redacted evidence-result matrix. The package page
+queried on 2026-08-09 identifies `7.4.0` as stable and `7.5.0-beta.1` as a
+prerelease; the latter is ineligible for this production lane. A `hold` requires
+both declaration and lock resolution to stay exactly `7.3.0`. An `accepted`
+decision requires PASS for automated proof, supported native build, physical
+iPhone permission, ja/zh/en recognition, cancellation, surfaced error,
+on-device recognition, and both caller-controlled fallback branches, then
+requires declaration and lock resolution to equal the stable candidate. Missing,
+UNAVAILABLE, FAILED, or partial native evidence cannot produce an accepted
+graph. The redacted ledger therefore separates automated adapter/corpus proof
+from physical-iPhone evidence rather than treating a simulator, resolver, or
+unavailable device as acceptance.
 
 ## Phase 59 platform-plugin inventory
 

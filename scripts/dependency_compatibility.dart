@@ -375,8 +375,6 @@ CompatibilityReport validateDependencyCompatibility({
   expectConstraint('package_info_plus', '^9.0.1');
   expectLocked('package_info_plus', '9.0.1');
   expectLocked('win32', '5.15.0');
-  expectConstraint('speech_to_text', '7.3.0');
-  expectLocked('speech_to_text', '7.3.0');
   expectConstraint('flutter_local_notifications', '^22.2.0');
   expectLocked('flutter_local_notifications', '22.2.0');
   _validatePhase59PluginCohorts(
@@ -850,7 +848,13 @@ void _validatePhase59PluginCohorts({
       );
     }
   }
-  if (speech['candidate']?.toString() != '7.4.0') {
+  final candidate = speech['candidate']?.toString() ?? '';
+  if (!_isProductionStableVersion(candidate)) {
+    issues.add(
+      'PLUG-03 speech_to_text candidate must be a production-stable release',
+    );
+  }
+  if (candidate != '7.4.0') {
     issues.add('PLUG-03 speech_to_text candidate must be stable 7.4.0');
   }
   if (speech['owner_phase'] != 59) {
@@ -861,22 +865,65 @@ void _validatePhase59PluginCohorts({
     issues.add('PLUG-03 speech_to_text must cite the official pub.dev source');
   }
 
+  const requiredSpeechAcceptanceResults = <String>{
+    'automated_adapter_corpus',
+    'supported_native_build',
+    'iphone_permission',
+    'iphone_ja_recognition',
+    'iphone_zh_recognition',
+    'iphone_en_recognition',
+    'iphone_cancellation',
+    'iphone_surfaced_error',
+    'iphone_on_device',
+    'iphone_allowed_fallback',
+    'iphone_disallowed_fallback',
+  };
+  final acceptanceEvidence = _map(speech['acceptance_evidence']);
+  for (final field in requiredSpeechAcceptanceResults) {
+    if (_isBlank(acceptanceEvidence[field])) {
+      issues.add(
+        'PLUG-03 speech_to_text is missing required acceptance evidence result: $field',
+      );
+    }
+  }
+
   final declared = _declaredDependency(directDependencies[speechPackage]);
-  if (declared != '7.3.0') {
-    issues.add(
-      'PLUG-03 speech_to_text declaration must remain 7.3.0 (found $declared)',
-    );
-  }
   final resolved = _map(lockedPackages[speechPackage])['version']?.toString();
-  if (resolved != '7.3.0') {
-    issues.add(
-      'PLUG-03 speech_to_text resolution must remain 7.3.0 (found $resolved)',
-    );
-  }
-  if (speech['decision']?.toString() != 'hold') {
-    issues.add(
-      'PLUG-03 speech_to_text must remain hold until physical-iPhone evidence is recorded',
-    );
+  final decision = speech['decision']?.toString();
+  switch (decision) {
+    case 'hold':
+      if (declared != '7.3.0') {
+        issues.add(
+          'PLUG-03 speech_to_text declaration must remain 7.3.0 (found $declared)',
+        );
+      }
+      if (resolved != '7.3.0') {
+        issues.add(
+          'PLUG-03 speech_to_text resolution must remain 7.3.0 (found $resolved)',
+        );
+      }
+    case 'accepted':
+      for (final field in requiredSpeechAcceptanceResults) {
+        if (acceptanceEvidence[field]?.toString() != 'PASS') {
+          issues.add(
+            'PLUG-03 speech_to_text accepted decision requires PASS iPhone evidence: $field',
+          );
+        }
+      }
+      if (declared != candidate) {
+        issues.add(
+          'PLUG-03 speech_to_text accepted declaration must equal candidate $candidate (found $declared)',
+        );
+      }
+      if (resolved != candidate) {
+        issues.add(
+          'PLUG-03 speech_to_text accepted resolution must equal candidate $candidate (found $resolved)',
+        );
+      }
+    default:
+      issues.add(
+        'PLUG-03 speech_to_text decision must be exactly hold or accepted',
+      );
   }
 
   const declarations = <String, String>{

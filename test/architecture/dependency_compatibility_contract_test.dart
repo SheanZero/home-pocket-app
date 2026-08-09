@@ -1242,20 +1242,23 @@ end
       );
     });
 
-    test('rejects accepted speech when one trilingual locale evidence result fails', () {
-      final manifest = speechManifest();
-      final speech = speechRow(manifest);
-      speech['decision'] = 'accepted';
-      final evidence = speech['acceptance_evidence'] as Map<String, dynamic>;
-      evidence['iphone_zh_recognition'] = 'FAILED';
+    test(
+      'rejects accepted speech when one trilingual locale evidence result fails',
+      () {
+        final manifest = speechManifest();
+        final speech = speechRow(manifest);
+        speech['decision'] = 'accepted';
+        final evidence = speech['acceptance_evidence'] as Map<String, dynamic>;
+        evidence['iphone_zh_recognition'] = 'FAILED';
 
-      expect(
-        validate(currentInputs(), baselineJson: jsonEncode(manifest)),
-        contains(
-          'PLUG-03 speech_to_text accepted decision requires PASS iPhone evidence: iphone_zh_recognition',
-        ),
-      );
-    });
+        expect(
+          validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+          contains(
+            'PLUG-03 speech_to_text accepted decision requires PASS iPhone evidence: iphone_zh_recognition',
+          ),
+        );
+      },
+    );
 
     test('rejects accepted speech paired with the held declaration and lock', () {
       final manifest = speechManifest();
