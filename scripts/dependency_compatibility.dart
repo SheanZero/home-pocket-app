@@ -1376,6 +1376,185 @@ void _validatePhase59PluginCohorts({
   }
 }
 
+/// Rejects contradictions between the machine-readable Phase 59 graph and its
+/// readable decision/evidence records. These records are part of the release
+/// gate: they must describe holds honestly rather than turn an unavailable
+/// native prerequisite into an implied acceptance.
+CompatibilityReport validatePhase59EvidenceArtifacts({
+  required String baselineJson,
+  required String compatibilityDocument,
+  required String acceptanceLedger,
+  required String coverageMatrix,
+}) {
+  final issues = <CompatibilityIssue>[];
+  void error(String message) => issues.add(
+    CompatibilityIssue(
+      code: 'PHASE59_ARTIFACT_CONTRADICTION',
+      severity: CompatibilitySeverity.error,
+      message: message,
+    ),
+  );
+
+  final baseline = StableBaselineManifest.parse(baselineJson);
+  for (final diagnostic in baseline.diagnostics) {
+    error(diagnostic);
+  }
+  final dependencies = _map(baseline.data['direct_dependencies']);
+
+  const readableMarkers = <String, String>{
+    'PLUG-02 readable compatibility document must retain the exact atomic file/share graph':
+        '`file_picker 11.0.3`, `package_info_plus 9.0.1`, `share_plus 12.0.2`, and\ntransitive `win32 5.15.0`',
+    'PLUG-03 readable compatibility document must retain speech_to_text candidate 7.4.0':
+        '`speech_to_text 7.4.0`',
+    'PLUG-04 readable compatibility document must retain held notification and storage candidates':
+        '`flutter_secure_storage 11.0.0`, `flutter_local_notifications 22.3.0`, and\nthe stable `speech_to_text 7.4.0`',
+  };
+  for (final entry in readableMarkers.entries) {
+    if (!compatibilityDocument.contains(entry.value)) error(entry.key);
+  }
+
+  const ledgerRows = <String, String>{
+    'file_picker':
+        '| 2026-08-09 | file_picker | 11.0.3 | 11.0.3 Stable | hold |',
+    'share_plus': '| 2026-08-09 | share_plus | 12.0.2 | 13.3.0 Stable | hold |',
+    'package_info_plus':
+        '| 2026-08-09 | package_info_plus | 9.0.1 | 10.2.1 Stable | hold |',
+    'win32': '| 2026-08-09 | win32 | 5.15.0 transitive | 6.4.0 Stable | hold |',
+    'speech_to_text':
+        '| 2026-08-09 | speech_to_text | 7.3.0 declared/resolved | 7.4.0 Stable; 7.5.0-beta.1 ineligible | hold |',
+    'flutter_local_notifications':
+        '| 2026-08-09 | flutter_local_notifications | 22.2.0 | 22.3.0 Stable | hold |',
+    'firebase_core':
+        '| 2026-08-09 | firebase_core / firebase_messaging | 4.13.0 / 16.5.0 | 4.13.0 / 16.5.0 Stable | hold |',
+    'local_auth':
+        '| 2026-08-09 | local_auth / flutter_secure_storage | 3.0.2 / 10.3.1 | 3.0.2 / 11.0.0 Stable | hold |',
+    'image_picker':
+        '| 2026-08-09 | image_picker / path_provider / url_launcher / connectivity_plus | 1.2.3 / 2.1.6 / 6.3.2 / 7.3.1 | same Stable | hold |',
+    'lucide_icons_flutter':
+        '| 2026-08-09 | lucide_icons_flutter path fork | 3.1.15+homepocket.1 static subset | not applicable | hold |',
+  };
+  for (final entry in ledgerRows.entries) {
+    if (!acceptanceLedger.contains(entry.value)) {
+      final requirement = entry.key == 'speech_to_text'
+          ? 'PLUG-03'
+          : const {
+              'file_picker',
+              'share_plus',
+              'package_info_plus',
+              'win32',
+            }.contains(entry.key)
+          ? 'PLUG-02'
+          : 'PLUG-04';
+      final selected = _map(dependencies[entry.key])['resolved']?.toString();
+      error(
+        '$requirement acceptance ledger must retain ${entry.key} selected $selected',
+      );
+    }
+  }
+  if (RegExp(
+    r'UNAVAILABLE\s*(?:—|-)?\s*PASS',
+    caseSensitive: false,
+  ).hasMatch(acceptanceLedger)) {
+    error(
+      'PLUG-01 acceptance ledger must not label unavailable native evidence PASS',
+    );
+  }
+
+  for (final entry in dependencies.entries) {
+    final package = entry.key.toString();
+    final row = _map(entry.value);
+    if (row['owner_phase'] != 59) continue;
+    final decision = row['decision']?.toString();
+    if (decision == 'hold' &&
+        (_isBlank(row['compatibility_reason']) ||
+            _isBlank(row['exit_condition']))) {
+      error('PLUG-01 $package hold must have a reason and exit condition');
+    }
+    if (decision == 'accepted') {
+      final evidence = _map(row['acceptance_evidence']);
+      if (evidence.isEmpty || evidence.values.any((value) => value != 'PASS')) {
+        error(
+          'PLUG-01 $package accepted decision requires complete PASS evidence',
+        );
+      }
+    }
+  }
+
+  const evidenceMarkers = <String, String>{
+    'file_picker': 'PLUG-02 terminal atomic decision',
+    'share_plus': 'PLUG-02 terminal atomic decision',
+    'package_info_plus': 'PLUG-02 terminal atomic decision',
+    'win32': 'PLUG-02 terminal atomic decision',
+    'speech_to_text': '## Speech acceptance evidence',
+    'firebase_core': '## PLUG-04 terminal notification decision',
+    'firebase_messaging': '## PLUG-04 terminal notification decision',
+    'apns': '## PLUG-04 terminal notification decision',
+    'flutter_local_notifications': '## PLUG-04 terminal notification decision',
+    'notifications': '## PLUG-04 terminal notification decision',
+    'local_auth': '## Biometric/PIN and secure-storage evidence',
+    'flutter_secure_storage': '### PLUG-04 secure-storage terminal decision',
+    'app_initializer': '### PLUG-04 secure-storage terminal decision',
+    'image_picker':
+        '| 2026-08-09 | image_picker / path_provider / url_launcher / connectivity_plus |',
+    'path_provider':
+        '| 2026-08-09 | image_picker / path_provider / url_launcher / connectivity_plus |',
+    'url_launcher':
+        '| 2026-08-09 | image_picker / path_provider / url_launcher / connectivity_plus |',
+    'connectivity_plus':
+        '| 2026-08-09 | image_picker / path_provider / url_launcher / connectivity_plus |',
+    'lucide_icons_flutter': '## Lucide source and asset integrity evidence',
+  };
+  final coverageRows = coverageMatrix
+      .split('\n')
+      .where(
+        (line) => line.startsWith('| ') && !line.startsWith('| capability '),
+      );
+  final coverageDecisions = <String, String>{};
+  for (final line in coverageRows) {
+    final columns = line.split('|').map((value) => value.trim()).toList();
+    if (columns.length < 4) continue;
+    final capability = columns[1];
+    final coverageDecision = columns[2];
+    coverageDecisions[capability] = coverageDecision;
+    if (coverageDecision != 'INTEGRATE') continue;
+    final group = capability.split('.').first;
+    final marker = evidenceMarkers[group];
+    if (marker == null || !acceptanceLedger.contains(marker)) {
+      final requirement = group == 'speech_to_text' ? 'PLUG-03' : 'PLUG-01';
+      error('$requirement API coverage must integrate $capability');
+    }
+  }
+  const requiredIntegrations = <String>{
+    'file_picker.custom_hpb_selection',
+    'share_plus.encrypted_backup_file_share',
+    'package_info_plus.application_identity_and_version',
+    'speech_to_text.ja_recognition',
+    'speech_to_text.zh_recognition',
+    'speech_to_text.en_recognition',
+    'firebase_core.android_initialization',
+    'apns.ios_custom_transport',
+    'local_auth.biometric_only_authenticate',
+    'local_auth.app_pin_fallback',
+    'flutter_secure_storage.read',
+    'app_initializer.master_key_before_database',
+    'lucide_icons_flutter.static_font_subset',
+  };
+  for (final capability in requiredIntegrations) {
+    if (coverageDecisions[capability] != 'INTEGRATE') {
+      final requirement = capability.startsWith('speech_to_text')
+          ? 'PLUG-03'
+          : capability.startsWith('file_picker') ||
+                capability.startsWith('share_plus') ||
+                capability.startsWith('package_info_plus')
+          ? 'PLUG-02'
+          : 'PLUG-04';
+      error('$requirement API coverage must integrate $capability');
+    }
+  }
+
+  return CompatibilityReport(issues);
+}
+
 List<String> _listOfStrings(Object? value) => value is List
     ? value.whereType<String>().toList(growable: false)
     : const <String>[];
@@ -1832,9 +2011,20 @@ Future<void> main(List<String> arguments) async {
     trackedInputContents: _trackedInputContents(read),
     mode: mode,
   );
+  final evidenceReport = validatePhase59EvidenceArtifacts(
+    baselineJson: read('docs/testing/STABLE_BASELINE.json'),
+    compatibilityDocument: read('docs/testing/DEPENDENCY_COMPATIBILITY.md'),
+    acceptanceLedger: read(
+      '.planning/phases/59-controlled-platform-plugin-cohorts/59-PLUGIN-ACCEPTANCE.md',
+    ),
+    coverageMatrix: read(
+      '.planning/phases/59-controlled-platform-plugin-cohorts/COVERAGE.md',
+    ),
+  );
   final completeReport = _reportFromMessages([
     ...running.errors,
     ...report.messages,
+    ...evidenceReport.messages,
   ], mode);
   if (!completeReport.isPassing) {
     stderr.writeln(
