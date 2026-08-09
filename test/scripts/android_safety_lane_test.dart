@@ -28,7 +28,7 @@ void main() {
 
     final current = File(lane.evidencePath).readAsStringSync();
     final contaminated = current.replaceFirst(
-      '"source_commit": "NOT_RUN"',
+      RegExp(r'"source_commit": "[^"]+"'),
       '"source_commit": "/Users/alice/private"',
     );
     final findings = lane.validateAndroidSafetyLane(
@@ -52,13 +52,29 @@ void main() {
   });
 
   test('strict evidence cannot pass while native results are NOT_RUN', () {
-    final result = Process.runSync('dart', [
-      'run',
-      'scripts/verify_android_safety_lane.dart',
-      '--mode=verify',
-    ]);
-    expect(result.exitCode, isNonZero);
-    expect('${result.stderr}', contains('candidate result must be observed'));
+    final baseline = File(
+      'docs/testing/STABLE_BASELINE.json',
+    ).readAsStringSync();
+    final current = File(lane.evidencePath).readAsStringSync();
+    final notRun = current
+        .replaceFirst(
+          '"completed_stage": "candidate"',
+          '"completed_stage": "contract"',
+        )
+        .replaceFirst('"candidate": "INCOMPATIBLE"', '"candidate": "NOT_RUN"');
+    final findings = lane.validateAndroidSafetyLane(
+      baselineJson: baseline,
+      settingsGradle: File('android/settings.gradle.kts').readAsStringSync(),
+      gradleProperties: File('android/gradle.properties').readAsStringSync(),
+      gradleWrapper: File(
+        'android/gradle/wrapper/gradle-wrapper.properties',
+      ).readAsStringSync(),
+      appBuildGradle: File('android/app/build.gradle.kts').readAsStringSync(),
+      evidenceMarkdown: notRun,
+      legacyKgpPlugins: lane.inventoryLegacyKgpPlugins(Directory.current),
+      allowNotRun: false,
+    );
+    expect(findings, contains('candidate result must be observed'));
   });
 
   test('text digest is deterministic', () {

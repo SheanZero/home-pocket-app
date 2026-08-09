@@ -70,8 +70,8 @@
       "owner_phase": 61,
       "official_source": "https://developer.android.com/build/releases/agp-9-3-0-release-notes",
       "queried_on": "2026-08-09",
-      "compatibility_reason": "Gradle 9.5.0 is the AGP 9.3 publisher-paired default and is coupled to the built-in Kotlin/new-DSL transaction; upgrading the wrapper independently would leave a partial Android lane.",
-      "exit_condition": "Select Gradle 9.5.0 only with AGP 9.3.1 after the complete app/plugin built-in Kotlin and new-DSL migration, signed AAB/APK proof, and API 36 x86_64 Emulator evidence at minSdk 24."
+      "compatibility_reason": "Gradle 9.5.0 is the AGP 9.3 publisher-paired default, but the disposable candidate configuration under JDK 17 restored Flutter's legacy built-in-Kotlin/new-DSL opt-outs; upgrading the wrapper independently would leave a partial Android lane.",
+      "exit_condition": "Select Gradle 9.5.0 only with AGP 9.3.1 after a reviewed Flutter 3.47+ identity transaction and Phase 59-approved plugin graph complete the built-in-Kotlin/new-DSL migration, signed AAB/APK proof, and API 36 x86_64 Emulator evidence at minSdk 24."
     },
     "agp": {
       "selected_current": "8.11.1",
@@ -80,8 +80,8 @@
       "owner_phase": 61,
       "official_source": "https://developer.android.com/reference/tools/gradle-api",
       "queried_on": "2026-08-09",
-      "compatibility_reason": "AGP 9.3.1 is the execution-date stable candidate, but built-in Kotlin/new DSL affect the locked Flutter app and every resolved plugin; no legacy KGP or temporary Flutter opt-out may remain in a selected graph.",
-      "exit_condition": "Select AGP 9.3.1 only after Flutter and every resolved Android plugin support the complete built-in Kotlin/new-DSL transaction, then prove signed AAB/APK and API 36 x86_64 Emulator gates at minSdk 24."
+      "compatibility_reason": "AGP 9.3.1 is the execution-date stable candidate, but Flutter 3.44.8 is below the official Flutter 3.47 built-in-Kotlin floor and the exact file_picker, package_info_plus, share_plus, and speech_to_text Android modules apply legacy KGP; no legacy KGP or temporary Flutter opt-out may remain in a selected graph.",
+      "exit_condition": "Select AGP 9.3.1 only after a reviewed Flutter 3.47+ identity transaction and Phase 59-approved plugin graph remove every legacy KGP application, then rerun the complete candidate and prove signed AAB/APK and API 36 x86_64 Emulator gates at minSdk 24."
     },
     "android_sdk": {
       "selected_current": "36",
@@ -146,7 +146,7 @@
     "yaml": { "kind": "dev", "declared": "^3.1.0", "resolved": "3.1.3", "candidate": "3.1.3", "decision": "already_current", "owner_phase": 57, "official_source": "https://pub.dev/packages/yaml", "queried_on": "2026-08-05" }
   },
   "lanes": {
-    "phase61_android": { "decision": "hold", "selected": "AGP 8.11.1 + Gradle 8.14 + Kotlin 2.2.20 + JDK 17 + API 36", "candidate": "AGP 9.3.1 + Gradle 9.5.0 + built-in Kotlin/new DSL + JDK 17 + API 36", "queried_on": "2026-08-09", "compatibility_reason": "The candidate is pending a disposable full-graph attempt; the source tree remains at the exact last-green graph until every atomic gate passes.", "exit_condition": "Select only after the disposable candidate, resolved plugin graph, signed AAB/APK, and API 36 x86_64 Emulator gates pass without legacy KGP, temporary flags, or minSdk drift." },
+    "phase61_android": { "decision": "hold", "selected": "AGP 8.11.1 + Gradle 8.14 + Kotlin 2.2.20 + JDK 17 + API 36", "candidate": "AGP 9.3.1 + Gradle 9.5.0 + built-in Kotlin/new DSL + JDK 17 + API 36", "queried_on": "2026-08-09", "compatibility_reason": "The disposable JDK 17 configuration attempt under Flutter 3.44.8 restored both legacy opt-outs, matching the official Flutter 3.47 built-in-Kotlin floor; resolved Android modules for file_picker, package_info_plus, share_plus, and speech_to_text also apply legacy KGP. The exact AGP 8.11.1 / Gradle 8.14 / Kotlin 2.2.20 graph is therefore held atomically.", "exit_condition": "Re-probe only after a reviewed Flutter 3.47+ identity transaction and Phase 59-approved file_picker, package_info_plus, share_plus, and speech_to_text graph remove legacy KGP, then require the complete candidate, signed AAB/APK, and API 36 x86_64 Emulator gates without temporary flags or minSdk drift." },
     "encrypted_storage": { "selected": "Drift 2.34.0 + sqlite3 3.5.1 + SQLCipher Native Assets 4.17.x", "prohibitions": "No sqlcipher_flutter_libs, sqlite3_flutter_libs, separate SQLCipher CocoaPod, system/plain SQLite, or obsolete Podfile sqlite3 linker strip." },
     "platform_floors": { "selected": "iOS 15.0 in Runner, CocoaPods, SwiftPM, and generated plugin package + inherited Android API 24", "generated_package_evidence": "post-generation input required; compile-only and not runtime proof" },
     "architecture": { "selected": "analyzer 12.1.0 + analyzer_plugin 0.14.8 + build 4.0.7 + source_gen 4.2.4 + flutter_riverpod 3.3.2 + riverpod_annotation 4.0.3 + riverpod_generator 4.0.4 + riverpod_lint 3.1.4 + freezed_annotation 3.1.0 + freezed 3.2.6-dev.1 + json_annotation 4.12.0 + json_serializable 6.14.1 + drift 2.34.0 + drift_dev 2.34.0 + build_runner 2.15.1 + import_lint 2.0.0 + dart_code_linter 4.1.9 + owned Riverpod provider-root contract" },

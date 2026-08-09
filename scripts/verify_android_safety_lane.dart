@@ -248,6 +248,26 @@ List<String> validateAndroidSafetyLane({
         'hold lane is missing $field',
       );
     }
+    final reason = '${lane['compatibility_reason'] ?? ''}';
+    _expect(
+      reason.contains('Flutter 3.44.8'),
+      issues,
+      'hold reason must identify the selected Flutter blocker',
+    );
+    for (final plugin in legacyKgpPlugins) {
+      _expect(
+        reason.contains(plugin),
+        issues,
+        'hold reason must identify legacy KGP plugin $plugin',
+      );
+    }
+    final exitCondition = '${lane['exit_condition'] ?? ''}';
+    _expect(
+      exitCondition.contains('Flutter 3.47') &&
+          exitCondition.contains('Phase 59'),
+      issues,
+      'hold exit condition must require Flutter 3.47+ and Phase 59 approval',
+    );
   } else if (decision == 'selected') {
     _expect(
       agp['selected_current'] == candidateAgp,
@@ -283,7 +303,12 @@ List<String> validateAndroidSafetyLane({
   }
 
   final evidence = parseEvidenceMarkdown(evidenceMarkdown, issues);
-  _validateEvidence(evidence, issues, allowNotRun: allowNotRun);
+  _validateEvidence(
+    evidence,
+    issues,
+    allowNotRun: allowNotRun,
+    legacyKgpPlugins: legacyKgpPlugins,
+  );
   return issues;
 }
 
@@ -309,6 +334,7 @@ void _validateEvidence(
   Map<String, Object?> evidence,
   List<String> issues, {
   required bool allowNotRun,
+  required List<String> legacyKgpPlugins,
 }) {
   _expect(
     evidence['schema_version'] == 1,
@@ -378,6 +404,30 @@ void _validateEvidence(
       results['candidate'] == 'INCOMPATIBLE' || results['candidate'] == 'PASS',
       issues,
       'candidate result must be observed',
+    );
+    final blocker = _object(evidence['blocker']);
+    for (final field in [
+      'component',
+      'official_source',
+      'reproduction',
+      'exit_condition',
+    ]) {
+      _expect(
+        '${blocker[field] ?? ''}'.trim().isNotEmpty &&
+            blocker[field] != 'NOT_RUN',
+        issues,
+        'observed candidate blocker is missing $field',
+      );
+    }
+    final inventory = evidence['plugin_legacy_kgp_inventory'];
+    _expect(
+      inventory is List &&
+          inventory
+              .map((item) => '$item')
+              .toSet()
+              .containsAll(legacyKgpPlugins),
+      issues,
+      'candidate evidence must include the complete legacy KGP inventory',
     );
   } else if (!allowNotRun) {
     _expect(false, issues, 'candidate result must be observed');
@@ -1002,8 +1052,7 @@ void _recordCandidateEvidence({
   evidence['source_commit'] = _gitOutput(root, ['rev-parse', 'HEAD']);
   evidence['started_utc'] = started.toIso8601String();
   evidence['completed_utc'] = DateTime.now().toUtc().toIso8601String();
-  evidence['host_os'] =
-      '${Platform.operatingSystem} ${Platform.version.split(' ').first} arm64';
+  evidence['host_os'] = _hostOs();
   evidence['plugin_legacy_kgp_inventory'] = legacyPlugins;
   evidence['candidate_observation'] = diagnostic;
   evidence['candidate_output_sha256'] = sha256Text(configuration.output);
@@ -1046,6 +1095,18 @@ String _gitOutput(Directory root, List<String> arguments) {
     throw StateError('git ${arguments.join(' ')} failed');
   }
   return '${result.stdout}'.trim();
+}
+
+String _hostOs() {
+  final version = Process.runSync('sw_vers', const ['-productVersion']);
+  final architecture = Process.runSync('uname', const ['-m']);
+  final versionValue = version.exitCode == 0
+      ? '${version.stdout}'.trim()
+      : 'unknown';
+  final architectureValue = architecture.exitCode == 0
+      ? '${architecture.stdout}'.trim()
+      : 'unknown';
+  return 'macOS $versionValue $architectureValue';
 }
 
 String sha256Text(String value) =>

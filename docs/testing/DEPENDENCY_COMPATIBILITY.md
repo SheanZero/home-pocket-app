@@ -26,7 +26,7 @@ successful safety decision, not a silent upgrade failure.
 | Analyzer/codegen | analyzer `12.1.0`, analyzer_plugin `0.14.8`, build `4.0.7`, source_gen `4.2.4`, Riverpod `3.3.2`/`4.0.3`/`4.0.4`/`3.1.4`, Freezed `3.1.0`/`3.2.6-dev.1`, JSON `4.12.0`/`6.14.1`, Drift `2.34.0`, build_runner `2.15.1`, import_lint `2.0.0`, dart_code_linter `4.1.9` | analyzer-13-compatible cohort | hold | `import_lint 2.0.0` requires analyzer `^12.1.0`; current newer Riverpod/Drift generator lines require analyzer 13. | All four analyzer/import-boundary exit conditions below must pass in one no-override transaction. |
 | File/share/metadata | `file_picker 11.0.3`, `share_plus 12.0.2`, `package_info_plus 9.0.1`, `win32 5.15.0` | stable compatible cohort | hold — Phase 59 | New plus-plugin lines and file-picker behavior must be verified as one native cohort. | Upgrade the cohort together and preserve single-file backup import and platform sharing behavior. |
 | Speech | `speech_to_text 7.3.0` | `7.4.0` Stable (the official page also lists `7.5.0-beta.1` as prerelease) | hold — Phase 59 | The 2026-08-09 official pub.dev query confirms the stable candidate, but resolver output cannot prove the adapter, ja/zh/en corpus, caller-controlled network fallback, or native speech lifecycle. | Keep `7.3.0` until adapter/corpus checks and physical-iPhone permission, recognition, cancellation, error, and fallback evidence pass. |
-| Android host | AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, JDK 17 | AGP `9.0.1`, Gradle `9.1` | hold — Phase 61 | Built-in Kotlin/new DSL need a complete app and plugin migration. | Debug/release builds and emulator evidence after the all-or-hold migration. |
+| Android host | AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, JDK 17, API 36 | AGP `9.3.1`, Gradle `9.5.0`, built-in Kotlin/new DSL | hold — Phase 61 | The disposable JDK 17 attempt under Flutter `3.44.8` restored both legacy opt-outs; Flutter requires `3.47+`, and `file_picker`, `package_info_plus`, `share_plus`, and `speech_to_text` still apply legacy KGP. | Complete a reviewed Flutter `3.47+` identity transaction and Phase 59-approved plugin graph, then rerun the full candidate, signed AAB/APK, and API 36 x86_64 Emulator gates at minSdk 24. |
 | Notifications/plugins | absent from the MVP graph | separately planned future feature | removed — Phase 60 | The owner removed the dormant Firebase/APNs/local-notification stack instead of retaining an unresolved hidden channel. | Add no notification package, native registration, permission prompt, token registration, or local notification until a future dedicated dependency/privacy/lifecycle/device-evidence transaction is approved. |
 | Biometric app lock | `local_auth 3.0.2` | `3.0.2` Stable | hold — Phase 59 | The official package permits passcode fallback unless `biometricOnly` is true; this app owns its own Argon2id PIN and must never accept the OS device passcode as app-lock authentication. | Keep the exact graph until a safe non-production supported build records redacted Face ID success plus cancel/false, temporary-lockout, biometric-lockout, platform-error, unknown-error, and reachable app-PIN fallback observations. |
 | Local Lucide icon subset | `lucide_icons_flutter 3.1.15+homepocket.1` from `third_party/` | not applicable until the local fork is re-reviewed | hold — Phase 59 | The local package preserves the upstream API with one static font and the 37 used codepoints instead of six unused variable-weight assets. | Phase 59 replaces or refreshes it only after reviewing upstream source/license and every icon reference, with static-subset and release tree-shaken asset checks green. |
@@ -40,6 +40,31 @@ generated package is inspected only after supported regeneration; a missing
 manifest is labelled compile-only and is neither generated-floor proof nor
 runtime encryption evidence. Baseline mode fails on any identity mismatch or
 lower supplied floor.
+
+## Phase 61 Android candidate decision
+
+On 2026-08-09, the current official production-stable candidate was rechecked
+as AGP `9.3.1` with its AGP 9.3 companion Gradle `9.5.0`, JDK 17, and API 36.
+The candidate transaction was applied only to a unique `git archive` workspace:
+the app KGP declaration/application and `android.kotlinOptions` were removed,
+the built-in Kotlin compiler DSL was added, both Flutter opt-outs were removed,
+and the wrapper was moved to Gradle `9.5.0` together.
+
+Under verified Temurin JDK 17, locked dependency retrieval and
+`flutter build apk --debug --config-only` both exited zero, but Flutter `3.44.8`
+restored `android.builtInKotlin=false` and `android.newDsl=false`. This observed
+configuration result agrees with Flutter's official `3.47+` floor. The resolved
+Android modules for `file_picker`, `package_info_plus`, `share_plus`, and
+`speech_to_text` independently remain legacy-KGP consumers. The source Android,
+Pub, and plugin-build digests were unchanged and the disposable directory was
+removed.
+
+The terminal decision is therefore the exact hold graph: AGP `8.11.1`, Gradle
+`8.14`, Kotlin `2.2.20`, JDK 17, API 36, and minSdk 24, with both opt-outs
+retained. This is not a mixed or compatibility-flagged AGP 9 selection. The
+hold exits only through a reviewed Flutter `3.47+` identity transaction plus a
+Phase 59-approved plugin graph without legacy KGP, followed by the complete
+candidate, signed-package, and x86_64 Emulator gates.
 
 ## Analyzer plugin lane
 

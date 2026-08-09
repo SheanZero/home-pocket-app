@@ -121,4 +121,32 @@ void main() {
       contains('compile result must be PASS at compile stage'),
     );
   });
+
+  test('observed hold names every blocker and a non-circular exit gate', () {
+    final current = inputs();
+    final baseline = jsonDecode(current['baseline']!) as Map<String, dynamic>;
+    final lanePolicy =
+        (baseline['lanes'] as Map<String, dynamic>)['phase61_android']
+            as Map<String, dynamic>;
+    final reason = lanePolicy['compatibility_reason'] as String;
+    final exitCondition = lanePolicy['exit_condition'] as String;
+
+    expect(reason, contains('Flutter 3.44.8'));
+    for (final plugin in <String>[
+      'file_picker',
+      'package_info_plus',
+      'share_plus',
+      'speech_to_text',
+    ]) {
+      expect(reason, contains(plugin));
+    }
+    expect(exitCondition, contains('Flutter 3.47'));
+    expect(exitCondition, contains('Phase 59'));
+    expect(
+      current['evidence'],
+      contains(
+        'Flutter configuration restored the legacy built-in-Kotlin/new-DSL opt-outs.',
+      ),
+    );
+  });
 }
