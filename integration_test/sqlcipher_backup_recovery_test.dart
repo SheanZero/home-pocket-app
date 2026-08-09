@@ -121,7 +121,11 @@ void main() {
 
         expect(result.isError, isTrue, reason: fault.name);
         expect(session.importCalls, lessThanOrEqualTo(1), reason: fault.name);
-        expect(session.resumeCalls, greaterThanOrEqualTo(1), reason: fault.name);
+        expect(
+          session.resumeCalls,
+          greaterThanOrEqualTo(1),
+          reason: fault.name,
+        );
         await sandbox.expectSnapshotUnchanged(
           before,
           originalBackup: originalBackup,

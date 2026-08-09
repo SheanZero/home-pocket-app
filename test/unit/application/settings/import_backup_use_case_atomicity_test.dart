@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/settings/export_backup_use_case.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
@@ -166,8 +164,7 @@ class _CommitFailingUnitOfWork implements UnitOfWork {
   }
 }
 
-/// Encrypts [backupData] into a valid `.hpb` file (same binary format the
-/// export use case produces: salt(16) + nonce(12) + ciphertext + mac(16)).
+/// Encrypts [backupData] into the current HPB v2 `.hpb` format.
 Future<File> _createEncryptedBackup({
   required String password,
   required BackupData backupData,
@@ -175,35 +172,10 @@ Future<File> _createEncryptedBackup({
 }) async {
   final jsonString = jsonEncode(backupData.toJson());
   final gzipBytes = gzip.encode(utf8.encode(jsonString));
-
-  final pbkdf2 = Pbkdf2(
-    macAlgorithm: Hmac.sha256(),
-    iterations: 100000,
-    bits: 256,
+  final result = await BackupCryptoService().encrypt(
+    Uint8List.fromList(gzipBytes),
+    password,
   );
-
-  final random = Random.secure();
-  final salt = List.generate(16, (_) => random.nextInt(256));
-  final nonce = List.generate(12, (_) => random.nextInt(256));
-
-  final secretKey = await pbkdf2.deriveKey(
-    secretKey: SecretKey(utf8.encode(password)),
-    nonce: salt,
-  );
-
-  final algorithm = AesGcm.with256bits();
-  final secretBox = await algorithm.encrypt(
-    gzipBytes,
-    secretKey: secretKey,
-    nonce: nonce,
-  );
-
-  final result = <int>[
-    ...salt,
-    ...nonce,
-    ...secretBox.cipherText,
-    ...secretBox.mac.bytes,
-  ];
 
   final file = File(filePath);
   await file.writeAsBytes(Uint8List.fromList(result));

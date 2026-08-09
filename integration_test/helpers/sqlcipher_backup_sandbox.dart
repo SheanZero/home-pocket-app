@@ -25,6 +25,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction_photo_
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
+import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
@@ -74,6 +75,16 @@ enum BackupHostileInput {
   invalidTransaction,
   encryptedSizeLimit,
   decompressedSizeLimit,
+}
+
+/// Faults are injected only into constructor callbacks that the production
+/// restore/import use cases already expose.
+enum BackupRestoreFault {
+  syncSuspend,
+  transactionCommit,
+  settingsApply,
+  syncCleanup,
+  syncResume,
 }
 
 /// Test-only composition of the production backup use cases below one unique
@@ -456,6 +467,29 @@ class SqlCipherBackupSandbox {
     );
   }
 
+  BackupRestoreFaultSession createFaultSession(BackupRestoreFault fault) {
+    if (fault == BackupRestoreFault.settingsApply) {
+      _settings.failNextUpdateAfterPersist();
+    }
+    _syncState.inject(fault);
+    final import = _composeImport(
+      unitOfWork: fault == BackupRestoreFault.transactionCommit
+          ? _CommitFaultingUnitOfWork(_database)
+          : UnitOfWorkImpl(db: _database),
+    );
+    var imports = 0;
+    final restore = RestoreBackupUseCase(
+      importBackup: ({required backupFile, required password}) async {
+        imports++;
+        return import.execute(backupFile: backupFile, password: password);
+      },
+      suspendSync: _syncState.suspend,
+      resetFamilySyncState: _syncState.reset,
+      resumeSync: _syncState.resume,
+    );
+    return BackupRestoreFaultSession._(restore, _syncState, () => imports);
+  }
+
   Future<void> expectSnapshotUnchanged(
     SqlCipherBackupSnapshot before, {
     required File originalBackup,
@@ -559,14 +593,17 @@ class SqlCipherBackupSandbox {
     return _digest(backup);
   }
 
-  ImportBackupUseCase _composeImport({BackupImportLimits? limits}) {
+  ImportBackupUseCase _composeImport({
+    BackupImportLimits? limits,
+    UnitOfWork? unitOfWork,
+  }) {
     return ImportBackupUseCase(
       transactionRepo: _transactions,
       categoryRepo: _categories,
       bookRepo: _books,
       settingsRepo: _settings,
       exchangeRateRepo: _exchangeRates,
-      unitOfWork: UnitOfWorkImpl(db: _database),
+      unitOfWork: unitOfWork ?? UnitOfWorkImpl(db: _database),
       backupCrypto: _backupCrypto,
       limits: limits ?? const BackupImportLimits(),
     );
@@ -684,11 +721,35 @@ class SqlCipherBackupSnapshot {
   final String? backupDigest;
 }
 
+class BackupRestoreFaultSession {
+  BackupRestoreFaultSession._(
+    this._restore,
+    this._syncState,
+    this._importCalls,
+  );
+
+  final RestoreBackupUseCase _restore;
+  final _SandboxSyncState _syncState;
+  final int Function() _importCalls;
+
+  int get importCalls => _importCalls();
+  int get resumeCalls => _syncState.resumeCalls;
+  bool get isSyncSuspended => _syncState.isSuspended;
+
+  Future<Result<void>> restore(File backup) => _restore.execute(
+    backupFile: backup,
+    password: _SyntheticSecureState.backupPassword,
+  );
+}
+
 class _SandboxSettingsRepository implements SettingsRepository {
   _SandboxSettingsRepository(this._file);
 
   final File _file;
   AppSettings _value = const AppSettings();
+  var _failNextUpdateAfterPersist = false;
+
+  void failNextUpdateAfterPersist() => _failNextUpdateAfterPersist = true;
 
   Future<void> initialize() async {
     await _file.parent.create(recursive: true);
@@ -704,6 +765,10 @@ class _SandboxSettingsRepository implements SettingsRepository {
   Future<void> updateSettings(AppSettings settings) async {
     _value = settings;
     await _persist();
+    if (_failNextUpdateAfterPersist) {
+      _failNextUpdateAfterPersist = false;
+      throw StateError('Injected settings apply failure.');
+    }
   }
 
   @override
@@ -779,11 +844,31 @@ class _SandboxSyncState {
   var inMemoryCleared = false;
   var familyStateReset = false;
   var _revision = 0;
+  BackupRestoreFault? _fault;
+  var resumeCalls = 0;
+
+  void inject(BackupRestoreFault fault) => _fault = fault;
 
   void seed() => _revision = 1;
-  Future<void> suspend() async => isSuspended = true;
-  Future<void> resume() async => isSuspended = false;
+  Future<void> suspend() async {
+    isSuspended = true;
+    if (_takeFault(BackupRestoreFault.syncSuspend)) {
+      throw StateError('Injected sync suspension failure.');
+    }
+  }
+
+  Future<void> resume() async {
+    resumeCalls++;
+    if (_takeFault(BackupRestoreFault.syncResume)) {
+      throw StateError('Injected sync resume failure.');
+    }
+    isSuspended = false;
+  }
+
   Future<void> reset() async {
+    if (_takeFault(BackupRestoreFault.syncCleanup)) {
+      throw StateError('Injected sync cleanup failure.');
+    }
     familyStateReset = true;
     _revision = 0;
   }
@@ -791,6 +876,26 @@ class _SandboxSyncState {
   Future<void> clearInMemory() async => inMemoryCleared = true;
   String get digest =>
       '$_revision:$isSuspended:$inMemoryCleared:$familyStateReset';
+
+  bool _takeFault(BackupRestoreFault fault) {
+    if (_fault != fault) return false;
+    _fault = null;
+    return true;
+  }
+}
+
+class _CommitFaultingUnitOfWork implements UnitOfWork {
+  _CommitFaultingUnitOfWork(this._database);
+
+  final AppDatabase _database;
+
+  @override
+  Future<T> run<T>(Future<T> Function() action) {
+    return _database.transaction<T>(() async {
+      await action();
+      throw StateError('Injected database transaction failure.');
+    });
+  }
 }
 
 Future<String> _scalar(AppDatabase database, String statement) async {
