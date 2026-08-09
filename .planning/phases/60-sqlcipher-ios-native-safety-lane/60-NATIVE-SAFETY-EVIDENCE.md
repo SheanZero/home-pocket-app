@@ -1,9 +1,9 @@
 ---
 phase: 60
-plan: "09"
-status: compile_pass_runtime_pending
+plan: "10"
+status: pass_ready_for_verification
 captured: 2026-08-09
-source_commit: 570064236eead5e9bdbd8567f8c866bf9d48aa99
+source_commit: ef66b5a07be6769a2e785f979a7488346aa60e36
 ---
 
 # Phase 60 Native Safety Evidence
@@ -14,8 +14,11 @@ This record distinguishes successful tests, generic iOS compilation, and booted-
 
 | Item | Value |
 | --- | --- |
-| Source commit | `570064236eead5e9bdbd8567f8c866bf9d48aa99` |
+| Compile source commit | `570064236eead5e9bdbd8567f8c866bf9d48aa99` |
 | Compile run start (UTC) | `2026-08-09T13:38:00.022171Z` |
+| Runtime source commit | `ef66b5a07be6769a2e785f979a7488346aa60e36` |
+| Runtime run start (UTC) | `2026-08-09T13:49:28.742113Z` |
+| Runtime destination | Booted iPhone 17 Pro Simulator, iOS 26.2; identifier redacted |
 | `pubspec.lock` SHA-256 | `a2a80891ca4596ab5e9eb1fe6b51a6a86088fa029fe1a65bbfbf55a7f1659ecd` |
 | `ios/Podfile.lock` SHA-256 | `5623ecf1f98ff2e8fd975aabf80a65bfbf46fc26a12b603c5563cf7593fa1b95` |
 | Flutter / Dart / engine | Flutter 3.44.8 stable / Dart 3.12.2 / `0cd610717bde95fd88343c64f81c11ba4e5c0010` |
@@ -36,8 +39,10 @@ The native commands started with a clean source state (empty-status SHA-256 `e3b
 | Static analysis | `flutter analyze` | PASS (0 issues) | Full repository analyzer. |
 | Full serial suite | `flutter test --concurrency=1 -r expanded` | PASS (4,592; 12 skipped) | Completed successfully in serial mode. |
 | SEC-02 deterministic compile lane | `dart run scripts/verify_ios_native_safety_lane.dart --lane=compile` | PASS | Clean retained-lock and disposable from-zero resolution matched; both supported generations produced iOS 15+; all six unsigned Xcode matrix commands exited 0. Source status was clean and preserved. |
-| Current-schema lifecycle lane | `dart run scripts/verify_ios_native_safety_lane.dart --lane=full --runtime-test=integration_test/sqlcipher_native_assets_lifecycle_test.dart --prepared-clean --before-status-sha256=<redacted clean digest>` | BLOCKED | Supported Flutter iOS package generation reached an Xcode linker failure for undefined Flutter symbols before any attributable lifecycle runtime test could launch. No compile-only or runtime PASS is claimed. |
+| Historical current-schema lifecycle lane (60-07) | `dart run scripts/verify_ios_native_safety_lane.dart --lane=full --runtime-test=integration_test/sqlcipher_native_assets_lifecycle_test.dart --prepared-clean --before-status-sha256=<redacted clean digest>` | BLOCKED | Historical pre-repair evidence only; undefined Flutter symbols prevented launch at that source state. |
+| Current-schema lifecycle lane (60-10) | `dart run scripts/verify_ios_native_safety_lane.dart --lane=runtime --runtime-test=integration_test/sqlcipher_native_assets_lifecycle_test.dart` | `RUNTIME_PASS` | Booted iPhone 17 Pro / iOS 26.2 Simulator, Debug integration runtime, exit 0. Production `AppDatabase` verified SQLCipher 4.17.x, `cipher_status == 1`, readable schema, user version 36, integrity, encrypted header, sentinel persistence, explicit close, and same-key cold reopen. |
 | Current HPB-v2 backup lane | `dart run scripts/verify_ios_native_safety_lane.dart --lane=runtime --runtime-test=integration_test/sqlcipher_backup_recovery_test.dart --prepared-clean --before-status-sha256=<redacted clean digest>` | RUNTIME_PASS | Booted Simulator, Debug, exit 0. The structured runner record redacts the Simulator identifier. Profile/Release remain `NOT_RUN` because Flutter integration tests do not execute in those modes. |
+| Plan 60-10 focused regressions | Eight architecture, startup, encrypted-database, backup-crypto, import-atomicity, and restore test files named in `60-10-PLAN.md` | PASS (79) | Preserves SEC-01/02/05/06 contracts and rollback/tamper behavior after the direct runtime pass. |
 | Whitespace integrity | `git diff --check` | Pending final documentation edits | Run again immediately before the documentation commit. |
 
 ## Native Runner Record Classification
@@ -49,7 +54,7 @@ The native commands started with a clean source state (empty-status SHA-256 `e3b
 | Generated Swift package floor | `COMPILE_ONLY` iOS 15+ | Source-controlled floor inspection; not runtime. |
 | Debug generic Simulator tracer | `COMPILE_ONLY` PASS | Generic destination compilation, unsigned. |
 | Booted Simulator HPB-v2 recovery | `RUNTIME_PASS` | Attributable current-v2 integration execution. |
-| Current-schema lifecycle | `BLOCKED` | Xcode Flutter-symbol linker failure occurred before launch. |
+| Historical current-schema lifecycle (60-07) | `BLOCKED` | Superseded evidence from before the clean linkage repair; retained for audit history. |
 | Retained-lock graph | `COMPILE_ONLY` PASS | Drift 2.34.0 / sqlite3 3.5.1 / SQLCipher Native Assets 4.17.x. |
 | Disposable from-zero graph | `COMPILE_ONLY` PASS | Same selected graph and same normalized graph digest as retained locks. |
 | Generated package floors | `COMPILE_ONLY` iOS 15+ | Retained and disposable outputs were generated through Flutter and inspected, never edited. |
@@ -59,19 +64,21 @@ The native commands started with a clean source state (empty-status SHA-256 `e3b
 | `matrix-device-debug` | `COMPILE_ONLY` PASS | Runner Debug, generic device, unsigned. |
 | `matrix-device-profile` | `COMPILE_ONLY` PASS | Runner Profile, generic device, unsigned. |
 | `matrix-device-release` | `COMPILE_ONLY` PASS | Runner Release, generic device, unsigned. |
+| Current-schema lifecycle (60-10) | `RUNTIME_PASS` | Allowlisted production-database lifecycle executed on a booted iPhone 17 Pro / iOS 26.2 Simulator; exit 0 and identifier redacted. |
+| Current-schema Profile/Release runtime | `NOT_RUN` | Flutter's integration-test runner does not execute these modes; no unsupported runtime claim is made. |
 
 ## Requirement and Mitigation Outcome
 
 | Requirement / mitigation | Outcome |
 | --- | --- |
-| SEC-01 / T-60-C1 | PASS for source/contract fail-closed graph protection; deterministic probe remains flagged unverified. |
+| SEC-01 / T-60-C1 | PASS: source/contract fail-closed graph protection and deterministic retained/from-zero probe are verified. |
 | SEC-02 / T-60-C2 | PASS: exact retained/from-zero graph convergence, iOS 15 generated floors, and all six unsigned compile-only matrix entries passed. T-60-C7/T-60-C8 evidence separation and redaction pass. |
-| SEC-03 / T-60-C3 | PENDING plan 60-10: the current-schema production-executor lifecycle still requires an attributable booted-Simulator rerun. |
+| SEC-03 / T-60-C3 | PASS: the allowlisted production `AppDatabase` lifecycle emitted `RUNTIME_PASS` after encrypted open, write, close, and same-key cold reopen on a booted supported Simulator. |
 | SEC-04 | N.A. by owner decision: no released population; no historical lane was run. |
 | SEC-05 / T-60-C4 through T-60-C6 | PASS: current HPB-v2 recovery runtime plus targeted atomicity/crypto tests. |
 | SEC-06 / T-60-C9 | PASS: native readiness is injected and awaited before container/key/database work; schema remains 36. |
 
-The plan 60-09 command directly resolves the SEC-02 deterministic compile probe. SEC-03 remains separate and unresolved; no result in this compile lane is promoted to runtime acceptance.
+Plan 60-09 directly resolves the SEC-02 deterministic compile probe. Plan 60-10 independently resolves SEC-03 with a booted-Simulator `RUNTIME_PASS`; no compile or host result is used as its substitute.
 
 ## Safety and Redaction Receipt
 
@@ -81,6 +88,6 @@ The plan 60-09 command directly resolves the SEC-02 deterministic compile probe.
 - Commands used only source-controlled current-schema/current-HPB-v2 tests and an injected synthetic Simulator sandbox.
 - This document omits Simulator IDs, absolute paths, credentials, keys, passwords, financial values, notes, merchants, recovery/sync payloads, and synthetic data.
 
-## Remaining Runtime Gate
+## Verification Handoff
 
-Plan 60-08 restored clean native linkage and plan 60-09 closes SEC-02 compile convergence. Phase 60 still requires plan 60-10 to run the current-schema lifecycle on a booted Simulator and record `RUNTIME_PASS`. The compile lane had `runtime_test: null`, emitted no `RUNTIME_PASS`, did not boot or launch an app, and cannot satisfy SEC-03.
+Plan 60-08 restored clean native linkage, plan 60-09 closed SEC-02 compile convergence, and plan 60-10 recorded the independent SEC-03 runtime pass. The compile lane still has `runtime_test: null` and no runtime record; the runtime lane has one Debug `RUNTIME_PASS` and no compile-matrix claim. Phase 60 now requests a fresh independent verification pass rather than self-declaring phase verification complete.
