@@ -23,10 +23,15 @@ class _AllowPushAcceptancePolicy implements PushAcceptancePolicy {
 }
 
 class FakePushMessagingClient implements PushMessagingClient {
-  FakePushMessagingClient({this.initialToken, this.initialMessage});
+  FakePushMessagingClient({
+    this.initialToken,
+    this.initialMessage,
+    this.failInitialMessageOnce = false,
+  });
 
   final String? initialToken;
   final Map<String, dynamic>? initialMessage;
+  bool failInitialMessageOnce;
   bool permissionRequested = false;
 
   final _tokenRefreshController = StreamController<String>.broadcast();
@@ -38,7 +43,13 @@ class FakePushMessagingClient implements PushMessagingClient {
   Future<String?> getToken() async => initialToken;
 
   @override
-  Future<Map<String, dynamic>?> getInitialMessage() async => initialMessage;
+  Future<Map<String, dynamic>?> getInitialMessage() async {
+    if (failInitialMessageOnce) {
+      failInitialMessageOnce = false;
+      throw StateError('initial message temporarily unavailable');
+    }
+    return initialMessage;
+  }
 
   @override
   Stream<Map<String, dynamic>> get onForegroundMessage =>
@@ -526,6 +537,35 @@ void main() {
 
       expect(bootstrapAttempts, 2);
       expect(syncAvailableCalls, 1);
+    },
+  );
+
+  test(
+    'cold-start failure clears the message pipeline so retry handles it once',
+    () async {
+      messagingClient = FakePushMessagingClient(
+        initialToken: 'token-1',
+        initialMessage: {'type': 'sync_available'},
+        failInitialMessageOnce: true,
+      );
+      service = PushNotificationService(
+        apiClient: apiClient,
+        acceptancePolicy: const _AllowPushAcceptancePolicy(),
+        messagingClient: messagingClient,
+        localNotificationClient: localNotificationClient,
+        firebaseInitializer: () async {},
+        localeProvider: () => const Locale('en'),
+      );
+      service.registerHandlers(
+        onSyncAvailable: (_) async => syncAvailableCalls++,
+      );
+
+      expect(await service.initialize(), isNull);
+      expect(await service.initialize(), 'token-1');
+      expect(syncAvailableCalls, 1);
+
+      await messagingClient.emitForegroundMessage({'type': 'sync_available'});
+      expect(syncAvailableCalls, 2);
     },
   );
 
