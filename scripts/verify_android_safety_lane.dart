@@ -22,6 +22,12 @@ const requiredAndroidApi = 36;
 const requiredAndroidAbi = 'x86_64';
 const requiredAndroidSystemImage =
     'system-images;android-36;google_apis;x86_64';
+const officialX86EmulatorBuild = '15917651';
+const officialX86EmulatorArchiveSha1 =
+    '7df8b0acbe915217dcbb576222bddfcc23e81230';
+const officialX86EmulatorArchiveUrl =
+    'https://dl.google.com/android/repository/'
+    'emulator-darwin_x64-15917651.zip';
 const candidateQueriedOn = '2026-08-09';
 const physicalDeviceDisclaimer =
     'Android physical-device validation was not performed or claimed.';
@@ -808,6 +814,7 @@ class _PreparedEmulator {
     required this.ready,
     required this.emulatorVersion,
     required this.softwareTranslation,
+    required this.x86HostBinary,
   });
 
   final String avdName;
@@ -816,6 +823,7 @@ class _PreparedEmulator {
   final DateTime ready;
   final String emulatorVersion;
   final bool softwareTranslation;
+  final bool x86HostBinary;
 }
 
 class EmulatorIdentityExpectation {
@@ -910,11 +918,33 @@ List<String> validateEmulatorPreparationRecord(
       preparation['serial_redacted'] == '<emulator-redacted>',
       'successful emulator preparation must redact the serial',
     );
+    if (preparation['host_architecture'] == 'arm64') {
+      final hostBinary = _object(preparation['emulator_host_binary']);
+      require(
+        hostBinary['architecture'] == 'x86_64' &&
+            hostBinary['archive_sha1'] == officialX86EmulatorArchiveSha1,
+        'Apple-silicon x86_64 preparation must prove the official Rosetta host binary',
+      );
+    }
   } else if (result == 'UNAVAILABLE') {
     require(
       '${preparation['failure'] ?? ''}'.trim().isNotEmpty,
       'unavailable emulator preparation must record a failure',
     );
+  }
+  return issues;
+}
+
+List<String> validateX86EmulatorArchiveIdentity({
+  required String fileOutput,
+  required String actualSha1,
+}) {
+  final issues = <String>[];
+  if (!fileOutput.toLowerCase().contains('x86_64')) {
+    issues.add('Rosetta Emulator executable must be x86_64');
+  }
+  if (actualSha1.toLowerCase() != officialX86EmulatorArchiveSha1) {
+    issues.add('Rosetta Emulator archive checksum does not match Google');
   }
   return issues;
 }
@@ -1008,6 +1038,14 @@ void _recordEmulatorPreparation({
         : 'native host execution',
     'emulator_version':
         prepared?.emulatorVersion ?? _installedEmulatorVersion(),
+    'emulator_host_binary': prepared?.x86HostBinary == true
+        ? {
+            'architecture': 'x86_64',
+            'build': officialX86EmulatorBuild,
+            'archive_sha1': officialX86EmulatorArchiveSha1,
+            'official_url': officialX86EmulatorArchiveUrl,
+          }
+        : {'architecture': hostArchitecture},
     'serial_redacted': prepared == null ? 'NOT_RUN' : '<emulator-redacted>',
     'boot_started_utc': prepared?.started.toIso8601String() ?? 'NOT_RUN',
     'boot_ready_utc': prepared?.ready.toIso8601String() ?? 'NOT_RUN',
@@ -1031,9 +1069,15 @@ Future<void> _withPreparedEmulator(
   if (jdkHome == null || androidSdk == null) {
     throw StateError('verified JDK 17 or Android SDK is unavailable');
   }
+  final hostArchitecture = _hostArchitectureSync();
   final sdkManager = '$androidSdk/cmdline-tools/latest/bin/sdkmanager';
   final avdManager = '$androidSdk/cmdline-tools/latest/bin/avdmanager';
-  final emulator = '$androidSdk/emulator/emulator';
+  final nativeEmulator = '$androidSdk/emulator/emulator';
+  final emulator = await _resolveEmulatorExecutable(
+    nativeEmulator: nativeEmulator,
+    hostArchitecture: hostArchitecture,
+  );
+  final x86HostBinary = emulator != nativeEmulator;
   final adb = '$androidSdk/platform-tools/adb';
   for (final executable in [sdkManager, avdManager, emulator, adb]) {
     if (!File(executable).existsSync()) {
@@ -1082,10 +1126,6 @@ Future<void> _withPreparedEmulator(
     );
   }
 
-  final architecture = await Process.run('uname', const ['-m']);
-  final hostArchitecture = architecture.exitCode == 0
-      ? '${architecture.stdout}'.trim()
-      : 'unknown';
   final avdName =
       'phase61_api36_x86_${DateTime.now().toUtc().microsecondsSinceEpoch}';
   final port = await _availableEmulatorPort();
@@ -1223,6 +1263,7 @@ Future<void> _withPreparedEmulator(
         ready: DateTime.now().toUtc(),
         emulatorVersion: _firstNonEmptyLine(version.output),
         softwareTranslation: hostArchitecture == 'arm64',
+        x86HostBinary: x86HostBinary,
       ),
     );
   } finally {
@@ -1250,6 +1291,40 @@ Future<void> _withPreparedEmulator(
       durableCommand: 'avdmanager delete avd --name <runner-owned>',
     );
   }
+}
+
+Future<String> _resolveEmulatorExecutable({
+  required String nativeEmulator,
+  required String hostArchitecture,
+}) async {
+  if (hostArchitecture != 'arm64') return nativeEmulator;
+  final overrideHome = Platform.environment['PHASE61_X86_EMULATOR_HOME'];
+  final overrideArchive = Platform.environment['PHASE61_X86_EMULATOR_ARCHIVE'];
+  if (overrideHome == null && overrideArchive == null) return nativeEmulator;
+  if (overrideHome == null || overrideArchive == null) {
+    throw StateError(
+      'both PHASE61_X86_EMULATOR_HOME and '
+      'PHASE61_X86_EMULATOR_ARCHIVE are required',
+    );
+  }
+  final executable = File('$overrideHome/emulator');
+  final archive = File(overrideArchive);
+  if (!executable.existsSync() || !archive.existsSync()) {
+    throw StateError('official x86_64 Emulator override is incomplete');
+  }
+  final architecture = await Process.run('file', [executable.path]);
+  final actualSha1 = (await sha1.bind(archive.openRead()).first).toString();
+  final issues = validateX86EmulatorArchiveIdentity(
+    fileOutput: '${architecture.stdout}${architecture.stderr}',
+    actualSha1: actualSha1,
+  );
+  if (architecture.exitCode != 0 || issues.isNotEmpty) {
+    throw StateError(
+      'official x86_64 Emulator override validation failed: '
+      '${issues.join('; ')}',
+    );
+  }
+  return executable.path;
 }
 
 Future<BoundedCommandResult> _adbCommand({

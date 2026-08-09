@@ -210,6 +210,30 @@ void main() {
     expect(arguments, containsAll(['-no-window', '-no-audio']));
   });
 
+  test('Rosetta emulator override requires the official x86_64 archive', () {
+    expect(
+      lane.validateX86EmulatorArchiveIdentity(
+        fileOutput: 'Mach-O 64-bit executable x86_64',
+        actualSha1: lane.officialX86EmulatorArchiveSha1,
+      ),
+      isEmpty,
+    );
+    expect(
+      lane.validateX86EmulatorArchiveIdentity(
+        fileOutput: 'Mach-O 64-bit executable arm64',
+        actualSha1: lane.officialX86EmulatorArchiveSha1,
+      ),
+      isNotEmpty,
+    );
+    expect(
+      lane.validateX86EmulatorArchiveIdentity(
+        fileOutput: 'Mach-O 64-bit executable x86_64',
+        actualSha1: '0' * 40,
+      ),
+      isNotEmpty,
+    );
+  });
+
   test('Emulator identity rejects false boot, API, ABI, and ownership', () {
     const expected = lane.EmulatorIdentityExpectation(
       avdName: 'phase61-owned',
