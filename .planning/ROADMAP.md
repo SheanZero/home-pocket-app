@@ -174,7 +174,7 @@ Plans:
   4. **Descoped / Not Applicable (2026-08-09 owner decision):** the app has no previous public release or released-schema population, so Phase 60 does not claim or manufacture historical migration proof; production migration code remains unchanged.
   5. Test-only current-format `.hpb` v2 export, clear, and password restore preserve data atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.
 
-**Plans**: 7/7 plans executed
+**Plans**: 10 plans (7 executed, 3 gap-closure plans pending)
 
 - [x] 60-03-PLAN.md
 - [x] 60-04-PLAN.md
@@ -200,6 +200,18 @@ Plans:
 **Wave 5** *(blocked on Wave 4 completion)*
 
 - [x] 60-07-PLAN.md
+
+**Gap Closure Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 60-08-PLAN.md — Diagnose and repair the supported Flutter/Xcode linkage with a clean Debug-Simulator tracer.
+
+**Gap Closure Wave 7** *(blocked on Gap Closure Wave 6 completion)*
+
+- [ ] 60-09-PLAN.md — Prove retained/from-zero iOS 15 resolution and six unsigned compile-only builds through an isolated compile lane.
+
+**Gap Closure Wave 8** *(blocked on Gap Closure Wave 7 completion)*
+
+- [ ] 60-10-PLAN.md — Capture booted-Simulator current-schema SQLCipher cold-reopen runtime evidence and converge Phase 60 status.
 
 ### Phase 61: Android Toolchain & Emulator Lane
 
