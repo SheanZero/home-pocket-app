@@ -191,6 +191,6 @@
     "android/gradle/wrapper/gradle-wrapper.properties": { "role": "Gradle distribution", "sha256": "297c9e63b6fa6e7e8b221900fa1787c1a0e38869d8957da66389fd0f6b00f78e" },
     "ios/Podfile": { "role": "iOS platform settings without legacy sqlite3 strip", "sha256": "448e56cb0f04aceee5901428fab3584ec035213798fcaff5bc93c2c27cee2d7a" },
     "ios/Podfile.lock": { "role": "resolved CocoaPods graph without legacy SQLCipher Pod", "sha256": "5623ecf1f98ff2e8fd975aabf80a65bfbf46fc26a12b603c5563cf7593fa1b95" },
-    "ios/Runner.xcodeproj/project.pbxproj": { "role": "SwiftPM/Xcode and Native Assets state", "sha256": "bd5ef8c6bbbff2fbc32d2b1217af0f5e93c54d60ef8273ff533da62693cb2f0a" }
+    "ios/Runner.xcodeproj/project.pbxproj": { "role": "SwiftPM/Xcode, explicit Runner iOS 15 floor, and Native Assets state", "sha256": "33fb8265dc29c9f8b60047e8621daeda3a65a9cac089ce3295a3870b405b4147" }
   }
 }
