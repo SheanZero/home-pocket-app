@@ -184,7 +184,7 @@
   "tracked_inputs": {
     ".metadata": { "role": "Stable Flutter identity", "sha256": "3d9ad80463efcba0b84e772c6f2cd6be270019fffc45463305c203e093a3bc36" },
     "pubspec.yaml": { "role": "direct dependency constraints, notification-free MVP graph, and SQLCipher Native Asset selection", "sha256": "570fe20c6a00751c36d81c310e04dcc39e26a60e1198ea18f1cdd8b03df21ee0" },
-    "pubspec.lock": { "role": "resolved notification-free Pub and Native Assets graph", "sha256": "511579674e6c93041848ceb62063bd12e3064389b4cfc3b62a5d5f93cbdf3a9b" },
+    "pubspec.lock": { "role": "resolved notification-free Pub and Native Assets graph", "sha256": "a2a80891ca4596ab5e9eb1fe6b51a6a86088fa029fe1a65bbfbf55a7f1659ecd" },
     "android/settings.gradle.kts": { "role": "Android plugin versions", "sha256": "be41fc440623b67c9c43f3ca8d878d9194c32231e318169c2b330bc92c6125d6" },
     "android/app/build.gradle.kts": { "role": "inherited Android floor without Firebase registration", "sha256": "6281a8f720bdb7794df57cb8edca1ccd6b95a445a0f06238d312d0060cf2cf8d" },
     "android/gradle.properties": { "role": "legacy Android DSL controls", "sha256": "4922e39cd2ea910bd97156fd4320b0be9217df262fc45435ce408bad534a20d0" },
