@@ -174,7 +174,7 @@ Plans:
   4. **Descoped / Not Applicable (2026-08-09 owner decision):** the app has no previous public release or released-schema population, so Phase 60 does not claim or manufacture historical migration proof; production migration code remains unchanged.
   5. Test-only current-format `.hpb` v2 export, clear, and password restore preserve data atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.
 
-**Plans**: 8/10 plans executed
+**Plans**: 9/10 plans executed
 
 - [x] 60-03-PLAN.md
 - [x] 60-04-PLAN.md
@@ -207,7 +207,7 @@ Plans:
 
 **Gap Closure Wave 7** *(blocked on Gap Closure Wave 6 completion)*
 
-- [ ] 60-09-PLAN.md — Prove retained/from-zero iOS 15 resolution and six unsigned compile-only builds through an isolated compile lane.
+- [x] 60-09-PLAN.md — Prove retained/from-zero iOS 15 resolution and six unsigned compile-only builds through an isolated compile lane.
 
 **Gap Closure Wave 8** *(blocked on Gap Closure Wave 7 completion)*
 
@@ -265,7 +265,7 @@ Plans:
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
 | 59. Controlled Platform Plugin Cohorts | 7/7 | Complete    | 2026-08-09 |
-| 60. SQLCipher & iOS Native Safety Lane | 8/10 | In Progress|  |
+| 60. SQLCipher & iOS Native Safety Lane | 9/10 | In Progress|  |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
 | 63. Isolated Wired-iPhone Acceptance | 0/TBD | Not started | - |

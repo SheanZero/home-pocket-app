@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 60
 current_phase_name: SQLCipher & iOS Native Safety Lane
 status: executing
-stopped_at: Completed 60-08-PLAN.md
-last_updated: "2026-08-09T13:20:13.099Z"
+stopped_at: Completed 60-09-PLAN.md
+last_updated: "2026-08-09T13:47:03.345Z"
 last_activity: 2026-08-09
-last_activity_desc: Phase 60 execution started
+last_activity_desc: Completed 60-09 compile-only native evidence; SEC-03 runtime remains for 60-10
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 30
-  completed_plans: 28
+  completed_plans: 29
   percent: 43
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 ## Current Position
 
 Phase: 60 (SQLCipher & iOS Native Safety Lane) — EXECUTING
-Plan: 8 of 10
+Plan: 9 of 10
 Status: Ready to execute
-Last activity: 2026-08-09 — Phase 60 execution started
+Last activity: 2026-08-09 — Completed 60-09 compile-only native evidence; SEC-03 runtime remains for 60-10
 
-Progress: [█████████░] 93%
+Progress: [██████████] 97%
 
 ### Decisions
 
@@ -513,11 +513,11 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Execute Phase 60 plan 60-10 to capture current-schema booted-Simulator SQLCipher lifecycle evidence and converge Phase 60.
 
 ### Blockers
 
 - ~~46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07.~~ **RESOLVED (46-01 + 46-07):** 46-01 resolved it at the time by ALSO deleting total_six_month_card.dart + monthly_spend_trend_bar_chart.dart + the Time section header + their registry specs (registry → 9 specs) so the data-only deletion compiled. 46-07 then verified those two files were already absent (no re-delete) and completed the round-5 B integration: re-ordered the registry to the flat 5-card lineup, deleted the remaining 4 dead files (best_joy_card, kpi_hero_card, largest_expense_card, analytics_screen_section_header), and updated the registry/screen/anti-toxicity tests in lockstep. Zero dangling references; full suite 2971/2971 green. No active blockers.
 - **49-06 Task 3 (blocking human-verify):** run `flutter test integration_test/merchant_migration_ladder_test.dart` on a booted simulator/device; confirm `PRAGMA cipher_version` non-empty + fresh-v22/v21→v22 index+seed+categoryId∈L2 assertions + D-08 ~10-row merchant spot-check. Cannot run in headless orchestrator (no simulator).
-- Phase 60 Plan 02 full native safety lane remains blocked: the approved persistent retry used a byte-exact prepared-clean status preflight (`0004d5b8187af324eb427c3a98d5be49fdbdd5d8d5505d0d590bc76438943e22`; raw 22-byte UTF-8 `git status --short` stream) and passed retained-lock generation plus the unsigned Debug Simulator compile. Its disposable from-zero exception (`type 'String' is not a subtype of type 'List<int>'` from `utf8.decode(listed.stdout)`) is fixed and regression-covered in commits `d97cfc4e` and `eedf605a`; `_run` already supplies decoded `String` stdout. Per the approved targeted-only continuation, the full `--lane=full` matrix was not rerun. Evidence therefore remains incomplete (`completed: false`, `outcome: INCOMPLETE`), with four compile-only records, no from-zero graph comparison, no remaining five builds, and no Simulator runtime evidence. This must not be reported as PASS. A future explicitly approved continuation must request authorization for a new full-lane attempt.
-- Phase 60 current-schema Simulator lifecycle is blocked before launch by Xcode undefined Flutter-symbol linkage; generic compilation is not runtime acceptance.
+- ~~Phase 60 Plan 02 compile convergence was incomplete.~~ **RESOLVED (60-08 + 60-09):** clean linkage passes, retained/from-zero graphs and iOS 15 floors match, and all six unsigned compile-only matrix rows pass.
+- Phase 60 current-schema Simulator lifecycle is now **pending plan 60-10**. The historical undefined-symbol failure did not reproduce after clean plan 60-08 regeneration; plan 60-09 compilation is not runtime acceptance.
