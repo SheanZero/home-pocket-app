@@ -24,17 +24,18 @@ key-files:
     - lib/infrastructure/crypto/services/backup_crypto_service.dart
     - test/infrastructure/crypto/services/backup_crypto_service_test.dart
     - test/unit/application/settings/import_backup_use_case_atomicity_test.dart
+    - test/unit/application/settings/import_backup_use_case_test.dart
 decisions:
   - "Only HPB v2 is accepted; headerless/non-v2 payloads fail before password KDF work."
   - "Fault injection stays in the isolated test composition and uses already-exposed constructor callbacks, never production test branches."
 metrics:
-  duration: 11m 21s
+  duration: 28m 11s
   completed: 2026-08-09
 status: complete
 actuals:
-  tokens: 8129
+  tokens: 10154
   tasks: 2
-  commits: 4
+  commits: 5
 ---
 
 # Phase 60 Plan 06: Current-v2 Atomic Recovery Summary
@@ -47,6 +48,7 @@ actuals:
 - Expanded the synthetic-only snapshot with database logical data, schema, integrity, settings, secure and sync state, owned-file digest, and original backup digest. Failure diagnostics name only the changed component.
 - Added transaction-commit, post-persist settings, sync-suspension, cleanup, and resume fault sessions through existing `ImportBackupUseCase` and `RestoreBackupUseCase` callback seams. Cleanup/resume retries prove the import runs once.
 - Changed the current pre-release backup policy to reject headerless/non-v2 payloads before KDF work, and converted the existing atomicity fixture writer to HPB v2.
+- Corrected the remaining mock-based import fixture writer after the post-merge suite exposed its retired headerless PBKDF2 encoding; all fixtures now use `BackupCryptoService.encrypt` and current HPB v2 bytes.
 
 ## Task Commits
 
@@ -57,6 +59,8 @@ actuals:
 
 - `dart analyze integration_test/helpers/sqlcipher_backup_sandbox.dart integration_test/sqlcipher_backup_recovery_test.dart lib/infrastructure/crypto/services/backup_crypto_service.dart test/infrastructure/crypto/services/backup_crypto_service_test.dart test/unit/application/settings/import_backup_use_case_atomicity_test.dart test/unit/application/settings/restore_backup_use_case_test.dart` — passed with 0 issues.
 - `flutter test test/infrastructure/crypto/services/backup_crypto_service_test.dart test/unit/application/settings/import_backup_use_case_atomicity_test.dart test/unit/application/settings/restore_backup_use_case_test.dart` — passed (24 tests).
+- Post-merge: `flutter test test/unit/application/settings/import_backup_use_case_test.dart test/infrastructure/crypto/services/backup_crypto_service_test.dart test/unit/application/settings/import_backup_use_case_atomicity_test.dart test/unit/application/settings/restore_backup_use_case_test.dart` — passed (33 tests).
+- Post-merge: `flutter analyze` — passed with 0 issues.
 - `git diff --check` — passed.
 - Source scan found no legacy/headerless success path, platform secure-storage/path-provider access, or sensitive test logging in the Plan 60-06 artifacts.
 
@@ -78,6 +82,13 @@ actuals:
 - **Files modified:** `test/unit/application/settings/import_backup_use_case_atomicity_test.dart`
 - **Commit:** `ea589634`
 
+**3. [Rule 1 - Regression] Converted the remaining mock-based import fixture writer to HPB v2**
+- **Found during:** Post-merge full-suite verification
+- **Issue:** Nine tests in `import_backup_use_case_test.dart` still generated headerless PBKDF2 bytes and no longer reached the import behavior under the required v2-only gate.
+- **Fix:** Replaced its test-only encoder with `BackupCryptoService.encrypt`, removed obsolete imports and historical-format wording, and asserted the current explicit non-v2 header rejection.
+- **Files modified:** `test/unit/application/settings/import_backup_use_case_test.dart`
+- **Commit:** `133447a2`
+
 ## Deferred Verification
 
 - The booted-Simulator runtime verifier was not run because this environment has not emitted an actual integration-test result for the Phase 60 lane. No Simulator runtime pass is claimed. Re-run when the native lane can produce an attributable result:
@@ -89,5 +100,5 @@ None.
 
 ## Self-Check: PASSED
 
-- All five scoped artifacts exist and all four TDD commits are present in Git history.
+- All six scoped artifacts exist and all five task commits are present in Git history.
 - No stubs, legacy/headerless fallback parser, platform secure-storage access, path-provider access, or sensitive logging were introduced in the Plan 60-06 artifacts.
