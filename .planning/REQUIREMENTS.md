@@ -23,10 +23,10 @@
 
 ### Platform Plugin Cohorts（平台插件组）
 
-- [ ] **PLUG-01**: 所有直接依赖及重要原生/传递依赖均逐项升级到最新可安全 production-stable，或以 BASE-04 规则形成有证据的 hold；不得用一次 blanket major upgrade 代替逐 lane 验证
-- [ ] **PLUG-02**: `file_picker`、`share_plus`、`package_info_plus`、`win32` 作为一个原子兼容组保留或升级，且 `.hpb` 文件选择、导入及系统分享流程在受支持平台上保持可用
-- [ ] **PLUG-03**: `speech_to_text` 仅在 7.4.0（或执行时更新 stable）通过 ja/zh/en 解析、权限、取消/错误与 iPhone 语音输入验证后升级，否则记录并保留 7.3.0
-- [ ] **PLUG-04**: Firebase Core/Messaging、通知、biometric、secure storage 等原生插件完成 stable 状态核对和编译/初始化回归；升级不得重新显示首版已隐藏的通知设置入口，也不得改变已披露的云端回退策略
+- [x] **PLUG-01**: 所有直接依赖及重要原生/传递依赖均逐项升级到最新可安全 production-stable，或以 BASE-04 规则形成有证据的 hold；不得用一次 blanket major upgrade 代替逐 lane 验证
+- [x] **PLUG-02**: `file_picker`、`share_plus`、`package_info_plus`、`win32` 作为一个原子兼容组保留或升级，且 `.hpb` 文件选择、导入及系统分享流程在受支持平台上保持可用
+- [x] **PLUG-03**: `speech_to_text` 仅在 7.4.0（或执行时更新 stable）通过 ja/zh/en 解析、权限、取消/错误与 iPhone 语音输入验证后升级，否则记录并保留 7.3.0
+- [x] **PLUG-04**: Firebase Core/Messaging、通知、biometric、secure storage 等原生插件完成 stable 状态核对和编译/初始化回归；升级不得重新显示首版已隐藏的通知设置入口，也不得改变已披露的云端回退策略
 
 ### Encrypted Storage & iOS Native Lane（加密存储与 iOS 原生链）
 
@@ -96,10 +96,10 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 | GEN-02 | Phase 58 | Complete |
 | GEN-03 | Phase 58 | Complete |
 | GEN-04 | Phase 58 | Complete |
-| PLUG-01 | Phase 59 | Pending |
-| PLUG-02 | Phase 59 | Pending |
-| PLUG-03 | Phase 59 | Pending |
-| PLUG-04 | Phase 59 | Pending |
+| PLUG-01 | Phase 59 | Complete |
+| PLUG-02 | Phase 59 | Complete |
+| PLUG-03 | Phase 59 | Complete |
+| PLUG-04 | Phase 59 | Complete |
 | SEC-01 | Phase 60 | Pending |
 | SEC-02 | Phase 60 | Pending |
 | SEC-03 | Phase 60 | Pending |

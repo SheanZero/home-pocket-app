@@ -142,9 +142,17 @@ Cross-cutting constraints:
   3. Japanese, Chinese, and English voice entry retain parsing, permission, cancellation, and error behavior after a stable speech upgrade; otherwise version 7.3.0 remains with the failed acceptance evidence recorded.
   4. Firebase/notification, biometric, and secure-storage initialization still works without resurfacing the intentionally hidden notification setting or changing the disclosed cloud-fallback behavior.
 
-**Plans**: 7 plans
+**Plans**: 1/7 plans executed
 
 Plans:
+
+- [x] 59-01-PLAN.md
+- [ ] 59-02-PLAN.md
+- [ ] 59-03-PLAN.md
+- [ ] 59-04-PLAN.md
+- [ ] 59-05-PLAN.md
+- [ ] 59-06-PLAN.md
+- [ ] 59-07-PLAN.md
 - [ ] `59-01-PLAN.md` — Wave 0 evidence ledger, atomic cohort contracts, six edge-probe resolutions, and complete API capability coverage.
 - [ ] `59-02-PLAN.md` — Atomic file/share/package-info/win32 candidate-or-hold lane with picker, import, share-sheet, and package-identity proof.
 - [ ] `59-03-PLAN.md` — Speech stable-candidate lane with ja/zh/en unit, corpus, and physical-iPhone evidence or exact hold.
@@ -219,7 +227,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
-| 59. Controlled Platform Plugin Cohorts | 0/7 | Not started | - |
+| 59. Controlled Platform Plugin Cohorts | 1/7 | In Progress|  |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
