@@ -99,4 +99,69 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 4)),
   );
+
+  testWidgets(
+    'pre-commit restore interruptions compensate every isolated store',
+    (tester) async {
+      const faults = <BackupRestoreFault>[
+        BackupRestoreFault.syncSuspend,
+        BackupRestoreFault.transactionCommit,
+        BackupRestoreFault.settingsApply,
+      ];
+
+      for (final fault in faults) {
+        final sandbox = await SqlCipherBackupSandbox.create();
+        addTearDown(sandbox.close);
+        await sandbox.seedCurrentV2State();
+        final originalBackup = await sandbox.exportCurrentV2();
+        final before = await sandbox.snapshot(backup: originalBackup);
+        final session = sandbox.createFaultSession(fault);
+
+        final result = await session.restore(originalBackup);
+
+        expect(result.isError, isTrue, reason: fault.name);
+        expect(session.importCalls, lessThanOrEqualTo(1), reason: fault.name);
+        expect(session.resumeCalls, greaterThanOrEqualTo(1), reason: fault.name);
+        await sandbox.expectSnapshotUnchanged(
+          before,
+          originalBackup: originalBackup,
+        );
+        await sandbox.expectCurrentSqlCipherColdReopen();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
+
+  testWidgets(
+    'cleanup and resume retries never re-import a valid current-v2 restore',
+    (tester) async {
+      const faults = <BackupRestoreFault>[
+        BackupRestoreFault.syncCleanup,
+        BackupRestoreFault.syncResume,
+      ];
+
+      for (final fault in faults) {
+        final sandbox = await SqlCipherBackupSandbox.create();
+        addTearDown(sandbox.close);
+        await sandbox.seedCurrentV2State();
+        final expectedRestore = await sandbox.snapshot();
+        final originalBackup = await sandbox.exportCurrentV2();
+        await sandbox.clearAllData();
+        final session = sandbox.createFaultSession(fault);
+
+        final first = await session.restore(originalBackup);
+        expect(first.isError, isTrue, reason: fault.name);
+        expect(session.importCalls, 1, reason: fault.name);
+        expect(session.isSyncSuspended, isTrue, reason: fault.name);
+
+        final retry = await session.restore(originalBackup);
+        expect(retry.isSuccess, isTrue, reason: fault.name);
+        expect(session.importCalls, 1, reason: fault.name);
+        expect(session.isSyncSuspended, isFalse, reason: fault.name);
+        await sandbox.expectSupportedStateEquals(expectedRestore);
+        await sandbox.expectCurrentSqlCipherColdReopen();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
 }
