@@ -4,6 +4,7 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 
@@ -108,10 +109,13 @@ Future<void> main(List<String> arguments) async {
         }
         stdout.writeln(result.message);
       case AndroidSafetyMode.release:
-        stderr.writeln(
-          'ERROR: release mode is not implemented until plan 61-04',
-        );
-        exitCode = 2;
+        final result = await runReleaseEvidence(Directory.current);
+        if (!result.completed) {
+          stderr.writeln('ERROR: ${result.message}');
+          exitCode = 2;
+          return;
+        }
+        stdout.writeln(result.message);
       case AndroidSafetyMode.emulator:
         stderr.writeln(
           'ERROR: emulator mode is not implemented until plan 61-05',
@@ -757,6 +761,565 @@ class CandidateProbeResult {
   final bool completed;
   final String message;
 }
+
+class ReleaseEvidenceResult {
+  const ReleaseEvidenceResult({required this.completed, required this.message});
+
+  final bool completed;
+  final String message;
+}
+
+class _ReleaseArtifactResult {
+  const _ReleaseArtifactResult({
+    required this.kind,
+    required this.sha256,
+    required this.sizeBytes,
+    required this.certificateSubject,
+    required this.certificateFingerprint,
+    required this.signatureTool,
+    required this.hygiene,
+  });
+
+  final String kind;
+  final String sha256;
+  final int sizeBytes;
+  final String certificateSubject;
+  final String certificateFingerprint;
+  final String signatureTool;
+  final String hygiene;
+}
+
+Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
+  final jdkHome = _resolveJdk17Home();
+  final flutterRoot = _flutterRoot();
+  final androidSdk = _androidSdkRoot();
+  if (jdkHome == null || flutterRoot == null || androidSdk == null) {
+    return const ReleaseEvidenceResult(
+      completed: false,
+      message: 'verified JDK 17, Flutter, or Android SDK is unavailable',
+    );
+  }
+  final apksigner = _latestBuildTool(androidSdk, 'apksigner');
+  final aapt = _latestBuildTool(androidSdk, 'aapt');
+  if (apksigner == null || aapt == null) {
+    return const ReleaseEvidenceResult(
+      completed: false,
+      message: 'Android apksigner or aapt is unavailable',
+    );
+  }
+
+  final sourceCommit = _gitOutput(root, ['rev-parse', 'HEAD']);
+  final started = DateTime.now().toUtc();
+  final outputArtifacts = _releaseArtifactFiles(root);
+  BoundedCommandResult? missingNegative;
+  BoundedCommandResult? debugNegative;
+  BoundedCommandResult? packaging;
+  BoundedCommandResult? apkSignature;
+  BoundedCommandResult? aabSignature;
+  BoundedCommandResult? aabCertificate;
+  BoundedCommandResult? apkMetadata;
+  List<_ReleaseArtifactResult>? artifacts;
+  Map<String, String>? metadata;
+  String? failure;
+
+  try {
+    await withDisposableCandidateDirectory((temporary) async {
+      final debugPassword = _randomSecret();
+      final evidencePassword = _randomSecret();
+      final debugKey = File('${temporary.path}/debug-evidence.p12');
+      final evidenceKey = File('${temporary.path}/release-evidence.p12');
+      final debugKeytool = await _generateEvidenceKey(
+        jdkHome: jdkHome,
+        workingDirectory: root,
+        output: debugKey,
+        password: debugPassword,
+        alias: 'phase61debug',
+        distinguishedName: 'CN=Android Debug,O=Android,C=US',
+        durableLabel: 'debug certificate',
+      );
+      if (debugKeytool.exitCode != 0) {
+        throw StateError('temporary debug certificate generation failed');
+      }
+      final evidenceKeytool = await _generateEvidenceKey(
+        jdkHome: jdkHome,
+        workingDirectory: root,
+        output: evidenceKey,
+        password: evidencePassword,
+        alias: 'phase61evidence',
+        distinguishedName:
+            'CN=Happy Pocket Phase 61 Evidence,O=Happy Pocket,C=JP',
+        durableLabel: 'non-debug evidence certificate',
+      );
+      if (evidenceKeytool.exitCode != 0) {
+        throw StateError('temporary evidence certificate generation failed');
+      }
+
+      final gradleArguments = <String>[
+        '--no-daemon',
+        '-Dorg.gradle.java.home=$jdkHome',
+        '-Pphase61SigningEvidence=true',
+        ':app:verifyReleaseSigning',
+      ];
+      missingNegative = await runBoundedCommand(
+        './gradlew',
+        gradleArguments,
+        workingDirectory: Directory('${root.path}/android'),
+        environment: _signingEnvironment(
+          jdkHome: jdkHome,
+          keyPath: '',
+          password: '',
+          alias: '',
+        ),
+        durableCommand:
+            './gradlew <verified-jdk17> -Pphase61SigningEvidence=true :app:verifyReleaseSigning (credentials absent)',
+      );
+      if (missingNegative!.exitCode == 0 ||
+          !missingNegative!.output.contains(
+            'Android release signing is not configured',
+          )) {
+        throw StateError('missing release credentials were not rejected');
+      }
+
+      debugNegative = await runBoundedCommand(
+        './gradlew',
+        gradleArguments,
+        workingDirectory: Directory('${root.path}/android'),
+        environment: _signingEnvironment(
+          jdkHome: jdkHome,
+          keyPath: debugKey.path,
+          password: debugPassword,
+          alias: 'phase61debug',
+        ),
+        durableCommand:
+            './gradlew <verified-jdk17> -Pphase61SigningEvidence=true :app:verifyReleaseSigning (Android Debug certificate)',
+      );
+      if (debugNegative!.exitCode == 0 ||
+          !debugNegative!.output.contains(
+            'Android release signing certificate is the Android Debug certificate',
+          )) {
+        throw StateError('Android Debug certificate was not rejected');
+      }
+
+      packaging = await runBoundedCommand(
+        'bash',
+        const [
+          'scripts/release_preflight.sh',
+          '--platform',
+          'android',
+          '--package',
+        ],
+        workingDirectory: root,
+        environment: {
+          ..._signingEnvironment(
+            jdkHome: jdkHome,
+            keyPath: evidenceKey.path,
+            password: evidencePassword,
+            alias: 'phase61evidence',
+          ),
+          'PHASE61_GRADLE_JAVA_HOME': jdkHome,
+          'ANDROID_HOME': androidSdk,
+          'ANDROID_SDK_ROOT': androidSdk,
+          'PATH': '$flutterRoot/bin:${Platform.environment['PATH'] ?? ''}',
+        },
+        timeout: const Duration(minutes: 30),
+        durableCommand:
+            'bash scripts/release_preflight.sh --platform android --package (ephemeral non-debug evidence certificate)',
+      );
+      if (packaging!.exitCode != 0) {
+        throw StateError(
+          'dual release packaging failed: ${_diagnosticLine(packaging!.output)}',
+        );
+      }
+
+      final aab = outputArtifacts['aab']!;
+      final apk = outputArtifacts['apk']!;
+      if (!aab.existsSync() || !apk.existsSync()) {
+        throw StateError(
+          'dual release packaging did not produce both artifacts',
+        );
+      }
+      final aabFindings = await scanAndroidReleaseArtifact(aab);
+      final apkFindings = await scanAndroidReleaseArtifact(apk);
+      if (aabFindings.isNotEmpty || apkFindings.isNotEmpty) {
+        throw StateError(
+          'release artifact hygiene failed: ${[...aabFindings, ...apkFindings].join('; ')}',
+        );
+      }
+      final registrant = File(
+        '${root.path}/android/app/src/main/java/io/flutter/plugins/'
+        'GeneratedPluginRegistrant.java',
+      );
+      if (!registrant.existsSync() ||
+          _testOnlyArtifactPatterns.any(
+            (pattern) =>
+                registrant.readAsStringSync().toLowerCase().contains(pattern),
+          )) {
+        throw StateError('clean Android release registrant hygiene failed');
+      }
+
+      final signatureEnvironment = <String, String>{
+        'JAVA_HOME': jdkHome,
+        'ANDROID_HOME': androidSdk,
+        'ANDROID_SDK_ROOT': androidSdk,
+      };
+      apkSignature = await runBoundedCommand(
+        apksigner,
+        ['verify', '--verbose', '--print-certs', apk.path],
+        workingDirectory: root,
+        environment: signatureEnvironment,
+        durableCommand:
+            'apksigner verify --verbose --print-certs app-release.apk',
+      );
+      if (apkSignature!.exitCode != 0) {
+        throw StateError('APK signature verification failed');
+      }
+      aabSignature = await runBoundedCommand(
+        '$jdkHome/bin/jarsigner',
+        ['-verify', '-verbose', '-certs', aab.path],
+        workingDirectory: root,
+        environment: signatureEnvironment,
+        durableCommand: 'jarsigner -verify -verbose -certs app-release.aab',
+      );
+      if (aabSignature!.exitCode != 0 ||
+          !aabSignature!.output.toLowerCase().contains('jar verified')) {
+        throw StateError('AAB JAR signature verification failed');
+      }
+      aabCertificate = await runBoundedCommand(
+        '$jdkHome/bin/keytool',
+        ['-printcert', '-jarfile', aab.path],
+        workingDirectory: root,
+        environment: signatureEnvironment,
+        durableCommand: 'keytool -printcert -jarfile app-release.aab',
+      );
+      if (aabCertificate!.exitCode != 0) {
+        throw StateError('AAB certificate inspection failed');
+      }
+
+      final apkSubject = _firstMatch(
+        apkSignature!.output,
+        RegExp(r'Signer #1 certificate DN:\s*(.+)', caseSensitive: false),
+      );
+      final apkFingerprint = _normalizeFingerprint(
+        _firstMatch(
+          apkSignature!.output,
+          RegExp(
+            r'Signer #1 certificate SHA-256 digest:\s*([0-9a-f:]+)',
+            caseSensitive: false,
+          ),
+        ),
+      );
+      final aabSubject = _firstMatch(
+        aabCertificate!.output,
+        RegExp(r'Owner:\s*(.+)', caseSensitive: false),
+      );
+      final aabFingerprint = _normalizeFingerprint(
+        _firstMatch(
+          aabCertificate!.output,
+          RegExp(r'SHA256:\s*([0-9a-f:]+)', caseSensitive: false),
+        ),
+      );
+      if (apkSubject == null ||
+          aabSubject == null ||
+          apkFingerprint == null ||
+          aabFingerprint == null ||
+          apkFingerprint != aabFingerprint ||
+          classifyAndroidCertificate(apkSubject) !=
+              AndroidCertificateClass.nonDebug ||
+          classifyAndroidCertificate(aabSubject) !=
+              AndroidCertificateClass.nonDebug) {
+        throw StateError(
+          'release certificate identity is missing, debug, or inconsistent',
+        );
+      }
+
+      apkMetadata = await runBoundedCommand(
+        aapt,
+        ['dump', 'badging', apk.path],
+        workingDirectory: root,
+        environment: signatureEnvironment,
+        durableCommand: 'aapt dump badging app-release.apk',
+      );
+      if (apkMetadata!.exitCode != 0) {
+        throw StateError('APK package metadata inspection failed');
+      }
+      metadata = _parseApkBadging(apkMetadata!.output);
+      if (metadata!['application_id'] != 'com.sheanzero.happypocket.app' ||
+          metadata!['version_name'] != '0.1.0' ||
+          metadata!['version_code'] != '1' ||
+          metadata!['min_sdk'] != '24' ||
+          metadata!['target_sdk'] != '36') {
+        throw StateError(
+          'release package/version/platform metadata is unexpected',
+        );
+      }
+      final aabManifest = await Process.run(
+        'unzip',
+        ['-p', aab.path, 'base/manifest/AndroidManifest.xml'],
+        stdoutEncoding: latin1,
+        stderrEncoding: utf8,
+      );
+      final aabManifestText = '${aabManifest.stdout}';
+      if (aabManifest.exitCode != 0 ||
+          !aabManifestText.contains(metadata!['application_id']!) ||
+          !aabManifestText.contains(metadata!['version_name']!)) {
+        throw StateError(
+          'AAB embedded manifest metadata does not match the APK',
+        );
+      }
+
+      artifacts = [
+        _ReleaseArtifactResult(
+          kind: 'release_aab',
+          sha256: sha256.convert(aab.readAsBytesSync()).toString(),
+          sizeBytes: aab.lengthSync(),
+          certificateSubject: 'CN=Happy Pocket Phase 61 Evidence',
+          certificateFingerprint: aabFingerprint,
+          signatureTool: 'jarsigner + keytool',
+          hygiene: 'PASS',
+        ),
+        _ReleaseArtifactResult(
+          kind: 'release_apk',
+          sha256: sha256.convert(apk.readAsBytesSync()).toString(),
+          sizeBytes: apk.lengthSync(),
+          certificateSubject: 'CN=Happy Pocket Phase 61 Evidence',
+          certificateFingerprint: apkFingerprint,
+          signatureTool: 'apksigner',
+          hygiene: 'PASS',
+        ),
+      ];
+    });
+  } on Object catch (error) {
+    failure = scrubCandidateOutput('$error');
+  } finally {
+    _deleteReleaseArtifacts(outputArtifacts.values);
+    final kotlinCache = Directory('${root.path}/android/.kotlin');
+    if (kotlinCache.existsSync()) kotlinCache.deleteSync(recursive: true);
+  }
+
+  if (failure != null ||
+      missingNegative == null ||
+      debugNegative == null ||
+      packaging == null ||
+      apkSignature == null ||
+      aabSignature == null ||
+      aabCertificate == null ||
+      apkMetadata == null ||
+      artifacts == null ||
+      metadata == null) {
+    return ReleaseEvidenceResult(
+      completed: false,
+      message: failure ?? 'release evidence execution was incomplete',
+    );
+  }
+
+  _recordReleaseEvidence(
+    root: root,
+    sourceCommit: sourceCommit,
+    started: started,
+    completed: DateTime.now().toUtc(),
+    missingNegative: missingNegative!,
+    debugNegative: debugNegative!,
+    packaging: packaging!,
+    apkSignature: apkSignature!,
+    aabSignature: aabSignature!,
+    aabCertificate: aabCertificate!,
+    apkMetadata: apkMetadata!,
+    artifacts: artifacts!,
+    metadata: metadata!,
+  );
+  return const ReleaseEvidenceResult(
+    completed: true,
+    message:
+        'PASS: missing/debug signing rejected; ephemeral non-debug AAB/APK signatures and hygiene verified',
+  );
+}
+
+Future<BoundedCommandResult> _generateEvidenceKey({
+  required String jdkHome,
+  required Directory workingDirectory,
+  required File output,
+  required String password,
+  required String alias,
+  required String distinguishedName,
+  required String durableLabel,
+}) => runBoundedCommand(
+  '$jdkHome/bin/keytool',
+  [
+    '-genkeypair',
+    '-keystore',
+    output.path,
+    '-storepass',
+    password,
+    '-keypass',
+    password,
+    '-alias',
+    alias,
+    '-dname',
+    distinguishedName,
+    '-keyalg',
+    'RSA',
+    '-keysize',
+    '2048',
+    '-validity',
+    '30',
+    '-storetype',
+    'PKCS12',
+    '-noprompt',
+  ],
+  workingDirectory: workingDirectory,
+  durableCommand: 'keytool -genkeypair <$durableLabel; credentials redacted>',
+);
+
+Map<String, String> _signingEnvironment({
+  required String jdkHome,
+  required String keyPath,
+  required String password,
+  required String alias,
+}) => {
+  'JAVA_HOME': jdkHome,
+  'ANDROID_KEYSTORE_PATH': keyPath,
+  'ANDROID_KEYSTORE_PASSWORD': password,
+  'ANDROID_KEY_ALIAS': alias,
+  'ANDROID_KEY_PASSWORD': password,
+};
+
+String _randomSecret() {
+  final random = Random.secure();
+  final bytes = List<int>.generate(32, (_) => random.nextInt(256));
+  return base64UrlEncode(bytes).replaceAll('=', '');
+}
+
+String? _latestBuildTool(String androidSdk, String tool) {
+  final root = Directory('$androidSdk/build-tools');
+  if (!root.existsSync()) return null;
+  final candidates =
+      root
+          .listSync()
+          .whereType<Directory>()
+          .map((directory) => File('${directory.path}/$tool'))
+          .where((file) => file.existsSync())
+          .toList()
+        ..sort((left, right) => left.path.compareTo(right.path));
+  return candidates.isEmpty ? null : candidates.last.path;
+}
+
+Map<String, File> _releaseArtifactFiles(Directory root) => {
+  'aab': File('${root.path}/build/app/outputs/bundle/release/app-release.aab'),
+  'apk': File('${root.path}/build/app/outputs/apk/release/app-release.apk'),
+};
+
+void _deleteReleaseArtifacts(Iterable<File> artifacts) {
+  for (final artifact in artifacts) {
+    if (artifact.existsSync()) artifact.deleteSync();
+  }
+}
+
+String? _firstMatch(String source, RegExp pattern) =>
+    pattern.firstMatch(source)?.group(1)?.trim();
+
+String? _normalizeFingerprint(String? value) =>
+    value?.replaceAll(':', '').toLowerCase();
+
+Map<String, String> _parseApkBadging(String output) {
+  final package = RegExp(
+    r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'",
+  ).firstMatch(output);
+  final minSdk = RegExp(r"sdkVersion:'([^']+)'").firstMatch(output);
+  final targetSdk = RegExp(r"targetSdkVersion:'([^']+)'").firstMatch(output);
+  return {
+    'application_id': package?.group(1) ?? '',
+    'version_code': package?.group(2) ?? '',
+    'version_name': package?.group(3) ?? '',
+    'min_sdk': minSdk?.group(1) ?? '',
+    'target_sdk': targetSdk?.group(1) ?? '',
+  };
+}
+
+void _recordReleaseEvidence({
+  required Directory root,
+  required String sourceCommit,
+  required DateTime started,
+  required DateTime completed,
+  required BoundedCommandResult missingNegative,
+  required BoundedCommandResult debugNegative,
+  required BoundedCommandResult packaging,
+  required BoundedCommandResult apkSignature,
+  required BoundedCommandResult aabSignature,
+  required BoundedCommandResult aabCertificate,
+  required BoundedCommandResult apkMetadata,
+  required List<_ReleaseArtifactResult> artifacts,
+  required Map<String, String> metadata,
+}) {
+  final file = File('${root.path}/$evidencePath');
+  final markdown = file.readAsStringSync();
+  final issues = <String>[];
+  final evidence = parseEvidenceMarkdown(markdown, issues);
+  if (issues.isNotEmpty) throw StateError(issues.join('; '));
+  evidence['completed_stage'] = 'package';
+  evidence['source_commit'] = sourceCommit;
+  evidence['package_source_commit'] = sourceCommit;
+  evidence['package_started_utc'] = started.toIso8601String();
+  evidence['package_completed_utc'] = completed.toIso8601String();
+  evidence['completed_utc'] = completed.toIso8601String();
+  final results = _object(evidence['results']);
+  results['package'] = 'PASS';
+  evidence['results'] = results;
+  evidence['release_signing_negatives'] = {
+    'missing_credentials': {
+      'result': 'REJECTED_AS_REQUIRED',
+      'exit_code': missingNegative.exitCode,
+    },
+    'android_debug_certificate': {
+      'result': 'REJECTED_AS_REQUIRED',
+      'exit_code': debugNegative.exitCode,
+    },
+  };
+  evidence['release_package_metadata'] = metadata;
+  evidence['commands'] = [
+    ...(_objectList(evidence['commands'])),
+    _commandEvidence(missingNegative),
+    _commandEvidence(debugNegative),
+    _commandEvidence(packaging),
+    _commandEvidence(apkSignature),
+    _commandEvidence(aabSignature),
+    _commandEvidence(aabCertificate),
+    _commandEvidence(apkMetadata),
+  ];
+  evidence['artifacts'] = artifacts
+      .map(
+        (artifact) => {
+          'kind': artifact.kind,
+          'sha256': artifact.sha256,
+          'size_bytes': artifact.sizeBytes,
+          'certificate_class': 'NON_DEBUG_EPHEMERAL_EVIDENCE',
+          'certificate_subject': artifact.certificateSubject,
+          'certificate_sha256': artifact.certificateFingerprint,
+          'signature_tool': artifact.signatureTool,
+          'archive_and_content_hygiene': artifact.hygiene,
+          'durable_artifact_retained': false,
+        },
+      )
+      .toList();
+  evidence['release_cleanup'] = {
+    'private_key_material': 'ABSENT',
+    'release_aab': 'DELETED_AFTER_EVIDENCE',
+    'release_apk': 'DELETED_AFTER_EVIDENCE',
+    'repository_secret_or_artifact': 'ABSENT',
+  };
+  final rendered = const JsonEncoder.withIndent('  ').convert(evidence);
+  final start = markdown.indexOf(_evidenceStart) + _evidenceStart.length;
+  final end = markdown.indexOf(_evidenceEnd);
+  file.writeAsStringSync(
+    '${markdown.substring(0, start)}\n```json\n$rendered\n```\n${markdown.substring(end)}',
+  );
+}
+
+List<Map<String, Object?>> _objectList(Object? value) => value is List
+    ? value
+          .whereType<Map>()
+          .map((item) => item.cast<String, Object?>())
+          .toList()
+    : const [];
 
 Future<BoundedCommandResult> runBoundedCommand(
   String executable,
