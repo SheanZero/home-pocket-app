@@ -142,12 +142,12 @@ Cross-cutting constraints:
   3. Japanese, Chinese, and English voice entry retain parsing, permission, cancellation, and error behavior after a stable speech upgrade; otherwise version 7.3.0 remains with the failed acceptance evidence recorded.
   4. Firebase/notification, biometric, and secure-storage initialization still works without resurfacing the intentionally hidden notification setting or changing the disclosed cloud-fallback behavior.
 
-**Plans**: 1/7 plans executed
+**Plans**: 2/7 plans executed
 
 Plans:
 
 - [x] 59-01-PLAN.md
-- [ ] 59-02-PLAN.md
+- [x] 59-02-PLAN.md
 - [ ] 59-03-PLAN.md
 - [ ] 59-04-PLAN.md
 - [ ] 59-05-PLAN.md
@@ -227,7 +227,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
-| 59. Controlled Platform Plugin Cohorts | 1/7 | In Progress|  |
+| 59. Controlled Platform Plugin Cohorts | 2/7 | In Progress|  |
 | 60. SQLCipher & iOS Native Safety Lane | 0/TBD | Not started | - |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
