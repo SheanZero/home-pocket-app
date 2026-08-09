@@ -59,8 +59,17 @@ and this ledger agree on the held four-member graph.
 
 | commit | package | platform | destination | os | build_mode | command_result | scenario | automated result | physical-iPhone result | hold_reason | exit_condition |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| b59fbf16 | speech_to_text 7.3.0 | Dart | repository contract | n/a | test | pass | Manifest evidence and declaration/lock drift | contract green | not applicable | Automated proof does not exercise native recognition. | Keep the physical-iPhone hold until every named scenario is recorded. |
-| pending device evidence | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | supported build | unavailable | ja/zh/en permission, recognition, cancellation, error, and caller-controlled fallback | Adapter/corpus evidence is separate | unavailable — hold | A simulator, corpus, or resolver result is not physical-iPhone proof. | Run the named scenarios on a supported physical iPhone and record only redacted outcome metadata. |
+| 308fa2c0 | speech_to_text 7.3.0 | Dart | repository contract | n/a | test | pass | binary candidate/hold mutations, adapter, on-device fallback, and ja/zh/en corpus | PASS — targeted adapter/on-device/corpus matrix passed; no transcript recorded | not applicable | Automated proof does not exercise native recognition. | Keep the physical-iPhone hold until every named scenario is PASS on an attributable candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | supported native candidate build/install | PASS automated proof is separate | UNAVAILABLE — HOLD | No Phase-59-attributable 7.4.0 build exists with a pre-authorized non-production identity; the Phase 63 wired-iPhone UAT lane was not used. | Build the exact candidate under an authorized non-production identity, then record only redacted build metadata and result. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | microphone and speech permission granted/denied behavior | PASS automated proof is separate | UNAVAILABLE — HOLD | Permission prompts were not requested because no attributable non-production candidate build was installed. | On the exact candidate build, record redacted granted and denied outcomes. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | ja recognition | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; corpus parsing is not recognizer evidence. | Record a redacted representative ja outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | zh recognition | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; corpus parsing is not recognizer evidence. | Record a redacted representative zh outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | en recognition | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; corpus parsing is not recognizer evidence. | Record a redacted representative en outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | cancel active recognition | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; mock cancellation cannot prove the native audio lifecycle. | Record a redacted cancellation outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | surfaced recognizer error | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; mock errors cannot prove native callback delivery. | Record a redacted surfaced-error outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | fresh-session on-device recognition | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; mock options cannot prove device recognition. | Record a redacted on-device outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | allowed default-recognition fallback after one on-device failure | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; automated retry coverage is not native fallback evidence. | Record the redacted one-retry outcome on the exact candidate build. |
+| no Phase-59 candidate commit | speech_to_text 7.3.0 | iOS | physical iPhone | not recorded | not built | UNAVAILABLE | disallowed default-recognition fallback after one on-device failure | PASS automated proof is separate | UNAVAILABLE — HOLD | No safe candidate session was run; automated no-retry coverage is not native privacy evidence. | Record the redacted no-retry outcome on the exact candidate build. |
 
 The approved Task 1 tracer checkpoint confirms this exact hold interpretation:
 `7.3.0` remains selected, `7.4.0` remains the stable candidate, and
@@ -93,6 +102,7 @@ change the hold decision.
 ## Decision rule
 
 `speech_to_text` is accepted only when the centralized adapter, ja/zh/en corpus,
-permission, recognition, cancellation, error, caller-controlled network
-fallback, and physical-iPhone evidence are all complete. Until then, the exact
-selected 7.3.0 graph remains a hold.
+supported native build, physical-iPhone permission, recognition, cancellation,
+error, caller-controlled network fallback, and physical-iPhone evidence are all
+complete and PASS on the exact candidate build. Until then, the exact selected
+7.3.0 graph remains a hold.

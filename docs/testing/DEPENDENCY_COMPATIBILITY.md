@@ -120,6 +120,13 @@ graph. The redacted ledger therefore separates automated adapter/corpus proof
 from physical-iPhone evidence rather than treating a simulator, resolver, or
 unavailable device as acceptance.
 
+The current terminal record is `hold`: the adapter and ja/zh/en corpus matrix
+passes on the exact `7.3.0` declaration and lock resolution, while every native
+candidate-build and physical-iPhone field is `UNAVAILABLE`. A detected device
+is not used as evidence without a Phase-59-attributable, pre-authorized
+non-production candidate identity; the later isolated wired-iPhone UAT lane is
+not a substitute for this selection decision.
+
 ## Phase 59 platform-plugin inventory
 
 The Phase 59 validator owns a lexical inventory of every direct, platform-backed
