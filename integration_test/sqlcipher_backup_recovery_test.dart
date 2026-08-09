@@ -49,4 +49,54 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 4)),
   );
+
+  testWidgets(
+    'hostile and non-v2 inputs reject before changing the isolated sandbox',
+    (tester) async {
+      const cases = <BackupHostileInput>[
+        BackupHostileInput.wrongPassword,
+        BackupHostileInput.truncatedHeader,
+        BackupHostileInput.truncatedBody,
+        BackupHostileInput.truncatedMac,
+        BackupHostileInput.unknownVersion,
+        BackupHostileInput.nonV2Headerless,
+        BackupHostileInput.invalidMagicLength,
+        BackupHostileInput.hostileMemoryKib,
+        BackupHostileInput.hostileIterations,
+        BackupHostileInput.hostileParallelism,
+        BackupHostileInput.corruptAuthenticatedPayload,
+        BackupHostileInput.invalidCompressedPayload,
+        BackupHostileInput.invalidJson,
+        BackupHostileInput.invalidSchema,
+        BackupHostileInput.invalidTransaction,
+        BackupHostileInput.encryptedSizeLimit,
+        BackupHostileInput.decompressedSizeLimit,
+      ];
+
+      for (final input in cases) {
+        final sandbox = await SqlCipherBackupSandbox.create();
+        addTearDown(sandbox.close);
+        await sandbox.seedCurrentV2State();
+        final originalBackup = await sandbox.exportCurrentV2();
+        final before = await sandbox.snapshot(backup: originalBackup);
+
+        final hostileBackup = await sandbox.createHostileBackup(
+          originalBackup,
+          input,
+        );
+        final result = await sandbox.attemptRestore(
+          hostileBackup,
+          input: input,
+        );
+
+        expect(result.isError, isTrue, reason: input.name);
+        await sandbox.expectSnapshotUnchanged(
+          before,
+          originalBackup: originalBackup,
+        );
+        await sandbox.expectCurrentSqlCipherColdReopen();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
 }
