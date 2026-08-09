@@ -80,9 +80,31 @@ change the hold decision.
 
 | commit | package/policy | platform | destination | os | build_mode | command_result | scenario | result | hold_reason | exit_condition |
 |---|---|---|---|---|---|---|---|---|---|---|
-| b59fbf16 | Firebase Core / Messaging / local notifications | Dart | repository contract | n/a | test | pass | selected graph and evidence completeness | automated contract green | Contract cannot prove native lifecycle. | Run the existing notification lifecycle tests plus supported native smoke before accepting a candidate. |
-| pending native evidence | Android FCM | Android | emulator or device | not recorded | supported build | unavailable | registration, foreground, opened-app, initial-message, and hidden-settings policy | unavailable — hold | JDK 17 and Android emulator/device unavailable. | Record redacted lifecycle outcomes while retaining Android FCM identity. |
-| pending native evidence | custom iOS APNs | iOS | supported iPhone | not recorded | supported build | unavailable | custom APNs routing and hidden-settings policy | unavailable — hold | No attributable supported-iPhone native result. | Record redacted lifecycle outcomes without replacing custom APNs with Firebase. |
+| 096d8416 / 7b255236 | Firebase Core 4.13.0 / Messaging 16.5.0 / local notifications 22.2.0 | Dart | repository contract | n/a | test | pass | declaration/lock/evidence completeness; Android-FCM versus custom-iOS-APNs source construction; success, concurrent initialization, failure/retry, token replay, foreground, opened, local tap, cold-start, and identity wipe | PASS — fake-client lifecycle and architecture contracts are green; no token, payload, identity, or credential recorded | Automated proof cannot exercise a supported native build or OS callback delivery. | Retain the exact graph until both transport-native matrices are attributable. |
+| no Phase-59 candidate build | Android FCM | Android | emulator or device | not recorded | supported build | UNAVAILABLE — HOLD | Firebase initialization, registration, foreground, opened-app, cold-start, and hidden-settings policy | PASS automated proof is separate | No JDK 17 runtime and no usable Android emulator/device; the Phase-61 Android toolchain lane is out of scope. | With JDK 17 and a supported destination, build the exact held graph and record redacted Android-FCM initialization/registration/foreground/opened/cold-start results while Firebase auto-init and the notification permission removal remain disabled. |
+| no Phase-59 candidate build | custom iOS APNs | iOS | supported iPhone | not recorded | supported build | UNAVAILABLE — HOLD | custom APNs initialization, foreground, opened-app, local tap, cold-start, and hidden-settings policy | PASS automated proof is separate | No Phase-59-attributable supported-iPhone result; the available simulator service is unavailable and Phase 63 wired-iPhone UAT was not used. | Build the exact held graph under an authorized non-production identity and record redacted custom-APNs lifecycle results without initializing Firebase on iOS or adding remote-notification mode / `aps-environment`. |
+| 096d8416 | hidden release policy | Android/iOS | source and native manifests | n/a | architecture test | pass | `pushNotifications == false`; no visible notification setting; Android Firebase auto-init/analytics disabled and notification permission removed; iOS Firebase auto-init disabled with no remote-notification mode or `aps-environment`; Android `fcm` and iOS `apns` remain distinct | PASS — source/native contract green | Native manifest/source proof does not replace a device lifecycle observation. | Preserve these policy assertions on every future candidate evaluation; never use a package change to re-enable a hidden release feature. |
+
+## PLUG-04 terminal notification decision
+
+**Decision:** HOLD — retain exactly Firebase Core `4.13.0`, Firebase Messaging
+`16.5.0`, and `flutter_local_notifications 22.2.0`. The official execution-date
+recheck confirms Firebase Core `4.13.0`, Firebase Messaging `16.5.0`, and the
+very recent local-notifications candidate `22.3.0`; registry recency cannot
+replace the required build and lifecycle evidence.
+
+Android retains `FirebasePushMessagingClient`, `Firebase.initializeApp`, and
+`pushPlatform: fcm`. iOS retains `ApnsPushMessagingClient`, no Firebase
+initializer, and `pushPlatform: apns`. `ReleaseFeatures.pushNotifications`
+remains false, notification settings remain hidden, Android auto-init remains
+disabled, iOS has neither remote-notification background mode nor
+`aps-environment`, and the disclosed cloud-fallback policy remains explicit.
+
+The exact hold exits only with PASS automated proof plus attributable supported
+Android-FCM and custom-iOS-APNs native builds covering initialization/retry,
+foreground, opened-app, local tap, and cold-start behavior. No production
+credential, live relay delivery, push token, payload, group/device identity, or
+Phase 61/62/63 evidence substitute was used or recorded.
 
 ## Biometric/PIN and secure-storage evidence
 

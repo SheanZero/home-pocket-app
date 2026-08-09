@@ -34,4 +34,32 @@ void main() {
     ).readAsStringSync();
     expect(entitlements, isNot(contains('aps-environment')));
   });
+
+  test('first release preserves custom iOS APNs and Android Firebase FCM', () {
+    final providers = File(
+      'lib/application/family_sync/repository_providers.dart',
+    ).readAsStringSync();
+    expect(providers, contains('Platform.isIOS'));
+    expect(providers, contains('? ApnsPushMessagingClient()'));
+    expect(providers, contains(': FirebasePushMessagingClient()'));
+    expect(
+      providers,
+      contains(
+        'firebaseInitializer: Platform.isIOS ? null : Firebase.initializeApp',
+      ),
+    );
+    expect(
+      providers,
+      contains("pushPlatform: Platform.isIOS ? 'apns' : 'fcm'"),
+    );
+
+    final service = File(
+      'lib/infrastructure/sync/push_notification_service.dart',
+    ).readAsStringSync();
+    expect(service, contains('Future<String?> _runInitialization()'));
+    expect(service, contains('await _localNotificationClient.initialize('));
+    expect(service, contains('await _messagingClient.requestPermission()'));
+    expect(service, contains('_initialized = true;'));
+    expect(service, contains('await _messagingClient.getInitialMessage()'));
+  });
 }
