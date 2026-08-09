@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +30,7 @@ import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/infrastructure/storage/app_owned_user_files_cleaner.dart';
 import 'package:home_pocket/infrastructure/storage/file_privacy_wipe_journal_store.dart';
+import 'package:home_pocket/shared/utils/result.dart';
 
 import 'device_test_crypto.dart';
 
@@ -50,6 +52,29 @@ const _plaintextSqliteHeader = <int>[
   0x33,
   0x00,
 ];
+const _minimumV2Bytes = 10 + 16 + 12 + 16;
+
+/// Each value maps to one current-v2-only failure boundary. No value creates
+/// or accepts a historical/headerless backup representation.
+enum BackupHostileInput {
+  wrongPassword,
+  truncatedHeader,
+  truncatedBody,
+  truncatedMac,
+  unknownVersion,
+  nonV2Headerless,
+  invalidMagicLength,
+  hostileMemoryKib,
+  hostileIterations,
+  hostileParallelism,
+  corruptAuthenticatedPayload,
+  invalidCompressedPayload,
+  invalidJson,
+  invalidSchema,
+  invalidTransaction,
+  encryptedSizeLimit,
+  decompressedSizeLimit,
+}
 
 /// Test-only composition of the production backup use cases below one unique
 /// temporary root. It deliberately does not resolve app containers, platform
@@ -74,6 +99,7 @@ class SqlCipherBackupSandbox {
   final _SandboxSettingsRepository _settings;
   final _SyntheticSecureState _secureState = _SyntheticSecureState();
   final _SandboxSyncState _syncState = _SandboxSyncState();
+  final BackupCryptoService _backupCrypto = BackupCryptoService();
 
   late AppDatabase _database;
   late BookRepositoryImpl _books;
@@ -124,7 +150,6 @@ class SqlCipherBackupSandbox {
 
   void _composeUseCases() {
     final unitOfWork = UnitOfWorkImpl(db: _database);
-    final backupCrypto = BackupCryptoService();
     _export = ExportBackupUseCase(
       transactionRepo: _transactions,
       categoryRepo: _categories,
@@ -132,7 +157,7 @@ class SqlCipherBackupSandbox {
       settingsRepo: _settings,
       exchangeRateRepo: _exchangeRates,
       unitOfWork: unitOfWork,
-      backupCrypto: backupCrypto,
+      backupCrypto: _backupCrypto,
     );
     _import = ImportBackupUseCase(
       transactionRepo: _transactions,
@@ -141,7 +166,7 @@ class SqlCipherBackupSandbox {
       settingsRepo: _settings,
       exchangeRateRepo: _exchangeRates,
       unitOfWork: unitOfWork,
-      backupCrypto: backupCrypto,
+      backupCrypto: _backupCrypto,
     );
     _restore = RestoreBackupUseCase(
       importBackup: _import.execute,
@@ -232,7 +257,8 @@ class SqlCipherBackupSandbox {
     _syncState.seed();
   }
 
-  Future<SqlCipherBackupSnapshot> snapshot() async {
+  Future<SqlCipherBackupSnapshot> snapshot({File? backup}) async {
+    if (backup != null) _assertOwned(backup);
     final books = await _books.findAll(
       includeArchived: true,
       includeShadow: true,
@@ -249,6 +275,7 @@ class SqlCipherBackupSandbox {
         .get();
     final schema = schemaRows.map((row) => row.read<String>('name')).toList()
       ..sort();
+    final integrity = await _scalar(_database, 'PRAGMA integrity_check');
     return SqlCipherBackupSnapshot(
       books: books.map((value) => value.toJson()).toList(),
       categories: categories.map((value) => value.toJson()).toList(),
@@ -269,8 +296,11 @@ class SqlCipherBackupSandbox {
           .toList(),
       settings: await _settings.getSettings(),
       schema: schema,
+      integrity: integrity,
       secureDigest: _secureState.digest,
       syncDigest: _syncState.digest,
+      ownedFilesDigest: await _ownedFilesDigest(),
+      backupDigest: backup == null ? null : await _digest(backup),
     );
   }
 
@@ -308,6 +338,172 @@ class SqlCipherBackupSandbox {
     expect(_syncState.isSuspended, isFalse);
     expect(_syncState.familyStateReset, isTrue);
     expect(await _digest(backup), digestBefore);
+  }
+
+  /// Generates a hostile current-v2 test file under this sandbox only.
+  /// Resource-limit cases reuse the authentic current-v2 bytes and lower the
+  /// importer budget instead of allocating attacker-advertised resources.
+  Future<File> createHostileBackup(
+    File original,
+    BackupHostileInput input,
+  ) async {
+    _assertOwned(original);
+    if (input == BackupHostileInput.wrongPassword ||
+        input == BackupHostileInput.encryptedSizeLimit ||
+        input == BackupHostileInput.decompressedSizeLimit) {
+      return original;
+    }
+
+    final target = File('${_backupDirectory.path}/hostile-${input.name}.hpb');
+    _assertOwned(target);
+    final bytes = await original.readAsBytes();
+    switch (input) {
+      case BackupHostileInput.truncatedHeader:
+        return target.writeAsBytes(bytes.sublist(0, 9), flush: true);
+      case BackupHostileInput.truncatedBody:
+        return target.writeAsBytes(
+          bytes.sublist(0, _minimumV2Bytes - 1),
+          flush: true,
+        );
+      case BackupHostileInput.truncatedMac:
+        return target.writeAsBytes(
+          bytes.sublist(0, bytes.length - 1),
+          flush: true,
+        );
+      case BackupHostileInput.unknownVersion:
+        return _writeMutated(target, bytes, (value) => value[3] = 0x7f);
+      case BackupHostileInput.nonV2Headerless:
+        return target.writeAsBytes(
+          List<int>.filled(_minimumV2Bytes, 0),
+          flush: true,
+        );
+      case BackupHostileInput.invalidMagicLength:
+        return target.writeAsBytes(const <int>[0x48, 0x50, 0x00], flush: true);
+      case BackupHostileInput.hostileMemoryKib:
+        return _writeMutated(
+          target,
+          bytes,
+          (value) => ByteData.sublistView(value).setUint32(4, 0xffffffff),
+        );
+      case BackupHostileInput.hostileIterations:
+        return _writeMutated(target, bytes, (value) => value[8] = 11);
+      case BackupHostileInput.hostileParallelism:
+        return _writeMutated(target, bytes, (value) => value[9] = 2);
+      case BackupHostileInput.corruptAuthenticatedPayload:
+        return _writeMutated(
+          target,
+          bytes,
+          (value) => value[value.length - 1] ^= 0xff,
+        );
+      case BackupHostileInput.invalidCompressedPayload:
+        return _encryptCurrentV2(
+          target,
+          Uint8List.fromList(const <int>[1, 2, 3]),
+        );
+      case BackupHostileInput.invalidJson:
+        return _encryptCurrentV2(
+          target,
+          Uint8List.fromList(gzip.encode(utf8.encode('{'))),
+        );
+      case BackupHostileInput.invalidSchema:
+        return _mutateCurrentV2Json(
+          original,
+          target,
+          (json) => json.remove('metadata'),
+        );
+      case BackupHostileInput.invalidTransaction:
+        return _mutateCurrentV2Json(original, target, (json) {
+          final transactions = json['transactions']! as List<dynamic>;
+          (transactions.single as Map<String, dynamic>).remove('amount');
+        });
+      case BackupHostileInput.wrongPassword:
+      case BackupHostileInput.encryptedSizeLimit:
+      case BackupHostileInput.decompressedSizeLimit:
+        throw StateError('Handled before hostile backup creation.');
+    }
+  }
+
+  /// Runs the real Restore→Import chain. The two resource cases configure a
+  /// smaller production limit, proving early rejection without large inputs.
+  Future<Result<void>> attemptRestore(
+    File backup, {
+    required BackupHostileInput input,
+  }) {
+    _assertOwned(backup);
+    final limits = switch (input) {
+      BackupHostileInput.encryptedSizeLimit => const BackupImportLimits(
+        maxEncryptedBytes: 1,
+        maxDecompressedBytes: 1,
+      ),
+      BackupHostileInput.decompressedSizeLimit => const BackupImportLimits(
+        maxEncryptedBytes: 1024 * 1024,
+        maxDecompressedBytes: 1,
+      ),
+      _ => const BackupImportLimits(),
+    };
+    final import = _composeImport(limits: limits);
+    final restore = RestoreBackupUseCase(
+      importBackup: import.execute,
+      suspendSync: _syncState.suspend,
+      resetFamilySyncState: _syncState.reset,
+      resumeSync: _syncState.resume,
+    );
+    return restore.execute(
+      backupFile: backup,
+      password: input == BackupHostileInput.wrongPassword
+          ? 'wrong-sandbox-password'
+          : _SyntheticSecureState.backupPassword,
+    );
+  }
+
+  Future<void> expectSnapshotUnchanged(
+    SqlCipherBackupSnapshot before, {
+    required File originalBackup,
+  }) async {
+    final after = await snapshot(backup: originalBackup);
+    void expectComponent(String name, Object? actual, Object? expected) {
+      expect(actual, equals(expected), reason: 'changed component: $name');
+    }
+
+    expectComponent(
+      'books',
+      _digestJson(after.books),
+      _digestJson(before.books),
+    );
+    expectComponent(
+      'categories',
+      _digestJson(after.categories),
+      _digestJson(before.categories),
+    );
+    expectComponent(
+      'transactions',
+      _digestJson(after.transactions),
+      _digestJson(before.transactions),
+    );
+    expectComponent(
+      'exchange-rates',
+      _digestJson(after.exchangeRates),
+      _digestJson(before.exchangeRates),
+    );
+    expectComponent(
+      'settings',
+      _digestJson(after.settings.toJson()),
+      _digestJson(before.settings.toJson()),
+    );
+    expectComponent(
+      'schema',
+      _digestJson(after.schema),
+      _digestJson(before.schema),
+    );
+    expectComponent('integrity', after.integrity, before.integrity);
+    expectComponent('secure-state', after.secureDigest, before.secureDigest);
+    expectComponent('sync-state', after.syncDigest, before.syncDigest);
+    expectComponent(
+      'owned-files',
+      after.ownedFilesDigest,
+      before.ownedFilesDigest,
+    );
+    expectComponent('original-backup', after.backupDigest, before.backupDigest);
   }
 
   Future<void> expectSupportedStateEquals(
@@ -363,6 +559,75 @@ class SqlCipherBackupSandbox {
     return _digest(backup);
   }
 
+  ImportBackupUseCase _composeImport({BackupImportLimits? limits}) {
+    return ImportBackupUseCase(
+      transactionRepo: _transactions,
+      categoryRepo: _categories,
+      bookRepo: _books,
+      settingsRepo: _settings,
+      exchangeRateRepo: _exchangeRates,
+      unitOfWork: UnitOfWorkImpl(db: _database),
+      backupCrypto: _backupCrypto,
+      limits: limits ?? const BackupImportLimits(),
+    );
+  }
+
+  Future<File> _writeMutated(
+    File target,
+    Uint8List original,
+    void Function(Uint8List value) mutate,
+  ) async {
+    final value = Uint8List.fromList(original);
+    mutate(value);
+    await target.writeAsBytes(value, flush: true);
+    return target;
+  }
+
+  Future<File> _encryptCurrentV2(File target, Uint8List plaintext) async {
+    final encrypted = await _backupCrypto.encrypt(
+      plaintext,
+      _SyntheticSecureState.backupPassword,
+    );
+    await target.writeAsBytes(encrypted, flush: true);
+    return target;
+  }
+
+  Future<File> _mutateCurrentV2Json(
+    File original,
+    File target,
+    void Function(Map<String, dynamic> json) mutate,
+  ) async {
+    final decrypted = await _backupCrypto.decrypt(
+      await original.readAsBytes(),
+      _SyntheticSecureState.backupPassword,
+    );
+    final json =
+        jsonDecode(utf8.decode(gzip.decode(decrypted))) as Map<String, dynamic>;
+    mutate(json);
+    return _encryptCurrentV2(
+      target,
+      Uint8List.fromList(gzip.encode(utf8.encode(jsonEncode(json)))),
+    );
+  }
+
+  Future<String> _ownedFilesDigest() async {
+    final files = <String, String>{};
+    for (final directory in <Directory>[
+      _documentsDirectory,
+      _supportDirectory,
+      _settings._file.parent,
+    ]) {
+      await for (final entity in directory.list(recursive: true)) {
+        if (entity is File) {
+          _assertOwned(entity);
+          final relative = entity.path.substring(_root.path.length);
+          files[relative] = await _digest(entity);
+        }
+      }
+    }
+    return _digestJson(files);
+  }
+
   Future<void> close() async {
     await _database.close();
     if (await _root.exists()) {
@@ -399,8 +664,11 @@ class SqlCipherBackupSnapshot {
     required this.exchangeRates,
     required this.settings,
     required this.schema,
+    required this.integrity,
     required this.secureDigest,
     required this.syncDigest,
+    required this.ownedFilesDigest,
+    required this.backupDigest,
   });
 
   final List<Map<String, dynamic>> books;
@@ -409,8 +677,11 @@ class SqlCipherBackupSnapshot {
   final List<Map<String, Object?>> exchangeRates;
   final AppSettings settings;
   final List<String> schema;
+  final String integrity;
   final String secureDigest;
   final String syncDigest;
+  final String ownedFilesDigest;
+  final String? backupDigest;
 }
 
 class _SandboxSettingsRepository implements SettingsRepository {
@@ -550,3 +821,6 @@ Future<void> _assertEncryptedHeader(File databaseFile) async {
 
 Future<String> _digest(File file) async =>
     sha256.convert(await file.readAsBytes()).toString();
+
+String _digestJson(Object? value) =>
+    sha256.convert(utf8.encode(jsonEncode(value))).toString();

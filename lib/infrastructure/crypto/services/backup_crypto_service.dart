@@ -10,14 +10,10 @@ import 'package:cryptography/cryptography.dart';
 /// Backup files leave the device via the share sheet, so offline brute force
 /// is the threat model. Encryption is Argon2id (OWASP profile, same as
 /// pin_kdf.dart) + AES-256-GCM, with a self-describing versioned header so
-/// KDF parameters can be raised later without breaking old files:
+/// KDF parameters can be raised in future current-format revisions:
 ///
 ///   v2 layout: 'HPB'(3) + version(1) + m KiB(uint32 BE) + t(1) + p(1)
 ///              + salt(16) + nonce(12) + ciphertext + mac(16)
-///
-/// Files without the magic are the legacy headerless format
-/// (PBKDF2-HMAC-SHA256 100k iterations, salt(16) + nonce(12) + ciphertext
-/// + mac(16)) and stay importable — [decrypt] auto-detects.
 ///
 /// KDF params parsed from a header are capped ([_kMaxMemoryKib] etc.): a
 /// hostile file must not be able to demand unbounded Argon2id memory.
@@ -57,17 +53,17 @@ class BackupCryptoService {
     ]);
   }
 
-  /// Decrypts a backup blob in either the v2 or the legacy format.
+  /// Decrypts a current HPB v2 backup blob.
   ///
   /// Throws [InvalidBackupFormatException] on structurally impossible input,
   /// [UnsupportedBackupFormatException] on an unknown version or hostile KDF
-  /// parameters, and [BackupDecryptionException] when authentication fails
-  /// (wrong password or tampered data — indistinguishable by design).
+  /// parameters, and [BackupDecryptionException] when authentication fails.
+  /// Headerless and otherwise non-v2 input is rejected before KDF work.
   Future<Uint8List> decrypt(Uint8List data, String password) async {
-    if (_hasMagic(data)) {
-      return _decryptVersioned(data, password);
+    if (!_hasMagic(data)) {
+      throw const InvalidBackupFormatException('missing HPB v2 header');
     }
-    return _decryptLegacy(data, password);
+    return _decryptVersioned(data, password);
   }
 
   Future<Uint8List> _decryptVersioned(Uint8List data, String password) async {
@@ -115,25 +111,6 @@ class BackupCryptoService {
     return _aesGcmDecrypt(cipherText, key, nonce, mac);
   }
 
-  Future<Uint8List> _decryptLegacy(Uint8List data, String password) async {
-    // salt(16) + nonce(12) + mac(16) with empty ciphertext = 44 bytes.
-    if (data.length < _kMinLegacyLength) {
-      throw const InvalidBackupFormatException('too small');
-    }
-    final salt = data.sublist(0, _kSaltLength);
-    final nonce = data.sublist(_kSaltLength, _kSaltLength + _kNonceLength);
-    final cipherText = data.sublist(
-      _kSaltLength + _kNonceLength,
-      data.length - _kMacLength,
-    );
-    final mac = Mac(data.sublist(data.length - _kMacLength));
-
-    final key = await Isolate.run(
-      () => _deriveLegacyPbkdf2(_KdfArgs(password, salt, 0, 0, 0)),
-    );
-    return _aesGcmDecrypt(cipherText, key, nonce, mac);
-  }
-
   Future<Uint8List> _aesGcmDecrypt(
     List<int> cipherText,
     List<int> key,
@@ -172,8 +149,8 @@ const int _kHeaderLength = 10; // magic(3) + version(1) + m(4) + t(1) + p(1)
 const int _kSaltLength = 16;
 const int _kNonceLength = 12;
 const int _kMacLength = 16;
-const int _kMinLegacyLength = _kSaltLength + _kNonceLength + _kMacLength;
-const int _kMinVersionedLength = _kHeaderLength + _kMinLegacyLength;
+const int _kMinVersionedLength =
+    _kHeaderLength + _kSaltLength + _kNonceLength + _kMacLength;
 
 // Argon2id write-path parameters — OWASP profile, mirrors pin_kdf.dart.
 // p is pinned to 1: DartArgon2id with parallelism > 1 spawns nested isolates
@@ -213,19 +190,6 @@ Future<List<int>> _deriveArgon2id(_KdfArgs args) async {
     hashLength: _kKeyLength,
   );
   final secret = await algorithm.deriveKey(
-    secretKey: SecretKey(utf8.encode(args.password)),
-    nonce: args.salt,
-  );
-  return secret.extractBytes();
-}
-
-Future<List<int>> _deriveLegacyPbkdf2(_KdfArgs args) async {
-  final pbkdf2 = Pbkdf2(
-    macAlgorithm: Hmac.sha256(),
-    iterations: 100000,
-    bits: 256,
-  );
-  final secret = await pbkdf2.deriveKey(
     secretKey: SecretKey(utf8.encode(args.password)),
     nonce: args.salt,
   );

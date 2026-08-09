@@ -1,38 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
-
-/// Builds a legacy (pre-v2, headerless) backup blob:
-/// salt(16) + nonce(12) + ciphertext + mac(16), PBKDF2-HMAC-SHA256 100k.
-Future<Uint8List> _encryptLegacy(List<int> plaintext, String password) async {
-  final pbkdf2 = Pbkdf2(
-    macAlgorithm: Hmac.sha256(),
-    iterations: 100000,
-    bits: 256,
-  );
-  final random = Random.secure();
-  final salt = List.generate(16, (_) => random.nextInt(256));
-  final nonce = List.generate(12, (_) => random.nextInt(256));
-  final secretKey = await pbkdf2.deriveKey(
-    secretKey: SecretKey(utf8.encode(password)),
-    nonce: salt,
-  );
-  final secretBox = await AesGcm.with256bits().encrypt(
-    plaintext,
-    secretKey: secretKey,
-    nonce: nonce,
-  );
-  return Uint8List.fromList([
-    ...salt,
-    ...nonce,
-    ...secretBox.cipherText,
-    ...secretBox.mac.bytes,
-  ]);
-}
 
 void main() {
   final service = BackupCryptoService();
@@ -108,18 +78,11 @@ void main() {
     });
   });
 
-  group('legacy format (headerless PBKDF2 100k) back-compat', () {
-    test('pre-v2 backup decrypts with the correct password', () async {
-      final legacy = await _encryptLegacy(plaintext, password);
-      final decrypted = await service.decrypt(legacy, password);
-      expect(decrypted, equals(plaintext));
-    });
-
-    test('pre-v2 backup with wrong password throws', () async {
-      final legacy = await _encryptLegacy(plaintext, password);
+  group('non-v2 input', () {
+    test('headerless payload rejects before decryption', () async {
       expect(
-        () => service.decrypt(legacy, 'wrong-password'),
-        throwsA(isA<BackupDecryptionException>()),
+        () => service.decrypt(Uint8List.fromList(List.filled(44, 0)), password),
+        throwsA(isA<InvalidBackupFormatException>()),
       );
     });
   });
