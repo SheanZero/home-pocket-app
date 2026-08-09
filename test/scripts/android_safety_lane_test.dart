@@ -263,6 +263,37 @@ void main() {
     );
   });
 
+  test('Emulator preparation evidence is exact or honestly unavailable', () {
+    final valid = <String, Object?>{
+      'result': 'UNAVAILABLE',
+      'api': 36,
+      'abi': 'x86_64',
+      'profile': 'pixel_6',
+      'system_image': lane.requiredAndroidSystemImage,
+      'cold_boot': 'wipe-data/no-snapshot',
+      'host_architecture': 'arm64',
+      'runtime': 'cross-architecture software translation requested',
+      'emulator_version': 'Android emulator version 36.3.10.0',
+      'serial_redacted': 'NOT_RUN',
+      'failure': 'x86_64 is unsupported on this aarch64 host',
+    };
+
+    expect(lane.validateEmulatorPreparationRecord(valid), isEmpty);
+    for (final mutation in <String, Object?>{
+      'result': 'PASS',
+      'api': 35,
+      'abi': 'arm64-v8a',
+      'system_image': 'system-images;android-36;google_apis;arm64-v8a',
+    }.entries) {
+      final mutated = {...valid, mutation.key: mutation.value};
+      expect(
+        lane.validateEmulatorPreparationRecord(mutated),
+        isNotEmpty,
+        reason: '${mutation.key} must fail closed',
+      );
+    }
+  });
+
   test(
     'release artifact scanner rejects missing and test-contaminated archives',
     () async {

@@ -475,6 +475,12 @@ void _validateEvidence(
       'emulator result must be PASS at emulator stage',
     );
   }
+  final preparation = evidence['emulator_preparation'];
+  if (preparation is Map) {
+    issues.addAll(
+      validateEmulatorPreparationRecord(preparation.cast<String, Object?>()),
+    );
+  }
   _expect(
     results['physical_device'] == 'NOT_PERFORMED_NOT_CLAIMED',
     issues,
@@ -861,6 +867,58 @@ List<String> validateEmulatorIdentity(
   return issues;
 }
 
+List<String> validateEmulatorPreparationRecord(
+  Map<String, Object?> preparation,
+) {
+  final issues = <String>[];
+  void require(bool condition, String issue) {
+    if (!condition) issues.add(issue);
+  }
+
+  final result = '${preparation['result'] ?? ''}';
+  require(
+    result == 'PASS' || result == 'UNAVAILABLE',
+    'emulator preparation result must be PASS or UNAVAILABLE',
+  );
+  require(
+    preparation['api'] == requiredAndroidApi,
+    'emulator preparation API must be 36',
+  );
+  require(
+    preparation['abi'] == requiredAndroidAbi,
+    'emulator preparation ABI must be x86_64',
+  );
+  require(
+    preparation['profile'] == 'pixel_6',
+    'emulator preparation profile must be pixel_6',
+  );
+  require(
+    preparation['system_image'] == requiredAndroidSystemImage,
+    'emulator preparation system image is not exact',
+  );
+  require(
+    preparation['cold_boot'] == 'wipe-data/no-snapshot',
+    'emulator preparation must be a clean cold boot',
+  );
+  require(
+    '${preparation['emulator_version'] ?? ''}'.trim().isNotEmpty &&
+        preparation['emulator_version'] != 'UNAVAILABLE',
+    'emulator preparation version is missing',
+  );
+  if (result == 'PASS') {
+    require(
+      preparation['serial_redacted'] == '<emulator-redacted>',
+      'successful emulator preparation must redact the serial',
+    );
+  } else if (result == 'UNAVAILABLE') {
+    require(
+      '${preparation['failure'] ?? ''}'.trim().isNotEmpty,
+      'unavailable emulator preparation must record a failure',
+    );
+  }
+  return issues;
+}
+
 List<String> discoverIntegrationTestFiles(Directory root) {
   if (!root.existsSync()) return const [];
   final prefix = '${root.path}${Platform.pathSeparator}';
@@ -933,6 +991,7 @@ void _recordEmulatorPreparation({
   final issues = <String>[];
   final evidence = parseEvidenceMarkdown(markdown, issues);
   if (issues.isNotEmpty) throw StateError(issues.join('; '));
+  final hostArchitecture = _hostArchitectureSync();
   evidence['emulator_preparation'] = {
     'result': prepared != null && failure == null ? 'PASS' : 'UNAVAILABLE',
     'source_commit': _gitOutput(root, ['rev-parse', 'HEAD']),
@@ -943,10 +1002,12 @@ void _recordEmulatorPreparation({
     'profile': 'pixel_6',
     'system_image': requiredAndroidSystemImage,
     'cold_boot': 'wipe-data/no-snapshot',
-    'runtime': prepared?.softwareTranslation == true
-        ? 'cross-architecture software translation (-no-accel)'
+    'host_architecture': hostArchitecture,
+    'runtime': hostArchitecture == 'arm64'
+        ? 'cross-architecture software translation requested (-no-accel)'
         : 'native host execution',
-    'emulator_version': prepared?.emulatorVersion ?? 'UNAVAILABLE',
+    'emulator_version':
+        prepared?.emulatorVersion ?? _installedEmulatorVersion(),
     'serial_redacted': prepared == null ? 'NOT_RUN' : '<emulator-redacted>',
     'boot_started_utc': prepared?.started.toIso8601String() ?? 'NOT_RUN',
     'boot_ready_utc': prepared?.ready.toIso8601String() ?? 'NOT_RUN',
@@ -1275,6 +1336,22 @@ String _firstNonEmptyLine(String output) => output
     .split('\n')
     .map((line) => line.trim())
     .firstWhere((line) => line.isNotEmpty, orElse: () => 'unknown');
+
+String _hostArchitectureSync() {
+  final result = Process.runSync('uname', const ['-m']);
+  return result.exitCode == 0 ? '${result.stdout}'.trim() : 'unknown';
+}
+
+String _installedEmulatorVersion() {
+  final androidSdk = _androidSdkRoot();
+  if (androidSdk == null) return 'unknown';
+  final result = Process.runSync('$androidSdk/emulator/emulator', const [
+    '-version',
+  ]);
+  return result.exitCode == 0
+      ? _firstNonEmptyLine('${result.stdout}${result.stderr}')
+      : 'unknown';
+}
 
 class _ReleaseArtifactResult {
   const _ReleaseArtifactResult({
