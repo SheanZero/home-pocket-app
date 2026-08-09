@@ -127,10 +127,16 @@ Future<void> main(List<String> arguments) async {
         }
         stdout.writeln(result.message);
       case AndroidSafetyMode.emulator:
-        stderr.writeln(
-          'ERROR: emulator mode is not implemented until plan 61-05',
+        final result = await runEmulatorEvidence(
+          Directory.current,
+          prepareOnly: options.prepareOnly,
         );
-        exitCode = 2;
+        if (!result.completed) {
+          stderr.writeln('ERROR: ${result.message}');
+          exitCode = 2;
+          return;
+        }
+        stdout.writeln(result.message);
     }
   } on Object catch (error) {
     stderr.writeln('ERROR: $error');
@@ -778,6 +784,34 @@ class ReleaseEvidenceResult {
   final String message;
 }
 
+class EmulatorEvidenceResult {
+  const EmulatorEvidenceResult({
+    required this.completed,
+    required this.message,
+  });
+
+  final bool completed;
+  final String message;
+}
+
+class _PreparedEmulator {
+  const _PreparedEmulator({
+    required this.avdName,
+    required this.serial,
+    required this.started,
+    required this.ready,
+    required this.emulatorVersion,
+    required this.softwareTranslation,
+  });
+
+  final String avdName;
+  final String serial;
+  final DateTime started;
+  final DateTime ready;
+  final String emulatorVersion;
+  final bool softwareTranslation;
+}
+
 class EmulatorIdentityExpectation {
   const EmulatorIdentityExpectation({
     required this.avdName,
@@ -848,6 +882,399 @@ List<String> discoverIntegrationTestFiles(Directory root) {
 
 String redactEmulatorSerial(String value) =>
     value.replaceAll(RegExp(r'emulator-\d{4}'), '<emulator-redacted>');
+
+Future<EmulatorEvidenceResult> runEmulatorEvidence(
+  Directory root, {
+  required bool prepareOnly,
+}) async {
+  final started = DateTime.now().toUtc();
+  _PreparedEmulator? prepared;
+  String? failure;
+  try {
+    await _withPreparedEmulator(root, (session) async {
+      prepared = session;
+      if (!prepareOnly) {
+        throw StateError(
+          'full emulator matrix is not implemented until task 61-05-02',
+        );
+      }
+    });
+  } on Object catch (error) {
+    failure = scrubCandidateOutput('$error');
+  }
+
+  _recordEmulatorPreparation(
+    root: root,
+    started: started,
+    prepared: prepared,
+    failure: failure,
+  );
+  if (failure != null || prepared == null) {
+    return EmulatorEvidenceResult(
+      completed: false,
+      message: failure ?? 'API 36 x86_64 Emulator preparation unavailable',
+    );
+  }
+  return const EmulatorEvidenceResult(
+    completed: true,
+    message:
+        'PASS: disposable API 36 x86_64 Emulator cold-booted and was cleaned up',
+  );
+}
+
+void _recordEmulatorPreparation({
+  required Directory root,
+  required DateTime started,
+  required _PreparedEmulator? prepared,
+  required String? failure,
+}) {
+  final file = File('${root.path}/$evidencePath');
+  final markdown = file.readAsStringSync();
+  final issues = <String>[];
+  final evidence = parseEvidenceMarkdown(markdown, issues);
+  if (issues.isNotEmpty) throw StateError(issues.join('; '));
+  evidence['emulator_preparation'] = {
+    'result': prepared != null && failure == null ? 'PASS' : 'UNAVAILABLE',
+    'source_commit': _gitOutput(root, ['rev-parse', 'HEAD']),
+    'started_utc': started.toIso8601String(),
+    'completed_utc': DateTime.now().toUtc().toIso8601String(),
+    'api': requiredAndroidApi,
+    'abi': requiredAndroidAbi,
+    'profile': 'pixel_6',
+    'system_image': requiredAndroidSystemImage,
+    'cold_boot': 'wipe-data/no-snapshot',
+    'runtime': prepared?.softwareTranslation == true
+        ? 'cross-architecture software translation (-no-accel)'
+        : 'native host execution',
+    'emulator_version': prepared?.emulatorVersion ?? 'UNAVAILABLE',
+    'serial_redacted': prepared == null ? 'NOT_RUN' : '<emulator-redacted>',
+    'boot_started_utc': prepared?.started.toIso8601String() ?? 'NOT_RUN',
+    'boot_ready_utc': prepared?.ready.toIso8601String() ?? 'NOT_RUN',
+    if (failure != null) 'failure': _diagnosticLine(failure),
+  };
+  final rendered = const JsonEncoder.withIndent('  ').convert(evidence);
+  final start = markdown.indexOf(_evidenceStart) + _evidenceStart.length;
+  final end = markdown.indexOf(_evidenceEnd);
+  file.writeAsStringSync(
+    '${markdown.substring(0, start)}\n```json\n$rendered\n```\n'
+    '${markdown.substring(end)}',
+  );
+}
+
+Future<void> _withPreparedEmulator(
+  Directory root,
+  Future<void> Function(_PreparedEmulator session) operation,
+) async {
+  final jdkHome = _resolveJdk17Home();
+  final androidSdk = _androidSdkRoot();
+  if (jdkHome == null || androidSdk == null) {
+    throw StateError('verified JDK 17 or Android SDK is unavailable');
+  }
+  final sdkManager = '$androidSdk/cmdline-tools/latest/bin/sdkmanager';
+  final avdManager = '$androidSdk/cmdline-tools/latest/bin/avdmanager';
+  final emulator = '$androidSdk/emulator/emulator';
+  final adb = '$androidSdk/platform-tools/adb';
+  for (final executable in [sdkManager, avdManager, emulator, adb]) {
+    if (!File(executable).existsSync()) {
+      throw StateError('required Android SDK tool is unavailable');
+    }
+  }
+  final environment = <String, String>{
+    'JAVA_HOME': jdkHome,
+    'ANDROID_HOME': androidSdk,
+    'ANDROID_SDK_ROOT': androidSdk,
+  };
+  final image = File(
+    '$androidSdk/system-images/android-36/google_apis/x86_64/package.xml',
+  );
+  if (!image.existsSync()) {
+    final install = await runBoundedCommand(
+      sdkManager,
+      const [requiredAndroidSystemImage],
+      workingDirectory: root,
+      environment: environment,
+      timeout: const Duration(minutes: 30),
+      durableCommand: 'sdkmanager $requiredAndroidSystemImage',
+    );
+    if (install.exitCode != 0 || !image.existsSync()) {
+      throw StateError(
+        'exact API 36 x86_64 system image installation failed: '
+        '${_diagnosticLine(install.output)}',
+      );
+    }
+  }
+
+  final devices = await runBoundedCommand(
+    adb,
+    const ['devices'],
+    workingDirectory: root,
+    environment: environment,
+    timeout: const Duration(seconds: 30),
+    durableCommand: 'adb devices',
+  );
+  if (devices.exitCode != 0) {
+    throw StateError('ADB readiness check failed');
+  }
+  if (_adbDeviceSerials(devices.output).isNotEmpty) {
+    throw StateError(
+      'existing unrelated Android device detected; refusing ownership claim',
+    );
+  }
+
+  final architecture = await Process.run('uname', const ['-m']);
+  final hostArchitecture = architecture.exitCode == 0
+      ? '${architecture.stdout}'.trim()
+      : 'unknown';
+  final avdName =
+      'phase61_api36_x86_${DateTime.now().toUtc().microsecondsSinceEpoch}';
+  final port = await _availableEmulatorPort();
+  final serial = 'emulator-$port';
+  final create = await runBoundedCommand(
+    avdManager,
+    [
+      'create',
+      'avd',
+      '--force',
+      '--name',
+      avdName,
+      '--package',
+      requiredAndroidSystemImage,
+      '--device',
+      'pixel_6',
+    ],
+    workingDirectory: root,
+    environment: environment,
+    timeout: const Duration(minutes: 2),
+    durableCommand:
+        'avdmanager create avd --name <runner-owned> '
+        '--package $requiredAndroidSystemImage --device pixel_6',
+  );
+  if (create.exitCode != 0) {
+    throw StateError(
+      'runner-owned AVD creation failed: ${_diagnosticLine(create.output)}',
+    );
+  }
+
+  Process? emulatorProcess;
+  final emulatorOutput = _BoundedOutputBuffer(maxDurableOutputChars * 2);
+  List<Future<void>> drains = const [];
+  var emulatorExited = false;
+  var emulatorExitCode = -1;
+  try {
+    final version = await runBoundedCommand(
+      emulator,
+      const ['-version'],
+      workingDirectory: root,
+      environment: environment,
+      timeout: const Duration(seconds: 30),
+      durableCommand: 'emulator -version',
+    );
+    if (version.exitCode != 0) {
+      throw StateError('Android Emulator version check failed');
+    }
+    final bootStarted = DateTime.now().toUtc();
+    emulatorProcess = await Process.start(
+      emulator,
+      emulatorLaunchArguments(
+        avdName: avdName,
+        port: port,
+        hostArchitecture: hostArchitecture,
+      ),
+      workingDirectory: root.path,
+      environment: environment,
+      includeParentEnvironment: true,
+    );
+    drains = [
+      emulatorProcess.stdout
+          .transform(utf8.decoder)
+          .forEach(emulatorOutput.add),
+      emulatorProcess.stderr
+          .transform(utf8.decoder)
+          .forEach(emulatorOutput.add),
+    ];
+    unawaited(
+      emulatorProcess.exitCode.then((code) {
+        emulatorExited = true;
+        emulatorExitCode = code;
+      }),
+    );
+
+    final deadline = DateTime.now().add(const Duration(minutes: 15));
+    Map<String, String>? observation;
+    while (DateTime.now().isBefore(deadline)) {
+      if (emulatorExited) {
+        throw StateError(
+          'Android Emulator exited before readiness '
+          '(exit $emulatorExitCode): ${_diagnosticLine(emulatorOutput.value)}',
+        );
+      }
+      final state = await _adbCommand(
+        adb: adb,
+        serial: serial,
+        arguments: const ['get-state'],
+        root: root,
+        environment: environment,
+      );
+      if (state.exitCode == 0 && state.output.trim() == 'device') {
+        observation = await _readEmulatorIdentity(
+          adb: adb,
+          serial: serial,
+          root: root,
+          environment: environment,
+        );
+        if (observation['bootCompleted'] == '1') break;
+      }
+      await Future<void>.delayed(const Duration(seconds: 3));
+    }
+    if (observation == null || observation['bootCompleted'] != '1') {
+      throw StateError('Android Emulator did not boot within 15 minutes');
+    }
+    final identityIssues = validateEmulatorIdentity(
+      observation,
+      EmulatorIdentityExpectation(avdName: avdName, serial: serial),
+    );
+    if (identityIssues.isNotEmpty) {
+      throw StateError(
+        'Android Emulator identity mismatch: ${identityIssues.join('; ')}',
+      );
+    }
+    for (final setting in const [
+      ['window_animation_scale', '0'],
+      ['transition_animation_scale', '0'],
+      ['animator_duration_scale', '0'],
+    ]) {
+      final disabled = await _adbCommand(
+        adb: adb,
+        serial: serial,
+        arguments: ['shell', 'settings', 'put', 'global', ...setting],
+        root: root,
+        environment: environment,
+      );
+      if (disabled.exitCode != 0) {
+        throw StateError('failed to disable Emulator animations');
+      }
+    }
+    await operation(
+      _PreparedEmulator(
+        avdName: avdName,
+        serial: serial,
+        started: bootStarted,
+        ready: DateTime.now().toUtc(),
+        emulatorVersion: _firstNonEmptyLine(version.output),
+        softwareTranslation: hostArchitecture == 'arm64',
+      ),
+    );
+  } finally {
+    if (emulatorProcess != null) {
+      await _adbCommand(
+        adb: adb,
+        serial: serial,
+        arguments: const ['emu', 'kill'],
+        root: root,
+        environment: environment,
+      );
+      try {
+        await emulatorProcess.exitCode.timeout(const Duration(seconds: 15));
+      } on TimeoutException {
+        emulatorProcess.kill(ProcessSignal.sigterm);
+      }
+      await Future.wait(drains);
+    }
+    await runBoundedCommand(
+      avdManager,
+      ['delete', 'avd', '--name', avdName],
+      workingDirectory: root,
+      environment: environment,
+      timeout: const Duration(minutes: 1),
+      durableCommand: 'avdmanager delete avd --name <runner-owned>',
+    );
+  }
+}
+
+Future<BoundedCommandResult> _adbCommand({
+  required String adb,
+  required String serial,
+  required List<String> arguments,
+  required Directory root,
+  required Map<String, String> environment,
+}) => runBoundedCommand(
+  adb,
+  ['-s', serial, ...arguments],
+  workingDirectory: root,
+  environment: environment,
+  timeout: const Duration(seconds: 20),
+  durableCommand: 'adb -s <emulator-redacted> ${arguments.join(' ')}',
+);
+
+Future<Map<String, String>> _readEmulatorIdentity({
+  required String adb,
+  required String serial,
+  required Directory root,
+  required Map<String, String> environment,
+}) async {
+  Future<String> property(String name) async {
+    final result = await _adbCommand(
+      adb: adb,
+      serial: serial,
+      arguments: ['shell', 'getprop', name],
+      root: root,
+      environment: environment,
+    );
+    return result.exitCode == 0 ? result.output.trim() : '';
+  }
+
+  final avd = await _adbCommand(
+    adb: adb,
+    serial: serial,
+    arguments: const ['emu', 'avd', 'name'],
+    root: root,
+    environment: environment,
+  );
+  return {
+    'serial': serial,
+    'bootCompleted': await property('sys.boot_completed'),
+    'api': await property('ro.build.version.sdk'),
+    'abi': await property('ro.product.cpu.abi'),
+    'avdName': avd.output
+        .split('\n')
+        .map((line) => line.trim())
+        .firstWhere(
+          (line) => line.isNotEmpty && line != 'OK',
+          orElse: () => '',
+        ),
+  };
+}
+
+List<String> _adbDeviceSerials(String output) => output
+    .split('\n')
+    .skip(1)
+    .map((line) => line.trim())
+    .where((line) => line.isNotEmpty)
+    .map((line) => line.split(RegExp(r'\s+')).first)
+    .toList();
+
+Future<int> _availableEmulatorPort() async {
+  for (var port = 5580; port <= 5680; port += 2) {
+    ServerSocket? console;
+    ServerSocket? adb;
+    try {
+      console = await ServerSocket.bind(InternetAddress.loopbackIPv4, port);
+      adb = await ServerSocket.bind(InternetAddress.loopbackIPv4, port + 1);
+      return port;
+    } on SocketException {
+      // Try the next complete console/ADB port pair.
+    } finally {
+      await console?.close();
+      await adb?.close();
+    }
+  }
+  throw StateError('no free Emulator console/ADB port pair is available');
+}
+
+String _firstNonEmptyLine(String output) => output
+    .split('\n')
+    .map((line) => line.trim())
+    .firstWhere((line) => line.isNotEmpty, orElse: () => 'unknown');
 
 class _ReleaseArtifactResult {
   const _ReleaseArtifactResult({
