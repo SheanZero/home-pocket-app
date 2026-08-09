@@ -225,7 +225,7 @@ Plans:
   3. The final Android combination produces a non-debug-signed release AAB/APK that the signing contract accepts and that contains no test-only registrar or plugin.
   4. Key integration journeys pass on a supported Android Emulator, and the final evidence explicitly says Android physical-device acceptance was not performed or claimed.
 
-**Plans**: 3/6 plans executed
+**Plans**: 4/6 plans executed
 **Wave 1**
 
 - [x] 61-01-PLAN.md — Establish the fail-closed candidate-or-hold tracer, official candidate metadata, and redacted evidence schema.
@@ -240,7 +240,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 61-04-PLAN.md — Produce and independently verify non-debug-signed release AAB/APK artifacts and packaged hygiene.
+- [x] 61-04-PLAN.md — Produce and independently verify non-debug-signed release AAB/APK artifacts and packaged hygiene.
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
