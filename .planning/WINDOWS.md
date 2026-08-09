@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 5
+open_count: 6
 waived_count: 0
 fixed_count: 2
-total_count: 7
-last_updated: 2026-08-09T11:00:58.351Z
+total_count: 8
+last_updated: 2026-08-09T12:15:46.161Z
 ---
 
 # Broken Windows Ledger
@@ -22,6 +22,7 @@ last_updated: 2026-08-09T11:00:58.351Z
 | 5 | 60 | unrun-verify | test/ |  | Serialized full Flutter suite was stopped after two scoped regressions were fixed; its remaining long script-fixture tail was not rerun. | open |  | 2026-08-09T08:58:42.785Z |  |
 | 6 | 60 | unrun-verify | integration_test/sqlcipher_native_assets_lifecycle_test.dart |  | Current-schema Simulator lifecycle blocked before test launch by existing iOS linker/CoreSimulator failure. | open |  | 2026-08-09T10:44:44.080Z |  |
 | 7 | 60 | unrun-verify | integration_test/sqlcipher_backup_recovery_test.dart |  | Booted-Simulator recovery verifier stopped during Flutter Xcode build before emitting a runtime test result. | open |  | 2026-08-09T11:00:58.351Z |  |
+| 8 | 60 | unrun-verify | scripts/verify_ios_native_safety_lane.dart |  | Current-schema lifecycle Simulator runtime is blocked by Flutter-symbol linkage before launch; do not substitute compile-only evidence. | open |  | 2026-08-09T12:15:46.161Z |  |
 
 ````json
 [
@@ -107,6 +108,18 @@ last_updated: 2026-08-09T11:00:58.351Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-09T11:00:58.351Z",
+    "resolved_at": null
+  },
+  {
+    "id": 8,
+    "kind": "unrun-verify",
+    "phase": "60",
+    "file": "scripts/verify_ios_native_safety_lane.dart",
+    "line": null,
+    "description": "Current-schema lifecycle Simulator runtime is blocked by Flutter-symbol linkage before launch; do not substitute compile-only evidence.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-09T12:15:46.161Z",
     "resolved_at": null
   }
 ]
