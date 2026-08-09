@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:yaml/yaml.dart';
 
+import 'verify_android_safety_lane.dart' as android_lane;
+
 enum DependencyCompatibilityMode { baseline, futureProbe }
 
 enum CompatibilitySeverity { error, warning }
@@ -283,6 +285,7 @@ CompatibilityReport validateDependencyCompatibility({
   required String metadataYaml,
   required String flutterExtensionSource,
   required String runningFlutterMachineJson,
+  required List<String> legacyKgpPlugins,
   String? generatedSwiftPackageManifest,
   required bool pubspecOverridesPresent,
   required Map<String, String> trackedInputContents,
@@ -306,6 +309,16 @@ CompatibilityReport validateDependencyCompatibility({
   final dartToolchain = _map(toolchains['dart']);
 
   _validateManifestPolicy(issues: issues, baseline: baseline.data);
+  _validateAndroidTerminalGraph(
+    issues: issues,
+    baseline: baseline.data,
+    androidSettings: androidSettings,
+    androidAppBuild: androidAppBuild,
+    androidProperties: androidProperties,
+    gradleWrapper: gradleWrapper,
+    flutterExtensionSource: flutterExtensionSource,
+    legacyKgpPlugins: legacyKgpPlugins,
+  );
 
   void expectConstraint(String package, String expected) {
     final actual = allDirectDependencies[package]?.toString();
@@ -462,32 +475,6 @@ CompatibilityReport validateDependencyCompatibility({
     }
   }
 
-  expectText(
-    'android/gradle.properties',
-    androidProperties,
-    'android.builtInKotlin=false',
-  );
-  expectText(
-    'android/gradle.properties',
-    androidProperties,
-    'android.newDsl=false',
-  );
-  expectText(
-    'android/settings.gradle.kts',
-    androidSettings,
-    'id("com.android.application") version "8.11.1"',
-  );
-  expectText(
-    'android/settings.gradle.kts',
-    androidSettings,
-    'id("org.jetbrains.kotlin.android") version "2.2.20"',
-  );
-  expectText(
-    'android/app/build.gradle.kts',
-    androidAppBuild,
-    'id("kotlin-android")',
-  );
-  expectText('Gradle wrapper', gradleWrapper, 'gradle-8.14-all.zip');
   if (pubspecYaml.contains('enable-swift-package-manager: false')) {
     issues.add('Swift Package Manager must stay enabled for supported plugins');
   }
@@ -518,10 +505,6 @@ CompatibilityReport validateDependencyCompatibility({
       pubspecYaml.contains('dependency_overrides:')) {
     issues.add('pubspec dependency_overrides must not be present');
   }
-  if (!androidAppBuild.contains('minSdk = flutter.minSdkVersion')) {
-    issues.add('Android minSdk must inherit flutter.minSdkVersion');
-  }
-
   _validateTrackedInputs(
     issues: issues,
     manifestInputs: _map(baseline.data['tracked_inputs']),
@@ -1496,6 +1479,185 @@ bool _isLexicallyOrdered(List<String> values) {
   return true;
 }
 
+void _validateAndroidTerminalGraph({
+  required List<String> issues,
+  required Map<String, Object?> baseline,
+  required String androidSettings,
+  required String androidAppBuild,
+  required String androidProperties,
+  required String gradleWrapper,
+  required String flutterExtensionSource,
+  required List<String> legacyKgpPlugins,
+}) {
+  const holdAgp = '8.11.1';
+  const holdGradle = '8.14';
+  const holdKotlin = '2.2.20';
+  const candidateAgp = '9.3.1';
+  const candidateGradle = '9.5.0';
+  const holdDescription =
+      'AGP 8.11.1 + Gradle 8.14 + Kotlin 2.2.20 + JDK 17 + API 36';
+  const candidateDescription =
+      'AGP 9.3.1 + Gradle 9.5.0 + built-in Kotlin/new DSL + JDK 17 + API 36';
+
+  final toolchains = _map(baseline['toolchains']);
+  final lanes = _map(baseline['lanes']);
+  final lane = _map(lanes['phase61_android']);
+  final agp = _map(toolchains['agp']);
+  final gradle = _map(toolchains['gradle']);
+  final jdk = _map(toolchains['jdk']);
+  final androidSdk = _map(toolchains['android_sdk']);
+  final androidFloor = _map(_map(baseline['platform_floors'])['android']);
+
+  void expect(bool condition, String message) {
+    if (!condition) issues.add(message);
+  }
+
+  int occurrences(String source, String marker) =>
+      marker.isEmpty ? 0 : source.split(marker).length - 1;
+
+  expect(
+    '${jdk['selected_current']}' == '17',
+    'Android JDK must be exactly 17',
+  );
+  expect(
+    '${androidSdk['selected_current']}' == '36',
+    'Android compile/target SDK policy must be API 36',
+  );
+  expect(
+    androidFloor['selected'] == 24,
+    'Android minSdk policy must be API 24',
+  );
+  expect(
+    androidAppBuild.contains('compileSdk = flutter.compileSdkVersion') &&
+        androidAppBuild.contains('targetSdk = flutter.targetSdkVersion'),
+    'Android compileSdk and targetSdk must inherit Flutter API 36',
+  );
+  expect(
+    androidAppBuild.contains('minSdk = flutter.minSdkVersion'),
+    'Android minSdk must inherit flutter.minSdkVersion',
+  );
+  expect(
+    androidAppBuild.contains('sourceCompatibility = JavaVersion.VERSION_17') &&
+        androidAppBuild.contains(
+          'targetCompatibility = JavaVersion.VERSION_17',
+        ),
+    'Android Java source and target compatibility must remain JDK 17',
+  );
+
+  int? extensionValue(String property) => int.tryParse(
+    RegExp(
+          'val ${RegExp.escape(property)}: Int = (\\d+)',
+        ).firstMatch(flutterExtensionSource)?.group(1) ??
+        '',
+  );
+  expect(
+    extensionValue('compileSdkVersion') == 36 &&
+        extensionValue('targetSdkVersion') == 36,
+    'FlutterExtension.kt compileSdkVersion and targetSdkVersion must both be API 36',
+  );
+
+  final decision = '${lane['decision'] ?? ''}';
+  expect(
+    decision == 'hold' || decision == 'selected',
+    'Phase 61 Android decision must be hold or selected',
+  );
+  if (decision == 'hold') {
+    expect(
+      lane['selected'] == holdDescription,
+      'Android hold description is stale',
+    );
+    expect(
+      agp['selected_current'] == holdAgp &&
+          gradle['selected_current'] == holdGradle,
+      'Android hold toolchains must be AGP $holdAgp and Gradle $holdGradle',
+    );
+    expect(
+      occurrences(
+            androidSettings,
+            'id("com.android.application") version "$holdAgp" apply false',
+          ) ==
+          1,
+      'Android hold must declare AGP $holdAgp exactly once',
+    );
+    expect(
+      occurrences(
+            androidSettings,
+            'id("org.jetbrains.kotlin.android") version "$holdKotlin" apply false',
+          ) ==
+          1,
+      'Android hold must declare Kotlin $holdKotlin exactly once',
+    );
+    expect(
+      occurrences(androidAppBuild, 'id("kotlin-android")') == 1,
+      'Android hold must apply app KGP exactly once',
+    );
+    expect(
+      occurrences(androidProperties, 'android.builtInKotlin=false') == 1 &&
+          occurrences(androidProperties, 'android.newDsl=false') == 1,
+      'Android hold must retain both legacy opt-outs exactly once',
+    );
+    expect(
+      gradleWrapper.contains('gradle-$holdGradle-all.zip') &&
+          !gradleWrapper.contains('gradle-$candidateGradle-all.zip'),
+      'Android hold wrapper must be exactly Gradle $holdGradle',
+    );
+    expect(
+      !androidSettings.contains('version "$candidateAgp"') &&
+          !androidAppBuild.contains('JvmTarget.JVM_17'),
+      'Android hold must contain no partial AGP 9/built-in-Kotlin residue',
+    );
+    expect(
+      legacyKgpPlugins.isNotEmpty,
+      'Android hold must retain an observed legacy KGP plugin inventory',
+    );
+    final reason = '${lane['compatibility_reason'] ?? ''}';
+    for (final plugin in legacyKgpPlugins) {
+      expect(
+        reason.contains(plugin),
+        'Android hold reason must name legacy KGP plugin $plugin',
+      );
+    }
+  } else if (decision == 'selected') {
+    expect(
+      lane['selected'] == candidateDescription,
+      'Android selected description is stale',
+    );
+    expect(
+      agp['selected_current'] == candidateAgp &&
+          gradle['selected_current'] == candidateGradle,
+      'Android selected toolchains must be AGP $candidateAgp and Gradle $candidateGradle',
+    );
+    expect(
+      occurrences(
+            androidSettings,
+            'id("com.android.application") version "$candidateAgp" apply false',
+          ) ==
+          1,
+      'Android selected graph must declare AGP $candidateAgp exactly once',
+    );
+    expect(
+      !androidSettings.contains('org.jetbrains.kotlin.android') &&
+          !androidAppBuild.contains('kotlin-android') &&
+          !androidAppBuild.contains('kotlinOptions') &&
+          androidAppBuild.contains('JvmTarget.JVM_17'),
+      'Android selected graph must use only the built-in Kotlin compiler DSL',
+    );
+    expect(
+      !androidProperties.contains('android.builtInKotlin') &&
+          !androidProperties.contains('android.newDsl'),
+      'Android selected graph must remove both legacy opt-outs',
+    );
+    expect(
+      gradleWrapper.contains('gradle-$candidateGradle-all.zip'),
+      'Android selected wrapper must be Gradle $candidateGradle',
+    );
+    expect(
+      legacyKgpPlugins.isEmpty,
+      'Android selected graph must have no resolved legacy KGP plugins',
+    );
+  }
+}
+
 void _validateManifestPolicy({
   required List<String> issues,
   required Map<String, Object?> baseline,
@@ -1937,6 +2099,7 @@ Future<void> main(List<String> arguments) async {
     metadataYaml: read('.metadata'),
     flutterExtensionSource: running.extensionSource,
     runningFlutterMachineJson: running.machineJson,
+    legacyKgpPlugins: android_lane.inventoryLegacyKgpPlugins(Directory.current),
     generatedSwiftPackageManifest: generatedSwiftPackageManifest,
     pubspecOverridesPresent: _pubspecOverridesPresent(pubspec),
     trackedInputContents: _trackedInputContents(read),

@@ -23,7 +23,11 @@ const _betaFlutterMachineJson = '''
 }
 ''';
 
-const _flutterExtensionFixture = 'val minSdkVersion: Int = 24';
+const _flutterExtensionFixture = '''
+val compileSdkVersion: Int = 36
+val minSdkVersion: Int = 24
+val targetSdkVersion: Int = 36
+''';
 
 const _generatedSwiftPackageIos15Manifest = '''
 // swift-tools-version: 5.9
@@ -218,6 +222,12 @@ void main() {
         flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
         runningFlutterMachineJson:
             runningFlutterMachineJson ?? _runningFlutterMachineJson,
+        legacyKgpPlugins: const [
+          'file_picker',
+          'package_info_plus',
+          'share_plus',
+          'speech_to_text',
+        ],
         generatedSwiftPackageManifest: generatedSwiftPackageManifest,
         pubspecOverridesPresent: pubspecOverridesPresent,
         trackedInputContents: trackedInputs(input),
@@ -247,6 +257,12 @@ void main() {
     flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
     runningFlutterMachineJson:
         runningFlutterMachineJson ?? _runningFlutterMachineJson,
+    legacyKgpPlugins: const [
+      'file_picker',
+      'package_info_plus',
+      'share_plus',
+      'speech_to_text',
+    ],
     pubspecOverridesPresent: false,
     trackedInputContents: trackedInputs(input),
     mode: mode,
@@ -258,6 +274,97 @@ void main() {
 
   test('BASE-01 traces the reviewed SQLCipher hold through the validator', () {
     expect(validate(currentInputs()), isEmpty);
+  });
+
+  test('AND-01/AND-02 terminal Android hold rejects every coupled drift', () {
+    final mutations = <String, (String, String, String)>{
+      'settings': (
+        'id("com.android.application") version "8.11.1"',
+        'id("com.android.application") version "9.3.1"',
+        'Android hold must declare AGP 8.11.1 exactly once',
+      ),
+      'wrapper': (
+        'gradle-8.14-all.zip',
+        'gradle-9.5.0-all.zip',
+        'Android hold wrapper must be exactly Gradle 8.14',
+      ),
+      'properties': (
+        'android.builtInKotlin=false',
+        '',
+        'Android hold must retain both legacy opt-outs exactly once',
+      ),
+      'appBuild': (
+        'id("kotlin-android")',
+        '',
+        'Android hold must apply app KGP exactly once',
+      ),
+    };
+
+    for (final entry in mutations.entries) {
+      final input = currentInputs();
+      input[entry.key] = input[entry.key]!.replaceFirst(
+        entry.value.$1,
+        entry.value.$2,
+      );
+      expect(validate(input), contains(entry.value.$3), reason: entry.key);
+    }
+  });
+
+  test('AND-01/AND-04 independently lock JDK 17 and Android API 36/24', () {
+    final baseline =
+        jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final toolchains = baseline['toolchains'] as Map<String, dynamic>;
+    (toolchains['jdk'] as Map<String, dynamic>)['selected_current'] = '21';
+    expect(
+      validate(currentInputs(), baselineJson: jsonEncode(baseline)),
+      contains('Android JDK must be exactly 17'),
+    );
+
+    expect(
+      validate(
+        currentInputs(),
+        extensionSource: _flutterExtensionFixture.replaceAll('36', '35'),
+      ),
+      contains(
+        'FlutterExtension.kt compileSdkVersion and targetSdkVersion must both be API 36',
+      ),
+    );
+
+    final app = currentInputs();
+    app['appBuild'] = app['appBuild']!.replaceFirst(
+      'targetCompatibility = JavaVersion.VERSION_17',
+      'targetCompatibility = JavaVersion.VERSION_11',
+    );
+    expect(
+      validate(app),
+      contains(
+        'Android Java source and target compatibility must remain JDK 17',
+      ),
+    );
+  });
+
+  test('AND-02 cannot relabel the current legacy graph as selected', () {
+    final baseline =
+        jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final lane =
+        (baseline['lanes'] as Map<String, dynamic>)['phase61_android']
+            as Map<String, dynamic>;
+    lane['decision'] = 'selected';
+    lane['selected'] =
+        'AGP 9.3.1 + Gradle 9.5.0 + built-in Kotlin/new DSL + JDK 17 + API 36';
+    final toolchains = baseline['toolchains'] as Map<String, dynamic>;
+    (toolchains['agp'] as Map<String, dynamic>)['selected_current'] = '9.3.1';
+    (toolchains['gradle'] as Map<String, dynamic>)['selected_current'] =
+        '9.5.0';
+
+    expect(
+      validate(currentInputs(), baselineJson: jsonEncode(baseline)),
+      contains(
+        'Android selected graph must use only the built-in Kotlin compiler DSL',
+      ),
+    );
   });
 
   test(
