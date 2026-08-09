@@ -25,6 +25,18 @@ const _betaFlutterMachineJson = '''
 
 const _flutterExtensionFixture = 'val minSdkVersion: Int = 24';
 
+const _generatedSwiftPackageIos15Manifest = '''
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        .iOS("15.0")
+    ]
+)
+''';
+
 String _activeWorkflowSource(String source) => source
     .split('\n')
     .where((line) => !line.trimLeft().startsWith('#'))
@@ -184,6 +196,7 @@ void main() {
     String? baselineJson,
     String? extensionSource,
     String? runningFlutterMachineJson,
+    String? generatedSwiftPackageManifest,
     bool pubspecOverridesPresent = false,
   }) => compatibility
       .validateDependencyCompatibility(
@@ -205,6 +218,7 @@ void main() {
         flutterExtensionSource: extensionSource ?? _flutterExtensionFixture,
         runningFlutterMachineJson:
             runningFlutterMachineJson ?? _runningFlutterMachineJson,
+        generatedSwiftPackageManifest: generatedSwiftPackageManifest,
         pubspecOverridesPresent: pubspecOverridesPresent,
         trackedInputContents: trackedInputs(input),
       )
@@ -534,6 +548,77 @@ void main() {
       );
     });
 
+    test('rejects every independent Native Assets graph substitution', () {
+      final declarationMutations = <String, String>{
+        'Drift declaration': 'drift: 2.34.1',
+        'sqlite3 declaration': 'sqlite3: ^3.3.2',
+        'legacy SQLCipher Flutter library':
+            'sqlite3: ^3.3.1\n  sqlcipher_flutter_libs: 0.6.8',
+      };
+      final declarationDiagnostics = <String, String>{
+        'Drift declaration': 'drift constraint must be 2.34.0 (found 2.34.1)',
+        'sqlite3 declaration':
+            'sqlite3 constraint must be ^3.3.1 (found ^3.3.2)',
+        'legacy SQLCipher Flutter library':
+            'sqlcipher_flutter_libs is obsolete on the sqlite3 Native Assets path',
+      };
+      for (final entry in declarationMutations.entries) {
+        final input = currentInputs();
+        input['pubspec'] = input['pubspec']!.replaceFirst(
+          entry.key == 'Drift declaration'
+              ? 'drift: 2.34.0'
+              : 'sqlite3: ^3.3.1',
+          entry.value,
+        );
+        expect(validate(input), contains(declarationDiagnostics[entry.key]));
+      }
+
+      final lockMutations = <String, (String, String)>{
+        'Drift lock': ('drift', '2.34.1'),
+        'sqlite3 lock': ('sqlite3', '3.5.2'),
+      };
+      for (final entry in lockMutations.entries) {
+        final input = currentInputs();
+        final package = entry.value.$1;
+        final actual = entry.value.$2;
+        input['lock'] = input['lock']!.replaceFirstMapped(
+          RegExp(
+            '(^  ${RegExp.escape(package)}:\\n'
+            r'(?:^(?:    |      ).*\n)*?^    version: )"[^"]+"',
+            multiLine: true,
+          ),
+          (match) => '${match.group(1)}"$actual"',
+        );
+        expect(
+          validate(input),
+          contains(
+            '$package lock must be ${package == 'drift' ? '2.34.0' : '3.5.1'} (found $actual)',
+          ),
+        );
+      }
+
+      final hookInput = currentInputs();
+      hookInput['pubspec'] = hookInput['pubspec']!.replaceFirst(
+        'source: sqlcipher',
+        'source: sqlite3',
+      );
+      expect(
+        validate(hookInput),
+        contains(
+          'pubspec must select SQLCipher through hooks.user_defines.sqlite3.source',
+        ),
+      );
+
+      final podInput = currentInputs();
+      podInput['podLock'] = '${podInput['podLock']}\n  - SQLCipher (4.17.0)\n';
+      expect(
+        validate(podInput),
+        contains(
+          'ios/Podfile.lock must not retain the legacy SQLCipher CocoaPod path',
+        ),
+      );
+    });
+
     test('rejects an active legacy SQLCipher linker strip', () {
       final input = currentInputs();
       input['podfile'] = '''${input['podfile']}
@@ -613,6 +698,26 @@ end
         validate(xcodeInput),
         contains(
           'every Xcode IPHONEOS_DEPLOYMENT_TARGET must be iOS 15.0 or later',
+        ),
+      );
+    });
+
+    test('rejects an explicit generated Swift package floor below iOS 15', () {
+      expect(
+        validate(
+          currentInputs(),
+          generatedSwiftPackageManifest: _generatedSwiftPackageIos15Manifest,
+        ),
+        isEmpty,
+      );
+      expect(
+        validate(
+          currentInputs(),
+          generatedSwiftPackageManifest: _generatedSwiftPackageIos15Manifest
+              .replaceFirst('15.0', '14.0'),
+        ),
+        contains(
+          'generated Flutter Swift package must declare iOS 15.0 or later',
         ),
       );
     });
