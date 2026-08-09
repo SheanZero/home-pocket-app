@@ -34,10 +34,26 @@ retains the exact selected dependency graph.
 
 | commit | package | platform | destination | os | build_mode | command_result | scenario | result | hold_reason | exit_condition |
 |---|---|---|---|---|---|---|---|---|---|---|
-| b59fbf16 | file_picker / share_plus / package_info_plus / win32 | Dart | repository contract | n/a | test | pass | exact membership, declaration, and lock mutations | automated contract green | Native UI cannot be exercised by this test. | Run cancel, select one `.hpb`, import, and share-sheet scenarios on every affected supported platform. |
-| pending native evidence | file_picker | Android/iOS | supported native destination | not recorded | supported build | unavailable | cancel, select one `.hpb`, and import validation | unavailable — hold | JDK 17, Android destination, and attributable supported iOS evidence are unavailable. | Record only redacted metadata for each successful and cancellation result. |
-| pending native evidence | share_plus | Android/iOS | supported native destination | not recorded | supported build | unavailable | present encrypted-backup file and family-invite share sheets | unavailable — hold | No supported native destination evidence. | Record redacted share-sheet presentation and dismissal/success outcome metadata. |
-| pending native evidence | package_info_plus | Android/iOS | supported native destination | not recorded | supported build | unavailable | application identity and version lookup | unavailable — hold | No attributable native build result. | Record redacted app identity/version lookup result on the exact graph. |
+| c0703166 / 165dc76e | file_picker 11.0.3 / share_plus 12.0.2 / package_info_plus 9.0.1 / win32 5.15.0 | Dart | repository contract | n/a | test | pass | atomic membership/declaration/lock/evidence mutations; `.hpb` picker/restore; backup-file share; both invite text-share callers | PASS — automated contract green | Automated checks do not exercise OS-owned UI or package identity. | Keep the exact graph until all supported native observations are attributable. |
+| 03bebfe8 | file_picker 11.0.3 | Android | no emulator or device available | not recorded | not run | `java -version`; Android destination probe | picker cancel, select one `.hpb`, and encrypted import | UNAVAILABLE — hold | No JDK 17 runtime and no Android emulator/device. | With JDK 17, run a clean Android build and record redacted cancel/select/import outcomes. |
+| 03bebfe8 | file_picker 11.0.3 | iOS | supported destinations listed, not exercised | iOS 26.5 family | not run | destination listing only | picker cancel, select one `.hpb`, and encrypted import | UNAVAILABLE — hold | The all-platform atomic probe stops before iOS testing because the Android/JDK prerequisite is missing. | After the Android prerequisite is met, run a clean supported-iOS build and record redacted picker outcomes. |
+| 03bebfe8 | share_plus 12.0.2 | Android/iOS | no attributable native share destination | not recorded | not run | prerequisite probe only | present encrypted-backup file and both family-invite text share sheets | UNAVAILABLE — hold | No complete native build matrix; no real share sheet was observed. | Record redacted presentation and dismissal/success outcomes for the file and both text-share scenarios on every supported destination. |
+| 03bebfe8 | package_info_plus 9.0.1 | Android/iOS | no attributable native build | not recorded | not run | prerequisite probe only | application identity and version lookup | UNAVAILABLE — hold | No clean native build ran, so the package identity/version result is not attributable. | Record the redacted observed identity/version result after the complete atomic native build matrix is green. |
+
+## PLUG-02 terminal atomic decision
+
+**Decision:** HOLD — retain exactly `file_picker 11.0.3`, `share_plus 12.0.2`,
+`package_info_plus 9.0.1`, and transitive `win32 5.15.0`.
+
+The official execution-date candidates remain `file_picker 11.0.3`,
+`share_plus 13.3.0`, `package_info_plus 10.2.1`, and `win32 6.4.0`. The newer
+Plus line requires Java 17, Kotlin 2.2.0, AGP 8.12.1, and Gradle 8.13; it also
+moves `win32` to 6.x while the held file-picker graph resolves 5.15.0. This
+environment has no Java 17 runtime and no Android emulator/device, so no
+candidate was resolved, no native build or OS-owned picker/share UI was
+observed, and no declaration, lockfile, AGP, Gradle, Kotlin, or caller source
+was changed. The machine contract, baseline, compatibility document, Pub files,
+and this ledger agree on the held four-member graph.
 
 ## Speech acceptance evidence
 
