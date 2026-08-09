@@ -1660,4 +1660,157 @@ end
       );
     });
   });
+
+  group('PLUG-04 biometric app-lock candidate contract', () {
+    Map<String, dynamic> manifest() =>
+        jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
+            as Map<String, dynamic>;
+
+    Map<String, dynamic> localAuthRow(Map<String, dynamic> source) =>
+        (source['direct_dependencies'] as Map<String, dynamic>)['local_auth']
+            as Map<String, dynamic>;
+
+    Map<String, dynamic> biometricLane(Map<String, dynamic> source) =>
+        (source['lanes'] as Map<String, dynamic>)['phase59_biometric']
+            as Map<String, dynamic>;
+
+    test('rejects missing local_auth source and terminal decision evidence', () {
+      const fields = <String>[
+        'official_source',
+        'queried_on',
+        'candidate',
+        'decision',
+        'compatibility_reason',
+        'exit_condition',
+        'acceptance_evidence',
+      ];
+
+      for (final field in fields) {
+        final source = manifest();
+        localAuthRow(source).remove(field);
+
+        expect(
+          validate(currentInputs(), baselineJson: jsonEncode(source)),
+          contains('PLUG-04 local_auth is missing biometric evidence field: $field'),
+          reason: field,
+        );
+      }
+    });
+
+    test('rejects acceptance without Face ID and app-PIN fallback evidence', () {
+      final source = manifest();
+      final localAuth = localAuthRow(source);
+      localAuth['decision'] = 'accepted';
+      final evidence = localAuth['acceptance_evidence'] as Map<String, dynamic>;
+      for (final field in evidence.keys.toList()) {
+        evidence[field] = 'PASS';
+      }
+      evidence['face_id_success'] = 'UNAVAILABLE';
+      evidence['app_pin_fallback'] = 'UNAVAILABLE';
+
+      final diagnostics = validate(
+        currentInputs(),
+        baselineJson: jsonEncode(source),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 local_auth accepted decision requires PASS native evidence: face_id_success',
+        ),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 local_auth accepted decision requires PASS native evidence: app_pin_fallback',
+        ),
+      );
+    });
+
+    test('rejects passcode policy and missing secure-option proof', () {
+      final source = manifest();
+      final policy = biometricLane(source);
+      policy['biometric_only'] = false;
+      policy.remove('sensitive_transaction');
+      policy.remove('persist_across_backgrounding');
+
+      final diagnostics = validate(
+        currentInputs(),
+        baselineJson: jsonEncode(source),
+      );
+      expect(
+        diagnostics,
+        contains('PLUG-04 biometric app lock must remain biometric-only'),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 biometric app lock is missing secure-option proof: sensitive_transaction',
+        ),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 biometric app lock is missing secure-option proof: persist_across_backgrounding',
+        ),
+      );
+    });
+
+    test('rejects missing residual exception and lockout PIN-fallback proof', () {
+      final source = manifest();
+      final localAuth = localAuthRow(source);
+      final evidence = localAuth['acceptance_evidence'] as Map<String, dynamic>;
+      evidence.remove('temporary_lockout_app_pin_fallback');
+      evidence.remove('biometric_lockout_app_pin_fallback');
+      evidence.remove('platform_exception_app_pin_fallback');
+      evidence.remove('unknown_exception_app_pin_fallback');
+
+      final diagnostics = validate(
+        currentInputs(),
+        baselineJson: jsonEncode(source),
+      );
+      for (final field in const <String>[
+        'temporary_lockout_app_pin_fallback',
+        'biometric_lockout_app_pin_fallback',
+        'platform_exception_app_pin_fallback',
+        'unknown_exception_app_pin_fallback',
+      ]) {
+        expect(
+          diagnostics,
+          contains(
+            'PLUG-04 local_auth is missing app-PIN fallback evidence: $field',
+          ),
+          reason: field,
+        );
+      }
+    });
+
+    test('rejects local_auth declaration and lock drift while held', () {
+      final declarationInput = currentInputs();
+      declarationInput['pubspec'] = declarationInput['pubspec']!.replaceFirst(
+        'local_auth: ^3.0.2',
+        'local_auth: ^3.0.3',
+      );
+      expect(
+        validate(declarationInput),
+        contains(
+          'PLUG-04 local_auth declaration must remain ^3.0.2 (found ^3.0.3)',
+        ),
+      );
+
+      final lockInput = currentInputs();
+      lockInput['lock'] = lockInput['lock']!.replaceFirstMapped(
+        RegExp(
+          r'(^  local_auth:\n(?:^(?:    |      ).*\n)*?^    version: )"3\.0\.2"',
+          multiLine: true,
+        ),
+        (match) => '${match.group(1)}"3.0.3"',
+      );
+      expect(
+        validate(lockInput),
+        contains(
+          'PLUG-04 local_auth resolution must remain 3.0.2 (found 3.0.3)',
+        ),
+      );
+    });
+  });
 }
