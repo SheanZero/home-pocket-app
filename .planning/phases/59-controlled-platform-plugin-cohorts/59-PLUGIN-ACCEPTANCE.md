@@ -115,6 +115,29 @@ Phase 61/62/63 evidence substitute was used or recorded.
 | b59fbf16 | flutter_secure_storage | Dart | repository contract | n/a | test | pass | selected graph and dated evidence | automated contract green | Contract cannot prove an existing key is readable. | Verify existing-key read and key-before-database startup behavior on supported native storage. |
 | pending native evidence | secure-storage existing key | iOS/Android | supported destination | not recorded | supported build | unavailable | existing key readability, `unlocked_this_device`, and startup ordering | unavailable — hold | Stored-key/device evidence is unavailable. | Record redacted pass/fail metadata only; do not include a key, path, or database detail. |
 
+### PLUG-04 secure-storage terminal decision
+
+**Decision:** HOLD — retain exactly `flutter_secure_storage 10.3.1` in both
+the declaration and lock. The official 2026-08-09 package/changelog recheck
+identifies `11.0.0` as the stable major and documents removal of legacy Android
+cipher paths. It does not provide a reviewed, app-specific read-then-rewrite
+migration for this app's persisted master key.
+
+| commit | package/policy | platform | destination | build_mode | command_result | scenario | result | hold_reason | exit_condition |
+|---|---|---|---|---|---|---|---|---|---|
+| 284bc970 / 4af55c25 / 59-06-03 | flutter_secure_storage 10.3.1 | Dart | repository contract | test | pass | declaration/lock, candidate, accepted-major mutation, Keychain accessibility, Android options, centralized CRUD, precise clear scope, and platform-error wrapping | PASS — automated contract | Automated checks cannot read a prior-build persisted native key. | Keep 10.3.1 unless an approved read-then-rewrite migration plus native prior-key proof exists. |
+| 59-06-03 | AppInitializer with exact selected storage policy | Dart | injected repository/database seams | test | pass | existing key reaches database; first launch initializes key before database; missing/unreadable key with existing data returns `masterKeyMissingWithData` without replacement or database construction | PASS — ordering and fail-closed contract | Unit seams cannot prove an existing Keychain/Keystore item or encrypted database from a prior native build. | Keep 10.3.1 until every supported native platform has redacted prior-build existing-key read and existing-encrypted-database startup PASS evidence. |
+| unavailable native evidence | flutter_secure_storage 10.3.1 | iOS/Android | supported non-production destination | not run | unavailable | read a key created by the prior selected build, then open its existing encrypted database without replacement | UNAVAILABLE — HOLD | No authorized stored-key/native test state was available; no synthetic production key or candidate build was created. | Use a safe existing-key fixture/device, preserve `unlocked_this_device` and Android options, record redacted PASS only after read then database startup succeeds, and supply the reviewed read-then-rewrite migration before considering 11.0.0. |
+
+The service/provider keep `KeychainAccessibility.unlocked_this_device`; the
+service applies the established iOS and Android options to every core CRUD
+operation, while the crypto key-manager remains the permitted key boundary.
+`clearUserData` preserves the installation master key, and the initializer
+fails closed before database construction when existing data lacks a readable
+key. This record includes no key name/value pair, database path/header, device
+identifier, credential, or user data. Phase 60 SQLCipher/iOS-native safety and
+Phase 63 isolated-device acceptance were not claimed or used here.
+
 ## Lucide source and asset integrity evidence
 
 | commit | package | platform | destination | os | build_mode | command_result | scenario | result | hold_reason | exit_condition |

@@ -123,6 +123,45 @@ void main() {
     });
 
     test(
+      'completes master-key initialization before database construction',
+      () async {
+        final calls = <String>[];
+        when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async {
+          calls.add('hasMasterKey');
+          return false;
+        });
+        when(() => fakeMasterKeyRepo.initializeMasterKey()).thenAnswer((
+          _,
+        ) async {
+          calls.add('initializeMasterKey');
+        });
+
+        final result = await makeInitializer(
+          databaseExists: () async {
+            calls.add('databaseExists');
+            return false;
+          },
+          databaseFactory: (_) async {
+            calls.add('databaseFactory');
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect(result, isA<InitSuccess>());
+        (result as InitSuccess).container.dispose();
+        expect(
+          calls,
+          equals([
+            'hasMasterKey',
+            'databaseExists',
+            'initializeMasterKey',
+            'databaseFactory',
+          ]),
+        );
+      },
+    );
+
+    test(
       'does NOT call generateKeyPair when key pair already exists',
       () async {
         when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
@@ -229,6 +268,32 @@ void main() {
     );
 
     test(
+      'does not construct the database when existing data has no key',
+      () async {
+        when(
+          () => fakeMasterKeyRepo.hasMasterKey(),
+        ).thenAnswer((_) async => false);
+        var databaseFactoryCalled = false;
+
+        final result = await makeInitializer(
+          databaseExists: () async => true,
+          databaseFactory: (_) async {
+            databaseFactoryCalled = true;
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect(
+          (result as InitFailure).type,
+          InitFailureType.masterKeyMissingWithData,
+        );
+        expect(databaseFactoryCalled, isFalse);
+        verifyNever(() => fakeMasterKeyRepo.initializeMasterKey());
+        verifyNever(() => fakeKeyRepo.hasKeyPair());
+      },
+    );
+
+    test(
       'InitFailure(masterKeyMissingWithData) carries the guard error',
       () async {
         when(
@@ -275,6 +340,27 @@ void main() {
       expect(result, isA<InitFailure>());
       expect((result as InitFailure).type, equals(InitFailureType.masterKey));
     });
+
+    test(
+      'does not construct the database after a master-key read failure',
+      () async {
+        when(
+          () => fakeMasterKeyRepo.hasMasterKey(),
+        ).thenThrow(Exception('secure storage unavailable'));
+        var databaseFactoryCalled = false;
+
+        final result = await makeInitializer(
+          databaseFactory: (_) async {
+            databaseFactoryCalled = true;
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect((result as InitFailure).type, InitFailureType.masterKey);
+        expect(databaseFactoryCalled, isFalse);
+        verifyNever(() => fakeKeyRepo.hasKeyPair());
+      },
+    );
 
     test(
       'returns InitFailure(masterKey) when initializeMasterKey throws',
