@@ -29,7 +29,7 @@
 
 **v2.0 shipped and archived on 2026-08-05.** All 32 requirements are covered; Phases 53-56 passed verification; 12/12 integration seams and 6/6 E2E flows are complete. The close audit status is `tech_debt`, with no broken runtime seam or critical requirement gap.
 
-**v2.1 is active as of 2026-08-05.** Phases 57 and 58 are complete; Phase 59 (Controlled Platform Plugin Cohorts) is next. Phase 58 fixed the production-stable Flutter/Dart, analyzer/lint, and code-generation compatibility graph. GEN-02 covers current production entrypoints and project-supported syntax; two unexposed token-scanner grammar edges are explicitly accepted as defense-in-depth technical debt. Release-owner legal review remains outside this technical milestone. The 38 historical artifact records accepted at v2.0 close remain documented in `.planning/STATE.md` and do not represent runtime failures.
+**v2.1 is active as of 2026-08-05.** Phases 57-59 are complete; Phase 60 (SQLCipher & iOS Native Safety Lane) is next. Phase 59 evidence-held every platform-plugin cohort at its exact compatible version where the required native acceptance lane was unavailable, preserved the file/share, speech, APNs/FCM, biometric/PIN, secure-storage, and key-before-database contracts, and closed two runtime regressions in push retry and biometric fallback behavior. Full analysis, test, coverage, code-generation, architecture, and iOS Runner gates passed. Two non-blocking review debts remain: the Markdown acceptance ledger is not yet terminal-decision machine-compared, and initializer tests leak successful in-memory Drift databases. Release-owner legal review remains outside this technical milestone. The 38 historical artifact records accepted at v2.0 close remain documented in `.planning/STATE.md` and do not represent runtime failures.
 
 Current sources of truth: `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and the v2.0 archive under `.planning/milestones/`.
 
@@ -351,6 +351,7 @@ A family accounting app users can trust with sensitive financial data — local-
 <!-- Capabilities shipped or confirmed stable. -->
 
 - **Validated in Phase 58: Flutter, Analyzer & Code Generation Lane** — Flutter 3.44.8 / Dart 3.12.2, analyzer 12.1.0, import_lint 2.0.0, riverpod_lint 3.1.4, and the Riverpod/Freezed/JSON/Drift generator cohort resolve as one exact no-override graph; Stable CI owns one locked two-pass generation wrapper. GEN-02 protects current production entrypoints and project-supported syntax, with the token scanner's nested unbraced-control-flow and local-`runApp` edges accepted as non-release-blocking defense-in-depth debt.
+- **Validated in Phase 59: Controlled Platform Plugin Cohorts** — PLUG-01..04 are complete. The exact compatible graph holds `file_picker` 11.0.3, `share_plus` 12.0.2, `package_info_plus` 9.0.1, `win32` 5.15.0, `speech_to_text` 7.3.0, `local_auth` 3.0.2, and `flutter_secure_storage` 10.3.1; notification/Firebase packages likewise remain on their recorded compatible versions. No unavailable Android, physical-iPhone, lifecycle, or pre-existing-key observation is presented as acceptance evidence. The validator, 319-test focused matrix, 4,589-test serial suite (12 expected skips), 15/15 coverage gate, strict analyzer, reproducible generation/architecture wrapper, and iOS Runner build/test gates passed. Review debt WR-01/WR-02 is explicitly non-blocking and tracked in the Phase 59 review/verification reports.
 
 **Existing app baseline (unchanged by milestone work):**
 
@@ -740,4 +741,4 @@ This document evolves at phase transitions and milestone boundaries.
 *Prior: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt.*
 
 ---
-*Last updated: 2026-08-08 after completing Phase 58 and transitioning to Phase 59.*
+*Last updated: 2026-08-09 after completing Phase 59 and transitioning to Phase 60.*
