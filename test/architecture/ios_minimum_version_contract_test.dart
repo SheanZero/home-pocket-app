@@ -76,6 +76,11 @@ void main() {
           'lane == NativeSafetyLane.full',
           'git status --short',
           'Directory.systemTemp.createTemp',
+          'NOT_RUN',
+          '_nativeGraphDigest',
+          'disposable Flutter iOS package generation',
+          'unsupported_configuration_reason',
+          '_simulatorRuntimeConfigurations',
         ]) {
           expect(
             runner,
