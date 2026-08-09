@@ -220,12 +220,35 @@ Plans:
 **Requirements**: AND-01, AND-02, AND-03, AND-04
 **Success Criteria** (what must be TRUE):
 
-  1. The AGP 9.0.1 / Gradle 9.1 / JDK 17 / API 36 candidate is evaluated as a single lane while preserving minSdk 24.
+  1. The execution-date AGP 9.3.1 / Gradle 9.5.0 / JDK 17 / API 36 candidate (rechecked from the dated 9.0.1/9.1 snapshot) is evaluated as a single lane while preserving minSdk 24.
   2. If AGP 9 is compatible, built-in Kotlin/new DSL adoption, legacy KGP removal, and temporary Flutter opt-out cleanup are complete across the app and plugin graph; if it is not, the entire lane is held at the last green AGP 8 combination with its blocker recorded.
   3. The final Android combination produces a non-debug-signed release AAB/APK that the signing contract accepts and that contains no test-only registrar or plugin.
   4. Key integration journeys pass on a supported Android Emulator, and the final evidence explicitly says Android physical-device acceptance was not performed or claimed.
 
-**Plans**: TBD
+**Plans**: 6 plans
+**Wave 1**
+
+- [ ] 61-01-PLAN.md — Establish the fail-closed candidate-or-hold tracer, official candidate metadata, and redacted evidence schema.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 61-02-PLAN.md — Attempt the complete AGP 9 candidate in a disposable workspace and seal the selected-or-held outcome.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 61-03-PLAN.md — Lock the terminal Android graph and declare the API 36 x86_64 full-suite device lane.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 61-04-PLAN.md — Produce and independently verify non-debug-signed release AAB/APK artifacts and packaged hygiene.
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 61-05-PLAN.md — Execute the complete integration suite on a clean API 36 x86_64 Emulator and rescan release artifacts.
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 61-06-PLAN.md — Converge the redacted provenance ledger and scoped Phase 61 verification gates.
 
 ### Phase 62: Automated Release-Gate Lock
 
