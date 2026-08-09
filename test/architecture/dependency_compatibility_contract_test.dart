@@ -1146,7 +1146,7 @@ end
     },
   );
 
-  group('PLUG-03 speech_to_text hold contract', () {
+  group('PLUG-03 speech_to_text terminal decision contract', () {
     Map<String, dynamic> speechManifest() =>
         jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
             as Map<String, dynamic>;
@@ -1215,14 +1215,67 @@ end
       },
     );
 
-    test('requires a hold while physical-iPhone evidence is unavailable', () {
+    test('rejects a prerelease speech candidate', () {
       final manifest = speechManifest();
-      speechRow(manifest)['decision'] = 'accepted';
+      speechRow(manifest)['candidate'] = '7.5.0-beta.1';
 
       expect(
         validate(currentInputs(), baselineJson: jsonEncode(manifest)),
         contains(
-          'PLUG-03 speech_to_text must remain hold until physical-iPhone evidence is recorded',
+          'PLUG-03 speech_to_text candidate must be a production-stable release',
+        ),
+      );
+    });
+
+    test('rejects accepted speech when an iPhone evidence result is missing', () {
+      final manifest = speechManifest();
+      final speech = speechRow(manifest);
+      speech['decision'] = 'accepted';
+      final evidence = speech['acceptance_evidence'] as Map<String, dynamic>;
+      evidence.remove('iphone_ja_recognition');
+
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+        contains(
+          'PLUG-03 speech_to_text accepted decision requires PASS iPhone evidence: iphone_ja_recognition',
+        ),
+      );
+    });
+
+    test('rejects accepted speech when one trilingual locale evidence result fails', () {
+      final manifest = speechManifest();
+      final speech = speechRow(manifest);
+      speech['decision'] = 'accepted';
+      final evidence = speech['acceptance_evidence'] as Map<String, dynamic>;
+      evidence['iphone_zh_recognition'] = 'FAILED';
+
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+        contains(
+          'PLUG-03 speech_to_text accepted decision requires PASS iPhone evidence: iphone_zh_recognition',
+        ),
+      );
+    });
+
+    test('rejects accepted speech paired with the held declaration and lock', () {
+      final manifest = speechManifest();
+      final speech = speechRow(manifest);
+      speech['decision'] = 'accepted';
+      final evidence = speech['acceptance_evidence'] as Map<String, dynamic>;
+      for (final field in evidence.keys.toList()) {
+        evidence[field] = 'PASS';
+      }
+
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+        contains(
+          'PLUG-03 speech_to_text accepted declaration must equal candidate 7.4.0 (found 7.3.0)',
+        ),
+      );
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(manifest)),
+        contains(
+          'PLUG-03 speech_to_text accepted resolution must equal candidate 7.4.0 (found 7.3.0)',
         ),
       );
     });
