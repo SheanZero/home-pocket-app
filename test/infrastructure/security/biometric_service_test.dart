@@ -303,9 +303,9 @@ void main() {
     test(
       'availability PlatformException -> fallbackToPIN before native auth',
       () async {
-        when(() => mockAuth.canCheckBiometrics).thenThrow(
-          PlatformException(code: 'availability'),
-        );
+        when(
+          () => mockAuth.canCheckBiometrics,
+        ).thenThrow(PlatformException(code: 'availability'));
 
         final result = await service.authenticate(reason: 'test');
 
@@ -326,9 +326,9 @@ void main() {
     test(
       'availability unknown error -> fallbackToPIN before native auth',
       () async {
-        when(() => mockAuth.canCheckBiometrics).thenThrow(
-          StateError('availability'),
-        );
+        when(
+          () => mockAuth.canCheckBiometrics,
+        ).thenThrow(StateError('availability'));
 
         final result = await service.authenticate(reason: 'test');
 

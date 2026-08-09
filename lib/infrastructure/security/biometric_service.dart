@@ -115,17 +115,20 @@ class BiometricService {
     required String reason,
     bool biometricOnly = true,
   }) async {
-    final availability = await checkAvailability();
-    if (availability == BiometricAvailability.notSupported ||
-        availability == BiometricAvailability.notEnrolled) {
-      return const AuthResult.fallbackToPIN();
-    }
-
-    if (_failedAttempts >= maxFailedAttempts) {
-      return const AuthResult.tooManyAttempts();
-    }
-
     try {
+      // Availability is part of the native boundary too. A platform failure
+      // here must be just as recoverable as one from authenticate(), so keep
+      // it inside the exhaustive app-PIN fallback guard.
+      final availability = await checkAvailability();
+      if (availability == BiometricAvailability.notSupported ||
+          availability == BiometricAvailability.notEnrolled) {
+        return const AuthResult.fallbackToPIN();
+      }
+
+      if (_failedAttempts >= maxFailedAttempts) {
+        return const AuthResult.tooManyAttempts();
+      }
+
       final authenticated = await _localAuth.authenticate(
         localizedReason: reason,
         biometricOnly: biometricOnly,
