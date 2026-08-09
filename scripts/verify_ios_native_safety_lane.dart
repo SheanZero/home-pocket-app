@@ -290,15 +290,10 @@ class _NativeSafetyRunner {
 
   Future<void> _runBuildMatrix() async {
     for (final configuration in <String>['Debug', 'Profile', 'Release']) {
-      // The tracer already covers Debug on the generic simulator. The full
-      // matrix adds the remaining five configurations, for six total builds.
-      if (configuration != 'Debug') {
-        await _runUnsignedBuild(
-          configuration: configuration,
-          destination: 'generic/platform=iOS Simulator',
-          label: 'simulator-${configuration.toLowerCase()}',
-        );
-      }
+      // Flutter supports simulator compilation only for Debug. Profile and
+      // Release are AOT physical-device configurations, so the retained
+      // tracer is the simulator proof while this matrix covers all supported
+      // unsigned device configurations.
       await _runUnsignedBuild(
         configuration: configuration,
         destination: 'generic/platform=iOS',

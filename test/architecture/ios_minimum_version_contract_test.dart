@@ -105,6 +105,11 @@ void main() {
         expect(runner, isNot(contains('xcrun devicectl')));
         expect(runner, isNot(contains('install-on-device')));
         expect(runner, isNot(contains('uninstall')));
+        expect(
+          runner,
+          isNot(contains("label: 'simulator-\${configuration.toLowerCase()}'")),
+          reason: 'Profile and Release simulator AOT builds are unsupported',
+        );
       },
     );
   });
