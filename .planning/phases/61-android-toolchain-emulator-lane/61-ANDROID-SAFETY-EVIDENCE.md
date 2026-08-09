@@ -6,10 +6,14 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
 ```json
 {
   "schema_version": 1,
-  "completed_stage": "candidate",
-  "source_commit": "ab6c25a4f6a1820250656258eee775ed0e94f205",
+  "completed_stage": "compile",
+  "source_commit": "5870a04ec041c0c8dba5d6b23cffead5a30b5385",
+  "candidate_source_commit": "ab6c25a4f6a1820250656258eee775ed0e94f205",
+  "compile_source_commit": "5870a04ec041c0c8dba5d6b23cffead5a30b5385",
   "started_utc": "2026-08-09T15:02:37.932294Z",
-  "completed_utc": "2026-08-09T15:02:41.018026Z",
+  "completed_utc": "2026-08-09T15:15:59Z",
+  "compile_started_utc": "2026-08-09T15:14:55Z",
+  "compile_completed_utc": "2026-08-09T15:15:59Z",
   "host_os": "macOS 26.5.1 arm64",
   "graph": {
     "decision": "hold",
@@ -30,7 +34,7 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
   },
   "results": {
     "candidate": "INCOMPATIBLE",
-    "compile": "NOT_RUN",
+    "compile": "PASS",
     "package": "NOT_RUN",
     "emulator": "NOT_RUN",
     "physical_device": "NOT_PERFORMED_NOT_CLAIMED"
@@ -50,9 +54,26 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
       "command": "flutter build apk --debug --config-only",
       "exit_code": 0,
       "timed_out": false
+    },
+    {
+      "command": "./gradlew --no-daemon -Dorg.gradle.java.home=<verified-jdk17> --version",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "./gradlew --no-daemon -Dorg.gradle.java.home=<verified-jdk17> clean :app:assembleDebug",
+      "exit_code": 0,
+      "timed_out": false
     }
   ],
-  "artifacts": [],
+  "artifacts": [
+    {
+      "kind": "debug_apk_compile_only",
+      "sha256": "b8abc36a5c570213ad8974d2cc3abfaa7c37e6e527f6137ccca84fcc08becec8",
+      "size_bytes": 187268566,
+      "durable_artifact_retained": false
+    }
+  ],
   "emulator": {
     "api": 36,
     "abi": "x86_64",
@@ -68,7 +89,14 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "speech_to_text"
   ],
   "candidate_observation": "Flutter configuration restored the legacy built-in-Kotlin/new-DSL opt-outs.",
-  "candidate_output_sha256": "763bd27af82051d4d022c6036741f27c1946d2664d4b8ca7b258579035fe5b99"
+  "candidate_output_sha256": "763bd27af82051d4d022c6036741f27c1946d2664d4b8ca7b258579035fe5b99",
+  "compile_runtime": {
+    "gradle": "8.14",
+    "launcher_jvm": "Eclipse Adoptium 17.0.20+8",
+    "daemon_jvm": "verified JDK 17",
+    "result": "BUILD SUCCESSFUL",
+    "hosted_api36_x86_64_workflow": "NOT_RUN"
+  }
 }
 ```
 <!-- phase61-evidence-json:end -->

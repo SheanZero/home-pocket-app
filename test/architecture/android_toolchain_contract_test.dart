@@ -103,10 +103,10 @@ void main() {
     final current = inputs();
     final candidateObserved = current['evidence']!
         .replaceFirst(
-          '"completed_stage": "contract"',
+          '"completed_stage": "compile"',
           '"completed_stage": "candidate"',
         )
-        .replaceFirst('"candidate": "NOT_RUN"', '"candidate": "INCOMPATIBLE"');
+        .replaceFirst('"compile": "PASS"', '"compile": "NOT_RUN"');
     expect(
       validate({...current, 'evidence': candidateObserved}, allowNotRun: false),
       isEmpty,
