@@ -577,6 +577,16 @@ class PushNotificationService {
 
       return token;
     } catch (e) {
+      // A cold-start read or handler can fail after stream subscriptions were
+      // installed. Fence that generation and await cancellation before
+      // returning so a retry builds exactly one fresh pipeline.
+      if (generation == _identityGeneration) {
+        _initialized = false;
+        _identityRevoked = true;
+        _boundIdentityGeneration = null;
+        _identityGeneration++;
+        await _cancelPipelineSubscriptions();
+      }
       if (kDebugMode) {
         debugPrint('PushNotificationService: initialization failed: $e');
       }
