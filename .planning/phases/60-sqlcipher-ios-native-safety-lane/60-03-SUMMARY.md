@@ -49,10 +49,12 @@ coverage:
     human_judgment: false
 duration: 55min
 completed: 2026-08-09
-status: complete
+status: descoped
 ---
 
 # Phase 60 Plan 03: Immutable SQLCipher v23 Witness Summary
+
+> **Superseded 2026-08-09:** The owner clarified that Happy Pocket has never been publicly released. No released v23 population exists, so this historical-witness lane is descoped/not applicable. Its fixture, manifest, verifier, README, and contract were removed without changing production migration code; current-schema lifecycle evidence replaces its Phase 60 role.
 
 **A real SQLCipher 4.10 Community encrypted schema-v23 database from the owner-authorized historical revision, protected by source provenance and an independent checksum contract.**
 

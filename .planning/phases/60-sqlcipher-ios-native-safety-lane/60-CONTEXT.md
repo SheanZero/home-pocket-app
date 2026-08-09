@@ -3,6 +3,8 @@
 **Gathered:** 2026-08-09
 **Status:** Ready for planning
 
+> **Superseding scope correction — 2026-08-09 owner decision:** Happy Pocket has never been publicly released. There is no released schema population and no supported legacy backup population to preserve. D-09 through D-12 are descoped/not applicable for Phase 60; do not create, restore, or prove v23/v35 fixtures or `onUpgrade` history. The legacy/headerless portion of D-14 is also descoped. Phase 60 retains production migration code unchanged and proves only the current-schema SQLCipher create/write/cold-reopen lifecycle and current `.hpb` v2 backup safety.
+
 <domain>
 ## Phase Boundary
 

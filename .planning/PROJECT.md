@@ -9,7 +9,7 @@
 - **联动升级原生与代码生成链** — 协调 Flutter/Dart、Riverpod/Freezed/Drift、analyzer/lints、Android Gradle/Kotlin/SDK、iOS CocoaPods/SwiftPM 与受约束插件，避免逐包自动升级造成不可复现组合。
 - **SQLCipher 安全不回退** — 保持加密数据库、密钥初始化顺序和现有数据可读；禁止引入 `sqlite3_flutter_libs`、系统明文 SQLite 或 `sqlcipher_flutter_libs 0.7.0+eol` 空壳。
 - **全量自动化验收** — 重新生成代码与本地化资源，完成 analyze、测试、覆盖率、架构/依赖门禁以及 Android release 构建和模拟器验证。
-- **iPhone 真机验收** — 在一台有线 iPhone 上使用隔离测试 Bundle ID 验证安装/启动、SQLCipher reopen、历史 schema 迁移、加密备份恢复、应用锁、关键记账/同步相关流程与启动/交互性能；不要求 iPad 或 Android 真机验收。
+- **iPhone 真机验收** — 在一台有线 iPhone 上使用隔离测试 Bundle ID 验证安装/启动、SQLCipher reopen、当前格式加密备份恢复、应用锁、关键记账/同步相关流程与启动/交互性能；不要求 iPad 或 Android 真机验收。历史 schema 迁移不在首次公开发布前的 v2.1 范围内。
 
 **Out of scope:** 新产品功能、UI 重设计、beta/RC 试用、Android 真机验收，以及为追求版本号而降低加密或最低系统兼容性。
 
@@ -30,6 +30,8 @@
 **v2.0 shipped and archived on 2026-08-05.** All 32 requirements are covered; Phases 53-56 passed verification; 12/12 integration seams and 6/6 E2E flows are complete. The close audit status is `tech_debt`, with no broken runtime seam or critical requirement gap.
 
 **v2.1 is active as of 2026-08-05.** Phases 57-59 are complete; Phase 60 (SQLCipher & iOS Native Safety Lane) is next. Phase 59 evidence-held every platform-plugin cohort at its exact compatible version where the required native acceptance lane was unavailable, preserved the file/share, speech, APNs/FCM, biometric/PIN, secure-storage, and key-before-database contracts, and closed two runtime regressions in push retry and biometric fallback behavior. Full analysis, test, coverage, code-generation, architecture, and iOS Runner gates passed. Two non-blocking review debts remain: the Markdown acceptance ledger is not yet terminal-decision machine-compared, and initializer tests leak successful in-memory Drift databases. Release-owner legal review remains outside this technical milestone. The 38 historical artifact records accepted at v2.0 close remain documented in `.planning/STATE.md` and do not represent runtime failures.
+
+**Phase 60 scope correction (2026-08-09):** The owner confirmed that Happy Pocket has never been publicly released. No released database schema or legacy backup population exists to support. Phase 60 keeps production migration code unchanged, descopes historical migration proof, and proves current-schema SQLCipher lifecycle plus current `.hpb` v2 backup atomicity only.
 
 Current sources of truth: `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and the v2.0 archive under `.planning/milestones/`.
 

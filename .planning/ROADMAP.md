@@ -47,7 +47,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 - [x] **Phase 57: Stable Baseline & Compatibility Contract** - Establish the official-source stable decision and reproducible, machine-checked dependency policy. (completed 2026-08-06)
 - [x] **Phase 58: Flutter, Analyzer & Code Generation Lane** - Select a coherent SDK, analyzer, lint, and generator graph without weakening architecture enforcement. (completed 2026-08-08)
 - [x] **Phase 59: Controlled Platform Plugin Cohorts** - Upgrade or evidence-hold native plugin groups through narrow behavioral compatibility lanes. (completed 2026-08-09)
-- [ ] **Phase 60: SQLCipher & iOS Native Safety Lane** - Preserve and prove the encrypted iOS database, migration, and backup path from clean native artifacts.
+- [ ] **Phase 60: SQLCipher & iOS Native Safety Lane** - Prove current-schema encrypted lifecycle and current `.hpb` backup safety from clean native artifacts.
 - [ ] **Phase 61: Android Toolchain & Emulator Lane** - Complete an all-or-hold AGP/Gradle/Kotlin migration with signed release and emulator evidence.
 - [ ] **Phase 62: Automated Release-Gate Lock** - Reproduce the final candidate through all generation, analysis, test, release, and simulator/emulator gates.
 - [ ] **Phase 63: Isolated Wired-iPhone Acceptance** - Validate the final candidate only in a separate test identity on the current wired iPhone.
@@ -163,7 +163,7 @@ Plans:
 
 ### Phase 60: SQLCipher & iOS Native Safety Lane
 
-**Goal**: Users' local financial data remains encrypted, readable, migratable, and recoverable through the clean iOS native dependency path.
+**Goal**: Current-schema local financial data remains encrypted, readable, cold-reopenable, and recoverable through the clean iOS native dependency path.
 **Depends on**: Phase 58
 **Requirements**: SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06
 **Success Criteria** (what must be TRUE):
@@ -171,10 +171,10 @@ Plans:
   1. The selected native graph is exactly Drift `2.34.0`, sqlite3 resolved `3.5.1`, and SQLCipher Native Assets `4.17.x` selected by `hooks.user_defines.sqlite3.source: sqlcipher`; both retired Flutter native-library packages, a separate SQLCipher CocoaPod, system/plain SQLite, and the obsolete Podfile `-lsqlite3` linker strip are rejected without upgrading the selected Drift/sqlite3 graph.
   2. Retained lockfiles and a disposable from-zero resolution produce the same clean SwiftPM/CocoaPods graph; Runner, CocoaPods, SwiftPM, and the generated plugin Swift package all target iOS `15.0`, six unsigned Simulator/generic-device Debug/Profile/Release builds remain compile-only, and distinct Simulator runtime evidence is required before any encryption-runtime claim.
   3. An encrypted database returns a non-empty `PRAGMA cipher_version` on initial open and after close/reopen, and its sentinel data remains readable.
-  4. A previous released encrypted schema migrates through the real upgrade path with its version, tables, indices, defaults, and representative data intact.
-  5. Test-only `.hpb` export, clear, and password restore preserve current and supported legacy backups atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.
+  4. **Descoped / Not Applicable (2026-08-09 owner decision):** the app has no previous public release or released-schema population, so Phase 60 does not claim or manufacture historical migration proof; production migration code remains unchanged.
+  5. Test-only current-format `.hpb` v2 export, clear, and password restore preserve data atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.
 
-**Plans**: 3/7 plans executed
+**Plans**: 4/7 plans resolved (60-03 and 60-04 descoped by owner decision)
 **Wave 1**
 
 - [x] 60-01-PLAN.md
@@ -182,11 +182,11 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 60-02-PLAN.md
-- [x] 60-03-PLAN.md
+- [~] 60-03-PLAN.md — Descoped/superseded: no historical released schema exists.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 60-04-PLAN.md
+- [~] 60-04-PLAN.md — Resolved as current-schema lifecycle evidence; historical migration proof is not applicable.
 - [ ] 60-05-PLAN.md
 
 **Wave 4** *(blocked on Wave 3 completion)*

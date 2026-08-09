@@ -121,6 +121,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: Phase 60 Plan 02 removed dormant Firebase/FCM/APNs/local-notification dependencies from the MVP; future notification work requires a separate reviewed native/privacy evidence lane.
 - [Phase ?]: Phase 60 native runner treats Profile/Release as unsigned generic-device builds because Flutter Simulator AOT is Debug-only.
 - [Phase ?]: Owner approved 2cb07b08e951db2fb142aff63e4465e2fb0d1740 (confirm-2cb07b08) as the immutable SQLCipher schema-v23 witness source.
+- [Phase 60, 2026-08-09]: Owner corrected scope: Happy Pocket has never been publicly released, so no historical schema or legacy backup population exists. SEC-04 is descoped/not applicable; remove v23/v35 fixture/provenance work and retain only current-schema SQLCipher lifecycle plus current `.hpb` v2 recovery evidence. Production migration code is unchanged.
 
 ### Quick Tasks Completed
 

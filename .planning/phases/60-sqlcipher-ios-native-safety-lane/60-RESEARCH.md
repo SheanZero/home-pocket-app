@@ -4,6 +4,8 @@
 **Domain:** Flutter iOS Native Assets, SQLCipher runtime proof, encrypted Drift migration, and sandboxed backup recovery
 **Confidence:** HIGH for repository findings; MEDIUM for official upstream documentation.
 
+> **Superseding scope correction — 2026-08-09 owner decision:** The historical migration and legacy-backup research below is retained as historical planning evidence, not an active requirement. The app has never shipped publicly, so no v23/v35 witness, historical `onUpgrade` proof, or headerless backup compatibility may be manufactured or claimed in Phase 60. Active evidence is current-schema SQLCipher lifecycle plus current `.hpb` v2 backup atomicity.
+
 <user_constraints>
 ## User Constraints (from CONTEXT.md)
 

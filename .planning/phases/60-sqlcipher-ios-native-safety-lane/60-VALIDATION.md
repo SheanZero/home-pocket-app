@@ -9,7 +9,9 @@ created: 2026-08-09
 
 # Phase 60 — Validation Strategy
 
-> Per-phase validation contract for SQLCipher Native Assets, encrypted historical migrations, and sandboxed backup recovery.
+> Per-phase validation contract for SQLCipher Native Assets, current-schema lifecycle, and current-format sandboxed backup recovery.
+
+> **Scope correction (owner, 2026-08-09):** Rows for 60-03 historical provenance and 60-04 v23/v35 migration are superseded/descoped. Do not execute their fixture commands. Replace their acceptance role with `integration_test/sqlcipher_native_assets_lifecycle_test.dart`; backup rows cover current `.hpb` v2 only.
 
 ---
 

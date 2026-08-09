@@ -1,5 +1,7 @@
 # Phase 60: SQLCipher & iOS Native Safety Lane - Pattern Map
 
+> **Scope correction (owner, 2026-08-09):** Historical v23/v35 fixture, provenance, and `onUpgrade` patterns below are superseded and must not be implemented. The active pattern is the current-schema production executor create → write → close → fresh AppDatabase reopen journey; backup work accepts current `.hpb` v2 only.
+
 **Mapped:** 2026-08-09  
 **Files analyzed:** 14 anticipated created/modified files  
 **Analogs found:** 13 / 14

@@ -1,1 +1,1 @@
-No external API integration: Phase 60 only validates existing local Flutter/iOS Native Assets, SQLCipher migration, initialization, and backup-recovery paths.
+No external API integration: Phase 60 only validates existing local Flutter/iOS Native Assets, current-schema SQLCipher lifecycle, initialization, and current-format backup-recovery paths. Historical migration/legacy-recovery coverage is descoped by the 2026-08-09 pre-release owner decision.

@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 3
+open_count: 4
 waived_count: 0
 fixed_count: 2
-total_count: 5
-last_updated: 2026-08-09T08:58:42.785Z
+total_count: 6
+last_updated: 2026-08-09T10:44:44.080Z
 ---
 
 # Broken Windows Ledger
@@ -20,6 +20,7 @@ last_updated: 2026-08-09T08:58:42.785Z
 | 3 | 59 | deviation | test/architecture/dependency_compatibility_contract_test.dart |  | Corrected Task 2 lock-version mutation expectations so lock fixtures use selected versions rather than caret constraints. | open |  | 2026-08-09T00:09:13.461Z |  |
 | 4 | 59 | lint-warning | lib/** |  | flutter analyze reports 289 pre-existing prefer_initializing_formals information diagnostics outside the Phase 59 cohort; recorded in 59 deferred-items.md. | fixed |  | 2026-08-09T00:21:31.870Z | 2026-08-09T02:24:35.100Z |
 | 5 | 60 | unrun-verify | test/ |  | Serialized full Flutter suite was stopped after two scoped regressions were fixed; its remaining long script-fixture tail was not rerun. | open |  | 2026-08-09T08:58:42.785Z |  |
+| 6 | 60 | unrun-verify | integration_test/sqlcipher_native_assets_lifecycle_test.dart |  | Current-schema Simulator lifecycle blocked before test launch by existing iOS linker/CoreSimulator failure. | open |  | 2026-08-09T10:44:44.080Z |  |
 
 ````json
 [
@@ -81,6 +82,18 @@ last_updated: 2026-08-09T08:58:42.785Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-09T08:58:42.785Z",
+    "resolved_at": null
+  },
+  {
+    "id": 6,
+    "kind": "unrun-verify",
+    "phase": "60",
+    "file": "integration_test/sqlcipher_native_assets_lifecycle_test.dart",
+    "line": null,
+    "description": "Current-schema Simulator lifecycle blocked before test launch by existing iOS linker/CoreSimulator failure.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-09T10:44:44.080Z",
     "resolved_at": null
   }
 ]
