@@ -80,6 +80,7 @@ void main() {
           '_nativeGraphDigest',
           'disposable Flutter iOS package generation',
           'unsupported_configuration_reason',
+          "listed.stdout.toString().split('\\u0000')",
           '_simulatorRuntimeConfigurations',
           'on ProcessException',
           'prepared-clean',
