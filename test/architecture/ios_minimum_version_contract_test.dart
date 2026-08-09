@@ -57,7 +57,7 @@ void main() {
         final runner = File(_nativeSafetyRunner).readAsStringSync();
 
         for (final marker in <String>[
-          "enum NativeSafetyLane { tracer, full, runtime }",
+          'enum NativeSafetyLane { tracer, full, runtime }',
           'COMPILE_ONLY',
           'RUNTIME_PASS',
           'RUNTIME_FAIL',
@@ -67,8 +67,8 @@ void main() {
           'flutter build ios --simulator --debug --no-codesign',
           '--generated-swift-package-manifest=',
           'CODE_SIGNING_ALLOWED=NO',
-          "generic/platform=iOS",
-          "platform=iOS Simulator",
+          'generic/platform=iOS',
+          'platform=iOS Simulator',
           'sqlcipher_native_assets_migration_test.dart',
           'CoreSimulator',
           'Process.start',

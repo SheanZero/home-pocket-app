@@ -458,7 +458,7 @@ class _NativeSafetyRunner {
     if (listed.exitCode != 0) {
       throw const _RunnerFailure('cannot list tracked inputs');
     }
-    for (final relative in utf8.decode(listed.stdout).split('\u0000')) {
+    for (final relative in listed.stdout.toString().split('\u0000')) {
       if (relative.isEmpty ||
           relative.startsWith('.git/') ||
           relative.startsWith('build/') ||
