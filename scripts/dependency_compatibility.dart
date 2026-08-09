@@ -1118,7 +1118,9 @@ void _validatePhase59PluginCohorts({
   }
   if (!_isProductionStableVersion(localAuth['candidate']?.toString() ?? '') ||
       localAuth['candidate']?.toString() != localAuthCandidate) {
-    issues.add('PLUG-04 local_auth candidate must be stable $localAuthCandidate');
+    issues.add(
+      'PLUG-04 local_auth candidate must be stable $localAuthCandidate',
+    );
   }
   final localAuthEvidence = _map(localAuth['acceptance_evidence']);
   for (final field in requiredLocalAuthEvidence) {
@@ -1155,14 +1157,17 @@ void _validatePhase59PluginCohorts({
   if (biometricLane['sensitive_transaction'] != true ||
       biometricLane['persist_across_backgrounding'] != true ||
       biometricLane['app_pin_fallback_required'] != true) {
-    issues.add('PLUG-04 biometric app lock must retain secure PIN-fallback policy');
+    issues.add(
+      'PLUG-04 biometric app lock must retain secure PIN-fallback policy',
+    );
   }
 
   final declaredLocalAuth = _declaredDependency(
     directDependencies[localAuthPackage],
   );
-  final resolvedLocalAuth =
-      _map(lockedPackages[localAuthPackage])['version']?.toString();
+  final resolvedLocalAuth = _map(
+    lockedPackages[localAuthPackage],
+  )['version']?.toString();
   switch (localAuth['decision']?.toString()) {
     case 'hold':
       if (declaredLocalAuth != localAuthHeldDeclaration) {
@@ -1198,7 +1203,144 @@ void _validatePhase59PluginCohorts({
         );
       }
     default:
-      issues.add('PLUG-04 local_auth decision must be exactly hold or accepted');
+      issues.add(
+        'PLUG-04 local_auth decision must be exactly hold or accepted',
+      );
+  }
+
+  const secureStoragePackage = 'flutter_secure_storage';
+  const secureStorageCandidate = '11.0.0';
+  const secureStorageHeldDeclaration = '^10.3.1';
+  const secureStorageHeldResolution = '10.3.1';
+  const requiredSecureStorageEvidence = <String>{
+    'existing_key_read',
+    'existing_database_startup',
+  };
+  final secureStorage = pluginRows[secureStoragePackage]!;
+  for (final field in {
+    'official_source',
+    'queried_on',
+    'candidate',
+    'decision',
+    'compatibility_reason',
+    'exit_condition',
+    'migration_design',
+    'acceptance_evidence',
+  }) {
+    if (_isBlank(secureStorage[field])) {
+      issues.add(
+        'PLUG-04 flutter_secure_storage is missing persisted-key evidence field: $field',
+      );
+    }
+  }
+  if (secureStorage['official_source']?.toString() !=
+      'https://pub.dev/packages/flutter_secure_storage') {
+    issues.add(
+      'PLUG-04 flutter_secure_storage must cite the official pub.dev source',
+    );
+  }
+  if (!_isProductionStableVersion(
+        secureStorage['candidate']?.toString() ?? '',
+      ) ||
+      secureStorage['candidate']?.toString() != secureStorageCandidate) {
+    issues.add(
+      'PLUG-04 flutter_secure_storage candidate must be stable $secureStorageCandidate',
+    );
+  }
+  final secureStorageEvidence = _map(secureStorage['acceptance_evidence']);
+  for (final field in requiredSecureStorageEvidence) {
+    if (_isBlank(secureStorageEvidence[field])) {
+      issues.add(
+        'PLUG-04 flutter_secure_storage is missing persisted-key evidence: $field',
+      );
+    }
+  }
+
+  final secureStorageLane = _map(baselineLanes['phase59_secure_storage']);
+  for (final field in {
+    'decision',
+    'keychain_accessibility',
+    'android_options',
+    'centralized_access',
+    'compatibility_reason',
+    'exit_condition',
+  }) {
+    if (!secureStorageLane.containsKey(field) ||
+        _isBlank(secureStorageLane[field])) {
+      issues.add(
+        'PLUG-04 flutter_secure_storage is missing platform policy proof: $field',
+      );
+    }
+  }
+  if (secureStorageLane['keychain_accessibility']?.toString() !=
+      'unlocked_this_device') {
+    issues.add(
+      'PLUG-04 flutter_secure_storage must retain unlocked_this_device Keychain accessibility',
+    );
+  }
+  if (secureStorageLane['android_options']?.toString() !=
+      'established_default') {
+    issues.add(
+      'PLUG-04 flutter_secure_storage must retain established Android options',
+    );
+  }
+  if (secureStorageLane['centralized_access']?.toString() !=
+      'SecureStorageService and crypto key-manager only') {
+    issues.add(
+      'PLUG-04 flutter_secure_storage must retain centralized key access',
+    );
+  }
+
+  final declaredSecureStorage = _declaredDependency(
+    directDependencies[secureStoragePackage],
+  );
+  final resolvedSecureStorage = _map(
+    lockedPackages[secureStoragePackage],
+  )['version']?.toString();
+  switch (secureStorage['decision']?.toString()) {
+    case 'hold':
+      if (declaredSecureStorage != secureStorageHeldDeclaration) {
+        issues.add(
+          'PLUG-04 flutter_secure_storage declaration must remain '
+          '$secureStorageHeldDeclaration (found $declaredSecureStorage)',
+        );
+      }
+      if (resolvedSecureStorage != secureStorageHeldResolution) {
+        issues.add(
+          'PLUG-04 flutter_secure_storage resolution must remain '
+          '$secureStorageHeldResolution (found $resolvedSecureStorage)',
+        );
+      }
+    case 'accepted':
+      if (secureStorage['migration_design']?.toString() !=
+          'read_then_rewrite') {
+        issues.add(
+          'PLUG-04 flutter_secure_storage accepted decision requires a read-then-rewrite migration design',
+        );
+      }
+      for (final field in requiredSecureStorageEvidence) {
+        if (secureStorageEvidence[field]?.toString() != 'PASS') {
+          issues.add(
+            'PLUG-04 flutter_secure_storage accepted decision requires PASS persisted-key evidence: $field',
+          );
+        }
+      }
+      if (declaredSecureStorage != '^$secureStorageCandidate') {
+        issues.add(
+          'PLUG-04 flutter_secure_storage accepted declaration must equal '
+          'candidate $secureStorageCandidate (found $declaredSecureStorage)',
+        );
+      }
+      if (resolvedSecureStorage != secureStorageCandidate) {
+        issues.add(
+          'PLUG-04 flutter_secure_storage accepted resolution must equal '
+          'candidate $secureStorageCandidate (found $resolvedSecureStorage)',
+        );
+      }
+    default:
+      issues.add(
+        'PLUG-04 flutter_secure_storage decision must be exactly hold or accepted',
+      );
   }
 
   const declarations = <String, String>{

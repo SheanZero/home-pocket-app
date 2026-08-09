@@ -1674,28 +1674,33 @@ end
         (source['lanes'] as Map<String, dynamic>)['phase59_biometric']
             as Map<String, dynamic>;
 
-    test('rejects missing local_auth source and terminal decision evidence', () {
-      const fields = <String>[
-        'official_source',
-        'queried_on',
-        'candidate',
-        'decision',
-        'compatibility_reason',
-        'exit_condition',
-        'acceptance_evidence',
-      ];
+    test(
+      'rejects missing local_auth source and terminal decision evidence',
+      () {
+        const fields = <String>[
+          'official_source',
+          'queried_on',
+          'candidate',
+          'decision',
+          'compatibility_reason',
+          'exit_condition',
+          'acceptance_evidence',
+        ];
 
-      for (final field in fields) {
-        final source = manifest();
-        localAuthRow(source).remove(field);
+        for (final field in fields) {
+          final source = manifest();
+          localAuthRow(source).remove(field);
 
-        expect(
-          validate(currentInputs(), baselineJson: jsonEncode(source)),
-          contains('PLUG-04 local_auth is missing biometric evidence field: $field'),
-          reason: field,
-        );
-      }
-    });
+          expect(
+            validate(currentInputs(), baselineJson: jsonEncode(source)),
+            contains(
+              'PLUG-04 local_auth is missing biometric evidence field: $field',
+            ),
+            reason: field,
+          );
+        }
+      },
+    );
 
     test('rejects acceptance without Face ID and app-PIN fallback evidence', () {
       final source = manifest();
@@ -1755,34 +1760,38 @@ end
       );
     });
 
-    test('rejects missing residual exception and lockout PIN-fallback proof', () {
-      final source = manifest();
-      final localAuth = localAuthRow(source);
-      final evidence = localAuth['acceptance_evidence'] as Map<String, dynamic>;
-      evidence.remove('temporary_lockout_app_pin_fallback');
-      evidence.remove('biometric_lockout_app_pin_fallback');
-      evidence.remove('platform_exception_app_pin_fallback');
-      evidence.remove('unknown_exception_app_pin_fallback');
+    test(
+      'rejects missing residual exception and lockout PIN-fallback proof',
+      () {
+        final source = manifest();
+        final localAuth = localAuthRow(source);
+        final evidence =
+            localAuth['acceptance_evidence'] as Map<String, dynamic>;
+        evidence.remove('temporary_lockout_app_pin_fallback');
+        evidence.remove('biometric_lockout_app_pin_fallback');
+        evidence.remove('platform_exception_app_pin_fallback');
+        evidence.remove('unknown_exception_app_pin_fallback');
 
-      final diagnostics = validate(
-        currentInputs(),
-        baselineJson: jsonEncode(source),
-      );
-      for (final field in const <String>[
-        'temporary_lockout_app_pin_fallback',
-        'biometric_lockout_app_pin_fallback',
-        'platform_exception_app_pin_fallback',
-        'unknown_exception_app_pin_fallback',
-      ]) {
-        expect(
-          diagnostics,
-          contains(
-            'PLUG-04 local_auth is missing app-PIN fallback evidence: $field',
-          ),
-          reason: field,
+        final diagnostics = validate(
+          currentInputs(),
+          baselineJson: jsonEncode(source),
         );
-      }
-    });
+        for (final field in const <String>[
+          'temporary_lockout_app_pin_fallback',
+          'biometric_lockout_app_pin_fallback',
+          'platform_exception_app_pin_fallback',
+          'unknown_exception_app_pin_fallback',
+        ]) {
+          expect(
+            diagnostics,
+            contains(
+              'PLUG-04 local_auth is missing app-PIN fallback evidence: $field',
+            ),
+            reason: field,
+          );
+        }
+      },
+    );
 
     test('rejects local_auth declaration and lock drift while held', () {
       final declarationInput = currentInputs();
@@ -1809,6 +1818,93 @@ end
         validate(lockInput),
         contains(
           'PLUG-04 local_auth resolution must remain 3.0.2 (found 3.0.3)',
+        ),
+      );
+    });
+  });
+
+  group('PLUG-04 secure storage persisted-key hold contract', () {
+    Map<String, dynamic> manifest() =>
+        jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
+            as Map<String, dynamic>;
+
+    Map<String, dynamic> secureStorageRow(Map<String, dynamic> source) =>
+        (source['direct_dependencies']
+                as Map<String, dynamic>)['flutter_secure_storage']
+            as Map<String, dynamic>;
+
+    Map<String, dynamic> secureStorageLane(Map<String, dynamic> source) =>
+        (source['lanes'] as Map<String, dynamic>)['phase59_secure_storage']
+            as Map<String, dynamic>;
+
+    test('rejects incomplete secure-storage major acceptance evidence', () {
+      final source = manifest();
+      final row = secureStorageRow(source);
+      row['decision'] = 'accepted';
+      row['migration_design'] = 'none';
+      row['acceptance_evidence'] = <String, dynamic>{
+        'existing_key_read': 'UNAVAILABLE',
+        'existing_database_startup': 'UNAVAILABLE',
+      };
+
+      final diagnostics = validate(
+        currentInputs(),
+        baselineJson: jsonEncode(source),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 flutter_secure_storage accepted decision requires a read-then-rewrite migration design',
+        ),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 flutter_secure_storage accepted decision requires PASS persisted-key evidence: existing_key_read',
+        ),
+      );
+      expect(
+        diagnostics,
+        contains(
+          'PLUG-04 flutter_secure_storage accepted decision requires PASS persisted-key evidence: existing_database_startup',
+        ),
+      );
+    });
+
+    test('rejects an accessibility change and selected declaration/lock drift', () {
+      final source = manifest();
+      secureStorageLane(source)['keychain_accessibility'] = 'first_unlock';
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(source)),
+        contains(
+          'PLUG-04 flutter_secure_storage must retain unlocked_this_device Keychain accessibility',
+        ),
+      );
+
+      final declarationInput = currentInputs();
+      declarationInput['pubspec'] = declarationInput['pubspec']!.replaceFirst(
+        'flutter_secure_storage: ^10.3.1',
+        'flutter_secure_storage: ^11.0.0',
+      );
+      expect(
+        validate(declarationInput),
+        contains(
+          'PLUG-04 flutter_secure_storage declaration must remain ^10.3.1 (found ^11.0.0)',
+        ),
+      );
+
+      final lockInput = currentInputs();
+      lockInput['lock'] = lockInput['lock']!.replaceFirstMapped(
+        RegExp(
+          r'(^  flutter_secure_storage:\n(?:^(?:    |      ).*\n)*?^    version: )"10\.3\.1"',
+          multiLine: true,
+        ),
+        (match) => '${match.group(1)}"11.0.0"',
+      );
+      expect(
+        validate(lockInput),
+        contains(
+          'PLUG-04 flutter_secure_storage resolution must remain 10.3.1 (found 11.0.0)',
         ),
       );
     });

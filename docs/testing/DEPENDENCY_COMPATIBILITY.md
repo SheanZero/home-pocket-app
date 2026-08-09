@@ -197,3 +197,31 @@ UAT is not a substitute. Acceptance requires a redacted supported-build record
 for Face ID success, cancel/false, both lockouts, platform and unknown errors,
 and app-PIN fallback; it must never record a PIN, biometric material, device
 identifier, Keychain item, financial data, or production credential.
+
+## Phase 59 secure-storage persisted-key evidence hold
+
+The official `flutter_secure_storage` package page and changelog were
+rechecked on 2026-08-09. `11.0.0` is the current stable major. Its changelog
+removes legacy Android cipher paths and warns that data saved with removed
+algorithms/features can become unusable unless it was migrated through v10.
+That publisher migration information is not an app-specific read-then-rewrite
+design for this app's persisted master key, nor is it proof that an existing
+`unlocked_this_device` Keychain item and its encrypted database remain
+readable.
+
+The selected declaration and lock remain exactly `flutter_secure_storage
+10.3.1`. The hold preserves `KeychainAccessibility.unlocked_this_device`, the
+established Android options, one `SecureStorageService`/crypto key-manager
+boundary, and AppInitializer's key-before-database fail-closed guard. Fresh
+install, resolver, or source-only checks cannot accept the major. The baseline
+validator rejects a changed accessibility value, direct declaration/lock drift,
+or an accepted major without a named `read_then_rewrite` migration and PASS
+prior-build existing-key plus existing-encrypted-database startup evidence.
+
+Exit only after an approved migration reads each existing key using the current
+options, rewrites it under the reviewed candidate options without minting a
+replacement, and records redacted PASS evidence on every supported native
+platform that the prior-build key and database open successfully. Until then,
+the unavailable existing-key/device result is an explicit exact-10.3.1 hold;
+Phase 60 SQLCipher/iOS-native safety and Phase 63 isolated-device acceptance
+remain outside this lane.
