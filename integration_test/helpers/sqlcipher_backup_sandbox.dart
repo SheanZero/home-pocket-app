@@ -546,12 +546,35 @@ class SqlCipherBackupSandbox {
     final after = await snapshot();
     expect(after.books, equals(before.books));
     expect(after.categories, equals(before.categories));
-    expect(after.transactions, equals(before.transactions));
+    // Backup intentionally converts a source-only photo hash into the
+    // destination's internal availability marker. Compare the canonical wire
+    // representation instead: `photoAvailability` preserves the supported
+    // user-visible state while the internal marker must not be treated as a
+    // restored photo/blob or as a transaction mutation.
+    expect(
+      _canonicalSupportedTransactions(after.transactions),
+      equals(_canonicalSupportedTransactions(before.transactions)),
+    );
     expect(after.exchangeRates, equals(before.exchangeRates));
     expect(after.settings, equals(before.settings));
     expect(after.schema, equals(before.schema));
     expect(after.secureDigest, isNot(before.secureDigest));
     expect(after.syncDigest, isNot(before.syncDigest));
+  }
+
+  List<Map<String, dynamic>> _canonicalSupportedTransactions(
+    List<Map<String, dynamic>> transactions,
+  ) {
+    return transactions.map((transaction) {
+      final canonical = Map<String, dynamic>.of(transaction);
+      final metadata = canonical['metadata'];
+      if (metadata is Map<String, dynamic>) {
+        final sanitized = Map<String, dynamic>.of(metadata)
+          ..remove(TransactionPhotoSyncPolicy.metadataAvailabilityKey);
+        canonical['metadata'] = sanitized.isEmpty ? null : sanitized;
+      }
+      return canonical;
+    }).toList();
   }
 
   Future<void> expectPhotoBackupPolicy() async {
