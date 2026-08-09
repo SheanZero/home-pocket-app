@@ -1377,5 +1377,97 @@ end
         );
       }
     });
+
+    test('names every partial atomic declaration and lock mutation', () {
+      const declarations = <String, String>{
+        'file_picker': '^11.0.3',
+        'share_plus': '^12.0.2',
+        'package_info_plus': '^9.0.1',
+      };
+      const locks = <String, String>{
+        'file_picker': '11.0.3',
+        'share_plus': '12.0.2',
+        'package_info_plus': '9.0.1',
+        'win32': '5.15.0',
+      };
+
+      for (final entry in declarations.entries) {
+        final input = currentInputs();
+        input['pubspec'] = input['pubspec']!.replaceFirst(
+          '${entry.key}: ${entry.value}',
+          '${entry.key}: ${entry.value}.partial',
+        );
+        expect(
+          validate(input),
+          contains(
+            'PLUG-02 atomic cohort declaration drift for ${entry.key}',
+          ),
+        );
+      }
+
+      for (final entry in locks.entries) {
+        final input = currentInputs();
+        final matcher = RegExp(
+          '(^  ${RegExp.escape(entry.key)}:\\n'
+          r'(?:^(?:    |      ).*\n)*?^    version: )"'
+          '${RegExp.escape(entry.value)}"',
+          multiLine: true,
+        );
+        input['lock'] = input['lock']!.replaceFirstMapped(
+          matcher,
+          (match) => '${match.group(1)}"${entry.value}.partial"',
+        );
+        expect(
+          validate(input),
+          contains(
+            'PLUG-02 atomic cohort resolution drift for ${entry.key}',
+          ),
+        );
+      }
+    });
+
+    test('rejects every missing held atomic-cohort evidence field', () {
+      const directMembers = <String>[
+        'file_picker',
+        'share_plus',
+        'package_info_plus',
+      ];
+      const fields = <String>[
+        'candidate',
+        'official_source',
+        'queried_on',
+        'compatibility_reason',
+        'exit_condition',
+      ];
+
+      for (final package in directMembers) {
+        for (final field in fields) {
+          final mutated = manifest();
+          final dependencies =
+              mutated['direct_dependencies'] as Map<String, dynamic>;
+          (dependencies[package] as Map<String, dynamic>).remove(field);
+          expect(
+            validate(currentInputs(), baselineJson: jsonEncode(mutated)),
+            contains(
+              'PLUG-02 atomic cohort $package is missing hold evidence field: $field',
+            ),
+          );
+        }
+      }
+
+      for (final field in fields) {
+        final mutated = manifest();
+        final lanes = mutated['lanes'] as Map<String, dynamic>;
+        final transitives =
+            lanes['phase59_native_transitives'] as Map<String, dynamic>;
+        (transitives['win32'] as Map<String, dynamic>).remove(field);
+        expect(
+          validate(currentInputs(), baselineJson: jsonEncode(mutated)),
+          contains(
+            'PLUG-02 atomic cohort win32 is missing hold evidence field: $field',
+          ),
+        );
+      }
+    });
   });
 }
