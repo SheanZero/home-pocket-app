@@ -6,12 +6,12 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
 ```json
 {
   "schema_version": 1,
-  "completed_stage": "compile",
-  "source_commit": "5870a04ec041c0c8dba5d6b23cffead5a30b5385",
+  "completed_stage": "package",
+  "source_commit": "b953bcc368a1783823963d4c1b4a0792fb17693e",
   "candidate_source_commit": "ab6c25a4f6a1820250656258eee775ed0e94f205",
   "compile_source_commit": "5870a04ec041c0c8dba5d6b23cffead5a30b5385",
   "started_utc": "2026-08-09T15:02:37.932294Z",
-  "completed_utc": "2026-08-09T15:15:59Z",
+  "completed_utc": "2026-08-09T15:51:04.020537Z",
   "compile_started_utc": "2026-08-09T15:14:55Z",
   "compile_completed_utc": "2026-08-09T15:15:59Z",
   "host_os": "macOS 26.5.1 arm64",
@@ -35,7 +35,7 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
   "results": {
     "candidate": "INCOMPATIBLE",
     "compile": "PASS",
-    "package": "NOT_RUN",
+    "package": "PASS",
     "emulator": "NOT_RUN",
     "physical_device": "NOT_PERFORMED_NOT_CLAIMED"
   },
@@ -64,13 +64,64 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
       "command": "./gradlew --no-daemon -Dorg.gradle.java.home=<verified-jdk17> clean :app:assembleDebug",
       "exit_code": 0,
       "timed_out": false
+    },
+    {
+      "command": "./gradlew <verified-jdk17> -Pphase61SigningEvidence=true :app:verifyReleaseSigning (credentials absent)",
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "command": "./gradlew <verified-jdk17> -Pphase61SigningEvidence=true :app:verifyReleaseSigning (Android Debug certificate)",
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "command": "bash scripts/release_preflight.sh --platform android --package (ephemeral non-debug evidence certificate)",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "apksigner verify --verbose --print-certs app-release.apk",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "jarsigner -verify app-release.aab",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "keytool -printcert -jarfile app-release.aab",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "aapt dump badging app-release.apk",
+      "exit_code": 0,
+      "timed_out": false
     }
   ],
   "artifacts": [
     {
-      "kind": "debug_apk_compile_only",
-      "sha256": "b8abc36a5c570213ad8974d2cc3abfaa7c37e6e527f6137ccca84fcc08becec8",
-      "size_bytes": 187268566,
+      "kind": "release_aab",
+      "sha256": "ec9fd01d96fc8cf60488628ba435755a82716e63fa47da714ef279f69db44c61",
+      "size_bytes": 83911159,
+      "certificate_class": "NON_DEBUG_EPHEMERAL_EVIDENCE",
+      "certificate_subject": "CN=Happy Pocket Phase 61 Evidence",
+      "certificate_sha256": "250315b3a00f8d4e6946365a44e2b875304585bb17c37bd83aea64351e0c53a7",
+      "signature_tool": "jarsigner + keytool",
+      "archive_and_content_hygiene": "PASS",
+      "durable_artifact_retained": false
+    },
+    {
+      "kind": "release_apk",
+      "sha256": "a351fc44d27f7e5abcc2f1cfc08eeb6651c1a50281b255f911886405da688597",
+      "size_bytes": 89743247,
+      "certificate_class": "NON_DEBUG_EPHEMERAL_EVIDENCE",
+      "certificate_subject": "CN=Happy Pocket Phase 61 Evidence",
+      "certificate_sha256": "250315b3a00f8d4e6946365a44e2b875304585bb17c37bd83aea64351e0c53a7",
+      "signature_tool": "apksigner",
+      "archive_and_content_hygiene": "PASS",
       "durable_artifact_retained": false
     }
   ],
@@ -96,6 +147,32 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "daemon_jvm": "verified JDK 17",
     "result": "BUILD SUCCESSFUL",
     "hosted_api36_x86_64_workflow": "NOT_RUN"
+  },
+  "package_source_commit": "b953bcc368a1783823963d4c1b4a0792fb17693e",
+  "package_started_utc": "2026-08-09T15:48:58.779404Z",
+  "package_completed_utc": "2026-08-09T15:51:04.020537Z",
+  "release_signing_negatives": {
+    "missing_credentials": {
+      "result": "REJECTED_AS_REQUIRED",
+      "exit_code": 1
+    },
+    "android_debug_certificate": {
+      "result": "REJECTED_AS_REQUIRED",
+      "exit_code": 1
+    }
+  },
+  "release_package_metadata": {
+    "application_id": "com.sheanzero.happypocket.app",
+    "version_code": "1",
+    "version_name": "0.1.0",
+    "min_sdk": "24",
+    "target_sdk": "36"
+  },
+  "release_cleanup": {
+    "private_key_material": "ABSENT",
+    "release_aab": "DELETED_AFTER_EVIDENCE",
+    "release_apk": "DELETED_AFTER_EVIDENCE",
+    "repository_secret_or_artifact": "ABSENT"
   }
 }
 ```
