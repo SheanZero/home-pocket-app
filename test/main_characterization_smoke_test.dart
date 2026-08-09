@@ -642,6 +642,7 @@ void main() {
             return AppDatabase.forTesting();
           },
           databaseExists: () async => false,
+          ensureNativeLibrary: () async {},
           seedRunner: (_) async {},
         );
       }

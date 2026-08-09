@@ -89,6 +89,7 @@ AppInitializer _createAppInitializer() {
     // already exists on disk (see AppInitializer / encryptedDatabaseExists).
     databaseExists: () =>
         _useInMemoryDatabase ? Future.value(false) : encryptedDatabaseExists(),
+    ensureNativeLibrary: ensureNativeLibrary,
     // Seeding (categories, default book) runs inside HomePocketApp._initialize().
     seedRunner: (_) async {},
     pendingPrivacyWipeResumer: (container) async {

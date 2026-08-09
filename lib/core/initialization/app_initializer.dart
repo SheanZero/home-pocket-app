@@ -14,6 +14,9 @@ typedef ProviderContainerFactory =
 typedef AppDatabaseFactory =
     Future<AppDatabase> Function(MasterKeyRepository masterKeyRepo);
 
+/// Loads the selected sqlite3 Native Asset without opening a database.
+typedef NativeLibraryReadiness = Future<void> Function();
+
 /// Whether an encrypted database already exists on disk. Injected so the
 /// data-loss guard stays unit-testable without touching path_provider.
 typedef EncryptedDatabaseExists = Future<bool> Function();
@@ -31,6 +34,7 @@ class AppInitializer {
     required this._databaseFactory,
     required this._databaseExists,
     required this._seedRunner,
+    required this.ensureNativeLibrary,
     this._pendingPrivacyWipeResumer,
   });
 
@@ -38,6 +42,7 @@ class AppInitializer {
   final AppDatabaseFactory _databaseFactory;
   final EncryptedDatabaseExists _databaseExists;
   final SeedRunner _seedRunner;
+  final NativeLibraryReadiness ensureNativeLibrary;
   final PendingPrivacyWipeResumer? _pendingPrivacyWipeResumer;
 
   Future<InitResult> initialize() async {
@@ -48,7 +53,19 @@ class AppInitializer {
 
     ProviderContainer? initContainer;
     try {
-      // Stage 1: Master key. Device identity is intentionally deferred until
+      // Stage 1: Native library. Load the sqlite3 Native Asset before the
+      // first ProviderContainer can reach secure storage or database setup.
+      try {
+        await ensureNativeLibrary();
+      } catch (e, st) {
+        return InitResult.failure(
+          type: InitFailureType.database,
+          error: e,
+          stackTrace: st,
+        );
+      }
+
+      // Stage 2: Master key. Device identity is intentionally deferred until
       // a pending privacy wipe has resumed and deleted its durable journal.
       initContainer = _containerFactory();
       final masterKeyRepo = initContainer.read(masterKeyRepositoryProvider);
@@ -77,7 +94,7 @@ class AppInitializer {
         );
       }
 
-      // Stage 2: Database
+      // Stage 3: Database
       final AppDatabase database;
       try {
         database = await _databaseFactory(masterKeyRepo);
@@ -89,7 +106,7 @@ class AppInitializer {
         );
       }
 
-      // Stage 3: Final container + pending privacy-wipe recovery. Nothing in
+      // Stage 4: Final container + pending privacy-wipe recovery. Nothing in
       // normal bootstrap may recreate identity, seed data, start sync/push, or
       // expose routes until this hook succeeds.
       initContainer.dispose();
@@ -114,7 +131,7 @@ class AppInitializer {
         }
       }
 
-      // Stage 4: Fresh/current device identity, only after wipe recovery.
+      // Stage 5: Fresh/current device identity, only after wipe recovery.
       try {
         final keyManager = container.read(keyManagerProvider);
         if (!await keyManager.hasKeyPair()) {
@@ -137,7 +154,7 @@ class AppInitializer {
         );
       }
 
-      // Stage 5: Normal seeding.
+      // Stage 6: Normal seeding.
       try {
         await _seedRunner(container);
       } catch (e, st) {

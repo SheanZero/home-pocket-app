@@ -29,6 +29,18 @@ const _plaintextSqliteHeader = <int>[
 
 final _requiredSqlCipherVersion = RegExp(r'^4\.17\.\d+(?:\s|$)');
 
+/// Loads the sqlite3 Native Asset selected by the package build hook.
+///
+/// This deliberately reads the native library version without opening a
+/// database, deriving a key, or creating any database file. SQLCipher identity
+/// and encrypted-handle checks remain owned by [createEncryptedExecutor].
+Future<void> ensureNativeLibrary() async {
+  final version = sqlite3.sqlite3.version.libVersion.trim();
+  if (version.isEmpty) {
+    throw StateError('sqlite3 Native Asset reported an empty library version');
+  }
+}
+
 /// Creates an encrypted SQLCipher database executor.
 ///
 /// Must be called after MasterKeyRepository is initialized (has master key).

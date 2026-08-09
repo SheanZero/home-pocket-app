@@ -84,7 +84,7 @@ void main() {
       databaseExists: databaseExists ?? (() async => false),
       seedRunner: seedRunner ?? _noopSeedRunner(),
       pendingPrivacyWipeResumer: pendingPrivacyWipeResumer,
-      ensureNativeLibrary: ensureNativeLibrary,
+      ensureNativeLibrary: ensureNativeLibrary ?? (() async {}),
     );
   }
 
@@ -219,6 +219,7 @@ void main() {
         seedRunner: (container) async {
           captured = container;
         },
+        ensureNativeLibrary: () async {},
       ).initialize();
 
       final success = result as InitSuccess;
