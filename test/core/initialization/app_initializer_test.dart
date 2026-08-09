@@ -73,6 +73,7 @@ void main() {
     SeedRunner? seedRunner,
     EncryptedDatabaseExists? databaseExists,
     PendingPrivacyWipeResumer? pendingPrivacyWipeResumer,
+    NativeLibraryReadiness? ensureNativeLibrary,
   }) {
     return AppInitializer(
       containerFactory: _makeContainerFactory(
@@ -83,6 +84,7 @@ void main() {
       databaseExists: databaseExists ?? (() async => false),
       seedRunner: seedRunner ?? _noopSeedRunner(),
       pendingPrivacyWipeResumer: pendingPrivacyWipeResumer,
+      ensureNativeLibrary: ensureNativeLibrary,
     );
   }
 
@@ -158,6 +160,31 @@ void main() {
             'databaseFactory',
           ]),
         );
+      },
+    );
+
+    test(
+      'completes native-library readiness before key and database construction',
+      () async {
+        final calls = <String>[];
+        when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async {
+          calls.add('hasMasterKey');
+          return true;
+        });
+
+        final result = await makeInitializer(
+          ensureNativeLibrary: () async {
+            calls.add('nativeLibrary');
+          },
+          databaseFactory: (_) async {
+            calls.add('databaseFactory');
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect(result, isA<InitSuccess>());
+        (result as InitSuccess).container.dispose();
+        expect(calls, ['nativeLibrary', 'hasMasterKey', 'databaseFactory']);
       },
     );
 
@@ -247,6 +274,38 @@ void main() {
   });
 
   group('AppInitializer — missing key with existing data guard', () {
+    test(
+      'checks native readiness before rejecting missing key with existing data',
+      () async {
+        final calls = <String>[];
+        when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async {
+          calls.add('hasMasterKey');
+          return false;
+        });
+
+        final result = await makeInitializer(
+          ensureNativeLibrary: () async {
+            calls.add('nativeLibrary');
+          },
+          databaseExists: () async {
+            calls.add('databaseExists');
+            return true;
+          },
+          databaseFactory: (_) async {
+            calls.add('databaseFactory');
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect(
+          (result as InitFailure).type,
+          InitFailureType.masterKeyMissingWithData,
+        );
+        expect(calls, ['nativeLibrary', 'hasMasterKey', 'databaseExists']);
+        verifyNever(() => fakeMasterKeyRepo.initializeMasterKey());
+      },
+    );
+
     test(
       'does NOT mint a new key when an encrypted DB already exists',
       () async {
@@ -390,6 +449,42 @@ void main() {
         expect((result as InitFailure).type, equals(InitFailureType.masterKey));
       },
     );
+  });
+
+  group('AppInitializer — native library failure', () {
+    test('fails closed before provider, key, or database access', () async {
+      final calls = <String>[];
+      final initializer = AppInitializer(
+        containerFactory: ({overrides = const []}) {
+          calls.add('containerFactory');
+          return _makeContainerFactory(
+            masterKeyRepo: fakeMasterKeyRepo,
+            keyRepo: fakeKeyRepo,
+          )(overrides: overrides);
+        },
+        databaseFactory: (_) async {
+          calls.add('databaseFactory');
+          return AppDatabase.forTesting();
+        },
+        databaseExists: () async {
+          calls.add('databaseExists');
+          return false;
+        },
+        seedRunner: _noopSeedRunner(),
+        ensureNativeLibrary: () async {
+          calls.add('nativeLibrary');
+          throw StateError('selected native library unavailable');
+        },
+      );
+
+      final result = await initializer.initialize();
+
+      expect(result, isA<InitFailure>());
+      expect((result as InitFailure).type, InitFailureType.database);
+      expect(calls, ['nativeLibrary']);
+      verifyNever(() => fakeMasterKeyRepo.hasMasterKey());
+      verifyNever(() => fakeMasterKeyRepo.initializeMasterKey());
+    });
   });
 
   group('AppInitializer — database failure', () {

@@ -53,6 +53,11 @@ class _FixtureKeyRepository implements MasterKeyRepository {
   Future<void> clearMasterKey() async {}
 }
 
+class _MissingKeyRepository extends _FixtureKeyRepository {
+  @override
+  Future<bool> hasMasterKey() async => false;
+}
+
 Future<String> _scalar(AppDatabase database, String sql) async {
   final rows = await database.customSelect(sql).get();
   return rows.single.data.values.single.toString().toLowerCase();
@@ -64,6 +69,21 @@ Future<void> _expectEncryptedHeader(File file) async {
 }
 
 void main() {
+  test(
+    'production executor rejects a repository without a master key',
+    () async {
+      final root = await Directory.systemTemp.createTemp('missing-key-guard-');
+      addTearDown(() => root.delete(recursive: true));
+      final file = File('${root.path}/must-not-exist.db');
+
+      await expectLater(
+        createEncryptedExecutor(_MissingKeyRepository(), databaseFile: file),
+        throwsA(isA<MasterKeyNotInitializedException>()),
+      );
+      expect(await file.exists(), isFalse);
+    },
+  );
+
   test(
     'production executor rejects an existing plaintext SQLite file',
     () async {
@@ -107,6 +127,7 @@ void main() {
       );
       expect(await _scalar(database, 'PRAGMA cipher_status'), '1');
       expect(await _scalar(database, 'PRAGMA user_version'), '36');
+      expect(database.schemaVersion, 36);
       expect(
         int.parse(
           await _scalar(database, 'SELECT count(*) FROM sqlite_master'),
