@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 59
 current_phase_name: Controlled Platform Plugin Cohorts
 status: executing
-stopped_at: Completed 59-03-PLAN.md
-last_updated: "2026-08-09T00:33:48.522Z"
+stopped_at: Completed 59-04-PLAN.md
+last_updated: "2026-08-09T00:53:39.486Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 59 execution started
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 20
-  completed_plans: 16
+  completed_plans: 17
   percent: 29
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 ## Current Position
 
 Phase: 59 (Controlled Platform Plugin Cohorts) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-08-09 — Phase 59 execution started
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 85%
 
 ### Decisions
 
@@ -106,6 +106,9 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 59-02: Keep file_picker 11.0.3/share_plus 12.0.2/package_info_plus 9.0.1/win32 5.15.0 as one exact hold until the full Java 17, Android, native build, picker/share, and identity evidence matrix is attributable.
 - [Phase ?]: 59-03: Keep speech_to_text exactly at 7.3.0; 7.4.0 remains eligible but unselected until complete native-build and physical-iPhone evidence is attributable.
 - [Phase ?]: 59-03: An accepted speech candidate must have PASS automated/native/iPhone evidence and matching declaration/lock; unavailable or partial evidence is an exact 7.3.0 hold.
+- [Phase ?]: Keep Firebase Core 4.13.0, Firebase Messaging 16.5.0, and flutter_local_notifications 22.2.0 selected until attributable Android-FCM and custom-iOS-APNs native lifecycle matrices pass.
+- [Phase ?]: Preserve custom APNs with no Firebase initializer on iOS and Firebase FCM on Android; the disclosed cloud fallback does not collapse the transport identities.
+- [Phase ?]: Keep notification settings hidden and native auto-registration/entitlements absent; unavailable native evidence is an explicit hold, never a feature-enable justification.
 
 ### Quick Tasks Completed
 
@@ -291,8 +294,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-09T00:33:48.508Z
-Stopped at: Completed 59-03-PLAN.md
+Last session: 2026-08-09T00:53:39.472Z
+Stopped at: Completed 59-04-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -397,6 +400,7 @@ Resume file: None
 | Phase 59 P01 | 19 min | 3 tasks | 6 files |
 | Phase 59 P02 | 7min | 3 tasks | 7 files |
 | Phase 59 P03 | 7min | 3 tasks | 5 files |
+| Phase 59 P04 | 15min | 3 tasks | 8 files |
 
 ## Decisions
 
