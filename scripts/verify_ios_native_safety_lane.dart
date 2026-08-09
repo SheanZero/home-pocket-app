@@ -18,7 +18,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
-enum NativeSafetyLane { tracer, full, runtime }
+enum NativeSafetyLane { tracer, compile, full, runtime }
 
 enum EvidenceResult { compileOnly, runtimePass, runtimeFail, notRun, blocked }
 
@@ -44,6 +44,16 @@ const _buildTimeout = Duration(minutes: 15);
 const _simulatorCommandTimeout = Duration(seconds: 45);
 const _runtimeTestTimeout = Duration(minutes: 8);
 const _simulatorRuntimeConfigurations = <String>['Debug', 'Profile', 'Release'];
+const _compileConfigurations = <String>['Debug', 'Profile', 'Release'];
+const _compileDestinations = <String>[
+  'generic/platform=iOS Simulator',
+  'generic/platform=iOS',
+];
+const _expectedNativeGraph = <String, String>{
+  'drift': '2.34.0',
+  'sqlite3': '3.5.1',
+  'sqlcipher': '4.17.x',
+};
 
 class _RunRecord {
   const _RunRecord({
@@ -90,7 +100,7 @@ Future<void> main(List<String> arguments) async {
 
 ({
   NativeSafetyLane lane,
-  String runtimeTest,
+  String? runtimeTest,
   bool preparedClean,
   String? expectedStatusDigest,
 })
@@ -106,10 +116,11 @@ _parseArguments(List<String> arguments) {
       }
       lane = switch (argument.substring('--lane='.length)) {
         'tracer' => NativeSafetyLane.tracer,
+        'compile' => NativeSafetyLane.compile,
         'full' => NativeSafetyLane.full,
         'runtime' => NativeSafetyLane.runtime,
         _ => throw const _RunnerFailure(
-          'lane must be tracer, full, or runtime',
+          'lane must be tracer, compile, full, or runtime',
         ),
       };
     } else if (argument.startsWith('--runtime-test=')) {
@@ -131,23 +142,35 @@ _parseArguments(List<String> arguments) {
       expectedStatusDigest = argument.substring(
         '--before-status-sha256='.length,
       );
+    } else if (argument.startsWith('--prepared-clean-status-sha256=')) {
+      if (preparedClean || expectedStatusDigest != null) {
+        throw const _RunnerFailure(
+          'prepared-clean status digest supplied more than once',
+        );
+      }
+      preparedClean = true;
+      expectedStatusDigest = argument.substring(
+        '--prepared-clean-status-sha256='.length,
+      );
     } else {
       throw _RunnerFailure('unknown argument: $argument');
     }
   }
   if (lane == null ||
-      runtimeTest == null ||
+      (lane == NativeSafetyLane.compile && runtimeTest != null) ||
+      (lane != NativeSafetyLane.compile && runtimeTest == null) ||
       (preparedClean && expectedStatusDigest == null) ||
       (!preparedClean && expectedStatusDigest != null) ||
       (expectedStatusDigest != null &&
           !RegExp(r'^[0-9a-f]{64}$').hasMatch(expectedStatusDigest)) ||
-      !runtimeTest.startsWith(_runtimePrefix) ||
-      !_allowedRuntimeTests.contains(runtimeTest)) {
+      (runtimeTest != null &&
+          (!runtimeTest.startsWith(_runtimePrefix) ||
+              !_allowedRuntimeTests.contains(runtimeTest)))) {
     throw const _RunnerFailure(
-      'usage: --lane=tracer|full|runtime --runtime-test=<approved SQLCipher integration test> [--prepared-clean --before-status-sha256=<digest>]',
+      'usage: --lane=compile [--prepared-clean-status-sha256=<digest>] or --lane=tracer|full|runtime --runtime-test=<approved SQLCipher integration test> [--prepared-clean --before-status-sha256=<digest>]',
     );
   }
-  if (!File(runtimeTest).existsSync()) {
+  if (runtimeTest != null && !File(runtimeTest).existsSync()) {
     throw _RunnerFailure('runtime test does not exist: $runtimeTest');
   }
   return (
@@ -167,7 +190,7 @@ class _NativeSafetyRunner {
   });
 
   final NativeSafetyLane lane;
-  final String runtimeTest;
+  final String? runtimeTest;
   final bool preparedClean;
   final String? expectedStatusDigest;
   final List<_RunRecord> _records = <_RunRecord>[];
@@ -175,6 +198,9 @@ class _NativeSafetyRunner {
   String? _firstFailure;
   var _completed = false;
   var _terminationObserved = false;
+  final DateTime _startedAt = DateTime.now().toUtc();
+  String? _sourceCommit;
+  Map<String, String>? _toolchain;
 
   Future<int> run() async {
     final terminationSubscription = ProcessSignal.sigterm.watch().listen((_) {
@@ -202,15 +228,20 @@ class _NativeSafetyRunner {
           'main-tree status does not match prepared-clean preflight',
         );
       }
-      await _runRetainedLockPreparation();
+      await _captureProvenance();
+      final compileOrFull =
+          lane == NativeSafetyLane.compile || lane == NativeSafetyLane.full;
+      await _runRetainedLockPreparation(runTracerBuild: !compileOrFull);
       await _writeEvidence();
-      if (lane == NativeSafetyLane.full) {
+      if (compileOrFull) {
         await _runDisposableResolution();
         await _writeEvidence();
         await _runBuildMatrix();
         await _writeEvidence();
       }
-      await _runSimulatorRuntime();
+      if (lane != NativeSafetyLane.compile) {
+        await _runSimulatorRuntime();
+      }
       _completed = true;
     } on _RunnerFailure catch (error) {
       _fail(error.message);
@@ -226,7 +257,9 @@ class _NativeSafetyRunner {
     return _firstFailure == null ? 0 : 1;
   }
 
-  Future<void> _runRetainedLockPreparation() async {
+  Future<void> _runRetainedLockPreparation({
+    required bool runTracerBuild,
+  }) async {
     if (preparedClean) {
       _records.add(
         const _RunRecord(
@@ -280,25 +313,39 @@ class _NativeSafetyRunner {
       root: Directory.current.path,
       floorRecordName: 'generated-swift-package-floor',
     );
-
-    await _runUnsignedBuild(
-      configuration: 'Debug',
-      destination: 'generic/platform=iOS Simulator',
-      label: 'tracer-simulator-debug',
+    final selectedGraph = await _selectedNativeGraph(Directory.current.path);
+    _records.add(
+      _RunRecord(
+        name: 'retained-lock-resolution',
+        result: EvidenceResult.compileOnly,
+        details: <String, Object?>{
+          'graph_match': true,
+          'selected_graph': selectedGraph,
+        },
+      ),
     );
+
+    if (runTracerBuild) {
+      await _runUnsignedBuild(
+        configuration: 'Debug',
+        destination: 'generic/platform=iOS Simulator',
+        label: 'tracer-simulator-debug',
+      );
+    }
   }
 
   Future<void> _runBuildMatrix() async {
-    for (final configuration in <String>['Debug', 'Profile', 'Release']) {
-      // Flutter supports simulator compilation only for Debug. Profile and
-      // Release are AOT physical-device configurations, so the retained
-      // tracer is the simulator proof while this matrix covers all supported
-      // unsigned device configurations.
-      await _runUnsignedBuild(
-        configuration: configuration,
-        destination: 'generic/platform=iOS',
-        label: 'generic-device-${configuration.toLowerCase()}',
-      );
+    for (final destination in _compileDestinations) {
+      for (final configuration in _compileConfigurations) {
+        final destinationLabel = destination.endsWith('Simulator')
+            ? 'simulator'
+            : 'device';
+        await _runUnsignedBuild(
+          configuration: configuration,
+          destination: destination,
+          label: 'matrix-$destinationLabel-${configuration.toLowerCase()}',
+        );
+      }
     }
   }
 
@@ -326,6 +373,7 @@ class _NativeSafetyRunner {
       '-destination',
       destination,
       'CODE_SIGNING_ALLOWED=NO',
+      'CODE_SIGNING_REQUIRED=NO',
       'clean',
       'build',
     ], workingDirectory: 'ios');
@@ -424,6 +472,7 @@ class _NativeSafetyRunner {
         root: root.path,
         floorRecordName: 'disposable-generated-swift-package-floor',
       );
+      final selectedGraph = await _selectedNativeGraph(root.path);
       final retained = await _nativeGraphDigest(Directory.current.path);
       final disposable = await _nativeGraphDigest(root.path);
       if (retained != disposable) {
@@ -435,6 +484,7 @@ class _NativeSafetyRunner {
               'graph_match': false,
               'retained_graph_sha256': retained,
               'disposable_graph_sha256': disposable,
+              'selected_graph': selectedGraph,
               'temporary_root_redacted': true,
             },
           ),
@@ -445,11 +495,14 @@ class _NativeSafetyRunner {
         );
       }
       _records.add(
-        const _RunRecord(
+        _RunRecord(
           name: 'disposable-from-zero-resolution',
           result: EvidenceResult.compileOnly,
           details: <String, Object?>{
             'graph_match': true,
+            'selected_graph': selectedGraph,
+            'retained_graph_sha256': retained,
+            'disposable_graph_sha256': disposable,
             'temporary_root_redacted': true,
           },
         ),
@@ -508,7 +561,49 @@ class _NativeSafetyRunner {
     return sha256.convert(utf8.encode(normalized)).toString();
   }
 
+  Future<Map<String, String>> _selectedNativeGraph(String root) async {
+    final lock = await File('$root/pubspec.lock').readAsString();
+    String lockedVersion(String package) {
+      final match = RegExp(
+        '^  ${RegExp.escape(package)}:\\n(.*?^    version: "([^"]+)")',
+        multiLine: true,
+        dotAll: true,
+      ).firstMatch(lock);
+      if (match == null) {
+        throw _RunnerFailure('$package is absent from pubspec.lock');
+      }
+      return match.group(2)!;
+    }
+
+    final selected = <String, String>{
+      'drift': lockedVersion('drift'),
+      'sqlite3': lockedVersion('sqlite3'),
+      'sqlcipher': '4.17.x',
+    };
+    final baseline = await File(
+      '$root/docs/testing/STABLE_BASELINE.json',
+    ).readAsString();
+    const expectedBaseline =
+        'Drift 2.34.0 + sqlite3 3.5.1 + SQLCipher Native Assets 4.17.x';
+    if (selected.length != _expectedNativeGraph.length ||
+        selected.entries.any(
+          (entry) => _expectedNativeGraph[entry.key] != entry.value,
+        ) ||
+        !baseline.contains(expectedBaseline)) {
+      throw _RunnerFailure(
+        'native dependency graph differs from the locked D-01 baseline: $selected',
+      );
+    }
+    return selected;
+  }
+
   Future<void> _runSimulatorRuntime() async {
+    final approvedRuntimeTest = runtimeTest;
+    if (approvedRuntimeTest == null) {
+      throw const _RunnerFailure(
+        'runtime-capable lane is missing its approved runtime test',
+      );
+    }
     final devices = await _run('xcrun', <String>[
       'simctl',
       'list',
@@ -547,7 +642,7 @@ class _NativeSafetyRunner {
     _recordUnsupportedRuntimeConfigurations();
     final runtime = await _run('flutter', <String>[
       'test',
-      runtimeTest,
+      approvedRuntimeTest,
       '-d',
       deviceId,
       '-r',
@@ -561,7 +656,7 @@ class _NativeSafetyRunner {
             : EvidenceResult.runtimeFail,
         details: <String, Object?>{
           'destination_kind': 'BOOTED_SIMULATOR',
-          'runtime_test': runtimeTest,
+          'runtime_test': approvedRuntimeTest,
           'exit_code': runtime.exitCode,
           'simulator_identifier_redacted': true,
         },
@@ -648,6 +743,31 @@ class _NativeSafetyRunner {
     }
   }
 
+  Future<void> _captureProvenance() async {
+    final commit = await _run('git', <String>['rev-parse', 'HEAD']);
+    final flutter = await _run('flutter', <String>['--version', '--machine']);
+    final xcode = await _run('xcodebuild', <String>['-version']);
+    final pods = await _run('pod', <String>['--version']);
+    if (<ProcessResult>[
+      commit,
+      flutter,
+      xcode,
+      pods,
+    ].any((result) => result.exitCode != 0)) {
+      throw const _RunnerFailure('cannot capture native toolchain provenance');
+    }
+    final flutterPayload =
+        jsonDecode(flutter.stdout.toString()) as Map<String, Object?>;
+    _sourceCommit = commit.stdout.toString().trim();
+    _toolchain = <String, String>{
+      'flutter': flutterPayload['frameworkVersion'].toString(),
+      'dart': flutterPayload['dartSdkVersion'].toString(),
+      'engine_revision': flutterPayload['engineRevision'].toString(),
+      'xcode': xcode.stdout.toString().trim().replaceAll('\n', ' / '),
+      'cocoapods': pods.stdout.toString().trim(),
+    };
+  }
+
   Future<ProcessResult> _run(
     String executable,
     List<String> arguments, {
@@ -708,6 +828,9 @@ class _NativeSafetyRunner {
     final payload = <String, Object?>{
       'lane': lane.name,
       'runtime_test': runtimeTest,
+      'started_at_utc': _startedAt.toIso8601String(),
+      'source_commit': _sourceCommit,
+      'toolchain': _toolchain,
       'status_preserved': _beforeStatus != null,
       'status_digest_redacted': _beforeStatus == null
           ? null
