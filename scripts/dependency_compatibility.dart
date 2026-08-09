@@ -41,6 +41,7 @@ DependencyCompatibilityMode parseDependencyCompatibilityMode(
   var mode = DependencyCompatibilityMode.baseline;
   var sawMode = false;
   var sawVerification = false;
+  var sawGeneratedSwiftPackageManifest = false;
   for (final argument in arguments) {
     switch (argument) {
       case '--mode=baseline':
@@ -60,10 +61,35 @@ DependencyCompatibilityMode parseDependencyCompatibilityMode(
         sawVerification = true;
         break;
       default:
+        if (argument.startsWith('--generated-swift-package-manifest=')) {
+          if (sawGeneratedSwiftPackageManifest) {
+            throw ArgumentError(
+              'generated Swift package manifest supplied more than once',
+            );
+          }
+          if (argument
+              .substring('--generated-swift-package-manifest='.length)
+              .trim()
+              .isEmpty) {
+            throw ArgumentError(
+              'generated Swift package manifest path is empty',
+            );
+          }
+          sawGeneratedSwiftPackageManifest = true;
+          break;
+        }
         throw ArgumentError('unknown argument: $argument');
     }
   }
   return mode;
+}
+
+String? generatedSwiftPackageManifestPath(List<String> arguments) {
+  const prefix = '--generated-swift-package-manifest=';
+  for (final argument in arguments) {
+    if (argument.startsWith(prefix)) return argument.substring(prefix.length);
+  }
+  return null;
 }
 
 String successSummary(
@@ -257,6 +283,7 @@ CompatibilityReport validateDependencyCompatibility({
   required String metadataYaml,
   required String flutterExtensionSource,
   required String runningFlutterMachineJson,
+  String? generatedSwiftPackageManifest,
   required bool pubspecOverridesPresent,
   required Map<String, String> trackedInputContents,
   DependencyCompatibilityMode mode = DependencyCompatibilityMode.baseline,
@@ -484,6 +511,7 @@ CompatibilityReport validateDependencyCompatibility({
     issues: issues,
     podfile: podfile,
     xcodeProject: xcodeProject,
+    generatedSwiftPackageManifest: generatedSwiftPackageManifest,
   );
   if (pubspecOverridesPresent) {
     issues.add('pubspec_overrides.yaml must not be present');
@@ -585,6 +613,7 @@ void _validateIosDeploymentTargets({
   required List<String> issues,
   required String podfile,
   required String xcodeProject,
+  required String? generatedSwiftPackageManifest,
 }) {
   final podfileVersion = RegExp(
     r'''^\s*platform\s+:ios\s*,\s*['"]([^'"]+)['"]''',
@@ -601,6 +630,25 @@ void _validateIosDeploymentTargets({
       xcodeVersions.any((value) => !_isAtLeastIos15(value))) {
     issues.add(
       'every Xcode IPHONEOS_DEPLOYMENT_TARGET must be iOS 15.0 or later',
+    );
+  }
+
+  if (generatedSwiftPackageManifest == null) return;
+  if (!generatedSwiftPackageManifest.contains(
+    'name: "FlutterGeneratedPluginSwiftPackage"',
+  )) {
+    issues.add(
+      'generated Flutter Swift package must identify FlutterGeneratedPluginSwiftPackage',
+    );
+    return;
+  }
+  final generatedVersions = RegExp(
+    r'\.iOS\s*\(\s*"([0-9.]+)"\s*\)',
+  ).allMatches(generatedSwiftPackageManifest).map((match) => match.group(1));
+  if (generatedVersions.isEmpty ||
+      generatedVersions.any((value) => !_isAtLeastIos15(value))) {
+    issues.add(
+      'generated Flutter Swift package must declare iOS 15.0 or later',
     );
   }
 }
@@ -1959,12 +2007,15 @@ bool _pubspecOverridesPresent(String pubspecYaml) =>
 
 Future<void> main(List<String> arguments) async {
   late final DependencyCompatibilityMode mode;
+  late final String? generatedManifestPath;
   try {
     mode = parseDependencyCompatibilityMode(arguments);
+    generatedManifestPath = generatedSwiftPackageManifestPath(arguments);
   } on ArgumentError catch (error) {
     stderr.writeln(
       'Usage: dependency_compatibility.dart '
-      '[--mode=baseline|future-probe] [--verify-running-flutter-sdk]',
+      '[--mode=baseline|future-probe] [--verify-running-flutter-sdk] '
+      '[--generated-swift-package-manifest=<path>]',
     );
     stderr.writeln('[dependency-compat] ERROR: ${error.message}');
     exitCode = 2;
@@ -1991,6 +2042,9 @@ Future<void> main(List<String> arguments) async {
           errors: [],
         );
   final pubspec = read('pubspec.yaml');
+  final generatedSwiftPackageManifest = generatedManifestPath == null
+      ? null
+      : read(generatedManifestPath);
   final report = validateDependencyCompatibility(
     pubspecYaml: pubspec,
     lockYaml: read('pubspec.lock'),
@@ -2007,6 +2061,7 @@ Future<void> main(List<String> arguments) async {
     metadataYaml: read('.metadata'),
     flutterExtensionSource: running.extensionSource,
     runningFlutterMachineJson: running.machineJson,
+    generatedSwiftPackageManifest: generatedSwiftPackageManifest,
     pubspecOverridesPresent: _pubspecOverridesPresent(pubspec),
     trackedInputContents: _trackedInputContents(read),
     mode: mode,
@@ -2047,6 +2102,11 @@ Future<void> main(List<String> arguments) async {
   }
   stdout.writeln(
     '  Drift 2.34.0 / sqlite3 3.5.1 / SQLCipher Native Asset 4.17',
+  );
+  stdout.writeln(
+    generatedManifestPath == null
+        ? '  Compile-only: generated Swift package floor not supplied; this is not generated-floor or runtime proof'
+        : '  Compile-only: generated Swift package iOS floor >= 15.0 verified; runtime encryption proof is separate',
   );
   final betaIdentityParsed = completeReport.warnings.any(
     (warning) =>
