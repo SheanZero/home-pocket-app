@@ -134,6 +134,17 @@ members are candidates only. A declaration or lock mutation of any selected
 member, a missing member, duplicate identity, empty evidence field, or
 non-lexical inventory fails before resolution.
 
+On 2026-08-09, the official package pages and changelogs were rechecked.
+`file_picker 11.0.3` remains the stable release and its native picker supports
+custom extension filtering. `share_plus 13.3.0` and `package_info_plus 10.2.1`
+both require Java 17, Kotlin 2.2.0, AGP 8.12.1, and Gradle 8.13; their 13/10
+major lines also move the transitive `win32` dependency from 5.15.0 to 6.0.0+.
+The selected Android lane remains on AGP 8.11.1 and this execution environment
+has no Java 17, Android destination, or usable iOS Simulator. Therefore the
+single cohort decision is `hold`: the manifest and validator reject an
+independent declaration or lock mutation, and no solver result is accepted
+without the complete native evidence exit condition.
+
 Official execution-date candidates retained as holds include
 `flutter_secure_storage 11.0.0`, `flutter_local_notifications 22.3.0`, and
 the stable `speech_to_text 7.4.0`; Firebase Core `4.13.0`, Firebase Messaging

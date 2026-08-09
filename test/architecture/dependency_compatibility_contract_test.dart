@@ -1399,9 +1399,7 @@ end
         );
         expect(
           validate(input),
-          contains(
-            'PLUG-02 atomic cohort declaration drift for ${entry.key}',
-          ),
+          contains('PLUG-02 atomic cohort declaration drift for ${entry.key}'),
         );
       }
 
@@ -1419,9 +1417,7 @@ end
         );
         expect(
           validate(input),
-          contains(
-            'PLUG-02 atomic cohort resolution drift for ${entry.key}',
-          ),
+          contains('PLUG-02 atomic cohort resolution drift for ${entry.key}'),
         );
       }
     });

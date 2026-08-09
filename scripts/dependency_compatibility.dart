@@ -751,6 +751,33 @@ void _validatePhase59PluginCohorts({
     issues.add('PLUG-01 Phase 59 plugin inventory must be in lexical order');
   }
 
+  const atomicHoldEvidence = <String>{
+    'candidate',
+    'official_source',
+    'queried_on',
+    'compatibility_reason',
+    'exit_condition',
+  };
+  for (final package in const <String>[
+    'file_picker',
+    'package_info_plus',
+    'share_plus',
+  ]) {
+    final row = pluginRows[package]!;
+    for (final field in atomicHoldEvidence) {
+      if (_isBlank(row[field])) {
+        issues.add(
+          'PLUG-02 atomic cohort $package is missing hold evidence field: $field',
+        );
+      }
+    }
+    if (row['decision']?.toString() != 'hold') {
+      issues.add(
+        'PLUG-02 atomic cohort $package must remain hold until the full native exit condition is met',
+      );
+    }
+  }
+
   final win32 = _map(
     _map(baselineLanes['phase59_native_transitives'])['win32'],
   );
@@ -769,11 +796,23 @@ void _validatePhase59PluginCohorts({
       issues.add('PLUG-01 win32 is missing required evidence field: $field');
     }
   }
+  for (final field in atomicHoldEvidence) {
+    if (_isBlank(win32[field])) {
+      issues.add(
+        'PLUG-02 atomic cohort win32 is missing hold evidence field: $field',
+      );
+    }
+  }
   if (win32['package']?.toString() != 'win32') {
     issues.add('PLUG-01 win32 package identity must match its manifest key');
   }
   if (win32['owner_phase'] != 59) {
     issues.add('PLUG-01 win32 owner phase must be 59');
+  }
+  if (win32['decision']?.toString() != 'hold') {
+    issues.add(
+      'PLUG-02 atomic cohort win32 must remain hold until the full native exit condition is met',
+    );
   }
 
   const speechPackage = 'speech_to_text';
@@ -841,6 +880,7 @@ void _validatePhase59PluginCohorts({
         'PLUG-02 ${entry.key} declaration must remain ${entry.value} '
         '(found $declared)',
       );
+      issues.add('PLUG-02 atomic cohort declaration drift for ${entry.key}');
     }
   }
   for (final entry in locked.entries) {
@@ -850,6 +890,7 @@ void _validatePhase59PluginCohorts({
         'PLUG-02 ${entry.key} resolution must remain ${entry.value} '
         '(found $selected)',
       );
+      issues.add('PLUG-02 atomic cohort resolution drift for ${entry.key}');
     }
   }
 }
