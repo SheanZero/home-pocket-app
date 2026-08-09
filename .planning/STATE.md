@@ -4,16 +4,16 @@ milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 60
 current_phase_name: SQLCipher & iOS Native Safety Lane
-status: executing
-stopped_at: Completed 60-09-PLAN.md
-last_updated: "2026-08-09T13:47:03.345Z"
+status: ready_for_verification
+stopped_at: Completed 60-10-PLAN.md; fresh Phase 60 verification required
+last_updated: "2026-08-09T13:54:50Z"
 last_activity: 2026-08-09
-last_activity_desc: Completed 60-09 compile-only native evidence; SEC-03 runtime remains for 60-10
+last_activity_desc: Completed 60-10 booted-Simulator SQLCipher lifecycle; Phase 60 ready for fresh verification
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 30
-  completed_plans: 29
+  completed_plans: 30
   percent: 43
 ---
 
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 
 ## Current Position
 
-Phase: 60 (SQLCipher & iOS Native Safety Lane) — EXECUTING
-Plan: 9 of 10
-Status: Ready to execute
-Last activity: 2026-08-09 — Completed 60-09 compile-only native evidence; SEC-03 runtime remains for 60-10
+Phase: 60 (SQLCipher & iOS Native Safety Lane) — READY FOR VERIFICATION
+Plan: 10 of 10
+Status: Fresh phase verification required
+Last activity: 2026-08-09 — Completed 60-10 booted-Simulator SQLCipher lifecycle; Phase 60 ready for fresh verification
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ### Decisions
 
@@ -513,11 +513,11 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Execute Phase 60 plan 60-10 to capture current-schema booted-Simulator SQLCipher lifecycle evidence and converge Phase 60.
+- Run a fresh independent Phase 60 verification against the 60-09 compile evidence and 60-10 runtime evidence.
 
 ### Blockers
 
 - ~~46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07.~~ **RESOLVED (46-01 + 46-07):** 46-01 resolved it at the time by ALSO deleting total_six_month_card.dart + monthly_spend_trend_bar_chart.dart + the Time section header + their registry specs (registry → 9 specs) so the data-only deletion compiled. 46-07 then verified those two files were already absent (no re-delete) and completed the round-5 B integration: re-ordered the registry to the flat 5-card lineup, deleted the remaining 4 dead files (best_joy_card, kpi_hero_card, largest_expense_card, analytics_screen_section_header), and updated the registry/screen/anti-toxicity tests in lockstep. Zero dangling references; full suite 2971/2971 green. No active blockers.
 - **49-06 Task 3 (blocking human-verify):** run `flutter test integration_test/merchant_migration_ladder_test.dart` on a booted simulator/device; confirm `PRAGMA cipher_version` non-empty + fresh-v22/v21→v22 index+seed+categoryId∈L2 assertions + D-08 ~10-row merchant spot-check. Cannot run in headless orchestrator (no simulator).
 - ~~Phase 60 Plan 02 compile convergence was incomplete.~~ **RESOLVED (60-08 + 60-09):** clean linkage passes, retained/from-zero graphs and iOS 15 floors match, and all six unsigned compile-only matrix rows pass.
-- Phase 60 current-schema Simulator lifecycle is now **pending plan 60-10**. The historical undefined-symbol failure did not reproduce after clean plan 60-08 regeneration; plan 60-09 compilation is not runtime acceptance.
+- ~~Phase 60 current-schema Simulator lifecycle was pending plan 60-10.~~ **RESOLVED:** the allowlisted production `AppDatabase` lifecycle emitted `RUNTIME_PASS` on a booted iPhone 17 Pro / iOS 26.2 Simulator; compile evidence remains separately attributable.
