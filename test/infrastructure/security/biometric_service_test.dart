@@ -300,6 +300,52 @@ void main() {
       expect(result, const AuthResult.fallbackToPIN());
     });
 
+    test(
+      'availability PlatformException -> fallbackToPIN before native auth',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenThrow(
+          PlatformException(code: 'availability'),
+        );
+
+        final result = await service.authenticate(reason: 'test');
+
+        expect(result, const AuthResult.fallbackToPIN());
+        verifyNever(
+          () => mockAuth.authenticate(
+            localizedReason: any(named: 'localizedReason'),
+            biometricOnly: any(named: 'biometricOnly'),
+            sensitiveTransaction: any(named: 'sensitiveTransaction'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'availability unknown error -> fallbackToPIN before native auth',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenThrow(
+          StateError('availability'),
+        );
+
+        final result = await service.authenticate(reason: 'test');
+
+        expect(result, const AuthResult.fallbackToPIN());
+        verifyNever(
+          () => mockAuth.authenticate(
+            localizedReason: any(named: 'localizedReason'),
+            biometricOnly: any(named: 'biometricOnly'),
+            sensitiveTransaction: any(named: 'sensitiveTransaction'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
+          ),
+        );
+      },
+    );
+
     // LOCK-05 / LOCK-10: local_auth 3.x throws LocalAuthException with a
     // LocalAuthExceptionCode enum (NOT a PlatformException with string codes).
     // EVERY one of the 14 codes — including the two lockout codes that the
