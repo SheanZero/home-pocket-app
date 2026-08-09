@@ -23,6 +23,8 @@ const _currentPlatformDeclarationFiles = <String>[
   'publish/ios/intro/ja/app-introduction.md',
 ];
 
+const _nativeSafetyRunner = 'scripts/verify_ios_native_safety_lane.dart';
+
 void main() {
   group('iOS minimum version contract', () {
     test('Podfile and every Xcode build configuration target iOS 15.0', () {
@@ -48,5 +50,47 @@ void main() {
         expect(contents, isNot(contains('iOS 14')));
       });
     }
+
+    test(
+      'native safety runner is source-controlled, fail-closed, and iOS 15-aware',
+      () {
+        final runner = File(_nativeSafetyRunner).readAsStringSync();
+
+        for (final marker in <String>[
+          "enum NativeSafetyLane { tracer, full, runtime }",
+          'COMPILE_ONLY',
+          'RUNTIME_PASS',
+          'RUNTIME_FAIL',
+          'BLOCKED',
+          'flutter pub get --enforce-lockfile',
+          'pod install --deployment',
+          '--generated-swift-package-manifest=',
+          'CODE_SIGNING_ALLOWED=NO',
+          "generic/platform=iOS",
+          "platform=iOS Simulator",
+          'sqlcipher_native_assets_migration_test.dart',
+          'CoreSimulator',
+          'git status --short',
+          'Directory.systemTemp.createTemp',
+        ]) {
+          expect(
+            runner,
+            contains(marker),
+            reason: 'missing safety marker: $marker',
+          );
+        }
+
+        expect(
+          runner,
+          isNot(contains('manifest.writeAsString')),
+          reason:
+              'the generated SwiftPM manifest must be inspected, never edited',
+        );
+        expect(runner, isNot(contains('ios-deploy')));
+        expect(runner, isNot(contains('xcrun devicectl')));
+        expect(runner, isNot(contains('install-on-device')));
+        expect(runner, isNot(contains('uninstall')));
+      },
+    );
   });
 }
