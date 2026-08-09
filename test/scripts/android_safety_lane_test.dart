@@ -191,6 +191,10 @@ void main() {
       lane.javaToolEnglishLocaleArguments,
       equals(['-J-Duser.language=en', '-J-Duser.country=US']),
     );
+    expect(
+      lane.aabJarVerificationArguments,
+      equals(['-J-Duser.language=en', '-J-Duser.country=US', '-verify']),
+    );
   });
 
   test(

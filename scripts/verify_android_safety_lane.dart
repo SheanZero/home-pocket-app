@@ -28,6 +28,10 @@ const javaToolEnglishLocaleArguments = <String>[
   '-J-Duser.language=en',
   '-J-Duser.country=US',
 ];
+const aabJarVerificationArguments = <String>[
+  ...javaToolEnglishLocaleArguments,
+  '-verify',
+];
 
 const evidencePath =
     '.planning/phases/61-android-toolchain-emulator-lane/'
@@ -978,16 +982,10 @@ Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
       }
       aabSignature = await runBoundedCommand(
         '$jdkHome/bin/jarsigner',
-        [
-          ...javaToolEnglishLocaleArguments,
-          '-verify',
-          '-verbose',
-          '-certs',
-          aab.path,
-        ],
+        [...aabJarVerificationArguments, aab.path],
         workingDirectory: root,
         environment: signatureEnvironment,
-        durableCommand: 'jarsigner -verify -verbose -certs app-release.aab',
+        durableCommand: 'jarsigner -verify app-release.aab',
       );
       if (aabSignature!.exitCode != 0 ||
           !aabSignature!.output.toLowerCase().contains('jar verified')) {
