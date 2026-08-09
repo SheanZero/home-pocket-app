@@ -16,18 +16,27 @@ void main() {
     expect(LegalUrls.tokusho, 'https://happypocket.app/tokusho');
   });
 
-  test('native push auto-registration is disabled for the first release', () {
+  test('MVP removes notification packages and native auto-registration', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    for (final package in <String>[
+      'firebase_core:',
+      'firebase_messaging:',
+      'flutter_local_notifications:',
+    ]) {
+      expect(pubspec, isNot(contains(package)), reason: package);
+    }
+
     final androidManifest = File(
       'android/app/src/main/AndroidManifest.xml',
     ).readAsStringSync();
-    expect(androidManifest, contains('firebase_messaging_auto_init_enabled'));
-    expect(androidManifest, contains('firebase_analytics_collection_enabled'));
-    expect(androidManifest, contains('android.permission.POST_NOTIFICATIONS'));
-    expect(androidManifest, contains('tools:node="remove"'));
+    expect(androidManifest, isNot(contains('POST_NOTIFICATIONS')));
+    expect(androidManifest, isNot(contains('firebase_')));
+
+    final androidBuild = File('android/app/build.gradle.kts').readAsStringSync();
+    expect(androidBuild, isNot(contains('com.google.firebase')));
 
     final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
-    expect(iosInfo, contains('FirebaseMessagingAutoInitEnabled'));
-    expect(iosInfo, isNot(contains('<string>remote-notification</string>')));
+    expect(iosInfo, isNot(contains('FirebaseMessagingAutoInitEnabled')));
 
     final entitlements = File(
       'ios/Runner/Runner.entitlements',
@@ -35,31 +44,31 @@ void main() {
     expect(entitlements, isNot(contains('aps-environment')));
   });
 
-  test('first release preserves custom iOS APNs and Android Firebase FCM', () {
+  test('MVP has no notification client or registration path', () {
     final providers = File(
       'lib/application/family_sync/repository_providers.dart',
     ).readAsStringSync();
-    expect(providers, contains('Platform.isIOS'));
-    expect(providers, contains('? ApnsPushMessagingClient()'));
-    expect(providers, contains(': FirebasePushMessagingClient()'));
-    expect(
-      providers,
-      contains(
-        'firebaseInitializer: Platform.isIOS ? null : Firebase.initializeApp',
-      ),
-    );
-    expect(
-      providers,
-      contains("pushPlatform: Platform.isIOS ? 'apns' : 'fcm'"),
-    );
-
+    expect(providers, isNot(contains('Firebase')));
+    expect(providers, isNot(contains('ApnsPushMessagingClient')));
     final service = File(
       'lib/infrastructure/sync/push_notification_service.dart',
     ).readAsStringSync();
-    expect(service, contains('Future<String?> _runInitialization()'));
-    expect(service, contains('await _localNotificationClient.initialize('));
-    expect(service, contains('await _messagingClient.requestPermission()'));
-    expect(service, contains('_initialized = true;'));
-    expect(service, contains('await _messagingClient.getInitialMessage()'));
+    expect(service, contains('DisabledPushMessagingClient'));
+    expect(service, isNot(contains('FirebaseMessaging')));
+    expect(service, isNot(contains('FlutterLocalNotificationsPlugin')));
+
+    final main = File('lib/main.dart').readAsStringSync();
+    expect(main, isNot(contains('connectPushNotifications')));
+    expect(main, isNot(contains('pushNotificationServiceProvider')));
+
+    final settingsProviders = File(
+      'lib/features/settings/presentation/providers/repository_providers.dart',
+    ).readAsStringSync();
+    expect(settingsProviders, isNot(contains('pushNotificationServiceProvider')));
+    expect(settingsProviders, isNot(contains('registerCurrentToken')));
+
+    final appDelegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();
+    expect(appDelegate, isNot(contains('UserNotifications')));
+    expect(appDelegate, isNot(contains('registerForRemoteNotifications')));
   });
 }
