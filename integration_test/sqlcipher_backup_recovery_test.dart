@@ -29,4 +29,24 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 4)),
   );
+
+  testWidgets(
+    'current HPB v2 input remains byte-stable through restore and re-export',
+    (tester) async {
+      final sandbox = await SqlCipherBackupSandbox.create();
+      addTearDown(sandbox.close);
+
+      await sandbox.seedCurrentV2State();
+      final originalBackup = await sandbox.exportCurrentV2();
+      final originalDigest = await sandbox.backupDigest(originalBackup);
+
+      await sandbox.clearAllData();
+      await sandbox.restoreCurrentV2(originalBackup);
+      expect(await sandbox.backupDigest(originalBackup), originalDigest);
+
+      final reexport = await sandbox.exportCurrentV2();
+      await sandbox.expectCurrentV2Backup(reexport);
+    },
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
 }
