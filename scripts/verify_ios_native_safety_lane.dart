@@ -427,6 +427,19 @@ class _NativeSafetyRunner {
       final retained = await _nativeGraphDigest(Directory.current.path);
       final disposable = await _nativeGraphDigest(root.path);
       if (retained != disposable) {
+        _records.add(
+          _RunRecord(
+            name: 'disposable-from-zero-resolution',
+            result: EvidenceResult.blocked,
+            details: <String, Object?>{
+              'graph_match': false,
+              'retained_graph_sha256': retained,
+              'disposable_graph_sha256': disposable,
+              'temporary_root_redacted': true,
+            },
+          ),
+        );
+        await _writeEvidence();
         throw const _RunnerFailure(
           'from-zero Pub/Pod graph differs from retained locks',
         );
