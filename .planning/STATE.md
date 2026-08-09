@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 60
 current_phase_name: SQLCipher & iOS Native Safety Lane
 status: executing
-stopped_at: Completed 60-01-PLAN.md
-last_updated: "2026-08-09T05:24:51.643Z"
+stopped_at: Completed 60-02-PLAN.md
+last_updated: "2026-08-09T08:58:43.231Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 60 execution started
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 27
-  completed_plans: 21
+  completed_plans: 22
   percent: 43
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 ## Current Position
 
 Phase: 60 (SQLCipher & iOS Native Safety Lane) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-08-09 — Phase 60 execution started
 
-Progress: [████████░░] 78%
+Progress: [████████░░] 81%
 
 ### Decisions
 
@@ -118,6 +118,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: User-authorized initializing-formal cleanup makes flutter analyze a strict 0-issue gate without suppressions or exclusions.
 - [Phase ?]: Generated Swift package inspection is explicit compile-only input; it cannot stand in for runtime encryption proof.
 - [Phase ?]: Phase 60 locks Drift 2.34.0, sqlite3 3.5.1, and SQLCipher Native Assets 4.17.x while rejecting legacy native substitutions.
+- [Phase ?]: Phase 60 Plan 02 removed dormant Firebase/FCM/APNs/local-notification dependencies from the MVP; future notification work requires a separate reviewed native/privacy evidence lane.
+- [Phase ?]: Phase 60 native runner treats Profile/Release as unsigned generic-device builds because Flutter Simulator AOT is Debug-only.
 
 ### Quick Tasks Completed
 
@@ -303,8 +305,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-09T05:24:51.630Z
-Stopped at: Completed 60-01-PLAN.md
+Last session: 2026-08-09T08:58:43.217Z
+Stopped at: Completed 60-02-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -414,6 +416,7 @@ Resume file: None
 | Phase 59-controlled-platform-plugin-cohorts P06 | 11min | 3 tasks | 7 files |
 | Phase 59 P07 | 34min | 2 tasks | 108 files |
 | Phase 60 P01 | 4m | 2 tasks | 6 files |
+| Phase 60 P02 | 2h 50m | 2 tasks | 24 files |
 
 ## Decisions
 
@@ -504,3 +507,4 @@ Resume file: None
 
 - ~~46-01 Task 2 sequencing conflict: plan deletes the 6-month trend DATA layer but reserves PRESENTATION consumers (total_six_month_card.dart, monthly_spend_trend_bar_chart.dart, registry spec + registry_test + 3 screen tests) for wave-3 46-07.~~ **RESOLVED (46-01 + 46-07):** 46-01 resolved it at the time by ALSO deleting total_six_month_card.dart + monthly_spend_trend_bar_chart.dart + the Time section header + their registry specs (registry → 9 specs) so the data-only deletion compiled. 46-07 then verified those two files were already absent (no re-delete) and completed the round-5 B integration: re-ordered the registry to the flat 5-card lineup, deleted the remaining 4 dead files (best_joy_card, kpi_hero_card, largest_expense_card, analytics_screen_section_header), and updated the registry/screen/anti-toxicity tests in lockstep. Zero dangling references; full suite 2971/2971 green. No active blockers.
 - **49-06 Task 3 (blocking human-verify):** run `flutter test integration_test/merchant_migration_ladder_test.dart` on a booted simulator/device; confirm `PRAGMA cipher_version` non-empty + fresh-v22/v21→v22 index+seed+categoryId∈L2 assertions + D-08 ~10-row merchant spot-check. Cannot run in headless orchestrator (no simulator).
+- Phase 60 Plan 02 full native safety lane remains blocked: the approved persistent retry used a byte-exact prepared-clean status preflight (`0004d5b8187af324eb427c3a98d5be49fdbdd5d8d5505d0d590bc76438943e22`; raw 22-byte UTF-8 `git status --short` stream) and passed retained-lock generation plus the unsigned Debug Simulator compile. Its disposable from-zero exception (`type 'String' is not a subtype of type 'List<int>'` from `utf8.decode(listed.stdout)`) is fixed and regression-covered in commits `d97cfc4e` and `eedf605a`; `_run` already supplies decoded `String` stdout. Per the approved targeted-only continuation, the full `--lane=full` matrix was not rerun. Evidence therefore remains incomplete (`completed: false`, `outcome: INCOMPLETE`), with four compile-only records, no from-zero graph comparison, no remaining five builds, and no Simulator runtime evidence. This must not be reported as PASS. A future explicitly approved continuation must request authorization for a new full-lane attempt.

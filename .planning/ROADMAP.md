@@ -174,14 +174,14 @@ Plans:
   4. A previous released encrypted schema migrates through the real upgrade path with its version, tables, indices, defaults, and representative data intact.
   5. Test-only `.hpb` export, clear, and password restore preserve current and supported legacy backups atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.
 
-**Plans**: 1/7 plans executed
+**Plans**: 2/7 plans executed
 **Wave 1**
 
 - [x] 60-01-PLAN.md
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 60-02-PLAN.md
+- [x] 60-02-PLAN.md
 - [ ] 60-03-PLAN.md
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -249,7 +249,7 @@ Plans:
 | 57. Stable Baseline & Compatibility Contract | 3/3 | Complete    | 2026-08-06 |
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
 | 59. Controlled Platform Plugin Cohorts | 7/7 | Complete    | 2026-08-09 |
-| 60. SQLCipher & iOS Native Safety Lane | 1/7 | In Progress|  |
+| 60. SQLCipher & iOS Native Safety Lane | 2/7 | In Progress|  |
 | 61. Android Toolchain & Emulator Lane | 0/TBD | Not started | - |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
 | 63. Isolated Wired-iPhone Acceptance | 0/TBD | Not started | - |
