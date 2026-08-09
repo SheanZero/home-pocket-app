@@ -1531,60 +1531,64 @@ end
     Map<String, dynamic> notificationRow(
       Map<String, dynamic> source,
       String package,
-    ) => (source['direct_dependencies'] as Map<String, dynamic>)[package]
-        as Map<String, dynamic>;
+    ) =>
+        (source['direct_dependencies'] as Map<String, dynamic>)[package]
+            as Map<String, dynamic>;
 
-    test('rejects notification declaration and lock drift before resolution', () {
-      const declarations = <String, String>{
-        'firebase_core': '^4.13.0',
-        'firebase_messaging': '^16.5.0',
-        'flutter_local_notifications': '^22.2.0',
-      };
-      const locks = <String, String>{
-        'firebase_core': '4.13.0',
-        'firebase_messaging': '16.5.0',
-        'flutter_local_notifications': '22.2.0',
-      };
+    test(
+      'rejects notification declaration and lock drift before resolution',
+      () {
+        const declarations = <String, String>{
+          'firebase_core': '^4.13.0',
+          'firebase_messaging': '^16.5.0',
+          'flutter_local_notifications': '^22.2.0',
+        };
+        const locks = <String, String>{
+          'firebase_core': '4.13.0',
+          'firebase_messaging': '16.5.0',
+          'flutter_local_notifications': '22.2.0',
+        };
 
-      for (final entry in declarations.entries) {
-        final input = currentInputs();
-        input['pubspec'] = input['pubspec']!.replaceFirst(
-          '${entry.key}: ${entry.value}',
-          '${entry.key}: ${entry.value}.drift',
-        );
-        expect(
-          validate(input),
-          contains(
-            'PLUG-04 ${entry.key} declaration must remain ${entry.value} '
-            '(found ${entry.value}.drift)',
-          ),
-          reason: entry.key,
-        );
-      }
+        for (final entry in declarations.entries) {
+          final input = currentInputs();
+          input['pubspec'] = input['pubspec']!.replaceFirst(
+            '${entry.key}: ${entry.value}',
+            '${entry.key}: ${entry.value}.drift',
+          );
+          expect(
+            validate(input),
+            contains(
+              'PLUG-04 ${entry.key} declaration must remain ${entry.value} '
+              '(found ${entry.value}.drift)',
+            ),
+            reason: entry.key,
+          );
+        }
 
-      for (final entry in locks.entries) {
-        final input = currentInputs();
-        final matcher = RegExp(
-          '(^  ${RegExp.escape(entry.key)}:\\n'
-          r'(?:^(?:    |      ).*\n)*?^    version: )"'
-          '${RegExp.escape(entry.value)}"',
-          multiLine: true,
-        );
-        expect(matcher.hasMatch(input['lock']!), isTrue, reason: entry.key);
-        input['lock'] = input['lock']!.replaceFirstMapped(
-          matcher,
-          (match) => '${match.group(1)}"${entry.value}.drift"',
-        );
-        expect(
-          validate(input),
-          contains(
-            'PLUG-04 ${entry.key} resolution must remain ${entry.value} '
-            '(found ${entry.value}.drift)',
-          ),
-          reason: entry.key,
-        );
-      }
-    });
+        for (final entry in locks.entries) {
+          final input = currentInputs();
+          final matcher = RegExp(
+            '(^  ${RegExp.escape(entry.key)}:\\n'
+            r'(?:^(?:    |      ).*\n)*?^    version: )"'
+            '${RegExp.escape(entry.value)}"',
+            multiLine: true,
+          );
+          expect(matcher.hasMatch(input['lock']!), isTrue, reason: entry.key);
+          input['lock'] = input['lock']!.replaceFirstMapped(
+            matcher,
+            (match) => '${match.group(1)}"${entry.value}.drift"',
+          );
+          expect(
+            validate(input),
+            contains(
+              'PLUG-04 ${entry.key} resolution must remain ${entry.value} '
+              '(found ${entry.value}.drift)',
+            ),
+            reason: entry.key,
+          );
+        }
+      },
+    );
 
     test('rejects a missing APNs/FCM transport split', () {
       final source = manifest();

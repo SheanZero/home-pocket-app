@@ -926,6 +926,155 @@ void _validatePhase59PluginCohorts({
       );
   }
 
+  const notificationPackages = <String>[
+    'firebase_core',
+    'firebase_messaging',
+    'flutter_local_notifications',
+  ];
+  const notificationCandidates = <String, String>{
+    'firebase_core': '4.13.0',
+    'firebase_messaging': '16.5.0',
+    'flutter_local_notifications': '22.3.0',
+  };
+  const notificationSelectedDeclarations = <String, String>{
+    'firebase_core': '^4.13.0',
+    'firebase_messaging': '^16.5.0',
+    'flutter_local_notifications': '^22.2.0',
+  };
+  const notificationSelectedResolutions = <String, String>{
+    'firebase_core': '4.13.0',
+    'firebase_messaging': '16.5.0',
+    'flutter_local_notifications': '22.2.0',
+  };
+  const requiredNotificationEvidence = <String>{
+    'automated_lifecycle',
+    'android_fcm_native_build',
+    'android_fcm_initialization',
+    'android_fcm_foreground',
+    'android_fcm_opened_app',
+    'android_fcm_cold_start',
+    'ios_apns_native_build',
+    'ios_apns_initialization',
+    'ios_apns_foreground',
+    'ios_apns_opened_app',
+    'ios_apns_local_tap',
+    'ios_apns_cold_start',
+    'initialization_retry',
+    'hidden_notification_settings',
+    'android_auto_init_disabled',
+    'ios_remote_notification_mode_absent',
+    'ios_aps_environment_absent',
+    'cloud_fallback_disclosed',
+  };
+  for (final package in notificationPackages) {
+    final row = pluginRows[package]!;
+    for (final field in {
+      'queried_on',
+      'candidate',
+      'decision',
+      'compatibility_reason',
+      'exit_condition',
+      'owner_phase',
+      'official_source',
+      'acceptance_evidence',
+    }) {
+      if (_isBlank(row[field])) {
+        issues.add(
+          'PLUG-04 $package is missing required evidence field: $field',
+        );
+      }
+    }
+    final candidate = row['candidate']?.toString() ?? '';
+    if (!_isProductionStableVersion(candidate) ||
+        candidate != notificationCandidates[package]) {
+      issues.add(
+        'PLUG-04 $package candidate must be stable ${notificationCandidates[package]}',
+      );
+    }
+    final evidence = _map(row['acceptance_evidence']);
+    for (final field in requiredNotificationEvidence) {
+      if (_isBlank(evidence[field])) {
+        issues.add('PLUG-04 $package is missing lifecycle evidence: $field');
+      }
+    }
+    if (evidence['hidden_notification_settings']?.toString() != 'PASS') {
+      issues.add(
+        'PLUG-04 $package requires hidden notification settings evidence',
+      );
+    }
+    if (evidence['android_auto_init_disabled']?.toString() != 'PASS' ||
+        evidence['ios_remote_notification_mode_absent']?.toString() != 'PASS' ||
+        evidence['ios_aps_environment_absent']?.toString() != 'PASS') {
+      issues.add('PLUG-04 $package requires native hidden-policy evidence');
+    }
+    if (evidence['cloud_fallback_disclosed']?.toString() != 'PASS') {
+      issues.add('PLUG-04 $package requires disclosed cloud fallback evidence');
+    }
+
+    final declared = _declaredDependency(directDependencies[package]);
+    final resolved = _map(lockedPackages[package])['version']?.toString();
+    switch (row['decision']?.toString()) {
+      case 'hold':
+        final selectedDeclaration = notificationSelectedDeclarations[package]!;
+        final selectedResolution = notificationSelectedResolutions[package]!;
+        if (declared != selectedDeclaration) {
+          issues.add(
+            'PLUG-04 $package declaration must remain $selectedDeclaration '
+            '(found $declared)',
+          );
+        }
+        if (resolved != selectedResolution) {
+          issues.add(
+            'PLUG-04 $package resolution must remain $selectedResolution '
+            '(found $resolved)',
+          );
+        }
+      case 'accepted':
+        for (final field in requiredNotificationEvidence) {
+          if (evidence[field]?.toString() != 'PASS') {
+            issues.add(
+              'PLUG-04 $package accepted decision requires PASS native evidence: $field',
+            );
+          }
+        }
+        if (declared != candidate) {
+          issues.add(
+            'PLUG-04 $package accepted declaration must equal candidate $candidate '
+            '(found $declared)',
+          );
+        }
+        if (resolved != candidate) {
+          issues.add(
+            'PLUG-04 $package accepted resolution must equal candidate $candidate '
+            '(found $resolved)',
+          );
+        }
+      default:
+        issues.add(
+          'PLUG-04 $package decision must be exactly hold or accepted',
+        );
+    }
+  }
+
+  final notificationLane = _map(baselineLanes['phase59_notification']);
+  if (notificationLane['ios_transport']?.toString() != 'apns') {
+    issues.add('PLUG-04 notification transport must identify iOS as apns');
+  }
+  if (notificationLane['android_transport']?.toString() != 'fcm') {
+    issues.add('PLUG-04 notification transport must identify Android as fcm');
+  }
+  if (notificationLane['settings_visible'] != false) {
+    issues.add('PLUG-04 notification settings must remain hidden');
+  }
+  if (notificationLane['ios_firebase_initialization'] != false) {
+    issues.add('PLUG-04 iOS must not initialize Firebase messaging');
+  }
+  if (notificationLane['cloud_fallback_disclosed'] != true) {
+    issues.add(
+      'PLUG-04 notification lane must retain disclosed cloud fallback policy',
+    );
+  }
+
   const declarations = <String, String>{
     'file_picker': '^11.0.3',
     'share_plus': '^12.0.2',
