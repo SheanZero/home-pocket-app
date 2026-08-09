@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 59
 current_phase_name: Controlled Platform Plugin Cohorts
 status: executing
-stopped_at: Completed 59-02-PLAN.md
-last_updated: "2026-08-09T00:22:39.848Z"
+stopped_at: Completed 59-03-PLAN.md
+last_updated: "2026-08-09T00:33:48.522Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 59 execution started
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 20
-  completed_plans: 15
+  completed_plans: 16
   percent: 29
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
 ## Current Position
 
 Phase: 59 (Controlled Platform Plugin Cohorts) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-08-09 — Phase 59 execution started
 
-Progress: [████████░░] 75%
+Progress: [████████░░] 80%
 
 ### Decisions
 
@@ -104,6 +104,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 59-01: Validate file_picker/share_plus/package_info_plus/win32 as one exact atomic selected cohort.
 - [Phase ?]: 59-01: Record unavailable Android, iOS, biometric, and existing-key evidence as explicit holds with exit conditions.
 - [Phase ?]: 59-02: Keep file_picker 11.0.3/share_plus 12.0.2/package_info_plus 9.0.1/win32 5.15.0 as one exact hold until the full Java 17, Android, native build, picker/share, and identity evidence matrix is attributable.
+- [Phase ?]: 59-03: Keep speech_to_text exactly at 7.3.0; 7.4.0 remains eligible but unselected until complete native-build and physical-iPhone evidence is attributable.
+- [Phase ?]: 59-03: An accepted speech candidate must have PASS automated/native/iPhone evidence and matching declaration/lock; unavailable or partial evidence is an exact 7.3.0 hold.
 
 ### Quick Tasks Completed
 
@@ -289,8 +291,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-09T00:22:39.835Z
-Stopped at: Completed 59-02-PLAN.md
+Last session: 2026-08-09T00:33:48.508Z
+Stopped at: Completed 59-03-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -394,6 +396,7 @@ Resume file: None
 | Phase 58 P10 | 30min | 1 tasks | 3 files |
 | Phase 59 P01 | 19 min | 3 tasks | 6 files |
 | Phase 59 P02 | 7min | 3 tasks | 7 files |
+| Phase 59 P03 | 7min | 3 tasks | 5 files |
 
 ## Decisions
 
