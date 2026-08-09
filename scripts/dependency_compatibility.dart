@@ -1685,7 +1685,7 @@ void _validateManifestPolicy({
     'encrypted_storage': [
       'Drift 2.34.0',
       'sqlite3 3.5.1',
-      'SQLCipher Native Asset 4.17',
+      'SQLCipher Native Assets 4.17.x',
     ],
     'platform_floors': ['iOS 15.0', 'Android API 24'],
     'architecture': [
@@ -2101,7 +2101,7 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln('  - [${warning.code}] ${warning.message}');
   }
   stdout.writeln(
-    '  Drift 2.34.0 / sqlite3 3.5.1 / SQLCipher Native Asset 4.17',
+    '  Drift 2.34.0 / sqlite3 3.5.1 / SQLCipher Native Assets 4.17.x',
   );
   stdout.writeln(
     generatedManifestPath == null

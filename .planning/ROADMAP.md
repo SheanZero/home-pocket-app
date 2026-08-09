@@ -168,8 +168,8 @@ Plans:
 **Requirements**: SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06
 **Success Criteria** (what must be TRUE):
 
-  1. The selected native graph keeps the proven `sqlcipher_flutter_libs 0.6.8` / `sqlite3 2.9.4` / SQLCipher Pod 4.10.0 lane unless a separately approved, equivalently evidenced replacement exists; EOL, `sqlite3_flutter_libs`, and plaintext/system-SQLite paths are rejected.
-  2. Clean SwiftPM plus SQLCipher-only CocoaPods resolution builds the supported simulator/device and debug/profile/release configurations while retaining the Podfile system-`sqlite3` linker protection.
+  1. The selected native graph is exactly Drift `2.34.0`, sqlite3 resolved `3.5.1`, and SQLCipher Native Assets `4.17.x` selected by `hooks.user_defines.sqlite3.source: sqlcipher`; both retired Flutter native-library packages, a separate SQLCipher CocoaPod, system/plain SQLite, and the obsolete Podfile `-lsqlite3` linker strip are rejected without upgrading the selected Drift/sqlite3 graph.
+  2. Retained lockfiles and a disposable from-zero resolution produce the same clean SwiftPM/CocoaPods graph; Runner, CocoaPods, SwiftPM, and the generated plugin Swift package all target iOS `15.0`, six unsigned Simulator/generic-device Debug/Profile/Release builds remain compile-only, and distinct Simulator runtime evidence is required before any encryption-runtime claim.
   3. An encrypted database returns a non-empty `PRAGMA cipher_version` on initial open and after close/reopen, and its sentinel data remains readable.
   4. A previous released encrypted schema migrates through the real upgrade path with its version, tables, indices, defaults, and representative data intact.
   5. Test-only `.hpb` export, clear, and password restore preserve current and supported legacy backups atomically; wrong passwords, truncation, and resource-limit failures leave existing data intact, and missing master keys continue to fail closed without an upgrade-only schema bump.

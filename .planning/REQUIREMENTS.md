@@ -30,8 +30,8 @@
 
 ### Encrypted Storage & iOS Native Lane（加密存储与 iOS 原生链）
 
-- [ ] **SEC-01**: 保留已验证的 `sqlcipher_flutter_libs 0.6.8 + sqlite3 2.9.4 + SQLCipher Pod 4.10.0`，除非另有 ADR 和等价真机证据；自动禁止 `0.7.0+eol`、`sqlite3_flutter_libs` 与 system/plain SQLite 回退
-- [ ] **SEC-02**: iOS 从干净 native artifact 状态用 SwiftPM + 仅 SQLCipher CocoaPods 例外重新解析，保留 Podfile 的 `-lsqlite3` 移除保护，并完成 simulator/device 与 debug/profile/release 相关构建验证
+- [ ] **SEC-01**: 精确保留 Drift `2.34.0`、sqlite3 resolved `3.5.1` 与由 `hooks.user_defines.sqlite3.source: sqlcipher` 选择的 SQLCipher Native Assets `4.17.x`，不得升级/降级该 Drift/sqlite3 graph；自动拒绝 `sqlcipher_flutter_libs`、`sqlite3_flutter_libs`、独立 SQLCipher CocoaPod、obsolete Podfile `-lsqlite3` linker strip，以及 system/plain SQLite 回退
+- [ ] **SEC-02**: 保留 committed lockfiles 的 clean rebuild 与 disposable from-zero dependency resolution 必须一致；Runner/CocoaPods/SwiftPM/生成的 plugin Swift package 一律为 iOS `15.0`，完成 Simulator 与 generic-device 的 Debug/Profile/Release 六项 unsigned compile-only checks，并将 Simulator runtime encryption evidence 独立记录，绝不以编译代替 runtime acceptance
 - [ ] **SEC-03**: 原生加密执行路径在首次打开及 close/reopen 后都返回非空 `PRAGMA cipher_version`，且加密库中持久化的 sentinel 数据保持可读
 - [ ] **SEC-04**: 前一已发布 schema 的加密 fixture 经真实 `onUpgrade` 路径迁移到当前 schema，历史迁移测试继续通过并验证 user_version、关键表/索引/default 与代表性数据
 - [ ] **SEC-05**: 当前及受支持旧格式的 `.hpb` 加密备份可完成 export → 仅测试数据 clear → password restore，wrong-password、截断与资源上限失败均不破坏现有数据

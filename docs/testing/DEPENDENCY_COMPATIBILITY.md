@@ -20,9 +20,9 @@ successful safety decision, not a silent upgrade failure.
 | Lane | Selected baseline | Candidate | Decision | Reason | Exit condition |
 |---|---|---|---|---|---|
 | Stable Flutter/Dart | Flutter `3.44.8`, Dart `3.12.2`, revision `058e0af2c2b57e369d905a03ac9748b0ebf543c6` | Flutter `3.44.9`, Dart `3.12.2` | hold — Phase 58 | The committed manifest, `.metadata`, Stable CI pin, running machine identity, and Flutter SDK source must agree; a patch cannot change just one identity surface. | Review one identity transaction, retain the exact analyzer cohort without overrides, pass D-04 negative fixtures, and obtain an unexplained-diff-free D-08/D-09 two-pass generation result. |
-| Xcode | Xcode `26.2` | Xcode `26.6` | hold — Phase 60 | Xcode can change SwiftPM, Native Asset embedding, and signing. Xcode 26.2 clean-builds the signed device app with the embedded SQLCipher framework. | Accept a newer Xcode after clean simulator and signed-device builds plus encrypted fixture open/reopen evidence. |
-| Encrypted storage | Drift `2.34.0`, sqlite3 `3.5.1`, SQLCipher Native Asset `4.17.x` | Drift `2.34.3` / drift_dev `2.34.5` | hold — analyzer lane | A genuine SQLCipher 4.10 fixture passes 4.17 identity, keyed status, schema read, v35→v36 migration, write, encrypted header, and cold reopen checks on Android and iOS simulator. | Move Drift when the analyzer-13 architecture-lint graph is coherent; retain the real-fixture device gate. |
-| iOS dependency manager | Flutter SwiftPM plus sqlite3 Native Assets; CocoaPods has no SQLCipher pod | same | already current | `sqlcipher.framework` is embedded by the Native Assets hook and the fixture passes after removing the old `-lsqlite3` strip. | Re-run the signed physical-device runtime test after the device allows installation. |
+| Xcode | Xcode `26.2` | Xcode `26.6` | hold — Phase 60 | Xcode changes SwiftPM, Native Asset embedding, and unsigned compilation. The selected lane must retain its locked graph while proving iOS 15 in Runner, CocoaPods, SwiftPM, and the generated plugin package. | Accept a newer Xcode only after retained-lock and disposable from-zero resolution agree, all six unsigned Simulator/generic-device Debug/Profile/Release builds pass, and separately recorded Simulator runtime evidence proves the encrypted fixture path. |
+| Encrypted storage | Drift `2.34.0`, sqlite3 `3.5.1`, SQLCipher Native Assets `4.17.x` | Drift `2.34.3` / drift_dev `2.34.5` | hold — Phase 60 | The sqlite3 hook selects SQLCipher Native Assets. Source/config, lock, Pod, linker, and generated-floor checks must reject both retired Flutter libraries, a separate SQLCipher CocoaPod, system/plain SQLite, and the obsolete linker strip. | Move Drift only when the analyzer-13 architecture-lint graph is coherent and the exact replacement completes retained-lock/from-zero resolution, six unsigned compile checks, and separate encrypted Simulator runtime evidence. |
+| iOS dependency manager | Flutter SwiftPM plus sqlite3 Native Assets; CocoaPods has no SQLCipher pod | same | hold — Phase 60 | `sqlcipher.framework` is embedded by the Native Assets hook; the generated `FlutterGeneratedPluginSwiftPackage` is a post-generation input and must declare iOS 15.0. Compilation is compile-only and never SQLCipher runtime acceptance. | Regenerate through supported Flutter tooling, pass the generated-package iOS-floor validator, then retain separate Simulator runtime SQLCipher open/reopen, migration, and backup evidence. |
 | Analyzer/codegen | analyzer `12.1.0`, analyzer_plugin `0.14.8`, build `4.0.7`, source_gen `4.2.4`, Riverpod `3.3.2`/`4.0.3`/`4.0.4`/`3.1.4`, Freezed `3.1.0`/`3.2.6-dev.1`, JSON `4.12.0`/`6.14.1`, Drift `2.34.0`, build_runner `2.15.1`, import_lint `2.0.0`, dart_code_linter `4.1.9` | analyzer-13-compatible cohort | hold | `import_lint 2.0.0` requires analyzer `^12.1.0`; current newer Riverpod/Drift generator lines require analyzer 13. | All four analyzer/import-boundary exit conditions below must pass in one no-override transaction. |
 | File/share/metadata | `file_picker 11.0.3`, `share_plus 12.0.2`, `package_info_plus 9.0.1`, `win32 5.15.0` | stable compatible cohort | hold — Phase 59 | New plus-plugin lines and file-picker behavior must be verified as one native cohort. | Upgrade the cohort together and preserve single-file backup import and platform sharing behavior. |
 | Speech | `speech_to_text 7.3.0` | `7.4.0` Stable (the official page also lists `7.5.0-beta.1` as prerelease) | hold — Phase 59 | The 2026-08-09 official pub.dev query confirms the stable candidate, but resolver output cannot prove the adapter, ja/zh/en corpus, caller-controlled network fallback, or native speech lifecycle. | Keep `7.3.0` until adapter/corpus checks and physical-iPhone permission, recognition, cancellation, error, and fallback evidence pass. |
@@ -35,7 +35,11 @@ The effective Android floor has two corroborating levels: `android/app/build.gra
 inherits `minSdk = flutter.minSdkVersion`, while the selected Stable
 `.metadata`/CI pin identifies the same running SDK whose machine JSON and
 `FlutterExtension.kt` declare the parsed default API `24`. iOS remains at
-`15.0`. Baseline mode fails on any identity mismatch or lower effective floor.
+`15.0` in Runner, CocoaPods, SwiftPM, and the generated plugin package. The
+generated package is inspected only after supported regeneration; a missing
+manifest is labelled compile-only and is neither generated-floor proof nor
+runtime encryption evidence. Baseline mode fails on any identity mismatch or
+lower supplied floor.
 
 ## Analyzer plugin lane
 
@@ -94,8 +98,11 @@ For an owner-phase upgrade, perform this transaction as one reviewed change:
    `dependency_overrides`, plaintext SQLite, `sqlite3_flutter_libs`, or the
    obsolete `sqlcipher_flutter_libs` path as a workaround.
 3. Run `flutter pub get --enforce-lockfile` to retrieve the committed graph.
-4. Run the running-SDK baseline validator, targeted contract tests, then the
-   phase-final analysis, full-suite, coverage, and whitespace gates.
+4. Run the running-SDK baseline validator and targeted contract tests. After
+   supported Flutter regeneration, pass
+   `--generated-swift-package-manifest=<path>` to prove the generated iOS 15
+   floor; this remains compile-only and cannot replace Simulator runtime proof.
+5. Run the phase-final analysis, full-suite, coverage, and whitespace gates.
 
 The 2026-08-08 refresh raises the project Dart declaration to `^3.12.2` while
 preserving the exact solver-produced lock graph. Native Asset configuration,
