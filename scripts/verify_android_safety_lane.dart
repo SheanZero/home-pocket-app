@@ -1370,24 +1370,43 @@ Future<BoundedCommandResult> runBoundedCommand(
 }
 
 class _BoundedOutputBuffer {
-  _BoundedOutputBuffer(this.limit);
+  _BoundedOutputBuffer(this.limit)
+    : _headLimit = (limit - _streamTruncationMarker.length) ~/ 2,
+      _tailLimit =
+          limit -
+          _streamTruncationMarker.length -
+          ((limit - _streamTruncationMarker.length) ~/ 2);
 
   final int limit;
-  final StringBuffer _buffer = StringBuffer();
-  int _length = 0;
+  final int _headLimit;
+  final int _tailLimit;
+  String _head = '';
+  String _tail = '';
+  bool _truncated = false;
 
   void add(String chunk) {
-    if (_length >= limit) return;
-    final remaining = limit - _length;
-    final kept = chunk.length <= remaining
-        ? chunk
-        : chunk.substring(0, remaining);
-    _buffer.write(kept);
-    _length += kept.length;
+    if (!_truncated) {
+      final combined = '$_head$chunk';
+      if (combined.length <= limit) {
+        _head = combined;
+        return;
+      }
+      _truncated = true;
+      _head = combined.substring(0, _headLimit);
+      _tail = combined.substring(combined.length - _tailLimit);
+      return;
+    }
+    final combinedTail = '$_tail$chunk';
+    _tail = combinedTail.length <= _tailLimit
+        ? combinedTail
+        : combinedTail.substring(combinedTail.length - _tailLimit);
   }
 
-  String get value => _buffer.toString();
+  String get value =>
+      _truncated ? '$_head$_streamTruncationMarker$_tail' : _head;
 }
+
+const _streamTruncationMarker = '\n...<stream-output-truncated>...\n';
 
 Future<CandidateProbeResult> runCandidateProbe(Directory root) async {
   final started = DateTime.now().toUtc();

@@ -146,6 +146,40 @@ void main() {
     expect(output, contains('<local-path>'));
   });
 
+  test(
+    'bounded command output preserves completion text from the tail',
+    () async {
+      final fixture = await Directory.systemTemp.createTemp(
+        'phase61-bounded-output-',
+      );
+      addTearDown(() => fixture.delete(recursive: true));
+      final emitter = File('${fixture.path}/emitter.dart');
+      await emitter.writeAsString('''
+import 'dart:io';
+void main() {
+  stdout.write('COMMAND_START\\n');
+  stdout.write('x' * 100000);
+  stdout.write('\\nCOMMAND_VERIFIED\\n');
+}
+''');
+
+      final result = await lane.runBoundedCommand(
+        'dart',
+        [emitter.path],
+        workingDirectory: fixture,
+        durableCommand: 'bounded-output-fixture',
+      );
+
+      expect(result.exitCode, 0);
+      expect(
+        result.output.length,
+        lessThanOrEqualTo(lane.maxDurableOutputChars),
+      );
+      expect(result.output, contains('COMMAND_START'));
+      expect(result.output, contains('COMMAND_VERIFIED'));
+    },
+  );
+
   test('JDK parser accepts 17 and rejects other or malformed versions', () {
     expect(lane.parseJavaMajor('openjdk version "17.0.16"'), 17);
     expect(lane.parseJavaMajor('openjdk version "21.0.8"'), 21);
