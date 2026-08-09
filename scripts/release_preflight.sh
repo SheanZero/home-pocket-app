@@ -152,11 +152,28 @@ restore_release_dependency_scope() {
 assert_release_registrants_clean() {
   local root="${1:-$PROJECT_ROOT}"
   local registrant
-  local -a registrants=(
-    "$root/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"
-    "$root/ios/Runner/GeneratedPluginRegistrant.h"
-    "$root/ios/Runner/GeneratedPluginRegistrant.m"
-  )
+  local -a registrants=()
+
+  case "$RELEASE_PREFLIGHT_PLATFORM" in
+    android)
+      registrants+=(
+        "$root/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"
+      )
+      ;;
+    ios)
+      registrants+=(
+        "$root/ios/Runner/GeneratedPluginRegistrant.h"
+        "$root/ios/Runner/GeneratedPluginRegistrant.m"
+      )
+      ;;
+    all)
+      registrants+=(
+        "$root/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"
+        "$root/ios/Runner/GeneratedPluginRegistrant.h"
+        "$root/ios/Runner/GeneratedPluginRegistrant.m"
+      )
+      ;;
+  esac
 
   for registrant in "${registrants[@]}"; do
     [[ -f "$registrant" ]] || continue

@@ -16,14 +16,18 @@ Future<ProcessResult> _runScript(
   ], workingDirectory: workingDirectory ?? _projectRoot());
 }
 
-Future<ProcessResult> _scanFixture(Directory fixture) {
+Future<ProcessResult> _scanFixture(
+  Directory fixture, {
+  String platform = 'all',
+}) {
   final script = File('${_projectRoot()}/$_scriptPath').absolute.path;
   return Process.run('bash', [
     '-c',
-    r'source "$1"; assert_release_registrants_clean "$2"',
+    r'source "$1"; RELEASE_PREFLIGHT_PLATFORM="$3"; assert_release_registrants_clean "$2"',
     'release-preflight-test',
     script,
     fixture.path,
+    platform,
   ]);
 }
 
@@ -142,6 +146,31 @@ dev_dependencies:
 
       expect(result.exitCode, equals(0), reason: result.stderr.toString());
     });
+
+    test(
+      'Android-only scan ignores unrelated regenerated iOS dev registrant',
+      () async {
+        final fixture = await Directory.systemTemp.createTemp(
+          'release-preflight-platform-',
+        );
+        addTearDown(() => fixture.delete(recursive: true));
+        final androidRegistrant = File(
+          '${fixture.path}/android/app/src/main/java/io/flutter/plugins/'
+          'GeneratedPluginRegistrant.java',
+        );
+        final iosRegistrant = File(
+          '${fixture.path}/ios/Runner/GeneratedPluginRegistrant.m',
+        );
+        await androidRegistrant.create(recursive: true);
+        await androidRegistrant.writeAsString('register production plugins');
+        await iosRegistrant.create(recursive: true);
+        await iosRegistrant.writeAsString('IntegrationTestPlugin');
+
+        final result = await _scanFixture(fixture, platform: 'android');
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+      },
+    );
 
     test(
       'dry run exposes the unsigned smoke step but never packages a release',
