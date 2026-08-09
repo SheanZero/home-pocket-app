@@ -151,3 +151,15 @@ supported native build, physical-iPhone permission, recognition, cancellation,
 error, caller-controlled network fallback, and physical-iPhone evidence are all
 complete and PASS on the exact candidate build. Until then, the exact selected
 7.3.0 graph remains a hold.
+
+## Final Phase 59 convergence
+
+| final reference | result | evidence |
+|---|---|---|
+| `da459184` / Flutter 3.44.8 / Dart 3.12.2 | PASS | The repository-wide `prefer_initializing_formals` analyzer cleanup leaves `flutter analyze` at 0 issues without suppressions, exclusions, dependency changes, or generated-file edits. |
+| exact held selected graph | PASS | `dart run scripts/dependency_compatibility.dart --mode=baseline --verify-running-flutter-sdk` and the API coverage precheck both passed on the final checkout. |
+| `8229c9a3` contract + final checkout | PASS | The Phase 59 targeted dependency, backup/restore, speech, push, biometric, secure-storage, initializer, and Lucide matrix passed 319 tests. |
+| exact held selected graph | PASS | `bash scripts/verify_codegen_reproducibility.sh` passed its locked retrieval, two generation passes, analyzer, lint, architecture, negative-fixture, and residue checks. |
+| exact held selected graph | PASS | `flutter test --coverage --concurrency=1` passed 4,589 tests with 12 expected skips; filtered LCOV passed all 15 required files at the configured 70% threshold. |
+
+No selected declaration, lock resolution, platform transport, Keychain policy, native entitlement, schema, or Phase 60–63 boundary changed during final convergence. Every unavailable native row above remains a hold with its documented exit condition.
