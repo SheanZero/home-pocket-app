@@ -17,6 +17,7 @@ void main() {
     );
     expect(workflow, contains('api-level: 36'));
     expect(workflow, contains('arch: x86_64'));
+    expect(workflow, isNot(contains('arch: arm64-v8a')));
     expect(workflow, contains('java-version: "17"'));
     expect(workflow, contains('flutter pub get --enforce-lockfile'));
     expect(workflow, contains('ios-device-e2e:'));
@@ -94,14 +95,19 @@ void main() {
       'device_critical_journey_test.dart',
       'device_sync_delivery_test.dart',
       'merchant_migration_ladder_test.dart',
+      'performance/performance_baseline_test.dart',
       'sqlcipher_backup_recovery_test.dart',
       'sqlcipher_native_assets_lifecycle_test.dart',
     };
     final actual = Directory('integration_test')
-        .listSync()
+        .listSync(recursive: true)
         .whereType<File>()
-        .map((file) => file.uri.pathSegments.last)
-        .where((name) => name.endsWith('_test.dart'))
+        .where((file) => file.path.endsWith('_test.dart'))
+        .map(
+          (file) => file.path
+              .replaceFirst('${Directory('integration_test').path}/', '')
+              .replaceAll('\\', '/'),
+        )
         .toSet();
 
     expect(actual, expected);

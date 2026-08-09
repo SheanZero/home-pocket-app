@@ -197,6 +197,72 @@ void main() {
     );
   });
 
+  test('Emulator launch is cold, snapshot-free, and cross-arch explicit', () {
+    final arguments = lane.emulatorLaunchArguments(
+      avdName: 'phase61-owned',
+      port: 5580,
+      hostArchitecture: 'arm64',
+    );
+
+    expect(arguments, containsAll(['-avd', 'phase61-owned', '-port', '5580']));
+    expect(arguments, containsAll(['-wipe-data', '-no-snapshot']));
+    expect(arguments, containsAll(['-no-snapshot-save', '-no-accel']));
+    expect(arguments, containsAll(['-no-window', '-no-audio']));
+  });
+
+  test('Emulator identity rejects false boot, API, ABI, and ownership', () {
+    const expected = lane.EmulatorIdentityExpectation(
+      avdName: 'phase61-owned',
+      serial: 'emulator-5580',
+    );
+    const valid = <String, String>{
+      'serial': 'emulator-5580',
+      'bootCompleted': '1',
+      'api': '36',
+      'abi': 'x86_64',
+      'avdName': 'phase61-owned',
+    };
+
+    expect(lane.validateEmulatorIdentity(valid, expected), isEmpty);
+    for (final mutation in <String, String>{
+      'serial': 'emulator-5582',
+      'bootCompleted': '0',
+      'api': '35',
+      'abi': 'arm64-v8a',
+      'avdName': 'someone-elses-avd',
+    }.entries) {
+      final mutated = {...valid, mutation.key: mutation.value};
+      expect(
+        lane.validateEmulatorIdentity(mutated, expected),
+        isNotEmpty,
+        reason: '${mutation.key} must fail closed',
+      );
+    }
+  });
+
+  test('Emulator discovery is recursive and serials are redacted', () async {
+    final fixture = await Directory.systemTemp.createTemp(
+      'phase61-integration-inventory-',
+    );
+    addTearDown(() => fixture.delete(recursive: true));
+    await File('${fixture.path}/root_test.dart').create();
+    await File(
+      '${fixture.path}/helpers/not_a_test.dart',
+    ).create(recursive: true);
+    await File(
+      '${fixture.path}/performance/nested_test.dart',
+    ).create(recursive: true);
+
+    expect(
+      lane.discoverIntegrationTestFiles(fixture),
+      equals(['performance/nested_test.dart', 'root_test.dart']),
+    );
+    expect(
+      lane.redactEmulatorSerial('booted emulator-5580 owned'),
+      equals('booted <emulator-redacted> owned'),
+    );
+  });
+
   test(
     'release artifact scanner rejects missing and test-contaminated archives',
     () async {
