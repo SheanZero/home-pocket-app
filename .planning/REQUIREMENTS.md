@@ -31,8 +31,8 @@
 ### Encrypted Storage & iOS Native Lane（加密存储与 iOS 原生链）
 
 - [x] **SEC-01**: 精确保留 Drift `2.34.0`、sqlite3 resolved `3.5.1` 与由 `hooks.user_defines.sqlite3.source: sqlcipher` 选择的 SQLCipher Native Assets `4.17.x`，不得升级/降级该 Drift/sqlite3 graph；自动拒绝 `sqlcipher_flutter_libs`、`sqlite3_flutter_libs`、独立 SQLCipher CocoaPod、obsolete Podfile `-lsqlite3` linker strip，以及 system/plain SQLite 回退
-- [x] **SEC-02**: 保留 committed lockfiles 的 clean rebuild 与 disposable from-zero dependency resolution 必须一致；Runner/CocoaPods/SwiftPM/生成的 plugin Swift package 一律为 iOS `15.0`，完成 Simulator 与 generic-device 的 Debug/Profile/Release 六项 unsigned compile-only checks，并将 Simulator runtime encryption evidence 独立记录，绝不以编译代替 runtime acceptance
-- [x] **SEC-03**: 原生加密执行路径在首次打开及 close/reopen 后都返回非空 `PRAGMA cipher_version`，且加密库中持久化的 sentinel 数据保持可读
+- [ ] **SEC-02**: 保留 committed lockfiles 的 clean rebuild 与 disposable from-zero dependency resolution 必须一致；Runner/CocoaPods/SwiftPM/生成的 plugin Swift package 一律为 iOS `15.0`，完成 Simulator 与 generic-device 的 Debug/Profile/Release 六项 unsigned compile-only checks，并将 Simulator runtime encryption evidence 独立记录，绝不以编译代替 runtime acceptance（**Blocked:** Flutter/Xcode undefined-symbol linkage prevents the full native lane from completing）
+- [ ] **SEC-03**: 原生加密执行路径在首次打开及 close/reopen 后都返回非空 `PRAGMA cipher_version`，且加密库中持久化的 sentinel 数据保持可读（**Blocked:** current-schema booted-Simulator lifecycle cannot launch until the same native linkage failure is repaired）
 - [~] **SEC-04**: **Descoped / Not Applicable (owner decision 2026-08-09):** app has never been publicly released, so Phase 60 has no prior released schema population to migrate. Production migration code remains intact; Phase 60 proves only current-schema encrypted lifecycle safety.
 - [x] **SEC-05**: 当前 `.hpb` v2 加密备份可完成 export → 仅测试数据 clear → password restore，wrong-password、截断与资源上限失败均不破坏现有数据；不再承诺 headerless/旧格式兼容。
 - [x] **SEC-06**: `ensureNativeLibrary()` 与 AppInitializer 的密钥先于数据库顺序保持不变；已有加密 DB 缺失 master key 时继续 fail closed，依赖升级本身不触发无业务理由的 Drift schema bump
@@ -101,8 +101,8 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 | PLUG-03 | Phase 59 | Complete |
 | PLUG-04 | Phase 59 | Complete |
 | SEC-01 | Phase 60 | Complete |
-| SEC-02 | Phase 60 | Complete |
-| SEC-03 | Phase 60 | Complete |
+| SEC-02 | Phase 60 | Blocked — full clean native lane stops at Flutter/Xcode undefined-symbol linkage |
+| SEC-03 | Phase 60 | Blocked — current-schema Simulator lifecycle cannot launch |
 | SEC-04 | Phase 60 | Descoped / Not Applicable — pre-release owner decision 2026-08-09 |
 | SEC-05 | Phase 60 | Complete |
 | SEC-06 | Phase 60 | Complete |

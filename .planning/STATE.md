@@ -4,11 +4,11 @@ milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 60
 current_phase_name: SQLCipher & iOS Native Safety Lane
-status: executing
+status: blocked
 stopped_at: Completed 60-07-PLAN.md; Phase 60 lifecycle runtime remains blocked
-last_updated: "2026-08-09T12:16:17.112Z"
+last_updated: "2026-08-09T12:29:29Z"
 last_activity: 2026-08-09
-last_activity_desc: Phase 60 execution started
+last_activity_desc: Phase 60 verification found native convergence and lifecycle runtime gaps
 progress:
   total_phases: 7
   completed_phases: 4
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 
 ## Current Position
 
-Phase: 60 (SQLCipher & iOS Native Safety Lane) — EXECUTING
+Phase: 60 (SQLCipher & iOS Native Safety Lane) — BLOCKED
 Plan: 7 of 7
-Status: Ready to execute
-Last activity: 2026-08-09 — Phase 60 execution started
+Status: Blocked — clean native convergence and current-schema Simulator lifecycle stop at Flutter/Xcode undefined-symbol linkage
+Last activity: 2026-08-09 — Phase 60 verification found 2 native-runtime gaps; 4/6 must-haves verified
 
 Progress: [██████████] 100%
 
