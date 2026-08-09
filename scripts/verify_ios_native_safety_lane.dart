@@ -361,6 +361,8 @@ class _NativeSafetyRunner {
     final sdk = destination.endsWith('Simulator')
         ? 'iphonesimulator'
         : 'iphoneos';
+    final simulatorFlutterArtifactOverride =
+        destination.endsWith('Simulator') && configuration != 'Debug';
     final result = await _run('xcodebuild', <String>[
       '-workspace',
       'Runner.xcworkspace',
@@ -374,6 +376,7 @@ class _NativeSafetyRunner {
       destination,
       'CODE_SIGNING_ALLOWED=NO',
       'CODE_SIGNING_REQUIRED=NO',
+      if (simulatorFlutterArtifactOverride) 'FLUTTER_BUILD_MODE=debug',
       'clean',
       'build',
     ], workingDirectory: 'ios');
@@ -387,6 +390,11 @@ class _NativeSafetyRunner {
               ? 'SIMULATOR_GENERIC'
               : 'GENERIC_DEVICE',
           'signed': false,
+          'simulator_flutter_artifact_override':
+              simulatorFlutterArtifactOverride ? 'debug' : null,
+          'configuration_scope': simulatorFlutterArtifactOverride
+              ? 'Xcode Runner configuration; Flutter Simulator artifacts use the supported Debug mode'
+              : 'Xcode Runner and Flutter build mode',
           'exit_code': result.exitCode,
           'outcome': result.exitCode == 0 ? 'PASS' : 'FAIL',
         },
