@@ -382,6 +382,7 @@ CompatibilityReport validateDependencyCompatibility({
   _validatePhase59PluginCohorts(
     issues: issues,
     baselineDependencies: baselineDependencies,
+    baselineLanes: _map(baseline.data['lanes']),
     directDependencies: allDirectDependencies,
     lockedPackages: packages,
   );
@@ -654,6 +655,13 @@ String _diagnosticCode(String message) {
   return 'BASELINE_CONTRACT';
 }
 
+const _phase59AtomicFileShareMembers = <String>[
+  'file_picker',
+  'package_info_plus',
+  'share_plus',
+  'win32',
+];
+
 /// Validates the Phase 59 speech hold before a package resolver can turn an
 /// execution-date candidate into an accepted graph. The explicit lane messages
 /// keep evidence failures attributable instead of relying on generic manifest
@@ -661,9 +669,113 @@ String _diagnosticCode(String message) {
 void _validatePhase59PluginCohorts({
   required List<String> issues,
   required Map<Object?, Object?> baselineDependencies,
+  required Map<Object?, Object?> baselineLanes,
   required Map<Object?, Object?> directDependencies,
   required Map<Object?, Object?> lockedPackages,
 }) {
+  const phase59PluginPackages = <String>[
+    'connectivity_plus',
+    'file_picker',
+    'firebase_core',
+    'firebase_messaging',
+    'flutter_local_notifications',
+    'flutter_secure_storage',
+    'image_picker',
+    'local_auth',
+    'lucide_icons_flutter',
+    'package_info_plus',
+    'path_provider',
+    'share_plus',
+    'speech_to_text',
+    'url_launcher',
+  ];
+  const requiredPluginEvidence = <String>{
+    'package',
+    'queried_on',
+    'candidate',
+    'decision',
+    'owner_phase',
+    'official_source',
+  };
+  final pluginRows = <String, Map<Object?, Object?>>{};
+  for (final package in phase59PluginPackages) {
+    final row = _map(baselineDependencies[package]);
+    pluginRows[package] = row;
+    for (final field in requiredPluginEvidence) {
+      if (_isBlank(row[field])) {
+        issues.add(
+          'PLUG-01 $package is missing required evidence field: $field',
+        );
+      }
+    }
+    if (row['package']?.toString() != package) {
+      issues.add(
+        'PLUG-01 $package package identity must match its manifest key',
+      );
+    }
+    if (row['owner_phase'] != 59) {
+      issues.add('PLUG-01 $package owner phase must be 59');
+    }
+  }
+  final identities = pluginRows.values
+      .map((row) => row['package']?.toString())
+      .whereType<String>()
+      .toList();
+  if (identities.toSet().length != identities.length) {
+    issues.add(
+      'PLUG-01 Phase 59 plugin inventory has duplicate package identities',
+    );
+  }
+
+  final inventoryMembers = _listOfStrings(
+    _map(baselineLanes['phase59_plugin_inventory'])['members'],
+  );
+  if (!_hasExactMembers(inventoryMembers, phase59PluginPackages)) {
+    issues.add(
+      'PLUG-01 Phase 59 plugin inventory must contain every decided plugin exactly once',
+    );
+  }
+  if (!_isLexicallyOrdered(inventoryMembers)) {
+    issues.add('PLUG-01 Phase 59 plugin inventory must be in lexical order');
+  }
+
+  final atomicMembers = _listOfStrings(
+    _map(baselineLanes['phase59_file_share'])['members'],
+  );
+  if (!_hasExactMembers(atomicMembers, _phase59AtomicFileShareMembers)) {
+    issues.add(
+      'PLUG-02 file/share cohort must contain exactly the four atomic members',
+    );
+  }
+  if (!_isLexicallyOrdered(atomicMembers)) {
+    issues.add('PLUG-01 Phase 59 plugin inventory must be in lexical order');
+  }
+
+  final win32 = _map(
+    _map(baselineLanes['phase59_native_transitives'])['win32'],
+  );
+  for (final field in {
+    'package',
+    'selected',
+    'candidate',
+    'decision',
+    'owner_phase',
+    'official_source',
+    'queried_on',
+    'compatibility_reason',
+    'exit_condition',
+  }) {
+    if (_isBlank(win32[field])) {
+      issues.add('PLUG-01 win32 is missing required evidence field: $field');
+    }
+  }
+  if (win32['package']?.toString() != 'win32') {
+    issues.add('PLUG-01 win32 package identity must match its manifest key');
+  }
+  if (win32['owner_phase'] != 59) {
+    issues.add('PLUG-01 win32 owner phase must be 59');
+  }
+
   const speechPackage = 'speech_to_text';
   const requiredSpeechEvidence = {
     'queried_on',
@@ -710,6 +822,53 @@ void _validatePhase59PluginCohorts({
       'PLUG-03 speech_to_text must remain hold until physical-iPhone evidence is recorded',
     );
   }
+
+  const declarations = <String, String>{
+    'file_picker': '^11.0.3',
+    'share_plus': '^12.0.2',
+    'package_info_plus': '^9.0.1',
+  };
+  const locked = <String, String>{
+    'file_picker': '11.0.3',
+    'share_plus': '12.0.2',
+    'package_info_plus': '9.0.1',
+    'win32': '5.15.0',
+  };
+  for (final entry in declarations.entries) {
+    final declared = _declaredDependency(directDependencies[entry.key]);
+    if (declared != entry.value) {
+      issues.add(
+        'PLUG-02 ${entry.key} declaration must remain ${entry.value} '
+        '(found $declared)',
+      );
+    }
+  }
+  for (final entry in locked.entries) {
+    final selected = _map(lockedPackages[entry.key])['version']?.toString();
+    if (selected != entry.value) {
+      issues.add(
+        'PLUG-02 ${entry.key} resolution must remain ${entry.value} '
+        '(found $selected)',
+      );
+    }
+  }
+}
+
+List<String> _listOfStrings(Object? value) => value is List
+    ? value.whereType<String>().toList(growable: false)
+    : const <String>[];
+
+bool _hasExactMembers(List<String> actual, List<String> expected) =>
+    actual.length == expected.length &&
+    actual.toSet().length == actual.length &&
+    actual.toSet().containsAll(expected) &&
+    expected.toSet().containsAll(actual);
+
+bool _isLexicallyOrdered(List<String> values) {
+  for (var index = 1; index < values.length; index++) {
+    if (values[index - 1].compareTo(values[index]) > 0) return false;
+  }
+  return true;
 }
 
 void _validateManifestPolicy({

@@ -1227,4 +1227,155 @@ end
       );
     });
   });
+
+  group('PLUG-01/PLUG-02 complete platform plugin cohort contract', () {
+    Map<String, dynamic> manifest() =>
+        jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
+            as Map<String, dynamic>;
+
+    test(
+      'rejects missing Phase 59 inventory evidence with lane diagnostics',
+      () {
+        const packages = <String>[
+          'flutter_secure_storage',
+          'local_auth',
+          'speech_to_text',
+          'file_picker',
+          'image_picker',
+          'share_plus',
+          'package_info_plus',
+          'url_launcher',
+          'firebase_core',
+          'firebase_messaging',
+          'flutter_local_notifications',
+          'path_provider',
+          'connectivity_plus',
+          'lucide_icons_flutter',
+        ];
+        const fields = <String>[
+          'package',
+          'queried_on',
+          'candidate',
+          'decision',
+          'owner_phase',
+        ];
+
+        for (final package in packages) {
+          for (final field in fields) {
+            final source = manifest();
+            final dependencies =
+                source['direct_dependencies'] as Map<String, dynamic>;
+            (dependencies[package] as Map<String, dynamic>).remove(field);
+
+            expect(
+              validate(currentInputs(), baselineJson: jsonEncode(source)),
+              contains(
+                'PLUG-01 $package is missing required evidence field: $field',
+              ),
+              reason: '$package $field',
+            );
+          }
+        }
+      },
+    );
+
+    test('rejects partial and malformed exact file/share cohort membership', () {
+      final source = manifest();
+      final lanes = source['lanes'] as Map<String, dynamic>;
+      final cohort = lanes['phase59_file_share'] as Map<String, dynamic>;
+      final members = cohort['members'] as List<dynamic>;
+
+      for (var index = 0; index < members.length; index++) {
+        final mutated = manifest();
+        final lane =
+            (mutated['lanes'] as Map<String, dynamic>)['phase59_file_share']
+                as Map<String, dynamic>;
+        (lane['members'] as List<dynamic>).removeAt(index);
+        expect(
+          validate(currentInputs(), baselineJson: jsonEncode(mutated)),
+          contains(
+            'PLUG-02 file/share cohort must contain exactly the four atomic members',
+          ),
+          reason: members[index],
+        );
+      }
+
+      final duplicate = manifest();
+      final duplicateMembers =
+          ((duplicate['lanes'] as Map<String, dynamic>)['phase59_file_share']
+                  as Map<String, dynamic>)['members']
+              as List<dynamic>;
+      duplicateMembers[1] = duplicateMembers.first;
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(duplicate)),
+        contains(
+          'PLUG-02 file/share cohort must contain exactly the four atomic members',
+        ),
+      );
+
+      final reordered = manifest();
+      final reorderedMembers =
+          ((reordered['lanes'] as Map<String, dynamic>)['phase59_file_share']
+                  as Map<String, dynamic>)['members']
+              as List<dynamic>;
+      reorderedMembers.sort((left, right) => '$right'.compareTo('$left'));
+      expect(
+        validate(currentInputs(), baselineJson: jsonEncode(reordered)),
+        contains('PLUG-01 Phase 59 plugin inventory must be in lexical order'),
+      );
+    });
+
+    test('rejects declaration and lock drift for every atomic member', () {
+      const declarations = <String, String>{
+        'file_picker': '^11.0.3',
+        'share_plus': '^12.0.2',
+        'package_info_plus': '^9.0.1',
+      };
+      const locks = <String, String>{
+        'file_picker': '11.0.3',
+        'share_plus': '12.0.2',
+        'package_info_plus': '9.0.1',
+        'win32': '5.15.0',
+      };
+
+      for (final entry in declarations.entries) {
+        final input = currentInputs();
+        input['pubspec'] = input['pubspec']!.replaceFirst(
+          '${entry.key}: ${entry.value}',
+          '${entry.key}: ${entry.value}.drift',
+        );
+        expect(
+          validate(input),
+          contains(
+            'PLUG-02 ${entry.key} declaration must remain ${entry.value} '
+            '(found ${entry.value}.drift)',
+          ),
+          reason: entry.key,
+        );
+      }
+
+      for (final entry in locks.entries) {
+        final input = currentInputs();
+        final matcher = RegExp(
+          '(^  ${RegExp.escape(entry.key)}:\\n'
+          r'(?:^(?:    |      ).*\n)*?^    version: )"'
+          '${RegExp.escape(entry.value)}"',
+          multiLine: true,
+        );
+        expect(matcher.hasMatch(input['lock']!), isTrue, reason: entry.key);
+        input['lock'] = input['lock']!.replaceFirstMapped(
+          matcher,
+          (match) => '${match.group(1)}"${entry.value}.drift"',
+        );
+        expect(
+          validate(input),
+          contains(
+            'PLUG-02 ${entry.key} resolution must remain ${entry.value} '
+            '(found ${entry.value}.drift)',
+          ),
+          reason: entry.key,
+        );
+      }
+    });
+  });
 }

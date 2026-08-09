@@ -113,3 +113,34 @@ The package page queried on 2026-08-09 identifies `7.4.0` as stable and
 lane. The redacted Phase 59 acceptance ledger separates automated adapter and
 corpus evidence from the still-required physical-iPhone evidence rather than
 treating an unavailable device as acceptance.
+
+## Phase 59 platform-plugin inventory
+
+The Phase 59 validator owns a lexical inventory of every direct, platform-backed
+plugin under this cohort: `connectivity_plus`, `file_picker`, Firebase Core and
+Messaging, `flutter_local_notifications`, `flutter_secure_storage`,
+`image_picker`, `local_auth`, the local Lucide fork, `package_info_plus`,
+`path_provider`, `share_plus`, `speech_to_text`, and `url_launcher`. Its
+significant transitive `win32` row is kept with the file/share lane. Each row
+records the package identity, official source, 2026-08-09 query date, exact
+selected graph, stable candidate, Phase 59 owner, decision, and a hold reason
+plus exit condition where native evidence remains unavailable.
+
+The four-member file/share cohort is deliberately exact and ordered:
+`file_picker 11.0.3`, `package_info_plus 9.0.1`, `share_plus 12.0.2`, and
+transitive `win32 5.15.0`. Pub.dev currently lists `file_picker 11.0.3`,
+`share_plus 13.3.0`, `package_info_plus 10.2.1`, and `win32 6.4.0`; newer
+members are candidates only. A declaration or lock mutation of any selected
+member, a missing member, duplicate identity, empty evidence field, or
+non-lexical inventory fails before resolution.
+
+Official execution-date candidates retained as holds include
+`flutter_secure_storage 11.0.0`, `flutter_local_notifications 22.3.0`, and
+the stable `speech_to_text 7.4.0`; Firebase Core `4.13.0`, Firebase Messaging
+`16.5.0`, `local_auth 3.0.2`, `image_picker 1.2.3`, `path_provider 2.1.6`,
+`connectivity_plus 7.3.1`, and `url_launcher 6.3.2` remain the current stable
+candidates but are not accepted without their described native evidence. The
+Lucide path fork has no registry candidate: its official upstream source and
+license, static subset, and used-codepoint contract remain mandatory evidence.
+No candidate is a resolver instruction, and missing JDK, Android, simulator,
+physical-iPhone, or existing-key evidence is always a hold rather than a pass.
