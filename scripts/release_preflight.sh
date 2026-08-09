@@ -15,6 +15,7 @@ RELEASE_PREFLIGHT_PLATFORM="all"
 DRY_RUN=false
 REGENERATE=false
 PACKAGE_RELEASE=false
+PHASE61_GRADLE_JAVA_HOME="${PHASE61_GRADLE_JAVA_HOME:-}"
 RELEASE_DEPENDENCY_SCOPE_ACTIVE=false
 RELEASE_DEPENDENCY_SCOPE_DIR=''
 RELEASE_PUBSPEC_BACKUP=''
@@ -175,6 +176,29 @@ assert_ios_release_artifact_clean() {
   fi
 }
 
+assert_android_release_artifacts_clean() {
+  local root="${1:-$PROJECT_ROOT}"
+  local aab="$root/build/app/outputs/bundle/release/app-release.aab"
+  local apk="$root/build/app/outputs/flutter-apk/app-release.apk"
+  local artifact
+  local test_pattern='integration[_-]?test|IntegrationTestPlugin|dev[.]flutter[.]integration_test'
+
+  if [[ ! -f "$apk" ]]; then
+    apk="$root/build/app/outputs/apk/release/app-release.apk"
+  fi
+  [[ -f "$aab" ]] || fail 'Android release packaging did not produce app-release.aab'
+  [[ -f "$apk" ]] || fail 'Android release packaging did not produce app-release.apk'
+
+  for artifact in "$aab" "$apk"; do
+    if unzip -Z1 "$artifact" | grep -n -i -E "$test_pattern" >&2; then
+      fail "dev-only test entry found in Android release artifact: ${artifact#$root/}"
+    fi
+    if strings "$artifact" | grep -n -i -E "$test_pattern" >&2; then
+      fail "dev-only test content found in Android release artifact: ${artifact#$root/}"
+    fi
+  done
+}
+
 assert_expected_registrants_exist() {
   local root="${1:-$PROJECT_ROOT}"
   case "$RELEASE_PREFLIGHT_PLATFORM" in
@@ -229,13 +253,26 @@ package_signed_release() {
   case "$RELEASE_PREFLIGHT_PLATFORM" in
     android)
       # This invokes verifyReleaseSigning; no debug-key fallback is permitted.
-      run_flutter build appbundle --release
+      if [[ -n "$PHASE61_GRADLE_JAVA_HOME" ]]; then
+        run env JAVA_HOME="$PHASE61_GRADLE_JAVA_HOME" \
+          "$PROJECT_ROOT/android/gradlew" -p "$PROJECT_ROOT/android" \
+          --no-daemon "-Dorg.gradle.java.home=$PHASE61_GRADLE_JAVA_HOME" \
+          -Pphase61SigningEvidence=true bundleRelease
+        run env JAVA_HOME="$PHASE61_GRADLE_JAVA_HOME" \
+          "$PROJECT_ROOT/android/gradlew" -p "$PROJECT_ROOT/android" \
+          --no-daemon "-Dorg.gradle.java.home=$PHASE61_GRADLE_JAVA_HOME" \
+          -Pphase61SigningEvidence=true assembleRelease
+      else
+        run_flutter build appbundle --release
+        run_flutter build apk --release
+      fi
       ;;
     ios)
       run_flutter build ipa --release
       ;;
     all)
       run_flutter build appbundle --release
+      run_flutter build apk --release
       run_flutter build ipa --release
       ;;
   esac
@@ -299,6 +336,13 @@ main() {
   if "$PACKAGE_RELEASE"; then
     log 'Preflight passed; starting signed production packaging.'
     package_signed_release
+    if "$DRY_RUN"; then
+      log 'DRY RUN: would scan both Android release artifacts.'
+    else
+      case "$RELEASE_PREFLIGHT_PLATFORM" in
+        android|all) assert_android_release_artifacts_clean ;;
+      esac
+    fi
   else
     log 'Preflight passed; signed production packaging was not requested.'
   fi

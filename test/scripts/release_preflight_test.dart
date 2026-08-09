@@ -41,6 +41,7 @@ void main() {
       expect(source, contains('flutter build ios --release --no-codesign'));
       expect(source, isNot(contains('flutter build ios --profile')));
       expect(source, contains('flutter build apk --release --config-only'));
+      expect(source, contains('assert_android_release_artifacts_clean'));
 
       final clean = source.indexOf('run_flutter clean');
       final removeRegistrants = source.lastIndexOf(
@@ -50,6 +51,11 @@ void main() {
       final codegen = source.lastIndexOf('regenerate_if_required');
       final smoke = source.lastIndexOf('run_smoke_compile');
       final scan = source.lastIndexOf('assert_release_registrants_clean');
+      final packageAab = source.indexOf('build appbundle --release');
+      final packageApk = source.indexOf('build apk --release', packageAab + 1);
+      final artifactScan = source.lastIndexOf(
+        'assert_android_release_artifacts_clean',
+      );
 
       expect(clean, greaterThanOrEqualTo(0));
       expect(removeRegistrants, greaterThan(clean));
@@ -58,6 +64,9 @@ void main() {
       expect(codegen, greaterThan(pubGet));
       expect(smoke, greaterThan(codegen));
       expect(scan, greaterThan(smoke));
+      expect(packageAab, greaterThanOrEqualTo(0));
+      expect(packageApk, greaterThan(packageAab));
+      expect(artifactScan, greaterThan(packageApk));
     });
 
     test('creates an iOS release manifest without integration_test', () async {
@@ -150,6 +159,27 @@ dev_dependencies:
           result.stdout,
           isNot(contains('flutter build appbundle --release')),
         );
+      },
+    );
+
+    test(
+      'package dry run orders AAB then APK without credential values',
+      () async {
+        final result = await _runScript([
+          '--platform',
+          'android',
+          '--package',
+          '--dry-run',
+        ]);
+
+        expect(result.exitCode, equals(0), reason: result.stderr.toString());
+        final output = result.stdout.toString();
+        final aab = output.indexOf('flutter build appbundle --release');
+        final apk = output.indexOf('flutter build apk --release', aab + 1);
+        expect(aab, greaterThanOrEqualTo(0));
+        expect(apk, greaterThan(aab));
+        expect(output, isNot(contains('storePassword')));
+        expect(output, isNot(contains('keyPassword')));
       },
     );
   });

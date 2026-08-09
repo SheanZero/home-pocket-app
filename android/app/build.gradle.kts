@@ -15,15 +15,15 @@ plugins {
 // environment variables. Debug builds do not require either source.
 val releaseSigningProperties = Properties()
 val releaseSigningPropertiesFile = rootProject.file("key.properties")
-if (releaseSigningPropertiesFile.exists()) {
+val phase61SigningEvidence =
+    providers.gradleProperty("phase61SigningEvidence").orNull == "true"
+if (!phase61SigningEvidence && releaseSigningPropertiesFile.exists()) {
     releaseSigningPropertiesFile.inputStream().use(releaseSigningProperties::load)
 }
 
 fun releaseSigningValue(propertyName: String, environmentName: String): String? =
-    releaseSigningProperties
-        .getProperty(propertyName)
-        ?.takeIf(String::isNotBlank)
-        ?: providers.environmentVariable(environmentName).orNull?.takeIf(String::isNotBlank)
+    providers.environmentVariable(environmentName).orNull?.takeIf(String::isNotBlank)
+        ?: releaseSigningProperties.getProperty(propertyName)?.takeIf(String::isNotBlank)
 
 val releaseSigningValues = mapOf(
     "storeFile" to releaseSigningValue("storeFile", "ANDROID_KEYSTORE_PATH"),

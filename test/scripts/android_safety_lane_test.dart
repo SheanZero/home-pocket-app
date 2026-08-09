@@ -151,4 +151,53 @@ void main() {
     expect(lane.parseJavaMajor('openjdk version "21.0.8"'), 21);
     expect(lane.parseJavaMajor('not-java'), isNull);
   });
+
+  test(
+    'release artifact scanner rejects missing and test-contaminated archives',
+    () async {
+      final fixture = await Directory.systemTemp.createTemp(
+        'phase61-artifact-',
+      );
+      addTearDown(() => fixture.delete(recursive: true));
+
+      expect(
+        await lane.scanAndroidReleaseArtifact(
+          File('${fixture.path}/missing.apk'),
+        ),
+        contains('release artifact is missing'),
+      );
+
+      final payload = File('${fixture.path}/IntegrationTestPlugin.class');
+      await payload.writeAsString(
+        'dev.flutter.plugins.integration_test.IntegrationTestPlugin',
+      );
+      final artifact = File('${fixture.path}/contaminated.apk');
+      final zip = await Process.run('zip', [
+        '-q',
+        artifact.path,
+        payload.uri.pathSegments.last,
+      ], workingDirectory: fixture.path);
+      expect(zip.exitCode, 0, reason: zip.stderr.toString());
+
+      final findings = await lane.scanAndroidReleaseArtifact(artifact);
+      expect(findings.join('\n'), contains('test-only archive entry'));
+      expect(findings.join('\n'), contains('test-only packaged content'));
+    },
+  );
+
+  test(
+    'certificate classifier rejects Android Debug and accepts evidence CN',
+    () {
+      expect(
+        lane.classifyAndroidCertificate('CN=Android Debug,O=Android,C=US'),
+        lane.AndroidCertificateClass.debug,
+      );
+      expect(
+        lane.classifyAndroidCertificate(
+          'CN=Happy Pocket Phase 61 Evidence,O=Happy Pocket,C=JP',
+        ),
+        lane.AndroidCertificateClass.nonDebug,
+      );
+    },
+  );
 }

@@ -24,6 +24,27 @@ void main() {
         contains('release build type must not use debug signing'),
       );
     });
+
+    test(
+      'evidence mode bypasses local key.properties and environment wins',
+      () {
+        final source = File(_gradlePath).readAsStringSync();
+
+        expect(source, contains('phase61SigningEvidence'));
+        expect(
+          source,
+          contains('providers.environmentVariable(environmentName)'),
+        );
+        expect(
+          source.indexOf('providers.environmentVariable(environmentName)'),
+          lessThan(
+            source.indexOf(
+              'releaseSigningProperties.getProperty(propertyName)',
+            ),
+          ),
+        );
+      },
+    );
   });
 }
 

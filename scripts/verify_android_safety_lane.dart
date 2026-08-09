@@ -9,6 +9,8 @@ import 'package:crypto/crypto.dart';
 
 enum AndroidSafetyMode { verify, candidateProbe, release, emulator }
 
+enum AndroidCertificateClass { debug, nonDebug }
+
 const candidateAgp = '9.3.1';
 const candidateGradle = '9.5.0';
 const selectedAgp = '8.11.1';
@@ -663,6 +665,76 @@ String scrubCandidateOutput(String raw) {
 int? parseJavaMajor(String output) {
   final match = RegExp(r'version\s+"(\d+)').firstMatch(output);
   return match == null ? null : int.tryParse(match.group(1)!);
+}
+
+AndroidCertificateClass classifyAndroidCertificate(String subject) =>
+    subject.toLowerCase().contains('cn=android debug')
+    ? AndroidCertificateClass.debug
+    : AndroidCertificateClass.nonDebug;
+
+const _testOnlyArtifactPatterns = <String>[
+  'integration_test',
+  'integration-test',
+  'integrationtestplugin',
+  'dev.flutter.integration_test',
+];
+
+Future<List<String>> scanAndroidReleaseArtifact(File artifact) async {
+  if (!artifact.existsSync()) return const ['release artifact is missing'];
+  final findings = <String>[];
+  final entries = await Process.run(
+    'unzip',
+    ['-Z1', artifact.path],
+    stdoutEncoding: utf8,
+    stderrEncoding: utf8,
+  );
+  if (entries.exitCode != 0) {
+    return ['release artifact is not a readable ZIP archive'];
+  }
+  final entryText = '${entries.stdout}'.toLowerCase();
+  for (final pattern in _testOnlyArtifactPatterns) {
+    if (entryText.contains(pattern)) {
+      findings.add('test-only archive entry found: $pattern');
+    }
+  }
+
+  final packagedPatterns = await _scanArchiveBytes(
+    artifact,
+    _testOnlyArtifactPatterns,
+  );
+  for (final pattern in packagedPatterns) {
+    findings.add('test-only packaged content found: $pattern');
+  }
+  return findings;
+}
+
+Future<Set<String>> _scanArchiveBytes(
+  File artifact,
+  List<String> patterns,
+) async {
+  final process = await Process.start('unzip', ['-p', artifact.path]);
+  final loweredPatterns = patterns
+      .map((pattern) => pattern.toLowerCase())
+      .toList();
+  final found = <String>{};
+  final maxPatternLength = loweredPatterns
+      .map((pattern) => pattern.length)
+      .fold<int>(0, (left, right) => left > right ? left : right);
+  var tail = '';
+  await for (final chunk in process.stdout) {
+    final text = '$tail${latin1.decode(chunk, allowInvalid: true)}'
+        .toLowerCase();
+    for (final pattern in loweredPatterns) {
+      if (text.contains(pattern)) found.add(pattern);
+    }
+    tail = text.length <= maxPatternLength
+        ? text
+        : text.substring(text.length - maxPatternLength);
+  }
+  await process.stderr.drain<void>();
+  final code = await process.exitCode;
+  if (code != 0) found.add('unreadable-archive-content');
+  return found;
 }
 
 class BoundedCommandResult {
