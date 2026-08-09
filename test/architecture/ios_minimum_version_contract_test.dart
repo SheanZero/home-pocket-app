@@ -157,6 +157,9 @@ void main() {
         'lane == NativeSafetyLane.compile',
         'lane != NativeSafetyLane.compile',
         'CODE_SIGNING_REQUIRED=NO',
+        'FLUTTER_BUILD_MODE=debug',
+        "configuration != 'Debug'",
+        "'simulator_flutter_artifact_override':",
         "'runtime_test': runtimeTest",
         'lane == NativeSafetyLane.compile && runtimeTest != null',
       ]) {
