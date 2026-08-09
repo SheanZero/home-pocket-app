@@ -1909,4 +1909,70 @@ end
       );
     });
   });
+
+  group('Phase 59 final artifact convergence contract', () {
+    String baseline() =>
+        File('docs/testing/STABLE_BASELINE.json').readAsStringSync();
+    String compatibilityDocument() =>
+        File('docs/testing/DEPENDENCY_COMPATIBILITY.md').readAsStringSync();
+    String acceptanceLedger() => File(
+      '.planning/phases/59-controlled-platform-plugin-cohorts/59-PLUGIN-ACCEPTANCE.md',
+    ).readAsStringSync();
+    String coverageMatrix() => File(
+      '.planning/phases/59-controlled-platform-plugin-cohorts/COVERAGE.md',
+    ).readAsStringSync();
+
+    List<String> validateArtifacts({
+      String? baselineJson,
+      String? document,
+      String? ledger,
+      String? coverage,
+    }) => compatibility
+        .validatePhase59EvidenceArtifacts(
+          baselineJson: baselineJson ?? baseline(),
+          compatibilityDocument: document ?? compatibilityDocument(),
+          acceptanceLedger: ledger ?? acceptanceLedger(),
+          coverageMatrix: coverage ?? coverageMatrix(),
+        )
+        .messages;
+
+    test('accepts the exact final selected and held graph', () {
+      expect(validateArtifacts(), isEmpty);
+    });
+
+    test('rejects readable-document, ledger-result, and API-matrix mutations', () {
+      final document = compatibilityDocument().replaceFirst(
+        '`speech_to_text 7.4.0`',
+        '`speech_to_text 7.5.0`',
+      );
+      expect(
+        validateArtifacts(document: document),
+        contains(
+          'PLUG-03 readable compatibility document must retain speech_to_text candidate 7.4.0',
+        ),
+      );
+
+      final ledger = acceptanceLedger().replaceFirst(
+        '| 2026-08-09 | speech_to_text | 7.3.0 declared/resolved |',
+        '| 2026-08-09 | speech_to_text | 7.4.0 declared/resolved |',
+      );
+      expect(
+        validateArtifacts(ledger: ledger),
+        contains(
+          'PLUG-03 acceptance ledger must retain speech_to_text selected 7.3.0',
+        ),
+      );
+
+      final coverage = coverageMatrix().replaceFirst(
+        '| speech_to_text.ja_recognition | INTEGRATE | |',
+        '| speech_to_text.ja_recognition | OPT-OUT | mutation |',
+      );
+      expect(
+        validateArtifacts(coverage: coverage),
+        contains(
+          'PLUG-03 API coverage must integrate speech_to_text.ja_recognition',
+        ),
+      );
+    });
+  });
 }
