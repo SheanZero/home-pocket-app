@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
@@ -41,7 +39,7 @@ class MockSettingsRepository extends Mock implements SettingsRepository {}
 class MockExchangeRateRepository extends Mock
     implements ExchangeRateRepository {}
 
-/// Helper to create an encrypted backup file for testing.
+/// Helper to create a current HPB v2 encrypted backup file for testing.
 Future<File> _createEncryptedBackup({
   required String password,
   required BackupData backupData,
@@ -50,34 +48,10 @@ Future<File> _createEncryptedBackup({
   final jsonString = jsonEncode(backupData.toJson());
   final gzipBytes = gzip.encode(utf8.encode(jsonString));
 
-  final pbkdf2 = Pbkdf2(
-    macAlgorithm: Hmac.sha256(),
-    iterations: 100000,
-    bits: 256,
+  final result = await BackupCryptoService().encrypt(
+    Uint8List.fromList(gzipBytes),
+    password,
   );
-
-  final random = Random.secure();
-  final salt = List.generate(16, (_) => random.nextInt(256));
-  final nonce = List.generate(12, (_) => random.nextInt(256));
-
-  final secretKey = await pbkdf2.deriveKey(
-    secretKey: SecretKey(utf8.encode(password)),
-    nonce: salt,
-  );
-
-  final algorithm = AesGcm.with256bits();
-  final secretBox = await algorithm.encrypt(
-    gzipBytes,
-    secretKey: secretKey,
-    nonce: nonce,
-  );
-
-  final result = <int>[
-    ...salt,
-    ...nonce,
-    ...secretBox.cipherText,
-    ...secretBox.mac.bytes,
-  ];
 
   final file = File(filePath);
   await file.writeAsBytes(Uint8List.fromList(result));
@@ -109,8 +83,7 @@ void main() {
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
       unitOfWork: _FakeUnitOfWork(),
-      // Real service: the legacy-format helper below doubles as coverage for
-      // the pre-v2 back-compat decrypt path.
+      // Real service: all fixture bytes use the supported current HPB v2 path.
       backupCrypto: BackupCryptoService(),
     );
 
@@ -179,7 +152,7 @@ void main() {
     );
 
     expect(result.isError, true);
-    expect(result.error, contains('too small'));
+    expect(result.error, contains('missing HPB v2 header'));
   });
 
   test('rejects wrong password', () async {
@@ -316,72 +289,67 @@ void main() {
     verify(() => mockSettingsRepo.updateSettings(any())).called(1);
   });
 
-  test(
-    'legacy backup photo hash becomes an unavailable-photo marker',
-    () async {
-      final now = DateTime.utc(2026, 8, 1);
-      final transaction = Transaction(
-        id: 'tx-photo',
-        bookId: 'book-1',
-        deviceId: 'dev',
-        amount: 1000,
-        type: TransactionType.expense,
-        categoryId: 'cat-1',
-        ledgerType: LedgerType.daily,
-        timestamp: now,
-        photoHash: 'device-local-hash',
-        isPrivate: true,
-        familySyncVisibility: FamilySyncVisibility.shared,
-        familySharedRevision: 55,
-        currentHash: 'chain',
-        createdAt: now,
-      );
-      final backupData = BackupData(
-        metadata: BackupMetadata(
-          version: '1.0',
-          createdAt: now.millisecondsSinceEpoch,
-          deviceId: 'test',
-          appVersion: '0.1.0',
-        ),
-        transactions: [transaction.toJson()],
-        categories: [],
-        books: [],
-        settings: const AppSettings().toJson(),
-      );
-      final file = await _createEncryptedBackup(
-        password: 'test-password-123',
-        backupData: backupData,
-        filePath: '${tempDir.path}/photo-backup.hpb',
-      );
-      when(
-        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
-      ).thenAnswer((_) async => []);
-      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
-      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
-      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
-      when(
-        () => mockSettingsRepo.updateSettings(any()),
-      ).thenAnswer((_) async {});
+  test('backup photo hash becomes an unavailable-photo marker', () async {
+    final now = DateTime.utc(2026, 8, 1);
+    final transaction = Transaction(
+      id: 'tx-photo',
+      bookId: 'book-1',
+      deviceId: 'dev',
+      amount: 1000,
+      type: TransactionType.expense,
+      categoryId: 'cat-1',
+      ledgerType: LedgerType.daily,
+      timestamp: now,
+      photoHash: 'device-local-hash',
+      isPrivate: true,
+      familySyncVisibility: FamilySyncVisibility.shared,
+      familySharedRevision: 55,
+      currentHash: 'chain',
+      createdAt: now,
+    );
+    final backupData = BackupData(
+      metadata: BackupMetadata(
+        version: '1.0',
+        createdAt: now.millisecondsSinceEpoch,
+        deviceId: 'test',
+        appVersion: '0.1.0',
+      ),
+      transactions: [transaction.toJson()],
+      categories: [],
+      books: [],
+      settings: const AppSettings().toJson(),
+    );
+    final file = await _createEncryptedBackup(
+      password: 'test-password-123',
+      backupData: backupData,
+      filePath: '${tempDir.path}/photo-backup.hpb',
+    );
+    when(
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
 
-      final result = await useCase.execute(
-        backupFile: file,
-        password: 'test-password-123',
-      );
+    final result = await useCase.execute(
+      backupFile: file,
+      password: 'test-password-123',
+    );
 
-      expect(result.isSuccess, isTrue);
-      final restored =
-          verify(() => mockTransactionRepo.insert(captureAny())).captured.single
-              as Transaction;
-      expect(restored.photoHash, isNull);
-      expect(restored.isPrivate, isTrue);
-      expect(restored.familySyncVisibility, FamilySyncVisibility.localOnly);
-      expect(restored.familySharedRevision, 0);
-      expect(
-        TransactionPhotoSyncPolicy.isUnavailableRemotePhoto(restored),
-        isTrue,
-      );
-    },
-  );
+    expect(result.isSuccess, isTrue);
+    final restored =
+        verify(() => mockTransactionRepo.insert(captureAny())).captured.single
+            as Transaction;
+    expect(restored.photoHash, isNull);
+    expect(restored.isPrivate, isTrue);
+    expect(restored.familySyncVisibility, FamilySyncVisibility.localOnly);
+    expect(restored.familySharedRevision, 0);
+    expect(
+      TransactionPhotoSyncPolicy.isUnavailableRemotePhoto(restored),
+      isTrue,
+    );
+  });
 
   test('D-10: upserts each exchange rate from the backup', () async {
     final now = DateTime(2026, 2, 7);
@@ -441,10 +409,11 @@ void main() {
   });
 
   test(
-    'D-06: old backup lacking onboarding_complete → forces onboardingComplete true',
+    'D-06: backup lacking onboarding_complete → forces onboardingComplete true',
     () async {
       final now = DateTime(2026, 2, 7);
-      // Simulate a pre-Phase-54 backup whose settings map omits the key entirely.
+      // Exercise a structurally valid current-v2 payload whose settings map
+      // omits the key entirely.
       final settingsMap = const AppSettings(language: 'en').toJson();
       settingsMap.remove('onboarding_complete');
 
