@@ -42,6 +42,33 @@ void main() {
       expect(targets.toSet(), {'15.0'});
     });
 
+    test('every Runner build configuration explicitly targets iOS 15.0', () {
+      final project = File(
+        'ios/Runner.xcodeproj/project.pbxproj',
+      ).readAsStringSync();
+      final runnerConfigurationList = RegExp(
+        r'/\* Build configuration list for PBXNativeTarget "Runner" \*/ '
+        r'= \{.*?buildConfigurations = \((.*?)\);',
+        dotAll: true,
+      ).firstMatch(project)!.group(1)!;
+      final configurationIds = RegExp(
+        r'([0-9A-F]+) /\* (?:Debug|Profile|Release)(?:-uat)? \*/',
+      ).allMatches(runnerConfigurationList).map((match) => match.group(1)!);
+
+      expect(configurationIds, hasLength(6));
+      for (final id in configurationIds) {
+        final configuration = RegExp(
+          '$id /\\*.*?\\*/ = \\{(.*?)\\n\\t\\t\\};',
+          dotAll: true,
+        ).firstMatch(project)!.group(1)!;
+        expect(
+          configuration,
+          contains('IPHONEOS_DEPLOYMENT_TARGET = 15.0;'),
+          reason: 'Runner build configuration $id must own the iOS 15 floor',
+        );
+      }
+    });
+
     for (final path in _currentPlatformDeclarationFiles) {
       test('$path declares iOS 15 and not iOS 14', () {
         final contents = File(path).readAsStringSync();
@@ -57,7 +84,7 @@ void main() {
         final runner = File(_nativeSafetyRunner).readAsStringSync();
 
         for (final marker in <String>[
-          'enum NativeSafetyLane { tracer, full, runtime }',
+          'enum NativeSafetyLane { tracer, compile, full, runtime }',
           'COMPILE_ONLY',
           'RUNTIME_PASS',
           'RUNTIME_FAIL',
@@ -112,5 +139,50 @@ void main() {
         );
       },
     );
+
+    test('compile lane is a six-build compile-only Cartesian matrix', () {
+      final runner = File(_nativeSafetyRunner).readAsStringSync();
+
+      expect(_constStringList(runner, '_compileConfigurations'), [
+        'Debug',
+        'Profile',
+        'Release',
+      ]);
+      expect(_constStringList(runner, '_compileDestinations'), [
+        'generic/platform=iOS Simulator',
+        'generic/platform=iOS',
+      ]);
+      for (final marker in <String>[
+        "'compile' => NativeSafetyLane.compile",
+        'lane == NativeSafetyLane.compile',
+        'lane != NativeSafetyLane.compile',
+        'CODE_SIGNING_REQUIRED=NO',
+        "'runtime_test': runtimeTest",
+        'lane == NativeSafetyLane.compile && runtimeTest != null',
+      ]) {
+        expect(runner, contains(marker), reason: 'missing marker: $marker');
+      }
+      expect(
+        runner,
+        contains(
+          'if (lane != NativeSafetyLane.compile) {\n'
+          '        await _runSimulatorRuntime();',
+        ),
+        reason: 'compile lane must have no runtime call path',
+      );
+    });
   });
+}
+
+List<String> _constStringList(String source, String name) {
+  final body = RegExp(
+    'const $name = <String>\\[(.*?)\\];',
+    dotAll: true,
+  ).firstMatch(source)?.group(1);
+  if (body == null) {
+    return const [];
+  }
+  return RegExp(
+    "'([^']+)'",
+  ).allMatches(body).map((match) => match.group(1)!).toList();
 }
