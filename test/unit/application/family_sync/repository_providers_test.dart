@@ -6,7 +6,6 @@ import 'package:home_pocket/application/family_sync/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart' as crypto;
-import 'package:home_pocket/infrastructure/sync/apns_push_messaging_client.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -57,16 +56,6 @@ void main() {
         addTearDown(container.dispose);
         final result = container.read(appPushNotificationServiceProvider);
         expect(result, isA<PushNotificationService>());
-      },
-    );
-
-    test(
-      'appApnsPushMessagingClientProvider returns an ApnsPushMessagingClient',
-      () {
-        final container = makeContainer();
-        addTearDown(container.dispose);
-        final result = container.read(appApnsPushMessagingClientProvider);
-        expect(result, isA<ApnsPushMessagingClient>());
       },
     );
 

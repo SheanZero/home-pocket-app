@@ -402,8 +402,6 @@ CompatibilityReport validateDependencyCompatibility({
   expectConstraint('package_info_plus', '^9.0.1');
   expectLocked('package_info_plus', '9.0.1');
   expectLocked('win32', '5.15.0');
-  expectConstraint('flutter_local_notifications', '^22.2.0');
-  expectLocked('flutter_local_notifications', '22.2.0');
   _validatePhase59PluginCohorts(
     issues: issues,
     baselineDependencies: baselineDependencies,
@@ -722,9 +720,6 @@ void _validatePhase59PluginCohorts({
   const phase59PluginPackages = <String>[
     'connectivity_plus',
     'file_picker',
-    'firebase_core',
-    'firebase_messaging',
-    'flutter_local_notifications',
     'flutter_secure_storage',
     'image_picker',
     'local_auth',
@@ -974,152 +969,29 @@ void _validatePhase59PluginCohorts({
       );
   }
 
-  const notificationPackages = <String>[
+  const removedNotificationPackages = <String>{
     'firebase_core',
     'firebase_messaging',
     'flutter_local_notifications',
-  ];
-  const notificationCandidates = <String, String>{
-    'firebase_core': '4.13.0',
-    'firebase_messaging': '16.5.0',
-    'flutter_local_notifications': '22.3.0',
   };
-  const notificationSelectedDeclarations = <String, String>{
-    'firebase_core': '^4.13.0',
-    'firebase_messaging': '^16.5.0',
-    'flutter_local_notifications': '^22.2.0',
-  };
-  const notificationSelectedResolutions = <String, String>{
-    'firebase_core': '4.13.0',
-    'firebase_messaging': '16.5.0',
-    'flutter_local_notifications': '22.2.0',
-  };
-  const requiredNotificationEvidence = <String>{
-    'automated_lifecycle',
-    'android_fcm_native_build',
-    'android_fcm_initialization',
-    'android_fcm_foreground',
-    'android_fcm_opened_app',
-    'android_fcm_cold_start',
-    'ios_apns_native_build',
-    'ios_apns_initialization',
-    'ios_apns_foreground',
-    'ios_apns_opened_app',
-    'ios_apns_local_tap',
-    'ios_apns_cold_start',
-    'initialization_retry',
-    'hidden_notification_settings',
-    'android_auto_init_disabled',
-    'ios_remote_notification_mode_absent',
-    'ios_aps_environment_absent',
-    'cloud_fallback_disclosed',
-  };
-  for (final package in notificationPackages) {
-    final row = pluginRows[package]!;
-    for (final field in {
-      'queried_on',
-      'candidate',
-      'decision',
-      'compatibility_reason',
-      'exit_condition',
-      'owner_phase',
-      'official_source',
-      'acceptance_evidence',
-    }) {
-      if (_isBlank(row[field])) {
-        issues.add(
-          'PLUG-04 $package is missing required evidence field: $field',
-        );
-      }
-    }
-    final candidate = row['candidate']?.toString() ?? '';
-    if (!_isProductionStableVersion(candidate) ||
-        candidate != notificationCandidates[package]) {
+  for (final package in removedNotificationPackages) {
+    if (baselineDependencies.containsKey(package) ||
+        directDependencies.containsKey(package) ||
+        lockedPackages.containsKey(package)) {
       issues.add(
-        'PLUG-04 $package candidate must be stable ${notificationCandidates[package]}',
+        'PLUG-04 MVP must not retain notification dependency $package',
       );
     }
-    final evidence = _map(row['acceptance_evidence']);
-    for (final field in requiredNotificationEvidence) {
-      if (_isBlank(evidence[field])) {
-        issues.add('PLUG-04 $package is missing lifecycle evidence: $field');
-      }
-    }
-    if (evidence['hidden_notification_settings']?.toString() != 'PASS') {
-      issues.add(
-        'PLUG-04 $package requires hidden notification settings evidence',
-      );
-    }
-    if (evidence['android_auto_init_disabled']?.toString() != 'PASS' ||
-        evidence['ios_remote_notification_mode_absent']?.toString() != 'PASS' ||
-        evidence['ios_aps_environment_absent']?.toString() != 'PASS') {
-      issues.add('PLUG-04 $package requires native hidden-policy evidence');
-    }
-    if (evidence['cloud_fallback_disclosed']?.toString() != 'PASS') {
-      issues.add('PLUG-04 $package requires disclosed cloud fallback evidence');
-    }
-
-    final declared = _declaredDependency(directDependencies[package]);
-    final resolved = _map(lockedPackages[package])['version']?.toString();
-    switch (row['decision']?.toString()) {
-      case 'hold':
-        final selectedDeclaration = notificationSelectedDeclarations[package]!;
-        final selectedResolution = notificationSelectedResolutions[package]!;
-        if (declared != selectedDeclaration) {
-          issues.add(
-            'PLUG-04 $package declaration must remain $selectedDeclaration '
-            '(found $declared)',
-          );
-        }
-        if (resolved != selectedResolution) {
-          issues.add(
-            'PLUG-04 $package resolution must remain $selectedResolution '
-            '(found $resolved)',
-          );
-        }
-      case 'accepted':
-        for (final field in requiredNotificationEvidence) {
-          if (evidence[field]?.toString() != 'PASS') {
-            issues.add(
-              'PLUG-04 $package accepted decision requires PASS native evidence: $field',
-            );
-          }
-        }
-        if (declared != candidate) {
-          issues.add(
-            'PLUG-04 $package accepted declaration must equal candidate $candidate '
-            '(found $declared)',
-          );
-        }
-        if (resolved != candidate) {
-          issues.add(
-            'PLUG-04 $package accepted resolution must equal candidate $candidate '
-            '(found $resolved)',
-          );
-        }
-      default:
-        issues.add(
-          'PLUG-04 $package decision must be exactly hold or accepted',
-        );
-    }
   }
-
-  final notificationLane = _map(baselineLanes['phase59_notification']);
-  if (notificationLane['ios_transport']?.toString() != 'apns') {
-    issues.add('PLUG-04 notification transport must identify iOS as apns');
-  }
-  if (notificationLane['android_transport']?.toString() != 'fcm') {
-    issues.add('PLUG-04 notification transport must identify Android as fcm');
-  }
-  if (notificationLane['settings_visible'] != false) {
-    issues.add('PLUG-04 notification settings must remain hidden');
-  }
-  if (notificationLane['ios_firebase_initialization'] != false) {
-    issues.add('PLUG-04 iOS must not initialize Firebase messaging');
-  }
-  if (notificationLane['cloud_fallback_disclosed'] != true) {
+  final notificationRemoval = _map(
+    baselineLanes['phase60_mvp_notification_removal'],
+  );
+  if (notificationRemoval['decision']?.toString() != 'removed' ||
+      notificationRemoval['direct_dependencies_absent'] != true ||
+      notificationRemoval['native_registration_absent'] != true ||
+      notificationRemoval['supersedes_phase59_hold'] != true) {
     issues.add(
-      'PLUG-04 notification lane must retain disclosed cloud fallback policy',
+      'PLUG-04 notification removal must record the Phase 60 MVP supersession',
     );
   }
 
@@ -1454,8 +1326,8 @@ CompatibilityReport validatePhase59EvidenceArtifacts({
         '`file_picker 11.0.3`, `package_info_plus 9.0.1`, `share_plus 12.0.2`, and\ntransitive `win32 5.15.0`',
     'PLUG-03 readable compatibility document must retain speech_to_text candidate 7.4.0':
         '`speech_to_text 7.4.0`',
-    'PLUG-04 readable compatibility document must retain held notification and storage candidates':
-        '`flutter_secure_storage 11.0.0`, `flutter_local_notifications 22.3.0`, and\nthe stable `speech_to_text 7.4.0`',
+    'PLUG-04 readable compatibility document must retain MVP notification removal':
+        '## Phase 60 MVP notification removal',
   };
   for (final entry in readableMarkers.entries) {
     if (!compatibilityDocument.contains(entry.value)) error(entry.key);
@@ -1470,10 +1342,6 @@ CompatibilityReport validatePhase59EvidenceArtifacts({
     'win32': '| 2026-08-09 | win32 | 5.15.0 transitive | 6.4.0 Stable | hold |',
     'speech_to_text':
         '| 2026-08-09 | speech_to_text | 7.3.0 declared/resolved | 7.4.0 Stable; 7.5.0-beta.1 ineligible | hold |',
-    'flutter_local_notifications':
-        '| 2026-08-09 | flutter_local_notifications | 22.2.0 | 22.3.0 Stable | hold |',
-    'firebase_core':
-        '| 2026-08-09 | firebase_core / firebase_messaging | 4.13.0 / 16.5.0 | 4.13.0 / 16.5.0 Stable | hold |',
     'local_auth':
         '| 2026-08-09 | local_auth / flutter_secure_storage | 3.0.2 / 10.3.1 | 3.0.2 / 11.0.0 Stable | hold |',
     'image_picker':
@@ -1498,6 +1366,11 @@ CompatibilityReport validatePhase59EvidenceArtifacts({
         '$requirement acceptance ledger must retain ${entry.key} selected $selected',
       );
     }
+  }
+  if (!acceptanceLedger.contains('## Phase 60 MVP notification supersession')) {
+    error(
+      'PLUG-04 acceptance ledger must retain the Phase 60 MVP supersession',
+    );
   }
   if (RegExp(
     r'UNAVAILABLE\s*(?:—|-)?\s*PASS',
@@ -1534,11 +1407,6 @@ CompatibilityReport validatePhase59EvidenceArtifacts({
     'package_info_plus': 'PLUG-02 terminal atomic decision',
     'win32': 'PLUG-02 terminal atomic decision',
     'speech_to_text': '## Speech acceptance evidence',
-    'firebase_core': '## PLUG-04 terminal notification decision',
-    'firebase_messaging': '## PLUG-04 terminal notification decision',
-    'apns': '## PLUG-04 terminal notification decision',
-    'flutter_local_notifications': '## PLUG-04 terminal notification decision',
-    'notifications': '## PLUG-04 terminal notification decision',
     'local_auth': '## Biometric/PIN and secure-storage evidence',
     'flutter_secure_storage': '### PLUG-04 secure-storage terminal decision',
     'app_initializer': '### PLUG-04 secure-storage terminal decision',
@@ -1566,6 +1434,16 @@ CompatibilityReport validatePhase59EvidenceArtifacts({
     coverageDecisions[capability] = coverageDecision;
     if (coverageDecision != 'INTEGRATE') continue;
     final group = capability.split('.').first;
+    if (const {
+      'firebase_core',
+      'firebase_messaging',
+      'apns',
+      'flutter_local_notifications',
+      'notifications',
+    }.contains(group)) {
+      // Phase 59 rows are historical; Phase 60 removed this MVP channel.
+      continue;
+    }
     final marker = evidenceMarkers[group];
     if (marker == null || !acceptanceLedger.contains(marker)) {
       final requirement = group == 'speech_to_text' ? 'PLUG-03' : 'PLUG-01';
@@ -1579,8 +1457,6 @@ CompatibilityReport validatePhase59EvidenceArtifacts({
     'speech_to_text.ja_recognition',
     'speech_to_text.zh_recognition',
     'speech_to_text.en_recognition',
-    'firebase_core.android_initialization',
-    'apns.ios_custom_transport',
     'local_auth.biometric_only_authenticate',
     'local_auth.app_pin_fallback',
     'flutter_secure_storage.read',

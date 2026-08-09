@@ -8,60 +8,6 @@ part of 'repository_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// APNS push messaging client (iOS push notification delivery).
-
-@ProviderFor(appApnsPushMessagingClient)
-final appApnsPushMessagingClientProvider =
-    AppApnsPushMessagingClientProvider._();
-
-/// APNS push messaging client (iOS push notification delivery).
-
-final class AppApnsPushMessagingClientProvider
-    extends
-        $FunctionalProvider<
-          ApnsPushMessagingClient,
-          ApnsPushMessagingClient,
-          ApnsPushMessagingClient
-        >
-    with $Provider<ApnsPushMessagingClient> {
-  /// APNS push messaging client (iOS push notification delivery).
-  AppApnsPushMessagingClientProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'appApnsPushMessagingClientProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$appApnsPushMessagingClientHash();
-
-  @$internal
-  @override
-  $ProviderElement<ApnsPushMessagingClient> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  ApnsPushMessagingClient create(Ref ref) {
-    return appApnsPushMessagingClient(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ApnsPushMessagingClient value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ApnsPushMessagingClient>(value),
-    );
-  }
-}
-
-String _$appApnsPushMessagingClientHash() =>
-    r'825d39f5bcdff697ec728703e04e3eee9be10f12';
-
 /// Application-layer re-export of [KeyManager] for feature consumption.
 ///
 /// Avoids two-hop import in features; all feature files that need
@@ -209,13 +155,21 @@ final class AppRelayApiClientProvider
 
 String _$appRelayApiClientHash() => r'83abf60e41473349c74dc45cffd7669f464667ac';
 
-/// Push notification service (wraps APNS/FCM + local notifications).
+/// Dormant, dependency-free notification seam reserved for a future release.
+///
+/// The MVP never reads this provider. Its default clients are inert and cannot
+/// request permission, register a token, display a notification, or initialize
+/// a vendor SDK.
 
 @ProviderFor(appPushNotificationService)
 final appPushNotificationServiceProvider =
     AppPushNotificationServiceProvider._();
 
-/// Push notification service (wraps APNS/FCM + local notifications).
+/// Dormant, dependency-free notification seam reserved for a future release.
+///
+/// The MVP never reads this provider. Its default clients are inert and cannot
+/// request permission, register a token, display a notification, or initialize
+/// a vendor SDK.
 
 final class AppPushNotificationServiceProvider
     extends
@@ -225,7 +179,11 @@ final class AppPushNotificationServiceProvider
           PushNotificationService
         >
     with $Provider<PushNotificationService> {
-  /// Push notification service (wraps APNS/FCM + local notifications).
+  /// Dormant, dependency-free notification seam reserved for a future release.
+  ///
+  /// The MVP never reads this provider. Its default clients are inert and cannot
+  /// request permission, register a token, display a notification, or initialize
+  /// a vendor SDK.
   AppPushNotificationServiceProvider._()
     : super(
         from: null,
@@ -261,7 +219,7 @@ final class AppPushNotificationServiceProvider
 }
 
 String _$appPushNotificationServiceHash() =>
-    r'8190c01e2726875d218a3700c202651a2cd14f4a';
+    r'2a5bf31c8abe4295f7d7b03db44cc3cf54adf913';
 
 /// Sync queue manager for offline sync operations.
 ///

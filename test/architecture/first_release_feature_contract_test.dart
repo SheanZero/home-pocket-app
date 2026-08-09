@@ -32,7 +32,9 @@ void main() {
     expect(androidManifest, isNot(contains('POST_NOTIFICATIONS')));
     expect(androidManifest, isNot(contains('firebase_')));
 
-    final androidBuild = File('android/app/build.gradle.kts').readAsStringSync();
+    final androidBuild = File(
+      'android/app/build.gradle.kts',
+    ).readAsStringSync();
     expect(androidBuild, isNot(contains('com.google.firebase')));
 
     final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
@@ -64,7 +66,10 @@ void main() {
     final settingsProviders = File(
       'lib/features/settings/presentation/providers/repository_providers.dart',
     ).readAsStringSync();
-    expect(settingsProviders, isNot(contains('pushNotificationServiceProvider')));
+    expect(
+      settingsProviders,
+      isNot(contains('pushNotificationServiceProvider')),
+    );
     expect(settingsProviders, isNot(contains('registerCurrentToken')));
 
     final appDelegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();

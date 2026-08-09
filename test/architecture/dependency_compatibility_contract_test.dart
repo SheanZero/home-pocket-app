@@ -1406,9 +1406,6 @@ end
           'share_plus',
           'package_info_plus',
           'url_launcher',
-          'firebase_core',
-          'firebase_messaging',
-          'flutter_local_notifications',
           'path_provider',
           'connectivity_plus',
           'lucide_icons_flutter',
@@ -1628,139 +1625,42 @@ end
     });
   });
 
-  group('PLUG-04 notification candidate and hidden-policy contract', () {
+  group('PLUG-04 MVP notification removal contract', () {
     Map<String, dynamic> manifest() =>
         jsonDecode(File('docs/testing/STABLE_BASELINE.json').readAsStringSync())
             as Map<String, dynamic>;
 
-    Map<String, dynamic> notificationRow(
-      Map<String, dynamic> source,
-      String package,
-    ) =>
-        (source['direct_dependencies'] as Map<String, dynamic>)[package]
-            as Map<String, dynamic>;
-
-    test(
-      'rejects notification declaration and lock drift before resolution',
-      () {
-        const declarations = <String, String>{
-          'firebase_core': '^4.13.0',
-          'firebase_messaging': '^16.5.0',
-          'flutter_local_notifications': '^22.2.0',
-        };
-        const locks = <String, String>{
-          'firebase_core': '4.13.0',
-          'firebase_messaging': '16.5.0',
-          'flutter_local_notifications': '22.2.0',
-        };
-
-        for (final entry in declarations.entries) {
-          final input = currentInputs();
-          input['pubspec'] = input['pubspec']!.replaceFirst(
-            '${entry.key}: ${entry.value}',
-            '${entry.key}: ${entry.value}.drift',
-          );
-          expect(
-            validate(input),
-            contains(
-              'PLUG-04 ${entry.key} declaration must remain ${entry.value} '
-              '(found ${entry.value}.drift)',
-            ),
-            reason: entry.key,
-          );
-        }
-
-        for (final entry in locks.entries) {
-          final input = currentInputs();
-          final matcher = RegExp(
-            '(^  ${RegExp.escape(entry.key)}:\\n'
-            r'(?:^(?:    |      ).*\n)*?^    version: )"'
-            '${RegExp.escape(entry.value)}"',
-            multiLine: true,
-          );
-          expect(matcher.hasMatch(input['lock']!), isTrue, reason: entry.key);
-          input['lock'] = input['lock']!.replaceFirstMapped(
-            matcher,
-            (match) => '${match.group(1)}"${entry.value}.drift"',
-          );
-          expect(
-            validate(input),
-            contains(
-              'PLUG-04 ${entry.key} resolution must remain ${entry.value} '
-              '(found ${entry.value}.drift)',
-            ),
-            reason: entry.key,
-          );
-        }
-      },
-    );
-
-    test('rejects a missing APNs/FCM transport split', () {
-      final source = manifest();
-      final transport =
-          (source['lanes'] as Map<String, dynamic>)['phase59_notification']
-              as Map<String, dynamic>;
-      transport.remove('ios_transport');
-
-      expect(
-        validate(currentInputs(), baselineJson: jsonEncode(source)),
-        contains('PLUG-04 notification transport must identify iOS as apns'),
-      );
-    });
-
-    test('rejects a visible notification policy', () {
-      final source = manifest();
-      final firebase = notificationRow(source, 'firebase_core');
-      final evidence = firebase['acceptance_evidence'] as Map<String, dynamic>;
-      evidence['hidden_notification_settings'] = 'FAILED';
-
-      expect(
-        validate(currentInputs(), baselineJson: jsonEncode(source)),
-        contains(
-          'PLUG-04 firebase_core requires hidden notification settings evidence',
-        ),
-      );
-    });
-
-    test('rejects missing retry and cold-start lifecycle evidence', () {
-      final source = manifest();
-      final local = notificationRow(source, 'flutter_local_notifications');
-      final evidence = local['acceptance_evidence'] as Map<String, dynamic>;
-      evidence.remove('initialization_retry');
-      evidence.remove('ios_apns_cold_start');
-
-      final diagnostics = validate(
-        currentInputs(),
-        baselineJson: jsonEncode(source),
-      );
-      expect(
-        diagnostics,
-        contains(
-          'PLUG-04 flutter_local_notifications is missing lifecycle evidence: initialization_retry',
-        ),
-      );
-      expect(
-        diagnostics,
-        contains(
-          'PLUG-04 flutter_local_notifications is missing lifecycle evidence: ios_apns_cold_start',
-        ),
-      );
-    });
-
-    test('rejects accepted notification packages without native-build PASS', () {
-      final source = manifest();
-      final firebase = notificationRow(source, 'firebase_core');
-      firebase['decision'] = 'accepted';
-      final evidence = firebase['acceptance_evidence'] as Map<String, dynamic>;
-      for (final field in evidence.keys.toList()) {
-        evidence[field] = 'PASS';
+    test('rejects a notification dependency restored to any graph', () {
+      const packages = <String>[
+        'firebase_core',
+        'firebase_messaging',
+        'flutter_local_notifications',
+      ];
+      for (final package in packages) {
+        final source = manifest();
+        (source['direct_dependencies'] as Map<String, dynamic>)[package] = {};
+        expect(
+          validate(currentInputs(), baselineJson: jsonEncode(source)),
+          contains(
+            'PLUG-04 MVP must not retain notification dependency $package',
+          ),
+          reason: package,
+        );
       }
-      evidence['android_fcm_native_build'] = 'UNAVAILABLE';
+    });
+
+    test('rejects an incomplete Phase 60 removal record', () {
+      final source = manifest();
+      final lane =
+          (source['lanes']
+                  as Map<String, dynamic>)['phase60_mvp_notification_removal']
+              as Map<String, dynamic>;
+      lane['native_registration_absent'] = false;
 
       expect(
         validate(currentInputs(), baselineJson: jsonEncode(source)),
         contains(
-          'PLUG-04 firebase_core accepted decision requires PASS native evidence: android_fcm_native_build',
+          'PLUG-04 notification removal must record the Phase 60 MVP supersession',
         ),
       );
     });

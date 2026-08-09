@@ -62,11 +62,6 @@ dependencies:
   # url_launcher_windows has no win32 dep → safe with the pinned win32 trio above.
   url_launcher: ^6.3.2
 
-  # Firebase & Notifications
-  firebase_core: ^4.13.0
-  firebase_messaging: ^16.5.0
-  flutter_local_notifications: ^22.2.0
-
   # Database
   drift: 2.34.0
   # sqlite3 3.x distributes SQLCipher through Dart Native Assets. Keep this

@@ -106,6 +106,16 @@ foreground, opened-app, local tap, and cold-start behavior. No production
 credential, live relay delivery, push token, payload, group/device identity, or
 Phase 61/62/63 evidence substitute was used or recorded.
 
+## Phase 60 MVP notification supersession
+
+**Decision:** SUPERSEDED — on 2026-08-09 the owner removed the dormant MVP
+notification channel rather than preserving or upgrading its unresolved hold.
+The current graph contains no Firebase Core, Firebase Messaging, or local
+notification package; no Android Firebase/notification registration and no iOS
+APNs/Firebase bridge remains. This correction preserves the Phase 59 hold as
+historical evidence and requires any future notification capability to start a
+new reviewed dependency, privacy, native-lifecycle, and device-evidence lane.
+
 ## Biometric/PIN and secure-storage evidence
 
 | commit | package/policy | platform | destination | os | build_mode | command_result | scenario | result | hold_reason | exit_condition |

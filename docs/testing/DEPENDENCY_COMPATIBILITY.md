@@ -27,7 +27,7 @@ successful safety decision, not a silent upgrade failure.
 | File/share/metadata | `file_picker 11.0.3`, `share_plus 12.0.2`, `package_info_plus 9.0.1`, `win32 5.15.0` | stable compatible cohort | hold — Phase 59 | New plus-plugin lines and file-picker behavior must be verified as one native cohort. | Upgrade the cohort together and preserve single-file backup import and platform sharing behavior. |
 | Speech | `speech_to_text 7.3.0` | `7.4.0` Stable (the official page also lists `7.5.0-beta.1` as prerelease) | hold — Phase 59 | The 2026-08-09 official pub.dev query confirms the stable candidate, but resolver output cannot prove the adapter, ja/zh/en corpus, caller-controlled network fallback, or native speech lifecycle. | Keep `7.3.0` until adapter/corpus checks and physical-iPhone permission, recognition, cancellation, error, and fallback evidence pass. |
 | Android host | AGP `8.11.1`, Gradle `8.14`, Kotlin `2.2.20`, JDK 17 | AGP `9.0.1`, Gradle `9.1` | hold — Phase 61 | Built-in Kotlin/new DSL need a complete app and plugin migration. | Debug/release builds and emulator evidence after the all-or-hold migration. |
-| Notifications/plugins | `flutter_local_notifications 22.2.0`, Firebase Core `4.13.0`, Messaging `16.5.0` | Firebase rows already-current; local notifications `22.3.0` candidate | hold — Phase 59 | Android initializes Firebase for FCM; iOS skips Firebase and keeps the custom APNs bridge. Native plugin changes require complete attributable lifecycle evidence without exposing settings. | PASS automated lifecycle plus supported Android-FCM and custom-iOS-APNs builds for initialization/retry/foreground/opened/tap/cold-start, while auto-init, entitlements, hidden settings, and disclosed cloud fallback remain unchanged. |
+| Notifications/plugins | absent from the MVP graph | separately planned future feature | removed — Phase 60 | The owner removed the dormant Firebase/APNs/local-notification stack instead of retaining an unresolved hidden channel. | Add no notification package, native registration, permission prompt, token registration, or local notification until a future dedicated dependency/privacy/lifecycle/device-evidence transaction is approved. |
 | Biometric app lock | `local_auth 3.0.2` | `3.0.2` Stable | hold — Phase 59 | The official package permits passcode fallback unless `biometricOnly` is true; this app owns its own Argon2id PIN and must never accept the OS device passcode as app-lock authentication. | Keep the exact graph until a safe non-production supported build records redacted Face ID success plus cancel/false, temporary-lockout, biometric-lockout, platform-error, unknown-error, and reachable app-PIN fallback observations. |
 | Local Lucide icon subset | `lucide_icons_flutter 3.1.15+homepocket.1` from `third_party/` | not applicable until the local fork is re-reviewed | hold — Phase 59 | The local package preserves the upstream API with one static font and the 37 used codepoints instead of six unused variable-weight assets. | Phase 59 replaces or refreshes it only after reviewing upstream source/license and every icon reference, with static-subset and release tree-shaken asset checks green. |
 
@@ -167,15 +167,27 @@ independent declaration or lock mutation, and no solver result is accepted
 without the complete native evidence exit condition.
 
 Official execution-date candidates retained as holds include
-`flutter_secure_storage 11.0.0`, `flutter_local_notifications 22.3.0`, and
-the stable `speech_to_text 7.4.0`; Firebase Core `4.13.0`, Firebase Messaging
-`16.5.0`, `local_auth 3.0.2`, `image_picker 1.2.3`, `path_provider 2.1.6`,
+`flutter_secure_storage 11.0.0` and the stable `speech_to_text 7.4.0`;
+`local_auth 3.0.2`, `image_picker 1.2.3`, `path_provider 2.1.6`,
 `connectivity_plus 7.3.1`, and `url_launcher 6.3.2` remain the current stable
 candidates but are not accepted without their described native evidence. The
 Lucide path fork has no registry candidate: its official upstream source and
 license, static subset, and used-codepoint contract remain mandatory evidence.
 No candidate is a resolver instruction, and missing JDK, Android, simulator,
 physical-iPhone, or existing-key evidence is always a hold rather than a pass.
+
+## Phase 60 MVP notification removal
+
+The Phase 59 notification hold is historical. On 2026-08-09 the owner chose
+to remove the dormant MVP notification channel rather than pin or upgrade it.
+`firebase_core`, `firebase_messaging`, and `flutter_local_notifications` are
+absent from the direct and resolved graph. Android has no notification/Firebase
+registration configuration, and iOS has no APNs bridge, remote-registration,
+or Firebase auto-init configuration. The retained source-only seam is inert:
+it has no plugin dependency and cannot request permission, register a token,
+show a notification, or initialize a vendor SDK. A future notification feature
+requires a separate approved dependency, privacy, native lifecycle, and
+supported-device evidence transaction.
 
 ## Phase 59 biometric app-lock evidence hold
 
