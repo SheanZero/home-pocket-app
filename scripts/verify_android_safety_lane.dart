@@ -20,6 +20,8 @@ const selectedKotlin = '2.2.20';
 const requiredJdk = '17';
 const requiredAndroidApi = 36;
 const requiredAndroidAbi = 'x86_64';
+const requiredAndroidSystemImage =
+    'system-images;android-36;google_apis;x86_64';
 const candidateQueriedOn = '2026-08-09';
 const physicalDeviceDisclaimer =
     'Android physical-device validation was not performed or claimed.';
@@ -775,6 +777,77 @@ class ReleaseEvidenceResult {
   final bool completed;
   final String message;
 }
+
+class EmulatorIdentityExpectation {
+  const EmulatorIdentityExpectation({
+    required this.avdName,
+    required this.serial,
+  });
+
+  final String avdName;
+  final String serial;
+}
+
+List<String> emulatorLaunchArguments({
+  required String avdName,
+  required int port,
+  required String hostArchitecture,
+}) => [
+  '-avd',
+  avdName,
+  '-port',
+  '$port',
+  '-wipe-data',
+  '-no-snapshot',
+  '-no-snapshot-save',
+  '-no-window',
+  '-no-audio',
+  '-no-boot-anim',
+  '-gpu',
+  'swiftshader_indirect',
+  if (hostArchitecture == 'arm64') '-no-accel',
+];
+
+List<String> validateEmulatorIdentity(
+  Map<String, String> observation,
+  EmulatorIdentityExpectation expected,
+) {
+  final issues = <String>[];
+  void require(String key, String value) {
+    if (observation[key]?.trim() != value) {
+      issues.add('$key must equal $value');
+    }
+  }
+
+  require('serial', expected.serial);
+  require('bootCompleted', '1');
+  require('api', '$requiredAndroidApi');
+  require('abi', requiredAndroidAbi);
+  require('avdName', expected.avdName);
+  return issues;
+}
+
+List<String> discoverIntegrationTestFiles(Directory root) {
+  if (!root.existsSync()) return const [];
+  final prefix = '${root.path}${Platform.pathSeparator}';
+  final files =
+      root
+          .listSync(recursive: true, followLinks: false)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('_test.dart'))
+          .map(
+            (file) => file.path
+                .replaceFirst(prefix, '')
+                .replaceAll(Platform.pathSeparator, '/'),
+          )
+          .where((relative) => !relative.startsWith('helpers/'))
+          .toList()
+        ..sort();
+  return files;
+}
+
+String redactEmulatorSerial(String value) =>
+    value.replaceAll(RegExp(r'emulator-\d{4}'), '<emulator-redacted>');
 
 class _ReleaseArtifactResult {
   const _ReleaseArtifactResult({
