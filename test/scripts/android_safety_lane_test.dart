@@ -182,6 +182,19 @@ void main() {
       final findings = await lane.scanAndroidReleaseArtifact(artifact);
       expect(findings.join('\n'), contains('test-only archive entry'));
       expect(findings.join('\n'), contains('test-only packaged content'));
+
+      final releaseNotes = File('${fixture.path}/release-notes.txt');
+      await releaseNotes.writeAsString(
+        'Ordinary integration-test guidance is not a packaged plugin.',
+      );
+      final benignArtifact = File('${fixture.path}/benign.apk');
+      final benignZip = await Process.run('zip', [
+        '-q',
+        benignArtifact.path,
+        releaseNotes.uri.pathSegments.last,
+      ], workingDirectory: fixture.path);
+      expect(benignZip.exitCode, 0, reason: benignZip.stderr.toString());
+      expect(await lane.scanAndroidReleaseArtifact(benignArtifact), isEmpty);
     },
   );
 

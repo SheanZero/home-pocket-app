@@ -198,7 +198,7 @@ assert_android_release_artifacts_clean() {
   local aab="$root/build/app/outputs/bundle/release/app-release.aab"
   local apk="$root/build/app/outputs/flutter-apk/app-release.apk"
   local artifact
-  local test_pattern='integration[_-]?test|IntegrationTestPlugin|dev[.]flutter[.]integration_test'
+  local test_pattern='integration_test|IntegrationTestPlugin|dev[.]flutter[.]integration_test'
 
   if [[ ! -f "$apk" ]]; then
     apk="$root/build/app/outputs/apk/release/app-release.apk"

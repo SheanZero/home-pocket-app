@@ -678,7 +678,6 @@ AndroidCertificateClass classifyAndroidCertificate(String subject) =>
 
 const _testOnlyArtifactPatterns = <String>[
   'integration_test',
-  'integration-test',
   'integrationtestplugin',
   'dev.flutter.integration_test',
 ];
@@ -1206,6 +1205,9 @@ String? _latestBuildTool(String androidSdk, String tool) {
 Map<String, File> _releaseArtifactFiles(Directory root) => {
   'aab': File('${root.path}/build/app/outputs/bundle/release/app-release.aab'),
   'apk': File('${root.path}/build/app/outputs/apk/release/app-release.apk'),
+  'flutter_apk_copy': File(
+    '${root.path}/build/app/outputs/flutter-apk/app-release.apk',
+  ),
 };
 
 void _deleteReleaseArtifacts(Iterable<File> artifacts) {
