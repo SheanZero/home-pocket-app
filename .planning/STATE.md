@@ -21,7 +21,7 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-05 after v2.0 milestone close)
+See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
 **Current focus:** Phase 59 — Controlled Platform Plugin Cohorts
