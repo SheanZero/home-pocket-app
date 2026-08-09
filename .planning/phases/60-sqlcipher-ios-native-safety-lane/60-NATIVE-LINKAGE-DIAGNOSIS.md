@@ -117,3 +117,42 @@ sentinel persistence, or cold reopen; those remain the responsibility of plan
 | Runner package dependency | One generated package product dependency |
 | Generated-file edits | None |
 | Runtime evidence | Not run / not claimed |
+
+## Regression Contract
+
+`ios_native_linkage_contract_test.dart` now checks the checked-in source and
+executes focused in-memory mutations. It fails when any of these seams is
+removed or duplicated:
+
+- launch override;
+- delegation to `super.application(...)`;
+- implicit-engine callback;
+- generated plugin registration;
+- Runner Frameworks generated-package product membership; or
+- Runner generated-package product dependency membership.
+
+The plan referenced
+`notification_stack_release_contract_test.dart` and
+`no_apns_uat_contract_test.dart`, but neither file exists in this repository.
+The same required release invariants are owned by the existing
+`dependency_compatibility_contract_test.dart`,
+`first_release_feature_contract_test.dart`, and
+`ios_uat_identity_contract_test.dart`; those canonical tests were used rather
+than creating duplicate notification contracts.
+
+Final focused command:
+
+```sh
+flutter test \
+  test/architecture/ios_native_linkage_contract_test.dart \
+  test/architecture/ios_minimum_version_contract_test.dart \
+  test/architecture/sqlcipher_native_assets_contract_test.dart \
+  test/architecture/dependency_compatibility_contract_test.dart \
+  test/architecture/first_release_feature_contract_test.dart \
+  test/architecture/ios_uat_identity_contract_test.dart \
+  -r expanded
+```
+
+Result: PASS, 103 tests. The suite retains iOS 15, the exact Native Assets
+SQLCipher graph, notification-package removal, and the no-APNs production/UAT
+surface.

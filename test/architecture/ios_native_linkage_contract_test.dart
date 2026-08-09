@@ -83,28 +83,72 @@ void main() {
         ),
         contains('Runner Frameworks generated package product'),
       );
+
+      final runnerTarget = _objectsWithIsa(
+        project,
+        'PBXNativeTarget',
+      ).singleWhere((target) => target.contains('\n\t\t\tname = Runner;'));
+      final dependencyLine = RegExp(
+        r'^\s+[0-9A-F]+ /\* FlutterGeneratedPluginSwiftPackage \*/,$',
+        multiLine: true,
+      ).firstMatch(runnerTarget)!.group(0)!;
+      expect(
+        _runnerProjectContractIssues(_removeOnce(project, dependencyLine)),
+        contains('Runner generated package product dependency'),
+      );
+      expect(
+        _runnerProjectContractIssues(
+          project.replaceFirst(
+            dependencyLine,
+            '$dependencyLine\n$dependencyLine',
+          ),
+        ),
+        contains('Runner generated package product dependency'),
+      );
     });
   });
 }
 
 List<String> _appDelegateContractIssues(String source) {
   final issues = <String>[];
-  if (!source.contains('override func application(')) {
-    issues.add('launch override');
+  const requiredMarkers = <String, String>{
+    'launch override': 'override func application(',
+    'super launch delegation':
+        'super.application(application, '
+        'didFinishLaunchingWithOptions: launchOptions)',
+    'implicit-engine callback': 'didInitializeImplicitFlutterEngine',
+    'generated plugin registration':
+        'GeneratedPluginRegistrant.register('
+        'with: engineBridge.pluginRegistry)',
+  };
+  for (final marker in requiredMarkers.entries) {
+    if (!source.contains(marker.value)) {
+      issues.add(marker.key);
+    }
   }
   return issues;
 }
 
 List<String> _runnerProjectContractIssues(String project) {
+  final issues = <String>[];
   final frameworkPhases = _objectsWithIsa(project, 'PBXFrameworksBuildPhase');
   final runnerPackagePhases = frameworkPhases
       .where((phase) => phase.contains(_generatedPluginPackage))
       .toList();
   if (runnerPackagePhases.length != 1 ||
       _occurrences(runnerPackagePhases.single, _generatedPluginPackage) != 1) {
-    return const ['Runner Frameworks generated package product'];
+    issues.add('Runner Frameworks generated package product');
   }
-  return const [];
+
+  final nativeTargets = _objectsWithIsa(project, 'PBXNativeTarget');
+  final runnerTargets = nativeTargets
+      .where((target) => target.contains('\n\t\t\tname = Runner;'))
+      .toList();
+  if (runnerTargets.length != 1 ||
+      _occurrences(runnerTargets.single, _generatedPluginPackage) != 1) {
+    issues.add('Runner generated package product dependency');
+  }
+  return issues;
 }
 
 List<String> _objectsWithIsa(String project, String isa) {
