@@ -4,11 +4,11 @@ milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 61
 current_phase_name: Android Toolchain & Emulator Lane
-status: executing
-stopped_at: Completed 61-04-PLAN.md
-last_updated: "2026-08-09T15:52:17Z"
+status: blocked
+stopped_at: Blocked during 61-05-PLAN.md Task 1 — API 36 x86_64 Emulator cannot boot on Apple-silicon host
+last_updated: "2026-08-09T16:12:52Z"
 last_activity: 2026-08-09
-last_activity_desc: Phase 61 Plan 04 completed — dual-format signed Android release evidence passed with no retained key or artifact
+last_activity_desc: Phase 61 Plan 05 blocked — native QEMU rejects x86_64 on aarch64 and official x86_64 QEMU deadlocks under Rosetta
 progress:
   total_phases: 7
   completed_phases: 4
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 
 Phase: 61 — Android Toolchain & Emulator Lane
 Plan: 5 of 6
-Status: Executing
-Last activity: 2026-08-09 — Phase 61 Plan 04 completed; API 36 x86_64 Emulator execution is next
+Status: Blocked
+Last activity: 2026-08-09 — Phase 61 Plan 05 stopped at the exact API 36 x86_64 host-compatibility gate
 
 Progress: [█████████░] 94%
 
@@ -209,7 +209,11 @@ v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/
 
 ### Blockers / Concerns
 
-No active execution blocker. v2.1 planning constraints that must remain explicit:
+Active execution blocker:
+
+- **Phase 61 AND-04 / Plan 61-05:** The installed arm64 Android Emulator 36.3.10 rejects the required API 36 `google_apis/x86_64` AVD because QEMU2 requires the system-image architecture to match the aarch64 host. Two official macOS x86_64 host binaries were also tried under Rosetta: stable 37.1.11 build 15917651 (Google-published SHA-1 verified) and matching 36.3.10 build 14472402 (downloaded from Google, SHA-256 recorded); both QEMU children failed to return even from `-version` and were terminated by exact PID. No AVD, device, diagnostic process, archive, or extracted runtime remains; the API 36 x86_64 system image remains installed outside the repository. **Exit condition:** execute the checked-in x86_64 GitHub device lane (or an equivalent Intel/x86_64 host) against this exact source graph, import redacted per-file runtime evidence, and rerun signed post-test AAB/APK hygiene. Arm64 substitution and an unexecuted workflow declaration remain prohibited.
+
+v2.1 planning constraints that must remain explicit:
 
 - **Official stable recheck:** Phase 57 re-queries only primary sources before changing candidates; beta/RC/dev and unapproved `dependency_overrides` are not fallback options.
 - **Analyzer gate:** analyzer 12.1.0 / import_lint 2.0.0 / active riverpod_lint 3.1.4 is the exact no-override graph; an analyzer/import-boundary upgrade requires the documented four-condition transaction, and disabling architecture enforcement without a negative test is not allowed.

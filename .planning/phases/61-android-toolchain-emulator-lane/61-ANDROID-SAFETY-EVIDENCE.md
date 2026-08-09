@@ -173,6 +173,50 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "release_aab": "DELETED_AFTER_EVIDENCE",
     "release_apk": "DELETED_AFTER_EVIDENCE",
     "repository_secret_or_artifact": "ABSENT"
+  },
+  "emulator_preparation": {
+    "result": "UNAVAILABLE",
+    "source_commit": "36d48912c3c7780c10c05eeba03c9feba369fd2f",
+    "started_utc": "2026-08-09T16:02:50.306774Z",
+    "completed_utc": "2026-08-09T16:02:54.312064Z",
+    "api": 36,
+    "abi": "x86_64",
+    "profile": "pixel_6",
+    "system_image": "system-images;android-36;google_apis;x86_64",
+    "cold_boot": "wipe-data/no-snapshot",
+    "host_architecture": "arm64",
+    "runtime": "cross-architecture software translation requested (-no-accel)",
+    "emulator_version": "Android emulator version 36.3.10.0 (build_id 14472402) (CL:N/A)",
+    "serial_redacted": "NOT_RUN",
+    "boot_started_utc": "NOT_RUN",
+    "boot_ready_utc": "NOT_RUN",
+    "failure": "Bad state: Android Emulator exited before readiness (exit 1): FATAL        | Avd's CPU Architecture 'x86_64' is not supported by the QEMU2 emulator on aarch64 host. System image must match the host architecture.",
+    "cross_architecture_attempts": [
+      {
+        "emulator_version": "37.1.11",
+        "build": "15917651",
+        "host_binary": "x86_64",
+        "archive_sha1": "7df8b0acbe915217dcbb576222bddfcc23e81230",
+        "official_url": "https://dl.google.com/android/repository/emulator-darwin_x64-15917651.zip",
+        "result": "UNAVAILABLE: Rosetta QEMU child did not return from -version within the bounded diagnostic window; exact process terminated."
+      },
+      {
+        "emulator_version": "36.3.10",
+        "build": "14472402",
+        "host_binary": "x86_64",
+        "archive_sha256": "a01025b471a9ac0ef0fbd59febd0c1cfdeb2e889cc6fedc7ea881239bd8bb9a4",
+        "official_url": "https://dl.google.com/android/repository/emulator-darwin_x64-14472402.zip",
+        "result": "UNAVAILABLE: matching-version Rosetta QEMU child did not return from -version within the bounded diagnostic window; exact process terminated."
+      }
+    ],
+    "cleanup": {
+      "runner_owned_avd": "ABSENT",
+      "adb_devices": "NONE",
+      "diagnostic_archives_and_runtimes": "ABSENT",
+      "diagnostic_processes": "ABSENT",
+      "api36_x86_64_system_image": "INSTALLED_OUTSIDE_REPOSITORY"
+    },
+    "exit_condition": "Run the checked-in API 36 google_apis x86_64 device-e2e lane on an x86_64 Linux/Intel host against this exact source graph, import redacted per-file runtime evidence, and rerun the signed post-test release rescan."
   }
 }
 ```
