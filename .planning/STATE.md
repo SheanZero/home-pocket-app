@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 60
 current_phase_name: SQLCipher & iOS Native Safety Lane
 status: executing
-stopped_at: Completed 60-05 current-v2 backup recovery sandbox; Simulator runtime evidence deferred
-last_updated: "2026-08-09T11:03:18.732Z"
+stopped_at: Completed 60-06 current-v2 recovery failure-atomicity matrix; Simulator runtime evidence deferred
+last_updated: "2026-08-09T11:31:13.807Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 60 execution started
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 27
-  completed_plans: 25
+  completed_plans: 26
   percent: 43
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 ## Current Position
 
 Phase: 60 (SQLCipher & iOS Native Safety Lane) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-08-09 — Phase 60 execution started
 
-Progress: [█████████░] 93%
+Progress: [██████████] 96%
 
 ### Decisions
 
@@ -124,6 +124,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase 60, 2026-08-09]: Owner corrected scope: Happy Pocket has never been publicly released, so no historical schema or legacy backup population exists. SEC-04 is descoped/not applicable; remove v23/v35 fixture/provenance work and retain only current-schema SQLCipher lifecycle plus current `.hpb` v2 recovery evidence. Production migration code is unchanged.
 - [Phase ?]: 60-05: Current HPB v2 recovery uses an injected unique-root sandbox and the four production use cases; no normal storage or platform secure storage is resolved.
 - [Phase ?]: 60-05: Explicit crypto verification selects only positive current-v2 tests; legacy/headerless compatibility remains out of scope.
+- [Phase ?]: 60-06: Only HPB v2 is accepted; headerless/non-v2 payloads fail before KDF work, and fault injection remains in isolated constructor seams.
 
 ### Quick Tasks Completed
 
@@ -309,9 +310,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-09T11:03:18.718Z
-Stopped at: Completed 60-05 current-v2 backup recovery sandbox; Simulator runtime evidence deferred
-Resume file: 60-06-PLAN.md
+Last session: 2026-08-09T11:31:13.795Z
+Stopped at: Completed 60-06 current-v2 recovery failure-atomicity matrix; Simulator runtime evidence deferred
+Resume file: 60-07-PLAN.md
 
 ## Performance Metrics
 
@@ -423,6 +424,7 @@ Resume file: 60-06-PLAN.md
 | Phase 60 P02 | 2h 50m | 2 tasks | 24 files |
 | Phase 60-sqlcipher-ios-native-safety-lane P03 | 55min | 3 tasks | 5 files |
 | Phase 60 P05 | 1h 15m | 2 tasks | 2 files |
+| Phase 60 P06 | 11m 21s | 2 tasks | 5 files |
 
 ## Decisions
 
