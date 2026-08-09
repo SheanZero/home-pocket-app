@@ -316,4 +316,4 @@ final class ClearAllDataUseCaseProvider
 }
 
 String _$clearAllDataUseCaseHash() =>
-    r'18705e602f71fd46b0e020d274dbf923e234077c';
+    r'0d924af602bcd69bb2dddaeb1ce96687393802fb';

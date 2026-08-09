@@ -18,6 +18,7 @@ import '../../../../features/family_sync/presentation/providers/repository_provi
     show
         familySyncOutboxRepositoryProvider,
         groupRepositoryProvider,
+        pushNotificationServiceProvider,
         syncQueueManagerProvider;
 import '../../../../features/family_sync/presentation/providers/state_sync.dart';
 import '../../../../infrastructure/security/providers.dart' as security;
@@ -90,11 +91,14 @@ ImportBackupUseCase importBackupUseCase(Ref ref) {
 /// but any pre-restore queued or semantic operation is discarded before sync is
 /// allowed to resume so it cannot publish rows that the restore replaced.
 final restoreBackupUseCaseProvider = Provider<RestoreBackupUseCase>((ref) {
+  final pushNotifications = ref.watch(pushNotificationServiceProvider);
   final syncEngine = ref.watch(syncEngineProvider);
   Future<void> suspendFamilySync() {
-    // The MVP has no notification/token channel. The durable sync barrier is
-    // still mandatory before restore replaces local accounting data.
-    return syncEngine.suspendForLocalDataWipe();
+    // The dependency-free client preserves the identity-clear ordering around
+    // destructive operations without configuring native notifications.
+    final pushSuspension = pushNotifications.clearIdentityBoundState();
+    final syncSuspension = syncEngine.suspendForLocalDataWipe();
+    return Future.wait<void>([pushSuspension, syncSuspension]);
   }
 
   Future<void> resumeFamilySync() async {
@@ -151,7 +155,13 @@ ClearAllDataUseCase clearAllDataUseCase(Ref ref) {
   return ClearAllDataUseCase(
     journalStore: wipeJournal,
     suspendSync: () {
-      return ref.read(syncEngineProvider).suspendForLocalDataWipe();
+      final pushSuspension = ref
+          .read(pushNotificationServiceProvider)
+          .clearIdentityBoundState();
+      final syncSuspension = ref
+          .read(syncEngineProvider)
+          .suspendForLocalDataWipe();
+      return Future.wait<void>([pushSuspension, syncSuspension]);
     },
     wipeDatabase: database.wipeLocalUserData,
     wipeAppOwnedFiles: fileCleaner.clear,
@@ -160,6 +170,7 @@ ClearAllDataUseCase clearAllDataUseCase(Ref ref) {
     resetInMemoryState: () async {
       ref.read(transactionChangeTrackerProvider).clear();
       ref.read(shoppingItemChangeTrackerProvider).clear();
+      await ref.read(pushNotificationServiceProvider).clearIdentityBoundState();
       ref.read(syncEngineProvider).resetAfterLocalDataWipe();
     },
   );

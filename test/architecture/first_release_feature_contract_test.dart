@@ -46,7 +46,7 @@ void main() {
     expect(entitlements, isNot(contains('aps-environment')));
   });
 
-  test('MVP has no notification client or registration path', () {
+  test('MVP has no native notification client or registration path', () {
     final providers = File(
       'lib/application/family_sync/repository_providers.dart',
     ).readAsStringSync();
@@ -66,10 +66,7 @@ void main() {
     final settingsProviders = File(
       'lib/features/settings/presentation/providers/repository_providers.dart',
     ).readAsStringSync();
-    expect(
-      settingsProviders,
-      isNot(contains('pushNotificationServiceProvider')),
-    );
+    expect(settingsProviders, contains('pushNotificationServiceProvider'));
     expect(settingsProviders, isNot(contains('registerCurrentToken')));
 
     final appDelegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();

@@ -65,52 +65,48 @@ void main() {
       },
     );
 
-    test(
-      'exposes a shared UAT scheme for Flutter device tests and profiles',
-      () {
-        final scheme = File(
-          'ios/Runner.xcodeproj/xcshareddata/xcschemes/uat.xcscheme',
-        ).readAsStringSync();
-        final benchmark = File(
-          'scripts/performance/run_performance_benchmark.sh',
-        ).readAsStringSync();
+    test('exposes a shared UAT scheme for Flutter device tests and profiles', () {
+      final scheme = File(
+        'ios/Runner.xcodeproj/xcshareddata/xcschemes/uat.xcscheme',
+      ).readAsStringSync();
+      final benchmark = File(
+        'scripts/performance/run_performance_benchmark.sh',
+      ).readAsStringSync();
 
-        expect(scheme, contains('buildConfiguration="Debug-uat"'));
-        expect(scheme, contains('buildConfiguration="Profile-uat"'));
-        expect(scheme, contains('buildConfiguration="Release-uat"'));
-        expect(scheme, contains('BlueprintName="Runner"'));
-        expect(
-          scheme,
-          contains(
-            '<TestAction buildConfiguration="Debug-uat" '
-            'selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" '
-            'selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" '
-            r'customLLDBInitFile="$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
-          ),
-        );
-        expect(
-          scheme,
-          contains(
-            '<LaunchAction buildConfiguration="Debug-uat" '
-            'selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" '
-            'selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" '
-            r'customLLDBInitFile="$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
-          ),
-        );
-        expect(benchmark, contains(r'--flavor) flavor="${2:-}"'));
-        expect(benchmark, contains(r'flavor_args=(--flavor "$flavor")'));
-      },
-    );
+      expect(scheme, contains('buildConfiguration="Debug-uat"'));
+      expect(scheme, contains('buildConfiguration="Profile-uat"'));
+      expect(scheme, contains('buildConfiguration="Release-uat"'));
+      expect(scheme, contains('BlueprintName="Runner"'));
+      expect(
+        scheme,
+        contains(
+          '<TestAction buildConfiguration="Debug-uat" '
+          'selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" '
+          'selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" '
+          r'customLLDBInitFile="$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
+        ),
+      );
+      expect(
+        scheme,
+        contains(
+          '<LaunchAction buildConfiguration="Debug-uat" '
+          'selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" '
+          'selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" '
+          r'customLLDBInitFile="$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"',
+        ),
+      );
+      expect(benchmark, contains(r'--flavor) flavor="${2:-}"'));
+      expect(benchmark, contains(r'flavor_args=(--flavor "$flavor")'));
+    });
 
-    test('does not let UAT request or register remote notifications', () {
+    test('does not contain an APNs registration path for either identity', () {
       final appDelegate = File(
         'ios/Runner/AppDelegate.swift',
       ).readAsStringSync();
 
-      expect(appDelegate, contains('private var isUatBuild: Bool'));
-      expect(appDelegate, contains('guard !isUatBuild else {'));
-      expect(appDelegate, contains('apns_unavailable_in_uat'));
-      expect(appDelegate, contains('registerForRemoteNotifications()'));
+      expect(appDelegate, isNot(contains('UserNotifications')));
+      expect(appDelegate, isNot(contains('registerForRemoteNotifications')));
+      expect(appDelegate, isNot(contains('apns_unavailable_in_uat')));
     });
 
     test(
