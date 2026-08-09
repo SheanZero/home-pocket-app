@@ -186,6 +186,13 @@ void main() {
     expect(lane.parseJavaMajor('not-java'), isNull);
   });
 
+  test('Java signing tools force deterministic English output', () {
+    expect(
+      lane.javaToolEnglishLocaleArguments,
+      equals(['-J-Duser.language=en', '-J-Duser.country=US']),
+    );
+  });
+
   test(
     'release artifact scanner rejects missing and test-contaminated archives',
     () async {

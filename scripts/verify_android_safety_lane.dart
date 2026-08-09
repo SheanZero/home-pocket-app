@@ -24,6 +24,10 @@ const candidateQueriedOn = '2026-08-09';
 const physicalDeviceDisclaimer =
     'Android physical-device validation was not performed or claimed.';
 const maxDurableOutputChars = 32768;
+const javaToolEnglishLocaleArguments = <String>[
+  '-J-Duser.language=en',
+  '-J-Duser.country=US',
+];
 
 const evidencePath =
     '.planning/phases/61-android-toolchain-emulator-lane/'
@@ -974,7 +978,13 @@ Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
       }
       aabSignature = await runBoundedCommand(
         '$jdkHome/bin/jarsigner',
-        ['-verify', '-verbose', '-certs', aab.path],
+        [
+          ...javaToolEnglishLocaleArguments,
+          '-verify',
+          '-verbose',
+          '-certs',
+          aab.path,
+        ],
         workingDirectory: root,
         environment: signatureEnvironment,
         durableCommand: 'jarsigner -verify -verbose -certs app-release.aab',
@@ -985,7 +995,7 @@ Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
       }
       aabCertificate = await runBoundedCommand(
         '$jdkHome/bin/keytool',
-        ['-printcert', '-jarfile', aab.path],
+        [...javaToolEnglishLocaleArguments, '-printcert', '-jarfile', aab.path],
         workingDirectory: root,
         environment: signatureEnvironment,
         durableCommand: 'keytool -printcert -jarfile app-release.aab',
