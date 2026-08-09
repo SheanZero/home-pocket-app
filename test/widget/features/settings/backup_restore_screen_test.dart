@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/settings/presentation/screens/backup_restore_screen.dart';
@@ -28,5 +30,42 @@ void main() {
     expect(find.textContaining('AES-256-GCM'), findsOneWidget);
     expect(find.textContaining('.hpb'), findsOneWidget);
     expect(find.textContaining('CSV'), findsNothing);
+  });
+
+  test('keeps the file picker, encrypted restore, and share entry points', () {
+    final backupRestoreSource = File(
+      'lib/features/settings/presentation/screens/backup_restore_screen.dart',
+    ).readAsStringSync();
+    final createGroupSource = File(
+      'lib/features/family_sync/presentation/screens/create_group_screen.dart',
+    ).readAsStringSync();
+    final groupManagementSource = File(
+      'lib/features/family_sync/presentation/screens/group_management_screen.dart',
+    ).readAsStringSync();
+
+    expect(backupRestoreSource, contains('FilePicker.pickFiles('));
+    expect(backupRestoreSource, contains('type: FileType.custom'));
+    expect(backupRestoreSource, contains("allowedExtensions: const ['hpb']"));
+    expect(
+      backupRestoreSource,
+      contains(
+        'picked == null || picked.files.single.path == null || !mounted',
+      ),
+    );
+    expect(backupRestoreSource, contains('restoreBackupUseCaseProvider'));
+    expect(
+      backupRestoreSource,
+      contains(
+        'SharePlus.instance.share(\n        ShareParams(files: [XFile(result.data!.path)]),',
+      ),
+    );
+    expect(
+      createGroupSource,
+      contains('SharePlus.instance.share(ShareParams(text: text))'),
+    );
+    expect(
+      groupManagementSource,
+      contains('SharePlus.instance.share(ShareParams(text: text))'),
+    );
   });
 }
