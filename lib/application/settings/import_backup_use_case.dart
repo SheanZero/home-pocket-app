@@ -28,21 +28,15 @@ import '../../shared/utils/result.dart';
 /// and bounded by [BackupImportLimits] before parsing or database writes.
 class ImportBackupUseCase {
   ImportBackupUseCase({
-    required TransactionRepository transactionRepo,
-    required CategoryRepository categoryRepo,
-    required BookRepository bookRepo,
-    required SettingsRepository settingsRepo,
-    required ExchangeRateRepository exchangeRateRepo,
-    required UnitOfWork unitOfWork,
-    required BackupCryptoService backupCrypto,
+    required this._transactionRepo,
+    required this._categoryRepo,
+    required this._bookRepo,
+    required this._settingsRepo,
+    required this._exchangeRateRepo,
+    required this._unitOfWork,
+    required this._backupCrypto,
     this.limits = const BackupImportLimits(),
-  }) : _transactionRepo = transactionRepo,
-       _categoryRepo = categoryRepo,
-       _bookRepo = bookRepo,
-       _settingsRepo = settingsRepo,
-       _exchangeRateRepo = exchangeRateRepo,
-       _unitOfWork = unitOfWork,
-       _backupCrypto = backupCrypto;
+  });
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;

@@ -24,20 +24,14 @@ enum ClearAllDataStage {
 /// Erases all local Happy Pocket user data without sending a server operation.
 class ClearAllDataUseCase {
   ClearAllDataUseCase({
-    required ClearAllDataStep suspendSync,
-    required PrivacyWipeJournalStore journalStore,
-    required ClearAllDataStep wipeDatabase,
-    required ClearAllDataStep wipeAppOwnedFiles,
-    required ClearAllDataStep clearSecureUserData,
-    required ClearAllDataStep resetSettings,
-    required ClearAllDataStep resetInMemoryState,
-  }) : _journalStore = journalStore,
-       _suspendSync = suspendSync,
-       _wipeDatabase = wipeDatabase,
-       _wipeAppOwnedFiles = wipeAppOwnedFiles,
-       _clearSecureUserData = clearSecureUserData,
-       _resetSettings = resetSettings,
-       _resetInMemoryState = resetInMemoryState;
+    required this._suspendSync,
+    required this._journalStore,
+    required this._wipeDatabase,
+    required this._wipeAppOwnedFiles,
+    required this._clearSecureUserData,
+    required this._resetSettings,
+    required this._resetInMemoryState,
+  });
 
   final PrivacyWipeJournalStore _journalStore;
   final ClearAllDataStep _suspendSync;

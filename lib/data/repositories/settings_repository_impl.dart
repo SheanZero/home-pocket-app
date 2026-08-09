@@ -5,7 +5,7 @@ import '../../features/settings/domain/repositories/settings_repository.dart';
 
 /// SharedPreferences-backed implementation of [SettingsRepository].
 class SettingsRepositoryImpl implements SettingsRepository {
-  SettingsRepositoryImpl({required SharedPreferences prefs}) : _prefs = prefs;
+  SettingsRepositoryImpl({required this._prefs});
 
   final SharedPreferences _prefs;
 

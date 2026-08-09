@@ -7,8 +7,8 @@ import '../../features/family_sync/domain/repositories/sync_repository.dart';
 /// settling a newer private/public transition.
 class TransactionWithdrawalAcknowledger {
   TransactionWithdrawalAcknowledger({
-    required TransactionRepository transactionRepository,
-  }) : _transactionRepository = transactionRepository;
+    required this._transactionRepository,
+  });
 
   final TransactionRepository _transactionRepository;
 

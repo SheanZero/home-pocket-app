@@ -14,16 +14,12 @@ typedef KeyRotatedCallback =
 /// and seals it independently to every remaining active member.
 class RotateGroupKeyUseCase {
   RotateGroupKeyUseCase({
-    required GroupRepository groupRepository,
-    required SyncQueueManager queueManager,
-    required RelayApiClient apiClient,
-    required E2EEService e2eeService,
-    KeyRotatedCallback? onKeyRotated,
-  }) : _groupRepository = groupRepository,
-       _queueManager = queueManager,
-       _apiClient = apiClient,
-       _e2eeService = e2eeService,
-       _onKeyRotated = onKeyRotated;
+    required this._groupRepository,
+    required this._queueManager,
+    required this._apiClient,
+    required this._e2eeService,
+    this._onKeyRotated,
+  });
 
   final GroupRepository _groupRepository;
   final SyncQueueManager _queueManager;

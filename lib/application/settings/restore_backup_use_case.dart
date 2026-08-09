@@ -30,14 +30,11 @@ enum _RestoreBarrierState {
 /// overlap the replacement transaction.
 class RestoreBackupUseCase {
   RestoreBackupUseCase({
-    required BackupRestoreImport importBackup,
-    required Future<void> Function() suspendSync,
-    required Future<void> Function() resetFamilySyncState,
-    required Future<void> Function() resumeSync,
-  }) : _importBackup = importBackup,
-       _suspendSync = suspendSync,
-       _resetFamilySyncState = resetFamilySyncState,
-       _resumeSync = resumeSync;
+    required this._importBackup,
+    required this._suspendSync,
+    required this._resetFamilySyncState,
+    required this._resumeSync,
+  });
 
   final BackupRestoreImport _importBackup;
   final Future<void> Function() _suspendSync;

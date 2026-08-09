@@ -7,8 +7,7 @@ import '../../infrastructure/sync/push_notification_service.dart';
 /// Surfaces the `navigationIntents` stream and helper methods so callers
 /// no longer need to import infrastructure/ directly.
 class ListenToPushNotificationsUseCase {
-  ListenToPushNotificationsUseCase({required PushNotificationService service})
-    : _service = service;
+  ListenToPushNotificationsUseCase({required this._service});
 
   final PushNotificationService _service;
 

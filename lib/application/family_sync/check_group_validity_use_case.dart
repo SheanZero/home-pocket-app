@@ -31,12 +31,10 @@ class GroupInvalid extends GroupValidityResult {
 /// Offline-tolerant: returns valid on network errors.
 class CheckGroupValidityUseCase {
   CheckGroupValidityUseCase({
-    required GroupRepository groupRepo,
-    required RelayApiClient apiClient,
-    required HandleGroupDissolvedUseCase invalidationCleanup,
-  }) : _groupRepo = groupRepo,
-       _apiClient = apiClient,
-       _invalidationCleanup = invalidationCleanup;
+    required this._groupRepo,
+    required this._apiClient,
+    required this._invalidationCleanup,
+  });
 
   final GroupRepository _groupRepo;
   final RelayApiClient _apiClient;

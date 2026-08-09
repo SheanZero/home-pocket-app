@@ -8,8 +8,7 @@ import '../../infrastructure/speech/speech_recognition_service.dart';
 /// Exposes the underlying callback-based API of [SpeechRecognitionService]
 /// as a thin wrapper following constructor-injection + delegation pattern.
 class StartSpeechRecognitionUseCase {
-  StartSpeechRecognitionUseCase({required SpeechRecognitionService service})
-    : _service = service;
+  StartSpeechRecognitionUseCase({required this._service});
 
   final SpeechRecognitionService _service;
 

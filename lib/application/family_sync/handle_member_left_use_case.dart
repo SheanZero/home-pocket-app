@@ -10,15 +10,12 @@ import 'shadow_book_service.dart';
 /// If another member left: update local member list.
 class HandleMemberLeftUseCase {
   HandleMemberLeftUseCase({
-    required GroupRepository groupRepo,
-    required SyncQueueManager queueManager,
-    required ShadowBookService shadowBookService,
-    required KeyManager keyManager,
+    required this._groupRepo,
+    required this._queueManager,
+    required this._shadowBookService,
+    required this._keyManager,
     required RotateGroupKeyUseCase rotateGroupKey,
-  }) : _groupRepo = groupRepo,
-       _queueManager = queueManager,
-       _shadowBookService = shadowBookService,
-       _keyManager = keyManager;
+  });
 
   final GroupRepository _groupRepo;
   final SyncQueueManager _queueManager;

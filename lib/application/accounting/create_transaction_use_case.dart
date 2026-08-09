@@ -62,19 +62,14 @@ class CreateTransactionUseCase {
     required TransactionRepository transactionRepository,
     required CategoryRepository categoryRepository,
     required DeviceIdentityRepository deviceIdentityRepository,
-    required HashChainService hashChainService,
-    required CategoryService categoryService,
-    SyncEngine? syncEngine,
-    TransactionChangeTracker? changeTracker,
-    CategoryReferenceSyncService? categoryReferenceSyncService,
+    required this._hashChainService,
+    required this._categoryService,
+    this._syncEngine,
+    this._changeTracker,
+    this._categoryReferenceSyncService,
   }) : _transactionRepo = transactionRepository,
        _categoryRepo = categoryRepository,
-       _deviceIdentityRepo = deviceIdentityRepository,
-       _hashChainService = hashChainService,
-       _categoryService = categoryService,
-       _syncEngine = syncEngine,
-       _changeTracker = changeTracker,
-       _categoryReferenceSyncService = categoryReferenceSyncService;
+       _deviceIdentityRepo = deviceIdentityRepository;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;

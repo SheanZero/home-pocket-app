@@ -62,14 +62,11 @@ class RefreshGroupSnapshotMembershipInvalid extends RefreshGroupSnapshotResult {
 /// name. The event data map remains extensible for a future server revision.
 class RefreshGroupSnapshotUseCase {
   RefreshGroupSnapshotUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-    required KeyManager keyManager,
-    MembershipRotationCoordinator? membershipRotation,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository,
-       _keyManager = keyManager,
-       _membershipRotation = membershipRotation;
+    required this._apiClient,
+    required this._groupRepository,
+    required this._keyManager,
+    this._membershipRotation,
+  });
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

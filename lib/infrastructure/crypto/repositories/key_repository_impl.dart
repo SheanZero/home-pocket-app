@@ -8,8 +8,7 @@ import '../models/device_key_pair.dart';
 import 'key_repository.dart';
 
 class KeyRepositoryImpl implements KeyRepository {
-  KeyRepositoryImpl({required FlutterSecureStorage secureStorage})
-    : _secureStorage = secureStorage;
+  KeyRepositoryImpl({required this._secureStorage});
 
   final FlutterSecureStorage _secureStorage;
   final _ed25519 = Ed25519();

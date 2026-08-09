@@ -46,8 +46,7 @@ class JoinRequestLifecycleError extends JoinRequestLifecycleResult
 }
 
 class GetJoinRequestStatusUseCase {
-  const GetJoinRequestStatusUseCase({required RelayApiClient apiClient})
-    : _apiClient = apiClient;
+  const GetJoinRequestStatusUseCase({required this._apiClient});
 
   final RelayApiClient _apiClient;
 
@@ -73,10 +72,9 @@ class GetJoinRequestStatusUseCase {
 
 class RejectJoinRequestUseCase {
   const RejectJoinRequestUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository;
+    required this._apiClient,
+    required this._groupRepository,
+  });
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;
@@ -118,10 +116,9 @@ class RejectJoinRequestUseCase {
 
 class CancelJoinRequestUseCase {
   const CancelJoinRequestUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository;
+    required this._apiClient,
+    required this._groupRepository,
+  });
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

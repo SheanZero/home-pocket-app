@@ -11,13 +11,10 @@ import '../family_sync/sync_engine.dart';
 class ShoppingItemUpdatePersistence {
   ShoppingItemUpdatePersistence({
     required ShoppingItemRepository shoppingItemRepository,
-    ShoppingItemChangeTracker? changeTracker,
-    SyncEngine? syncEngine,
-    Future<String?> Function()? deviceIdResolver,
-  }) : _repo = shoppingItemRepository,
-       _changeTracker = changeTracker,
-       _syncEngine = syncEngine,
-       _deviceIdResolver = deviceIdResolver;
+    this._changeTracker,
+    this._syncEngine,
+    this._deviceIdResolver,
+  }) : _repo = shoppingItemRepository;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;

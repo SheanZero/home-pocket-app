@@ -44,12 +44,10 @@ class ManageGroupInviteError extends ManageGroupInviteResult
 /// code is returned so UI and later shares cannot observe different values.
 class ManageGroupInviteUseCase {
   ManageGroupInviteUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
+    required this._apiClient,
+    required this._groupRepository,
     DateTime Function()? now,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository,
-       _now = now ?? DateTime.now;
+  }) : _now = now ?? DateTime.now;
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

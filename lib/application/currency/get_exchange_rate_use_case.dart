@@ -43,10 +43,9 @@ class GetExchangeRateParams {
 /// [RateResultWithSignal] carrying [RateUnavailable] (RATE-03).
 class GetExchangeRateUseCase {
   GetExchangeRateUseCase({
-    required ExchangeRateCacheService cacheService,
-    required ExchangeRateRepository repository,
-  }) : _cacheService = cacheService,
-       _repository = repository;
+    required this._cacheService,
+    required this._repository,
+  });
 
   final ExchangeRateCacheService _cacheService;
   final ExchangeRateRepository _repository;

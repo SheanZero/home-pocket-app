@@ -58,18 +58,13 @@ typedef OwnerTransferEpochCommittedCallback =
 /// changing roles, so a successful response can never expose a keyless epoch.
 class OwnerTransferUseCase {
   OwnerTransferUseCase({
-    required GroupRepository groupRepository,
-    required RelayApiClient apiClient,
-    required E2EEService e2eeService,
-    required RefreshGroupSnapshotUseCase refreshGroupSnapshot,
+    required this._groupRepository,
+    required this._apiClient,
+    required this._e2eeService,
+    required this._refreshGroupSnapshot,
     OwnerTransferRequestIdFactory? requestIdFactory,
-    OwnerTransferEpochCommittedCallback? onEpochCommitted,
-  }) : _groupRepository = groupRepository,
-       _apiClient = apiClient,
-       _e2eeService = e2eeService,
-       _refreshGroupSnapshot = refreshGroupSnapshot,
-       _requestIdFactory = requestIdFactory ?? const Uuid().v4,
-       _onEpochCommitted = onEpochCommitted;
+    this._onEpochCommitted,
+  }) : _requestIdFactory = requestIdFactory ?? const Uuid().v4;
 
   static const envelopePurpose = 'owner_transfer';
 

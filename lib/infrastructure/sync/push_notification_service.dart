@@ -109,8 +109,7 @@ abstract interface class IdentityBoundLocalNotificationCleaner {
 }
 
 class FirebasePushMessagingClient implements PushMessagingClient {
-  FirebasePushMessagingClient({FirebaseMessaging? messaging})
-    : _messaging = messaging;
+  FirebasePushMessagingClient({this._messaging});
 
   final FirebaseMessaging? _messaging;
 
@@ -256,10 +255,9 @@ class RejectIdentityBoundFamilyPushAcceptancePolicy
 
 class IdentityBoundFamilyPushAcceptancePolicy implements PushAcceptancePolicy {
   IdentityBoundFamilyPushAcceptancePolicy({
-    required Future<String?> Function() identityGenerationResolver,
-    required Future<FamilyPushAcceptanceContext?> Function() contextResolver,
-  }) : _identityGenerationResolver = identityGenerationResolver,
-       _contextResolver = contextResolver;
+    required this._identityGenerationResolver,
+    required this._contextResolver,
+  });
 
   static const _familyTypes = <String>{
     'member_confirmed',
@@ -372,16 +370,15 @@ enum _PushMessageSource { direct, foreground, appOpened, initialMessage }
 
 class PushNotificationService {
   PushNotificationService({
-    required RelayApiClient apiClient,
+    required this._apiClient,
     PushMessagingClient? messagingClient,
     LocalNotificationClient? localNotificationClient,
     FirebaseInitializer? firebaseInitializer,
     Locale Function()? localeProvider,
-    String? pushPlatform,
-    PushAcceptancePolicy acceptancePolicy =
+    this._pushPlatform,
+    this._acceptancePolicy =
         const RejectIdentityBoundFamilyPushAcceptancePolicy(),
-  }) : _apiClient = apiClient,
-       _messagingClient = messagingClient ?? FirebasePushMessagingClient(),
+  }) : _messagingClient = messagingClient ?? FirebasePushMessagingClient(),
        _localNotificationClient =
            localNotificationClient ?? FlutterLocalNotificationClient(),
        _firebaseInitializer =
@@ -389,9 +386,7 @@ class PushNotificationService {
            (Platform.isAndroid ? Firebase.initializeApp : null),
        _localeProvider =
            localeProvider ??
-           (() => WidgetsBinding.instance.platformDispatcher.locale),
-       _pushPlatform = pushPlatform,
-       _acceptancePolicy = acceptancePolicy;
+           (() => WidgetsBinding.instance.platformDispatcher.locale);
 
   final RelayApiClient _apiClient;
   final PushMessagingClient _messagingClient;

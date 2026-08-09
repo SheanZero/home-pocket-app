@@ -36,16 +36,12 @@ typedef AmountResolvedCallback = void Function(int amount);
 /// ```
 class VoiceChunkMerger {
   VoiceChunkMerger({
-    required NumeralStateMachine parser,
-    required SpeechRecognitionService speechService,
-    required AmountResolvedCallback onAmountResolved,
-    int? Function(String text)? amountExtractor,
+    required this._parser,
+    required this._speechService,
+    required this._onAmountResolved,
+    this._amountExtractor,
     DateTime Function()? clock,
-  }) : _parser = parser,
-       _speechService = speechService,
-       _onAmountResolved = onAmountResolved,
-       _amountExtractor = amountExtractor,
-       _clock = clock ?? DateTime.now;
+  }) : _clock = clock ?? DateTime.now;
 
   static const _windowDuration = VoiceTuning.mergerWindow;
 

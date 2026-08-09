@@ -7,8 +7,7 @@ import '../daos/category_ledger_config_dao.dart';
 /// Concrete implementation of [CategoryLedgerConfigRepository].
 class CategoryLedgerConfigRepositoryImpl
     implements CategoryLedgerConfigRepository {
-  CategoryLedgerConfigRepositoryImpl({required CategoryLedgerConfigDao dao})
-    : _dao = dao;
+  CategoryLedgerConfigRepositoryImpl({required this._dao});
 
   final CategoryLedgerConfigDao _dao;
 

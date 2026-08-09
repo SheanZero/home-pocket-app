@@ -3,8 +3,7 @@ import '../../features/shopping_list/domain/repositories/shopping_unit_usage_rep
 import '../daos/shopping_unit_usage_dao.dart';
 
 class ShoppingUnitUsageRepositoryImpl implements ShoppingUnitUsageRepository {
-  ShoppingUnitUsageRepositoryImpl({required ShoppingUnitUsageDao dao})
-    : _dao = dao;
+  ShoppingUnitUsageRepositoryImpl({required this._dao});
 
   final ShoppingUnitUsageDao _dao;
 

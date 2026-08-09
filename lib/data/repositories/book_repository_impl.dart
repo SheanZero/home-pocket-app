@@ -5,7 +5,7 @@ import '../daos/book_dao.dart';
 
 /// Concrete implementation of [BookRepository].
 class BookRepositoryImpl implements BookRepository {
-  BookRepositoryImpl({required BookDao dao}) : _dao = dao;
+  BookRepositoryImpl({required this._dao});
 
   final BookDao _dao;
 

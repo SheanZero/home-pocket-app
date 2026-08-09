@@ -35,14 +35,11 @@ class EpochSyncRecoveryResult {
 /// the next startup/resume safely repeats this state machine.
 class EpochSyncRecoveryUseCase {
   EpochSyncRecoveryUseCase({
-    required SyncQueueManager queueManager,
-    required DrainFamilySyncOutboxUseCase outboxDrainer,
-    required FullSyncUseCase fullSync,
-    EpochSyncRecoveryStageCallback? onStageChanged,
-  }) : _queueManager = queueManager,
-       _outboxDrainer = outboxDrainer,
-       _fullSync = fullSync,
-       _onStageChanged = onStageChanged;
+    required this._queueManager,
+    required this._outboxDrainer,
+    required this._fullSync,
+    this._onStageChanged,
+  });
 
   final SyncQueueManager _queueManager;
   final DrainFamilySyncOutboxUseCase _outboxDrainer;

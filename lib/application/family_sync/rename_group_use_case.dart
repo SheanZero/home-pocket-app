@@ -39,10 +39,9 @@ class RenameGroupError extends RenameGroupResult
 /// If server fails, local DB is NOT updated.
 class RenameGroupUseCase {
   RenameGroupUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository;
+    required this._apiClient,
+    required this._groupRepository,
+  });
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

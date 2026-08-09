@@ -50,16 +50,12 @@ typedef GroupKeyRecoveryClock = DateTime Function();
 /// authority.
 class GroupKeyRecoveryCoordinator {
   GroupKeyRecoveryCoordinator({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-    required KeyManager keyManager,
-    required E2EEService e2eeService,
+    required this._apiClient,
+    required this._groupRepository,
+    required this._keyManager,
+    required this._e2eeService,
     GroupKeyRecoveryClock? clock,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository,
-       _keyManager = keyManager,
-       _e2eeService = e2eeService,
-       _clock = clock ?? DateTime.now;
+  }) : _clock = clock ?? DateTime.now;
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

@@ -10,8 +10,7 @@ import 'master_key_repository.dart';
 /// Cipher format: Base64(nonce[12B] + encrypted_data + mac[16B])
 /// Key derived via HKDF-SHA256 from master key using [MasterKeyRepository].
 class EncryptionRepositoryImpl implements EncryptionRepository {
-  EncryptionRepositoryImpl({required MasterKeyRepository masterKeyRepository})
-    : _masterKeyRepository = masterKeyRepository;
+  EncryptionRepositoryImpl({required this._masterKeyRepository});
 
   final MasterKeyRepository _masterKeyRepository;
   final _algorithm = Chacha20.poly1305Aead();

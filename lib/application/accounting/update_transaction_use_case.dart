@@ -88,13 +88,10 @@ class UpdateTransactionParams {
 class UpdateTransactionUseCase {
   UpdateTransactionUseCase({
     required TransactionRepository transactionRepository,
-    SyncEngine? syncEngine,
-    TransactionChangeTracker? changeTracker,
-    CategoryReferenceSyncService? categoryReferenceSyncService,
-  }) : _transactionRepo = transactionRepository,
-       _syncEngine = syncEngine,
-       _changeTracker = changeTracker,
-       _categoryReferenceSyncService = categoryReferenceSyncService;
+    this._syncEngine,
+    this._changeTracker,
+    this._categoryReferenceSyncService,
+  }) : _transactionRepo = transactionRepository;
 
   final TransactionRepository _transactionRepo;
   final SyncEngine? _syncEngine;

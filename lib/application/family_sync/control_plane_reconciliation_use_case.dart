@@ -90,17 +90,13 @@ class ControlPlaneReconciliationDeferred
 /// [RefreshGroupSnapshotUseCase] with the authoritative status snapshot.
 class ControlPlaneReconciliationUseCase {
   ControlPlaneReconciliationUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-    required RefreshGroupSnapshotUseCase refreshSnapshot,
-    required CheckGroupValidityUseCase checkValidity,
+    required this._apiClient,
+    required this._groupRepository,
+    required this._refreshSnapshot,
+    required this._checkValidity,
     int maxPagesPerExecution = 20,
     Duration requestTimeout = const Duration(seconds: 10),
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository,
-       _refreshSnapshot = refreshSnapshot,
-       _checkValidity = checkValidity,
-       _maxPagesPerExecution = maxPagesPerExecution,
+  }) : _maxPagesPerExecution = maxPagesPerExecution,
        _requestTimeout = requestTimeout {
     if (maxPagesPerExecution <= 0) {
       throw ArgumentError.value(

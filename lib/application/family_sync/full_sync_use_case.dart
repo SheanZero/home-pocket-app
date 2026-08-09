@@ -24,16 +24,12 @@ typedef FullSyncOperationsAcceptedCallback =
 /// Chunks all local operations and pushes via PushSyncUseCase.
 class FullSyncUseCase {
   FullSyncUseCase({
-    required PushSyncUseCase pushSync,
-    required FetchAllTransactionsCallback fetchAllTransactions,
-    required FetchAllShoppingOpsCallback fetchAllShoppingOps,
-    FetchAdditionalFamilySyncOpsCallback? fetchAdditionalOperations,
-    FullSyncOperationsAcceptedCallback? onOperationsAccepted,
-  }) : _pushSync = pushSync,
-       _fetchAllTransactions = fetchAllTransactions,
-       _fetchAllShoppingOps = fetchAllShoppingOps,
-       _fetchAdditionalOperations = fetchAdditionalOperations,
-       _onOperationsAccepted = onOperationsAccepted;
+    required this._pushSync,
+    required this._fetchAllTransactions,
+    required this._fetchAllShoppingOps,
+    this._fetchAdditionalOperations,
+    this._onOperationsAccepted,
+  });
 
   final PushSyncUseCase _pushSync;
   final FetchAllTransactionsCallback _fetchAllTransactions;

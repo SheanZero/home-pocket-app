@@ -24,27 +24,21 @@ typedef MembershipEpochCommittedCallback =
 class MembershipRotationCoordinator {
   MembershipRotationCoordinator({
     required GroupRepository groupRepository,
-    required RelayApiClient apiClient,
-    required E2EEService e2eeService,
-    required KeyManager keyManager,
+    required this._apiClient,
+    required this._e2eeService,
+    required this._keyManager,
     MembershipRotationIntentStore? intentStore,
-    SyncQueueManager? queueManager,
-    ShadowBookService? shadowBookService,
+    this._queueManager,
+    this._shadowBookService,
     MembershipRotationRequestIdFactory? requestIdFactory,
-    MembershipEpochCommittedCallback? onEpochCommitted,
+    this._onEpochCommitted,
   }) : _groupRepository = groupRepository,
-       _apiClient = apiClient,
-       _e2eeService = e2eeService,
-       _keyManager = keyManager,
        _intentStore =
            intentStore ??
            (groupRepository is MembershipRotationIntentStore
                ? groupRepository as MembershipRotationIntentStore
                : null),
-       _queueManager = queueManager,
-       _shadowBookService = shadowBookService,
-       _requestIdFactory = requestIdFactory ?? const Uuid().v4,
-       _onEpochCommitted = onEpochCommitted;
+       _requestIdFactory = requestIdFactory ?? const Uuid().v4;
 
   static const removeOperation = 'remove';
   static const leaveOperation = 'leave';

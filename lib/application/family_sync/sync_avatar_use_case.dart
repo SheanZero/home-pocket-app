@@ -41,15 +41,12 @@ class AvatarSyncValidationException implements Exception {
 /// every other family payload.
 class SyncAvatarUseCase {
   SyncAvatarUseCase({
-    required PushSyncUseCase pushSync,
-    required GroupRepository groupRepository,
+    required this._pushSync,
+    required this._groupRepository,
     required UserProfileRepository userProfileRepository,
-    required KeyManager keyManager,
+    required this._keyManager,
     AvatarSemanticStagingStore? stagingStore,
-  }) : _pushSync = pushSync,
-       _groupRepository = groupRepository,
-       _userProfileRepository = userProfileRepository,
-       _keyManager = keyManager,
+  }) : _userProfileRepository = userProfileRepository,
        _stagingStore = stagingStore,
        _stagingMaintenance = stagingStore == null
            ? null

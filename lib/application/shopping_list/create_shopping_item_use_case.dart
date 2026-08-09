@@ -47,15 +47,9 @@ class CreateShoppingItemParams {
 class CreateShoppingItemUseCase {
   CreateShoppingItemUseCase({
     required ShoppingItemRepository shoppingItemRepository,
-    ShoppingItemChangeTracker? changeTracker, // nullable — D37-06
-    SyncEngine? syncEngine, // nullable — fire-and-forget
-    Future<String?> Function()? deviceIdResolver,
-    ShoppingUnitUsageRepository? unitUsageRepository,
-  }) : _repo = shoppingItemRepository,
-       _changeTracker = changeTracker,
-       _syncEngine = syncEngine,
-       _deviceIdResolver = deviceIdResolver,
-       _unitUsageRepository = unitUsageRepository;
+    this._changeTracker, this._syncEngine, this._deviceIdResolver,
+    this._unitUsageRepository,
+  }) : _repo = shoppingItemRepository;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;

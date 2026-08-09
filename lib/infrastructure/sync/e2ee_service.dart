@@ -14,7 +14,7 @@ import '../crypto/services/key_manager.dart';
 /// 3. XSalsa20-Poly1305 encrypt/decrypt (NaCl box)
 /// 4. Output format: base64(nonce_24bytes + ciphertext)
 class E2EEService {
-  E2EEService({required KeyManager keyManager}) : _keyManager = keyManager;
+  E2EEService({required this._keyManager});
 
   final KeyManager _keyManager;
 

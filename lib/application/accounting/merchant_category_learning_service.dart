@@ -3,10 +3,9 @@ import '../../features/accounting/domain/repositories/merchant_category_preferen
 
 class MerchantCategoryLearningService {
   MerchantCategoryLearningService({
-    required MerchantCategoryPreferenceRepository repository,
-    required CategoryRepository categoryRepository,
-  }) : _repository = repository,
-       _categoryRepository = categoryRepository;
+    required this._repository,
+    required this._categoryRepository,
+  });
 
   final MerchantCategoryPreferenceRepository _repository;
   final CategoryRepository _categoryRepository;

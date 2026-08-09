@@ -23,12 +23,10 @@ import '../../shared/utils/result.dart';
 /// reliant on a comment in `main.dart`.
 class SeedAllUseCase {
   SeedAllUseCase({
-    required SeedCategoriesUseCase seedCategories,
-    required SeedVoiceSynonymsUseCase seedVoiceSynonyms,
-    required SeedMerchantsUseCase seedMerchants,
-  }) : _seedCategories = seedCategories,
-       _seedVoiceSynonyms = seedVoiceSynonyms,
-       _seedMerchants = seedMerchants;
+    required this._seedCategories,
+    required this._seedVoiceSynonyms,
+    required this._seedMerchants,
+  });
 
   final SeedCategoriesUseCase _seedCategories;
   final SeedVoiceSynonymsUseCase _seedVoiceSynonyms;

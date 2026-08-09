@@ -4,8 +4,7 @@ import '../daos/inbound_sync_operation_dao.dart';
 
 class InboundSyncOperationRepositoryImpl
     implements InboundSyncOperationRepository {
-  InboundSyncOperationRepositoryImpl({required InboundSyncOperationDao dao})
-    : _dao = dao;
+  InboundSyncOperationRepositoryImpl({required this._dao});
 
   final InboundSyncOperationDao _dao;
 

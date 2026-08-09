@@ -7,12 +7,10 @@ import 'shadow_book_service.dart';
 /// Cleans local sync data and deactivates the group.
 class HandleGroupDissolvedUseCase {
   HandleGroupDissolvedUseCase({
-    required GroupRepository groupRepo,
-    required SyncQueueManager queueManager,
-    required ShadowBookService shadowBookService,
-  }) : _groupRepo = groupRepo,
-       _queueManager = queueManager,
-       _shadowBookService = shadowBookService;
+    required this._groupRepo,
+    required this._queueManager,
+    required this._shadowBookService,
+  });
 
   final GroupRepository _groupRepo;
   final SyncQueueManager _queueManager;

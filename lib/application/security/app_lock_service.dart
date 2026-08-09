@@ -18,10 +18,9 @@ import '../../infrastructure/security/secure_storage_service.dart';
 class AppLockService {
   AppLockService({
     required SettingsRepository settingsRepository,
-    required SecureStorageService secureStorage,
+    required this._secureStorage,
     required BiometricService biometricService,
   })  : _settings = settingsRepository,
-        _secureStorage = secureStorage,
         _biometric = biometricService;
 
   final SettingsRepository _settings;

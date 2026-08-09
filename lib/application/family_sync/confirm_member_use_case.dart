@@ -42,16 +42,12 @@ class ConfirmMemberError extends ConfirmMemberResult
 /// retained only for legacy/test compositions that do not provide full sync.
 class ConfirmMemberUseCase {
   ConfirmMemberUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-    required E2EEService e2eeService,
-    FullSyncUseCase? fullSync,
-    SyncAvatarUseCase? syncAvatar,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository,
-       _e2eeService = e2eeService,
-       _fullSync = fullSync,
-       _syncAvatar = syncAvatar;
+    required this._apiClient,
+    required this._groupRepository,
+    required this._e2eeService,
+    this._fullSync,
+    this._syncAvatar,
+  });
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

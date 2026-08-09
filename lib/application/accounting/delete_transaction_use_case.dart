@@ -12,12 +12,10 @@ import '../family_sync/transaction_sync_version.dart';
 class DeleteTransactionUseCase {
   DeleteTransactionUseCase({
     required TransactionRepository transactionRepository,
-    SyncEngine? syncEngine,
-    TransactionChangeTracker? changeTracker,
+    this._syncEngine,
+    this._changeTracker,
     CategoryReferenceSyncService? categoryReferenceSyncService,
-  }) : _transactionRepo = transactionRepository,
-       _syncEngine = syncEngine,
-       _changeTracker = changeTracker;
+  }) : _transactionRepo = transactionRepository;
 
   final TransactionRepository _transactionRepo;
   final SyncEngine? _syncEngine;

@@ -17,10 +17,9 @@ typedef PrivacyWipeClock = DateTime Function();
 /// group, token, path, or other user data.
 class FilePrivacyWipeJournalStore implements PrivacyWipeJournalStore {
   FilePrivacyWipeJournalStore({
-    required UserDataDirectoryResolver supportDirectoryResolver,
+    required this._supportDirectoryResolver,
     PrivacyWipeClock? clock,
-  }) : _supportDirectoryResolver = supportDirectoryResolver,
-       _clock = clock ?? (() => DateTime.now().toUtc());
+  }) : _clock = clock ?? (() => DateTime.now().toUtc());
 
   static const int journalVersion = 1;
   static const String directoryName = 'home_pocket_privacy';

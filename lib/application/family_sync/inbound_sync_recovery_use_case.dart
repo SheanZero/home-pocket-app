@@ -29,10 +29,9 @@ class InboundSyncAutomaticResolutionResult {
 /// durably quarantined before their relay messages were ACKed.
 class InboundSyncRecoveryUseCase {
   InboundSyncRecoveryUseCase({
-    required InboundSyncOperationRepository repository,
-    required ApplySyncOperationsUseCase applyOperations,
-  }) : _repository = repository,
-       _applyOperations = applyOperations;
+    required this._repository,
+    required this._applyOperations,
+  });
 
   final InboundSyncOperationRepository _repository;
   final ApplySyncOperationsUseCase _applyOperations;

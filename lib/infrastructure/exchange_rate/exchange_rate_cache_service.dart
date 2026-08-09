@@ -26,12 +26,10 @@ import 'exchange_rate_api_client.dart';
 ///   - D-09: 2-year TTL prune on every successful upsert.
 class ExchangeRateCacheService {
   ExchangeRateCacheService({
-    required ExchangeRateRepository repository,
-    required ExchangeRateApiClient apiClient,
+    required this._repository,
+    required this._apiClient,
     Connectivity? connectivity,
-  }) : _repository = repository,
-       _apiClient = apiClient,
-       _connectivity = connectivity ?? Connectivity();
+  }) : _connectivity = connectivity ?? Connectivity();
 
   final ExchangeRateRepository _repository;
   final ExchangeRateApiClient _apiClient;

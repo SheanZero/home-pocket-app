@@ -6,7 +6,7 @@ import '../app_database.dart';
 import '../daos/category_dao.dart';
 
 class CategorySyncRepositoryImpl implements CategorySyncRepository {
-  CategorySyncRepositoryImpl({required CategoryDao dao}) : _dao = dao;
+  CategorySyncRepositoryImpl({required this._dao});
 
   final CategoryDao _dao;
   static final _systemIds = DefaultCategories.all

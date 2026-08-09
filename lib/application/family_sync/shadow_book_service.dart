@@ -7,10 +7,9 @@ import '../../features/accounting/domain/repositories/transaction_repository.dar
 /// Manages remote-member shadow books and their synced data lifecycle.
 class ShadowBookService {
   ShadowBookService({
-    required BookRepository bookRepository,
-    required TransactionRepository transactionRepository,
-  }) : _bookRepository = bookRepository,
-       _transactionRepository = transactionRepository;
+    required this._bookRepository,
+    required this._transactionRepository,
+  });
 
   final BookRepository _bookRepository;
   final TransactionRepository _transactionRepository;

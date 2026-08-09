@@ -8,8 +8,8 @@ import '../../features/shopping_list/domain/repositories/shopping_unit_usage_rep
 /// because repeating the already-selected default would not reduce effort.
 class WatchShoppingUnitSuggestionsUseCase {
   const WatchShoppingUnitSuggestionsUseCase({
-    required ShoppingUnitUsageRepository repository,
-  }) : _repository = repository;
+    required this._repository,
+  });
 
   final ShoppingUnitUsageRepository _repository;
 

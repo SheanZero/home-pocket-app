@@ -9,7 +9,7 @@ import '../daos/analytics_dao.dart';
 
 /// Bridges analytics domain queries to Drift analytics DAO.
 class AnalyticsRepositoryImpl implements AnalyticsRepository {
-  AnalyticsRepositoryImpl({required AnalyticsDao dao}) : _dao = dao;
+  AnalyticsRepositoryImpl({required this._dao});
 
   final AnalyticsDao _dao;
 

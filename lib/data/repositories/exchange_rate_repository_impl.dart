@@ -11,7 +11,7 @@ import '../../features/currency/domain/repositories/exchange_rate_repository.dar
 /// (pure-Dart [ExchangeRate] model). All Drift types are contained here —
 /// the domain layer never sees them.
 class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
-  ExchangeRateRepositoryImpl({required ExchangeRateDao dao}) : _dao = dao;
+  ExchangeRateRepositoryImpl({required this._dao});
 
   final ExchangeRateDao _dao;
 

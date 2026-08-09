@@ -5,7 +5,7 @@ import '../daos/category_dao.dart';
 
 /// Concrete implementation of [CategoryRepository].
 class CategoryRepositoryImpl implements CategoryRepository {
-  CategoryRepositoryImpl({required CategoryDao dao}) : _dao = dao;
+  CategoryRepositoryImpl({required this._dao});
 
   final CategoryDao _dao;
 

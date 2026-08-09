@@ -4,8 +4,7 @@ import '../../features/accounting/domain/repositories/category_sync_repository.d
 
 /// Attaches and applies custom-category reference snapshots inside E2EE bills.
 class CategoryReferenceSyncService {
-  CategoryReferenceSyncService({required CategorySyncRepository repository})
-    : _repository = repository;
+  CategoryReferenceSyncService({required this._repository});
 
   final CategorySyncRepository _repository;
 

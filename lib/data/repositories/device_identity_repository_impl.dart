@@ -3,8 +3,7 @@ import '../../infrastructure/crypto/services/key_manager.dart';
 
 /// Device identity repository backed by crypto key manager.
 class DeviceIdentityRepositoryImpl implements DeviceIdentityRepository {
-  DeviceIdentityRepositoryImpl({required KeyManager keyManager})
-    : _keyManager = keyManager;
+  DeviceIdentityRepositoryImpl({required this._keyManager});
 
   final KeyManager _keyManager;
 

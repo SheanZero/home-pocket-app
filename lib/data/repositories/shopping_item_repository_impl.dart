@@ -24,10 +24,9 @@ class ShoppingItemRepositoryImpl
     implements DurableFamilySyncShoppingItemRepository {
   ShoppingItemRepositoryImpl({
     required ShoppingItemDao dao,
-    required FieldEncryptionService encryptionService,
+    required this._encryptionService,
   }) : _dao = dao,
-       _outboxDao = FamilySyncOutboxDao(dao.attachedDatabase),
-       _encryptionService = encryptionService;
+       _outboxDao = FamilySyncOutboxDao(dao.attachedDatabase);
 
   final ShoppingItemDao _dao;
   final FamilySyncOutboxDao _outboxDao;

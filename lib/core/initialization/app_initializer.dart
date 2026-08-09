@@ -27,16 +27,12 @@ typedef PendingPrivacyWipeResumer =
 
 class AppInitializer {
   AppInitializer({
-    required ProviderContainerFactory containerFactory,
-    required AppDatabaseFactory databaseFactory,
-    required EncryptedDatabaseExists databaseExists,
-    required SeedRunner seedRunner,
-    PendingPrivacyWipeResumer? pendingPrivacyWipeResumer,
-  }) : _containerFactory = containerFactory,
-       _databaseFactory = databaseFactory,
-       _databaseExists = databaseExists,
-       _seedRunner = seedRunner,
-       _pendingPrivacyWipeResumer = pendingPrivacyWipeResumer;
+    required this._containerFactory,
+    required this._databaseFactory,
+    required this._databaseExists,
+    required this._seedRunner,
+    this._pendingPrivacyWipeResumer,
+  });
 
   final ProviderContainerFactory _containerFactory;
   final AppDatabaseFactory _databaseFactory;

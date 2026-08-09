@@ -33,14 +33,11 @@ class DeactivateGroupError extends DeactivateGroupResult
 
 class DeactivateGroupUseCase {
   DeactivateGroupUseCase({
-    required RelayApiClient apiClient,
-    required GroupRepository groupRepository,
-    required SyncQueueManager queueManager,
-    ShadowBookService? shadowBookService,
-  }) : _apiClient = apiClient,
-       _groupRepository = groupRepository,
-       _queueManager = queueManager,
-       _shadowBookService = shadowBookService;
+    required this._apiClient,
+    required this._groupRepository,
+    required this._queueManager,
+    this._shadowBookService,
+  });
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;

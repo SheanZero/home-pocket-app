@@ -29,10 +29,9 @@ class SaveProfileResult {
 class SaveUserProfileUseCase {
   SaveUserProfileUseCase(
     this._repository, {
-    Future<String?> Function()? deviceIdResolver,
-    AvatarSemanticStagingStore? avatarStagingStore,
-  }) : _deviceIdResolver = deviceIdResolver,
-       _avatarStagingStore = avatarStagingStore;
+    this._deviceIdResolver,
+    this._avatarStagingStore,
+  });
 
   final UserProfileRepository _repository;
   final Future<String?> Function()? _deviceIdResolver;

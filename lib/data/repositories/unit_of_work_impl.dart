@@ -7,7 +7,7 @@ import '../app_database.dart';
 /// reaches the same [AppDatabase] inside [run]'s action automatically joins
 /// the transaction and rolls back together on failure.
 class UnitOfWorkImpl implements UnitOfWork {
-  UnitOfWorkImpl({required AppDatabase db}) : _db = db;
+  UnitOfWorkImpl({required this._db});
 
   final AppDatabase _db;
 

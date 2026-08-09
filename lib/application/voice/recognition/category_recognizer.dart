@@ -49,12 +49,10 @@ const int kLearnedPromotionThreshold = VoiceTuning.learnedPromotionThreshold;
 /// recognition/category_recognizer_test.dart for the structural verification.
 class CategoryRecognizer {
   CategoryRecognizer({
-    required CategoryRepository categoryRepository,
-    required CategoryKeywordPreferenceRepository preferenceRepository,
-    required CategoryService categoryService,
-  }) : _categoryRepository = categoryRepository,
-       _preferenceRepository = preferenceRepository,
-       _categoryService = categoryService;
+    required this._categoryRepository,
+    required this._preferenceRepository,
+    required this._categoryService,
+  });
 
   final CategoryRepository _categoryRepository;
   final CategoryKeywordPreferenceRepository _preferenceRepository;

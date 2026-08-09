@@ -39,12 +39,10 @@ class ConfirmJoinError extends ConfirmJoinResult
 /// to local DB. Members are fetched later via group status polling.
 class ConfirmJoinUseCase {
   ConfirmJoinUseCase({
-    required RelayApiClient apiClient,
-    required KeyManager keyManager,
-    required GroupRepository groupRepository,
-  }) : _apiClient = apiClient,
-       _keyManager = keyManager,
-       _groupRepository = groupRepository;
+    required this._apiClient,
+    required this._keyManager,
+    required this._groupRepository,
+  });
 
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;

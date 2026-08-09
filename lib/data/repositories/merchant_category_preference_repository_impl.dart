@@ -6,8 +6,8 @@ import '../daos/merchant_category_preference_dao.dart';
 class MerchantCategoryPreferenceRepositoryImpl
     implements MerchantCategoryPreferenceRepository {
   MerchantCategoryPreferenceRepositoryImpl({
-    required MerchantCategoryPreferenceDao dao,
-  }) : _dao = dao;
+    required this._dao,
+  });
 
   final MerchantCategoryPreferenceDao _dao;
 

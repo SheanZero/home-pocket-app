@@ -65,12 +65,10 @@ class JoinGroupError extends JoinGroupResult implements GroupOperationFailure {
 /// and profile fields.
 class JoinGroupUseCase {
   JoinGroupUseCase({
-    required RelayApiClient apiClient,
+    required this._apiClient,
     required KeyManager keyManager,
-    Future<void> Function()? onDeviceRegistered,
-  }) : _apiClient = apiClient,
-       _deviceIdentityResolver = DeviceIdentityResolver(keyManager),
-       _onDeviceRegistered = onDeviceRegistered;
+    this._onDeviceRegistered,
+  }) : _deviceIdentityResolver = DeviceIdentityResolver(keyManager);
 
   final RelayApiClient _apiClient;
   final DeviceIdentityResolver _deviceIdentityResolver;

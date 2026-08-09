@@ -22,9 +22,8 @@
 /// transition logic is also exposed via static helpers so it can be reasoned
 /// about and tested independently of the mutable handle.
 class AmountInputController {
-  AmountInputController({required int decimals})
-      : _decimals = decimals,
-        _text = '';
+  AmountInputController({required this._decimals})
+      : _text = '';
 
   String _text;
   int _decimals;

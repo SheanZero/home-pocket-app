@@ -36,8 +36,8 @@ class RemoveMemberUseCase {
     required RelayApiClient apiClient,
     required GroupRepository groupRepository,
     required RotateGroupKeyUseCase rotateGroupKey,
-    MembershipRotationCoordinator? membershipRotation,
-  }) : _membershipRotation = membershipRotation;
+    this._membershipRotation,
+  });
 
   final MembershipRotationCoordinator? _membershipRotation;
 

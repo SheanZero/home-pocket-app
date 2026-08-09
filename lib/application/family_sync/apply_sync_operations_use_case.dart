@@ -76,23 +76,16 @@ class SyncOperationTransientException implements Exception {
 /// Applies pulled sync operations into local shadow books and group members.
 class ApplySyncOperationsUseCase {
   ApplySyncOperationsUseCase({
-    required TransactionRepository transactionRepository,
-    required ShoppingItemRepository shoppingItemRepository,
-    required ShadowBookService shadowBookService,
-    required GroupRepository groupRepository,
-    required InboundSyncOperationRepository inboundRepository,
-    SyncAvatarUseCase? syncAvatarUseCase,
+    required this._transactionRepository,
+    required this._shoppingItemRepository,
+    required this._shadowBookService,
+    required this._groupRepository,
+    required this._inboundRepository,
+    this._syncAvatarUseCase,
     String? appDirectory,
     AppDirectoryResolver? appDirectoryResolver,
-    CategoryReferenceSyncService? categoryReferenceSyncService,
-  }) : _transactionRepository = transactionRepository,
-       _shoppingItemRepository = shoppingItemRepository,
-       _shadowBookService = shadowBookService,
-       _groupRepository = groupRepository,
-       _inboundRepository = inboundRepository,
-       _syncAvatarUseCase = syncAvatarUseCase,
-       _categoryReferenceSyncService = categoryReferenceSyncService,
-       _appDirectoryResolver =
+    this._categoryReferenceSyncService,
+  }) : _appDirectoryResolver =
            appDirectoryResolver ??
            (appDirectory == null ? null : (() async => appDirectory));
 

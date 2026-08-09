@@ -135,22 +135,15 @@ typedef RejectOperationsBatchCallback =
 /// 6. Drain the offline queue only after full reconciliation
 class PullSyncUseCase {
   PullSyncUseCase({
-    required RelayApiClient apiClient,
-    required E2EEService e2eeService,
-    required GroupRepository groupRepo,
-    required SyncQueueManager queueManager,
-    required KeyManager keyManager,
-    required ApplyOperationsCallback applyOperations,
-    RejectOperationsBatchCallback? rejectOperationsBatch,
+    required this._apiClient,
+    required this._e2eeService,
+    required this._groupRepo,
+    required this._queueManager,
+    required this._keyManager,
+    required this._applyOperations,
+    this._rejectOperationsBatch,
     int maxPagesPerExecution = 50,
-  }) : _apiClient = apiClient,
-       _e2eeService = e2eeService,
-       _groupRepo = groupRepo,
-       _queueManager = queueManager,
-       _keyManager = keyManager,
-       _applyOperations = applyOperations,
-       _rejectOperationsBatch = rejectOperationsBatch,
-       _maxPagesPerExecution = maxPagesPerExecution {
+  }) : _maxPagesPerExecution = maxPagesPerExecution {
     if (maxPagesPerExecution <= 0) {
       throw ArgumentError.value(
         maxPagesPerExecution,

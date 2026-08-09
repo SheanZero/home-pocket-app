@@ -49,14 +49,11 @@ class PushSyncError extends PushSyncResult {
 /// 4. Push to server (or queue on failure)
 class PushSyncUseCase {
   PushSyncUseCase({
-    required RelayApiClient apiClient,
-    required E2EEService e2eeService,
-    required GroupRepository groupRepo,
-    required SyncQueueManager queueManager,
-  }) : _apiClient = apiClient,
-       _e2eeService = e2eeService,
-       _groupRepo = groupRepo,
-       _queueManager = queueManager;
+    required this._apiClient,
+    required this._e2eeService,
+    required this._groupRepo,
+    required this._queueManager,
+  });
 
   final RelayApiClient _apiClient;
   final E2EEService _e2eeService;

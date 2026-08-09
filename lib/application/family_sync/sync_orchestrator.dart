@@ -65,31 +65,20 @@ class SyncOrchestratorError extends SyncOrchestratorResult {
 /// No timers or scheduling — pure business logic coordination.
 class SyncOrchestrator {
   SyncOrchestrator({
-    required PullSyncUseCase pullSync,
-    required PushSyncUseCase pushSync,
-    required FullSyncUseCase fullSync,
-    required SyncAvatarUseCase avatarSync,
-    required CheckGroupValidityUseCase checkValidity,
+    required this._pullSync,
+    required this._pushSync,
+    required this._fullSync,
+    required this._avatarSync,
+    required this._checkValidity,
     ShadowBookService? shadowBookService,
-    required GroupRepository groupRepo,
-    required UserProfileRepository profileRepo,
-    required SyncQueueManager queueManager,
-    required KeyManager keyManager,
-    required TransactionChangeTracker changeTracker,
-    required ShoppingItemChangeTracker shoppingChangeTracker,
-    DrainFamilySyncOutboxUseCase? outboxDrainer,
-  }) : _pullSync = pullSync,
-       _pushSync = pushSync,
-       _fullSync = fullSync,
-       _avatarSync = avatarSync,
-       _checkValidity = checkValidity,
-       _groupRepo = groupRepo,
-       _profileRepo = profileRepo,
-       _queueManager = queueManager,
-       _keyManager = keyManager,
-       _changeTracker = changeTracker,
-       _shoppingChangeTracker = shoppingChangeTracker,
-       _outboxDrainer = outboxDrainer;
+    required this._groupRepo,
+    required this._profileRepo,
+    required this._queueManager,
+    required this._keyManager,
+    required this._changeTracker,
+    required this._shoppingChangeTracker,
+    this._outboxDrainer,
+  });
 
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;

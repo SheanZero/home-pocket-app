@@ -9,7 +9,7 @@ import '../daos/sync_queue_dao.dart';
 /// Concrete implementation of [SyncRepository].
 class SyncRepositoryImpl
     implements SyncRepository, SyncWithdrawalReceiptStore, SyncEpochQueueStore {
-  SyncRepositoryImpl({required SyncQueueDao dao}) : _dao = dao;
+  SyncRepositoryImpl({required this._dao});
 
   final SyncQueueDao _dao;
 

@@ -12,14 +12,11 @@ typedef WithdrawalDeliveryCallback =
 /// The queue is drained on app resume and after successful pulls.
 class SyncQueueManager {
   SyncQueueManager({
-    required SyncRepository syncRepository,
-    required RelayApiClient apiClient,
-    WithdrawalDeliveryCallback? onWithdrawalsDelivered,
+    required this._syncRepository,
+    required this._apiClient,
+    this._onWithdrawalsDelivered,
     DateTime Function()? now,
-  }) : _syncRepository = syncRepository,
-       _apiClient = apiClient,
-       _onWithdrawalsDelivered = onWithdrawalsDelivered,
-       _now = now ?? DateTime.now;
+  }) : _now = now ?? DateTime.now;
 
   final SyncRepository _syncRepository;
   final RelayApiClient _apiClient;

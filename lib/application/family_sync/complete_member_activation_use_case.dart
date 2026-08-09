@@ -47,16 +47,12 @@ class MemberActivationError extends MemberActivationResult {
 /// incremental pull have succeeded.
 class CompleteMemberActivationUseCase {
   CompleteMemberActivationUseCase({
-    required CheckGroupUseCase checkGroup,
-    required PullSyncUseCase pullSync,
-    required GroupRepository groupRepository,
-    required SyncOrchestrator orchestrator,
-    GroupKeyRecoveryCoordinator? keyRecovery,
-  }) : _checkGroup = checkGroup,
-       _pullSync = pullSync,
-       _groupRepository = groupRepository,
-       _orchestrator = orchestrator,
-       _keyRecovery = keyRecovery;
+    required this._checkGroup,
+    required this._pullSync,
+    required this._groupRepository,
+    required this._orchestrator,
+    this._keyRecovery,
+  });
 
   final CheckGroupUseCase _checkGroup;
   final PullSyncUseCase _pullSync;

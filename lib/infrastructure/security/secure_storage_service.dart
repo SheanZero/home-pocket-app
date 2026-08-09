@@ -81,8 +81,7 @@ class SecureStorageException implements Exception {
 ///
 /// All methods may throw [SecureStorageException] on platform errors.
 class SecureStorageService {
-  SecureStorageService({required FlutterSecureStorage storage})
-    : _storage = storage;
+  SecureStorageService({required this._storage});
 
   final FlutterSecureStorage _storage;
 

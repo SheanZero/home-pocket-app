@@ -19,10 +19,9 @@ typedef UserDataDirectoryResolver = Future<String> Function();
 /// never traversed.
 class AppOwnedUserFilesCleaner {
   AppOwnedUserFilesCleaner({
-    required UserDataDirectoryResolver documentsDirectoryResolver,
-    required UserDataDirectoryResolver supportDirectoryResolver,
-  }) : _documentsDirectoryResolver = documentsDirectoryResolver,
-       _supportDirectoryResolver = supportDirectoryResolver;
+    required this._documentsDirectoryResolver,
+    required this._supportDirectoryResolver,
+  });
 
   final UserDataDirectoryResolver _documentsDirectoryResolver;
   final UserDataDirectoryResolver _supportDirectoryResolver;

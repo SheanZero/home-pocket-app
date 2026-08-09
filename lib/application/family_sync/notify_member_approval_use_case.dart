@@ -13,10 +13,9 @@ import '../../infrastructure/sync/websocket_service.dart';
 /// Constructor-injection pattern per PATTERNS.md §C.
 class NotifyMemberApprovalUseCase {
   NotifyMemberApprovalUseCase({
-    required WebSocketService wsService,
-    required KeyManager keyManager,
-  }) : _wsService = wsService,
-       _keyManager = keyManager;
+    required this._wsService,
+    required this._keyManager,
+  });
 
   final WebSocketService _wsService;
   final KeyManager _keyManager;

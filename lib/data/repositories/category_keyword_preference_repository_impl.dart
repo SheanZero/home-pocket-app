@@ -6,8 +6,8 @@ import '../daos/category_keyword_preference_dao.dart';
 class CategoryKeywordPreferenceRepositoryImpl
     implements CategoryKeywordPreferenceRepository {
   CategoryKeywordPreferenceRepositoryImpl({
-    required CategoryKeywordPreferenceDao dao,
-  }) : _dao = dao;
+    required this._dao,
+  });
 
   final CategoryKeywordPreferenceDao _dao;
 

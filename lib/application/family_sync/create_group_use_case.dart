@@ -57,16 +57,12 @@ class CreateGroupError extends CreateGroupResult
 /// Migrated from `features/family_sync/use_cases/` with added profile fields.
 class CreateGroupUseCase {
   CreateGroupUseCase({
-    required RelayApiClient apiClient,
+    required this._apiClient,
     required KeyManager keyManager,
-    required GroupRepository groupRepository,
-    required E2EEService e2eeService,
-    Future<void> Function()? onDeviceRegistered,
-  }) : _apiClient = apiClient,
-       _deviceIdentityResolver = DeviceIdentityResolver(keyManager),
-       _groupRepository = groupRepository,
-       _e2eeService = e2eeService,
-       _onDeviceRegistered = onDeviceRegistered;
+    required this._groupRepository,
+    required this._e2eeService,
+    this._onDeviceRegistered,
+  }) : _deviceIdentityResolver = DeviceIdentityResolver(keyManager);
 
   final RelayApiClient _apiClient;
   final DeviceIdentityResolver _deviceIdentityResolver;

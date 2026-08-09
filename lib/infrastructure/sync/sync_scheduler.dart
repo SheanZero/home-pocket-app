@@ -16,10 +16,9 @@ typedef NeedsFullPullCallback = Future<bool> Function();
 /// via the [onSyncRequested] callback.
 class SyncScheduler {
   SyncScheduler({
-    required SyncRequestCallback onSyncRequested,
-    required NeedsFullPullCallback checkNeedsFullPull,
-  }) : _onSyncRequested = onSyncRequested,
-       _checkNeedsFullPull = checkNeedsFullPull;
+    required this._onSyncRequested,
+    required this._checkNeedsFullPull,
+  });
 
   final SyncRequestCallback _onSyncRequested;
   final NeedsFullPullCallback _checkNeedsFullPull;

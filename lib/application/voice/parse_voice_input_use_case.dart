@@ -50,12 +50,10 @@ class ParseVoiceInputUseCase {
   late final AmountArbiter _arbiter = AmountArbiter(textParser: _textParser);
 
   ParseVoiceInputUseCase({
-    required VoiceTextParser textParser,
-    required CategoryRecognizer categoryRecognizer,
-    required MerchantRecognizer merchantRecognizer,
-  }) : _textParser = textParser,
-       _categoryRecognizer = categoryRecognizer,
-       _merchantRecognizer = merchantRecognizer;
+    required this._textParser,
+    required this._categoryRecognizer,
+    required this._merchantRecognizer,
+  });
 
   /// Parses [recognizedText] into a [VoiceParseResult].
   ///

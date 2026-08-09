@@ -11,8 +11,7 @@ import 'master_key_repository.dart';
 /// The master key is a 256-bit (32-byte) cryptographically secure random key.
 /// All encryption keys are derived from this master key using HKDF-SHA256.
 class MasterKeyRepositoryImpl implements MasterKeyRepository {
-  MasterKeyRepositoryImpl({required FlutterSecureStorage secureStorage})
-    : _secureStorage = secureStorage;
+  MasterKeyRepositoryImpl({required this._secureStorage});
 
   final FlutterSecureStorage _secureStorage;
 

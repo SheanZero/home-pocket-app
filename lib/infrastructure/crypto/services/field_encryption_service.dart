@@ -5,8 +5,7 @@ import '../repositories/encryption_repository.dart';
 /// Encrypts sensitive transaction fields (notes, merchant names, amounts).
 /// Delegates to [EncryptionRepository] for crypto operations.
 class FieldEncryptionService {
-  FieldEncryptionService({required EncryptionRepository repository})
-    : _repository = repository;
+  FieldEncryptionService({required this._repository});
 
   final EncryptionRepository _repository;
 

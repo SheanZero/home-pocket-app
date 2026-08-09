@@ -12,7 +12,7 @@ import '../daos/merchant_dao.dart';
 /// model, and decomposes `insertBatch(List<Merchant>)` into companions
 /// delegated to the DAO's single transaction (INSERT OR IGNORE).
 class MerchantRepositoryImpl implements MerchantRepository {
-  MerchantRepositoryImpl({required MerchantDao dao}) : _dao = dao;
+  MerchantRepositoryImpl({required this._dao});
 
   final MerchantDao _dao;
 

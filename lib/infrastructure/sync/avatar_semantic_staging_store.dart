@@ -70,12 +70,11 @@ class AvatarStagingGarbageCollectionResult {
 /// Neither external picker paths nor image bytes are written to the outbox.
 class AvatarSemanticStagingStore {
   AvatarSemanticStagingStore({
-    required AvatarStagingRootDirectoryResolver rootDirectoryResolver,
+    required this._rootDirectoryResolver,
     this.orphanRetention = const Duration(days: 7),
     this.maxStoredFiles = 16,
     this.maxStoredBytes = maxBlobBytes * 8,
-  }) : _rootDirectoryResolver = rootDirectoryResolver,
-       assert(maxStoredFiles > 0),
+  }) : assert(maxStoredFiles > 0),
        assert(maxStoredBytes >= maxBlobBytes);
 
   static const maxBlobBytes = 768 * 1024;

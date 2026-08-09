@@ -38,8 +38,8 @@ class LeaveGroupUseCase {
     required GroupRepository groupRepository,
     required SyncQueueManager queueManager,
     ShadowBookService? shadowBookService,
-    MembershipRotationCoordinator? membershipRotation,
-  }) : _membershipRotation = membershipRotation;
+    this._membershipRotation,
+  });
 
   final MembershipRotationCoordinator? _membershipRotation;
 

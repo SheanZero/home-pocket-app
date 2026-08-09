@@ -15,13 +15,8 @@ import '../family_sync/sync_engine.dart';
 class ClearCompletedItemsUseCase {
   ClearCompletedItemsUseCase({
     required ShoppingItemRepository shoppingItemRepository,
-    ShoppingItemChangeTracker? changeTracker, // nullable — D37-06
-    SyncEngine? syncEngine, // nullable — fire-and-forget
-    Future<String?> Function()? deviceIdResolver,
-  }) : _repo = shoppingItemRepository,
-       _changeTracker = changeTracker,
-       _syncEngine = syncEngine,
-       _deviceIdResolver = deviceIdResolver;
+    this._changeTracker, this._syncEngine, this._deviceIdResolver,
+  }) : _repo = shoppingItemRepository;
 
   final ShoppingItemRepository _repo;
   final ShoppingItemChangeTracker? _changeTracker;

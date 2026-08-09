@@ -64,10 +64,9 @@ class WebSocketEvent {
 /// Three-layer degradation: WebSocket (primary) -> push (backup) -> polling (fallback).
 class WebSocketService with WidgetsBindingObserver {
   WebSocketService({
-    required String baseUrl,
+    required this._baseUrl,
     WebSocketChannelFactory? channelFactory,
-  }) : _baseUrl = baseUrl,
-       _channelFactory = channelFactory ?? _defaultChannelFactory;
+  }) : _channelFactory = channelFactory ?? _defaultChannelFactory;
 
   final String _baseUrl;
   final WebSocketChannelFactory _channelFactory;

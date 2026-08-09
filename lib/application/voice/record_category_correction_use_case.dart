@@ -10,8 +10,8 @@ class RecordCategoryCorrectionUseCase {
   final CategoryKeywordPreferenceRepository _preferenceRepository;
 
   RecordCategoryCorrectionUseCase({
-    required CategoryKeywordPreferenceRepository preferenceRepository,
-  }) : _preferenceRepository = preferenceRepository;
+    required this._preferenceRepository,
+  });
 
   /// Records that [keyword] should map to [correctedCategoryId].
   ///

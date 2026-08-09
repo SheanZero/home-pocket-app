@@ -21,14 +21,11 @@ typedef LockEffectivePredicate = bool Function();
 /// call with [beginAuth] / [endAuth].
 class AppLockLifecycleObserver with WidgetsBindingObserver {
   AppLockLifecycleObserver({
-    required LockEffectivePredicate isLockEffective,
-    required VoidCallback onRelock,
-    required VoidCallback onMask,
-    required VoidCallback onUnmask,
-  })  : _isLockEffective = isLockEffective,
-        _onRelock = onRelock,
-        _onMask = onMask,
-        _onUnmask = onUnmask;
+    required this._isLockEffective,
+    required this._onRelock,
+    required this._onMask,
+    required this._onUnmask,
+  });
 
   final LockEffectivePredicate _isLockEffective;
   final VoidCallback _onRelock;

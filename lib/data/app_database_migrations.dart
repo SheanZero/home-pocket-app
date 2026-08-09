@@ -9,11 +9,9 @@ typedef _MigrationStep = Future<void> Function();
 class _DatabaseMigrationRunner {
   _DatabaseMigrationRunner({
     required AppDatabase database,
-    required Migrator migrator,
-    required int sourceVersion,
-  }) : _db = database,
-       _migrator = migrator,
-       _sourceVersion = sourceVersion;
+    required this._migrator,
+    required this._sourceVersion,
+  }) : _db = database;
 
   final AppDatabase _db;
   final Migrator _migrator;

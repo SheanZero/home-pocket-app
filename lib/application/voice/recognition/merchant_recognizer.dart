@@ -20,8 +20,7 @@ import '../../../infrastructure/ml/merchant_name_normalizer.dart';
 /// No-log discipline (V7): never `print`/log the raw query or candidate names.
 /// The user utterance is sensitive; the seed list is public non-sensitive data.
 class MerchantRecognizer {
-  MerchantRecognizer({required MerchantRepository merchantRepository})
-    : _merchantRepository = merchantRepository;
+  MerchantRecognizer({required this._merchantRepository});
 
   final MerchantRepository _merchantRepository;
 

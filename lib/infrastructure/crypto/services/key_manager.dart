@@ -7,7 +7,7 @@ import '../repositories/key_repository.dart';
 /// Delegates to [KeyRepository] for storage operations.
 /// This is the primary API for key operations throughout the app.
 class KeyManager {
-  KeyManager({required KeyRepository repository}) : _repository = repository;
+  KeyManager({required this._repository});
 
   final KeyRepository _repository;
 

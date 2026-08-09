@@ -30,8 +30,7 @@ class SyncQueueAutomaticResolutionResult {
 
 /// Explicit recovery operations for outbound sync dead letters.
 class SyncQueueRecoveryUseCase {
-  SyncQueueRecoveryUseCase({required SyncQueueManager queueManager})
-    : _queueManager = queueManager;
+  SyncQueueRecoveryUseCase({required this._queueManager});
 
   final SyncQueueManager _queueManager;
 

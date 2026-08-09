@@ -85,7 +85,7 @@ class RelayPullResponse {
 /// **IMPORTANT:** `path` must be the full URL path including the API version
 /// prefix (e.g., `/api/v1/group/create`), not just the relative path.
 class RequestSigner {
-  RequestSigner({required KeyManager keyManager}) : _keyManager = keyManager;
+  RequestSigner({required this._keyManager});
 
   final KeyManager _keyManager;
 
@@ -136,18 +136,16 @@ class RequestSigner {
 class RelayApiClient {
   RelayApiClient({
     required this.baseUrl,
-    required RequestSigner signer,
+    required this._signer,
     http.Client? httpClient,
     NetworkStatusChecker? networkStatusChecker,
     String Function()? requestNonceGenerator,
-    Duration requestTimeout = const Duration(seconds: 15),
-  }) : _signer = signer,
-       _httpClient = httpClient ?? http.Client(),
+    this._requestTimeout = const Duration(seconds: 15),
+  }) : _httpClient = httpClient ?? http.Client(),
        _networkStatusChecker =
            networkStatusChecker ?? ConnectivityNetworkStatusChecker(),
        _requestNonceGenerator =
-           requestNonceGenerator ?? RequestSigner.generateRequestNonce,
-       _requestTimeout = requestTimeout;
+           requestNonceGenerator ?? RequestSigner.generateRequestNonce;
 
   final String baseUrl;
   final RequestSigner _signer;

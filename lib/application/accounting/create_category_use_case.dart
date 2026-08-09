@@ -42,15 +42,12 @@ class CreateCategoryParams {
 /// redundant config row.
 class CreateCategoryUseCase {
   CreateCategoryUseCase({
-    required CategoryRepository categoryRepository,
-    required CategoryLedgerConfigRepository ledgerConfigRepository,
-    required UnitOfWork unitOfWork,
+    required this._categoryRepository,
+    required this._ledgerConfigRepository,
+    required this._unitOfWork,
     String Function()? idGenerator,
     DateTime Function()? clock,
-  }) : _categoryRepository = categoryRepository,
-       _ledgerConfigRepository = ledgerConfigRepository,
-       _unitOfWork = unitOfWork,
-       _idGenerator = idGenerator ?? const Uuid().v4,
+  }) : _idGenerator = idGenerator ?? const Uuid().v4,
        _clock = clock ?? DateTime.now;
 
   static const maxNameLength = 50;

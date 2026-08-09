@@ -14,10 +14,9 @@ import '_time_window_validation.dart';
 /// daily spending patterns, ledger type splits, and month-over-month comparison.
 class GetMonthlyReportUseCase {
   GetMonthlyReportUseCase({
-    required AnalyticsRepository analyticsRepository,
+    required this._analyticsRepository,
     required CategoryRepository categoryRepository,
-  }) : _analyticsRepository = analyticsRepository,
-       _categoryRepo = categoryRepository;
+  }) : _categoryRepo = categoryRepository;
 
   final AnalyticsRepository _analyticsRepository;
   final CategoryRepository _categoryRepo;

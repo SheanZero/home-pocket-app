@@ -6,8 +6,7 @@ import '../app_database.dart';
 import '../daos/family_sync_outbox_dao.dart';
 
 class FamilySyncOutboxRepositoryImpl implements FamilySyncOutboxRepository {
-  FamilySyncOutboxRepositoryImpl({required FamilySyncOutboxDao dao})
-    : _dao = dao;
+  FamilySyncOutboxRepositoryImpl({required this._dao});
 
   final FamilySyncOutboxDao _dao;
 

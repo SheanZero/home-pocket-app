@@ -4,10 +4,9 @@ import '../../infrastructure/sync/avatar_semantic_staging_store.dart';
 /// Coordinates app-owned Avatar blob mutations with reference-safe cleanup.
 class AvatarSemanticStagingMaintenance {
   AvatarSemanticStagingMaintenance({
-    required AvatarSemanticStagingStore stagingStore,
-    required UserProfileRepository userProfileRepository,
-  }) : _stagingStore = stagingStore,
-       _userProfileRepository = userProfileRepository;
+    required this._stagingStore,
+    required this._userProfileRepository,
+  });
 
   final AvatarSemanticStagingStore _stagingStore;
   final UserProfileRepository _userProfileRepository;

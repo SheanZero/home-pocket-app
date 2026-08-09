@@ -23,20 +23,14 @@ typedef FamilySyncOutboxEntriesSettledCallback =
 /// row is removed only after the relay explicitly accepts the batch.
 class DrainFamilySyncOutboxUseCase {
   DrainFamilySyncOutboxUseCase({
-    required FamilySyncOutboxRepository outboxRepository,
-    required GroupRepository groupRepository,
-    required PushSyncUseCase pushSync,
-    SyncQueueManager? queueManager,
-    FamilySyncOutboxOperationMaterializer? operationMaterializer,
-    FamilySyncOutboxMaterializationFailureHandler? onMaterializationFailure,
-    FamilySyncOutboxEntriesSettledCallback? onEntriesSettled,
-  }) : _outboxRepository = outboxRepository,
-       _groupRepository = groupRepository,
-       _pushSync = pushSync,
-       _queueManager = queueManager,
-       _operationMaterializer = operationMaterializer,
-       _onMaterializationFailure = onMaterializationFailure,
-       _onEntriesSettled = onEntriesSettled;
+    required this._outboxRepository,
+    required this._groupRepository,
+    required this._pushSync,
+    this._queueManager,
+    this._operationMaterializer,
+    this._onMaterializationFailure,
+    this._onEntriesSettled,
+  });
 
   final FamilySyncOutboxRepository _outboxRepository;
   final GroupRepository _groupRepository;

@@ -56,16 +56,12 @@ class CheckGroupError extends CheckGroupResult
 
 class CheckGroupUseCase {
   CheckGroupUseCase({
-    required RelayApiClient apiClient,
+    required this._apiClient,
     required KeyManager keyManager,
-    required GroupRepository groupRepository,
-    MembershipRotationCoordinator? membershipRotation,
-    Future<void> Function()? onDeviceRegistered,
-  }) : _apiClient = apiClient,
-       _deviceIdentityResolver = DeviceIdentityResolver(keyManager),
-       _groupRepository = groupRepository,
-       _membershipRotation = membershipRotation,
-       _onDeviceRegistered = onDeviceRegistered;
+    required this._groupRepository,
+    this._membershipRotation,
+    this._onDeviceRegistered,
+  }) : _deviceIdentityResolver = DeviceIdentityResolver(keyManager);
 
   final RelayApiClient _apiClient;
   final DeviceIdentityResolver _deviceIdentityResolver;
