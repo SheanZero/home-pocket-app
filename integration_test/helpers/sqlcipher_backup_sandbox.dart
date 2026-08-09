@@ -358,6 +358,11 @@ class SqlCipherBackupSandbox {
     );
   }
 
+  Future<String> backupDigest(File backup) async {
+    _assertOwned(backup);
+    return _digest(backup);
+  }
+
   Future<void> close() async {
     await _database.close();
     if (await _root.exists()) {
