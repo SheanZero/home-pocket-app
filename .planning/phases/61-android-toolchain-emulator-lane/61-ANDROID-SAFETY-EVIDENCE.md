@@ -6,6 +6,7 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
 ```json
 {
   "schema_version": 1,
+  "completed_stage": "contract",
   "source_commit": "NOT_RUN",
   "started_utc": "NOT_RUN",
   "completed_utc": "NOT_RUN",

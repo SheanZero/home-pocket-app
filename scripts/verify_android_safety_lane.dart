@@ -1,6 +1,7 @@
 /// Fail-closed Android candidate/hold, release, and Emulator evidence runner.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,6 +20,7 @@ const requiredAndroidAbi = 'x86_64';
 const candidateQueriedOn = '2026-08-09';
 const physicalDeviceDisclaimer =
     'Android physical-device validation was not performed or claimed.';
+const maxDurableOutputChars = 32768;
 
 const evidencePath =
     '.planning/phases/61-android-toolchain-emulator-lane/'
@@ -96,10 +98,13 @@ Future<void> main(List<String> arguments) async {
         }
         stdout.writeln('PASS: Android safety lane evidence is coherent');
       case AndroidSafetyMode.candidateProbe:
-        stderr.writeln(
-          'ERROR: candidate-probe mode is not implemented until plan 61-02',
-        );
-        exitCode = 2;
+        final result = await runCandidateProbe(Directory.current);
+        if (!result.completed) {
+          stderr.writeln('ERROR: ${result.message}');
+          exitCode = 2;
+          return;
+        }
+        stdout.writeln(result.message);
       case AndroidSafetyMode.release:
         stderr.writeln(
           'ERROR: release mode is not implemented until plan 61-04',
@@ -364,26 +369,38 @@ void _validateEvidence(
       'evidence result is missing: $field',
     );
   }
-  if (!allowNotRun) {
+  final completedStage = '${evidence['completed_stage'] ?? ''}';
+  const stages = ['contract', 'candidate', 'compile', 'package', 'emulator'];
+  final stageIndex = stages.indexOf(completedStage);
+  _expect(stageIndex >= 0, issues, 'evidence completed_stage is invalid');
+  if (!allowNotRun && stageIndex >= 1) {
     _expect(
       results['candidate'] == 'INCOMPATIBLE' || results['candidate'] == 'PASS',
       issues,
       'candidate result must be observed',
     );
+  } else if (!allowNotRun) {
+    _expect(false, issues, 'candidate result must be observed');
+  }
+  if (!allowNotRun && stageIndex >= 2) {
     _expect(
       results['compile'] == 'PASS',
       issues,
-      'compile result must be PASS',
+      'compile result must be PASS at compile stage',
     );
+  }
+  if (!allowNotRun && stageIndex >= 3) {
     _expect(
       results['package'] == 'PASS',
       issues,
-      'package result must be PASS',
+      'package result must be PASS at package stage',
     );
+  }
+  if (!allowNotRun && stageIndex >= 4) {
     _expect(
       results['emulator'] == 'PASS',
       issues,
-      'emulator result must be PASS',
+      'emulator result must be PASS at emulator stage',
     );
   }
   _expect(
@@ -429,6 +446,606 @@ List<String> inventoryLegacyKgpPlugins(Directory root) {
   }
   found.sort();
   return found;
+}
+
+class CandidateInputs {
+  const CandidateInputs({
+    required this.settingsGradle,
+    required this.gradleProperties,
+    required this.gradleWrapper,
+    required this.appBuildGradle,
+    required this.issues,
+  });
+
+  final String settingsGradle;
+  final String gradleProperties;
+  final String gradleWrapper;
+  final String appBuildGradle;
+  final List<String> issues;
+}
+
+CandidateInputs migrateCandidateInputs({
+  required String settingsGradle,
+  required String gradleProperties,
+  required String gradleWrapper,
+  required String appBuildGradle,
+}) {
+  final issues = <String>[];
+  var settings = _replaceExactlyOnce(
+    settingsGradle,
+    'id("com.android.application") version "$selectedAgp" apply false',
+    'id("com.android.application") version "$candidateAgp" apply false',
+    'AGP declaration',
+    issues,
+  );
+  settings = _removeExactlyOnce(
+    settings,
+    '    id("org.jetbrains.kotlin.android") version "$selectedKotlin" apply false\n',
+    'legacy KGP declaration',
+    issues,
+  );
+
+  var properties = gradleProperties;
+  for (final entry in <(String, String)>[
+    (
+      '# This builtInKotlin flag was added automatically by Flutter migrator\n'
+          'android.builtInKotlin=false\n',
+      'built-in Kotlin opt-out',
+    ),
+    (
+      '# This newDsl flag was added automatically by Flutter migrator\n'
+          'android.newDsl=false\n',
+      'new DSL opt-out',
+    ),
+  ]) {
+    properties = _removeExactlyOnce(properties, entry.$1, entry.$2, issues);
+  }
+
+  final wrapper = _replaceExactlyOnce(
+    gradleWrapper,
+    'gradle-$selectedGradle-all.zip',
+    'gradle-$candidateGradle-all.zip',
+    'Gradle wrapper declaration',
+    issues,
+  );
+
+  var app = _removeExactlyOnce(
+    appBuildGradle,
+    '    id("kotlin-android")\n',
+    'app KGP application',
+    issues,
+  );
+  app = _removeExactlyOnce(
+    app,
+    '    kotlinOptions {\n'
+        '        jvmTarget = JavaVersion.VERSION_17.toString()\n'
+        '    }\n\n',
+    'legacy kotlinOptions block',
+    issues,
+  );
+  app = _replaceExactlyOnce(
+    app,
+    '\nval verifyReleaseSigning = tasks.register("verifyReleaseSigning") {',
+    '\nkotlin {\n'
+        '    compilerOptions {\n'
+        '        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17\n'
+        '    }\n'
+        '}\n\n'
+        'val verifyReleaseSigning = tasks.register("verifyReleaseSigning") {',
+    'built-in Kotlin compiler insertion point',
+    issues,
+  );
+
+  if (!appBuildGradle.contains('minSdk = flutter.minSdkVersion') ||
+      !app.contains('minSdk = flutter.minSdkVersion')) {
+    issues.add('candidate source is missing the minSdk declaration');
+  }
+  if (!settings.contains('version "$candidateAgp"') ||
+      settings.contains('org.jetbrains.kotlin.android') ||
+      properties.contains('android.builtInKotlin') ||
+      properties.contains('android.newDsl') ||
+      !wrapper.contains('gradle-$candidateGradle-all.zip') ||
+      app.contains('kotlin-android') ||
+      app.contains('kotlinOptions') ||
+      !app.contains('JvmTarget.JVM_17')) {
+    issues.add('candidate transaction is incomplete');
+  }
+  return CandidateInputs(
+    settingsGradle: settings,
+    gradleProperties: properties,
+    gradleWrapper: wrapper,
+    appBuildGradle: app,
+    issues: issues,
+  );
+}
+
+String _replaceExactlyOnce(
+  String source,
+  String before,
+  String after,
+  String label,
+  List<String> issues,
+) {
+  if (before.isEmpty || source.split(before).length != 2) {
+    issues.add('$label must occur exactly once');
+    return source;
+  }
+  return source.replaceFirst(before, after);
+}
+
+String _removeExactlyOnce(
+  String source,
+  String value,
+  String label,
+  List<String> issues,
+) => _replaceExactlyOnce(source, value, '', label, issues);
+
+Future<T> withDisposableCandidateDirectory<T>(
+  Future<T> Function(Directory directory) operation,
+) async {
+  final directory = Directory.systemTemp.createTempSync(
+    'home-pocket-phase61-candidate-',
+  );
+  try {
+    return await operation(directory);
+  } finally {
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
+  }
+}
+
+String scrubCandidateOutput(String raw) {
+  var scrubbed = raw
+      .replaceAll(RegExp(r'/Users/[^\s]+'), '<local-path>')
+      .replaceAll(RegExp(r'/private/(?:tmp|var)/[^\s]+'), '<temp-path>')
+      .replaceAll(RegExp(r'emulator-\d{4}'), '<emulator-redacted>');
+  if (scrubbed.length > maxDurableOutputChars) {
+    const marker = '\n...<bounded-output>...\n';
+    final side = (maxDurableOutputChars - marker.length) ~/ 2;
+    scrubbed =
+        '${scrubbed.substring(0, side)}$marker'
+        '${scrubbed.substring(scrubbed.length - side)}';
+  }
+  return scrubbed;
+}
+
+int? parseJavaMajor(String output) {
+  final match = RegExp(r'version\s+"(\d+)').firstMatch(output);
+  return match == null ? null : int.tryParse(match.group(1)!);
+}
+
+class BoundedCommandResult {
+  const BoundedCommandResult({
+    required this.command,
+    required this.exitCode,
+    required this.output,
+    required this.timedOut,
+  });
+
+  final String command;
+  final int exitCode;
+  final String output;
+  final bool timedOut;
+}
+
+class CandidateProbeResult {
+  const CandidateProbeResult({required this.completed, required this.message});
+
+  final bool completed;
+  final String message;
+}
+
+Future<BoundedCommandResult> runBoundedCommand(
+  String executable,
+  List<String> arguments, {
+  required Directory workingDirectory,
+  Map<String, String>? environment,
+  Duration timeout = const Duration(minutes: 10),
+  String? durableCommand,
+}) async {
+  final process = await Process.start(
+    executable,
+    arguments,
+    workingDirectory: workingDirectory.path,
+    environment: environment,
+    includeParentEnvironment: true,
+  );
+  final output = _BoundedOutputBuffer(maxDurableOutputChars * 2);
+  final drains = <Future<void>>[
+    process.stdout.transform(utf8.decoder).forEach(output.add),
+    process.stderr.transform(utf8.decoder).forEach(output.add),
+  ];
+  var timedOut = false;
+  int code;
+  try {
+    code = await process.exitCode.timeout(timeout);
+  } on TimeoutException {
+    timedOut = true;
+    process.kill(ProcessSignal.sigterm);
+    code = await process.exitCode.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        process.kill(ProcessSignal.sigkill);
+        return 124;
+      },
+    );
+  }
+  await Future.wait(drains);
+  return BoundedCommandResult(
+    command:
+        durableCommand ??
+        '${executable.split('/').last} ${arguments.join(' ')}',
+    exitCode: timedOut ? 124 : code,
+    output: scrubCandidateOutput(output.value),
+    timedOut: timedOut,
+  );
+}
+
+class _BoundedOutputBuffer {
+  _BoundedOutputBuffer(this.limit);
+
+  final int limit;
+  final StringBuffer _buffer = StringBuffer();
+  int _length = 0;
+
+  void add(String chunk) {
+    if (_length >= limit) return;
+    final remaining = limit - _length;
+    final kept = chunk.length <= remaining
+        ? chunk
+        : chunk.substring(0, remaining);
+    _buffer.write(kept);
+    _length += kept.length;
+  }
+
+  String get value => _buffer.toString();
+}
+
+Future<CandidateProbeResult> runCandidateProbe(Directory root) async {
+  final started = DateTime.now().toUtc();
+  final before = trackedAndroidInputDigests(root);
+  final pluginBefore = legacyKgpPluginInputDigests(root);
+  final legacyPlugins = inventoryLegacyKgpPlugins(root);
+  if (legacyPlugins.isEmpty) {
+    return const CandidateProbeResult(
+      completed: false,
+      message: 'legacy KGP inventory unexpectedly empty before candidate probe',
+    );
+  }
+
+  final jdkHome = _resolveJdk17Home();
+  if (jdkHome == null) {
+    return const CandidateProbeResult(
+      completed: false,
+      message: 'verified JDK 17 not found; set PHASE61_JAVA_HOME',
+    );
+  }
+  final java = await runBoundedCommand(
+    '$jdkHome/bin/java',
+    const ['-version'],
+    workingDirectory: root,
+    durableCommand: 'java -version',
+  );
+  if (java.exitCode != 0 || parseJavaMajor(java.output) != 17) {
+    return CandidateProbeResult(
+      completed: false,
+      message: 'candidate JDK check failed: ${java.output}',
+    );
+  }
+
+  final flutterRoot = _flutterRoot();
+  final androidSdk = _androidSdkRoot();
+  if (flutterRoot == null || androidSdk == null) {
+    return const CandidateProbeResult(
+      completed: false,
+      message: 'Flutter or Android SDK root is unavailable',
+    );
+  }
+
+  BoundedCommandResult? pubGet;
+  BoundedCommandResult? configuration;
+  bool flagsRestored = false;
+  String? operationError;
+  try {
+    await withDisposableCandidateDirectory((temporary) async {
+      final archive = File('${temporary.path}/source.tar');
+      final archiveResult = await Process.run('git', [
+        'archive',
+        '--format=tar',
+        '-o',
+        archive.path,
+        'HEAD',
+      ], workingDirectory: root.path);
+      if (archiveResult.exitCode != 0) {
+        throw StateError('git archive failed');
+      }
+      final extract = await Process.run('tar', [
+        '-xf',
+        archive.path,
+        '-C',
+        temporary.path,
+      ]);
+      archive.deleteSync();
+      if (extract.exitCode != 0) throw StateError('archive extraction failed');
+
+      final migrated = migrateCandidateInputs(
+        settingsGradle: File(
+          '${temporary.path}/android/settings.gradle.kts',
+        ).readAsStringSync(),
+        gradleProperties: File(
+          '${temporary.path}/android/gradle.properties',
+        ).readAsStringSync(),
+        gradleWrapper: File(
+          '${temporary.path}/android/gradle/wrapper/gradle-wrapper.properties',
+        ).readAsStringSync(),
+        appBuildGradle: File(
+          '${temporary.path}/android/app/build.gradle.kts',
+        ).readAsStringSync(),
+      );
+      if (migrated.issues.isNotEmpty) {
+        throw StateError(migrated.issues.join('; '));
+      }
+      File(
+        '${temporary.path}/android/settings.gradle.kts',
+      ).writeAsStringSync(migrated.settingsGradle);
+      File(
+        '${temporary.path}/android/gradle.properties',
+      ).writeAsStringSync(migrated.gradleProperties);
+      File(
+        '${temporary.path}/android/gradle/wrapper/gradle-wrapper.properties',
+      ).writeAsStringSync(migrated.gradleWrapper);
+      File(
+        '${temporary.path}/android/app/build.gradle.kts',
+      ).writeAsStringSync(migrated.appBuildGradle);
+      File('${temporary.path}/android/local.properties').writeAsStringSync(
+        'sdk.dir=${_escapePropertiesPath(androidSdk)}\n'
+        'flutter.sdk=${_escapePropertiesPath(flutterRoot)}\n',
+      );
+
+      final environment = <String, String>{
+        'JAVA_HOME': jdkHome,
+        'ANDROID_SDK_ROOT': androidSdk,
+        'ANDROID_HOME': androidSdk,
+        'CI': 'true',
+      };
+      pubGet = await runBoundedCommand(
+        '$flutterRoot/bin/flutter',
+        const ['pub', 'get', '--enforce-lockfile'],
+        workingDirectory: temporary,
+        environment: environment,
+        durableCommand: 'flutter pub get --enforce-lockfile',
+      );
+      if (pubGet!.exitCode != 0) {
+        throw StateError('locked dependency retrieval failed');
+      }
+      configuration = await runBoundedCommand(
+        '$flutterRoot/bin/flutter',
+        const ['build', 'apk', '--debug', '--config-only'],
+        workingDirectory: temporary,
+        environment: environment,
+        durableCommand: 'flutter build apk --debug --config-only',
+      );
+      final properties = File(
+        '${temporary.path}/android/gradle.properties',
+      ).readAsStringSync();
+      flagsRestored =
+          properties.contains('android.builtInKotlin=false') ||
+          properties.contains('android.newDsl=false');
+    });
+  } on Object catch (error) {
+    operationError = scrubCandidateOutput('$error');
+  }
+
+  final after = trackedAndroidInputDigests(root);
+  final pluginAfter = legacyKgpPluginInputDigests(root);
+  if (!_sameDigests(before, after) ||
+      !_sameDigests(pluginBefore, pluginAfter)) {
+    return const CandidateProbeResult(
+      completed: false,
+      message:
+          'source or resolved plugin input digest changed during candidate probe',
+    );
+  }
+  if (pubGet == null || pubGet!.exitCode != 0) {
+    return CandidateProbeResult(
+      completed: false,
+      message: operationError ?? 'candidate dependency preparation unavailable',
+    );
+  }
+  if (configuration == null) {
+    return CandidateProbeResult(
+      completed: false,
+      message: operationError ?? 'candidate configuration did not run',
+    );
+  }
+
+  final incompatible = flagsRestored || configuration!.exitCode != 0;
+  final diagnostic = flagsRestored
+      ? 'Flutter configuration restored the legacy built-in-Kotlin/new-DSL opt-outs.'
+      : _diagnosticLine(configuration!.output);
+  _recordCandidateEvidence(
+    root: root,
+    started: started,
+    java: java,
+    pubGet: pubGet!,
+    configuration: configuration!,
+    legacyPlugins: legacyPlugins,
+    incompatible: incompatible || legacyPlugins.isNotEmpty,
+    diagnostic: diagnostic,
+  );
+  return CandidateProbeResult(
+    completed: true,
+    message:
+        'PASS: disposable candidate probe completed; '
+        'terminal result is ${incompatible || legacyPlugins.isNotEmpty ? 'INCOMPATIBLE' : 'PASS'}',
+  );
+}
+
+Map<String, String> trackedAndroidInputDigests(Directory root) {
+  const paths = [
+    '.metadata',
+    'pubspec.yaml',
+    'pubspec.lock',
+    'android/settings.gradle.kts',
+    'android/gradle.properties',
+    'android/gradle/wrapper/gradle-wrapper.properties',
+    'android/app/build.gradle.kts',
+  ];
+  return {
+    for (final path in paths)
+      path: sha256
+          .convert(File('${root.path}/$path').readAsBytesSync())
+          .toString(),
+  };
+}
+
+Map<String, String> legacyKgpPluginInputDigests(Directory root) {
+  final dependencyFile = File('${root.path}/.flutter-plugins-dependencies');
+  if (!dependencyFile.existsSync()) return const {};
+  final decoded = jsonDecode(dependencyFile.readAsStringSync());
+  if (decoded is! Map) return const {};
+  final plugins = _object(decoded.cast<String, Object?>()['plugins']);
+  final android = plugins['android'];
+  if (android is! List) return const {};
+  final digests = <String, String>{};
+  for (final raw in android) {
+    if (raw is! Map) continue;
+    final row = raw.cast<String, Object?>();
+    final name = '${row['name'] ?? ''}';
+    final path = '${row['path'] ?? ''}';
+    if (name.isEmpty || path.isEmpty) continue;
+    for (final fileName in ['build.gradle', 'build.gradle.kts']) {
+      final file = File('$path/android/$fileName');
+      if (file.existsSync()) {
+        digests['$name/$fileName'] = sha256
+            .convert(file.readAsBytesSync())
+            .toString();
+      }
+    }
+  }
+  return digests;
+}
+
+bool _sameDigests(Map<String, String> left, Map<String, String> right) =>
+    left.length == right.length &&
+    left.entries.every((entry) => right[entry.key] == entry.value);
+
+String? _resolveJdk17Home() {
+  final candidates = <String?>[
+    Platform.environment['PHASE61_JAVA_HOME'],
+    Platform.environment['JAVA_HOME'],
+    '/private/tmp/phase61-jdk17/Contents/Home',
+    '/private/tmp/phase61-jdk17',
+  ];
+  for (final candidate in candidates) {
+    if (candidate != null && File('$candidate/bin/java').existsSync()) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+String? _flutterRoot() {
+  var directory = File(Platform.resolvedExecutable).parent;
+  while (directory.parent.path != directory.path) {
+    if (File('${directory.path}/bin/flutter').existsSync() &&
+        Directory('${directory.path}/packages/flutter_tools').existsSync()) {
+      return directory.path;
+    }
+    directory = directory.parent;
+  }
+  return null;
+}
+
+String? _androidSdkRoot() {
+  for (final candidate in <String?>[
+    Platform.environment['ANDROID_SDK_ROOT'],
+    Platform.environment['ANDROID_HOME'],
+    '${Platform.environment['HOME']}/Library/Android/sdk',
+  ]) {
+    if (candidate != null && Directory(candidate).existsSync()) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+String _escapePropertiesPath(String path) => path.replaceAll('\\', '\\\\');
+
+String _diagnosticLine(String output) {
+  for (final line in output.split('\n').reversed) {
+    final trimmed = line.trim();
+    if (trimmed.isNotEmpty) {
+      return trimmed.length > 500 ? trimmed.substring(0, 500) : trimmed;
+    }
+  }
+  return 'Candidate command produced no diagnostic output.';
+}
+
+void _recordCandidateEvidence({
+  required Directory root,
+  required DateTime started,
+  required BoundedCommandResult java,
+  required BoundedCommandResult pubGet,
+  required BoundedCommandResult configuration,
+  required List<String> legacyPlugins,
+  required bool incompatible,
+  required String diagnostic,
+}) {
+  final file = File('${root.path}/$evidencePath');
+  final markdown = file.readAsStringSync();
+  final issues = <String>[];
+  final evidence = parseEvidenceMarkdown(markdown, issues);
+  if (issues.isNotEmpty) throw StateError(issues.join('; '));
+  evidence['completed_stage'] = 'candidate';
+  evidence['source_commit'] = _gitOutput(root, ['rev-parse', 'HEAD']);
+  evidence['started_utc'] = started.toIso8601String();
+  evidence['completed_utc'] = DateTime.now().toUtc().toIso8601String();
+  evidence['host_os'] =
+      '${Platform.operatingSystem} ${Platform.version.split(' ').first} arm64';
+  evidence['plugin_legacy_kgp_inventory'] = legacyPlugins;
+  evidence['candidate_observation'] = diagnostic;
+  evidence['candidate_output_sha256'] = sha256Text(configuration.output);
+  evidence['blocker'] = <String, Object?>{
+    'component': 'Flutter 3.44.8 and resolved legacy-KGP plugin graph',
+    'official_source':
+        'https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers',
+    'reproduction':
+        '${configuration.command} (exit ${configuration.exitCode}); $diagnostic',
+    'exit_condition':
+        'Upgrade Flutter through a reviewed identity transaction to 3.47 or later and select Phase 59-approved plugin releases whose Android modules no longer apply legacy KGP, then rerun the complete candidate transaction.',
+  };
+  final results = _object(evidence['results']);
+  results['candidate'] = incompatible ? 'INCOMPATIBLE' : 'PASS';
+  evidence['results'] = results;
+  evidence['commands'] = [
+    _commandEvidence(java),
+    _commandEvidence(pubGet),
+    _commandEvidence(configuration),
+  ];
+  evidence['clean_tree'] =
+      'PASS: source and resolved-plugin input digests unchanged';
+  final rendered = const JsonEncoder.withIndent('  ').convert(evidence);
+  final start = markdown.indexOf(_evidenceStart) + _evidenceStart.length;
+  final end = markdown.indexOf(_evidenceEnd);
+  file.writeAsStringSync(
+    '${markdown.substring(0, start)}\n```json\n$rendered\n```\n${markdown.substring(end)}',
+  );
+}
+
+Map<String, Object?> _commandEvidence(BoundedCommandResult result) => {
+  'command': result.command,
+  'exit_code': result.exitCode,
+  'timed_out': result.timedOut,
+};
+
+String _gitOutput(Directory root, List<String> arguments) {
+  final result = Process.runSync('git', arguments, workingDirectory: root.path);
+  if (result.exitCode != 0) {
+    throw StateError('git ${arguments.join(' ')} failed');
+  }
+  return '${result.stdout}'.trim();
 }
 
 String sha256Text(String value) =>

@@ -98,4 +98,27 @@ void main() {
       ]),
     );
   });
+
+  test('strict verification follows the evidence completion stage', () {
+    final current = inputs();
+    final candidateObserved = current['evidence']!
+        .replaceFirst(
+          '"completed_stage": "contract"',
+          '"completed_stage": "candidate"',
+        )
+        .replaceFirst('"candidate": "NOT_RUN"', '"candidate": "INCOMPATIBLE"');
+    expect(
+      validate({...current, 'evidence': candidateObserved}, allowNotRun: false),
+      isEmpty,
+    );
+
+    final dishonestCompile = candidateObserved.replaceFirst(
+      '"completed_stage": "candidate"',
+      '"completed_stage": "compile"',
+    );
+    expect(
+      validate({...current, 'evidence': dishonestCompile}, allowNotRun: false),
+      contains('compile result must be PASS at compile stage'),
+    );
+  });
 }
