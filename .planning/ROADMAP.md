@@ -225,14 +225,14 @@ Plans:
   3. The final Android combination produces a non-debug-signed release AAB/APK that the signing contract accepts and that contains no test-only registrar or plugin.
   4. Key integration journeys pass on a supported Android Emulator, and the final evidence explicitly says Android physical-device acceptance was not performed or claimed.
 
-**Plans**: 1/6 plans executed
+**Plans**: 2/6 plans executed
 **Wave 1**
 
 - [x] 61-01-PLAN.md — Establish the fail-closed candidate-or-hold tracer, official candidate metadata, and redacted evidence schema.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 61-02-PLAN.md — Attempt the complete AGP 9 candidate in a disposable workspace and seal the selected-or-held outcome.
+- [x] 61-02-PLAN.md — Attempt the complete AGP 9 candidate in a disposable workspace and seal the selected-or-held outcome.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -289,6 +289,6 @@ Plans:
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
 | 59. Controlled Platform Plugin Cohorts | 7/7 | Complete    | 2026-08-09 |
 | 60. SQLCipher & iOS Native Safety Lane | 10/10 | Complete    | 2026-08-09 |
-| 61. Android Toolchain & Emulator Lane | 1/6 | In progress | 2026-08-09 |
+| 61. Android Toolchain & Emulator Lane | 2/6 | In progress | 2026-08-09 |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
 | 63. Isolated Wired-iPhone Acceptance | 0/TBD | Not started | - |
