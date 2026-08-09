@@ -739,9 +739,8 @@ void _validatePhase59PluginCohorts({
     issues.add('PLUG-01 Phase 59 plugin inventory must be in lexical order');
   }
 
-  final atomicMembers = _listOfStrings(
-    _map(baselineLanes['phase59_file_share'])['members'],
-  );
+  final fileShareLane = _map(baselineLanes['phase59_file_share']);
+  final atomicMembers = _listOfStrings(fileShareLane['members']);
   if (!_hasExactMembers(atomicMembers, _phase59AtomicFileShareMembers)) {
     issues.add(
       'PLUG-02 file/share cohort must contain exactly the four atomic members',
@@ -749,6 +748,24 @@ void _validatePhase59PluginCohorts({
   }
   if (!_isLexicallyOrdered(atomicMembers)) {
     issues.add('PLUG-01 Phase 59 plugin inventory must be in lexical order');
+  }
+  for (final field in {
+    'decision',
+    'queried_on',
+    'native_prerequisite_result',
+    'compatibility_reason',
+    'exit_condition',
+  }) {
+    if (_isBlank(fileShareLane[field])) {
+      issues.add(
+        'PLUG-02 atomic cohort is missing hold evidence field: $field',
+      );
+    }
+  }
+  if (fileShareLane['decision']?.toString() != 'hold') {
+    issues.add(
+      'PLUG-02 atomic cohort must remain hold until the full native exit condition is met',
+    );
   }
 
   const atomicHoldEvidence = <String>{
